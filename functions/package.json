@@ -1,0 +1,39 @@
+{
+  "name": "gathr-functions",
+  "version": "1.0.0",
+  "description": "GathR Cloud Functions for data processing pipeline",
+  "main": "lib/index.js",
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "serve": "npm run build && firebase emulators:start --only functions",
+    "shell": "npm run build && firebase functions:shell",
+    "start": "npm run shell",
+    "deploy": "firebase deploy --only functions",
+    "verify:parser-env": "node scripts/verify-parser-env.mjs",
+    "logs": "firebase functions:log",
+    "lint": "eslint src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix"
+  },
+  "engines": {
+    "node": "20"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.0.0",
+    "firebase-functions": "^6.3.0",
+    "openai": "^4.76.0",
+    "googleapis": "^144.0.0",
+    "xlsx": "^0.18.5",
+    "luxon": "^3.5.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/luxon": "^3.4.2",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "eslint": "^9.0.0",
+    "firebase-functions-test": "^3.4.0",
+    "typescript": "^5.7.0"
+  },
+  "private": true
+}

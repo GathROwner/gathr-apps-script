@@ -1,0 +1,71 @@
+{
+  "generatedAt": "2026-04-02T01:25:36.584Z",
+  "path": "venues/fb_100052606604879/events/kna4SfqdcZwHjrJC93pw",
+  "existedBeforeDelete": true,
+  "data": {
+    "uniqueId": "1615830863513785_1",
+    "establishment": "redshoresPEI",
+    "additionalLocation": "Top of the Park",
+    "eventType": "food_special",
+    "eventName": "Theme Nights at Top of the Park",
+    "description": "Fridays & Saturdays 5:30PM – 8:00PM — Theme Nights at Top of the Park (Homestyle BBQ nights / Fiesta Feast with Mexican flair). Just $29.95 (+tax).",
+    "startDate": "2026-03-25",
+    "endDate": "2026-03-25",
+    "startTime": "17:00",
+    "endTime": "20:00",
+    "price": "$29.95",
+    "mediaUrls": [],
+    "facebookUrl": "https://www.facebook.com/p/Red-Shores-100089826703784/",
+    "sourceTimestamp": {
+      "_seconds": 1774447222,
+      "_nanoseconds": 0
+    },
+    "likes": 2,
+    "shares": 2,
+    "topReactionsCount": 1,
+    "venueId": "fb_100052606604879",
+    "category": "Food Special",
+    "isEvent": "No",
+    "isFoodSpecial": "Yes",
+    "name": "Theme Nights at Top of the Park",
+    "address": "58 Kensington Rd, Charlottetown, PE C1A 9S8, Canada",
+    "ticketPrice": "$29.95",
+    "isRecurring": "Yes",
+    "recurringPattern": "weekly_custom",
+    "recurringDaysOfWeek": [
+      "friday",
+      "saturday"
+    ],
+    "recurringWeekInterval": 1,
+    "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1771374960523-2eprbb.webp",
+    "cleanedFacebookUrl": "https://www.facebook.com/p/Red-Shores-100089826703784/",
+    "latitude": "",
+    "longitude": "",
+    "timeResolution": {
+      "hoursUsed": false
+    },
+    "timeFlags": {
+      "start": {
+        "source": "explicit",
+        "evidence": "5:30PM"
+      },
+      "end": {
+        "source": "explicit",
+        "evidence": "8:00PM",
+        "toClose": false
+      }
+    },
+    "lastSeenAt": {
+      "_seconds": 1775092848,
+      "_nanoseconds": 616000000
+    },
+    "createdAt": {
+      "_seconds": 1775092848,
+      "_nanoseconds": 616000000
+    },
+    "updatedAt": {
+      "_seconds": 1775092848,
+      "_nanoseconds": 616000000
+    }
+  }
+}

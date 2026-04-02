@@ -1,0 +1,83 @@
+{
+  "checkedAt": "2026-04-02T18:34:10.743Z",
+  "latestSnapshot": {
+    "id": "12DvqvGpvHToTqW1v9MRP70wzhhOydEQE_349_1775154736112",
+    "createdAt": "2026-04-02T18:32:16.000Z",
+    "events": [
+      {
+        "name": "Easter Needle Felting Workshop",
+        "startDate": "2026-04-01",
+        "endDate": "2026-04-01",
+        "startTime": "18:00",
+        "endTime": "20:30",
+        "recurringPattern": "none",
+        "totalOccurrences": null,
+        "recurrenceUntilDate": ""
+      },
+      {
+        "name": "Adult Drawing for Beginners",
+        "startDate": "2026-04-02",
+        "endDate": "2026-04-02",
+        "startTime": "18:30",
+        "endTime": "20:30",
+        "recurringPattern": "weekly_thursday",
+        "totalOccurrences": null,
+        "recurrenceUntilDate": ""
+      },
+      {
+        "name": "Loose Watercolour Course (with Dave Wilson)",
+        "startDate": "2026-04-06",
+        "endDate": "2026-04-06",
+        "startTime": "18:30",
+        "endTime": "20:30",
+        "recurringPattern": "weekly_monday",
+        "totalOccurrences": null,
+        "recurrenceUntilDate": ""
+      }
+    ]
+  },
+  "liveDocs": [
+    {
+      "path": "venues/name_2lgcnn/events/2VnMAjxGA8zbt1Xccrkg",
+      "name": "Easter Needle Felting Workshop",
+      "startDate": "2026-04-01",
+      "endDate": "2026-04-01",
+      "startTime": "18:00",
+      "endTime": "20:30",
+      "recurringPattern": "none",
+      "isRecurring": "No",
+      "totalOccurrences": null,
+      "recurrenceUntilDate": "",
+      "uniqueId": "881743228221416_1",
+      "updatedAt": "2026-04-02T18:32:15.000Z"
+    },
+    {
+      "path": "venues/name_2lgcnn/events/H3xvknLYpXxe9vpOLkzu",
+      "name": "Adult Drawing for Beginners",
+      "startDate": "2026-04-02",
+      "endDate": "2026-04-02",
+      "startTime": "18:00",
+      "endTime": "20:00",
+      "recurringPattern": "weekly_thursday",
+      "isRecurring": "Yes",
+      "totalOccurrences": 6,
+      "recurrenceUntilDate": "2026-05-07",
+      "uniqueId": "885921884470217_2",
+      "updatedAt": "2026-04-02T18:32:15.000Z"
+    },
+    {
+      "path": "venues/name_2lgcnn/events/m2b2KdbFymTZjLmnrrNl",
+      "name": "Loose Watercolour Course (with Dave Wilson)",
+      "startDate": "2026-04-06",
+      "endDate": "2026-04-06",
+      "startTime": "18:00",
+      "endTime": "20:00",
+      "recurringPattern": "weekly_monday",
+      "isRecurring": "Yes",
+      "totalOccurrences": 3,
+      "recurrenceUntilDate": "2026-04-20",
+      "uniqueId": "885921884470217_3",
+      "updatedAt": "2026-04-02T18:32:16.000Z"
+    }
+  ]
+}

@@ -1,0 +1,1 @@
+﻿{"success":true,"message":"Selected rows processed","stats":{"processedCount":1,"skippedCount":0,"invalidCount":0,"duplicateCount":1,"errorCount":0,"newEventsCreated":3,"existingEventsUpdated":3,"newStandardEventsCreated":2,"existingStandardEventsUpdated":0,"newFoodSpecialsCreated":1,"existingFoodSpecialsUpdated":3},"nextBatchScheduled":false}

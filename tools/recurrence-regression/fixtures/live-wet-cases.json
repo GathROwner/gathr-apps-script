@@ -1,0 +1,292 @@
+[
+  {
+    "id": "redshores_theme_nights",
+    "description": "Finite date-list theme nights should resolve into bounded Homestyle Friday/Saturday docs plus two Fiesta one-offs, with stale umbrella docs removed.",
+    "fileId": "11cI3E3816koHKDrPNvTj9brG5d5fiB2o",
+    "rowIndex": 281,
+    "venueId": "fb_100052606604879",
+    "keywordsAny": [
+      "theme nights at top of the park",
+      "homestyle bbq",
+      "fiesta feast"
+    ],
+    "watchPaths": [
+      "venues/fb_100052606604879/events/sRsSBr5J5UKJlfe1yFpl",
+      "venues/fb_100052606604879/events/wK68CeVitoUkLaOKhbWT",
+      "venues/fb_100052606604879/events/1SnieFK5JYNuPUJV6E4Z",
+      "venues/fb_100052606604879/events/THEs9pV7qYqcq6U8cKEl",
+      "venues/fb_100052606604879/events/akqRDyI23cp7l9IbZhZa",
+      "venues/fb_100052606604879/events/NYBb0XPLBDQYWcaz5uG2",
+      "venues/fb_100052606604879/events/HMBTXlYc2oktwYQydVOf"
+    ],
+    "expectedDocCountExact": 4,
+    "expectedDocs": [
+      {
+        "path": "venues/fb_100052606604879/events/sRsSBr5J5UKJlfe1yFpl",
+        "exactName": "Theme Nights at Top of the Park - Homestyle BBQ",
+        "startDate": "2026-03-20",
+        "endDate": "2026-03-20",
+        "startTime": "17:30",
+        "endTime": "20:00",
+        "recurringPattern": "weekly_friday",
+        "isRecurring": true,
+        "totalOccurrences": 2,
+        "recurrenceUntilDate": "2026-03-27"
+      },
+      {
+        "path": "venues/fb_100052606604879/events/wK68CeVitoUkLaOKhbWT",
+        "exactName": "Theme Nights at Top of the Park - Homestyle BBQ",
+        "startDate": "2026-03-21",
+        "endDate": "2026-03-21",
+        "startTime": "17:30",
+        "endTime": "20:00",
+        "recurringPattern": "weekly_saturday",
+        "isRecurring": true,
+        "totalOccurrences": 3,
+        "recurrenceUntilDate": "2026-04-04"
+      },
+      {
+        "path": "venues/fb_100052606604879/events/1SnieFK5JYNuPUJV6E4Z",
+        "exactName": "Theme Nights at Top of the Park - Fiesta Feast Mexican Flair",
+        "startDate": "2026-04-17",
+        "endDate": "2026-04-17",
+        "startTime": "17:30",
+        "endTime": "20:00",
+        "recurringPattern": "none",
+        "isRecurring": false
+      },
+      {
+        "path": "venues/fb_100052606604879/events/THEs9pV7qYqcq6U8cKEl",
+        "exactName": "Theme Nights at Top of the Park - Fiesta Feast Mexican Flair",
+        "startDate": "2026-04-18",
+        "endDate": "2026-04-18",
+        "startTime": "17:30",
+        "endTime": "20:00",
+        "recurringPattern": "none",
+        "isRecurring": false
+      }
+    ],
+    "forbiddenDocs": [
+      {
+        "path": "venues/fb_100052606604879/events/akqRDyI23cp7l9IbZhZa"
+      },
+      {
+        "path": "venues/fb_100052606604879/events/NYBb0XPLBDQYWcaz5uG2"
+      },
+      {
+        "path": "venues/fb_100052606604879/events/HMBTXlYc2oktwYQydVOf"
+      },
+      {
+        "exactName": "Theme Nights at Top of the Park"
+      },
+      {
+        "exactName": "Fiesta Feast (Mexican Flair)"
+      }
+    ],
+    "cleanupDocs": [
+      {
+        "path": "venues/fb_100052606604879/events/akqRDyI23cp7l9IbZhZa"
+      },
+      {
+        "path": "venues/fb_100052606604879/events/NYBb0XPLBDQYWcaz5uG2"
+      },
+      {
+        "path": "venues/fb_100052606604879/events/HMBTXlYc2oktwYQydVOf"
+      }
+    ]
+  },
+  {
+    "id": "trailside_tyler_childers",
+    "description": "One-off Trailside concert should stay non-recurring after a live rerun.",
+    "fileId": "1oJUytO-MCCrrGO9zIsZihPv4R7V_JGRE",
+    "rowIndex": 235,
+    "venueId": "slug_trailsidemusichall",
+    "keywordsAny": [
+      "tyler childers",
+      "chris stapleton"
+    ],
+    "watchPaths": [
+      "venues/slug_trailsidemusichall/events/RpkqgIiEepc7uWa6vT2Q"
+    ],
+    "expectedDocCountExact": 1,
+    "expectedDocs": [
+      {
+        "path": "venues/slug_trailsidemusichall/events/RpkqgIiEepc7uWa6vT2Q",
+        "exactName": "A Night of Tyler Childers & Chris Stapleton (The Stolen Goods Tribute Band)",
+        "startDate": "2026-03-19",
+        "endDate": "2026-03-20",
+        "startTime": "19:00",
+        "endTime": "01:00",
+        "recurringPattern": "none",
+        "isRecurring": false
+      }
+    ]
+  },
+  {
+    "id": "body_bar_krista",
+    "description": "Alternating Tuesday/Wednesday class should remain a single weekly_custom keeper doc.",
+    "fileId": "1oJUytO-MCCrrGO9zIsZihPv4R7V_JGRE",
+    "rowIndex": 210,
+    "venueId": "slug_creditunionplace",
+    "keywordsAny": [
+      "body bar with krista"
+    ],
+    "watchPaths": [
+      "venues/slug_creditunionplace/events/59liXjiExkxfb90nT0Vs",
+      "venues/slug_creditunionplace/events/ol4duFVEvPjBhoXWNaJd"
+    ],
+    "expectedDocCountExact": 1,
+    "expectedDocs": [
+      {
+        "path": "venues/slug_creditunionplace/events/59liXjiExkxfb90nT0Vs",
+        "exactName": "Body Bar with Krista",
+        "startDate": "2026-03-31",
+        "endDate": "2026-03-31",
+        "startTime": "16:30",
+        "endTime": "17:15",
+        "recurringPattern": "weekly_custom",
+        "isRecurring": true,
+        "recurringWeekdaySequence": [
+          "tuesday",
+          "wednesday"
+        ],
+        "recurringWeekInterval": 1
+      }
+    ],
+    "forbiddenDocs": [
+      {
+        "path": "venues/slug_creditunionplace/events/ol4duFVEvPjBhoXWNaJd"
+      }
+    ]
+  },
+  {
+    "id": "tai_chi_master_tien_li",
+    "description": "Finite Tai Chi Saturday series should stay bounded and same-day.",
+    "fileId": "1oJUytO-MCCrrGO9zIsZihPv4R7V_JGRE",
+    "rowIndex": 218,
+    "venueId": "0F6W6IBgJqlKQ8AmaTGC",
+    "keywordsAny": [
+      "tai chi with master tien li"
+    ],
+    "watchPaths": [
+      "venues/0F6W6IBgJqlKQ8AmaTGC/events/UyWNHU2A4KPSxSyX7Eeh"
+    ],
+    "expectedDocCountExact": 1,
+    "expectedDocs": [
+      {
+        "path": "venues/0F6W6IBgJqlKQ8AmaTGC/events/UyWNHU2A4KPSxSyX7Eeh",
+        "exactName": "Tai Chi with Master Tien Li",
+        "startDate": "2026-03-21",
+        "endDate": "2026-03-21",
+        "startTime": "09:00",
+        "endTime": "10:00",
+        "recurringPattern": "weekly_saturday",
+        "isRecurring": true,
+        "totalOccurrences": 4,
+        "recurrenceUntilDate": "2026-04-11"
+      }
+    ]
+  },
+  {
+    "id": "art_buds_classes",
+    "description": "Art Buds class row should keep two weekly series and no stale flat youth duplicate.",
+    "fileId": "1oJUytO-MCCrrGO9zIsZihPv4R7V_JGRE",
+    "rowIndex": 198,
+    "venueId": "slug_artbudspei",
+    "keywordsAny": [
+      "kids art & crafts club",
+      "youth illustration"
+    ],
+    "watchPaths": [
+      "venues/slug_artbudspei/events/sg6ORPFf2oI2TjS47iPo",
+      "venues/slug_artbudspei/events/JtKB9In3JhDcKc9g257t",
+      "venues/slug_artbudspei/events/iaZ3QwPj7sUvKjFJ2qpA"
+    ],
+    "expectedDocCountExact": 2,
+    "expectedDocs": [
+      {
+        "path": "venues/slug_artbudspei/events/sg6ORPFf2oI2TjS47iPo",
+        "exactName": "Kids Art & Crafts Club (Ages 5–12yo)",
+        "startDate": "2026-04-01",
+        "endDate": "2026-04-01",
+        "startTime": "18:00",
+        "endTime": "19:00",
+        "recurringPattern": "weekly_wednesday",
+        "isRecurring": true,
+        "totalOccurrences": 6,
+        "recurrenceUntilDate": "2026-05-06"
+      },
+      {
+        "path": "venues/slug_artbudspei/events/JtKB9In3JhDcKc9g257t",
+        "exactName": "Youth Illustration (6 week program)",
+        "startDate": "2026-04-02",
+        "endDate": "2026-04-02",
+        "startTime": "18:00",
+        "endTime": "19:00",
+        "recurringPattern": "weekly_thursday",
+        "isRecurring": true,
+        "totalOccurrences": 6,
+        "recurrenceUntilDate": "2026-05-07"
+      }
+    ],
+    "forbiddenDocs": [
+      {
+        "path": "venues/slug_artbudspei/events/iaZ3QwPj7sUvKjFJ2qpA"
+      }
+    ]
+  },
+  {
+    "id": "buenos_sass_class",
+    "description": "Buenos Sass Class should stay a bounded weekly Saturday series with the current live 1pm-2pm timing.",
+    "fileId": "14bwscmAx5gVgq1x3weMCDhO5SDUcniC-",
+    "rowIndex": 284,
+    "venueId": "0F6W6IBgJqlKQ8AmaTGC",
+    "keywordsAny": [
+      "sass class"
+    ],
+    "watchPaths": [
+      "venues/0F6W6IBgJqlKQ8AmaTGC/events/xf6h1LJqr4ABwjMhAvM0"
+    ],
+    "expectedDocCountExact": 1,
+    "expectedDocs": [
+      {
+        "path": "venues/0F6W6IBgJqlKQ8AmaTGC/events/xf6h1LJqr4ABwjMhAvM0",
+        "exactName": "Sass Class (Sexy High Heels Dance Class)",
+        "startDate": "2026-03-14",
+        "endDate": "2026-03-14",
+        "startTime": "13:00",
+        "endTime": "14:00",
+        "recurringPattern": "weekly_saturday",
+        "isRecurring": true,
+        "totalOccurrences": 8,
+        "recurrenceUntilDate": "2026-04-30"
+      }
+    ]
+  },
+  {
+    "id": "buenos_kens_rueda",
+    "description": "Buenos Ken's Rueda Club should stay a same-day weekly Sunday series with 4pm-6pm timing.",
+    "fileId": "12Jstjt5uQUIfx8vYAzDBuO3usYTnLc3U",
+    "rowIndex": 289,
+    "venueId": "0F6W6IBgJqlKQ8AmaTGC",
+    "keywordsAny": [
+      "ken's rueda club"
+    ],
+    "watchPaths": [
+      "venues/0F6W6IBgJqlKQ8AmaTGC/events/AeIyB9ZRrq9TfVr9FfuL"
+    ],
+    "expectedDocCountExact": 1,
+    "expectedDocs": [
+      {
+        "path": "venues/0F6W6IBgJqlKQ8AmaTGC/events/AeIyB9ZRrq9TfVr9FfuL",
+        "exactName": "Ken's Rueda Club",
+        "startDate": "2026-03-22",
+        "endDate": "2026-03-22",
+        "startTime": "16:00",
+        "endTime": "18:00",
+        "recurringPattern": "weekly_sunday",
+        "isRecurring": true
+      }
+    ]
+  }
+]

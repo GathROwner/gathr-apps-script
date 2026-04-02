@@ -1,0 +1,336 @@
+{
+  "generatedAt": "2026-04-02T02:54:35.145Z",
+  "result": [
+    {
+      "isEvent": "No",
+      "isFoodSpecial": "Yes",
+      "category": "Food Special",
+      "name": "Murder Mystery Dinner Theatre",
+      "description": "Murder Mystery Dinner Theatre).",
+      "establishment": "Top of the Park",
+      "address": "",
+      "startDate": "2026-04-10",
+      "endDate": "2026-04-10",
+      "startTime": "11:00",
+      "endTime": "21:00",
+      "ticketPrice": "",
+      "ticketLink": "",
+      "relevantImageIndex": 0,
+      "venue": "Top of the Park",
+      "additionalLocation": "Top of the Park",
+      "isRecurring": "No",
+      "recurringPattern": "none",
+      "_categoryOriginal": "Food Special",
+      "_categoryHintOriginal": "",
+      "_categorySource": "model_final",
+      "_categoryNormalizationReason": "kept allowed model category \"Food Special\"",
+      "timeFlags": {
+        "start": {
+          "source": "semantic",
+          "evidence": "Start from post time 11:00"
+        },
+        "end": {
+          "source": "none",
+          "toClose": false,
+          "evidence": ""
+        }
+      },
+      "timeResolution": {
+        "hoursUsed": false,
+        "reason": "no_place_match",
+        "startFromPostTime": true,
+        "endFromHours": "category_default"
+      },
+      "icon": "",
+      "image": "",
+      "cleanedFacebookUrl": "https://www.facebook.com/redshoresPEI",
+      "sharedPostThumbnail": "",
+      "id": "1615830863513785",
+      "latitude": "",
+      "longitude": "",
+      "city": "",
+      "streetAddress": "",
+      "organizedBy": "",
+      "usersResponded": "",
+      "utcStartDate": "",
+      "ticketsBuyUrl": "",
+      "relevantImageUrl": "",
+      "mediaUrls": []
+    },
+    {
+      "isEvent": "No",
+      "isFoodSpecial": "Yes",
+      "category": "Food Special",
+      "name": "Homestyle BBQ (Theme Night)",
+      "description": "Homestyle BBQ nights — Fridays & Saturdays — 5:30PM – 8:00PM — Just $29.95 (+tax).",
+      "establishment": "Top of the Park",
+      "address": "",
+      "startDate": "2026-03-20",
+      "endDate": "2026-03-20",
+      "startTime": "17:30",
+      "endTime": "20:00",
+      "ticketPrice": "$29.95 (+tax)",
+      "ticketLink": "",
+      "relevantImageIndex": 0,
+      "venue": "Top of the Park",
+      "additionalLocation": "Top of the Park",
+      "isRecurring": "Yes",
+      "recurringPattern": "weekly_custom",
+      "recurringDaysOfWeek": [
+        "friday",
+        "saturday"
+      ],
+      "recurringWeekInterval": 1,
+      "_categoryOriginal": "Food Special",
+      "_categoryHintOriginal": "",
+      "_categorySource": "model_final",
+      "_categoryNormalizationReason": "kept allowed model category \"Food Special\"",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "5:30PM"
+        },
+        "end": {
+          "source": "explicit",
+          "evidence": "8:00PM",
+          "toClose": false
+        }
+      },
+      "timeResolution": {
+        "hoursUsed": false
+      },
+      "icon": "",
+      "image": "",
+      "cleanedFacebookUrl": "https://www.facebook.com/redshoresPEI",
+      "sharedPostThumbnail": "",
+      "id": "1615830863513785",
+      "latitude": "",
+      "longitude": "",
+      "city": "",
+      "streetAddress": "",
+      "organizedBy": "",
+      "usersResponded": "",
+      "utcStartDate": "",
+      "ticketsBuyUrl": "",
+      "relevantImageUrl": "",
+      "mediaUrls": []
+    },
+    {
+      "isEvent": "No",
+      "isFoodSpecial": "Yes",
+      "category": "Food Special",
+      "name": "Homestyle BBQ (Theme Night)",
+      "description": "Homestyle BBQ — MARCH 28 — FRIDAYS & SATURDAYS 5:30 8:00PM — $29.95.",
+      "establishment": "Top of the Park",
+      "address": "",
+      "startDate": "2026-03-28",
+      "endDate": "2026-03-28",
+      "startTime": "17:30",
+      "endTime": "20:00",
+      "ticketPrice": "$29.95",
+      "ticketLink": "",
+      "relevantImageIndex": 0,
+      "venue": "Top of the Park",
+      "additionalLocation": "Top of the Park",
+      "isRecurring": "No",
+      "recurringPattern": "none",
+      "_categoryOriginal": "Food Special",
+      "_categoryHintOriginal": "",
+      "_categorySource": "model_final",
+      "_categoryNormalizationReason": "kept allowed model category \"Food Special\"",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "5:30"
+        },
+        "end": {
+          "source": "explicit",
+          "evidence": "8:00PM",
+          "toClose": false
+        }
+      },
+      "timeResolution": {
+        "hoursUsed": false
+      },
+      "icon": "",
+      "image": "",
+      "cleanedFacebookUrl": "https://www.facebook.com/redshoresPEI",
+      "sharedPostThumbnail": "",
+      "id": "1615830863513785",
+      "latitude": "",
+      "longitude": "",
+      "city": "",
+      "streetAddress": "",
+      "organizedBy": "",
+      "usersResponded": "",
+      "utcStartDate": "",
+      "ticketsBuyUrl": "",
+      "relevantImageUrl": "",
+      "mediaUrls": []
+    },
+    {
+      "isEvent": "No",
+      "isFoodSpecial": "Yes",
+      "category": "Food Special",
+      "name": "Fiesta Feast (Mexican Flair) (Theme Night)",
+      "description": "Fiesta Feast with Mexican flair — Fridays & Saturdays — 5:30PM – 8:00PM — Just $29.95 (+tax).",
+      "establishment": "Top of the Park",
+      "address": "",
+      "startDate": "2026-03-25",
+      "endDate": "2026-03-25",
+      "startTime": "17:30",
+      "endTime": "20:00",
+      "ticketPrice": "$29.95 (+tax)",
+      "ticketLink": "",
+      "relevantImageIndex": 0,
+      "venue": "Top of the Park",
+      "additionalLocation": "Top of the Park",
+      "isRecurring": "Yes",
+      "recurringPattern": "weekly_custom",
+      "recurringDaysOfWeek": [
+        "friday",
+        "saturday"
+      ],
+      "recurringWeekInterval": 1,
+      "_categoryOriginal": "Food Special",
+      "_categoryHintOriginal": "",
+      "_categorySource": "model_final",
+      "_categoryNormalizationReason": "kept allowed model category \"Food Special\"",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "5:30PM"
+        },
+        "end": {
+          "source": "explicit",
+          "evidence": "8:00PM",
+          "toClose": false
+        }
+      },
+      "timeResolution": {
+        "hoursUsed": false
+      },
+      "icon": "",
+      "image": "",
+      "cleanedFacebookUrl": "https://www.facebook.com/redshoresPEI",
+      "sharedPostThumbnail": "",
+      "id": "1615830863513785",
+      "latitude": "",
+      "longitude": "",
+      "city": "",
+      "streetAddress": "",
+      "organizedBy": "",
+      "usersResponded": "",
+      "utcStartDate": "",
+      "ticketsBuyUrl": "",
+      "relevantImageUrl": "",
+      "mediaUrls": []
+    },
+    {
+      "isEvent": "No",
+      "isFoodSpecial": "Yes",
+      "category": "Food Special",
+      "name": "Fiesta Feast (Mexican Flair) (Theme Night)",
+      "description": "FIESTA FEAST MEXICAN FLAIR — APRIL 17&18 — FRIDAYS & SATURDAYS 5:30 8:00PM — $29.95.",
+      "establishment": "Top of the Park",
+      "address": "",
+      "startDate": "2026-04-17",
+      "endDate": "2026-04-17",
+      "startTime": "17:30",
+      "endTime": "20:00",
+      "ticketPrice": "$29.95",
+      "ticketLink": "",
+      "relevantImageIndex": 0,
+      "venue": "Top of the Park",
+      "additionalLocation": "Top of the Park",
+      "isRecurring": "No",
+      "recurringPattern": "none",
+      "_categoryOriginal": "Food Special",
+      "_categoryHintOriginal": "",
+      "_categorySource": "model_final",
+      "_categoryNormalizationReason": "kept allowed model category \"Food Special\"",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "5:30"
+        },
+        "end": {
+          "source": "explicit",
+          "evidence": "8:00PM",
+          "toClose": false
+        }
+      },
+      "timeResolution": {
+        "hoursUsed": false
+      },
+      "icon": "",
+      "image": "",
+      "cleanedFacebookUrl": "https://www.facebook.com/redshoresPEI",
+      "sharedPostThumbnail": "",
+      "id": "1615830863513785",
+      "latitude": "",
+      "longitude": "",
+      "city": "",
+      "streetAddress": "",
+      "organizedBy": "",
+      "usersResponded": "",
+      "utcStartDate": "",
+      "ticketsBuyUrl": "",
+      "relevantImageUrl": "",
+      "mediaUrls": []
+    },
+    {
+      "isEvent": "No",
+      "isFoodSpecial": "Yes",
+      "category": "Food Special",
+      "name": "Fiesta Feast (Mexican Flair) (Theme Night)",
+      "description": "FIESTA FEAST MEXICAN FLAIR — APRIL 17&18 — FRIDAYS & SATURDAYS 5:30 8:00PM — $29.95.",
+      "establishment": "Top of the Park",
+      "address": "",
+      "startDate": "2026-04-17",
+      "endDate": "2026-04-17",
+      "startTime": "17:30",
+      "endTime": "20:00",
+      "ticketPrice": "$29.95",
+      "ticketLink": "",
+      "relevantImageIndex": 0,
+      "venue": "Top of the Park",
+      "additionalLocation": "Top of the Park",
+      "isRecurring": "No",
+      "recurringPattern": "none",
+      "_categoryOriginal": "Food Special",
+      "_categoryHintOriginal": "",
+      "_categorySource": "model_final",
+      "_categoryNormalizationReason": "kept allowed model category \"Food Special\"",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "5:30"
+        },
+        "end": {
+          "source": "explicit",
+          "evidence": "8:00PM",
+          "toClose": false
+        }
+      },
+      "timeResolution": {
+        "hoursUsed": false
+      },
+      "icon": "",
+      "image": "",
+      "cleanedFacebookUrl": "https://www.facebook.com/redshoresPEI",
+      "sharedPostThumbnail": "",
+      "id": "1615830863513785",
+      "latitude": "",
+      "longitude": "",
+      "city": "",
+      "streetAddress": "",
+      "organizedBy": "",
+      "usersResponded": "",
+      "utcStartDate": "",
+      "ticketsBuyUrl": "",
+      "relevantImageUrl": "",
+      "mediaUrls": []
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "generatedAt": "2026-04-02T02:13:31.672Z",
+  "restored": [
+    {
+      "path": "venues/fb_100052606604879/events/sRsSBr5J5UKJlfe1yFpl",
+      "name": "Theme Nights at Top of the Park - Homestyle BBQ"
+    },
+    {
+      "path": "venues/fb_100052606604879/events/wK68CeVitoUkLaOKhbWT",
+      "name": "Theme Nights at Top of the Park - Homestyle BBQ"
+    },
+    {
+      "path": "venues/fb_100052606604879/events/1SnieFK5JYNuPUJV6E4Z",
+      "name": "Theme Nights at Top of the Park - Fiesta Feast Mexican Flair"
+    },
+    {
+      "path": "venues/fb_100052606604879/events/THEs9pV7qYqcq6U8cKEl",
+      "name": "Theme Nights at Top of the Park - Fiesta Feast Mexican Flair"
+    }
+  ],
+  "deleted": [
+    {
+      "path": "venues/fb_100052606604879/events/9HaOUq5NQbRjLXO82q1B"
+    },
+    {
+      "path": "venues/fb_100052606604879/events/LnOW6gc6xW92DHe6UhfV"
+    },
+    {
+      "path": "venues/fb_100052606604879/events/MRD7LtNNRmtf94SqxzFm"
+    },
+    {
+      "path": "venues/fb_100052606604879/events/UmrS6rTaeKTRWc1D64ZJ"
+    },
+    {
+      "path": "venues/fb_100052606604879/events/s7qjRAeLfPrpN0tWaASJ"
+    }
+  ],
+  "missingDeletes": []
+}

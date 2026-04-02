@@ -82,8 +82,13 @@ function updateProcessedSheetIds(sheet, processedIds) {
     return;
   }
 
+  console.log(
+    `updateProcessedSheetIds: Writing ${processedIds.length} IDs to sheet "${sheet.getName()}" in spreadsheet ${sheet.getParent().getId()}`
+  );
+
   sheet.clear();
   if (processedIds.length > 0) {
+
     const range = sheet.getRange(1, 1, processedIds.length, 1);
     range.setValues(processedIds.map(id => [id]));
   }

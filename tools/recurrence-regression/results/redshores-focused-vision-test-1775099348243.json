@@ -1,0 +1,24 @@
+{
+  "themes": [
+    {
+      "theme": "Homestyle BBQ",
+      "dates": [
+        "2026-03-20",
+        "2026-03-21",
+        "2026-03-27",
+        "2026-03-28",
+        "2026-04-04"
+      ],
+      "dateListText": "MARCH 20 & 21, 27 & 28 - APRIL 4"
+    },
+    {
+      "theme": "Fiesta Feast Mexican Flair",
+      "dates": [
+        "2026-04-17",
+        "2026-04-18"
+      ],
+      "dateListText": "APRIL 17 & 18"
+    }
+  ],
+  "notes": ""
+}

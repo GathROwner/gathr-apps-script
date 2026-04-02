@@ -1,0 +1,361 @@
+{
+  "id": "11cI3E3816koHKDrPNvTj9brG5d5fiB2o_281_1775096197744",
+  "stageKeys": [
+    "0"
+  ],
+  "stages": [
+    {
+      "stage": "format",
+      "success": true,
+      "output": {
+        "parserMode": "full5stage",
+        "dryRun": false,
+        "eventCount": 7,
+        "events": [
+          {
+            "id": "1615830863513785",
+            "name": "Theme Nights at Top of the Park",
+            "category": "Gatherings & Parties",
+            "isEvent": "Yes",
+            "isFoodSpecial": "No",
+            "establishment": "Top of the Park",
+            "additionalLocation": "Top of the Park",
+            "startDate": "2026-03-27",
+            "startTime": "17:30",
+            "endDate": "2026-03-27",
+            "endTime": "20:00",
+            "recurringPattern": "weekly_custom",
+            "ticketLink": "",
+            "ticketsBuyUrl": "",
+            "image": "",
+            "relevantImageUrl": "",
+            "sharedPostThumbnail": "",
+            "timeResolution": {
+              "hoursUsed": false
+            },
+            "timeFlags": {
+              "start": {
+                "source": "explicit",
+                "evidence": "5:30PM"
+              },
+              "end": {
+                "source": "explicit",
+                "toClose": false,
+                "evidence": "8:00PM"
+              }
+            },
+            "description": "Theme Nights at Top of the Park — Fridays & Saturdays ⏰ 5:30PM – 8:00PM (19+)."
+          },
+          {
+            "id": "1615830863513785",
+            "name": "Theme Nights at Top of the Park",
+            "category": "Gatherings & Parties",
+            "isEvent": "Yes",
+            "isFoodSpecial": "No",
+            "establishment": "Top of the Park",
+            "additionalLocation": "Top of the Park",
+            "startDate": "2026-03-28",
+            "startTime": "17:30",
+            "endDate": "2026-03-28",
+            "endTime": "20:00",
+            "recurringPattern": "weekly_custom",
+            "ticketLink": "",
+            "ticketsBuyUrl": "",
+            "image": "",
+            "relevantImageUrl": "",
+            "sharedPostThumbnail": "",
+            "timeResolution": {
+              "hoursUsed": false
+            },
+            "timeFlags": {
+              "start": {
+                "source": "explicit",
+                "evidence": "5:30PM"
+              },
+              "end": {
+                "source": "explicit",
+                "toClose": false,
+                "evidence": "8:00PM"
+              }
+            },
+            "description": "Theme Nights at Top of the Park — Fridays & Saturdays ⏰ 5:30PM – 8:00PM (19+)."
+          },
+          {
+            "id": "1615830863513785",
+            "name": "Homestyle BBQ",
+            "category": "Food Special",
+            "isEvent": "No",
+            "isFoodSpecial": "Yes",
+            "establishment": "Top of the Park",
+            "additionalLocation": "Top of the Park",
+            "startDate": "2026-03-20",
+            "startTime": "17:30",
+            "endDate": "2026-03-20",
+            "endTime": "20:00",
+            "recurringPattern": "weekly_custom",
+            "ticketLink": "",
+            "ticketsBuyUrl": "",
+            "image": "",
+            "relevantImageUrl": "",
+            "sharedPostThumbnail": "",
+            "timeResolution": {
+              "hoursUsed": false
+            },
+            "timeFlags": {
+              "start": {
+                "source": "explicit",
+                "evidence": "5:30PM"
+              },
+              "end": {
+                "source": "explicit",
+                "evidence": "8:00PM",
+                "toClose": false
+              }
+            },
+            "description": "Homestyle BBQ nights — Fridays & Saturdays, 5:30PM – 8:00PM — Just $29.95 (+tax)."
+          },
+          {
+            "id": "1615830863513785",
+            "name": "Homestyle BBQ",
+            "category": "Food Special",
+            "isEvent": "No",
+            "isFoodSpecial": "Yes",
+            "establishment": "Top of the Park",
+            "additionalLocation": "Top of the Park",
+            "startDate": "2026-03-20",
+            "startTime": "17:30",
+            "endDate": "2026-03-20",
+            "endTime": "20:00",
+            "recurringPattern": "none",
+            "ticketLink": "",
+            "ticketsBuyUrl": "",
+            "image": "",
+            "relevantImageUrl": "",
+            "sharedPostThumbnail": "",
+            "timeResolution": {
+              "hoursUsed": false
+            },
+            "timeFlags": {
+              "start": {
+                "source": "explicit",
+                "evidence": "5:30"
+              },
+              "end": {
+                "source": "explicit",
+                "evidence": "8:00PM",
+                "toClose": false
+              }
+            },
+            "description": "Homestyle BBQ — MARCH 20 & 28 — FRIDAYS & SATURDAYS 5:30 – 8:00PM — $29.95."
+          },
+          {
+            "id": "1615830863513785",
+            "name": "Fiesta Feast (Mexican Flair)",
+            "category": "Food Special",
+            "isEvent": "No",
+            "isFoodSpecial": "Yes",
+            "establishment": "Top of the Park",
+            "additionalLocation": "Top of the Park",
+            "startDate": "2026-03-25",
+            "startTime": "17:30",
+            "endDate": "2026-03-25",
+            "endTime": "20:00",
+            "recurringPattern": "weekly_custom",
+            "ticketLink": "",
+            "ticketsBuyUrl": "",
+            "image": "",
+            "relevantImageUrl": "",
+            "sharedPostThumbnail": "",
+            "timeResolution": {
+              "hoursUsed": false
+            },
+            "timeFlags": {
+              "start": {
+                "source": "explicit",
+                "evidence": "5:30PM"
+              },
+              "end": {
+                "source": "explicit",
+                "evidence": "8:00PM",
+                "toClose": false
+              }
+            },
+            "description": "Fiesta Feast with Mexican flair — Fridays & Saturdays, 5:30PM – 8:00PM — Just $29.95 (+tax)."
+          },
+          {
+            "id": "1615830863513785",
+            "name": "Fiesta Feast (Mexican Flair)",
+            "category": "Food Special",
+            "isEvent": "No",
+            "isFoodSpecial": "Yes",
+            "establishment": "Top of the Park",
+            "additionalLocation": "Top of the Park",
+            "startDate": "2026-04-17",
+            "startTime": "17:30",
+            "endDate": "2026-04-17",
+            "endTime": "20:00",
+            "recurringPattern": "none",
+            "ticketLink": "",
+            "ticketsBuyUrl": "",
+            "image": "",
+            "relevantImageUrl": "",
+            "sharedPostThumbnail": "",
+            "timeResolution": {
+              "hoursUsed": false
+            },
+            "timeFlags": {
+              "start": {
+                "source": "explicit",
+                "evidence": "5:30"
+              },
+              "end": {
+                "source": "explicit",
+                "evidence": "8:00PM",
+                "toClose": false
+              }
+            },
+            "description": "Fiesta Feast (Mexican Flair) — APRIL 17 & 18 — FRIDAYS & SATURDAYS 5:30 – 8:00PM — $29.95."
+          },
+          {
+            "id": "1615830863513785",
+            "name": "Fiesta Feast (Mexican Flair)",
+            "category": "Food Special",
+            "isEvent": "No",
+            "isFoodSpecial": "Yes",
+            "establishment": "Top of the Park",
+            "additionalLocation": "Top of the Park",
+            "startDate": "2026-04-17",
+            "startTime": "17:30",
+            "endDate": "2026-04-17",
+            "endTime": "20:00",
+            "recurringPattern": "none",
+            "ticketLink": "",
+            "ticketsBuyUrl": "",
+            "image": "",
+            "relevantImageUrl": "",
+            "sharedPostThumbnail": "",
+            "timeResolution": {
+              "hoursUsed": false
+            },
+            "timeFlags": {
+              "start": {
+                "source": "explicit",
+                "evidence": "5:30"
+              },
+              "end": {
+                "source": "explicit",
+                "evidence": "8:00PM",
+                "toClose": false
+              }
+            },
+            "description": "Fiesta Feast (Mexican Flair) — APRIL 17 & 18 — FRIDAYS & SATURDAYS 5:30 – 8:00PM — $29.95."
+          }
+        ],
+        "gptUsageSummary": {
+          "totalCalls": 6,
+          "inputTokens": 13106,
+          "outputTokens": 13674,
+          "totalTokens": 26780,
+          "cachedInputTokens": 2688,
+          "byStage": {
+            "stage1": {
+              "calls": 1,
+              "inputTokens": 1516,
+              "outputTokens": 884,
+              "totalTokens": 2400,
+              "cachedInputTokens": 0
+            },
+            "stage2": {
+              "calls": 1,
+              "inputTokens": 939,
+              "outputTokens": 624,
+              "totalTokens": 1563,
+              "cachedInputTokens": 0
+            },
+            "stage3": {
+              "calls": 2,
+              "inputTokens": 2978,
+              "outputTokens": 1990,
+              "totalTokens": 4968,
+              "cachedInputTokens": 2688
+            },
+            "stage4": {
+              "calls": 1,
+              "inputTokens": 3623,
+              "outputTokens": 3182,
+              "totalTokens": 6805,
+              "cachedInputTokens": 0
+            },
+            "stage5": {
+              "calls": 1,
+              "inputTokens": 4050,
+              "outputTokens": 6994,
+              "totalTokens": 11044,
+              "cachedInputTokens": 0
+            }
+          },
+          "byComponent": {
+            "contentValidator": {
+              "calls": 1,
+              "inputTokens": 1516,
+              "outputTokens": 884,
+              "totalTokens": 2400,
+              "cachedInputTokens": 0
+            },
+            "contentClassifier": {
+              "calls": 1,
+              "inputTokens": 939,
+              "outputTokens": 624,
+              "totalTokens": 1563,
+              "cachedInputTokens": 0
+            },
+            "eventExtractor": {
+              "calls": 2,
+              "inputTokens": 2978,
+              "outputTokens": 1990,
+              "totalTokens": 4968,
+              "cachedInputTokens": 2688
+            },
+            "secondaryValidator": {
+              "calls": 1,
+              "inputTokens": 3623,
+              "outputTokens": 3182,
+              "totalTokens": 6805,
+              "cachedInputTokens": 0
+            },
+            "finalFormatter": {
+              "calls": 1,
+              "inputTokens": 4050,
+              "outputTokens": 6994,
+              "totalTokens": 11044,
+              "cachedInputTokens": 0
+            }
+          },
+          "byModel": {
+            "gpt-5-mini": {
+              "calls": 2,
+              "inputTokens": 2455,
+              "outputTokens": 1508,
+              "totalTokens": 3963,
+              "cachedInputTokens": 0
+            },
+            "gpt-5.2": {
+              "calls": 2,
+              "inputTokens": 2978,
+              "outputTokens": 1990,
+              "totalTokens": 4968,
+              "cachedInputTokens": 2688
+            },
+            "gpt-5-nano": {
+              "calls": 2,
+              "inputTokens": 7673,
+              "outputTokens": 10176,
+              "totalTokens": 17849,
+              "cachedInputTokens": 0
+            }
+          }
+        }
+      }
+    }
+  ]
+}

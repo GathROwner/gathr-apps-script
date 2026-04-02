@@ -1,0 +1,46 @@
+{
+  "id": "11cI3E3816koHKDrPNvTj9brG5d5fiB2o_281_1775092848660",
+  "fileId": "11cI3E3816koHKDrPNvTj9brG5d5fiB2o",
+  "rowIndex": 281,
+  "establishment": "Red Shores",
+  "inputText": "Join us for Theme Nights at Top of the Park  every weekend brings something deliciously different ️\n\n Homestyle BBQ nights\n Fiesta Feast with Mexican flair\n Great food, great vibes, and unforgettable evenings\n\n Fridays & Saturdays\n⏰ 5:30PM – 8:00PM\n Just $29.95 (+tax)\n\nGather your crew and make it a night to remember \n\n Reserve your table: 902-620-4264\n\n19+\n\nOCR TEXT:\nMay be an image of ‎text that says '‎EXPERIENCE WORLD OF AVOURS AND FUN WITH THEME NIGHTS at Юop of the Park HOMESTYLE BB MARCH 20 28 APRIL FIESTA FEAST MEXICAN FLAIR APRIL17&18 APRIL FRIDAYS & SATURDAYS 5:30 8:00PM $29.95 Top the Park be closed pril [Good Friday), April STI Easter Sunday). and April 10 OTI יוד וזדך lurderMystery Dinner Theatre). FOR RESERVATIONS. CALL 902-620-4264 -4264 MENUS & MORE: REDSHORES.CA/TOP-OF-THE-PARK PARK TOP TOPofthePARK of the PARK RED SHORES REDSHORES.CA 19‎'‎",
+  "skipReason": null,
+  "eventCount": 1,
+  "events": [
+    {
+      "id": "1615830863513785",
+      "name": "Theme Nights at Top of the Park",
+      "category": "Food Special",
+      "isEvent": "No",
+      "isFoodSpecial": "Yes",
+      "establishment": "Top of the Park",
+      "additionalLocation": "Top of the Park",
+      "startDate": "2026-03-25",
+      "startTime": "17:30",
+      "endDate": "2026-03-25",
+      "endTime": "20:00",
+      "recurringPattern": "weekly_custom",
+      "ticketLink": "",
+      "ticketsBuyUrl": "",
+      "image": "",
+      "relevantImageUrl": "",
+      "sharedPostThumbnail": "",
+      "timeResolution": {
+        "hoursUsed": false
+      },
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "5:30PM"
+        },
+        "end": {
+          "source": "explicit",
+          "evidence": "8:00PM",
+          "toClose": false
+        }
+      },
+      "description": "Fridays & Saturdays 5:30PM – 8:00PM — Theme Nights at Top of the Park (Homestyle BBQ nights / Fiesta Feast with Mexican flair). Just $29.95 (+tax)."
+    }
+  ],
+  "stageArtifacts": null
+}

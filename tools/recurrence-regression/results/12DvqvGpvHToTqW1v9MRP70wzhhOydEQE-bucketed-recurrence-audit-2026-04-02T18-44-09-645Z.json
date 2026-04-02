@@ -1,0 +1,765 @@
+{
+  "fileId": "12DvqvGpvHToTqW1v9MRP70wzhhOydEQE",
+  "generatedAt": "2026-04-02T18:44:09.645Z",
+  "batchWindow": {
+    "startedAt": "2026-04-02T17:28:52.650Z",
+    "completedAt": "2026-04-02T17:31:46.634Z"
+  },
+  "processedDataset": {
+    "fileId": "12DvqvGpvHToTqW1v9MRP70wzhhOydEQE",
+    "fileName": "APIFY Dataset.xlsx",
+    "stats": {
+      "processedCount": 84,
+      "skippedCount": 118,
+      "invalidCount": 160,
+      "duplicateCount": 42,
+      "errorCount": 0,
+      "newEventsCreated": 100,
+      "existingEventsUpdated": 91,
+      "newStandardEventsCreated": 63,
+      "existingStandardEventsUpdated": 78,
+      "newFoodSpecialsCreated": 37,
+      "existingFoodSpecialsUpdated": 13
+    },
+    "processedAt": {
+      "_seconds": 1775151106,
+      "_nanoseconds": 634000000
+    }
+  },
+  "snapshotRowCount": 2,
+  "collapsedRecurringFamiliesCount": 0,
+  "splitRecurringCandidatesCount": 4,
+  "divergenceFamiliesCount": 5,
+  "postBatchTouchedFamiliesCount": 0,
+  "collapsedRecurringFamilies": [],
+  "splitRecurringCandidates": [
+    {
+      "rowIndex": 356,
+      "snapshotId": "12DvqvGpvHToTqW1v9MRP70wzhhOydEQE_356_1775150980707",
+      "uniqueId": "122259150770151845",
+      "venueId": "slug_soulfitpei",
+      "familyName": "soulcave box fit",
+      "name": "SoulCave Box Fit",
+      "count": 5,
+      "dates": [
+        "2026-04-01",
+        "2026-04-08",
+        "2026-04-15",
+        "2026-04-22",
+        "2026-04-29"
+      ],
+      "startTime": "19:00",
+      "endTime": "21:00",
+      "description": ""
+    },
+    {
+      "rowIndex": 356,
+      "snapshotId": "12DvqvGpvHToTqW1v9MRP70wzhhOydEQE_356_1775150980707",
+      "uniqueId": "122259150770151845",
+      "venueId": "slug_soulfitpei",
+      "familyName": "rebound fit",
+      "name": "Rebound Fit",
+      "count": 4,
+      "dates": [
+        "2026-04-04",
+        "2026-04-11",
+        "2026-04-18",
+        "2026-04-25"
+      ],
+      "startTime": "08:30",
+      "endTime": "21:00",
+      "description": ""
+    },
+    {
+      "rowIndex": 356,
+      "snapshotId": "12DvqvGpvHToTqW1v9MRP70wzhhOydEQE_356_1775150980707",
+      "uniqueId": "122259150770151845",
+      "venueId": "slug_soulfitpei",
+      "familyName": "reiki treatments",
+      "name": "Reiki treatments",
+      "count": 2,
+      "dates": [
+        "2026-04-23",
+        "2026-04-30"
+      ],
+      "startTime": "17:30",
+      "endTime": "21:00",
+      "description": ""
+    },
+    {
+      "rowIndex": 356,
+      "snapshotId": "12DvqvGpvHToTqW1v9MRP70wzhhOydEQE_356_1775150980707",
+      "uniqueId": "122259150770151845",
+      "venueId": "slug_soulfitpei",
+      "familyName": "reiki treatments",
+      "name": "Reiki treatments",
+      "count": 2,
+      "dates": [
+        "2026-04-23",
+        "2026-04-30"
+      ],
+      "startTime": "19:00",
+      "endTime": "21:00",
+      "description": ""
+    }
+  ],
+  "divergenceFamilies": [
+    {
+      "rowIndex": 356,
+      "snapshotId": "12DvqvGpvHToTqW1v9MRP70wzhhOydEQE_356_1775150980707",
+      "uniqueId": "122259150770151845",
+      "venueId": "slug_soulfitpei",
+      "familyName": "rebound fit",
+      "postBatchTouched": false,
+      "reasons": [
+        "doc_count_mismatch",
+        "time_set_mismatch"
+      ],
+      "snapshot": {
+        "side": "snapshot",
+        "name": "Rebound Fit",
+        "familyName": "rebound fit",
+        "count": 13,
+        "dates": [
+          "2026-04-01",
+          "2026-04-04",
+          "2026-04-06",
+          "2026-04-08",
+          "2026-04-11",
+          "2026-04-13",
+          "2026-04-15",
+          "2026-04-18",
+          "2026-04-20",
+          "2026-04-22",
+          "2026-04-25",
+          "2026-04-27",
+          "2026-04-29"
+        ],
+        "timeSet": [
+          "08:30|21:00",
+          "18:00|21:00"
+        ],
+        "patternSet": [
+          "none"
+        ],
+        "recurringLike": false,
+        "totalOccurrencesValues": [],
+        "recurrenceUntilDates": [],
+        "sample": [
+          {
+            "name": "Rebound Fit",
+            "startDate": "2026-04-01",
+            "endDate": "2026-04-01",
+            "startTime": "18:00",
+            "endTime": "21:00",
+            "recurringPattern": "none",
+            "isRecurring": false,
+            "totalOccurrences": 0,
+            "recurrenceUntilDate": "",
+            "path": "",
+            "updatedAt": ""
+          },
+          {
+            "name": "Rebound Fit",
+            "startDate": "2026-04-04",
+            "endDate": "2026-04-04",
+            "startTime": "08:30",
+            "endTime": "21:00",
+            "recurringPattern": "none",
+            "isRecurring": false,
+            "totalOccurrences": 0,
+            "recurrenceUntilDate": "",
+            "path": "",
+            "updatedAt": ""
+          },
+          {
+            "name": "Rebound Fit",
+            "startDate": "2026-04-06",
+            "endDate": "2026-04-06",
+            "startTime": "18:00",
+            "endTime": "21:00",
+            "recurringPattern": "none",
+            "isRecurring": false,
+            "totalOccurrences": 0,
+            "recurrenceUntilDate": "",
+            "path": "",
+            "updatedAt": ""
+          },
+          {
+            "name": "Rebound Fit",
+            "startDate": "2026-04-08",
+            "endDate": "2026-04-08",
+            "startTime": "18:00",
+            "endTime": "21:00",
+            "recurringPattern": "none",
+            "isRecurring": false,
+            "totalOccurrences": 0,
+            "recurrenceUntilDate": "",
+            "path": "",
+            "updatedAt": ""
+          },
+          {
+            "name": "Rebound Fit",
+            "startDate": "2026-04-11",
+            "endDate": "2026-04-11",
+            "startTime": "08:30",
+            "endTime": "21:00",
+            "recurringPattern": "none",
+            "isRecurring": false,
+            "totalOccurrences": 0,
+            "recurrenceUntilDate": "",
+            "path": "",
+            "updatedAt": ""
+          },
+          {
+            "name": "Rebound Fit",
+            "startDate": "2026-04-13",
+            "endDate": "2026-04-13",
+            "startTime": "18:00",
+            "endTime": "21:00",
+            "recurringPattern": "none",
+            "isRecurring": false,
+            "totalOccurrences": 0,
+            "recurrenceUntilDate": "",
+            "path": "",
+            "updatedAt": ""
+          },
+          {
+            "name": "Rebound Fit",
+            "startDate": "2026-04-15",
+            "endDate": "2026-04-15",
+            "startTime": "18:00",
+            "endTime": "21:00",
+            "recurringPattern": "none",
+            "isRecurring": false,
+            "totalOccurrences": 0,
+            "recurrenceUntilDate": "",
+            "path": "",
+            "updatedAt": ""
+          },
+          {
+            "name": "Rebound Fit",
+            "startDate": "2026-04-18",
+            "endDate": "2026-04-18",
+            "startTime": "08:30",
+            "endTime": "21:00",
+            "recurringPattern": "none",
+            "isRecurring": false,
+            "totalOccurrences": 0,
+            "recurrenceUntilDate": "",
+            "path": "",
+            "updatedAt": ""
+          },
+          {
+            "name": "Rebound Fit",
+            "startDate": "2026-04-20",
+            "endDate": "2026-04-20",
+            "startTime": "18:00",
+            "endTime": "21:00",
+            "recurringPattern": "none",
+            "isRecurring": false,
+            "totalOccurrences": 0,
+            "recurrenceUntilDate": "",
+            "path": "",
+            "updatedAt": ""
+          },
+          {
+            "name": "Rebound Fit",
+            "startDate": "2026-04-22",
+            "endDate": "2026-04-22",
+            "startTime": "18:00",
+            "endTime": "21:00",
+            "recurringPattern": "none",
+            "isRecurring": false,
+            "totalOccurrences": 0,
+            "recurrenceUntilDate": "",
+            "path": "",
+            "updatedAt": ""
+          },
+          {
+            "name": "Rebound Fit",
+            "startDate": "2026-04-25",
+            "endDate": "2026-04-25",
+            "startTime": "08:30",
+            "endTime": "21:00",
+            "recurringPattern": "none",
+            "isRecurring": false,
+            "totalOccurrences": 0,
+            "recurrenceUntilDate": "",
+            "path": "",
+            "updatedAt": ""
+          },
+          {
+            "name": "Rebound Fit",
+            "startDate": "2026-04-27",
+            "endDate": "2026-04-27",
+            "startTime": "18:00",
+            "endTime": "21:00",
+            "recurringPattern": "none",
+            "isRecurring": false,
+            "totalOccurrences": 0,
+            "recurrenceUntilDate": "",
+            "path": "",
+            "updatedAt": ""
+          },
+          {
+            "name": "Rebound Fit",
+            "startDate": "2026-04-29",
+            "endDate": "2026-04-29",
+            "startTime": "18:00",
+            "endTime": "21:00",
+            "recurringPattern": "none",
+            "isRecurring": false,
+            "totalOccurrences": 0,
+            "recurrenceUntilDate": "",
+            "path": "",
+            "updatedAt": ""
+          }
+        ]
+      },
+      "firestore": {
+        "side": "firestore",
+        "name": "Rebound Fit",
+        "familyName": "rebound fit",
+        "count": 1,
+        "dates": [
+          "2026-04-25"
+        ],
+        "timeSet": [
+          "08:00|21:00"
+        ],
+        "patternSet": [
+          "none"
+        ],
+        "recurringLike": false,
+        "totalOccurrencesValues": [],
+        "recurrenceUntilDates": [],
+        "sample": [
+          {
+            "name": "Rebound Fit",
+            "startDate": "2026-04-25",
+            "endDate": "2026-04-25",
+            "startTime": "08:00",
+            "endTime": "21:00",
+            "recurringPattern": "none",
+            "isRecurring": false,
+            "totalOccurrences": 0,
+            "recurrenceUntilDate": "",
+            "path": "venues/slug_soulfitpei/events/6GxrYxG0rgt00oisyVBT",
+            "updatedAt": "2026-04-02T17:29:40.261Z"
+          }
+        ]
+      }
+    },
+    {
+      "rowIndex": 356,
+      "snapshotId": "12DvqvGpvHToTqW1v9MRP70wzhhOydEQE_356_1775150980707",
+      "uniqueId": "122259150770151845",
+      "venueId": "slug_soulfitpei",
+      "familyName": "reiki share",
+      "postBatchTouched": false,
+      "reasons": [
+        "missing_in_firestore"
+      ],
+      "snapshot": {
+        "side": "snapshot",
+        "name": "Reiki Share",
+        "familyName": "reiki share",
+        "count": 1,
+        "dates": [
+          "2026-04-09"
+        ],
+        "timeSet": [
+          "18:00|20:00"
+        ],
+        "patternSet": [
+          "none"
+        ],
+        "recurringLike": false,
+        "totalOccurrencesValues": [],
+        "recurrenceUntilDates": [],
+        "sample": [
+          {
+            "name": "Reiki Share",
+            "startDate": "2026-04-09",
+            "endDate": "2026-04-09",
+            "startTime": "18:00",
+            "endTime": "20:00",
+            "recurringPattern": "none",
+            "isRecurring": false,
+            "totalOccurrences": 0,
+            "recurrenceUntilDate": "",
+            "path": "",
+            "updatedAt": ""
+          }
+        ]
+      },
+      "firestore": null
+    },
+    {
+      "rowIndex": 356,
+      "snapshotId": "12DvqvGpvHToTqW1v9MRP70wzhhOydEQE_356_1775150980707",
+      "uniqueId": "122259150770151845",
+      "venueId": "slug_soulfitpei",
+      "familyName": "reiki treatments",
+      "postBatchTouched": false,
+      "reasons": [
+        "missing_in_firestore"
+      ],
+      "snapshot": {
+        "side": "snapshot",
+        "name": "Reiki treatments",
+        "familyName": "reiki treatments",
+        "count": 4,
+        "dates": [
+          "2026-04-23",
+          "2026-04-30"
+        ],
+        "timeSet": [
+          "17:30|21:00",
+          "19:00|21:00"
+        ],
+        "patternSet": [
+          "none"
+        ],
+        "recurringLike": false,
+        "totalOccurrencesValues": [],
+        "recurrenceUntilDates": [],
+        "sample": [
+          {
+            "name": "Reiki treatments",
+            "startDate": "2026-04-23",
+            "endDate": "2026-04-23",
+            "startTime": "17:30",
+            "endTime": "21:00",
+            "recurringPattern": "none",
+            "isRecurring": false,
+            "totalOccurrences": 0,
+            "recurrenceUntilDate": "",
+            "path": "",
+            "updatedAt": ""
+          },
+          {
+            "name": "Reiki treatments",
+            "startDate": "2026-04-23",
+            "endDate": "2026-04-23",
+            "startTime": "19:00",
+            "endTime": "21:00",
+            "recurringPattern": "none",
+            "isRecurring": false,
+            "totalOccurrences": 0,
+            "recurrenceUntilDate": "",
+            "path": "",
+            "updatedAt": ""
+          },
+          {
+            "name": "Reiki treatments",
+            "startDate": "2026-04-30",
+            "endDate": "2026-04-30",
+            "startTime": "17:30",
+            "endTime": "21:00",
+            "recurringPattern": "none",
+            "isRecurring": false,
+            "totalOccurrences": 0,
+            "recurrenceUntilDate": "",
+            "path": "",
+            "updatedAt": ""
+          },
+          {
+            "name": "Reiki treatments",
+            "startDate": "2026-04-30",
+            "endDate": "2026-04-30",
+            "startTime": "19:00",
+            "endTime": "21:00",
+            "recurringPattern": "none",
+            "isRecurring": false,
+            "totalOccurrences": 0,
+            "recurrenceUntilDate": "",
+            "path": "",
+            "updatedAt": ""
+          }
+        ]
+      },
+      "firestore": null
+    },
+    {
+      "rowIndex": 356,
+      "snapshotId": "12DvqvGpvHToTqW1v9MRP70wzhhOydEQE_356_1775150980707",
+      "uniqueId": "122259150770151845",
+      "venueId": "slug_soulfitpei",
+      "familyName": "soulcave box fit",
+      "postBatchTouched": false,
+      "reasons": [
+        "doc_count_mismatch",
+        "time_set_mismatch"
+      ],
+      "snapshot": {
+        "side": "snapshot",
+        "name": "SoulCave Box Fit",
+        "familyName": "soulcave box fit",
+        "count": 8,
+        "dates": [
+          "2026-04-01",
+          "2026-04-04",
+          "2026-04-08",
+          "2026-04-11",
+          "2026-04-15",
+          "2026-04-22",
+          "2026-04-25",
+          "2026-04-29"
+        ],
+        "timeSet": [
+          "09:30|21:00",
+          "19:00|21:00"
+        ],
+        "patternSet": [
+          "none"
+        ],
+        "recurringLike": false,
+        "totalOccurrencesValues": [],
+        "recurrenceUntilDates": [],
+        "sample": [
+          {
+            "name": "SoulCave Box Fit",
+            "startDate": "2026-04-01",
+            "endDate": "2026-04-01",
+            "startTime": "19:00",
+            "endTime": "21:00",
+            "recurringPattern": "none",
+            "isRecurring": false,
+            "totalOccurrences": 0,
+            "recurrenceUntilDate": "",
+            "path": "",
+            "updatedAt": ""
+          },
+          {
+            "name": "SoulCave Box Fit",
+            "startDate": "2026-04-04",
+            "endDate": "2026-04-04",
+            "startTime": "09:30",
+            "endTime": "21:00",
+            "recurringPattern": "none",
+            "isRecurring": false,
+            "totalOccurrences": 0,
+            "recurrenceUntilDate": "",
+            "path": "",
+            "updatedAt": ""
+          },
+          {
+            "name": "SoulCave Box Fit",
+            "startDate": "2026-04-08",
+            "endDate": "2026-04-08",
+            "startTime": "19:00",
+            "endTime": "21:00",
+            "recurringPattern": "none",
+            "isRecurring": false,
+            "totalOccurrences": 0,
+            "recurrenceUntilDate": "",
+            "path": "",
+            "updatedAt": ""
+          },
+          {
+            "name": "SoulCave Box Fit",
+            "startDate": "2026-04-11",
+            "endDate": "2026-04-11",
+            "startTime": "09:30",
+            "endTime": "21:00",
+            "recurringPattern": "none",
+            "isRecurring": false,
+            "totalOccurrences": 0,
+            "recurrenceUntilDate": "",
+            "path": "",
+            "updatedAt": ""
+          },
+          {
+            "name": "SoulCave Box Fit",
+            "startDate": "2026-04-15",
+            "endDate": "2026-04-15",
+            "startTime": "19:00",
+            "endTime": "21:00",
+            "recurringPattern": "none",
+            "isRecurring": false,
+            "totalOccurrences": 0,
+            "recurrenceUntilDate": "",
+            "path": "",
+            "updatedAt": ""
+          },
+          {
+            "name": "SoulCave Box Fit",
+            "startDate": "2026-04-22",
+            "endDate": "2026-04-22",
+            "startTime": "19:00",
+            "endTime": "21:00",
+            "recurringPattern": "none",
+            "isRecurring": false,
+            "totalOccurrences": 0,
+            "recurrenceUntilDate": "",
+            "path": "",
+            "updatedAt": ""
+          },
+          {
+            "name": "SoulCave Box Fit",
+            "startDate": "2026-04-25",
+            "endDate": "2026-04-25",
+            "startTime": "09:30",
+            "endTime": "21:00",
+            "recurringPattern": "none",
+            "isRecurring": false,
+            "totalOccurrences": 0,
+            "recurrenceUntilDate": "",
+            "path": "",
+            "updatedAt": ""
+          },
+          {
+            "name": "SoulCave Box Fit",
+            "startDate": "2026-04-29",
+            "endDate": "2026-04-29",
+            "startTime": "19:00",
+            "endTime": "21:00",
+            "recurringPattern": "none",
+            "isRecurring": false,
+            "totalOccurrences": 0,
+            "recurrenceUntilDate": "",
+            "path": "",
+            "updatedAt": ""
+          }
+        ]
+      },
+      "firestore": {
+        "side": "firestore",
+        "name": "SoulCave Box Fit",
+        "familyName": "soulcave box fit",
+        "count": 1,
+        "dates": [
+          "2026-04-25"
+        ],
+        "timeSet": [
+          "09:00|21:00"
+        ],
+        "patternSet": [
+          "none"
+        ],
+        "recurringLike": false,
+        "totalOccurrencesValues": [],
+        "recurrenceUntilDates": [],
+        "sample": [
+          {
+            "name": "SoulCave Box Fit",
+            "startDate": "2026-04-25",
+            "endDate": "2026-04-25",
+            "startTime": "09:00",
+            "endTime": "21:00",
+            "recurringPattern": "none",
+            "isRecurring": false,
+            "totalOccurrences": 0,
+            "recurrenceUntilDate": "",
+            "path": "venues/slug_soulfitpei/events/GjnXXXzcDUjQ2n8D7fwJ",
+            "updatedAt": "2026-04-02T17:29:40.324Z"
+          }
+        ]
+      }
+    },
+    {
+      "rowIndex": 356,
+      "snapshotId": "12DvqvGpvHToTqW1v9MRP70wzhhOydEQE_356_1775150980707",
+      "uniqueId": "122259150770151845",
+      "venueId": "slug_soulfitpei",
+      "familyName": "soulcave line dancing",
+      "postBatchTouched": false,
+      "reasons": [
+        "missing_in_firestore"
+      ],
+      "snapshot": {
+        "side": "snapshot",
+        "name": "SoulCave Line Dancing",
+        "familyName": "soulcave line dancing",
+        "count": 3,
+        "dates": [
+          "2026-04-06",
+          "2026-04-13",
+          "2026-04-27"
+        ],
+        "timeSet": [
+          "19:00|21:00"
+        ],
+        "patternSet": [
+          "none"
+        ],
+        "recurringLike": false,
+        "totalOccurrencesValues": [],
+        "recurrenceUntilDates": [],
+        "sample": [
+          {
+            "name": "SoulCave Line Dancing",
+            "startDate": "2026-04-06",
+            "endDate": "2026-04-06",
+            "startTime": "19:00",
+            "endTime": "21:00",
+            "recurringPattern": "none",
+            "isRecurring": false,
+            "totalOccurrences": 0,
+            "recurrenceUntilDate": "",
+            "path": "",
+            "updatedAt": ""
+          },
+          {
+            "name": "SoulCave Line Dancing",
+            "startDate": "2026-04-13",
+            "endDate": "2026-04-13",
+            "startTime": "19:00",
+            "endTime": "21:00",
+            "recurringPattern": "none",
+            "isRecurring": false,
+            "totalOccurrences": 0,
+            "recurrenceUntilDate": "",
+            "path": "",
+            "updatedAt": ""
+          },
+          {
+            "name": "SoulCave Line Dancing",
+            "startDate": "2026-04-27",
+            "endDate": "2026-04-27",
+            "startTime": "19:00",
+            "endTime": "21:00",
+            "recurringPattern": "none",
+            "isRecurring": false,
+            "totalOccurrences": 0,
+            "recurrenceUntilDate": "",
+            "path": "",
+            "updatedAt": ""
+          }
+        ]
+      },
+      "firestore": null
+    }
+  ],
+  "postBatchTouchedFamilies": [],
+  "rowSummaries": [
+    {
+      "rowIndex": 356,
+      "snapshotId": "12DvqvGpvHToTqW1v9MRP70wzhhOydEQE_356_1775150980707",
+      "createdAtIso": "2026-04-02T17:29:40.729Z",
+      "uniqueId": "122259150770151845",
+      "venueId": "slug_soulfitpei",
+      "snapshotEventCount": 29,
+      "matchedFirestoreDocCount": 2,
+      "postBatchTouched": false,
+      "recurringSnapshotFamilyCount": 0,
+      "splitCandidateCount": 4,
+      "divergenceCount": 5
+    },
+    {
+      "rowIndex": 358,
+      "snapshotId": "12DvqvGpvHToTqW1v9MRP70wzhhOydEQE_358_1775151106488",
+      "createdAtIso": "2026-04-02T17:31:46.503Z",
+      "uniqueId": "122259144590151845",
+      "venueId": "slug_soulfitpei",
+      "snapshotEventCount": 0,
+      "matchedFirestoreDocCount": 0,
+      "postBatchTouched": false,
+      "recurringSnapshotFamilyCount": 0,
+      "splitCandidateCount": 0,
+      "divergenceCount": 0
+    }
+  ]
+}

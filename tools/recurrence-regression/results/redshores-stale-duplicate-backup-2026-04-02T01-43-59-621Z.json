@@ -1,0 +1,74 @@
+{
+  "path": "venues/fb_100052606604879/events/Gr5kp494Dg4N3Tsi8Ed9",
+  "exists": true,
+  "data": {
+    "uniqueId": "1615830863513785_4",
+    "establishment": "redshoresPEI",
+    "additionalLocation": "Top of the Park",
+    "eventType": "gatherings_parties",
+    "eventName": "Theme Nights at Top of the Park - Fiesta Feast Mexican Flair",
+    "description": "Fiesta Feast with Mexican flair — Fridays & Saturdays 5:30PM – 8:00PM — Just $29.95 (+tax).. Dates shown: APRIL 17 & 18.",
+    "startDate": "2026-04-18",
+    "endDate": "2026-04-18",
+    "startTime": "17:00",
+    "endTime": "20:00",
+    "price": "$29.95 + tax",
+    "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774105378908-gszpr5.webp",
+    "mediaUrls": [
+      "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774105378908-gszpr5.webp",
+      "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774096880707-kg3vgn.webp",
+      "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774186547814-fklsqi.webp",
+      "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774188018514-c9shkb.webp"
+    ],
+    "facebookUrl": "https://www.facebook.com/p/Red-Shores-100089826703784/",
+    "sourceTimestamp": {
+      "_seconds": 1774447222,
+      "_nanoseconds": 0
+    },
+    "likes": 2,
+    "shares": 2,
+    "topReactionsCount": 1,
+    "venueId": "fb_100052606604879",
+    "category": "Gatherings & Parties",
+    "isEvent": "Yes",
+    "isFoodSpecial": "No",
+    "name": "Theme Nights at Top of the Park - Fiesta Feast Mexican Flair",
+    "address": "58 Kensington Rd, Charlottetown, PE C1A 9S8, Canada",
+    "ticketPrice": "$29.95 + tax",
+    "isRecurring": "No",
+    "recurringPattern": "none",
+    "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1771374960523-2eprbb.webp",
+    "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774105378908-gszpr5.webp",
+    "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774105378908-gszpr5.webp",
+    "cleanedFacebookUrl": "https://www.facebook.com/p/Red-Shores-100089826703784/",
+    "latitude": "",
+    "longitude": "",
+    "timeResolution": {
+      "hoursUsed": false
+    },
+    "timeFlags": {
+      "start": {
+        "source": "explicit",
+        "evidence": "5:30PM"
+      },
+      "end": {
+        "source": "explicit",
+        "evidence": "8:00PM",
+        "toClose": false
+      }
+    },
+    "lastSeenAt": {
+      "_seconds": 1775104490,
+      "_nanoseconds": 144000000
+    },
+    "createdAt": {
+      "_seconds": 1775104490,
+      "_nanoseconds": 144000000
+    },
+    "updatedAt": {
+      "_seconds": 1775104490,
+      "_nanoseconds": 144000000
+    }
+  },
+  "backedUpAt": "2026-04-02T04:44:01.901Z"
+}

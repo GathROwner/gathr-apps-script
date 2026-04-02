@@ -1,0 +1,299 @@
+{
+  "generatedAt": "2026-04-02T01:57:25.917Z",
+  "docs": [
+    {
+      "path": "venues/fb_100052606604879/events/sRsSBr5J5UKJlfe1yFpl",
+      "exists": true,
+      "data": {
+        "uniqueId": "1611543780609160_1",
+        "establishment": "redshoresPEI",
+        "additionalLocation": "Top of the Park",
+        "eventType": "food_special",
+        "eventName": "Theme Nights at Top of the Park - Homestyle BBQ",
+        "startDate": "2026-03-20",
+        "endDate": "2026-03-20",
+        "endTime": "20:00",
+        "price": "$29.95 + tax",
+        "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774096880707-kg3vgn.webp",
+        "facebookUrl": "https://www.facebook.com/redshoresPEI",
+        "sourceTimestamp": {
+          "_seconds": 1774062014,
+          "_nanoseconds": 0
+        },
+        "comments": 1,
+        "topReactionsCount": 1,
+        "venueId": "fb_100052606604879",
+        "category": "Food Special",
+        "isFoodSpecial": "Yes",
+        "name": "Theme Nights at Top of the Park - Homestyle BBQ",
+        "address": "58 Kensington Rd, Charlottetown, PE C1A 9S8, Canada",
+        "ticketPrice": "$29.95 + tax",
+        "isRecurring": "Yes",
+        "recurringPattern": "weekly_friday",
+        "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1771374960523-2eprbb.webp",
+        "cleanedFacebookUrl": "https://www.facebook.com/redshoresPEI",
+        "latitude": "",
+        "longitude": "",
+        "timeResolution": {
+          "hoursUsed": false
+        },
+        "timeFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "5:30 - 8:00PM"
+          },
+          "end": {
+            "source": "explicit",
+            "evidence": "5:30 - 8:00PM",
+            "toClose": false
+          }
+        },
+        "createdAt": {
+          "_seconds": 1774096948,
+          "_nanoseconds": 937000000
+        },
+        "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774105378908-gszpr5.webp",
+        "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774105378908-gszpr5.webp",
+        "description": "Homestyle BBQ (Theme Nights at Top of the Park) — Fridays & Saturdays 5:30 - 8:00PM — $29.95 + tax. Dates shown: March 20 & 21, 27 & 28; April 4.",
+        "shares": 3,
+        "isEvent": false,
+        "likes": 6,
+        "lastSeenAt": {
+          "_seconds": 1774188072,
+          "_nanoseconds": 558000000
+        },
+        "mediaUrls": [
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774096880707-kg3vgn.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774105378908-gszpr5.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774186547814-fklsqi.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774188018514-c9shkb.webp"
+        ],
+        "startTime": "17:30",
+        "totalOccurrences": 2,
+        "recurrenceUntilDate": "2026-03-27",
+        "updatedAt": {
+          "_seconds": 1775089766,
+          "_nanoseconds": 980000000
+        }
+      }
+    },
+    {
+      "path": "venues/fb_100052606604879/events/wK68CeVitoUkLaOKhbWT",
+      "exists": true,
+      "data": {
+        "uniqueId": "1611543780609160_4",
+        "establishment": "redshoresPEI",
+        "additionalLocation": "Top of the Park",
+        "eventType": "food_special",
+        "endTime": "20:00",
+        "price": "$29.95",
+        "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774104863648-v2q402.webp",
+        "mediaUrls": [
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774104863648-v2q402.webp"
+        ],
+        "facebookUrl": "https://www.facebook.com/p/Red-Shores-100089826703784/",
+        "sourceTimestamp": {
+          "_seconds": 1774062014,
+          "_nanoseconds": 0
+        },
+        "likes": 2,
+        "shares": 2,
+        "comments": 1,
+        "topReactionsCount": 1,
+        "venueId": "fb_100052606604879",
+        "category": "Food Special",
+        "isEvent": "No",
+        "isFoodSpecial": "Yes",
+        "address": "58 Kensington Rd, Charlottetown, PE C1A 9S8, Canada",
+        "ticketPrice": "$29.95",
+        "isRecurring": "Yes",
+        "recurringPattern": "weekly_saturday",
+        "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1771374960523-2eprbb.webp",
+        "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774104863648-v2q402.webp",
+        "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774104863648-v2q402.webp",
+        "cleanedFacebookUrl": "https://www.facebook.com/p/Red-Shores-100089826703784/",
+        "latitude": "",
+        "longitude": "",
+        "timeResolution": {
+          "hoursUsed": false
+        },
+        "timeFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "5:30 - 8:00PM"
+          },
+          "end": {
+            "source": "explicit",
+            "evidence": "5:30 - 8:00PM",
+            "toClose": false
+          }
+        },
+        "lastSeenAt": {
+          "_seconds": 1774104985,
+          "_nanoseconds": 7000000
+        },
+        "createdAt": {
+          "_seconds": 1774104985,
+          "_nanoseconds": 7000000
+        },
+        "startTime": "17:30",
+        "totalOccurrences": 3,
+        "recurrenceUntilDate": "2026-04-04",
+        "endDate": "2026-03-21",
+        "name": "Theme Nights at Top of the Park - Homestyle BBQ",
+        "description": "Homestyle BBQ (Theme Nights at Top of the Park) ? Fridays & Saturdays 5:30 - 8:00PM ? $29.95 + tax. Dates shown: March 20 & 21, 27 & 28; April 4.",
+        "eventName": "Theme Nights at Top of the Park - Homestyle BBQ",
+        "startDate": "2026-03-21",
+        "updatedAt": {
+          "_seconds": 1775089766,
+          "_nanoseconds": 980000000
+        }
+      }
+    },
+    {
+      "path": "venues/fb_100052606604879/events/1SnieFK5JYNuPUJV6E4Z",
+      "exists": true,
+      "data": {
+        "uniqueId": "1611543780609160_2",
+        "establishment": "redshoresPEI",
+        "additionalLocation": "Top of the Park",
+        "eventType": "food_special",
+        "eventName": "Theme Nights at Top of the Park - Fiesta Feast Mexican Flair",
+        "startDate": "2026-04-17",
+        "endDate": "2026-04-17",
+        "endTime": "20:00",
+        "price": "$29.95 + tax",
+        "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774096880707-kg3vgn.webp",
+        "facebookUrl": "https://www.facebook.com/redshoresPEI",
+        "sourceTimestamp": {
+          "_seconds": 1774062014,
+          "_nanoseconds": 0
+        },
+        "comments": 1,
+        "topReactionsCount": 1,
+        "venueId": "fb_100052606604879",
+        "category": "Food Special",
+        "isFoodSpecial": "Yes",
+        "name": "Theme Nights at Top of the Park - Fiesta Feast Mexican Flair",
+        "address": "58 Kensington Rd, Charlottetown, PE C1A 9S8, Canada",
+        "ticketPrice": "$29.95 + tax",
+        "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1771374960523-2eprbb.webp",
+        "cleanedFacebookUrl": "https://www.facebook.com/redshoresPEI",
+        "latitude": "",
+        "longitude": "",
+        "timeResolution": {
+          "hoursUsed": false
+        },
+        "timeFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "5:30 - 8:00PM"
+          },
+          "end": {
+            "source": "explicit",
+            "evidence": "5:30 - 8:00PM",
+            "toClose": false
+          }
+        },
+        "createdAt": {
+          "_seconds": 1774096949,
+          "_nanoseconds": 129000000
+        },
+        "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774105378908-gszpr5.webp",
+        "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774105378908-gszpr5.webp",
+        "description": "Fiesta Feast Mexican Flair (Theme Nights at Top of the Park) — Fridays & Saturdays 5:30 - 8:00PM — $29.95 + tax. Dates shown: April 17 & 18.",
+        "shares": 3,
+        "isEvent": false,
+        "likes": 6,
+        "lastSeenAt": {
+          "_seconds": 1774188072,
+          "_nanoseconds": 728000000
+        },
+        "mediaUrls": [
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774096880707-kg3vgn.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774105378908-gszpr5.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774186547814-fklsqi.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774188018514-c9shkb.webp"
+        ],
+        "startTime": "17:30",
+        "recurringPattern": "none",
+        "isRecurring": "No",
+        "updatedAt": {
+          "_seconds": 1775089766,
+          "_nanoseconds": 980000000
+        }
+      }
+    },
+    {
+      "path": "venues/fb_100052606604879/events/THEs9pV7qYqcq6U8cKEl",
+      "exists": true,
+      "data": {
+        "uniqueId": "1611543780609160_8",
+        "establishment": "redshoresPEI",
+        "additionalLocation": "Top of the Park Restaurant",
+        "eventType": "food_special",
+        "eventName": "Theme Nights at Top of the Park - Fiesta Feast Mexican Flair",
+        "description": "Fiesta Feast Mexican Flair (Theme Nights at Top of the Park) — Fridays & Saturdays 5:30 - 8:00PM — $29.95 + tax. Dates listed: April 17 & 18.",
+        "endTime": "20:00",
+        "price": "$29.95 + tax",
+        "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774186547814-fklsqi.webp",
+        "mediaUrls": [
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774186547814-fklsqi.webp"
+        ],
+        "facebookUrl": "https://www.facebook.com/redshoresPEI",
+        "sourceTimestamp": {
+          "_seconds": 1774062014,
+          "_nanoseconds": 0
+        },
+        "likes": 6,
+        "shares": 3,
+        "comments": 1,
+        "topReactionsCount": 1,
+        "venueId": "fb_100052606604879",
+        "category": "Food Special",
+        "isEvent": "No",
+        "isFoodSpecial": "Yes",
+        "name": "Theme Nights at Top of the Park - Fiesta Feast Mexican Flair",
+        "address": "58 Kensington Rd, Charlottetown, PE C1A 9S8, Canada",
+        "ticketPrice": "$29.95 + tax",
+        "isRecurring": "No",
+        "recurringPattern": "none",
+        "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1771374960523-2eprbb.webp",
+        "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774186547814-fklsqi.webp",
+        "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774186547814-fklsqi.webp",
+        "cleanedFacebookUrl": "https://www.facebook.com/redshoresPEI",
+        "latitude": "",
+        "longitude": "",
+        "timeResolution": {
+          "hoursUsed": false
+        },
+        "timeFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "5:30 - 8:00PM"
+          },
+          "end": {
+            "source": "explicit",
+            "evidence": "5:30 - 8:00PM",
+            "toClose": false
+          }
+        },
+        "createdAt": {
+          "_seconds": 1774186724,
+          "_nanoseconds": 398000000
+        },
+        "lastSeenAt": {
+          "_seconds": 1774186724,
+          "_nanoseconds": 496000000
+        },
+        "endDate": "2026-04-18",
+        "startTime": "17:30",
+        "startDate": "2026-04-18",
+        "updatedAt": {
+          "_seconds": 1775089766,
+          "_nanoseconds": 980000000
+        }
+      }
+    }
+  ]
+}

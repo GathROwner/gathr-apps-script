@@ -1,0 +1,249 @@
+{
+  "fileId": "12DvqvGpvHToTqW1v9MRP70wzhhOydEQE",
+  "generatedAt": "2026-04-02T17:43:01.163Z",
+  "rowsScanned": 201,
+  "recurringOutputsCount": 56,
+  "weeklySeriesCandidatesLeftAsOneOffs": 14,
+  "candidates": [
+    {
+      "rowIndex": 349,
+      "name": "Loose Watercolour Course (with Dave Wilson)",
+      "count": 3,
+      "dates": [
+        "2026-04-06",
+        "2026-04-13",
+        "2026-04-20"
+      ],
+      "startTime": "18:30",
+      "endTime": "20:30",
+      "category": "Workshops & Classes",
+      "recurringFlags": "none",
+      "venue": "Confederation Court Mall, Charlottetown",
+      "descriptionSample": "Loose Watercolour Course with Dave Wilson — April 6, 13, 20 — 6:30 - 8:30 pm. Emphasis is focused more on creativity and balance than technical learning. Register online at www.bla",
+      "snapshotId": "12DvqvGpvHToTqW1v9MRP70wzhhOydEQE_349_1775149503492"
+    },
+    {
+      "rowIndex": 351,
+      "name": "Adult Beginner Drawing",
+      "count": 5,
+      "dates": [
+        "2026-04-02",
+        "2026-04-09",
+        "2026-04-16",
+        "2026-04-23",
+        "2026-04-30"
+      ],
+      "startTime": "18:30",
+      "endTime": "20:30",
+      "category": "Workshops & Classes",
+      "recurringFlags": "none",
+      "venue": "Blank Canvas Art Supplies (Confederation Court Mall, Charlottetown)",
+      "descriptionSample": "Adult Beginner Drawing (Session 1 of 6).",
+      "snapshotId": "12DvqvGpvHToTqW1v9MRP70wzhhOydEQE_351_1775150638459"
+    },
+    {
+      "rowIndex": 351,
+      "name": "Adult Watercolour w/ Dave Wilson",
+      "count": 3,
+      "dates": [
+        "2026-04-06",
+        "2026-04-13",
+        "2026-04-20"
+      ],
+      "startTime": "18:30",
+      "endTime": "20:30",
+      "category": "Workshops & Classes",
+      "recurringFlags": "none",
+      "venue": "Blank Canvas Art Supplies (Confederation Court Mall, Charlottetown)",
+      "descriptionSample": "Adult Watercolour w/ Dave (Session 1 of 3).",
+      "snapshotId": "12DvqvGpvHToTqW1v9MRP70wzhhOydEQE_351_1775150638459"
+    },
+    {
+      "rowIndex": 351,
+      "name": "Kids Beginner Acrylic Painting",
+      "count": 3,
+      "dates": [
+        "2026-04-12",
+        "2026-04-19",
+        "2026-04-26"
+      ],
+      "startTime": "12:30",
+      "endTime": "14:30",
+      "category": "Workshops & Classes",
+      "recurringFlags": "none",
+      "venue": "Blank Canvas Art Supplies",
+      "descriptionSample": "Kids Beginner Acrylic Painting (Session 1 of 4). Ages 8-13.",
+      "snapshotId": "12DvqvGpvHToTqW1v9MRP70wzhhOydEQE_351_1775150638459"
+    },
+    {
+      "rowIndex": 351,
+      "name": "Adult Beginner Acrylic Painting",
+      "count": 3,
+      "dates": [
+        "2026-04-12",
+        "2026-04-19",
+        "2026-04-26"
+      ],
+      "startTime": "15:00",
+      "endTime": "21:00",
+      "category": "Workshops & Classes",
+      "recurringFlags": "none",
+      "venue": "Blank Canvas Art Supplies",
+      "descriptionSample": "Adult Beginner Acrylic Painting (Session 1 of 4). Ages 18+.",
+      "snapshotId": "12DvqvGpvHToTqW1v9MRP70wzhhOydEQE_351_1775150638459"
+    },
+    {
+      "rowIndex": 356,
+      "name": "SoulCave Box Fit",
+      "count": 5,
+      "dates": [
+        "2026-04-01",
+        "2026-04-08",
+        "2026-04-15",
+        "2026-04-22",
+        "2026-04-29"
+      ],
+      "startTime": "19:00",
+      "endTime": "21:00",
+      "category": "Workshops & Classes",
+      "recurringFlags": "none",
+      "venue": "Soul Fit PEI",
+      "descriptionSample": "",
+      "snapshotId": "12DvqvGpvHToTqW1v9MRP70wzhhOydEQE_356_1775150980707"
+    },
+    {
+      "rowIndex": 356,
+      "name": "Rebound Fit",
+      "count": 4,
+      "dates": [
+        "2026-04-04",
+        "2026-04-11",
+        "2026-04-18",
+        "2026-04-25"
+      ],
+      "startTime": "08:30",
+      "endTime": "21:00",
+      "category": "Workshops & Classes",
+      "recurringFlags": "none",
+      "venue": "Soul Fit PEI",
+      "descriptionSample": "",
+      "snapshotId": "12DvqvGpvHToTqW1v9MRP70wzhhOydEQE_356_1775150980707"
+    },
+    {
+      "rowIndex": 356,
+      "name": "Reiki treatments",
+      "count": 2,
+      "dates": [
+        "2026-04-23",
+        "2026-04-30"
+      ],
+      "startTime": "17:30",
+      "endTime": "21:00",
+      "category": "Workshops & Classes",
+      "recurringFlags": "none",
+      "venue": "Soul Fit PEI",
+      "descriptionSample": "",
+      "snapshotId": "12DvqvGpvHToTqW1v9MRP70wzhhOydEQE_356_1775150980707"
+    },
+    {
+      "rowIndex": 356,
+      "name": "Reiki treatments",
+      "count": 2,
+      "dates": [
+        "2026-04-23",
+        "2026-04-30"
+      ],
+      "startTime": "19:00",
+      "endTime": "21:00",
+      "category": "Workshops & Classes",
+      "recurringFlags": "none",
+      "venue": "Soul Fit PEI",
+      "descriptionSample": "",
+      "snapshotId": "12DvqvGpvHToTqW1v9MRP70wzhhOydEQE_356_1775150980707"
+    },
+    {
+      "rowIndex": 357,
+      "name": "SoulCave Box Fit",
+      "count": 5,
+      "dates": [
+        "2026-04-01",
+        "2026-04-08",
+        "2026-04-15",
+        "2026-04-22",
+        "2026-04-29"
+      ],
+      "startTime": "19:00",
+      "endTime": "21:00",
+      "category": "Workshops & Classes",
+      "recurringFlags": "none",
+      "venue": "Soul Fit PEI",
+      "descriptionSample": "",
+      "snapshotId": "12DvqvGpvHToTqW1v9MRP70wzhhOydEQE_357_1775150388384"
+    },
+    {
+      "rowIndex": 357,
+      "name": "Rebound Fit",
+      "count": 3,
+      "dates": [
+        "2026-04-04",
+        "2026-04-11",
+        "2026-04-18"
+      ],
+      "startTime": "08:30",
+      "endTime": "21:00",
+      "category": "Workshops & Classes",
+      "recurringFlags": "none",
+      "venue": "Soul Fit PEI",
+      "descriptionSample": "",
+      "snapshotId": "12DvqvGpvHToTqW1v9MRP70wzhhOydEQE_357_1775150388384"
+    },
+    {
+      "rowIndex": 357,
+      "name": "SoulCave Box Fit",
+      "count": 2,
+      "dates": [
+        "2026-04-04",
+        "2026-04-11"
+      ],
+      "startTime": "09:30",
+      "endTime": "21:00",
+      "category": "Workshops & Classes",
+      "recurringFlags": "none",
+      "venue": "Soul Fit PEI",
+      "descriptionSample": "",
+      "snapshotId": "12DvqvGpvHToTqW1v9MRP70wzhhOydEQE_357_1775150388384"
+    },
+    {
+      "rowIndex": 357,
+      "name": "Reiki treatments",
+      "count": 2,
+      "dates": [
+        "2026-04-23",
+        "2026-04-30"
+      ],
+      "startTime": "17:30",
+      "endTime": "21:00",
+      "category": "Workshops & Classes",
+      "recurringFlags": "none",
+      "venue": "Soul Fit PEI",
+      "descriptionSample": "& 7pm",
+      "snapshotId": "12DvqvGpvHToTqW1v9MRP70wzhhOydEQE_357_1775150388384"
+    },
+    {
+      "rowIndex": 357,
+      "name": "Reiki treatments",
+      "count": 2,
+      "dates": [
+        "2026-04-23",
+        "2026-04-30"
+      ],
+      "startTime": "19:00",
+      "endTime": "21:00",
+      "category": "Workshops & Classes",
+      "recurringFlags": "none",
+      "venue": "Soul Fit PEI",
+      "descriptionSample": "",
+      "snapshotId": "12DvqvGpvHToTqW1v9MRP70wzhhOydEQE_357_1775150388384"
+    }
+  ]
+}

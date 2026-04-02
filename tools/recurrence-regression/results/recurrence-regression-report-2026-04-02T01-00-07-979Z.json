@@ -1,0 +1,284 @@
+{
+  "generatedAt": "2026-04-02T01:00:07.979Z",
+  "caseCount": 7,
+  "passedCount": 5,
+  "failedCount": 2,
+  "results": [
+    {
+      "id": "trailside_oneoff_concert",
+      "description": "One-off concert should not survive as a daily recurring event.",
+      "passed": false,
+      "mismatches": [
+        {
+          "path": "isRecurring",
+          "expected": false,
+          "actual": true
+        },
+        {
+          "path": "recurringPattern",
+          "expected": "none",
+          "actual": "weekly_thursday"
+        },
+        {
+          "path": "recurrenceUntilDate",
+          "expected": "__absent__",
+          "actual": "2026-03-20"
+        }
+      ],
+      "expected": {
+        "isRecurring": false,
+        "recurringPattern": "none",
+        "totalOccurrences": "__absent__",
+        "recurrenceUntilDate": "__absent__"
+      },
+      "actual": {
+        "isEvent": "Yes",
+        "isFoodSpecial": "No",
+        "category": "Live Music",
+        "name": "A Night of Tyler Childers & Chris Stapleton",
+        "description": "A Night of Tyler Childers & Chris Stapleton. Thursday March 19th at 7pm.",
+        "establishment": "Trailside Music Hall",
+        "address": "",
+        "startDate": "2026-03-19",
+        "endDate": "2026-03-20",
+        "startTime": "19:00",
+        "endTime": "01:00",
+        "ticketPrice": "",
+        "ticketLink": "",
+        "relevantImageIndex": 0,
+        "venue": "Trailside Music Hall",
+        "additionalLocation": "",
+        "isRecurring": true,
+        "recurringPattern": "weekly_thursday",
+        "recurrenceUntilDate": "2026-03-20"
+      }
+    },
+    {
+      "id": "body_bar_alternating_weekdays",
+      "description": "Alternating Tuesday/Wednesday schedule should normalize to a weekday sequence.",
+      "passed": true,
+      "mismatches": [],
+      "expected": {
+        "isRecurring": true,
+        "recurringPattern": "weekly_custom",
+        "recurringWeekdaySequence": [
+          "tuesday",
+          "wednesday"
+        ],
+        "recurringWeekInterval": 1
+      },
+      "actual": {
+        "isEvent": "Yes",
+        "isFoodSpecial": "No",
+        "category": "Workshops & Classes",
+        "name": "Body Bar with Krista",
+        "description": "Body Bar with Krista. Alternating Tuesdays and Wednesdays from 4:30pm to 5:15pm.",
+        "establishment": "Credit Union Place",
+        "address": "",
+        "startDate": "2026-04-07",
+        "endDate": "2026-04-07",
+        "startTime": "16:30",
+        "endTime": "17:15",
+        "ticketPrice": "",
+        "ticketLink": "",
+        "relevantImageIndex": 0,
+        "venue": "Credit Union Place",
+        "additionalLocation": "",
+        "isRecurring": true,
+        "recurringPattern": "weekly_custom",
+        "recurringWeekdaySequence": [
+          "tuesday",
+          "wednesday"
+        ],
+        "recurringWeekInterval": 1
+      }
+    },
+    {
+      "id": "tai_chi_finite_saturday_dates",
+      "description": "Finite explicit Saturday date list should become a bounded Saturday series.",
+      "passed": true,
+      "mismatches": [],
+      "expected": {
+        "isRecurring": true,
+        "recurringPattern": "weekly_saturday",
+        "startDate": "2026-03-21",
+        "endDate": "2026-03-21",
+        "totalOccurrences": 4,
+        "recurrenceUntilDate": "2026-04-11"
+      },
+      "actual": {
+        "isEvent": "Yes",
+        "isFoodSpecial": "No",
+        "category": "Workshops & Classes",
+        "name": "Tai Chi with Master Tien Li",
+        "description": "Tai Chi with Master Tien Li. Saturdays 9:00am - 10:00am. March 21 & 28, April 4 & 11.",
+        "establishment": "Buenos Island Studio",
+        "address": "",
+        "startDate": "2026-03-21",
+        "endDate": "2026-03-21",
+        "startTime": "09:00",
+        "endTime": "10:00",
+        "ticketPrice": "",
+        "ticketLink": "",
+        "relevantImageIndex": 0,
+        "venue": "Buenos Island Studio",
+        "additionalLocation": "",
+        "isRecurring": true,
+        "recurringPattern": "weekly_saturday",
+        "totalOccurrences": 4,
+        "recurrenceUntilDate": "2026-04-11"
+      }
+    },
+    {
+      "id": "sass_class_bounded_saturdays",
+      "description": "Finite Saturday class dates should become a bounded weekly Saturday series.",
+      "passed": true,
+      "mismatches": [],
+      "expected": {
+        "isRecurring": true,
+        "recurringPattern": "weekly_saturday",
+        "startDate": "2026-04-04",
+        "endDate": "2026-04-04",
+        "totalOccurrences": 4,
+        "recurrenceUntilDate": "2026-04-25"
+      },
+      "actual": {
+        "isEvent": "Yes",
+        "isFoodSpecial": "No",
+        "category": "Workshops & Classes",
+        "name": "Sass Class",
+        "description": "Sass Class. Saturdays 1:00pm - 3:00pm. April 4, 11, 18 and 25.",
+        "establishment": "Buenos Island Studio",
+        "address": "",
+        "startDate": "2026-04-04",
+        "endDate": "2026-04-04",
+        "startTime": "13:00",
+        "endTime": "15:00",
+        "ticketPrice": "",
+        "ticketLink": "",
+        "relevantImageIndex": 0,
+        "venue": "Buenos Island Studio",
+        "additionalLocation": "",
+        "isRecurring": true,
+        "recurringPattern": "weekly_saturday",
+        "totalOccurrences": 4,
+        "recurrenceUntilDate": "2026-04-25"
+      }
+    },
+    {
+      "id": "founders_split_series_sunday",
+      "description": "Sunday record in a split Thu-Sun series should stay Sunday-only.",
+      "passed": false,
+      "mismatches": [
+        {
+          "path": "recurringPattern",
+          "expected": "weekly_sunday",
+          "actual": "weekly_custom"
+        }
+      ],
+      "expected": {
+        "isRecurring": true,
+        "recurringPattern": "weekly_sunday",
+        "startDate": "2026-03-08",
+        "recurrenceUntilDate": "2026-03-29"
+      },
+      "actual": {
+        "isEvent": "Yes",
+        "isFoodSpecial": "No",
+        "category": "Live Music",
+        "name": "Winter Music Series (Live Local Music)",
+        "description": "Our Winter Music Series starts this Thursday, March 5 and runs until March 29 at Founders' Food Hall & Market! Join us Thursday-Saturday from 5-7 PM and Sundays from 2:30-4:30 PM for live local music!",
+        "establishment": "Founders' Food Hall and Market",
+        "address": "",
+        "startDate": "2026-03-08",
+        "endDate": "2026-03-08",
+        "startTime": "14:30",
+        "endTime": "16:30",
+        "ticketPrice": "",
+        "ticketLink": "",
+        "relevantImageIndex": 0,
+        "venue": "Founders' Food Hall and Market",
+        "additionalLocation": "",
+        "isRecurring": true,
+        "recurringPattern": "weekly_custom",
+        "recurrenceUntilDate": "2026-03-29",
+        "recurringDaysOfWeek": [
+          "thursday",
+          "friday",
+          "saturday"
+        ],
+        "recurringWeekInterval": 1
+      }
+    },
+    {
+      "id": "redshores_homestyle_finite_fridays",
+      "description": "Finite Friday dates should become a bounded weekly Friday series instead of an open-ended one.",
+      "passed": true,
+      "mismatches": [],
+      "expected": {
+        "isRecurring": true,
+        "recurringPattern": "weekly_friday",
+        "startDate": "2026-03-20",
+        "endDate": "2026-03-20",
+        "totalOccurrences": 2,
+        "recurrenceUntilDate": "2026-03-27"
+      },
+      "actual": {
+        "isEvent": "No",
+        "isFoodSpecial": "Yes",
+        "category": "Food Special",
+        "name": "Theme Nights at Top of the Park - Homestyle BBQ",
+        "description": "Theme Nights at Top of the Park: Homestyle BBQ nights (Fridays & Saturdays) 5:30PM - 8:00PM. Just $29.95 (+tax). Dates shown: March 20 & 21, 27 & 28; April 4.",
+        "establishment": "Top of the Park",
+        "address": "",
+        "startDate": "2026-03-20",
+        "endDate": "2026-03-20",
+        "startTime": "17:30",
+        "endTime": "20:00",
+        "ticketPrice": "$29.95 + tax",
+        "ticketLink": "",
+        "relevantImageIndex": 0,
+        "venue": "Top of the Park",
+        "additionalLocation": "Top of the Park",
+        "isRecurring": true,
+        "recurringPattern": "weekly_friday",
+        "totalOccurrences": 2,
+        "recurrenceUntilDate": "2026-03-27"
+      }
+    },
+    {
+      "id": "redshores_fiesta_friday_demotes_to_oneoff",
+      "description": "Single matching Friday from a finite Friday/Saturday poster should be treated as a one-off.",
+      "passed": true,
+      "mismatches": [],
+      "expected": {
+        "isRecurring": false,
+        "recurringPattern": "none",
+        "startDate": "2026-04-17",
+        "endDate": "2026-04-17",
+        "totalOccurrences": "__absent__",
+        "recurrenceUntilDate": "__absent__"
+      },
+      "actual": {
+        "isEvent": "No",
+        "isFoodSpecial": "Yes",
+        "category": "Food Special",
+        "name": "Theme Nights at Top of the Park - Fiesta Feast (Mexican flair)",
+        "description": "Theme Nights at Top of the Park: Fiesta Feast with Mexican flair (Fridays & Saturdays) 5:30PM - 8:00PM. Just $29.95 (+tax). Dates shown: April 17 & 18.",
+        "establishment": "Top of the Park",
+        "address": "",
+        "startDate": "2026-04-17",
+        "endDate": "2026-04-17",
+        "startTime": "17:30",
+        "endTime": "20:00",
+        "ticketPrice": "$29.95 + tax",
+        "ticketLink": "",
+        "relevantImageIndex": 0,
+        "venue": "Top of the Park",
+        "additionalLocation": "Top of the Park",
+        "isRecurring": false,
+        "recurringPattern": "none"
+      }
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "name": "gathr-venue-migration",
+  "version": "1.0.0",
+  "description": "Migration script to move venue data from Google Sheets to Firestore",
+  "main": "migrate-venues.js",
+  "scripts": {
+    "migrate": "node migrate-venues.js",
+    "migrate:dry-run": "node migrate-venues.js --dry-run",
+    "migrate:resume": "node migrate-venues.js --resume"
+  },
+  "keywords": ["migration", "firestore", "google-sheets"],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "firebase-admin": "^13.6.0",
+    "googleapis": "^144.0.0",
+    "dotenv": "^16.4.5"
+  }
+}

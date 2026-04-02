@@ -1,0 +1,6 @@
+{
+  "projects": {
+    "default": "gathr-migrated",
+    "production": "gathr-m1"
+  }
+}

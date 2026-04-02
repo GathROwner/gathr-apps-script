@@ -1,0 +1,340 @@
+{
+  "generatedAt": "2026-04-02T02:47:24.210Z",
+  "resultCount": 4,
+  "result": [
+    {
+      "isEvent": "Yes",
+      "isFoodSpecial": "No",
+      "category": "Gatherings & Parties",
+      "name": "Fiesta Feast Theme Night (Mexican Flair)",
+      "description": "Fiesta Feast (Mexican flair) (Theme Nights at Top of the Park).",
+      "establishment": "Top of the Park",
+      "address": "",
+      "startDate": "2026-04-17",
+      "endDate": "2026-04-17",
+      "startTime": "17:30",
+      "endTime": "20:00",
+      "ticketPrice": "",
+      "ticketLink": "",
+      "relevantImageIndex": 0,
+      "venue": "Top of the Park",
+      "additionalLocation": "Top of the Park",
+      "isRecurring": "No",
+      "recurringPattern": "none",
+      "_categoryOriginal": "Gatherings & Parties",
+      "_categoryHintOriginal": "",
+      "_categorySource": "model_final",
+      "_categoryNormalizationReason": "kept weak model category \"Gatherings & Parties\" after no stronger hint/keyword evidence",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "5:30"
+        },
+        "end": {
+          "source": "explicit",
+          "toClose": false,
+          "evidence": "8:00PM"
+        }
+      },
+      "timeResolution": {
+        "hoursUsed": false
+      },
+      "icon": "",
+      "image": "",
+      "cleanedFacebookUrl": "https://www.facebook.com/redshoresPEI",
+      "sharedPostThumbnail": "",
+      "id": "1615830863513785",
+      "latitude": "",
+      "longitude": "",
+      "city": "",
+      "streetAddress": "",
+      "organizedBy": "",
+      "usersResponded": "",
+      "utcStartDate": "",
+      "ticketsBuyUrl": "",
+      "relevantImageUrl": "",
+      "mediaUrls": []
+    },
+    {
+      "isEvent": "Yes",
+      "isFoodSpecial": "No",
+      "category": "Gatherings & Parties",
+      "name": "Fiesta Feast Theme Night (Mexican Flair)",
+      "description": "Fiesta Feast (Mexican flair) (Theme Nights at Top of the Park).",
+      "establishment": "Top of the Park",
+      "address": "",
+      "startDate": "2026-04-18",
+      "endDate": "2026-04-18",
+      "startTime": "17:30",
+      "endTime": "20:00",
+      "ticketPrice": "",
+      "ticketLink": "",
+      "relevantImageIndex": 0,
+      "venue": "Top of the Park",
+      "additionalLocation": "Top of the Park",
+      "isRecurring": "No",
+      "recurringPattern": "none",
+      "_categoryOriginal": "Gatherings & Parties",
+      "_categoryHintOriginal": "",
+      "_categorySource": "model_final",
+      "_categoryNormalizationReason": "kept weak model category \"Gatherings & Parties\" after no stronger hint/keyword evidence",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "5:30"
+        },
+        "end": {
+          "source": "explicit",
+          "toClose": false,
+          "evidence": "8:00PM"
+        }
+      },
+      "timeResolution": {
+        "hoursUsed": false
+      },
+      "icon": "",
+      "image": "",
+      "cleanedFacebookUrl": "https://www.facebook.com/redshoresPEI",
+      "sharedPostThumbnail": "",
+      "id": "1615830863513785",
+      "latitude": "",
+      "longitude": "",
+      "city": "",
+      "streetAddress": "",
+      "organizedBy": "",
+      "usersResponded": "",
+      "utcStartDate": "",
+      "ticketsBuyUrl": "",
+      "relevantImageUrl": "",
+      "mediaUrls": []
+    },
+    {
+      "isEvent": "No",
+      "isFoodSpecial": "Yes",
+      "category": "Food Special",
+      "name": "Homestyle BBQ",
+      "description": "Homestyle BBQ — Theme Nights at Top of the Park. Fridays & Saturdays, 5:30PM – 8:00PM. Just $29.95 (+tax).",
+      "establishment": "Top of the Park",
+      "address": "",
+      "startDate": "2026-03-20",
+      "endDate": "2026-03-20",
+      "startTime": "17:30",
+      "endTime": "20:00",
+      "ticketPrice": "$29.95 (+tax)",
+      "ticketLink": "",
+      "relevantImageIndex": 0,
+      "venue": "Top of the Park",
+      "additionalLocation": "Top of the Park",
+      "isRecurring": "Yes",
+      "recurringPattern": "weekly_custom",
+      "recurringDaysOfWeek": [
+        "friday",
+        "saturday"
+      ],
+      "recurringWeekInterval": 1,
+      "_categoryOriginal": "Food Special",
+      "_categoryHintOriginal": "",
+      "_categorySource": "model_final",
+      "_categoryNormalizationReason": "kept allowed model category \"Food Special\"",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "5:30PM"
+        },
+        "end": {
+          "source": "explicit",
+          "evidence": "8:00PM",
+          "toClose": false
+        }
+      },
+      "timeResolution": {
+        "hoursUsed": false
+      },
+      "icon": "",
+      "image": "",
+      "cleanedFacebookUrl": "https://www.facebook.com/redshoresPEI",
+      "sharedPostThumbnail": "",
+      "id": "1615830863513785",
+      "latitude": "",
+      "longitude": "",
+      "city": "",
+      "streetAddress": "",
+      "organizedBy": "",
+      "usersResponded": "",
+      "utcStartDate": "",
+      "ticketsBuyUrl": "",
+      "relevantImageUrl": "",
+      "mediaUrls": []
+    },
+    {
+      "isEvent": "No",
+      "isFoodSpecial": "Yes",
+      "category": "Food Special",
+      "name": "Homestyle BBQ",
+      "description": "Homestyle BBQ — Theme Nights at Top of the Park. Fridays & Saturdays, 5:30PM – 8:00PM. Just $29.95 (+tax).",
+      "establishment": "Top of the Park",
+      "address": "",
+      "startDate": "2026-03-28",
+      "endDate": "2026-03-28",
+      "startTime": "17:30",
+      "endTime": "20:00",
+      "ticketPrice": "$29.95 (+tax)",
+      "ticketLink": "",
+      "relevantImageIndex": 0,
+      "venue": "Top of the Park",
+      "additionalLocation": "Top of the Park",
+      "isRecurring": "Yes",
+      "recurringPattern": "weekly_custom",
+      "recurringDaysOfWeek": [
+        "friday",
+        "saturday"
+      ],
+      "recurringWeekInterval": 1,
+      "_categoryOriginal": "Food Special",
+      "_categoryHintOriginal": "",
+      "_categorySource": "model_final",
+      "_categoryNormalizationReason": "kept allowed model category \"Food Special\"",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "5:30PM"
+        },
+        "end": {
+          "source": "explicit",
+          "evidence": "8:00PM",
+          "toClose": false
+        }
+      },
+      "timeResolution": {
+        "hoursUsed": false
+      },
+      "icon": "",
+      "image": "",
+      "cleanedFacebookUrl": "https://www.facebook.com/redshoresPEI",
+      "sharedPostThumbnail": "",
+      "id": "1615830863513785",
+      "latitude": "",
+      "longitude": "",
+      "city": "",
+      "streetAddress": "",
+      "organizedBy": "",
+      "usersResponded": "",
+      "utcStartDate": "",
+      "ticketsBuyUrl": "",
+      "relevantImageUrl": "",
+      "mediaUrls": []
+    }
+  ],
+  "stageArtifacts": {
+    "source": "live",
+    "contentType": "MIXED_EVENTS_AND_SPECIALS",
+    "stage4Items": [
+      {
+        "name": "Fiesta Feast Theme Night (Mexican Flair)",
+        "description": "Fiesta Feast (Mexican flair) (Theme Nights at Top of the Park).",
+        "date": "2026-04-17",
+        "startTime": "17:30",
+        "endTime": "20:00",
+        "venue": "Top of the Park",
+        "price": "",
+        "recurringPattern": "none",
+        "extractionReason": "A named theme night/entertainment activity block (“FIESTA FEAST / MEXICAN FLAIR”) with explicit date and the posted event time window.",
+        "timeFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "5:30"
+          },
+          "end": {
+            "source": "explicit",
+            "toClose": false,
+            "evidence": "8:00PM"
+          }
+        },
+        "_sourceType": "event",
+        "_pipelineIndex": 1,
+        "_pipelineTotalStage3": 7
+      },
+      {
+        "name": "Fiesta Feast Theme Night (Mexican Flair)",
+        "description": "Fiesta Feast (Mexican flair) (Theme Nights at Top of the Park).",
+        "date": "2026-04-18",
+        "startTime": "17:30",
+        "endTime": "20:00",
+        "venue": "Top of the Park",
+        "price": "",
+        "recurringPattern": "none",
+        "extractionReason": "A named theme night/entertainment activity block (“FIESTA FEAST / MEXICAN FLAIR”) with explicit date and the posted event time window.",
+        "timeFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "5:30"
+          },
+          "end": {
+            "source": "explicit",
+            "toClose": false,
+            "evidence": "8:00PM"
+          }
+        },
+        "_sourceType": "event",
+        "_pipelineIndex": 2,
+        "_pipelineTotalStage3": 7
+      },
+      {
+        "name": "Homestyle BBQ",
+        "description": "Homestyle BBQ — Theme Nights at Top of the Park. Fridays & Saturdays, 5:30PM – 8:00PM. Just $29.95 (+tax).",
+        "date": "2026-03-20",
+        "startTime": "17:30",
+        "endTime": "20:00",
+        "venue": "Top of the Park",
+        "pricing": {
+          "price": "$29.95 (+tax)",
+          "details": "Just $29.95 (+tax)"
+        },
+        "recurringPattern": "none",
+        "timeFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "5:30PM"
+          },
+          "end": {
+            "source": "explicit",
+            "evidence": "8:00PM",
+            "toClose": false
+          }
+        },
+        "extractionReason": "Food special with explicit deal pricing (“Just $29.95 (+tax)”) and explicit service window (5:30PM–8:00PM) tied to the named theme Homestyle BBQ.",
+        "_sourceType": "special",
+        "_pipelineIndex": 4,
+        "_pipelineTotalStage3": 7
+      },
+      {
+        "name": "Homestyle BBQ",
+        "description": "Homestyle BBQ — Theme Nights at Top of the Park. Fridays & Saturdays, 5:30PM – 8:00PM. Just $29.95 (+tax).",
+        "date": "2026-03-28",
+        "startTime": "17:30",
+        "endTime": "20:00",
+        "venue": "Top of the Park",
+        "pricing": {
+          "price": "$29.95 (+tax)",
+          "details": "Just $29.95 (+tax)"
+        },
+        "recurringPattern": "none",
+        "timeFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "5:30PM"
+          },
+          "end": {
+            "source": "explicit",
+            "evidence": "8:00PM",
+            "toClose": false
+          }
+        },
+        "extractionReason": "Food special with explicit deal pricing (“Just $29.95 (+tax)”) and explicit service window (5:30PM–8:00PM) tied to the named theme Homestyle BBQ.",
+        "_sourceType": "special",
+        "_pipelineIndex": 5,
+        "_pipelineTotalStage3": 7
+      }
+    ]
+  }
+}

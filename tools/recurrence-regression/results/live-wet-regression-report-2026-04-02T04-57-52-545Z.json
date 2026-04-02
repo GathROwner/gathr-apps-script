@@ -1,0 +1,482 @@
+{
+  "generatedAt": "2026-04-02T04:57:52.545Z",
+  "processUrl": "https://processdataset-6ju7yi5g2a-pd.a.run.app",
+  "cleanupStale": true,
+  "totalCases": 1,
+  "passedCases": 0,
+  "failedCases": [
+    {
+      "caseId": "body_bar_krista",
+      "failures": [
+        "missing expected doc: {\"path\":\"venues/slug_creditunionplace/events/59liXjiExkxfb90nT0Vs\",\"exactName\":\"Body Bar with Krista\",\"startDate\":\"2026-03-31\",\"endDate\":\"2026-03-31\",\"startTime\":\"16:30\",\"endTime\":\"17:15\",\"recurringPattern\":\"weekly_custom\",\"isRecurring\":true,\"recurringWeekdaySequence\":[\"tuesday\",\"wednesday\"],\"recurringWeekInterval\":1}"
+      ],
+      "responseOk": true,
+      "status": 200
+    }
+  ],
+  "results": [
+    {
+      "caseId": "body_bar_krista",
+      "description": "Alternating Tuesday/Wednesday class should remain a single weekly_custom keeper doc.",
+      "processUrl": "https://processdataset-6ju7yi5g2a-pd.a.run.app",
+      "request": {
+        "fileId": "1oJUytO-MCCrrGO9zIsZihPv4R7V_JGRE",
+        "rowIndex": 210,
+        "parserMode": "full5stage",
+        "dryRun": false
+      },
+      "response": {
+        "ok": true,
+        "status": 200,
+        "body": {
+          "success": true,
+          "message": "Selected rows processed",
+          "stats": {
+            "processedCount": 0,
+            "skippedCount": 1,
+            "invalidCount": 0,
+            "duplicateCount": 0,
+            "errorCount": 0,
+            "newEventsCreated": 0,
+            "existingEventsUpdated": 0,
+            "newStandardEventsCreated": 0,
+            "existingStandardEventsUpdated": 0,
+            "newFoodSpecialsCreated": 0,
+            "existingFoodSpecialsUpdated": 0
+          },
+          "nextBatchScheduled": false
+        }
+      },
+      "latestSnapshot": {
+        "id": "1oJUytO-MCCrrGO9zIsZihPv4R7V_JGRE_210_1775105873596",
+        "createdAt": "2026-04-02T04:57:53.600Z",
+        "createdAtMs": 1775105873600,
+        "eventCount": 0,
+        "parserMode": "full5stage",
+        "error": "Due to failing Stage 1 validation: The post advertises fitness class sign-up and mentions 'Regular Class Schedule' and 'Body Bar with Krista', but neither the text nor the image provides extractable event details (no specific dates, times, locations beyond the venue name, or pricing). According to the rules, events/specials must include specific timing or detailed schedule information to be extracted; this post lacks those specifics."
+      },
+      "before": {
+        "evaluation": {
+          "success": false,
+          "failures": [
+            "missing expected doc: {\"path\":\"venues/slug_creditunionplace/events/59liXjiExkxfb90nT0Vs\",\"exactName\":\"Body Bar with Krista\",\"startDate\":\"2026-03-31\",\"endDate\":\"2026-03-31\",\"startTime\":\"16:30\",\"endTime\":\"17:15\",\"recurringPattern\":\"weekly_custom\",\"isRecurring\":true,\"recurringWeekdaySequence\":[\"tuesday\",\"wednesday\"],\"recurringWeekInterval\":1}"
+          ],
+          "expectedMatches": [],
+          "forbiddenMatches": []
+        },
+        "docs": [
+          {
+            "path": "venues/slug_creditunionplace/events/59liXjiExkxfb90nT0Vs",
+            "exists": true,
+            "id": "59liXjiExkxfb90nT0Vs",
+            "name": "Body Bar with Krista",
+            "eventName": "Body Bar with Krista",
+            "description": "Body Bar with Krista. Alternating Tuesdays and Wednesdays at 4:30pm. A total-body barbell workout using light to moderate weights and high reps. You’ll squat, press, curl and lunge your way through motivating music and coached technique. This class builds strength, tones muscle, and boosts endurance.",
+            "startDate": "2026-03-31",
+            "endDate": "2026-03-31",
+            "startTime": "16:30",
+            "endTime": "21:00",
+            "recurringPattern": "weekly_custom",
+            "recurrenceUntilDate": "",
+            "totalOccurrences": 0,
+            "isRecurring": true,
+            "recurringDaysOfWeek": [],
+            "recurringWeekdaySequence": [
+              "tuesday",
+              "wednesday"
+            ],
+            "recurringWeekInterval": 1,
+            "updatedAt": "2026-04-01T19:08:37.428Z",
+            "lastSeenAt": "2026-04-01T19:08:37.428Z",
+            "raw": {
+              "uniqueId": "1576717427509405_1",
+              "establishment": "Credit Union Place",
+              "eventType": "workshops_classes",
+              "eventName": "Body Bar with Krista",
+              "description": "Body Bar with Krista. Alternating Tuesdays and Wednesdays at 4:30pm. A total-body barbell workout using light to moderate weights and high reps. You’ll squat, press, curl and lunge your way through motivating music and coached technique. This class builds strength, tones muscle, and boosts endurance.",
+              "startDate": "2026-03-31",
+              "endDate": "2026-03-31",
+              "endTime": "21:00",
+              "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774790187728-1ihoj3.webp",
+              "facebookUrl": "https://www.facebook.com/creditunionplace",
+              "sourceTimestamp": {
+                "_seconds": 1774785718,
+                "_nanoseconds": 0
+              },
+              "shares": 0,
+              "venueId": "slug_creditunionplace",
+              "category": "Workshops & Classes",
+              "isEvent": "Yes",
+              "isFoodSpecial": "No",
+              "name": "Body Bar with Krista",
+              "address": "511 Notre Dame St, Summerside, PE C1N 1T2, Canada",
+              "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1772905657135-vsvu86.webp",
+              "cleanedFacebookUrl": "https://www.facebook.com/creditunionplace",
+              "latitude": "",
+              "longitude": "",
+              "createdAt": {
+                "_seconds": 1774790213,
+                "_nanoseconds": 978000000
+              },
+              "comments": 1,
+              "topReactionsCount": 1,
+              "likes": 6,
+              "totalOccurrences": 0,
+              "recurringPattern": "weekly_custom",
+              "recurrenceUntilDate": "",
+              "recurringDaysOfWeek": [],
+              "isRecurring": true,
+              "recurringWeekdaySequence": [
+                "tuesday",
+                "wednesday"
+              ],
+              "recurringWeekInterval": 1,
+              "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1775069677397-lyrj4j.webp",
+              "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1775069677397-lyrj4j.webp",
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "4:30pm"
+                },
+                "end": {
+                  "source": "none",
+                  "toClose": false,
+                  "evidence": ""
+                }
+              },
+              "timeResolution": {
+                "hoursUsed": true,
+                "endFromHours": "category_default"
+              },
+              "startTime": "16:30",
+              "lastSeenAt": {
+                "_seconds": 1775070517,
+                "_nanoseconds": 428000000
+              },
+              "mediaUrls": [
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774790187728-1ihoj3.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774876414985-upqtlm.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1775058560398-qyrmv9.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1775060994079-oal3wx.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1775063955597-crr1by.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1775067095929-02iiax.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1775068520478-zlphp8.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1775069677397-lyrj4j.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1775070481565-aeaqdu.webp"
+              ],
+              "updatedAt": {
+                "_seconds": 1775070517,
+                "_nanoseconds": 428000000
+              }
+            }
+          },
+          {
+            "path": "venues/slug_creditunionplace/events/ol4duFVEvPjBhoXWNaJd",
+            "exists": false,
+            "id": "ol4duFVEvPjBhoXWNaJd",
+            "name": "",
+            "eventName": "",
+            "description": "",
+            "startDate": "",
+            "endDate": "",
+            "startTime": "",
+            "endTime": "",
+            "recurringPattern": "",
+            "recurrenceUntilDate": "",
+            "totalOccurrences": null,
+            "isRecurring": false,
+            "recurringDaysOfWeek": [],
+            "recurringWeekdaySequence": [],
+            "recurringWeekInterval": null,
+            "updatedAt": "",
+            "lastSeenAt": "",
+            "raw": null
+          }
+        ]
+      },
+      "after": {
+        "evaluation": {
+          "success": false,
+          "failures": [
+            "missing expected doc: {\"path\":\"venues/slug_creditunionplace/events/59liXjiExkxfb90nT0Vs\",\"exactName\":\"Body Bar with Krista\",\"startDate\":\"2026-03-31\",\"endDate\":\"2026-03-31\",\"startTime\":\"16:30\",\"endTime\":\"17:15\",\"recurringPattern\":\"weekly_custom\",\"isRecurring\":true,\"recurringWeekdaySequence\":[\"tuesday\",\"wednesday\"],\"recurringWeekInterval\":1}"
+          ],
+          "expectedMatches": [],
+          "forbiddenMatches": []
+        },
+        "docs": [
+          {
+            "path": "venues/slug_creditunionplace/events/59liXjiExkxfb90nT0Vs",
+            "exists": true,
+            "id": "59liXjiExkxfb90nT0Vs",
+            "name": "Body Bar with Krista",
+            "eventName": "Body Bar with Krista",
+            "description": "Body Bar with Krista. Alternating Tuesdays and Wednesdays at 4:30pm. A total-body barbell workout using light to moderate weights and high reps. You’ll squat, press, curl and lunge your way through motivating music and coached technique. This class builds strength, tones muscle, and boosts endurance.",
+            "startDate": "2026-03-31",
+            "endDate": "2026-03-31",
+            "startTime": "16:30",
+            "endTime": "21:00",
+            "recurringPattern": "weekly_custom",
+            "recurrenceUntilDate": "",
+            "totalOccurrences": 0,
+            "isRecurring": true,
+            "recurringDaysOfWeek": [],
+            "recurringWeekdaySequence": [
+              "tuesday",
+              "wednesday"
+            ],
+            "recurringWeekInterval": 1,
+            "updatedAt": "2026-04-01T19:08:37.428Z",
+            "lastSeenAt": "2026-04-01T19:08:37.428Z",
+            "raw": {
+              "uniqueId": "1576717427509405_1",
+              "establishment": "Credit Union Place",
+              "eventType": "workshops_classes",
+              "eventName": "Body Bar with Krista",
+              "description": "Body Bar with Krista. Alternating Tuesdays and Wednesdays at 4:30pm. A total-body barbell workout using light to moderate weights and high reps. You’ll squat, press, curl and lunge your way through motivating music and coached technique. This class builds strength, tones muscle, and boosts endurance.",
+              "startDate": "2026-03-31",
+              "endDate": "2026-03-31",
+              "endTime": "21:00",
+              "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774790187728-1ihoj3.webp",
+              "facebookUrl": "https://www.facebook.com/creditunionplace",
+              "sourceTimestamp": {
+                "_seconds": 1774785718,
+                "_nanoseconds": 0
+              },
+              "shares": 0,
+              "venueId": "slug_creditunionplace",
+              "category": "Workshops & Classes",
+              "isEvent": "Yes",
+              "isFoodSpecial": "No",
+              "name": "Body Bar with Krista",
+              "address": "511 Notre Dame St, Summerside, PE C1N 1T2, Canada",
+              "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1772905657135-vsvu86.webp",
+              "cleanedFacebookUrl": "https://www.facebook.com/creditunionplace",
+              "latitude": "",
+              "longitude": "",
+              "createdAt": {
+                "_seconds": 1774790213,
+                "_nanoseconds": 978000000
+              },
+              "comments": 1,
+              "topReactionsCount": 1,
+              "likes": 6,
+              "totalOccurrences": 0,
+              "recurringPattern": "weekly_custom",
+              "recurrenceUntilDate": "",
+              "recurringDaysOfWeek": [],
+              "isRecurring": true,
+              "recurringWeekdaySequence": [
+                "tuesday",
+                "wednesday"
+              ],
+              "recurringWeekInterval": 1,
+              "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1775069677397-lyrj4j.webp",
+              "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1775069677397-lyrj4j.webp",
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "4:30pm"
+                },
+                "end": {
+                  "source": "none",
+                  "toClose": false,
+                  "evidence": ""
+                }
+              },
+              "timeResolution": {
+                "hoursUsed": true,
+                "endFromHours": "category_default"
+              },
+              "startTime": "16:30",
+              "lastSeenAt": {
+                "_seconds": 1775070517,
+                "_nanoseconds": 428000000
+              },
+              "mediaUrls": [
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774790187728-1ihoj3.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774876414985-upqtlm.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1775058560398-qyrmv9.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1775060994079-oal3wx.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1775063955597-crr1by.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1775067095929-02iiax.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1775068520478-zlphp8.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1775069677397-lyrj4j.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1775070481565-aeaqdu.webp"
+              ],
+              "updatedAt": {
+                "_seconds": 1775070517,
+                "_nanoseconds": 428000000
+              }
+            }
+          },
+          {
+            "path": "venues/slug_creditunionplace/events/ol4duFVEvPjBhoXWNaJd",
+            "exists": false,
+            "id": "ol4duFVEvPjBhoXWNaJd",
+            "name": "",
+            "eventName": "",
+            "description": "",
+            "startDate": "",
+            "endDate": "",
+            "startTime": "",
+            "endTime": "",
+            "recurringPattern": "",
+            "recurrenceUntilDate": "",
+            "totalOccurrences": null,
+            "isRecurring": false,
+            "recurringDaysOfWeek": [],
+            "recurringWeekdaySequence": [],
+            "recurringWeekInterval": null,
+            "updatedAt": "",
+            "lastSeenAt": "",
+            "raw": null
+          }
+        ]
+      },
+      "cleanup": {
+        "enabled": true,
+        "deletedDocs": []
+      },
+      "final": {
+        "evaluation": {
+          "success": false,
+          "failures": [
+            "missing expected doc: {\"path\":\"venues/slug_creditunionplace/events/59liXjiExkxfb90nT0Vs\",\"exactName\":\"Body Bar with Krista\",\"startDate\":\"2026-03-31\",\"endDate\":\"2026-03-31\",\"startTime\":\"16:30\",\"endTime\":\"17:15\",\"recurringPattern\":\"weekly_custom\",\"isRecurring\":true,\"recurringWeekdaySequence\":[\"tuesday\",\"wednesday\"],\"recurringWeekInterval\":1}"
+          ],
+          "expectedMatches": [],
+          "forbiddenMatches": []
+        },
+        "docs": [
+          {
+            "path": "venues/slug_creditunionplace/events/59liXjiExkxfb90nT0Vs",
+            "exists": true,
+            "id": "59liXjiExkxfb90nT0Vs",
+            "name": "Body Bar with Krista",
+            "eventName": "Body Bar with Krista",
+            "description": "Body Bar with Krista. Alternating Tuesdays and Wednesdays at 4:30pm. A total-body barbell workout using light to moderate weights and high reps. You’ll squat, press, curl and lunge your way through motivating music and coached technique. This class builds strength, tones muscle, and boosts endurance.",
+            "startDate": "2026-03-31",
+            "endDate": "2026-03-31",
+            "startTime": "16:30",
+            "endTime": "21:00",
+            "recurringPattern": "weekly_custom",
+            "recurrenceUntilDate": "",
+            "totalOccurrences": 0,
+            "isRecurring": true,
+            "recurringDaysOfWeek": [],
+            "recurringWeekdaySequence": [
+              "tuesday",
+              "wednesday"
+            ],
+            "recurringWeekInterval": 1,
+            "updatedAt": "2026-04-01T19:08:37.428Z",
+            "lastSeenAt": "2026-04-01T19:08:37.428Z",
+            "raw": {
+              "uniqueId": "1576717427509405_1",
+              "establishment": "Credit Union Place",
+              "eventType": "workshops_classes",
+              "eventName": "Body Bar with Krista",
+              "description": "Body Bar with Krista. Alternating Tuesdays and Wednesdays at 4:30pm. A total-body barbell workout using light to moderate weights and high reps. You’ll squat, press, curl and lunge your way through motivating music and coached technique. This class builds strength, tones muscle, and boosts endurance.",
+              "startDate": "2026-03-31",
+              "endDate": "2026-03-31",
+              "endTime": "21:00",
+              "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774790187728-1ihoj3.webp",
+              "facebookUrl": "https://www.facebook.com/creditunionplace",
+              "sourceTimestamp": {
+                "_seconds": 1774785718,
+                "_nanoseconds": 0
+              },
+              "shares": 0,
+              "venueId": "slug_creditunionplace",
+              "category": "Workshops & Classes",
+              "isEvent": "Yes",
+              "isFoodSpecial": "No",
+              "name": "Body Bar with Krista",
+              "address": "511 Notre Dame St, Summerside, PE C1N 1T2, Canada",
+              "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1772905657135-vsvu86.webp",
+              "cleanedFacebookUrl": "https://www.facebook.com/creditunionplace",
+              "latitude": "",
+              "longitude": "",
+              "createdAt": {
+                "_seconds": 1774790213,
+                "_nanoseconds": 978000000
+              },
+              "comments": 1,
+              "topReactionsCount": 1,
+              "likes": 6,
+              "totalOccurrences": 0,
+              "recurringPattern": "weekly_custom",
+              "recurrenceUntilDate": "",
+              "recurringDaysOfWeek": [],
+              "isRecurring": true,
+              "recurringWeekdaySequence": [
+                "tuesday",
+                "wednesday"
+              ],
+              "recurringWeekInterval": 1,
+              "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1775069677397-lyrj4j.webp",
+              "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1775069677397-lyrj4j.webp",
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "4:30pm"
+                },
+                "end": {
+                  "source": "none",
+                  "toClose": false,
+                  "evidence": ""
+                }
+              },
+              "timeResolution": {
+                "hoursUsed": true,
+                "endFromHours": "category_default"
+              },
+              "startTime": "16:30",
+              "lastSeenAt": {
+                "_seconds": 1775070517,
+                "_nanoseconds": 428000000
+              },
+              "mediaUrls": [
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774790187728-1ihoj3.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774876414985-upqtlm.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1775058560398-qyrmv9.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1775060994079-oal3wx.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1775063955597-crr1by.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1775067095929-02iiax.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1775068520478-zlphp8.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1775069677397-lyrj4j.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1775070481565-aeaqdu.webp"
+              ],
+              "updatedAt": {
+                "_seconds": 1775070517,
+                "_nanoseconds": 428000000
+              }
+            }
+          },
+          {
+            "path": "venues/slug_creditunionplace/events/ol4duFVEvPjBhoXWNaJd",
+            "exists": false,
+            "id": "ol4duFVEvPjBhoXWNaJd",
+            "name": "",
+            "eventName": "",
+            "description": "",
+            "startDate": "",
+            "endDate": "",
+            "startTime": "",
+            "endTime": "",
+            "recurringPattern": "",
+            "recurrenceUntilDate": "",
+            "totalOccurrences": null,
+            "isRecurring": false,
+            "recurringDaysOfWeek": [],
+            "recurringWeekdaySequence": [],
+            "recurringWeekInterval": null,
+            "updatedAt": "",
+            "lastSeenAt": "",
+            "raw": null
+          }
+        ]
+      },
+      "success": false
+    }
+  ]
+}

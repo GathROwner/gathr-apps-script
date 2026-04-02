@@ -1,0 +1,480 @@
+{
+  "generatedAt": "2026-04-02T02:01:13.561Z",
+  "count": 3,
+  "docs": [
+    {
+      "id": "11cI3E3816koHKDrPNvTj9brG5d5fiB2o_281_1774536515322",
+      "createdAt": "2026-03-26T14:48:35.336Z",
+      "rowMeta": {
+        "pageName": "p",
+        "userName": "Red Shores",
+        "timestamp": "2026-03-25T14:00:22.000Z",
+        "utcStartDate": "",
+        "mediaUrls": [
+          "https://scontent-hou1-1.xx.fbcdn.net/v/t39.30808-6/657290497_1615830820180456_3250549063054296663_n.jpg?stp=dst-jpg_p526x296_tt6&_nc_cat=108&ccb=1-7&_nc_sid=13d280&_nc_ohc=y1NOM4u4PKwQ7kNvwFZgl4j&_nc_oc=Adrd4HVXqitQY1LgwUrjaSiYmIFp6O_ND_vrZNhe70ldDrpywuiXBOBz0BrAd_T-GlI&_nc_zt=23&_nc_ht=scontent-hou1-1.xx&_nc_gid=PdoCj4rZ6f_XJORgNXSXzA&_nc_ss=7a30f&oh=00_Afzp8Am-vKExGiDpfTUfDp3RWPpnpRY0CkfoS6mJD3M-xg&oe=69CAFF04"
+        ],
+        "parserMode": "full5stage",
+        "dryRun": false
+      },
+      "eventCount": 4,
+      "events": [
+        {
+          "id": "1615830863513785",
+          "name": "Murder Mystery Dinner Theatre",
+          "category": "Food Special",
+          "isEvent": "No",
+          "isFoodSpecial": "Yes",
+          "establishment": "Top of the Park",
+          "additionalLocation": "Top of the Park",
+          "startDate": "2026-04-10",
+          "startTime": "11:00",
+          "endDate": "2026-04-10",
+          "endTime": "21:00",
+          "recurringPattern": "none",
+          "ticketLink": "",
+          "ticketsBuyUrl": "",
+          "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774536439393-zvwy9f.webp",
+          "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774536439393-zvwy9f.webp",
+          "sharedPostThumbnail": "",
+          "timeResolution": {
+            "hoursUsed": true,
+            "endFromHours": "category_default",
+            "startFromPostTime": true
+          },
+          "timeFlags": {
+            "start": {
+              "source": "semantic",
+              "evidence": "Stage 5.6 fallback from post time 11:00"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "description": "Top of the Park will be closed April 10th & 11th (Murder Mystery Dinner Theatre)."
+        },
+        {
+          "id": "1615830863513785",
+          "name": "Murder Mystery Dinner Theatre",
+          "category": "Food Special",
+          "isEvent": "No",
+          "isFoodSpecial": "Yes",
+          "establishment": "Top of the Park",
+          "additionalLocation": "Top of the Park",
+          "startDate": "2026-04-11",
+          "startTime": "11:00",
+          "endDate": "2026-04-11",
+          "endTime": "21:00",
+          "recurringPattern": "none",
+          "ticketLink": "",
+          "ticketsBuyUrl": "",
+          "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774536439393-zvwy9f.webp",
+          "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774536439393-zvwy9f.webp",
+          "sharedPostThumbnail": "",
+          "timeResolution": {
+            "hoursUsed": true,
+            "endFromHours": "category_default",
+            "startFromPostTime": true
+          },
+          "timeFlags": {
+            "start": {
+              "source": "semantic",
+              "evidence": "Stage 5.6 fallback from post time 11:00"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "description": "Top of the Park will be closed April 10th & 11th (Murder Mystery Dinner Theatre)."
+        },
+        {
+          "id": "1615830863513785",
+          "name": "Theme Nights at Top of the Park – Homestyle BBQ",
+          "category": "Food Special",
+          "isEvent": "No",
+          "isFoodSpecial": "Yes",
+          "establishment": "Top of the Park",
+          "additionalLocation": "Top of the Park",
+          "startDate": "2026-03-25",
+          "startTime": "17:30",
+          "endDate": "2026-03-25",
+          "endTime": "20:00",
+          "recurringPattern": "weekly_friday",
+          "ticketLink": "",
+          "ticketsBuyUrl": "",
+          "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774536439393-zvwy9f.webp",
+          "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774536439393-zvwy9f.webp",
+          "sharedPostThumbnail": "",
+          "timeResolution": {
+            "hoursUsed": false
+          },
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "5:30PM"
+            },
+            "end": {
+              "source": "explicit",
+              "evidence": "8:00PM",
+              "toClose": false
+            }
+          },
+          "description": "Theme Nights at Top of the Park: Homestyle BBQ nights (Fridays & Saturdays) 5:30PM – 8:00PM. Just $29.95 (+tax). Dates shown: March 20 & 21, 27 & 28; April 4."
+        },
+        {
+          "id": "1615830863513785",
+          "name": "Theme Nights at Top of the Park – Fiesta Feast (Mexican flair)",
+          "category": "Food Special",
+          "isEvent": "No",
+          "isFoodSpecial": "Yes",
+          "establishment": "Top of the Park",
+          "additionalLocation": "Top of the Park",
+          "startDate": "2026-03-25",
+          "startTime": "17:30",
+          "endDate": "2026-03-25",
+          "endTime": "20:00",
+          "recurringPattern": "weekly_friday",
+          "ticketLink": "",
+          "ticketsBuyUrl": "",
+          "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774536439393-zvwy9f.webp",
+          "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774536439393-zvwy9f.webp",
+          "sharedPostThumbnail": "",
+          "timeResolution": {
+            "hoursUsed": false
+          },
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "5:30PM"
+            },
+            "end": {
+              "source": "explicit",
+              "evidence": "8:00PM",
+              "toClose": false
+            }
+          },
+          "description": "Theme Nights at Top of the Park: Fiesta Feast with Mexican flair (Fridays & Saturdays) 5:30PM – 8:00PM. Just $29.95 (+tax). Dates shown: April 17 & 18."
+        }
+      ],
+      "skipReason": null,
+      "stageArtifacts": null
+    },
+    {
+      "id": "11cI3E3816koHKDrPNvTj9brG5d5fiB2o_281_1775092848660",
+      "createdAt": "2026-04-02T01:20:48.668Z",
+      "rowMeta": {
+        "pageName": "p",
+        "userName": "Red Shores",
+        "timestamp": "2026-03-25T14:00:22.000Z",
+        "utcStartDate": "",
+        "mediaUrls": [
+          "https://scontent-hou1-1.xx.fbcdn.net/v/t39.30808-6/657290497_1615830820180456_3250549063054296663_n.jpg?stp=dst-jpg_p526x296_tt6&_nc_cat=108&ccb=1-7&_nc_sid=13d280&_nc_ohc=y1NOM4u4PKwQ7kNvwFZgl4j&_nc_oc=Adrd4HVXqitQY1LgwUrjaSiYmIFp6O_ND_vrZNhe70ldDrpywuiXBOBz0BrAd_T-GlI&_nc_zt=23&_nc_ht=scontent-hou1-1.xx&_nc_gid=PdoCj4rZ6f_XJORgNXSXzA&_nc_ss=7a30f&oh=00_Afzp8Am-vKExGiDpfTUfDp3RWPpnpRY0CkfoS6mJD3M-xg&oe=69CAFF04"
+        ],
+        "parserMode": "full5stage",
+        "dryRun": false
+      },
+      "eventCount": 1,
+      "events": [
+        {
+          "id": "1615830863513785",
+          "name": "Theme Nights at Top of the Park",
+          "category": "Food Special",
+          "isEvent": "No",
+          "isFoodSpecial": "Yes",
+          "establishment": "Top of the Park",
+          "additionalLocation": "Top of the Park",
+          "startDate": "2026-03-25",
+          "startTime": "17:30",
+          "endDate": "2026-03-25",
+          "endTime": "20:00",
+          "recurringPattern": "weekly_custom",
+          "ticketLink": "",
+          "ticketsBuyUrl": "",
+          "image": "",
+          "relevantImageUrl": "",
+          "sharedPostThumbnail": "",
+          "timeResolution": {
+            "hoursUsed": false
+          },
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "5:30PM"
+            },
+            "end": {
+              "source": "explicit",
+              "evidence": "8:00PM",
+              "toClose": false
+            }
+          },
+          "description": "Fridays & Saturdays 5:30PM – 8:00PM — Theme Nights at Top of the Park (Homestyle BBQ nights / Fiesta Feast with Mexican flair). Just $29.95 (+tax)."
+        }
+      ],
+      "skipReason": null,
+      "stageArtifacts": null
+    },
+    {
+      "id": "11cI3E3816koHKDrPNvTj9brG5d5fiB2o_281_1775095166753",
+      "createdAt": "2026-04-02T01:59:26.767Z",
+      "rowMeta": {
+        "pageName": "p",
+        "userName": "Red Shores",
+        "timestamp": "2026-03-25T14:00:22.000Z",
+        "utcStartDate": "",
+        "mediaUrls": [
+          "https://scontent-hou1-1.xx.fbcdn.net/v/t39.30808-6/657290497_1615830820180456_3250549063054296663_n.jpg?stp=dst-jpg_p526x296_tt6&_nc_cat=108&ccb=1-7&_nc_sid=13d280&_nc_ohc=y1NOM4u4PKwQ7kNvwFZgl4j&_nc_oc=Adrd4HVXqitQY1LgwUrjaSiYmIFp6O_ND_vrZNhe70ldDrpywuiXBOBz0BrAd_T-GlI&_nc_zt=23&_nc_ht=scontent-hou1-1.xx&_nc_gid=PdoCj4rZ6f_XJORgNXSXzA&_nc_ss=7a30f&oh=00_Afzp8Am-vKExGiDpfTUfDp3RWPpnpRY0CkfoS6mJD3M-xg&oe=69CAFF04"
+        ],
+        "parserMode": "full5stage",
+        "dryRun": false
+      },
+      "eventCount": 7,
+      "events": [
+        {
+          "id": "1615830863513785",
+          "name": "Theme Nights at Top of the Park",
+          "category": "Gatherings & Parties",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "establishment": "Top of the Park",
+          "additionalLocation": "Top of the Park",
+          "startDate": "2026-03-27",
+          "startTime": "17:30",
+          "endDate": "2026-03-27",
+          "endTime": "23:00",
+          "recurringPattern": "weekly_custom",
+          "ticketLink": "",
+          "ticketsBuyUrl": "",
+          "image": "",
+          "relevantImageUrl": "",
+          "sharedPostThumbnail": "",
+          "timeResolution": {
+            "hoursUsed": true,
+            "endFromHours": "category_default"
+          },
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "5:30PM"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "8:00PM"
+            }
+          },
+          "description": "Theme Nights at Top of the Park (Fridays & Saturdays) — Great vibes, and unforgettable evenings. 19+"
+        },
+        {
+          "id": "1615830863513785",
+          "name": "Theme Nights at Top of the Park",
+          "category": "Gatherings & Parties",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "establishment": "Top of the Park",
+          "additionalLocation": "Top of the Park",
+          "startDate": "2026-03-28",
+          "startTime": "17:30",
+          "endDate": "2026-03-28",
+          "endTime": "23:00",
+          "recurringPattern": "weekly_custom",
+          "ticketLink": "",
+          "ticketsBuyUrl": "",
+          "image": "",
+          "relevantImageUrl": "",
+          "sharedPostThumbnail": "",
+          "timeResolution": {
+            "hoursUsed": true,
+            "endFromHours": "category_default"
+          },
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "5:30PM"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "8:00PM"
+            }
+          },
+          "description": "Theme Nights at Top of the Park (Fridays & Saturdays) — Great vibes, and unforgettable evenings. 19+"
+        },
+        {
+          "id": "1615830863513785",
+          "name": "Homestyle BBQ (Theme Night)",
+          "category": "Food Special",
+          "isEvent": "No",
+          "isFoodSpecial": "Yes",
+          "establishment": "Top of the Park",
+          "additionalLocation": "Top of the Park",
+          "startDate": "2026-03-20",
+          "startTime": "17:30",
+          "endDate": "2026-03-20",
+          "endTime": "20:00",
+          "recurringPattern": "weekly_custom",
+          "ticketLink": "",
+          "ticketsBuyUrl": "",
+          "image": "",
+          "relevantImageUrl": "",
+          "sharedPostThumbnail": "",
+          "timeResolution": {
+            "hoursUsed": false
+          },
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "5:30PM – 8:00PM"
+            },
+            "end": {
+              "source": "explicit",
+              "evidence": "5:30PM – 8:00PM",
+              "toClose": false
+            }
+          },
+          "description": "Homestyle BBQ nights — Fridays & Saturdays, 5:30PM – 8:00PM. Just $29.95 (+tax)."
+        },
+        {
+          "id": "1615830863513785",
+          "name": "Homestyle BBQ (Theme Night)",
+          "category": "Food Special",
+          "isEvent": "No",
+          "isFoodSpecial": "Yes",
+          "establishment": "Top of the Park",
+          "additionalLocation": "Top of the Park",
+          "startDate": "2026-03-28",
+          "startTime": "17:30",
+          "endDate": "2026-03-28",
+          "endTime": "20:00",
+          "recurringPattern": "weekly_custom",
+          "ticketLink": "",
+          "ticketsBuyUrl": "",
+          "image": "",
+          "relevantImageUrl": "",
+          "sharedPostThumbnail": "",
+          "timeResolution": {
+            "hoursUsed": false
+          },
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "5:30PM – 8:00PM"
+            },
+            "end": {
+              "source": "explicit",
+              "evidence": "5:30PM – 8:00PM",
+              "toClose": false
+            }
+          },
+          "description": "Homestyle BBQ nights — Fridays & Saturdays, 5:30PM – 8:00PM. Just $29.95 (+tax)."
+        },
+        {
+          "id": "1615830863513785",
+          "name": "Fiesta Feast (Mexican Flair) (Theme Night)",
+          "category": "Food Special",
+          "isEvent": "No",
+          "isFoodSpecial": "Yes",
+          "establishment": "Top of the Park",
+          "additionalLocation": "Top of the Park",
+          "startDate": "2026-04-03",
+          "startTime": "17:30",
+          "endDate": "2026-04-03",
+          "endTime": "20:00",
+          "recurringPattern": "weekly_custom",
+          "ticketLink": "",
+          "ticketsBuyUrl": "",
+          "image": "",
+          "relevantImageUrl": "",
+          "sharedPostThumbnail": "",
+          "timeResolution": {
+            "hoursUsed": false
+          },
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "5:30PM – 8:00PM"
+            },
+            "end": {
+              "source": "explicit",
+              "evidence": "5:30PM – 8:00PM",
+              "toClose": false
+            }
+          },
+          "description": "Fiesta Feast with Mexican flair — Fridays & Saturdays, 5:30PM – 8:00PM. Just $29.95 (+tax)."
+        },
+        {
+          "id": "1615830863513785",
+          "name": "Fiesta Feast (Mexican Flair) (Theme Night)",
+          "category": "Food Special",
+          "isEvent": "No",
+          "isFoodSpecial": "Yes",
+          "establishment": "Top of the Park",
+          "additionalLocation": "Top of the Park",
+          "startDate": "2026-04-17",
+          "startTime": "17:30",
+          "endDate": "2026-04-17",
+          "endTime": "20:00",
+          "recurringPattern": "weekly_custom",
+          "ticketLink": "",
+          "ticketsBuyUrl": "",
+          "image": "",
+          "relevantImageUrl": "",
+          "sharedPostThumbnail": "",
+          "timeResolution": {
+            "hoursUsed": false
+          },
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "5:30PM – 8:00PM"
+            },
+            "end": {
+              "source": "explicit",
+              "evidence": "5:30PM – 8:00PM",
+              "toClose": false
+            }
+          },
+          "description": "Fiesta Feast with Mexican flair — Fridays & Saturdays, 5:30PM – 8:00PM. Just $29.95 (+tax)."
+        },
+        {
+          "id": "1615830863513785",
+          "name": "Fiesta Feast (Mexican Flair) (Theme Night)",
+          "category": "Food Special",
+          "isEvent": "No",
+          "isFoodSpecial": "Yes",
+          "establishment": "Top of the Park",
+          "additionalLocation": "Top of the Park",
+          "startDate": "2026-04-18",
+          "startTime": "17:30",
+          "endDate": "2026-04-18",
+          "endTime": "20:00",
+          "recurringPattern": "weekly_custom",
+          "ticketLink": "",
+          "ticketsBuyUrl": "",
+          "image": "",
+          "relevantImageUrl": "",
+          "sharedPostThumbnail": "",
+          "timeResolution": {
+            "hoursUsed": false
+          },
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "5:30PM – 8:00PM"
+            },
+            "end": {
+              "source": "explicit",
+              "evidence": "5:30PM – 8:00PM",
+              "toClose": false
+            }
+          },
+          "description": "Fiesta Feast with Mexican flair — Fridays & Saturdays, 5:30PM – 8:00PM. Just $29.95 (+tax)."
+        }
+      ],
+      "skipReason": null,
+      "stageArtifacts": null
+    }
+  ]
+}

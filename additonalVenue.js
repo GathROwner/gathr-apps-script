@@ -32,13 +32,15 @@ function findVenueInContactInfo(venueName) {
 
   // Find relevant column indices
   const nameIndex        = headers.indexOf('Pagename');
-  const facebookUrlIndex = headers.indexOf('Pageurl');
+  const titleIndex       = headers.indexOf('Title');
+  const pageUrlIndex     = headers.indexOf('Pageurl');
+  const facebookUrlIndex = headers.indexOf('Facebookurl');
   const addressIndex     = headers.indexOf('Address');
   const latitudeIndex    = headers.indexOf('Latitude');
   const longitudeIndex   = headers.indexOf('Longitude');
 
-  if (nameIndex === -1 || facebookUrlIndex === -1 || addressIndex === -1) {
-    console.error('findVenueInContactInfo: Required columns (Pagename, Pageurl, or Address) not found');
+  if ((nameIndex === -1 && titleIndex === -1) || (pageUrlIndex === -1 && facebookUrlIndex === -1)) {
+    console.error('findVenueInContactInfo: Required columns (Pagename/Title or Pageurl/Facebookurl) not found');
     return null;
   }
 
@@ -64,7 +66,25 @@ function findVenueInContactInfo(venueName) {
 
   // Normalize the search name (apostrophes removed, etc.)
   const normalizedSearchName = normalizeVenueNameNoApostrophe(venueName);
+  const normalizedSearchCollapsed = normalizedSearchName.replace(/\s+/g, '');
+  const normalizedSearchUrl = normalizeUrl_(venueName);
   console.log(`findVenueInContactInfo: Normalized venue name for comparison: "${normalizedSearchName}"`);
+
+  function normalizeUrl_(u) {
+    return String(u || '')
+      .toLowerCase()
+      .replace(/^https?:\/\//, '')
+      .replace(/^www\./, '')
+      .replace(/^m\./, '')
+      .replace(/\/+$/, '');
+  }
+
+  function extractSlug_(u) {
+    const cleaned = normalizeUrl_(u);
+    if (!cleaned) return '';
+    const parts = cleaned.split('/');
+    return parts[parts.length - 1] || '';
+  }
 
   // Split the normalized search name into words
   const searchWords = normalizedSearchName.split(' ');
@@ -107,11 +127,41 @@ function findVenueInContactInfo(venueName) {
   // Loop through each row in the Contact Info sheet (skipping header row)
   for (let i = 1; i < data.length; i++) {
     const row = data[i];
-    const name = row[nameIndex];
-    if (!name) continue;
+    const name = nameIndex !== -1 ? row[nameIndex] : '';
+    const title = titleIndex !== -1 ? row[titleIndex] : '';
+    const pageUrl = pageUrlIndex !== -1 ? row[pageUrlIndex] : '';
+    const fbUrl = facebookUrlIndex !== -1 ? row[facebookUrlIndex] : '';
+    const compareName = name || title;
+    if (!compareName) continue;
+
+    const normalizedName = normalizeVenueNameNoApostrophe(compareName);
+    const normalizedNameCollapsed = normalizedName.replace(/\s+/g, '');
+
+    const rowUrlNorm = normalizeUrl_(pageUrl || fbUrl);
+    const rowSlug = extractSlug_(pageUrl || fbUrl);
+
+    // Exact URL or slug match wins immediately
+    if (normalizedSearchUrl && rowUrlNorm && normalizedSearchUrl === rowUrlNorm) {
+      return {
+        name:        compareName,
+        facebookUrl: pageUrl || fbUrl,
+        address:     row[addressIndex],
+        latitude:    latitudeIndex !== -1 ? row[latitudeIndex] : '',
+        longitude:   longitudeIndex !== -1 ? row[longitudeIndex] : ''
+      };
+    }
+
+    if (normalizedSearchCollapsed && (normalizedSearchCollapsed === rowSlug || normalizedSearchCollapsed === normalizedNameCollapsed)) {
+      return {
+        name:        compareName,
+        facebookUrl: pageUrl || fbUrl,
+        address:     row[addressIndex],
+        latitude:    latitudeIndex !== -1 ? row[latitudeIndex] : '',
+        longitude:   longitudeIndex !== -1 ? row[longitudeIndex] : ''
+      };
+    }
 
     // Normalize the sheet’s venue name with the same apostrophe-stripping logic
-    const normalizedName = normalizeVenueNameNoApostrophe(name);
 
     // Split the normalized sheet name into words
     const nameWords      = normalizedName.split(' ');
@@ -243,8 +293,8 @@ function findVenueInContactInfo(venueName) {
     if (finalScore >= similarityThreshold && finalScore > bestSimilarity) {
       bestSimilarity = finalScore;
       bestMatch = {
-        name:        name,
-        facebookUrl: row[facebookUrlIndex],
+        name:        compareName,
+        facebookUrl: (pageUrlIndex !== -1 ? row[pageUrlIndex] : '') || (facebookUrlIndex !== -1 ? row[facebookUrlIndex] : ''),
         address:     row[addressIndex],
         latitude:    latitudeIndex !== -1 ? row[latitudeIndex] : '',
         longitude:   longitudeIndex !== -1 ? row[longitudeIndex] : ''

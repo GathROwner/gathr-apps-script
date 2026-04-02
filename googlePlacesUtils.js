@@ -208,28 +208,42 @@ function resolveTimesWithOperatingHours(items, userName, partialAddress, timesta
       try {
          let tf = item.timeFlags || {};
 
-        // If start is missing or "unknown", ask resolver to use venue OPEN time
-        const _startStr = (item.startTime || '').toString().trim().toLowerCase();
-        if (!_startStr || _startStr === 'unknown') {
-          item.timeFlags = item.timeFlags || {};
-          item.timeFlags.start = item.timeFlags.start || {};
-          if (item.timeFlags.start.source !== 'semantic') {
-            item.timeFlags.start.source = 'semantic';
-            item.timeFlags.start.evidence = (item.timeFlags.start.evidence ? item.timeFlags.start.evidence + '; ' : '') + 'start missing/unknown → use venue open time';
-          }
-        }
+      // ANCHOR: HOURS_UNKNOWN_TREAT_EMPTY_START
+      // Normalize "unknown" to empty so downstream logic treats it as missing.
+      const isMissingTime = (v) => {
+        if (v === null || v === undefined) return true;
+        const s = String(v).trim().toLowerCase();
+        return s === '' || s === 'unknown';
+      };
 
-        // If the item has no end time, prefer venue CLOSING time over category default
-        let endMissing = !(item.endTime && String(item.endTime).trim() !== '');
-        if (endMissing) {
-          item.timeFlags = item.timeFlags || {};
-          item.timeFlags.end = item.timeFlags.end || {};
-          if (item.timeFlags.end.toClose !== true) {
-            item.timeFlags.end.toClose = true;
-            item.timeFlags.end.evidence = (item.timeFlags.end.evidence ? item.timeFlags.end.evidence + '; ' : '') + 'end missing → default to close';
-            console.log('resolveTimesWithOperatingHours: end missing → choosing best path (hours or category default)');
-          }
+      if (isMissingTime(item.startTime)) item.startTime = '';
+      if (isMissingTime(item.endTime)) item.endTime = '';
+
+      // If start is missing or "unknown", ask resolver to use venue OPEN time
+      const _startStr = (item.startTime || '').toString().trim().toLowerCase();
+      if (!_startStr) {
+        item.timeFlags = item.timeFlags || {};
+        item.timeFlags.start = item.timeFlags.start || {};
+        if (item.timeFlags.start.source !== 'semantic') {
+          item.timeFlags.start.source = 'semantic';
+          item.timeFlags.start.evidence =
+  (item.timeFlags.start.evidence ? item.timeFlags.start.evidence + '; ' : '') +
+  'start missing/unknown → use venue open time';
         }
+      }
+
+      // If the item has no end time, prefer venue CLOSING time over category default
+      let endMissing = isMissingTime(item.endTime);
+      if (endMissing) {
+        item.timeFlags = item.timeFlags || {};
+        item.timeFlags.end = item.timeFlags.end || {};
+        if (item.timeFlags.end.toClose !== true) {
+          item.timeFlags.end.toClose = true;
+          item.timeFlags.end.evidence = (item.timeFlags.end.evidence ? item.timeFlags.end.evidence + '; ' : '') + 'end missing → use venue close time';
+        }
+      }
+      // ANCHOR: HOURS_UNKNOWN_TREAT_EMPTY_END
+
 
         // refresh snapshot AFTER mutations so logic below sees the new flags
         tf = item.timeFlags || tf;

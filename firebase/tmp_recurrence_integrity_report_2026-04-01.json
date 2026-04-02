@@ -1,0 +1,21 @@
+{
+  "summary": {
+    "asOfDate": "2026-04-01",
+    "next7WindowEnd": "2026-04-08",
+    "scanned": 1022,
+    "recurringScanned": 536,
+    "docsWithIssues": 0,
+    "highSeverityDocs": 0,
+    "todayWindowMismatchDocs": 0,
+    "stretchedSeriesEndDateDocs": 0,
+    "explicitTimeMismatchDocs": 0,
+    "suspiciousLongDurationDocs": 0,
+    "weekdayMismatchDocs": 0,
+    "issuesMaterializingNext7": 0
+  },
+  "issuesByType": [],
+  "topVenues": [],
+  "allResultsCount": 0,
+  "findings": [],
+  "samples": []
+}

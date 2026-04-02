@@ -1,0 +1,547 @@
+{
+  "generatedAt": "2026-04-02T18:18:41.202Z",
+  "keepPath": "venues/name_2lgcnn/events/H3xvknLYpXxe9vpOLkzu",
+  "docs": [
+    {
+      "path": "venues/name_2lgcnn/events/0u9uS7F4vuM9RwbsHuVT",
+      "uniqueId": "885921884470217_9",
+      "establishment": "The Confederation Court Mall",
+      "additionalLocation": "Blank Canvas Art Supplies, Confederation Court Mall, Charlottetown",
+      "eventType": "workshops_classes",
+      "eventName": "Loose Watercolour Course (Session 2 of 3)",
+      "startDate": "2026-04-13",
+      "endDate": "2026-04-13",
+      "startTime": "18:00",
+      "endTime": "20:00",
+      "price": "$130 + tax",
+      "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774707401320-2y6hxx.webp",
+      "mediaUrls": [
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774707401320-2y6hxx.webp",
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774707401687-trgs81.webp",
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774707401901-p0lyjf.webp",
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774707402093-s2dwft.webp"
+      ],
+      "facebookUrl": "https://www.facebook.com/p/Blank-Canvas-Art-Supplies-100091572402204/",
+      "sourceTimestamp": {
+        "_seconds": 1775079357,
+        "_nanoseconds": 0
+      },
+      "likes": 3,
+      "shares": 2,
+      "topReactionsCount": 2,
+      "venueId": "name_2lgcnn",
+      "category": "Workshops & Classes",
+      "isEvent": "Yes",
+      "isFoodSpecial": "No",
+      "name": "Loose Watercolour Course (Session 2 of 3)",
+      "address": "125 Great George Street, Charlottetown, PE, Canada, C1A 4K7",
+      "ticketPrice": "$130 + tax",
+      "isRecurring": "No",
+      "recurringPattern": "none",
+      "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1773264157578-ebt5oq.webp",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774707401320-2y6hxx.webp",
+      "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774707401320-2y6hxx.webp",
+      "cleanedFacebookUrl": "https://www.facebook.com/p/Blank-Canvas-Art-Supplies-100091572402204/",
+      "latitude": "",
+      "longitude": "",
+      "timeResolution": {
+        "hoursUsed": false
+      },
+      "createdAt": {
+        "_seconds": 1775148983,
+        "_nanoseconds": 216000000
+      },
+      "description": "Loose Watercolour Course with Dave Wilson — April 6, 13, 20 — 6:30 - 8:30 pm. Emphasis is focused more on creativity and balance than technical learning. Register online at www.blankcanvasartsupplies.ca. Blank Canvas Art Supplies, Confederation Court Mall, Charlottetown.",
+      "lastSeenAt": {
+        "_seconds": 1775149781,
+        "_nanoseconds": 359000000
+      },
+      "updatedAt": {
+        "_seconds": 1775149781,
+        "_nanoseconds": 359000000
+      }
+    },
+    {
+      "path": "venues/name_2lgcnn/events/0vNTmNQQWRKYaodhYOmr",
+      "uniqueId": "885921884470217_18",
+      "establishment": "The Confederation Court Mall",
+      "additionalLocation": "Confederation Court Mall, Charlottetown",
+      "eventType": "workshops_classes",
+      "eventName": "Adult Drawing for Beginners",
+      "description": "Adult beginner drawing course (Session 4 of 6). All supplies included.",
+      "startDate": "2026-04-23",
+      "endDate": "2026-04-23",
+      "startTime": "18:00",
+      "endTime": "20:00",
+      "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774707401320-2y6hxx.webp",
+      "mediaUrls": [
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774707401320-2y6hxx.webp",
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774707401687-trgs81.webp",
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774707401901-p0lyjf.webp",
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774707402093-s2dwft.webp"
+      ],
+      "facebookUrl": "https://www.facebook.com/p/Blank-Canvas-Art-Supplies-100091572402204/",
+      "sourceTimestamp": {
+        "_seconds": 1775079357,
+        "_nanoseconds": 0
+      },
+      "likes": 3,
+      "shares": 2,
+      "topReactionsCount": 2,
+      "venueId": "name_2lgcnn",
+      "category": "Workshops & Classes",
+      "isEvent": "Yes",
+      "isFoodSpecial": "No",
+      "name": "Adult Drawing for Beginners",
+      "address": "125 Great George Street, Charlottetown, PE, Canada, C1A 4K7",
+      "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1773264157578-ebt5oq.webp",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774707401320-2y6hxx.webp",
+      "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774707401320-2y6hxx.webp",
+      "cleanedFacebookUrl": "https://www.facebook.com/p/Blank-Canvas-Art-Supplies-100091572402204/",
+      "latitude": "",
+      "longitude": "",
+      "timeResolution": {
+        "hoursUsed": false
+      },
+      "createdAt": {
+        "_seconds": 1775148985,
+        "_nanoseconds": 292000000
+      },
+      "totalOccurrences": 0,
+      "recurringPattern": "none",
+      "recurrenceUntilDate": "",
+      "recurringDaysOfWeek": [],
+      "isRecurring": false,
+      "recurringWeekdaySequence": [],
+      "recurringWeekInterval": 1,
+      "lastSeenAt": {
+        "_seconds": 1775149783,
+        "_nanoseconds": 688000000
+      },
+      "updatedAt": {
+        "_seconds": 1775149783,
+        "_nanoseconds": 688000000
+      }
+    },
+    {
+      "path": "venues/name_2lgcnn/events/1dRgcW4WFWkAZW9CxQ8Y",
+      "uniqueId": "885921884470217_12",
+      "establishment": "The Confederation Court Mall",
+      "additionalLocation": "Confederation Court Mall, Charlottetown",
+      "eventType": "workshops_classes",
+      "eventName": "Adult Drawing for Beginners",
+      "description": "Adult beginner drawing course (Session 3 of 6). All supplies included.",
+      "startDate": "2026-04-16",
+      "endDate": "2026-04-16",
+      "startTime": "18:00",
+      "endTime": "20:00",
+      "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774707401320-2y6hxx.webp",
+      "mediaUrls": [
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774707401320-2y6hxx.webp",
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774707401687-trgs81.webp",
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774707401901-p0lyjf.webp",
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774707402093-s2dwft.webp"
+      ],
+      "facebookUrl": "https://www.facebook.com/p/Blank-Canvas-Art-Supplies-100091572402204/",
+      "sourceTimestamp": {
+        "_seconds": 1775079357,
+        "_nanoseconds": 0
+      },
+      "likes": 3,
+      "shares": 2,
+      "topReactionsCount": 2,
+      "venueId": "name_2lgcnn",
+      "category": "Workshops & Classes",
+      "isEvent": "Yes",
+      "isFoodSpecial": "No",
+      "name": "Adult Drawing for Beginners",
+      "address": "125 Great George Street, Charlottetown, PE, Canada, C1A 4K7",
+      "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1773264157578-ebt5oq.webp",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774707401320-2y6hxx.webp",
+      "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774707401320-2y6hxx.webp",
+      "cleanedFacebookUrl": "https://www.facebook.com/p/Blank-Canvas-Art-Supplies-100091572402204/",
+      "latitude": "",
+      "longitude": "",
+      "timeResolution": {
+        "hoursUsed": false
+      },
+      "createdAt": {
+        "_seconds": 1775148983,
+        "_nanoseconds": 874000000
+      },
+      "totalOccurrences": 0,
+      "recurringPattern": "none",
+      "recurrenceUntilDate": "",
+      "recurringDaysOfWeek": [],
+      "isRecurring": false,
+      "recurringWeekdaySequence": [],
+      "recurringWeekInterval": 1,
+      "lastSeenAt": {
+        "_seconds": 1775149782,
+        "_nanoseconds": 168000000
+      },
+      "updatedAt": {
+        "_seconds": 1775149782,
+        "_nanoseconds": 168000000
+      }
+    },
+    {
+      "path": "venues/name_2lgcnn/events/2cE3HiEkOLoIZvzBThqK",
+      "uniqueId": "885921884470217_6",
+      "establishment": "The Confederation Court Mall",
+      "additionalLocation": "Confederation Court Mall, Charlottetown",
+      "eventType": "workshops_classes",
+      "eventName": "Adult Drawing for Beginners",
+      "description": "Adult beginner drawing course (Session 2 of 6). All supplies included.",
+      "startDate": "2026-04-09",
+      "endDate": "2026-04-09",
+      "startTime": "18:00",
+      "endTime": "20:00",
+      "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774707401320-2y6hxx.webp",
+      "mediaUrls": [
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774707401320-2y6hxx.webp",
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774707401687-trgs81.webp",
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774707401901-p0lyjf.webp",
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774707402093-s2dwft.webp"
+      ],
+      "facebookUrl": "https://www.facebook.com/p/Blank-Canvas-Art-Supplies-100091572402204/",
+      "sourceTimestamp": {
+        "_seconds": 1775079357,
+        "_nanoseconds": 0
+      },
+      "likes": 3,
+      "shares": 2,
+      "topReactionsCount": 2,
+      "venueId": "name_2lgcnn",
+      "category": "Workshops & Classes",
+      "isEvent": "Yes",
+      "isFoodSpecial": "No",
+      "name": "Adult Drawing for Beginners",
+      "address": "125 Great George Street, Charlottetown, PE, Canada, C1A 4K7",
+      "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1773264157578-ebt5oq.webp",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774707401320-2y6hxx.webp",
+      "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774707401320-2y6hxx.webp",
+      "cleanedFacebookUrl": "https://www.facebook.com/p/Blank-Canvas-Art-Supplies-100091572402204/",
+      "latitude": "",
+      "longitude": "",
+      "timeResolution": {
+        "hoursUsed": false
+      },
+      "createdAt": {
+        "_seconds": 1775148982,
+        "_nanoseconds": 323000000
+      },
+      "totalOccurrences": 0,
+      "recurringPattern": "none",
+      "recurrenceUntilDate": "",
+      "recurringDaysOfWeek": [],
+      "isRecurring": false,
+      "recurringWeekdaySequence": [],
+      "recurringWeekInterval": 1,
+      "lastSeenAt": {
+        "_seconds": 1775149780,
+        "_nanoseconds": 577000000
+      },
+      "updatedAt": {
+        "_seconds": 1775149780,
+        "_nanoseconds": 577000000
+      }
+    },
+    {
+      "path": "venues/name_2lgcnn/events/78QefZSPJNx0vmCRiRzY",
+      "uniqueId": "885921884470217_24",
+      "establishment": "The Confederation Court Mall",
+      "additionalLocation": "Confederation Court Mall, Charlottetown",
+      "eventType": "workshops_classes",
+      "eventName": "Adult Drawing for Beginners",
+      "description": "Adult beginner drawing course (Session 5 of 6). All supplies included.",
+      "startDate": "2026-04-30",
+      "endDate": "2026-04-30",
+      "startTime": "18:00",
+      "endTime": "20:00",
+      "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774707401320-2y6hxx.webp",
+      "mediaUrls": [
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774707401320-2y6hxx.webp",
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774707401687-trgs81.webp",
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774707401901-p0lyjf.webp",
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774707402093-s2dwft.webp"
+      ],
+      "facebookUrl": "https://www.facebook.com/p/Blank-Canvas-Art-Supplies-100091572402204/",
+      "sourceTimestamp": {
+        "_seconds": 1775079357,
+        "_nanoseconds": 0
+      },
+      "likes": 3,
+      "shares": 2,
+      "topReactionsCount": 2,
+      "venueId": "name_2lgcnn",
+      "category": "Workshops & Classes",
+      "isEvent": "Yes",
+      "isFoodSpecial": "No",
+      "name": "Adult Drawing for Beginners",
+      "address": "125 Great George Street, Charlottetown, PE, Canada, C1A 4K7",
+      "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1773264157578-ebt5oq.webp",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774707401320-2y6hxx.webp",
+      "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774707401320-2y6hxx.webp",
+      "cleanedFacebookUrl": "https://www.facebook.com/p/Blank-Canvas-Art-Supplies-100091572402204/",
+      "latitude": "",
+      "longitude": "",
+      "timeResolution": {
+        "hoursUsed": false
+      },
+      "createdAt": {
+        "_seconds": 1775148986,
+        "_nanoseconds": 75000000
+      },
+      "totalOccurrences": 0,
+      "recurringPattern": "none",
+      "recurrenceUntilDate": "",
+      "recurringDaysOfWeek": [],
+      "isRecurring": false,
+      "recurringWeekdaySequence": [],
+      "recurringWeekInterval": 1,
+      "lastSeenAt": {
+        "_seconds": 1775149784,
+        "_nanoseconds": 374000000
+      },
+      "updatedAt": {
+        "_seconds": 1775149784,
+        "_nanoseconds": 374000000
+      }
+    },
+    {
+      "path": "venues/name_2lgcnn/events/H3xvknLYpXxe9vpOLkzu",
+      "uniqueId": "885921884470217_2",
+      "establishment": "The Confederation Court Mall",
+      "additionalLocation": "Confederation Court Mall, Charlottetown",
+      "eventType": "workshops_classes",
+      "eventName": "Adult Drawing for Beginners",
+      "startDate": "2026-04-02",
+      "endDate": "2026-04-02",
+      "startTime": "18:00",
+      "endTime": "20:00",
+      "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774707401320-2y6hxx.webp",
+      "mediaUrls": [
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774707401320-2y6hxx.webp",
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774707401687-trgs81.webp",
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774707401901-p0lyjf.webp",
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774707402093-s2dwft.webp"
+      ],
+      "facebookUrl": "https://www.facebook.com/p/Blank-Canvas-Art-Supplies-100091572402204/",
+      "sourceTimestamp": {
+        "_seconds": 1775079357,
+        "_nanoseconds": 0
+      },
+      "likes": 3,
+      "shares": 2,
+      "topReactionsCount": 2,
+      "venueId": "name_2lgcnn",
+      "category": "Workshops & Classes",
+      "isEvent": "Yes",
+      "isFoodSpecial": "No",
+      "name": "Adult Drawing for Beginners",
+      "address": "125 Great George Street, Charlottetown, PE, Canada, C1A 4K7",
+      "isRecurring": "Yes",
+      "recurringPattern": "weekly_thursday",
+      "totalOccurrences": 6,
+      "recurrenceUntilDate": "2026-05-07",
+      "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1773264157578-ebt5oq.webp",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774707401320-2y6hxx.webp",
+      "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774707401320-2y6hxx.webp",
+      "cleanedFacebookUrl": "https://www.facebook.com/p/Blank-Canvas-Art-Supplies-100091572402204/",
+      "latitude": "",
+      "longitude": "",
+      "timeResolution": {
+        "hoursUsed": false
+      },
+      "createdAt": {
+        "_seconds": 1775148980,
+        "_nanoseconds": 586000000
+      },
+      "description": "THURSDAYS APRIL 2, 9, 16, 23, 30TH AND MAY 7TH 6:30-8:30PM. Through this six-week beginner drawing course, students of all levels will master foundational techniques like perspective, shading, and composition to develop artistic control while creating finished works. All supplies included. Confederation Court Mall, Charlottetown.",
+      "lastSeenAt": {
+        "_seconds": 1775149778,
+        "_nanoseconds": 943000000
+      },
+      "updatedAt": {
+        "_seconds": 1775149778,
+        "_nanoseconds": 943000000
+      }
+    },
+    {
+      "path": "venues/name_2lgcnn/events/UwLiF7NOzHl5BNlidoOU",
+      "uniqueId": "885921884470217_15",
+      "establishment": "The Confederation Court Mall",
+      "additionalLocation": "Blank Canvas Art Supplies, Confederation Court Mall, Charlottetown",
+      "eventType": "workshops_classes",
+      "eventName": "Loose Watercolour Course (Session 3 of 3)",
+      "startDate": "2026-04-20",
+      "endDate": "2026-04-20",
+      "startTime": "18:00",
+      "endTime": "20:00",
+      "price": "$130 + tax",
+      "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774707401320-2y6hxx.webp",
+      "mediaUrls": [
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774707401320-2y6hxx.webp",
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774707401687-trgs81.webp",
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774707401901-p0lyjf.webp",
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774707402093-s2dwft.webp"
+      ],
+      "facebookUrl": "https://www.facebook.com/p/Blank-Canvas-Art-Supplies-100091572402204/",
+      "sourceTimestamp": {
+        "_seconds": 1775079357,
+        "_nanoseconds": 0
+      },
+      "likes": 3,
+      "shares": 2,
+      "topReactionsCount": 2,
+      "venueId": "name_2lgcnn",
+      "category": "Workshops & Classes",
+      "isEvent": "Yes",
+      "isFoodSpecial": "No",
+      "name": "Loose Watercolour Course (Session 3 of 3)",
+      "address": "125 Great George Street, Charlottetown, PE, Canada, C1A 4K7",
+      "ticketPrice": "$130 + tax",
+      "isRecurring": "No",
+      "recurringPattern": "none",
+      "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1773264157578-ebt5oq.webp",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774707401320-2y6hxx.webp",
+      "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774707401320-2y6hxx.webp",
+      "cleanedFacebookUrl": "https://www.facebook.com/p/Blank-Canvas-Art-Supplies-100091572402204/",
+      "latitude": "",
+      "longitude": "",
+      "timeResolution": {
+        "hoursUsed": false
+      },
+      "createdAt": {
+        "_seconds": 1775148984,
+        "_nanoseconds": 671000000
+      },
+      "description": "Loose Watercolour Course with Dave Wilson — April 6, 13, 20 — 6:30 - 8:30 pm. Emphasis is focused more on creativity and balance than technical learning. Register online at www.blankcanvasartsupplies.ca. Blank Canvas Art Supplies, Confederation Court Mall, Charlottetown.",
+      "lastSeenAt": {
+        "_seconds": 1775149782,
+        "_nanoseconds": 874000000
+      },
+      "updatedAt": {
+        "_seconds": 1775149782,
+        "_nanoseconds": 874000000
+      }
+    },
+    {
+      "path": "venues/name_2lgcnn/events/nL2yFVQvroMIjLTV9dea",
+      "uniqueId": "885921884470217_3",
+      "establishment": "The Confederation Court Mall",
+      "additionalLocation": "Blank Canvas Art Supplies, Confederation Court Mall, Charlottetown",
+      "eventType": "workshops_classes",
+      "eventName": "Loose Watercolour Course (Session 1 of 3)",
+      "startDate": "2026-04-06",
+      "endDate": "2026-04-06",
+      "startTime": "18:00",
+      "endTime": "20:00",
+      "price": "$130 + tax",
+      "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774707401320-2y6hxx.webp",
+      "mediaUrls": [
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774707401320-2y6hxx.webp",
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774707401687-trgs81.webp",
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774707401901-p0lyjf.webp",
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774707402093-s2dwft.webp"
+      ],
+      "facebookUrl": "https://www.facebook.com/p/Blank-Canvas-Art-Supplies-100091572402204/",
+      "sourceTimestamp": {
+        "_seconds": 1775079357,
+        "_nanoseconds": 0
+      },
+      "likes": 3,
+      "shares": 2,
+      "topReactionsCount": 2,
+      "venueId": "name_2lgcnn",
+      "category": "Workshops & Classes",
+      "isEvent": "Yes",
+      "isFoodSpecial": "No",
+      "name": "Loose Watercolour Course (Session 1 of 3)",
+      "address": "125 Great George Street, Charlottetown, PE, Canada, C1A 4K7",
+      "ticketPrice": "$130 + tax",
+      "isRecurring": "No",
+      "recurringPattern": "none",
+      "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1773264157578-ebt5oq.webp",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774707401320-2y6hxx.webp",
+      "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774707401320-2y6hxx.webp",
+      "cleanedFacebookUrl": "https://www.facebook.com/p/Blank-Canvas-Art-Supplies-100091572402204/",
+      "latitude": "",
+      "longitude": "",
+      "timeResolution": {
+        "hoursUsed": false
+      },
+      "createdAt": {
+        "_seconds": 1775148981,
+        "_nanoseconds": 431000000
+      },
+      "description": "Loose Watercolour Course with Dave Wilson — April 6, 13, 20 — 6:30 - 8:30 pm. Emphasis is focused more on creativity and balance than technical learning. Register online at www.blankcanvasartsupplies.ca. Blank Canvas Art Supplies, Confederation Court Mall, Charlottetown.",
+      "lastSeenAt": {
+        "_seconds": 1775149779,
+        "_nanoseconds": 606000000
+      },
+      "updatedAt": {
+        "_seconds": 1775149779,
+        "_nanoseconds": 606000000
+      }
+    },
+    {
+      "path": "venues/name_2lgcnn/events/rfCLiJOuF6ctcVVDdleH",
+      "uniqueId": "885921884470217_25",
+      "establishment": "The Confederation Court Mall",
+      "additionalLocation": "Confederation Court Mall, Charlottetown",
+      "eventType": "workshops_classes",
+      "eventName": "Adult Drawing for Beginners",
+      "description": "Adult beginner drawing course (Session 6 of 6). All supplies included.",
+      "startDate": "2026-05-07",
+      "endDate": "2026-05-07",
+      "startTime": "18:00",
+      "endTime": "20:00",
+      "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774707401320-2y6hxx.webp",
+      "mediaUrls": [
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774707401320-2y6hxx.webp",
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774707401687-trgs81.webp",
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774707401901-p0lyjf.webp",
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774707402093-s2dwft.webp"
+      ],
+      "facebookUrl": "https://www.facebook.com/p/Blank-Canvas-Art-Supplies-100091572402204/",
+      "sourceTimestamp": {
+        "_seconds": 1775079357,
+        "_nanoseconds": 0
+      },
+      "likes": 3,
+      "shares": 2,
+      "topReactionsCount": 2,
+      "venueId": "name_2lgcnn",
+      "category": "Workshops & Classes",
+      "isEvent": "Yes",
+      "isFoodSpecial": "No",
+      "name": "Adult Drawing for Beginners",
+      "address": "125 Great George Street, Charlottetown, PE, Canada, C1A 4K7",
+      "isRecurring": "No",
+      "recurringPattern": "none",
+      "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1773264157578-ebt5oq.webp",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774707401320-2y6hxx.webp",
+      "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774707401320-2y6hxx.webp",
+      "cleanedFacebookUrl": "https://www.facebook.com/p/Blank-Canvas-Art-Supplies-100091572402204/",
+      "latitude": "",
+      "longitude": "",
+      "timeResolution": {
+        "hoursUsed": false
+      },
+      "lastSeenAt": {
+        "_seconds": 1775148986,
+        "_nanoseconds": 515000000
+      },
+      "createdAt": {
+        "_seconds": 1775148986,
+        "_nanoseconds": 515000000
+      },
+      "updatedAt": {
+        "_seconds": 1775148986,
+        "_nanoseconds": 515000000
+      }
+    }
+  ]
+}

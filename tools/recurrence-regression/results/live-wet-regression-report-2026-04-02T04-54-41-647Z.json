@@ -1,0 +1,3153 @@
+{
+  "generatedAt": "2026-04-02T04:54:41.646Z",
+  "processUrl": "https://processdataset-6ju7yi5g2a-pd.a.run.app",
+  "cleanupStale": true,
+  "totalCases": 4,
+  "passedCases": 3,
+  "failedCases": [
+    {
+      "caseId": "body_bar_krista",
+      "failures": [
+        "missing expected doc: {\"path\":\"venues/slug_creditunionplace/events/59liXjiExkxfb90nT0Vs\",\"exactName\":\"Body Bar with Krista\",\"startDate\":\"2026-03-31\",\"endDate\":\"2026-03-31\",\"startTime\":\"16:30\",\"endTime\":\"17:15\",\"recurringPattern\":\"weekly_custom\",\"isRecurring\":true,\"recurringWeekdaySequence\":[\"tuesday\",\"wednesday\"],\"recurringWeekInterval\":1}"
+      ],
+      "responseOk": true,
+      "status": 200
+    }
+  ],
+  "results": [
+    {
+      "caseId": "trailside_tyler_childers",
+      "description": "One-off Trailside concert should stay non-recurring after a live rerun.",
+      "processUrl": "https://processdataset-6ju7yi5g2a-pd.a.run.app",
+      "request": {
+        "fileId": "1oJUytO-MCCrrGO9zIsZihPv4R7V_JGRE",
+        "rowIndex": 235,
+        "parserMode": "full5stage",
+        "dryRun": false
+      },
+      "response": {
+        "ok": true,
+        "status": 200,
+        "body": {
+          "success": true,
+          "message": "Selected rows processed",
+          "stats": {
+            "processedCount": 0,
+            "skippedCount": 0,
+            "invalidCount": 1,
+            "duplicateCount": 0,
+            "errorCount": 0,
+            "newEventsCreated": 0,
+            "existingEventsUpdated": 0,
+            "newStandardEventsCreated": 0,
+            "existingStandardEventsUpdated": 0,
+            "newFoodSpecialsCreated": 0,
+            "existingFoodSpecialsUpdated": 0
+          },
+          "nextBatchScheduled": false
+        }
+      },
+      "latestSnapshot": null,
+      "before": {
+        "evaluation": {
+          "success": true,
+          "failures": [],
+          "expectedMatches": [
+            {
+              "matcher": {
+                "path": "venues/slug_trailsidemusichall/events/RpkqgIiEepc7uWa6vT2Q",
+                "exactName": "A Night of Tyler Childers & Chris Stapleton (The Stolen Goods Tribute Band)",
+                "startDate": "2026-03-19",
+                "endDate": "2026-03-20",
+                "startTime": "19:00",
+                "endTime": "01:00",
+                "recurringPattern": "none",
+                "isRecurring": false
+              },
+              "doc": {
+                "path": "venues/slug_trailsidemusichall/events/RpkqgIiEepc7uWa6vT2Q",
+                "exists": true,
+                "id": "RpkqgIiEepc7uWa6vT2Q",
+                "name": "A Night of Tyler Childers & Chris Stapleton (The Stolen Goods Tribute Band)",
+                "eventName": "A Night of Tyler Childers & Chris Stapleton (The Stolen Goods Tribute Band)",
+                "description": "Thursday March 19th @ The Trailside Presented by The Stolen Goods Tribute Band. Tickets on sale now @ Trailside.ca",
+                "startDate": "2026-03-19",
+                "endDate": "2026-03-20",
+                "startTime": "19:00",
+                "endTime": "01:00",
+                "recurringPattern": "none",
+                "recurrenceUntilDate": "",
+                "totalOccurrences": 0,
+                "isRecurring": false,
+                "recurringDaysOfWeek": [],
+                "recurringWeekdaySequence": [],
+                "recurringWeekInterval": null,
+                "updatedAt": "2026-04-01T14:15:48.520Z",
+                "lastSeenAt": "2026-03-19T13:11:38.996Z",
+                "raw": {
+                  "uniqueId": "1354419450037722_1",
+                  "establishment": "Trailside Music Hall",
+                  "eventType": "live_music",
+                  "eventName": "A Night of Tyler Childers & Chris Stapleton (The Stolen Goods Tribute Band)",
+                  "description": "Thursday March 19th @ The Trailside Presented by The Stolen Goods Tribute Band. Tickets on sale now @ Trailside.ca",
+                  "startDate": "2026-03-19",
+                  "endDate": "2026-03-20",
+                  "endTime": "01:00",
+                  "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1772203836289-1ty2g8.webp",
+                  "facebookUrl": "https://www.facebook.com/TrailsideMusicHall",
+                  "likes": 6,
+                  "shares": 2,
+                  "comments": 1,
+                  "topReactionsCount": 1,
+                  "venueId": "slug_trailsidemusichall",
+                  "category": "Live Music",
+                  "isEvent": "Yes",
+                  "isFoodSpecial": "No",
+                  "name": "A Night of Tyler Childers & Chris Stapleton (The Stolen Goods Tribute Band)",
+                  "address": "155 Kent St, Charlottetown, PE C1A 4K9, Canada",
+                  "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1769528612283.webp",
+                  "cleanedFacebookUrl": "https://www.facebook.com/TrailsideMusicHall",
+                  "latitude": "",
+                  "longitude": "",
+                  "timeFlags": {
+                    "start": {
+                      "source": "semantic",
+                      "evidence": "Start from venue hours (opens 16:00)"
+                    },
+                    "end": {
+                      "source": "none",
+                      "toClose": false,
+                      "evidence": ""
+                    }
+                  },
+                  "createdAt": {
+                    "_seconds": 1772203899,
+                    "_nanoseconds": 496000000
+                  },
+                  "timeResolution": {
+                    "hoursUsed": true,
+                    "endFromHours": "category_default"
+                  },
+                  "sourceTimestamp": {
+                    "_seconds": 1773920033,
+                    "_nanoseconds": 0
+                  },
+                  "lastSeenAt": {
+                    "_seconds": 1773925898,
+                    "_nanoseconds": 996000000
+                  },
+                  "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773925598377-2y5mi7.webp",
+                  "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773925598377-2y5mi7.webp",
+                  "startTime": "19:00",
+                  "mediaUrls": [
+                    "https://storage.googleapis.com/gathr-uploaded-images/postimages/1772203836289-1ty2g8.webp",
+                    "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773838349593-g9pnhz.webp",
+                    "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773924949011-l6vdy9.webp",
+                    "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773925598377-2y5mi7.webp"
+                  ],
+                  "totalOccurrences": 0,
+                  "recurringPattern": "none",
+                  "recurrenceUntilDate": "",
+                  "isRecurring": false,
+                  "updatedAt": {
+                    "_seconds": 1775052948,
+                    "_nanoseconds": 520000000
+                  }
+                }
+              }
+            }
+          ],
+          "forbiddenMatches": []
+        },
+        "docs": [
+          {
+            "path": "venues/slug_trailsidemusichall/events/RpkqgIiEepc7uWa6vT2Q",
+            "exists": true,
+            "id": "RpkqgIiEepc7uWa6vT2Q",
+            "name": "A Night of Tyler Childers & Chris Stapleton (The Stolen Goods Tribute Band)",
+            "eventName": "A Night of Tyler Childers & Chris Stapleton (The Stolen Goods Tribute Band)",
+            "description": "Thursday March 19th @ The Trailside Presented by The Stolen Goods Tribute Band. Tickets on sale now @ Trailside.ca",
+            "startDate": "2026-03-19",
+            "endDate": "2026-03-20",
+            "startTime": "19:00",
+            "endTime": "01:00",
+            "recurringPattern": "none",
+            "recurrenceUntilDate": "",
+            "totalOccurrences": 0,
+            "isRecurring": false,
+            "recurringDaysOfWeek": [],
+            "recurringWeekdaySequence": [],
+            "recurringWeekInterval": null,
+            "updatedAt": "2026-04-01T14:15:48.520Z",
+            "lastSeenAt": "2026-03-19T13:11:38.996Z",
+            "raw": {
+              "uniqueId": "1354419450037722_1",
+              "establishment": "Trailside Music Hall",
+              "eventType": "live_music",
+              "eventName": "A Night of Tyler Childers & Chris Stapleton (The Stolen Goods Tribute Band)",
+              "description": "Thursday March 19th @ The Trailside Presented by The Stolen Goods Tribute Band. Tickets on sale now @ Trailside.ca",
+              "startDate": "2026-03-19",
+              "endDate": "2026-03-20",
+              "endTime": "01:00",
+              "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1772203836289-1ty2g8.webp",
+              "facebookUrl": "https://www.facebook.com/TrailsideMusicHall",
+              "likes": 6,
+              "shares": 2,
+              "comments": 1,
+              "topReactionsCount": 1,
+              "venueId": "slug_trailsidemusichall",
+              "category": "Live Music",
+              "isEvent": "Yes",
+              "isFoodSpecial": "No",
+              "name": "A Night of Tyler Childers & Chris Stapleton (The Stolen Goods Tribute Band)",
+              "address": "155 Kent St, Charlottetown, PE C1A 4K9, Canada",
+              "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1769528612283.webp",
+              "cleanedFacebookUrl": "https://www.facebook.com/TrailsideMusicHall",
+              "latitude": "",
+              "longitude": "",
+              "timeFlags": {
+                "start": {
+                  "source": "semantic",
+                  "evidence": "Start from venue hours (opens 16:00)"
+                },
+                "end": {
+                  "source": "none",
+                  "toClose": false,
+                  "evidence": ""
+                }
+              },
+              "createdAt": {
+                "_seconds": 1772203899,
+                "_nanoseconds": 496000000
+              },
+              "timeResolution": {
+                "hoursUsed": true,
+                "endFromHours": "category_default"
+              },
+              "sourceTimestamp": {
+                "_seconds": 1773920033,
+                "_nanoseconds": 0
+              },
+              "lastSeenAt": {
+                "_seconds": 1773925898,
+                "_nanoseconds": 996000000
+              },
+              "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773925598377-2y5mi7.webp",
+              "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773925598377-2y5mi7.webp",
+              "startTime": "19:00",
+              "mediaUrls": [
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1772203836289-1ty2g8.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773838349593-g9pnhz.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773924949011-l6vdy9.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773925598377-2y5mi7.webp"
+              ],
+              "totalOccurrences": 0,
+              "recurringPattern": "none",
+              "recurrenceUntilDate": "",
+              "isRecurring": false,
+              "updatedAt": {
+                "_seconds": 1775052948,
+                "_nanoseconds": 520000000
+              }
+            }
+          }
+        ]
+      },
+      "after": {
+        "evaluation": {
+          "success": true,
+          "failures": [],
+          "expectedMatches": [
+            {
+              "matcher": {
+                "path": "venues/slug_trailsidemusichall/events/RpkqgIiEepc7uWa6vT2Q",
+                "exactName": "A Night of Tyler Childers & Chris Stapleton (The Stolen Goods Tribute Band)",
+                "startDate": "2026-03-19",
+                "endDate": "2026-03-20",
+                "startTime": "19:00",
+                "endTime": "01:00",
+                "recurringPattern": "none",
+                "isRecurring": false
+              },
+              "doc": {
+                "path": "venues/slug_trailsidemusichall/events/RpkqgIiEepc7uWa6vT2Q",
+                "exists": true,
+                "id": "RpkqgIiEepc7uWa6vT2Q",
+                "name": "A Night of Tyler Childers & Chris Stapleton (The Stolen Goods Tribute Band)",
+                "eventName": "A Night of Tyler Childers & Chris Stapleton (The Stolen Goods Tribute Band)",
+                "description": "Thursday March 19th @ The Trailside Presented by The Stolen Goods Tribute Band. Tickets on sale now @ Trailside.ca",
+                "startDate": "2026-03-19",
+                "endDate": "2026-03-20",
+                "startTime": "19:00",
+                "endTime": "01:00",
+                "recurringPattern": "none",
+                "recurrenceUntilDate": "",
+                "totalOccurrences": 0,
+                "isRecurring": false,
+                "recurringDaysOfWeek": [],
+                "recurringWeekdaySequence": [],
+                "recurringWeekInterval": null,
+                "updatedAt": "2026-04-01T14:15:48.520Z",
+                "lastSeenAt": "2026-03-19T13:11:38.996Z",
+                "raw": {
+                  "uniqueId": "1354419450037722_1",
+                  "establishment": "Trailside Music Hall",
+                  "eventType": "live_music",
+                  "eventName": "A Night of Tyler Childers & Chris Stapleton (The Stolen Goods Tribute Band)",
+                  "description": "Thursday March 19th @ The Trailside Presented by The Stolen Goods Tribute Band. Tickets on sale now @ Trailside.ca",
+                  "startDate": "2026-03-19",
+                  "endDate": "2026-03-20",
+                  "endTime": "01:00",
+                  "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1772203836289-1ty2g8.webp",
+                  "facebookUrl": "https://www.facebook.com/TrailsideMusicHall",
+                  "likes": 6,
+                  "shares": 2,
+                  "comments": 1,
+                  "topReactionsCount": 1,
+                  "venueId": "slug_trailsidemusichall",
+                  "category": "Live Music",
+                  "isEvent": "Yes",
+                  "isFoodSpecial": "No",
+                  "name": "A Night of Tyler Childers & Chris Stapleton (The Stolen Goods Tribute Band)",
+                  "address": "155 Kent St, Charlottetown, PE C1A 4K9, Canada",
+                  "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1769528612283.webp",
+                  "cleanedFacebookUrl": "https://www.facebook.com/TrailsideMusicHall",
+                  "latitude": "",
+                  "longitude": "",
+                  "timeFlags": {
+                    "start": {
+                      "source": "semantic",
+                      "evidence": "Start from venue hours (opens 16:00)"
+                    },
+                    "end": {
+                      "source": "none",
+                      "toClose": false,
+                      "evidence": ""
+                    }
+                  },
+                  "createdAt": {
+                    "_seconds": 1772203899,
+                    "_nanoseconds": 496000000
+                  },
+                  "timeResolution": {
+                    "hoursUsed": true,
+                    "endFromHours": "category_default"
+                  },
+                  "sourceTimestamp": {
+                    "_seconds": 1773920033,
+                    "_nanoseconds": 0
+                  },
+                  "lastSeenAt": {
+                    "_seconds": 1773925898,
+                    "_nanoseconds": 996000000
+                  },
+                  "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773925598377-2y5mi7.webp",
+                  "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773925598377-2y5mi7.webp",
+                  "startTime": "19:00",
+                  "mediaUrls": [
+                    "https://storage.googleapis.com/gathr-uploaded-images/postimages/1772203836289-1ty2g8.webp",
+                    "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773838349593-g9pnhz.webp",
+                    "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773924949011-l6vdy9.webp",
+                    "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773925598377-2y5mi7.webp"
+                  ],
+                  "totalOccurrences": 0,
+                  "recurringPattern": "none",
+                  "recurrenceUntilDate": "",
+                  "isRecurring": false,
+                  "updatedAt": {
+                    "_seconds": 1775052948,
+                    "_nanoseconds": 520000000
+                  }
+                }
+              }
+            }
+          ],
+          "forbiddenMatches": []
+        },
+        "docs": [
+          {
+            "path": "venues/slug_trailsidemusichall/events/RpkqgIiEepc7uWa6vT2Q",
+            "exists": true,
+            "id": "RpkqgIiEepc7uWa6vT2Q",
+            "name": "A Night of Tyler Childers & Chris Stapleton (The Stolen Goods Tribute Band)",
+            "eventName": "A Night of Tyler Childers & Chris Stapleton (The Stolen Goods Tribute Band)",
+            "description": "Thursday March 19th @ The Trailside Presented by The Stolen Goods Tribute Band. Tickets on sale now @ Trailside.ca",
+            "startDate": "2026-03-19",
+            "endDate": "2026-03-20",
+            "startTime": "19:00",
+            "endTime": "01:00",
+            "recurringPattern": "none",
+            "recurrenceUntilDate": "",
+            "totalOccurrences": 0,
+            "isRecurring": false,
+            "recurringDaysOfWeek": [],
+            "recurringWeekdaySequence": [],
+            "recurringWeekInterval": null,
+            "updatedAt": "2026-04-01T14:15:48.520Z",
+            "lastSeenAt": "2026-03-19T13:11:38.996Z",
+            "raw": {
+              "uniqueId": "1354419450037722_1",
+              "establishment": "Trailside Music Hall",
+              "eventType": "live_music",
+              "eventName": "A Night of Tyler Childers & Chris Stapleton (The Stolen Goods Tribute Band)",
+              "description": "Thursday March 19th @ The Trailside Presented by The Stolen Goods Tribute Band. Tickets on sale now @ Trailside.ca",
+              "startDate": "2026-03-19",
+              "endDate": "2026-03-20",
+              "endTime": "01:00",
+              "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1772203836289-1ty2g8.webp",
+              "facebookUrl": "https://www.facebook.com/TrailsideMusicHall",
+              "likes": 6,
+              "shares": 2,
+              "comments": 1,
+              "topReactionsCount": 1,
+              "venueId": "slug_trailsidemusichall",
+              "category": "Live Music",
+              "isEvent": "Yes",
+              "isFoodSpecial": "No",
+              "name": "A Night of Tyler Childers & Chris Stapleton (The Stolen Goods Tribute Band)",
+              "address": "155 Kent St, Charlottetown, PE C1A 4K9, Canada",
+              "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1769528612283.webp",
+              "cleanedFacebookUrl": "https://www.facebook.com/TrailsideMusicHall",
+              "latitude": "",
+              "longitude": "",
+              "timeFlags": {
+                "start": {
+                  "source": "semantic",
+                  "evidence": "Start from venue hours (opens 16:00)"
+                },
+                "end": {
+                  "source": "none",
+                  "toClose": false,
+                  "evidence": ""
+                }
+              },
+              "createdAt": {
+                "_seconds": 1772203899,
+                "_nanoseconds": 496000000
+              },
+              "timeResolution": {
+                "hoursUsed": true,
+                "endFromHours": "category_default"
+              },
+              "sourceTimestamp": {
+                "_seconds": 1773920033,
+                "_nanoseconds": 0
+              },
+              "lastSeenAt": {
+                "_seconds": 1773925898,
+                "_nanoseconds": 996000000
+              },
+              "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773925598377-2y5mi7.webp",
+              "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773925598377-2y5mi7.webp",
+              "startTime": "19:00",
+              "mediaUrls": [
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1772203836289-1ty2g8.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773838349593-g9pnhz.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773924949011-l6vdy9.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773925598377-2y5mi7.webp"
+              ],
+              "totalOccurrences": 0,
+              "recurringPattern": "none",
+              "recurrenceUntilDate": "",
+              "isRecurring": false,
+              "updatedAt": {
+                "_seconds": 1775052948,
+                "_nanoseconds": 520000000
+              }
+            }
+          }
+        ]
+      },
+      "cleanup": {
+        "enabled": true,
+        "deletedDocs": []
+      },
+      "final": {
+        "evaluation": {
+          "success": true,
+          "failures": [],
+          "expectedMatches": [
+            {
+              "matcher": {
+                "path": "venues/slug_trailsidemusichall/events/RpkqgIiEepc7uWa6vT2Q",
+                "exactName": "A Night of Tyler Childers & Chris Stapleton (The Stolen Goods Tribute Band)",
+                "startDate": "2026-03-19",
+                "endDate": "2026-03-20",
+                "startTime": "19:00",
+                "endTime": "01:00",
+                "recurringPattern": "none",
+                "isRecurring": false
+              },
+              "doc": {
+                "path": "venues/slug_trailsidemusichall/events/RpkqgIiEepc7uWa6vT2Q",
+                "exists": true,
+                "id": "RpkqgIiEepc7uWa6vT2Q",
+                "name": "A Night of Tyler Childers & Chris Stapleton (The Stolen Goods Tribute Band)",
+                "eventName": "A Night of Tyler Childers & Chris Stapleton (The Stolen Goods Tribute Band)",
+                "description": "Thursday March 19th @ The Trailside Presented by The Stolen Goods Tribute Band. Tickets on sale now @ Trailside.ca",
+                "startDate": "2026-03-19",
+                "endDate": "2026-03-20",
+                "startTime": "19:00",
+                "endTime": "01:00",
+                "recurringPattern": "none",
+                "recurrenceUntilDate": "",
+                "totalOccurrences": 0,
+                "isRecurring": false,
+                "recurringDaysOfWeek": [],
+                "recurringWeekdaySequence": [],
+                "recurringWeekInterval": null,
+                "updatedAt": "2026-04-01T14:15:48.520Z",
+                "lastSeenAt": "2026-03-19T13:11:38.996Z",
+                "raw": {
+                  "uniqueId": "1354419450037722_1",
+                  "establishment": "Trailside Music Hall",
+                  "eventType": "live_music",
+                  "eventName": "A Night of Tyler Childers & Chris Stapleton (The Stolen Goods Tribute Band)",
+                  "description": "Thursday March 19th @ The Trailside Presented by The Stolen Goods Tribute Band. Tickets on sale now @ Trailside.ca",
+                  "startDate": "2026-03-19",
+                  "endDate": "2026-03-20",
+                  "endTime": "01:00",
+                  "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1772203836289-1ty2g8.webp",
+                  "facebookUrl": "https://www.facebook.com/TrailsideMusicHall",
+                  "likes": 6,
+                  "shares": 2,
+                  "comments": 1,
+                  "topReactionsCount": 1,
+                  "venueId": "slug_trailsidemusichall",
+                  "category": "Live Music",
+                  "isEvent": "Yes",
+                  "isFoodSpecial": "No",
+                  "name": "A Night of Tyler Childers & Chris Stapleton (The Stolen Goods Tribute Band)",
+                  "address": "155 Kent St, Charlottetown, PE C1A 4K9, Canada",
+                  "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1769528612283.webp",
+                  "cleanedFacebookUrl": "https://www.facebook.com/TrailsideMusicHall",
+                  "latitude": "",
+                  "longitude": "",
+                  "timeFlags": {
+                    "start": {
+                      "source": "semantic",
+                      "evidence": "Start from venue hours (opens 16:00)"
+                    },
+                    "end": {
+                      "source": "none",
+                      "toClose": false,
+                      "evidence": ""
+                    }
+                  },
+                  "createdAt": {
+                    "_seconds": 1772203899,
+                    "_nanoseconds": 496000000
+                  },
+                  "timeResolution": {
+                    "hoursUsed": true,
+                    "endFromHours": "category_default"
+                  },
+                  "sourceTimestamp": {
+                    "_seconds": 1773920033,
+                    "_nanoseconds": 0
+                  },
+                  "lastSeenAt": {
+                    "_seconds": 1773925898,
+                    "_nanoseconds": 996000000
+                  },
+                  "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773925598377-2y5mi7.webp",
+                  "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773925598377-2y5mi7.webp",
+                  "startTime": "19:00",
+                  "mediaUrls": [
+                    "https://storage.googleapis.com/gathr-uploaded-images/postimages/1772203836289-1ty2g8.webp",
+                    "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773838349593-g9pnhz.webp",
+                    "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773924949011-l6vdy9.webp",
+                    "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773925598377-2y5mi7.webp"
+                  ],
+                  "totalOccurrences": 0,
+                  "recurringPattern": "none",
+                  "recurrenceUntilDate": "",
+                  "isRecurring": false,
+                  "updatedAt": {
+                    "_seconds": 1775052948,
+                    "_nanoseconds": 520000000
+                  }
+                }
+              }
+            }
+          ],
+          "forbiddenMatches": []
+        },
+        "docs": [
+          {
+            "path": "venues/slug_trailsidemusichall/events/RpkqgIiEepc7uWa6vT2Q",
+            "exists": true,
+            "id": "RpkqgIiEepc7uWa6vT2Q",
+            "name": "A Night of Tyler Childers & Chris Stapleton (The Stolen Goods Tribute Band)",
+            "eventName": "A Night of Tyler Childers & Chris Stapleton (The Stolen Goods Tribute Band)",
+            "description": "Thursday March 19th @ The Trailside Presented by The Stolen Goods Tribute Band. Tickets on sale now @ Trailside.ca",
+            "startDate": "2026-03-19",
+            "endDate": "2026-03-20",
+            "startTime": "19:00",
+            "endTime": "01:00",
+            "recurringPattern": "none",
+            "recurrenceUntilDate": "",
+            "totalOccurrences": 0,
+            "isRecurring": false,
+            "recurringDaysOfWeek": [],
+            "recurringWeekdaySequence": [],
+            "recurringWeekInterval": null,
+            "updatedAt": "2026-04-01T14:15:48.520Z",
+            "lastSeenAt": "2026-03-19T13:11:38.996Z",
+            "raw": {
+              "uniqueId": "1354419450037722_1",
+              "establishment": "Trailside Music Hall",
+              "eventType": "live_music",
+              "eventName": "A Night of Tyler Childers & Chris Stapleton (The Stolen Goods Tribute Band)",
+              "description": "Thursday March 19th @ The Trailside Presented by The Stolen Goods Tribute Band. Tickets on sale now @ Trailside.ca",
+              "startDate": "2026-03-19",
+              "endDate": "2026-03-20",
+              "endTime": "01:00",
+              "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1772203836289-1ty2g8.webp",
+              "facebookUrl": "https://www.facebook.com/TrailsideMusicHall",
+              "likes": 6,
+              "shares": 2,
+              "comments": 1,
+              "topReactionsCount": 1,
+              "venueId": "slug_trailsidemusichall",
+              "category": "Live Music",
+              "isEvent": "Yes",
+              "isFoodSpecial": "No",
+              "name": "A Night of Tyler Childers & Chris Stapleton (The Stolen Goods Tribute Band)",
+              "address": "155 Kent St, Charlottetown, PE C1A 4K9, Canada",
+              "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1769528612283.webp",
+              "cleanedFacebookUrl": "https://www.facebook.com/TrailsideMusicHall",
+              "latitude": "",
+              "longitude": "",
+              "timeFlags": {
+                "start": {
+                  "source": "semantic",
+                  "evidence": "Start from venue hours (opens 16:00)"
+                },
+                "end": {
+                  "source": "none",
+                  "toClose": false,
+                  "evidence": ""
+                }
+              },
+              "createdAt": {
+                "_seconds": 1772203899,
+                "_nanoseconds": 496000000
+              },
+              "timeResolution": {
+                "hoursUsed": true,
+                "endFromHours": "category_default"
+              },
+              "sourceTimestamp": {
+                "_seconds": 1773920033,
+                "_nanoseconds": 0
+              },
+              "lastSeenAt": {
+                "_seconds": 1773925898,
+                "_nanoseconds": 996000000
+              },
+              "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773925598377-2y5mi7.webp",
+              "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773925598377-2y5mi7.webp",
+              "startTime": "19:00",
+              "mediaUrls": [
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1772203836289-1ty2g8.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773838349593-g9pnhz.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773924949011-l6vdy9.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773925598377-2y5mi7.webp"
+              ],
+              "totalOccurrences": 0,
+              "recurringPattern": "none",
+              "recurrenceUntilDate": "",
+              "isRecurring": false,
+              "updatedAt": {
+                "_seconds": 1775052948,
+                "_nanoseconds": 520000000
+              }
+            }
+          }
+        ]
+      },
+      "success": true
+    },
+    {
+      "caseId": "body_bar_krista",
+      "description": "Alternating Tuesday/Wednesday class should remain a single weekly_custom keeper doc.",
+      "processUrl": "https://processdataset-6ju7yi5g2a-pd.a.run.app",
+      "request": {
+        "fileId": "1oJUytO-MCCrrGO9zIsZihPv4R7V_JGRE",
+        "rowIndex": 136,
+        "parserMode": "full5stage",
+        "dryRun": false
+      },
+      "response": {
+        "ok": true,
+        "status": 200,
+        "body": {
+          "success": true,
+          "message": "Selected rows processed",
+          "stats": {
+            "processedCount": 0,
+            "skippedCount": 1,
+            "invalidCount": 0,
+            "duplicateCount": 0,
+            "errorCount": 0,
+            "newEventsCreated": 0,
+            "existingEventsUpdated": 0,
+            "newStandardEventsCreated": 0,
+            "existingStandardEventsUpdated": 0,
+            "newFoodSpecialsCreated": 0,
+            "existingFoodSpecialsUpdated": 0
+          },
+          "nextBatchScheduled": false
+        }
+      },
+      "latestSnapshot": {
+        "id": "1oJUytO-MCCrrGO9zIsZihPv4R7V_JGRE_136_1775105577573",
+        "createdAt": "2026-04-02T04:52:57.581Z",
+        "createdAtMs": 1775105577581,
+        "eventCount": 0,
+        "parserMode": "full5stage",
+        "error": "Due to failing Stage 1 validation: The post is a personal/marketing-style message promoting local New Brunswick seafood and calling out a specific dish at @claudineseatery, but it does not contain any extractable events (no dates or times) nor any food/drink specials (no discounts, happy hour, price deals, or limited-time offers). The image is illustrative only and contains no event/special details. Therefore there is no valid event or food/drink special to extract."
+      },
+      "before": {
+        "evaluation": {
+          "success": false,
+          "failures": [
+            "missing expected doc: {\"path\":\"venues/slug_creditunionplace/events/59liXjiExkxfb90nT0Vs\",\"exactName\":\"Body Bar with Krista\",\"startDate\":\"2026-03-31\",\"endDate\":\"2026-03-31\",\"startTime\":\"16:30\",\"endTime\":\"17:15\",\"recurringPattern\":\"weekly_custom\",\"isRecurring\":true,\"recurringWeekdaySequence\":[\"tuesday\",\"wednesday\"],\"recurringWeekInterval\":1}"
+          ],
+          "expectedMatches": [],
+          "forbiddenMatches": []
+        },
+        "docs": [
+          {
+            "path": "venues/slug_creditunionplace/events/59liXjiExkxfb90nT0Vs",
+            "exists": true,
+            "id": "59liXjiExkxfb90nT0Vs",
+            "name": "Body Bar with Krista",
+            "eventName": "Body Bar with Krista",
+            "description": "Body Bar with Krista. Alternating Tuesdays and Wednesdays at 4:30pm. A total-body barbell workout using light to moderate weights and high reps. You’ll squat, press, curl and lunge your way through motivating music and coached technique. This class builds strength, tones muscle, and boosts endurance.",
+            "startDate": "2026-03-31",
+            "endDate": "2026-03-31",
+            "startTime": "16:30",
+            "endTime": "21:00",
+            "recurringPattern": "weekly_custom",
+            "recurrenceUntilDate": "",
+            "totalOccurrences": 0,
+            "isRecurring": true,
+            "recurringDaysOfWeek": [],
+            "recurringWeekdaySequence": [
+              "tuesday",
+              "wednesday"
+            ],
+            "recurringWeekInterval": 1,
+            "updatedAt": "2026-04-01T19:08:37.428Z",
+            "lastSeenAt": "2026-04-01T19:08:37.428Z",
+            "raw": {
+              "uniqueId": "1576717427509405_1",
+              "establishment": "Credit Union Place",
+              "eventType": "workshops_classes",
+              "eventName": "Body Bar with Krista",
+              "description": "Body Bar with Krista. Alternating Tuesdays and Wednesdays at 4:30pm. A total-body barbell workout using light to moderate weights and high reps. You’ll squat, press, curl and lunge your way through motivating music and coached technique. This class builds strength, tones muscle, and boosts endurance.",
+              "startDate": "2026-03-31",
+              "endDate": "2026-03-31",
+              "endTime": "21:00",
+              "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774790187728-1ihoj3.webp",
+              "facebookUrl": "https://www.facebook.com/creditunionplace",
+              "sourceTimestamp": {
+                "_seconds": 1774785718,
+                "_nanoseconds": 0
+              },
+              "shares": 0,
+              "venueId": "slug_creditunionplace",
+              "category": "Workshops & Classes",
+              "isEvent": "Yes",
+              "isFoodSpecial": "No",
+              "name": "Body Bar with Krista",
+              "address": "511 Notre Dame St, Summerside, PE C1N 1T2, Canada",
+              "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1772905657135-vsvu86.webp",
+              "cleanedFacebookUrl": "https://www.facebook.com/creditunionplace",
+              "latitude": "",
+              "longitude": "",
+              "createdAt": {
+                "_seconds": 1774790213,
+                "_nanoseconds": 978000000
+              },
+              "comments": 1,
+              "topReactionsCount": 1,
+              "likes": 6,
+              "totalOccurrences": 0,
+              "recurringPattern": "weekly_custom",
+              "recurrenceUntilDate": "",
+              "recurringDaysOfWeek": [],
+              "isRecurring": true,
+              "recurringWeekdaySequence": [
+                "tuesday",
+                "wednesday"
+              ],
+              "recurringWeekInterval": 1,
+              "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1775069677397-lyrj4j.webp",
+              "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1775069677397-lyrj4j.webp",
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "4:30pm"
+                },
+                "end": {
+                  "source": "none",
+                  "toClose": false,
+                  "evidence": ""
+                }
+              },
+              "timeResolution": {
+                "hoursUsed": true,
+                "endFromHours": "category_default"
+              },
+              "startTime": "16:30",
+              "lastSeenAt": {
+                "_seconds": 1775070517,
+                "_nanoseconds": 428000000
+              },
+              "mediaUrls": [
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774790187728-1ihoj3.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774876414985-upqtlm.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1775058560398-qyrmv9.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1775060994079-oal3wx.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1775063955597-crr1by.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1775067095929-02iiax.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1775068520478-zlphp8.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1775069677397-lyrj4j.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1775070481565-aeaqdu.webp"
+              ],
+              "updatedAt": {
+                "_seconds": 1775070517,
+                "_nanoseconds": 428000000
+              }
+            }
+          },
+          {
+            "path": "venues/slug_creditunionplace/events/ol4duFVEvPjBhoXWNaJd",
+            "exists": false,
+            "id": "ol4duFVEvPjBhoXWNaJd",
+            "name": "",
+            "eventName": "",
+            "description": "",
+            "startDate": "",
+            "endDate": "",
+            "startTime": "",
+            "endTime": "",
+            "recurringPattern": "",
+            "recurrenceUntilDate": "",
+            "totalOccurrences": null,
+            "isRecurring": false,
+            "recurringDaysOfWeek": [],
+            "recurringWeekdaySequence": [],
+            "recurringWeekInterval": null,
+            "updatedAt": "",
+            "lastSeenAt": "",
+            "raw": null
+          }
+        ]
+      },
+      "after": {
+        "evaluation": {
+          "success": false,
+          "failures": [
+            "missing expected doc: {\"path\":\"venues/slug_creditunionplace/events/59liXjiExkxfb90nT0Vs\",\"exactName\":\"Body Bar with Krista\",\"startDate\":\"2026-03-31\",\"endDate\":\"2026-03-31\",\"startTime\":\"16:30\",\"endTime\":\"17:15\",\"recurringPattern\":\"weekly_custom\",\"isRecurring\":true,\"recurringWeekdaySequence\":[\"tuesday\",\"wednesday\"],\"recurringWeekInterval\":1}"
+          ],
+          "expectedMatches": [],
+          "forbiddenMatches": []
+        },
+        "docs": [
+          {
+            "path": "venues/slug_creditunionplace/events/59liXjiExkxfb90nT0Vs",
+            "exists": true,
+            "id": "59liXjiExkxfb90nT0Vs",
+            "name": "Body Bar with Krista",
+            "eventName": "Body Bar with Krista",
+            "description": "Body Bar with Krista. Alternating Tuesdays and Wednesdays at 4:30pm. A total-body barbell workout using light to moderate weights and high reps. You’ll squat, press, curl and lunge your way through motivating music and coached technique. This class builds strength, tones muscle, and boosts endurance.",
+            "startDate": "2026-03-31",
+            "endDate": "2026-03-31",
+            "startTime": "16:30",
+            "endTime": "21:00",
+            "recurringPattern": "weekly_custom",
+            "recurrenceUntilDate": "",
+            "totalOccurrences": 0,
+            "isRecurring": true,
+            "recurringDaysOfWeek": [],
+            "recurringWeekdaySequence": [
+              "tuesday",
+              "wednesday"
+            ],
+            "recurringWeekInterval": 1,
+            "updatedAt": "2026-04-01T19:08:37.428Z",
+            "lastSeenAt": "2026-04-01T19:08:37.428Z",
+            "raw": {
+              "uniqueId": "1576717427509405_1",
+              "establishment": "Credit Union Place",
+              "eventType": "workshops_classes",
+              "eventName": "Body Bar with Krista",
+              "description": "Body Bar with Krista. Alternating Tuesdays and Wednesdays at 4:30pm. A total-body barbell workout using light to moderate weights and high reps. You’ll squat, press, curl and lunge your way through motivating music and coached technique. This class builds strength, tones muscle, and boosts endurance.",
+              "startDate": "2026-03-31",
+              "endDate": "2026-03-31",
+              "endTime": "21:00",
+              "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774790187728-1ihoj3.webp",
+              "facebookUrl": "https://www.facebook.com/creditunionplace",
+              "sourceTimestamp": {
+                "_seconds": 1774785718,
+                "_nanoseconds": 0
+              },
+              "shares": 0,
+              "venueId": "slug_creditunionplace",
+              "category": "Workshops & Classes",
+              "isEvent": "Yes",
+              "isFoodSpecial": "No",
+              "name": "Body Bar with Krista",
+              "address": "511 Notre Dame St, Summerside, PE C1N 1T2, Canada",
+              "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1772905657135-vsvu86.webp",
+              "cleanedFacebookUrl": "https://www.facebook.com/creditunionplace",
+              "latitude": "",
+              "longitude": "",
+              "createdAt": {
+                "_seconds": 1774790213,
+                "_nanoseconds": 978000000
+              },
+              "comments": 1,
+              "topReactionsCount": 1,
+              "likes": 6,
+              "totalOccurrences": 0,
+              "recurringPattern": "weekly_custom",
+              "recurrenceUntilDate": "",
+              "recurringDaysOfWeek": [],
+              "isRecurring": true,
+              "recurringWeekdaySequence": [
+                "tuesday",
+                "wednesday"
+              ],
+              "recurringWeekInterval": 1,
+              "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1775069677397-lyrj4j.webp",
+              "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1775069677397-lyrj4j.webp",
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "4:30pm"
+                },
+                "end": {
+                  "source": "none",
+                  "toClose": false,
+                  "evidence": ""
+                }
+              },
+              "timeResolution": {
+                "hoursUsed": true,
+                "endFromHours": "category_default"
+              },
+              "startTime": "16:30",
+              "lastSeenAt": {
+                "_seconds": 1775070517,
+                "_nanoseconds": 428000000
+              },
+              "mediaUrls": [
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774790187728-1ihoj3.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774876414985-upqtlm.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1775058560398-qyrmv9.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1775060994079-oal3wx.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1775063955597-crr1by.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1775067095929-02iiax.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1775068520478-zlphp8.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1775069677397-lyrj4j.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1775070481565-aeaqdu.webp"
+              ],
+              "updatedAt": {
+                "_seconds": 1775070517,
+                "_nanoseconds": 428000000
+              }
+            }
+          },
+          {
+            "path": "venues/slug_creditunionplace/events/ol4duFVEvPjBhoXWNaJd",
+            "exists": false,
+            "id": "ol4duFVEvPjBhoXWNaJd",
+            "name": "",
+            "eventName": "",
+            "description": "",
+            "startDate": "",
+            "endDate": "",
+            "startTime": "",
+            "endTime": "",
+            "recurringPattern": "",
+            "recurrenceUntilDate": "",
+            "totalOccurrences": null,
+            "isRecurring": false,
+            "recurringDaysOfWeek": [],
+            "recurringWeekdaySequence": [],
+            "recurringWeekInterval": null,
+            "updatedAt": "",
+            "lastSeenAt": "",
+            "raw": null
+          }
+        ]
+      },
+      "cleanup": {
+        "enabled": true,
+        "deletedDocs": []
+      },
+      "final": {
+        "evaluation": {
+          "success": false,
+          "failures": [
+            "missing expected doc: {\"path\":\"venues/slug_creditunionplace/events/59liXjiExkxfb90nT0Vs\",\"exactName\":\"Body Bar with Krista\",\"startDate\":\"2026-03-31\",\"endDate\":\"2026-03-31\",\"startTime\":\"16:30\",\"endTime\":\"17:15\",\"recurringPattern\":\"weekly_custom\",\"isRecurring\":true,\"recurringWeekdaySequence\":[\"tuesday\",\"wednesday\"],\"recurringWeekInterval\":1}"
+          ],
+          "expectedMatches": [],
+          "forbiddenMatches": []
+        },
+        "docs": [
+          {
+            "path": "venues/slug_creditunionplace/events/59liXjiExkxfb90nT0Vs",
+            "exists": true,
+            "id": "59liXjiExkxfb90nT0Vs",
+            "name": "Body Bar with Krista",
+            "eventName": "Body Bar with Krista",
+            "description": "Body Bar with Krista. Alternating Tuesdays and Wednesdays at 4:30pm. A total-body barbell workout using light to moderate weights and high reps. You’ll squat, press, curl and lunge your way through motivating music and coached technique. This class builds strength, tones muscle, and boosts endurance.",
+            "startDate": "2026-03-31",
+            "endDate": "2026-03-31",
+            "startTime": "16:30",
+            "endTime": "21:00",
+            "recurringPattern": "weekly_custom",
+            "recurrenceUntilDate": "",
+            "totalOccurrences": 0,
+            "isRecurring": true,
+            "recurringDaysOfWeek": [],
+            "recurringWeekdaySequence": [
+              "tuesday",
+              "wednesday"
+            ],
+            "recurringWeekInterval": 1,
+            "updatedAt": "2026-04-01T19:08:37.428Z",
+            "lastSeenAt": "2026-04-01T19:08:37.428Z",
+            "raw": {
+              "uniqueId": "1576717427509405_1",
+              "establishment": "Credit Union Place",
+              "eventType": "workshops_classes",
+              "eventName": "Body Bar with Krista",
+              "description": "Body Bar with Krista. Alternating Tuesdays and Wednesdays at 4:30pm. A total-body barbell workout using light to moderate weights and high reps. You’ll squat, press, curl and lunge your way through motivating music and coached technique. This class builds strength, tones muscle, and boosts endurance.",
+              "startDate": "2026-03-31",
+              "endDate": "2026-03-31",
+              "endTime": "21:00",
+              "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774790187728-1ihoj3.webp",
+              "facebookUrl": "https://www.facebook.com/creditunionplace",
+              "sourceTimestamp": {
+                "_seconds": 1774785718,
+                "_nanoseconds": 0
+              },
+              "shares": 0,
+              "venueId": "slug_creditunionplace",
+              "category": "Workshops & Classes",
+              "isEvent": "Yes",
+              "isFoodSpecial": "No",
+              "name": "Body Bar with Krista",
+              "address": "511 Notre Dame St, Summerside, PE C1N 1T2, Canada",
+              "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1772905657135-vsvu86.webp",
+              "cleanedFacebookUrl": "https://www.facebook.com/creditunionplace",
+              "latitude": "",
+              "longitude": "",
+              "createdAt": {
+                "_seconds": 1774790213,
+                "_nanoseconds": 978000000
+              },
+              "comments": 1,
+              "topReactionsCount": 1,
+              "likes": 6,
+              "totalOccurrences": 0,
+              "recurringPattern": "weekly_custom",
+              "recurrenceUntilDate": "",
+              "recurringDaysOfWeek": [],
+              "isRecurring": true,
+              "recurringWeekdaySequence": [
+                "tuesday",
+                "wednesday"
+              ],
+              "recurringWeekInterval": 1,
+              "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1775069677397-lyrj4j.webp",
+              "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1775069677397-lyrj4j.webp",
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "4:30pm"
+                },
+                "end": {
+                  "source": "none",
+                  "toClose": false,
+                  "evidence": ""
+                }
+              },
+              "timeResolution": {
+                "hoursUsed": true,
+                "endFromHours": "category_default"
+              },
+              "startTime": "16:30",
+              "lastSeenAt": {
+                "_seconds": 1775070517,
+                "_nanoseconds": 428000000
+              },
+              "mediaUrls": [
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774790187728-1ihoj3.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1774876414985-upqtlm.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1775058560398-qyrmv9.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1775060994079-oal3wx.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1775063955597-crr1by.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1775067095929-02iiax.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1775068520478-zlphp8.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1775069677397-lyrj4j.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1775070481565-aeaqdu.webp"
+              ],
+              "updatedAt": {
+                "_seconds": 1775070517,
+                "_nanoseconds": 428000000
+              }
+            }
+          },
+          {
+            "path": "venues/slug_creditunionplace/events/ol4duFVEvPjBhoXWNaJd",
+            "exists": false,
+            "id": "ol4duFVEvPjBhoXWNaJd",
+            "name": "",
+            "eventName": "",
+            "description": "",
+            "startDate": "",
+            "endDate": "",
+            "startTime": "",
+            "endTime": "",
+            "recurringPattern": "",
+            "recurrenceUntilDate": "",
+            "totalOccurrences": null,
+            "isRecurring": false,
+            "recurringDaysOfWeek": [],
+            "recurringWeekdaySequence": [],
+            "recurringWeekInterval": null,
+            "updatedAt": "",
+            "lastSeenAt": "",
+            "raw": null
+          }
+        ]
+      },
+      "success": false
+    },
+    {
+      "caseId": "tai_chi_master_tien_li",
+      "description": "Finite Tai Chi Saturday series should stay bounded and same-day.",
+      "processUrl": "https://processdataset-6ju7yi5g2a-pd.a.run.app",
+      "request": {
+        "fileId": "1oJUytO-MCCrrGO9zIsZihPv4R7V_JGRE",
+        "rowIndex": 218,
+        "parserMode": "full5stage",
+        "dryRun": false
+      },
+      "response": {
+        "ok": true,
+        "status": 200,
+        "body": {
+          "success": true,
+          "message": "Selected rows processed",
+          "stats": {
+            "processedCount": 0,
+            "skippedCount": 0,
+            "invalidCount": 1,
+            "duplicateCount": 0,
+            "errorCount": 0,
+            "newEventsCreated": 0,
+            "existingEventsUpdated": 0,
+            "newStandardEventsCreated": 0,
+            "existingStandardEventsUpdated": 0,
+            "newFoodSpecialsCreated": 0,
+            "existingFoodSpecialsUpdated": 0
+          },
+          "nextBatchScheduled": false
+        }
+      },
+      "latestSnapshot": null,
+      "before": {
+        "evaluation": {
+          "success": true,
+          "failures": [],
+          "expectedMatches": [
+            {
+              "matcher": {
+                "path": "venues/0F6W6IBgJqlKQ8AmaTGC/events/UyWNHU2A4KPSxSyX7Eeh",
+                "exactName": "Tai Chi with Master Tien Li",
+                "startDate": "2026-03-21",
+                "endDate": "2026-03-21",
+                "startTime": "09:00",
+                "endTime": "10:00",
+                "recurringPattern": "weekly_saturday",
+                "isRecurring": true,
+                "totalOccurrences": 4,
+                "recurrenceUntilDate": "2026-04-11"
+              },
+              "doc": {
+                "path": "venues/0F6W6IBgJqlKQ8AmaTGC/events/UyWNHU2A4KPSxSyX7Eeh",
+                "exists": true,
+                "id": "UyWNHU2A4KPSxSyX7Eeh",
+                "name": "Tai Chi with Master Tien Li",
+                "eventName": "Tai Chi with Master Tien Li",
+                "description": "SATURDAYS MARCH 21-APRIL 11 9 -10AM FOUR CLASSES $75",
+                "startDate": "2026-03-21",
+                "endDate": "2026-03-21",
+                "startTime": "09:00",
+                "endTime": "10:00",
+                "recurringPattern": "weekly_saturday",
+                "recurrenceUntilDate": "2026-04-11",
+                "totalOccurrences": 4,
+                "isRecurring": true,
+                "recurringDaysOfWeek": [],
+                "recurringWeekdaySequence": [],
+                "recurringWeekInterval": null,
+                "updatedAt": "2026-04-01T21:01:28.988Z",
+                "lastSeenAt": "2026-04-01T20:16:54.000Z",
+                "raw": {
+                  "uniqueId": "122127823569035455_1",
+                  "establishment": "Buenos Island Studio",
+                  "eventType": "workshops_classes",
+                  "eventName": "Tai Chi with Master Tien Li",
+                  "startDate": "2026-03-21",
+                  "startTime": "09:00",
+                  "price": "$75",
+                  "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1772721720194-2p5kbc.webp",
+                  "mediaUrls": [
+                    "https://storage.googleapis.com/gathr-uploaded-images/postimages/1772721720194-2p5kbc.webp"
+                  ],
+                  "facebookUrl": "https://www.facebook.com/people/Buenos-Island-Studio/61581063652574",
+                  "sourceTimestamp": {
+                    "_seconds": 1772706434,
+                    "_nanoseconds": 0
+                  },
+                  "likes": 1,
+                  "shares": 0,
+                  "topReactionsCount": 1,
+                  "venueId": "0F6W6IBgJqlKQ8AmaTGC",
+                  "category": "Workshops & Classes",
+                  "isEvent": "Yes",
+                  "isFoodSpecial": "No",
+                  "name": "Tai Chi with Master Tien Li",
+                  "address": "135 Great George St 2nd Floor, Charlottetown, PE C1A 4K7, Canada",
+                  "ticketPrice": "$75",
+                  "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1772721720194-2p5kbc.webp",
+                  "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1772721720194-2p5kbc.webp",
+                  "cleanedFacebookUrl": "https://www.facebook.com/people/Buenos-Island-Studio/61581063652574",
+                  "latitude": "",
+                  "longitude": "",
+                  "createdAt": {
+                    "_seconds": 1772721760,
+                    "_nanoseconds": 840000000
+                  },
+                  "totalOccurrences": 4,
+                  "timeFlags": {
+                    "start": {
+                      "source": "explicit",
+                      "evidence": "9 -10AM"
+                    },
+                    "end": {
+                      "source": "explicit",
+                      "toClose": false,
+                      "evidence": "9 -10AM"
+                    }
+                  },
+                  "recurringPattern": "weekly_saturday",
+                  "recurrenceUntilDate": "2026-04-11",
+                  "timeResolution": {
+                    "hoursUsed": false
+                  },
+                  "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1774104537366-j846g9.webp",
+                  "isRecurring": true,
+                  "endTime": "10:00",
+                  "lastSeenAt": {
+                    "_seconds": 1775074614,
+                    "_nanoseconds": 0
+                  },
+                  "description": "SATURDAYS MARCH 21-APRIL 11 9 -10AM FOUR CLASSES $75",
+                  "endDate": "2026-03-21",
+                  "updatedAt": {
+                    "_seconds": 1775077288,
+                    "_nanoseconds": 988000000
+                  }
+                }
+              }
+            }
+          ],
+          "forbiddenMatches": []
+        },
+        "docs": [
+          {
+            "path": "venues/0F6W6IBgJqlKQ8AmaTGC/events/UyWNHU2A4KPSxSyX7Eeh",
+            "exists": true,
+            "id": "UyWNHU2A4KPSxSyX7Eeh",
+            "name": "Tai Chi with Master Tien Li",
+            "eventName": "Tai Chi with Master Tien Li",
+            "description": "SATURDAYS MARCH 21-APRIL 11 9 -10AM FOUR CLASSES $75",
+            "startDate": "2026-03-21",
+            "endDate": "2026-03-21",
+            "startTime": "09:00",
+            "endTime": "10:00",
+            "recurringPattern": "weekly_saturday",
+            "recurrenceUntilDate": "2026-04-11",
+            "totalOccurrences": 4,
+            "isRecurring": true,
+            "recurringDaysOfWeek": [],
+            "recurringWeekdaySequence": [],
+            "recurringWeekInterval": null,
+            "updatedAt": "2026-04-01T21:01:28.988Z",
+            "lastSeenAt": "2026-04-01T20:16:54.000Z",
+            "raw": {
+              "uniqueId": "122127823569035455_1",
+              "establishment": "Buenos Island Studio",
+              "eventType": "workshops_classes",
+              "eventName": "Tai Chi with Master Tien Li",
+              "startDate": "2026-03-21",
+              "startTime": "09:00",
+              "price": "$75",
+              "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1772721720194-2p5kbc.webp",
+              "mediaUrls": [
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1772721720194-2p5kbc.webp"
+              ],
+              "facebookUrl": "https://www.facebook.com/people/Buenos-Island-Studio/61581063652574",
+              "sourceTimestamp": {
+                "_seconds": 1772706434,
+                "_nanoseconds": 0
+              },
+              "likes": 1,
+              "shares": 0,
+              "topReactionsCount": 1,
+              "venueId": "0F6W6IBgJqlKQ8AmaTGC",
+              "category": "Workshops & Classes",
+              "isEvent": "Yes",
+              "isFoodSpecial": "No",
+              "name": "Tai Chi with Master Tien Li",
+              "address": "135 Great George St 2nd Floor, Charlottetown, PE C1A 4K7, Canada",
+              "ticketPrice": "$75",
+              "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1772721720194-2p5kbc.webp",
+              "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1772721720194-2p5kbc.webp",
+              "cleanedFacebookUrl": "https://www.facebook.com/people/Buenos-Island-Studio/61581063652574",
+              "latitude": "",
+              "longitude": "",
+              "createdAt": {
+                "_seconds": 1772721760,
+                "_nanoseconds": 840000000
+              },
+              "totalOccurrences": 4,
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "9 -10AM"
+                },
+                "end": {
+                  "source": "explicit",
+                  "toClose": false,
+                  "evidence": "9 -10AM"
+                }
+              },
+              "recurringPattern": "weekly_saturday",
+              "recurrenceUntilDate": "2026-04-11",
+              "timeResolution": {
+                "hoursUsed": false
+              },
+              "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1774104537366-j846g9.webp",
+              "isRecurring": true,
+              "endTime": "10:00",
+              "lastSeenAt": {
+                "_seconds": 1775074614,
+                "_nanoseconds": 0
+              },
+              "description": "SATURDAYS MARCH 21-APRIL 11 9 -10AM FOUR CLASSES $75",
+              "endDate": "2026-03-21",
+              "updatedAt": {
+                "_seconds": 1775077288,
+                "_nanoseconds": 988000000
+              }
+            }
+          }
+        ]
+      },
+      "after": {
+        "evaluation": {
+          "success": true,
+          "failures": [],
+          "expectedMatches": [
+            {
+              "matcher": {
+                "path": "venues/0F6W6IBgJqlKQ8AmaTGC/events/UyWNHU2A4KPSxSyX7Eeh",
+                "exactName": "Tai Chi with Master Tien Li",
+                "startDate": "2026-03-21",
+                "endDate": "2026-03-21",
+                "startTime": "09:00",
+                "endTime": "10:00",
+                "recurringPattern": "weekly_saturday",
+                "isRecurring": true,
+                "totalOccurrences": 4,
+                "recurrenceUntilDate": "2026-04-11"
+              },
+              "doc": {
+                "path": "venues/0F6W6IBgJqlKQ8AmaTGC/events/UyWNHU2A4KPSxSyX7Eeh",
+                "exists": true,
+                "id": "UyWNHU2A4KPSxSyX7Eeh",
+                "name": "Tai Chi with Master Tien Li",
+                "eventName": "Tai Chi with Master Tien Li",
+                "description": "SATURDAYS MARCH 21-APRIL 11 9 -10AM FOUR CLASSES $75",
+                "startDate": "2026-03-21",
+                "endDate": "2026-03-21",
+                "startTime": "09:00",
+                "endTime": "10:00",
+                "recurringPattern": "weekly_saturday",
+                "recurrenceUntilDate": "2026-04-11",
+                "totalOccurrences": 4,
+                "isRecurring": true,
+                "recurringDaysOfWeek": [],
+                "recurringWeekdaySequence": [],
+                "recurringWeekInterval": null,
+                "updatedAt": "2026-04-01T21:01:28.988Z",
+                "lastSeenAt": "2026-04-01T20:16:54.000Z",
+                "raw": {
+                  "uniqueId": "122127823569035455_1",
+                  "establishment": "Buenos Island Studio",
+                  "eventType": "workshops_classes",
+                  "eventName": "Tai Chi with Master Tien Li",
+                  "startDate": "2026-03-21",
+                  "startTime": "09:00",
+                  "price": "$75",
+                  "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1772721720194-2p5kbc.webp",
+                  "mediaUrls": [
+                    "https://storage.googleapis.com/gathr-uploaded-images/postimages/1772721720194-2p5kbc.webp"
+                  ],
+                  "facebookUrl": "https://www.facebook.com/people/Buenos-Island-Studio/61581063652574",
+                  "sourceTimestamp": {
+                    "_seconds": 1772706434,
+                    "_nanoseconds": 0
+                  },
+                  "likes": 1,
+                  "shares": 0,
+                  "topReactionsCount": 1,
+                  "venueId": "0F6W6IBgJqlKQ8AmaTGC",
+                  "category": "Workshops & Classes",
+                  "isEvent": "Yes",
+                  "isFoodSpecial": "No",
+                  "name": "Tai Chi with Master Tien Li",
+                  "address": "135 Great George St 2nd Floor, Charlottetown, PE C1A 4K7, Canada",
+                  "ticketPrice": "$75",
+                  "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1772721720194-2p5kbc.webp",
+                  "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1772721720194-2p5kbc.webp",
+                  "cleanedFacebookUrl": "https://www.facebook.com/people/Buenos-Island-Studio/61581063652574",
+                  "latitude": "",
+                  "longitude": "",
+                  "createdAt": {
+                    "_seconds": 1772721760,
+                    "_nanoseconds": 840000000
+                  },
+                  "totalOccurrences": 4,
+                  "timeFlags": {
+                    "start": {
+                      "source": "explicit",
+                      "evidence": "9 -10AM"
+                    },
+                    "end": {
+                      "source": "explicit",
+                      "toClose": false,
+                      "evidence": "9 -10AM"
+                    }
+                  },
+                  "recurringPattern": "weekly_saturday",
+                  "recurrenceUntilDate": "2026-04-11",
+                  "timeResolution": {
+                    "hoursUsed": false
+                  },
+                  "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1774104537366-j846g9.webp",
+                  "isRecurring": true,
+                  "endTime": "10:00",
+                  "lastSeenAt": {
+                    "_seconds": 1775074614,
+                    "_nanoseconds": 0
+                  },
+                  "description": "SATURDAYS MARCH 21-APRIL 11 9 -10AM FOUR CLASSES $75",
+                  "endDate": "2026-03-21",
+                  "updatedAt": {
+                    "_seconds": 1775077288,
+                    "_nanoseconds": 988000000
+                  }
+                }
+              }
+            }
+          ],
+          "forbiddenMatches": []
+        },
+        "docs": [
+          {
+            "path": "venues/0F6W6IBgJqlKQ8AmaTGC/events/UyWNHU2A4KPSxSyX7Eeh",
+            "exists": true,
+            "id": "UyWNHU2A4KPSxSyX7Eeh",
+            "name": "Tai Chi with Master Tien Li",
+            "eventName": "Tai Chi with Master Tien Li",
+            "description": "SATURDAYS MARCH 21-APRIL 11 9 -10AM FOUR CLASSES $75",
+            "startDate": "2026-03-21",
+            "endDate": "2026-03-21",
+            "startTime": "09:00",
+            "endTime": "10:00",
+            "recurringPattern": "weekly_saturday",
+            "recurrenceUntilDate": "2026-04-11",
+            "totalOccurrences": 4,
+            "isRecurring": true,
+            "recurringDaysOfWeek": [],
+            "recurringWeekdaySequence": [],
+            "recurringWeekInterval": null,
+            "updatedAt": "2026-04-01T21:01:28.988Z",
+            "lastSeenAt": "2026-04-01T20:16:54.000Z",
+            "raw": {
+              "uniqueId": "122127823569035455_1",
+              "establishment": "Buenos Island Studio",
+              "eventType": "workshops_classes",
+              "eventName": "Tai Chi with Master Tien Li",
+              "startDate": "2026-03-21",
+              "startTime": "09:00",
+              "price": "$75",
+              "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1772721720194-2p5kbc.webp",
+              "mediaUrls": [
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1772721720194-2p5kbc.webp"
+              ],
+              "facebookUrl": "https://www.facebook.com/people/Buenos-Island-Studio/61581063652574",
+              "sourceTimestamp": {
+                "_seconds": 1772706434,
+                "_nanoseconds": 0
+              },
+              "likes": 1,
+              "shares": 0,
+              "topReactionsCount": 1,
+              "venueId": "0F6W6IBgJqlKQ8AmaTGC",
+              "category": "Workshops & Classes",
+              "isEvent": "Yes",
+              "isFoodSpecial": "No",
+              "name": "Tai Chi with Master Tien Li",
+              "address": "135 Great George St 2nd Floor, Charlottetown, PE C1A 4K7, Canada",
+              "ticketPrice": "$75",
+              "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1772721720194-2p5kbc.webp",
+              "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1772721720194-2p5kbc.webp",
+              "cleanedFacebookUrl": "https://www.facebook.com/people/Buenos-Island-Studio/61581063652574",
+              "latitude": "",
+              "longitude": "",
+              "createdAt": {
+                "_seconds": 1772721760,
+                "_nanoseconds": 840000000
+              },
+              "totalOccurrences": 4,
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "9 -10AM"
+                },
+                "end": {
+                  "source": "explicit",
+                  "toClose": false,
+                  "evidence": "9 -10AM"
+                }
+              },
+              "recurringPattern": "weekly_saturday",
+              "recurrenceUntilDate": "2026-04-11",
+              "timeResolution": {
+                "hoursUsed": false
+              },
+              "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1774104537366-j846g9.webp",
+              "isRecurring": true,
+              "endTime": "10:00",
+              "lastSeenAt": {
+                "_seconds": 1775074614,
+                "_nanoseconds": 0
+              },
+              "description": "SATURDAYS MARCH 21-APRIL 11 9 -10AM FOUR CLASSES $75",
+              "endDate": "2026-03-21",
+              "updatedAt": {
+                "_seconds": 1775077288,
+                "_nanoseconds": 988000000
+              }
+            }
+          }
+        ]
+      },
+      "cleanup": {
+        "enabled": true,
+        "deletedDocs": []
+      },
+      "final": {
+        "evaluation": {
+          "success": true,
+          "failures": [],
+          "expectedMatches": [
+            {
+              "matcher": {
+                "path": "venues/0F6W6IBgJqlKQ8AmaTGC/events/UyWNHU2A4KPSxSyX7Eeh",
+                "exactName": "Tai Chi with Master Tien Li",
+                "startDate": "2026-03-21",
+                "endDate": "2026-03-21",
+                "startTime": "09:00",
+                "endTime": "10:00",
+                "recurringPattern": "weekly_saturday",
+                "isRecurring": true,
+                "totalOccurrences": 4,
+                "recurrenceUntilDate": "2026-04-11"
+              },
+              "doc": {
+                "path": "venues/0F6W6IBgJqlKQ8AmaTGC/events/UyWNHU2A4KPSxSyX7Eeh",
+                "exists": true,
+                "id": "UyWNHU2A4KPSxSyX7Eeh",
+                "name": "Tai Chi with Master Tien Li",
+                "eventName": "Tai Chi with Master Tien Li",
+                "description": "SATURDAYS MARCH 21-APRIL 11 9 -10AM FOUR CLASSES $75",
+                "startDate": "2026-03-21",
+                "endDate": "2026-03-21",
+                "startTime": "09:00",
+                "endTime": "10:00",
+                "recurringPattern": "weekly_saturday",
+                "recurrenceUntilDate": "2026-04-11",
+                "totalOccurrences": 4,
+                "isRecurring": true,
+                "recurringDaysOfWeek": [],
+                "recurringWeekdaySequence": [],
+                "recurringWeekInterval": null,
+                "updatedAt": "2026-04-01T21:01:28.988Z",
+                "lastSeenAt": "2026-04-01T20:16:54.000Z",
+                "raw": {
+                  "uniqueId": "122127823569035455_1",
+                  "establishment": "Buenos Island Studio",
+                  "eventType": "workshops_classes",
+                  "eventName": "Tai Chi with Master Tien Li",
+                  "startDate": "2026-03-21",
+                  "startTime": "09:00",
+                  "price": "$75",
+                  "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1772721720194-2p5kbc.webp",
+                  "mediaUrls": [
+                    "https://storage.googleapis.com/gathr-uploaded-images/postimages/1772721720194-2p5kbc.webp"
+                  ],
+                  "facebookUrl": "https://www.facebook.com/people/Buenos-Island-Studio/61581063652574",
+                  "sourceTimestamp": {
+                    "_seconds": 1772706434,
+                    "_nanoseconds": 0
+                  },
+                  "likes": 1,
+                  "shares": 0,
+                  "topReactionsCount": 1,
+                  "venueId": "0F6W6IBgJqlKQ8AmaTGC",
+                  "category": "Workshops & Classes",
+                  "isEvent": "Yes",
+                  "isFoodSpecial": "No",
+                  "name": "Tai Chi with Master Tien Li",
+                  "address": "135 Great George St 2nd Floor, Charlottetown, PE C1A 4K7, Canada",
+                  "ticketPrice": "$75",
+                  "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1772721720194-2p5kbc.webp",
+                  "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1772721720194-2p5kbc.webp",
+                  "cleanedFacebookUrl": "https://www.facebook.com/people/Buenos-Island-Studio/61581063652574",
+                  "latitude": "",
+                  "longitude": "",
+                  "createdAt": {
+                    "_seconds": 1772721760,
+                    "_nanoseconds": 840000000
+                  },
+                  "totalOccurrences": 4,
+                  "timeFlags": {
+                    "start": {
+                      "source": "explicit",
+                      "evidence": "9 -10AM"
+                    },
+                    "end": {
+                      "source": "explicit",
+                      "toClose": false,
+                      "evidence": "9 -10AM"
+                    }
+                  },
+                  "recurringPattern": "weekly_saturday",
+                  "recurrenceUntilDate": "2026-04-11",
+                  "timeResolution": {
+                    "hoursUsed": false
+                  },
+                  "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1774104537366-j846g9.webp",
+                  "isRecurring": true,
+                  "endTime": "10:00",
+                  "lastSeenAt": {
+                    "_seconds": 1775074614,
+                    "_nanoseconds": 0
+                  },
+                  "description": "SATURDAYS MARCH 21-APRIL 11 9 -10AM FOUR CLASSES $75",
+                  "endDate": "2026-03-21",
+                  "updatedAt": {
+                    "_seconds": 1775077288,
+                    "_nanoseconds": 988000000
+                  }
+                }
+              }
+            }
+          ],
+          "forbiddenMatches": []
+        },
+        "docs": [
+          {
+            "path": "venues/0F6W6IBgJqlKQ8AmaTGC/events/UyWNHU2A4KPSxSyX7Eeh",
+            "exists": true,
+            "id": "UyWNHU2A4KPSxSyX7Eeh",
+            "name": "Tai Chi with Master Tien Li",
+            "eventName": "Tai Chi with Master Tien Li",
+            "description": "SATURDAYS MARCH 21-APRIL 11 9 -10AM FOUR CLASSES $75",
+            "startDate": "2026-03-21",
+            "endDate": "2026-03-21",
+            "startTime": "09:00",
+            "endTime": "10:00",
+            "recurringPattern": "weekly_saturday",
+            "recurrenceUntilDate": "2026-04-11",
+            "totalOccurrences": 4,
+            "isRecurring": true,
+            "recurringDaysOfWeek": [],
+            "recurringWeekdaySequence": [],
+            "recurringWeekInterval": null,
+            "updatedAt": "2026-04-01T21:01:28.988Z",
+            "lastSeenAt": "2026-04-01T20:16:54.000Z",
+            "raw": {
+              "uniqueId": "122127823569035455_1",
+              "establishment": "Buenos Island Studio",
+              "eventType": "workshops_classes",
+              "eventName": "Tai Chi with Master Tien Li",
+              "startDate": "2026-03-21",
+              "startTime": "09:00",
+              "price": "$75",
+              "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1772721720194-2p5kbc.webp",
+              "mediaUrls": [
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1772721720194-2p5kbc.webp"
+              ],
+              "facebookUrl": "https://www.facebook.com/people/Buenos-Island-Studio/61581063652574",
+              "sourceTimestamp": {
+                "_seconds": 1772706434,
+                "_nanoseconds": 0
+              },
+              "likes": 1,
+              "shares": 0,
+              "topReactionsCount": 1,
+              "venueId": "0F6W6IBgJqlKQ8AmaTGC",
+              "category": "Workshops & Classes",
+              "isEvent": "Yes",
+              "isFoodSpecial": "No",
+              "name": "Tai Chi with Master Tien Li",
+              "address": "135 Great George St 2nd Floor, Charlottetown, PE C1A 4K7, Canada",
+              "ticketPrice": "$75",
+              "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1772721720194-2p5kbc.webp",
+              "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1772721720194-2p5kbc.webp",
+              "cleanedFacebookUrl": "https://www.facebook.com/people/Buenos-Island-Studio/61581063652574",
+              "latitude": "",
+              "longitude": "",
+              "createdAt": {
+                "_seconds": 1772721760,
+                "_nanoseconds": 840000000
+              },
+              "totalOccurrences": 4,
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "9 -10AM"
+                },
+                "end": {
+                  "source": "explicit",
+                  "toClose": false,
+                  "evidence": "9 -10AM"
+                }
+              },
+              "recurringPattern": "weekly_saturday",
+              "recurrenceUntilDate": "2026-04-11",
+              "timeResolution": {
+                "hoursUsed": false
+              },
+              "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1774104537366-j846g9.webp",
+              "isRecurring": true,
+              "endTime": "10:00",
+              "lastSeenAt": {
+                "_seconds": 1775074614,
+                "_nanoseconds": 0
+              },
+              "description": "SATURDAYS MARCH 21-APRIL 11 9 -10AM FOUR CLASSES $75",
+              "endDate": "2026-03-21",
+              "updatedAt": {
+                "_seconds": 1775077288,
+                "_nanoseconds": 988000000
+              }
+            }
+          }
+        ]
+      },
+      "success": true
+    },
+    {
+      "caseId": "art_buds_classes",
+      "description": "Art Buds class row should keep two weekly series and no stale flat youth duplicate.",
+      "processUrl": "https://processdataset-6ju7yi5g2a-pd.a.run.app",
+      "request": {
+        "fileId": "1oJUytO-MCCrrGO9zIsZihPv4R7V_JGRE",
+        "rowIndex": 198,
+        "parserMode": "full5stage",
+        "dryRun": false
+      },
+      "response": {
+        "ok": true,
+        "status": 200,
+        "body": {
+          "success": true,
+          "message": "Selected rows processed",
+          "stats": {
+            "processedCount": 1,
+            "skippedCount": 0,
+            "invalidCount": 0,
+            "duplicateCount": 0,
+            "errorCount": 0,
+            "newEventsCreated": 3,
+            "existingEventsUpdated": 0,
+            "newStandardEventsCreated": 1,
+            "existingStandardEventsUpdated": 0,
+            "newFoodSpecialsCreated": 2,
+            "existingFoodSpecialsUpdated": 0
+          },
+          "nextBatchScheduled": false
+        }
+      },
+      "latestSnapshot": {
+        "id": "1oJUytO-MCCrrGO9zIsZihPv4R7V_JGRE_198_1775105682733",
+        "createdAt": "2026-04-02T04:54:42.742Z",
+        "createdAtMs": 1775105682742,
+        "eventCount": 3,
+        "parserMode": "full5stage",
+        "error": ""
+      },
+      "before": {
+        "evaluation": {
+          "success": true,
+          "failures": [],
+          "expectedMatches": [
+            {
+              "matcher": {
+                "path": "venues/slug_artbudspei/events/sg6ORPFf2oI2TjS47iPo",
+                "exactName": "Kids Art & Crafts Club (Ages 5–12yo)",
+                "startDate": "2026-04-01",
+                "endDate": "2026-04-01",
+                "startTime": "18:00",
+                "endTime": "19:00",
+                "recurringPattern": "weekly_wednesday",
+                "isRecurring": true,
+                "totalOccurrences": 6,
+                "recurrenceUntilDate": "2026-05-06"
+              },
+              "doc": {
+                "path": "venues/slug_artbudspei/events/sg6ORPFf2oI2TjS47iPo",
+                "exists": true,
+                "id": "sg6ORPFf2oI2TjS47iPo",
+                "name": "Kids Art & Crafts Club (Ages 5–12yo)",
+                "eventName": "Kids Art & Crafts Club (Ages 5–12yo)",
+                "description": "Kids Art & Crafts Club Ages 5–12yo. 6 week program: April 1 – May 6. Wednesdays 6:00–7:00pm.",
+                "startDate": "2026-04-01",
+                "endDate": "2026-04-01",
+                "startTime": "18:00",
+                "endTime": "19:00",
+                "recurringPattern": "weekly_wednesday",
+                "recurrenceUntilDate": "2026-05-06",
+                "totalOccurrences": 6,
+                "isRecurring": true,
+                "recurringDaysOfWeek": [],
+                "recurringWeekdaySequence": [],
+                "recurringWeekInterval": 1,
+                "updatedAt": "2026-04-01T21:26:07.465Z",
+                "lastSeenAt": "2026-04-01T21:26:07.465Z",
+                "raw": {
+                  "uniqueId": "122293964294219467_1",
+                  "establishment": "Art Buds",
+                  "eventType": "workshops_classes",
+                  "eventName": "Kids Art & Crafts Club (Ages 5–12yo)",
+                  "description": "Kids Art & Crafts Club Ages 5–12yo. 6 week program: April 1 – May 6. Wednesdays 6:00–7:00pm.",
+                  "startDate": "2026-04-01",
+                  "startTime": "18:00",
+                  "endTime": "19:00",
+                  "price": "$130 +HST",
+                  "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1772547985815-bzde0z.webp",
+                  "facebookUrl": "https://www.facebook.com/artbudspei/",
+                  "likes": 3,
+                  "shares": 3,
+                  "topReactionsCount": 2,
+                  "venueId": "slug_artbudspei",
+                  "category": "Workshops & Classes",
+                  "isEvent": "Yes",
+                  "isFoodSpecial": "No",
+                  "name": "Kids Art & Crafts Club (Ages 5–12yo)",
+                  "address": "329 Water Street, Summerside, PE, Canada",
+                  "ticketPrice": "$130 +HST",
+                  "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1772547985815-bzde0z.webp",
+                  "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1772547985815-bzde0z.webp",
+                  "cleanedFacebookUrl": "https://www.facebook.com/artbudspei/",
+                  "latitude": "",
+                  "longitude": "",
+                  "timeResolution": {
+                    "hoursUsed": false
+                  },
+                  "createdAt": {
+                    "_seconds": 1772548018,
+                    "_nanoseconds": 781000000
+                  },
+                  "sourceTimestamp": {
+                    "_seconds": 1773365011,
+                    "_nanoseconds": 0
+                  },
+                  "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1773239580570-19add7.webp",
+                  "mediaUrls": [
+                    "https://storage.googleapis.com/gathr-uploaded-images/postimages/1772547985815-bzde0z.webp",
+                    "https://storage.googleapis.com/gathr-uploaded-images/postimages/1772547986067-11auc0.webp",
+                    "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773410757952-lvcy6m.webp",
+                    "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773410758482-w4emxq.webp",
+                    "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773497045749-62vm0w.webp",
+                    "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773497046150-srphw7.webp"
+                  ],
+                  "recurringWeekdaySequence": [],
+                  "recurringWeekInterval": 1,
+                  "recurringDaysOfWeek": [],
+                  "totalOccurrences": 6,
+                  "recurringPattern": "weekly_wednesday",
+                  "recurrenceUntilDate": "2026-05-06",
+                  "isRecurring": true,
+                  "lastSeenAt": {
+                    "_seconds": 1775078767,
+                    "_nanoseconds": 465000000
+                  },
+                  "timeFlags": {
+                    "start": {
+                      "source": "explicit",
+                      "evidence": "6:00-7:00pm"
+                    },
+                    "end": {
+                      "source": "explicit",
+                      "toClose": false,
+                      "evidence": "6:00-7:00pm"
+                    }
+                  },
+                  "endDate": "2026-04-01",
+                  "updatedAt": {
+                    "_seconds": 1775078767,
+                    "_nanoseconds": 465000000
+                  }
+                }
+              }
+            },
+            {
+              "matcher": {
+                "path": "venues/slug_artbudspei/events/JtKB9In3JhDcKc9g257t",
+                "exactName": "Youth Illustration (6 week program)",
+                "startDate": "2026-04-02",
+                "endDate": "2026-04-02",
+                "startTime": "18:00",
+                "endTime": "19:00",
+                "recurringPattern": "weekly_thursday",
+                "isRecurring": true,
+                "totalOccurrences": 6,
+                "recurrenceUntilDate": "2026-05-07"
+              },
+              "doc": {
+                "path": "venues/slug_artbudspei/events/JtKB9In3JhDcKc9g257t",
+                "exists": true,
+                "id": "JtKB9In3JhDcKc9g257t",
+                "name": "Youth Illustration (6 week program)",
+                "eventName": "Youth Illustration (6 week program)",
+                "description": "Youth Illustration. Ages 10–16yo. 6 week program: April 2 – May 7. Thursdays 6:00–7:00pm.",
+                "startDate": "2026-04-02",
+                "endDate": "2026-04-02",
+                "startTime": "18:00",
+                "endTime": "19:00",
+                "recurringPattern": "weekly_thursday",
+                "recurrenceUntilDate": "2026-05-07",
+                "totalOccurrences": 6,
+                "isRecurring": true,
+                "recurringDaysOfWeek": [],
+                "recurringWeekdaySequence": [],
+                "recurringWeekInterval": 1,
+                "updatedAt": "2026-04-01T21:26:07.575Z",
+                "lastSeenAt": "2026-04-01T21:26:07.575Z",
+                "raw": {
+                  "uniqueId": "122295901010219467_2",
+                  "establishment": "Art Buds",
+                  "eventType": "workshops_classes",
+                  "eventName": "Youth Illustration (6 week program)",
+                  "description": "Youth Illustration. Ages 10–16yo. 6 week program: April 2 – May 7. Thursdays 6:00–7:00pm.",
+                  "startDate": "2026-04-02",
+                  "startTime": "18:00",
+                  "endTime": "19:00",
+                  "price": "$130 +HST",
+                  "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773410757952-lvcy6m.webp",
+                  "facebookUrl": "https://www.facebook.com/artbudspei/",
+                  "sourceTimestamp": {
+                    "_seconds": 1773365011,
+                    "_nanoseconds": 0
+                  },
+                  "venueId": "slug_artbudspei",
+                  "category": "Workshops & Classes",
+                  "isEvent": "Yes",
+                  "isFoodSpecial": "No",
+                  "name": "Youth Illustration (6 week program)",
+                  "address": "329 Water Street, Summerside, PE, Canada",
+                  "ticketPrice": "$130 +HST",
+                  "isRecurring": "Yes",
+                  "totalOccurrences": 6,
+                  "recurrenceUntilDate": "2026-05-07",
+                  "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1773239580570-19add7.webp",
+                  "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773410757952-lvcy6m.webp",
+                  "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773410757952-lvcy6m.webp",
+                  "cleanedFacebookUrl": "https://www.facebook.com/artbudspei/",
+                  "latitude": "",
+                  "longitude": "",
+                  "timeResolution": {
+                    "hoursUsed": false
+                  },
+                  "createdAt": {
+                    "_seconds": 1773410818,
+                    "_nanoseconds": 167000000
+                  },
+                  "shares": 3,
+                  "topReactionsCount": 2,
+                  "recurringWeekdaySequence": [],
+                  "recurringWeekInterval": 1,
+                  "likes": 3,
+                  "ageRestriction": "Ages 10-16",
+                  "mediaUrls": [
+                    "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773410757952-lvcy6m.webp",
+                    "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773410758482-w4emxq.webp",
+                    "https://scontent-lga3-2.xx.fbcdn.net/v/t39.30808-6/645621704_122293963886219467_9209059307164584624_n.jpg?stp=dst-jpg_s590x590_tt6&_nc_cat=107&ccb=1-7&_nc_sid=13d280&_nc_ohc=lsGTaMj7LZIQ7kNvwE6gtON&_nc_oc=AdmHv8pprfygnIA4PjEq8mlaAxMAxcwZlUghAtK-gGsKTu0tcUT9OGEJ6yeK3qmdngQ&_nc_zt=23&_nc_ht=scontent-lga3-2.xx&_nc_gid=SLx2OmtMXsv9P0VqTxBNbw&_nc_ss=8&oh=00_AfzcVHSuUXOHyNuJ3Xc9Iy5-S9jHWXEjmI8nHib2hckRGA&oe=69ACCF10",
+                    "https://scontent-lga3-1.xx.fbcdn.net/v/t39.30808-6/645338436_122293963892219467_4891303114416989836_n.jpg?stp=dst-jpg_s590x590_tt6&_nc_cat=108&ccb=1-7&_nc_sid=13d280&_nc_ohc=5RV92qB-oGcQ7kNvwEHhpAj&_nc_oc=Adk7wR9YSagHfF5ZiySsYLSYMX_jImi8k4m0-VroazFK7JBgif83vrni2W8oX9D_pCk&_nc_zt=23&_nc_ht=scontent-lga3-1.xx&_nc_gid=SLx2OmtMXsv9P0VqTxBNbw&_nc_ss=8&oh=00_Afz__iYwL7IoTx3tu0sUmNpTsLSFcp64UWF1Ep6eI5i1jg&oe=69ACAFD7"
+                  ],
+                  "recurringPattern": "weekly_thursday",
+                  "recurringDaysOfWeek": [],
+                  "lastSeenAt": {
+                    "_seconds": 1775078767,
+                    "_nanoseconds": 575000000
+                  },
+                  "timeFlags": {
+                    "start": {
+                      "source": "explicit",
+                      "evidence": "6:00-7:00pm"
+                    },
+                    "end": {
+                      "source": "explicit",
+                      "toClose": false,
+                      "evidence": "6:00-7:00pm"
+                    }
+                  },
+                  "endDate": "2026-04-02",
+                  "updatedAt": {
+                    "_seconds": 1775078767,
+                    "_nanoseconds": 575000000
+                  }
+                }
+              }
+            }
+          ],
+          "forbiddenMatches": []
+        },
+        "docs": [
+          {
+            "path": "venues/slug_artbudspei/events/iaZ3QwPj7sUvKjFJ2qpA",
+            "exists": false,
+            "id": "iaZ3QwPj7sUvKjFJ2qpA",
+            "name": "",
+            "eventName": "",
+            "description": "",
+            "startDate": "",
+            "endDate": "",
+            "startTime": "",
+            "endTime": "",
+            "recurringPattern": "",
+            "recurrenceUntilDate": "",
+            "totalOccurrences": null,
+            "isRecurring": false,
+            "recurringDaysOfWeek": [],
+            "recurringWeekdaySequence": [],
+            "recurringWeekInterval": null,
+            "updatedAt": "",
+            "lastSeenAt": "",
+            "raw": null
+          },
+          {
+            "path": "venues/slug_artbudspei/events/JtKB9In3JhDcKc9g257t",
+            "exists": true,
+            "id": "JtKB9In3JhDcKc9g257t",
+            "name": "Youth Illustration (6 week program)",
+            "eventName": "Youth Illustration (6 week program)",
+            "description": "Youth Illustration. Ages 10–16yo. 6 week program: April 2 – May 7. Thursdays 6:00–7:00pm.",
+            "startDate": "2026-04-02",
+            "endDate": "2026-04-02",
+            "startTime": "18:00",
+            "endTime": "19:00",
+            "recurringPattern": "weekly_thursday",
+            "recurrenceUntilDate": "2026-05-07",
+            "totalOccurrences": 6,
+            "isRecurring": true,
+            "recurringDaysOfWeek": [],
+            "recurringWeekdaySequence": [],
+            "recurringWeekInterval": 1,
+            "updatedAt": "2026-04-01T21:26:07.575Z",
+            "lastSeenAt": "2026-04-01T21:26:07.575Z",
+            "raw": {
+              "uniqueId": "122295901010219467_2",
+              "establishment": "Art Buds",
+              "eventType": "workshops_classes",
+              "eventName": "Youth Illustration (6 week program)",
+              "description": "Youth Illustration. Ages 10–16yo. 6 week program: April 2 – May 7. Thursdays 6:00–7:00pm.",
+              "startDate": "2026-04-02",
+              "startTime": "18:00",
+              "endTime": "19:00",
+              "price": "$130 +HST",
+              "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773410757952-lvcy6m.webp",
+              "facebookUrl": "https://www.facebook.com/artbudspei/",
+              "sourceTimestamp": {
+                "_seconds": 1773365011,
+                "_nanoseconds": 0
+              },
+              "venueId": "slug_artbudspei",
+              "category": "Workshops & Classes",
+              "isEvent": "Yes",
+              "isFoodSpecial": "No",
+              "name": "Youth Illustration (6 week program)",
+              "address": "329 Water Street, Summerside, PE, Canada",
+              "ticketPrice": "$130 +HST",
+              "isRecurring": "Yes",
+              "totalOccurrences": 6,
+              "recurrenceUntilDate": "2026-05-07",
+              "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1773239580570-19add7.webp",
+              "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773410757952-lvcy6m.webp",
+              "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773410757952-lvcy6m.webp",
+              "cleanedFacebookUrl": "https://www.facebook.com/artbudspei/",
+              "latitude": "",
+              "longitude": "",
+              "timeResolution": {
+                "hoursUsed": false
+              },
+              "createdAt": {
+                "_seconds": 1773410818,
+                "_nanoseconds": 167000000
+              },
+              "shares": 3,
+              "topReactionsCount": 2,
+              "recurringWeekdaySequence": [],
+              "recurringWeekInterval": 1,
+              "likes": 3,
+              "ageRestriction": "Ages 10-16",
+              "mediaUrls": [
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773410757952-lvcy6m.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773410758482-w4emxq.webp",
+                "https://scontent-lga3-2.xx.fbcdn.net/v/t39.30808-6/645621704_122293963886219467_9209059307164584624_n.jpg?stp=dst-jpg_s590x590_tt6&_nc_cat=107&ccb=1-7&_nc_sid=13d280&_nc_ohc=lsGTaMj7LZIQ7kNvwE6gtON&_nc_oc=AdmHv8pprfygnIA4PjEq8mlaAxMAxcwZlUghAtK-gGsKTu0tcUT9OGEJ6yeK3qmdngQ&_nc_zt=23&_nc_ht=scontent-lga3-2.xx&_nc_gid=SLx2OmtMXsv9P0VqTxBNbw&_nc_ss=8&oh=00_AfzcVHSuUXOHyNuJ3Xc9Iy5-S9jHWXEjmI8nHib2hckRGA&oe=69ACCF10",
+                "https://scontent-lga3-1.xx.fbcdn.net/v/t39.30808-6/645338436_122293963892219467_4891303114416989836_n.jpg?stp=dst-jpg_s590x590_tt6&_nc_cat=108&ccb=1-7&_nc_sid=13d280&_nc_ohc=5RV92qB-oGcQ7kNvwEHhpAj&_nc_oc=Adk7wR9YSagHfF5ZiySsYLSYMX_jImi8k4m0-VroazFK7JBgif83vrni2W8oX9D_pCk&_nc_zt=23&_nc_ht=scontent-lga3-1.xx&_nc_gid=SLx2OmtMXsv9P0VqTxBNbw&_nc_ss=8&oh=00_Afz__iYwL7IoTx3tu0sUmNpTsLSFcp64UWF1Ep6eI5i1jg&oe=69ACAFD7"
+              ],
+              "recurringPattern": "weekly_thursday",
+              "recurringDaysOfWeek": [],
+              "lastSeenAt": {
+                "_seconds": 1775078767,
+                "_nanoseconds": 575000000
+              },
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "6:00-7:00pm"
+                },
+                "end": {
+                  "source": "explicit",
+                  "toClose": false,
+                  "evidence": "6:00-7:00pm"
+                }
+              },
+              "endDate": "2026-04-02",
+              "updatedAt": {
+                "_seconds": 1775078767,
+                "_nanoseconds": 575000000
+              }
+            }
+          },
+          {
+            "path": "venues/slug_artbudspei/events/sg6ORPFf2oI2TjS47iPo",
+            "exists": true,
+            "id": "sg6ORPFf2oI2TjS47iPo",
+            "name": "Kids Art & Crafts Club (Ages 5–12yo)",
+            "eventName": "Kids Art & Crafts Club (Ages 5–12yo)",
+            "description": "Kids Art & Crafts Club Ages 5–12yo. 6 week program: April 1 – May 6. Wednesdays 6:00–7:00pm.",
+            "startDate": "2026-04-01",
+            "endDate": "2026-04-01",
+            "startTime": "18:00",
+            "endTime": "19:00",
+            "recurringPattern": "weekly_wednesday",
+            "recurrenceUntilDate": "2026-05-06",
+            "totalOccurrences": 6,
+            "isRecurring": true,
+            "recurringDaysOfWeek": [],
+            "recurringWeekdaySequence": [],
+            "recurringWeekInterval": 1,
+            "updatedAt": "2026-04-01T21:26:07.465Z",
+            "lastSeenAt": "2026-04-01T21:26:07.465Z",
+            "raw": {
+              "uniqueId": "122293964294219467_1",
+              "establishment": "Art Buds",
+              "eventType": "workshops_classes",
+              "eventName": "Kids Art & Crafts Club (Ages 5–12yo)",
+              "description": "Kids Art & Crafts Club Ages 5–12yo. 6 week program: April 1 – May 6. Wednesdays 6:00–7:00pm.",
+              "startDate": "2026-04-01",
+              "startTime": "18:00",
+              "endTime": "19:00",
+              "price": "$130 +HST",
+              "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1772547985815-bzde0z.webp",
+              "facebookUrl": "https://www.facebook.com/artbudspei/",
+              "likes": 3,
+              "shares": 3,
+              "topReactionsCount": 2,
+              "venueId": "slug_artbudspei",
+              "category": "Workshops & Classes",
+              "isEvent": "Yes",
+              "isFoodSpecial": "No",
+              "name": "Kids Art & Crafts Club (Ages 5–12yo)",
+              "address": "329 Water Street, Summerside, PE, Canada",
+              "ticketPrice": "$130 +HST",
+              "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1772547985815-bzde0z.webp",
+              "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1772547985815-bzde0z.webp",
+              "cleanedFacebookUrl": "https://www.facebook.com/artbudspei/",
+              "latitude": "",
+              "longitude": "",
+              "timeResolution": {
+                "hoursUsed": false
+              },
+              "createdAt": {
+                "_seconds": 1772548018,
+                "_nanoseconds": 781000000
+              },
+              "sourceTimestamp": {
+                "_seconds": 1773365011,
+                "_nanoseconds": 0
+              },
+              "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1773239580570-19add7.webp",
+              "mediaUrls": [
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1772547985815-bzde0z.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1772547986067-11auc0.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773410757952-lvcy6m.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773410758482-w4emxq.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773497045749-62vm0w.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773497046150-srphw7.webp"
+              ],
+              "recurringWeekdaySequence": [],
+              "recurringWeekInterval": 1,
+              "recurringDaysOfWeek": [],
+              "totalOccurrences": 6,
+              "recurringPattern": "weekly_wednesday",
+              "recurrenceUntilDate": "2026-05-06",
+              "isRecurring": true,
+              "lastSeenAt": {
+                "_seconds": 1775078767,
+                "_nanoseconds": 465000000
+              },
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "6:00-7:00pm"
+                },
+                "end": {
+                  "source": "explicit",
+                  "toClose": false,
+                  "evidence": "6:00-7:00pm"
+                }
+              },
+              "endDate": "2026-04-01",
+              "updatedAt": {
+                "_seconds": 1775078767,
+                "_nanoseconds": 465000000
+              }
+            }
+          }
+        ]
+      },
+      "after": {
+        "evaluation": {
+          "success": true,
+          "failures": [],
+          "expectedMatches": [
+            {
+              "matcher": {
+                "path": "venues/slug_artbudspei/events/sg6ORPFf2oI2TjS47iPo",
+                "exactName": "Kids Art & Crafts Club (Ages 5–12yo)",
+                "startDate": "2026-04-01",
+                "endDate": "2026-04-01",
+                "startTime": "18:00",
+                "endTime": "19:00",
+                "recurringPattern": "weekly_wednesday",
+                "isRecurring": true,
+                "totalOccurrences": 6,
+                "recurrenceUntilDate": "2026-05-06"
+              },
+              "doc": {
+                "path": "venues/slug_artbudspei/events/sg6ORPFf2oI2TjS47iPo",
+                "exists": true,
+                "id": "sg6ORPFf2oI2TjS47iPo",
+                "name": "Kids Art & Crafts Club (Ages 5–12yo)",
+                "eventName": "Kids Art & Crafts Club (Ages 5–12yo)",
+                "description": "Kids Art & Crafts Club Ages 5–12yo. 6 week program: April 1 – May 6. Wednesdays 6:00–7:00pm.",
+                "startDate": "2026-04-01",
+                "endDate": "2026-04-01",
+                "startTime": "18:00",
+                "endTime": "19:00",
+                "recurringPattern": "weekly_wednesday",
+                "recurrenceUntilDate": "2026-05-06",
+                "totalOccurrences": 6,
+                "isRecurring": true,
+                "recurringDaysOfWeek": [],
+                "recurringWeekdaySequence": [],
+                "recurringWeekInterval": 1,
+                "updatedAt": "2026-04-01T21:26:07.465Z",
+                "lastSeenAt": "2026-04-01T21:26:07.465Z",
+                "raw": {
+                  "uniqueId": "122293964294219467_1",
+                  "establishment": "Art Buds",
+                  "eventType": "workshops_classes",
+                  "eventName": "Kids Art & Crafts Club (Ages 5–12yo)",
+                  "description": "Kids Art & Crafts Club Ages 5–12yo. 6 week program: April 1 – May 6. Wednesdays 6:00–7:00pm.",
+                  "startDate": "2026-04-01",
+                  "startTime": "18:00",
+                  "endTime": "19:00",
+                  "price": "$130 +HST",
+                  "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1772547985815-bzde0z.webp",
+                  "facebookUrl": "https://www.facebook.com/artbudspei/",
+                  "likes": 3,
+                  "shares": 3,
+                  "topReactionsCount": 2,
+                  "venueId": "slug_artbudspei",
+                  "category": "Workshops & Classes",
+                  "isEvent": "Yes",
+                  "isFoodSpecial": "No",
+                  "name": "Kids Art & Crafts Club (Ages 5–12yo)",
+                  "address": "329 Water Street, Summerside, PE, Canada",
+                  "ticketPrice": "$130 +HST",
+                  "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1772547985815-bzde0z.webp",
+                  "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1772547985815-bzde0z.webp",
+                  "cleanedFacebookUrl": "https://www.facebook.com/artbudspei/",
+                  "latitude": "",
+                  "longitude": "",
+                  "timeResolution": {
+                    "hoursUsed": false
+                  },
+                  "createdAt": {
+                    "_seconds": 1772548018,
+                    "_nanoseconds": 781000000
+                  },
+                  "sourceTimestamp": {
+                    "_seconds": 1773365011,
+                    "_nanoseconds": 0
+                  },
+                  "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1773239580570-19add7.webp",
+                  "mediaUrls": [
+                    "https://storage.googleapis.com/gathr-uploaded-images/postimages/1772547985815-bzde0z.webp",
+                    "https://storage.googleapis.com/gathr-uploaded-images/postimages/1772547986067-11auc0.webp",
+                    "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773410757952-lvcy6m.webp",
+                    "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773410758482-w4emxq.webp",
+                    "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773497045749-62vm0w.webp",
+                    "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773497046150-srphw7.webp"
+                  ],
+                  "recurringWeekdaySequence": [],
+                  "recurringWeekInterval": 1,
+                  "recurringDaysOfWeek": [],
+                  "totalOccurrences": 6,
+                  "recurringPattern": "weekly_wednesday",
+                  "recurrenceUntilDate": "2026-05-06",
+                  "isRecurring": true,
+                  "lastSeenAt": {
+                    "_seconds": 1775078767,
+                    "_nanoseconds": 465000000
+                  },
+                  "timeFlags": {
+                    "start": {
+                      "source": "explicit",
+                      "evidence": "6:00-7:00pm"
+                    },
+                    "end": {
+                      "source": "explicit",
+                      "toClose": false,
+                      "evidence": "6:00-7:00pm"
+                    }
+                  },
+                  "endDate": "2026-04-01",
+                  "updatedAt": {
+                    "_seconds": 1775078767,
+                    "_nanoseconds": 465000000
+                  }
+                }
+              }
+            },
+            {
+              "matcher": {
+                "path": "venues/slug_artbudspei/events/JtKB9In3JhDcKc9g257t",
+                "exactName": "Youth Illustration (6 week program)",
+                "startDate": "2026-04-02",
+                "endDate": "2026-04-02",
+                "startTime": "18:00",
+                "endTime": "19:00",
+                "recurringPattern": "weekly_thursday",
+                "isRecurring": true,
+                "totalOccurrences": 6,
+                "recurrenceUntilDate": "2026-05-07"
+              },
+              "doc": {
+                "path": "venues/slug_artbudspei/events/JtKB9In3JhDcKc9g257t",
+                "exists": true,
+                "id": "JtKB9In3JhDcKc9g257t",
+                "name": "Youth Illustration (6 week program)",
+                "eventName": "Youth Illustration (6 week program)",
+                "description": "Youth Illustration. Ages 10–16yo. 6 week program: April 2 – May 7. Thursdays 6:00–7:00pm.",
+                "startDate": "2026-04-02",
+                "endDate": "2026-04-02",
+                "startTime": "18:00",
+                "endTime": "19:00",
+                "recurringPattern": "weekly_thursday",
+                "recurrenceUntilDate": "2026-05-07",
+                "totalOccurrences": 6,
+                "isRecurring": true,
+                "recurringDaysOfWeek": [],
+                "recurringWeekdaySequence": [],
+                "recurringWeekInterval": 1,
+                "updatedAt": "2026-04-01T21:26:07.575Z",
+                "lastSeenAt": "2026-04-01T21:26:07.575Z",
+                "raw": {
+                  "uniqueId": "122295901010219467_2",
+                  "establishment": "Art Buds",
+                  "eventType": "workshops_classes",
+                  "eventName": "Youth Illustration (6 week program)",
+                  "description": "Youth Illustration. Ages 10–16yo. 6 week program: April 2 – May 7. Thursdays 6:00–7:00pm.",
+                  "startDate": "2026-04-02",
+                  "startTime": "18:00",
+                  "endTime": "19:00",
+                  "price": "$130 +HST",
+                  "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773410757952-lvcy6m.webp",
+                  "facebookUrl": "https://www.facebook.com/artbudspei/",
+                  "sourceTimestamp": {
+                    "_seconds": 1773365011,
+                    "_nanoseconds": 0
+                  },
+                  "venueId": "slug_artbudspei",
+                  "category": "Workshops & Classes",
+                  "isEvent": "Yes",
+                  "isFoodSpecial": "No",
+                  "name": "Youth Illustration (6 week program)",
+                  "address": "329 Water Street, Summerside, PE, Canada",
+                  "ticketPrice": "$130 +HST",
+                  "isRecurring": "Yes",
+                  "totalOccurrences": 6,
+                  "recurrenceUntilDate": "2026-05-07",
+                  "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1773239580570-19add7.webp",
+                  "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773410757952-lvcy6m.webp",
+                  "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773410757952-lvcy6m.webp",
+                  "cleanedFacebookUrl": "https://www.facebook.com/artbudspei/",
+                  "latitude": "",
+                  "longitude": "",
+                  "timeResolution": {
+                    "hoursUsed": false
+                  },
+                  "createdAt": {
+                    "_seconds": 1773410818,
+                    "_nanoseconds": 167000000
+                  },
+                  "shares": 3,
+                  "topReactionsCount": 2,
+                  "recurringWeekdaySequence": [],
+                  "recurringWeekInterval": 1,
+                  "likes": 3,
+                  "ageRestriction": "Ages 10-16",
+                  "mediaUrls": [
+                    "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773410757952-lvcy6m.webp",
+                    "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773410758482-w4emxq.webp",
+                    "https://scontent-lga3-2.xx.fbcdn.net/v/t39.30808-6/645621704_122293963886219467_9209059307164584624_n.jpg?stp=dst-jpg_s590x590_tt6&_nc_cat=107&ccb=1-7&_nc_sid=13d280&_nc_ohc=lsGTaMj7LZIQ7kNvwE6gtON&_nc_oc=AdmHv8pprfygnIA4PjEq8mlaAxMAxcwZlUghAtK-gGsKTu0tcUT9OGEJ6yeK3qmdngQ&_nc_zt=23&_nc_ht=scontent-lga3-2.xx&_nc_gid=SLx2OmtMXsv9P0VqTxBNbw&_nc_ss=8&oh=00_AfzcVHSuUXOHyNuJ3Xc9Iy5-S9jHWXEjmI8nHib2hckRGA&oe=69ACCF10",
+                    "https://scontent-lga3-1.xx.fbcdn.net/v/t39.30808-6/645338436_122293963892219467_4891303114416989836_n.jpg?stp=dst-jpg_s590x590_tt6&_nc_cat=108&ccb=1-7&_nc_sid=13d280&_nc_ohc=5RV92qB-oGcQ7kNvwEHhpAj&_nc_oc=Adk7wR9YSagHfF5ZiySsYLSYMX_jImi8k4m0-VroazFK7JBgif83vrni2W8oX9D_pCk&_nc_zt=23&_nc_ht=scontent-lga3-1.xx&_nc_gid=SLx2OmtMXsv9P0VqTxBNbw&_nc_ss=8&oh=00_Afz__iYwL7IoTx3tu0sUmNpTsLSFcp64UWF1Ep6eI5i1jg&oe=69ACAFD7"
+                  ],
+                  "recurringPattern": "weekly_thursday",
+                  "recurringDaysOfWeek": [],
+                  "lastSeenAt": {
+                    "_seconds": 1775078767,
+                    "_nanoseconds": 575000000
+                  },
+                  "timeFlags": {
+                    "start": {
+                      "source": "explicit",
+                      "evidence": "6:00-7:00pm"
+                    },
+                    "end": {
+                      "source": "explicit",
+                      "toClose": false,
+                      "evidence": "6:00-7:00pm"
+                    }
+                  },
+                  "endDate": "2026-04-02",
+                  "updatedAt": {
+                    "_seconds": 1775078767,
+                    "_nanoseconds": 575000000
+                  }
+                }
+              }
+            }
+          ],
+          "forbiddenMatches": []
+        },
+        "docs": [
+          {
+            "path": "venues/slug_artbudspei/events/iaZ3QwPj7sUvKjFJ2qpA",
+            "exists": false,
+            "id": "iaZ3QwPj7sUvKjFJ2qpA",
+            "name": "",
+            "eventName": "",
+            "description": "",
+            "startDate": "",
+            "endDate": "",
+            "startTime": "",
+            "endTime": "",
+            "recurringPattern": "",
+            "recurrenceUntilDate": "",
+            "totalOccurrences": null,
+            "isRecurring": false,
+            "recurringDaysOfWeek": [],
+            "recurringWeekdaySequence": [],
+            "recurringWeekInterval": null,
+            "updatedAt": "",
+            "lastSeenAt": "",
+            "raw": null
+          },
+          {
+            "path": "venues/slug_artbudspei/events/JtKB9In3JhDcKc9g257t",
+            "exists": true,
+            "id": "JtKB9In3JhDcKc9g257t",
+            "name": "Youth Illustration (6 week program)",
+            "eventName": "Youth Illustration (6 week program)",
+            "description": "Youth Illustration. Ages 10–16yo. 6 week program: April 2 – May 7. Thursdays 6:00–7:00pm.",
+            "startDate": "2026-04-02",
+            "endDate": "2026-04-02",
+            "startTime": "18:00",
+            "endTime": "19:00",
+            "recurringPattern": "weekly_thursday",
+            "recurrenceUntilDate": "2026-05-07",
+            "totalOccurrences": 6,
+            "isRecurring": true,
+            "recurringDaysOfWeek": [],
+            "recurringWeekdaySequence": [],
+            "recurringWeekInterval": 1,
+            "updatedAt": "2026-04-01T21:26:07.575Z",
+            "lastSeenAt": "2026-04-01T21:26:07.575Z",
+            "raw": {
+              "uniqueId": "122295901010219467_2",
+              "establishment": "Art Buds",
+              "eventType": "workshops_classes",
+              "eventName": "Youth Illustration (6 week program)",
+              "description": "Youth Illustration. Ages 10–16yo. 6 week program: April 2 – May 7. Thursdays 6:00–7:00pm.",
+              "startDate": "2026-04-02",
+              "startTime": "18:00",
+              "endTime": "19:00",
+              "price": "$130 +HST",
+              "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773410757952-lvcy6m.webp",
+              "facebookUrl": "https://www.facebook.com/artbudspei/",
+              "sourceTimestamp": {
+                "_seconds": 1773365011,
+                "_nanoseconds": 0
+              },
+              "venueId": "slug_artbudspei",
+              "category": "Workshops & Classes",
+              "isEvent": "Yes",
+              "isFoodSpecial": "No",
+              "name": "Youth Illustration (6 week program)",
+              "address": "329 Water Street, Summerside, PE, Canada",
+              "ticketPrice": "$130 +HST",
+              "isRecurring": "Yes",
+              "totalOccurrences": 6,
+              "recurrenceUntilDate": "2026-05-07",
+              "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1773239580570-19add7.webp",
+              "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773410757952-lvcy6m.webp",
+              "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773410757952-lvcy6m.webp",
+              "cleanedFacebookUrl": "https://www.facebook.com/artbudspei/",
+              "latitude": "",
+              "longitude": "",
+              "timeResolution": {
+                "hoursUsed": false
+              },
+              "createdAt": {
+                "_seconds": 1773410818,
+                "_nanoseconds": 167000000
+              },
+              "shares": 3,
+              "topReactionsCount": 2,
+              "recurringWeekdaySequence": [],
+              "recurringWeekInterval": 1,
+              "likes": 3,
+              "ageRestriction": "Ages 10-16",
+              "mediaUrls": [
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773410757952-lvcy6m.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773410758482-w4emxq.webp",
+                "https://scontent-lga3-2.xx.fbcdn.net/v/t39.30808-6/645621704_122293963886219467_9209059307164584624_n.jpg?stp=dst-jpg_s590x590_tt6&_nc_cat=107&ccb=1-7&_nc_sid=13d280&_nc_ohc=lsGTaMj7LZIQ7kNvwE6gtON&_nc_oc=AdmHv8pprfygnIA4PjEq8mlaAxMAxcwZlUghAtK-gGsKTu0tcUT9OGEJ6yeK3qmdngQ&_nc_zt=23&_nc_ht=scontent-lga3-2.xx&_nc_gid=SLx2OmtMXsv9P0VqTxBNbw&_nc_ss=8&oh=00_AfzcVHSuUXOHyNuJ3Xc9Iy5-S9jHWXEjmI8nHib2hckRGA&oe=69ACCF10",
+                "https://scontent-lga3-1.xx.fbcdn.net/v/t39.30808-6/645338436_122293963892219467_4891303114416989836_n.jpg?stp=dst-jpg_s590x590_tt6&_nc_cat=108&ccb=1-7&_nc_sid=13d280&_nc_ohc=5RV92qB-oGcQ7kNvwEHhpAj&_nc_oc=Adk7wR9YSagHfF5ZiySsYLSYMX_jImi8k4m0-VroazFK7JBgif83vrni2W8oX9D_pCk&_nc_zt=23&_nc_ht=scontent-lga3-1.xx&_nc_gid=SLx2OmtMXsv9P0VqTxBNbw&_nc_ss=8&oh=00_Afz__iYwL7IoTx3tu0sUmNpTsLSFcp64UWF1Ep6eI5i1jg&oe=69ACAFD7"
+              ],
+              "recurringPattern": "weekly_thursday",
+              "recurringDaysOfWeek": [],
+              "lastSeenAt": {
+                "_seconds": 1775078767,
+                "_nanoseconds": 575000000
+              },
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "6:00-7:00pm"
+                },
+                "end": {
+                  "source": "explicit",
+                  "toClose": false,
+                  "evidence": "6:00-7:00pm"
+                }
+              },
+              "endDate": "2026-04-02",
+              "updatedAt": {
+                "_seconds": 1775078767,
+                "_nanoseconds": 575000000
+              }
+            }
+          },
+          {
+            "path": "venues/slug_artbudspei/events/sg6ORPFf2oI2TjS47iPo",
+            "exists": true,
+            "id": "sg6ORPFf2oI2TjS47iPo",
+            "name": "Kids Art & Crafts Club (Ages 5–12yo)",
+            "eventName": "Kids Art & Crafts Club (Ages 5–12yo)",
+            "description": "Kids Art & Crafts Club Ages 5–12yo. 6 week program: April 1 – May 6. Wednesdays 6:00–7:00pm.",
+            "startDate": "2026-04-01",
+            "endDate": "2026-04-01",
+            "startTime": "18:00",
+            "endTime": "19:00",
+            "recurringPattern": "weekly_wednesday",
+            "recurrenceUntilDate": "2026-05-06",
+            "totalOccurrences": 6,
+            "isRecurring": true,
+            "recurringDaysOfWeek": [],
+            "recurringWeekdaySequence": [],
+            "recurringWeekInterval": 1,
+            "updatedAt": "2026-04-01T21:26:07.465Z",
+            "lastSeenAt": "2026-04-01T21:26:07.465Z",
+            "raw": {
+              "uniqueId": "122293964294219467_1",
+              "establishment": "Art Buds",
+              "eventType": "workshops_classes",
+              "eventName": "Kids Art & Crafts Club (Ages 5–12yo)",
+              "description": "Kids Art & Crafts Club Ages 5–12yo. 6 week program: April 1 – May 6. Wednesdays 6:00–7:00pm.",
+              "startDate": "2026-04-01",
+              "startTime": "18:00",
+              "endTime": "19:00",
+              "price": "$130 +HST",
+              "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1772547985815-bzde0z.webp",
+              "facebookUrl": "https://www.facebook.com/artbudspei/",
+              "likes": 3,
+              "shares": 3,
+              "topReactionsCount": 2,
+              "venueId": "slug_artbudspei",
+              "category": "Workshops & Classes",
+              "isEvent": "Yes",
+              "isFoodSpecial": "No",
+              "name": "Kids Art & Crafts Club (Ages 5–12yo)",
+              "address": "329 Water Street, Summerside, PE, Canada",
+              "ticketPrice": "$130 +HST",
+              "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1772547985815-bzde0z.webp",
+              "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1772547985815-bzde0z.webp",
+              "cleanedFacebookUrl": "https://www.facebook.com/artbudspei/",
+              "latitude": "",
+              "longitude": "",
+              "timeResolution": {
+                "hoursUsed": false
+              },
+              "createdAt": {
+                "_seconds": 1772548018,
+                "_nanoseconds": 781000000
+              },
+              "sourceTimestamp": {
+                "_seconds": 1773365011,
+                "_nanoseconds": 0
+              },
+              "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1773239580570-19add7.webp",
+              "mediaUrls": [
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1772547985815-bzde0z.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1772547986067-11auc0.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773410757952-lvcy6m.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773410758482-w4emxq.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773497045749-62vm0w.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773497046150-srphw7.webp"
+              ],
+              "recurringWeekdaySequence": [],
+              "recurringWeekInterval": 1,
+              "recurringDaysOfWeek": [],
+              "totalOccurrences": 6,
+              "recurringPattern": "weekly_wednesday",
+              "recurrenceUntilDate": "2026-05-06",
+              "isRecurring": true,
+              "lastSeenAt": {
+                "_seconds": 1775078767,
+                "_nanoseconds": 465000000
+              },
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "6:00-7:00pm"
+                },
+                "end": {
+                  "source": "explicit",
+                  "toClose": false,
+                  "evidence": "6:00-7:00pm"
+                }
+              },
+              "endDate": "2026-04-01",
+              "updatedAt": {
+                "_seconds": 1775078767,
+                "_nanoseconds": 465000000
+              }
+            }
+          }
+        ]
+      },
+      "cleanup": {
+        "enabled": true,
+        "deletedDocs": []
+      },
+      "final": {
+        "evaluation": {
+          "success": true,
+          "failures": [],
+          "expectedMatches": [
+            {
+              "matcher": {
+                "path": "venues/slug_artbudspei/events/sg6ORPFf2oI2TjS47iPo",
+                "exactName": "Kids Art & Crafts Club (Ages 5–12yo)",
+                "startDate": "2026-04-01",
+                "endDate": "2026-04-01",
+                "startTime": "18:00",
+                "endTime": "19:00",
+                "recurringPattern": "weekly_wednesday",
+                "isRecurring": true,
+                "totalOccurrences": 6,
+                "recurrenceUntilDate": "2026-05-06"
+              },
+              "doc": {
+                "path": "venues/slug_artbudspei/events/sg6ORPFf2oI2TjS47iPo",
+                "exists": true,
+                "id": "sg6ORPFf2oI2TjS47iPo",
+                "name": "Kids Art & Crafts Club (Ages 5–12yo)",
+                "eventName": "Kids Art & Crafts Club (Ages 5–12yo)",
+                "description": "Kids Art & Crafts Club Ages 5–12yo. 6 week program: April 1 – May 6. Wednesdays 6:00–7:00pm.",
+                "startDate": "2026-04-01",
+                "endDate": "2026-04-01",
+                "startTime": "18:00",
+                "endTime": "19:00",
+                "recurringPattern": "weekly_wednesday",
+                "recurrenceUntilDate": "2026-05-06",
+                "totalOccurrences": 6,
+                "isRecurring": true,
+                "recurringDaysOfWeek": [],
+                "recurringWeekdaySequence": [],
+                "recurringWeekInterval": 1,
+                "updatedAt": "2026-04-01T21:26:07.465Z",
+                "lastSeenAt": "2026-04-01T21:26:07.465Z",
+                "raw": {
+                  "uniqueId": "122293964294219467_1",
+                  "establishment": "Art Buds",
+                  "eventType": "workshops_classes",
+                  "eventName": "Kids Art & Crafts Club (Ages 5–12yo)",
+                  "description": "Kids Art & Crafts Club Ages 5–12yo. 6 week program: April 1 – May 6. Wednesdays 6:00–7:00pm.",
+                  "startDate": "2026-04-01",
+                  "startTime": "18:00",
+                  "endTime": "19:00",
+                  "price": "$130 +HST",
+                  "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1772547985815-bzde0z.webp",
+                  "facebookUrl": "https://www.facebook.com/artbudspei/",
+                  "likes": 3,
+                  "shares": 3,
+                  "topReactionsCount": 2,
+                  "venueId": "slug_artbudspei",
+                  "category": "Workshops & Classes",
+                  "isEvent": "Yes",
+                  "isFoodSpecial": "No",
+                  "name": "Kids Art & Crafts Club (Ages 5–12yo)",
+                  "address": "329 Water Street, Summerside, PE, Canada",
+                  "ticketPrice": "$130 +HST",
+                  "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1772547985815-bzde0z.webp",
+                  "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1772547985815-bzde0z.webp",
+                  "cleanedFacebookUrl": "https://www.facebook.com/artbudspei/",
+                  "latitude": "",
+                  "longitude": "",
+                  "timeResolution": {
+                    "hoursUsed": false
+                  },
+                  "createdAt": {
+                    "_seconds": 1772548018,
+                    "_nanoseconds": 781000000
+                  },
+                  "sourceTimestamp": {
+                    "_seconds": 1773365011,
+                    "_nanoseconds": 0
+                  },
+                  "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1773239580570-19add7.webp",
+                  "mediaUrls": [
+                    "https://storage.googleapis.com/gathr-uploaded-images/postimages/1772547985815-bzde0z.webp",
+                    "https://storage.googleapis.com/gathr-uploaded-images/postimages/1772547986067-11auc0.webp",
+                    "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773410757952-lvcy6m.webp",
+                    "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773410758482-w4emxq.webp",
+                    "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773497045749-62vm0w.webp",
+                    "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773497046150-srphw7.webp"
+                  ],
+                  "recurringWeekdaySequence": [],
+                  "recurringWeekInterval": 1,
+                  "recurringDaysOfWeek": [],
+                  "totalOccurrences": 6,
+                  "recurringPattern": "weekly_wednesday",
+                  "recurrenceUntilDate": "2026-05-06",
+                  "isRecurring": true,
+                  "lastSeenAt": {
+                    "_seconds": 1775078767,
+                    "_nanoseconds": 465000000
+                  },
+                  "timeFlags": {
+                    "start": {
+                      "source": "explicit",
+                      "evidence": "6:00-7:00pm"
+                    },
+                    "end": {
+                      "source": "explicit",
+                      "toClose": false,
+                      "evidence": "6:00-7:00pm"
+                    }
+                  },
+                  "endDate": "2026-04-01",
+                  "updatedAt": {
+                    "_seconds": 1775078767,
+                    "_nanoseconds": 465000000
+                  }
+                }
+              }
+            },
+            {
+              "matcher": {
+                "path": "venues/slug_artbudspei/events/JtKB9In3JhDcKc9g257t",
+                "exactName": "Youth Illustration (6 week program)",
+                "startDate": "2026-04-02",
+                "endDate": "2026-04-02",
+                "startTime": "18:00",
+                "endTime": "19:00",
+                "recurringPattern": "weekly_thursday",
+                "isRecurring": true,
+                "totalOccurrences": 6,
+                "recurrenceUntilDate": "2026-05-07"
+              },
+              "doc": {
+                "path": "venues/slug_artbudspei/events/JtKB9In3JhDcKc9g257t",
+                "exists": true,
+                "id": "JtKB9In3JhDcKc9g257t",
+                "name": "Youth Illustration (6 week program)",
+                "eventName": "Youth Illustration (6 week program)",
+                "description": "Youth Illustration. Ages 10–16yo. 6 week program: April 2 – May 7. Thursdays 6:00–7:00pm.",
+                "startDate": "2026-04-02",
+                "endDate": "2026-04-02",
+                "startTime": "18:00",
+                "endTime": "19:00",
+                "recurringPattern": "weekly_thursday",
+                "recurrenceUntilDate": "2026-05-07",
+                "totalOccurrences": 6,
+                "isRecurring": true,
+                "recurringDaysOfWeek": [],
+                "recurringWeekdaySequence": [],
+                "recurringWeekInterval": 1,
+                "updatedAt": "2026-04-01T21:26:07.575Z",
+                "lastSeenAt": "2026-04-01T21:26:07.575Z",
+                "raw": {
+                  "uniqueId": "122295901010219467_2",
+                  "establishment": "Art Buds",
+                  "eventType": "workshops_classes",
+                  "eventName": "Youth Illustration (6 week program)",
+                  "description": "Youth Illustration. Ages 10–16yo. 6 week program: April 2 – May 7. Thursdays 6:00–7:00pm.",
+                  "startDate": "2026-04-02",
+                  "startTime": "18:00",
+                  "endTime": "19:00",
+                  "price": "$130 +HST",
+                  "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773410757952-lvcy6m.webp",
+                  "facebookUrl": "https://www.facebook.com/artbudspei/",
+                  "sourceTimestamp": {
+                    "_seconds": 1773365011,
+                    "_nanoseconds": 0
+                  },
+                  "venueId": "slug_artbudspei",
+                  "category": "Workshops & Classes",
+                  "isEvent": "Yes",
+                  "isFoodSpecial": "No",
+                  "name": "Youth Illustration (6 week program)",
+                  "address": "329 Water Street, Summerside, PE, Canada",
+                  "ticketPrice": "$130 +HST",
+                  "isRecurring": "Yes",
+                  "totalOccurrences": 6,
+                  "recurrenceUntilDate": "2026-05-07",
+                  "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1773239580570-19add7.webp",
+                  "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773410757952-lvcy6m.webp",
+                  "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773410757952-lvcy6m.webp",
+                  "cleanedFacebookUrl": "https://www.facebook.com/artbudspei/",
+                  "latitude": "",
+                  "longitude": "",
+                  "timeResolution": {
+                    "hoursUsed": false
+                  },
+                  "createdAt": {
+                    "_seconds": 1773410818,
+                    "_nanoseconds": 167000000
+                  },
+                  "shares": 3,
+                  "topReactionsCount": 2,
+                  "recurringWeekdaySequence": [],
+                  "recurringWeekInterval": 1,
+                  "likes": 3,
+                  "ageRestriction": "Ages 10-16",
+                  "mediaUrls": [
+                    "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773410757952-lvcy6m.webp",
+                    "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773410758482-w4emxq.webp",
+                    "https://scontent-lga3-2.xx.fbcdn.net/v/t39.30808-6/645621704_122293963886219467_9209059307164584624_n.jpg?stp=dst-jpg_s590x590_tt6&_nc_cat=107&ccb=1-7&_nc_sid=13d280&_nc_ohc=lsGTaMj7LZIQ7kNvwE6gtON&_nc_oc=AdmHv8pprfygnIA4PjEq8mlaAxMAxcwZlUghAtK-gGsKTu0tcUT9OGEJ6yeK3qmdngQ&_nc_zt=23&_nc_ht=scontent-lga3-2.xx&_nc_gid=SLx2OmtMXsv9P0VqTxBNbw&_nc_ss=8&oh=00_AfzcVHSuUXOHyNuJ3Xc9Iy5-S9jHWXEjmI8nHib2hckRGA&oe=69ACCF10",
+                    "https://scontent-lga3-1.xx.fbcdn.net/v/t39.30808-6/645338436_122293963892219467_4891303114416989836_n.jpg?stp=dst-jpg_s590x590_tt6&_nc_cat=108&ccb=1-7&_nc_sid=13d280&_nc_ohc=5RV92qB-oGcQ7kNvwEHhpAj&_nc_oc=Adk7wR9YSagHfF5ZiySsYLSYMX_jImi8k4m0-VroazFK7JBgif83vrni2W8oX9D_pCk&_nc_zt=23&_nc_ht=scontent-lga3-1.xx&_nc_gid=SLx2OmtMXsv9P0VqTxBNbw&_nc_ss=8&oh=00_Afz__iYwL7IoTx3tu0sUmNpTsLSFcp64UWF1Ep6eI5i1jg&oe=69ACAFD7"
+                  ],
+                  "recurringPattern": "weekly_thursday",
+                  "recurringDaysOfWeek": [],
+                  "lastSeenAt": {
+                    "_seconds": 1775078767,
+                    "_nanoseconds": 575000000
+                  },
+                  "timeFlags": {
+                    "start": {
+                      "source": "explicit",
+                      "evidence": "6:00-7:00pm"
+                    },
+                    "end": {
+                      "source": "explicit",
+                      "toClose": false,
+                      "evidence": "6:00-7:00pm"
+                    }
+                  },
+                  "endDate": "2026-04-02",
+                  "updatedAt": {
+                    "_seconds": 1775078767,
+                    "_nanoseconds": 575000000
+                  }
+                }
+              }
+            }
+          ],
+          "forbiddenMatches": []
+        },
+        "docs": [
+          {
+            "path": "venues/slug_artbudspei/events/iaZ3QwPj7sUvKjFJ2qpA",
+            "exists": false,
+            "id": "iaZ3QwPj7sUvKjFJ2qpA",
+            "name": "",
+            "eventName": "",
+            "description": "",
+            "startDate": "",
+            "endDate": "",
+            "startTime": "",
+            "endTime": "",
+            "recurringPattern": "",
+            "recurrenceUntilDate": "",
+            "totalOccurrences": null,
+            "isRecurring": false,
+            "recurringDaysOfWeek": [],
+            "recurringWeekdaySequence": [],
+            "recurringWeekInterval": null,
+            "updatedAt": "",
+            "lastSeenAt": "",
+            "raw": null
+          },
+          {
+            "path": "venues/slug_artbudspei/events/JtKB9In3JhDcKc9g257t",
+            "exists": true,
+            "id": "JtKB9In3JhDcKc9g257t",
+            "name": "Youth Illustration (6 week program)",
+            "eventName": "Youth Illustration (6 week program)",
+            "description": "Youth Illustration. Ages 10–16yo. 6 week program: April 2 – May 7. Thursdays 6:00–7:00pm.",
+            "startDate": "2026-04-02",
+            "endDate": "2026-04-02",
+            "startTime": "18:00",
+            "endTime": "19:00",
+            "recurringPattern": "weekly_thursday",
+            "recurrenceUntilDate": "2026-05-07",
+            "totalOccurrences": 6,
+            "isRecurring": true,
+            "recurringDaysOfWeek": [],
+            "recurringWeekdaySequence": [],
+            "recurringWeekInterval": 1,
+            "updatedAt": "2026-04-01T21:26:07.575Z",
+            "lastSeenAt": "2026-04-01T21:26:07.575Z",
+            "raw": {
+              "uniqueId": "122295901010219467_2",
+              "establishment": "Art Buds",
+              "eventType": "workshops_classes",
+              "eventName": "Youth Illustration (6 week program)",
+              "description": "Youth Illustration. Ages 10–16yo. 6 week program: April 2 – May 7. Thursdays 6:00–7:00pm.",
+              "startDate": "2026-04-02",
+              "startTime": "18:00",
+              "endTime": "19:00",
+              "price": "$130 +HST",
+              "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773410757952-lvcy6m.webp",
+              "facebookUrl": "https://www.facebook.com/artbudspei/",
+              "sourceTimestamp": {
+                "_seconds": 1773365011,
+                "_nanoseconds": 0
+              },
+              "venueId": "slug_artbudspei",
+              "category": "Workshops & Classes",
+              "isEvent": "Yes",
+              "isFoodSpecial": "No",
+              "name": "Youth Illustration (6 week program)",
+              "address": "329 Water Street, Summerside, PE, Canada",
+              "ticketPrice": "$130 +HST",
+              "isRecurring": "Yes",
+              "totalOccurrences": 6,
+              "recurrenceUntilDate": "2026-05-07",
+              "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1773239580570-19add7.webp",
+              "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773410757952-lvcy6m.webp",
+              "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773410757952-lvcy6m.webp",
+              "cleanedFacebookUrl": "https://www.facebook.com/artbudspei/",
+              "latitude": "",
+              "longitude": "",
+              "timeResolution": {
+                "hoursUsed": false
+              },
+              "createdAt": {
+                "_seconds": 1773410818,
+                "_nanoseconds": 167000000
+              },
+              "shares": 3,
+              "topReactionsCount": 2,
+              "recurringWeekdaySequence": [],
+              "recurringWeekInterval": 1,
+              "likes": 3,
+              "ageRestriction": "Ages 10-16",
+              "mediaUrls": [
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773410757952-lvcy6m.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773410758482-w4emxq.webp",
+                "https://scontent-lga3-2.xx.fbcdn.net/v/t39.30808-6/645621704_122293963886219467_9209059307164584624_n.jpg?stp=dst-jpg_s590x590_tt6&_nc_cat=107&ccb=1-7&_nc_sid=13d280&_nc_ohc=lsGTaMj7LZIQ7kNvwE6gtON&_nc_oc=AdmHv8pprfygnIA4PjEq8mlaAxMAxcwZlUghAtK-gGsKTu0tcUT9OGEJ6yeK3qmdngQ&_nc_zt=23&_nc_ht=scontent-lga3-2.xx&_nc_gid=SLx2OmtMXsv9P0VqTxBNbw&_nc_ss=8&oh=00_AfzcVHSuUXOHyNuJ3Xc9Iy5-S9jHWXEjmI8nHib2hckRGA&oe=69ACCF10",
+                "https://scontent-lga3-1.xx.fbcdn.net/v/t39.30808-6/645338436_122293963892219467_4891303114416989836_n.jpg?stp=dst-jpg_s590x590_tt6&_nc_cat=108&ccb=1-7&_nc_sid=13d280&_nc_ohc=5RV92qB-oGcQ7kNvwEHhpAj&_nc_oc=Adk7wR9YSagHfF5ZiySsYLSYMX_jImi8k4m0-VroazFK7JBgif83vrni2W8oX9D_pCk&_nc_zt=23&_nc_ht=scontent-lga3-1.xx&_nc_gid=SLx2OmtMXsv9P0VqTxBNbw&_nc_ss=8&oh=00_Afz__iYwL7IoTx3tu0sUmNpTsLSFcp64UWF1Ep6eI5i1jg&oe=69ACAFD7"
+              ],
+              "recurringPattern": "weekly_thursday",
+              "recurringDaysOfWeek": [],
+              "lastSeenAt": {
+                "_seconds": 1775078767,
+                "_nanoseconds": 575000000
+              },
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "6:00-7:00pm"
+                },
+                "end": {
+                  "source": "explicit",
+                  "toClose": false,
+                  "evidence": "6:00-7:00pm"
+                }
+              },
+              "endDate": "2026-04-02",
+              "updatedAt": {
+                "_seconds": 1775078767,
+                "_nanoseconds": 575000000
+              }
+            }
+          },
+          {
+            "path": "venues/slug_artbudspei/events/sg6ORPFf2oI2TjS47iPo",
+            "exists": true,
+            "id": "sg6ORPFf2oI2TjS47iPo",
+            "name": "Kids Art & Crafts Club (Ages 5–12yo)",
+            "eventName": "Kids Art & Crafts Club (Ages 5–12yo)",
+            "description": "Kids Art & Crafts Club Ages 5–12yo. 6 week program: April 1 – May 6. Wednesdays 6:00–7:00pm.",
+            "startDate": "2026-04-01",
+            "endDate": "2026-04-01",
+            "startTime": "18:00",
+            "endTime": "19:00",
+            "recurringPattern": "weekly_wednesday",
+            "recurrenceUntilDate": "2026-05-06",
+            "totalOccurrences": 6,
+            "isRecurring": true,
+            "recurringDaysOfWeek": [],
+            "recurringWeekdaySequence": [],
+            "recurringWeekInterval": 1,
+            "updatedAt": "2026-04-01T21:26:07.465Z",
+            "lastSeenAt": "2026-04-01T21:26:07.465Z",
+            "raw": {
+              "uniqueId": "122293964294219467_1",
+              "establishment": "Art Buds",
+              "eventType": "workshops_classes",
+              "eventName": "Kids Art & Crafts Club (Ages 5–12yo)",
+              "description": "Kids Art & Crafts Club Ages 5–12yo. 6 week program: April 1 – May 6. Wednesdays 6:00–7:00pm.",
+              "startDate": "2026-04-01",
+              "startTime": "18:00",
+              "endTime": "19:00",
+              "price": "$130 +HST",
+              "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1772547985815-bzde0z.webp",
+              "facebookUrl": "https://www.facebook.com/artbudspei/",
+              "likes": 3,
+              "shares": 3,
+              "topReactionsCount": 2,
+              "venueId": "slug_artbudspei",
+              "category": "Workshops & Classes",
+              "isEvent": "Yes",
+              "isFoodSpecial": "No",
+              "name": "Kids Art & Crafts Club (Ages 5–12yo)",
+              "address": "329 Water Street, Summerside, PE, Canada",
+              "ticketPrice": "$130 +HST",
+              "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1772547985815-bzde0z.webp",
+              "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1772547985815-bzde0z.webp",
+              "cleanedFacebookUrl": "https://www.facebook.com/artbudspei/",
+              "latitude": "",
+              "longitude": "",
+              "timeResolution": {
+                "hoursUsed": false
+              },
+              "createdAt": {
+                "_seconds": 1772548018,
+                "_nanoseconds": 781000000
+              },
+              "sourceTimestamp": {
+                "_seconds": 1773365011,
+                "_nanoseconds": 0
+              },
+              "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1773239580570-19add7.webp",
+              "mediaUrls": [
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1772547985815-bzde0z.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1772547986067-11auc0.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773410757952-lvcy6m.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773410758482-w4emxq.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773497045749-62vm0w.webp",
+                "https://storage.googleapis.com/gathr-uploaded-images/postimages/1773497046150-srphw7.webp"
+              ],
+              "recurringWeekdaySequence": [],
+              "recurringWeekInterval": 1,
+              "recurringDaysOfWeek": [],
+              "totalOccurrences": 6,
+              "recurringPattern": "weekly_wednesday",
+              "recurrenceUntilDate": "2026-05-06",
+              "isRecurring": true,
+              "lastSeenAt": {
+                "_seconds": 1775078767,
+                "_nanoseconds": 465000000
+              },
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "6:00-7:00pm"
+                },
+                "end": {
+                  "source": "explicit",
+                  "toClose": false,
+                  "evidence": "6:00-7:00pm"
+                }
+              },
+              "endDate": "2026-04-01",
+              "updatedAt": {
+                "_seconds": 1775078767,
+                "_nanoseconds": 465000000
+              }
+            }
+          }
+        ]
+      },
+      "success": true
+    }
+  ]
+}

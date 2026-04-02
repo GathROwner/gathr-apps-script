@@ -6,7 +6,7 @@
  * @return {GoogleAppsScript.Drive.File[]} Array of new files to process.
  */
 function findNewApifyDatasetFiles(processedIds) {
-  const query = 'title contains "APIFY Dataset" and (mimeType contains "spreadsheet" or mimeType contains "excel" or mimeType contains "sheet")';
+  const query = 'title contains "APIFY Dataset" and trashed = false and (mimeType contains "spreadsheet" or mimeType contains "excel" or mimeType contains "sheet")';
   const files = DriveApp.searchFiles(query);
   const newFiles = [];
 
@@ -24,6 +24,77 @@ function findNewApifyDatasetFiles(processedIds) {
 
 
 /**
+ * Purges APIFY Dataset files older than a given age and removes their IDs from the processed sheet.
+ * @param {string[]} processedIds - Array of already processed file IDs.
+ * @param {GoogleAppsScript.Spreadsheet.Sheet} processedSheet - The sheet containing processed file IDs.
+ * @param {number} maxAgeDays - Files older than this (by last updated date) will be purged.
+ * @return {string[]} The updated processed IDs list.
+ */
+function purgeOldApifyDatasets(processedIds, processedSheet, maxAgeDays) {
+  if (!processedSheet) {
+    console.error('purgeOldApifyDatasets: Processed Sheet IDs sheet not found');
+    return processedIds;
+  }
+
+  console.log(
+    `purgeOldApifyDatasets: Using sheet "${processedSheet.getName()}" in spreadsheet ${processedSheet.getParent().getId()}`
+  );
+  console.log(`purgeOldApifyDatasets: Incoming processedIds count=${processedIds.length}`);
+
+  const cutoffDate = new Date();
+  cutoffDate.setDate(cutoffDate.getDate() - (maxAgeDays || 14));
+
+  const MAX_TRASH_PER_RUN = 50;
+  let trashedThisRun = 0;
+
+  const query = 'title contains "APIFY Dataset" and trashed = false and (mimeType contains "spreadsheet" or mimeType contains "excel" or mimeType contains "sheet")';
+  const files = DriveApp.searchFiles(query);
+
+  const trashedIds = [];
+
+  while (files.hasNext()) {
+    const file = files.next();
+    const lastUpdated = file.getLastUpdated();
+    if (lastUpdated < cutoffDate) {
+      const fileId = String(file.getId());
+      try {
+        file.setTrashed(true);
+        trashedIds.push(fileId);
+        trashedThisRun++;
+        console.log(`purgeOldApifyDatasets: Trashed ${file.getName()} (${fileId}) last updated ${lastUpdated}`);
+      } catch (error) {
+        console.error(`purgeOldApifyDatasets: Failed to trash ${file.getName()} (${fileId}): ${error}`);
+      }
+      if (trashedThisRun >= MAX_TRASH_PER_RUN) {
+        console.log(`purgeOldApifyDatasets: Reached per-run limit ${MAX_TRASH_PER_RUN}; stopping early`);
+        break;
+      }
+    }
+  }
+  if (trashedThisRun >= MAX_TRASH_PER_RUN) {
+    console.log('purgeOldApifyDatasets: Will continue purging on the next run');
+  }
+
+
+  if (trashedIds.length === 0) {
+    console.log('purgeOldApifyDatasets: No APIFY Dataset files older than cutoff to purge');
+    updateProcessedSheetIds(processedSheet, processedIds);
+    return processedIds;
+  }
+
+  const trashedIdSet = new Set(trashedIds);
+  const updatedProcessedIds = processedIds.filter(id => !trashedIdSet.has(String(id)));
+
+  console.log(`purgeOldApifyDatasets: trashedIds count=${trashedIds.length}`);
+  console.log(`purgeOldApifyDatasets: updatedProcessedIds count=${updatedProcessedIds.length}`);
+
+  updateProcessedSheetIds(processedSheet, updatedProcessedIds);
+
+  console.log(`purgeOldApifyDatasets: Purged ${trashedIds.length} files; removed ${processedIds.length - updatedProcessedIds.length} IDs from Processed Sheet IDs`);
+  return updatedProcessedIds;
+}
+
+/**
  * Processes a single file and extracts data from it.
  * @param {GoogleAppsScript.Drive.File} file - The file to process.
  * @param {GoogleAppsScript.Spreadsheet.Spreadsheet} destinationSpreadsheet - The spreadsheet to store processed data.
@@ -34,10 +105,13 @@ function findNewApifyDatasetFiles(processedIds) {
  */
 function processFile(file, destinationSpreadsheet, addressMap, openaiApiKey, processedIds, mainSpreadsheetId) {
   const PROCESSING_CONFIG = {
-    BATCH_SIZE: 25,          // Number of valid rows to process per batch
-    PAUSE_MINUTES: 5,        // Minutes to wait between batches
+    BATCH_SIZE: 15,          // Number of valid rows to process per batch (reduced from 25 for safety)
+    PAUSE_MINUTES: 2,        // Minutes to wait between batches (reduced from 5)
     VALID_ROW_COUNT: 0,      // Tracks valid rows processed in current batch
-    DEBUG_MODE: false        // For testing with smaller batches
+    DEBUG_MODE: false,       // For testing with smaller batches
+    START_TIME: Date.now(),  // Track when execution started
+    MAX_EXECUTION_MS: 5 * 60 * 1000,  // 5 minutes (leaving 1 min buffer before 6 min limit)
+    TIME_CHECK_INTERVAL: 1   // Check time every valid row so we can checkpoint before the hard limit
   };
 
   const sourceSheetId = file.getId();
@@ -65,6 +139,9 @@ function processFile(file, destinationSpreadsheet, addressMap, openaiApiKey, pro
 
   const destinationSheet = destinationSpreadsheet.getSheetByName('Sheet1');
   const destinationData = destinationSheet.getDataRange().getValues().slice(1); // Skip the header row
+  destinationData.forEach((row, idx) => {
+    row.__sourceSheetRow = idx + 2; // Track the sheet row for debugging
+  });
   const currentRunEntries = []; // Array to store entries processed in this run
 
   // Build cache of processed event IDs
@@ -104,13 +181,47 @@ function processFile(file, destinationSpreadsheet, addressMap, openaiApiKey, pro
       }
 
       // Process the valid row
-      processRow(row, rowIndex, columnIndexMap, destinationSheet, destinationData, 
-                currentRunEntries, openaiApiKey, addressMap, processedIdsCache, 
+      processRow(row, rowIndex, columnIndexMap, destinationSheet, destinationData,
+                currentRunEntries, openaiApiKey, addressMap, processedIdsCache,
                 destinationSpreadsheet);
       processedCount++;
       PROCESSING_CONFIG.VALID_ROW_COUNT++;
 
       console.log(`Processing valid row #${PROCESSING_CONFIG.VALID_ROW_COUNT} at source row ${rowIndex}`);
+
+      // Check execution time periodically to avoid hitting the 6-minute limit
+      if (PROCESSING_CONFIG.VALID_ROW_COUNT % PROCESSING_CONFIG.TIME_CHECK_INTERVAL === 0) {
+        const elapsedMs = Date.now() - PROCESSING_CONFIG.START_TIME;
+        const elapsedMinutes = (elapsedMs / 1000 / 60).toFixed(2);
+        console.log(`Time check: ${elapsedMinutes} minutes elapsed`);
+
+        if (elapsedMs >= PROCESSING_CONFIG.MAX_EXECUTION_MS) {
+          console.log(`⚠️ Approaching execution time limit (${elapsedMinutes} min). Checkpointing early.`);
+
+          // Save our position and schedule next run
+          scriptProperties.setProperty('CURRENT_ROW_INDEX', (rowIndex + 1).toString());
+          scriptProperties.setProperty('CURRENT_FILE_ID', file.getId());
+
+          // Clean up any existing triggers
+          const triggers = ScriptApp.getProjectTriggers();
+          triggers.forEach(trigger => {
+            if (trigger.getHandlerFunction() === 'resumeProcessing') {
+              ScriptApp.deleteTrigger(trigger);
+            }
+          });
+
+          // Create new trigger for next batch
+          ScriptApp.newTrigger('resumeProcessing')
+            .timeBased()
+            .after(PROCESSING_CONFIG.PAUSE_MINUTES * 60 * 1000)
+            .create();
+
+          console.log(`Early checkpoint at row ${rowIndex} due to time limit. Processed ${PROCESSING_CONFIG.VALID_ROW_COUNT} valid rows.`);
+          console.log(`Processed: ${processedCount}, Skipped: ${skippedCount}, Invalid: ${invalidCount}`);
+          console.log(`Will resume in ${PROCESSING_CONFIG.PAUSE_MINUTES} minutes`);
+          return;
+        }
+      }
 
       // Check if we've hit our batch size of valid processed rows
       if (PROCESSING_CONFIG.VALID_ROW_COUNT >= PROCESSING_CONFIG.BATCH_SIZE) {
@@ -148,8 +259,9 @@ function processFile(file, destinationSpreadsheet, addressMap, openaiApiKey, pro
   scriptProperties.deleteProperty('CURRENT_ROW_INDEX');
   scriptProperties.deleteProperty('CURRENT_FILE_ID');
   processedIds.push(sourceSheetId);
-  updateProcessedSheetIds(SpreadsheetApp.openById(mainSpreadsheetId)
-    .getSheetByName('Processed Sheet IDs'), processedIds);
+  const processedSheet = SpreadsheetApp.openById(mainSpreadsheetId)
+    .getSheetByName('Processed Sheet IDs');
+  purgeOldApifyDatasets(processedIds, processedSheet, 14);
 
   // Remove outdated events after the entire file has been processed
   removeOutdatedEvents(destinationSpreadsheet);
@@ -307,10 +419,16 @@ function processRow(row, rowIndex, columnIndexMap, destinationSheet, destination
   
   if (parsedData && parsedData.length > 0) {
     console.log(`processRow: Successfully parsed ${parsedData.length} events/specials from the post`);
-    
+
+    // Initialize counters for tracking appends and duplicate updates
+    let appendedCount = 0;
+    let updatedViaDupCheck = 0;
+
     // Process each event/special
-    parsedData.forEach(data => {
-      console.log("processRow: Processing parsed data item:", data.name);
+    parsedData.forEach((data, eventIndex) => {
+      const pipelineIdx = data._pipelineIndex || (eventIndex + 1);
+      const pipelineTotal = data._pipelineTotalStage3 || parsedData.length;
+      console.log(`processRow: Processing [${pipelineIdx}/${pipelineTotal}]: "${data.name}"`);
       
                       // Canonicalize establishment from Contact Info before duplicate detection (logging-only change)
         (function () {
@@ -408,15 +526,17 @@ function processRow(row, rowIndex, columnIndexMap, destinationSheet, destination
           
           // Process updates for the duplicate
           processUpdateForDuplicate(
-            data, 
-            matchInfo, 
-            extractedData, 
-            openaiApiKey, 
-            destinationSheet, 
+            data,
+            matchInfo,
+            extractedData,
+            openaiApiKey,
+            destinationSheet,
             currentRunEntries,
             destinationSpreadsheet,
             null // No GPT assessment available
           );
+          updatedViaDupCheck++;
+          console.log(`processRow: [${pipelineIdx}/${pipelineTotal}] UPDATED (dup): "${data.name}"`);
         } else {
           console.log('processRow: Duplicate found but matching entry not identified');
         }
@@ -455,12 +575,14 @@ function processRow(row, rowIndex, columnIndexMap, destinationSheet, destination
 
         // Add the event to the destination sheet
         appendToDestinationSheet(destinationSheet, data, destinationSpreadsheet);
+        data.__sourceSheetRow = rowIndex + 2;
         currentRunEntries.push(data);
-        
+
         // Add the processed ID to the cache
         processedIdsCache.add(String(data.id));
-        
-        console.log(`processRow: Successfully added new event: ${data.name}`);
+
+        appendedCount++;
+        console.log(`processRow: [${pipelineIdx}/${pipelineTotal}] APPENDED: "${data.name}"`);
       }
     });
     
@@ -469,6 +591,17 @@ function processRow(row, rowIndex, columnIndexMap, destinationSheet, destination
     console.log("processRow: All events processed, finalizing image handling");
     const imageResults = finalizeImageProcessing();
     console.log(`processRow: Image finalization complete. Deleted ${imageResults.deleted.length} unused images, preserved ${imageResults.preserved.length} images.`);
+
+    // Log processing summary
+    const totalProcessed = appendedCount + updatedViaDupCheck;
+    const originalStage3Count = parsedData[0]?._pipelineTotalStage3 || parsedData.length;
+    const skippedUnrecognizedVenue = parsedData[0]?._skippedUnrecognizedVenue || 0;
+    console.log(`processRow: Event Processing Summary for row ${rowIndex + 2}:`);
+    console.log(`  - ${appendedCount} event(s) appended as new entries`);
+    console.log(`  - ${updatedViaDupCheck} event(s) updated via duplicate checker`);
+    console.log(`  - ${skippedUnrecognizedVenue} event(s) skipped (occurring at unrecognized venue)`);
+    console.log(`  - Total processed: ${totalProcessed} : Total skipped: ${skippedUnrecognizedVenue}`);
+    console.log(`  - Original Stage 3 count: ${originalStage3Count}`);
   } else {
     console.log(`processRow: No valid data parsed for row ${rowIndex + 2}`);
     
@@ -493,7 +626,7 @@ function processRow(row, rowIndex, columnIndexMap, destinationSheet, destination
  * @return {Object|null} Object with source, reference, and data of the matching entry, or null if not found
  */
 function findMatchingEntry(newData, destinationSheetData, currentRunEntries) {
-  console.log("findMatchingEntry: Searching for the matching entry that caused the duplicate detection");
+  console.log("findMatchingEntry: Double-checking the row containing the duplicate so we can return the matching index for updating");
   
   // First check destinationSheetData
   for (let i = 0; i < destinationSheetData.length; i++) {
@@ -1098,14 +1231,14 @@ function updateRecordInSheet(rowIndex, updatedRecord, sheet) {
       'end date': 'endDate',
       'event name': 'name',
       'description': 'description',
-      'establishment': 'establishment',
+      'hosting establishment': 'establishment',
       'address': 'address',
       'ticket price': 'ticketPrice',
-      'ticket link': 'ticketLink',
+      'link to event / tickets': 'ticketLink',
       'icon': 'icon',
       'image': 'image',
       'relevantimageurl': 'relevantImageUrl',
-      'relevantimageUrlcolumn': 'relevantImageUrl',
+      'relevantimageurlcolumn': 'relevantImageUrl',
       // Add social engagement metrics mappings
       'likes': 'likes',
       'shares': 'shares',

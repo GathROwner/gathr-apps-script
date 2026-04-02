@@ -1,0 +1,80 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Helper function to check if request is from admin
+    function isAdmin() {
+      return isAuthenticated() &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // Venues collection - public read, admin write
+    match /venues/{venueId} {
+      allow read: if true;
+      allow write: if isAdmin();
+
+      // Events subcollection under venues
+      match /events/{eventId} {
+        allow read: if true;
+        allow write: if isAdmin();
+      }
+    }
+
+    // Users collection - users can only access their own data
+    match /users/{userId} {
+      allow read, write: if isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Processing state collections - admin only
+    match /batch_states/{docId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /checkpoints/{docId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /processed_datasets/{docId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /apify_webhooks/{docId} {
+      allow read, write: if isAdmin();
+    }
+
+    // Interest categories - public read
+    match /interests/{interestId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // User engagement collections
+    match /eventLikes/{eventId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
+    match /eventShares/{eventId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
+    match /eventUsersResponded/{docId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
+    // Page submissions from users
+    match /pageSubmissions/{docId} {
+      allow read: if isAuthenticated() &&
+        (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isAuthenticated();
+      allow update, delete: if isAdmin();
+    }
+  }
+}

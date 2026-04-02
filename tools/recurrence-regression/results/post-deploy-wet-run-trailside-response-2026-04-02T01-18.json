@@ -1,0 +1,18 @@
+﻿{
+    "success":  true,
+    "message":  "Selected rows processed",
+    "stats":  {
+                  "processedCount":  0,
+                  "skippedCount":  1,
+                  "invalidCount":  0,
+                  "duplicateCount":  0,
+                  "errorCount":  0,
+                  "newEventsCreated":  0,
+                  "existingEventsUpdated":  0,
+                  "newStandardEventsCreated":  0,
+                  "existingStandardEventsUpdated":  0,
+                  "newFoodSpecialsCreated":  0,
+                  "existingFoodSpecialsUpdated":  0
+              },
+    "nextBatchScheduled":  false
+}

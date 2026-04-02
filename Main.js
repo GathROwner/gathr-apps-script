@@ -7,6 +7,16 @@ const FEATURE_FLAGS = {
   USE_GPT_ASSISTED_DUPLICATE_DETECTION: PropertiesService.getScriptProperties().getProperty('USE_GPT_ASSISTED_DUPLICATE_DETECTION') === 'true'
 };
 
+// Model Configuration - Centralized for easy version switching
+const MODEL_CONFIG = {
+  // Fast model for parsing, classification, and formatting tasks
+  FAST_MODEL: 'gpt-5-nano',
+  // Capable model for complex reasoning tasks (duplicate detection, record comparison)
+  REASONING_MODEL: 'gpt-5-mini',
+  // Reasoning effort for GPT-5 models (minimal, low, medium, high)
+  REASONING_EFFORT: 'minimal'
+};
+
 // Functions to control feature flags
 function enableGptFunctionCalling(enable = true) {
   PropertiesService.getScriptProperties().setProperty('USE_GPT_FUNCTION_CALLING', enable.toString());
@@ -106,11 +116,15 @@ function processNewDatasets() {
       throw new Error('Error opening spreadsheets');
     }
 
-    const processedIds = getProcessedSheetIds(mainSpreadsheet.getSheetByName(PROCESSED_SHEET_NAME));
+    const processedSheet = mainSpreadsheet.getSheetByName(PROCESSED_SHEET_NAME);
+    const processedIds = getProcessedSheetIds(processedSheet);
+    purgeOldApifyDatasets(processedIds, processedSheet, 14);
     const openaiApiKey = getOpenAIApiKey();
     if (!openaiApiKey) {
       throw new Error('OpenAI API key not found');
     }
+
+
 
     const addressMap = cachedFetch('addressMap', () => createAddressMap(destinationSpreadsheet.getSheetByName(CONTACT_INFO_SHEET_NAME)), 3600);
     
@@ -481,7 +495,15 @@ function appendToDestinationSheet(sheet, data, spreadsheet) {
     );
 
     // 4) Update the Contact Info sheet with any new info
-    updateContactInfoSheet(data, spreadsheet);
+    // CRITICAL FIX: Skip Contact Info update for aggregator posts to prevent URL pollution
+    // When a page (e.g., Trailside) shares events at another venue (e.g., Hopyard),
+    // the event has establishment="Hopyard" but cleanedFacebookUrl="TrailsideMusicHall".
+    // Updating Contact Info with this mismatched data would overwrite Hopyard's URLs with Trailside's URLs.
+    if (!data.isAggregatorPost) {
+      updateContactInfoSheet(data, spreadsheet);
+    } else {
+      console.log('appendToDestinationSheet : Skipping Contact Info update for aggregator post (establishment != post author)');
+    }
 
     console.log('appendToDestinationSheet : Finished appendToDestinationSheet function');
   }, 'appendToDestinationSheet')();
@@ -889,6 +911,11 @@ function removeOutdatedEvents(destinationSpreadsheet) {
   // Normalize header: trim and remove question marks
   const normalizedHeader = header.map(h => h.toString().trim().replace(/\?/g, ''));
 
+  const sheetName = sheet && sheet.getName ? sheet.getName() : '(unknown)';
+  console.log(`removeOutdatedEvents: Sheet=${sheetName} rows=${data.length} cols=${header.length}`);
+  console.log(`removeOutdatedEvents: Headers(raw)=${JSON.stringify(header)}`);
+  console.log(`removeOutdatedEvents: Headers(normalized)=${JSON.stringify(normalizedHeader)}`);
+
   // Helper to find column index by name (case-insensitive)
   const getIndex = name => normalizedHeader.findIndex(h => h.toLowerCase() === name.toLowerCase());
 
@@ -909,6 +936,9 @@ function removeOutdatedEvents(destinationSpreadsheet) {
   if (recurringPatternIndex === -1) {
     recurringPatternIndex = getIndex('Recurrence Pattern');
   }
+
+  const eventIdIndex = getIndex('Event ID');
+  console.log(`removeOutdatedEvents: Column indices endDate=${endDateIndex} endTime=${endTimeIndex} startDate=${startDateIndex} isRecurring=${isRecurringIndex} recurringPattern=${recurringPatternIndex} eventName=${eventNameIndex} relevantImageUrl=${relevantImageUrlIdx} icon=${iconIndex} eventId=${eventIdIndex}`);
 
   // Verify required columns exist
   const missing = [];
@@ -947,15 +977,31 @@ function removeOutdatedEvents(destinationSpreadsheet) {
     const recurringPattern  = row[recurringPatternIndex];
     const relevantImageUrl  = row[relevantImageUrlIdx];
     const iconUrl           = row[iconIndex];
+    const eventId           = eventIdIndex !== -1 ? row[eventIdIndex] : null;
+    const targetEventId     = '1521460066284199';
+    if (eventId && String(eventId) === targetEventId) {
+      console.log(`removeOutdatedEvents: Found target eventId ${targetEventId} at row ${rowNum}`);
+      console.log(`removeOutdatedEvents: Target row endDate=${endDateValue} endTime=${endTimeValue} startDate=${startDateValue} isRecurring=${isRecurringCell} recurringPattern=${recurringPattern}`);
+    }
 
     // Track images
-    if (relevantImageUrl) allImages.push(relevantImageUrl);
+   if (relevantImageUrl) allImages.push(relevantImageUrl);
     if (iconUrl)          allImages.push(iconUrl);
 
     // Recurring events: 30-day window
-    const isRecurring = isRecurringCell && isRecurringCell.toString().toLowerCase() === 'yes';
+    const isRecurringRaw = isRecurringCell && isRecurringCell.toString().toLowerCase() === 'yes';
+    const recurringPatternStr = (recurringPattern || '')
+      .toString()
+      .trim()
+      .toLowerCase()
+      .replace(/[.,;:]+$/, '');
+    const hasValidPattern = recurringPatternStr && recurringPatternStr !== 'none' && recurringPatternStr !== 'n/a';
+    const isRecurring = isRecurringRaw && hasValidPattern;
+
     if (isRecurring) {
+
       let startObj;
+
       try {
         startObj = startDateValue instanceof Date ? new Date(startDateValue) : new Date(startDateValue);
       } catch (e) {
@@ -1034,7 +1080,35 @@ function removeOutdatedEvents(destinationSpreadsheet) {
         }
       }
     } else {
-      console.log(`removeOutdatedEvents: Row ${rowNum} invalid end date; not deleting.`);
+      // No end date: check if start date is more than 1 day in the past (likely incomplete data)
+      let startDateObj = null;
+      if (startDateValue) {
+        startDateObj = startDateValue instanceof Date
+          ? new Date(startDateValue)
+          : new Date(startDateValue);
+      }
+
+      if (startDateObj) {
+        const startDateOnly = new Date(
+          startDateObj.getFullYear(),
+          startDateObj.getMonth(),
+          startDateObj.getDate()
+        );
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+
+        if (startDateOnly < yesterday) {
+          rowsToDelete.push(rowNum);
+          [relevantImageUrl, iconUrl].forEach(url => {
+            if (url) outdatedMap.set(url, (outdatedMap.get(url) || []).concat(eventName));
+          });
+          console.log(`removeOutdatedEvents: "${eventName}" has no end date and started >1 day ago. Marked.`);
+        } else {
+          console.log(`removeOutdatedEvents: "${eventName}" has no end date but started recently. Keeping.`);
+        }
+      } else {
+        console.log(`removeOutdatedEvents: Row ${rowNum} has no end date and no valid start date; not deleting.`);
+      }
     }
   }
 
@@ -1354,24 +1428,58 @@ function mergeFieldValues(existingValue, newValue, fieldName) {
       // For descriptions, merge text without duplicating information
       if (existingStr.includes(newStr)) return existingStr;
       if (newStr.includes(existingStr)) return newStr;
-      
+
+      // If descriptions are nearly identical (>90% word overlap), just pick the longer one
+      // This avoids garbled output from findCommonPhrases when only punctuation differs
+      const descWords1 = existingStr.toLowerCase().split(/\s+/).filter(Boolean);
+      const descWords2 = newStr.toLowerCase().split(/\s+/).filter(Boolean);
+      const descWordSet1 = new Set(descWords1);
+      const descOverlap = descWords2.filter(w => descWordSet1.has(w)).length;
+      const descMaxLen = Math.max(descWords1.length, descWords2.length) || 1;
+      const descSimilarity = descOverlap / descMaxLen;
+
+      if (descSimilarity >= 0.9) {
+        // Descriptions are essentially the same — prefer the longer one (more detail)
+        // or the new one if same length (may have punctuation fixes)
+        console.log(`mergeFieldValues: Descriptions are ${(descSimilarity * 100).toFixed(0)}% similar — picking ${newStr.length >= existingStr.length ? 'new' : 'existing'} (no text merge needed)`);
+        return newStr.length >= existingStr.length ? newStr : existingStr;
+      }
+
       // Check for common substrings to avoid duplication
       const commonPhrases = findCommonPhrases(existingStr, newStr);
       if (commonPhrases.length > 0) {
+        // Calculate how much of the existing text is covered by common phrases
+        const totalCommonLength = commonPhrases.reduce((sum, phrase) => sum + phrase.length, 0);
+        const coverageRatio = totalCommonLength / existingStr.length;
+
+        // If common phrases cover >80% of the existing text, the descriptions are
+        // essentially the same — just pick the new one (likely cleaner formatting)
+        if (coverageRatio >= 0.8) {
+          console.log(`mergeFieldValues: Common phrases cover ${(coverageRatio * 100).toFixed(0)}% of existing description — using new (cleaner version)`);
+          return newStr;
+        }
+
         // Use the new value as the base and remove common phrases from the existing value
         let mergedText = newStr;
         let remainingText = existingStr;
-        
+
         commonPhrases.forEach(phrase => {
           remainingText = remainingText.replace(phrase, '');
         });
-        
-        // Add non-duplicative content from the existing description
+
+        // Sanity check: if remaining text is mostly short fragments (garbled),
+        // discard it rather than appending garbage
         const addedContent = remainingText.trim();
         if (addedContent) {
-          mergedText += ' ' + addedContent;
+          // Check if remaining content has meaningful words (3+ chars each)
+          const meaningfulWords = addedContent.split(/\s+/).filter(w => w.length >= 3 && /[a-zA-Z]/.test(w));
+          if (meaningfulWords.length >= 3) {
+            mergedText += ' ' + addedContent;
+          } else {
+            console.log(`mergeFieldValues: Remaining text after phrase removal is too fragmented (${meaningfulWords.length} meaningful words) — discarding`);
+          }
         }
-        
+
         return mergedText.trim();
       }
       
@@ -1390,6 +1498,45 @@ function mergeFieldValues(existingValue, newValue, fieldName) {
       // If both have similar length, combine unique information
       return `${newStr} (also listed as: ${existingStr})`;
     
+    // Special handling for time fields - prefer clean time strings over Date artifacts
+    case 'startTime':
+    case 'endTime':
+      // Google Sheets stores times as Date serial numbers (e.g. "1899-12-30T23:44:24.000Z")
+      // Clean time strings like "19:30" or "09:00:00 PM" are always preferred
+      const existingIsArtifact = /1899|1900/.test(existingStr) || (/T.*Z$/.test(existingStr) && /\d{4}-\d{2}-\d{2}/.test(existingStr));
+      const newIsCleanTime = /^\d{1,2}:\d{2}(:\d{2})?\s*(AM|PM)?$/i.test(newStr.trim());
+
+      if (existingIsArtifact && newIsCleanTime) {
+        console.log(`mergeFieldValues: ${fieldName} - preferring clean time "${newStr}" over artifact "${existingStr}"`);
+        return newStr;
+      }
+      if (newIsCleanTime) {
+        console.log(`mergeFieldValues: ${fieldName} - using clean time format: "${newStr}"`);
+        return newStr;
+      }
+      // If new value is also an artifact or unclear, prefer existing
+      console.log(`mergeFieldValues: ${fieldName} - keeping longer/existing value`);
+      return existingStr.length >= newStr.length ? existingStr : newStr;
+
+    // Special handling for date fields - prefer clean date strings over ISO timestamps
+    case 'startDate':
+    case 'endDate':
+      // Clean date format "2026-02-14" is preferred over "2026-02-14T04:00:00.000Z"
+      const newIsCleanDate = /^\d{4}-\d{2}-\d{2}$/.test(newStr.trim());
+      const existingIsCleanDate = /^\d{4}-\d{2}-\d{2}$/.test(existingStr.trim());
+
+      if (newIsCleanDate && !existingIsCleanDate) {
+        console.log(`mergeFieldValues: ${fieldName} - preferring clean date "${newStr}" over "${existingStr}"`);
+        return newStr;
+      }
+      if (existingIsCleanDate && !newIsCleanDate) {
+        console.log(`mergeFieldValues: ${fieldName} - keeping clean existing date "${existingStr}"`);
+        return existingStr;
+      }
+      // Both are same format, prefer new as it's likely more current
+      console.log(`mergeFieldValues: ${fieldName} - both similar format, using new: "${newStr}"`);
+      return newStr;
+
     // Special handling for social engagement metrics
     case 'likes':
     case 'shares':

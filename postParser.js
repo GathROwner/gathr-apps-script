@@ -4,7 +4,7 @@
 const PARSING_CONFIG = {
   BATCH_SIZE: 50,
   MAX_RETRIES: 3,
-  CONFIDENCE_THRESHOLD: 0.7
+  CONFIDENCE_THRESHOLD: 0.6
 };
 
 // MAIN ENTRY POINT
@@ -52,9 +52,9 @@ function parsePostData(combinedText, mediaUrls, sharedPostThumbnails, userName, 
       return [];
     }
 
-    // STAGE 2: Content Classification  
+    // STAGE 2: Content Classification
     console.log('\n=== STAGE 2: CONTENT CLASSIFICATION ===');
-    const classification = classifyContent(combinedText, allImageUrls, userName, openaiApiKey);
+    const classification = classifyContent(combinedText, allImageUrls, userName, openaiApiKey, extractedData);
     
     if (!classification || classification.confidence < PARSING_CONFIG.CONFIDENCE_THRESHOLD) {
       console.log(`parsePostData: Classification confidence too low: ${classification?.confidence || 0}`);
@@ -63,6 +63,11 @@ function parsePostData(combinedText, mediaUrls, sharedPostThumbnails, userName, 
     }
 
     console.log(`parsePostData: Content classified as: ${classification.contentType}`);
+
+    console.log(`\n=== STAGE 2 RESULT ===`);
+    console.log(`Content Type: ${classification.contentType}`);
+    console.log(`Estimated Items: ${classification.estimatedItemCount}`);
+    console.log(`Confidence: ${classification.confidence}`);
 
     // STAGE 3: Content Extraction
     console.log('\n=== STAGE 3: CONTENT EXTRACTION ===');
@@ -83,6 +88,76 @@ function parsePostData(combinedText, mediaUrls, sharedPostThumbnails, userName, 
 
     console.log(`parsePostData: Extracted ${rawExtractedData.length} raw items`);
 
+    // Add pipeline indices to each item for tracking through the pipeline
+    rawExtractedData.forEach((item, idx) => {
+      item._pipelineIndex = idx + 1;
+      item._pipelineTotalStage3 = rawExtractedData.length;
+    });
+    console.log(`parsePostData: Assigned pipeline indices [1-${rawExtractedData.length}] to Stage 3 items`);
+
+    // STAGE 3.5: Use Facebook Events utcStartDate as authoritative source for date/time
+    // Facebook Events scrapes have dedicated date/time fields that are MORE RELIABLE than GPT extraction
+    // or any weekday-based date correction logic. ALWAYS use utcStartDate when available.
+    if (extractedData && extractedData.utcStartDate) {
+      console.log('\n=== STAGE 3.5: FACEBOOK EVENTS TIME RESOLUTION ===');
+      console.log(`Found utcStartDate in extractedData: ${extractedData.utcStartDate}`);
+
+      // Use the script's timezone for consistent local time conversion
+      const tz = (typeof Session !== 'undefined' && Session.getScriptTimeZone && Session.getScriptTimeZone())
+        ? Session.getScriptTimeZone()
+        : 'America/Halifax';
+
+      rawExtractedData.forEach((item, i) => {
+        const needsTime = !item.startTime || item.startTime === 'unknown' || item.startTime === '';
+
+        try {
+          const utcDate = new Date(extractedData.utcStartDate);
+          if (!isNaN(utcDate.getTime())) {
+            // Convert UTC to local time using Utilities.formatDate for proper timezone handling
+            const localTime = (typeof Utilities !== 'undefined' && Utilities.formatDate)
+              ? Utilities.formatDate(utcDate, tz, 'HH:mm')
+              : String(utcDate.getHours()).padStart(2, '0') + ':' + String(utcDate.getMinutes()).padStart(2, '0');
+
+            const localDate = (typeof Utilities !== 'undefined' && Utilities.formatDate)
+              ? Utilities.formatDate(utcDate, tz, 'yyyy-MM-dd')
+              : utcDate.toISOString().split('T')[0];
+
+          const hasMultipleExplicitDates = rawExtractedData.length > 1 && item.timeFlags && item.timeFlags.start && item.timeFlags.start.source === 'explicit';
+          // ALWAYS override the date from utcStartDate when we don't already have multiple explicit dates captured
+          if (!hasMultipleExplicitDates) {
+            // This fixes cases where GPT or date correction logic got the date wrong
+            // (e.g., "Fri Feb 14th" when Feb 14 is actually a Saturday)
+            if (item.date !== localDate) {
+              console.log(`Stage 3.5: Item "${item.name}" - OVERRIDING date from utcStartDate: "${item.date}" → "${localDate}" (utcStartDate is authoritative)`);
+              item.date = localDate;
+              item._dateSourcedFromUtcStartDate = true;
+            } else {
+              console.log(`Stage 3.5: Item "${item.name}" - date already matches utcStartDate: "${localDate}"`);
+            }
+          } else {
+            console.log(`Stage 3.5: Item "${item.name}" - keeping extracted date "${item.date}" because multiple explicit dates were provided`);
+          }
+
+            // Set time if needed
+            if (needsTime) {
+              console.log(`Stage 3.5: Item "${item.name}" - Setting startTime from utcStartDate: "${item.startTime || 'unknown'}" → "${localTime}"`);
+              item.startTime = localTime;
+              item._timeSourcedFromUtcStartDate = true;
+            } else {
+              console.log(`Stage 3.5: Item "${item.name}" - already has startTime="${item.startTime}", keeping it`);
+            }
+          }
+        } catch (e) {
+          console.error(`Stage 3.5: Error parsing utcStartDate for item "${item.name}":`, e);
+        }
+      });
+    }
+
+    console.log(`\n=== STAGE 3 RESULT ===`);
+    rawExtractedData.forEach((item, i) => {
+      console.log(`Item [${item._pipelineIndex}/${item._pipelineTotalStage3}]: "${item.name}" | Type: ${item._sourceType || 'unknown'} | Date: ${item.date} | Time: ${item.startTime || 'none'}`);
+    });
+
     // STAGE 4: Secondary Validation
     console.log('\n=== STAGE 4: SECONDARY VALIDATION ===');
     const validatedData = performSecondaryValidation(rawExtractedData, userName, timestamp, openaiApiKey);
@@ -95,6 +170,12 @@ function parsePostData(combinedText, mediaUrls, sharedPostThumbnails, userName, 
 
     console.log(`parsePostData: ${validatedData.length} items passed secondary validation`);
 
+    console.log(`\n=== STAGE 4 RESULT ===`);
+    console.log(`Items before validation: ${rawExtractedData.length}`);
+    console.log(`Items after validation: ${validatedData.length}`);
+    console.log(`Items rejected: ${rawExtractedData.length - validatedData.length}`);
+    console.log(`Stage 4 Happy Hour no-price overrides: ${validatedData._happyHourNoPriceOverrideCount || 0}`);
+
     // STAGE 5: Final Formatting
     console.log('\n=== STAGE 5: FINAL FORMATTING ===');
     const formattedEvents = performFinalFormatting(validatedData, userName, partialAddress, timestamp, openaiApiKey);
@@ -104,6 +185,11 @@ function parsePostData(combinedText, mediaUrls, sharedPostThumbnails, userName, 
       cleanupAllImages(extractedData);
       return [];
     }
+
+    console.log(`\n=== STAGE 5 RESULT ===`);
+    formattedEvents.forEach((item, i) => {
+      console.log(`Final ${i+1}: "${item.name}" | ${item.isEvent === 'Yes' ? 'EVENT' : 'SPECIAL'} | ${item.category} | ${item.establishment}`);
+    });
 
     // Merge Stage-4 timeFlags back if Stage-5 omitted them
     const formattedEventsWithFlags = formattedEvents.map((it, i) => {
@@ -240,6 +326,7 @@ if (m12) {
 
 // Process formatted events with metadata
 const processedEvents = processEvents(normalizedEvents, userName, facebookUrl, profilePicUrl, mediaUrls, sharedPostThumbnails, extractedData);
+processedEvents._happyHourNoPriceOverrideCount = validatedData._happyHourNoPriceOverrideCount || 0;
 
     
     console.log(`parsePostData: Completed. Final events: ${processedEvents.length}`);
@@ -471,10 +558,10 @@ function detectCalendarSignals(text) {
 // STAGE 2: CONTENT CLASSIFICATION
 // ============================
 
-function classifyContent(combinedText, allImageUrls, userName, openaiApiKey) {
+function classifyContent(combinedText, allImageUrls, userName, openaiApiKey, extractedData) {
   console.log('classifyContent: Starting content classification');
-  
-  const classificationPrompt = createClassificationPrompt(combinedText, allImageUrls.length > 0, userName);
+
+  const classificationPrompt = createClassificationPrompt(combinedText, allImageUrls.length > 0, userName, extractedData);
   
   try {
     let response = callGPTWithSchema(classificationPrompt, allImageUrls, openaiApiKey, 'classifyContent', createClassificationSchema());
@@ -506,12 +593,38 @@ if (typeof response === 'string') {
       console.log(`  - Organization style: ${response.contentAnalysis.organizationStyle}`);
     }
     
+    // POST-PROCESSING: Fix contradictory classifications
+    // If GPT says MIXED_EVENTS_AND_SPECIALS but hasFoodSpecials is false, correct to EVENT
+    if (response.contentType === 'MIXED_EVENTS_AND_SPECIALS' &&
+        response.contentAnalysis &&
+        response.contentAnalysis.hasFoodSpecials === false) {
+      console.log('classifyContent: CORRECTING contradictory classification - MIXED but no food specials');
+      console.log(`  Original: MIXED_EVENTS_AND_SPECIALS with confidence ${response.confidence}`);
+      response.contentType = 'EVENT';
+      response.classificationReason = (response.classificationReason || '') + ' | Corrected: No food specials detected, reclassified as EVENT.';
+      // Boost confidence since it's clearly an event
+      response.confidence = Math.max(response.confidence, 0.75);
+      console.log(`  Corrected: EVENT with confidence ${response.confidence}`);
+    }
+
+    // POST-PROCESSING: Boost confidence for confirmed Facebook Events
+    // When utcStartDate exists, this is a structured Facebook Event with reliable metadata
+    if (extractedData && extractedData.utcStartDate && response.contentAnalysis && response.contentAnalysis.hasEvents) {
+      const minConfidenceForFBEvent = 0.8;
+      if (response.confidence < minConfidenceForFBEvent) {
+        console.log(`classifyContent: Boosting confidence for Facebook Event (utcStartDate present)`);
+        console.log(`  Original confidence: ${response.confidence} → ${minConfidenceForFBEvent}`);
+        response.confidence = minConfidenceForFBEvent;
+        response.classificationReason = (response.classificationReason || '') + ' | Confidence boosted: Facebook Event with structured date/time data.';
+      }
+    }
+
     // Log classification decision
     console.log(`classifyContent: CLASSIFICATION DECISION: ${response.contentType}`);
     console.log(`classifyContent: Reason: ${response.classificationReason}`);
     console.log(`classifyContent: Confidence: ${response.confidence}`);
     console.log(`classifyContent: Estimated items: ${response.estimatedItemCount}`);
-    
+
     return response;
   } catch (error) {
     console.error('classifyContent: Error during classification:', error);
@@ -530,18 +643,31 @@ if (typeof response === 'string') {
   }
 }
 
-function createClassificationPrompt(combinedText, hasImages, userName) {
+function createClassificationPrompt(combinedText, hasImages, userName, extractedData) {
+  // Build Facebook Events context if available
+  let facebookEventContext = '';
+  if (extractedData && extractedData.utcStartDate) {
+    const eventDate = extractedData.utcStartDate.split('T')[0]; // YYYY-MM-DD
+    const eventTime = extractedData.utcStartDate.split('T')[1]?.substring(0, 5) || ''; // HH:mm
+    facebookEventContext = `
+- FACEBOOK EVENT DATA (from Facebook's event system):
+  - Event Date: ${eventDate}
+  - Event Time (UTC): ${eventTime}
+  - This is a confirmed Facebook Event with structured date/time data.`;
+  }
+
   return `Classify this validated content into ONE of these categories:
 
 CONTENT:
 - Posted by: ${userName}
 - Text: "${combinedText}"
-- Has images: ${hasImages}
+- Has images: ${hasImages}${facebookEventContext}
 
 CLASSIFICATION CATEGORIES:
 
 1. EVENT - Single or few entertainment activities
    Examples: "Live music tonight 8pm", "Trivia Tuesday at 7"
+   NOTE: If FACEBOOK EVENT DATA is present above, this is likely an EVENT even if the text is promotional/biographical.
 
 2. FOOD_SPECIAL - Food/drink deals only
    Examples: "Happy hour 5-7pm half price apps", "$0.50 wings tonight"
@@ -559,6 +685,7 @@ ANALYSIS REQUIREMENTS:
 1. Analyze what content elements are present
 2. Determine which category best fits
 3. Provide detailed reasoning for your classification choice
+4. If FACEBOOK EVENT DATA is present, factor that into your confidence level
 
 Analyze and classify into exactly ONE category.`;
 }
@@ -640,12 +767,39 @@ function extractContentByType(contentType, combinedText, allImageUrls, userName,
         // Run both extractors independently
         const events = extractEvents(combinedText, allImageUrls, userName, timestamp, openaiApiKey);
         const specials = extractFoodSpecials(combinedText, allImageUrls, userName, timestamp, openaiApiKey);
-        
+
         // Tag each item with its source to help Stage 4 validation
         const taggedEvents = events.map(event => ({ ...event, _sourceType: 'event' }));
         const taggedSpecials = specials.map(special => ({ ...special, _sourceType: 'special' }));
-        
-        rawData = [...taggedEvents, ...taggedSpecials];
+
+        // Deduplicate: If both extractors found the same FOOD item, prefer the food special extractor's version
+        // This handles cases where event extractor incorrectly extracts food items despite being told to ignore them
+        const foodKeywordsRe = /\b(wrap|soup|burger|pizza|wings|sandwich|salad|taco|tacos|fries|special|appetizer|entree|dinner|lunch|breakfast|brunch|steak|chicken|fish|seafood|pasta|nachos|quesadilla|burrito|poutine|platter|ribs|bbq|grill|happy hour|wing night)\b/i;
+
+        const specialNames = new Map();
+        taggedSpecials.forEach(special => {
+          if (special && special.name) {
+            const key = String(special.name).toLowerCase().trim();
+            const desc = String(special.description || '').toLowerCase();
+            const isFoodRelated = foodKeywordsRe.test(key) || foodKeywordsRe.test(desc);
+            specialNames.set(key, isFoodRelated);
+          }
+        });
+
+        const deduplicatedEvents = taggedEvents.filter(event => {
+          if (!event || !event.name) return true;
+          const key = String(event.name).toLowerCase().trim();
+          const desc = String(event.description || '').toLowerCase();
+          const eventIsFoodRelated = foodKeywordsRe.test(key) || foodKeywordsRe.test(desc);
+
+          if (specialNames.has(key) && specialNames.get(key) && eventIsFoodRelated) {
+            console.log(`extractContentByType: Removing food-related duplicate "${event.name}" from events (already in food specials)`);
+            return false;
+          }
+          return true;
+        });
+
+        rawData = [...deduplicatedEvents, ...taggedSpecials];
         break;
         
       case 'CALENDAR':
@@ -680,6 +834,8 @@ function extractEvents(combinedText, allImageUrls, userName, timestamp, openaiAp
   const _postedLocalDate = (() => { try { return Utilities.formatDate(new Date(timestamp), _tzRef, "yyyy-MM-dd"); } catch(e){ return ""; } })();
 
 const prompt = `Extract ONLY EVENTS (entertainment/activities) from this content. IGNORE all food/drink specials.
+
+- When a single session or workshop block lists multiple explicit dates/times (e.g., "Session 1: Jan 14 & 28, 6-8 pm"), emit a separate event object for each listed date/time pair instead of collapsing them into one. Only treat it as a recurring event if the language explicitly says "every" or "weekly" with a weekday.
 
 CONTENT:
 - Posted by: ${userName}
@@ -757,13 +913,15 @@ IGNORE COMPLETELY:
 
 For each EVENT found, extract:
 - name: Event name
-- description: Full details
-- date: Date (YYYY-MM-DD) or "recurring"
+- description: Full details - IMPORTANT: If the original text has a weekday prefix (e.g., "Friday-", "Thursday-", "Saturday-"), you MUST preserve it at the start of the description field for date validation.
+- date: Specific date (YYYY-MM-DD) - NEVER use "recurring" here. For recurring events, use the first occurrence date or posted date.
+- When a single session block lists multiple explicit dates (and times) in one paragraph, emit a separate event object for every date/time pair instead of collapsing them into one repeated recurrence.
+- Example: “Session 1: Jan 14 & Jan 28, 6-8 pm” should produce two output objects, one dated 2026-01-14 and another 2026-01-28, both describing the same workshop but kept distinct.
 - startTime: Start time.
 - endTime: End time (only if shown), If no end time is shown, set endTime="" (empty string).
 - venue: Venue name if different from ${userName}
 - price: if no specific price mentioned, use empty string
-- recurringPattern: "none", "weekly_monday", etc.
+- recurringPattern: Set to "daily" ONLY if text says "Everyday" or "Daily". Set to "weekly_monday" through "weekly_sunday" ONLY if text says "Every Monday", "Every Tuesday", etc. Otherwise set to "none".
 - extractionReason: Why this was identified as an event
 - timeFlags: {
       start: { source: "explicit" | "implied" | "semantic", evidence: "string" },
@@ -791,18 +949,81 @@ Run the HARD CONSISTENCY INVARIANTS above before returning. If any invariant fai
 Return pure JSON with events and extraction reasoning.`;
 
 
+  console.log('extractEvents: Prompt text:', prompt);
   const response = callGPT(prompt, allImageUrls, openaiApiKey);
   console.log('extractEvents: Raw GPT response:', response);
   
   try {
     const parsed = JSON.parse(response);
-    
+
+    // Recurring pattern detection for events
+    if (parsed && Array.isArray(parsed.extractedEvents)) {
+      parsed.extractedEvents.forEach(event => {
+        if (!event || !event.description) return;
+
+        // Sanitize recurringPattern from GPT (may be garbled or have trailing punctuation)
+        if (event.recurringPattern) {
+          const VALID_RECURRING_PATTERNS_S3 = ['none', 'daily', 'weekly_monday', 'weekly_tuesday', 'weekly_wednesday', 'weekly_thursday', 'weekly_friday', 'weekly_saturday', 'weekly_sunday'];
+          const cleanedPattern = event.recurringPattern.toString().trim().replace(/[,;]+$/, '').toLowerCase();
+          if (!VALID_RECURRING_PATTERNS_S3.includes(cleanedPattern)) {
+            console.log(`extractEvents: ⚠️ SANITIZED garbled recurringPattern from GPT: "${event.recurringPattern.substring(0, 80)}..." → "none"`);
+            event.recurringPattern = 'none';
+          } else {
+            event.recurringPattern = cleanedPattern;
+          }
+        }
+
+        // Date correction: ONLY correct if GPT's date doesn't match the weekday in the description
+        // This prevents overriding correct explicit dates (e.g., "Feb 14") with incorrect weekday-based calculations
+        const dateInfo = _extractDateFromText(event.description, _postedLocalDate);
+        if (dateInfo.hasExplicitDayPrefix && dateInfo.date && event.date !== dateInfo.date) {
+          // Validate: check if GPT's extracted date actually matches the weekday mentioned
+          // If GPT says "2026-02-14" and description says "Friday-", check if Feb 14 IS a Friday
+          const gptDate = new Date(event.date + 'T00:00:00');
+          const gptDayOfWeek = gptDate.getDay(); // 0=Sun, 1=Mon, ..., 5=Fri, 6=Sat
+          const descriptionDayOfWeek = _getDayOfWeekFromPrefix(event.description);
+
+          if (descriptionDayOfWeek !== null && gptDayOfWeek === descriptionDayOfWeek) {
+            // GPT's date already falls on the correct weekday - don't "correct" it
+            console.log(`extractEvents: 📅 Skipping date correction for "${event.name}"`);
+            console.log(`  ↳ GPT extracted: ${event.date} (${_dayName(gptDayOfWeek)})`);
+            console.log(`  ↳ Description weekday prefix matches GPT's date - keeping GPT's date`);
+          } else {
+            // Weekday mismatch - apply correction
+            console.log(`extractEvents: 📅 Correcting GPT event "${event.name}"`);
+            console.log(`  ↳ GPT extracted: ${event.date} (${_dayName(gptDayOfWeek)})`);
+            console.log(`  ↳ Description has explicit day prefix (${descriptionDayOfWeek !== null ? _dayName(descriptionDayOfWeek) : 'unknown'}), correcting to: ${dateInfo.date}`);
+            event.date = dateInfo.date;
+          }
+        }
+
+        // Check for recurring pattern in description first, then fall back to original post text
+        let detectedPattern = _detectRecurringPattern(event.description);
+        if (detectedPattern === 'none') {
+          // Description didn't have recurring keywords - check the original post text
+          detectedPattern = _detectRecurringPattern(combinedText);
+        }
+
+        if (detectedPattern !== 'none') {
+          // Apply detected pattern if GPT didn't set one, or CORRECT it if GPT got the wrong day
+          if (!event.recurringPattern || event.recurringPattern === 'none') {
+            console.log(`extractEvents: 🔁 Detected recurring pattern for "${event.name}": ${detectedPattern}`);
+            event.recurringPattern = detectedPattern;
+          } else if (event.recurringPattern !== detectedPattern && event.recurringPattern.startsWith('weekly_')) {
+            // GPT set a weekly pattern but got the day wrong - correct it
+            console.log(`extractEvents: 🔁 CORRECTING recurring pattern for "${event.name}": GPT said "${event.recurringPattern}" but text says "${detectedPattern}"`);
+            event.recurringPattern = detectedPattern;
+          }
+        }
+      });
+    }
+
     // Log extraction summary
     if (parsed.extractionSummary) {
       console.log(`extractEvents: Found ${parsed.extractionSummary.totalFound} events`);
       console.log(`extractEvents: Extraction notes: ${parsed.extractionSummary.extractionNotes}`);
     }
-    
+
     // Log individual event reasoning
     if (parsed.extractedEvents && parsed.extractedEvents.length > 0) {
       parsed.extractedEvents.forEach((event, index) => {
@@ -810,11 +1031,119 @@ Return pure JSON with events and extraction reasoning.`;
         console.log(`  Extraction reason: ${event.extractionReason || 'No reason provided'}`);
       });
     }
-    
+
     return parsed.extractedEvents || [];
   } catch (error) {
     console.error('extractEvents: Error parsing response:', error);
     return parseJSONResponse(response, 'events');
+  }
+}
+
+// Helper function to get day of week number from a weekday prefix in text
+function _getDayOfWeekFromPrefix(text) {
+  const t = String(text || '').toLowerCase();
+  const dayMap = {
+    sunday: 0, sun: 0, monday: 1, mon: 1, tuesday: 2, tue: 2, tues: 2,
+    wednesday: 3, wed: 3, thursday: 4, thu: 4, thur: 4, thurs: 4,
+    friday: 5, fri: 5, saturday: 6, sat: 6
+  };
+
+  const dayMatch = t.match(/^(monday|tuesday|wednesday|thursday|friday|saturday|sunday|mon|tue|wed|thu|fri|sat|sun)[\s\-–—:;,]/i);
+  if (!dayMatch) return null;
+
+  const dayName = dayMatch[1].toLowerCase();
+  return dayMap[dayName] !== undefined ? dayMap[dayName] : null;
+}
+
+// Helper function to get day name from day number
+function _dayName(dayNum) {
+  const names = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  return names[dayNum] || 'Unknown';
+}
+
+// Helper function to detect recurring pattern from text
+function _detectRecurringPattern(text) {
+  const t = String(text || '').toLowerCase();
+
+  // Check for daily/everyday patterns FIRST - these are the clearest recurring indicators
+  if (/\b(everyday|daily)\b/i.test(t)) {
+    return 'daily';
+  }
+
+  // IMPORTANT: ONLY match recurring weekday patterns with explicit keywords
+  // Bare weekday names like "Thursday-" are specific dates, NOT recurring events!
+  const dayMap = {
+    'monday': 'weekly_monday', 'mon': 'weekly_monday',
+    'tuesday': 'weekly_tuesday', 'tue': 'weekly_tuesday', 'tues': 'weekly_tuesday',
+    'wednesday': 'weekly_wednesday', 'wed': 'weekly_wednesday',
+    'thursday': 'weekly_thursday', 'thu': 'weekly_thursday', 'thur': 'weekly_thursday', 'thurs': 'weekly_thursday',
+    'friday': 'weekly_friday', 'fri': 'weekly_friday',
+    'saturday': 'weekly_saturday', 'sat': 'weekly_saturday',
+    'sunday': 'weekly_sunday', 'sun': 'weekly_sunday'
+  };
+
+  // ONLY match when preceded by explicit recurring keywords: "every", "weekly", "each"
+  const weeklyMatch = t.match(/\b(every|weekly|each)\s+(mondays?|tuesdays?|wednesdays?|thursdays?|fridays?|saturdays?|sundays?|mon|tue|tues|wed|thu|thur|thurs|fri|sat|sun)\b/i);
+  if (weeklyMatch) {
+    const day = weeklyMatch[2].toLowerCase().replace(/s$/, ''); // Remove trailing 's' from group 2
+    if (dayMap[day]) {
+      return dayMap[day];
+    }
+  }
+
+  // Secondary pattern: "weekly" appears somewhere AND "on [day] nights/evenings" appears
+  // This handles: "Weekly from January 7th until March 11th, on Wednesday nights"
+  if (/\bweekly\b/i.test(t)) {
+    const onDayMatch = t.match(/\bon\s+(mondays?|tuesdays?|wednesdays?|thursdays?|fridays?|saturdays?|sundays?)\s*(nights?|evenings?|mornings?|afternoons?)?\b/i);
+    if (onDayMatch) {
+      const day = onDayMatch[1].toLowerCase().replace(/s$/, '');
+      if (dayMap[day]) {
+        return dayMap[day];
+      }
+    }
+  }
+
+  return 'none';
+}
+
+// Helper function to extract date from text with day-of-week patterns
+function _extractDateFromText(text, postedDate) {
+  const t = String(text || '').toLowerCase();
+
+  if (/\b(everyday|daily)\b/i.test(t)) {
+    return { date: postedDate, isRecurring: true, hasExplicitDayPrefix: false };
+  }
+
+  const dayMap = {
+    sunday: 0, sun: 0, monday: 1, mon: 1, tuesday: 2, tue: 2, tues: 2,
+    wednesday: 3, wed: 3, thursday: 4, thu: 4, thur: 4, thurs: 4,
+    friday: 5, fri: 5, saturday: 6, sat: 6
+  };
+
+  const dayMatch = t.match(/^(monday|tuesday|wednesday|thursday|friday|saturday|sunday|mon|tue|wed|thu|fri|sat|sun)[\s\-–—:;,]/i);
+  if (!dayMatch) return { date: postedDate, isRecurring: false, hasExplicitDayPrefix: false };
+
+  const dayName = dayMatch[1].toLowerCase();
+  const targetDay = dayMap[dayName];
+  if (targetDay === undefined) return { date: postedDate, isRecurring: false, hasExplicitDayPrefix: false };
+
+  try {
+    const posted = new Date(postedDate);
+    const postedDay = posted.getDay();
+
+    let daysToAdd = targetDay - postedDay;
+    if (daysToAdd < 0) daysToAdd += 7;
+
+    const targetDate = new Date(posted);
+    targetDate.setDate(posted.getDate() + daysToAdd);
+
+    const year = targetDate.getFullYear();
+    const month = String(targetDate.getMonth() + 1).padStart(2, '0');
+    const day = String(targetDate.getDate()).padStart(2, '0');
+
+    return { date: `${year}-${month}-${day}`, isRecurring: false, hasExplicitDayPrefix: true };
+  } catch (e) {
+    return { date: postedDate, isRecurring: false, hasExplicitDayPrefix: false };
   }
 }
 
@@ -827,14 +1156,14 @@ const _tzRef = (Session.getScriptTimeZone && Session.getScriptTimeZone()) ? Sess
 const _postedLocalPretty = (() => { try { return Utilities.formatDate(new Date(timestamp), _tzRef, "yyyy-MM-dd EEE HH:mm:ss"); } catch(e){ return "(format failed)"; } })();
 const _postedLocalDate   = (() => { try { return Utilities.formatDate(new Date(timestamp), _tzRef, "yyyy-MM-dd"); } catch(e){ return ""; } })();
   
-  const prompt = `Your job is to Extract ONLY FOOD/DRINK SPECIALS that have cost savings from this content. IGNORE all events/entertainment.
+  const prompt = `Your job is to Extract ALL FOOD/DRINK SPECIALS that have cost savings from this content. IGNORE all events/entertainment.
 
 CONTENT:
 - Posted by: ${userName}
 - Posted at: ${timestamp}
 - Text: "${combinedText}"
 
-EXTRACT ONLY (MUST have pricing/savings):
+EXTRACT ALL SPECIALS (each MUST have pricing/savings):
 
 TIME & EVIDENCE RULES (FOR SPECIALS — SAME AS EVENTS):
 - Read times ONLY from the text or image regions relevant to the special. Do not infer.
@@ -853,11 +1182,15 @@ HARD CONSISTENCY INVARIANTS (apply per item before emitting JSON):
 2) If timeFlags.start.source !== "explicit", do NOT copy any global time into startTime.
 3) Assert examples: “from 9 pm” ⇒ startTime “21:00”; “from 10 pm” ⇒ “22:00”.
 
-✓ Happy hour deals
+✓ Happy hour deals (including "Everyday" happy hours)
 ✓ Wing nights with prices
 ✓ Drink specials
 ✓ Food discounts
+✓ Breakfast/brunch specials (BREKKIE, pancakes, breakfast items, brunch items)
+✓ Daily/recurring food specials (e.g., "Everyday- [special]", "Daily- [special]")
 ✓ Any cost savings on food/drinks
+
+CRITICAL: Extract ALL food/drink specials even if they say "Everyday", "Daily", or appear at the end of the post text.
 
 IGNORE COMPLETELY:
 ✗ Live music, trivia, entertainment
@@ -866,20 +1199,34 @@ IGNORE COMPLETELY:
 
 For each SPECIAL found, extract:
 - name: Special name
-- description: Full details WITH pricing
-- date: Date (YYYY-MM-DD) or "recurring"
+- description: Full details WITH pricing - IMPORTANT: If the original text has a weekday prefix (e.g., "Friday-", "Thursday-", "Saturday-"), you MUST preserve it at the start of the description field for date validation.
+- date: Specific date (YYYY-MM-DD) - NEVER use "recurring" here. For recurring specials, use the first occurrence date or posted date.
 - startTime: Start time
 - endTime: End time
 - venue: Venue name if different from ${userName} (look for location names, venue names, "at [location]")
 - pricing: Specific prices/discounts. - price: if no specific price mentioned, use empty string.
-- recurringPattern: "none", "weekly_tuesday", etc.
+- recurringPattern: Set to "daily" ONLY if text says "Everyday" or "Daily". Set to "weekly_monday" through "weekly_sunday" ONLY if text says "Every Monday", "Every Tuesday", etc. Otherwise set to "none".
 - extractionReason: Why this was identified as a valid special with cost savings
 
-VENUE EXTRACTION:
-- Look for hints that the special is occuring at a different venue
-- Check for "at [Location]" patterns
-- Extract venue names from specials descriptions
-- If no specific venue mentioned, use empty string
+VENUE EXTRACTION - Use this priority order:
+
+1. CHECK IMAGES FIRST: Look at the provided images for venue signs, logos, or venue names
+   - Example: If images show "Hopyard" signage, that's the venue for all items
+
+2. CHECK POST TEXT: Look for venue indicators at the start of the post text
+   - Example: "THIS WEEK @ HOP!", "@ [venue name]", "[Venue] presents"
+
+3. MAINTAIN CONSISTENCY: If extracting multiple items from this post, they should typically share the same venue based on steps 1-2
+   - If images/post text indicate one venue, ALL items should use that venue unless step 4 applies
+
+4. ITEM-SPECIFIC OVERRIDES: Only use a different venue if the individual item's description explicitly mentions a different location
+   - Examples: "at [Location]", "@ [Location]", "[Day]- [Event] - [Location]", "[Location]: [Event]"
+   - This venue override applies ONLY to that specific item
+
+5. FALLBACK: If no venue found in images, post text, or item description, use empty string
+   - NEVER default to ${userName} unless the post/images explicitly indicate ${userName} is the venue
+
+CRITICAL: The poster (${userName}) may be SHARING content about another venue. Always prioritize venue evidence from images and post text over the poster's name.
 
 CRITICAL JSON FORMATTING REQUIREMENTS:
 - Return ONLY valid JSON object with two arrays
@@ -920,13 +1267,47 @@ Return pure JSON with specials and extraction reasoning.`;
   
   try {
     const parsed = JSON.parse(response);
-    
+
+    // Date correction: Check if GPT-extracted specials have explicit day-of-week prefixes in their descriptions
+    if (parsed && Array.isArray(parsed.extractedSpecials)) {
+      parsed.extractedSpecials.forEach(special => {
+        if (!special || !special.description) return;
+
+        // Sanitize recurringPattern from GPT (may be garbled or have trailing punctuation)
+        if (special.recurringPattern) {
+          const VALID_RECURRING_PATTERNS_FS = ['none', 'daily', 'weekly_monday', 'weekly_tuesday', 'weekly_wednesday', 'weekly_thursday', 'weekly_friday', 'weekly_saturday', 'weekly_sunday'];
+          const cleanedPattern = special.recurringPattern.toString().trim().replace(/[,;]+$/, '').toLowerCase();
+          if (!VALID_RECURRING_PATTERNS_FS.includes(cleanedPattern)) {
+            console.log(`extractFoodSpecials: ⚠️ SANITIZED garbled recurringPattern from GPT: "${special.recurringPattern.substring(0, 80)}..." → "none"`);
+            special.recurringPattern = 'none';
+          } else {
+            special.recurringPattern = cleanedPattern;
+          }
+        }
+
+        const dateInfo = _extractDateFromText(special.description, _postedLocalDate);
+        if (dateInfo.hasExplicitDayPrefix && dateInfo.date && special.date !== dateInfo.date) {
+          console.log(`extractFoodSpecials: 📅 Correcting GPT special "${special.name}"`);
+          console.log(`  ↳ GPT extracted: ${special.date}`);
+          console.log(`  ↳ Description has explicit day prefix, correcting to: ${dateInfo.date}`);
+          special.date = dateInfo.date;
+        }
+
+        // Recurring pattern detection: Check if description indicates recurring pattern
+        const detectedPattern = _detectRecurringPattern(special.description);
+        if (detectedPattern !== 'none' && (!special.recurringPattern || special.recurringPattern === 'none')) {
+          console.log(`extractFoodSpecials: 🔁 Detected recurring pattern for "${special.name}": ${detectedPattern}`);
+          special.recurringPattern = detectedPattern;
+        }
+      });
+    }
+
     // Log extraction summary
     if (parsed.extractionSummary) {
       console.log(`extractFoodSpecials: Found ${parsed.extractionSummary.totalFound} specials`);
       console.log(`extractFoodSpecials: Extraction notes: ${parsed.extractionSummary.extractionNotes}`);
     }
-    
+
     // Log individual special reasoning
     if (parsed.extractedSpecials && parsed.extractedSpecials.length > 0) {
       parsed.extractedSpecials.forEach((special, index) => {
@@ -935,7 +1316,7 @@ Return pure JSON with specials and extraction reasoning.`;
         console.log(`  Pricing: ${special.pricing || 'No pricing specified'}`);
       });
     }
-    
+
     return parsed.extractedSpecials || [];
   } catch (error) {
     console.error('extractFoodSpecials: Error parsing response:', error);
@@ -1021,31 +1402,40 @@ Return pure JSON with ALL calendar items.`;
 
   console.log('extractCalendarContent: Raw GPT response:', response);
   
+  let parsed;
   try {
-    const parsed = JSON.parse(response);
-    
-    // Log extraction summary
-    if (parsed.extractionSummary) {
-      console.log(`extractCalendarContent: Calendar extraction summary:`);
-      console.log(`  - Total items: ${parsed.extractionSummary.totalFound}`);
-      console.log(`  - Events: ${parsed.extractionSummary.eventsFound}`);
-      console.log(`  - Specials: ${parsed.extractionSummary.specialsFound}`);
-      console.log(`  - Notes: ${parsed.extractionSummary.extractionNotes}`);
-    }
-    
-    const items = parsed.extractedItems || [];
-    
-    // Validate calendar extraction for completeness
-    if (items.length < 5) { // Calendars typically have many items
-      console.log('extractCalendarContent: Few items extracted, attempting secondary extraction');
-      return performCalendarValidation(combinedText, allImageUrls, items, userName, timestamp, openaiApiKey);
-    }
-    
-    return items;
+    parsed = parseJsonObjectWithRepair(response, 'extractCalendarContent');
   } catch (error) {
     console.error('extractCalendarContent: Error parsing response:', error);
     return parseJSONResponse(response, 'calendar');
   }
+
+  // Log extraction summary
+  if (parsed.extractionSummary) {
+    console.log(`extractCalendarContent: Calendar extraction summary:`);
+    console.log(`  - Total items: ${parsed.extractionSummary.totalFound}`);
+    console.log(`  - Events: ${parsed.extractionSummary.eventsFound}`);
+    console.log(`  - Specials: ${parsed.extractionSummary.specialsFound}`);
+    console.log(`  - Notes: ${parsed.extractionSummary.extractionNotes}`);
+  }
+
+  // Log compact item list to see what GPT actually returned vs claimed count
+  if (parsed.extractedItems && parsed.extractedItems.length > 0) {
+    console.log(`extractCalendarContent: GPT returned ${parsed.extractedItems.length} items (claimed ${parsed.extractionSummary?.totalFound || 'unknown'}):`);
+    parsed.extractedItems.forEach((item, i) => {
+      console.log(`  CalItem [${i+1}/${parsed.extractedItems.length}]: "${item.name}" | ${item.type || 'unknown'} | ${item.date} | ${item.startTime || 'no time'}`);
+    });
+  }
+
+  const items = parsed.extractedItems || [];
+  
+  // Validate calendar extraction for completeness
+  if (items.length < 5) { // Calendars typically have many items
+    console.log('extractCalendarContent: Few items extracted, attempting secondary extraction');
+    return performCalendarValidation(combinedText, allImageUrls, items, userName, timestamp, openaiApiKey);
+  }
+  
+  return items;
 }
 
 // SCHEDULE EXTRACTOR
@@ -1170,10 +1560,55 @@ function performCalendarValidation(combinedText, allImageUrls, initialItems, use
 
 function performSecondaryValidation(rawData, userName, timestamp, openaiApiKey) {
   console.log('performSecondaryValidation: Starting secondary validation');
+
+  // Capture the original Stage 3 count before any GPT processing
+  // This ensures we preserve the correct count even if GPT reorders/drops items
+  const originalStage3Count = rawData.length;
+
   console.log('performSecondaryValidation: Items to validate:', JSON.stringify(rawData, null, 2));
-  
+
   // Get current date for holiday detection context
   const currentYear = new Date().getFullYear();
+
+  function hasNonEmptyValue(value) {
+    if (value === undefined || value === null) return false;
+    const normalized = String(value).trim().toLowerCase();
+    return normalized !== '' && normalized !== 'unknown';
+  }
+
+  function hasPricingOrDiscount(item) {
+    if (!item) return false;
+    const fields = [item.price, item.pricing, item.discount];
+    return fields.some(hasNonEmptyValue);
+  }
+
+  function isTimeBoundHappyHourSpecial(item) {
+    if (!item) return false;
+    if (String(item._sourceType || '').toLowerCase() !== 'special') return false;
+
+    const name = String(item.name || '');
+    const description = String(item.description || '');
+    const combinedText = `${name} ${description}`;
+    if (!/\bhappy\s*hour\b/i.test(combinedText)) return false;
+
+    const hasStartTime = hasNonEmptyValue(item.startTime);
+    const hasEndTime = hasNonEmptyValue(item.endTime);
+    const hasToCloseFlag = Boolean(item.timeFlags && item.timeFlags.end && item.timeFlags.end.toClose === true);
+    const hasExplicitStartEvidence = Boolean(
+      item.timeFlags &&
+      item.timeFlags.start &&
+      item.timeFlags.start.source === 'explicit' &&
+      hasNonEmptyValue(item.timeFlags.start.evidence)
+    );
+
+    // Catch plain-language time windows in case structured fields are missing.
+    const hasTimeRangeInText =
+      /\b\d{1,2}(:\d{2})?\s*(am|pm)\s*(to|-)\s*\d{1,2}(:\d{2})?\s*(am|pm)\b/i.test(combinedText) ||
+      /\bfrom\s+\d{1,2}(:\d{2})?\s*(am|pm)\b/i.test(combinedText) ||
+      /\b\d{1,2}\s*-\s*\d{1,2}\b/.test(combinedText);
+
+    return hasStartTime || hasEndTime || hasToCloseFlag || hasExplicitStartEvidence || hasTimeRangeInText;
+  }
   
   const validationPrompt = `Validate these extracted items. Analyze each item and determine if it should be kept or removed.
 
@@ -1202,11 +1637,48 @@ REMOVE items that are:
 ✗ Items from event extractor that aren't real events (e.g., forced interpretation of food as "celebration")
 ✗ Items from special extractor that have no actual pricing/discount
 
+EXCEPTION RULE (APPLY BEFORE REJECTING SPECIALS):
+- For _sourceType="special", if the item is a Happy Hour and has a clear time window
+  (start/end time, explicit range like "3-6", "from 3 PM to 6 PM", or "to close"),
+  KEEP the item even when price/discount is missing.
+
 KEEP items that are:
 ✓ Actual events with specific dates/times
 ✓ Events that happen to occur on holidays (e.g., "Father's Day Movie at 5pm")
 ✓ Food specials with specified cost savings and pricing
 ✓ Any activity with specific timing and details
+✓ Recurring specials (date="recurring") ARE VALID - these are daily/weekly specials like happy hours that happen regularly
+✓ Items with date="recurring" should be KEPT if they have valid pricing, timing, and description
+
+IMPORTANT - MINIMUM REQUIRED FIELDS FOR REGULAR EVENTS (no _sourceType or _sourceType="event"):
+Regular events only need these fields to be valid:
+- name (required)
+- date (required) - must be a specific YYYY-MM-DD date
+- startTime (required) - can come from any source including _timeSourcedFromUtcStartDate
+
+These fields are OPTIONAL and should NEVER cause rejection if missing:
+- venue (optional - empty venue means the event is AT the posting venue/page)
+- endTime (optional - many events don't list end times)
+- price (optional - free events won't have pricing)
+- description (optional - though usually present for regular events)
+
+DO NOT reject events just because venue is empty. An empty venue means the event takes place at the posting page's own venue.
+DO NOT reject events just because endTime or price are missing.
+A regular event with a name, date, and startTime is VALID even if all other fields are empty.
+
+IMPORTANT - MINIMUM REQUIRED FIELDS FOR CALENDAR EVENTS:
+Calendar events (_sourceType="calendar") only need these fields to be valid:
+- name (required)
+- date (required)
+- startTime (required)
+- venue (required)
+
+These fields are OPTIONAL and should NOT cause rejection if missing:
+- endTime (optional - many events don't list end times)
+- price (optional - free events won't have pricing)
+- description (optional - brief listings often omit descriptions)
+
+DO NOT reject calendar events just because endTime, price, or description are empty/missing.
 
 DUPLICATE DETECTION RULES:
 - Same venue + SAME time = likely duplicate (reject one)
@@ -1220,16 +1692,20 @@ SPECIAL VALIDATION FOR MIXED CONTENT:
 When _sourceType indicates the item came from a specific extractor:
 - Be extra critical of "events" that seem to be about food
 - Be extra critical of "specials" without clear pricing
+- Exception: time-bounded Happy Hour specials can still be valid without explicit pricing
 - The extractors may have forced interpretations that don't make sense
 
 HOLIDAY-SPECIFIC RECURRING PATTERN CORRECTION:
 Many venues modify their regular recurring specials for holidays. Check for these patterns:
 - If an item is marked as "recurring" or "daily" BUT:
-  * The date matches a known holiday (Father's Day, Mother's Day, Christmas, etc.)
-  * The description mentions holiday-specific language ("treat dad", "mom deserves", "valentine's special")
-  * The timing differs from typical patterns (e.g., "all day" instead of usual "3-5pm" happy hour)
+  * The date matches a known holiday (Father's Day, Mother's Day, Christmas, etc.) AND
+  * The description contains explicit holiday keywords (Father's Day, Mother's Day, Christmas, Valentine's, Easter, Halloween, Thanksgiving, New Year, St. Patrick's, etc.) OR
+  * The description contains holiday-specific phrases ("treat dad", "mom deserves", "valentine special", "christmas menu", "holiday menu", "festive menu")
+  * DO NOT trigger on generic promotional language like "new menu", "try our menu", "special offer", "come visit"
 - THEN: Change recurringPattern to "none" because this is a one-day holiday variation
 - Note this correction in your reasoning
+
+IMPORTANT: Generic promotional language ("Come try our new greek menu", "Check out our specials") is NOT holiday-specific. Only trigger this correction when you see actual holiday names or explicit holiday context.
 
 Common holidays to check:
 - Father's Day (third Sunday in June)
@@ -1296,26 +1772,68 @@ Return pure JSON with validation results.`;
     const keptItems = [];
     const rejectedItems = [];
     let recurringCorrectionsCount = 0;
+    let happyHourNoPriceOverrideCount = 0;
     
     if (validationResult.validatedItems) {
       validationResult.validatedItems.forEach((validatedItem, index) => {
-        const decision = validatedItem.decision;
+        let decision = validatedItem.decision;
         const item = validatedItem.item;
         const reason = validatedItem.reason;
-        
+
+        // Preserve pipeline metadata - use the captured Stage 3 count for all items
+        // GPT may reorder or drop items, so we can't rely on index matching
+        item._pipelineTotalStage3 = originalStage3Count;
+        // Try to preserve _pipelineIndex if GPT returned it, otherwise try to get from rawData
+        if (!item._pipelineIndex && rawData[index] && rawData[index]._pipelineIndex) {
+          item._pipelineIndex = rawData[index]._pipelineIndex;
+        }
+
+        // Contradiction detection: GPT sometimes sets decision="REJECTED" but the reasoning
+        // clearly states the item should be kept. Trust the reasoning over the enum value.
+        if (decision === 'REJECTED' && reason) {
+          const reasonLower = String(reason).toLowerCase();
+          const keptIndicators = [
+            'should be kept', 'correct decision is kept', 'this should be kept',
+            'keep as', 'kept as', 'therefore, kept', 'therefore kept',
+            'decision is kept', 'should be kept as', 'valid event',
+            'valid as a regular event', 'keeping this item', 'recommend keeping'
+          ];
+          const hasKeptIntent = keptIndicators.some(phrase => reasonLower.includes(phrase));
+
+          if (hasKeptIntent) {
+            console.log(`performSecondaryValidation: CONTRADICTION DETECTED for "${item.name || 'Unnamed'}"`);
+            console.log(`  Decision field says REJECTED but reasoning says to keep. Overriding to KEPT.`);
+            decision = 'KEPT';
+          }
+        }
+
+        // Targeted exception:
+        // Keep Happy Hour specials when a concrete time window exists, even if pricing is omitted.
+        if (decision === 'REJECTED' && isTimeBoundHappyHourSpecial(item) && !hasPricingOrDiscount(item)) {
+          console.log(`performSecondaryValidation: TARGETED HAPPY HOUR OVERRIDE for "${item.name || 'Unnamed'}"`);
+          console.log(`  Rejected special is time-bounded Happy Hour without pricing. Overriding to KEPT.`);
+          decision = 'KEPT';
+          happyHourNoPriceOverrideCount++;
+        }
+
         console.log(`performSecondaryValidation: Item ${index + 1} - "${item.name || 'Unnamed'}"`);
         console.log(`  Decision: ${decision}`);
         console.log(`  Reason: ${reason}`);
-        
+
         // Check for recurring pattern corrections
         if (validatedItem.corrections && validatedItem.corrections.recurringPattern) {
-          console.log(`  RECURRING PATTERN CORRECTED: ${item.recurringPattern} → ${validatedItem.corrections.recurringPattern}`);
-          console.log(`  Correction reason: ${validatedItem.corrections.correctionReason}`);
-          // Apply the correction to the item
-          item.recurringPattern = validatedItem.corrections.recurringPattern;
-          recurringCorrectionsCount++;
+          const VALID_RECURRING_PATTERNS_S4 = ['none', 'daily', 'weekly_monday', 'weekly_tuesday', 'weekly_wednesday', 'weekly_thursday', 'weekly_friday', 'weekly_saturday', 'weekly_sunday'];
+          const correctedPattern = (validatedItem.corrections.recurringPattern || '').toString().trim().replace(/[,;]+$/, '').toLowerCase();
+          if (VALID_RECURRING_PATTERNS_S4.includes(correctedPattern)) {
+            console.log(`  RECURRING PATTERN CORRECTED: ${item.recurringPattern} → ${correctedPattern}`);
+            console.log(`  Correction reason: ${validatedItem.corrections.correctionReason}`);
+            item.recurringPattern = correctedPattern;
+            recurringCorrectionsCount++;
+          } else {
+            console.log(`  ⚠️ REJECTED garbled recurringPattern correction: "${(validatedItem.corrections.recurringPattern || '').substring(0, 80)}..." → keeping "${item.recurringPattern}"`);
+          }
         }
-        
+
         if (decision === 'KEPT') {
           keptItems.push(item);
         } else {
@@ -1326,10 +1844,20 @@ Return pure JSON with validation results.`;
     
     // Log final counts
     console.log(`performSecondaryValidation: Final result - ${keptItems.length} items kept, ${rejectedItems.length} items rejected`);
+    console.log(`performSecondaryValidation: Happy Hour no-price overrides applied: ${happyHourNoPriceOverrideCount}`);
     if (recurringCorrectionsCount > 0) {
       console.log(`performSecondaryValidation: Corrected recurring patterns for ${recurringCorrectionsCount} items`);
     }
-    
+
+    // Log pipeline index tracking
+    const keptIndices = keptItems.map(item => item._pipelineIndex).filter(Boolean).join(', ');
+    const rejectedIndices = rejectedItems.map(r => r.item._pipelineIndex).filter(Boolean).join(', ');
+    console.log(`performSecondaryValidation: Pipeline indices KEPT: [${keptIndices || 'none'}]`);
+    console.log(`performSecondaryValidation: Pipeline indices REJECTED: [${rejectedIndices || 'none'}]`);
+
+    // Attach targeted override count so parsePostData can include it in Stage 4 summary logs.
+    keptItems._happyHourNoPriceOverrideCount = happyHourNoPriceOverrideCount;
+
     return keptItems;
   } catch (error) {
     console.error('performSecondaryValidation: Error during validation:', error);
@@ -1341,24 +1869,54 @@ Return pure JSON with validation results.`;
 // Helper function to parse secondary validation response
 function parseSecondaryValidationResponse(response) {
   console.log('parseSecondaryValidationResponse: Parsing validation response');
-  
+
   try {
     // Try to extract JSON from the response
     const jsonMatch = response.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
-      const parsed = JSON.parse(jsonMatch[0]);
-      console.log('parseSecondaryValidationResponse: Successfully parsed validation result');
+      let jsonStr = jsonMatch[0];
+
+      // First try to parse the original JSON without repair
+      try {
+        const parsed = JSON.parse(jsonStr);
+        console.log('parseSecondaryValidationResponse: Successfully parsed validation result (no repair needed)');
+        return parsed;
+      } catch (originalError) {
+        // Original parse failed, try to repair
+        console.log('parseSecondaryValidationResponse: Original parse failed, attempting repair');
+        const repairedStr = repairMalformedJson(jsonStr);
+
+        if (repairedStr !== jsonStr) {
+          // Repair made changes, try parsing the repaired version
+          try {
+            const parsed = JSON.parse(repairedStr);
+            console.log('parseSecondaryValidationResponse: Successfully parsed after repair');
+            return parsed;
+          } catch (repairError) {
+            // Repair didn't help
+            console.error('parseSecondaryValidationResponse: Repair did not fix the JSON');
+            console.error('parseSecondaryValidationResponse: Original error:', originalError);
+            console.error('parseSecondaryValidationResponse: Repair error:', repairError);
+            console.error('parseSecondaryValidationResponse: Original JSON:', jsonStr);
+            console.error('parseSecondaryValidationResponse: Repaired JSON:', repairedStr);
+          }
+        } else {
+          // No repairs were made, log the original error
+          console.error('parseSecondaryValidationResponse: No repairs applicable');
+          console.error('parseSecondaryValidationResponse: Parse error:', originalError);
+          console.error('parseSecondaryValidationResponse: JSON:', jsonStr);
+        }
+      }
+    } else {
+      // No JSON match found, try parsing the whole response
+      const parsed = JSON.parse(response);
       return parsed;
     }
-    
-    // Try parsing the whole response
-    const parsed = JSON.parse(response);
-    return parsed;
-    
+
   } catch (error) {
     console.error('parseSecondaryValidationResponse: Error parsing validation response:', error);
     console.error('parseSecondaryValidationResponse: Raw response that failed to parse:', response);
-    
+
     // Return safe default
     return {
       validatedItems: [],
@@ -1371,6 +1929,127 @@ function parseSecondaryValidationResponse(response) {
       }
     };
   }
+}
+
+/**
+ * Attempts to repair common JSON syntax errors produced by GPT models.
+ * @param {string} jsonStr - The potentially malformed JSON string.
+ * @return {string} The repaired JSON string.
+ */
+function repairMalformedJson(jsonStr) {
+  let repaired = jsonStr;
+  let previousRepaired;
+  let iterations = 0;
+  const maxIterations = 15; // Safety limit
+  const changesApplied = [];
+
+  // Keep applying repairs until no more changes are made
+  do {
+    previousRepaired = repaired;
+    iterations++;
+    const iterationChanges = [];
+
+    // Pattern 1: Extra } before , in arrays: "} }," -> "},"
+    // Handles: corrections object closes, then extra brace, then comma
+    let before = repaired;
+    repaired = repaired.replace(/\}(\s*)\}(\s*),/g, '}$1,');
+    if (repaired !== before) iterationChanges.push('P1:}} -> }');
+
+    // Pattern 2: Extra } before ] (end of array): "} }]" -> "}]"
+    // Handles: last item in array has extra closing brace
+    before = repaired;
+    repaired = repaired.replace(/\}(\s*)\}(\s*)\]/g, '}$1]');
+    if (repaired !== before) iterationChanges.push('P2:}}] -> }]');
+
+    // Pattern 3: Extra } before ], (array followed by more content): "} }]," -> "}],"
+    // This is slightly different - the ] has a comma after it
+    before = repaired;
+    repaired = repaired.replace(/\}(\s*)\}(\s*)\](\s*),/g, '}$1]$3,');
+    if (repaired !== before) iterationChanges.push('P3:}}], -> }],');
+
+    // Pattern 4: Triple braces (deeply nested): "} } }," -> "},"
+    before = repaired;
+    repaired = repaired.replace(/\}(\s*)\}(\s*)\}(\s*),/g, '}$1,');
+    if (repaired !== before) iterationChanges.push('P4:}}} -> }');
+
+    // Pattern 5: Fix trailing commas before closing brackets: ",]" -> "]"
+    before = repaired;
+    repaired = repaired.replace(/,(\s*)\]/g, '$1]');
+    if (repaired !== before) iterationChanges.push('P5:,] -> ]');
+
+    // Pattern 6: Fix trailing commas before closing braces: ",}" -> "}"
+    before = repaired;
+    repaired = repaired.replace(/,(\s*)\}/g, '$1}');
+    if (repaired !== before) iterationChanges.push('P6:,} -> }');
+
+    // Pattern 7: Escape unescaped double quotes within strings to keep JSON valid
+    before = repaired;
+    repaired = escapeUnescapedQuotesInStrings(repaired);
+    if (repaired !== before) iterationChanges.push('P7:escapeQuotes');
+
+    if (iterationChanges.length > 0) {
+      changesApplied.push(`iter${iterations}:[${iterationChanges.join(',')}]`);
+    }
+
+  } while (repaired !== previousRepaired && iterations < maxIterations);
+
+  if (repaired !== jsonStr) {
+    console.log(`repairMalformedJson: Applied repairs in ${iterations} iteration(s): ${changesApplied.join(' ')}`);
+  }
+
+  return repaired;
+}
+
+function escapeUnescapedQuotesInStrings(jsonStr) {
+  let result = '';
+  let inString = false;
+
+  for (let i = 0; i < jsonStr.length; i++) {
+    const char = jsonStr[i];
+
+    if (char === '"') {
+      const escaped = isQuoteEscaped(jsonStr, i);
+      if (!escaped) {
+        if (!inString) {
+          inString = true;
+          result += char;
+          continue;
+        }
+
+        const nextNonWhitespace = findNextNonWhitespaceChar(jsonStr, i + 1);
+        if (!nextNonWhitespace || [',', '}', ']', ':'].includes(nextNonWhitespace)) {
+          inString = false;
+          result += char;
+          continue;
+        }
+
+        result += '\\\"';
+        continue;
+      }
+    }
+
+    result += char;
+  }
+
+  return result;
+}
+
+function findNextNonWhitespaceChar(str, startIndex) {
+  for (let i = startIndex; i < str.length; i++) {
+    const char = str[i];
+    if (!/\s/.test(char)) {
+      return char;
+    }
+  }
+  return null;
+}
+
+function isQuoteEscaped(str, index) {
+  let backslashCount = 0;
+  for (let i = index - 1; i >= 0 && str[i] === '\\'; i--) {
+    backslashCount++;
+  }
+  return backslashCount % 2 === 1;
 }
 
 // ==========================
@@ -1413,6 +2092,37 @@ try {
   let __fe = (response && Array.isArray(response.formattedEvents)) ? response.formattedEvents : [];
   if (!Array.isArray(__fe)) __fe = [];
 
+  // Deduplicate GPT response before truncating (GPT sometimes hallucinates duplicates)
+  if (__fe.length > __expectedCount) {
+    console.log('performFinalFormatting: GPT returned ' + __fe.length + ' items but expected ' + __expectedCount + '. Deduplicating before truncation.');
+
+    const seen = new Map();
+    const deduplicated = [];
+
+    for (const item of __fe) {
+      if (!item || !item.name) {
+        deduplicated.push(item);
+        continue;
+      }
+
+      // Create dedup key: normalized name + date + start time
+      const normName = String(item.name || '').toLowerCase().trim();
+      const date = String(item.startDate || '').trim();
+      const time = String(item.startTime || '').trim();
+      const key = `${normName}|${date}|${time}`;
+
+      if (!seen.has(key)) {
+        seen.set(key, true);
+        deduplicated.push(item);
+      } else {
+        console.log(`performFinalFormatting: Removing GPT duplicate: "${item.name}" (${date} ${time})`);
+      }
+    }
+
+    console.log(`performFinalFormatting: After deduplication: ${deduplicated.length} unique items (removed ${__fe.length - deduplicated.length} duplicates)`);
+    __fe = deduplicated;
+  }
+
   // Truncate extras if the model returned more than expected
   if (__fe.length > __expectedCount) {
     console.log('performFinalFormatting: truncating extras formatted=' + __fe.length + ' expected=' + __expectedCount);
@@ -1440,6 +2150,17 @@ try {
     if (!('additionalLocation' in e)) e.additionalLocation = e.venue || "";
     if (!('isRecurring' in e)) e.isRecurring = false;
     if (!('recurringPattern' in e)) e.recurringPattern = "none";
+
+    // Guard against garbled recurringPattern values from GPT
+    const VALID_RECURRING_PATTERNS = ['none', 'daily', 'weekly_monday', 'weekly_tuesday', 'weekly_wednesday', 'weekly_thursday', 'weekly_friday', 'weekly_saturday', 'weekly_sunday'];
+    const rawPattern = (e.recurringPattern || '').toString().trim().replace(/[,;]+$/, '').toLowerCase();
+    if (!VALID_RECURRING_PATTERNS.includes(rawPattern)) {
+      console.log(`  ⚠️ SANITIZED recurringPattern: garbled value "${(e.recurringPattern || '').substring(0, 80)}..." → "none"`);
+      e.recurringPattern = 'none';
+    } else {
+      e.recurringPattern = rawPattern;
+    }
+
     __fe[i] = e;
   }
 
@@ -1542,6 +2263,21 @@ try {
     // Handle the recurring pattern properly in formatted events
     const formattedEvents = response.formattedEvents || [];
 const processedEvents = formattedEvents.map((event, index) => {
+  // CRITICAL FIX: Always restore venue information from validatedData
+  // GPT in Stage 5 ignores the venue field and uses userName instead, so we must force-restore it
+  const originalItem = validatedData[index];
+  if (originalItem && originalItem.venue && originalItem.venue.trim() !== '') {
+    // Only restore if the original had a venue AND it's different from the current one
+    const originalVenue = originalItem.venue.trim();
+    const currentVenue = (event.venue || '').trim();
+
+    if (currentVenue !== originalVenue) {
+      console.log(`  🔧 RESTORING VENUE: GPT changed venue from "${originalVenue}" to "${currentVenue}", restoring correct value`);
+      event.venue = originalVenue;
+      event.additionalLocation = originalVenue; // Also set additionalLocation for venue override logic
+    }
+  }
+
   // Log what we're actually formatting
 console.log(`performFinalFormatting: Processing event ${index + 1}:`);
 
@@ -1621,7 +2357,76 @@ console.log(`performFinalFormatting: Processing event ${index + 1}:`);
       } else {
         console.log(`  WARNING: No matching decision found for this event!`);
       }
-      
+
+      // POST-PROCESSING CATEGORY CORRECTIONS
+      // These run in a specific order to avoid conflicts between correction rules.
+      // Art Party check runs FIRST because it's more specific than Comedy (which has broad indicators like "hilarious")
+
+      // 1. Art Party events → Gatherings & Parties (MUST RUN FIRST)
+      // GPT often miscategorizes art party/paint night events as "Family Friendly" or "Live Music"
+      // when they should be "Gatherings & Parties" (adult social painting events at bars/breweries)
+      if (event.category === 'Family Friendly' || event.category === 'Live Music') {
+        const textToCheck = `${event.name || ''} ${event.description || ''}`.toLowerCase();
+        const artPartyIndicators = [
+          'art party', 'paint party', 'paint night', 'paint your partner',
+          'paint and sip', 'sip and paint', 'canvas and cocktails',
+          'wine and canvas', 'paint nite', 'painting party'
+        ];
+        const hasArtPartyIndicator = artPartyIndicators.some(indicator => textToCheck.includes(indicator));
+
+        if (hasArtPartyIndicator) {
+          console.log(`  🎨 CATEGORY CORRECTION: "${event.name}" has art party/paint night indicators in text`);
+          console.log(`    Changing from "${event.category}" to "Gatherings & Parties"`);
+          event.category = 'Gatherings & Parties';
+        }
+      }
+
+      // 2. Comedy vs Live Music
+      // GPT often miscategorizes comedy shows as "Live Music" because they contain "LIVE" in the title.
+      // This code-level check is more reliable than prompt-based exclusion rules.
+      // IMPORTANT: Skip if this is an art party (already handled above, and "hilarious" in descriptions shouldn't trigger Comedy)
+      if (event.category === 'Live Music') {
+        const textToCheck = `${event.name || ''} ${event.description || ''} ${originalItem?.extractionReason || ''}`.toLowerCase();
+
+        // Check for art party indicators first - if present, skip the comedy check
+        const artPartyExclusions = ['art party', 'paint party', 'paint night', 'paint your partner', 'sip and paint', 'paint and sip'];
+        const isArtParty = artPartyExclusions.some(indicator => textToCheck.includes(indicator));
+
+        if (!isArtParty) {
+          const comedyIndicators = [
+            'comedy', 'comedian', 'comic', 'stand-up', 'standup', 'improv',
+            'comedy award', 'just for laughs', 'the debaters', 'last comic standing',
+            'yuk yuk', 'yukyuk', 'comedy club', 'comedy night', 'laugh factory',
+            'funny', 'jokes', 'hilarious'
+          ];
+          const hasComedyIndicator = comedyIndicators.some(indicator => textToCheck.includes(indicator));
+
+          if (hasComedyIndicator) {
+            console.log(`  🎭 CATEGORY CORRECTION: "${event.name}" has comedy indicators in text`);
+            console.log(`    Changing from "Live Music" to "Comedy"`);
+            event.category = 'Comedy';
+          }
+        }
+      }
+
+      // 3. Book Clubs → Gatherings & Parties
+      // GPT often miscategorizes book clubs as "Family Friendly" when they should be "Gatherings & Parties"
+      if (event.category === 'Family Friendly') {
+        const textToCheck = `${event.name || ''} ${event.description || ''}`.toLowerCase();
+        const gatheringsIndicators = [
+          'book club', 'bookclub', 'discussion group', 'discussion club',
+          'meetup', 'meet-up', 'meet up', 'networking', 'mixer',
+          'social club', 'club meeting', 'club gathering'
+        ];
+        const hasGatheringsIndicator = gatheringsIndicators.some(indicator => textToCheck.includes(indicator));
+
+        if (hasGatheringsIndicator) {
+          console.log(`  📚 CATEGORY CORRECTION: "${event.name}" has gatherings/club indicators in text`);
+          console.log(`    Changing from "Family Friendly" to "Gatherings & Parties"`);
+          event.category = 'Gatherings & Parties';
+        }
+      }
+
             // If the model set establishment to the page name, prefer the detected venue (additionalLocation) (logging-only)
       if (
         event.establishment &&
@@ -1751,12 +2556,19 @@ ITEMS TO FORMAT:
 ${JSON.stringify(items, null, 2)}
 
 CRITICAL CATEGORIZATION INSTRUCTION:
-Before formatting, carefully check each event name for category keywords IN ORDER.
-Example: "Name That Tune Trivia" contains "trivia" → MUST be "Trivia Night" category (NOT "Gatherings & Parties")
+Before formatting each event, assess the full event name/description and choose the category that best matches the observable context. Use keywords as clues, not rigid ranking rules—the model should weigh every hint in the text (description, extractionReason, venue, time flags) before committing to a category.
 
-SPECIAL CINEMA/MOVIE HANDLING:
-- If venue contains "Cinema" or event contains "movie"/"film"/"screening" → use "Cinema")
-- Examples: "City Cinema: Bonjour Tristesse" → Cinema, "The Tivoli Cinema: Cool Hand Look" → Cinema
+Special guidance:
+- Only select **Trivia Night** when the name or description explicitly mentions core trivia cues (e.g., "trivia", "quiz", "game show", "name that tune", "pub quiz", "kahoot-style"). Do not reclassify more general Q&A, info sessions, or book club titles as Trivia Night unless one of those keywords is actually present.
+- If the venue text includes “Cinema” or the poster mentions “movie”, “film”, or “screening,” select **Cinema**.
+- If you see music-specific keywords (band, music, concert, singer, festival, DJ, performance, session, matinee, trio/duo) or performer names, **Live Music** is the best fit unless a stronger keyword points elsewhere.
+- Comedy should be reserved for shows/mentions of stand-up, improv, comedian, or laughter-driven promotions.
+- Workshops & Classes are for educational, hands-on, or creation-focused activities (workshop, class, course, lesson, seminar, craft, art, learn, creation, print, paint, design).
+- Religious sessions require faith-related wording (church, service, mass, prayer, bible, worship).
+- Sports events include game/match/tournament/league/marathon/championship/finals or anything tied to athletic activity, training, or live viewing of competitions.
+- "Gatherings & Parties" is the catch-all for social meet-ups that do not fit any other category; use it when the event reads like a general community, networking, or book club gathering without any of the stronger keywords above.
+- Reserve **Family Friendly** for general all-ages community events or children-focused activities when no other category applies.
+- For food/drink specials, select the appropriate special category (Happy Hour, Wing Night, Food Special, Drink Special) based on the offer, not the event categories.
 
 FORMAT REQUIREMENTS:
 
@@ -1776,7 +2588,7 @@ FORMAT REQUIREMENTS:
 5. Set isEvent="Yes" for events, "No" for specials
 6. Set isFoodSpecial="Yes" for specials, "No" for events
 6.5 isEvent and isFoodSpecial can not both be "Yes". If both would be yes, create seperate entries for each. 
-7. Choose appropriate category based on type - CHECK IN PRIORITY ORDER (see CATEGORY MAPPING RULES below)
+7. Choose appropriate category based on type - Appoint the most appropriate category to all Events , and / or Specials. 
 8. Handle recurring items:
    - If recurringPattern exists, set isRecurring = true
    - Otherwise, set isRecurring = false
@@ -1785,56 +2597,60 @@ FORMAT REQUIREMENTS:
 
 CATEGORY MAPPING RULES:
 
-IMPORTANT: Check categories in PRIORITY ORDER (1-8) to ensure correct classification!
+IMPORTANT: Use the guidance above to pick the most fitting category, but do not assume any single category is the default; let the text, venue, and formattingDecisions justify the choice.
 
 FOR EVENTS (when isFoodSpecial="No"):
 
-PRIORITY CATEGORY DETECTION (check these patterns first in this order):
+**Event CATEGORIES:
 
-1. Trivia Night (check FIRST):
-- Keywords: "trivia", "quiz", "game show", "name that tune"
-- IMPORTANT: ANY event with "trivia" in the name MUST be categorized as "Trivia Night"
-- DO NOT categorize trivia events as "Gatherings & Parties"
+*Trivia Night:
+- Keywords: "trivia", "quiz", "game show", "name that tune", "pub quiz", "kahoot"
+- Use Trivia Night **only** when the post explicitly calls out one of these cues. Q&A, info sessions, or educational meetings are unlikely to qualify unless they literally mention trivia.
 
-2. Live Music:
+* Live Music:
 - Keywords: "band", "music", "singer", "concert", "performance", "sessions", "matinee", "duo", "trio", "music festival"
 - Performer names (e.g., "Ben Aitken & Emma Clark", "Gordon Belsher")
 - Venues known for music (pubs, lounges, cafes with performer names, festivals)
 - EXCLUDE: Events at "Cinema" venues or with "movie"/"film"/"screening" keywords
+- EXCLUDE: If description mentions "comedy", "comedian", "Comedy Award", "The Debaters", "Last Comic Standing", "Just For Laughs", or "Yuk Yuk's" → use Comedy instead
 
-3. Comedy:
-- Keywords: "comedy", "stand-up", "improv", "comedian", "laugh"
+* Comedy:
+- Keywords: "comedy", "stand-up", "improv", "comedian", "comic", "laugh", "funny", "jokes"
+- Comedy shows/references: "Comedy Award", "Just For Laughs", "The Debaters", "Last Comic Standing", "Yuk Yuk's", "comedy club", "comedy night"
+- Note: A comedian performing live is COMEDY, not Live Music. If description mentions comedy awards, comedy TV shows, or comedy venues, use Comedy.
 
-4. Workshops & Classes:
+* Workshops & Classes:
 - Keywords: "workshop", "class", "courses", "educational", "lesson", "seminar", "create", "creation", "print", "paint", "craft", "art", "learn"
-- Activities like "3D Print & Paint", "Clay Creation Sessions"
+- Activities that involve education or learning, like: "3D Print & Paint", "Clay Creation Sessions"
 
-5. Religious:
+* Religious:
 - Keywords: "church", "service", "mass", "prayer", "faith", "bible"
 
-6. Sports:
+* Sports:
 - Keywords: "game", "match", "tournament", "league", "athletic", "marathon", "championships", "finals".
+- Includes activities like training for events, watching sporting events live or on tv. 
 
-7. Gatherings & Parties:
-- Keywords: "party", "mixer", "networking", "social" (but NOT trivia)
-- IMPORTANT: Check for trivia FIRST - if event contains "trivia", use Trivia Night category instead
+* Gatherings & Parties:
+- Keywords: "party", "mixer", "networking", "social" (but NOT trivia), "club gatherings", "book clubs", "discussion group", "meetup".
+- This is a larger catch all for social events that do not fall into trivia nights, live music, workshops, or sporting categories. When the name or description explicitly mentions "book club", "book discussion", "club gathering", "discussion group", or similar meetup language (and no stronger keyword category already applies), choose Gatherings & Parties before defaulting to Family Friendly.
 
-8. Family Friendly (use ONLY when no other category fits):
-- General all-ages events
+* Family Friendly (use ONLY when no other category fits):
+- General all-ages events appropriate for families with children under age 18. 
 - Children's activities
-- Community events without specific category
+- Community events without specific category.
+- Must be appropriate for children. 
 
-DEFAULT FOR EVENTS: Only use "Family Friendly" after checking ALL priority categories (1-8) first
+DEFAULT FOR EVENTS: Use "Family Friendly" only when every other category lacks a clear match; never inflate Family Friendly to cover ambiguous cases that have stronger keywords.
 
-FOR FOOD/DRINK SPECIALS (when isFoodSpecial="Yes"):
-- Happy Hour: Time-specific drink discounts (usually 3-7pm)
-- Wing Night: Wing specials specifically
-- Food Special: All non-wing food deals, discounts, and special menus
-- Drink Special: Drink deals outside of happy hour times
+** Specials CATEGORIES FOR FOOD/DRINK SPECIALS (when isFoodSpecial="Yes"):
+
+* Happy Hour: Time-specific drink discounts (usually 3-7pm)
+* Wing Night: Wing specials specifically
+* Food Special: All non-wing food deals, discounts, and special menus
+* Drink Special: Drink deals outside of happy hour times
 DEFAULT FOR SPECIALS: When in doubt, use "Food Special"
 
 CRITICAL: 
-- Check categories IN PRIORITY ORDER - start with #1 (Trivia Night) and work down
 - "Name That Tune Trivia" MUST be categorized as "Trivia Night", NOT "Gatherings & Parties"
 - For "trivia" in event name/description, ALWAYS use "Trivia Night" category, NEVER "Gatherings & Parties"
 - Check specific keywords BEFORE defaulting to Family Friendly
@@ -1994,16 +2810,16 @@ function callGPT(prompt, imageUrls, openaiApiKey) {
   // [LOG][GPT] Message composition summary
   const _imgCount = Array.isArray(imageUrls) ? imageUrls.length : 0;
   const _contentType = Array.isArray(input) ? 'array' : typeof input;
-  console.log(`callGPT: model=gpt-4.1-nano | contentType=${_contentType} | textParts=1 | imageParts=${_imgCount}`);
+  console.log(`callGPT: model=${MODEL_CONFIG.FAST_MODEL} | contentType=${_contentType} | textParts=1 | imageParts=${_imgCount}`);
   if (_imgCount > 0) {
     imageUrls.forEach((u, i) => console.log(`callGPT: image[${i}]=${u}`));
   }
 
   const payload = {
-    'model': 'gpt-4.1-nano',
+    'model': MODEL_CONFIG.FAST_MODEL,
     'input': input,
     'max_output_tokens': 32768,
-    'temperature': 0.2
+    'reasoning': { 'effort': MODEL_CONFIG.REASONING_EFFORT }
   };
 
   const options = {
@@ -2061,7 +2877,7 @@ function callGPTWithSchema(prompt, imageUrls, openaiApiKey, functionName, schema
   // [LOG][GPT+SCHEMA] Message composition summary
   const _imgCount = Array.isArray(imageUrls) ? imageUrls.length : 0;
   const _contentType = Array.isArray(content) ? 'array' : typeof content;
-  console.log(`callGPTWithSchema: fn=${functionName} | model=gpt-4.1-nano | contentType=${_contentType} | textParts=1 | imageParts=${_imgCount}`);
+  console.log(`callGPTWithSchema: fn=${functionName} | model=${MODEL_CONFIG.FAST_MODEL} | contentType=${_contentType} | textParts=1 | imageParts=${_imgCount}`);
   if (_imgCount > 0) {
     imageUrls.forEach((u, i) => console.log(`callGPTWithSchema: image[${i}]=${u}`));
   }
@@ -2085,12 +2901,12 @@ const tools = (schema || []).map(fn => ({
     : prompt;
 
   const payload = {
-    'model': 'gpt-4.1-nano',
+    'model': MODEL_CONFIG.FAST_MODEL,
     'input': input,
     'tools': tools,
     'tool_choice': { 'type': 'function', 'name': functionName },
     'max_output_tokens': 32768,
-    'temperature': 0.2
+    'reasoning': { 'effort': MODEL_CONFIG.REASONING_EFFORT }
   };
 
   const options = {
@@ -2225,6 +3041,49 @@ function parseJSONResponse(response, extractorType) {
   }
 }
 
+function parseJsonObjectWithRepair(response, logLabel) {
+  const prefix = logLabel ? `${logLabel}: ` : '';
+  const jsonMatch = response.match(/\{[\s\S]*\}/);
+
+  if (!jsonMatch) {
+    try {
+      return JSON.parse(response);
+    } catch (error) {
+      console.error(`${prefix}Failed to parse response as JSON object:`, error);
+      throw error;
+    }
+  }
+
+  const jsonStr = jsonMatch[0];
+
+  try {
+    return JSON.parse(jsonStr);
+  } catch (originalError) {
+    console.log(`${prefix}Original parse failed, attempting repair`);
+    const repairedStr = repairMalformedJson(jsonStr);
+
+    if (repairedStr !== jsonStr) {
+      try {
+        const parsed = JSON.parse(repairedStr);
+        console.log(`${prefix}Successfully parsed after repair`);
+        return parsed;
+      } catch (repairError) {
+        console.error(`${prefix}Repair did not fix the JSON`);
+        console.error(`${prefix}Original error:`, originalError);
+        console.error(`${prefix}Repair error:`, repairError);
+        console.error(`${prefix}Original JSON:`, jsonStr);
+        console.error(`${prefix}Repaired JSON:`, repairedStr);
+        throw repairError;
+      }
+    }
+
+    console.error(`${prefix}No repairs applicable`);
+    console.error(`${prefix}Parse error:`, originalError);
+    console.error(`${prefix}JSON:`, jsonStr);
+    throw originalError;
+  }
+}
+
 // ====================
 // EXISTING FUNCTIONS
 // ====================
@@ -2233,7 +3092,10 @@ function processEvents(parsedData, userName, facebookUrl, profilePicUrl, mediaUr
   console.log('processEvents: Processing formatted events');
   console.log(`processEvents: Processing ${parsedData.length} events`);
 
-  return parsedData.flatMap(event => {
+  // Track events skipped due to unrecognized venues
+  let skippedUnrecognizedVenue = 0;
+
+  const result = parsedData.flatMap(event => {
     try {
       // Override the establishment with the userName
       // Preserve establishment from GPT if available, otherwise fallback
@@ -2246,37 +3108,43 @@ function processEvents(parsedData, userName, facebookUrl, profilePicUrl, mediaUr
       // Handle additional location
       if (event.additionalLocation) {
         console.log(`processEvents: Event has additionalLocation: "${event.additionalLocation}"`);
-        
+
         const venueInfo = findVenueInContactInfo(event.additionalLocation);
-        
+
         if (venueInfo) {
           console.log(`processEvents: Found venue information for "${event.additionalLocation}"`);
-          
+
+          // CRITICAL: Mark this event as using a venue override
+          // This flag prevents updateContactInfoSheet from mixing post author (aggregator) URL
+          // with event venue establishment, which would pollute Contact Info with wrong URLs
+          event.isAggregatorPost = true;
+
           // Update establishment name
           const cleanedName = cleanVenueName(venueInfo.name);
           event.establishment = cleanedName;
-          
-          // Update Facebook URL
+
+          // Update Facebook URL (will be overwritten by addMetadata later with post author URL)
           if (venueInfo.facebookUrl) {
             event.cleanedFacebookUrl = venueInfo.facebookUrl;
           }
-          
+
           // Update address
           if (venueInfo.address) {
             const cleanedAddress = venueInfo.address.split('https://')[0].trim();
             event.address = cleanedAddress;
           }
-          
+
           // Update coordinates
           if (venueInfo.latitude) event.latitude = venueInfo.latitude;
           if (venueInfo.longitude) event.longitude = venueInfo.longitude;
-          
+
         } else {
           console.log(`processEvents: Venue "${event.additionalLocation}" not found. Recording as unrecognized.`);
-          
+
           const eventDetails = `${event.name} | ${event.startDate} ${event.startTime} | ${event.description}`;
           recordUnrecognizedVenue(event.additionalLocation, userName, eventDetails);
-          
+
+          skippedUnrecognizedVenue++;
           return []; // Skip this event
         }
       }
@@ -2298,6 +3166,17 @@ function processEvents(parsedData, userName, facebookUrl, profilePicUrl, mediaUr
       return [];
     }
   });
+
+  // Attach skip count to first event for pipeline tracking
+  if (result.length > 0) {
+    result[0]._skippedUnrecognizedVenue = skippedUnrecognizedVenue;
+  }
+
+  if (skippedUnrecognizedVenue > 0) {
+    console.log(`processEvents: ${skippedUnrecognizedVenue} event(s) skipped due to unrecognized venue`);
+  }
+
+  return result;
 }
 
 function addMetadata(event, profilePicUrl, mediaUrl, facebookUrl, sharedPostThumbnail, extractedData) {

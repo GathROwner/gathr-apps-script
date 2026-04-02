@@ -5,7 +5,7 @@
 // Add to existing FEATURE_FLAGS object
 // const FEATURE_FLAGS = {
 //   USE_GPT_FUNCTION_CALLING: PropertiesService.getScriptProperties().getProperty('USE_GPT_FUNCTION_CALLING') === 'true',
-//   USE_ENHANCED_DUPLICATE_DETECTION: PropertiesService.getScriptProperties().getProperty('USE_ENHANCED_DUPLICATE_DETECTION') === 'true',
+  USE_ENHANCED_DUPLICATE_DETECTION: PropertiesService.getScriptProperties().getProperty('USE_ENHANCED_DUPLICATE_DETECTION') === 'true',
 //   USE_OPTIMIZED_IMAGE_HANDLING: PropertiesService.getScriptProperties().getProperty('USE_OPTIMIZED_IMAGE_HANDLING') === 'true'
 // };
 
@@ -241,19 +241,69 @@ function retrieveExistingRecord(matchInfo, destinationSheet, currentRunEntries) 
 function retrieveRecordFromSheet(rowIndex, sheet) {
   try {
     console.log(`retrieveRecordFromSheet: Retrieving record from row ${rowIndex}`);
-    
+
+    // Map sheet header names to camelCase property names used internally
+    const headerToCamelCase = {
+      'Event?': 'isEvent',
+      'Food Special?': 'isFoodSpecial',
+      'Recurring?': 'isRecurring',
+      'Recurrence Pattern': 'recurringPattern',
+      'Category': 'category',
+      'Event Name': 'name',
+      'Description': 'description',
+      'Hosting Establishment': 'establishment',
+      'Address': 'address',
+      'Start Date': 'startDate',
+      'End Date': 'endDate',
+      'Start Time': 'startTime',
+      'End Time': 'endTime',
+      'Ticket Price': 'ticketPrice',
+      'Icon': 'icon',
+      'Image': 'image',
+      'Profile Url': 'cleanedFacebookUrl',
+      'SharedPostThumbnail': 'sharedPostThumbnail',
+      'Operating Hours': 'operatingHours',
+      'Rating': 'rating',
+      'Reviews': 'reviews',
+      'Link to Event / Tickets': 'ticketLink',
+      'latitude': 'latitude',
+      'longitude': 'longitude',
+      'City Address': 'city',
+      'Street Address': 'streetAddress',
+      'organizedBy': 'organizedBy',
+      'usersResponded': 'usersResponded',
+      'utcStartDate': 'utcStartDate',
+      'ticketsBuyUrl': 'ticketsBuyUrl',
+      'ticketProvider': 'ticketProvider',
+      'Event ID': 'id',
+      'RelevantImageUrlColumn': 'relevantImageUrl',
+      'likes': 'likes',
+      'shares': 'shares',
+      'comments': 'comments',
+      'topReactionsCount': 'topReactionsCount',
+      'Sub Venue': 'venue',
+      'Time Meta': 'timeMeta',
+      'Resolved Start Time Note': 'resolvedStartTimeNote',
+      'Resolved End Time Note': 'resolvedEndTimeNote',
+      'Operating Hours (JSON)': 'operatingHoursJson',
+      'Place ID': 'placeId'
+    };
+
     // Get the header row to determine field positions
     const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
-    
+
     // Get the data row
     const dataRow = sheet.getRange(rowIndex, 1, 1, sheet.getLastColumn()).getValues()[0];
-    
-    // Create object mapping header names to data values
+
+    // Create object mapping camelCase property names to data values
     const record = {};
     headers.forEach((header, index) => {
-      record[header] = dataRow[index];
+      const key = headerToCamelCase[header] || header;
+      if (key) {
+        record[key] = dataRow[index];
+      }
     });
-    
+
     console.log(`retrieveRecordFromSheet: Successfully retrieved record from row ${rowIndex}`);
     return record;
   } catch (error) {
@@ -533,13 +583,14 @@ Provide your determination in this format:
   "fieldsToUpdate": ["field1", "field2"]
 }`;
 
-  // Create the function schema for GPT
+  // Create the function schema for GPT (with additionalProperties for strict mode)
   const functionSchema = [
     {
       "name": "assessEventDuplication",
       "description": "Determine if two events are the same event with updates or distinct events",
       "parameters": {
         "type": "object",
+        "additionalProperties": false,
         "properties": {
           "sameCoreEvent": {
             "type": "boolean",
@@ -572,18 +623,23 @@ Provide your determination in this format:
   ];
 
   try {
-    // Prepare the API payload
+    // Convert legacy function schema to Responses API tools format
+    const tools = functionSchema.map(fn => ({
+      type: 'function',
+      name: fn.name,
+      description: fn.description,
+      parameters: fn.parameters,
+      strict: true
+    }));
+
+    // Prepare the API payload (Responses API format)
     const payload = {
-      'model': 'gpt-4o-mini',
-      'messages': [
-        {
-          'role': 'user',
-          'content': prompt
-        }
-      ],
-      'functions': functionSchema,
-      'function_call': { 'name': 'assessEventDuplication' },
-      'max_tokens': 16384
+      'model': MODEL_CONFIG.REASONING_MODEL,
+      'input': prompt,
+      'tools': tools,
+      'tool_choice': { 'type': 'function', 'name': 'assessEventDuplication' },
+      'max_output_tokens': 16384,
+      'reasoning': { 'effort': MODEL_CONFIG.REASONING_EFFORT }
     };
 
     // Prepare the request options
@@ -596,9 +652,9 @@ Provide your determination in this format:
       },
       'muteHttpExceptions': true
     };
-    
-    console.log('assessEventsWithGpt: Sending request to OpenAI API');
-    const response = UrlFetchApp.fetch('https://api.openai.com/v1/chat/completions', options);
+
+    console.log(`assessEventsWithGpt: Sending request to OpenAI Responses API (model: ${MODEL_CONFIG.REASONING_MODEL})`);
+    const response = UrlFetchApp.fetch('https://api.openai.com/v1/responses', options);
     const responseCode = response.getResponseCode();
     const responseBody = response.getContentText();
 
@@ -608,16 +664,19 @@ Provide your determination in this format:
     }
 
     const json = JSON.parse(responseBody);
-    
-    if (json.choices[0].message.function_call) {
-      console.log('assessEventsWithGpt: Received function call response');
-      const functionArgs = JSON.parse(json.choices[0].message.function_call.arguments);
-      console.log('assessEventsWithGpt: Parsed assessment:', JSON.stringify(functionArgs, null, 2));
-      return functionArgs;
-    } else {
-      console.log('assessEventsWithGpt: No function call in response');
-      return null;
+
+    // Parse Responses API format
+    if (json.output && json.output.length) {
+      const tool = json.output.find(it => it.type === 'tool_call' && it.name === 'assessEventDuplication');
+      if (tool && tool.arguments) {
+        console.log('assessEventsWithGpt: Received tool call response');
+        const functionArgs = JSON.parse(tool.arguments);
+        console.log('assessEventsWithGpt: Parsed assessment:', JSON.stringify(functionArgs, null, 2));
+        return functionArgs;
+      }
     }
+    console.log('assessEventsWithGpt: No tool_call in response');
+    return null;
   } catch (error) {
     console.error(`assessEventsWithGpt: Error assessing events: ${error}`);
     console.error(`assessEventsWithGpt: Error stack: ${error.stack}`);
@@ -712,11 +771,13 @@ function createRecordComparisonSchema() {
       "description": "Compare two event records and recommend updates",
       "parameters": {
         "type": "object",
+        "additionalProperties": false,
         "properties": {
           "fields": {
             "type": "array",
             "items": {
               "type": "object",
+              "additionalProperties": false,
               "properties": {
                 "fieldName": {
                   "type": "string",
@@ -755,7 +816,7 @@ function createRecordComparisonSchema() {
             "description": "Strategy to use for social engagement metrics (likes, shares, comments, topReactionsCount)"
           }
         },
-        "required": ["fields", "imagePreference", "imageReason", "overallAssessment"]
+        "required": ["fields", "imagePreference", "imageReason", "overallAssessment", "socialMetricsStrategy"]
       }
     }
   ];
@@ -852,18 +913,24 @@ For images, determine if the new image is likely to be better than the existing 
 
 Provide reasons for each recommendation.`;
 
-  // Prepare API call
+  // Convert schema to tools format for Responses API
+  const schema = createRecordComparisonSchema();
+  const tools = schema.map(fn => ({
+    type: 'function',
+    name: fn.name,
+    description: fn.description,
+    parameters: fn.parameters,
+    strict: true
+  }));
+
+  // Prepare API call (Responses API format)
   const payload = {
-    'model': 'gpt-4o-mini',
-    'messages': [
-      {
-        'role': 'user',
-        'content': prompt
-      }
-    ],
-    'max_tokens': 16384,
-    'functions': createRecordComparisonSchema(),
-    'function_call': { 'name': 'compareEventRecords' }
+    'model': MODEL_CONFIG.REASONING_MODEL,
+    'input': prompt,
+    'tools': tools,
+    'tool_choice': { 'type': 'function', 'name': 'compareEventRecords' },
+    'max_output_tokens': 16384,
+    'reasoning': { 'effort': MODEL_CONFIG.REASONING_EFFORT }
   };
 
   const options = {
@@ -877,8 +944,8 @@ Provide reasons for each recommendation.`;
   };
 
   try {
-    console.log('compareRecordsWithGPT: Sending request to OpenAI API');
-    const response = UrlFetchApp.fetch('https://api.openai.com/v1/chat/completions', options);
+    console.log(`compareRecordsWithGPT: Sending request to OpenAI Responses API (model: ${MODEL_CONFIG.REASONING_MODEL})`);
+    const response = UrlFetchApp.fetch('https://api.openai.com/v1/responses', options);
     const responseCode = response.getResponseCode();
     const responseBody = response.getContentText();
 
@@ -888,21 +955,49 @@ Provide reasons for each recommendation.`;
     }
 
     const json = JSON.parse(responseBody);
-    
-    if (json.choices[0].message.function_call) {
-      console.log('compareRecordsWithGPT: Received function call response');
-      const functionArgs = JSON.parse(json.choices[0].message.function_call.arguments);
-      console.log('compareRecordsWithGPT: Parsed function arguments:', JSON.stringify(functionArgs, null, 2));
-      return functionArgs;
+
+    // Log raw response structure for debugging gpt-5 compatibility
+    console.log('compareRecordsWithGPT: Raw response status:', json.status);
+    console.log('compareRecordsWithGPT: Raw response output types:', JSON.stringify(
+      (json.output || []).map(it => ({ type: it.type, name: it.name || 'N/A', hasArguments: !!it.arguments }))
+    ));
+    // Log truncated full response (avoid exceeding Apps Script log limits)
+    const rawResponseStr = JSON.stringify(json, null, 2);
+    if (rawResponseStr.length > 5000) {
+      console.log('compareRecordsWithGPT: Full raw response (truncated):', rawResponseStr.substring(0, 5000) + '...[TRUNCATED]');
     } else {
-      console.log('compareRecordsWithGPT: No function call in response, using text response');
-      return {
-        fields: [],
-        imagePreference: 'keep_existing',
-        imageReason: 'Unable to compare images',
-        overallAssessment: 'Failed to get structured comparison. Defaulting to keeping existing record.'
-      };
+      console.log('compareRecordsWithGPT: Full raw response:', rawResponseStr);
     }
+
+    // Parse Responses API format
+    if (json.output && json.output.length) {
+      // Try standard Responses API tool_call format
+      let tool = json.output.find(it => it.type === 'tool_call' && it.name === 'compareEventRecords');
+
+      // Fallback: check for function_call type (gpt-5 may use different type string)
+      if (!tool) {
+        tool = json.output.find(it => it.type === 'function_call' && it.name === 'compareEventRecords');
+      }
+
+      // Fallback: check any output item with matching function name regardless of type
+      if (!tool) {
+        tool = json.output.find(it => it.name === 'compareEventRecords');
+      }
+
+      if (tool && tool.arguments) {
+        console.log('compareRecordsWithGPT: Received tool call response (type: ' + tool.type + ')');
+        const functionArgs = JSON.parse(tool.arguments);
+        console.log('compareRecordsWithGPT: Parsed function arguments:', JSON.stringify(functionArgs, null, 2));
+        return functionArgs;
+      }
+    }
+    console.log('compareRecordsWithGPT: No tool_call in response, using fallback');
+    return {
+      fields: [],
+      imagePreference: 'keep_existing',
+      imageReason: 'Unable to compare images',
+      overallAssessment: 'Failed to get structured comparison. Defaulting to keeping existing record.'
+    };
   } catch (error) {
     console.error(`compareRecordsWithGPT: Error comparing records: ${error}`);
     console.error(`compareRecordsWithGPT: Error stack: ${error.stack}`);
@@ -944,6 +1039,8 @@ function shouldTriggerGptAssessment(newData, existingData) {
 
 function formatDate(dateString) {
   if (!dateString) return '';
+  // Handle recurring dates - don't convert them
+  if (dateString === 'recurring') return 'recurring';
   const date = new Date(dateString);
   return Utilities.formatDate(date, 'UTC', 'yyyy-MM-dd');
 }
@@ -1001,67 +1098,69 @@ function formatTime(timeString) {
   // If timeString is a Date object, extract time components directly
   if (timeString instanceof Date) {
     const date = timeString;
-    const hours = date.getHours();
+    const hours24 = date.getHours();
     const minutes = date.getMinutes();
     const seconds = date.getSeconds();
 
-    const period = hours >= 12 ? 'PM' : 'AM';
-    const adjustedHours = hours % 12 || 12; // Convert 0 to 12
+    const period = hours24 >= 12 ? 'PM' : 'AM';
+    const hours12 = hours24 % 12 || 12; // Convert 0 to 12
 
     // Use 12-hour format consistently with AM/PM
-    return `${adjustedHours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')} ${period}`;
+    return `${hours12.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')} ${period}`;
   }
 
   // Normalize input
-  if (typeof timeString !== 'string') {
-    timeString = timeString.toString();
-  }
-  
-  timeString = timeString.trim().toUpperCase();
+  let s = String(timeString).trim();
+  if (!s) return '';
 
-  // Try to parse timeString as a Date object
-  const date = new Date(timeString);
-  if (!isNaN(date.getTime())) {
-    const hours = date.getHours();
-    const minutes = date.getMinutes();
-    const seconds = date.getSeconds();
+  // Fast-path for common sentinel values
+  if (/^(unknown|n\/a|na|null)$/i.test(s)) return '';
 
-    const period = hours >= 12 ? 'PM' : 'AM';
-    const adjustedHours = hours % 12 || 12;
+  // Normalize whitespace and AM/PM punctuation
+  s = s.replace(/\u00A0/g, ' ').trim().toUpperCase().replace(/\./g, '');
 
-    // Use 12-hour format consistently
-    return `${adjustedHours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')} ${period}`;
+  // Try to parse strings that include a date component (avoid treating plain times as dates)
+  const parsedDate = new Date(s);
+  if (!isNaN(parsedDate.getTime()) && (/[T\-\/]/.test(s) || /\d{4}/.test(s))) {
+    const hours24 = parsedDate.getHours();
+    const minutes = parsedDate.getMinutes();
+    const seconds = parsedDate.getSeconds();
+
+    const period = hours24 >= 12 ? 'PM' : 'AM';
+    const hours12 = hours24 % 12 || 12;
+
+    return `${hours12.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')} ${period}`;
   }
-  
-  // Handle existing 12-hour format with AM/PM
-  if (timeString.includes('AM') || timeString.includes('PM')) {
-    // If already in 12-hour format, standardize formatting
-    const timeParts = timeString.split(' ');
-    const timeComponent = timeParts[0];
-    const period = timeParts[1];
-    
-    let [hours, minutes, seconds] = timeComponent.split(':');
-    hours = parseInt(hours, 10).toString().padStart(2, '0');
-    minutes = (minutes ? parseInt(minutes, 10) : 0).toString().padStart(2, '0');
-    seconds = (seconds ? parseInt(seconds, 10) : 0).toString().padStart(2, '0');
-    
-    return `${hours}:${minutes}:${seconds} ${period}`;
+
+  // Handle 12-hour formats with AM/PM (supports "10PM", "10 PM", "10:30pm", "10:30:00 PM", etc.)
+  const m12 = s.match(/^(\d{1,2})(?::([0-5]\d))?(?::([0-5]\d))?\s*(AM|PM)$/i);
+  if (m12) {
+    let hours = parseInt(m12[1], 10);
+    const minutes = parseInt(m12[2] || '0', 10);
+    const seconds = parseInt(m12[3] || '0', 10);
+    const period = String(m12[4]).toUpperCase();
+
+    // Keep hours in 1-12 range
+    if (hours <= 0) hours = 12;
+    if (hours > 12) hours = hours % 12 || 12;
+
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')} ${period}`;
   }
-  
-  // Handle 24-hour format inputs
-  if (timeString.includes(':')) {
-    let [hours, minutes, seconds] = timeString.split(':');
-    hours = parseInt(hours, 10);
-    minutes = minutes ? parseInt(minutes, 10) : 0;
-    seconds = seconds ? parseInt(seconds, 10) : 0;
-    
-    const period = hours >= 12 ? 'PM' : 'AM';
-    const adjustedHours = hours % 12 || 12;
-    
-    return `${adjustedHours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')} ${period}`;
+
+  // Handle 24-hour formats like "H:MM", "HH:MM", or "HH:MM:SS"
+  const m24 = s.match(/^([01]?\d|2[0-3]):([0-5]\d)(?::([0-5]\d))?$/);
+  if (m24) {
+    const hours24 = parseInt(m24[1], 10);
+    const minutes = parseInt(m24[2], 10);
+    const seconds = parseInt(m24[3] || '0', 10);
+
+    const period = hours24 >= 12 ? 'PM' : 'AM';
+    const hours12 = hours24 % 12 || 12;
+
+    return `${hours12.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')} ${period}`;
   }
-  
-  return timeString; // Return original if no format matched
+
+  return s; // Return normalized input if no format matched
 }
 
 
@@ -1234,9 +1333,9 @@ function isDuplicateEntry(newData, existingData) {
   const normNewSub      = normalize(newAdditionalLocation).replace(/\s*\|\s*charlottetown\s+pe\b/i, '');
 
   if (normExistingSub !== normNewSub) {
-    console.log(`🏢 [DupCheck:SubVenue] Different additional locations → NOT DUP
-    ↳ existing(eventId=${existingEventId}) = "${existingAdditionalLocation}" → "${normExistingSub}"
-    ↳ new = "${newAdditionalLocation}" → "${normNewSub}"`);
+    // console.log(`🏢 [DupCheck:SubVenue] Different additional locations → NOT DUP
+    // ↳ existing(eventId=${existingEventId}) = "${existingAdditionalLocation}" → "${normExistingSub}"
+    // ↳ new = "${newAdditionalLocation}" → "${normNewSub}"`);
     return false;
   }
 }
@@ -1278,6 +1377,27 @@ function isDuplicateEntry(newData, existingData) {
   const existingStartDateRaw = (existingData && (existingData.startDate || existingData[9])) || '';
   const newStartDateRaw = (newData && newData.startDate) || '';
   const datesAppearEqual = (formatDate ? (formatDate(existingStartDateRaw) === formatDate(newStartDateRaw)) : (existingStartDateRaw === newStartDateRaw));
+  const formattedExistingTime = formatTime(existingData && (existingData.startTime || existingData[11]));
+  const formattedNewTime = formatTime(newData && newData.startTime);
+  const startTimeMatch = formattedExistingTime && formattedNewTime ? (formattedExistingTime === formattedNewTime) : false;
+  const startTimeStatus = formattedExistingTime && formattedNewTime
+    ? (startTimeMatch ? 'Start Time MATCH' : 'Start Time mismatch')
+    : (formattedExistingTime || formattedNewTime ? 'Start Time partial' : 'Start Time missing');
+  const startDateStatus = datesAppearEqual ? 'Start Date MATCH' : 'Start Date mismatch';
+  const metaReason = !datesAppearEqual
+    ? 'dates differ'
+    : (!formattedExistingTime || !formattedNewTime)
+      ? 'missing time data'
+      : (!startTimeMatch ? 'time mismatch' : 'moving to similarity');
+  const matchSymbol = metaReason === 'moving to similarity' ? '✅ ' : '';
+  const existingRowNumber = existingData && (
+    existingData.__sourceSheetRow ||
+    existingData.__rowIndex ||
+    existingData.rowIndex ||
+    existingData._sheetRowIndex
+  );
+  const rowLabel = existingRowNumber ? `Row ${existingRowNumber}` : 'Row unknown';
+  const establishmentStatus = (cmpExistingEstablishment === cmpNewEstablishment) ? 'Establishment MATCH' : 'Establishment mismatch';
 
   // Per-new-item throttle: only log first 3 mismatches; always log matches & sub-venue conflicts
   if (typeof newData.__estLogCount === 'undefined') newData.__estLogCount = 0;
@@ -1290,22 +1410,16 @@ function isDuplicateEntry(newData, existingData) {
     || (newData.__estLogCount < 3);
 
   if (shouldLogThisComparison) {
-  console.log(`🏛️ [DupCheck:Establishment]
-  ↳ existing(eventId=${existingEventId}) [source=establishment] raw="${rawExistingEstablishment}" | norm="${normalizedExistingEstablishment}"
-  ↳ new [source=${newEstablishmentSource}] raw="${rawNewEstablishment}" | norm="${normalizedNewEstablishment}"
-  ↳ cmpExisting="${cmpExistingEstablishment}" cmpNew="${cmpNewEstablishment}"
-  ↳ match=${cmpExistingEstablishment === cmpNewEstablishment}
-  ↳ datesEqual=${datesAppearEqual}`);
-}
+    console.log(`${matchSymbol}[DupCheck:Establishment] MATCH (cmp) | ${rowLabel} | ${establishmentStatus} | ${startDateStatus} | ${startTimeStatus} | reason=${metaReason}`);
+  }
+
 
 
 
   if (cmpExistingEstablishment !== cmpNewEstablishment) {
-  if (shouldLogThisComparison) console.log('❌ [DupCheck:Establishment] MISMATCH → NOT DUP (cmp)');
+  // if (shouldLogThisComparison) console.log('❌ [DupCheck:Establishment] MISMATCH → NOT DUP (cmp)');
   newData.__estLogCount++;
   return false; // Not the same venue
-} else {
-  console.log('✅ [DupCheck:Establishment] MATCH (cmp)');
 }
 
 
@@ -1321,9 +1435,9 @@ function isDuplicateEntry(newData, existingData) {
   if (existingStartDate !== newStartDate) {
     // Log only a sample of date mismatches
     if (newData.__dupTimeLogCount < 5) {
-      console.log(`📅 [DupCheck:Date] NOT DUP (date mismatch)
-      ↳ existing="${existingStartDate}" (raw="${existingStartDateRaw2}")
-      ↳ new     ="${newStartDate}" (raw="${newStartDateRaw2}")`);
+      // console.log(`📅 [DupCheck:Date] NOT DUP (date mismatch)
+      // ↳ existing="${existingStartDate}" (raw="${existingStartDateRaw2}")
+      // ↳ new     ="${newStartDate}" (raw="${newStartDateRaw2}")`);
       newData.__dupTimeLogCount++;
     }
     return false;
@@ -1391,17 +1505,17 @@ function isDuplicateEntry(newData, existingData) {
   const denom = Math.max(exTokens.size, nwTokens.size) || 1;
   const approxSimilarity = overlap / denom;
 
-  console.log(`⏱️ [DupCheck:Time]
-  ↳ exStart="${exStart}" exEnd="${exEnd}" | newStart="${nwStart}" newEnd="${nwEnd}"
-  ↳ timeEqual=${timeEqual} minutesDiff=${minutesDiff} looksAdjacent=${looksAdjacent}
-  ↳ thresholdUsed=${thresholdUsed === null ? '>3h (none)' : thresholdUsed}`);
+  // console.log(`⏱️ [DupCheck:Time]
+  // ↳ exStart="${exStart}" exEnd="${exEnd}" | newStart="${nwStart}" newEnd="${nwEnd}"
+  // ↳ timeEqual=${timeEqual} minutesDiff=${minutesDiff} looksAdjacent=${looksAdjacent}
+  // ↳ thresholdUsed=${thresholdUsed === null ? '>3h (none)' : thresholdUsed}`);
 
   if (thresholdUsed !== null) {
-    console.log(`🧮 [DupCheck:Similarity] approx=${approxSimilarity.toFixed(3)} (threshold=${thresholdUsed})
-    ↳ exName="${exName}"
-    ↳ newName="${nwName}"`);
+    // console.log(`🧮 [DupCheck:Similarity] approx=${approxSimilarity.toFixed(3)} (threshold=${thresholdUsed})
+    // ↳ exName="${exName}"
+    // ↳ newName="${nwName}"`);
   } else {
-    console.log('🧮 [DupCheck:Similarity] skipped (start times > 3 hours apart)');
+    // console.log('🧮 [DupCheck:Similarity] skipped (start times > 3 hours apart)');
   }
 
   newData.__dupTimeLogCount++;
@@ -1411,9 +1525,60 @@ function isDuplicateEntry(newData, existingData) {
   }
 
 
+  // --- Step 2.5: Missing start time bypass ---
+  // If either record has no start time, we can't compare times.
+  // Instead, use name/description similarity with a strict threshold (0.7)
+  // to determine if it's the same event (same establishment + same date is already confirmed).
+  const existingStartTimeRaw = (existingData && (existingData.startTime || existingData[11])) || '';
+  const newStartTimeRaw = (newData && newData.startTime) || '';
+
+  // Check if the raw time value is genuinely empty/blank (not just "00:00")
+  const isTimeEmpty = (raw) => {
+    if (!raw) return true;
+    const s = String(raw).trim();
+    if (s === '' || /^(unknown|n\/a|na|null|none)$/i.test(s)) return true;
+    return false;
+  };
+
+  const existingTimeIsEmpty = isTimeEmpty(existingStartTimeRaw);
+  const newTimeIsEmpty = isTimeEmpty(newStartTimeRaw);
+
+  if (existingTimeIsEmpty || newTimeIsEmpty) {
+    const whichEmpty = existingTimeIsEmpty ? 'existing' : 'new';
+    console.log(`[DupCheck:MissingTime] ${whichEmpty} record has no start time — bypassing time comparison`);
+
+    // Use name/description similarity with strict threshold
+    const estFallbackExisting = (rawExistingEstablishment || '').replace(/\s*\|\s*charlottetown\s+pe\b/i, '');
+    const estFallbackNew = (effectiveNewEstablishment || '').replace(/\s*\|\s*charlottetown\s+pe\b/i, '');
+
+    // Compute food detection locally (the main existingIsFood/newIsFood are declared later)
+    const foodCatRe = /(happy hour|wing night|food special|drink special)/i;
+    const existingCat = (existingData && (existingData.category || existingData[4])) || '';
+    const newCat = (newData && newData.category) || '';
+    const localExistingIsFood = foodCatRe.test(existingCat) ||
+      String((existingData && (existingData.isFoodSpecial || existingData[1])) || '').toLowerCase() === 'yes';
+    const localNewIsFood = foodCatRe.test(newCat) ||
+      String((newData && newData.isFoodSpecial) || '').toLowerCase() === 'yes';
+
+    const useVenueFallback = !(localExistingIsFood && localNewIsFood);
+    const existingDescForSim = (existingData.description || existingData[6] || (useVenueFallback ? estFallbackExisting : ''));
+    const newDescForSim = (newData.description || (useVenueFallback ? estFallbackNew : ''));
+
+    const existingCombinedName = normalize(((existingData.name || existingData[5]) || '') + ' - ' + (existingDescForSim || ''));
+    const newCombinedName = normalize(((newData.name || '') + ' - ' + (newDescForSim || '')));
+
+    const similarityRatio = isSimilarName(existingCombinedName, newCombinedName, '', '', true);
+
+    if (similarityRatio >= 0.7) {
+      console.log(`✅ [DupCheck:MissingTime] Names similar enough (${similarityRatio.toFixed(3)} >= 0.7) → DUPLICATE (will fill in missing time)`);
+      return true;
+    } else {
+      console.log(`❌ [DupCheck:MissingTime] Names too different (${similarityRatio.toFixed(3)} < 0.7) → NOT DUP`);
+      return false;
+    }
+  }
+
   // --- Step 3: Time comparison setup ---
-  const formattedExistingTime = formatTime(existingData.startTime || existingData[11]); // <-- 11 = Start Time
-  const formattedNewTime = formatTime(newData.startTime);
 
   let [existingHours, existingMinutes] = parseTimeString(existingData.startTime, formattedExistingTime);
   let [newHours, newMinutes] = parseTimeString(newData.startTime, formattedNewTime);
@@ -1436,6 +1601,52 @@ function isDuplicateEntry(newData, existingData) {
   const normalizedExistingEndTime = `${existingEndHours.toString().padStart(2, '0')}:${existingEndMinutes.toString().padStart(2, '0')}`;
   const normalizedNewEndTime = `${newEndHours.toString().padStart(2, '0')}:${newEndMinutes.toString().padStart(2, '0')}`;
 
+    // --- Food specials: do NOT dedupe different item names on same date/time ---
+  const existingCategory = (existingData && (existingData.category || existingData[4])) || '';
+  const newCategory = (newData && newData.category) || '';
+  const foodCategoryRe = /(happy hour|wing night|food special|drink special)/i;
+
+  const existingNameOnly = normalize(((existingData && (existingData.name || existingData[5])) || ''));
+  const newNameOnly = normalize(((newData && newData.name) || ''));
+
+  // Enhanced food special detection using keywords in addition to category
+  const foodKeywordsRe = /\b(wrap|soup|burger|pizza|wings|sandwich|salad|taco|tacos|fries|special|appetizer|entree|dinner|lunch|breakfast|brunch|steak|chicken|fish|seafood|pasta|nachos|quesadilla|burrito|poutine|platter|ribs)\b/i;
+
+  const existingDescText = (existingData && (existingData.description || existingData[6])) || '';
+  const newDescText = (newData && newData.description) || '';
+
+  const existingHasFoodKeywords = foodKeywordsRe.test(existingNameOnly) || foodKeywordsRe.test(existingDescText);
+  const newHasFoodKeywords = foodKeywordsRe.test(newNameOnly) || foodKeywordsRe.test(newDescText);
+
+  const existingIsFood = foodCategoryRe.test(existingCategory) ||
+    String((existingData && (existingData.isFoodSpecial || existingData[1])) || '').toLowerCase() === 'yes' ||
+    existingHasFoodKeywords;
+  const newIsFood = foodCategoryRe.test(newCategory) ||
+    String((newData && newData.isFoodSpecial) || '').toLowerCase() === 'yes' ||
+    newHasFoodKeywords;
+
+  if (existingIsFood && newIsFood && existingNameOnly && newNameOnly && existingNameOnly !== newNameOnly) {
+    // Check if the names share significant keywords (3+ chars) - if so, they might be the same special
+    const getKeywords = (str) => String(str || '').split(/\s+/).filter(w => w.length >= 3);
+    const existingKeywords = getKeywords(existingNameOnly);
+    const newKeywords = getKeywords(newNameOnly);
+    const sharedKeywords = existingKeywords.filter(ew => newKeywords.some(nw => ew.includes(nw) || nw.includes(ew)));
+
+    if (sharedKeywords.length > 0) {
+      // console.log('🍔 [DupCheck:FoodSpecial] Different names but shared keywords — checking similarity');
+      console.log(`  ↳ existing: "${existingNameOnly}"`);
+      console.log(`  ↳ new: "${newNameOnly}"`);
+      console.log(`  ↳ sharedKeywords=[${sharedKeywords.join(', ')}] — allowing normal dup check to proceed`);
+      // Fall through to normal similarity checking
+    } else {
+      // console.log('🍔 [DupCheck:FoodSpecial] Different special names on same date/time — NOT DUP');
+      console.log(`  ↳ existing: "${existingNameOnly}" (category="${existingCategory}", hasKeywords=${existingHasFoodKeywords})`);
+      console.log(`  ↳ new: "${newNameOnly}" (category="${newCategory}", hasKeywords=${newHasFoodKeywords})`);
+      return false;
+    }
+  }
+
+
 
   // --- Step 5: If start times match exactly, compare name/description ---
 // Add venue as a fallback when a description is missing to improve similarity on terse posts
@@ -1443,14 +1654,23 @@ function isDuplicateEntry(newData, existingData) {
     const estFallbackExisting = (rawExistingEstablishment || '').replace(/\s*\|\s*charlottetown\s+pe\b/i, '');
     const estFallbackNew = (effectiveNewEstablishment || '').replace(/\s*\|\s*charlottetown\s+pe\b/i, '');
 
-    const existingDescOrFallback = (existingData.description || existingData[6] || estFallbackExisting);
-    const newDescOrFallback = (newData.description || estFallbackNew);
+    const useVenueFallback = !(existingIsFood && newIsFood);
+    const existingDescOrFallback = (existingData.description || existingData[6] || (useVenueFallback ? estFallbackExisting : ''));
+    const newDescOrFallback = (newData.description || (useVenueFallback ? estFallbackNew : ''));
 
     const existingCombinedName = normalize(((existingData.name || existingData[5]) || '') + ' - ' + (existingDescOrFallback || ''));
     const newCombinedName = normalize(((newData.name || '') + ' - ' + (newDescOrFallback || '')));
-    // Use the “min” denominator ONLY when start times are equal
-    if (isSimilarName(existingCombinedName, newCombinedName, '', '', true)) {
+
+    // Get actual similarity ratio and require minimum threshold
+    const similarityRatio = isSimilarName(existingCombinedName, newCombinedName, '', '', true);
+
+    // Require minimum 0.4 threshold even for exact time matches to prevent false positives
+    if (similarityRatio >= 0.4) {
+      console.log(`✅ [DupCheck:ExactTime] Names similar enough (${similarityRatio.toFixed(3)} >= 0.4) → DUPLICATE`);
       return true;
+    } else {
+      // console.log(`❌ [DupCheck:ExactTime] Names too different (${similarityRatio.toFixed(3)} < 0.4) → NOT DUP`);
+      return false;
     }
 
   } else {
@@ -1474,8 +1694,9 @@ function isDuplicateEntry(newData, existingData) {
       const estFallbackExisting = (rawExistingEstablishment || '').replace(/\s*\|\s*charlottetown\s+pe\b/i, '');
       const estFallbackNew = (effectiveNewEstablishment || '').replace(/\s*\|\s*charlottetown\s+pe\b/i, '');
 
-      const existingDescOrFallback = (existingData.description || existingData[6] || estFallbackExisting);
-      const newDescOrFallback = (newData.description || estFallbackNew);
+      const useVenueFallback = !(existingIsFood && newIsFood);
+      const existingDescOrFallback = (existingData.description || existingData[6] || (useVenueFallback ? estFallbackExisting : ''));
+      const newDescOrFallback = (newData.description || (useVenueFallback ? estFallbackNew : ''));
 
       const existingCombinedName = normalize(((existingData.name || existingData[5]) || '') + ' - ' + (existingDescOrFallback || ''));
       const newCombinedName = normalize(((newData.name || '') + ' - ' + (newDescOrFallback || '')));
