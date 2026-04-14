@@ -15,6 +15,8 @@ What it does:
 - builds `functions`
 - imports the compiled helper from `functions/lib/parsing/finalFormatter.js`
 - runs curated fixture cases from `fixtures/recurrence-normalization-fixtures.json`
+- includes a separate explicit-time regression runner for cases like `11-12PM` and standalone end-evidence recovery
+- includes a separate holiday-weekend regression runner for mixed finite specials like `Saturday from 4pm onwards, Sunday & Monday all day`
 - writes a JSON report under `tools/recurrence-regression/results/`
 - includes a live wet-run verifier driven by `fixtures/live-wet-cases.json`
 
@@ -26,6 +28,18 @@ What it does not do:
 
 The live wet-run verifier is separate and does touch Firestore.
 
+Audit interpretation:
+
+- the bucketed recurrence audit compares a row's final parser snapshot against Firestore docs that still carry that row's `uniqueId` prefix
+- divergence families are investigation leads, not a direct count of live user-visible bugs
+- `missing_in_firestore` can mean a true write miss, but it can also mean the row merged into an older keeper from a different post and therefore no longer appears under this row's `uniqueId` prefix
+- use the live integrity scan as the source of truth for confirmed active data problems
+- use the bucketed audit to separate parser-shape issues from write/merge landing issues
+
+Open follow-up note:
+
+- [PENDING_PARSER_HARDENING.md](C:/Users/craig/Dev/gathr-apps-script/tools/recurrence-regression/PENDING_PARSER_HARDENING.md)
+
 Run all fixtures:
 
 ```powershell
@@ -36,6 +50,18 @@ Run one fixture:
 
 ```powershell
 node tools/recurrence-regression/run-recurrence-regression.mjs --case redshores_homestyle_finite_fridays
+```
+
+Run the explicit-time fixture pack:
+
+```powershell
+node tools/recurrence-regression/run-explicit-time-regression.mjs
+```
+
+Run the holiday/weekend fixture pack:
+
+```powershell
+node tools/recurrence-regression/run-holiday-weekend-regression.mjs
 ```
 
 Run one live wet case:

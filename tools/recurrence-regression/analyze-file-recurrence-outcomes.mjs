@@ -419,6 +419,30 @@ async function main() {
   const report = {
     fileId,
     generatedAt: new Date().toISOString(),
+    interpretationNotes: [
+      'This audit compares the parser snapshot for each row against Firestore docs matched by that row\'s uniqueId prefix.',
+      'Divergence families are investigation leads, not a direct count of live user-visible bugs.',
+      'A missing_in_firestore divergence can mean the row merged into an older keeper from a different post or uniqueId, so the event may still exist correctly in Firestore.',
+      'Use the live integrity scan to measure definite active data issues; use this audit to separate parser-shape problems from write/merge landing problems.',
+    ],
+    divergenceReasonGuidance: {
+      missing_in_firestore:
+        'Snapshot produced a family that was not found under this row\'s uniqueId prefix in Firestore. This can be a true write miss or a merge into an older keeper.',
+      extra_in_firestore:
+        'Firestore still has a family under this row\'s uniqueId prefix that the latest snapshot did not produce. This often indicates stale older docs.',
+      time_set_mismatch:
+        'Snapshot and Firestore matched the same family, but the stored times differ.',
+      recurring_pattern_mismatch:
+        'Snapshot and Firestore matched the same family, but recurrence pattern differs.',
+      recurrence_shape_mismatch:
+        'Snapshot and Firestore disagree on whether the family is effectively recurring/collapsed versus one-off/split.',
+      doc_count_mismatch:
+        'Snapshot and Firestore matched the same family, but with different document counts.',
+      snapshot_collapsed_but_firestore_split:
+        'Snapshot collapsed a recurring family into one keeper, but Firestore still has multiple split docs.',
+      snapshot_split_but_firestore_collapsed:
+        'Snapshot emitted multiple one-offs, but Firestore only has one collapsed recurring keeper.',
+    },
     batchWindow: {
       startedAt: batchStates
         .map((entry) => timestampIso(entry.startedAt))

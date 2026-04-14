@@ -30,6 +30,8 @@ import {
   normalizeUrl,
 } from '../utils/similarity.js';
 import { getVenueAliasCandidates } from './venueAliases.js';
+import { pickCompatibleExactUniqueIdMatch } from './exactUniqueIdCompatibility.js';
+import { pickRecurringFamilyFallbackMatch } from './recurringFamilyFallback.js';
 
 // Initialize Firebase Admin if not already initialized
 if (!admin.apps.length) {
@@ -1965,6 +1967,43 @@ export async function findVenueManagedMediaFallbacks(
   return selected;
 }
 
+function extractUniqueIdRoot(value: unknown): string {
+  const normalized = String(value || '').trim();
+  if (!normalized) return '';
+  const separatorIndex = normalized.lastIndexOf('_');
+  if (separatorIndex <= 0) return normalized;
+  const suffix = normalized.slice(separatorIndex + 1);
+  if (!/^\d+$/.test(suffix)) return normalized;
+  return normalized.slice(0, separatorIndex);
+}
+
+function shouldSkipSiblingUniqueIdDuplicateCheck(
+  incoming: EventData,
+  existing: EventData
+): boolean {
+  const incomingUniqueId = String(incoming.uniqueId || '').trim();
+  const existingUniqueId = String(existing.uniqueId || '').trim();
+  if (!incomingUniqueId || !existingUniqueId || incomingUniqueId === existingUniqueId) {
+    return false;
+  }
+
+  const incomingRoot = extractUniqueIdRoot(incomingUniqueId);
+  const existingRoot = extractUniqueIdRoot(existingUniqueId);
+  if (!incomingRoot || incomingRoot !== existingRoot) return false;
+
+  const incomingStartDate = String(incoming.startDate || '').trim();
+  const existingStartDate = String(existing.startDate || '').trim();
+  if (!incomingStartDate || incomingStartDate !== existingStartDate) return false;
+
+  const incomingStartTime = String(incoming.startTime || '').trim();
+  const existingStartTime = String(existing.startTime || '').trim();
+  if (incomingStartTime && existingStartTime && incomingStartTime !== existingStartTime) {
+    return true;
+  }
+
+  return false;
+}
+
 /**
  * Check if an event is a duplicate
  */
@@ -1973,9 +2012,50 @@ export async function checkDuplicate(
   venueId: string,
   currentRunEntries: EventData[] = []
 ): Promise<{ isDuplicate: boolean; existingEvent?: EventData }> {
+  const normalizedUniqueId = String(event.uniqueId || '').trim();
+
+  if (normalizedUniqueId) {
+    const exactCurrentRunMatches = currentRunEntries.filter((existing) => {
+      const sameVenue = String(existing.venueId || '').trim() === String(venueId || '').trim();
+      if (!sameVenue) return false;
+      return String(existing.uniqueId || '').trim() === normalizedUniqueId;
+    });
+
+    const compatibleCurrentRunMatch = pickCompatibleExactUniqueIdMatch(event, exactCurrentRunMatches, {
+      venueId,
+    });
+    if (compatibleCurrentRunMatch) {
+      return { isDuplicate: true, existingEvent: compatibleCurrentRunMatch };
+    }
+
+    const exactUniqueIdSnapshot = await db
+      .collection(COLLECTIONS.VENUES)
+      .doc(venueId)
+      .collection(COLLECTIONS.EVENTS)
+      .where('uniqueId', '==', normalizedUniqueId)
+      .get();
+
+    if (!exactUniqueIdSnapshot.empty) {
+      const exactMatches = exactUniqueIdSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...(doc.data() as EventData),
+      }));
+      const compatibleExactMatch = pickCompatibleExactUniqueIdMatch(event, exactMatches, { venueId });
+      if (compatibleExactMatch) {
+        return {
+          isDuplicate: true,
+          existingEvent: compatibleExactMatch,
+        };
+      }
+    }
+  }
+
   // Check against current run entries first
   for (const existing of currentRunEntries) {
     const sameVenue = String(existing.venueId || '').trim() === String(venueId || '').trim();
+    if (sameVenue && shouldSkipSiblingUniqueIdDuplicateCheck(event, existing)) {
+      continue;
+    }
     if (isDuplicateEntry(event, existing, { requireEstablishmentMatch: !sameVenue })) {
       return { isDuplicate: true, existingEvent: existing };
     }
@@ -1988,8 +2068,63 @@ export async function checkDuplicate(
   });
 
   for (const existing of existingEvents) {
+    if (shouldSkipSiblingUniqueIdDuplicateCheck(event, existing)) {
+      continue;
+    }
     if (isDuplicateEntry(event, existing, { requireEstablishmentMatch: false })) {
       return { isDuplicate: true, existingEvent: existing };
+    }
+  }
+
+  const currentRunRecurringFallbackMatch = pickRecurringFamilyFallbackMatch(
+    event,
+    currentRunEntries,
+    {
+      venueId,
+    }
+  );
+  if (currentRunRecurringFallbackMatch) {
+    logger.info('Recurring-family fallback matched current-run keeper', {
+      venueId,
+      incomingUniqueId: event.uniqueId,
+      incomingTitle: event.eventName || event.name,
+      incomingStartDate: event.startDate,
+      existingUniqueId: currentRunRecurringFallbackMatch.uniqueId,
+      existingTitle: currentRunRecurringFallbackMatch.eventName || currentRunRecurringFallbackMatch.name,
+      existingStartDate: currentRunRecurringFallbackMatch.startDate,
+      existingEventId: currentRunRecurringFallbackMatch.id,
+    });
+    return { isDuplicate: true, existingEvent: currentRunRecurringFallbackMatch };
+  }
+
+  const fallbackAnchorDate = parseDateOnlyValue(event.startDate);
+  const fallbackWindowStart = fallbackAnchorDate ? addDaysToIsoDate(fallbackAnchorDate, -120) : null;
+  const fallbackWindowEnd = fallbackAnchorDate ? addDaysToIsoDate(fallbackAnchorDate, 21) : null;
+  if (fallbackWindowStart && fallbackWindowEnd) {
+    const recurringFallbackCandidates = await getVenueEvents(venueId, {
+      startDate: fallbackWindowStart,
+      endDate: fallbackWindowEnd,
+      limit: 250,
+    });
+
+    const recurringFallbackMatch = pickRecurringFamilyFallbackMatch(event, recurringFallbackCandidates, {
+      venueId,
+    });
+    if (recurringFallbackMatch) {
+      logger.info('Recurring-family fallback matched Firestore keeper', {
+        venueId,
+        incomingUniqueId: event.uniqueId,
+        incomingTitle: event.eventName || event.name,
+        incomingStartDate: event.startDate,
+        existingUniqueId: recurringFallbackMatch.uniqueId,
+        existingTitle: recurringFallbackMatch.eventName || recurringFallbackMatch.name,
+        existingStartDate: recurringFallbackMatch.startDate,
+        existingEventId: recurringFallbackMatch.id,
+      });
+      return {
+        isDuplicate: true,
+        existingEvent: recurringFallbackMatch,
+      };
     }
   }
 

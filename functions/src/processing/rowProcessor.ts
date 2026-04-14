@@ -375,7 +375,9 @@ export async function processRow(
     if (parserMode === 'full5stage') {
       let parserMediaUrls = normalizeUrlList(row.mediaUrls);
       const parserSharedPostThumbnails = normalizeUrlList(row.sharedPostThumbnails);
-      if (venue && !parserMediaUrls.some((url) => isStorageManagedUrl(url))) {
+      const hasUsableParserMedia =
+        parserMediaUrls.length > 0 || parserSharedPostThumbnails.length > 0;
+      if (venue && !hasUsableParserMedia) {
         const fallbackMediaUrls = await firestoreService.findVenueManagedMediaFallbacks(
           venue.id,
           combinedText,
@@ -2152,6 +2154,7 @@ function buildDuplicateEventUpdates(
   }
 
   const newerSourceTimestamp = selectNewerDate(existing.sourceTimestamp, incoming.sourceTimestamp);
+  const hasNewerSourceTimestamp = Boolean(newerSourceTimestamp);
   if (newerSourceTimestamp) {
     setField('sourceTimestamp', newerSourceTimestamp);
   }
@@ -2182,14 +2185,35 @@ function buildDuplicateEventUpdates(
     setField('mediaUrls', mergedMediaUrls);
   }
 
-  const promoteImages = descriptionImproved || timeImproved;
+  const normalizedIncomingMediaUrls = normalizeUrlList(incoming.mediaUrls);
+  const incomingPreferredMediaUrl =
+    normalizedIncomingMediaUrls.find((url) => isStorageManagedUrl(url)) ||
+    normalizedIncomingMediaUrls[0] ||
+    '';
+  const canonicalIncomingImage =
+    asTrimmedString(incoming.image) || incomingPreferredMediaUrl;
+  const canonicalIncomingRelevantImage =
+    asTrimmedString(incoming.relevantImageUrl) ||
+    canonicalIncomingImage ||
+    incomingPreferredMediaUrl;
 
-  if (shouldReplaceImageUrl(existing.relevantImageUrl, incoming.relevantImageUrl, promoteImages)) {
-    setField('relevantImageUrl', incoming.relevantImageUrl);
+  const promoteImages =
+    descriptionImproved ||
+    timeImproved ||
+    shouldPromoteCanonicalImageFromNewerDuplicate(existing, incoming, hasNewerSourceTimestamp);
+
+  if (
+    shouldReplaceImageUrl(
+      existing.relevantImageUrl,
+      canonicalIncomingRelevantImage,
+      promoteImages
+    )
+  ) {
+    setField('relevantImageUrl', canonicalIncomingRelevantImage);
   }
 
-  if (shouldReplaceImageUrl(existing.image, incoming.image, promoteImages)) {
-    setField('image', incoming.image);
+  if (shouldReplaceImageUrl(existing.image, canonicalIncomingImage, promoteImages)) {
+    setField('image', canonicalIncomingImage);
   }
 
   if (shouldReplaceIconUrl(existing.icon, incoming.icon)) {
@@ -2822,6 +2846,21 @@ function incomingRepresentsOccurrenceLocalSpan(
 }
 
 function shouldReplaceEndDateField(existingEvent: EventData, incomingEvent: EventData): boolean {
+  const existingStartDate = normalizeIsoDateValue(existingEvent.startDate);
+  const incomingStartDate = normalizeIsoDateValue(incomingEvent.startDate);
+  const startDateWillBeReplaced = shouldReplaceDateField(
+    existingEvent.startDate,
+    incomingEvent.startDate
+  );
+  if (
+    !startDateWillBeReplaced &&
+    existingStartDate &&
+    incomingStartDate &&
+    existingStartDate !== incomingStartDate
+  ) {
+    return false;
+  }
+
   if (shouldReplaceDateField(existingEvent.endDate, incomingEvent.endDate)) {
     return true;
   }
@@ -2865,6 +2904,18 @@ function toComparableTime(value: string): string {
   return raw.replace(/\s+/g, '');
 }
 
+function hhmmToMinutes(value: string): number | null {
+  const match = String(value || '')
+    .trim()
+    .match(/^(\d{2}):(\d{2})$/);
+  if (!match) return null;
+
+  const hours = Number(match[1]);
+  const minutes = Number(match[2]);
+  if (!Number.isFinite(hours) || !Number.isFinite(minutes)) return null;
+  return hours * 60 + minutes;
+}
+
 function asRecord(value: unknown): Record<string, unknown> | null {
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
     return null;
@@ -2898,11 +2949,8 @@ function normalizeComparableEvidenceTimeToken(
   const explicitMeridiemMatch = normalized.match(/(am|pm)$/);
   const explicitMeridiem = explicitMeridiemMatch?.[1] || '';
   let body = explicitMeridiem ? normalized.slice(0, -explicitMeridiem.length).trim() : normalized;
-  if (!body.includes(':')) {
-    body = `${body}:00`;
-  }
-
-  return toComparableTime(`${body}${explicitMeridiem || impliedMeridiem || ''}`);
+  const normalizedTime = normalizeTime(`${body}${explicitMeridiem || impliedMeridiem || ''}`);
+  return normalizedTime ? toComparableTime(normalizedTime) : '';
 }
 
 function extractComparableTimesFromEvidence(evidence: string): string[] {
@@ -2913,22 +2961,101 @@ function extractComparableTimesFromEvidence(evidence: string): string[] {
     /(\d{1,2}(?::\d{2})?)\s*(?:-|to)\s*(\d{1,2}(?::\d{2})?)\s*(am|pm)\b/i
   );
   if (rangeWithTrailingMeridiem) {
-    return [
-      normalizeComparableEvidenceTimeToken(
-        rangeWithTrailingMeridiem[1],
-        rangeWithTrailingMeridiem[3]
-      ),
-      normalizeComparableEvidenceTimeToken(
-        rangeWithTrailingMeridiem[2],
-        rangeWithTrailingMeridiem[3]
-      ),
-    ].filter(Boolean);
+    const resolvedRange = resolveComparableRangeTimesFromEvidence(
+      rangeWithTrailingMeridiem[1],
+      '',
+      rangeWithTrailingMeridiem[2],
+      rangeWithTrailingMeridiem[3]
+    );
+    if (resolvedRange) return resolvedRange;
   }
 
   const explicitTokens = normalized.match(/\b\d{1,2}(?::\d{2})?\s*(?:am|pm)\b/gi) || [];
   return explicitTokens
     .map((token) => normalizeComparableEvidenceTimeToken(token))
     .filter(Boolean);
+}
+
+function resolveComparableRangeTimesFromEvidence(
+  startRaw: string,
+  startPeriodRaw: string,
+  endRaw: string,
+  endPeriodRaw: string
+): [string, string] | null {
+  const normalizedStartRaw = String(startRaw || '').trim();
+  const normalizedEndRaw = String(endRaw || '').trim();
+  const startPeriod = String(startPeriodRaw || '').trim().toUpperCase();
+  const endPeriod = String(endPeriodRaw || '').trim().toUpperCase();
+  if (!normalizedStartRaw || !normalizedEndRaw) return null;
+
+  const startCandidates = startPeriod
+    ? [{ period: startPeriod, inferred: false }]
+    : endPeriod
+      ? [
+          { period: endPeriod, inferred: false },
+          { period: endPeriod === 'AM' ? 'PM' : 'AM', inferred: true },
+        ]
+      : [];
+  const endCandidates = endPeriod
+    ? [{ period: endPeriod, inferred: false }]
+    : startPeriod
+      ? [
+          { period: startPeriod, inferred: false },
+          { period: startPeriod === 'AM' ? 'PM' : 'AM', inferred: true },
+        ]
+      : [];
+
+  let best:
+    | {
+        startTime: string;
+        endTime: string;
+        durationMinutes: number;
+        longPenalty: number;
+        inferencePenalty: number;
+      }
+    | null = null;
+
+  for (const startCandidate of startCandidates) {
+    const startTime = normalizeComparableEvidenceTimeToken(
+      normalizedStartRaw,
+      startCandidate.period
+    );
+    const startMinutes = hhmmToMinutes(startTime);
+    if (!startTime || startMinutes === null) continue;
+
+    for (const endCandidate of endCandidates) {
+      const endTime = normalizeComparableEvidenceTimeToken(normalizedEndRaw, endCandidate.period);
+      const endMinutes = hhmmToMinutes(endTime);
+      if (!endTime || endMinutes === null) continue;
+
+      let durationMinutes = endMinutes - startMinutes;
+      if (durationMinutes <= 0) durationMinutes += 24 * 60;
+      if (durationMinutes <= 0 || durationMinutes > 12 * 60) continue;
+
+      const candidate = {
+        startTime,
+        endTime,
+        durationMinutes,
+        longPenalty: durationMinutes > 6 * 60 ? 1 : 0,
+        inferencePenalty:
+          (startCandidate.inferred ? 1 : 0) + (endCandidate.inferred ? 1 : 0),
+      };
+
+      if (
+        !best ||
+        candidate.longPenalty < best.longPenalty ||
+        (candidate.longPenalty === best.longPenalty &&
+          candidate.inferencePenalty < best.inferencePenalty) ||
+        (candidate.longPenalty === best.longPenalty &&
+          candidate.inferencePenalty === best.inferencePenalty &&
+          candidate.durationMinutes < best.durationMinutes)
+      ) {
+        best = candidate;
+      }
+    }
+  }
+
+  return best ? [best.startTime, best.endTime] : null;
 }
 
 function getEvidenceComparableTime(event: EventData, side: 'start' | 'end'): string {
@@ -3208,6 +3335,41 @@ function shouldReplaceImageUrl(
   if (existing === incoming) return false;
   if (!isStorageManagedUrl(existing) && isStorageManagedUrl(incoming)) return true;
   return allowPromotion;
+}
+
+function shouldPromoteCanonicalImageFromNewerDuplicate(
+  existing: EventData,
+  incoming: EventData,
+  hasNewerSourceTimestamp: boolean
+): boolean {
+  const existingImage = asTrimmedString(existing.relevantImageUrl || existing.image);
+  const incomingMediaUrls = normalizeUrlList(incoming.mediaUrls);
+  const incomingPreferredMediaUrl =
+    incomingMediaUrls.find((url) => isStorageManagedUrl(url)) ||
+    incomingMediaUrls[0] ||
+    '';
+  const incomingImage =
+    asTrimmedString(incoming.relevantImageUrl || incoming.image) || incomingPreferredMediaUrl;
+  if (!incomingImage || existingImage === incomingImage) return false;
+  if (!isStorageManagedUrl(incomingImage)) return false;
+
+  if (hasNewerSourceTimestamp) return true;
+
+  const existingUniqueId = asTrimmedString(existing.uniqueId || existing.id);
+  const incomingUniqueId = asTrimmedString(incoming.uniqueId || incoming.id);
+  if (!existingUniqueId || !incomingUniqueId || existingUniqueId !== incomingUniqueId) {
+    return false;
+  }
+
+  if (incomingMediaUrls.length === 0) return false;
+
+  const incomingContainsIncomingImage = incomingMediaUrls.includes(incomingImage);
+  const incomingContainsExistingImage = existingImage ? incomingMediaUrls.includes(existingImage) : false;
+  if (!incomingContainsIncomingImage || incomingContainsExistingImage) {
+    return false;
+  }
+
+  return true;
 }
 
 function shouldReplaceIconUrl(existingValue: string | undefined, incomingValue: string | undefined): boolean {
