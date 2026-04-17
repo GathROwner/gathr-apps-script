@@ -272,6 +272,66 @@ function normalizeCalendarDealCardAsAllDaySpecial(
   return changed;
 }
 
+export function preserveValidatedItemSourceType(
+  item: ExtractedItem,
+  originalItem?: ExtractedItem
+): ExtractedItem {
+  if (!item) return item;
+
+  const existingSourceType = String((item as any)?._sourceType || '').trim();
+  const originalSourceType = String((originalItem as any)?._sourceType || '').trim();
+  const nextItem = { ...item } as ExtractedItem;
+
+  if (!existingSourceType && originalSourceType) {
+    (nextItem as any)._sourceType = originalSourceType as ExtractedItem['_sourceType'];
+  }
+
+  if (
+    !hasMeaningfulTimeFlags((nextItem as any)?.timeFlags) &&
+    hasMeaningfulTimeFlags((originalItem as any)?.timeFlags)
+  ) {
+    (nextItem as any).timeFlags = cloneTimeFlags((originalItem as any)?.timeFlags);
+  }
+
+  return nextItem;
+}
+
+function cloneTimeFlags(value: unknown): TimeFlags | undefined {
+  const raw = value as Record<string, unknown> | null | undefined;
+  if (!raw || typeof raw !== 'object') return undefined;
+
+  const startRaw = (raw.start || {}) as Record<string, unknown>;
+  const endRaw = (raw.end || {}) as Record<string, unknown>;
+  const hasStart = Object.keys(startRaw).length > 0;
+  const hasEnd = Object.keys(endRaw).length > 0;
+  if (!hasStart && !hasEnd) return undefined;
+
+  return {
+    start: {
+      source: String(startRaw.source || 'none') as TimeFlags['start']['source'],
+      evidence: String(startRaw.evidence || ''),
+    },
+    end: {
+      source: String(endRaw.source || 'none') as NonNullable<TimeFlags['end']['source']>,
+      toClose: Boolean(endRaw.toClose),
+      evidence: String(endRaw.evidence || ''),
+    },
+  };
+}
+
+function hasMeaningfulTimeFlags(value: unknown): boolean {
+  const flags = cloneTimeFlags(value);
+  if (!flags) return false;
+
+  return Boolean(
+    String(flags.start.source || '').trim() !== 'none' ||
+      String(flags.start.evidence || '').trim() ||
+      String(flags.end.source || '').trim() !== 'none' ||
+      String(flags.end.evidence || '').trim() ||
+      flags.end.toClose === true
+  );
+}
+
 /**
  * Stage 4: Secondary validation of extracted items
  */
@@ -336,7 +396,8 @@ export async function performSecondaryValidation(
     if (validationResult.validatedItems) {
       validationResult.validatedItems.forEach((validatedItem, index) => {
         let decision = validatedItem.decision;
-        const item = validatedItem.item;
+        const item = preserveValidatedItemSourceType(validatedItem.item, rawData[index]);
+        validatedItem.item = item;
         const reason = validatedItem.reason;
 
         // Preserve pipeline metadata

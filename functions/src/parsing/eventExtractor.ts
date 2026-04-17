@@ -18,6 +18,7 @@ import {
   ExtractedItem,
   ExtractionSummary,
   RecurringPattern,
+  TimeFlags,
   ParsingConfig,
   DEFAULT_PARSING_CONFIG,
 } from './types.js';
@@ -56,6 +57,20 @@ const VALID_RECURRING_PATTERNS: RecurringPattern[] = [
   'weekly_saturday',
   'weekly_sunday',
 ];
+
+const SPECIAL_WEEKDAY_TOKEN_PATTERN =
+  '(?:mondays?|tuesdays?|wednesdays?|thursdays?|fridays?|saturdays?|sundays?|mon|tue|tues|wed|thu|thur|thurs|fri|sat|sun)';
+const SPECIAL_WEEKDAY_LIST_PATTERN = `(${SPECIAL_WEEKDAY_TOKEN_PATTERN}(?:\\s*(?:,|&|and)\\s*${SPECIAL_WEEKDAY_TOKEN_PATTERN})*)`;
+
+type SpecialWeekdayTimingClause = {
+  index: number;
+  weekdays: string[];
+  timingKind: 'all_day' | 'from_time' | 'range';
+  timingText: string;
+  startTime: string;
+  endTime: string;
+  timeFlags: TimeFlags;
+};
 
 /**
  * Stage 3: Extract content based on classified type
@@ -300,7 +315,11 @@ async function extractFoodSpecials(
         return { ...special, _sourceType: 'special' as const };
       });
 
-      return ensureWeekdayBrunchSpecials(combinedText, postedLocalDate, processedSpecials);
+      return splitMixedHolidayWeekendSpecials(
+        combinedText,
+        postedLocalDate,
+        ensureWeekdayBrunchSpecials(combinedText, postedLocalDate, processedSpecials)
+      );
     }
 
     return [];
@@ -311,7 +330,11 @@ async function extractFoodSpecials(
       const normalized = fallback.map((item: any) =>
         item && typeof item === 'object' ? { ...item, _sourceType: 'special' as const } : item
       ) as ExtractedSpecial[];
-      return ensureWeekdayBrunchSpecials(combinedText, postedLocalDate, normalized);
+      return splitMixedHolidayWeekendSpecials(
+        combinedText,
+        postedLocalDate,
+        ensureWeekdayBrunchSpecials(combinedText, postedLocalDate, normalized)
+      );
     }
     return [];
   }
@@ -463,6 +486,335 @@ function ensureWeekdayBrunchSpecials(
   return specials;
 }
 
+function splitMixedHolidayWeekendSpecials(
+  combinedText: string,
+  postedLocalDate: string,
+  specials: ExtractedSpecial[]
+): ExtractedSpecial[] {
+  if (!Array.isArray(specials) || specials.length === 0) {
+    return specials;
+  }
+
+  const split: ExtractedSpecial[] = [];
+  let changed = false;
+
+  for (const special of specials) {
+    const expanded = splitMixedHolidayWeekendSpecial(combinedText, postedLocalDate, special);
+    if (expanded.length > 1) {
+      changed = true;
+      logger.info('Split mixed holiday/weekend special into weekday-specific items', {
+        name: special.name,
+        originalDate: special.date,
+        splitCount: expanded.length,
+        dates: expanded.map((item) => item.date),
+      });
+      split.push(...expanded);
+      continue;
+    }
+    split.push(special);
+  }
+
+  return changed ? split : specials;
+}
+
+export function splitMixedHolidayWeekendSpecialsForRegression(
+  combinedText: string,
+  postedLocalDate: string,
+  specials: ExtractedSpecial[]
+): ExtractedSpecial[] {
+  return splitMixedHolidayWeekendSpecials(combinedText, postedLocalDate, specials);
+}
+
+function splitMixedHolidayWeekendSpecial(
+  combinedText: string,
+  postedLocalDate: string,
+  special: ExtractedSpecial
+): ExtractedSpecial[] {
+  if (!special || typeof special !== 'object') return [special];
+  if (sanitizeRecurringPattern(special.recurringPattern) !== 'none') return [special];
+
+  const sourceText = String(special.description || '').trim();
+  if (!sourceText) return [special];
+
+  const combinedSignals = `${String(special.name || '')} ${sourceText} ${stripOcrTextFromCombined(combinedText)}`;
+  if (!/\b(this weekend|weekend|easter|holiday|long weekend)\b/i.test(combinedSignals)) {
+    return [special];
+  }
+  if (/\b(every|each|weekly|daily)\b/i.test(combinedSignals)) {
+    return [special];
+  }
+
+  const clauses = extractSpecialWeekdayTimingClauses(sourceText);
+  if (clauses.length < 2) return [special];
+
+  const uniqueWeekdays = Array.from(
+    new Set(
+      clauses.flatMap((clause) => clause.weekdays)
+    )
+  );
+  const uniqueTimingSignatures = Array.from(
+    new Set(
+      clauses.map((clause) => `${clause.timingKind}|${clause.startTime}|${clause.endTime}`)
+    )
+  );
+  if (uniqueWeekdays.length < 2 || uniqueTimingSignatures.length < 2) {
+    return [special];
+  }
+
+  const clones: Array<{ item: ExtractedSpecial; weekdayLabel: string }> = [];
+  let splitOrdinal = 0;
+
+  for (const clause of clauses) {
+    for (const weekdayToken of clause.weekdays) {
+      const resolvedDate = resolveWeekdayDateFromPostedLocalDate(weekdayToken, postedLocalDate);
+      if (!resolvedDate) continue;
+
+      const weekdayLabel = canonicalWeekdayLabel(weekdayToken);
+      const perDaySentence = buildPerDayAvailabilitySentence(
+        clause,
+        weekdayLabel,
+        resolvedDate
+      );
+      const description = replaceAvailabilitySentence(sourceText, perDaySentence);
+      const normalizedPrice = String(special.price || special.pricing || '').trim();
+      const nextName =
+        splitOrdinal === 0 || new RegExp(`\\b${weekdayLabel}\\b`, 'i').test(String(special.name || ''))
+          ? special.name
+          : `${String(special.name || '').trim()} — ${weekdayLabel}`;
+
+      clones.push({
+        weekdayLabel,
+        item: {
+          ...special,
+          name: nextName,
+          description,
+          date: resolvedDate,
+          startTime: clause.startTime,
+          endTime: clause.endTime,
+          price: normalizedPrice,
+          pricing: String(special.pricing || normalizedPrice || '').trim(),
+          recurringPattern: 'none',
+          totalOccurrences: undefined,
+          recurrenceUntilDate: undefined,
+          timeFlags: cloneTimeFlags(clause.timeFlags),
+          extractionReason: `mixed_holiday_weekend_split:${weekdayLabel.toLowerCase()}`,
+          _sourceType: 'special' as const,
+        },
+      });
+      splitOrdinal += 1;
+    }
+  }
+
+  const deduped = new Map<string, ExtractedSpecial>();
+  for (const clone of clones.sort((left, right) => {
+    if (left.item.date === right.item.date) return left.weekdayLabel.localeCompare(right.weekdayLabel);
+    return left.item.date.localeCompare(right.item.date);
+  })) {
+    const key = [
+      String(clone.item.date || '').trim(),
+      String(clone.item.startTime || '').trim(),
+      String(clone.item.endTime || '').trim(),
+      clone.weekdayLabel.toLowerCase(),
+    ].join('|');
+    if (!deduped.has(key)) {
+      deduped.set(key, clone.item);
+    }
+  }
+
+  return deduped.size > 1 ? Array.from(deduped.values()) : [special];
+}
+
+function extractSpecialWeekdayTimingClauses(text: string): SpecialWeekdayTimingClause[] {
+  const normalized = String(text || '')
+    .replace(/[\u2012-\u2015]/g, '-')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (!normalized) return [];
+
+  const timingPattern =
+    '(?:from\\s+\\d{1,2}(?::\\d{2})?\\s*(?:am|pm)\\s+onwards|all day|\\d{1,2}(?::\\d{2})?\\s*(?:am|pm)?\\s*[-\\u2013\\u2014]\\s*\\d{1,2}(?::\\d{2})?\\s*(?:am|pm))';
+  const regexes: Array<{ regex: RegExp; weekdayGroup: number; timingGroup: number }> = [
+    {
+      regex: new RegExp(`\\b(${timingPattern})\\s+on\\s+${SPECIAL_WEEKDAY_LIST_PATTERN}`, 'gi'),
+      weekdayGroup: 2,
+      timingGroup: 1,
+    },
+    {
+      regex: new RegExp(`\\b(${timingPattern})\\s+${SPECIAL_WEEKDAY_LIST_PATTERN}`, 'gi'),
+      weekdayGroup: 2,
+      timingGroup: 1,
+    },
+    {
+      regex: new RegExp(`\\b${SPECIAL_WEEKDAY_LIST_PATTERN}\\s+(${timingPattern})`, 'gi'),
+      weekdayGroup: 1,
+      timingGroup: 2,
+    },
+  ];
+
+  const matches: Array<SpecialWeekdayTimingClause & { matchLength: number }> = [];
+  for (const pattern of regexes) {
+    for (const match of normalized.matchAll(pattern.regex)) {
+      const fullText = String(match[0] || '').trim();
+      const weekdayText = String(match[pattern.weekdayGroup] || '').trim();
+      const timingText = String(match[pattern.timingGroup] || '').trim();
+      const weekdays = extractWeekdayTokensFromList(weekdayText);
+      const timing = resolveSpecialClauseTiming(timingText);
+      if (weekdays.length === 0 || !timing) continue;
+      matches.push({
+        index: match.index || 0,
+        weekdays,
+        timingKind: timing.timingKind,
+        timingText,
+        startTime: timing.startTime,
+        endTime: timing.endTime,
+        timeFlags: timing.timeFlags,
+        matchLength: fullText.length,
+      });
+    }
+  }
+
+  matches.sort((left, right) => left.index - right.index || right.matchLength - left.matchLength);
+
+  const selected: SpecialWeekdayTimingClause[] = [];
+  let lastCoveredEnd = -1;
+  for (const match of matches) {
+    const matchEnd = match.index + match.matchLength;
+    if (match.index < lastCoveredEnd) continue;
+    selected.push({
+      index: match.index,
+      weekdays: match.weekdays,
+      timingKind: match.timingKind,
+      timingText: match.timingText,
+      startTime: match.startTime,
+      endTime: match.endTime,
+      timeFlags: match.timeFlags,
+    });
+    lastCoveredEnd = matchEnd;
+  }
+
+  return selected;
+}
+
+function extractWeekdayTokensFromList(text: string): string[] {
+  const matches = String(text || '').match(
+    /\b(mondays?|tuesdays?|wednesdays?|thursdays?|fridays?|saturdays?|sundays?|mon|tue|tues|wed|thu|thur|thurs|fri|sat|sun)\b/gi
+  );
+  if (!matches) return [];
+
+  const seen = new Set<string>();
+  const weekdays: string[] = [];
+  for (const match of matches) {
+    const normalized = String(match || '')
+      .toLowerCase()
+      .replace(/[^a-z]/g, '')
+      .replace(/s$/, '');
+    if (seen.has(normalized)) continue;
+    seen.add(normalized);
+    weekdays.push(normalized);
+  }
+  return weekdays;
+}
+
+function resolveSpecialClauseTiming(
+  timingText: string
+): Pick<SpecialWeekdayTimingClause, 'timingKind' | 'startTime' | 'endTime' | 'timeFlags'> | null {
+  const normalized = String(timingText || '').trim();
+  if (!normalized) return null;
+
+  if (/\ball day\b/i.test(normalized)) {
+    return {
+      timingKind: 'all_day',
+      startTime: '',
+      endTime: '',
+      timeFlags: {
+        start: { source: 'semantic', evidence: 'all day' },
+        end: { source: 'semantic', toClose: true, evidence: 'all day' },
+      },
+    };
+  }
+
+  if (/\bfrom\b/i.test(normalized) && /\bonwards\b/i.test(normalized)) {
+    const startTime = extractTimeTokens(normalized)[0] || '';
+    if (!startTime) return null;
+    return {
+      timingKind: 'from_time',
+      startTime,
+      endTime: '',
+      timeFlags: {
+        start: { source: 'explicit', evidence: normalized },
+        end: { source: 'semantic', toClose: true, evidence: 'onwards' },
+      },
+    };
+  }
+
+  const parsedTimes = extractLineTimes(normalized);
+  if (parsedTimes.ranges.length > 0) {
+    const firstRange = parsedTimes.ranges[0];
+    return {
+      timingKind: 'range',
+      startTime: firstRange.startTime,
+      endTime: firstRange.endTime,
+      timeFlags: {
+        start: { source: 'explicit', evidence: normalized },
+        end: { source: 'explicit', toClose: false, evidence: normalized },
+      },
+    };
+  }
+
+  return null;
+}
+
+function resolveWeekdayDateFromPostedLocalDate(
+  weekdayToken: string,
+  postedLocalDate: string
+): string {
+  const normalizedLabel = canonicalWeekdayLabel(weekdayToken);
+  return extractDateFromText(`${normalizedLabel} -`, postedLocalDate).date;
+}
+
+function buildPerDayAvailabilitySentence(
+  clause: SpecialWeekdayTimingClause,
+  weekdayLabel: string,
+  resolvedDate: string
+): string {
+  const explicitDateLabel = formatExplicitSpecialDateLabel(resolvedDate);
+  const dayWithDate = explicitDateLabel
+    ? `${weekdayLabel}, ${explicitDateLabel} only`
+    : `${weekdayLabel} only`;
+  if (clause.timingKind === 'all_day') {
+    return `Available all day ${dayWithDate}.`;
+  }
+  if (clause.timingKind === 'from_time') {
+    return `Available ${clause.timingText} on ${dayWithDate}.`;
+  }
+  return `Available ${clause.timingText} on ${dayWithDate}.`;
+}
+
+function replaceAvailabilitySentence(description: string, replacementSentence: string): string {
+  const original = String(description || '').trim();
+  if (!original) return replacementSentence;
+
+  const replaced = original.replace(/\bavailable\b[^.]*\.?/i, replacementSentence);
+  if (replaced !== original) {
+    return replaced.replace(/\s+/g, ' ').trim();
+  }
+
+  return `${replacementSentence} ${original}`.replace(/\s+/g, ' ').trim();
+}
+
+function cloneTimeFlags(timeFlags: TimeFlags): TimeFlags {
+  return {
+    start: { ...timeFlags.start },
+    end: { ...timeFlags.end },
+  };
+}
+
+function formatExplicitSpecialDateLabel(resolvedDate: string): string {
+  const dt = DateTime.fromISO(String(resolvedDate || ''));
+  if (!dt.isValid) return '';
+  return dt.toFormat('MMMM d');
+}
+
 /**
  * Extract calendar content (date-organized multi-event content)
  */
@@ -565,17 +917,239 @@ async function extractScheduleContent(
     const parsed = parseJSONResponse(response);
 
     if (parsed?.extractedItems && Array.isArray(parsed.extractedItems)) {
-      return parsed.extractedItems.map((item: CalendarItem) => ({
-        ...item,
-        _sourceType: 'schedule' as const,
-      }));
+      return normalizeExtractedScheduleItems(parsed.extractedItems);
     }
 
     return [];
   } catch (error) {
     logger.error('Error parsing schedule extraction response', error);
-    return parseJSONFallback(response, 'schedule');
+    return normalizeExtractedScheduleItems(parseJSONFallback(response, 'schedule') as CalendarItem[]);
   }
+}
+
+function normalizeExtractedScheduleItems(items: Array<Record<string, unknown>>): CalendarItem[] {
+  return (items || [])
+    .map((rawItem) => normalizeExtractedScheduleItem(rawItem as CalendarItem))
+    .filter((item) => Boolean(String(item.name || '').trim()));
+}
+
+function normalizeExtractedScheduleItem(item: CalendarItem): CalendarItem {
+  const normalized: CalendarItem = {
+    ...item,
+    type: item?.type === 'special' ? 'special' : 'event',
+    startTime: String(item?.startTime || '').trim(),
+    endTime: String(item?.endTime || '').trim(),
+    _sourceType: 'schedule',
+  };
+
+  const existingTimeFlags = cloneNormalizedTimeFlags((item as any)?.timeFlags);
+  const evidenceCandidates = [
+    String((item as any)?.description || '').trim(),
+    String((item as any)?.extractionReason || '').trim(),
+    String((item as any)?.timeText || '').trim(),
+  ].filter(Boolean);
+
+  let derivedTiming: { startTime: string; endTime: string; timeFlags: TimeFlags } | null = null;
+  for (const evidenceText of evidenceCandidates) {
+    derivedTiming = deriveScheduleTimingFromText(
+      evidenceText,
+      normalized.startTime,
+      normalized.endTime || ''
+    );
+    if (derivedTiming) break;
+  }
+
+  if (derivedTiming) {
+    if (!normalized.startTime && derivedTiming.startTime) {
+      normalized.startTime = derivedTiming.startTime;
+    }
+    if (!normalized.endTime && derivedTiming.endTime) {
+      normalized.endTime = derivedTiming.endTime;
+    }
+  }
+
+  const mergedTimeFlags = mergeScheduleTimeFlags(existingTimeFlags, derivedTiming?.timeFlags);
+  if (hasMeaningfulTimeFlags(mergedTimeFlags)) {
+    normalized.timeFlags = mergedTimeFlags;
+  }
+
+  return normalized;
+}
+
+function createEmptyTimeFlags(): TimeFlags {
+  return {
+    start: { source: 'none', evidence: '' },
+    end: { source: 'none', toClose: false, evidence: '' },
+  };
+}
+
+function normalizeTimeFlagSource(
+  value: unknown,
+  allowed: Array<'explicit' | 'implied' | 'semantic' | 'none'>
+): 'explicit' | 'implied' | 'semantic' | 'none' {
+  const normalized = String(value || '').trim().toLowerCase();
+  if (allowed.includes(normalized as any)) {
+    return normalized as 'explicit' | 'implied' | 'semantic' | 'none';
+  }
+  return 'none';
+}
+
+function cloneNormalizedTimeFlags(value: unknown): TimeFlags {
+  const raw = value as Record<string, unknown> | null | undefined;
+  const startRaw = ((raw && raw.start) || {}) as Record<string, unknown>;
+  const endRaw = ((raw && raw.end) || {}) as Record<string, unknown>;
+
+  return {
+    start: {
+      source: normalizeTimeFlagSource(startRaw.source, ['explicit', 'implied', 'semantic', 'none']),
+      evidence: String(startRaw.evidence || '').trim(),
+    },
+    end: {
+      source: normalizeTimeFlagSource(endRaw.source, ['explicit', 'implied', 'semantic', 'none']),
+      toClose: Boolean(endRaw.toClose),
+      evidence: String(endRaw.evidence || '').trim(),
+    },
+  };
+}
+
+function hasMeaningfulTimeFlags(value: unknown): boolean {
+  const flags = cloneNormalizedTimeFlags(value);
+  return Boolean(
+    String(flags.start.source || '').trim() !== 'none' ||
+      String(flags.start.evidence || '').trim() ||
+      String(flags.end.source || '').trim() !== 'none' ||
+      String(flags.end.evidence || '').trim() ||
+      flags.end.toClose === true
+  );
+}
+
+function mergeScheduleTimeFlags(existing: TimeFlags, derived?: TimeFlags): TimeFlags {
+  if (!derived) {
+    return existing;
+  }
+
+  const next = cloneNormalizedTimeFlags(existing);
+
+  if (
+    String(next.start.source || '').trim().toLowerCase() === 'none' &&
+    String(next.start.evidence || '').trim() === ''
+  ) {
+    next.start = { ...derived.start };
+  }
+
+  if (
+    String(next.end.source || '').trim().toLowerCase() === 'none' &&
+    String(next.end.evidence || '').trim() === '' &&
+    next.end.toClose !== true
+  ) {
+    next.end = { ...derived.end };
+  }
+
+  return next;
+}
+
+function deriveScheduleTimingFromText(
+  text: string,
+  startTime: string,
+  endTime: string
+): { startTime: string; endTime: string; timeFlags: TimeFlags } | null {
+  const normalizedText = String(text || '').trim();
+  if (!normalizedText) return null;
+
+  const expectedStart = String(startTime || '').trim();
+  const expectedEnd = String(endTime || '').trim();
+  const extracted = extractLineTimesWithEvidence(normalizedText);
+
+  for (const range of extracted.ranges) {
+    const startMatches = !expectedStart || range.startTime === expectedStart;
+    const endMatches = !expectedEnd || range.endTime === expectedEnd;
+    if (!startMatches || !endMatches) continue;
+
+    return {
+      startTime: range.startTime,
+      endTime: range.endTime,
+      timeFlags: {
+        start: { source: 'explicit', evidence: range.evidence },
+        end: { source: 'explicit', toClose: false, evidence: range.evidence },
+      },
+    };
+  }
+
+  const bareRangeEvidence = findBareRangeEvidenceForKnownTimes(
+    normalizedText,
+    expectedStart,
+    expectedEnd
+  );
+  if (bareRangeEvidence) {
+    return {
+      startTime: expectedStart,
+      endTime: expectedEnd,
+      timeFlags: {
+        start: { source: 'explicit', evidence: bareRangeEvidence },
+        end: { source: 'explicit', toClose: false, evidence: bareRangeEvidence },
+      },
+    };
+  }
+
+  for (const single of extracted.singles) {
+    if (expectedStart && single.time !== expectedStart) continue;
+    return {
+      startTime: single.time,
+      endTime: '',
+      timeFlags: {
+        start: { source: 'explicit', evidence: single.evidence },
+        end: { source: 'none', toClose: false, evidence: '' },
+      },
+    };
+  }
+
+  return null;
+}
+
+function findBareRangeEvidenceForKnownTimes(
+  text: string,
+  expectedStart: string,
+  expectedEnd: string
+): string {
+  const normalizedText = String(text || '').trim();
+  if (!normalizedText || !expectedStart || !expectedEnd) return '';
+
+  const rangeMatches = Array.from(
+    normalizedText.matchAll(/\b(\d{1,2}(?::\d{2})?)\s*[-\u2013\u2014]\s*(\d{1,2}(?::\d{2})?)\b/g)
+  );
+
+  for (const match of rangeMatches) {
+    const startComparable = comparableBareTimeToken(match[1], expectedStart);
+    const endComparable = comparableBareTimeToken(match[2], expectedEnd);
+    if (startComparable === expectedStart && endComparable === expectedEnd) {
+      return String(match[0] || '').trim();
+    }
+  }
+
+  return '';
+}
+
+function comparableBareTimeToken(token: string, expectedTime: string): string {
+  const normalizedExpected = String(expectedTime || '').trim();
+  const expectedMatch = normalizedExpected.match(/^(\d{2}):(\d{2})$/);
+  if (!expectedMatch) return '';
+
+  const raw = String(token || '').trim();
+  const tokenMatch = raw.match(/^(\d{1,2})(?::(\d{2}))?$/);
+  if (!tokenMatch) return '';
+
+  const expectedHour24 = Number(expectedMatch[1]);
+  const expectedMinute = Number(expectedMatch[2]);
+  const tokenHour = Number(tokenMatch[1]);
+  const tokenMinute = Number(tokenMatch[2] || '00');
+
+  if (!Number.isFinite(expectedHour24) || !Number.isFinite(tokenHour)) return '';
+  if (tokenMinute !== expectedMinute) return '';
+
+  const expectedHour12 = expectedHour24 % 12 === 0 ? 12 : expectedHour24 % 12;
+  if (tokenHour !== expectedHour12) return '';
+
+  return normalizedExpected;
 }
 
 /**
@@ -1900,7 +2474,7 @@ function parseScheduleText(
 
     if (!hasTimeToken(line)) continue;
 
-    const { ranges, singles } = extractLineTimes(line);
+    const { ranges, singles } = extractLineTimesWithEvidence(line);
     if (ranges.length === 0 && singles.length === 0) continue;
 
     const date = currentDate || parseDateHeader(line, postedLocalDate) || postedLocalDate;
@@ -1921,6 +2495,10 @@ function parseScheduleText(
           price: '',
           description,
           extractionReason: 'schedule_text_fallback',
+          timeFlags: {
+            start: { source: 'explicit', evidence: range.evidence },
+            end: { source: 'explicit', toClose: false, evidence: range.evidence },
+          },
           _sourceType: source,
         });
       }
@@ -1930,12 +2508,16 @@ function parseScheduleText(
           name,
           type: 'event',
           date,
-          startTime: time,
+          startTime: time.time,
           endTime: '',
           venue,
           price: '',
           description,
           extractionReason: 'schedule_text_fallback',
+          timeFlags: {
+            start: { source: 'explicit', evidence: time.evidence },
+            end: { source: 'none', toClose: false, evidence: '' },
+          },
           _sourceType: source,
         });
       }
@@ -2066,7 +2648,20 @@ function hasTimeToken(line: string): boolean {
 function extractLineTimes(
   line: string
 ): { ranges: Array<{ startTime: string; endTime: string }>; singles: string[] } {
-  const ranges: Array<{ startTime: string; endTime: string }> = [];
+  const extracted = extractLineTimesWithEvidence(line);
+  return {
+    ranges: extracted.ranges.map(({ startTime, endTime }) => ({ startTime, endTime })),
+    singles: extracted.singles.map(({ time }) => time),
+  };
+}
+
+function extractLineTimesWithEvidence(
+  line: string
+): {
+  ranges: Array<{ startTime: string; endTime: string; evidence: string }>;
+  singles: Array<{ time: string; evidence: string }>;
+} {
+  const ranges: Array<{ startTime: string; endTime: string; evidence: string }> = [];
   let scrubbed = line;
 
   const rangeRe =
@@ -2075,24 +2670,39 @@ function extractLineTimes(
     /\b(\d{1,2}(?::\d{2})?)\s*[-\u2013\u2014]\s*(\d{1,2}(?::\d{2})?)\s*(am|pm)\b/gi;
 
   scrubbed = scrubbed.replace(rangeRe, (match, start, startMer, end, endMer) => {
-    const startTime = parseTimeToken(`${start}${startMer}`);
-    const endTime = parseTimeToken(`${end}${endMer}`);
-    if (startTime && endTime) {
-      ranges.push({ startTime, endTime });
+    const resolved = resolveTimeRangeTokens(start, startMer, end, endMer);
+    if (resolved) {
+      ranges.push({
+        ...resolved,
+        evidence: String(match || '').trim(),
+      });
     }
     return ' ';
   });
 
   scrubbed = scrubbed.replace(looseRangeRe, (match, start, end, endMer) => {
-    const startTime = parseTimeToken(`${start}${endMer}`);
-    const endTime = parseTimeToken(`${end}${endMer}`);
-    if (startTime && endTime) {
-      ranges.push({ startTime, endTime });
+    const resolved = resolveTimeRangeTokens(start, '', end, endMer);
+    if (resolved) {
+      ranges.push({
+        ...resolved,
+        evidence: String(match || '').trim(),
+      });
     }
     return ' ';
   });
 
-  const singles = extractTimeTokens(scrubbed);
+  const singleMatches = Array.from(
+    scrubbed.matchAll(/\b(\d{1,2}(?::\d{2})?\s*(?:am|pm)|\d{3,4}\s*(?:am|pm))\b/gi)
+  );
+  const singles = singleMatches
+    .map((match) => {
+      const evidence = String(match[1] || '').trim();
+      const time = parseTimeToken(evidence);
+      if (!time) return null;
+      return { time, evidence };
+    })
+    .filter(Boolean) as Array<{ time: string; evidence: string }>;
+
   return { ranges, singles };
 }
 
@@ -2223,9 +2833,14 @@ function parseCalendarOcrText(
     );
 
     if (rangeMatch) {
-      const startMeridiem = rangeMatch[2] || rangeMatch[4];
-      const startTime = parseTimeToken(`${rangeMatch[1]}${startMeridiem || ''}`);
-      const endTime = parseTimeToken(`${rangeMatch[3]}${rangeMatch[4]}`);
+      const resolvedRange = resolveTimeRangeTokens(
+        rangeMatch[1],
+        rangeMatch[2] || '',
+        rangeMatch[3],
+        rangeMatch[4] || ''
+      );
+      const startTime = resolvedRange?.startTime || '';
+      const endTime = resolvedRange?.endTime || '';
       if (!startTime || !endTime) {
         continue;
       }
@@ -2393,6 +3008,107 @@ function extractTimeTokens(line: string): string[] {
     }
   }
   return times;
+}
+
+function oppositeMeridiem(period: string): string {
+  return String(period || '').toLowerCase() === 'am' ? 'pm' : 'am';
+}
+
+function timeRangeDurationMinutes(startTime: string, endTime: string): number | null {
+  const startParts = String(startTime || '').split(':').map((value) => parseInt(value, 10));
+  const endParts = String(endTime || '').split(':').map((value) => parseInt(value, 10));
+  if (startParts.length !== 2 || endParts.length !== 2) return null;
+  const [startHour, startMinute] = startParts;
+  const [endHour, endMinute] = endParts;
+  if (
+    !Number.isFinite(startHour) ||
+    !Number.isFinite(startMinute) ||
+    !Number.isFinite(endHour) ||
+    !Number.isFinite(endMinute)
+  ) {
+    return null;
+  }
+
+  let duration = endHour * 60 + endMinute - (startHour * 60 + startMinute);
+  if (duration <= 0) duration += 24 * 60;
+  return duration;
+}
+
+function resolveTimeRangeTokens(
+  startRaw: string,
+  startPeriodRaw: string,
+  endRaw: string,
+  endPeriodRaw: string
+): { startTime: string; endTime: string } | null {
+  const normalizedStartRaw = String(startRaw || '').trim();
+  const normalizedEndRaw = String(endRaw || '').trim();
+  const startPeriod = String(startPeriodRaw || '').trim().toLowerCase();
+  const endPeriod = String(endPeriodRaw || '').trim().toLowerCase();
+
+  if (!normalizedStartRaw || !normalizedEndRaw) return null;
+
+  const startCandidates = startPeriod
+    ? [{ period: startPeriod, inferred: false }]
+    : endPeriod
+      ? [
+          { period: endPeriod, inferred: false },
+          { period: oppositeMeridiem(endPeriod), inferred: true },
+        ]
+      : [];
+  const endCandidates = endPeriod
+    ? [{ period: endPeriod, inferred: false }]
+    : startPeriod
+      ? [
+          { period: startPeriod, inferred: false },
+          { period: oppositeMeridiem(startPeriod), inferred: true },
+        ]
+      : [];
+
+  let best:
+    | {
+        startTime: string;
+        endTime: string;
+        durationMinutes: number;
+        longPenalty: number;
+        inferencePenalty: number;
+      }
+    | null = null;
+
+  for (const startCandidate of startCandidates) {
+    const startTime = parseTimeToken(`${normalizedStartRaw}${startCandidate.period}`);
+    if (!startTime) continue;
+
+    for (const endCandidate of endCandidates) {
+      const endTime = parseTimeToken(`${normalizedEndRaw}${endCandidate.period}`);
+      if (!endTime) continue;
+
+      const durationMinutes = timeRangeDurationMinutes(startTime, endTime);
+      if (durationMinutes === null) continue;
+
+      const candidate = {
+        startTime,
+        endTime,
+        durationMinutes,
+        longPenalty: durationMinutes > 12 * 60 ? 1 : 0,
+        inferencePenalty:
+          (startCandidate.inferred ? 1 : 0) + (endCandidate.inferred ? 1 : 0),
+      };
+
+      if (
+        !best ||
+        candidate.longPenalty < best.longPenalty ||
+        (candidate.longPenalty === best.longPenalty &&
+          candidate.durationMinutes < best.durationMinutes) ||
+        (candidate.longPenalty === best.longPenalty &&
+          candidate.durationMinutes === best.durationMinutes &&
+          candidate.inferencePenalty < best.inferencePenalty)
+      ) {
+        best = candidate;
+      }
+    }
+  }
+
+  return best ? { startTime: best.startTime, endTime: best.endTime } : null;
 }
 
 function parseTimeToken(token: string): string | null {
@@ -2604,6 +3320,8 @@ SERIES SPLITTING RULE:
 - If one poster lists multiple named themed specials under an umbrella heading, output one item per named theme instead of one generic umbrella special.
 - If a named theme has explicit Friday dates and explicit Saturday dates, output separate Friday and Saturday items for that theme.
 - Do not collapse multiple named theme blocks into a single generic "theme nights" item.
+- If a single finite holiday/weekend special has different weekday-specific availability clauses, output separate one-off specials for each weekday/date.
+- Example: "Available from 4pm onwards on Saturday, and all day Sunday & Monday" should become separate Saturday, Sunday, and Monday items.
 
 VENUE EXTRACTION - Use this priority order:
 1. CHECK IMAGES FIRST: Look at the provided images for venue signs, logos, or venue names
@@ -2711,16 +3429,29 @@ For each item found, extract:
 - name: Performer/event name
 - day: Day of week if shown
 - date: Date if available (YYYY-MM-DD)
-- startTime: Performance time
+- startTime: Performance start time
+- endTime: Performance end time ONLY when the same schedule line shows an explicit range (otherwise use "")
 - venue: Venue name if different from ${userName} (look for location names, venue names, "at [location]")
 - price: if no specific price mentioned, use empty string
 - description: Any additional details
 - extractionReason: Why this was identified as a scheduled item
+- timeFlags: {
+    start: { source: "explicit" | "implied" | "semantic" | "none", evidence: "exact timing substring or empty string" },
+    end: { source: "explicit" | "implied" | "semantic" | "none", toClose: boolean, evidence: "exact timing substring or empty string" }
+  }
 
 Look for patterns like:
 - "Monday: Band A at 8pm"
 - "8pm - Venue: Performer"
 - Time-based lineups
+
+TIME RULES:
+- Preserve explicit ranges like "12-1PM", "2:30-5:30", or "6-7:30 PM" as both startTime and endTime.
+- If only a start time is visible on that schedule line, extract startTime and leave endTime as "".
+- Never invent an end time when the source line only shows a start time.
+- When a visible time token exists, set timeFlags.start.source="explicit" and use the exact timing substring as evidence.
+- When a visible range exists, set timeFlags.end.source="explicit", timeFlags.end.toClose=false, and use the exact range substring as evidence.
+- When no end token is visible, set timeFlags.end.source="none", timeFlags.end.toClose=false, and timeFlags.end.evidence="".
 
 CRITICAL JSON FORMATTING REQUIREMENTS:
 - Return ONLY valid JSON object with extraction summary
@@ -2728,7 +3459,23 @@ CRITICAL JSON FORMATTING REQUIREMENTS:
 - NO explanatory text before or after JSON
 - Use this exact structure:
 {
-  "extractedItems": [...array of scheduled items...],
+  "extractedItems": [
+    {
+      "name": "string",
+      "day": "string",
+      "date": "YYYY-MM-DD",
+      "startTime": "HH:mm or \"\"",
+      "endTime": "HH:mm or \"\"",
+      "venue": "string",
+      "price": "string",
+      "description": "string",
+      "extractionReason": "string",
+      "timeFlags": {
+        "start": { "source": "explicit" | "implied" | "semantic" | "none", "evidence": "string" },
+        "end": { "source": "explicit" | "implied" | "semantic" | "none", "toClose": boolean, "evidence": "string" }
+      }
+    }
+  ],
   "extractionSummary": {
     "totalFound": number,
     "venuesFound": number,
@@ -2737,6 +3484,21 @@ CRITICAL JSON FORMATTING REQUIREMENTS:
 }
 
 Return pure JSON with ALL scheduled items.`;
+}
+
+export function normalizeScheduleItemsForRegression(
+  items: Array<Record<string, unknown>>
+): CalendarItem[] {
+  return normalizeExtractedScheduleItems(items);
+}
+
+export function parseScheduleTextForRegression(
+  combinedText: string,
+  postedLocalDate: string,
+  userName: string,
+  sourceType: 'calendar' | 'schedule'
+): CalendarItem[] {
+  return parseScheduleText(combinedText, postedLocalDate, userName, sourceType);
 }
 
 function createOcrDebugPrompt(imageUrls: string[]): string {

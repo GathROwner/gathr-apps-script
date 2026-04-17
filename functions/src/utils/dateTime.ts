@@ -72,8 +72,8 @@ export function normalizeTime(timeString: string): string {
 
   let time = timeString.trim().toLowerCase();
 
-  // Remove seconds if present
-  time = time.replace(/:\d{2}(?=\s|$|[ap])/i, '');
+  // Remove seconds if present, but preserve HH:MM values.
+  time = time.replace(/^(\d{1,2}:\d{2}):\d{2}(?=\s|$|[ap])/i, '$1');
 
   // Handle "noon" and "midnight"
   if (time === 'noon' || time === '12 noon') return '12:00';

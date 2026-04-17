@@ -1197,11 +1197,16 @@ async function processFullParserEvent(
 
   const startDateRaw = String(item.startDate || '').trim();
   const startDate = startDateRaw ? formatDate(startDateRaw) : '';
+  const rawEndDateValue = item.endDate;
   let endDate = String(item.endDate || '').trim();
   endDate = endDate ? formatDate(endDate) : '';
-  let startTime = String(item.startTime || '').trim();
+  const rawStartTimeValue = item.startTime;
+  const rawEndTimeValue = item.endTime;
+  const startTimeBeforeNormalize = String(item.startTime || '').trim();
+  let startTime = startTimeBeforeNormalize;
   startTime = startTime ? normalizeTime(startTime) : '';
-  let endTime = String(item.endTime || '').trim();
+  const endTimeBeforeNormalize = String(item.endTime || '').trim();
+  let endTime = endTimeBeforeNormalize;
   endTime = endTime ? normalizeTime(endTime) : '';
 
   if (startDate && startTime && endTime && !endDate) {
@@ -1305,11 +1310,12 @@ async function processFullParserEvent(
     streetAddress: String(item.streetAddress || '').trim() || undefined,
     timeResolution: item.timeResolution,
     timeFlags: item.timeFlags,
+    _sourceType: (item as unknown as Record<string, unknown>)._sourceType || undefined,
     organizedBy: String(item.organizedBy || '').trim() || undefined,
     utcStartDate: String(item.utcStartDate || '').trim() || undefined,
     ticketsBuyUrl: String(item.ticketsBuyUrl || '').trim() || undefined,
     ticketProvider: String(item.ticketProvider || '').trim() || undefined,
-  } as EventData;
+  } as EventData & { _sourceType?: string };
 
   enforceCategoryTypeConsistency(eventData);
 
@@ -2491,6 +2497,92 @@ function isWeekdayOnlyRecurringSet(days?: RecurringWeekday[]): boolean {
   );
 }
 
+const WEEKLY_PATTERN_BY_WEEKDAY_INDEX = [
+  'weekly_sunday',
+  'weekly_monday',
+  'weekly_tuesday',
+  'weekly_wednesday',
+  'weekly_thursday',
+  'weekly_friday',
+  'weekly_saturday',
+] as const;
+
+function isSimpleWeeklyPattern(pattern: string): boolean {
+  return Boolean(pattern && pattern.startsWith('weekly_') && pattern !== 'weekly_custom');
+}
+
+function recurringPatternFromIsoDateValue(value: unknown): string | undefined {
+  const normalizedDate = normalizeIsoDateValue(value);
+  if (!normalizedDate) return undefined;
+  const date = new Date(`${normalizedDate}T00:00:00Z`);
+  if (Number.isNaN(date.getTime())) return undefined;
+  return WEEKLY_PATTERN_BY_WEEKDAY_INDEX[date.getUTCDay()] || undefined;
+}
+
+function normalizeRecurringFamilyTitle(event: Pick<EventData, 'name' | 'eventName'>): string {
+  const rawTitle = asTrimmedString(event.name) || asTrimmedString(event.eventName);
+  return rawTitle
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
+function shouldCorrectConflictingSimpleWeeklyPattern(
+  existing: EventData,
+  incoming: EventData,
+  existingPattern: string,
+  incomingPattern: string,
+  existingHasCustomSchedule: boolean,
+  incomingHasCustomSchedule: boolean
+): boolean {
+  if (
+    !isSimpleWeeklyPattern(existingPattern) ||
+    !isSimpleWeeklyPattern(incomingPattern) ||
+    existingPattern === incomingPattern ||
+    existingHasCustomSchedule ||
+    incomingHasCustomSchedule
+  ) {
+    return false;
+  }
+
+  const existingStartDate = normalizeIsoDateValue(existing.startDate);
+  const incomingStartDate = normalizeIsoDateValue(incoming.startDate);
+  if (!existingStartDate || !incomingStartDate || existingStartDate !== incomingStartDate) {
+    return false;
+  }
+
+  const existingEndDate =
+    normalizeIsoDateValue(existing.endDate) || existingStartDate;
+  const incomingEndDate =
+    normalizeIsoDateValue(incoming.endDate) || incomingStartDate;
+  if (existingEndDate !== incomingEndDate) {
+    return false;
+  }
+
+  const dateImpliedPattern = recurringPatternFromIsoDateValue(incomingStartDate);
+  if (
+    !dateImpliedPattern ||
+    incomingPattern !== dateImpliedPattern ||
+    existingPattern === dateImpliedPattern
+  ) {
+    return false;
+  }
+
+  const existingStartTime = normalizeTime(asTrimmedString(existing.startTime));
+  const incomingStartTime = normalizeTime(asTrimmedString(incoming.startTime));
+  if (!existingStartTime || !incomingStartTime || existingStartTime !== incomingStartTime) {
+    return false;
+  }
+
+  const existingTitle = normalizeRecurringFamilyTitle(existing);
+  const incomingTitle = normalizeRecurringFamilyTitle(incoming);
+  if (!existingTitle || !incomingTitle || existingTitle !== incomingTitle) {
+    return false;
+  }
+
+  return true;
+}
+
 function selectRecurringLifecycleMerge(
   existing: EventData,
   incoming: EventData
@@ -2572,6 +2664,21 @@ function selectRecurringLifecycleMerge(
         forceIsRecurring: false,
       };
     }
+  }
+
+  const shouldCorrectSimpleWeeklyPattern = shouldCorrectConflictingSimpleWeeklyPattern(
+    existing,
+    incoming,
+    existingPattern,
+    incomingPattern,
+    existingHasCustomSchedule,
+    incomingHasCustomSchedule
+  );
+  if (shouldCorrectSimpleWeeklyPattern) {
+    recurringPattern = incomingPattern;
+    recurringDaysOfWeek = [];
+    recurringWeekdaySequence = [];
+    recurringWeekInterval = 1;
   }
 
   if (incomingHasCustomSchedule) {
@@ -2953,7 +3060,29 @@ function normalizeComparableEvidenceTimeToken(
   return normalizedTime ? toComparableTime(normalizedTime) : '';
 }
 
-function extractComparableTimesFromEvidence(evidence: string): string[] {
+function getComparableEventClockContext(
+  primaryEvent: EventData,
+  counterpartEvent?: EventData
+): { expectedStart?: string; expectedEnd?: string } {
+  const primaryStart = toComparableTime(asTrimmedString(primaryEvent.startTime));
+  const primaryEnd = toComparableTime(asTrimmedString(primaryEvent.endTime));
+  const counterpartStart = counterpartEvent
+    ? toComparableTime(asTrimmedString(counterpartEvent.startTime))
+    : '';
+  const counterpartEnd = counterpartEvent
+    ? toComparableTime(asTrimmedString(counterpartEvent.endTime))
+    : '';
+
+  return {
+    expectedStart: counterpartStart || primaryStart || undefined,
+    expectedEnd: counterpartEnd || primaryEnd || undefined,
+  };
+}
+
+function extractComparableTimesFromEvidence(
+  evidence: string,
+  context?: { expectedStart?: string; expectedEnd?: string }
+): string[] {
   const normalized = evidence.trim().toLowerCase().replace(/[–—]/g, '-').replace(/\./g, '');
   if (!normalized) return [];
 
@@ -2970,6 +3099,20 @@ function extractComparableTimesFromEvidence(evidence: string): string[] {
     if (resolvedRange) return resolvedRange;
   }
 
+  const bareRangeMatch = normalized.match(
+    /\b(\d{1,2}(?::\d{2})?)\s*(?:-|to)\s*(\d{1,2}(?::\d{2})?)\b/i
+  );
+  if (bareRangeMatch && (context?.expectedStart || context?.expectedEnd)) {
+    const resolvedRange = resolveComparableRangeTimesFromEvidence(
+      bareRangeMatch[1],
+      '',
+      bareRangeMatch[2],
+      '',
+      context
+    );
+    if (resolvedRange) return resolvedRange;
+  }
+
   const explicitTokens = normalized.match(/\b\d{1,2}(?::\d{2})?\s*(?:am|pm)\b/gi) || [];
   return explicitTokens
     .map((token) => normalizeComparableEvidenceTimeToken(token))
@@ -2980,7 +3123,8 @@ function resolveComparableRangeTimesFromEvidence(
   startRaw: string,
   startPeriodRaw: string,
   endRaw: string,
-  endPeriodRaw: string
+  endPeriodRaw: string,
+  context?: { expectedStart?: string; expectedEnd?: string }
 ): [string, string] | null {
   const normalizedStartRaw = String(startRaw || '').trim();
   const normalizedEndRaw = String(endRaw || '').trim();
@@ -2990,6 +3134,11 @@ function resolveComparableRangeTimesFromEvidence(
 
   const startCandidates = startPeriod
     ? [{ period: startPeriod, inferred: false }]
+    : !endPeriod
+      ? [
+          { period: 'AM', inferred: true },
+          { period: 'PM', inferred: true },
+        ]
     : endPeriod
       ? [
           { period: endPeriod, inferred: false },
@@ -2998,6 +3147,11 @@ function resolveComparableRangeTimesFromEvidence(
       : [];
   const endCandidates = endPeriod
     ? [{ period: endPeriod, inferred: false }]
+    : !startPeriod
+      ? [
+          { period: 'AM', inferred: true },
+          { period: 'PM', inferred: true },
+        ]
     : startPeriod
       ? [
           { period: startPeriod, inferred: false },
@@ -3012,6 +3166,7 @@ function resolveComparableRangeTimesFromEvidence(
         durationMinutes: number;
         longPenalty: number;
         inferencePenalty: number;
+        contextPenalty: number;
       }
     | null = null;
 
@@ -3039,14 +3194,21 @@ function resolveComparableRangeTimesFromEvidence(
         longPenalty: durationMinutes > 6 * 60 ? 1 : 0,
         inferencePenalty:
           (startCandidate.inferred ? 1 : 0) + (endCandidate.inferred ? 1 : 0),
+        contextPenalty:
+          (context?.expectedStart && context.expectedStart !== startTime ? 1 : 0) +
+          (context?.expectedEnd && context.expectedEnd !== endTime ? 1 : 0),
       };
 
       if (
         !best ||
-        candidate.longPenalty < best.longPenalty ||
-        (candidate.longPenalty === best.longPenalty &&
+        candidate.contextPenalty < best.contextPenalty ||
+        (candidate.contextPenalty === best.contextPenalty &&
+          candidate.longPenalty < best.longPenalty) ||
+        (candidate.contextPenalty === best.contextPenalty &&
+          candidate.longPenalty === best.longPenalty &&
           candidate.inferencePenalty < best.inferencePenalty) ||
-        (candidate.longPenalty === best.longPenalty &&
+        (candidate.contextPenalty === best.contextPenalty &&
+          candidate.longPenalty === best.longPenalty &&
           candidate.inferencePenalty === best.inferencePenalty &&
           candidate.durationMinutes < best.durationMinutes)
       ) {
@@ -3058,14 +3220,133 @@ function resolveComparableRangeTimesFromEvidence(
   return best ? [best.startTime, best.endTime] : null;
 }
 
-function getEvidenceComparableTime(event: EventData, side: 'start' | 'end'): string {
+function getEventSourceType(event: EventData): string {
+  const record = event as unknown as Record<string, unknown>;
+  return String(record._sourceType || '').trim().toLowerCase();
+}
+
+function hasExplicitRangeEvidenceString(value: string): boolean {
+  return /\b\d{1,2}(?::\d{2})?\s*(?:am|pm)?\s*(?:-|to)\s*\d{1,2}(?::\d{2})?\s*(?:am|pm)?\b/i.test(
+    value
+  );
+}
+
+function hasUsableTimeFlagEvidence(event: EventData): boolean {
+  const context = getComparableEventClockContext(event);
+  return (['start', 'end'] as const).some((side) => {
+    const evidence = getTimeFlagEvidence(event.timeFlags, side);
+    if (!evidence) return false;
+    return extractComparableTimesFromEvidence(evidence, context).length > 0;
+  });
+}
+
+function extractSingleClearScheduleRangeEvidence(text: string): string {
+  const normalized = String(text || '').replace(/[â€“â€”]/g, '-');
+  const matches = Array.from(
+    normalized.matchAll(
+      /\b\d{1,2}(?::\d{2})?\s*(?:am|pm)?\s*(?:-|to)\s*\d{1,2}(?::\d{2})?\s*(?:am|pm)?\b/gi
+    )
+  );
+  if (matches.length !== 1) return '';
+  return matches[0]?.[0]?.trim() || '';
+}
+
+const TITLE_FAMILY_STOPWORDS = new Set([
+  'with',
+  'w',
+  'the',
+  'and',
+  'studio',
+  'class',
+  'classes',
+]);
+
+function normalizeTitleFamilyTokens(value: unknown): string[] {
+  return String(value || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .split(/\s+/)
+    .map((token) => token.trim())
+    .filter((token) => token.length > 1 && !TITLE_FAMILY_STOPWORDS.has(token));
+}
+
+function hasConsistentScheduleRangeTitleFamily(
+  existingEvent: EventData,
+  incomingEvent: EventData
+): boolean {
+  const existingTokens = normalizeTitleFamilyTokens(
+    asTrimmedString(existingEvent.name) || asTrimmedString(existingEvent.eventName)
+  );
+  const incomingTokens = normalizeTitleFamilyTokens(
+    asTrimmedString(incomingEvent.name) || asTrimmedString(incomingEvent.eventName)
+  );
+  if (existingTokens.length === 0 || incomingTokens.length === 0) return false;
+
+  const sharedCount = existingTokens.filter((token) => incomingTokens.includes(token)).length;
+  return sharedCount >= Math.min(2, existingTokens.length, incomingTokens.length);
+}
+
+function hasIncomingScheduleExplicitRangeForMerge(incomingEvent: EventData): boolean {
+  if (getEventSourceType(incomingEvent) !== 'schedule') return false;
+  if (getTimeFlagSource(incomingEvent.timeFlags, 'start') !== 'explicit') return false;
+  if (getTimeFlagSource(incomingEvent.timeFlags, 'end') !== 'explicit') return false;
+  const evidence =
+    getTimeFlagEvidence(incomingEvent.timeFlags, 'start') ||
+    getTimeFlagEvidence(incomingEvent.timeFlags, 'end');
+  if (!hasExplicitRangeEvidenceString(evidence)) return false;
+  const context = getComparableEventClockContext(incomingEvent);
+  return extractComparableTimesFromEvidence(evidence, context).length >= 2;
+}
+
+function shouldUseDescriptionRangeFallback(
+  existingEvent: EventData,
+  incomingEvent?: EventData
+): boolean {
+  if (!incomingEvent) return false;
+  if (hasUsableTimeFlagEvidence(existingEvent)) return false;
+  if (!hasIncomingScheduleExplicitRangeForMerge(incomingEvent)) return false;
+  if (!hasConsistentScheduleRangeTitleFamily(existingEvent, incomingEvent)) return false;
+  return Boolean(extractSingleClearScheduleRangeEvidence(asTrimmedString(existingEvent.description)));
+}
+
+function getEvidenceComparableTime(
+  event: EventData,
+  side: 'start' | 'end',
+  options?: {
+    counterpartEvent?: EventData;
+    allowDescriptionFallback?: boolean;
+  }
+): string {
+  const context = getComparableEventClockContext(event, options?.counterpartEvent);
   const evidence = getTimeFlagEvidence(event.timeFlags, side);
-  if (!evidence) return '';
-  const comparableTimes = extractComparableTimesFromEvidence(evidence);
-  if (comparableTimes.length === 0) return '';
-  return side === 'end'
-    ? comparableTimes[comparableTimes.length - 1] || ''
-    : comparableTimes[0] || '';
+  const comparableTimes = evidence
+    ? extractComparableTimesFromEvidence(evidence, context)
+    : [];
+  if (comparableTimes.length > 0) {
+    return side === 'end'
+      ? comparableTimes[comparableTimes.length - 1] || ''
+      : comparableTimes[0] || '';
+  }
+
+  if (
+    options?.allowDescriptionFallback &&
+    shouldUseDescriptionRangeFallback(event, options.counterpartEvent)
+  ) {
+    const descriptionRange = extractSingleClearScheduleRangeEvidence(
+      asTrimmedString(event.description)
+    );
+    const descriptionComparableTimes = extractComparableTimesFromEvidence(
+      descriptionRange,
+      context
+    );
+    if (descriptionComparableTimes.length > 0) {
+      return side === 'end'
+        ? descriptionComparableTimes[descriptionComparableTimes.length - 1] || ''
+        : descriptionComparableTimes[0] || '';
+    }
+  }
+
+  return '';
 }
 
 function selectPreferredIncomingTimeMergeValue(
@@ -3089,7 +3370,10 @@ function selectPreferredIncomingTimeMergeValue(
     return incoming || evidenceComparable;
   }
 
-  const existingEvidenceComparable = getEvidenceComparableTime(existingEvent, side);
+  const existingEvidenceComparable = getEvidenceComparableTime(existingEvent, side, {
+    counterpartEvent: incomingEvent,
+    allowDescriptionFallback: true,
+  });
   if (existingEvidenceComparable && existingEvidenceComparable === evidenceComparable) {
     return evidenceComparable;
   }
@@ -3157,7 +3441,10 @@ function shouldPreferIncomingInferredEndTime(
   }
 
   if (incomingRank === existingRank && incomingRank > 0) {
-    const existingStartEvidence = getEvidenceComparableTime(existingEvent, 'start');
+    const existingStartEvidence = getEvidenceComparableTime(existingEvent, 'start', {
+      counterpartEvent: incomingEvent,
+      allowDescriptionFallback: true,
+    });
     const incomingStartEvidence = getEvidenceComparableTime(incomingEvent, 'start');
     if (
       existingStartEvidence &&
@@ -3188,10 +3475,14 @@ function shouldReplaceTimeField(
   }
 
   const incomingExplicit = isExplicitIncomingTime(incomingEvent, side);
+  const existingEvidenceComparable = getEvidenceComparableTime(existingEvent, side, {
+    counterpartEvent: incomingEvent,
+    allowDescriptionFallback: true,
+  });
   if (
     incomingExplicit &&
-    getEvidenceComparableTime(existingEvent, side) === toComparableTime(incoming) &&
-    getEvidenceComparableTime(existingEvent, side) !== toComparableTime(existing)
+    existingEvidenceComparable === toComparableTime(incoming) &&
+    existingEvidenceComparable !== toComparableTime(existing)
   ) {
     return true;
   }
@@ -3439,7 +3730,7 @@ function resolveDatesAndTimes(
   return { startDate, endDate, startTime, endTime };
 }
 
-function summarizeFullParserEvents(
+export function summarizeFullParserEvents(
   events: ParserProcessedEvent[]
 ): Array<Record<string, unknown>> {
   return events.map((event) => ({
@@ -3454,7 +3745,17 @@ function summarizeFullParserEvents(
     startTime: event.startTime || '',
     endDate: event.endDate || '',
     endTime: event.endTime || '',
+    isRecurring: event.isRecurring || '',
     recurringPattern: event.recurringPattern || 'none',
+    recurringDaysOfWeek: Array.isArray(event.recurringDaysOfWeek) ? event.recurringDaysOfWeek : [],
+    recurringWeekdaySequence: Array.isArray(event.recurringWeekdaySequence)
+      ? event.recurringWeekdaySequence
+      : [],
+    recurringWeekInterval:
+      typeof event.recurringWeekInterval === 'number' ? event.recurringWeekInterval : null,
+    totalOccurrences:
+      typeof event.totalOccurrences === 'number' ? event.totalOccurrences : null,
+    recurrenceUntilDate: event.recurrenceUntilDate || '',
     ticketLink: event.ticketLink || '',
     ticketsBuyUrl: event.ticketsBuyUrl || '',
     image: event.image || '',
@@ -3462,6 +3763,7 @@ function summarizeFullParserEvents(
     sharedPostThumbnail: event.sharedPostThumbnail || '',
     timeResolution: event.timeResolution || null,
     timeFlags: event.timeFlags || null,
+    _sourceType: (event as unknown as Record<string, unknown>)._sourceType || null,
     description: String(event.description || '').slice(0, 240),
   }));
 }

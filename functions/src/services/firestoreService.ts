@@ -1977,7 +1977,7 @@ function extractUniqueIdRoot(value: unknown): string {
   return normalized.slice(0, separatorIndex);
 }
 
-function shouldSkipSiblingUniqueIdDuplicateCheck(
+export function shouldSkipSiblingUniqueIdDuplicateCheck(
   incoming: EventData,
   existing: EventData
 ): boolean {
@@ -1998,6 +1998,9 @@ function shouldSkipSiblingUniqueIdDuplicateCheck(
   const incomingStartTime = String(incoming.startTime || '').trim();
   const existingStartTime = String(existing.startTime || '').trim();
   if (incomingStartTime && existingStartTime && incomingStartTime !== existingStartTime) {
+    if (isDuplicateEntry(incoming, existing, { requireEstablishmentMatch: false })) {
+      return false;
+    }
     return true;
   }
 

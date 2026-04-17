@@ -310,6 +310,7 @@ export interface CalendarItem extends RecurrenceScheduleFields {
   day?: string;
   totalOccurrences?: number;
   recurrenceUntilDate?: string;
+  timeFlags?: TimeFlags;
   _sourceType?: 'calendar' | 'schedule';
   _ticketImageUrl?: string;
 }

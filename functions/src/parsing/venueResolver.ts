@@ -463,15 +463,10 @@ function inferEndFromStartAndCategory(
 }
 
 function shouldPreferDurationDefaultForMissingEnd(
-  event?: Pick<FormattedEvent, 'name' | 'description' | 'timeFlags' | 'category'>
+  event?: Pick<FormattedEvent, 'name' | 'description' | 'timeFlags' | 'category' | '_sourceType'>
 ): boolean {
   if (!event) return false;
   if (SPECIAL_LIKE_CATEGORY_PATTERN.test(String(event.category || ''))) {
-    return false;
-  }
-
-  const startSource = String(event.timeFlags?.start?.source || '').trim().toLowerCase();
-  if (startSource !== 'explicit') {
     return false;
   }
 
@@ -480,8 +475,18 @@ function shouldPreferDurationDefaultForMissingEnd(
     return false;
   }
 
+  const sourceType = String((event as any)?._sourceType || '').trim().toLowerCase();
+  if (sourceType === 'schedule' || sourceType === 'calendar') {
+    return true;
+  }
+
   const haystack = `${String(event.name || '')} ${String(event.description || '')}`.toLowerCase();
-  return SHORT_FORM_PROGRAM_PATTERN.test(haystack);
+  if (SHORT_FORM_PROGRAM_PATTERN.test(haystack)) {
+    return true;
+  }
+
+  const startSource = String(event.timeFlags?.start?.source || '').trim().toLowerCase();
+  return startSource === 'explicit' && !String(event.description || '').trim();
 }
 
 /**

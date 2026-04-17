@@ -19,6 +19,7 @@ import {
   ALLOWED_CATEGORIES,
   RecurringPattern,
   RecurringWeekday,
+  TimeFlags,
   GPTFunctionSchema,
   ParsingConfig,
   DEFAULT_PARSING_CONFIG,
@@ -240,6 +241,7 @@ const TARGETED_CATEGORY_HARDENING_RULES: Array<{ regex: RegExp; target: Category
   { regex: /\bpoetry\s+reading\b/i, target: 'Family Friendly', note: 'targeted poetry reading' },
   { regex: /\btableside\s+magic\b/i, target: 'Family Friendly', note: 'targeted tableside magic' },
   { regex: /\bopening\s+reception\b/i, target: 'Family Friendly', note: 'targeted opening reception' },
+  { regex: /\bglow\s*&\s*flow\b|\bpilates\b/i, target: 'Workshops & Classes', note: 'targeted wellness/pilates session' },
 ];
 
 interface CategoryNormalizationStats {
@@ -263,7 +265,8 @@ export async function performFinalFormatting(
   userName: string,
   partialAddress: string,
   timestamp: string,
-  config: Partial<ParsingConfig> = {}
+  config: Partial<ParsingConfig> = {},
+  combinedText = ''
 ): Promise<FormattedEvent[]> {
   const cfg = { ...DEFAULT_PARSING_CONFIG, ...config };
 
@@ -370,6 +373,8 @@ Do not drop, merge, or reorder items. Never return arrays of values for an item;
         event = applyLegacyRecurringNormalization(event);
       }
 
+      event = rehydrateFormattedEventMetadata(event, originalItem);
+
       // Ensure isRecurring is properly set in canonical output format.
       const processedEvent: FormattedEvent = {
         ...event,
@@ -385,7 +390,13 @@ Do not drop, merge, or reorder items. Never return arrays of values for an item;
       return processedEvent;
     });
 
-    const collapsedProcessedEvents = collapseRecurringSeriesEvents(processedEvents);
+    const workshopGroundedEvents = filterUnsupportedWorkshopBleed(processedEvents, combinedText);
+    const sourceGroundedEvents = filterUnsupportedClosureFoodBleed(
+      workshopGroundedEvents,
+      combinedText
+    );
+    const promotedFiniteWeeklyEvents = promoteFiniteWeeklyOneOffSequences(sourceGroundedEvents);
+    const collapsedProcessedEvents = collapseRecurringSeriesEvents(promotedFiniteWeeklyEvents);
 
     // Final validation pass
     const validationErrors = runFinalValidation(collapsedProcessedEvents);
@@ -893,17 +904,10 @@ function normalizeFormattingResponse(
     if (!('recurrenceUntilDate' in e)) e.recurrenceUntilDate = '';
 
     if (ENABLE_RECURRENCE_LIFECYCLE_NORMALIZATION) {
-      const normalizedRecurrence = normalizeRecurringForFormattedEvent(
+      e = normalizeRecurringForFormattedEvent(
         e,
         validatedData[i]
       );
-      e.recurringPattern = normalizedRecurrence.recurringPattern;
-      e.isRecurring = normalizedRecurrence.isRecurring;
-      e.recurringDaysOfWeek = normalizedRecurrence.recurringDaysOfWeek;
-      e.recurringWeekdaySequence = normalizedRecurrence.recurringWeekdaySequence;
-      e.recurringWeekInterval = normalizedRecurrence.recurringWeekInterval;
-      e.totalOccurrences = normalizedRecurrence.totalOccurrences;
-      e.recurrenceUntilDate = normalizedRecurrence.recurrenceUntilDate;
     } else {
       e = applyLegacyRecurringNormalization(e);
     }
@@ -947,6 +951,84 @@ function normalizeFormattingResponse(
     formattedEvents,
     formattingDecisions: response.formattingDecisions || [],
   };
+}
+
+export function rehydrateFormattedEventMetadata(
+  event: FormattedEvent,
+  originalItem?: ExtractedItem
+): FormattedEvent {
+  const nextEvent = { ...event } as FormattedEvent;
+  let changed = false;
+
+  const existingSourceType = String((event as Record<string, unknown>)._sourceType || '').trim();
+  const originalSourceType = String((originalItem as Record<string, unknown> | undefined)?._sourceType || '').trim();
+  if (!existingSourceType && originalSourceType) {
+    nextEvent._sourceType = originalSourceType;
+    changed = true;
+  }
+
+  if (
+    !hasMeaningfulFormattedTimeFlags((event as Record<string, unknown>).timeFlags) &&
+    hasMeaningfulFormattedTimeFlags((originalItem as Record<string, unknown> | undefined)?.timeFlags)
+  ) {
+    nextEvent.timeFlags = cloneFormattedTimeFlags(
+      (originalItem as Record<string, unknown> | undefined)?.timeFlags
+    );
+    changed = true;
+  }
+
+  return changed ? nextEvent : event;
+}
+
+function cloneFormattedTimeFlags(value: unknown): TimeFlags | undefined {
+  const raw = value as Record<string, unknown> | null | undefined;
+  if (!raw || typeof raw !== 'object') return undefined;
+
+  const startRaw = ((raw.start as Record<string, unknown> | undefined) || {}) as Record<string, unknown>;
+  const endRaw = ((raw.end as Record<string, unknown> | undefined) || {}) as Record<string, unknown>;
+  const hasStart = Object.keys(startRaw).length > 0;
+  const hasEnd = Object.keys(endRaw).length > 0;
+  if (!hasStart && !hasEnd) return undefined;
+
+  return {
+    start: {
+      source: normalizeFormattedTimeFlagSource(startRaw.source),
+      evidence: String(startRaw.evidence || ''),
+    },
+    end: {
+      source: normalizeFormattedTimeFlagSource(endRaw.source),
+      toClose: Boolean(endRaw.toClose),
+      evidence: String(endRaw.evidence || ''),
+    },
+  };
+}
+
+function normalizeFormattedTimeFlagSource(
+  value: unknown
+): 'explicit' | 'implied' | 'semantic' | 'none' {
+  const normalized = String(value || '').trim().toLowerCase();
+  if (
+    normalized === 'explicit' ||
+    normalized === 'implied' ||
+    normalized === 'semantic' ||
+    normalized === 'none'
+  ) {
+    return normalized;
+  }
+  return 'none';
+}
+
+function hasMeaningfulFormattedTimeFlags(value: unknown): boolean {
+  const flags = cloneFormattedTimeFlags(value);
+  if (!flags) return false;
+
+  return Boolean(
+    String(flags.start.source || '').trim() !== 'none' ||
+      String(flags.start.evidence || '').trim() ||
+      String(flags.end.source || '').trim() !== 'none' ||
+      String(flags.end.evidence || '').trim() ||
+      flags.end.toClose === true
+  );
 }
 
 function detectExplicitFoodSpecialCategory(
@@ -1779,6 +1861,141 @@ function runFinalValidation(events: FormattedEvent[]): number {
   return validationErrors;
 }
 
+const WORKSHOP_BLEED_SUPPORT_STOPWORDS = new Set([
+  'ages',
+  'and',
+  'art',
+  'beginner',
+  'beginners',
+  'canvas',
+  'class',
+  'classes',
+  'confederation',
+  'court',
+  'course',
+  'fit',
+  'for',
+  'introduction',
+  'kids',
+  'mall',
+  'of',
+  'supplies',
+  'the',
+  'to',
+  'with',
+  'workshop',
+]);
+
+function normalizeWorkshopSupportText(value: string): string {
+  return String(value || '')
+    .toLowerCase()
+    .replace(/[\u2018\u2019\u201c\u201d]/g, "'")
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function extractWorkshopSupportTokens(name: string): string[] {
+  const seen = new Set<string>();
+  const tokens: string[] = [];
+  for (const token of normalizeWorkshopSupportText(name).split(' ')) {
+    if (!token || token.length < 4) continue;
+    if (WORKSHOP_BLEED_SUPPORT_STOPWORDS.has(token)) continue;
+    if (seen.has(token)) continue;
+    seen.add(token);
+    tokens.push(token);
+  }
+  return tokens;
+}
+
+function countWorkshopNameSupport(name: string, combinedText: string): number {
+  const supportText = normalizeWorkshopSupportText(combinedText);
+  if (!supportText) return 0;
+  const tokens = extractWorkshopSupportTokens(name);
+  if (tokens.length === 0) return 0;
+  return tokens.filter((token) => supportText.includes(token)).length;
+}
+
+function filterUnsupportedWorkshopBleed(
+  events: FormattedEvent[],
+  combinedText: string
+): FormattedEvent[] {
+  const supportText = normalizeWorkshopSupportText(combinedText);
+  if (!supportText) return events;
+
+  const workshopIndices = events
+    .map((event, index) => ({ event, index }))
+    .filter(({ event }) => event.category === 'Workshops & Classes');
+  if (workshopIndices.length < 2) return events;
+
+  const supportByIndex = new Map<number, number>();
+  let stronglySupportedWorkshopCount = 0;
+  for (const { event, index } of workshopIndices) {
+    const supportCount = countWorkshopNameSupport(String(event.name || ''), supportText);
+    supportByIndex.set(index, supportCount);
+    if (supportCount >= 2) stronglySupportedWorkshopCount += 1;
+  }
+
+  if (stronglySupportedWorkshopCount === 0) return events;
+
+  const filtered = events.filter((event, index) => {
+    if (event.category !== 'Workshops & Classes') return true;
+    const supportCount = supportByIndex.get(index) || 0;
+    if (supportCount > 0) return true;
+
+    const meaningfulTokens = extractWorkshopSupportTokens(String(event.name || ''));
+    if (meaningfulTokens.length < 2) return true;
+
+    logger.debug(`Dropped unsupported workshop/course bleed item "${event.name}"`, {
+      supportCount,
+      stronglySupportedWorkshopCount,
+      startDate: event.startDate,
+      startTime: event.startTime,
+    });
+    return false;
+  });
+
+  return filtered.length > 0 ? filtered : events;
+}
+
+function hasClosureOnlyPostCue(text: string): boolean {
+  const normalized = normalizeWorkshopSupportText(text);
+  if (!normalized) return false;
+  return /\b(will be closed|closed|closure|closed on|good friday|easter sunday)\b/.test(
+    normalized
+  );
+}
+
+function hasFoodSpecialSourceCue(text: string): boolean {
+  const normalized = normalizeWorkshopSupportText(text);
+  if (!normalized) return false;
+  return /\b(daily specials?|special menu|menu item|chef s choice|burger|fries|quesadilla|rice bowl|philly|meatloaf|shepards pie|cheeseburger|mac cheese|mac n cheese|avocado)\b/.test(
+    normalized
+  );
+}
+
+function filterUnsupportedClosureFoodBleed(
+  events: FormattedEvent[],
+  combinedText: string
+): FormattedEvent[] {
+  if (!hasClosureOnlyPostCue(combinedText) || hasFoodSpecialSourceCue(combinedText)) {
+    return events;
+  }
+
+  const filtered = events.filter((event) => {
+    if (!FOOD_CATEGORIES.includes(event.category)) return true;
+
+    logger.debug(`Dropped unsupported food-special bleed item from closure-only post "${event.name}"`, {
+      category: event.category,
+      startDate: event.startDate,
+      startTime: event.startTime,
+    });
+    return false;
+  });
+
+  return filtered;
+}
+
 function normalizeRecurringFlagValue(value: unknown): 'yes' | 'no' | 'unknown' {
   if (value === true) return 'yes';
   if (value === false) return 'no';
@@ -2015,6 +2232,34 @@ function hasRecurringCue(text: string): boolean {
   );
 }
 
+function hasStrongRecurringCue(text: string): boolean {
+  const normalized = normalizeWeekdayExtractionText(text);
+  if (!normalized) return false;
+  return /\b(every|each|weekly|daily|biweekly|every other|recurring|repeats?|weekdays|monthly)\b/.test(
+    normalized
+  );
+}
+
+function hasSingleDayMultiSessionOneOffCue(
+  event: Pick<FormattedEvent, 'startDate' | 'endDate'>,
+  sourceText: string
+): boolean {
+  const startDate = String(event.startDate || '').trim();
+  const endDate = String(event.endDate || '').trim();
+  if (!startDate || startDate !== endDate) return false;
+
+  const normalized = normalizeWeekdayExtractionText(sourceText);
+  if (!normalized) return false;
+  if (hasRecurringCue(normalized)) return false;
+  if (!/\bsessions?\b|\btime\s*slots?\b/.test(normalized)) return false;
+
+  const explicitTimes = normalized.match(/\b\d{1,2}(?::\d{2})?\s*(?:am|pm)\b/g) || [];
+  const distinctTimes = [
+    ...new Set(explicitTimes.map((value) => value.toLowerCase().replace(/\s+/g, '')))
+  ];
+  return distinctTimes.length >= 2;
+}
+
 function hasConcreteDateReference(text: string): boolean {
   const normalized = String(text || '').toLowerCase();
   if (!normalized) return false;
@@ -2034,7 +2279,7 @@ function hasConcreteDateReference(text: string): boolean {
 function hasOneOffEventCue(text: string): boolean {
   const normalized = String(text || '').toLowerCase();
   if (!normalized) return false;
-  return /\b(tonight|tomorrow|this\s+(monday|tuesday|wednesday|thursday|friday|saturday|sunday)|one night only|doors open|tickets on sale)\b/.test(
+  return /\b(tonight|tomorrow|this\s+(monday|tuesday|wednesday|thursday|friday|saturday|sunday)|this\s+coming\s+(monday|tuesday|wednesday|thursday|friday|saturday|sunday)|coming\s+(monday|tuesday|wednesday|thursday|friday|saturday|sunday)|one night only|doors open|tickets on sale)\b/.test(
     normalized
   );
 }
@@ -2045,6 +2290,111 @@ function hasSeriesOrProgramCue(text: string): boolean {
   return /\b(class|classes|session|sessions|series|program|programs|camp|course|courses|workshop|workshops|monthly feature)\b/.test(
     normalized
   );
+}
+
+function hasHolidayWeekendOneOffCue(text: string): boolean {
+  const normalized = String(text || '').toLowerCase();
+  if (!normalized) return false;
+  return /\b(this weekend|weekend special|holiday special|easter|long weekend|holiday weekend|good friday|thanksgiving|labou?r day|victoria day|family day|canada day)\b/.test(
+    normalized
+  );
+}
+
+function normalizeProgramIdentityText(value: unknown): string {
+  return String(value || '')
+    .toLowerCase()
+    .replace(/[\u2019\u2018\u02bc\u2032\uff07']/g, '')
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function isBabasIslandJazzContext(
+  event: Pick<FormattedEvent, 'name' | 'description' | 'establishment' | 'venue' | 'additionalLocation'>,
+  sourceText: string
+): boolean {
+  const venueHint = normalizeProgramIdentityText(
+    `${event.establishment || ''} ${event.venue || ''} ${event.additionalLocation || ''}`
+  );
+  if (!/\bbabas?\s+lounge\b/.test(venueHint)) {
+    return false;
+  }
+
+  const contentText = normalizeProgramIdentityText(
+    `${event.name || ''} ${event.description || ''} ${sourceText || ''}`
+  );
+  return /\bisland\s+jazz\b/.test(contentText);
+}
+
+function isGenericBabasIslandJazzFallbackName(name: string): boolean {
+  const normalized = normalizeProgramIdentityText(name);
+  if (!normalized) return false;
+  return (
+    normalized === 'island jazz' ||
+    normalized === 'island jazz at babas lounge' ||
+    normalized === 'island jazz weekly thursday night' ||
+    normalized === 'island jazz at babas lounge weekly thursday night'
+  );
+}
+
+function analyzeBabasIslandJazzProgramInstance(
+  event: Pick<
+    FormattedEvent,
+    'name' | 'description' | 'establishment' | 'venue' | 'additionalLocation' | 'startDate' | 'endDate'
+  >,
+  sourceText: string
+): {
+  matchesProgram: boolean;
+  isGenericFallback: boolean;
+  hasSpecificShowSignal: boolean;
+  hasOneOffAnchor: boolean;
+  shouldForceOneOff: boolean;
+} {
+  const matchesProgram = isBabasIslandJazzContext(event, sourceText);
+  if (!matchesProgram) {
+    return {
+      matchesProgram: false,
+      isGenericFallback: false,
+      hasSpecificShowSignal: false,
+      hasOneOffAnchor: false,
+      shouldForceOneOff: false,
+    };
+  }
+
+  const rawName = String(event.name || '').trim();
+  const normalizedText = normalizeProgramIdentityText(
+    `${rawName} ${event.description || ''} ${sourceText || ''}`
+  );
+  const hasSpecificShowSignal =
+    looksPerformerLikeTitle(rawName) ||
+    /\b(feat(?:uring)?|ft|features?|presents?|welcomes?(?:\s+back)?|joins?|performing)\b/.test(
+      normalizedText
+    ) ||
+    /\bisland\s+jazz\s*[:\-]\s*[a-z0-9]/.test(normalizeProgramIdentityText(rawName));
+  const hasOneOffAnchor =
+    hasConcreteDateReference(sourceText) ||
+    hasOneOffEventCue(sourceText) ||
+    /\bthis\s+week\b/i.test(sourceText) ||
+    /\btwo\s+sets?\s+starting\b/i.test(sourceText);
+  const hasSeriesFallbackCue =
+    /\bevery\s+thursday\s+night\b/.test(normalizedText) ||
+    /\bweekly\s+thursday\b/.test(normalizedText) ||
+    /\ball\s+year\s+round\b/.test(normalizedText);
+  const isGenericFallback =
+    isGenericBabasIslandJazzFallbackName(rawName) ||
+    (hasSeriesFallbackCue && !hasSpecificShowSignal && normalizeProgramIdentityText(rawName).startsWith('island jazz'));
+
+  return {
+    matchesProgram,
+    isGenericFallback,
+    hasSpecificShowSignal,
+    hasOneOffAnchor,
+    shouldForceOneOff:
+      matchesProgram &&
+      !isGenericFallback &&
+      hasSpecificShowSignal &&
+      hasOneOffAnchor,
+  };
 }
 
 function parseDateFromText(
@@ -2326,6 +2676,224 @@ function alignFiniteExplicitOccurrenceDates(
   };
 }
 
+function parseTimeToMinutes(value: string | undefined): number | null {
+  const match = String(value || '')
+    .trim()
+    .match(/^(\d{1,2}):(\d{2})$/);
+  if (!match) return null;
+
+  const hours = Number(match[1]);
+  const minutes = Number(match[2]);
+  if (!Number.isFinite(hours) || !Number.isFinite(minutes)) return null;
+  return hours * 60 + minutes;
+}
+
+function resolveOccurrenceLocalEndDate(
+  startDate: string | undefined,
+  startTime: string | undefined,
+  endTime: string | undefined
+): string | undefined {
+  const normalizedStartDate = String(startDate || '').trim();
+  if (!normalizedStartDate) return undefined;
+
+  const startMinutes = parseTimeToMinutes(startTime);
+  const endMinutes = parseTimeToMinutes(endTime);
+  if (
+    startMinutes !== null &&
+    endMinutes !== null &&
+    endMinutes < startMinutes
+  ) {
+    return addDaysToIsoDate(normalizedStartDate, 1) || normalizedStartDate;
+  }
+
+  return normalizedStartDate;
+}
+
+function alignSingleWeekdayRecurringStartDate(
+  startDate: string | undefined,
+  pattern: RecurringPattern
+): string | undefined {
+  const normalizedStartDate = String(startDate || '').trim();
+  if (
+    !normalizedStartDate ||
+    !pattern.startsWith('weekly_') ||
+    pattern === 'weekly_custom'
+  ) {
+    return undefined;
+  }
+
+  if (patternFromIsoDate(normalizedStartDate) === pattern) {
+    return normalizedStartDate;
+  }
+
+  for (let offset = 1; offset <= 7; offset += 1) {
+    const candidate = addDaysToIsoDate(normalizedStartDate, offset);
+    if (candidate && patternFromIsoDate(candidate) === pattern) {
+      return candidate;
+    }
+  }
+
+  return normalizedStartDate;
+}
+
+function shouldDemoteRecurringFiniteRunToOneOff(
+  event: Pick<FormattedEvent, 'startDate'>,
+  sourceText: string,
+  recurringPattern: RecurringPattern,
+  recurrenceUntilDate: string | undefined,
+  hasRecurringSignal: boolean,
+  hasSeriesCue: boolean,
+  customRecurringConfiguration?:
+    | {
+        recurringDaysOfWeek?: RecurringWeekday[];
+        recurringWeekdaySequence?: RecurringWeekday[];
+        recurringWeekInterval?: number;
+      }
+    | undefined
+): boolean {
+  if (
+    recurringPattern === 'none' ||
+    recurringPattern === 'daily' ||
+    recurringPattern === 'weekly_custom' ||
+    customRecurringConfiguration
+  ) {
+    return false;
+  }
+
+  const startDate = String(event.startDate || '').trim();
+  const normalizedUntilDate = String(recurrenceUntilDate || '').trim();
+  if (!startDate || !normalizedUntilDate) return false;
+
+  const spanDays = getDifferenceInDays(startDate, normalizedUntilDate);
+  if (spanDays === null || spanDays < 1 || spanDays > 6) {
+    return false;
+  }
+
+  if (hasRecurringSignal || hasSeriesCue) {
+    return false;
+  }
+
+  if (extractExplicitOccurrenceDateListFromText(sourceText, startDate).length >= 2) {
+    return false;
+  }
+
+  return (
+    hasOneOffEventCue(sourceText) ||
+    /\b(opens?|opening|runs?|running|plays?|screening run|this weekend|through|thru|until|till)\b/i.test(
+      sourceText
+    )
+  );
+}
+
+function shouldForceExplicitDatedWeeklyOneOff(
+  event: Pick<FormattedEvent, 'startDate' | 'endDate' | 'startTime' | 'endTime'>,
+  sourceText: string,
+  recurringPattern: RecurringPattern,
+  explicitOccurrenceDates: string[],
+  hasRecurringCueSignal: boolean,
+  hasSeriesCue: boolean,
+  recurrenceUntilDate: string | undefined,
+  totalOccurrences: number | undefined,
+  customRecurringConfiguration?:
+    | {
+        recurringDaysOfWeek?: RecurringWeekday[];
+        recurringWeekdaySequence?: RecurringWeekday[];
+        recurringWeekInterval?: number;
+      }
+    | undefined
+): boolean {
+  if (
+    recurringPattern === 'none' ||
+    recurringPattern === 'daily' ||
+    recurringPattern === 'weekly_custom' ||
+    customRecurringConfiguration
+  ) {
+    return false;
+  }
+
+  if (hasRecurringCueSignal || recurrenceUntilDate || totalOccurrences !== undefined) {
+    return false;
+  }
+
+  const hasOneOffCue = hasOneOffEventCue(sourceText);
+  if (hasSeriesCue && !hasOneOffCue) {
+    return false;
+  }
+
+  if (!hasConcreteDateReference(sourceText) || explicitOccurrenceDates.length > 1) {
+    return false;
+  }
+
+  const startDate = String(event.startDate || '').trim();
+  const endDate = String(event.endDate || '').trim() || startDate;
+  if (!startDate) return false;
+
+  const expectedOccurrenceEndDate =
+    resolveOccurrenceLocalEndDate(startDate, event.startTime, event.endTime) ||
+    startDate;
+  if (endDate !== startDate && endDate !== expectedOccurrenceEndDate) {
+    return false;
+  }
+
+  return true;
+}
+
+function shouldForceSingleExplicitDateOneOff(
+  event: Pick<FormattedEvent, 'startDate' | 'endDate' | 'startTime' | 'endTime'>,
+  sourceText: string,
+  recurringPattern: RecurringPattern,
+  _explicitOccurrenceDates: string[],
+  recurrenceUntilDate: string | undefined,
+  totalOccurrences: number | undefined,
+  customRecurringConfiguration?:
+    | {
+        recurringDaysOfWeek?: RecurringWeekday[];
+        recurringWeekdaySequence?: RecurringWeekday[];
+        recurringWeekInterval?: number;
+      }
+    | undefined
+): boolean {
+  if (
+    recurringPattern === 'none' ||
+    recurringPattern === 'daily' ||
+    recurringPattern === 'weekly_custom' ||
+    customRecurringConfiguration
+  ) {
+    return false;
+  }
+
+  if (recurrenceUntilDate || totalOccurrences !== undefined) {
+    return false;
+  }
+
+  const normalizedSource = normalizeWeekdayExtractionText(sourceText);
+  if (!normalizedSource || !hasConcreteDateReference(normalizedSource)) {
+    return false;
+  }
+
+  if (hasStrongRecurringCue(normalizedSource)) {
+    return false;
+  }
+
+  const startDate = String(event.startDate || '').trim();
+  const endDate = String(event.endDate || '').trim() || startDate;
+  if (!startDate) return false;
+
+  const startDatePattern = patternFromIsoDate(startDate);
+  if (!startDatePattern || startDatePattern !== recurringPattern) {
+    return false;
+  }
+
+  const expectedOccurrenceEndDate =
+    resolveOccurrenceLocalEndDate(startDate, event.startTime, event.endTime) ||
+    startDate;
+  if (endDate !== startDate && endDate !== expectedOccurrenceEndDate) {
+    return false;
+  }
+
+  return true;
+}
+
 function extractRecurrenceUntilDateFromText(
   text: string,
   startDate: string | undefined
@@ -2481,19 +3049,150 @@ function buildRecurrenceSourceText(
     .trim();
 }
 
+function buildItemLocalRecurrenceText(event: Pick<FormattedEvent, 'name' | 'description'>): string {
+  return [String(event.name || ''), String(event.description || '')]
+    .map((value) => value.trim())
+    .filter(Boolean)
+    .join(' ')
+    .trim();
+}
+
+function collectDistinctWeekdayPatternsFromText(text: string): Set<RecurringPattern> {
+  const normalized = normalizeWeekdayExtractionText(text);
+  if (!normalized) return new Set<RecurringPattern>();
+
+  const matches = new Set<RecurringPattern>();
+  const weekdayPattern =
+    /\b(mondays?|tuesdays?|wednesdays?|thursdays?|fridays?|saturdays?|sundays?|mon|tue|tues|wed|thu|thur|thurs|fri|sat|sun)\b/g;
+
+  for (const match of normalized.matchAll(weekdayPattern)) {
+    const mapped = mapWeekdayTokenToPattern(match[1]);
+    if (mapped) {
+      matches.add(mapped);
+    }
+  }
+
+  return matches;
+}
+
+function inferItemLocalRecurringPatternFromText(
+  event: Pick<FormattedEvent, 'name' | 'description' | 'startDate'>,
+  sourceText: string,
+  sourceWeekdayPatterns: Set<RecurringPattern>
+): RecurringPattern {
+  const itemLocalText = buildItemLocalRecurrenceText(event);
+  if (!itemLocalText) return 'none';
+
+  const startDatePattern = patternFromIsoDate(event.startDate);
+  const directPattern = detectRecurringPatternFromText(itemLocalText);
+  if (directPattern !== 'none') {
+    if (!startDatePattern || directPattern === startDatePattern) {
+      return directPattern;
+    }
+    return 'none';
+  }
+
+  const hasRecurringBoardContext =
+    hasRecurringCue(sourceText) || hasSeriesOrProgramCue(sourceText) || sourceWeekdayPatterns.size > 1;
+  if (!hasRecurringBoardContext) return 'none';
+  if (hasConcreteDateReference(itemLocalText)) return 'none';
+
+  const standalonePattern = detectStandaloneWeeklyPattern(itemLocalText);
+  if (standalonePattern === 'none') return 'none';
+  if (!startDatePattern || standalonePattern === startDatePattern) {
+    return standalonePattern;
+  }
+  return 'none';
+}
+
+function shouldAcceptRowScopedRecurringTextFallback(
+  event: Pick<FormattedEvent, 'startDate'>,
+  textPattern: RecurringPattern,
+  sourceWeekdayPatterns: Set<RecurringPattern>,
+  itemLocalPattern: RecurringPattern
+): boolean {
+  if (textPattern === 'none') return false;
+  if (textPattern === 'daily') return true;
+
+  const startDatePattern = patternFromIsoDate(event.startDate);
+  if (startDatePattern && textPattern.startsWith('weekly_') && textPattern !== startDatePattern) {
+    return false;
+  }
+
+  if (
+    sourceWeekdayPatterns.size > 1 &&
+    (itemLocalPattern === 'none' || itemLocalPattern !== textPattern)
+  ) {
+    return false;
+  }
+
+  return true;
+}
+
+function shouldAcceptSourceDerivedSpecificWeeklyPattern(
+  event: Pick<FormattedEvent, 'startDate'>,
+  candidatePattern: RecurringPattern,
+  candidateSource: 'standalone_weekday' | 'explicit_date_sequence' | 'none',
+  sourceWeekdayPatterns: Set<RecurringPattern>,
+  itemLocalPattern: RecurringPattern
+): boolean {
+  if (candidatePattern === 'none' || candidateSource === 'none') return false;
+  if (candidateSource === 'explicit_date_sequence') return true;
+
+  const startDatePattern = patternFromIsoDate(event.startDate);
+  if (startDatePattern && candidatePattern !== startDatePattern) {
+    return false;
+  }
+
+  if (
+    sourceWeekdayPatterns.size > 1 &&
+    (itemLocalPattern === 'none' || itemLocalPattern !== candidatePattern)
+  ) {
+    return false;
+  }
+
+  return true;
+}
+
 function normalizeRecurringForFormattedEvent(
   event: FormattedEvent,
   originalItem?: ExtractedItem
 ): FormattedEvent {
   const sourceText = buildRecurrenceSourceText(event, originalItem);
+  const sourceWeekdayPatterns = collectDistinctWeekdayPatternsFromText(sourceText);
   const hasCue = hasRecurringCue(sourceText);
   const hasConcreteDate = hasConcreteDateReference(sourceText);
   const hasOneOffCue = hasOneOffEventCue(sourceText);
   const hasSeriesCue = hasSeriesOrProgramCue(sourceText);
+  const babasIslandJazzAnalysis = analyzeBabasIslandJazzProgramInstance(event, sourceText);
   const eventRecord = event as unknown as Record<string, unknown>;
   const itemRecord = asRecord(originalItem) || {};
+  const extractionReasonText = [
+    String(eventRecord.extractionReason || ''),
+    String(itemRecord.extractionReason || ''),
+  ]
+    .filter(Boolean)
+    .join(' ');
+  const isForcedHolidayWeekendOneOff = /\bmixed_holiday_weekend_split:/i.test(extractionReasonText);
+
+  if (isForcedHolidayWeekendOneOff) {
+    logger.debug(`Forced holiday/weekend split item to one-off for "${event.name}"`, {
+      extractionReason: extractionReasonText,
+      startDate: event.startDate,
+      endDate: event.endDate,
+    });
+    event.totalOccurrences = undefined;
+    event.recurrenceUntilDate = undefined;
+    event.recurringDaysOfWeek = undefined;
+    event.recurringWeekdaySequence = undefined;
+    event.recurringWeekInterval = undefined;
+    event.isRecurring = false;
+    event.recurringPattern = 'none';
+    return event;
+  }
 
   let recurringPattern = sanitizeRecurringPattern(event.recurringPattern, event);
+  const incomingRecurringPattern = recurringPattern;
   let customRecurringConfiguration = resolveCustomRecurringConfiguration(
     sourceText,
     event.startDate,
@@ -2501,6 +3200,11 @@ function normalizeRecurringForFormattedEvent(
     itemRecord
   );
   const startDatePattern = patternFromIsoDate(event.startDate);
+  const itemLocalRecurringPattern = inferItemLocalRecurringPatternFromText(
+    event,
+    sourceText,
+    sourceWeekdayPatterns
+  );
   if (
     customRecurringConfiguration &&
     recurringPattern.startsWith('weekly_') &&
@@ -2516,9 +3220,21 @@ function normalizeRecurringForFormattedEvent(
   if (customRecurringConfiguration) {
     recurringPattern = 'weekly_custom';
   }
+  if (recurringPattern === 'none' && itemLocalRecurringPattern !== 'none') {
+    recurringPattern = itemLocalRecurringPattern;
+  }
   if (recurringPattern === 'none') {
     const textPattern = detectRecurringPatternFromText(sourceText);
-    if (textPattern !== 'none') recurringPattern = textPattern;
+    if (
+      shouldAcceptRowScopedRecurringTextFallback(
+        event,
+        textPattern,
+        sourceWeekdayPatterns,
+        itemLocalRecurringPattern
+      )
+    ) {
+      recurringPattern = textPattern;
+    }
   }
 
   if (recurringPattern === 'none' && FOOD_CATEGORIES.includes(event.category)) {
@@ -2554,6 +3270,19 @@ function normalizeRecurringForFormattedEvent(
       : explicitDateSequenceWeeklyPattern !== 'none'
         ? 'explicit_date_sequence'
         : 'none';
+  if (
+    specificWeeklyPatternCandidate !== 'none' &&
+    !shouldAcceptSourceDerivedSpecificWeeklyPattern(
+      event,
+      specificWeeklyPatternCandidate,
+      specificWeeklyPatternSource,
+      sourceWeekdayPatterns,
+      itemLocalRecurringPattern
+    )
+  ) {
+    specificWeeklyPatternCandidate = 'none';
+    specificWeeklyPatternSource = 'none';
+  }
   const canPromoteSpecificWeeklyPattern =
     specificWeeklyPatternSource === 'explicit_date_sequence' ||
     (
@@ -2632,6 +3361,7 @@ function normalizeRecurringForFormattedEvent(
     ) ??
     extractRecurrenceUntilDateFromText(sourceText, event.startDate);
 
+  let forcedFiniteRunOneOff = false;
   let explicitDateAlignmentDemotedToOneOff = false;
   const explicitOccurrenceAlignment = alignFiniteExplicitOccurrenceDates(
     event,
@@ -2650,6 +3380,132 @@ function normalizeRecurringForFormattedEvent(
       specificWeeklyPatternCandidate = 'none';
       specificWeeklyPatternSource = 'none';
       explicitDateAlignmentDemotedToOneOff = true;
+    }
+  }
+
+  if (
+    shouldDemoteRecurringFiniteRunToOneOff(
+      event,
+      sourceText,
+      recurringPattern,
+      recurrenceUntilDate,
+      hasCue,
+      hasSeriesCue,
+      customRecurringConfiguration
+    )
+  ) {
+    logger.debug(`Demoted finite one-off run from recurring for "${event.name}"`, {
+      recurringPatternFrom: recurringPattern,
+      startDate: event.startDate,
+      endDateTo: recurrenceUntilDate,
+    });
+    recurringPattern = 'none';
+    customRecurringConfiguration = undefined;
+    totalOccurrences = undefined;
+    event.endDate =
+      String(recurrenceUntilDate || '').trim() ||
+      String(event.endDate || '').trim() ||
+      String(event.startDate || '').trim();
+    recurrenceUntilDate = undefined;
+    forcedFiniteRunOneOff = true;
+  }
+
+  if (
+    !forcedFiniteRunOneOff &&
+    shouldForceExplicitDatedWeeklyOneOff(
+      event,
+      sourceText,
+      recurringPattern,
+      explicitOccurrenceDates,
+      hasCue,
+      hasSeriesCue,
+      recurrenceUntilDate,
+      totalOccurrences,
+      customRecurringConfiguration
+    )
+  ) {
+    logger.debug(`Forced explicit dated weekly item to one-off for "${event.name}"`, {
+      recurringPatternFrom: recurringPattern,
+      startDate: event.startDate,
+      sourceText: sourceText.slice(0, 220),
+    });
+    recurringPattern = 'none';
+    customRecurringConfiguration = undefined;
+    totalOccurrences = undefined;
+    recurrenceUntilDate = undefined;
+    forcedFiniteRunOneOff = true;
+  }
+
+  if (
+    !forcedFiniteRunOneOff &&
+    shouldForceSingleExplicitDateOneOff(
+      event,
+      sourceText,
+      recurringPattern,
+      explicitOccurrenceDates,
+      recurrenceUntilDate,
+      totalOccurrences,
+      customRecurringConfiguration
+    )
+  ) {
+    logger.debug(`Forced single explicit-date weekly item to one-off for "${event.name}"`, {
+      recurringPatternFrom: recurringPattern,
+      startDate: event.startDate,
+      sourceText: sourceText.slice(0, 220),
+    });
+    recurringPattern = 'none';
+    customRecurringConfiguration = undefined;
+    totalOccurrences = undefined;
+    recurrenceUntilDate = undefined;
+    forcedFiniteRunOneOff = true;
+  }
+
+  if (
+    incomingRecurringPattern === 'none' &&
+    recurringPattern.startsWith('weekly_') &&
+    recurringPattern !== 'weekly_custom' &&
+    !customRecurringConfiguration &&
+    sourceWeekdayPatterns.size > 1 &&
+    itemLocalRecurringPattern === 'none'
+  ) {
+    logger.debug(`Rejected mixed-board row-scoped weekday fallback for "${event.name}"`, {
+      recurringPatternFrom: recurringPattern,
+      startDate: event.startDate,
+      sourceText: sourceText.slice(0, 220),
+    });
+    recurringPattern = 'none';
+    specificWeeklyPatternCandidate = 'none';
+    specificWeeklyPatternSource = 'none';
+  }
+
+  if (
+    recurringPattern !== 'none' &&
+    !customRecurringConfiguration &&
+    !explicitDateAlignmentDemotedToOneOff &&
+    !forcedFiniteRunOneOff
+  ) {
+    const alignedRecurringStartDate = alignSingleWeekdayRecurringStartDate(
+      event.startDate,
+      recurringPattern
+    );
+    if (
+      alignedRecurringStartDate &&
+      alignedRecurringStartDate !== String(event.startDate || '').trim()
+    ) {
+      const alignedEndDate = resolveOccurrenceLocalEndDate(
+        alignedRecurringStartDate,
+        event.startTime,
+        event.endTime
+      );
+      logger.debug(`Realigned recurring anchor date for "${event.name}"`, {
+        recurringPattern,
+        startDateFrom: event.startDate,
+        startDateTo: alignedRecurringStartDate,
+        endDateFrom: event.endDate,
+        endDateTo: alignedEndDate || alignedRecurringStartDate,
+      });
+      event.startDate = alignedRecurringStartDate;
+      event.endDate = alignedEndDate || alignedRecurringStartDate;
     }
   }
 
@@ -2699,6 +3555,26 @@ function normalizeRecurringForFormattedEvent(
     recurrenceUntilDate = undefined;
     isRecurring = false;
   }
+  if (forcedFiniteRunOneOff) {
+    recurringPattern = 'none';
+    totalOccurrences = undefined;
+    recurrenceUntilDate = undefined;
+    isRecurring = false;
+  }
+
+  if (babasIslandJazzAnalysis.shouldForceOneOff) {
+    logger.debug(`Forced Baba's Island Jazz specific show to one-off for "${event.name}"`, {
+      recurringPatternFrom: recurringPattern,
+      hasSpecificShowSignal: babasIslandJazzAnalysis.hasSpecificShowSignal,
+      hasOneOffAnchor: babasIslandJazzAnalysis.hasOneOffAnchor,
+      isGenericFallback: babasIslandJazzAnalysis.isGenericFallback,
+    });
+    recurringPattern = 'none';
+    customRecurringConfiguration = undefined;
+    totalOccurrences = undefined;
+    recurrenceUntilDate = undefined;
+    isRecurring = false;
+  }
 
   if (
     recurringPattern !== 'none' &&
@@ -2715,6 +3591,45 @@ function normalizeRecurringForFormattedEvent(
       sourceText: sourceText.slice(0, 200),
     });
     recurringPattern = 'none';
+    isRecurring = false;
+  }
+
+  const shouldForceHolidayWeekendOneOff =
+    recurringPattern !== 'none' &&
+    recurringPattern !== 'daily' &&
+    !customRecurringConfiguration &&
+    FOOD_CATEGORIES.includes(event.category) &&
+    !hasSeriesCue &&
+    !recurrenceUntilDate &&
+    totalOccurrences === undefined &&
+    String(event.startDate || '').trim() === String(event.endDate || '').trim() &&
+    hasHolidayWeekendOneOffCue(sourceText);
+
+  if (shouldForceHolidayWeekendOneOff) {
+    logger.debug(`Forced holiday/weekend weekly special to one-off for "${event.name}"`, {
+      recurringPatternFrom: recurringPattern,
+      startDate: event.startDate,
+      endDate: event.endDate,
+      sourceText: sourceText.slice(0, 220),
+    });
+    recurringPattern = 'none';
+    isRecurring = false;
+  }
+
+  if (
+    recurringPattern !== 'none' &&
+    !customRecurringConfiguration &&
+    hasSingleDayMultiSessionOneOffCue(event, sourceText)
+  ) {
+    logger.debug(`Forced same-day multi-session event to one-off for "${event.name}"`, {
+      recurringPatternFrom: recurringPattern,
+      startDate: event.startDate,
+      endDate: event.endDate,
+      sourceText: sourceText.slice(0, 220),
+    });
+    recurringPattern = 'none';
+    totalOccurrences = undefined;
+    recurrenceUntilDate = undefined;
     isRecurring = false;
   }
 
@@ -3335,17 +4250,11 @@ function buildRecurringSeriesCollapseKey(event: FormattedEvent): string | null {
     return null;
   }
 
-  const recurrenceUntilDate = parseDateOnlyValue(event.recurrenceUntilDate);
-  const totalOccurrences = parsePositiveIntegerValue(event.totalOccurrences);
-  if (!recurrenceUntilDate && !(totalOccurrences && totalOccurrences > 1)) {
-    return null;
-  }
-
   return [
     normalizeRecurringSeriesTextForKey(event.establishment),
+    normalizeRecurringSeriesTextForKey(event.additionalLocation),
     normalizeRecurringSeriesTextForKey(event.category),
     normalizeRecurringSeriesTextForKey(event.name),
-    normalizeRecurringSeriesTextForKey(event.description),
     String(event.startTime || '').trim(),
     String(event.endTime || '').trim(),
     recurringPattern,
@@ -3354,6 +4263,90 @@ function buildRecurringSeriesCollapseKey(event: FormattedEvent): string | null {
     String(event.recurringWeekInterval || ''),
     String(event.ticketPrice || '').trim(),
   ].join('|');
+}
+
+function buildFiniteWeeklyOneOffSequenceKey(event: FormattedEvent): string | null {
+  const recurringPattern = sanitizeRecurringPattern(event.recurringPattern, event);
+  if (recurringPattern !== 'none' || isRecurringFlagEnabled(event.isRecurring)) {
+    return null;
+  }
+
+  const startDate = String(event.startDate || '').trim();
+  const endDate = String(event.endDate || '').trim() || startDate;
+  if (!parseIsoDate(startDate) || startDate !== endDate) {
+    return null;
+  }
+
+  return [
+    normalizeRecurringSeriesTextForKey(event.establishment),
+    normalizeRecurringSeriesTextForKey(event.additionalLocation),
+    normalizeRecurringSeriesTextForKey(event.category),
+    normalizeRecurringSeriesTextForKey(event.name),
+    String(event.startTime || '').trim(),
+    String(event.endTime || '').trim(),
+    String(event.ticketPrice || '').trim(),
+  ].join('|');
+}
+
+function promoteFiniteWeeklyOneOffSequences(events: FormattedEvent[]): FormattedEvent[] {
+  const groups = new Map<string, Array<{ index: number; startDate: string }>>();
+
+  events.forEach((event, index) => {
+    const key = buildFiniteWeeklyOneOffSequenceKey(event);
+    if (!key) return;
+    const startDate = String(event.startDate || '').trim();
+    const group = groups.get(key) || [];
+    group.push({ index, startDate });
+    groups.set(key, group);
+  });
+
+  const promoted = events.map((event) => ({ ...event }));
+
+  for (const group of groups.values()) {
+    if (group.length < 2) continue;
+
+    const sorted = group
+      .filter((entry) => Boolean(parseIsoDate(entry.startDate)))
+      .sort((left, right) => left.startDate.localeCompare(right.startDate));
+    if (sorted.length < 2) continue;
+
+    const firstDate = sorted[0].startDate;
+    const pattern = patternFromIsoDate(firstDate);
+    if (pattern === 'none') continue;
+
+    const distinctDates = Array.from(new Set(sorted.map((entry) => entry.startDate)));
+    if (distinctDates.length !== sorted.length) continue;
+
+    const sameWeekday = distinctDates.every((date) => patternFromIsoDate(date) === pattern);
+    if (!sameWeekday) continue;
+
+    let consecutiveWeekly = true;
+    for (let index = 1; index < distinctDates.length; index += 1) {
+      if (getDifferenceInDays(distinctDates[index - 1], distinctDates[index]) !== 7) {
+        consecutiveWeekly = false;
+        break;
+      }
+    }
+    if (!consecutiveWeekly) continue;
+
+    const recurrenceUntilDate = distinctDates[distinctDates.length - 1];
+    for (const entry of sorted) {
+      const event = promoted[entry.index];
+      event.isRecurring = true;
+      event.recurringPattern = pattern;
+      event.totalOccurrences = distinctDates.length;
+      event.recurrenceUntilDate = recurrenceUntilDate;
+    }
+
+    logger.debug(`Promoted finite weekly one-off sequence for "${promoted[sorted[0].index].name}"`, {
+      recurringPattern: pattern,
+      startDate: firstDate,
+      recurrenceUntilDate,
+      totalOccurrences: distinctDates.length,
+    });
+  }
+
+  return promoted;
 }
 
 function collapseRecurringSeriesEvents(events: FormattedEvent[]): FormattedEvent[] {

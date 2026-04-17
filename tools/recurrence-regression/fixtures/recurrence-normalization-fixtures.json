@@ -341,5 +341,404 @@
       "totalOccurrences": 3,
       "recurrenceUntilDate": "2026-04-20"
     }
+  },
+  {
+    "id": "glow_and_flow_same_day_sessions_oneoff",
+    "description": "Single-day multi-session wellness posts should stay one-off sessions rather than becoming a weekly recurring special.",
+    "event": {
+      "isEvent": "No",
+      "isFoodSpecial": "Yes",
+      "category": "Food Special",
+      "name": "Glow & Flow at Mill River",
+      "description": "Only 6 spots per session. Join us Saturday, April 25 with sessions at 9am, 11am, and 1pm.",
+      "establishment": "Mill River Resort",
+      "address": "",
+      "startDate": "2026-04-25",
+      "endDate": "2026-04-25",
+      "startTime": "09:00",
+      "endTime": "21:00",
+      "ticketPrice": "",
+      "ticketLink": "",
+      "relevantImageIndex": 0,
+      "venue": "Mill River Resort",
+      "additionalLocation": "Mill River Resort",
+      "isRecurring": "Yes",
+      "recurringPattern": "weekly_saturday"
+    },
+    "originalItem": {
+      "name": "Glow & Flow at Mill River",
+      "description": "Only 6 spots per session. Join us Saturday, April 25 with sessions at 9am, 11am, and 1pm.",
+      "date": "2026-04-25",
+      "startTime": "09:00",
+      "endTime": "21:00",
+      "venue": "Mill River Resort",
+      "price": "",
+      "recurringPattern": "weekly_saturday",
+      "extractionReason": "Saturday, April 25 with sessions at 9am, 11am, and 1pm."
+    },
+    "expect": {
+      "isRecurring": false,
+      "recurringPattern": "none",
+      "totalOccurrences": "__absent__",
+      "recurrenceUntilDate": "__absent__"
+    }
+  },
+  {
+    "id": "waterfront_weekly_anchor_realigns_to_next_weekday",
+    "description": "Weekly specials anchored to post date should realign to the recurring weekday instead of staying on the post day.",
+    "event": {
+      "isEvent": "No",
+      "isFoodSpecial": "Yes",
+      "category": "Food Special",
+      "name": "Cheeseburger Deluxe",
+      "description": "Daily special item at Waterfront Cafe",
+      "establishment": "Summerside Waterfront Cafe & Training Center",
+      "address": "",
+      "startDate": "2026-04-03",
+      "endDate": "2026-04-03",
+      "startTime": "11:00",
+      "endTime": "21:00",
+      "ticketPrice": "",
+      "ticketLink": "",
+      "relevantImageIndex": 0,
+      "venue": "Summerside Waterfront Cafe & Training Center",
+      "additionalLocation": "",
+      "isRecurring": "Yes",
+      "recurringPattern": "weekly_monday"
+    },
+    "originalItem": {
+      "name": "Cheeseburger Deluxe",
+      "description": "Daily special item at Waterfront Cafe",
+      "date": "2026-04-03",
+      "startTime": "11:00",
+      "endTime": "21:00",
+      "venue": "Summerside Waterfront Cafe & Training Center",
+      "price": "",
+      "recurringPattern": "weekly_monday",
+      "extractionReason": "Weekly Monday special with no explicit occurrence date."
+    },
+    "expect": {
+      "isRecurring": true,
+      "recurringPattern": "weekly_monday",
+      "startDate": "2026-04-06",
+      "endDate": "2026-04-06"
+    }
+  },
+  {
+    "id": "city_cinema_finite_run_demotes_from_weekly",
+    "description": "Finite Friday-to-Monday film runs should stay one-offs instead of being forced into a weekly Monday recurrence.",
+    "event": {
+      "isEvent": "Yes",
+      "isFoodSpecial": "No",
+      "category": "Cinema",
+      "name": "What We Dreamed of Then (film screening run)",
+      "description": "What We Dreamed of Then opens tonight (Friday) and plays until Monday.",
+      "establishment": "City Cinema",
+      "address": "",
+      "startDate": "2026-04-03",
+      "endDate": "2026-04-03",
+      "startTime": "08:00",
+      "endTime": "23:00",
+      "ticketPrice": "",
+      "ticketLink": "",
+      "relevantImageIndex": 0,
+      "venue": "City Cinema",
+      "additionalLocation": "",
+      "isRecurring": "Yes",
+      "recurringPattern": "weekly_monday",
+      "recurrenceUntilDate": "2026-04-06"
+    },
+    "originalItem": {
+      "name": "What We Dreamed of Then (film screening run)",
+      "description": "What We Dreamed of Then opens tonight (Friday) and plays until Monday.",
+      "date": "2026-04-03",
+      "startTime": "08:00",
+      "endTime": "23:00",
+      "venue": "City Cinema",
+      "price": "",
+      "recurringPattern": "weekly_monday",
+      "recurrenceUntilDate": "2026-04-06",
+      "extractionReason": "Finite Friday-to-Monday screening run."
+    },
+    "expect": {
+      "isRecurring": false,
+      "recurringPattern": "none",
+      "startDate": "2026-04-03",
+      "endDate": "2026-04-06",
+      "totalOccurrences": "__absent__",
+      "recurrenceUntilDate": "__absent__"
+    }
+  },
+  {
+    "id": "babas_island_jazz_specific_show_oneoff",
+    "description": "Performer-specific Baba's Island Jazz posts should normalize to one-offs even when the description mentions the weekly Thursday series.",
+    "event": {
+      "isEvent": "Yes",
+      "isFoodSpecial": "No",
+      "category": "Live Music",
+      "name": "Groove Company",
+      "description": "Island Jazz features Groove Company this week. Two sets starting 8pm, with a $10 minimum at the door. Island Jazz at Baba's Lounge every Thursday night all year round.",
+      "establishment": "Baba's Lounge",
+      "address": "",
+      "startDate": "2026-02-26",
+      "endDate": "2026-02-27",
+      "startTime": "20:00",
+      "endTime": "01:00",
+      "ticketPrice": "",
+      "ticketLink": "",
+      "relevantImageIndex": 0,
+      "venue": "Baba's Lounge",
+      "additionalLocation": "",
+      "isRecurring": "Yes",
+      "recurringPattern": "weekly_thursday"
+    },
+    "originalItem": {
+      "name": "Groove Company",
+      "description": "Island Jazz features Groove Company this week. Two sets starting 8pm, with a $10 minimum at the door. Island Jazz at Baba's Lounge every Thursday night all year round.",
+      "date": "2026-02-26",
+      "startTime": "20:00",
+      "endTime": "01:00",
+      "venue": "Baba's Lounge",
+      "price": "$10 minimum",
+      "recurringPattern": "weekly_thursday",
+      "extractionReason": "Specific Island Jazz performer post for this week's Thursday show."
+    },
+    "expect": {
+      "isRecurring": false,
+      "recurringPattern": "none",
+      "totalOccurrences": "__absent__",
+      "recurrenceUntilDate": "__absent__"
+    }
+  },
+  {
+    "id": "babas_island_jazz_generic_fallback_recurring",
+    "description": "Generic Baba's Island Jazz fallback copy should remain a weekly Thursday recurring series.",
+    "event": {
+      "isEvent": "Yes",
+      "isFoodSpecial": "No",
+      "category": "Live Music",
+      "name": "Island Jazz at Baba's Lounge",
+      "description": "Island Jazz at Baba's Lounge every Thursday night all year round.",
+      "establishment": "Baba's Lounge",
+      "address": "",
+      "startDate": "2026-03-19",
+      "endDate": "2026-03-20",
+      "startTime": "20:00",
+      "endTime": "01:00",
+      "ticketPrice": "",
+      "ticketLink": "",
+      "relevantImageIndex": 0,
+      "venue": "Baba's Lounge",
+      "additionalLocation": "",
+      "isRecurring": "Yes",
+      "recurringPattern": "weekly_thursday"
+    },
+    "originalItem": {
+      "name": "Island Jazz at Baba's Lounge",
+      "description": "Island Jazz at Baba's Lounge every Thursday night all year round.",
+      "date": "2026-03-19",
+      "startTime": "20:00",
+      "endTime": "01:00",
+      "venue": "Baba's Lounge",
+      "price": "",
+      "recurringPattern": "weekly_thursday",
+      "extractionReason": "Generic recurring Island Jazz series post."
+    },
+    "expect": {
+      "isRecurring": true,
+      "recurringPattern": "weekly_thursday",
+      "startDate": "2026-03-19",
+      "endDate": "2026-03-20"
+    }
+  },
+  {
+    "id": "holiday_weekend_split_item_stays_oneoff",
+    "description": "A finite holiday weekend split item with an explicit one-off date should stay non-recurring after normalization.",
+    "event": {
+      "isEvent": "No",
+      "isFoodSpecial": "Yes",
+      "category": "Food Special",
+      "name": "Easter Special - Turkey Dinner with Choice of Pie",
+      "description": "Easter special: Turkey Dinner Special with your choice of Coconut Cream or Lemon Cream Pie for $32 + tax. Available from 4pm onwards on Saturday, April 4 only.",
+      "establishment": "Clamdiggers Beach House & Restaurant",
+      "address": "",
+      "startDate": "2026-04-04",
+      "endDate": "2026-04-04",
+      "startTime": "16:00",
+      "endTime": "21:00",
+      "ticketPrice": "$32 + tax",
+      "ticketLink": "",
+      "relevantImageIndex": 0,
+      "venue": "Clamdiggers Beach House & Restaurant",
+      "additionalLocation": "",
+      "isRecurring": "No",
+      "recurringPattern": "none",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "from 4pm onwards"
+        },
+        "end": {
+          "source": "semantic",
+          "toClose": true,
+          "evidence": "onwards"
+        }
+      }
+    },
+    "originalItem": {
+      "name": "Easter Special - Turkey Dinner with Choice of Pie",
+      "description": "Easter special: Turkey Dinner Special with your choice of Coconut Cream or Lemon Cream Pie for $32 + tax. Available from 4pm onwards on Saturday, April 4 only.",
+      "date": "2026-04-04",
+      "startTime": "16:00",
+      "endTime": "",
+      "venue": "Clamdiggers Beach House & Restaurant",
+      "price": "$32 + tax",
+      "recurringPattern": "none",
+      "extractionReason": "mixed_holiday_weekend_split:saturday"
+    },
+    "expect": {
+      "isRecurring": false,
+      "recurringPattern": "none",
+      "startDate": "2026-04-04",
+      "endDate": "2026-04-04",
+      "totalOccurrences": "__absent__",
+      "recurrenceUntilDate": "__absent__"
+    }
+  },
+  {
+    "id": "holiday_weekend_weekly_shape_demotes_to_oneoff",
+    "description": "A holiday weekend food special emitted as a single-day weekly special with no lifecycle should be forced back to a one-off.",
+    "event": {
+      "isEvent": "No",
+      "isFoodSpecial": "Yes",
+      "category": "Food Special",
+      "name": "Easter Turkey Dinner Special (Turkey Dinner + choice of pie)",
+      "description": "Turkey Dinner Special this weekend; with your choice of Coconut Cream or Lemon Cream Pie for $32 + tax. Available all day Sunday.",
+      "establishment": "Clamdiggers Beach House & Restaurant",
+      "address": "",
+      "startDate": "2026-04-05",
+      "endDate": "2026-04-05",
+      "startTime": "11:30",
+      "endTime": "20:00",
+      "ticketPrice": "$32 + tax",
+      "ticketLink": "",
+      "relevantImageIndex": 0,
+      "venue": "Clamdiggers Beach House & Restaurant",
+      "additionalLocation": "",
+      "isRecurring": "Yes",
+      "recurringPattern": "weekly_sunday",
+      "timeFlags": {
+        "start": {
+          "source": "semantic",
+          "evidence": "Start from venue hours (opens 11:30)"
+        },
+        "end": {
+          "source": "semantic",
+          "toClose": true,
+          "evidence": "all day Sunday"
+        }
+      }
+    },
+    "originalItem": {
+      "name": "Easter Turkey Dinner Special (Turkey Dinner + choice of pie)",
+      "description": "Turkey Dinner Special this weekend; with your choice of Coconut Cream or Lemon Cream Pie for $32 + tax. Available all day Sunday.",
+      "date": "2026-04-05",
+      "startTime": "",
+      "endTime": "",
+      "venue": "Clamdiggers Beach House & Restaurant",
+      "price": "$32 + tax",
+      "recurringPattern": "none",
+      "extractionReason": "holiday weekend clause split output"
+    },
+    "expect": {
+      "isRecurring": false,
+      "recurringPattern": "none",
+      "startDate": "2026-04-05",
+      "endDate": "2026-04-05",
+      "totalOccurrences": "__absent__",
+      "recurrenceUntilDate": "__absent__"
+    }
+  },
+  {
+    "id": "single_explicit_saturday_craft_fair_is_oneoff",
+    "description": "A single explicit Saturday craft-fair date should not survive as a weekly recurring series.",
+    "event": {
+      "isEvent": "Yes",
+      "isFoodSpecial": "No",
+      "category": "Gatherings & Parties",
+      "name": "Finally Spring Craft Fair",
+      "description": "Join me and 60+ other vendors at the \"Finally Spring\" Craft Fair at the Loyalist in Summerside. Sat May 9th, 9am - 3pm Mothers Day Weekend",
+      "establishment": "Loyalist Country Inn & Conference Centre | Summerside PE",
+      "address": "",
+      "startDate": "2026-05-09",
+      "endDate": "2026-05-09",
+      "startTime": "09:00",
+      "endTime": "15:00",
+      "ticketPrice": "",
+      "ticketLink": "",
+      "relevantImageIndex": 0,
+      "venue": "Loyalist Country Inn & Conference Centre | Summerside PE",
+      "additionalLocation": "",
+      "isRecurring": "Yes",
+      "recurringPattern": "weekly_saturday"
+    },
+    "originalItem": {
+      "name": "Finally Spring Craft Fair",
+      "description": "Join me and 60+ other vendors at the \"Finally Spring\" Craft Fair at the Loyalist in Summerside. Sat May 9th, 9am - 3pm Mothers Day Weekend",
+      "date": "2026-05-09",
+      "startTime": "09:00",
+      "endTime": "15:00",
+      "venue": "Loyalist Country Inn & Conference Centre | Summerside PE",
+      "price": "",
+      "recurringPattern": "weekly_saturday",
+      "extractionReason": "Single explicit Saturday date."
+    },
+    "expect": {
+      "isRecurring": false,
+      "recurringPattern": "none",
+      "totalOccurrences": "__absent__",
+      "recurrenceUntilDate": "__absent__"
+    }
+  },
+  {
+    "id": "single_explicit_friday_workshop_is_oneoff",
+    "description": "A single explicit Friday workshop date should not be normalized into a weekly Friday series.",
+    "event": {
+      "isEvent": "Yes",
+      "isFoodSpecial": "No",
+      "category": "Workshops & Classes",
+      "name": "Needle Felted Landscape Workshop",
+      "description": "Friday May 15\\n5:30pm - 7:30pm",
+      "establishment": "Art Buds",
+      "address": "",
+      "startDate": "2026-05-15",
+      "endDate": "2026-05-15",
+      "startTime": "17:30",
+      "endTime": "19:30",
+      "ticketPrice": "",
+      "ticketLink": "",
+      "relevantImageIndex": 0,
+      "venue": "Art Buds",
+      "additionalLocation": "",
+      "isRecurring": "Yes",
+      "recurringPattern": "weekly_friday"
+    },
+    "originalItem": {
+      "name": "Needle Felted Landscape Workshop",
+      "description": "Friday May 15\\n5:30pm - 7:30pm",
+      "date": "2026-05-15",
+      "startTime": "17:30",
+      "endTime": "19:30",
+      "venue": "Art Buds",
+      "price": "",
+      "recurringPattern": "weekly_friday",
+      "extractionReason": "Single explicit Friday date."
+    },
+    "expect": {
+      "isRecurring": false,
+      "recurringPattern": "none",
+      "totalOccurrences": "__absent__",
+      "recurrenceUntilDate": "__absent__"
+    }
   }
 ]

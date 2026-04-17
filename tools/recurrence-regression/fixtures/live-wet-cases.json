@@ -288,5 +288,54 @@
         "isRecurring": true
       }
     ]
+  },
+  {
+    "id": "babas_island_jazz_groove_company",
+    "description": "Baba's Groove Company Island Jazz post should write back as a one-off specific show, not a recurring Thursday series.",
+    "fileId": "19DWnrBssxaVxAcKut6HkcG5SduhLyZUV",
+    "rowIndex": 11,
+    "venueId": "fb_100057766283684",
+    "keywordsAny": [
+      "groove company"
+    ],
+    "watchPaths": [
+      "venues/fb_100057766283684/events/tc5M7UHzAlnGD7p2H5HG"
+    ],
+    "expectedDocCountExact": 1,
+    "expectedDocs": [
+      {
+        "path": "venues/fb_100057766283684/events/tc5M7UHzAlnGD7p2H5HG",
+        "exactName": "Groove Company",
+        "startDate": "2026-02-26",
+        "startTime": "20:00",
+        "recurringPattern": "none",
+        "isRecurring": false
+      }
+    ]
+  },
+  {
+    "id": "babas_island_jazz_adam_hill",
+    "description": "Baba's Adam Hill Island Jazz post should write back as a one-off specific show, not a recurring Thursday series.",
+    "fileId": "1SjxHqNu3SM-9FwSYlhobdD_INogwLqy3",
+    "rowIndex": 203,
+    "venueId": "fb_100057766283684",
+    "keywordsAny": [
+      "adam hill",
+      "the art of the duo"
+    ],
+    "watchPaths": [
+      "venues/fb_100057766283684/events/tUwFuijVabbfWuTylXWk"
+    ],
+    "expectedDocCountExact": 1,
+    "expectedDocs": [
+      {
+        "path": "venues/fb_100057766283684/events/tUwFuijVabbfWuTylXWk",
+        "exactName": "Island Jazz presents Adam Hill performing \"The Art of the Duo\"",
+        "startDate": "2026-03-26",
+        "startTime": "20:00",
+        "recurringPattern": "none",
+        "isRecurring": false
+      }
+    ]
   }
 ]

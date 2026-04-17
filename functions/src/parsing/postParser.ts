@@ -65,6 +65,18 @@ const CATEGORY_END_DEFAULTS: Record<string, string> = {
 const SPECIAL_LIKE_CATEGORY_PATTERN = /\b(food special|drink special|happy hour|wing night)\b/i;
 const SHORT_FORM_PROGRAM_PATTERN =
   /\b(class|classes|workshop|workshops|lesson|lessons|training|fitness|tai chi|yoga|dance|body bar|rueda|salsa|bachata|heels|belly dance|masterclass|session|sessions|drop-?in|beginner|group)\b/i;
+const NIGHTLIFE_LIKE_CATEGORIES = new Set([
+  'Live Music',
+  'Comedy',
+  'DJ/Nightlife',
+  'Karaoke',
+  'Open Mic',
+  'Gatherings & Parties',
+]);
+const NIGHTLIFE_LIKE_HINT_PATTERN =
+  /\b(karaoke|dj|late\s*night|party|after\s*party|open mic|live music|concert|band|club night)\b/i;
+const CLOSING_HINT_PATTERN =
+  /\bopen\s*(?:['’]?\s*til|till|until)\s*(\d{1,2}(?::\d{2})?)\s*\.?\s*(a\.?\s*m\.?|p\.?\s*m\.?)\b/gi;
 
 const MAX_OCR_IMAGES = 4;
 const MAX_OCR_OUTPUT_IMAGES_DEFAULT = 16;
@@ -126,6 +138,8 @@ interface Stage2ScoreThresholds {
 interface Stage2ScoreRoutingDecision {
   enabled: boolean;
   shadowEnabled: boolean;
+  forceContentTypeOverride: boolean;
+  shouldUseRoutedContentType: boolean;
   originalContentType: ContentType;
   routedContentType: ContentType;
   routingReason: string;
@@ -419,7 +433,53 @@ function resolveSmallPostFallbackType(
   return 'EVENT';
 }
 
-function resolveStage2ScoreRouting(
+function shouldForceEventRowToCalendar(
+  originalContentType: ContentType,
+  hasFoodSpecials: boolean,
+  estimatedItemCount: number,
+  calendarScore: number,
+  hasCalendarGrid: boolean,
+  recommendsTiling: boolean,
+  hasMultipleEventListings: boolean,
+  allPromotionalPhoto: boolean,
+  hasTextCalendarSignal: boolean,
+  hasLinkedCalendarSignal: boolean,
+  organizationStyle: string,
+  thresholds: Stage2ScoreThresholds
+): boolean {
+  const isEventLike =
+    originalContentType === 'EVENT' || originalContentType === 'MIXED_EVENTS_AND_SPECIALS';
+  if (!isEventLike) return false;
+  if (hasFoodSpecials) return false;
+  if (allPromotionalPhoto) return false;
+  if (!hasMultipleEventListings) return false;
+
+  const strongImageCalendarSignal =
+    hasCalendarGrid ||
+    (recommendsTiling && hasMultipleEventListings);
+  if (!strongImageCalendarSignal) return false;
+
+  const hasScheduleLikeSupport =
+    hasTextCalendarSignal ||
+    hasLinkedCalendarSignal ||
+    organizationStyle.includes('date') ||
+    organizationStyle.includes('time') ||
+    hasCalendarGrid;
+  if (!hasScheduleLikeSupport) return false;
+
+  const requiredItemCount = Math.max(thresholds.tiledMinItems, 8);
+  if (estimatedItemCount < requiredItemCount) return false;
+
+  const requiredCalendarScore = Math.max(
+    thresholds.calendarScoreMin,
+    thresholds.tiledCalendarScoreMin
+  );
+  if (calendarScore < requiredCalendarScore) return false;
+
+  return true;
+}
+
+export function resolveStage2ScoreRouting(
   combinedText: string,
   classification: any,
   validation: any
@@ -550,8 +610,33 @@ function resolveStage2ScoreRouting(
 
   let routedContentType: ContentType = originalContentType;
   let routingReason = 'keep_model';
+  let forceContentTypeOverride = false;
 
-  if (originalContentType === 'CALENDAR' || originalContentType === 'SCHEDULE') {
+  if (
+    shouldForceEventRowToCalendar(
+      originalContentType,
+      hasFoodSpecials,
+      estimatedItemCount,
+      calendarScore,
+      hasCalendarGrid,
+      recommendsTiling,
+      hasMultipleEventListings,
+      allPromotionalPhoto,
+      hasTextCalendarSignal,
+      hasLinkedCalendarSignal,
+      organizationStyle,
+      thresholds
+    )
+  ) {
+    routedContentType = 'CALENDAR';
+    routingReason = 'image_calendar_guard';
+    forceContentTypeOverride = true;
+  }
+
+  if (
+    !forceContentTypeOverride &&
+    (originalContentType === 'CALENDAR' || originalContentType === 'SCHEDULE')
+  ) {
     if (smallPostGuard && originalContentType === 'CALENDAR') {
       routedContentType = resolveSmallPostFallbackType(classification, scheduleScore, thresholds);
       routingReason = 'small_post_guard';
@@ -576,13 +661,16 @@ function resolveStage2ScoreRouting(
     estimatedItemCount >= thresholds.tiledMinItems &&
     hasTiledSignal;
 
-  const shouldUseCalendarTiles = enabled
+  const shouldUseRoutedContentType = enabled || forceContentTypeOverride;
+  const shouldUseCalendarTiles = shouldUseRoutedContentType
     ? shouldUseTiledCalendarOcr
     : legacyShouldUseCalendarTiles;
 
   return {
     enabled,
     shadowEnabled,
+    forceContentTypeOverride,
+    shouldUseRoutedContentType,
     originalContentType,
     routedContentType,
     routingReason,
@@ -807,7 +895,8 @@ export async function replayPostDataFromArtifacts(
     userName,
     partialAddress,
     timestamp,
-    cfg
+    cfg,
+    input.combinedText
   );
   logTiming('stage5_format_replay', stage5Start, {
     postId,
@@ -1103,7 +1192,7 @@ export async function parsePostData(
     }
 
     const stage2Routing = resolveStage2ScoreRouting(combinedText, classification, validation);
-    const resolvedContentType = stage2Routing.enabled
+    const resolvedContentType = stage2Routing.shouldUseRoutedContentType
       ? stage2Routing.routedContentType
       : classification.contentType;
 
@@ -1112,6 +1201,8 @@ export async function parsePostData(
         modelContentType: classification.contentType,
         routedContentType: stage2Routing.routedContentType,
         enabled: stage2Routing.enabled,
+        forceContentTypeOverride: stage2Routing.forceContentTypeOverride,
+        shouldUseRoutedContentType: stage2Routing.shouldUseRoutedContentType,
         routingReason: stage2Routing.routingReason,
         calendarScore: stage2Routing.calendarScore,
         scheduleScore: stage2Routing.scheduleScore,
@@ -1125,7 +1216,10 @@ export async function parsePostData(
       });
     }
 
-    if (stage2Routing.enabled && resolvedContentType !== classification.contentType) {
+    if (
+      stage2Routing.shouldUseRoutedContentType &&
+      resolvedContentType !== classification.contentType
+    ) {
       logger.info('Stage 2 score routing override applied', {
         modelContentType: classification.contentType,
         routedContentType: resolvedContentType,
@@ -1133,6 +1227,7 @@ export async function parsePostData(
         calendarScore: stage2Routing.calendarScore,
         scheduleScore: stage2Routing.scheduleScore,
         scoreDelta: stage2Routing.scoreDelta,
+        forceContentTypeOverride: stage2Routing.forceContentTypeOverride,
       });
     }
 
@@ -1141,6 +1236,7 @@ export async function parsePostData(
       estimatedItems: classification.estimatedItemCount,
       confidence: classification.confidence,
       routingEnabled: stage2Routing.enabled,
+      forceContentTypeOverride: stage2Routing.forceContentTypeOverride,
       routingReason: stage2Routing.routingReason,
       ocrMode: stage2Routing.ocrMode,
     });
@@ -1504,7 +1600,8 @@ export async function parsePostData(
       userName,
       partialAddress,
       timestamp,
-      cfg
+      cfg,
+      input.combinedText
     );
     logTiming('stage5_format', stage5Start, {
       postId,
@@ -1844,7 +1941,7 @@ function extractMediaAssetKey(url: string): string {
 /**
  * Apply startTime fallbacks for specials before final completeness checks
  */
-function applySpecialTimeFallbacks(
+export function applySpecialTimeFallbacks(
   events: TimeResolvedEvent[],
   timestamp: string,
   timezone: string
@@ -1915,7 +2012,7 @@ function applySpecialTimeFallbacks(
   });
 }
 
-function enforceDateTimeCompleteness(
+export function enforceDateTimeCompleteness(
   events: TimeResolvedEvent[],
   timestamp: string,
   timezone: string,
@@ -1926,11 +2023,12 @@ function enforceDateTimeCompleteness(
   const postedHHMM = posted.isValid ? posted.toFormat('HH:mm') : '';
   const sharedCombinedTextRange =
     events.length === 1 ? extractExplicitTimeRangeFromEvidence(combinedText, '') : null;
+  const siblingEndTimeHints = buildSiblingEndTimeHints(events);
 
   const kept: TimeResolvedEvent[] = [];
   const rejectedByReason: Record<string, number> = {};
 
-  for (const raw of events) {
+  for (const [index, raw] of events.entries()) {
     const ev: TimeResolvedEvent = { ...raw };
     ev.timeResolution = ev.timeResolution || { hoursUsed: false };
 
@@ -2022,6 +2120,30 @@ function enforceDateTimeCompleteness(
       }
     }
 
+    const closingHint = getClosingHoursEndHint(ev, combinedText, events.length);
+    if (
+      closingHint &&
+      (!ev.endTime || ev.timeResolution?.endFromHours === 'category_default')
+    ) {
+      ev.endTime = closingHint.endTime;
+      ev.timeResolution = ev.timeResolution || { hoursUsed: false };
+      ev.timeResolution.endFromHours = 'to_close';
+      ev.timeFlags = ev.timeFlags || {
+        start: { source: 'none', evidence: '' },
+        end: { source: 'none', toClose: false, evidence: '' },
+      };
+      ev.timeFlags.end = {
+        source: 'semantic',
+        toClose: true,
+        evidence: closingHint.evidence,
+      };
+
+      logger.debug(`Recovered closing-hours hint end time for "${ev.name}"`, {
+        evidence: closingHint.evidence,
+        endTime: closingHint.endTime,
+      });
+    }
+
     // Guard against unverified midnight defaults.
     if (ev.startTime === '00:00' && !hasExplicitMidnight(ev, 'start')) {
       ev.startTime = '';
@@ -2060,14 +2182,38 @@ function enforceDateTimeCompleteness(
     }
 
     // If end time is missing but we have start time, infer a deterministic end time.
-    if (!ev.endTime && ev.startTime) {
-      const inferred = inferEndTimeFromStart(ev.startTime, String(ev.category || ''), ev);
-      ev.endTime = inferred.endTime;
-      ev.timeResolution.endFromHours = inferred.source;
-    }
+      if (!ev.endTime && ev.startTime) {
+        const inferred = inferEndTimeFromStart(ev.startTime, String(ev.category || ''), ev);
+        ev.endTime = inferred.endTime;
+        ev.timeResolution.endFromHours = inferred.source;
+      }
 
-    // Normalize overnight endDate in one place (Stage 5.6 only).
-    applyOvernightEndDate(ev, timezone);
+      const siblingEndHint = siblingEndTimeHints.get(index);
+      if (
+        siblingEndHint &&
+        ev.endTime &&
+        ev.timeResolution?.endFromHours === 'category_default'
+      ) {
+        ev.endTime = siblingEndHint.endTime;
+        ev.timeResolution.endFromHours = 'duration_default';
+        ev.timeFlags = ev.timeFlags || {
+          start: { source: 'none', evidence: '' },
+          end: { source: 'none', toClose: false, evidence: '' },
+        };
+        ev.timeFlags.end = {
+          source: 'semantic',
+          toClose: false,
+          evidence: siblingEndHint.evidence,
+        };
+
+        logger.debug(`Recovered grouped end time for "${ev.name}"`, {
+          endTime: siblingEndHint.endTime,
+          evidence: siblingEndHint.evidence,
+        });
+      }
+
+      // Normalize overnight endDate in one place (Stage 5.6 only).
+      applyOvernightEndDate(ev, timezone);
 
     const missingFields = [
       !ev.startDate ? 'startDate' : '',
@@ -2105,6 +2251,86 @@ function enforceDateTimeCompleteness(
   return kept;
 }
 
+function buildSiblingEndTimeHints(
+  events: TimeResolvedEvent[]
+): Map<number, { endTime: string; evidence: string }> {
+  const hints = new Map<number, { endTime: string; evidence: string }>();
+  const groups = new Map<
+    string,
+    Array<{ index: number; startTime: string; startMinutes: number }>
+  >();
+
+  for (const [index, event] of events.entries()) {
+    if (String(event.category || '').trim() !== 'Workshops & Classes') continue;
+    if (String(event.timeFlags?.start?.source || '').trim().toLowerCase() !== 'explicit') continue;
+    if (String(event.timeFlags?.end?.source || '').trim().toLowerCase() === 'explicit') continue;
+    if (event.timeFlags?.end?.toClose === true) continue;
+
+    const startTime = normalizeTimeHHMM(event.startTime);
+    const startMinutes = hhmmToMinutes(startTime);
+    const startDate = String(event.startDate || '').trim();
+    if (!startTime || startMinutes === null || !startDate) continue;
+
+    const key = startDate;
+    const list = groups.get(key) || [];
+    list.push({ index, startTime, startMinutes });
+    groups.set(key, list);
+  }
+
+  for (const entries of groups.values()) {
+    if (entries.length < 2) continue;
+    entries.sort((left, right) => left.startMinutes - right.startMinutes);
+
+    const finalizeCluster = (
+      cluster: Array<{ index: number; startTime: string; startMinutes: number }>
+    ) => {
+      if (cluster.length < 2) return;
+
+      const gaps = cluster
+        .slice(1)
+        .map((entry, idx) => entry.startMinutes - cluster[idx].startMinutes)
+        .filter((gap) => gap >= 15 && gap <= 180);
+      const fallbackDuration = gaps[0] || 60;
+
+      for (let index = 0; index < cluster.length; index += 1) {
+        const current = cluster[index];
+        const next = cluster[index + 1];
+        if (next) {
+          const gap = next.startMinutes - current.startMinutes;
+          if (gap >= 15 && gap <= 180) {
+            hints.set(current.index, {
+              endTime: next.startTime,
+              evidence: `next grouped start ${next.startTime}`,
+            });
+            continue;
+          }
+        }
+
+        hints.set(current.index, {
+          endTime: addMinutesToHHMM(current.startTime, fallbackDuration),
+          evidence: `grouped duration default ${fallbackDuration}m`,
+        });
+      }
+    };
+
+    let cluster: Array<{ index: number; startTime: string; startMinutes: number }> = [entries[0]];
+    for (let index = 1; index < entries.length; index += 1) {
+      const current = entries[index];
+      const previous = entries[index - 1];
+      const gap = current.startMinutes - previous.startMinutes;
+      if (gap > 180) {
+        finalizeCluster(cluster);
+        cluster = [current];
+        continue;
+      }
+      cluster.push(current);
+    }
+    finalizeCluster(cluster);
+  }
+
+  return hints;
+}
+
 function inferEndTimeFromStart(
   startTime: string,
   category: string,
@@ -2139,16 +2365,82 @@ function inferEndTimeFromStart(
   };
 }
 
+function getClosingHoursEndHint(
+  event: Pick<
+    TimeResolvedEvent,
+    'name' | 'description' | 'category' | 'startTime' | 'timeFlags' | 'isFoodSpecial' | '_sourceType'
+  >,
+  combinedText: string,
+  totalEvents: number
+): { endTime: string; evidence: string } | null {
+  if (!event || totalEvents !== 1) return null;
+  if (String(event.isFoodSpecial || '').toLowerCase() === 'yes') return null;
+
+  const sourceType = String((event as any)?._sourceType || '')
+    .trim()
+    .toLowerCase();
+  if (sourceType === 'schedule' || sourceType === 'calendar') return null;
+
+  const startSource = String(event.timeFlags?.start?.source || '')
+    .trim()
+    .toLowerCase();
+  const endSource = String(event.timeFlags?.end?.source || '')
+    .trim()
+    .toLowerCase();
+  if (startSource !== 'explicit') return null;
+  if (endSource === 'explicit' || event.timeFlags?.end?.toClose === true) return null;
+
+  const explicitRange = extractExplicitTimeRangeFromEvidence(
+    event.timeFlags?.start?.evidence,
+    event.timeFlags?.end?.evidence
+  );
+  if (explicitRange?.endTime) return null;
+
+  const startHHMM = normalizeTimeHHMM(event.startTime);
+  const startMinutes = hhmmToMinutes(startHHMM);
+  if (!startHHMM || startMinutes === null || startMinutes < 20 * 60) return null;
+
+  const haystack = `${String(event.name || '')} ${String(event.description || '')} ${String(
+    combinedText || ''
+  )}`;
+  const category = String(event.category || '').trim();
+  const nightlifeLike =
+    NIGHTLIFE_LIKE_CATEGORIES.has(category) || NIGHTLIFE_LIKE_HINT_PATTERN.test(haystack);
+  if (!nightlifeLike) return null;
+
+  const matches = Array.from(String(combinedText || '').matchAll(CLOSING_HINT_PATTERN));
+  if (matches.length === 0) return null;
+
+  const resolvedHints = matches
+    .map((match) => ({
+      endTime: normalizeTimeHHMM(`${match[1]} ${match[2]}`),
+      evidence: String(match[0] || '').trim(),
+    }))
+    .filter((match) => Boolean(match.endTime));
+  if (resolvedHints.length === 0) return null;
+
+  const uniqueHintTimes = Array.from(new Set(resolvedHints.map((match) => match.endTime)));
+  if (uniqueHintTimes.length !== 1) return null;
+
+  const hintTime = uniqueHintTimes[0];
+  const hintMinutes = hhmmToMinutes(hintTime);
+  if (!hintTime || hintMinutes === null) return null;
+
+  let durationMinutes = hintMinutes - startMinutes;
+  if (durationMinutes <= 0) durationMinutes += 24 * 60;
+  if (durationMinutes < 60 || durationMinutes > 6 * 60) return null;
+
+  return {
+    endTime: hintTime,
+    evidence: `closing hours hint ${resolvedHints[0].evidence}`,
+  };
+}
+
 function shouldPreferDurationDefaultForMissingEnd(
-  event?: Pick<TimeResolvedEvent, 'name' | 'description' | 'timeFlags' | 'category'>
+  event?: Pick<TimeResolvedEvent, 'name' | 'description' | 'timeFlags' | 'category' | '_sourceType'>
 ): boolean {
   if (!event) return false;
   if (SPECIAL_LIKE_CATEGORY_PATTERN.test(String(event.category || ''))) {
-    return false;
-  }
-
-  const startSource = String(event.timeFlags?.start?.source || '').trim().toLowerCase();
-  if (startSource !== 'explicit') {
     return false;
   }
 
@@ -2157,8 +2449,18 @@ function shouldPreferDurationDefaultForMissingEnd(
     return false;
   }
 
+  const sourceType = String((event as any)?._sourceType || '').trim().toLowerCase();
+  if (sourceType === 'schedule' || sourceType === 'calendar') {
+    return true;
+  }
+
   const haystack = `${String(event.name || '')} ${String(event.description || '')}`.toLowerCase();
-  return SHORT_FORM_PROGRAM_PATTERN.test(haystack);
+  if (SHORT_FORM_PROGRAM_PATTERN.test(haystack)) {
+    return true;
+  }
+
+  const startSource = String(event.timeFlags?.start?.source || '').trim().toLowerCase();
+  return startSource === 'explicit' && !String(event.description || '').trim();
 }
 
 function applyOvernightEndDate(event: TimeResolvedEvent, timezone: string): void {
@@ -2201,11 +2503,118 @@ function normalizeTimeHHMM(value: unknown): string {
   return '';
 }
 
+function extractStandaloneExplicitTime(value: unknown): string {
+  const raw = String(value || '').trim();
+  if (!raw) return '';
+
+  const match = raw.match(/\b(\d{1,2}(?::\d{2})?)\s*(AM|PM)\b/i);
+  if (!match) return '';
+  return normalizeTimeHHMM(`${match[1]} ${match[2]}`);
+}
+
+function oppositeMeridiem(period: string): string {
+  return String(period || '').toUpperCase() === 'AM' ? 'PM' : 'AM';
+}
+
+function resolveExplicitRangeTimes(
+  startRaw: string,
+  startPeriodRaw: string,
+  endRaw: string,
+  endPeriodRaw: string
+): { startTime: string; endTime: string } | null {
+  const normalizedStartRaw = String(startRaw || '').trim();
+  const normalizedEndRaw = String(endRaw || '').trim();
+  const startPeriod = String(startPeriodRaw || '').trim().toUpperCase();
+  const endPeriod = String(endPeriodRaw || '').trim().toUpperCase();
+
+  if (!normalizedStartRaw || !normalizedEndRaw) return null;
+
+  const startCandidates = startPeriod
+    ? [{ period: startPeriod, inferred: false }]
+    : endPeriod
+      ? [
+          { period: endPeriod, inferred: false },
+          { period: oppositeMeridiem(endPeriod), inferred: true },
+        ]
+      : [];
+  const endCandidates = endPeriod
+    ? [{ period: endPeriod, inferred: false }]
+    : startPeriod
+      ? [
+          { period: startPeriod, inferred: false },
+          { period: oppositeMeridiem(startPeriod), inferred: true },
+        ]
+      : [];
+
+  let best:
+    | {
+        startTime: string;
+        endTime: string;
+        durationMinutes: number;
+        longPenalty: number;
+        inferencePenalty: number;
+      }
+    | null = null;
+
+  for (const startCandidate of startCandidates) {
+    const explicitStart = normalizeTimeHHMM(
+      `${normalizedStartRaw} ${startCandidate.period}`.trim()
+    );
+    if (!explicitStart) continue;
+
+    for (const endCandidate of endCandidates) {
+      const explicitEnd = normalizeTimeHHMM(
+        `${normalizedEndRaw} ${endCandidate.period}`.trim()
+      );
+      if (!explicitEnd) continue;
+
+      const startMinutes = hhmmToMinutes(explicitStart);
+      const endMinutes = hhmmToMinutes(explicitEnd);
+      if (startMinutes === null || endMinutes === null) continue;
+
+      let durationMinutes = endMinutes - startMinutes;
+      if (durationMinutes <= 0) {
+        durationMinutes += 24 * 60;
+      }
+
+      const candidate = {
+        startTime: explicitStart,
+        endTime: explicitEnd,
+        durationMinutes,
+        longPenalty: durationMinutes > 12 * 60 ? 1 : 0,
+        inferencePenalty:
+          (startCandidate.inferred ? 1 : 0) + (endCandidate.inferred ? 1 : 0),
+      };
+
+      if (
+        !best ||
+        candidate.longPenalty < best.longPenalty ||
+        (candidate.longPenalty === best.longPenalty &&
+          candidate.durationMinutes < best.durationMinutes) ||
+        (candidate.longPenalty === best.longPenalty &&
+          candidate.durationMinutes === best.durationMinutes &&
+          candidate.inferencePenalty < best.inferencePenalty)
+      ) {
+        best = candidate;
+      }
+    }
+  }
+
+  return best
+    ? {
+        startTime: best.startTime,
+        endTime: best.endTime,
+      }
+    : null;
+}
+
 function extractExplicitTimeRangeFromEvidence(
   startEvidence: unknown,
   endEvidence: unknown
 ): { startTime: string; endTime: string } | null {
-  const candidates = [String(startEvidence || '').trim(), String(endEvidence || '').trim()].filter(Boolean);
+  const startRawEvidence = String(startEvidence || '').trim();
+  const endRawEvidence = String(endEvidence || '').trim();
+  const candidates = [startRawEvidence, endRawEvidence].filter(Boolean);
   if (candidates.length === 0) return null;
 
   const rangePattern =
@@ -2215,26 +2624,22 @@ function extractExplicitTimeRangeFromEvidence(
     const rangeMatch = raw.match(rangePattern);
     if (!rangeMatch) continue;
 
-    const startRaw = String(rangeMatch[1] || '').trim();
-    const startPeriod = String(rangeMatch[2] || '').trim().toUpperCase();
-    const endRaw = String(rangeMatch[3] || '').trim();
-    const endPeriod = String(rangeMatch[4] || '').trim().toUpperCase();
-    const inferredStartPeriod = startPeriod || endPeriod;
-    const inferredEndPeriod = endPeriod || startPeriod;
-
-    const explicitStart = normalizeTimeHHMM(
-      `${startRaw}${inferredStartPeriod ? ` ${inferredStartPeriod}` : ''}`.trim()
+    const resolvedRange = resolveExplicitRangeTimes(
+      String(rangeMatch[1] || '').trim(),
+      String(rangeMatch[2] || '').trim(),
+      String(rangeMatch[3] || '').trim(),
+      String(rangeMatch[4] || '').trim()
     );
-    const explicitEnd = normalizeTimeHHMM(
-      `${endRaw}${inferredEndPeriod ? ` ${inferredEndPeriod}` : ''}`.trim()
-    );
+    if (resolvedRange) return resolvedRange;
+  }
 
-    if (explicitStart && explicitEnd) {
-      return {
-        startTime: explicitStart,
-        endTime: explicitEnd,
-      };
-    }
+  const standaloneStart = extractStandaloneExplicitTime(startRawEvidence);
+  const standaloneEnd = extractStandaloneExplicitTime(endRawEvidence);
+  if (standaloneStart && standaloneEnd) {
+    return {
+      startTime: standaloneStart,
+      endTime: standaloneEnd,
+    };
   }
 
   return null;
@@ -2248,11 +2653,13 @@ function extractExplicitEndTimeFromEvidence(value: unknown): string {
     /(\d{1,2}(?::\d{2})?)\s*(AM|PM)?\s*[-\u2013\u2014]\s*(\d{1,2}(?::\d{2})?)\s*(AM|PM)?/i
   );
   if (rangeMatch) {
-    const startPeriod = String(rangeMatch[2] || '').trim().toUpperCase();
-    const endRaw = String(rangeMatch[3] || '').trim();
-    const endPeriod = String(rangeMatch[4] || startPeriod).trim().toUpperCase();
-    const explicitEnd = `${endRaw}${endPeriod ? ` ${endPeriod}` : ''}`.trim();
-    return normalizeTimeHHMM(explicitEnd);
+    const resolvedRange = resolveExplicitRangeTimes(
+      String(rangeMatch[1] || '').trim(),
+      String(rangeMatch[2] || '').trim(),
+      String(rangeMatch[3] || '').trim(),
+      String(rangeMatch[4] || '').trim()
+    );
+    return resolvedRange?.endTime || '';
   }
 
   const untilMatch = raw.match(
@@ -2262,7 +2669,7 @@ function extractExplicitEndTimeFromEvidence(value: unknown): string {
     return normalizeTimeHHMM(`${untilMatch[1]} ${untilMatch[2]}`);
   }
 
-  return '';
+  return extractStandaloneExplicitTime(raw);
 }
 
 function hhmmToMinutes(hhmm: string): number | null {
@@ -3262,7 +3669,11 @@ function hasExplicitMidnight(event: TimeResolvedEvent, which: 'start' | 'end'): 
   const haystack = [event.name, event.description, evidence]
     .filter(Boolean)
     .join(' ');
-  return /\bmidnight\b/i.test(haystack) || /\ball[\s-]?day\b|\bopen\s*to\s*close\b/i.test(haystack);
+  return (
+    /\bmidnight\b/i.test(haystack) ||
+    /\b12(?::00)?\s*a\.?m\.?\b/i.test(haystack) ||
+    /\ball[\s-]?day\b|\bopen\s*to\s*close\b/i.test(haystack)
+  );
 }
 
 // Re-export types and config for convenience
@@ -3272,4 +3683,6 @@ export {
   ParsingConfig,
   DEFAULT_PARSING_CONFIG,
   EstablishmentMap,
+  extractExplicitTimeRangeFromEvidence as extractExplicitTimeRangeForRegression,
+  extractExplicitEndTimeFromEvidence as extractExplicitEndTimeForRegression,
 };

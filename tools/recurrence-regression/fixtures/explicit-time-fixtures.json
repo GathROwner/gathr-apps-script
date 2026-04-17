@@ -1,0 +1,48 @@
+[
+  {
+    "id": "bunny_walkabout_shared_pm_suffix",
+    "description": "A shared PM suffix should not turn 11-12PM into 23:00-12:00.",
+    "startEvidence": "11-12PM",
+    "endEvidence": "11-12PM",
+    "expectRange": {
+      "startTime": "11:00",
+      "endTime": "12:00"
+    }
+  },
+  {
+    "id": "separate_explicit_start_end_tokens",
+    "description": "Separate explicit start/end evidence should be combined into one usable range.",
+    "startEvidence": "10:00am",
+    "endEvidence": "4:00pm",
+    "expectRange": {
+      "startTime": "10:00",
+      "endTime": "16:00"
+    }
+  },
+  {
+    "id": "standalone_explicit_end_token",
+    "description": "A standalone explicit end token should override a default close time.",
+    "endEvidence": "4:00pm",
+    "expectEndTime": "16:00"
+  },
+  {
+    "id": "evening_shared_pm_suffix",
+    "description": "A normal evening range should still stay in the PM window.",
+    "startEvidence": "7-10pm",
+    "endEvidence": "7-10pm",
+    "expectRange": {
+      "startTime": "19:00",
+      "endTime": "22:00"
+    }
+  },
+  {
+    "id": "midnight_range_preserved",
+    "description": "An explicit midnight end should survive as 00:00 instead of being cleared.",
+    "startEvidence": "8:00 PM to 12:00 AM",
+    "endEvidence": "8:00 PM to 12:00 AM",
+    "expectRange": {
+      "startTime": "20:00",
+      "endTime": "00:00"
+    }
+  }
+]

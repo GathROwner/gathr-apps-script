@@ -1,0 +1,129 @@
+[
+  {
+    "id": "clamdiggers_easter_weekend_special",
+    "description": "Splits a mixed holiday weekend special into separate Saturday, Sunday, and Monday one-offs.",
+    "postedLocalDate": "2026-04-01",
+    "combinedText": "Join us for Easter this weekend! We will be open regular hours, and are offering a delicious Turkey Dinner Special this weekend; with your choice of Coconut Cream or Lemon Cream Pie for $32 + tax. Available from 4pm onwards on Saturday, and all day Sunday & Monday. Takeout options are available.",
+    "specials": [
+      {
+        "name": "Easter Special - Turkey Dinner with Choice of Pie",
+        "description": "Easter special: Turkey Dinner with your choice of Coconut Cream or Lemon Cream Pie for $32 + tax. Available from 4pm onwards on Saturday, and all day Sunday & Monday. Takeout options available.",
+        "date": "2026-04-01",
+        "startTime": "16:00",
+        "endTime": "",
+        "venue": "",
+        "pricing": "$32 + tax",
+        "price": "$32 + tax",
+        "recurringPattern": "none",
+        "extractionReason": "holiday weekend special",
+        "timeFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "from 4pm onwards"
+          },
+          "end": {
+            "source": "semantic",
+            "toClose": true,
+            "evidence": "onwards"
+          }
+        }
+      }
+    ],
+    "expectCount": 3,
+    "expect": [
+      {
+        "name": "Easter Special - Turkey Dinner with Choice of Pie",
+        "date": "2026-04-04",
+        "startTime": "16:00",
+        "endTime": "",
+        "recurringPattern": "none",
+        "timeFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "from 4pm onwards"
+          },
+          "end": {
+            "source": "semantic",
+            "toClose": true,
+            "evidence": "onwards"
+          }
+        }
+      },
+      {
+        "name": "Easter Special - Turkey Dinner with Choice of Pie — Sunday",
+        "date": "2026-04-05",
+        "startTime": "",
+        "endTime": "",
+        "recurringPattern": "none",
+        "timeFlags": {
+          "start": {
+            "source": "semantic",
+            "evidence": "all day"
+          },
+          "end": {
+            "source": "semantic",
+            "toClose": true,
+            "evidence": "all day"
+          }
+        }
+      },
+      {
+        "name": "Easter Special - Turkey Dinner with Choice of Pie — Monday",
+        "date": "2026-04-06",
+        "startTime": "",
+        "endTime": "",
+        "recurringPattern": "none",
+        "timeFlags": {
+          "start": {
+            "source": "semantic",
+            "evidence": "all day"
+          },
+          "end": {
+            "source": "semantic",
+            "toClose": true,
+            "evidence": "all day"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "same_timing_weekend_special_stays_single",
+    "description": "Does not split a weekend special when every weekday in the clause shares the same timing signature.",
+    "postedLocalDate": "2026-04-01",
+    "combinedText": "Weekend special: fish and chips for $18. Available all day Saturday & Sunday.",
+    "specials": [
+      {
+        "name": "Weekend Fish and Chips Special",
+        "description": "Weekend special: fish and chips for $18. Available all day Saturday & Sunday.",
+        "date": "2026-04-01",
+        "startTime": "",
+        "endTime": "",
+        "venue": "",
+        "pricing": "$18",
+        "price": "$18",
+        "recurringPattern": "none",
+        "extractionReason": "weekend special",
+        "timeFlags": {
+          "start": {
+            "source": "semantic",
+            "evidence": "all day"
+          },
+          "end": {
+            "source": "semantic",
+            "toClose": true,
+            "evidence": "all day"
+          }
+        }
+      }
+    ],
+    "expectCount": 1,
+    "expect": [
+      {
+        "name": "Weekend Fish and Chips Special",
+        "date": "2026-04-01",
+        "recurringPattern": "none"
+      }
+    ]
+  }
+]
