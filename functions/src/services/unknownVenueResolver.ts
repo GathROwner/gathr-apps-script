@@ -579,10 +579,18 @@ function hasCompetingIndependentIdentitySignal(params: {
     return { hasConflict: false };
   }
 
-  const rawToCandidateSimilarity = calculateEnhancedSimilarity(rawName, candidateName);
+  const rawNameCandidates = Array.from(new Set(
+    [rawName, ...getExistingMatchNameCandidates(rawName)]
+      .map((value) => String(value || '').trim())
+      .filter(Boolean)
+  ));
+  const rawToCandidateSimilarity = Math.max(
+    ...rawNameCandidates.map((candidate) => calculateEnhancedSimilarity(candidate, candidateName))
+  );
   const candidateLooksLikeUnknown =
     rawToCandidateSimilarity >= 0.72 ||
-    candidateContainsUnknownNameTokens(rawName, candidateName);
+    rawNameCandidates.some((candidate) => candidateContainsUnknownNameTokens(candidate, candidateName)) ||
+    rawNameCandidates.some((candidate) => candidateExtendsUnknownNameByTokens(candidate, candidateName));
   if (!candidateLooksLikeUnknown) {
     return { hasConflict: false };
   }
@@ -913,6 +921,32 @@ function stripParenthesizedAddressSuffix(rawName: string): string {
   return looksLikeAddressOrLocation ? base : value;
 }
 
+function stripContextualParentheticalSegments(rawName: string): string {
+  let value = String(rawName || '').trim();
+  if (!value || !value.includes('(')) return value;
+
+  let changed = false;
+  value = value.replace(/\s*\(([^()]+)\)/g, (fullMatch, inner) => {
+    const suffix = String(inner || '').trim();
+    if (!suffix) return fullMatch;
+
+    const looksLikeContext = (
+      /^(?:in|inside|within|at|located(?:\s+in)?|held(?:\s+at)?|hosted(?:\s+at|(?:\s+in)?)?)\b/i.test(suffix) ||
+      /,/.test(suffix) ||
+      /\d/.test(suffix) ||
+      /\b(?:pe|pei|ns|nb|nl|on|qc|ab|bc|sk|mb|canada|charlottetown|summerside|stratford|cornwall|montague|souris)\b/i.test(suffix) ||
+      /\b(?:room|meeting\s+room|conference\s+room|lounge|hall|hallway|concourse|lobby|foyer|suite|floor|level|wing|atrium|ballroom|gallery|studio)\b/i.test(suffix)
+    );
+
+    if (!looksLikeContext) return fullMatch;
+    changed = true;
+    return '';
+  });
+
+  if (!changed) return String(rawName || '').trim();
+  return value.replace(/\s+,/g, ',').replace(/\s{2,}/g, ' ').trim();
+}
+
 function stripCommaAddressSuffix(rawName: string): string {
   const value = String(rawName || '').trim();
   if (!value || !value.includes(',')) return value;
@@ -937,10 +971,12 @@ function stripCommaAddressSuffix(rawName: string): string {
 
 function getExistingMatchNameCandidates(rawName: string): string[] {
   const trimmed = String(rawName || '').trim();
+  const strippedContextual = stripContextualParentheticalSegments(trimmed);
   const strippedParenthesized = stripParenthesizedAddressSuffix(trimmed);
   const strippedComma = stripCommaAddressSuffix(strippedParenthesized);
+  const strippedCommaContextual = stripContextualParentheticalSegments(strippedComma);
   const candidates = new Set<string>(
-    [trimmed, strippedParenthesized, strippedComma]
+    [trimmed, strippedContextual, strippedParenthesized, strippedComma, strippedCommaContextual]
       .map((value) => String(value || '').trim())
       .filter(Boolean)
   );
@@ -970,10 +1006,37 @@ function getExistingMatchNameCandidates(rawName: string): string[] {
   };
 
   addNormalizedVariants(trimmed);
+  addNormalizedVariants(strippedContextual);
   addNormalizedVariants(strippedParenthesized);
   addNormalizedVariants(strippedComma);
+  addNormalizedVariants(strippedCommaContextual);
 
   return Array.from(candidates);
+}
+
+function scorePlacesQueryNameCandidateComplexity(rawName: string, candidate: string): number {
+  const raw = String(rawName || '').trim();
+  const value = String(candidate || '').trim();
+  if (!value) return Number.POSITIVE_INFINITY;
+
+  let score = value.length;
+  if (value === raw) score += 20;
+  if (/[(),]/.test(value)) score += 15;
+  if (/\b\d{1,6}\b/.test(value)) score += 10;
+  if (/^(?:art\s+fest|festival|showcase|event|series)\b/i.test(value)) score += 12;
+  return score;
+}
+
+function getPlacesSearchNameCandidates(rawName: string): string[] {
+  const raw = String(rawName || '').trim();
+  const candidates = getExistingMatchNameCandidates(raw);
+  if (!raw) return candidates;
+  if (!/[(),]/.test(raw)) return candidates;
+
+  const ordered = [...candidates].sort((a, b) => (
+    scorePlacesQueryNameCandidateComplexity(raw, a) - scorePlacesQueryNameCandidateComplexity(raw, b)
+  ));
+  return Array.from(new Set(ordered));
 }
 
 async function linkSuggestionToExistingVenueByFacebookUrl(
@@ -1211,7 +1274,7 @@ async function linkSuggestionToExistingVenueByAddress(
     venueName: top.venueName || suggestion.venueName,
     address: top.address || candidateAddress,
     facebookUrl: getVenueFacebookUrl(top.venueAny) || suggestion.facebookUrl,
-    note: buildSuggestionNote([
+    note: mergeSuggestionNotes(suggestion.note, [
       ['linkedBy', linkedByMode],
       ['candidateAddress', candidateAddress],
       ['addressKey', candidateAddressKey],
@@ -1942,8 +2005,18 @@ async function collectExistingVenueSuggestions(
   const unknownCivicKey = unknownLooksAddressLike ? normalizeCivicAddressKey(rawName) : '';
 
   for (const aggregatorFacebookUrl of getSampleAggregatorFacebookUrls(record)) {
-    const aggregatorMatch = await firestoreService.findMatchingVenue(rawName, aggregatorFacebookUrl);
-    if (!aggregatorMatch.isMatch || !aggregatorMatch.matchedVenue) continue;
+    let aggregatorMatch:
+      | Awaited<ReturnType<typeof firestoreService.findMatchingVenue>>
+      | null = null;
+    let matchedInputName = rawName;
+    for (const matchName of matchNameCandidates) {
+      const attempted = await firestoreService.findMatchingVenue(matchName, aggregatorFacebookUrl);
+      if (!attempted.isMatch || !attempted.matchedVenue) continue;
+      aggregatorMatch = attempted;
+      matchedInputName = matchName;
+      break;
+    }
+    if (!aggregatorMatch?.isMatch || !aggregatorMatch.matchedVenue) continue;
 
     const venueAny = aggregatorMatch.matchedVenue as unknown as Record<string, unknown>;
     const matchedVenueName = getVenueDisplayName(venueAny) || aggregatorMatch.matchedVenue.name || '';
@@ -1976,6 +2049,7 @@ async function collectExistingVenueSuggestions(
       note: buildSuggestionNote([
         ['matcher', 'aggregatorFacebookUrl'],
         ['sourceAggregatorUrl', aggregatorFacebookUrl],
+        ['inputName', matchedInputName],
         ['exactName', exactName ? '1' : '0'],
         ['tokenAlias', tokenAlias ? '1' : '0'],
         ['addressExact', addressExact ? '1' : '0'],
@@ -2119,6 +2193,7 @@ async function collectPlacesSuggestion(
 ): Promise<UnrecognizedVenueSuggestedMatch[]> {
   const rawName = String(record.establishment || '').trim();
   if (!rawName) return [];
+  const placesSearchNameCandidates = getPlacesSearchNameCandidates(rawName);
 
   const contextHints = getResolverGeoHints(record);
   const cityHint = normalizeCity(contextHints.cityHint);
@@ -2139,38 +2214,249 @@ async function collectPlacesSuggestion(
     queryCandidates.push(normalized);
   };
 
+  for (const searchName of placesSearchNameCandidates) {
+    for (const aggregatorAddress of aggregatorAddresses) {
+      addQueryCandidate(`${searchName} ${aggregatorAddress}`);
+    }
+  }
   for (const aggregatorAddress of aggregatorAddresses) {
-    addQueryCandidate(`${rawName} ${aggregatorAddress}`);
     addQueryCandidate(aggregatorAddress);
   }
 
   if (fallbackAddressFromSamples) {
-    addQueryCandidate(`${rawName} ${fallbackAddressFromSamples}`);
+    for (const searchName of placesSearchNameCandidates) {
+      addQueryCandidate(`${searchName} ${fallbackAddressFromSamples}`);
+    }
     addQueryCandidate(fallbackAddressFromSamples);
   }
 
   const cityCandidates = Array.from(new Set([sampleCityHint, cityHint].map((v) => String(v || '').trim()).filter(Boolean)));
   const provinceCandidates = Array.from(new Set([sampleProvinceHint, provinceHint, 'PE'].map((v) => String(v || '').trim()).filter(Boolean)));
-  for (const candidateCity of cityCandidates) {
-    for (const candidateProvince of provinceCandidates) {
-      addQueryCandidate([rawName, candidateCity, candidateProvince].filter(Boolean).join(' '));
+  for (const searchName of placesSearchNameCandidates) {
+    for (const candidateCity of cityCandidates) {
+      for (const candidateProvince of provinceCandidates) {
+        addQueryCandidate([searchName, candidateCity, candidateProvince].filter(Boolean).join(' '));
+      }
+      addQueryCandidate([searchName, candidateCity].filter(Boolean).join(' '));
     }
-    addQueryCandidate([rawName, candidateCity].filter(Boolean).join(' '));
+    for (const candidateProvince of provinceCandidates) {
+      addQueryCandidate([searchName, candidateProvince].filter(Boolean).join(' '));
+    }
+    addQueryCandidate(searchName);
   }
-  for (const candidateProvince of provinceCandidates) {
-    addQueryCandidate([rawName, candidateProvince].filter(Boolean).join(' '));
-  }
-  addQueryCandidate(rawName);
 
   const foodVenuePattern = /\b(brew(?:ery|pub)?|coffee|cafe|restaurant|bar|pub|kitchen|grill|bistro|pizza|diner|eatery)\b/i;
   const preferRestaurantSearchFirst = foodVenuePattern.test(rawName);
 
   try {
+    const scoreRecord = {
+      ...record,
+      cityHint: cityHint || record.cityHint,
+      provinceHint: provinceHint || record.provinceHint,
+    } as UnrecognizedVenueRecord;
+
+    const finalizePlaceCandidate = async (
+      place: Awaited<ReturnType<typeof placesService.searchPlace>>,
+      queryUsed: string,
+      searchMode: 'restaurant' | 'broad'
+    ): Promise<UnrecognizedVenueSuggestedMatch[]> => {
+      const details = place?.placeId ? await placesService.getPlaceDetails(place.placeId) : null;
+      const address = details?.formattedAddress || place?.formattedAddress || '';
+      const placesName = String(details?.name || place?.name || rawName).trim();
+      const placesConfidence = Math.max(
+        ...placesSearchNameCandidates.map((candidateName) => scoreApifyCandidate(candidateName, placesName, address, scoreRecord))
+      );
+      const rawWebsite = details?.website || '';
+      const normalizedWebsite = normalizeWebsiteUrlForDisplay(rawWebsite) || rawWebsite;
+      const website = isFacebookDomainUrl(normalizedWebsite) ? '' : normalizedWebsite;
+      const phone = details?.formattedPhoneNumber || '';
+      const directWebsiteFacebookUrl = rawWebsite ? normalizeFetchedFacebookUrl(rawWebsite) : undefined;
+      let websiteFacebookUrlRaw = directWebsiteFacebookUrl;
+      if (!websiteFacebookUrlRaw && rawWebsite) {
+        const websiteFacebookNameCandidates = Array.from(new Set(
+          [placesName, ...placesSearchNameCandidates, rawName]
+            .map((value) => String(value || '').trim())
+            .filter(Boolean)
+        ));
+        for (const candidateVenueName of websiteFacebookNameCandidates) {
+          websiteFacebookUrlRaw = await extractFacebookUrlFromWebsite(rawWebsite, candidateVenueName);
+          if (websiteFacebookUrlRaw) break;
+        }
+      }
+      const websiteFacebookUrl = websiteFacebookUrlRaw
+        ? ((await resolveFacebookUrlForDisplay(websiteFacebookUrlRaw, { pageLabel: placesName || rawName })) || websiteFacebookUrlRaw)
+        : undefined;
+
+      let suggestion: UnrecognizedVenueSuggestedMatch = {
+        venueName: placesName,
+        confidence: Math.max(0.7, placesConfidence),
+        matchType: 'places',
+        address,
+        facebookUrl: websiteFacebookUrl || undefined,
+        note: buildSuggestionNote([
+          ['placeId', place?.placeId],
+          ['website', website],
+          ['phone', phone],
+          ['websiteFacebookUrl', websiteFacebookUrl],
+          ['lat', place?.location?.lat],
+          ['lng', place?.location?.lng],
+          ['types', place?.types || []],
+          ['businessStatus', place?.businessStatus],
+          ['rating', details?.rating],
+          ['userRatingsTotal', details?.userRatingsTotal],
+          ['placesQuery', queryUsed],
+          ['placesSearchMode', searchMode],
+        ]) || 'Google Places candidate',
+      };
+
+      suggestion = await linkSuggestionToExistingVenueByFacebookUrl(suggestion, {
+        docId: record.id,
+        unknownVenueName: rawName,
+        source: 'places',
+      });
+      if (!suggestion.venueId) {
+        suggestion = await linkSuggestionToExistingVenueByPlaceId(suggestion, place?.placeId, {
+          docId: record.id,
+          unknownVenueName: rawName,
+          source: 'places',
+        });
+      }
+      if (!suggestion.venueId) {
+        suggestion = await linkSuggestionToExistingVenueByAddress(suggestion, scoreRecord, {
+          docId: record.id,
+          unknownVenueName: rawName,
+          source: 'places',
+        });
+      }
+
+      const normalizedAggregatorUrls = new Set(
+        getSampleAggregatorFacebookUrls(record)
+          .map((value) => normalizeUrl(value))
+          .filter(Boolean)
+      );
+      const linkedVenueFacebookUrlNormalized = normalizeUrl(String(suggestion.facebookUrl || ''));
+      const linkedVenueAddressKey = normalizeAddressMatchKey(String(suggestion.address || ''));
+      const aggregatorAddressKeys = new Set(
+        getSampleAggregatorAddresses(record)
+          .map((value) => normalizeAddressMatchKey(value))
+          .filter(Boolean)
+      );
+      const aggregatorSupportsLowConfidencePlaces = Boolean(
+        suggestion.venueId && (
+          (linkedVenueFacebookUrlNormalized && normalizedAggregatorUrls.has(linkedVenueFacebookUrlNormalized)) ||
+          (linkedVenueAddressKey && aggregatorAddressKeys.has(linkedVenueAddressKey))
+        )
+      );
+
+      if (placesConfidence < 0.55 && !aggregatorSupportsLowConfidencePlaces) {
+        logger.info('Dropped low-confidence Places candidate for unknown venue', {
+          docId: record.id,
+          venueName: rawName,
+          candidateName: placesName,
+          address,
+          confidence: placesConfidence,
+          queryUsed,
+          searchMode,
+        });
+        if (fallbackAddressFromSamples) {
+          return [{
+            venueName: rawName,
+            confidence: 0.82,
+            matchType: 'manual',
+            address: fallbackAddressFromSamples,
+            note: buildSuggestionNote([
+              ['fallbackReason', 'sample_address_low_confidence_places'],
+              ['fallbackAddress', fallbackAddressFromSamples],
+              ['placesCandidate', placesName],
+              ['placesAddress', address],
+              ['placesConfidence', placesConfidence],
+              ['placesQuery', queryUsed],
+            ]) || 'Manual fallback from sample event address',
+          }];
+        }
+        return [];
+      }
+
+      if (placesConfidence < 0.55 && aggregatorSupportsLowConfidencePlaces) {
+        suggestion.confidence = Math.max(Number(suggestion.confidence || 0), 0.88);
+        suggestion.note = mergeSuggestionNotes(suggestion.note, [
+          ['rescuedLowConfidence', '1'],
+          ['rescueReason', 'aggregator_source_address_or_page_match'],
+          ['placesConfidence', placesConfidence],
+          ['placesQuery', queryUsed],
+          ['placesAddress', address],
+          ['linkedVenueAddress', suggestion.address],
+        ]) || suggestion.note;
+        logger.info('Kept low-confidence Places candidate due to aggregator source corroboration', {
+          docId: record.id,
+          venueName: rawName,
+          candidateName: placesName,
+          linkedVenueId: suggestion.venueId,
+          linkedVenueName: suggestion.venueName,
+          address,
+          confidence: placesConfidence,
+          queryUsed,
+        });
+      }
+
+      const shouldAddManualAddressFallback = Boolean(
+        fallbackAddressFromSamples &&
+        !suggestion.venueId &&
+        !placesSearchNameCandidates.some((candidateName) => candidateContainsUnknownNameTokens(candidateName, placesName))
+      );
+      if (shouldAddManualAddressFallback) {
+        const manualFallbackSuggestion: UnrecognizedVenueSuggestedMatch = {
+          venueName: rawName,
+          confidence: Math.max(0.82, Math.min(0.93, placesConfidence + 0.12)),
+          matchType: 'manual',
+          address: fallbackAddressFromSamples,
+          note: buildSuggestionNote([
+            ['fallbackReason', 'sample_address_mismatch'],
+            ['fallbackAddress', fallbackAddressFromSamples],
+            ['placesCandidate', placesName],
+            ['placesAddress', address],
+            ['placesConfidence', placesConfidence],
+            ['placesQuery', queryUsed],
+          ]) || 'Manual fallback from sample event address',
+        };
+        return dedupeSuggestions([manualFallbackSuggestion, suggestion]);
+      }
+
+      return [suggestion];
+    };
+
+    const highPrioritySearchNames = placesSearchNameCandidates.filter((candidateName) => (
+      candidateName !== rawName && !/[(),]/.test(candidateName)
+    ));
+    for (const searchName of highPrioritySearchNames.slice(0, 2)) {
+      const directQueries = Array.from(new Set([
+        [searchName, cityHint, provinceHint || 'PE'].filter(Boolean).join(' '),
+        [searchName, cityHint].filter(Boolean).join(' '),
+        [searchName, provinceHint || 'PE'].filter(Boolean).join(' '),
+        searchName,
+      ].filter(Boolean)));
+
+      for (const directQuery of directQueries) {
+        const directPlace = await placesService.searchPlace(directQuery);
+        if (!directPlace) continue;
+        const directPlaceName = String(directPlace.name || '').trim();
+        const strongCleanNameMatch = (
+          calculateEnhancedSimilarity(searchName, directPlaceName) >= 0.74 ||
+          candidateContainsUnknownNameTokens(searchName, directPlaceName) ||
+          candidateExtendsUnknownNameByTokens(searchName, directPlaceName)
+        );
+        if (!strongCleanNameMatch) continue;
+
+        const finalized = await finalizePlaceCandidate(directPlace, directQuery, 'broad');
+        if (finalized.length) return finalized;
+      }
+    }
+
     let place: Awaited<ReturnType<typeof placesService.searchPlace>> = null;
     let queryUsed = '';
     let searchMode: 'restaurant' | 'broad' = 'restaurant';
 
-    for (const query of queryCandidates.slice(0, 3)) {
+    for (const query of queryCandidates.slice(0, 10)) {
       const attempts: Array<{ mode: 'restaurant' | 'broad'; options?: { types?: string[] } }> =
         preferRestaurantSearchFirst
           ? [
@@ -2195,162 +2481,7 @@ async function collectPlacesSuggestion(
     }
 
     if (!place) return [];
-
-    const details = place.placeId ? await placesService.getPlaceDetails(place.placeId) : null;
-    const address = details?.formattedAddress || place.formattedAddress || '';
-    const scoreRecord = {
-      ...record,
-      cityHint: cityHint || record.cityHint,
-      provinceHint: provinceHint || record.provinceHint,
-    } as UnrecognizedVenueRecord;
-    const placesName = String(details?.name || place.name || rawName).trim();
-    const placesConfidence = scoreApifyCandidate(rawName, placesName, address, scoreRecord);
-    const rawWebsite = details?.website || '';
-    const normalizedWebsite = normalizeWebsiteUrlForDisplay(rawWebsite) || rawWebsite;
-    const website = isFacebookDomainUrl(normalizedWebsite) ? '' : normalizedWebsite;
-    const phone = details?.formattedPhoneNumber || '';
-    const directWebsiteFacebookUrl = rawWebsite ? normalizeFetchedFacebookUrl(rawWebsite) : undefined;
-    const websiteFacebookUrlRaw = directWebsiteFacebookUrl || (rawWebsite ? await extractFacebookUrlFromWebsite(rawWebsite, rawName) : undefined);
-    const websiteFacebookUrl = websiteFacebookUrlRaw
-      ? ((await resolveFacebookUrlForDisplay(websiteFacebookUrlRaw, { pageLabel: placesName || rawName })) || websiteFacebookUrlRaw)
-      : undefined;
-
-    let suggestion: UnrecognizedVenueSuggestedMatch = {
-      venueName: placesName,
-      confidence: Math.max(0.7, placesConfidence),
-      matchType: 'places',
-      address,
-      facebookUrl: websiteFacebookUrl || undefined,
-      note: buildSuggestionNote([
-        ['placeId', place.placeId],
-        ['website', website],
-        ['phone', phone],
-        ['websiteFacebookUrl', websiteFacebookUrl],
-        ['lat', place.location?.lat],
-        ['lng', place.location?.lng],
-        ['types', place.types || []],
-        ['businessStatus', place.businessStatus],
-        ['rating', details?.rating],
-        ['userRatingsTotal', details?.userRatingsTotal],
-        ['placesQuery', queryUsed],
-        ['placesSearchMode', searchMode],
-      ]) || 'Google Places candidate',
-    };
-
-    suggestion = await linkSuggestionToExistingVenueByFacebookUrl(suggestion, {
-      docId: record.id,
-      unknownVenueName: rawName,
-      source: 'places',
-    });
-    if (!suggestion.venueId) {
-      suggestion = await linkSuggestionToExistingVenueByPlaceId(suggestion, place.placeId, {
-        docId: record.id,
-        unknownVenueName: rawName,
-        source: 'places',
-      });
-    }
-    if (!suggestion.venueId) {
-      suggestion = await linkSuggestionToExistingVenueByAddress(suggestion, scoreRecord, {
-        docId: record.id,
-        unknownVenueName: rawName,
-        source: 'places',
-      });
-    }
-
-    const normalizedAggregatorUrls = new Set(
-      getSampleAggregatorFacebookUrls(record)
-        .map((value) => normalizeUrl(value))
-        .filter(Boolean)
-    );
-    const linkedVenueFacebookUrlNormalized = normalizeUrl(String(suggestion.facebookUrl || ''));
-    const linkedVenueAddressKey = normalizeAddressMatchKey(String(suggestion.address || ''));
-    const aggregatorAddressKeys = new Set(
-      getSampleAggregatorAddresses(record)
-        .map((value) => normalizeAddressMatchKey(value))
-        .filter(Boolean)
-    );
-    const aggregatorSupportsLowConfidencePlaces = Boolean(
-      suggestion.venueId && (
-        (linkedVenueFacebookUrlNormalized && normalizedAggregatorUrls.has(linkedVenueFacebookUrlNormalized)) ||
-        (linkedVenueAddressKey && aggregatorAddressKeys.has(linkedVenueAddressKey))
-      )
-    );
-
-    if (placesConfidence < 0.55 && !aggregatorSupportsLowConfidencePlaces) {
-      logger.info('Dropped low-confidence Places candidate for unknown venue', {
-        docId: record.id,
-        venueName: rawName,
-        candidateName: placesName,
-        address,
-        confidence: placesConfidence,
-        queryUsed,
-        searchMode,
-      });
-      if (fallbackAddressFromSamples) {
-        return [{
-          venueName: rawName,
-          confidence: 0.82,
-          matchType: 'manual',
-          address: fallbackAddressFromSamples,
-          note: buildSuggestionNote([
-            ['fallbackReason', 'sample_address_low_confidence_places'],
-            ['fallbackAddress', fallbackAddressFromSamples],
-            ['placesCandidate', placesName],
-            ['placesAddress', address],
-            ['placesConfidence', placesConfidence],
-            ['placesQuery', queryUsed],
-          ]) || 'Manual fallback from sample event address',
-        }];
-      }
-      return [];
-    }
-
-    if (placesConfidence < 0.55 && aggregatorSupportsLowConfidencePlaces) {
-      suggestion.confidence = Math.max(Number(suggestion.confidence || 0), 0.88);
-      suggestion.note = mergeSuggestionNotes(suggestion.note, [
-        ['rescuedLowConfidence', '1'],
-        ['rescueReason', 'aggregator_source_address_or_page_match'],
-        ['placesConfidence', placesConfidence],
-        ['placesQuery', queryUsed],
-        ['placesAddress', address],
-        ['linkedVenueAddress', suggestion.address],
-      ]) || suggestion.note;
-      logger.info('Kept low-confidence Places candidate due to aggregator source corroboration', {
-        docId: record.id,
-        venueName: rawName,
-        candidateName: placesName,
-        linkedVenueId: suggestion.venueId,
-        linkedVenueName: suggestion.venueName,
-        address,
-        confidence: placesConfidence,
-        queryUsed,
-      });
-    }
-
-    const shouldAddManualAddressFallback = Boolean(
-      fallbackAddressFromSamples &&
-      !suggestion.venueId &&
-      !candidateContainsUnknownNameTokens(rawName, placesName)
-    );
-    if (shouldAddManualAddressFallback) {
-      const manualFallbackSuggestion: UnrecognizedVenueSuggestedMatch = {
-        venueName: rawName,
-        confidence: Math.max(0.82, Math.min(0.93, placesConfidence + 0.12)),
-        matchType: 'manual',
-        address: fallbackAddressFromSamples,
-        note: buildSuggestionNote([
-          ['fallbackReason', 'sample_address_mismatch'],
-          ['fallbackAddress', fallbackAddressFromSamples],
-          ['placesCandidate', placesName],
-          ['placesAddress', address],
-          ['placesConfidence', placesConfidence],
-          ['placesQuery', queryUsed],
-        ]) || 'Manual fallback from sample event address',
-      };
-      return dedupeSuggestions([manualFallbackSuggestion, suggestion]);
-    }
-
-    return [suggestion];
+    return await finalizePlaceCandidate(place, queryUsed, searchMode);
   } catch (error) {
     logger.warn('Google Places suggestion lookup failed for unrecognized venue', {
       docId: record.id,
