@@ -8,6 +8,8 @@ export type VenueAliasEntry = {
 };
 
 // Keep this list small and explicit. Add/remove entries as needed.
+export const VENUE_ALIAS_RULESET_VERSION = '2026-04-13-maclauchlan-arena-a';
+
 const VENUE_ALIASES: VenueAliasEntry[] = [
   {
     alias: 'Confederation Court Mall',
@@ -61,6 +63,12 @@ const VENUE_ALIASES: VenueAliasEntry[] = [
   },
   {
     alias: 'MacLauchlan Arena B',
+    canonical: 'Bell Aliant Centre',
+    isSubVenue: true,
+    note: 'Arena inside Bell Aliant Centre.',
+  },
+  {
+    alias: 'MacLauchlan Arena A',
     canonical: 'Bell Aliant Centre',
     isSubVenue: true,
     note: 'Arena inside Bell Aliant Centre.',
