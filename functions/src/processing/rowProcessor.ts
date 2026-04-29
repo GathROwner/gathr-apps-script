@@ -2110,14 +2110,42 @@ function buildDuplicateEventUpdates(
     descriptionImproved = true;
   }
 
+  const authoritativeFamilyShapePromoted = shouldPromoteAuthoritativeCurrentFamilyShape(
+    existing,
+    incoming
+  );
+
+  if (authoritativeFamilyShapePromoted) {
+    if (isMeaningfulValue(incoming.eventName)) {
+      setField('eventName', incoming.eventName);
+    }
+    if (isMeaningfulValue(incoming.name)) {
+      setField('name', incoming.name);
+    }
+    if (isMeaningfulValue(incoming.description)) {
+      setField('description', incoming.description);
+      descriptionImproved = true;
+    }
+    if (isMeaningfulValue(incoming.startDate)) {
+      setField('startDate', incoming.startDate);
+    }
+    if (isMeaningfulValue(incoming.endDate)) {
+      setField('endDate', incoming.endDate);
+    }
+  }
+
   if (shouldReplaceDateField(existing.startDate, incoming.startDate)) {
     setField('startDate', incoming.startDate);
-    timeImproved = true;
+    if (!authoritativeFamilyShapePromoted) {
+      timeImproved = true;
+    }
   }
 
   if (shouldReplaceEndDateField(existing, incoming)) {
     setField('endDate', incoming.endDate);
-    timeImproved = true;
+    if (!authoritativeFamilyShapePromoted) {
+      timeImproved = true;
+    }
   }
 
   const preferredIncomingStartTime = selectPreferredIncomingTimeMergeValue(
@@ -2894,6 +2922,151 @@ function shouldReplaceDescription(existingValue?: string, incomingValue?: string
   if (existing.includes(incoming)) return false;
   if (existing.length < 60 && incoming.length >= existing.length + 30) return true;
   return incoming.length > existing.length * 1.4;
+}
+
+const AUTHORITATIVE_FAMILY_SHAPE_STOP_WORDS = new Set([
+  'a',
+  'an',
+  'and',
+  'for',
+  'hst',
+  'plus',
+  'the',
+]);
+
+function getAuthoritativeFamilyTitleTokens(value: unknown): string[] {
+  return normalizeVenueName(asTrimmedString(value))
+    .split(' ')
+    .map((token) => token.trim())
+    .filter(
+      (token) =>
+        token.length >= 3 &&
+        !AUTHORITATIVE_FAMILY_SHAPE_STOP_WORDS.has(token) &&
+        !/^\d+$/.test(token)
+    );
+}
+
+function isOrderedTokenSubsequence(shorterTokens: string[], longerTokens: string[]): boolean {
+  if (!shorterTokens.length || !longerTokens.length || shorterTokens.length > longerTokens.length) {
+    return false;
+  }
+
+  let shorterIndex = 0;
+  for (const token of longerTokens) {
+    if (token === shorterTokens[shorterIndex]) {
+      shorterIndex += 1;
+      if (shorterIndex === shorterTokens.length) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+function hasTightAuthoritativeFamilyTitleMatch(
+  existingEvent: EventData,
+  incomingEvent: EventData
+): boolean {
+  const existingTokens = getAuthoritativeFamilyTitleTokens(
+    asTrimmedString(existingEvent.name) || asTrimmedString(existingEvent.eventName)
+  );
+  const incomingTokens = getAuthoritativeFamilyTitleTokens(
+    asTrimmedString(incomingEvent.name) || asTrimmedString(incomingEvent.eventName)
+  );
+
+  if (!existingTokens.length || !incomingTokens.length) {
+    return false;
+  }
+
+  const shorterTokens =
+    existingTokens.length <= incomingTokens.length ? existingTokens : incomingTokens;
+  const longerTokens =
+    shorterTokens === existingTokens ? incomingTokens : existingTokens;
+
+  return shorterTokens.length >= 3 && isOrderedTokenSubsequence(shorterTokens, longerTokens);
+}
+
+function getDuplicateMergeContentBucket(event: EventData): 'food_special' | 'event' {
+  const normalizedEventType = asTrimmedString(event.eventType).toLowerCase();
+  const isFoodSpecial = normalizeFlagState(event.isFoodSpecial) === 'yes';
+  if (
+    isFoodSpecial ||
+    normalizedEventType === 'food_special' ||
+    normalizedEventType === 'drink_special' ||
+    normalizedEventType === 'happy_hour' ||
+    normalizedEventType === 'wing_night' ||
+    normalizedEventType === 'brunch'
+  ) {
+    return 'food_special';
+  }
+
+  return 'event';
+}
+
+function sourceTimestampIsNotOlder(existingEvent: EventData, incomingEvent: EventData): boolean {
+  const incomingSourceTimestamp = coerceDate(incomingEvent.sourceTimestamp);
+  if (!incomingSourceTimestamp) return false;
+
+  const existingSourceTimestamp = coerceDate(existingEvent.sourceTimestamp);
+  if (!existingSourceTimestamp) return true;
+
+  return incomingSourceTimestamp.getTime() >= existingSourceTimestamp.getTime();
+}
+
+function shouldPromoteAuthoritativeCurrentFamilyShape(
+  existingEvent: EventData,
+  incomingEvent: EventData
+): boolean {
+  if (!sourceTimestampIsNotOlder(existingEvent, incomingEvent)) {
+    return false;
+  }
+
+  if (getDuplicateMergeContentBucket(existingEvent) !== getDuplicateMergeContentBucket(incomingEvent)) {
+    return false;
+  }
+
+  if (!hasTightAuthoritativeFamilyTitleMatch(existingEvent, incomingEvent)) {
+    return false;
+  }
+
+  if (isRecurringLikeEvent(incomingEvent)) {
+    return false;
+  }
+
+  const incomingStartDate = normalizeIsoDateValue(incomingEvent.startDate);
+  const incomingEndDate = normalizeIsoDateValue(incomingEvent.endDate);
+  if (!incomingStartDate || !incomingEndDate || incomingStartDate === incomingEndDate) {
+    return false;
+  }
+
+  const existingStartDate = normalizeIsoDateValue(existingEvent.startDate);
+  const existingEndDate = normalizeIsoDateValue(existingEvent.endDate);
+  const existingIsSingleDay = Boolean(
+    existingStartDate &&
+      (!existingEndDate || existingStartDate === existingEndDate)
+  );
+  if (!(isRecurringLikeEvent(existingEvent) || existingIsSingleDay)) {
+    return false;
+  }
+
+  if (!existingStartDate || incomingStartDate <= existingStartDate) {
+    return false;
+  }
+
+  const existingStartTime = toComparableTime(asTrimmedString(existingEvent.startTime));
+  const incomingStartTime = toComparableTime(asTrimmedString(incomingEvent.startTime));
+  if (!existingStartTime || !incomingStartTime || existingStartTime !== incomingStartTime) {
+    return false;
+  }
+
+  const existingEndTime = toComparableTime(asTrimmedString(existingEvent.endTime));
+  const incomingEndTime = toComparableTime(asTrimmedString(incomingEvent.endTime));
+  if (!existingEndTime || !incomingEndTime || existingEndTime !== incomingEndTime) {
+    return false;
+  }
+
+  return isMeaningfulValue(incomingEvent.description);
 }
 
 function normalizeDateToken(value: string): string {

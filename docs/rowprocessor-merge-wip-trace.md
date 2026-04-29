@@ -130,3 +130,23 @@ If this patch is resumed later, treat it as:
 - something that should be validated in isolation before any deploy
 
 If this patch is accepted later, `rowProcessor.currentFamilyShapeMerge.test.ts` should be committed with it as the matching regression coverage.
+
+## 2026-04-29 hardening review
+
+The local `Two Can Dine` patch was reviewed again on 2026-04-29 before any checkpoint decision.
+
+Hardening applied locally:
+
+- the authoritative-family-shape promotion path no longer marks the merge as a generic `timeImproved` case by itself
+- start/end date updates triggered by that promotion no longer pull `timeResolution` or `timeFlags` across as a side effect
+- title matching was narrowed to require at least 3 meaningful ordered tokens, so short generic overlaps like `Happy Hour` vs `Happy Hour Karaoke` do not promote
+
+Local verification completed:
+
+- `npm run build` in `functions`
+- `node --test functions/lib/processing/rowProcessor.currentFamilyShapeMerge.test.js`
+
+Current assessment after hardening:
+
+- reasonable as an isolated local checkpoint
+- still not proven as production-ready without a targeted dry/wet replay against the real `Two Can Dine` family
