@@ -2024,6 +2024,7 @@ export function enforceDateTimeCompleteness(
   const sharedCombinedTextRange =
     events.length === 1 ? extractExplicitTimeRangeFromEvidence(combinedText, '') : null;
   const siblingEndTimeHints = buildSiblingEndTimeHints(events);
+  const denseScheduleBatchUsesDurationDefault = shouldUseBatchDurationDefault(events);
 
   const kept: TimeResolvedEvent[] = [];
   const rejectedByReason: Record<string, number> = {};
@@ -2182,19 +2183,60 @@ export function enforceDateTimeCompleteness(
     }
 
     // If end time is missing but we have start time, infer a deterministic end time.
-      if (!ev.endTime && ev.startTime) {
-        const inferred = inferEndTimeFromStart(ev.startTime, String(ev.category || ''), ev);
-        ev.endTime = inferred.endTime;
-        ev.timeResolution.endFromHours = inferred.source;
-      }
+    if (!ev.endTime && ev.startTime) {
+      const inferred = inferEndTimeFromStart(ev.startTime, String(ev.category || ''), ev);
+      ev.endTime = inferred.endTime;
+      ev.timeResolution.endFromHours = inferred.source;
+    }
 
-      const siblingEndHint = siblingEndTimeHints.get(index);
+    const siblingEndHint = siblingEndTimeHints.get(index);
+    if (
+      siblingEndHint &&
+      ev.endTime &&
+      ev.timeResolution?.endFromHours === 'category_default'
+    ) {
+      ev.endTime = siblingEndHint.endTime;
+      ev.timeResolution.endFromHours = 'duration_default';
+      ev.timeFlags = ev.timeFlags || {
+        start: { source: 'none', evidence: '' },
+        end: { source: 'none', toClose: false, evidence: '' },
+      };
+      ev.timeFlags.end = {
+        source: 'semantic',
+        toClose: false,
+        evidence: siblingEndHint.evidence,
+      };
+
+      logger.debug(`Recovered grouped end time for "${ev.name}"`, {
+        endTime: siblingEndHint.endTime,
+        evidence: siblingEndHint.evidence,
+      });
+    }
+
+    if (
+      ev.endTime &&
+      ev.startTime &&
+      ev.timeResolution?.endFromHours === 'category_default' &&
+      (
+        shouldPreferDurationDefaultForMissingEnd(ev) ||
+        denseScheduleBatchUsesDurationDefault
+      )
+    ) {
+      const previousEndTime = ev.endTime;
+      const shortFormOverride = shouldPreferDurationDefaultForMissingEnd(ev);
+      const inferred =
+        denseScheduleBatchUsesDurationDefault && !shortFormOverride
+          ? {
+              endTime: addMinutesToHHMM(ev.startTime, 120),
+              source: 'duration_default' as const,
+            }
+          : inferEndTimeFromStart(ev.startTime, String(ev.category || ''), ev);
       if (
-        siblingEndHint &&
-        ev.endTime &&
-        ev.timeResolution?.endFromHours === 'category_default'
+        inferred.endTime &&
+        inferred.source === 'duration_default' &&
+        inferred.endTime !== ev.endTime
       ) {
-        ev.endTime = siblingEndHint.endTime;
+        ev.endTime = inferred.endTime;
         ev.timeResolution.endFromHours = 'duration_default';
         ev.timeFlags = ev.timeFlags || {
           start: { source: 'none', evidence: '' },
@@ -2203,17 +2245,20 @@ export function enforceDateTimeCompleteness(
         ev.timeFlags.end = {
           source: 'semantic',
           toClose: false,
-          evidence: siblingEndHint.evidence,
+          evidence: denseScheduleBatchUsesDurationDefault && !shortFormOverride
+            ? 'dense schedule duration default override'
+            : 'short-form duration default override',
         };
 
-        logger.debug(`Recovered grouped end time for "${ev.name}"`, {
-          endTime: siblingEndHint.endTime,
-          evidence: siblingEndHint.evidence,
+        logger.debug(`Replaced category-default end time for "${ev.name}"`, {
+          previousEndTime,
+          endTime: inferred.endTime,
         });
       }
+    }
 
-      // Normalize overnight endDate in one place (Stage 5.6 only).
-      applyOvernightEndDate(ev, timezone);
+    // Normalize overnight endDate in one place (Stage 5.6 only).
+    applyOvernightEndDate(ev, timezone);
 
     const missingFields = [
       !ev.startDate ? 'startDate' : '',
@@ -2262,7 +2307,6 @@ function buildSiblingEndTimeHints(
 
   for (const [index, event] of events.entries()) {
     if (String(event.category || '').trim() !== 'Workshops & Classes') continue;
-    if (String(event.timeFlags?.start?.source || '').trim().toLowerCase() !== 'explicit') continue;
     if (String(event.timeFlags?.end?.source || '').trim().toLowerCase() === 'explicit') continue;
     if (event.timeFlags?.end?.toClose === true) continue;
 
@@ -2271,6 +2315,10 @@ function buildSiblingEndTimeHints(
     const startDate = String(event.startDate || '').trim();
     if (!startTime || startMinutes === null || !startDate) continue;
 
+    const startSource = String(event.timeFlags?.start?.source || '').trim().toLowerCase();
+    const categoryDefaultEnd =
+      String(event.timeResolution?.endFromHours || '').trim().toLowerCase() === 'category_default';
+    if (startSource !== 'explicit' && !categoryDefaultEnd) continue;
     const key = startDate;
     const list = groups.get(key) || [];
     list.push({ index, startTime, startMinutes });
@@ -2331,6 +2379,26 @@ function buildSiblingEndTimeHints(
   return hints;
 }
 
+function shouldUseBatchDurationDefault(events: TimeResolvedEvent[]): boolean {
+  if (!Array.isArray(events) || events.length < 8) return false;
+
+  const distinctDates = new Set(
+    events
+      .map((event) => String(event.startDate || '').trim())
+      .filter(Boolean)
+  );
+  if (distinctDates.size < 4) return false;
+
+  const eligibleCount = events.filter((event) => {
+    if (!event.startTime || !event.endTime) return false;
+    if (SPECIAL_LIKE_CATEGORY_PATTERN.test(String(event.category || ''))) return false;
+    if (String(event.timeFlags?.end?.source || '').trim().toLowerCase() === 'explicit') return false;
+    if (event.timeFlags?.end?.toClose === true) return false;
+    return String(event.timeResolution?.endFromHours || '').trim().toLowerCase() === 'category_default';
+  }).length;
+
+  return eligibleCount >= Math.max(4, Math.ceil(events.length * 0.25));
+}
 function inferEndTimeFromStart(
   startTime: string,
   category: string,
