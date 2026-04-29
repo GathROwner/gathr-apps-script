@@ -848,7 +848,9 @@ function hydrateVenueNameFallback(venue: VenueData): VenueData {
 
   const venueRecord = venue as unknown as Record<string, unknown>;
   const existingName = String(venueRecord.name || '').trim();
-  if (existingName) return venue;
+  const existingWebsite = String(venueRecord.website || '').trim();
+  const placeDetails = venueRecord.placeDetailsParsed as Record<string, unknown> | undefined;
+  const fallbackWebsite = String(placeDetails?.website || '').trim();
 
   const fallback = String(
     venueRecord.pagename ||
@@ -856,12 +858,17 @@ function hydrateVenueNameFallback(venue: VenueData): VenueData {
     venueRecord.title ||
     ''
   ).trim();
-  if (!fallback) return venue;
+  if (existingName && (existingWebsite || !fallbackWebsite)) return venue;
 
-  return {
-    ...venue,
-    name: fallback,
-  } as VenueData;
+  const nextVenue: VenueData = { ...venue };
+  if (!existingName && fallback) {
+    nextVenue.name = fallback;
+  }
+  if (!existingWebsite && fallbackWebsite) {
+    nextVenue.website = fallbackWebsite;
+  }
+
+  return nextVenue;
 }
 
 function venueMatchesCityHint(

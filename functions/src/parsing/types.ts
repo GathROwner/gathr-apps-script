@@ -114,6 +114,14 @@ export interface ParsingConfig {
     maxFeedDays?: number;
     maxDetailPages?: number;
   };
+  venueWebsiteEnrichment?: {
+    enabled?: boolean;
+    timeoutMs?: number;
+    maxHtmlBytes?: number;
+    maxListingPages?: number;
+    maxDetailPages?: number;
+    maxScriptFetches?: number;
+  };
   ocrDebugHandler?: (snapshot: OcrDebugSnapshot) => void | Promise<void>;
   stage3FallbackHandler?: (snapshot: Stage3FallbackSnapshot) => void | Promise<void>;
   skipReasonHandler?: (skipReason: ParseSkipReason) => void | Promise<void>;
@@ -143,6 +151,14 @@ export const DEFAULT_PARSING_CONFIG: ParsingConfig = {
     maxHtmlBytes: 1000000,
     maxFeedDays: 8,
     maxDetailPages: 80,
+  },
+  venueWebsiteEnrichment: {
+    enabled: true,
+    timeoutMs: 12000,
+    maxHtmlBytes: 1000000,
+    maxListingPages: 2,
+    maxDetailPages: 6,
+    maxScriptFetches: 3,
   },
 };
 
@@ -547,6 +563,7 @@ export interface EstablishmentInfo {
   category?: string;
   facebookUrl?: string;
   name?: string;
+  website?: string;
 }
 
 export type EstablishmentMap = Record<string, EstablishmentInfo>;

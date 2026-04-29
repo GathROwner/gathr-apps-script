@@ -38,6 +38,7 @@ import { classifyContent } from './contentClassifier.js';
 import { extractContentByType, extractOcrDebugText } from './eventExtractor.js';
 import { enrichEventsFromTicketLinks } from './ticketLinkEnricher.js';
 import { enrichEventsFromCalendarLinks } from './calendarLinkEnricher.js';
+import { enrichEventsFromVenueWebsite } from './websiteDetailEnricher.js';
 import { performSecondaryValidation } from './secondaryValidator.js';
 import { performFinalFormatting } from './finalFormatter.js';
 import { resolveTimesWithOperatingHours } from './venueResolver.js';
@@ -1430,6 +1431,32 @@ export async function parsePostData(
         mergedCount: calendarLinkResult.summary.mergedCount,
         usedUrl: calendarLinkResult.summary.usedUrl || '',
         reason: calendarLinkResult.summary.reason || '',
+        model: stage3Model,
+        attempt,
+      });
+
+      logger.info('=== STAGE 3.9: VENUE WEBSITE ENRICHMENT ===');
+      const stage39Start = Date.now();
+      const venueWebsiteResult = await enrichEventsFromVenueWebsite(
+        stage3Items,
+        combinedText,
+        ocrDebugSnapshot?.ocrText,
+        timestamp,
+        establishmentInfo,
+        stage3Cfg
+      );
+      stage3Items = Array.isArray(venueWebsiteResult.items) ? venueWebsiteResult.items : [];
+      logTiming('stage3_9_venue_website', stage39Start, {
+        postId,
+        attemptedUrls: venueWebsiteResult.summary.attemptedUrls,
+        listingPagesAttempted: venueWebsiteResult.summary.listingPagesAttempted,
+        detailPagesAttempted: venueWebsiteResult.summary.detailPagesAttempted,
+        scriptFetchesAttempted: venueWebsiteResult.summary.scriptFetchesAttempted,
+        apiRequestsAttempted: venueWebsiteResult.summary.apiRequestsAttempted,
+        candidateItemsFound: venueWebsiteResult.summary.candidateItemsFound,
+        appliedCount: venueWebsiteResult.summary.appliedCount,
+        usedUrl: venueWebsiteResult.summary.usedUrl || '',
+        reason: venueWebsiteResult.summary.reason || '',
         model: stage3Model,
         attempt,
       });

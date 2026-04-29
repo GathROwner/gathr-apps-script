@@ -967,6 +967,15 @@ export function rehydrateFormattedEventMetadata(
     changed = true;
   }
 
+  const existingTicketLink = String((event as Record<string, unknown>).ticketLink || '').trim();
+  const originalTicketLink = String(
+    (originalItem as Record<string, unknown> | undefined)?.ticketLink || ''
+  ).trim();
+  if (!existingTicketLink && originalTicketLink) {
+    nextEvent.ticketLink = originalTicketLink;
+    changed = true;
+  }
+
   if (
     !hasMeaningfulFormattedTimeFlags((event as Record<string, unknown>).timeFlags) &&
     hasMeaningfulFormattedTimeFlags((originalItem as Record<string, unknown> | undefined)?.timeFlags)
@@ -4128,7 +4137,7 @@ function extractExplicitMonthDayRange(
   return null;
 }
 
-function applyExplicitDateRangeCorrections(
+export function applyExplicitDateRangeCorrections(
   event: FormattedEvent,
   originalItem?: ExtractedItem
 ): FormattedEvent {
@@ -4155,6 +4164,17 @@ function applyExplicitDateRangeCorrections(
 
   const explicitRange = extractExplicitMonthDayRange(text, fallbackYear);
   if (!explicitRange) return event;
+
+  const originalItemDate = String((originalItem as any)?.date || '').trim();
+  const pipelineTotalStage3 = Number((originalItem as any)?._pipelineTotalStage3 || 0);
+  const shouldPreserveSplitSingleDate =
+    pipelineTotalStage3 > 1 &&
+    !!originalItemDate &&
+    originalItemDate === currentStartDate &&
+    currentEndDate === currentStartDate;
+  if (shouldPreserveSplitSingleDate) {
+    return event;
+  }
 
   const rawRecurringPattern = sanitizeRecurringPattern(event.recurringPattern, event);
   const hasWeekdayCue =
