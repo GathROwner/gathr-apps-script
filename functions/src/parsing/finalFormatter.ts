@@ -3893,6 +3893,18 @@ function extractAlternatingRecurringWeekdaySequence(
   return alignRecurringWeekdaySequenceToStartDate([firstDay, secondDay], startDate);
 }
 
+function extractCompactRecurringWeekdaySet(text: string): RecurringWeekday[] | undefined {
+  const normalized = normalizeWeekdayExtractionText(text);
+  if (!normalized) return undefined;
+
+  const mwfMatch = normalized.match(/\bm\s*\/?\s*w\s*\/?\s*f\b/);
+  if (mwfMatch) {
+    return ['monday', 'wednesday', 'friday'];
+  }
+
+  return undefined;
+}
+
 function extractRecurringWeekdayRange(text: string): RecurringWeekday[] | undefined {
   const normalized = normalizeWeekdayExtractionText(text);
   if (!normalized) return undefined;
@@ -4002,7 +4014,9 @@ function resolveCustomRecurringConfiguration(
   }
 
   const recurringDaysOfWeek =
-    extractRecurringWeekdayRange(sourceText) || extractRecurringDaysOfWeekList(sourceText);
+    extractCompactRecurringWeekdaySet(sourceText) ||
+    extractRecurringWeekdayRange(sourceText) ||
+    extractRecurringDaysOfWeekList(sourceText);
   if (recurringDaysOfWeek?.length && recurringDaysOfWeek.length > 1) {
     return {
       recurringDaysOfWeek,

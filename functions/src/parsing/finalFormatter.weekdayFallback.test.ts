@@ -113,3 +113,31 @@ test('multi-weekday board text does not assign a weekday when item-local support
 
   assert.equal(normalized.recurringPattern, 'none');
 });
+
+test('MWF shorthand expands to a weekly_custom multi-day recurrence', () => {
+  const normalized = applyRecurrenceNormalizationForRegression(
+    buildEvent({
+      category: 'Workshops & Classes',
+      name: 'Exercise Class Videos (Big Screen)',
+      description: 'The rest of May exercise classes will be videos on the big screen.',
+      startDate: '2026-05-01',
+      endDate: '2026-05-01',
+      startTime: '09:00',
+      endTime: '11:00',
+      isRecurring: 'Yes',
+      recurringPattern: 'weekly_monday',
+    }),
+    buildOriginalItem({
+      name: 'Exercise Class Videos (Big Screen)',
+      description:
+        'This Friday, May 1 is Zumba Gold at 9 am. The rest of May’s MWF 9 am exercise classes will be videos on the big screen.',
+      date: '2026-05-01',
+      startTime: '09:00',
+      endTime: '11:00',
+      recurringPattern: 'weekly_monday',
+    })
+  );
+
+  assert.equal(normalized.recurringPattern, 'weekly_custom');
+  assert.deepEqual(normalized.recurringDaysOfWeek, ['monday', 'wednesday', 'friday']);
+});
