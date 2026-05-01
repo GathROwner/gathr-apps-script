@@ -183,6 +183,69 @@ test('ordinary category-default rows without short-form cues stay unchanged', ()
   assert.equal(resolved.timeResolution?.endFromHours, 'category_default');
 });
 
+test('regular events fail closed when only venue hours invented the start time', () => {
+  const resolved = enforceDateTimeCompleteness(
+    [
+      buildEvent({
+        category: 'Cinema',
+        name: 'Bleak Week: Cinema of Despair',
+        description: 'A week straight of films from Monday, June 1 to Sunday, June 7.',
+        establishment: 'The Tivoli Cinema',
+        venue: 'The Tivoli Cinema',
+        startDate: '2026-06-01',
+        endDate: '2026-06-07',
+        startTime: '16:00',
+        endTime: '23:00',
+        timeFlags: {
+          start: { source: 'semantic', evidence: 'Start from venue hours (opens 16:00)' },
+          end: { source: 'none', toClose: false, evidence: '' },
+        },
+        timeResolution: {
+          hoursUsed: true,
+          startFromHours: true,
+          endFromHours: 'category_default',
+        },
+      }),
+    ],
+    '2026-04-28T12:01:13.000Z',
+    'America/Halifax',
+    'Bleak Week: Cinema of Despair June 1-7. No showtimes listed.'
+  );
+
+  assert.equal(resolved.length, 0);
+});
+
+test('special-like rows may keep venue-hours start fallbacks', () => {
+  const [resolved] = enforceDateTimeCompleteness(
+    [
+      buildEvent({
+        isEvent: 'No',
+        isFoodSpecial: 'Yes',
+        category: 'Happy Hour',
+        name: 'Happy Hour',
+        description: 'Happy hour specials today.',
+        startTime: '16:00',
+        endTime: '19:00',
+        timeFlags: {
+          start: { source: 'semantic', evidence: 'Start from venue hours (opens 16:00)' },
+          end: { source: 'none', toClose: false, evidence: '' },
+        },
+        timeResolution: {
+          hoursUsed: true,
+          startFromHours: true,
+          endFromHours: 'category_default',
+        },
+      }),
+    ],
+    '2026-04-28T12:01:13.000Z',
+    'America/Halifax',
+    'Happy hour specials today.'
+  );
+
+  assert.equal(resolved.startTime, '16:00');
+  assert.equal(resolved.timeResolution?.startFromHours, true);
+});
+
 test('lunch special shorthand ranges recover the intended daytime window', () => {
   const [resolved] = enforceDateTimeCompleteness(
     [

@@ -2191,6 +2191,26 @@ export function enforceDateTimeCompleteness(
       ev.isFoodSpecial === 'Yes' ||
       String(ev.isFoodSpecial || '').toLowerCase() === 'yes' ||
       /special/i.test(String(ev.category || ''));
+    const isSpecialLike =
+      isSpecial || SPECIAL_LIKE_CATEGORY_PATTERN.test(String(ev.category || ''));
+
+    if (ev.timeResolution?.startFromHours === true && !isSpecialLike) {
+      const previousStartTime = ev.startTime;
+      ev.startTime = '';
+      delete ev.timeResolution.startFromHours;
+      if (ev.timeFlags?.start) {
+        ev.timeFlags.start = {
+          ...ev.timeFlags.start,
+          source: 'none',
+          evidence: '',
+        };
+      }
+      logger.debug(`Rejected venue-hours start fallback for "${ev.name}"`, {
+        previousStartTime,
+        category: ev.category,
+      });
+    }
+
     const hasTodayCue = /today|tonight|this\s*(evening|afternoon|morning|weekend)/i.test(
       `${ev.description || ''}`
     );
