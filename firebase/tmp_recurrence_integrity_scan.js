@@ -1,13 +1,28 @@
 const fs = require('fs');
 const path = require('path');
-const admin = require('firebase-admin');
-
-const serviceAccount = require(path.join(process.cwd(), 'service-account.json'));
-admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
-
-const db = admin.firestore();
+let admin = null;
+let db = null;
 const AS_OF_DATE = process.argv[2] || '2026-04-01';
 const NEXT_7_END = addDays(AS_OF_DATE, 7) || AS_OF_DATE;
+
+function getDb() {
+  if (db) return db;
+  admin = require('firebase-admin');
+  const serviceAccount = require(path.join(process.cwd(), 'service-account.json'));
+  if (!admin.apps.length) {
+    admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
+  }
+  db = admin.firestore();
+  return db;
+}
+
+async function shutdownDb() {
+  if (admin && admin.apps.length) {
+    await admin.app().delete();
+  }
+  admin = null;
+  db = null;
+}
 
 const WEEKDAY_ORDER = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
 const WEEKDAY_INDEX = Object.fromEntries(WEEKDAY_ORDER.map((day, index) => [day, index]));
@@ -455,6 +470,28 @@ function getExpectedOccurrenceLocalEndDate(startDate, startTime, endTime, recurr
   return startDate;
 }
 
+function isLegitimateOvernightCarryover(baseStartDate, asOfDate, startTime, endTime, recurringRule) {
+  if (!baseStartDate || !asOfDate || !recurringRule || recurringRule.kind === 'none') return false;
+
+  const startMinutes = parseTimeToMinutes(startTime);
+  const endMinutes = parseTimeToMinutes(endTime);
+  if (startMinutes === null || endMinutes === null || endMinutes >= startMinutes) {
+    return false;
+  }
+
+  const expectedEndDate = getExpectedOccurrenceLocalEndDate(
+    baseStartDate,
+    startTime,
+    endTime,
+    recurringRule
+  );
+  if (!expectedEndDate || expectedEndDate !== asOfDate) {
+    return false;
+  }
+
+  return isOccurrenceOnDate(baseStartDate, recurringRule, baseStartDate);
+}
+
 function getDurationMinutes(startDate, endDate, startTime, endTime) {
   if (!startDate || !endDate || !startTime || !endTime) return null;
   const startMinutes = parseTimeToMinutes(startTime);
@@ -702,7 +739,11 @@ function selectBestExplicitTimeRange(text, startTime, endTime) {
 }
 
 function looksLikeShortFormProgram(text, category) {
-  if (/\b(food special|drink special|happy hour|wing night)\b/i.test(String(category || ''))) {
+  if (
+    /\b(food special|drink special|happy hour|wing night|lunch|dinner|brunch|breakfast|supper)\b/i.test(
+      `${String(category || '')} ${String(text || '')}`
+    )
+  ) {
     return false;
   }
   const normalized = `${String(category || '')} ${String(text || '')}`.toLowerCase();
@@ -724,6 +765,67 @@ function matchesStoredTimeRange(explicitTimeRange, startTime, endTime) {
     storedEndMinutes !== null &&
     explicitStartMinutes === storedStartMinutes &&
     explicitEndMinutes === storedEndMinutes
+  );
+}
+
+function isExplicitBoundedOpenHoursSeries({
+  title,
+  text,
+  category,
+  startTime,
+  endTime,
+  explicitTimeRange,
+  recurringRule,
+  lifecycle,
+}) {
+  if (!matchesStoredTimeRange(explicitTimeRange, startTime, endTime)) return false;
+  if (!lifecycle?.recurrenceUntilDate) return false;
+  if (recurringRule.kind !== 'weekly_multi' || recurringRule.recurringDaysOfWeek.length < 2) return false;
+
+  const normalized = `${String(title || '')} ${String(category || '')} ${String(text || '')}`.toLowerCase();
+  const hasOpenHoursCue =
+    /\bopen(?::|\s)/.test(normalized) ||
+    /\b(mon|monday)\s*-\s*(fri|friday)\b/.test(normalized) ||
+    /\bmonday\s*-\s*friday\b/.test(normalized);
+  const hasExhibitCue =
+    /\b(show|showcase|sale|gallery|framing|exhibit|exhibition|opening reception|open house|art show)\b/.test(
+      normalized
+    );
+
+  return hasOpenHoursCue && hasExhibitCue;
+}
+
+function shouldFlagSuspiciousLongDuration({
+  title,
+  text,
+  category,
+  startTime,
+  endTime,
+  durationMinutes,
+  explicitTimeRange,
+  recurringRule,
+  lifecycle,
+}) {
+  const isProgramLike = looksLikeShortFormProgram(text, category);
+  const isMatchingDropInWorkshop =
+    /\bdrop-?in\b/i.test(String(text || '')) && matchesStoredTimeRange(explicitTimeRange, startTime, endTime);
+  const isMatchingBoundedOpenHoursSeries = isExplicitBoundedOpenHoursSeries({
+    title,
+    text,
+    category,
+    startTime,
+    endTime,
+    explicitTimeRange,
+    recurringRule,
+    lifecycle,
+  });
+
+  return (
+    durationMinutes !== null &&
+    durationMinutes >= 6 * 60 &&
+    isProgramLike &&
+    !isMatchingDropInWorkshop &&
+    !isMatchingBoundedOpenHoursSeries
   );
 }
 
@@ -862,7 +964,7 @@ function suppressSourceFamilyWeekdayMismatchFindings(findings) {
 }
 
 async function main() {
-  const snapshot = await db
+  const snapshot = await getDb()
     .collectionGroup('events')
     .select(
       'title',
@@ -967,10 +1069,13 @@ async function main() {
     const textWeekdaysInfo = extractWeekdaysFromText(text);
     const textWeekdays = textWeekdaysInfo.days;
     const explicitTimeRange = selectBestExplicitTimeRange(text, startTime, endTime);
-    const isProgramLike = looksLikeShortFormProgram(text, category);
     const issues = [];
 
-    if (baseWindowIncludesToday && !occursToday) {
+    const canFlagTodayWindowMismatch =
+      recurringRule.kind !== 'none' &&
+      !isLegitimateOvernightCarryover(startDate, AS_OF_DATE, startTime, endTime, recurringRule);
+
+    if (canFlagTodayWindowMismatch && baseWindowIncludesToday && !occursToday) {
       issues.push({
         type: 'today_window_mismatch',
         severity: 'high',
@@ -1017,14 +1122,18 @@ async function main() {
       }
     }
 
-    const isMatchingDropInWorkshop =
-      /\bdrop-?in\b/i.test(text) && matchesStoredTimeRange(explicitTimeRange, startTime, endTime);
-
     if (
-      durationMinutes !== null &&
-      durationMinutes >= 6 * 60 &&
-      isProgramLike &&
-      !isMatchingDropInWorkshop
+      shouldFlagSuspiciousLongDuration({
+        title,
+        text,
+        category,
+        startTime,
+        endTime,
+        durationMinutes,
+        explicitTimeRange,
+        recurringRule,
+        lifecycle,
+      })
     ) {
       issues.push({
         type: 'suspicious_long_duration',
@@ -1173,14 +1282,30 @@ async function main() {
   console.log(JSON.stringify({ outPath, summary, issuesByType, sampleCount: report.samples.length }, null, 2));
 }
 
-main()
-  .then(async () => {
-    await admin.app().delete();
-  })
-  .catch(async (error) => {
-    console.error(error);
-    try {
-      await admin.app().delete();
-    } catch {}
-    process.exit(1);
-  });
+module.exports = {
+  addDays,
+  resolveRecurringRule,
+  getLifecycle,
+  isOccurrenceOnDate,
+  isOccurrenceWithinLifecycle,
+  getNextOccurrence,
+  selectBestExplicitTimeRange,
+  looksLikeShortFormProgram,
+  matchesStoredTimeRange,
+  isExplicitBoundedOpenHoursSeries,
+  shouldFlagSuspiciousLongDuration,
+};
+
+if (require.main === module) {
+  main()
+    .then(async () => {
+      await shutdownDb();
+    })
+    .catch(async (error) => {
+      console.error(error);
+      try {
+        await shutdownDb();
+      } catch {}
+      process.exit(1);
+    });
+}
