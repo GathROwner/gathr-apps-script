@@ -19,7 +19,7 @@ export interface ProcessingConfig {
 
 export const DEFAULT_CONFIG: ProcessingConfig = {
   batchSize: 15,
-  pauseBetweenBatchesMs: 120000,
+  pauseBetweenBatchesMs: 10000,
   maxExecutionMs: 540000,
   gptModelFast: 'gpt-5.2',
   gptModelReasoning: 'gpt-5.2',
