@@ -16,6 +16,11 @@ import {
 } from '../types/index.js';
 import { logger } from '../utils/logger.js';
 import * as firestoreService from '../services/firestoreService.js';
+import {
+  buildResumeTaskCheckpoint,
+  matchesResumeTaskCheckpoint,
+  ResumeTaskCheckpoint,
+} from '../processing/resumeTaskGuard.js';
 
 const TASK_QUEUE_LOCATION = 'northamerica-northeast1';
 let fileProcessorPromise: Promise<typeof import('../processing/fileProcessor.js')> | null = null;
@@ -240,12 +245,14 @@ export const processDatasetResume = onTaskDispatched(
       dryRun = false,
       parserMode = 'legacy',
       runId,
+      expectedCheckpoint,
     } = request.data as {
       fileId: string;
       fileName?: string;
       dryRun?: boolean;
       parserMode?: 'legacy' | 'full5stage';
       runId?: string;
+      expectedCheckpoint?: ResumeTaskCheckpoint;
     };
     const resumeMaxExecutionMsRaw = Number(process.env.RESUME_MAX_EXECUTION_MS);
     const resumeMaxExecutionMs = Number.isFinite(resumeMaxExecutionMsRaw)
@@ -259,6 +266,19 @@ export const processDatasetResume = onTaskDispatched(
       if (!runId) {
         logger.warn('Missing runId on resume task, skipping');
         return;
+      }
+
+      if (expectedCheckpoint) {
+        const currentCheckpoint = await firestoreService.getCheckpoint(fileId);
+        if (!matchesResumeTaskCheckpoint(expectedCheckpoint, currentCheckpoint)) {
+          logger.info('Resume skipped by stale checkpoint guard', {
+            expectedCheckpoint,
+            currentCheckpoint: currentCheckpoint
+              ? buildResumeTaskCheckpoint(currentCheckpoint)
+              : null,
+          });
+          return;
+        }
       }
 
       const lock = await firestoreService.refreshProcessingLock(fileId, runId, {
@@ -509,7 +529,7 @@ async function scheduleNextBatch(
       `locations/${TASK_QUEUE_LOCATION}/functions/processDatasetResume`
     );
 
-    const taskId = await buildResumeTaskId(fileId, runId);
+    const taskMeta = await buildResumeTaskMeta(fileId, runId);
     await queue.enqueue(
       {
         fileId,
@@ -517,10 +537,11 @@ async function scheduleNextBatch(
         runId,
         dryRun: options?.dryRun ?? false,
         parserMode: options?.parserMode || 'legacy',
+        expectedCheckpoint: taskMeta?.expectedCheckpoint,
       },
       {
         scheduleDelaySeconds: Math.floor(delay / 1000),
-        id: taskId,
+        id: taskMeta?.taskId,
       }
     );
 
@@ -538,17 +559,23 @@ async function scheduleNextBatch(
   }
 }
 
-async function buildResumeTaskId(
+async function buildResumeTaskMeta(
   fileId: string,
   runId?: string
-): Promise<string | undefined> {
+): Promise<{
+  taskId?: string;
+  expectedCheckpoint?: ResumeTaskCheckpoint;
+} | undefined> {
   if (!runId) return undefined;
   const checkpoint = await firestoreService.getCheckpoint(fileId);
   if (!checkpoint) return undefined;
 
   const raw = `${fileId}|${runId}|${checkpoint.batchNumber}|${checkpoint.rowIndex}`;
   const hash = createHash('sha1').update(raw).digest('hex');
-  return `resume-${hash}`;
+  return {
+    taskId: `resume-${hash}`,
+    expectedCheckpoint: buildResumeTaskCheckpoint(checkpoint),
+  };
 }
 
 function isTaskAlreadyExistsError(error: unknown): boolean {
