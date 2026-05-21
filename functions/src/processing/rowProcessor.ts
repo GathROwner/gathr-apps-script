@@ -11,6 +11,7 @@ import {
   ExtractedItem,
   ProcessingConfig,
   ParseSnapshotStage,
+  MatchInfo,
 } from '../types/index.js';
 import {
   ParsePostInput,
@@ -66,6 +67,363 @@ function deepCloneJson<T>(value: T): T {
   return JSON.parse(JSON.stringify(value)) as T;
 }
 
+function normalizeDateOnlyCandidate(value: unknown): string {
+  const raw = String(value || '').trim();
+  if (!raw) return '';
+
+  const direct = raw.match(/^(\d{4}-\d{2}-\d{2})/);
+  if (direct) return direct[1];
+
+  const parsed = new Date(raw);
+  return Number.isNaN(parsed.getTime()) ? '' : parsed.toISOString().slice(0, 10);
+}
+
+function meaningfulSelectionTokens(value: string): string[] {
+  const stopWords = new Set([
+    'the',
+    'and',
+    'for',
+    'with',
+    'from',
+    'this',
+    'that',
+    'pei',
+    'prince',
+    'edward',
+    'island',
+    'charlottetown',
+    'event',
+  ]);
+
+  return normalizeVenueName(value)
+    .split(/\s+/)
+    .map(token => token.trim())
+    .filter(token => token.length >= 4 && !stopWords.has(token));
+}
+
+function scoreFacebookEventScraperCandidate(
+  event: ParserProcessedEvent,
+  row: RawRowData,
+  targetDate: string
+): number {
+  const eventName = String(event.name || '').trim();
+  const eventText = normalizeVenueName([
+    eventName,
+    event.venue,
+    event.establishment,
+    event.additionalLocation,
+    event.address,
+    event.description,
+  ].join(' '));
+  const rowTitle = String(row.sharedPostText || '').trim();
+  const normalizedRowTitle = normalizeVenueName(rowTitle);
+  const rowLocationText = normalizeVenueName([
+    row.userName,
+    row.pageName,
+    row.address,
+  ].join(' '));
+
+  let score = 0;
+  if (targetDate) {
+    score += normalizeDateOnlyCandidate(event.startDate) === targetDate ? 60 : -20;
+  }
+
+  if (normalizedRowTitle && eventText.includes(normalizedRowTitle)) {
+    score += 40;
+  }
+
+  const titleTokens = meaningfulSelectionTokens(rowTitle);
+  const sharedTitleTokens = titleTokens.filter(token => eventText.includes(token)).length;
+  score += sharedTitleTokens * 8;
+
+  const locationTokens = meaningfulSelectionTokens(rowLocationText);
+  const sharedLocationTokens = locationTokens.filter(token => eventText.includes(token)).length;
+  score += sharedLocationTokens * 10;
+
+  if (rowLocationText.includes('charlottetown') && eventText.includes('charlottetown')) {
+    score += 30;
+  }
+
+  if (
+    rowLocationText.includes('charlottetown') &&
+    /\b(sydney|fredericton|sarnia|aylmer|truro|wolfville|halifax|lunenburg|parrsboro|saint john|gardiner|portland|bradford|beverly|peterborough|sault ste marie)\b/.test(eventText)
+  ) {
+    score -= 80;
+  }
+
+  return score;
+}
+
+function selectSingleFacebookEventScraperEvent(
+  events: ParserProcessedEvent[],
+  row: RawRowData,
+  rowIndex: number
+): ParserProcessedEvent[] {
+  if (row.sourceScraperType !== 'events' || events.length <= 1) {
+    return events;
+  }
+
+  const targetDate = normalizeDateOnlyCandidate(row.utcStartDate || row.timestamp);
+  const scored = events
+    .map((event, index) => ({
+      event,
+      index,
+      score: scoreFacebookEventScraperCandidate(event, row, targetDate),
+    }))
+    .sort((a, b) => b.score - a.score || a.index - b.index);
+  const selected = scored[0];
+
+  if (!selected) {
+    return events;
+  }
+
+  const selectedEvent = {
+    ...selected.event,
+    _pipelineIndex: 1,
+    _pipelineTotalStage3: 1,
+  };
+
+  logger.warn('Facebook events scraper row produced multiple parser items; selected one', {
+    rowIndex,
+    uniqueId: row.uniqueId,
+    targetDate,
+    originalCount: events.length,
+    selectedName: selectedEvent.name,
+    selectedScore: selected.score,
+  });
+
+  return [selectedEvent];
+}
+
+function extractFacebookEventTextValue(text: string, label: string): string {
+  const escapedLabel = label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const match = text.match(new RegExp(`^${escapedLabel}:\\s*(.+)$`, 'im'));
+  return String(match?.[1] || '').trim();
+}
+
+function inferFacebookEventCategory(row: RawRowData): ParserProcessedEvent['category'] {
+  const text = normalizeVenueName([
+    row.sharedPostText,
+    row.text,
+    row.userName,
+    row.pageName,
+  ].join(' '));
+
+  if (/\b(concert|music|band|tribute|tour|singer|song|choir|acoustic)\b/.test(text)) {
+    return 'Live Music';
+  }
+  if (/\b(circus|family|kids|children|parade|festival|farm day)\b/.test(text)) {
+    return 'Family Friendly';
+  }
+  if (/\b(conference|workshop|class|seminar|training|lecture)\b/.test(text)) {
+    return 'Workshops & Classes';
+  }
+  if (/\b(comedy|comedian)\b/.test(text)) {
+    return 'Comedy';
+  }
+  if (/\b(movie|film|cinema)\b/.test(text)) {
+    return 'Cinema';
+  }
+  if (/\b(game|hockey|soccer|baseball|football|sport)\b/.test(text)) {
+    return 'Sports';
+  }
+
+  return 'Gatherings & Parties';
+}
+
+function getVenueDisplayNameForProcessing(venue?: VenueData | null): string {
+  if (!venue) return '';
+  const venueAny = venue as unknown as Record<string, unknown>;
+  return String(
+    venue.name ||
+    venueAny.pagename ||
+    venueAny.displayName ||
+    venueAny.title ||
+    ''
+  ).trim();
+}
+
+function isCityLevelFacebookEventLocation(row: RawRowData): boolean {
+  if (row.sourceScraperType !== 'events') {
+    return false;
+  }
+  if (row.facebookEventLocationIsCityLevel === true) {
+    return true;
+  }
+
+  const candidate = String(row.facebookEventLocationName || row.userName || '').trim();
+  if (!candidate || /\d/.test(candidate)) {
+    return false;
+  }
+  if (/\b(park|centre|center|hall|arena|stadium|theatre|theater|cafe|restaurant|bar|pub|club|church|school|hotel|inn|brewery|market)\b/i.test(candidate)) {
+    return false;
+  }
+
+  const normalized = candidate
+    .toLowerCase()
+    .replace(/\bcanada\b/g, '')
+    .replace(/\bprince edward island\b/g, 'pei')
+    .replace(/\bp\.?e\.?i\.?\b/g, 'pei')
+    .replace(/\s*,\s*/g, ',')
+    .replace(/\s+/g, ' ')
+    .replace(/,+$/g, '')
+    .trim();
+
+  return /^(pei|pe)$/.test(normalized) ||
+    /^[a-z .'-]+,(pe|pei)$/.test(normalized) ||
+    /^[a-z .'-]+ (pe|pei)$/.test(normalized);
+}
+
+function normalizeFacebookEventProvinceDisplay(value: string): string {
+  const normalized = value.toLowerCase().replace(/\./g, '').trim();
+  if (normalized === 'pe' || normalized === 'pei') return 'PEI';
+  return value.toUpperCase();
+}
+
+function getCityLevelFacebookEventLocationDetails(row: RawRowData): {
+  locationScope: 'city' | 'area';
+  locationLabel: string;
+  locationCity?: string;
+  locationProvince?: string;
+  locationPrecision: 'city_centroid' | 'approximate';
+} | null {
+  if (!isCityLevelFacebookEventLocation(row)) {
+    return null;
+  }
+
+  const raw = String(row.facebookEventLocationName || row.userName || '').trim();
+  const cleaned = raw
+    .replace(/\bcanada\b/gi, '')
+    .replace(/\bprince edward island\b/gi, 'PEI')
+    .replace(/\bp\.?\s*e\.?\s*i\.?\b/gi, 'PEI')
+    .replace(/\s*,\s*/g, ', ')
+    .replace(/\s+/g, ' ')
+    .replace(/,+$/g, '')
+    .trim();
+  const match = cleaned.match(/^(.+?)(?:,\s*|\s+)(PEI?|PE)$/i);
+  if (match) {
+    const city = match[1].trim();
+    const province = normalizeFacebookEventProvinceDisplay(match[2]);
+    return {
+      locationScope: 'city',
+      locationLabel: `${city}, ${province}`,
+      locationCity: city,
+      locationProvince: province,
+      locationPrecision: 'city_centroid',
+    };
+  }
+
+  const provinceOnly = cleaned.match(/^(PEI?|PE)$/i);
+  if (provinceOnly) {
+    const province = normalizeFacebookEventProvinceDisplay(provinceOnly[1]);
+    return {
+      locationScope: 'area',
+      locationLabel: province,
+      locationProvince: province,
+      locationPrecision: 'approximate',
+    };
+  }
+
+  return {
+    locationScope: 'area',
+    locationLabel: cleaned || raw,
+    locationPrecision: 'approximate',
+  };
+}
+
+function buildStructuredFacebookEventScraperEvents(
+  row: RawRowData,
+  establishment: string,
+  mediaUrls: string[],
+  matchedVenue?: VenueData | null
+): ParserProcessedEvent[] | null {
+  if (row.sourceScraperType !== 'events') {
+    return null;
+  }
+
+  const title = String(row.sharedPostText || '').trim();
+  const utcStartDate = String(row.utcStartDate || row.timestamp || '').trim();
+  if (!title || !utcStartDate) {
+    return null;
+  }
+
+  const localDateTime = utcToLocal(utcStartDate);
+  if (!localDateTime.date) {
+    return null;
+  }
+
+  const matchedVenueName = getVenueDisplayNameForProcessing(matchedVenue);
+  const cityLevelLocation = getCityLevelFacebookEventLocationDetails(row);
+  const venueName = String(
+    matchedVenueName ||
+    cityLevelLocation?.locationLabel ||
+    row.userName ||
+    row.pageName ||
+    establishment ||
+    ''
+  ).trim();
+  const normalizedMediaUrls = normalizeUrlList(mediaUrls);
+  const primaryImageUrl = normalizedMediaUrls[0] || '';
+  const ticketLink = extractFacebookEventTextValue(row.text, 'Ticket link');
+  const ticketSummary = extractFacebookEventTextValue(row.text, 'Tickets');
+  const cleanDescription = String(row.facebookEventDescription || row.text || title).trim();
+
+  const event: ParserProcessedEvent = {
+    id: row.uniqueId,
+    uniqueId: row.uniqueId,
+    isEvent: 'Yes',
+    isFoodSpecial: 'No',
+    category: inferFacebookEventCategory(row),
+    name: title,
+    description: cleanDescription || title,
+    establishment: venueName || establishment,
+    address: String(row.address || '').trim(),
+    startDate: localDateTime.date,
+    endDate: localDateTime.date,
+    startTime: localDateTime.time,
+    endTime: '',
+    ticketPrice: ticketSummary,
+    ticketLink,
+    ticketsBuyUrl: ticketLink || row.ticketsBuyUrl,
+    relevantImageIndex: primaryImageUrl ? 0 : -1,
+    venue: venueName || establishment,
+    additionalLocation: '',
+    isRecurring: false,
+    recurringPattern: 'none',
+    image: primaryImageUrl,
+    relevantImageUrl: primaryImageUrl,
+    mediaUrls: normalizedMediaUrls,
+    utcStartDate,
+    usersResponded: row.usersResponded,
+    usersGoing: row.usersGoing,
+    usersInterested: row.usersInterested,
+    facebookUsersResponded: row.facebookUsersResponded,
+    likes: row.likes,
+    shares: row.shares,
+    comments: row.comments,
+    topReactionsCount: row.topReactionsCount,
+    locationScope: matchedVenue ? 'venue' : cityLevelLocation?.locationScope,
+    locationLabel: cityLevelLocation?.locationLabel,
+    locationCity: cityLevelLocation?.locationCity,
+    locationProvince: cityLevelLocation?.locationProvince,
+    locationPrecision: matchedVenue ? 'exact' : cityLevelLocation?.locationPrecision,
+    locationReviewStatus: cityLevelLocation ? 'needs_review' : undefined,
+    _pipelineIndex: 1,
+    _pipelineTotalStage3: 1,
+    _sourceType: 'facebook_events_scraper_structured_row',
+  };
+
+  logger.info('Using structured Facebook Events scraper row adapter', {
+    uniqueId: row.uniqueId,
+    name: event.name,
+    startDate: event.startDate,
+    startTime: event.startTime,
+    mediaCount: normalizedMediaUrls.length,
+  });
+
+  return [event];
+}
+
 function mergeStageArtifactsSnapshot(
   base: ParseStageArtifactsSnapshot | undefined,
   incoming: ParseStageArtifactsSnapshot
@@ -112,6 +470,11 @@ function sanitizeStageArtifactsSnapshot(
 }
 
 function deriveAggregatorNameForUnknownQueue(row: RawRowData): string | undefined {
+  if (row.sourceScraperType === 'events') {
+    const organizerName = String(row.facebookEventOrganizerName || '').trim();
+    if (organizerName) return organizerName;
+  }
+
   const direct = String(row.pageName || row.userName || '').trim();
   if (direct && !/^people$/i.test(direct)) {
     return direct;
@@ -175,7 +538,10 @@ function isLikelyFacebookPostPermalink(rawUrl: string): boolean {
 
 function deriveTopLevelPostUrlForUnknownQueue(row: RawRowData): string | undefined {
   const topLevel = String(row.topLevelUrl || '').trim();
-  return isLikelyFacebookPostPermalink(topLevel) ? topLevel : undefined;
+  if (isLikelyFacebookPostPermalink(topLevel)) return topLevel;
+
+  const facebookUrl = String(row.facebookUrl || '').trim();
+  return isLikelyFacebookPostPermalink(facebookUrl) ? facebookUrl : undefined;
 }
 
 const UNKNOWN_QUEUE_ADDRESS_KEYS = [
@@ -218,6 +584,91 @@ function deriveAggregatorAddressForUnknownQueue(row: RawRowData): string | undef
   }
 
   return undefined;
+}
+
+async function queueCityLevelFacebookEventForReview(params: {
+  row: RawRowData;
+  rowIndex: number;
+  batchManager: BatchManager;
+  parserMode: 'legacy' | 'full5stage';
+  eventName?: string;
+  eventDate?: string;
+  eventTime?: string;
+  endDate?: string;
+  endTime?: string;
+  eventType?: string;
+  category?: string;
+  description?: string;
+  imageUrl?: string;
+  mediaUrls?: string[];
+  usersResponded?: string;
+  usersGoing?: string;
+  usersInterested?: string;
+  facebookUsersResponded?: string;
+  likes?: number;
+  shares?: number;
+  comments?: number;
+  topReactionsCount?: number;
+  ticketsBuyUrl?: string;
+  externalLinks?: string[];
+}): Promise<void> {
+  const location = getCityLevelFacebookEventLocationDetails(params.row);
+  if (!location) return;
+
+  try {
+    const state = params.batchManager.getState();
+    const result = await firestoreService.queueCityLevelEventReview({
+      uniqueId: params.row.uniqueId,
+      fileId: state.fileId,
+      fileName: state.fileName,
+      rowIndex: params.rowIndex,
+      parserMode: params.parserMode,
+      eventName: params.eventName,
+      eventDate: params.eventDate,
+      eventTime: params.eventTime,
+      endDate: params.endDate,
+      endTime: params.endTime,
+      eventType: params.eventType,
+      category: params.category,
+      description: params.description,
+      imageUrl: params.imageUrl,
+      mediaUrls: params.mediaUrls,
+      usersResponded: params.usersResponded,
+      usersGoing: params.usersGoing,
+      usersInterested: params.usersInterested,
+      facebookUsersResponded: params.facebookUsersResponded,
+      likes: params.likes,
+      shares: params.shares,
+      comments: params.comments,
+      topReactionsCount: params.topReactionsCount,
+      ticketsBuyUrl: params.ticketsBuyUrl,
+      externalLinks: params.externalLinks,
+      locationLabel: location.locationLabel,
+      locationCity: location.locationCity,
+      locationProvince: location.locationProvince,
+      locationScope: location.locationScope,
+      locationPrecision: location.locationPrecision,
+      organizerName: String(params.row.facebookEventOrganizerName || '').trim() || undefined,
+      facebookUrl: String(params.row.facebookUrl || '').trim() || undefined,
+      topLevelUrl: deriveTopLevelPostUrlForUnknownQueue(params.row),
+      sourceScraperType: params.row.sourceScraperType,
+    });
+
+    if (!result.queued) {
+      logger.debug('City-level event candidate not queued', {
+        rowIndex: params.rowIndex,
+        locationLabel: location.locationLabel,
+        reason: result.reason,
+      });
+    }
+  } catch (error) {
+    logger.warn('Failed to queue city-level event candidate', {
+      rowIndex: params.rowIndex,
+      locationLabel: location.locationLabel,
+      eventName: params.eventName,
+      error: error instanceof Error ? error.message : String(error),
+    });
+  }
 }
 
 async function queueUnknownVenueForReview(params: {
@@ -316,7 +767,7 @@ export async function processRow(
     }
 
     // Determine establishment from page name or user name
-    const establishment = selectEstablishment(row.pageName, row.userName);
+    let establishment = selectEstablishment(row.pageName, row.userName);
     if (!establishment) {
       result.isInvalid = true;
       result.error = 'No establishment name';
@@ -326,23 +777,66 @@ export async function processRow(
 
     const parserMode = config?.parserMode || 'legacy';
 
+    const cityLevelFacebookEventLocation = isCityLevelFacebookEventLocation(row);
+
     // Find matching venue
-    const venueMatchStart = Date.now();
-    const venueMatch = await firestoreService.findMatchingVenue(
-      establishment,
-      row.facebookUrl
-    );
-    logTiming('venue_match_row', venueMatchStart, {
-      rowIndex,
-      establishment,
-      hasFacebookUrl: Boolean(row.facebookUrl),
-      matched: venueMatch.isMatch,
-    });
+    let venueMatch: MatchInfo = {
+      isMatch: false,
+      matchType: 'none',
+      similarity: 0,
+    };
+    if (cityLevelFacebookEventLocation) {
+      logger.info('Skipping row-level venue match for city-level Facebook Event location', {
+        rowIndex,
+        establishment,
+        locationName: row.facebookEventLocationName || row.userName,
+        organizerName: row.facebookEventOrganizerName,
+      });
+    } else {
+      const venueMatchStart = Date.now();
+      venueMatch = await firestoreService.findMatchingVenue(
+        establishment,
+        row.facebookUrl
+      );
+      logTiming('venue_match_row', venueMatchStart, {
+        rowIndex,
+        establishment,
+        hasFacebookUrl: Boolean(row.facebookUrl),
+        matched: venueMatch.isMatch,
+      });
+    }
+
+    if (!cityLevelFacebookEventLocation && !venueMatch.isMatch && row.sourceScraperType === 'events' && String(row.address || '').trim()) {
+      const addressMatchStart = Date.now();
+      const addressMatch = await firestoreService.findVenueByAddress(String(row.address || '').trim());
+      logTiming('venue_match_row_address', addressMatchStart, {
+        rowIndex,
+        establishment,
+        address: row.address,
+        matched: addressMatch.isMatch,
+        matchedVenueId: addressMatch.matchedVenue?.id,
+      });
+
+      if (addressMatch.isMatch && addressMatch.matchedVenue) {
+        venueMatch = addressMatch;
+        const matchedName = getVenueDisplayNameForProcessing(addressMatch.matchedVenue);
+        if (matchedName) {
+          establishment = matchedName;
+        }
+      }
+    }
 
     const venue = venueMatch.isMatch ? venueMatch.matchedVenue! : null;
     const matchedVenueId = venue?.id;
 
-    if (!venueMatch.isMatch) {
+    if (!venueMatch.isMatch && cityLevelFacebookEventLocation) {
+      logger.debug('Skipping unknown-venue queue for city-level Facebook Event location', {
+        rowIndex,
+        establishment,
+        locationName: row.facebookEventLocationName || row.userName,
+        organizerName: row.facebookEventOrganizerName,
+      });
+    } else if (!venueMatch.isMatch) {
       logger.debug('No venue match found for row-level establishment', {
         rowIndex,
         establishment,
@@ -412,6 +906,10 @@ export async function processRow(
           postId: row.uniqueId || '',
           utcStartDate: row.utcStartDate || '',
           usersResponded: row.usersResponded || '',
+          usersGoing: row.usersGoing || '',
+          usersInterested: row.usersInterested || '',
+          facebookUsersResponded: row.facebookUsersResponded || '',
+          ticketsBuyUrl: row.ticketsBuyUrl || '',
           likes: row.likes,
           shares: row.shares,
           comments: row.comments,
@@ -426,6 +924,7 @@ export async function processRow(
           category: venue.category || '',
           facebookUrl: row.facebookUrl,
           name: venue.name || establishment,
+          website: venue.website || '',
         };
       }
 
@@ -459,14 +958,30 @@ export async function processRow(
       }
 
       const parseStart = Date.now();
-      const fullParserEvents = await parsePostData(
-        fullParserInput,
-        establishmentMap,
-        parserConfig
+      let fullParserEvents = buildStructuredFacebookEventScraperEvents(
+        row,
+        establishment,
+        parserMediaUrls,
+        venue
       );
+      if (fullParserEvents) {
+        logTiming('parse_facebook_events_structured_row', parseStart, {
+          rowIndex,
+          extractedCount: fullParserEvents.length,
+          sourceScraperType: row.sourceScraperType,
+        });
+      } else {
+        fullParserEvents = await parsePostData(
+          fullParserInput,
+          establishmentMap,
+          parserConfig
+        );
+        fullParserEvents = selectSingleFacebookEventScraperEvent(fullParserEvents, row, rowIndex);
+      }
       logTiming('parse_full5stage', parseStart, {
         rowIndex,
         extractedCount: fullParserEvents.length,
+        sourceScraperType: row.sourceScraperType,
       });
 
       if (fullParserEvents.length === 0) {
@@ -493,11 +1008,14 @@ export async function processRow(
             facebookUrl: row.facebookUrl,
             inputText: combinedText,
             rowMeta: {
-              pageName: row.pageName,
-              userName: row.userName,
-              timestamp: row.timestamp,
-              utcStartDate: row.utcStartDate,
-              mediaUrls: parserMediaUrls,
+          pageName: row.pageName,
+          userName: row.userName,
+          facebookEventLocationName: row.facebookEventLocationName,
+          facebookEventLocationIsCityLevel: row.facebookEventLocationIsCityLevel,
+          facebookEventOrganizerName: row.facebookEventOrganizerName,
+          timestamp: row.timestamp,
+          utcStartDate: row.utcStartDate,
+          mediaUrls: parserMediaUrls,
               parserMode: 'full5stage',
               dryRun: isDryRun,
             },
@@ -626,6 +1144,9 @@ export async function processRow(
           rowMeta: {
             pageName: row.pageName,
             userName: row.userName,
+            facebookEventLocationName: row.facebookEventLocationName,
+            facebookEventLocationIsCityLevel: row.facebookEventLocationIsCityLevel,
+            facebookEventOrganizerName: row.facebookEventOrganizerName,
             timestamp: row.timestamp,
             utcStartDate: row.utcStartDate,
             mediaUrls: parserMediaUrls,
@@ -1064,6 +1585,7 @@ async function resolveVenueForFullParserEvent(
   const itemEstablishment = String(item.establishment || '').trim();
   const itemVenue = String(item.venue || '').trim();
   const normalizedRowEstablishment = normalizeVenueName(establishment);
+  const cityLevelFacebookEventLocation = isCityLevelFacebookEventLocation(row);
 
   // Check if the event specifies a different venue than the row-level establishment
   const itemHasDifferentVenue =
@@ -1104,6 +1626,17 @@ async function resolveVenueForFullParserEvent(
       rowEstablishment: establishment,
       eventEstablishment: itemEstablishment,
       eventVenue: itemVenue,
+    });
+    return null;
+  }
+
+  if (cityLevelFacebookEventLocation) {
+    logger.info('Skipping fallback venue match for city-level Facebook Event location', {
+      rowIndex,
+      establishment,
+      locationName: row.facebookEventLocationName || row.userName,
+      organizerName: row.facebookEventOrganizerName,
+      itemName: item.name || '',
     });
     return null;
   }
@@ -1167,6 +1700,42 @@ async function processFullParserEvent(
   );
 
   if (!venue) {
+    if (isCityLevelFacebookEventLocation(row)) {
+      await queueCityLevelFacebookEventForReview({
+        row,
+        rowIndex,
+        batchManager,
+        parserMode: 'full5stage',
+        eventName: String(item.name || (item as unknown as { eventName?: string }).eventName || '').trim() || undefined,
+        eventDate: String(item.startDate || '').trim() || undefined,
+        eventTime: String(item.startTime || '').trim() || undefined,
+        endDate: String(item.endDate || '').trim() || undefined,
+        endTime: String(item.endTime || '').trim() || undefined,
+        eventType: normalizeFullParserEventType(item),
+        category: String(item.category || '').trim() || undefined,
+        description: String(item.description || row.text || '').trim() || undefined,
+        imageUrl: String(item.image || item.relevantImageUrl || '').trim() || undefined,
+        mediaUrls: Array.isArray(item.mediaUrls) ? item.mediaUrls : row.mediaUrls,
+        usersResponded: item.usersResponded || row.usersResponded,
+        usersGoing: item.usersGoing || row.usersGoing,
+        usersInterested: item.usersInterested || row.usersInterested,
+        facebookUsersResponded: item.facebookUsersResponded || row.facebookUsersResponded,
+        likes: item.likes ?? row.likes,
+        shares: item.shares ?? row.shares,
+        comments: item.comments ?? row.comments,
+        topReactionsCount: item.topReactionsCount ?? row.topReactionsCount,
+        ticketsBuyUrl: item.ticketsBuyUrl || row.ticketsBuyUrl,
+        externalLinks: row.externalLinks,
+      });
+      logger.debug('Skipping app event write for city-level Facebook Event location', {
+        rowIndex,
+        itemName: item.name || '',
+        locationName: row.facebookEventLocationName || row.userName,
+        organizerName: row.facebookEventOrganizerName,
+      });
+      return { created: false, updated: false, isDuplicate: false };
+    }
+
     const candidateVenueName = String(
       item.additionalLocation ||
       item.venue ||
@@ -1254,6 +1823,10 @@ async function processFullParserEvent(
   const eventData = {
     uniqueId: `${row.uniqueId || item.id || ''}_${item._pipelineIndex || itemIndex + 1}`,
     establishment: canonicalVenueName || parsedEstablishment || String(establishment || '').trim(),
+    locationScope: 'venue',
+    locationLabel: canonicalVenueName || parsedEstablishment || String(establishment || '').trim(),
+    locationPrecision: 'exact',
+    locationReviewStatus: 'not_needed',
     additionalLocation:
       additionalLocationCandidate &&
       normalizeVenueName(additionalLocationCandidate) !== normalizeVenueName(canonicalVenueName)
@@ -1274,6 +1847,9 @@ async function processFullParserEvent(
     facebookUrl: row.facebookUrl,
     sourceTimestamp: row.timestamp ? new Date(row.timestamp) : undefined,
     usersResponded: item.usersResponded || row.usersResponded,
+    usersGoing: item.usersGoing || row.usersGoing,
+    usersInterested: item.usersInterested || row.usersInterested,
+    facebookUsersResponded: item.facebookUsersResponded || row.facebookUsersResponded,
     likes: item.likes ?? row.likes,
     shares: item.shares ?? row.shares,
     comments: item.comments ?? row.comments,
@@ -1286,6 +1862,8 @@ async function processFullParserEvent(
     address: String(item.address || '').trim() || undefined,
     ticketPrice: String(item.ticketPrice || '').trim() || undefined,
     ticketLink: String(item.ticketLink || '').trim() || undefined,
+    ticketsBuyUrl: String(item.ticketsBuyUrl || row.ticketsBuyUrl || '').trim() || undefined,
+    externalLinks: row.externalLinks,
     isRecurring: item.isRecurring,
     recurringPattern: item.recurringPattern || undefined,
     recurringDaysOfWeek: normalizeRecurringWeekdayListValue(
@@ -1313,7 +1891,6 @@ async function processFullParserEvent(
     _sourceType: (item as unknown as Record<string, unknown>)._sourceType || undefined,
     organizedBy: String(item.organizedBy || '').trim() || undefined,
     utcStartDate: String(item.utcStartDate || '').trim() || undefined,
-    ticketsBuyUrl: String(item.ticketsBuyUrl || '').trim() || undefined,
     ticketProvider: String(item.ticketProvider || '').trim() || undefined,
   } as EventData & { _sourceType?: string };
 
@@ -1479,10 +2056,15 @@ async function processExtractedItem(
     facebookUrl: row.facebookUrl,
     sourceTimestamp: row.timestamp ? new Date(row.timestamp) : undefined,
     usersResponded: item.usersResponded || row.usersResponded,
+    usersGoing: (item as unknown as ParserProcessedEvent).usersGoing || row.usersGoing,
+    usersInterested: (item as unknown as ParserProcessedEvent).usersInterested || row.usersInterested,
+    facebookUsersResponded: (item as unknown as ParserProcessedEvent).facebookUsersResponded || row.facebookUsersResponded,
     likes: item.likes ?? row.likes,
     shares: item.shares ?? row.shares,
     comments: item.comments ?? row.comments,
     topReactionsCount: item.topReactionsCount ?? row.topReactionsCount,
+    ticketsBuyUrl: row.ticketsBuyUrl,
+    externalLinks: row.externalLinks,
     venueId: venue.id,
     category: (normalizedLegacyCategory || legacyItem.category) as EventData['category'],
     isEvent: legacyItem.isEvent,
@@ -2212,6 +2794,23 @@ function buildDuplicateEventUpdates(
   );
   if (preferredUsersResponded !== undefined) {
     setField('usersResponded', preferredUsersResponded);
+  }
+
+  const facebookResponseMetrics: Array<'usersGoing' | 'usersInterested' | 'facebookUsersResponded'> = [
+    'usersGoing',
+    'usersInterested',
+    'facebookUsersResponded',
+  ];
+  for (const metric of facebookResponseMetrics) {
+    const preferredValue = selectPreferredUsersResponded(existing[metric], incoming[metric]);
+    if (preferredValue !== undefined) {
+      setField(metric, preferredValue);
+    }
+  }
+
+  const mergedExternalLinks = mergeUniqueUrls(existing.externalLinks, incoming.externalLinks);
+  if (mergedExternalLinks.length > 0 && valuesDiffer(existing.externalLinks, mergedExternalLinks)) {
+    setField('externalLinks', mergedExternalLinks);
   }
 
   const mergedMediaUrls = mergeUniqueUrls(existing.mediaUrls, incoming.mediaUrls);
@@ -3914,6 +4513,12 @@ export function summarizeFullParserEvents(
     isFoodSpecial: event.isFoodSpecial || '',
     establishment: event.establishment || '',
     additionalLocation: event.additionalLocation || '',
+    locationScope: event.locationScope || '',
+    locationLabel: event.locationLabel || '',
+    locationCity: event.locationCity || '',
+    locationProvince: event.locationProvince || '',
+    locationPrecision: event.locationPrecision || '',
+    locationReviewStatus: event.locationReviewStatus || '',
     startDate: event.startDate || '',
     startTime: event.startTime || '',
     endDate: event.endDate || '',

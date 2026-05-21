@@ -310,7 +310,9 @@ function buildColumnIndexMap(headers: string[]): ColumnIndexMap {
     const normalizedHeader = header.toLowerCase().replace(/[^a-z0-9]/g, '');
     for (const [key, field] of Object.entries(columnMappings)) {
       if (normalizedHeader === key.replace(/[^a-z0-9]/g, '')) {
-        map[field] = index;
+        if (map[field] === -1) {
+          map[field] = index;
+        }
         break;
       }
     }
@@ -382,6 +384,85 @@ function getColumnValue(
   return null;
 }
 
+function getFirstNonEmptyColumnValue(
+  row: unknown[],
+  headerMap: HeaderIndexMap,
+  possibleHeaders: string[]
+): unknown {
+  for (const header of possibleHeaders) {
+    const index = headerMap[normalizeHeader(header)];
+    if (index === undefined || index < 0 || index >= row.length) {
+      continue;
+    }
+
+    const value = row[index];
+    if (value === null || value === undefined) {
+      continue;
+    }
+
+    if (String(value).trim()) {
+      return value;
+    }
+  }
+
+  return null;
+}
+
+function hasHeader(headerMap: HeaderIndexMap, header: string): boolean {
+  return headerMap[normalizeHeader(header)] !== undefined;
+}
+
+function isFacebookEventsDataset(headerMap: HeaderIndexMap): boolean {
+  return (
+    hasHeader(headerMap, 'eventFrequency') &&
+    hasHeader(headerMap, 'utcStartDate') &&
+    hasHeader(headerMap, 'dateTimeSentence') &&
+    hasHeader(headerMap, 'usersResponded')
+  );
+}
+
+function parseOptionalPositiveInteger(value: unknown): number | undefined {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed <= 0) return undefined;
+  return Math.floor(parsed);
+}
+
+function getFacebookEventsDatasetRowLimit(): number | undefined {
+  return parseOptionalPositiveInteger(process.env.FACEBOOK_EVENTS_DATASET_ROW_LIMIT);
+}
+
+function getFacebookEventsPastGraceMs(): number {
+  const parsedHours = parseOptionalPositiveInteger(process.env.FACEBOOK_EVENTS_PAST_GRACE_HOURS);
+  const hours = parsedHours ?? 12;
+  return hours * 60 * 60 * 1000;
+}
+
+function parseSortableDateMillis(value: unknown): number {
+  const raw = String(value || '').trim();
+  if (!raw) return Number.POSITIVE_INFINITY;
+
+  const parsed = new Date(raw);
+  const time = parsed.getTime();
+  return Number.isFinite(time) ? time : Number.POSITIVE_INFINITY;
+}
+
+function filterUpcomingFacebookEventRows(rows: RawRowData[]): RawRowData[] {
+  const cutoffMs = Date.now() - getFacebookEventsPastGraceMs();
+  const filtered = rows.filter(row => {
+    const eventTimeMs = parseSortableDateMillis(row.utcStartDate || row.timestamp);
+    return eventTimeMs === Number.POSITIVE_INFINITY || eventTimeMs >= cutoffMs;
+  });
+
+  if (filtered.length !== rows.length) {
+    logger.info('Filtered past Facebook event rows', {
+      originalRows: rows.length,
+      filteredRows: filtered.length,
+    });
+  }
+
+  return filtered;
+}
+
 function isLikelyAddress(str: string): boolean {
   if (!str) return false;
   const streetAddressPattern =
@@ -415,6 +496,141 @@ function isLikelyAddress(str: string): boolean {
       multipleCommasPattern.test(str)) &&
     !locationKeywords.some(keyword => str.toLowerCase().includes(keyword))
   );
+}
+
+function isLikelyCityLevelLocation(str: string): boolean {
+  const raw = String(str || '').replace(/\s+/g, ' ').trim();
+  if (!raw) return false;
+
+  const lower = raw.toLowerCase();
+  if (/\d/.test(lower)) return false;
+  if (/\b(street|st|road|rd|avenue|ave|drive|dr|lane|ln|boulevard|blvd|court|ct|way|highway|hwy|route|rte|place|pl|terrace|ter)\b/i.test(lower)) {
+    return false;
+  }
+  if (/\b(park|centre|center|hall|arena|stadium|theatre|theater|cafe|restaurant|bar|pub|club|church|school|hotel|inn|brewery|market)\b/i.test(lower)) {
+    return false;
+  }
+
+  const normalized = lower
+    .replace(/\bcanada\b/g, '')
+    .replace(/\bprince edward island\b/g, 'pei')
+    .replace(/\bp\.?e\.?i\.?\b/g, 'pei')
+    .replace(/\s*,\s*/g, ',')
+    .replace(/\s+/g, ' ')
+    .replace(/,+$/g, '')
+    .trim();
+
+  if (/^(pei|pe)$/.test(normalized)) return true;
+  return /^[a-z .'-]+,(pe|pei)$/.test(normalized) ||
+    /^[a-z .'-]+ (pe|pei)$/.test(normalized);
+}
+
+function normalizeCityLevelLocationName(str: string): string {
+  const raw = String(str || '').replace(/\s+/g, ' ').trim();
+  if (!raw) return '';
+
+  const normalized = raw
+    .replace(/\bcanada\b/gi, '')
+    .replace(/\bprince edward island\b/gi, 'PEI')
+    .replace(/\bp\.?e\.?i\.?\b/gi, 'PEI')
+    .replace(/\bpe\b/g, 'PE')
+    .replace(/\s*,\s*/g, ', ')
+    .replace(/\s+/g, ' ')
+    .replace(/[, ]+$/g, '')
+    .trim();
+
+  const noCommaMatch = normalized.match(/^(.+?)\s+(PEI|PE)$/i);
+  if (noCommaMatch && !normalized.includes(',')) {
+    return `${noCommaMatch[1].trim()}, ${noCommaMatch[2].toUpperCase()}`;
+  }
+
+  return normalized;
+}
+
+function cleanVenueHint(value: string): string {
+  return String(value || '')
+    .replace(/\s+/g, ' ')
+    .replace(/\s+\bin\s+(charlottetown|summerside|stratford|cornwall|montague|kensington|hunter river)(?:\s*,?\s*(?:pe|pei|canada))?$/i, '')
+    .replace(/^[\s\-|:]+/g, '')
+    .replace(/[\s\-|:,.!]+$/g, '')
+    .trim();
+}
+
+function isLikelyCitySegment(value: string): boolean {
+  const normalized = String(value || '')
+    .toLowerCase()
+    .replace(/\./g, '')
+    .replace(/\bcanada\b/g, '')
+    .replace(/\bprince edward island\b/g, 'pei')
+    .replace(/\s*,\s*/g, ',')
+    .replace(/\s+/g, ' ')
+    .replace(/[, ]+$/g, '')
+    .trim();
+
+  return /^(charlottetown|summerside|stratford|cornwall|montague|kensington|hunter river|pei|pe)$/.test(normalized) ||
+    /^[a-z .'-]+,(pe|pei)$/.test(normalized) ||
+    /^[a-z .'-]+ (pe|pei)$/.test(normalized);
+}
+
+function hasVenueHintKeyword(value: string): boolean {
+  return /\b(company|brewing|brewery|taproom|centre|center|hall|arena|stadium|theatre|theater|cafe|restaurant|bar|pub|club|church|school|college|university|hotel|inn|market|gallery|museum|library|studio|plaza|room|house|legion|park)\b/i.test(value);
+}
+
+function isPlausibleVenueHint(candidate: string, organizerName: string): boolean {
+  const clean = cleanVenueHint(candidate);
+  if (clean.length < 3 || clean.length > 90) return false;
+  if (isLikelyCitySegment(clean) || isLikelyCityLevelLocation(clean)) return false;
+
+  const normalizedCandidate = clean.toLowerCase();
+  const normalizedOrganizer = String(organizerName || '').trim().toLowerCase();
+  if (normalizedOrganizer && normalizedCandidate === normalizedOrganizer) return false;
+  if (normalizedOrganizer && normalizedCandidate.includes(normalizedOrganizer)) return false;
+  if (/\b(event|events|class|classes|tour|tickets?|sponsored|presented|happening)\b/i.test(clean)) return false;
+
+  const hasKeyword = hasVenueHintKeyword(clean);
+  if (isLikelyAddress(clean) && !hasKeyword) return false;
+
+  return hasKeyword;
+}
+
+function extractVenueHintFromFacebookEventTitle(title: string, organizerName: string): string {
+  const segments = String(title || '')
+    .split(/\s+(?:-|\u2012|\u2013|\u2014|\|)\s+/g)
+    .map(cleanVenueHint)
+    .filter(Boolean);
+
+  if (segments.length < 3) return '';
+
+  for (const segment of segments.slice(1).reverse()) {
+    if (isPlausibleVenueHint(segment, organizerName)) {
+      return segment;
+    }
+  }
+
+  return '';
+}
+
+function extractVenueHintFromFacebookEventDescription(description: string, organizerName: string): string {
+  const raw = String(description || '');
+  if (!raw) return '';
+
+  const venueKeyword =
+    'company|brewing|brewery|taproom|centre|center|hall|arena|stadium|theatre|theater|cafe|restaurant|bar|pub|club|church|school|college|university|hotel|inn|market|gallery|museum|library|studio|plaza|room|house|legion|park';
+  const pattern = new RegExp(
+    `\\b(?:at|@)\\s+(?:the\\s+)?([A-Z][A-Za-z0-9&'(). /-]{2,80}?\\b(?:${venueKeyword})\\b[A-Za-z0-9&'(). /-]{0,40})(?=\\s+in\\s+|\\s+on\\s+|[,.;!?\\n]|$)`,
+    'gi'
+  );
+
+  const matches = Array.from(raw.matchAll(pattern))
+    .map((match) => cleanVenueHint(match[1] || ''))
+    .filter((candidate) => isPlausibleVenueHint(candidate, organizerName));
+
+  return matches[matches.length - 1] || '';
+}
+
+function inferFacebookEventVenueHint(title: string, description: string, organizerName: string): string {
+  return extractVenueHintFromFacebookEventTitle(title, organizerName) ||
+    extractVenueHintFromFacebookEventDescription(description, organizerName);
 }
 
 function collectMediaUrls(row: unknown[], headerMap: HeaderIndexMap): string[] {
@@ -473,6 +689,86 @@ function collectOcrText(row: unknown[], headerMap: HeaderIndexMap): string {
   return texts.join('\n').trim();
 }
 
+function collectExternalLinks(row: unknown[], headerMap: HeaderIndexMap): string[] {
+  const links: string[] = [];
+  const add = (value: unknown) => {
+    if (!value) return;
+    const str = String(value).trim();
+    if (str) links.push(str);
+  };
+
+  add(getFirstNonEmptyColumnValue(row, headerMap, ['externalLinks']));
+  for (let i = 0; i < 10; i++) {
+    add(getColumnValue(row, headerMap, [`externalLinks/${i}`]));
+  }
+
+  return Array.from(new Set(links));
+}
+
+function joinNonEmpty(parts: unknown[], separator = ' '): string {
+  return parts
+    .map(part => String(part || '').trim())
+    .filter(Boolean)
+    .join(separator)
+    .trim();
+}
+
+function buildFacebookEventText(
+  row: unknown[],
+  headerMap: HeaderIndexMap,
+  description: string
+): string {
+  const lines: string[] = [];
+  const addLine = (label: string, value: unknown) => {
+    const str = String(value || '').trim();
+    if (str) {
+      lines.push(`${label}: ${str}`);
+    }
+  };
+
+  addLine('When', getFirstNonEmptyColumnValue(row, headerMap, ['dateTimeSentence', 'startTime']));
+  addLine('UTC start', getFirstNonEmptyColumnValue(row, headerMap, ['utcStartDate']));
+  addLine('Duration', getFirstNonEmptyColumnValue(row, headerMap, ['duration']));
+  addLine('Location', getFirstNonEmptyColumnValue(row, headerMap, ['location/name', 'location/contextualName']));
+  addLine(
+    'Address',
+    getFirstNonEmptyColumnValue(row, headerMap, [
+      'address',
+      'location/streetAddress',
+      'location/city',
+    ])
+  );
+  addLine('Organizer', getFirstNonEmptyColumnValue(row, headerMap, ['organizators/0/name', 'organizedBy']));
+
+  const ticketSummary = joinNonEmpty([
+    getFirstNonEmptyColumnValue(row, headerMap, ['ticketsInfo/title']),
+    getFirstNonEmptyColumnValue(row, headerMap, ['ticketsInfo/price']),
+    getFirstNonEmptyColumnValue(row, headerMap, ['ticketsInfo/subtitle']),
+    getFirstNonEmptyColumnValue(row, headerMap, ['ticketsInfo/ticketProvider']),
+  ], ' | ');
+  addLine('Tickets', ticketSummary);
+  addLine('Ticket link', getFirstNonEmptyColumnValue(row, headerMap, ['ticketsInfo/buyUrl']));
+
+  const responseSummary = joinNonEmpty([
+    getFirstNonEmptyColumnValue(row, headerMap, ['usersGoing']) ? `${getFirstNonEmptyColumnValue(row, headerMap, ['usersGoing'])} going` : '',
+    getFirstNonEmptyColumnValue(row, headerMap, ['usersInterested']) ? `${getFirstNonEmptyColumnValue(row, headerMap, ['usersInterested'])} interested` : '',
+    getFirstNonEmptyColumnValue(row, headerMap, ['usersResponded']) ? `${getFirstNonEmptyColumnValue(row, headerMap, ['usersResponded'])} responded` : '',
+  ], ', ');
+  addLine('Facebook responses', responseSummary);
+
+  const externalLinks = collectExternalLinks(row, headerMap);
+  if (externalLinks.length > 0) {
+    addLine('External links', externalLinks.join(' '));
+  }
+
+  const cleanDescription = description.trim();
+  if (cleanDescription) {
+    lines.push(`Description:\n${cleanDescription}`);
+  }
+
+  return lines.join('\n').trim();
+}
+
 /**
  * Extract row data from a worksheet row
  */
@@ -482,14 +778,20 @@ function extractRowData(
   headerMap: HeaderIndexMap,
   rowIndex: number
 ): RawRowData | null {
-  const text = String(
-    getColumnValue(row, headerMap, ['Text', 'text', 'description']) || ''
+  const isFacebookEvent = isFacebookEventsDataset(headerMap);
+  const description = String(
+    getFirstNonEmptyColumnValue(row, headerMap, ['Text', 'text', 'description']) || ''
   );
+  const text = isFacebookEvent
+    ? buildFacebookEventText(row, headerMap, description)
+    : description;
   const sharedPostText = String(
-    getColumnValue(row, headerMap, ['Sharedpost Text', 'sharedPost/text', 'name']) || ''
+    getFirstNonEmptyColumnValue(row, headerMap, ['Sharedpost Text', 'sharedPost/text', 'name']) || ''
   );
   const mediaUrls = collectMediaUrls(row, headerMap);
-  const ocrText = collectOcrText(row, headerMap);
+  const ocrText = isFacebookEvent ? '' : collectOcrText(row, headerMap);
+  const externalLinks = isFacebookEvent ? collectExternalLinks(row, headerMap) : [];
+  const ticketsBuyUrl = String(getFirstNonEmptyColumnValue(row, headerMap, ['ticketsInfo/buyUrl']) || '').trim();
 
   // Skip rows that are entirely empty
   const hasAnyValue = row.some(value => {
@@ -500,28 +802,54 @@ function extractRowData(
     return null;
   }
 
-  const locationName = String(getColumnValue(row, headerMap, ['location/name']) || '');
-  const organizerName = String(getColumnValue(row, headerMap, ['organizators/0/name']) || '');
-  const fallbackUserName = String(getColumnValue(row, headerMap, ['User Name', 'user/name']) || '');
-  const userName = isLikelyAddress(locationName)
-    ? organizerName || fallbackUserName || locationName
-    : locationName || organizerName || fallbackUserName;
+  const locationName = String(getFirstNonEmptyColumnValue(row, headerMap, ['location/name']) || '');
+  const contextualLocationName = String(
+    getFirstNonEmptyColumnValue(row, headerMap, ['location/contextualName']) || ''
+  );
+  const organizerName = String(
+    getFirstNonEmptyColumnValue(row, headerMap, ['organizators/0/name', 'organizedBy']) || ''
+  );
+  const fallbackUserName = String(getFirstNonEmptyColumnValue(row, headerMap, ['User Name', 'user/name']) || '');
+  const locationNameIsCityLevel = isLikelyCityLevelLocation(locationName);
+  const contextualLocationNameIsCityLevel = isLikelyCityLevelLocation(contextualLocationName);
+  const specificEventLocationName =
+    isFacebookEvent && locationName && !locationNameIsCityLevel && !isLikelyAddress(locationName)
+      ? locationName
+      : isFacebookEvent && contextualLocationName && !contextualLocationNameIsCityLevel && !isLikelyAddress(contextualLocationName)
+        ? contextualLocationName
+        : '';
+  const eventLocationIsCityLevel =
+    isFacebookEvent && !specificEventLocationName && (locationNameIsCityLevel || contextualLocationNameIsCityLevel);
+  const cityLevelLocationName = eventLocationIsCityLevel
+    ? normalizeCityLevelLocationName(locationName || contextualLocationName)
+    : '';
+  const inferredVenueHint =
+    isFacebookEvent && !specificEventLocationName && !eventLocationIsCityLevel
+      ? inferFacebookEventVenueHint(sharedPostText, description, organizerName)
+      : '';
+  const preferredEventLocationName =
+    specificEventLocationName || inferredVenueHint || cityLevelLocationName || locationName || contextualLocationName;
+  const eventVenueName = specificEventLocationName || inferredVenueHint;
+  const userName = eventVenueName ||
+    (eventLocationIsCityLevel
+      ? preferredEventLocationName
+      : isLikelyAddress(locationName)
+        ? organizerName || fallbackUserName || locationName
+        : locationName || organizerName || fallbackUserName);
 
-  const pageName = String(getColumnValue(row, headerMap, ['Pagename', 'pageName']) || '');
+  const pageName = String(getFirstNonEmptyColumnValue(row, headerMap, ['Pagename', 'pageName']) || '');
 
   const facebookUrl = String(
-    getColumnValue(row, headerMap, [
-      'Facebookurl',
-      'facebookUrl',
-      'location/url',
-      'inputUrl',
-      'url',
-      'pageUrl',
-      'pageurl',
-    ]) || ''
+    getFirstNonEmptyColumnValue(
+      row,
+      headerMap,
+      isFacebookEvent
+        ? ['url', 'Facebookurl', 'facebookUrl', 'inputUrl', 'location/url', 'pageUrl', 'pageurl']
+        : ['Facebookurl', 'facebookUrl', 'location/url', 'inputUrl', 'url', 'pageUrl', 'pageurl']
+    ) || ''
   );
   const topLevelUrl = String(
-    getColumnValue(row, headerMap, [
+    getFirstNonEmptyColumnValue(row, headerMap, [
       'topLevelUrl',
       'top level url',
       'topLevelPostUrl',
@@ -531,15 +859,15 @@ function extractRowData(
   );
 
   const timestamp = String(
-    getColumnValue(row, headerMap, ['Time', 'time', 'timestamp', 'utcStartDate', 'UTC Start Date']) || ''
+    getFirstNonEmptyColumnValue(row, headerMap, ['Time', 'time', 'timestamp', 'utcStartDate', 'UTC Start Date']) || ''
   );
 
   const profilePicUrl = String(
-    getColumnValue(row, headerMap, ['user/profilePic', 'sharedPost/user/profilePic', 'profilePicUrl']) || ''
+    getFirstNonEmptyColumnValue(row, headerMap, ['user/profilePic', 'sharedPost/user/profilePic', 'profilePicUrl']) || ''
   );
 
   const utcStartDate = String(
-    getColumnValue(row, headerMap, [
+    getFirstNonEmptyColumnValue(row, headerMap, [
       'utcStartDate',
       'UTC Start Date',
       'childEvents/0/utcStartDate',
@@ -549,24 +877,48 @@ function extractRowData(
   );
 
   const uniqueId = String(
-    getColumnValue(row, headerMap, ['id', 'ID', 'postId', 'post_id', 'eventId', 'childEvents/0/id']) ||
+    getFirstNonEmptyColumnValue(row, headerMap, ['id', 'ID', 'postId', 'post_id', 'eventId', 'childEvents/0/id']) ||
       `row_${rowIndex}_${Date.now()}`
+  );
+  const locationAddress =
+    isFacebookEvent && isLikelyAddress(contextualLocationName)
+      ? contextualLocationName
+      : isFacebookEvent && isLikelyAddress(locationName)
+        ? locationName
+        : '';
+  const address = String(
+    getFirstNonEmptyColumnValue(row, headerMap, [
+      'address',
+      'location/streetAddress',
+      'location/city',
+    ]) || locationAddress || ''
   );
 
   const likes = parseMetricNumber(
-    getColumnValue(row, headerMap, ['likes', 'Like Count', 'reactions/likes', 'reactionCount'])
+    getFirstNonEmptyColumnValue(row, headerMap, ['likes', 'Like Count', 'reactions/likes', 'reactionCount'])
   );
   const shares = parseMetricNumber(
-    getColumnValue(row, headerMap, ['shares', 'Share Count', 'shareCount'])
+    getFirstNonEmptyColumnValue(row, headerMap, ['shares', 'Share Count', 'shareCount'])
   );
   const comments = parseMetricNumber(
-    getColumnValue(row, headerMap, ['comments', 'Comment Count', 'commentCount'])
+    getFirstNonEmptyColumnValue(row, headerMap, ['comments', 'Comment Count', 'commentCount'])
   );
   const topReactionsCount = parseMetricNumber(
-    getColumnValue(row, headerMap, ['topReactionsCount', 'Top Reactions Count'])
+    getFirstNonEmptyColumnValue(row, headerMap, ['topReactionsCount', 'Top Reactions Count'])
   );
-  const usersResponded = parseMetricString(
-    getColumnValue(row, headerMap, ['usersResponded', 'Users Responded', 'Interested', 'Going'])
+  const usersGoing = parseMetricString(
+    getFirstNonEmptyColumnValue(row, headerMap, ['usersGoing', 'Users Going', 'Going'])
+  );
+  const usersInterested = parseMetricString(
+    getFirstNonEmptyColumnValue(row, headerMap, ['usersInterested', 'Users Interested', 'Interested'])
+  );
+  const facebookUsersResponded = parseMetricString(
+    getFirstNonEmptyColumnValue(row, headerMap, ['usersResponded', 'Users Responded'])
+  );
+  const usersResponded = isFacebookEvent
+    ? usersGoing || facebookUsersResponded
+    : parseMetricString(
+      getFirstNonEmptyColumnValue(row, headerMap, ['usersResponded', 'Users Responded', 'Interested', 'Going'])
   );
 
   return {
@@ -580,9 +932,20 @@ function extractRowData(
     timestamp,
     facebookUrl,
     topLevelUrl,
+    address,
     profilePicUrl,
     utcStartDate,
+    sourceScraperType: isFacebookEvent ? 'events' : undefined,
+    facebookEventLocationName: isFacebookEvent ? preferredEventLocationName || undefined : undefined,
+    facebookEventLocationIsCityLevel: isFacebookEvent ? eventLocationIsCityLevel : undefined,
+    facebookEventOrganizerName: isFacebookEvent ? organizerName || undefined : undefined,
+    facebookEventDescription: isFacebookEvent ? description.trim() || undefined : undefined,
+    externalLinks,
+    ticketsBuyUrl: ticketsBuyUrl || undefined,
     usersResponded,
+    usersGoing,
+    usersInterested,
+    facebookUsersResponded,
     likes,
     shares,
     comments,
@@ -639,6 +1002,7 @@ export async function parseXlsxFile(
 
   // Process data rows (skip header)
   const rows: RawRowData[] = [];
+  const isFacebookEvents = isFacebookEventsDataset(headerMap);
   for (let i = 1; i < data.length; i++) {
     const rowData = extractRowData(data[i] as unknown[], columnMap, headerMap, i);
     if (rowData) {
@@ -646,9 +1010,26 @@ export async function parseXlsxFile(
     }
   }
 
+  let effectiveRows = rows;
+  if (isFacebookEvents) {
+    effectiveRows = filterUpcomingFacebookEventRows(rows).sort(
+      (a, b) => parseSortableDateMillis(a.utcStartDate || a.timestamp) -
+        parseSortableDateMillis(b.utcStartDate || b.timestamp)
+    );
+
+    const rowLimit = getFacebookEventsDatasetRowLimit();
+    if (rowLimit && effectiveRows.length > rowLimit) {
+      logger.info('Applied Facebook events dataset row limit', {
+        originalRows: effectiveRows.length,
+        limitedRows: rowLimit,
+      });
+      effectiveRows = effectiveRows.slice(0, rowLimit);
+    }
+  }
+
   return {
-    rows,
-    totalRows: data.length - 1, // Exclude header
+    rows: effectiveRows,
+    totalRows: effectiveRows.length,
     columnMap,
   };
 }

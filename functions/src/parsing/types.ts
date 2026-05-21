@@ -500,6 +500,12 @@ export interface ProcessedEvent extends TimeResolvedEvent {
   longitude?: number | string;
   city?: string;
   streetAddress?: string;
+  locationScope?: 'venue' | 'city' | 'area' | 'route' | 'unknown';
+  locationLabel?: string;
+  locationCity?: string;
+  locationProvince?: string;
+  locationPrecision?: 'exact' | 'approximate' | 'city_centroid' | 'none';
+  locationReviewStatus?: 'not_needed' | 'needs_review' | 'approved' | 'rejected';
 
   // Media
   icon?: string;
@@ -511,6 +517,9 @@ export interface ProcessedEvent extends TimeResolvedEvent {
   // Facebook metadata
   organizedBy?: string;
   usersResponded?: string;
+  usersGoing?: string;
+  usersInterested?: string;
+  facebookUsersResponded?: string;
   utcStartDate?: string;
   ticketsBuyUrl?: string;
   ticketProvider?: string;
@@ -550,6 +559,9 @@ export interface ExtractedDataInput {
   streetAddress?: string;
   organizedBy?: string;
   usersResponded?: string;
+  usersGoing?: string;
+  usersInterested?: string;
+  facebookUsersResponded?: string;
   ticketsBuyUrl?: string;
   ticketProvider?: string;
   likes?: number;

@@ -15,6 +15,12 @@ import {
   ProcessingLock,
   MatchInfo,
   ParseSnapshot,
+  CityLevelEventReviewRecord,
+  CityLevelEventReviewSample,
+  FinalizeCityLevelEventReviewInput,
+  FinalizeCityLevelEventReviewResult,
+  QueueCityLevelEventReviewInput,
+  QueueCityLevelEventReviewResult,
   QueueUnrecognizedVenueInput,
   QueueUnrecognizedVenueResult,
   UnrecognizedVenueRecord,
@@ -51,6 +57,7 @@ const COLLECTIONS = {
   PARSE_SNAPSHOTS: 'parse_snapshots',
   PROCESSING_LOCKS: 'processing_locks',
   UNRECOGNIZED_VENUES: 'unrecognized_venues',
+  CITY_LEVEL_EVENT_REVIEWS: 'city_level_event_reviews',
 } as const;
 
 const MAX_SNAPSHOT_TEXT_LENGTH = 20000;
@@ -59,6 +66,8 @@ const CITY_SUFFIX_REGEX =
   /^(.*?)(?:\s*[|,-]\s*)([A-Za-z .'-]+?)\s*,?\s*(PEI?|NS|NB|NL|ON|QC|AB|BC|SK|MB)\s*$/i;
 const UNKNOWN_VENUE_SAMPLE_LIMIT = 5;
 const UNKNOWN_VENUE_DESCRIPTION_PREVIEW_LEN = 240;
+const CITY_LEVEL_EVENT_REVIEW_SAMPLE_LIMIT = 10;
+const CITY_LEVEL_EVENT_REVIEW_DESCRIPTION_PREVIEW_LEN = 360;
 const NON_VENUE_LABEL_EXACT_BLOCKLIST = new Set(
   [
     'Aquafit',
@@ -572,6 +581,129 @@ function isTerminalUnrecognizedStatus(status: string): status is UnrecognizedVen
   return ['resolved_existing', 'created_new', 'ignored'].includes(status);
 }
 
+function trimCityLevelEventPreview(value?: string): string | undefined {
+  const normalized = String(value || '').replace(/\s+/g, ' ').trim();
+  if (!normalized) return undefined;
+  if (normalized.length <= CITY_LEVEL_EVENT_REVIEW_DESCRIPTION_PREVIEW_LEN) {
+    return normalized;
+  }
+  return `${normalized.slice(0, Math.max(0, CITY_LEVEL_EVENT_REVIEW_DESCRIPTION_PREVIEW_LEN - 3)).trimEnd()}...`;
+}
+
+function compactRecord<T extends Record<string, unknown>>(value: T): T {
+  const result: Record<string, unknown> = {};
+  for (const [key, entry] of Object.entries(value)) {
+    if (entry !== undefined) {
+      result[key] = entry;
+    }
+  }
+  return result as T;
+}
+
+function buildCityLevelEventReviewDocId(input: QueueCityLevelEventReviewInput): string {
+  const fingerprint = [
+    input.uniqueId,
+    input.facebookUrl,
+    input.eventName,
+    input.eventDate,
+    input.locationLabel,
+  ]
+    .map((value) => String(value || '').trim().toLowerCase())
+    .filter(Boolean)
+    .join('|');
+  const stableKey = fingerprint || [
+    input.fileId,
+    input.rowIndex,
+    input.locationLabel,
+  ].join('|');
+  return `cityevt_${createHash('sha1').update(stableKey).digest('hex').slice(0, 24)}`;
+}
+
+function buildCityLevelEventReviewSample(
+  input: QueueCityLevelEventReviewInput
+): CityLevelEventReviewSample {
+  const mediaUrls = dedupeUrls([
+    ...tokenizeMediaUrls(input.mediaUrls),
+    ...tokenizeMediaUrls(input.imageUrl),
+  ]);
+  const externalLinks = dedupeUrls(tokenizeMediaUrls(input.externalLinks));
+
+  return compactRecord({
+    fileId: input.fileId,
+    fileName: input.fileName,
+    rowIndex: input.rowIndex,
+    parserMode: input.parserMode,
+    eventName: input.eventName,
+    eventDate: input.eventDate,
+    eventTime: input.eventTime,
+    observedLocationName: input.locationLabel,
+    organizerName: input.organizerName,
+    facebookUrl: input.facebookUrl,
+    topLevelUrl: input.topLevelUrl,
+    descriptionPreview: trimCityLevelEventPreview(input.description),
+    imageUrl: asOptionalTrimmedString(input.imageUrl) || mediaUrls[0],
+    mediaUrls: mediaUrls.length > 0 ? mediaUrls : undefined,
+    usersResponded: asOptionalTrimmedString(input.usersResponded),
+    usersGoing: asOptionalTrimmedString(input.usersGoing),
+    usersInterested: asOptionalTrimmedString(input.usersInterested),
+    facebookUsersResponded: asOptionalTrimmedString(input.facebookUsersResponded),
+    likes: input.likes,
+    shares: input.shares,
+    comments: input.comments,
+    topReactionsCount: input.topReactionsCount,
+    ticketsBuyUrl: asOptionalTrimmedString(input.ticketsBuyUrl),
+    externalLinks: externalLinks.length > 0 ? externalLinks : undefined,
+    createdAt: new Date(),
+  });
+}
+
+function mergeCityLevelEventReviewSamples(
+  existingSamples: unknown,
+  nextSample: CityLevelEventReviewSample
+): CityLevelEventReviewSample[] {
+  const existing = Array.isArray(existingSamples)
+    ? (existingSamples.filter((value) => value && typeof value === 'object') as CityLevelEventReviewSample[])
+    : [];
+  const fingerprint = [
+    nextSample.fileId,
+    nextSample.rowIndex,
+    nextSample.eventName,
+    nextSample.eventDate,
+    nextSample.eventTime,
+    nextSample.observedLocationName,
+  ].join('|').toLowerCase();
+
+  const result = existing.filter((sample) => {
+    const sampleFingerprint = [
+      sample.fileId,
+      sample.rowIndex,
+      sample.eventName,
+      sample.eventDate,
+      sample.eventTime,
+      sample.observedLocationName,
+    ].join('|').toLowerCase();
+    return sampleFingerprint !== fingerprint;
+  });
+
+  result.unshift(nextSample);
+  return result.slice(0, CITY_LEVEL_EVENT_REVIEW_SAMPLE_LIMIT);
+}
+
+function normalizeCityLevelReviewStatus(status: string): CityLevelEventReviewRecord['status'] {
+  if (['approved', 'rejected', 'published', 'ignored'].includes(status)) {
+    return status as CityLevelEventReviewRecord['status'];
+  }
+  return 'needs_review';
+}
+
+function normalizeLocationReviewStatus(
+  status: CityLevelEventReviewRecord['status']
+): CityLevelEventReviewRecord['locationReviewStatus'] {
+  if (status === 'approved' || status === 'published') return 'approved';
+  if (status === 'rejected' || status === 'ignored') return 'rejected';
+  return 'needs_review';
+}
+
 function truncateText(value?: string): { text?: string; length?: number } {
   if (!value) return { text: undefined, length: 0 };
   const length = value.length;
@@ -1031,6 +1163,528 @@ function computeTokenOverlapEvidence(candidate: string, target: string): TokenOv
 }
 
 /**
+ * Queue a city/area-scoped Facebook Event for explicit review.
+ * These records are display-location candidates, not matchable venue candidates.
+ */
+export async function queueCityLevelEventReview(
+  input: QueueCityLevelEventReviewInput
+): Promise<QueueCityLevelEventReviewResult> {
+  const locationLabel = String(input.locationLabel || '').trim();
+  if (!locationLabel) {
+    return { queued: false, reason: 'empty_location_label' };
+  }
+
+  const docId = buildCityLevelEventReviewDocId(input);
+  const docRef = db.collection(COLLECTIONS.CITY_LEVEL_EVENT_REVIEWS).doc(docId);
+  const sample = buildCityLevelEventReviewSample({
+    ...input,
+    locationLabel,
+  });
+  const locationScope = input.locationScope || 'city';
+  const locationPrecision = input.locationPrecision || 'city_centroid';
+  const mediaUrls = dedupeUrls([
+    ...tokenizeMediaUrls(input.mediaUrls),
+    ...tokenizeMediaUrls(input.imageUrl),
+  ]);
+  const imageUrl = asOptionalTrimmedString(input.imageUrl) || mediaUrls[0];
+  const externalLinks = dedupeUrls(tokenizeMediaUrls(input.externalLinks));
+  const descriptionPreview = trimCityLevelEventPreview(input.description);
+  const usersResponded = asOptionalTrimmedString(input.usersResponded);
+  const usersGoing = asOptionalTrimmedString(input.usersGoing);
+  const usersInterested = asOptionalTrimmedString(input.usersInterested);
+  const facebookUsersResponded = asOptionalTrimmedString(input.facebookUsersResponded);
+  let created = false;
+  let shouldRefreshPublishedEvent = false;
+
+  await db.runTransaction(async (tx) => {
+    const snapshot = await tx.get(docRef);
+    const now = admin.firestore.FieldValue.serverTimestamp();
+
+    if (!snapshot.exists) {
+      created = true;
+      const payload: CityLevelEventReviewRecord = {
+        status: 'needs_review',
+        uniqueId: String(input.uniqueId || '').trim() || undefined,
+        fileId: String(input.fileId || '').trim() || undefined,
+        fileName: String(input.fileName || '').trim() || undefined,
+        rowIndex: Number.isFinite(Number(input.rowIndex)) ? Number(input.rowIndex) : undefined,
+        lastSeenFileId: String(input.fileId || '').trim() || undefined,
+        lastSeenRowIndex: Number.isFinite(Number(input.rowIndex)) ? Number(input.rowIndex) : undefined,
+        sourceScraperType: input.sourceScraperType,
+        locationScope,
+        locationLabel,
+        locationCity: String(input.locationCity || '').trim() || undefined,
+        locationProvince: String(input.locationProvince || '').trim() || undefined,
+        locationPrecision,
+        locationReviewStatus: 'needs_review',
+        eventName: String(input.eventName || '').trim() || undefined,
+        eventDate: String(input.eventDate || '').trim() || undefined,
+        eventTime: String(input.eventTime || '').trim() || undefined,
+        endDate: String(input.endDate || '').trim() || undefined,
+        endTime: String(input.endTime || '').trim() || undefined,
+        eventType: String(input.eventType || '').trim() || undefined,
+        category: String(input.category || '').trim() || undefined,
+        descriptionPreview,
+        imageUrl,
+        mediaUrls: mediaUrls.length > 0 ? mediaUrls : undefined,
+        usersResponded,
+        usersGoing,
+        usersInterested,
+        facebookUsersResponded,
+        likes: input.likes,
+        shares: input.shares,
+        comments: input.comments,
+        topReactionsCount: input.topReactionsCount,
+        ticketsBuyUrl: asOptionalTrimmedString(input.ticketsBuyUrl),
+        externalLinks: externalLinks.length > 0 ? externalLinks : undefined,
+        organizerName: String(input.organizerName || '').trim() || undefined,
+        facebookUrl: String(input.facebookUrl || '').trim() || undefined,
+        topLevelUrl: String(input.topLevelUrl || '').trim() || undefined,
+        occurrences: 1,
+        sampleRows: [sample],
+      };
+
+      tx.set(docRef, {
+        ...payload,
+        createdAt: now,
+        updatedAt: now,
+        lastSeenAt: now,
+      });
+      return;
+    }
+
+    const existing = (snapshot.data() || {}) as Partial<CityLevelEventReviewRecord> & Record<string, unknown>;
+    const nextStatus = normalizeCityLevelReviewStatus(String(existing.status || 'needs_review'));
+    shouldRefreshPublishedEvent = nextStatus === 'published';
+    const sampleRows = mergeCityLevelEventReviewSamples(existing.sampleRows, sample);
+    const mergedMediaUrls = dedupeUrls([
+      ...tokenizeMediaUrls(existing.mediaUrls),
+      ...mediaUrls,
+    ]);
+    const mergedExternalLinks = dedupeUrls([
+      ...tokenizeMediaUrls(existing.externalLinks),
+      ...externalLinks,
+    ]);
+
+    tx.set(
+      docRef,
+      compactRecord({
+        status: nextStatus,
+        uniqueId: String(existing.uniqueId || input.uniqueId || '').trim() || undefined,
+        fileId: String(existing.fileId || input.fileId || '').trim() || undefined,
+        fileName: String(existing.fileName || input.fileName || '').trim() || undefined,
+        rowIndex: existing.rowIndex ?? (Number.isFinite(Number(input.rowIndex)) ? Number(input.rowIndex) : undefined),
+        lastSeenFileId: String(input.fileId || existing.lastSeenFileId || '').trim() || undefined,
+        lastSeenRowIndex: Number.isFinite(Number(input.rowIndex))
+          ? Number(input.rowIndex)
+          : existing.lastSeenRowIndex,
+        sourceScraperType: existing.sourceScraperType || input.sourceScraperType,
+        locationScope: existing.locationScope || locationScope,
+        locationLabel: String(existing.locationLabel || locationLabel).trim(),
+        locationCity: String(existing.locationCity || input.locationCity || '').trim() || undefined,
+        locationProvince: String(existing.locationProvince || input.locationProvince || '').trim() || undefined,
+        locationPrecision: existing.locationPrecision || locationPrecision,
+        locationReviewStatus: normalizeLocationReviewStatus(nextStatus),
+        eventName: String(existing.eventName || input.eventName || '').trim() || undefined,
+        eventDate: String(existing.eventDate || input.eventDate || '').trim() || undefined,
+        eventTime: String(existing.eventTime || input.eventTime || '').trim() || undefined,
+        endDate: String(existing.endDate || input.endDate || '').trim() || undefined,
+        endTime: String(existing.endTime || input.endTime || '').trim() || undefined,
+        eventType: String(existing.eventType || input.eventType || '').trim() || undefined,
+        category: String(existing.category || input.category || '').trim() || undefined,
+        descriptionPreview: descriptionPreview || asOptionalTrimmedString(existing.descriptionPreview),
+        imageUrl: imageUrl || asOptionalTrimmedString(existing.imageUrl),
+        mediaUrls: mergedMediaUrls.length > 0 ? mergedMediaUrls : undefined,
+        usersResponded: usersResponded || asOptionalTrimmedString(existing.usersResponded),
+        usersGoing: usersGoing || asOptionalTrimmedString(existing.usersGoing),
+        usersInterested: usersInterested || asOptionalTrimmedString(existing.usersInterested),
+        facebookUsersResponded: facebookUsersResponded || asOptionalTrimmedString(existing.facebookUsersResponded),
+        likes: input.likes ?? existing.likes,
+        shares: input.shares ?? existing.shares,
+        comments: input.comments ?? existing.comments,
+        topReactionsCount: input.topReactionsCount ?? existing.topReactionsCount,
+        ticketsBuyUrl: asOptionalTrimmedString(input.ticketsBuyUrl) || asOptionalTrimmedString(existing.ticketsBuyUrl),
+        externalLinks: mergedExternalLinks.length > 0 ? mergedExternalLinks : undefined,
+        organizerName: String(existing.organizerName || input.organizerName || '').trim() || undefined,
+        facebookUrl: String(existing.facebookUrl || input.facebookUrl || '').trim() || undefined,
+        topLevelUrl: String(existing.topLevelUrl || input.topLevelUrl || '').trim() || undefined,
+        occurrences: Number(existing.occurrences || 0) + 1,
+        sampleRows,
+        updatedAt: now,
+        lastSeenAt: now,
+      }),
+      { merge: true }
+    );
+  });
+
+  logger.info(created ? 'Queued new city-level event review' : 'Updated city-level event review', {
+    docId,
+    locationLabel,
+    locationScope,
+    eventName: input.eventName,
+    eventDate: input.eventDate,
+    rowIndex: input.rowIndex,
+    fileId: input.fileId,
+    organizerName: input.organizerName,
+    created,
+  });
+
+  if (shouldRefreshPublishedEvent) {
+    try {
+      await refreshPublishedCityLevelEventFromReview(docId);
+    } catch (error) {
+      logger.warn('Failed to refresh published city-level event after new occurrence', {
+        docId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
+  return {
+    queued: true,
+    docId,
+    created,
+  };
+}
+
+function asOptionalTrimmedString(value: unknown): string | undefined {
+  const normalized = String(value || '').trim();
+  return normalized || undefined;
+}
+
+function requireCityLevelEventField(value: unknown, fieldName: string): string {
+  const normalized = asOptionalTrimmedString(value);
+  if (!normalized) {
+    throw new Error(`City-level event review is missing ${fieldName}`);
+  }
+  return normalized;
+}
+
+function normalizePublishedCityLevelScope(value: unknown): 'city' | 'area' {
+  return String(value || '').trim() === 'area' ? 'area' : 'city';
+}
+
+function normalizePublishedCityLevelPrecision(
+  value: unknown,
+  scope: 'city' | 'area'
+): 'city_centroid' | 'approximate' | 'none' {
+  const normalized = String(value || '').trim();
+  if (normalized === 'none' || normalized === 'approximate' || normalized === 'city_centroid') {
+    return normalized;
+  }
+  return scope === 'city' ? 'city_centroid' : 'approximate';
+}
+
+function normalizePublishedCityLevelEventType(value: unknown): string {
+  const normalized = String(value || '').trim();
+  return normalized || 'community';
+}
+
+function normalizePublishedCityLevelCategory(value: unknown): string {
+  const normalized = String(value || '').trim();
+  return normalized || 'Community';
+}
+
+function normalizePublishedCityLevelEngagement(
+  manual: FinalizeCityLevelEventReviewInput['manual'] = {},
+  record: CityLevelEventReviewRecord
+): {
+  usersResponded?: string;
+  usersGoing?: string;
+  usersInterested?: string;
+  facebookUsersResponded?: string;
+} {
+  const usersGoing = asOptionalTrimmedString(manual.usersGoing || record.usersGoing);
+  const usersInterested = asOptionalTrimmedString(manual.usersInterested || record.usersInterested);
+  const facebookUsersResponded = asOptionalTrimmedString(
+    manual.facebookUsersResponded || record.facebookUsersResponded || record.usersResponded
+  );
+  return {
+    usersResponded: asOptionalTrimmedString(manual.usersResponded) || usersGoing || asOptionalTrimmedString(record.usersResponded),
+    usersGoing,
+    usersInterested,
+    facebookUsersResponded,
+  };
+}
+
+function collectPublishedCityLevelSourceMedia(
+  manual: FinalizeCityLevelEventReviewInput['manual'] = {},
+  record: CityLevelEventReviewRecord
+): string[] {
+  return dedupeUrls([
+    ...tokenizeMediaUrls(manual.mediaUrls),
+    ...tokenizeMediaUrls(manual.imageUrl),
+    ...tokenizeMediaUrls(record.mediaUrls),
+    ...tokenizeMediaUrls(record.imageUrl),
+  ]);
+}
+
+async function buildPublishedCityLevelMediaFields(
+  manual: FinalizeCityLevelEventReviewInput['manual'] = {},
+  record: CityLevelEventReviewRecord
+): Promise<Partial<EventData>> {
+  const sourceMediaUrls = collectPublishedCityLevelSourceMedia(manual, record);
+  if (sourceMediaUrls.length === 0) {
+    throw new Error('City-level event review is missing imageUrl/mediaUrls');
+  }
+
+  const uploadUrl = String(process.env.IMAGE_UPLOAD_URL || '').trim();
+  const cache = new Map<string, string | null>();
+  const outputUrls: string[] = [];
+
+  for (const sourceUrl of sourceMediaUrls) {
+    let resolvedUrl = sourceUrl;
+    if (uploadUrl) {
+      const managedUrl = await convertImageUrlToManaged(sourceUrl, 'postimages', uploadUrl, cache);
+      if (managedUrl) {
+        resolvedUrl = managedUrl;
+      } else {
+        logger.warn('City-level event image upload failed; preserving source image URL', {
+          sourceUrl,
+          eventName: record.eventName || '',
+          reviewUniqueId: record.uniqueId || '',
+        });
+      }
+    } else {
+      logger.warn('City-level event image upload disabled (IMAGE_UPLOAD_URL not set); preserving source image URL', {
+        sourceUrl,
+        eventName: record.eventName || '',
+        reviewUniqueId: record.uniqueId || '',
+      });
+    }
+
+    outputUrls.push(resolvedUrl);
+  }
+
+  const mediaUrls = dedupeUrls(outputUrls);
+  const primaryImageUrl = mediaUrls.find((url) => isManagedImageUrl(url)) || mediaUrls[0];
+
+  return compactRecord({
+    imageUrl: primaryImageUrl,
+    image: primaryImageUrl,
+    relevantImageUrl: primaryImageUrl,
+    mediaUrls,
+  });
+}
+
+function buildPublishedCityLevelEventData(
+  reviewId: string,
+  record: CityLevelEventReviewRecord,
+  manual: FinalizeCityLevelEventReviewInput['manual'] = {},
+  mediaFields: Partial<EventData> = {}
+): EventData & Record<string, unknown> {
+  const locationScope = normalizePublishedCityLevelScope(manual.locationScope || record.locationScope);
+  const locationPrecision = normalizePublishedCityLevelPrecision(
+    manual.locationPrecision || record.locationPrecision,
+    locationScope
+  );
+  const locationLabel = requireCityLevelEventField(
+    manual.locationLabel || record.locationLabel,
+    'locationLabel'
+  );
+  const eventName = requireCityLevelEventField(
+    manual.eventName || record.eventName,
+    'eventName'
+  );
+  const startDate = requireCityLevelEventField(
+    manual.eventDate || record.eventDate,
+    'eventDate'
+  );
+  const startTime = asOptionalTrimmedString(manual.eventTime || record.eventTime);
+  const endDate = asOptionalTrimmedString(manual.endDate || record.endDate) || startDate;
+  const description = asOptionalTrimmedString(manual.description || record.descriptionPreview);
+  const engagement = normalizePublishedCityLevelEngagement(manual, record);
+  const externalLinks = dedupeUrls([
+    ...tokenizeMediaUrls(manual.externalLinks),
+    ...tokenizeMediaUrls(record.externalLinks),
+  ]);
+
+  return compactRecord({
+    uniqueId: `${asOptionalTrimmedString(record.uniqueId) || reviewId}_city`,
+    cityLevelReviewId: reviewId,
+    sourceScraperType: record.sourceScraperType,
+    establishment: locationLabel,
+    venue: locationLabel,
+    name: eventName,
+    eventName,
+    description,
+    eventType: normalizePublishedCityLevelEventType(manual.eventType || record.eventType),
+    category: normalizePublishedCityLevelCategory(manual.category || record.category),
+    isEvent: 'Yes',
+    isFoodSpecial: 'No',
+    startDate,
+    startTime,
+    endDate,
+    endTime: asOptionalTrimmedString(manual.endTime || record.endTime),
+    ...mediaFields,
+    venueId: null,
+    locationScope,
+    locationLabel,
+    locationCity: asOptionalTrimmedString(manual.locationCity || record.locationCity),
+    locationProvince: asOptionalTrimmedString(manual.locationProvince || record.locationProvince),
+    locationPrecision,
+    locationReviewStatus: 'approved',
+    mapMode: locationPrecision === 'none' ? 'none' : 'area',
+    address: locationLabel,
+    facebookUrl: asOptionalTrimmedString(record.facebookUrl),
+    cleanedFacebookUrl: asOptionalTrimmedString(record.facebookUrl),
+    organizedBy: asOptionalTrimmedString(record.organizerName),
+    usersResponded: engagement.usersResponded,
+    usersGoing: engagement.usersGoing,
+    usersInterested: engagement.usersInterested,
+    facebookUsersResponded: engagement.facebookUsersResponded,
+    likes: record.likes,
+    shares: record.shares,
+    comments: record.comments,
+    topReactionsCount: record.topReactionsCount,
+    ticketsBuyUrl: asOptionalTrimmedString(manual.ticketsBuyUrl || record.ticketsBuyUrl),
+    externalLinks: externalLinks.length > 0 ? externalLinks : undefined,
+    source: 'city_level_event_review',
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    lastSeenAt: admin.firestore.FieldValue.serverTimestamp(),
+  }) as unknown as EventData & Record<string, unknown>;
+}
+
+async function writePublishedCityLevelEvent(
+  reviewId: string,
+  record: CityLevelEventReviewRecord,
+  manual: FinalizeCityLevelEventReviewInput['manual'] = {},
+  options: { preserveCreatedAt?: boolean } = {}
+): Promise<admin.firestore.DocumentReference> {
+  const eventId = asOptionalTrimmedString(record.publishedEventId) || reviewId;
+  const eventRef = db.collection(COLLECTIONS.EVENTS).doc(eventId);
+  const mediaFields = await buildPublishedCityLevelMediaFields(manual, record);
+  const eventData = normalizeRecurringBaseWritePayload(
+    buildPublishedCityLevelEventData(reviewId, record, manual, mediaFields)
+  ) as EventData & Record<string, unknown>;
+
+  if (options.preserveCreatedAt) {
+    delete eventData.createdAt;
+  }
+
+  await eventRef.set(eventData, { merge: true });
+  return eventRef;
+}
+
+async function refreshPublishedCityLevelEventFromReview(reviewId: string): Promise<void> {
+  const docRef = db.collection(COLLECTIONS.CITY_LEVEL_EVENT_REVIEWS).doc(reviewId);
+  const snapshot = await docRef.get();
+  if (!snapshot.exists) return;
+
+  const record = {
+    id: snapshot.id,
+    ...(snapshot.data() || {}),
+  } as CityLevelEventReviewRecord;
+
+  if (normalizeCityLevelReviewStatus(String(record.status || '')) !== 'published') {
+    return;
+  }
+
+  const eventRef = await writePublishedCityLevelEvent(reviewId, record, {}, { preserveCreatedAt: true });
+  await docRef.set(
+    compactRecord({
+      publishedEventId: eventRef.id,
+      publishedEventPath: eventRef.path,
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    }),
+    { merge: true }
+  );
+}
+
+export async function finalizeCityLevelEventReview(
+  input: FinalizeCityLevelEventReviewInput
+): Promise<FinalizeCityLevelEventReviewResult> {
+  const reviewId = String(input.reviewId || '').trim();
+  if (!reviewId) {
+    throw new Error('reviewId is required');
+  }
+
+  const action = input.action || 'reject';
+  if (!['approve_publish', 'reject', 'ignore'].includes(action)) {
+    throw new Error('action must be approve_publish, reject, or ignore');
+  }
+
+  const docRef = db.collection(COLLECTIONS.CITY_LEVEL_EVENT_REVIEWS).doc(reviewId);
+  const snapshot = await docRef.get();
+  if (!snapshot.exists) {
+    throw new Error(`City-level event review not found: ${reviewId}`);
+  }
+
+  const record = {
+    id: snapshot.id,
+    ...(snapshot.data() || {}),
+  } as CityLevelEventReviewRecord;
+
+  const resolvedBy = asOptionalTrimmedString(input.resolvedBy) || 'finalizeCityLevelEventReview';
+  const notes = asOptionalTrimmedString(input.notes);
+
+  if (action === 'reject' || action === 'ignore') {
+    const status = action === 'reject' ? 'rejected' : 'ignored';
+    await docRef.set(
+      compactRecord({
+        status,
+        locationReviewStatus: 'rejected',
+        resolvedAt: admin.firestore.FieldValue.serverTimestamp(),
+        resolvedBy,
+        notes,
+        finalization: {
+          action,
+          manual: input.manual || {},
+        },
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      }),
+      { merge: true }
+    );
+
+    return {
+      success: true,
+      reviewId,
+      action,
+      status,
+    };
+  }
+
+  const eventRef = await writePublishedCityLevelEvent(reviewId, record, input.manual);
+  await docRef.set(
+    compactRecord({
+      status: 'published',
+      locationReviewStatus: 'approved',
+      publishedEventId: eventRef.id,
+      publishedEventPath: eventRef.path,
+      publishedAt: admin.firestore.FieldValue.serverTimestamp(),
+      resolvedAt: admin.firestore.FieldValue.serverTimestamp(),
+      resolvedBy,
+      notes,
+      finalization: {
+        action,
+        manual: input.manual || {},
+        publishedEventPath: eventRef.path,
+      },
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    }),
+    { merge: true }
+  );
+
+  logger.info('Published city-level event review', {
+    reviewId,
+    eventId: eventRef.id,
+    eventPath: eventRef.path,
+    eventName: input.manual?.eventName || record.eventName || '',
+    locationLabel: input.manual?.locationLabel || record.locationLabel || '',
+  });
+
+  return {
+    success: true,
+    reviewId,
+    action,
+    status: 'published',
+    publishedEventId: eventRef.id,
+    publishedEventPath: eventRef.path,
+  };
+}
+
+/**
  * Queue an unrecognized venue for manual review / lookup pipeline.
  * This is gated by env flags so we can safely enable it for targeted wet runs first.
  */
@@ -1129,9 +1783,12 @@ export async function queueUnrecognizedVenue(
     const existing = (snapshot.data() || {}) as Partial<UnrecognizedVenueRecord> & Record<string, unknown>;
     const existingOccurrences = Number(existing.occurrences || 0);
     const existingStatusRaw = String(existing.status || 'pending');
+    const existingStatus = existingStatusRaw as UnrecognizedVenueStatus;
     const nextStatus: UnrecognizedVenueStatus = isTerminalUnrecognizedStatus(existingStatusRaw)
-      ? (existingStatusRaw as UnrecognizedVenueStatus)
-      : 'pending';
+      ? existingStatus
+      : ['pending', 'lookup_running', 'candidate_found', 'manual_review'].includes(existingStatusRaw)
+        ? existingStatus
+        : 'pending';
 
     const existingAliases = Array.isArray(existing.aliasCandidates)
       ? existing.aliasCandidates.map((value) => String(value))
@@ -1569,6 +2226,180 @@ export async function findVenueByName(name: string): Promise<VenueData | null> {
   if (snapshot.empty) return null;
   const doc = snapshot.docs[0];
   return hydrateVenueNameFallback({ id: doc.id, ...doc.data() } as VenueData);
+}
+
+const ADDRESS_CIVIC_REGEX =
+  /\b\d{1,6}\s+[A-Za-z0-9][A-Za-z0-9'.#-]*(?:\s+[A-Za-z0-9][A-Za-z0-9'.#-]*){0,7}\s(?:street|st|road|rd|avenue|ave|drive|dr|lane|ln|boulevard|blvd|court|ct|way|highway|hwy|route|rte|place|pl|terrace|ter)\b/i;
+
+function extractCivicAddress(value?: string): string {
+  const raw = String(value || '').replace(/\s+/g, ' ').trim();
+  if (!raw) return '';
+  const match = raw.match(ADDRESS_CIVIC_REGEX);
+  return String(match?.[0] || raw.split(',')[0] || '').replace(/[;:.]+$/g, '').trim();
+}
+
+function normalizeStreetTypeTokens(value: string): string {
+  return String(value || '')
+    .replace(/\bstreet\b/g, 'st')
+    .replace(/\broad\b/g, 'rd')
+    .replace(/\bavenue\b/g, 'ave')
+    .replace(/\bdrive\b/g, 'dr')
+    .replace(/\blane\b/g, 'ln')
+    .replace(/\bboulevard\b/g, 'blvd')
+    .replace(/\bcourt\b/g, 'ct')
+    .replace(/\bhighway\b/g, 'hwy')
+    .replace(/\broute\b/g, 'rte')
+    .replace(/\bplace\b/g, 'pl')
+    .replace(/\bterrace\b/g, 'ter');
+}
+
+function normalizeAddressCivic(value?: string): string {
+  const civic = normalizeVenueName(extractCivicAddress(value));
+  if (!civic) return '';
+  return normalizeStreetTypeTokens(civic)
+    .replace(/\b(unit|suite|ste|apt|floor)\s*[a-z0-9-]+\b/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function extractPostalCode(value?: string): string {
+  const normalized = String(value || '').toUpperCase();
+  const match = normalized.match(/\b([A-Z]\d[A-Z])\s?(\d[A-Z]\d)\b/);
+  return match ? `${match[1]}${match[2]}`.toLowerCase() : '';
+}
+
+function parseAddressCityProvince(value?: string): { city?: string; province?: string } {
+  const raw = String(value || '').trim();
+  if (!raw) return {};
+  const parts = raw
+    .split(',')
+    .map((part) => part.trim())
+    .filter(Boolean);
+
+  const firstNonCivic = parts.slice(1).find((part) => {
+    const normalized = normalizeVenueName(part);
+    return Boolean(normalized) && normalized !== 'canada' && !/\b[a-z]\d[a-z]\s?\d[a-z]\d\b/i.test(part);
+  });
+  const city = firstNonCivic
+    ? firstNonCivic.replace(/\b(PEI?|NS|NB|NL|ON|QC|AB|BC|SK|MB)\b.*$/i, '').trim()
+    : undefined;
+
+  let province = '';
+  for (const part of parts) {
+    const match = part.match(/\b(PEI?|NS|NB|NL|ON|QC|AB|BC|SK|MB)\b/i);
+    if (match) {
+      province = normalizeProvinceToken(match[1]) || '';
+      break;
+    }
+  }
+
+  return {
+    city: city || undefined,
+    province: province || undefined,
+  };
+}
+
+function normalizeAddressExactKey(value?: string): string {
+  const civic = normalizeAddressCivic(value);
+  const postal = extractPostalCode(value);
+  if (civic && postal) return `${civic}|${postal}`;
+  return '';
+}
+
+function normalizeAddressLooseKey(value?: string): string {
+  const civic = normalizeAddressCivic(value);
+  if (!civic) return '';
+  const hints = parseAddressCityProvince(value);
+  const city = normalizeVenueName(hints.city || '');
+  const province = normalizeVenueName(hints.province || '');
+  if (!city && !province) return '';
+  return [civic, city, province].filter(Boolean).join('|');
+}
+
+function venueAddressMatchesHints(venue: VenueData, address: string): boolean {
+  const inputHints = parseAddressCityProvince(address);
+  const venueHints = parseAddressCityProvince(venue.address || '');
+  const inputCity = normalizeVenueName(inputHints.city || '');
+  const inputProvince = normalizeProvinceToken(inputHints.province || '');
+  const explicitVenueCity = String(venue.city || '').trim();
+  const venueCity = normalizeVenueName(
+    explicitVenueCity && !/^canada$/i.test(explicitVenueCity)
+      ? explicitVenueCity
+      : String(venueHints.city || '').trim()
+  );
+  const venueProvince = normalizeProvinceToken(String((venue as unknown as Record<string, unknown>).province || venueHints.province || '').trim());
+
+  if (inputCity && venueCity && inputCity !== venueCity) return false;
+  if (inputProvince && venueProvince && inputProvince !== venueProvince) return false;
+  return true;
+}
+
+function pickUniqueAddressMatch(
+  matches: VenueData[],
+  address: string,
+  matchType: 'exact' | 'fuzzy',
+  similarity: number
+): MatchInfo {
+  if (matches.length === 1) {
+    return {
+      isMatch: true,
+      matchType,
+      similarity,
+      matchedVenue: matches[0],
+    };
+  }
+
+  if (matches.length > 1) {
+    logger.info('Skipped venue address match due to ambiguity', {
+      address,
+      matchType,
+      candidateCount: matches.length,
+      candidateVenueIds: matches.map((venue) => venue.id).filter(Boolean),
+    });
+  }
+
+  return {
+    isMatch: false,
+    matchType: 'none',
+    similarity: 0,
+  };
+}
+
+export async function findVenueByAddress(address: string): Promise<MatchInfo> {
+  const normalizedAddress = String(address || '').trim();
+  if (!normalizedAddress) {
+    return {
+      isMatch: false,
+      matchType: 'none',
+      similarity: 0,
+    };
+  }
+
+  const venues = await getAllVenues();
+  const targetExactKey = normalizeAddressExactKey(normalizedAddress);
+  if (targetExactKey) {
+    const exactMatches = venues.filter((venue) => (
+      normalizeAddressExactKey(venue.address || '') === targetExactKey &&
+      venueAddressMatchesHints(venue, normalizedAddress)
+    ));
+    const exact = pickUniqueAddressMatch(exactMatches, normalizedAddress, 'exact', 0.99);
+    if (exact.isMatch) return exact;
+  }
+
+  const targetLooseKey = normalizeAddressLooseKey(normalizedAddress);
+  if (targetLooseKey) {
+    const looseMatches = venues.filter((venue) => (
+      normalizeAddressLooseKey(venue.address || '') === targetLooseKey &&
+      venueAddressMatchesHints(venue, normalizedAddress)
+    ));
+    return pickUniqueAddressMatch(looseMatches, normalizedAddress, 'fuzzy', 0.93);
+  }
+
+  return {
+    isMatch: false,
+    matchType: 'none',
+    similarity: 0,
+  };
 }
 
 /**

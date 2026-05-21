@@ -96,6 +96,15 @@ export interface EventData {
   id?: string;
   uniqueId: string;
   establishment: string;
+  locationScope?: 'venue' | 'city' | 'area' | 'route' | 'unknown';
+  locationLabel?: string;
+  locationCity?: string;
+  locationProvince?: string;
+  locationPrecision?: 'exact' | 'approximate' | 'city_centroid' | 'none';
+  locationReviewStatus?: 'not_needed' | 'needs_review' | 'approved' | 'rejected';
+  mapMode?: 'venue' | 'area' | 'none';
+  cityLevelReviewId?: string;
+  sourceScraperType?: ScraperType;
   additionalLocation?: string;
   subVenue?: string;
   eventType: string;
@@ -138,18 +147,22 @@ export interface EventData {
   utcStartDate?: string;
   ticketsBuyUrl?: string;
   ticketProvider?: string;
+  externalLinks?: string[];
   timeResolution?: unknown;
   timeFlags?: unknown;
   sourceTimestamp?: Date;
   lastSeenAt?: Date;
   usersResponded?: string;
+  usersGoing?: string;
+  usersInterested?: string;
+  facebookUsersResponded?: string;
   likes?: number;
   shares?: number;
   comments?: number;
   topReactionsCount?: number;
   createdAt?: Date;
   updatedAt?: Date;
-  venueId?: string;
+  venueId?: string | null;
 }
 
 export interface RawRowData {
@@ -163,14 +176,189 @@ export interface RawRowData {
   timestamp: string;
   facebookUrl?: string;
   topLevelUrl?: string;
+  address?: string;
   profilePicUrl?: string;
   utcStartDate?: string;
+  sourceScraperType?: ScraperType;
+  facebookEventLocationName?: string;
+  facebookEventLocationIsCityLevel?: boolean;
+  facebookEventOrganizerName?: string;
+  facebookEventDescription?: string;
+  externalLinks?: string[];
+  ticketsBuyUrl?: string;
   usersResponded?: string;
+  usersGoing?: string;
+  usersInterested?: string;
+  facebookUsersResponded?: string;
   likes?: number;
   shares?: number;
   comments?: number;
   topReactionsCount?: number;
   sharedPostThumbnails?: string[];
+}
+
+export interface QueueCityLevelEventReviewInput {
+  uniqueId?: string;
+  fileId?: string;
+  fileName?: string;
+  rowIndex: number;
+  parserMode?: 'legacy' | 'full5stage';
+  eventName?: string;
+  eventDate?: string;
+  eventTime?: string;
+  endDate?: string;
+  endTime?: string;
+  eventType?: string;
+  category?: string;
+  description?: string;
+  imageUrl?: string;
+  mediaUrls?: string[];
+  usersResponded?: string;
+  usersGoing?: string;
+  usersInterested?: string;
+  facebookUsersResponded?: string;
+  likes?: number;
+  shares?: number;
+  comments?: number;
+  topReactionsCount?: number;
+  ticketsBuyUrl?: string;
+  externalLinks?: string[];
+  locationLabel: string;
+  locationCity?: string;
+  locationProvince?: string;
+  locationScope?: 'city' | 'area';
+  locationPrecision?: 'city_centroid' | 'approximate' | 'none';
+  organizerName?: string;
+  facebookUrl?: string;
+  topLevelUrl?: string;
+  sourceScraperType?: ScraperType;
+}
+
+export interface CityLevelEventReviewSample {
+  fileId?: string;
+  fileName?: string;
+  rowIndex: number;
+  parserMode?: 'legacy' | 'full5stage';
+  eventName?: string;
+  eventDate?: string;
+  eventTime?: string;
+  observedLocationName: string;
+  organizerName?: string;
+  facebookUrl?: string;
+  topLevelUrl?: string;
+  descriptionPreview?: string;
+  imageUrl?: string;
+  mediaUrls?: string[];
+  usersResponded?: string;
+  usersGoing?: string;
+  usersInterested?: string;
+  facebookUsersResponded?: string;
+  likes?: number;
+  shares?: number;
+  comments?: number;
+  topReactionsCount?: number;
+  ticketsBuyUrl?: string;
+  externalLinks?: string[];
+  createdAt?: Date;
+}
+
+export interface CityLevelEventReviewRecord {
+  id?: string;
+  status: 'needs_review' | 'approved' | 'rejected' | 'published' | 'ignored';
+  uniqueId?: string;
+  fileId?: string;
+  fileName?: string;
+  rowIndex?: number;
+  lastSeenFileId?: string;
+  lastSeenRowIndex?: number;
+  sourceScraperType?: ScraperType;
+  locationScope: 'city' | 'area';
+  locationLabel: string;
+  locationCity?: string;
+  locationProvince?: string;
+  locationPrecision: 'city_centroid' | 'approximate' | 'none';
+  locationReviewStatus: 'needs_review' | 'approved' | 'rejected';
+  eventName?: string;
+  eventDate?: string;
+  eventTime?: string;
+  endDate?: string;
+  endTime?: string;
+  eventType?: string;
+  category?: string;
+  descriptionPreview?: string;
+  imageUrl?: string;
+  mediaUrls?: string[];
+  usersResponded?: string;
+  usersGoing?: string;
+  usersInterested?: string;
+  facebookUsersResponded?: string;
+  likes?: number;
+  shares?: number;
+  comments?: number;
+  topReactionsCount?: number;
+  ticketsBuyUrl?: string;
+  externalLinks?: string[];
+  organizerName?: string;
+  facebookUrl?: string;
+  topLevelUrl?: string;
+  occurrences: number;
+  sampleRows: CityLevelEventReviewSample[];
+  publishedEventId?: string;
+  publishedEventPath?: string;
+  publishedAt?: Date;
+  resolvedAt?: Date;
+  resolvedBy?: string;
+  notes?: string;
+  finalization?: Record<string, unknown>;
+  createdAt?: Date;
+  updatedAt?: Date;
+  lastSeenAt?: Date;
+}
+
+export interface QueueCityLevelEventReviewResult {
+  queued: boolean;
+  docId?: string;
+  created?: boolean;
+  reason?: string;
+}
+
+export interface FinalizeCityLevelEventReviewInput {
+  reviewId: string;
+  action: 'approve_publish' | 'reject' | 'ignore';
+  manual?: {
+    eventName?: string;
+    eventDate?: string;
+    eventTime?: string;
+    endDate?: string;
+    endTime?: string;
+    eventType?: string;
+    category?: string;
+    description?: string;
+    locationLabel?: string;
+    locationCity?: string;
+    locationProvince?: string;
+    locationScope?: 'city' | 'area';
+    locationPrecision?: 'city_centroid' | 'approximate' | 'none';
+    imageUrl?: string;
+    mediaUrls?: string[];
+    usersResponded?: string;
+    usersGoing?: string;
+    usersInterested?: string;
+    facebookUsersResponded?: string;
+    ticketsBuyUrl?: string;
+    externalLinks?: string[];
+  };
+  notes?: string;
+  resolvedBy?: string;
+}
+
+export interface FinalizeCityLevelEventReviewResult {
+  success: boolean;
+  reviewId: string;
+  action: 'approve_publish' | 'reject' | 'ignore';
+  status: CityLevelEventReviewRecord['status'];
+  publishedEventId?: string;
+  publishedEventPath?: string;
 }
 
 // ===================
