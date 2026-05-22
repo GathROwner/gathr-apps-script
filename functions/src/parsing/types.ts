@@ -478,6 +478,8 @@ export interface TimeResolution {
   startFromHours?: boolean;
   startFromPostTime?: boolean;
   endFromHours?: 'to_close' | 'category_default' | 'duration_default';
+  startFromFacebookEvent?: boolean;
+  endFromFacebookEvent?: 'dateTimeSentence' | 'duration';
   reason?: 'no_place_match' | 'no_hours' | 'no_date';
 }
 

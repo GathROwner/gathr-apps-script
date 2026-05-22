@@ -33,6 +33,7 @@ import {
   utcToLocal,
   calculateEndDate,
 } from '../utils/dateTime.js';
+import { DateTime } from 'luxon';
 import { createHash } from 'crypto';
 import { normalizeVenueName, normalizeUrl, extractFacebookSlug } from '../utils/similarity.js';
 import { getVenueAliasEntry } from '../services/venueAliases.js';
@@ -201,6 +202,166 @@ function extractFacebookEventTextValue(text: string, label: string): string {
   return String(match?.[1] || '').trim();
 }
 
+const FACEBOOK_EVENT_TIMEZONE = 'America/Halifax';
+
+const FACEBOOK_EVENT_MONTHS: Record<string, number> = {
+  jan: 1,
+  january: 1,
+  feb: 2,
+  february: 2,
+  mar: 3,
+  march: 3,
+  apr: 4,
+  april: 4,
+  may: 5,
+  jun: 6,
+  june: 6,
+  jul: 7,
+  july: 7,
+  aug: 8,
+  august: 8,
+  sep: 9,
+  sept: 9,
+  september: 9,
+  oct: 10,
+  october: 10,
+  nov: 11,
+  november: 11,
+  dec: 12,
+  december: 12,
+};
+
+type FacebookEventEndResolution = {
+  endDate?: string;
+  endTime?: string;
+  evidence: string;
+  source: 'dateTimeSentence' | 'duration';
+};
+
+function normalizeFacebookEventTimeText(value: unknown): string {
+  return String(value || '')
+    .replace(/[\u00a0\u202f]/g, ' ')
+    .replace(/\u00e2\u20ac[\u201c\u201d]/g, ' - ')
+    .replace(/[\u2013\u2014]/g, ' - ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function parseFacebookEventTime(value: string): string {
+  const text = normalizeFacebookEventTimeText(value).replace(/\b(?:A[DS]T|E[DS]T|UTC|GMT)\b/gi, '').trim();
+  const twelveHour = text.match(/\b(\d{1,2})(?::(\d{2}))?\s*(AM|PM)\b/i);
+  if (twelveHour) {
+    return normalizeTime(`${twelveHour[1]}:${twelveHour[2] || '00'} ${twelveHour[3]}`);
+  }
+
+  const twentyFourHour = text.match(/\b([01]?\d|2[0-3]):([0-5]\d)\b/);
+  if (twentyFourHour) {
+    return normalizeTime(`${twentyFourHour[1]}:${twentyFourHour[2]}`);
+  }
+
+  return '';
+}
+
+function parseFacebookEventDate(value: string, startDate: string): string {
+  const text = normalizeFacebookEventTimeText(value);
+  const start = DateTime.fromISO(startDate, { zone: FACEBOOK_EVENT_TIMEZONE });
+  if (!start.isValid) return '';
+
+  const monthDay = text.match(
+    /\b(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:t|tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\.?\s+(\d{1,2})(?:,\s*(\d{4}))?\b/i
+  );
+  if (!monthDay) return '';
+
+  const month = FACEBOOK_EVENT_MONTHS[monthDay[1].replace(/\.$/, '').toLowerCase()];
+  const day = Number(monthDay[2]);
+  const explicitYear = monthDay[3] ? Number(monthDay[3]) : null;
+  if (!month || !Number.isFinite(day)) return '';
+
+  let end = DateTime.fromObject(
+    { year: explicitYear || start.year, month, day },
+    { zone: FACEBOOK_EVENT_TIMEZONE }
+  );
+  if (!end.isValid) return '';
+
+  if (!explicitYear && end < start.startOf('day')) {
+    end = end.plus({ years: 1 });
+  }
+
+  return end.toFormat('yyyy-MM-dd');
+}
+
+function addMinutesToLocalDateTime(
+  startDate: string,
+  startTime: string,
+  minutes: number
+): { endDate: string; endTime: string } | null {
+  const start = DateTime.fromISO(`${startDate}T${startTime}`, { zone: FACEBOOK_EVENT_TIMEZONE });
+  if (!start.isValid || !Number.isFinite(minutes) || minutes <= 0) return null;
+
+  const end = start.plus({ minutes });
+  return {
+    endDate: end.toFormat('yyyy-MM-dd'),
+    endTime: end.toFormat('HH:mm'),
+  };
+}
+
+function parseFacebookEventDurationMinutes(value: unknown): number | null {
+  const text = normalizeFacebookEventTimeText(value).toLowerCase();
+  if (!text) return null;
+
+  let minutes = 0;
+  const days = text.match(/(\d+(?:\.\d+)?)\s*(?:days?|d)\b/);
+  if (days) minutes += Number(days[1]) * 24 * 60;
+
+  const hours = text.match(/(\d+(?:\.\d+)?)\s*(?:hours?|hrs?|hr|h)\b/);
+  if (hours) minutes += Number(hours[1]) * 60;
+
+  const mins = text.match(/(\d+(?:\.\d+)?)\s*(?:minutes?|mins?|min|m)\b/);
+  if (mins) minutes += Number(mins[1]);
+
+  return Number.isFinite(minutes) && minutes > 0 ? Math.round(minutes) : null;
+}
+
+export function resolveFacebookEventEndDateTime(
+  row: RawRowData,
+  localDateTime: { date: string; time: string }
+): FacebookEventEndResolution | null {
+  const startDate = localDateTime.date;
+  const startTime = localDateTime.time;
+  if (!startDate || !startTime) return null;
+
+  const whenText = normalizeFacebookEventTimeText(extractFacebookEventTextValue(row.text, 'When'));
+  const rangeParts = whenText.split(/\s+-\s+/).map((part) => part.trim()).filter(Boolean);
+  if (rangeParts.length >= 2) {
+    const endPart = rangeParts.slice(1).join(' - ');
+    const endTime = parseFacebookEventTime(endPart);
+    if (endTime) {
+      const explicitEndDate = parseFacebookEventDate(endPart, startDate);
+      return {
+        endDate: explicitEndDate || calculateEndDate(startDate, startTime, endTime),
+        endTime,
+        evidence: `When: ${whenText}`,
+        source: 'dateTimeSentence',
+      };
+    }
+  }
+
+  const durationText = extractFacebookEventTextValue(row.text, 'Duration');
+  const durationMinutes = parseFacebookEventDurationMinutes(durationText);
+  const durationEnd = durationMinutes
+    ? addMinutesToLocalDateTime(startDate, startTime, durationMinutes)
+    : null;
+  if (durationEnd) {
+    return {
+      ...durationEnd,
+      evidence: `Duration: ${durationText}`,
+      source: 'duration',
+    };
+  }
+
+  return null;
+}
+
 function inferFacebookEventCategory(row: RawRowData): ParserProcessedEvent['category'] {
   const text = normalizeVenueName([
     row.sharedPostText,
@@ -367,6 +528,7 @@ function buildStructuredFacebookEventScraperEvents(
   const ticketLink = extractFacebookEventTextValue(row.text, 'Ticket link');
   const ticketSummary = extractFacebookEventTextValue(row.text, 'Tickets');
   const cleanDescription = String(row.facebookEventDescription || row.text || title).trim();
+  const endResolution = resolveFacebookEventEndDateTime(row, localDateTime);
 
   const event: ParserProcessedEvent = {
     id: row.uniqueId,
@@ -379,9 +541,9 @@ function buildStructuredFacebookEventScraperEvents(
     establishment: venueName || establishment,
     address: String(row.address || '').trim(),
     startDate: localDateTime.date,
-    endDate: localDateTime.date,
+    endDate: endResolution?.endDate || localDateTime.date,
     startTime: localDateTime.time,
-    endTime: '',
+    endTime: endResolution?.endTime || '',
     ticketPrice: ticketSummary,
     ticketLink,
     ticketsBuyUrl: ticketLink || row.ticketsBuyUrl,
@@ -408,6 +570,32 @@ function buildStructuredFacebookEventScraperEvents(
     locationProvince: cityLevelLocation?.locationProvince,
     locationPrecision: matchedVenue ? 'exact' : cityLevelLocation?.locationPrecision,
     locationReviewStatus: cityLevelLocation ? 'needs_review' : undefined,
+    timeFlags: {
+      start: {
+        source: 'explicit',
+        evidence: `UTC start: ${utcStartDate}`,
+      },
+      end: endResolution
+        ? {
+            source: 'explicit',
+            toClose: false,
+            evidence: endResolution.evidence,
+          }
+        : {
+            source: 'none',
+            toClose: false,
+            evidence: '',
+          },
+    },
+    timeResolution: {
+      hoursUsed: false,
+      startFromFacebookEvent: true,
+      ...(endResolution
+        ? {
+            endFromFacebookEvent: endResolution.source,
+          }
+        : {}),
+    },
     _pipelineIndex: 1,
     _pipelineTotalStage3: 1,
     _sourceType: 'facebook_events_scraper_structured_row',
@@ -418,6 +606,8 @@ function buildStructuredFacebookEventScraperEvents(
     name: event.name,
     startDate: event.startDate,
     startTime: event.startTime,
+    endDate: event.endDate,
+    endTime: event.endTime,
     mediaCount: normalizedMediaUrls.length,
   });
 
@@ -3724,6 +3914,46 @@ function incomingRepresentsOccurrenceLocalSpan(
   return incomingEndDate === expectedIncomingEndDate;
 }
 
+function isStructuredFacebookEventSource(event: EventData): boolean {
+  const record = event as unknown as Record<string, unknown>;
+  return String(record._sourceType || event.sourceScraperType || '').trim() ===
+    'facebook_events_scraper_structured_row';
+}
+
+function getTimeResolutionValue(value: unknown, key: string): string {
+  const resolution = asRecord(value);
+  if (!resolution) return '';
+  return String(resolution[key] || '').trim();
+}
+
+function shouldTrustStructuredFacebookEventEndDate(
+  existingEvent: EventData,
+  incomingEvent: EventData
+): boolean {
+  if (!isStructuredFacebookEventSource(incomingEvent)) {
+    return false;
+  }
+  if (getTimeResolutionValue(incomingEvent.timeResolution, 'endFromFacebookEvent') !== 'dateTimeSentence') {
+    return false;
+  }
+  if (getTimeFlagSource(incomingEvent.timeFlags, 'end') !== 'explicit') {
+    return false;
+  }
+
+  const existingStart = normalizeIsoDateValue(existingEvent.startDate);
+  const incomingStart = normalizeIsoDateValue(incomingEvent.startDate);
+  const incomingEnd = normalizeIsoDateValue(incomingEvent.endDate);
+  if (!existingStart || !incomingStart || !incomingEnd) {
+    return false;
+  }
+  if (existingStart !== incomingStart || incomingEnd < incomingStart) {
+    return false;
+  }
+
+  const existingEnd = normalizeIsoDateValue(existingEvent.endDate) || existingStart;
+  return existingEnd !== incomingEnd;
+}
+
 function shouldReplaceEndDateField(existingEvent: EventData, incomingEvent: EventData): boolean {
   const existingStartDate = normalizeIsoDateValue(existingEvent.startDate);
   const incomingStartDate = normalizeIsoDateValue(incomingEvent.startDate);
@@ -3741,6 +3971,10 @@ function shouldReplaceEndDateField(existingEvent: EventData, incomingEvent: Even
   }
 
   if (shouldReplaceDateField(existingEvent.endDate, incomingEvent.endDate)) {
+    return true;
+  }
+
+  if (shouldTrustStructuredFacebookEventEndDate(existingEvent, incomingEvent)) {
     return true;
   }
 
