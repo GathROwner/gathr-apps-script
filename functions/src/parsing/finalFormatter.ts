@@ -395,7 +395,8 @@ Do not drop, merge, or reorder items. Never return arrays of values for an item;
       workshopGroundedEvents,
       combinedText
     );
-    const promotedFiniteWeeklyEvents = promoteFiniteWeeklyOneOffSequences(sourceGroundedEvents);
+    const cruiseFilteredEvents = filterCruiseShipLogisticsEvents(sourceGroundedEvents, combinedText);
+    const promotedFiniteWeeklyEvents = promoteFiniteWeeklyOneOffSequences(cruiseFilteredEvents);
     const collapsedProcessedEvents = collapseRecurringSeriesEvents(promotedFiniteWeeklyEvents);
 
     // Final validation pass
@@ -2000,6 +2001,120 @@ function filterUnsupportedClosureFoodBleed(
       startTime: event.startTime,
     });
     return false;
+  });
+
+  return filtered;
+}
+
+function normalizeCruiseLogisticsText(value: unknown): string {
+  return String(value || '')
+    .toLowerCase()
+    .replace(/[\u2018\u2019]/g, "'")
+    .replace(/[\u201c\u201d]/g, '"')
+    .replace(/[\u2013\u2014]/g, '-')
+    .replace(/[^a-z0-9\s'":()/-]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function hasPassengerCountCue(text: string): boolean {
+  return /\b\d{2,5}\s*pax\b/.test(text) || /\b\d{2,5}\s+passengers?\b/.test(text);
+}
+
+function hasCruiseScheduleCue(text: string): boolean {
+  return (
+    /\bcruise arrivals?\b/.test(text) ||
+    /\bcruise departures?\b/.test(text) ||
+    /\bcruise schedule\b/.test(text) ||
+    /\bupcoming cruise schedule\b/.test(text)
+  );
+}
+
+function hasCruiseArrivalDepartureCue(text: string): boolean {
+  return (
+    /\bcruise\s+(arrival|departure)s?\b/.test(text) ||
+    /\b(arrival|departure)\s*;\s*\d{2,5}\s*pax\b/.test(text) ||
+    /\((?:cruise\s+)?(arrival|departure)\)/.test(text)
+  );
+}
+
+function hasPortCharlottetownCue(text: string): boolean {
+  return /\bport charlottetown\b/.test(text);
+}
+
+function hasPublicEventCue(text: string): boolean {
+  return /\b(concert|live music|festival|market|vendors?|fundraiser|workshops?|classes|show|performance|trivia|karaoke|comedy|movie|tickets?|register|registration|run|walk|race|parade|food trucks?)\b/.test(text);
+}
+
+function eventNameLooksLikeShipScheduleEntry(eventName: string, sourceText: string): boolean {
+  const normalizedName = normalizeCruiseLogisticsText(eventName);
+  if (!normalizedName || hasPublicEventCue(normalizedName)) return false;
+
+  const sourceHasSchedule = hasCruiseScheduleCue(sourceText) || hasPassengerCountCue(sourceText);
+  if (!sourceHasSchedule) return false;
+
+  const tokens = normalizedName
+    .replace(/\b(cruise|arrival|departure)\b/g, ' ')
+    .split(/\s+/)
+    .filter(Boolean);
+  if (tokens.length === 0 || tokens.length > 3) return false;
+
+  return sourceText.includes(normalizedName);
+}
+
+function isCruiseShipLogisticsEvent(event: FormattedEvent, combinedText: string): boolean {
+  const sourceText = normalizeCruiseLogisticsText(combinedText);
+  const eventText = normalizeCruiseLogisticsText([
+    event.name,
+    event.description,
+    event.venue,
+    event.establishment,
+    event.address,
+  ].join(' '));
+
+  const sourceHasLogistics =
+    hasCruiseScheduleCue(sourceText) ||
+    hasPassengerCountCue(sourceText) ||
+    (
+      /\bcruise season\b/.test(sourceText) &&
+      /\barrival of\b/.test(sourceText) &&
+      /\b(passengers? and crew|port charlottetown)\b/.test(sourceText)
+    );
+  const eventHasLogistics =
+    hasCruiseArrivalDepartureCue(eventText) ||
+    hasPassengerCountCue(eventText);
+
+  if (!sourceHasLogistics && !eventHasLogistics) return false;
+
+  const eventHasPublicSignal = hasPublicEventCue(eventText);
+  if (eventHasPublicSignal && !hasPassengerCountCue(eventText) && !hasCruiseScheduleCue(eventText)) {
+    return false;
+  }
+
+  if (eventHasLogistics) return true;
+
+  return (
+    hasPortCharlottetownCue(sourceText + ' ' + eventText) &&
+    eventNameLooksLikeShipScheduleEntry(event.name, sourceText)
+  );
+}
+
+export function filterCruiseShipLogisticsEvents(
+  events: FormattedEvent[],
+  combinedText: string
+): FormattedEvent[] {
+  if (events.length === 0) return events;
+
+  const filtered = events.filter((event) => {
+    const shouldDrop = isCruiseShipLogisticsEvent(event, combinedText);
+    if (shouldDrop) {
+      logger.debug(`Dropped cruise ship logistics listing "${event.name}"`, {
+        venue: event.venue || event.establishment,
+        startDate: event.startDate,
+        startTime: event.startTime,
+      });
+    }
+    return !shouldDrop;
   });
 
   return filtered;
