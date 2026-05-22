@@ -237,7 +237,7 @@ async function handleRunSucceeded(
   await delay(5000);
 
   // Find the exported file in Drive
-  const file = await findExportedFile(payload);
+  const file = await findExportedFile(payload, scraperType);
 
   if (!file || !file.id) {
     const error = 'Could not find exported file in Google Drive';
@@ -330,14 +330,15 @@ async function handleRunSucceeded(
  * Searches for recently created XLSX files matching Apify naming patterns
  */
 async function findExportedFile(
-  payload: ApifyWebhookPayload
+  payload: ApifyWebhookPayload,
+  scraperType: ScraperType
 ): Promise<{ id: string; name: string } | null> {
   const { defaultDatasetId } = payload.eventData;
 
   // Build search query for Apify dataset files
-  const query = buildDriveSearchQuery(payload.eventData, 'posts');
+  const query = buildDriveSearchQuery(payload.eventData, scraperType);
 
-  logger.debug('Searching for exported file', { query });
+  logger.debug('Searching for exported file', { query, scraperType });
 
   try {
     // Search with a broader query first

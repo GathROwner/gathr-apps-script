@@ -12,10 +12,12 @@ import { logger } from '../utils/logger.js';
  * These should be configured based on the actual Apify actors being used
  */
 const ACTOR_TYPE_MAPPING: Record<string, ScraperType> = {
-  // Add your actual Apify actor IDs here
-  // Example:
-  // 'apify/facebook-posts-scraper': 'posts',
-  // 'apify/facebook-events-scraper': 'events',
+  KoJrdxJCTtpon81KY: 'posts',
+  'apify/facebook-posts-scraper': 'posts',
+  'apify~facebook-posts-scraper': 'posts',
+  UZBnerCFBo5FgGouO: 'events',
+  'apify/facebook-events-scraper': 'events',
+  'apify~facebook-events-scraper': 'events',
 };
 
 /**
@@ -173,23 +175,40 @@ export function buildDriveFilePatterns(
  * @returns Drive API search query string
  */
 export function buildDriveSearchQuery(
-  _eventData: ApifyEventData,
+  eventData: ApifyEventData,
   _scraperType: ScraperType
 ): string {
   // Search for XLSX files with Apify-related names
-  // The file should have been created recently (within the last hour)
   // Note: Drive's 'contains' is case-sensitive, so we search for 'Apify' (actual file naming)
+  const folderId = String(
+    process.env.APIFY_DRIVE_FOLDER_ID || process.env.APIFY_UPLOADS_DRIVE_FOLDER_ID || ''
+  ).trim();
+  const startedAt = String(eventData.startedAt || '').trim();
+  const finishedAt = String(eventData.finishedAt || '').trim();
+  const referenceTime = startedAt || finishedAt;
 
-  const baseQuery = [
+  const queryParts = [
     // Look for XLSX files or Google Sheets
     "(mimeType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' or mimeType = 'application/vnd.google-apps.spreadsheet')",
     // Not trashed
     'trashed = false',
     // Contains 'Apify' in the name (matches "Apify Dataset.xlsx")
     "name contains 'Apify'",
-  ].join(' and ');
+  ];
 
-  return baseQuery;
+  if (folderId) {
+    queryParts.push(`'${folderId.replace(/'/g, "\\'")}' in parents`);
+  }
+
+  if (referenceTime) {
+    const parsed = Date.parse(referenceTime);
+    if (Number.isFinite(parsed)) {
+      const cutoff = new Date(parsed - 10 * 60 * 1000).toISOString();
+      queryParts.push(`createdTime > '${cutoff}'`);
+    }
+  }
+
+  return queryParts.join(' and ');
 }
 
 /**

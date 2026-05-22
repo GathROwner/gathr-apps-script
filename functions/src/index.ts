@@ -36,11 +36,15 @@ export { listApifyWebhooks } from './triggers/apifyWebhook.js';
 // Retry Apify Webhook - Admin endpoint to retry failed webhooks
 export { retryApifyWebhook } from './triggers/apifyWebhook.js';
 
+// Facebook Events - Start capped test scrapes through Apify
+export { startFacebookEventsScrape } from './triggers/facebookEvents.js';
+
 // Unknown Venues - Queue inspection and resolver controls
 export {
   listUnrecognizedVenues,
   processUnrecognizedVenues,
   finalizeUnrecognizedVenueTrigger,
+  finalizeCityLevelEventReviewTrigger,
   seedVenueFacebookBackfillReviewsTrigger,
   finalizeVenueFacebookBackfillReviewTrigger,
   startVenueFacebookPostsScrape,

@@ -23,3 +23,7 @@ export {
   apifyWebhook,
   listApifyWebhooks,
 } from './apifyWebhook.js';
+
+export {
+  startFacebookEventsScrape,
+} from './facebookEvents.js';

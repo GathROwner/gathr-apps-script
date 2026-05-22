@@ -369,6 +369,56 @@ export const finalizeUnrecognizedVenueTrigger = onRequest(
   }
 );
 
+export const finalizeCityLevelEventReviewTrigger = onRequest(
+  {
+    timeoutSeconds: 180,
+    memory: '512MiB',
+    region: 'northamerica-northeast2',
+    cors: true,
+    secrets: [adminApiKey],
+  },
+  async (request, response) => {
+    if (request.method !== 'POST') {
+      response.status(405).json({ error: 'Method not allowed' });
+      return;
+    }
+
+    const expectedKey = adminApiKey.value();
+    if (!isAdminAuthorized(request, expectedKey)) {
+      response.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
+    try {
+      const body = (request.body || {}) as {
+        reviewId?: string;
+        action?: 'approve_publish' | 'reject' | 'ignore';
+        manual?: Record<string, unknown>;
+        notes?: string;
+        resolvedBy?: string;
+      };
+
+      const result = await firestoreService.finalizeCityLevelEventReview({
+        reviewId: String(body.reviewId || '').trim(),
+        action: body.action || 'reject',
+        manual: body.manual as any,
+        notes: typeof body.notes === 'string' ? body.notes : undefined,
+        resolvedBy: typeof body.resolvedBy === 'string' ? body.resolvedBy : undefined,
+      });
+
+      response.json({
+        success: true,
+        result,
+      });
+    } catch (error) {
+      logger.error('Finalize city-level event review failed', error);
+      response.status(500).json({
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
+  }
+);
+
 export const startVenueFacebookPostsScrape = onRequest(
   {
     timeoutSeconds: 60,

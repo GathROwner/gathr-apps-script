@@ -2336,15 +2336,30 @@ async function collectPlacesSuggestion(
       );
       const linkedVenueFacebookUrlNormalized = normalizeUrl(String(suggestion.facebookUrl || ''));
       const linkedVenueAddressKey = normalizeAddressMatchKey(String(suggestion.address || ''));
+      const linkedVenueAddressLooseKey = normalizeAddressLooseMatchKey(String(suggestion.address || ''));
       const aggregatorAddressKeys = new Set(
-        getSampleAggregatorAddresses(record)
+        [
+          ...getSampleAggregatorAddresses(record),
+          fallbackAddressFromSamples || '',
+        ]
           .map((value) => normalizeAddressMatchKey(value))
+          .filter(Boolean)
+      );
+      const aggregatorAddressLooseKeys = new Set(
+        [
+          ...getRecordAddressLooseMatchKeys(scoreRecord),
+          ...[
+            ...getSampleAggregatorAddresses(record),
+            fallbackAddressFromSamples || '',
+          ].map((value) => normalizeAddressLooseMatchKey(value)),
+        ]
           .filter(Boolean)
       );
       const aggregatorSupportsLowConfidencePlaces = Boolean(
         suggestion.venueId && (
           (linkedVenueFacebookUrlNormalized && normalizedAggregatorUrls.has(linkedVenueFacebookUrlNormalized)) ||
-          (linkedVenueAddressKey && aggregatorAddressKeys.has(linkedVenueAddressKey))
+          (linkedVenueAddressKey && aggregatorAddressKeys.has(linkedVenueAddressKey)) ||
+          (linkedVenueAddressLooseKey && aggregatorAddressLooseKeys.has(linkedVenueAddressLooseKey))
         )
       );
 
@@ -2846,8 +2861,8 @@ function chooseNextStatusAndResolution(
   }
 
   return {
-    status: 'failed',
-    note: 'No viable suggestions generated',
+    status: 'manual_review',
+    note: 'No viable suggestions generated; awaiting manual review',
   };
 }
 
@@ -3856,7 +3871,7 @@ async function hydrateSampleTopLevelUrls(
 
     const parsed = rowCache.get(fileId);
     const row = parsed?.rows?.[rowIndex] as Record<string, unknown> | undefined;
-    const candidateTopLevelUrl = String(row?.topLevelUrl || '').trim();
+    const candidateTopLevelUrl = String(row?.topLevelUrl || row?.facebookUrl || '').trim();
     const candidateAggregatorAddress = deriveAggregatorAddressFromRowForHydration(row);
     const shouldHydrateTopLevelUrl = !topLevelUrl && isLikelyFacebookPostPermalink(candidateTopLevelUrl);
     const shouldHydrateAggregatorAddress = !aggregatorAddress && Boolean(candidateAggregatorAddress);
