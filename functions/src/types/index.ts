@@ -242,6 +242,8 @@ export interface CityLevelEventReviewSample {
   eventName?: string;
   eventDate?: string;
   eventTime?: string;
+  endDate?: string;
+  endTime?: string;
   observedLocationName: string;
   organizerName?: string;
   facebookUrl?: string;

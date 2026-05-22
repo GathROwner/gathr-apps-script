@@ -636,6 +636,8 @@ function buildCityLevelEventReviewSample(
     eventName: input.eventName,
     eventDate: input.eventDate,
     eventTime: input.eventTime,
+    endDate: input.endDate,
+    endTime: input.endTime,
     observedLocationName: input.locationLabel,
     organizerName: input.organizerName,
     facebookUrl: input.facebookUrl,
@@ -687,6 +689,50 @@ function mergeCityLevelEventReviewSamples(
 
   result.unshift(nextSample);
   return result.slice(0, CITY_LEVEL_EVENT_REVIEW_SAMPLE_LIMIT);
+}
+
+function shouldRefreshCityLevelReviewTiming(
+  existing: Partial<CityLevelEventReviewRecord> & Record<string, unknown>,
+  input: QueueCityLevelEventReviewInput
+): boolean {
+  if ((input.sourceScraperType || existing.sourceScraperType) !== 'events') {
+    return false;
+  }
+
+  const inputEndDate = asOptionalTrimmedString(input.endDate);
+  const inputEndTime = asOptionalTrimmedString(input.endTime);
+  if (!inputEndDate && !inputEndTime) {
+    return false;
+  }
+
+  const existingFacebookUrl = asOptionalTrimmedString(existing.facebookUrl)?.toLowerCase();
+  const inputFacebookUrl = asOptionalTrimmedString(input.facebookUrl)?.toLowerCase();
+  const existingEventName = asOptionalTrimmedString(existing.eventName)?.toLowerCase();
+  const inputEventName = asOptionalTrimmedString(input.eventName)?.toLowerCase();
+  const sameFacebookUrl = Boolean(existingFacebookUrl && inputFacebookUrl && existingFacebookUrl === inputFacebookUrl);
+  const sameEventName = Boolean(existingEventName && inputEventName && existingEventName === inputEventName);
+  if (!sameFacebookUrl && !sameEventName) {
+    return false;
+  }
+
+  const existingEventDate = asOptionalTrimmedString(existing.eventDate);
+  const inputEventDate = asOptionalTrimmedString(input.eventDate);
+  if (existingEventDate && inputEventDate && existingEventDate !== inputEventDate) {
+    return false;
+  }
+
+  const existingEventTime = asOptionalTrimmedString(existing.eventTime);
+  const inputEventTime = asOptionalTrimmedString(input.eventTime);
+  if (existingEventTime && inputEventTime && existingEventTime !== inputEventTime) {
+    return false;
+  }
+
+  const existingEndDate = asOptionalTrimmedString(existing.endDate);
+  const existingEndTime = asOptionalTrimmedString(existing.endTime);
+  return Boolean(
+    (inputEndDate && inputEndDate !== existingEndDate) ||
+      (inputEndTime && inputEndTime !== existingEndTime)
+  );
 }
 
 function normalizeCityLevelReviewStatus(status: string): CityLevelEventReviewRecord['status'] {
@@ -1265,6 +1311,13 @@ export async function queueCityLevelEventReview(
       ...tokenizeMediaUrls(existing.externalLinks),
       ...externalLinks,
     ]);
+    const shouldRefreshTiming = shouldRefreshCityLevelReviewTiming(existing, input);
+    const nextEndDate = shouldRefreshTiming
+      ? asOptionalTrimmedString(input.endDate) || asOptionalTrimmedString(existing.endDate)
+      : asOptionalTrimmedString(existing.endDate) || asOptionalTrimmedString(input.endDate);
+    const nextEndTime = shouldRefreshTiming
+      ? asOptionalTrimmedString(input.endTime) || asOptionalTrimmedString(existing.endTime)
+      : asOptionalTrimmedString(existing.endTime) || asOptionalTrimmedString(input.endTime);
 
     tx.set(
       docRef,
@@ -1288,8 +1341,8 @@ export async function queueCityLevelEventReview(
         eventName: String(existing.eventName || input.eventName || '').trim() || undefined,
         eventDate: String(existing.eventDate || input.eventDate || '').trim() || undefined,
         eventTime: String(existing.eventTime || input.eventTime || '').trim() || undefined,
-        endDate: String(existing.endDate || input.endDate || '').trim() || undefined,
-        endTime: String(existing.endTime || input.endTime || '').trim() || undefined,
+        endDate: nextEndDate,
+        endTime: nextEndTime,
         eventType: String(existing.eventType || input.eventType || '').trim() || undefined,
         category: String(existing.category || input.category || '').trim() || undefined,
         descriptionPreview: descriptionPreview || asOptionalTrimmedString(existing.descriptionPreview),

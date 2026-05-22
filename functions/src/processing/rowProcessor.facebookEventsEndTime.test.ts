@@ -79,6 +79,17 @@ test('uses Facebook Events duration as a fallback when the structured When text 
   assert.equal(result?.endTime, '20:30');
 });
 
+test('resolves Facebook Events day-month end dates like 7 Jun', () => {
+  const result = resolveFacebookEventEndDateTime(
+    buildRawRow('When: 5 Jun at 17:00 - 7 Jun at 15:00 ADT\nDuration: 2 days'),
+    { date: '2026-06-05', time: '17:00' }
+  );
+
+  assert.equal(result?.source, 'dateTimeSentence');
+  assert.equal(result?.endDate, '2026-06-07');
+  assert.equal(result?.endTime, '15:00');
+});
+
 test('promotes a structured Facebook Events end date and end time over an older single-day keeper', () => {
   const preview = previewDuplicateMerge({
     existingEvent: buildEvent(),

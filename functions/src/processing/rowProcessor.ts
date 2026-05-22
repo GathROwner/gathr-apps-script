@@ -267,14 +267,25 @@ function parseFacebookEventDate(value: string, startDate: string): string {
   const start = DateTime.fromISO(startDate, { zone: FACEBOOK_EVENT_TIMEZONE });
   if (!start.isValid) return '';
 
+  let month = 0;
+  let day = 0;
+  let explicitYear: number | null = null;
   const monthDay = text.match(
     /\b(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:t|tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\.?\s+(\d{1,2})(?:,\s*(\d{4}))?\b/i
   );
-  if (!monthDay) return '';
-
-  const month = FACEBOOK_EVENT_MONTHS[monthDay[1].replace(/\.$/, '').toLowerCase()];
-  const day = Number(monthDay[2]);
-  const explicitYear = monthDay[3] ? Number(monthDay[3]) : null;
+  if (monthDay) {
+    month = FACEBOOK_EVENT_MONTHS[monthDay[1].replace(/\.$/, '').toLowerCase()] || 0;
+    day = Number(monthDay[2]);
+    explicitYear = monthDay[3] ? Number(monthDay[3]) : null;
+  } else {
+    const dayMonth = text.match(
+      /\b(\d{1,2})\s+(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:t|tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\.?(?:,?\s*(\d{4}))?\b/i
+    );
+    if (!dayMonth) return '';
+    day = Number(dayMonth[1]);
+    month = FACEBOOK_EVENT_MONTHS[dayMonth[2].replace(/\.$/, '').toLowerCase()] || 0;
+    explicitYear = dayMonth[3] ? Number(dayMonth[3]) : null;
+  }
   if (!month || !Number.isFinite(day)) return '';
 
   let end = DateTime.fromObject(
