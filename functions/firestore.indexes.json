@@ -1,20 +1,6 @@
 {
   "indexes": [
     {
-      "collectionGroup": "events",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "startDate", "order": "ASCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "events",
-      "queryScope": "COLLECTION_GROUP",
-      "fields": [
-        { "fieldPath": "startDate", "order": "ASCENDING" }
-      ]
-    },
-    {
       "collectionGroup": "batch_states",
       "queryScope": "COLLECTION",
       "fields": [
@@ -23,17 +9,11 @@
       ]
     },
     {
-      "collectionGroup": "processed_datasets",
-      "queryScope": "COLLECTION",
+      "collectionGroup": "batch_states",
+      "queryScope": "COLLECTION_GROUP",
       "fields": [
-        { "fieldPath": "processedAt", "order": "ASCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "apify_webhooks",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "receivedAt", "order": "DESCENDING" }
+        { "fieldPath": "fileId", "order": "ASCENDING" },
+        { "fieldPath": "batchNumber", "order": "DESCENDING" }
       ]
     },
     {
@@ -45,5 +25,36 @@
       ]
     }
   ],
-  "fieldOverrides": []
+  "fieldOverrides": [
+    {
+      "collectionGroup": "events",
+      "fieldPath": "startDate",
+      "indexes": [
+        { "order": "ASCENDING", "queryScope": "COLLECTION" },
+        { "order": "DESCENDING", "queryScope": "COLLECTION" },
+        { "order": "ASCENDING", "queryScope": "COLLECTION_GROUP" },
+        { "order": "DESCENDING", "queryScope": "COLLECTION_GROUP" }
+      ]
+    },
+    {
+      "collectionGroup": "events",
+      "fieldPath": "facebookUrl",
+      "indexes": [
+        { "order": "ASCENDING", "queryScope": "COLLECTION" },
+        { "order": "DESCENDING", "queryScope": "COLLECTION" },
+        { "order": "ASCENDING", "queryScope": "COLLECTION_GROUP" },
+        { "order": "DESCENDING", "queryScope": "COLLECTION_GROUP" }
+      ]
+    },
+    {
+      "collectionGroup": "events",
+      "fieldPath": "cleanedFacebookUrl",
+      "indexes": [
+        { "order": "ASCENDING", "queryScope": "COLLECTION" },
+        { "order": "DESCENDING", "queryScope": "COLLECTION" },
+        { "order": "ASCENDING", "queryScope": "COLLECTION_GROUP" },
+        { "order": "DESCENDING", "queryScope": "COLLECTION_GROUP" }
+      ]
+    }
+  ]
 }
