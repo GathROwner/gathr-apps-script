@@ -569,6 +569,7 @@ function normalizeCityLevelLocationName(str: string): string {
 
 function cleanVenueHint(value: string): string {
   return String(value || '')
+    .replace(/[‘’]/g, "'")
     .replace(/\s+/g, ' ')
     .replace(/\s+\bin\s+(charlottetown|summerside|stratford|cornwall|montague|kensington|hunter river)(?:\s*,?\s*(?:pe|pei|canada))?$/i, '')
     .replace(/^[\s\-|:]+/g, '')
@@ -596,15 +597,21 @@ function hasVenueHintKeyword(value: string): boolean {
   return /\b(company|brewing|brewery|taproom|centre|center|hall|arena|stadium|theatre|theater|cafe|restaurant|bar|pub|club|church|school|college|university|hotel|inn|market|gallery|museum|library|studio|plaza|room|house|legion|park)\b/i.test(value);
 }
 
-function isPlausibleVenueHint(candidate: string, organizerName: string): boolean {
+function isPlausibleVenueHint(
+  candidate: string,
+  organizerName: string,
+  options: { allowOrganizerMatch?: boolean } = {}
+): boolean {
   const clean = cleanVenueHint(candidate);
   if (clean.length < 3 || clean.length > 90) return false;
   if (isLikelyCitySegment(clean) || isLikelyCityLevelLocation(clean)) return false;
 
   const normalizedCandidate = clean.toLowerCase();
-  const normalizedOrganizer = String(organizerName || '').trim().toLowerCase();
-  if (normalizedOrganizer && normalizedCandidate === normalizedOrganizer) return false;
-  if (normalizedOrganizer && normalizedCandidate.includes(normalizedOrganizer)) return false;
+  const normalizedOrganizer = cleanVenueHint(organizerName).toLowerCase();
+  if (!options.allowOrganizerMatch) {
+    if (normalizedOrganizer && normalizedCandidate === normalizedOrganizer) return false;
+    if (normalizedOrganizer && normalizedCandidate.includes(normalizedOrganizer)) return false;
+  }
   if (/\b(event|events|class|classes|tour|tickets?|sponsored|presented|happening)\b/i.test(clean)) return false;
 
   const hasKeyword = hasVenueHintKeyword(clean);
@@ -637,7 +644,7 @@ function extractVenueHintFromFacebookEventDescription(description: string, organ
   const venueKeyword =
     'company|brewing|brewery|taproom|centre|center|hall|arena|stadium|theatre|theater|cafe|restaurant|bar|pub|club|church|school|college|university|hotel|inn|market|gallery|museum|library|studio|plaza|room|house|legion|park';
   const pattern = new RegExp(
-    `\\b(?:at|@)\\s+(?:the\\s+)?([A-Z][A-Za-z0-9&'(). /-]{2,80}?\\b(?:${venueKeyword})\\b[A-Za-z0-9&'(). /-]{0,40})(?=\\s+in\\s+|\\s+on\\s+|[,.;!?\\n]|$)`,
+    `\\b(?:at|@)\\s+(?:the\\s+)?([A-Z][A-Za-z0-9&'\\u2019(). /-]{2,80}?\\b(?:${venueKeyword})\\b[A-Za-z0-9&'\\u2019(). /-]{0,40})(?=\\s+in\\s+|\\s+on\\s+|[,.;!?\\n]|$)`,
     'gi'
   );
 
@@ -646,6 +653,36 @@ function extractVenueHintFromFacebookEventDescription(description: string, organ
     .filter((candidate) => isPlausibleVenueHint(candidate, organizerName));
 
   return matches[matches.length - 1] || '';
+}
+
+function extractExplicitVenueHintFromFacebookEventDescription(description: string, organizerName: string): string {
+  const raw = String(description || '');
+  if (!raw) return '';
+
+  const lineCandidates: string[] = [];
+  const addLineMatches = (pattern: RegExp) => {
+    for (const match of raw.matchAll(pattern)) {
+      const candidate = cleanVenueHint(match[1] || '');
+      if (candidate) {
+        lineCandidates.push(candidate);
+      }
+    }
+  };
+
+  addLineMatches(/(?:^|\n)\s*\u{1F4CD}\s*([^\n]{2,120})/giu);
+  addLineMatches(/(?:^|\n)\s*(?:location|venue|where)\s*[:\-]\s*([^\n]{2,120})/giu);
+
+  const plausibleLineCandidates = lineCandidates
+    .map(cleanVenueHint)
+    .filter((candidate) => isPlausibleVenueHint(candidate, organizerName, { allowOrganizerMatch: true }));
+  if (plausibleLineCandidates.length > 0) {
+    return plausibleLineCandidates[plausibleLineCandidates.length - 1];
+  }
+
+  const atHint = extractVenueHintFromFacebookEventDescription(raw, '');
+  return isPlausibleVenueHint(atHint, organizerName, { allowOrganizerMatch: true })
+    ? cleanVenueHint(atHint)
+    : '';
 }
 
 function inferFacebookEventVenueHint(title: string, description: string, organizerName: string): string {
@@ -843,15 +880,23 @@ function extractRowData(
       : isFacebookEvent && contextualLocationName && !contextualLocationNameIsReviewLevel && !isLikelyAddress(contextualLocationName)
         ? contextualLocationName
         : '';
-  const eventLocationIsCityLevel =
+  const rawEventLocationIsCityLevel =
     isFacebookEvent && !specificEventLocationName &&
       (locationNameIsReviewLevel || contextualLocationNameIsReviewLevel);
+  const explicitVenueHintFromCityLevelLocation =
+    rawEventLocationIsCityLevel
+      ? extractExplicitVenueHintFromFacebookEventDescription(description, organizerName)
+      : '';
+  const eventLocationIsCityLevel = rawEventLocationIsCityLevel && !explicitVenueHintFromCityLevelLocation;
   const cityLevelLocationName = eventLocationIsCityLevel
     ? normalizeCityLevelLocationName(locationName || contextualLocationName)
     : '';
   const inferredVenueHint =
-    isFacebookEvent && !specificEventLocationName && !eventLocationIsCityLevel
-      ? inferFacebookEventVenueHint(sharedPostText, description, organizerName)
+    isFacebookEvent && !specificEventLocationName
+      ? explicitVenueHintFromCityLevelLocation ||
+        (!rawEventLocationIsCityLevel
+          ? inferFacebookEventVenueHint(sharedPostText, description, organizerName)
+          : '')
       : '';
   const preferredEventLocationName =
     specificEventLocationName || inferredVenueHint || cityLevelLocationName || locationName || contextualLocationName;
