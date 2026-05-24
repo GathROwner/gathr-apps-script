@@ -552,6 +552,28 @@ function dedupeStringList(values: string[]): string[] {
   return result;
 }
 
+function normalizeStringList(value: unknown): string[] {
+  return Array.isArray(value)
+    ? dedupeStringList(value.map((entry) => String(entry || '').trim()).filter(Boolean))
+    : [];
+}
+
+function normalizeStringRecord(value: unknown): Record<string, string> {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return {};
+  }
+
+  const result: Record<string, string> = {};
+  for (const [key, entry] of Object.entries(value as Record<string, unknown>)) {
+    const normalizedKey = String(key || '').trim();
+    const normalizedEntry = String(entry || '').trim();
+    if (normalizedKey && normalizedEntry) {
+      result[normalizedKey] = normalizedEntry;
+    }
+  }
+  return result;
+}
+
 function buildUnrecognizedVenueDocId(
   establishmentNormalized: string,
   cityHint?: string,
@@ -580,6 +602,8 @@ function buildUnrecognizedVenueSample(
     aggregatorFacebookUrl: input.aggregatorFacebookUrl,
     aggregatorAddress: input.aggregatorAddress,
     topLevelUrl: input.topLevelUrl,
+    sourceUniqueId: input.sourceUniqueId,
+    sourceContentSignature: input.sourceContentSignature,
     eventName: input.eventName,
     eventDate: input.eventDate,
     eventTime: input.eventTime,
@@ -601,6 +625,7 @@ function mergeUnrecognizedSamples(
   const fingerprint = [
     nextSample.observedVenueNormalized || '',
     nextSample.aggregatorName || '',
+    nextSample.sourceUniqueId || '',
     nextSample.topLevelUrl || '',
     nextSample.eventName || '',
     nextSample.eventDate || '',
@@ -611,6 +636,7 @@ function mergeUnrecognizedSamples(
     const sampleFingerprint = [
       String(sample.observedVenueNormalized || ''),
       String(sample.aggregatorName || ''),
+      String(sample.sourceUniqueId || ''),
       String(sample.topLevelUrl || ''),
       String(sample.eventName || ''),
       String(sample.eventDate || ''),
@@ -1846,6 +1872,8 @@ export async function queueUnrecognizedVenue(
   const docId = buildUnrecognizedVenueDocId(establishmentNormalized, cityHint, provinceHint);
   const docRef = db.collection(COLLECTIONS.UNRECOGNIZED_VENUES).doc(docId);
   const sample = buildUnrecognizedVenueSample(input, establishmentNormalized);
+  const sourceUniqueId = asOptionalTrimmedString(input.sourceUniqueId);
+  const sourceContentSignature = asOptionalTrimmedString(input.sourceContentSignature);
 
   let created = false;
 
@@ -1864,6 +1892,11 @@ export async function queueUnrecognizedVenue(
         provinceHint,
         aliasCandidates,
         sourceTypes: [input.source],
+        sourceUniqueIds: sourceUniqueId ? [sourceUniqueId] : [],
+        sourceContentSignaturesBySourceId:
+          sourceUniqueId && sourceContentSignature
+            ? { [sourceUniqueId]: sourceContentSignature }
+            : {},
         sampleEvents: [sample],
         suggestedMatches: aliasCandidates.map((alias) => ({
           venueName: alias,
@@ -1899,9 +1932,23 @@ export async function queueUnrecognizedVenue(
     const existingSources = Array.isArray(existing.sourceTypes)
       ? existing.sourceTypes.map((value) => String(value))
       : [];
+    const existingSourceUniqueIds = normalizeStringList(existing.sourceUniqueIds);
+    const existingSourceContentSignaturesBySourceId = normalizeStringRecord(
+      existing.sourceContentSignaturesBySourceId
+    );
 
     const mergedAliases = dedupeStringList([...existingAliases, ...aliasCandidates]);
     const mergedSources = dedupeStringList([...existingSources, input.source]);
+    const mergedSourceUniqueIds = dedupeStringList([
+      ...existingSourceUniqueIds,
+      ...(sourceUniqueId ? [sourceUniqueId] : []),
+    ]);
+    const mergedSourceContentSignaturesBySourceId = {
+      ...existingSourceContentSignaturesBySourceId,
+      ...(sourceUniqueId && sourceContentSignature
+        ? { [sourceUniqueId]: sourceContentSignature }
+        : {}),
+    };
     const mergedSamples = mergeUnrecognizedSamples(existing.sampleEvents, sample);
 
     const nextSuggestedMatches =
@@ -1925,6 +1972,8 @@ export async function queueUnrecognizedVenue(
         provinceHint: normalizeProvinceToken(String(existing.provinceHint || provinceHint || '').trim()),
         aliasCandidates: mergedAliases,
         sourceTypes: mergedSources,
+        sourceUniqueIds: mergedSourceUniqueIds,
+        sourceContentSignaturesBySourceId: mergedSourceContentSignaturesBySourceId,
         sampleEvents: mergedSamples,
         suggestedMatches: nextSuggestedMatches,
         testMode: Boolean(existing.testMode || gate.testMode),
@@ -1942,6 +1991,8 @@ export async function queueUnrecognizedVenue(
     cityHint,
     provinceHint,
     aliasCandidates,
+    sourceUniqueId,
+    hasSourceContentSignature: Boolean(sourceContentSignature),
     source: input.source,
     parserMode: input.parserMode,
     rowIndex: input.rowIndex,
@@ -1965,6 +2016,23 @@ export async function getUnrecognizedVenue(
   const doc = await db.collection(COLLECTIONS.UNRECOGNIZED_VENUES).doc(normalizedId).get();
   if (!doc.exists) return null;
   return { id: doc.id, ...(doc.data() as UnrecognizedVenueRecord) };
+}
+
+export async function findUnrecognizedVenuesBySourceUniqueId(
+  sourceUniqueId: string
+): Promise<UnrecognizedVenueRecord[]> {
+  const normalizedSourceUniqueId = String(sourceUniqueId || '').trim();
+  if (!normalizedSourceUniqueId) return [];
+
+  const snapshot = await db.collection(COLLECTIONS.UNRECOGNIZED_VENUES)
+    .where('sourceUniqueIds', 'array-contains', normalizedSourceUniqueId)
+    .limit(10)
+    .get();
+
+  return snapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...(doc.data() as UnrecognizedVenueRecord),
+  }));
 }
 
 export async function listUnrecognizedVenues(options?: {

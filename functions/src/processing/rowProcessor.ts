@@ -13,6 +13,7 @@ import {
   ProcessingConfig,
   ParseSnapshotStage,
   MatchInfo,
+  UnrecognizedVenueRecord,
 } from '../types/index.js';
 import {
   ParsePostInput,
@@ -487,6 +488,34 @@ function getManagedMediaUrlsFromCityReview(review?: CityLevelEventReviewRecord |
     normalizeUrlList(review.mediaUrls),
     [review.imageUrl].filter(Boolean) as string[]
   ).filter((url) => isStorageManagedUrl(url));
+}
+
+function isUnresolvedUnknownVenueReview(record?: UnrecognizedVenueRecord | null): boolean {
+  const status = String(record?.status || '').trim();
+  return ['pending', 'lookup_running', 'candidate_found', 'manual_review'].includes(status);
+}
+
+function getUnknownVenueSourceContentSignature(
+  record: UnrecognizedVenueRecord,
+  sourceUniqueId: string
+): string {
+  const normalizedSourceUniqueId = asTrimmedString(sourceUniqueId);
+  if (!normalizedSourceUniqueId) return '';
+
+  const signatureMap = record.sourceContentSignaturesBySourceId;
+  if (signatureMap && typeof signatureMap === 'object') {
+    const mappedSignature = asTrimmedString(signatureMap[normalizedSourceUniqueId]);
+    if (mappedSignature) return mappedSignature;
+  }
+
+  const sampleEvents = Array.isArray(record.sampleEvents) ? record.sampleEvents : [];
+  for (const sample of sampleEvents) {
+    if (asTrimmedString(sample.sourceUniqueId) !== normalizedSourceUniqueId) continue;
+    const sampleSignature = asTrimmedString(sample.sourceContentSignature);
+    if (sampleSignature) return sampleSignature;
+  }
+
+  return '';
 }
 
 function isCityLevelFacebookEventLocation(row: RawRowData): boolean {
@@ -994,6 +1023,12 @@ async function queueUnknownVenueForReview(params: {
 
   try {
     const state = params.batchManager.getState();
+    const sourceUniqueId = params.row.sourceScraperType === 'events'
+      ? asTrimmedString(params.row.uniqueId)
+      : undefined;
+    const sourceContentSignature = sourceUniqueId
+      ? buildFacebookEventSourceContentSignature(params.row)
+      : undefined;
     const result = await firestoreService.queueUnrecognizedVenue({
       venueName,
       source: params.source,
@@ -1005,6 +1040,8 @@ async function queueUnknownVenueForReview(params: {
       aggregatorFacebookUrl: String(params.row.facebookUrl || '').trim() || undefined,
       aggregatorAddress: deriveAggregatorAddressForUnknownQueue(params.row),
       topLevelUrl: deriveTopLevelPostUrlForUnknownQueue(params.row),
+      sourceUniqueId,
+      sourceContentSignature,
       eventName: params.eventName,
       eventDate: params.eventDate,
       eventTime: params.eventTime,
@@ -1181,6 +1218,25 @@ export async function processRow(
               reviewId: existingReview.id,
               status: existingReview.status,
               managedMediaCount: reusableFacebookEventMediaUrls.length,
+            });
+            result.success = true;
+            result.skipped = true;
+            batchManager.markRowSkipped(rowIndex, 'facebook_event_source_unchanged');
+            return result;
+          }
+        } else {
+          const existingUnknownVenues = await firestoreService.findUnrecognizedVenuesBySourceUniqueId(row.uniqueId || '');
+          const unchangedUnknownVenue = existingUnknownVenues.find((record) =>
+            isUnresolvedUnknownVenueReview(record) &&
+            getUnknownVenueSourceContentSignature(record, row.uniqueId || '') === facebookEventSourceContentSignature
+          );
+          if (unchangedUnknownVenue) {
+            logger.info('Skipping unchanged Facebook Events source row queued for unknown venue review', {
+              rowIndex,
+              uniqueId: row.uniqueId,
+              unknownVenueDocId: unchangedUnknownVenue.id,
+              unknownVenueStatus: unchangedUnknownVenue.status,
+              venueName: unchangedUnknownVenue.establishment,
             });
             result.success = true;
             result.skipped = true;

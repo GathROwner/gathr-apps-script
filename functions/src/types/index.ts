@@ -534,6 +534,8 @@ export interface UnrecognizedVenueSampleEvent {
   aggregatorFacebookUrl?: string;
   aggregatorAddress?: string;
   topLevelUrl?: string;
+  sourceUniqueId?: string;
+  sourceContentSignature?: string;
   eventName?: string;
   eventDate?: string;
   eventTime?: string;
@@ -566,6 +568,8 @@ export interface UnrecognizedVenueRecord {
   provinceHint?: string;
   aliasCandidates?: string[];
   sourceTypes?: string[];
+  sourceUniqueIds?: string[];
+  sourceContentSignaturesBySourceId?: Record<string, string>;
   sampleEvents?: UnrecognizedVenueSampleEvent[];
   suggestedMatches?: UnrecognizedVenueSuggestedMatch[];
   resolvedVenueId?: string;
@@ -586,6 +590,8 @@ export interface QueueUnrecognizedVenueInput {
   aggregatorFacebookUrl?: string;
   aggregatorAddress?: string;
   topLevelUrl?: string;
+  sourceUniqueId?: string;
+  sourceContentSignature?: string;
   eventName?: string;
   eventDate?: string;
   eventTime?: string;
