@@ -23,7 +23,7 @@ import {
   ParseSkipReason,
   ParseStageArtifactsSnapshot,
 } from '../parsing/types.js';
-import { parsePostData } from '../parsing/postParser.js';
+import { parsePostData, prepareManagedDisplayImageUrls } from '../parsing/postParser.js';
 import * as gptService from '../services/gptService.js';
 import * as firestoreService from '../services/firestoreService.js';
 import { logger } from '../utils/logger.js';
@@ -503,12 +503,12 @@ function getCityLevelFacebookEventLocationDetails(row: RawRowData): {
   };
 }
 
-function buildStructuredFacebookEventScraperEvents(
+async function buildStructuredFacebookEventScraperEvents(
   row: RawRowData,
   establishment: string,
   mediaUrls: string[],
   matchedVenue?: VenueData | null
-): ParserProcessedEvent[] | null {
+): Promise<ParserProcessedEvent[] | null> {
   if (row.sourceScraperType !== 'events') {
     return null;
   }
@@ -534,7 +534,21 @@ function buildStructuredFacebookEventScraperEvents(
     establishment ||
     ''
   ).trim();
-  const normalizedMediaUrls = normalizeUrlList(mediaUrls);
+  const sourceMediaUrls = normalizeUrlList(mediaUrls);
+  const managedMediaUrls = normalizeUrlList(
+    await prepareManagedDisplayImageUrls(sourceMediaUrls, {
+      postId: row.uniqueId || row.facebookUrl || title,
+    })
+  ).filter((url) => isStorageManagedUrl(url));
+  if (sourceMediaUrls.length > 0 && managedMediaUrls.length === 0) {
+    logger.warn('Structured Facebook Events image upload produced no managed URLs; falling back to full parser', {
+      uniqueId: row.uniqueId,
+      title,
+      sourceMediaCount: sourceMediaUrls.length,
+    });
+    return null;
+  }
+  const normalizedMediaUrls = managedMediaUrls;
   const primaryImageUrl = normalizedMediaUrls[0] || '';
   const ticketLink = extractFacebookEventTextValue(row.text, 'Ticket link');
   const ticketSummary = extractFacebookEventTextValue(row.text, 'Tickets');
@@ -620,6 +634,8 @@ function buildStructuredFacebookEventScraperEvents(
     endDate: event.endDate,
     endTime: event.endTime,
     mediaCount: normalizedMediaUrls.length,
+    sourceMediaCount: sourceMediaUrls.length,
+    managedMediaCount: normalizedMediaUrls.length,
   });
 
   return [event];
@@ -1159,7 +1175,7 @@ export async function processRow(
       }
 
       const parseStart = Date.now();
-      let fullParserEvents = buildStructuredFacebookEventScraperEvents(
+      let fullParserEvents = await buildStructuredFacebookEventScraperEvents(
         row,
         establishment,
         parserMediaUrls,
@@ -3066,7 +3082,7 @@ function buildDuplicateEventUpdates(
     setField('externalLinks', mergedExternalLinks);
   }
 
-  const mergedMediaUrls = mergeUniqueUrls(existing.mediaUrls, incoming.mediaUrls);
+  const mergedMediaUrls = mergeDuplicateMediaUrls(existing, incoming);
   if (mergedMediaUrls.length > 0 && valuesDiffer(existing.mediaUrls, mergedMediaUrls)) {
     setField('mediaUrls', mergedMediaUrls);
   }
@@ -3100,6 +3116,10 @@ function buildDuplicateEventUpdates(
 
   if (shouldReplaceImageUrl(existing.image, canonicalIncomingImage, promoteImages)) {
     setField('image', canonicalIncomingImage);
+  }
+
+  if (shouldReplaceImageUrl(existing.imageUrl, canonicalIncomingImage, promoteImages)) {
+    setField('imageUrl', canonicalIncomingImage);
   }
 
   if (shouldReplaceIconUrl(existing.icon, incoming.icon)) {
@@ -4677,6 +4697,18 @@ function mergeUniqueUrls(existingUrls?: string[], incomingUrls?: string[]): stri
     merged.push(url);
   }
   return merged;
+}
+
+function mergeDuplicateMediaUrls(existing: EventData, incoming: EventData): string[] {
+  const incomingUrls = normalizeUrlList(incoming.mediaUrls);
+  if (isStructuredFacebookEventSource(incoming)) {
+    const incomingManagedUrls = incomingUrls.filter((url) => isStorageManagedUrl(url));
+    if (incomingManagedUrls.length > 0) {
+      return incomingManagedUrls;
+    }
+  }
+
+  return mergeUniqueUrls(existing.mediaUrls, incoming.mediaUrls);
 }
 
 function isStorageManagedUrl(url: string): boolean {

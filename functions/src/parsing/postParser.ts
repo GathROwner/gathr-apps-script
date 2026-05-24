@@ -2999,7 +2999,7 @@ async function prepareOcrImageUrls(
   return uploaded;
 }
 
-async function prepareManagedDisplayImageUrls(
+export async function prepareManagedDisplayImageUrls(
   urls: string[],
   context: { postId?: string }
 ): Promise<string[]> {
