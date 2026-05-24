@@ -153,6 +153,7 @@ export interface EventData {
   timeResolution?: unknown;
   timeFlags?: unknown;
   sourceTimestamp?: Date;
+  sourceContentSignature?: string;
   lastSeenAt?: Date;
   usersResponded?: string;
   usersGoing?: string;
@@ -234,6 +235,7 @@ export interface QueueCityLevelEventReviewInput {
   facebookUrl?: string;
   topLevelUrl?: string;
   sourceScraperType?: ScraperType;
+  sourceContentSignature?: string;
 }
 
 export interface CityLevelEventReviewSample {
@@ -276,6 +278,7 @@ export interface CityLevelEventReviewRecord {
   lastSeenFileId?: string;
   lastSeenRowIndex?: number;
   sourceScraperType?: ScraperType;
+  sourceContentSignature?: string;
   locationScope: 'city' | 'area';
   locationLabel: string;
   locationCity?: string;

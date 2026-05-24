@@ -6,6 +6,7 @@
 import {
   RawRowData,
   EventData,
+  CityLevelEventReviewRecord,
   RecurringWeekday,
   VenueData,
   ExtractedItem,
@@ -415,6 +416,79 @@ function getVenueDisplayNameForProcessing(venue?: VenueData | null): string {
   ).trim();
 }
 
+function getStructuredFacebookEventStoredUniqueId(row: RawRowData): string {
+  const sourceId = String(row.uniqueId || '').trim();
+  return sourceId ? `${sourceId}_1` : '';
+}
+
+function normalizeSignatureText(value: unknown): string {
+  return String(value || '').replace(/\s+/g, ' ').trim();
+}
+
+function normalizeSignatureStringList(values: unknown): string[] {
+  return normalizeUrlList(Array.isArray(values) ? values.map(String) : [])
+    .map((value) => normalizeSignatureText(value))
+    .filter(Boolean)
+    .sort();
+}
+
+function normalizeSignatureNumber(value: unknown): number | null {
+  const numberValue = Number(value);
+  return Number.isFinite(numberValue) ? numberValue : null;
+}
+
+function buildFacebookEventSourceContentSignature(row: RawRowData): string | undefined {
+  if (row.sourceScraperType !== 'events') return undefined;
+  const sourceId = String(row.uniqueId || '').trim();
+  if (!sourceId) return undefined;
+
+  const payload = {
+    schema: 'facebook_events_source_v1',
+    uniqueId: sourceId,
+    facebookUrl: normalizeSignatureText(row.facebookUrl),
+    title: normalizeSignatureText(row.sharedPostText),
+    description: normalizeSignatureText(row.facebookEventDescription || row.text),
+    locationName: normalizeSignatureText(row.facebookEventLocationName || row.userName),
+    locationIsCityLevel: row.facebookEventLocationIsCityLevel === true,
+    organizerName: normalizeSignatureText(row.facebookEventOrganizerName || row.pageName),
+    address: normalizeSignatureText(row.address),
+    utcStartDate: normalizeSignatureText(row.utcStartDate || row.timestamp),
+    ticketsBuyUrl: normalizeSignatureText(row.ticketsBuyUrl),
+    externalLinks: normalizeSignatureStringList(row.externalLinks),
+    usersResponded: normalizeSignatureText(row.usersResponded),
+    usersGoing: normalizeSignatureText(row.usersGoing),
+    usersInterested: normalizeSignatureText(row.usersInterested),
+    facebookUsersResponded: normalizeSignatureText(row.facebookUsersResponded),
+    likes: normalizeSignatureNumber(row.likes),
+    shares: normalizeSignatureNumber(row.shares),
+    comments: normalizeSignatureNumber(row.comments),
+    topReactionsCount: normalizeSignatureNumber(row.topReactionsCount),
+    mediaCount: normalizeUrlList(row.mediaUrls).length,
+  };
+
+  return createHash('sha256').update(JSON.stringify(payload)).digest('hex');
+}
+
+function getManagedMediaUrlsFromEvent(event?: Partial<EventData> | null): string[] {
+  if (!event) return [];
+  return mergeUniqueUrls(
+    normalizeUrlList(event.mediaUrls),
+    [
+      event.imageUrl,
+      event.image,
+      event.relevantImageUrl,
+    ].filter(Boolean) as string[]
+  ).filter((url) => isStorageManagedUrl(url));
+}
+
+function getManagedMediaUrlsFromCityReview(review?: CityLevelEventReviewRecord | null): string[] {
+  if (!review) return [];
+  return mergeUniqueUrls(
+    normalizeUrlList(review.mediaUrls),
+    [review.imageUrl].filter(Boolean) as string[]
+  ).filter((url) => isStorageManagedUrl(url));
+}
+
 function isCityLevelFacebookEventLocation(row: RawRowData): boolean {
   if (row.sourceScraperType !== 'events') {
     return false;
@@ -507,7 +581,8 @@ async function buildStructuredFacebookEventScraperEvents(
   row: RawRowData,
   establishment: string,
   mediaUrls: string[],
-  matchedVenue?: VenueData | null
+  matchedVenue?: VenueData | null,
+  options: { managedMediaUrls?: string[] } = {}
 ): Promise<ParserProcessedEvent[] | null> {
   if (row.sourceScraperType !== 'events') {
     return null;
@@ -535,11 +610,22 @@ async function buildStructuredFacebookEventScraperEvents(
     ''
   ).trim();
   const sourceMediaUrls = normalizeUrlList(mediaUrls);
-  const managedMediaUrls = normalizeUrlList(
-    await prepareManagedDisplayImageUrls(sourceMediaUrls, {
-      postId: row.uniqueId || row.facebookUrl || title,
-    })
-  ).filter((url) => isStorageManagedUrl(url));
+  const reusableManagedMediaUrls = normalizeUrlList(options.managedMediaUrls)
+    .filter((url) => isStorageManagedUrl(url));
+  const managedMediaUrls = reusableManagedMediaUrls.length > 0
+    ? reusableManagedMediaUrls
+    : normalizeUrlList(
+      await prepareManagedDisplayImageUrls(sourceMediaUrls, {
+        postId: row.uniqueId || row.facebookUrl || title,
+      })
+    ).filter((url) => isStorageManagedUrl(url));
+  if (reusableManagedMediaUrls.length > 0) {
+    logger.info('Reusing managed media for structured Facebook Events row', {
+      uniqueId: row.uniqueId,
+      title,
+      reusedManagedMediaCount: reusableManagedMediaUrls.length,
+    });
+  }
   if (sourceMediaUrls.length > 0 && managedMediaUrls.length === 0) {
     logger.warn('Structured Facebook Events image upload produced no managed URLs; falling back to full parser', {
       uniqueId: row.uniqueId,
@@ -828,6 +914,7 @@ async function queueCityLevelFacebookEventForReview(params: {
   topReactionsCount?: number;
   ticketsBuyUrl?: string;
   externalLinks?: string[];
+  sourceContentSignature?: string;
 }): Promise<void> {
   const location = getCityLevelFacebookEventLocationDetails(params.row);
   if (!location) return;
@@ -869,6 +956,8 @@ async function queueCityLevelFacebookEventForReview(params: {
       facebookUrl: String(params.row.facebookUrl || '').trim() || undefined,
       topLevelUrl: deriveTopLevelPostUrlForUnknownQueue(params.row),
       sourceScraperType: params.row.sourceScraperType,
+      sourceContentSignature: params.sourceContentSignature ||
+        buildFacebookEventSourceContentSignature(params.row),
     });
 
     if (!result.queued) {
@@ -993,6 +1082,7 @@ export async function processRow(
     }
 
     const parserMode = config?.parserMode || 'legacy';
+    const isDryRun = config?.dryRun === true;
 
     const cityLevelFacebookEventLocation = isCityLevelFacebookEventLocation(row);
 
@@ -1045,6 +1135,61 @@ export async function processRow(
 
     const venue = venueMatch.isMatch ? venueMatch.matchedVenue! : null;
     const matchedVenueId = venue?.id;
+    let facebookEventSourceContentSignature: string | undefined;
+    let reusableFacebookEventMediaUrls: string[] = [];
+
+    if (!isDryRun && parserMode === 'full5stage' && row.sourceScraperType === 'events') {
+      facebookEventSourceContentSignature = buildFacebookEventSourceContentSignature(row);
+      if (facebookEventSourceContentSignature) {
+        if (venue) {
+          const storedUniqueId = getStructuredFacebookEventStoredUniqueId(row);
+          const existingEvent = storedUniqueId
+            ? await firestoreService.findVenueEventByUniqueId(venue.id, storedUniqueId)
+            : null;
+          reusableFacebookEventMediaUrls = getManagedMediaUrlsFromEvent(existingEvent);
+          const existingSignature = asTrimmedString(existingEvent?.sourceContentSignature);
+          if (
+            existingEvent &&
+            existingSignature === facebookEventSourceContentSignature &&
+            reusableFacebookEventMediaUrls.length > 0
+          ) {
+            logger.info('Skipping unchanged Facebook Events source row', {
+              rowIndex,
+              uniqueId: row.uniqueId,
+              storedUniqueId,
+              venueId: venue.id,
+              eventId: existingEvent.id,
+              managedMediaCount: reusableFacebookEventMediaUrls.length,
+            });
+            result.success = true;
+            result.skipped = true;
+            batchManager.markRowSkipped(rowIndex, 'facebook_event_source_unchanged');
+            return result;
+          }
+        } else if (cityLevelFacebookEventLocation) {
+          const existingReview = await firestoreService.findCityLevelEventReviewByUniqueId(row.uniqueId || '');
+          reusableFacebookEventMediaUrls = getManagedMediaUrlsFromCityReview(existingReview);
+          const existingSignature = asTrimmedString(existingReview?.sourceContentSignature);
+          if (
+            existingReview &&
+            existingSignature === facebookEventSourceContentSignature &&
+            reusableFacebookEventMediaUrls.length > 0
+          ) {
+            logger.info('Skipping unchanged city-level Facebook Events source row', {
+              rowIndex,
+              uniqueId: row.uniqueId,
+              reviewId: existingReview.id,
+              status: existingReview.status,
+              managedMediaCount: reusableFacebookEventMediaUrls.length,
+            });
+            result.success = true;
+            result.skipped = true;
+            batchManager.markRowSkipped(rowIndex, 'facebook_event_source_unchanged');
+            return result;
+          }
+        }
+      }
+    }
 
     if (!venueMatch.isMatch && cityLevelFacebookEventLocation) {
       logger.debug('Skipping unknown-venue queue for city-level Facebook Event location', {
@@ -1080,8 +1225,6 @@ export async function processRow(
           snapshotStages.push(stage);
         }
       : undefined;
-
-    const isDryRun = config?.dryRun === true;
 
     if (parserMode === 'full5stage') {
       let parserMediaUrls = normalizeUrlList(row.mediaUrls);
@@ -1179,7 +1322,8 @@ export async function processRow(
         row,
         establishment,
         parserMediaUrls,
-        venue
+        venue,
+        { managedMediaUrls: reusableFacebookEventMediaUrls }
       );
       if (fullParserEvents) {
         logTiming('parse_facebook_events_structured_row', parseStart, {
@@ -1943,6 +2087,7 @@ async function processFullParserEvent(
         topReactionsCount: item.topReactionsCount ?? row.topReactionsCount,
         ticketsBuyUrl: item.ticketsBuyUrl || row.ticketsBuyUrl,
         externalLinks: row.externalLinks,
+        sourceContentSignature: buildFacebookEventSourceContentSignature(row),
       });
       logger.debug('Skipping app event write for city-level Facebook Event location', {
         rowIndex,
@@ -2062,7 +2207,9 @@ async function processFullParserEvent(
     imageUrl: resolvedImage,
     mediaUrls: eventMediaUrls,
     facebookUrl: row.facebookUrl,
+    sourceScraperType: row.sourceScraperType,
     sourceTimestamp: row.timestamp ? new Date(row.timestamp) : undefined,
+    sourceContentSignature: buildFacebookEventSourceContentSignature(row),
     usersResponded: item.usersResponded || row.usersResponded,
     usersGoing: item.usersGoing || row.usersGoing,
     usersInterested: item.usersInterested || row.usersInterested,
@@ -3075,6 +3222,17 @@ function buildDuplicateEventUpdates(
     if (preferredValue !== undefined) {
       setField(metric, preferredValue);
     }
+  }
+
+  const incomingSourceContentSignature = asTrimmedString(
+    (incoming as unknown as Record<string, unknown>).sourceContentSignature
+  );
+  if (
+    incomingSourceContentSignature &&
+    asTrimmedString((existing as unknown as Record<string, unknown>).sourceContentSignature) !==
+      incomingSourceContentSignature
+  ) {
+    setField('sourceContentSignature' as keyof EventData, incomingSourceContentSignature);
   }
 
   const mergedExternalLinks = mergeUniqueUrls(existing.externalLinks, incoming.externalLinks);

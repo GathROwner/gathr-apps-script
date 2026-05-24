@@ -105,6 +105,7 @@ const EVENT_UPDATE_AUDIT_BASE_FIELDS = [
   'streetAddress',
   'latitude',
   'longitude',
+  'sourceContentSignature',
 ] as const;
 const DEFAULT_LOCK_TTL_MS = 30 * 60 * 1000;
 const CITY_SUFFIX_REGEX =
@@ -1302,6 +1303,7 @@ export async function queueCityLevelEventReview(
         lastSeenFileId: String(input.fileId || '').trim() || undefined,
         lastSeenRowIndex: Number.isFinite(Number(input.rowIndex)) ? Number(input.rowIndex) : undefined,
         sourceScraperType: input.sourceScraperType,
+        sourceContentSignature: asOptionalTrimmedString(input.sourceContentSignature),
         locationScope,
         locationLabel,
         locationCity: String(input.locationCity || '').trim() || undefined,
@@ -1377,6 +1379,8 @@ export async function queueCityLevelEventReview(
           ? Number(input.rowIndex)
           : existing.lastSeenRowIndex,
         sourceScraperType: existing.sourceScraperType || input.sourceScraperType,
+        sourceContentSignature: asOptionalTrimmedString(input.sourceContentSignature) ||
+          asOptionalTrimmedString(existing.sourceContentSignature),
         locationScope: existing.locationScope || locationScope,
         locationLabel: String(existing.locationLabel || locationLabel).trim(),
         locationCity: String(existing.locationCity || input.locationCity || '').trim() || undefined,
@@ -1601,6 +1605,7 @@ function buildPublishedCityLevelEventData(
     uniqueId: `${asOptionalTrimmedString(record.uniqueId) || reviewId}_city`,
     cityLevelReviewId: reviewId,
     sourceScraperType: record.sourceScraperType,
+    sourceContentSignature: asOptionalTrimmedString(record.sourceContentSignature),
     establishment: locationLabel,
     venue: locationLabel,
     name: eventName,
@@ -2941,6 +2946,57 @@ export function shouldSkipSiblingUniqueIdDuplicateCheck(
   }
 
   return false;
+}
+
+/**
+ * Find a venue-scoped event by its exact source unique id.
+ */
+export async function findVenueEventByUniqueId(
+  venueId: string,
+  uniqueId: string
+): Promise<EventData | null> {
+  const normalizedVenueId = String(venueId || '').trim();
+  const normalizedUniqueId = String(uniqueId || '').trim();
+  if (!normalizedVenueId || !normalizedUniqueId) return null;
+
+  const snapshot = await db
+    .collection(COLLECTIONS.VENUES)
+    .doc(normalizedVenueId)
+    .collection(COLLECTIONS.EVENTS)
+    .where('uniqueId', '==', normalizedUniqueId)
+    .limit(1)
+    .get();
+
+  if (snapshot.empty) return null;
+  const doc = snapshot.docs[0];
+  return {
+    id: doc.id,
+    venueId: normalizedVenueId,
+    ...(doc.data() as EventData),
+  };
+}
+
+/**
+ * Find a city-level Facebook event review by its exact source unique id.
+ */
+export async function findCityLevelEventReviewByUniqueId(
+  uniqueId: string
+): Promise<CityLevelEventReviewRecord | null> {
+  const normalizedUniqueId = String(uniqueId || '').trim();
+  if (!normalizedUniqueId) return null;
+
+  const snapshot = await db
+    .collection(COLLECTIONS.CITY_LEVEL_EVENT_REVIEWS)
+    .where('uniqueId', '==', normalizedUniqueId)
+    .limit(1)
+    .get();
+
+  if (snapshot.empty) return null;
+  const doc = snapshot.docs[0];
+  return {
+    id: doc.id,
+    ...(doc.data() as CityLevelEventReviewRecord),
+  };
 }
 
 /**
