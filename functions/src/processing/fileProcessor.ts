@@ -32,6 +32,7 @@ export async function processDatasetFile(
     config?: Partial<ProcessingConfig>;
     rowIndexes?: number[];
     mediaOverrideUrl?: string;
+    runId?: string;
   }
 ): Promise<ProcessDatasetResponse> {
   const config: ProcessingConfig = {
@@ -92,7 +93,8 @@ export async function processDatasetFile(
         options?.fileName || fileName,
         options.rowIndexes,
         config,
-        options.mediaOverrideUrl
+        options.mediaOverrideUrl,
+        options.runId
       );
     }
 
@@ -102,7 +104,8 @@ export async function processDatasetFile(
       options?.fileName || fileName,
       rows.length,
       options?.resumeFromCheckpoint ?? true,
-      config
+      config,
+      options?.runId
     );
 
     // Start processing
@@ -231,7 +234,8 @@ async function processSelectedRows(
   fileName: string,
   rowIndexes: number[],
   config: ProcessingConfig,
-  mediaOverrideUrl?: string
+  mediaOverrideUrl?: string,
+  runId?: string
 ): Promise<ProcessDatasetResponse> {
   const uniqueIndexes = Array.from(
     new Set(rowIndexes.map((value) => Math.floor(value)))
@@ -260,7 +264,7 @@ async function processSelectedRows(
     };
   }
 
-  const state = createBatchState(fileId, fileName, rows.length);
+  const state = createBatchState(fileId, fileName, rows.length, 1, runId);
   const batchManager = new BatchManager(state, config);
 
   logger.info('Processing selected rows', {

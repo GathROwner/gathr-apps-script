@@ -23,6 +23,7 @@ import {
   QueueCityLevelEventReviewResult,
   QueueUnrecognizedVenueInput,
   QueueUnrecognizedVenueResult,
+  RawRowData,
   UnrecognizedVenueRecord,
   UnrecognizedVenueSampleEvent,
   UnrecognizedVenueStatus,
@@ -58,9 +59,53 @@ const COLLECTIONS = {
   PROCESSING_LOCKS: 'processing_locks',
   UNRECOGNIZED_VENUES: 'unrecognized_venues',
   CITY_LEVEL_EVENT_REVIEWS: 'city_level_event_reviews',
+  EVENT_UPDATE_AUDITS: 'event_update_audits',
 } as const;
 
 const MAX_SNAPSHOT_TEXT_LENGTH = 20000;
+const EVENT_UPDATE_AUDIT_TEXT_LIMIT = 1600;
+const EVENT_UPDATE_AUDIT_ARRAY_LIMIT = 12;
+const EVENT_UPDATE_AUDIT_BASE_FIELDS = [
+  'uniqueId',
+  'eventName',
+  'name',
+  'establishment',
+  'venueId',
+  'startDate',
+  'startTime',
+  'endDate',
+  'endTime',
+  'description',
+  'category',
+  'eventType',
+  'facebookUrl',
+  'cleanedFacebookUrl',
+  'ticketsBuyUrl',
+  'ticketLink',
+  'ticketPrice',
+  'price',
+  'mediaUrls',
+  'imageUrl',
+  'image',
+  'relevantImageUrl',
+  'usersResponded',
+  'usersGoing',
+  'usersInterested',
+  'facebookUsersResponded',
+  'likes',
+  'shares',
+  'comments',
+  'topReactionsCount',
+  'locationScope',
+  'locationLabel',
+  'locationPrecision',
+  'mapMode',
+  'address',
+  'city',
+  'streetAddress',
+  'latitude',
+  'longitude',
+] as const;
 const DEFAULT_LOCK_TTL_MS = 30 * 60 * 1000;
 const CITY_SUFFIX_REGEX =
   /^(.*?)(?:\s*[|,-]\s*)([A-Za-z .'-]+?)\s*,?\s*(PEI?|NS|NB|NL|ON|QC|AB|BC|SK|MB)\s*$/i;
@@ -3090,6 +3135,225 @@ export async function updateEvent(
     .update(data);
 
   logger.debug('Updated event', { venueId, eventId });
+}
+
+interface EventUpdateAuditInput {
+  fileId?: string;
+  fileName?: string;
+  runId?: string;
+  batchNumber?: number;
+  rowIndex: number;
+  parserMode: 'legacy' | 'full5stage';
+  venueId: string;
+  venueName?: string;
+  eventId: string;
+  changedFields: string[];
+  descriptionImproved?: boolean;
+  timeImproved?: boolean;
+  beforeEvent: EventData;
+  incomingEvent: EventData;
+  afterEvent: EventData;
+  updatePayload: Partial<EventData>;
+  row?: RawRowData;
+}
+
+/**
+ * Persist a compact audit record for duplicate-event enrichment updates.
+ */
+export async function recordEventUpdateAudit(input: EventUpdateAuditInput): Promise<string | undefined> {
+  const changedFields = input.changedFields
+    .map((field) => String(field || '').trim())
+    .filter(Boolean);
+
+  if (!input.venueId || !input.eventId || changedFields.length === 0) {
+    return undefined;
+  }
+
+  const before = buildEventUpdateAuditSnapshot(input.beforeEvent, changedFields);
+  const incoming = buildEventUpdateAuditSnapshot(input.incomingEvent, changedFields);
+  const after = buildEventUpdateAuditSnapshot(input.afterEvent, changedFields);
+  const updatePayload = buildEventUpdateAuditSnapshot(
+    input.updatePayload as Partial<EventData>,
+    changedFields,
+    false
+  );
+  const row = buildRowUpdateAuditSnapshot(input.row);
+  const originalPostUrl = firstMeaningfulString(
+    input.incomingEvent.facebookUrl,
+    input.row?.facebookUrl,
+    input.row?.topLevelUrl
+  );
+  const eventName = firstMeaningfulString(
+    input.afterEvent.eventName,
+    input.afterEvent.name,
+    input.incomingEvent.eventName,
+    input.incomingEvent.name,
+    input.beforeEvent.eventName,
+    input.beforeEvent.name
+  );
+
+  const payload = compactRecord({
+    fileId: input.fileId,
+    fileName: input.fileName,
+    runId: input.runId,
+    batchNumber: input.batchNumber,
+    rowIndex: input.rowIndex,
+    parserMode: input.parserMode,
+    venueId: input.venueId,
+    venueName: input.venueName,
+    eventId: input.eventId,
+    eventPath: `${COLLECTIONS.VENUES}/${input.venueId}/${COLLECTIONS.EVENTS}/${input.eventId}`,
+    eventName,
+    originalPostUrl,
+    facebookUrl: originalPostUrl,
+    topLevelUrl: firstMeaningfulString(input.row?.topLevelUrl),
+    sourceScraperType: firstMeaningfulString(
+      input.incomingEvent.sourceScraperType,
+      input.row?.sourceScraperType
+    ),
+    uniqueId: firstMeaningfulString(input.incomingEvent.uniqueId, input.row?.uniqueId),
+    changedFields,
+    descriptionImproved: input.descriptionImproved,
+    timeImproved: input.timeImproved,
+    updatePayload,
+    before,
+    incoming,
+    after,
+    row,
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+  });
+
+  const docRef = await db.collection(COLLECTIONS.EVENT_UPDATE_AUDITS).add(payload);
+  logger.debug('Recorded event update audit', {
+    auditId: docRef.id,
+    fileId: input.fileId,
+    runId: input.runId,
+    rowIndex: input.rowIndex,
+    venueId: input.venueId,
+    eventId: input.eventId,
+    changedFields,
+  });
+  return docRef.id;
+}
+
+function buildEventUpdateAuditSnapshot(
+  event: Partial<EventData> | undefined,
+  changedFields: string[],
+  includeBaseFields = true
+): Record<string, unknown> {
+  if (!event) return {};
+
+  const fields = new Set<string>(includeBaseFields ? EVENT_UPDATE_AUDIT_BASE_FIELDS : []);
+  for (const field of changedFields) fields.add(field);
+
+  const snapshot: Record<string, unknown> = {};
+  const record = event as Record<string, unknown>;
+  for (const field of fields) {
+    const sanitized = sanitizeAuditValue(record[field]);
+    if (sanitized !== undefined) {
+      snapshot[field] = sanitized;
+    }
+  }
+
+  const mediaUrls = Array.isArray(record.mediaUrls)
+    ? record.mediaUrls.map((value) => String(value || '').trim()).filter(Boolean)
+    : [];
+  if (mediaUrls.length > 0) {
+    snapshot.mediaUrlCount = mediaUrls.length;
+    snapshot.primaryMediaUrl = mediaUrls[0];
+  }
+
+  return snapshot;
+}
+
+function buildRowUpdateAuditSnapshot(row?: RawRowData): Record<string, unknown> | undefined {
+  if (!row) return undefined;
+
+  const mediaUrls = Array.isArray(row.mediaUrls)
+    ? row.mediaUrls.map((url) => String(url || '').trim()).filter(Boolean)
+    : [];
+
+  return compactRecord({
+    uniqueId: row.uniqueId,
+    userName: row.userName,
+    pageName: row.pageName,
+    timestamp: row.timestamp,
+    facebookUrl: row.facebookUrl,
+    topLevelUrl: row.topLevelUrl,
+    sourceScraperType: row.sourceScraperType,
+    address: row.address,
+    facebookEventLocationName: row.facebookEventLocationName,
+    facebookEventLocationIsCityLevel: row.facebookEventLocationIsCityLevel,
+    facebookEventOrganizerName: row.facebookEventOrganizerName,
+    ticketsBuyUrl: row.ticketsBuyUrl,
+    externalLinks: sanitizeAuditValue(row.externalLinks),
+    mediaUrls: sanitizeAuditValue(mediaUrls),
+    mediaUrlCount: mediaUrls.length || undefined,
+    usersResponded: row.usersResponded,
+    usersGoing: row.usersGoing,
+    usersInterested: row.usersInterested,
+    facebookUsersResponded: row.facebookUsersResponded,
+    likes: row.likes,
+    shares: row.shares,
+    comments: row.comments,
+    topReactionsCount: row.topReactionsCount,
+    textPreview: trimAuditText(row.text),
+    sharedPostTextPreview: trimAuditText(row.sharedPostText),
+    ocrTextPreview: trimAuditText(row.ocrText),
+  });
+}
+
+function sanitizeAuditValue(value: unknown): unknown {
+  if (value === undefined) return undefined;
+  if (value === null) return null;
+  if (typeof value === 'string') return trimAuditText(value);
+  if (typeof value === 'number') return Number.isFinite(value) ? value : undefined;
+  if (typeof value === 'boolean') return value;
+  if (value instanceof Date) return value.toISOString();
+  if (value instanceof admin.firestore.Timestamp) return value.toDate().toISOString();
+  if (Array.isArray(value)) {
+    return value
+      .slice(0, EVENT_UPDATE_AUDIT_ARRAY_LIMIT)
+      .map((entry) => sanitizeAuditValue(entry))
+      .filter((entry) => entry !== undefined);
+  }
+  if (typeof value === 'object') {
+    if (
+      'toDate' in (value as Record<string, unknown>) &&
+      typeof (value as { toDate?: unknown }).toDate === 'function'
+    ) {
+      try {
+        return (value as { toDate: () => Date }).toDate().toISOString();
+      } catch {
+        return undefined;
+      }
+    }
+
+    const output: Record<string, unknown> = {};
+    for (const [key, entry] of Object.entries(value as Record<string, unknown>)) {
+      const sanitized = sanitizeAuditValue(entry);
+      if (sanitized !== undefined) {
+        output[key] = sanitized;
+      }
+    }
+    return Object.keys(output).length > 0 ? output : undefined;
+  }
+  return String(value);
+}
+
+function trimAuditText(value: unknown): string | undefined {
+  const text = String(value || '').replace(/\s+/g, ' ').trim();
+  if (!text) return undefined;
+  if (text.length <= EVENT_UPDATE_AUDIT_TEXT_LIMIT) return text;
+  return `${text.slice(0, EVENT_UPDATE_AUDIT_TEXT_LIMIT - 3).trimEnd()}...`;
+}
+
+function firstMeaningfulString(...values: unknown[]): string | undefined {
+  for (const value of values) {
+    const text = typeof value === 'string' ? value.trim() : String(value || '').trim();
+    if (text) return text;
+  }
+  return undefined;
 }
 
 function parseDateOnlyValue(value: unknown): string | null {

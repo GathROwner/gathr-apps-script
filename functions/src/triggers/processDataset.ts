@@ -142,6 +142,7 @@ export const processDataset = onRequest(
         config: buildParserConfig(parserMode),
         rowIndexes,
         mediaOverrideUrl: mediaOverrideUrl || undefined,
+        runId: activeRunId,
       });
 
       // If processing was paused, schedule the next batch
@@ -448,6 +449,7 @@ export const processDatasetSelectedRows = onTaskDispatched(
         dryRun: Boolean(dryRun),
         config: buildParserConfig(normalizedParserMode),
         rowIndexes: normalizedRowIndexes,
+        runId,
       });
 
       await firestoreService.releaseProcessingLock(

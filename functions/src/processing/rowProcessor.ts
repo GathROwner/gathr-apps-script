@@ -2134,7 +2134,8 @@ async function processFullParserEvent(
           existingEvent,
           eventData,
           rowIndex,
-          'full5stage'
+          'full5stage',
+          { row, batchManager }
         );
         if (updateResult.updated) {
           return {
@@ -2328,7 +2329,8 @@ async function processExtractedItem(
           existingEvent,
           eventData,
           rowIndex,
-          'legacy'
+          'legacy',
+          { row, batchManager }
         );
         if (updateResult.updated) {
           return {
@@ -2376,6 +2378,10 @@ async function processExtractedItem(
 }
 
 type ParserMode = 'legacy' | 'full5stage';
+interface DuplicateEventAuditContext {
+  row: RawRowData;
+  batchManager: BatchManager;
+}
 const PROFILE_IMAGE_COMPARE_TIMEOUT_MS = 10_000;
 const managedImageContentHashCache = new Map<string, string | null>();
 
@@ -2656,7 +2662,8 @@ async function updateDuplicateEventIfNeeded(
   existingEvent: EventData,
   incomingEvent: EventData,
   rowIndex: number,
-  parserMode: ParserMode
+  parserMode: ParserMode,
+  auditContext?: DuplicateEventAuditContext
 ): Promise<{
   updated: boolean;
   mergedEvent: EventData;
@@ -2707,6 +2714,51 @@ async function updateDuplicateEventIfNeeded(
     parserMode,
     changedFields: mergeOutcome.changedFields,
   });
+
+  try {
+    const auditStart = Date.now();
+    const batchState = auditContext?.batchManager.getState();
+    const venueRecord = venue as unknown as Record<string, unknown>;
+    const venueName =
+      venue.name ||
+      String(venueRecord.pagename || '').trim() ||
+      String(venueRecord.title || '').trim() ||
+      '';
+    const auditId = await firestoreService.recordEventUpdateAudit({
+      fileId: batchState?.fileId,
+      fileName: batchState?.fileName,
+      runId: batchState?.runId,
+      batchNumber: batchState?.batchNumber,
+      rowIndex,
+      parserMode,
+      venueId,
+      venueName,
+      eventId: existingEvent.id,
+      changedFields: mergeOutcome.changedFields,
+      descriptionImproved: mergeOutcome.descriptionImproved,
+      timeImproved: mergeOutcome.timeImproved,
+      beforeEvent: existingEvent,
+      incomingEvent,
+      afterEvent: mergedEvent,
+      updatePayload: mergeOutcome.updates,
+      row: auditContext?.row,
+    });
+    logTiming('write_event_update_audit', auditStart, {
+      rowIndex,
+      venueId,
+      eventId: existingEvent.id,
+      parserMode,
+      auditId: auditId || '',
+    });
+  } catch (error) {
+    logger.warn('Failed to record duplicate event update audit', {
+      rowIndex,
+      venueId,
+      eventId: existingEvent.id,
+      parserMode,
+      error: error instanceof Error ? error.message : String(error),
+    });
+  }
 
   Object.assign(existingEvent, mergeOutcome.updates);
 

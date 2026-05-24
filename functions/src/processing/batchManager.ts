@@ -40,11 +40,13 @@ export function createBatchState(
   fileId: string,
   fileName: string,
   totalRows: number,
-  batchNumber: number = 1
+  batchNumber: number = 1,
+  runId?: string
 ): BatchState {
   return {
     fileId,
     fileName,
+    runId,
     totalRows,
     processedRows: 0,
     currentRowIndex: 0,
@@ -264,6 +266,7 @@ export class BatchManager {
   async saveCheckpoint(): Promise<void> {
     const checkpoint: CheckpointData = {
       fileId: this.state.fileId,
+      runId: this.state.runId,
       rowIndex: this.state.currentRowIndex,
       batchNumber: this.state.batchNumber,
       stats: this.state.stats,
@@ -376,7 +379,8 @@ export async function loadOrCreateBatchManager(
   fileName: string,
   totalRows: number,
   resumeFromCheckpoint: boolean = true,
-  config?: Partial<ProcessingConfig>
+  config?: Partial<ProcessingConfig>,
+  runId?: string
 ): Promise<BatchManager> {
   if (resumeFromCheckpoint) {
     // Try to load existing checkpoint
@@ -389,7 +393,13 @@ export async function loadOrCreateBatchManager(
         batchNumber: checkpoint.batchNumber,
       });
 
-      const state = createBatchState(fileId, fileName, totalRows, checkpoint.batchNumber);
+      const state = createBatchState(
+        fileId,
+        fileName,
+        totalRows,
+        checkpoint.batchNumber,
+        checkpoint.runId || runId
+      );
       state.currentRowIndex = checkpoint.rowIndex;
       state.processedRows = checkpoint.rowIndex;
       state.stats = checkpoint.stats;
@@ -406,7 +416,7 @@ export async function loadOrCreateBatchManager(
   }
 
   // Create new batch manager
-  const state = createBatchState(fileId, fileName, totalRows);
+  const state = createBatchState(fileId, fileName, totalRows, 1, runId);
   return new BatchManager(state, config);
 }
 

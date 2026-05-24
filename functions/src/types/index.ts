@@ -35,6 +35,7 @@ export const DEFAULT_CONFIG: ProcessingConfig = {
 export interface BatchState {
   fileId: string;
   fileName: string;
+  runId?: string;
   totalRows: number;
   processedRows: number;
   currentRowIndex: number;
@@ -62,6 +63,7 @@ export interface ProcessingStats {
 
 export interface CheckpointData {
   fileId: string;
+  runId?: string;
   rowIndex: number;
   batchNumber: number;
   stats: ProcessingStats;
