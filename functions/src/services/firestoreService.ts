@@ -1348,10 +1348,10 @@ export async function queueCityLevelEventReview(
     const nextStatus = normalizeCityLevelReviewStatus(String(existing.status || 'needs_review'));
     shouldRefreshPublishedEvent = nextStatus === 'published';
     const sampleRows = mergeCityLevelEventReviewSamples(existing.sampleRows, sample);
-    const mergedMediaUrls = dedupeUrls([
-      ...tokenizeMediaUrls(existing.mediaUrls),
-      ...mediaUrls,
-    ]);
+    const mergedMediaUrls = mergeCityLevelEventMediaUrls(
+      tokenizeMediaUrls(existing.mediaUrls),
+      mediaUrls
+    );
     const mergedExternalLinks = dedupeUrls([
       ...tokenizeMediaUrls(existing.externalLinks),
       ...externalLinks,
@@ -5336,6 +5336,16 @@ function dedupeUrls(urls: string[]): string[] {
     deduped.push(url);
   }
   return deduped;
+}
+
+function mergeCityLevelEventMediaUrls(existingUrls: string[], incomingUrls: string[]): string[] {
+  const incoming = dedupeUrls(incomingUrls);
+  const incomingManaged = incoming.filter((url) => isManagedImageUrl(url));
+  if (incomingManaged.length > 0) {
+    return incomingManaged;
+  }
+
+  return dedupeUrls(existingUrls);
 }
 
 function sameUrlArray(existing: string[] | undefined, next: string[]): boolean {
