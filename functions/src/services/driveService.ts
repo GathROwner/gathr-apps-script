@@ -525,6 +525,26 @@ function isLikelyCityLevelLocation(str: string): boolean {
     /^[a-z .'-]+ (pe|pei)$/.test(normalized);
 }
 
+function isLikelyAreaLevelLocation(str: string): boolean {
+  const normalized = String(str || '')
+    .toLowerCase()
+    .replace(/\bcanada\b/g, '')
+    .replace(/\bprince edward island\b/g, 'pei')
+    .replace(/\bp\.?e\.?i\.?\b/g, 'pei')
+    .replace(/\s*,\s*/g, ',')
+    .replace(/\s+/g, ' ')
+    .replace(/[.,]+$/g, '')
+    .trim();
+
+  if (/\b(inc|incorporated|ltd|limited|corp|corporation)\b/i.test(normalized)) {
+    return false;
+  }
+
+  return normalized === 'downtown charlottetown' ||
+    normalized === 'downtown charlottetown,pei' ||
+    normalized === 'downtown charlottetown pei';
+}
+
 function normalizeCityLevelLocationName(str: string): string {
   const raw = String(str || '').replace(/\s+/g, ' ').trim();
   if (!raw) return '';
@@ -812,14 +832,20 @@ function extractRowData(
   const fallbackUserName = String(getFirstNonEmptyColumnValue(row, headerMap, ['User Name', 'user/name']) || '');
   const locationNameIsCityLevel = isLikelyCityLevelLocation(locationName);
   const contextualLocationNameIsCityLevel = isLikelyCityLevelLocation(contextualLocationName);
+  const locationNameIsAreaLevel = isLikelyAreaLevelLocation(locationName);
+  const contextualLocationNameIsAreaLevel = isLikelyAreaLevelLocation(contextualLocationName);
+  const locationNameIsReviewLevel = locationNameIsCityLevel || locationNameIsAreaLevel;
+  const contextualLocationNameIsReviewLevel =
+    contextualLocationNameIsCityLevel || contextualLocationNameIsAreaLevel;
   const specificEventLocationName =
-    isFacebookEvent && locationName && !locationNameIsCityLevel && !isLikelyAddress(locationName)
+    isFacebookEvent && locationName && !locationNameIsReviewLevel && !isLikelyAddress(locationName)
       ? locationName
-      : isFacebookEvent && contextualLocationName && !contextualLocationNameIsCityLevel && !isLikelyAddress(contextualLocationName)
+      : isFacebookEvent && contextualLocationName && !contextualLocationNameIsReviewLevel && !isLikelyAddress(contextualLocationName)
         ? contextualLocationName
         : '';
   const eventLocationIsCityLevel =
-    isFacebookEvent && !specificEventLocationName && (locationNameIsCityLevel || contextualLocationNameIsCityLevel);
+    isFacebookEvent && !specificEventLocationName &&
+      (locationNameIsReviewLevel || contextualLocationNameIsReviewLevel);
   const cityLevelLocationName = eventLocationIsCityLevel
     ? normalizeCityLevelLocationName(locationName || contextualLocationName)
     : '';

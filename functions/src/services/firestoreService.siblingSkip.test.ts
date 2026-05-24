@@ -2,7 +2,10 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { EventData } from '../types/index.js';
 import { pickCompatibleExactUniqueIdMatch } from './exactUniqueIdCompatibility.js';
-import { shouldSkipSiblingUniqueIdDuplicateCheck } from './firestoreService.js';
+import {
+  pickUnrecognizedVenueDocIdForSource,
+  shouldSkipSiblingUniqueIdDuplicateCheck,
+} from './firestoreService.js';
 import { isDuplicateEntry } from '../utils/similarity.js';
 
 function buildEvent(overrides: Partial<EventData>): EventData {
@@ -86,4 +89,28 @@ test('keeps the sibling-skip guard for same-root same-date items that are not st
     false
   );
   assert.equal(shouldSkipSiblingUniqueIdDuplicateCheck(incoming, differentSibling), true);
+});
+
+test('reuses an existing unknown venue doc for the same Facebook event source and venue name', () => {
+  const picked = pickUnrecognizedVenueDocIdForSource(
+    [
+      {
+        id: 'uv_other',
+        establishment: 'Other Venue',
+        establishmentNormalized: 'other venue',
+        status: 'pending',
+        occurrences: 1,
+      },
+      {
+        id: 'uv_island_hill_existing',
+        establishment: 'Island Hill Farm Inc',
+        establishmentNormalized: 'island hill farm inc',
+        status: 'manual_review',
+        occurrences: 1,
+      },
+    ],
+    'island hill farm inc'
+  );
+
+  assert.equal(picked, 'uv_island_hill_existing');
 });

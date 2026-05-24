@@ -518,7 +518,7 @@ function getUnknownVenueSourceContentSignature(
   return '';
 }
 
-function isCityLevelFacebookEventLocation(row: RawRowData): boolean {
+export function isCityLevelFacebookEventLocation(row: RawRowData): boolean {
   if (row.sourceScraperType !== 'events') {
     return false;
   }
@@ -526,12 +526,16 @@ function isCityLevelFacebookEventLocation(row: RawRowData): boolean {
     return true;
   }
 
-  const candidate = String(row.facebookEventLocationName || row.userName || '').trim();
+  const candidate = String(row.facebookEventLocationName || '').trim();
   if (!candidate || /\d/.test(candidate)) {
     return false;
   }
   if (/\b(park|centre|center|hall|arena|stadium|theatre|theater|cafe|restaurant|bar|pub|club|church|school|hotel|inn|brewery|market)\b/i.test(candidate)) {
     return false;
+  }
+
+  if (isAreaLevelFacebookEventLocationName(candidate)) {
+    return true;
   }
 
   const normalized = candidate
@@ -549,13 +553,33 @@ function isCityLevelFacebookEventLocation(row: RawRowData): boolean {
     /^[a-z .'-]+ (pe|pei)$/.test(normalized);
 }
 
+function isAreaLevelFacebookEventLocationName(value: string): boolean {
+  const normalized = String(value || '')
+    .toLowerCase()
+    .replace(/\bcanada\b/g, '')
+    .replace(/\bprince edward island\b/g, 'pei')
+    .replace(/\bp\.?e\.?i\.?\b/g, 'pei')
+    .replace(/\s*,\s*/g, ',')
+    .replace(/\s+/g, ' ')
+    .replace(/[.,]+$/g, '')
+    .trim();
+
+  if (/\b(inc|incorporated|ltd|limited|corp|corporation)\b/i.test(normalized)) {
+    return false;
+  }
+
+  return normalized === 'downtown charlottetown' ||
+    normalized === 'downtown charlottetown,pei' ||
+    normalized === 'downtown charlottetown pei';
+}
+
 function normalizeFacebookEventProvinceDisplay(value: string): string {
   const normalized = value.toLowerCase().replace(/\./g, '').trim();
   if (normalized === 'pe' || normalized === 'pei') return 'PEI';
   return value.toUpperCase();
 }
 
-function getCityLevelFacebookEventLocationDetails(row: RawRowData): {
+export function getCityLevelFacebookEventLocationDetails(row: RawRowData): {
   locationScope: 'city' | 'area';
   locationLabel: string;
   locationCity?: string;
@@ -566,7 +590,7 @@ function getCityLevelFacebookEventLocationDetails(row: RawRowData): {
     return null;
   }
 
-  const raw = String(row.facebookEventLocationName || row.userName || '').trim();
+  const raw = String(row.facebookEventLocationName || '').trim();
   const cleaned = raw
     .replace(/\bcanada\b/gi, '')
     .replace(/\bprince edward island\b/gi, 'PEI')
@@ -575,6 +599,17 @@ function getCityLevelFacebookEventLocationDetails(row: RawRowData): {
     .replace(/\s+/g, ' ')
     .replace(/,+$/g, '')
     .trim();
+
+  if (isAreaLevelFacebookEventLocationName(cleaned)) {
+    return {
+      locationScope: 'area',
+      locationLabel: 'Downtown Charlottetown',
+      locationCity: 'Charlottetown',
+      locationProvince: 'PEI',
+      locationPrecision: 'approximate',
+    };
+  }
+
   const match = cleaned.match(/^(.+?)(?:,\s*|\s+)(PEI?|PE)$/i);
   if (match) {
     const city = match[1].trim();

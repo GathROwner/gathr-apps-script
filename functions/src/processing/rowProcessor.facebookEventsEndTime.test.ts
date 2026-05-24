@@ -1,7 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { previewDuplicateMerge, resolveFacebookEventEndDateTime } from './rowProcessor.js';
+import {
+  getCityLevelFacebookEventLocationDetails,
+  isCityLevelFacebookEventLocation,
+  previewDuplicateMerge,
+  resolveFacebookEventEndDateTime,
+} from './rowProcessor.js';
 import { EventData, RawRowData, VenueData } from '../types/index.js';
 
 function buildVenue(): VenueData {
@@ -118,4 +123,39 @@ test('promotes a structured Facebook Events end date and end time over an older 
   assert.equal(preview.updates.endTime, '20:00');
   assert.ok(preview.changedFields.includes('endDate'));
   assert.ok(preview.changedFields.includes('endTime'));
+});
+
+test('routes explicit Downtown Charlottetown Facebook location as area review', () => {
+  const row = buildRawRow('Location: Downtown Charlottetown');
+  row.userName = 'Downtown Charlottetown';
+  row.facebookEventLocationName = 'Downtown Charlottetown';
+  row.facebookEventOrganizerName = "Suzanne Scott - The Potter's Daughter";
+  row.facebookEventLocationIsCityLevel = true;
+
+  assert.equal(isCityLevelFacebookEventLocation(row), true);
+  assert.deepEqual(getCityLevelFacebookEventLocationDetails(row), {
+    locationScope: 'area',
+    locationLabel: 'Downtown Charlottetown',
+    locationCity: 'Charlottetown',
+    locationProvince: 'PEI',
+    locationPrecision: 'approximate',
+  });
+});
+
+test('does not treat Downtown Charlottetown Inc organizer/page text as an area venue', () => {
+  const organizerOnlyRow = buildRawRow('Organizer: Downtown Charlottetown Inc.');
+  organizerOnlyRow.userName = 'Downtown Charlottetown Inc.';
+  organizerOnlyRow.facebookEventOrganizerName = 'Downtown Charlottetown Inc.';
+  organizerOnlyRow.facebookEventLocationName = undefined;
+  organizerOnlyRow.facebookEventLocationIsCityLevel = false;
+
+  assert.equal(isCityLevelFacebookEventLocation(organizerOnlyRow), false);
+
+  const pageLocationRow = buildRawRow('Location: Downtown Charlottetown Inc.');
+  pageLocationRow.userName = 'Downtown Charlottetown Inc.';
+  pageLocationRow.facebookEventLocationName = 'Downtown Charlottetown Inc.';
+  pageLocationRow.facebookEventOrganizerName = 'Downtown Charlottetown Inc.';
+  pageLocationRow.facebookEventLocationIsCityLevel = false;
+
+  assert.equal(isCityLevelFacebookEventLocation(pageLocationRow), false);
 });

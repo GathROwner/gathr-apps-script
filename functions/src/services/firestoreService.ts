@@ -588,6 +588,23 @@ function buildUnrecognizedVenueDocId(
   return `uv_${hash}`;
 }
 
+export function pickUnrecognizedVenueDocIdForSource(
+  records: UnrecognizedVenueRecord[],
+  establishmentNormalized: string
+): string {
+  const normalized = normalizeVenueName(establishmentNormalized);
+  if (!normalized) return '';
+
+  const matchingRecords = records
+    .filter((record) => normalizeVenueName(record.establishmentNormalized || record.establishment || '') === normalized)
+    .filter((record) => String(record.id || '').trim());
+
+  const activeRecord = matchingRecords.find((record) =>
+    !isTerminalUnrecognizedStatus(String(record.status || 'pending'))
+  );
+  return String(activeRecord?.id || matchingRecords[0]?.id || '').trim();
+}
+
 function buildUnrecognizedVenueSample(
   input: QueueUnrecognizedVenueInput,
   establishmentNormalized: string
@@ -1869,11 +1886,19 @@ export async function queueUnrecognizedVenue(
     String(input.provinceHint || inferredHints.provinceHint || '').trim()
   );
   const aliasCandidates = dedupeStringList(getVenueAliasCandidates(venueName));
-  const docId = buildUnrecognizedVenueDocId(establishmentNormalized, cityHint, provinceHint);
-  const docRef = db.collection(COLLECTIONS.UNRECOGNIZED_VENUES).doc(docId);
-  const sample = buildUnrecognizedVenueSample(input, establishmentNormalized);
   const sourceUniqueId = asOptionalTrimmedString(input.sourceUniqueId);
   const sourceContentSignature = asOptionalTrimmedString(input.sourceContentSignature);
+  const existingSourceRecords = sourceUniqueId
+    ? await findUnrecognizedVenuesBySourceUniqueId(sourceUniqueId)
+    : [];
+  const existingSourceDocId = pickUnrecognizedVenueDocIdForSource(
+    existingSourceRecords,
+    establishmentNormalized
+  );
+  const docId =
+    existingSourceDocId || buildUnrecognizedVenueDocId(establishmentNormalized, cityHint, provinceHint);
+  const docRef = db.collection(COLLECTIONS.UNRECOGNIZED_VENUES).doc(docId);
+  const sample = buildUnrecognizedVenueSample(input, establishmentNormalized);
 
   let created = false;
 
