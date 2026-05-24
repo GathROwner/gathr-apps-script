@@ -299,6 +299,7 @@ export const processDatasetResume = onTaskDispatched(
       const { resumeProcessing } = await loadFileProcessor();
       const result = await resumeProcessing(fileId, {
         dryRun,
+        runId,
         config: buildParserConfig(parserMode, {
           maxExecutionMs: resumeMaxExecutionMs,
         }),

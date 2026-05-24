@@ -371,6 +371,7 @@ export async function resumeProcessing(
   options?: {
     dryRun?: boolean;
     config?: Partial<ProcessingConfig>;
+    runId?: string;
   }
 ): Promise<ProcessDatasetResponse> {
   logger.info('Resuming processing', { fileId });
@@ -379,6 +380,7 @@ export async function resumeProcessing(
     resumeFromCheckpoint: true,
     dryRun: options?.dryRun ?? false,
     config: options?.config,
+    runId: options?.runId,
   });
 }
 
