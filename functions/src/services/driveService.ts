@@ -597,6 +597,24 @@ function hasVenueHintKeyword(value: string): boolean {
   return /\b(company|brewing|brewery|taproom|centre|center|hall|arena|stadium|theatre|theater|cafe|restaurant|bar|pub|club|church|school|college|university|hotel|inn|market|gallery|museum|library|studio|plaza|room|house|legion|park)\b/i.test(value);
 }
 
+function normalizeVenueHintForComparison(value: string): string {
+  return cleanVenueHint(value).toLowerCase();
+}
+
+function applyOrganizerCasingToExplicitVenueHint(candidate: string, organizerName: string): string {
+  const cleanCandidate = cleanVenueHint(candidate);
+  const cleanOrganizer = cleanVenueHint(organizerName);
+  if (
+    cleanCandidate &&
+    cleanOrganizer &&
+    normalizeVenueHintForComparison(cleanCandidate) === normalizeVenueHintForComparison(cleanOrganizer)
+  ) {
+    return cleanOrganizer;
+  }
+
+  return cleanCandidate;
+}
+
 function isPlausibleVenueHint(
   candidate: string,
   organizerName: string,
@@ -606,8 +624,8 @@ function isPlausibleVenueHint(
   if (clean.length < 3 || clean.length > 90) return false;
   if (isLikelyCitySegment(clean) || isLikelyCityLevelLocation(clean)) return false;
 
-  const normalizedCandidate = clean.toLowerCase();
-  const normalizedOrganizer = cleanVenueHint(organizerName).toLowerCase();
+  const normalizedCandidate = normalizeVenueHintForComparison(clean);
+  const normalizedOrganizer = normalizeVenueHintForComparison(organizerName);
   if (!options.allowOrganizerMatch) {
     if (normalizedOrganizer && normalizedCandidate === normalizedOrganizer) return false;
     if (normalizedOrganizer && normalizedCandidate.includes(normalizedOrganizer)) return false;
@@ -676,12 +694,15 @@ function extractExplicitVenueHintFromFacebookEventDescription(description: strin
     .map(cleanVenueHint)
     .filter((candidate) => isPlausibleVenueHint(candidate, organizerName, { allowOrganizerMatch: true }));
   if (plausibleLineCandidates.length > 0) {
-    return plausibleLineCandidates[plausibleLineCandidates.length - 1];
+    return applyOrganizerCasingToExplicitVenueHint(
+      plausibleLineCandidates[plausibleLineCandidates.length - 1],
+      organizerName
+    );
   }
 
   const atHint = extractVenueHintFromFacebookEventDescription(raw, '');
   return isPlausibleVenueHint(atHint, organizerName, { allowOrganizerMatch: true })
-    ? cleanVenueHint(atHint)
+    ? applyOrganizerCasingToExplicitVenueHint(atHint, organizerName)
     : '';
 }
 

@@ -65,7 +65,8 @@ test('uses an explicit description location marker from a city-only Facebook Eve
       '',
       'This Friday AND next Friday from 8:00PM - 11:00PM, join us for a night of great music.',
       '',
-      '\u{1F4CD} Playmaker’s Club',
+      ' Kitchen open until 11:30PM',
+      ' Playmaker’s Club',
     ].join('\n'),
   }));
 
