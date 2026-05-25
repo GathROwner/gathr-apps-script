@@ -436,6 +436,7 @@ export interface ProcessDatasetRequest {
   parserMode?: 'legacy' | 'full5stage';
   rowIndexes?: number[];
   rowIndex?: number;
+  sourceUniqueIds?: string[];
   mediaOverrideUrl?: string;
 }
 

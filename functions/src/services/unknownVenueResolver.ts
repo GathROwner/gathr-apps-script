@@ -79,6 +79,7 @@ type FinalizeUnknownVenueRowReplayGroup = {
   fileName?: string;
   parserMode: 'legacy' | 'full5stage';
   rowIndexes: number[];
+  sourceUniqueIds?: string[];
   taskId?: string;
   status: 'queued' | 'deduped' | 'skipped' | 'failed';
   warning?: string;
@@ -189,11 +190,15 @@ function getRecordRowReplaySummary(
             )
           ).sort((a, b) => a - b)
         : [];
+      const sourceUniqueIds = Array.isArray(group.sourceUniqueIds)
+        ? Array.from(new Set(group.sourceUniqueIds.map((item) => String(item || '').trim()).filter(Boolean))).sort()
+        : [];
       return {
         fileId: String(group.fileId || '').trim(),
         fileName: String(group.fileName || '').trim() || undefined,
         parserMode: String(group.parserMode || 'full5stage') === 'legacy' ? 'legacy' : 'full5stage',
         rowIndexes,
+        sourceUniqueIds,
         taskId: String(group.taskId || '').trim() || undefined,
         status: (['queued', 'deduped', 'skipped', 'failed'].includes(String(group.status || ''))
           ? String(group.status)
@@ -3107,6 +3112,7 @@ type UnknownVenueRowReplayTarget = {
   fileName?: string;
   parserMode: 'legacy' | 'full5stage';
   rowIndex: number;
+  sourceUniqueId?: string;
 };
 
 function isTaskAlreadyExistsError(error: unknown): boolean {
@@ -3132,7 +3138,8 @@ function extractReplayTargetsFromSamples(
     const rowIndex = Math.trunc(Number(sample.rowIndex));
     if (!fileId || !Number.isFinite(rowIndex) || rowIndex < 0) continue;
     const parserMode = normalizeSampleParserMode(sample.parserMode);
-    const key = `${fileId}|${parserMode}|${rowIndex}`;
+    const sourceUniqueId = String(sample.sourceUniqueId || '').trim() || undefined;
+    const key = `${fileId}|${parserMode}|${sourceUniqueId || rowIndex}`;
     if (seen.has(key)) continue;
     seen.add(key);
     targets.push({
@@ -3140,6 +3147,7 @@ function extractReplayTargetsFromSamples(
       fileName: String(sample.fileName || '').trim() || undefined,
       parserMode,
       rowIndex,
+      sourceUniqueId,
     });
   }
 
@@ -3153,12 +3161,14 @@ function groupReplayTargets(
   fileName?: string;
   parserMode: 'legacy' | 'full5stage';
   rowIndexes: number[];
+  sourceUniqueIds: string[];
 }> {
   const groups = new Map<string, {
     fileId: string;
     fileName?: string;
     parserMode: 'legacy' | 'full5stage';
     rowIndexes: number[];
+    sourceUniqueIds: string[];
   }>();
 
   for (const target of targets) {
@@ -3166,6 +3176,7 @@ function groupReplayTargets(
     const existing = groups.get(key);
     if (existing) {
       existing.rowIndexes.push(target.rowIndex);
+      if (target.sourceUniqueId) existing.sourceUniqueIds.push(target.sourceUniqueId);
       if (!existing.fileName && target.fileName) existing.fileName = target.fileName;
       continue;
     }
@@ -3174,12 +3185,14 @@ function groupReplayTargets(
       fileName: target.fileName,
       parserMode: target.parserMode,
       rowIndexes: [target.rowIndex],
+      sourceUniqueIds: target.sourceUniqueId ? [target.sourceUniqueId] : [],
     });
   }
 
   return Array.from(groups.values()).map((group) => ({
     ...group,
     rowIndexes: Array.from(new Set(group.rowIndexes)).sort((a, b) => a - b),
+    sourceUniqueIds: Array.from(new Set(group.sourceUniqueIds)).sort(),
   }));
 }
 
@@ -3214,6 +3227,7 @@ async function queueSampleEventRowReplays(
       group.fileId,
       group.parserMode,
       group.rowIndexes.join(','),
+      group.sourceUniqueIds.join(','),
     ].join('|');
     const taskId = `uvreplay-${createHash('sha1').update(rawTaskId).digest('hex').slice(0, 32)}`;
 
@@ -3223,6 +3237,7 @@ async function queueSampleEventRowReplays(
           fileId: group.fileId,
           fileName: group.fileName,
           rowIndexes: group.rowIndexes,
+          sourceUniqueIds: group.sourceUniqueIds,
           parserMode: group.parserMode,
           dryRun: false,
           sourceDocId: docId || undefined,
@@ -3241,6 +3256,7 @@ async function queueSampleEventRowReplays(
         fileName: group.fileName,
         parserMode: group.parserMode,
         rowIndexes: group.rowIndexes,
+        sourceUniqueIds: group.sourceUniqueIds,
         taskId,
         status: 'queued',
       });
@@ -3252,6 +3268,7 @@ async function queueSampleEventRowReplays(
           fileName: group.fileName,
           parserMode: group.parserMode,
           rowIndexes: group.rowIndexes,
+          sourceUniqueIds: group.sourceUniqueIds,
           taskId,
           status: 'deduped',
         });
@@ -3266,6 +3283,7 @@ async function queueSampleEventRowReplays(
         fileId: group.fileId,
         parserMode: group.parserMode,
         rowIndexes: group.rowIndexes,
+        sourceUniqueIds: group.sourceUniqueIds,
         error: warning,
       });
       groups.push({
@@ -3273,6 +3291,7 @@ async function queueSampleEventRowReplays(
         fileName: group.fileName,
         parserMode: group.parserMode,
         rowIndexes: group.rowIndexes,
+        sourceUniqueIds: group.sourceUniqueIds,
         taskId,
         status: 'failed',
         warning,

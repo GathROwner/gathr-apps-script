@@ -369,6 +369,7 @@ export const processDatasetSelectedRows = onTaskDispatched(
       fileId,
       fileName,
       rowIndexes,
+      sourceUniqueIds,
       dryRun = false,
       parserMode = 'full5stage',
       sourceDocId,
@@ -377,6 +378,7 @@ export const processDatasetSelectedRows = onTaskDispatched(
       fileId?: string;
       fileName?: string;
       rowIndexes?: number[];
+      sourceUniqueIds?: string[];
       dryRun?: boolean;
       parserMode?: 'legacy' | 'full5stage';
       sourceDocId?: string;
@@ -388,6 +390,9 @@ export const processDatasetSelectedRows = onTaskDispatched(
       ? Array.from(new Set(rowIndexes.map((value) => Math.trunc(Number(value))).filter((value) => Number.isFinite(value) && value >= 0)))
           .sort((a, b) => a - b)
       : [];
+    const normalizedSourceUniqueIds = Array.isArray(sourceUniqueIds)
+      ? Array.from(new Set(sourceUniqueIds.map((value) => String(value || '').trim()).filter(Boolean)))
+      : [];
     const normalizedParserMode = parserMode === 'legacy' ? 'legacy' : 'full5stage';
 
     logger.setContext({
@@ -398,6 +403,7 @@ export const processDatasetSelectedRows = onTaskDispatched(
     logger.info('Processing selected rows from task queue', {
       fileName,
       rowIndexes: normalizedRowIndexes,
+      sourceUniqueIds: normalizedSourceUniqueIds,
       parserMode: normalizedParserMode,
       dryRun,
       triggeredBy,
@@ -410,8 +416,8 @@ export const processDatasetSelectedRows = onTaskDispatched(
       return;
     }
 
-    if (!normalizedRowIndexes.length) {
-      logger.warn('Selected rows task missing rowIndexes, skipping', { fileId: normalizedFileId });
+    if (!normalizedRowIndexes.length && !normalizedSourceUniqueIds.length) {
+      logger.warn('Selected rows task missing rowIndexes/sourceUniqueIds, skipping', { fileId: normalizedFileId });
       logger.clearContext('functionName', 'fileId', 'sourceDocId');
       return;
     }
@@ -430,6 +436,7 @@ export const processDatasetSelectedRows = onTaskDispatched(
           lockStatus: lock.lock?.status,
           fileId: normalizedFileId,
           rowIndexes: normalizedRowIndexes,
+          sourceUniqueIds: normalizedSourceUniqueIds,
         });
 
         // Allow Cloud Tasks retries to replay later once the active parse finishes.
@@ -450,6 +457,7 @@ export const processDatasetSelectedRows = onTaskDispatched(
         dryRun: Boolean(dryRun),
         config: buildParserConfig(normalizedParserMode),
         rowIndexes: normalizedRowIndexes,
+        sourceUniqueIds: normalizedSourceUniqueIds,
         runId,
       });
 
@@ -473,6 +481,7 @@ export const processDatasetSelectedRows = onTaskDispatched(
       logger.info('Selected rows replay complete', {
         fileId: normalizedFileId,
         rowIndexes: normalizedRowIndexes,
+        sourceUniqueIds: normalizedSourceUniqueIds,
         parserMode: normalizedParserMode,
         result,
       });
@@ -480,6 +489,7 @@ export const processDatasetSelectedRows = onTaskDispatched(
       logger.error('Selected rows replay task failed', error, {
         fileId: normalizedFileId,
         rowIndexes: normalizedRowIndexes,
+        sourceUniqueIds: normalizedSourceUniqueIds,
         parserMode: normalizedParserMode,
       });
 

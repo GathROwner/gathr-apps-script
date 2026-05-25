@@ -31,6 +31,7 @@ export async function processDatasetFile(
     dryRun?: boolean;
     config?: Partial<ProcessingConfig>;
     rowIndexes?: number[];
+    sourceUniqueIds?: string[];
     mediaOverrideUrl?: string;
     runId?: string;
   }
@@ -47,7 +48,10 @@ export async function processDatasetFile(
   try {
     // Check if already processed
     const isProcessed = await firestoreService.isDatasetProcessed(fileId);
-    const hasRowSelection = Boolean(options?.rowIndexes && options.rowIndexes.length > 0);
+    const hasRowSelection = Boolean(
+      (options?.rowIndexes && options.rowIndexes.length > 0) ||
+      (options?.sourceUniqueIds && options.sourceUniqueIds.length > 0)
+    );
     if (isProcessed && !hasRowSelection) {
       logger.info('File already processed', { fileId });
       return {
@@ -82,19 +86,21 @@ export async function processDatasetFile(
       };
     }
 
-    if (options?.rowIndexes && options.rowIndexes.length > 0) {
+    if (hasRowSelection) {
       logger.info('Processing selected rows override', {
-        rowIndexes: options.rowIndexes,
+        rowIndexes: options?.rowIndexes,
+        sourceUniqueIds: options?.sourceUniqueIds,
         dryRun: config.dryRun,
       });
       return processSelectedRows(
         rows,
         fileId,
         options?.fileName || fileName,
-        options.rowIndexes,
+        options?.rowIndexes || [],
+        options?.sourceUniqueIds || [],
         config,
-        options.mediaOverrideUrl,
-        options.runId
+        options?.mediaOverrideUrl,
+        options?.runId
       );
     }
 
@@ -233,15 +239,12 @@ async function processSelectedRows(
   fileId: string,
   fileName: string,
   rowIndexes: number[],
+  sourceUniqueIds: string[],
   config: ProcessingConfig,
   mediaOverrideUrl?: string,
   runId?: string
 ): Promise<ProcessDatasetResponse> {
-  const uniqueIndexes = Array.from(
-    new Set(rowIndexes.map((value) => Math.floor(value)))
-  )
-    .filter((value) => Number.isFinite(value) && value >= 0 && value < rows.length)
-    .sort((a, b) => a - b);
+  const uniqueIndexes = resolveSelectedRowIndexes(rows, rowIndexes, sourceUniqueIds);
 
   if (uniqueIndexes.length === 0) {
     return {
@@ -272,6 +275,7 @@ async function processSelectedRows(
     totalRows: rows.length,
     selectedCount: uniqueIndexes.length,
     selectedRows: uniqueIndexes,
+    sourceUniqueIds,
   });
 
   for (const rowIndex of uniqueIndexes) {
@@ -313,6 +317,34 @@ async function processSelectedRows(
     stats: batchManager.getStats(),
     nextBatchScheduled: false,
   };
+}
+
+export function resolveSelectedRowIndexes(
+  rows: RawRowData[],
+  rowIndexes: number[] = [],
+  sourceUniqueIds: string[] = []
+): number[] {
+  const normalizedSourceUniqueIds = new Set(
+    sourceUniqueIds
+      .map((value) => String(value || '').trim())
+      .filter(Boolean)
+  );
+
+  if (normalizedSourceUniqueIds.size > 0) {
+    const bySourceId = rows
+      .map((row, index) => normalizedSourceUniqueIds.has(String(row.uniqueId || '').trim()) ? index : -1)
+      .filter((index) => index >= 0);
+
+    if (bySourceId.length > 0) {
+      return Array.from(new Set(bySourceId)).sort((a, b) => a - b);
+    }
+  }
+
+  return Array.from(
+    new Set(rowIndexes.map((value) => Math.floor(value)))
+  )
+    .filter((value) => Number.isFinite(value) && value >= 0 && value < rows.length)
+    .sort((a, b) => a - b);
 }
 
 /**
