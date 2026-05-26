@@ -6,7 +6,8 @@ import { formatRunUrl } from '../services/apifyService.js';
 const adminApiKey = defineSecret('ADMIN_API_KEY');
 const DEFAULT_FACEBOOK_EVENTS_ACTOR_ID = 'UZBnerCFBo5FgGouO';
 const DEFAULT_FACEBOOK_EVENTS_SEARCH_QUERY = 'Charlottetown PEI';
-const TEST_MAX_EVENTS_CAP = 10;
+const DEFAULT_MAX_EVENTS_CAP = 25;
+const ABSOLUTE_MAX_EVENTS_CAP = 100;
 
 function isAdminAuthorized(request: { headers?: Record<string, unknown> }, expectedKey: string): boolean {
   if (!expectedKey) return true;
@@ -18,6 +19,15 @@ function parsePositiveInt(value: unknown, fallback: number, min: number, max: nu
   const parsed = Number(value);
   if (!Number.isFinite(parsed)) return fallback;
   return Math.max(min, Math.min(Math.trunc(parsed), max));
+}
+
+function getMaxEventsCap(): number {
+  return parsePositiveInt(
+    process.env.FACEBOOK_EVENTS_MAX_EVENTS_CAP,
+    DEFAULT_MAX_EVENTS_CAP,
+    1,
+    ABSOLUTE_MAX_EVENTS_CAP
+  );
 }
 
 function normalizeSearchQueries(value: unknown): string[] {
@@ -152,11 +162,12 @@ export const startFacebookEventsScrape = onRequest(
       }
 
       const requestedMaxEvents = Number(body.maxEvents);
+      const maxEventsCap = getMaxEventsCap();
       const maxEvents = parsePositiveInt(
         body.maxEvents,
-        TEST_MAX_EVENTS_CAP,
+        maxEventsCap,
         1,
-        TEST_MAX_EVENTS_CAP
+        maxEventsCap
       );
 
       const input: Record<string, unknown> = {
@@ -188,7 +199,7 @@ export const startFacebookEventsScrape = onRequest(
         datasetId: run.datasetId,
         runUrl: run.runUrl,
         input,
-        maxEventsCap: TEST_MAX_EVENTS_CAP,
+        maxEventsCap,
         note: 'Facebook Events Scraper run started. The Apify Drive export and apifyWebhook flow should pick up the resulting dataset when the actor finishes.',
       });
     } catch (error) {
