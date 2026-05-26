@@ -32,8 +32,15 @@ type ResolverConfig = {
   apifyActorId: string;
   apifyToken: string;
   apifyResultsLimit: number;
+  facebookUrlOverrides: FacebookUrlOverride[];
   emailWebhookUrl: string;
   emailWebhookKey: string;
+};
+
+type FacebookUrlOverride = {
+  venueName: string;
+  normalizedName: string;
+  facebookUrl: string;
 };
 
 type ResolverResult = {
@@ -274,6 +281,99 @@ function parseBooleanEnv(value: string | undefined, fallback: boolean): boolean 
   return fallback;
 }
 
+function parseFacebookUrlOverrideEntry(venueName: unknown, facebookUrl: unknown): FacebookUrlOverride | undefined {
+  const name = String(venueName || '').trim();
+  const normalizedName = normalizeVenueName(name);
+  const normalizedUrl = normalizeFetchedFacebookUrl(String(facebookUrl || '').trim());
+  if (!name || !normalizedName || !normalizedUrl) return undefined;
+
+  return {
+    venueName: name,
+    normalizedName,
+    facebookUrl: normalizedUrl,
+  };
+}
+
+function parseFacebookUrlOverridesFromJson(value: unknown): FacebookUrlOverride[] {
+  if (!value || typeof value !== 'object') return [];
+
+  const result: FacebookUrlOverride[] = [];
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      if (!item || typeof item !== 'object' || Array.isArray(item)) continue;
+      const entry = item as Record<string, unknown>;
+      const parsed = parseFacebookUrlOverrideEntry(
+        entry.venueName || entry.name || entry.establishment,
+        entry.facebookUrl || entry.url || entry.pageurl
+      );
+      if (parsed) result.push(parsed);
+    }
+    return result;
+  }
+
+  for (const [venueName, entryValue] of Object.entries(value as Record<string, unknown>)) {
+    if (typeof entryValue === 'string') {
+      const parsed = parseFacebookUrlOverrideEntry(venueName, entryValue);
+      if (parsed) result.push(parsed);
+      continue;
+    }
+
+    if (entryValue && typeof entryValue === 'object' && !Array.isArray(entryValue)) {
+      const entry = entryValue as Record<string, unknown>;
+      const parsed = parseFacebookUrlOverrideEntry(
+        entry.venueName || entry.name || venueName,
+        entry.facebookUrl || entry.url || entry.pageurl
+      );
+      if (parsed) result.push(parsed);
+    }
+  }
+
+  return result;
+}
+
+function parseFacebookUrlOverrides(value: string | undefined): FacebookUrlOverride[] {
+  const raw = String(value || '').trim();
+  if (!raw) return [];
+
+  try {
+    const decoded = JSON.parse(raw);
+    const parsed = parseFacebookUrlOverridesFromJson(decoded);
+    if (parsed.length) return dedupeFacebookUrlOverrides(parsed);
+  } catch {
+    // Fall through to the line/semicolon form.
+  }
+
+  const parsed = raw
+    .split(/[\r\n;]+/g)
+    .map((entry) => entry.trim())
+    .filter(Boolean)
+    .map((entry) => {
+      const separatorIndex = entry.includes('=')
+        ? entry.indexOf('=')
+        : entry.indexOf('|');
+      if (separatorIndex <= 0) return undefined;
+      return parseFacebookUrlOverrideEntry(
+        entry.slice(0, separatorIndex),
+        entry.slice(separatorIndex + 1)
+      );
+    })
+    .filter((entry): entry is FacebookUrlOverride => Boolean(entry));
+
+  return dedupeFacebookUrlOverrides(parsed);
+}
+
+function dedupeFacebookUrlOverrides(overrides: FacebookUrlOverride[]): FacebookUrlOverride[] {
+  const seen = new Set<string>();
+  const result: FacebookUrlOverride[] = [];
+  for (const override of overrides) {
+    const key = `${override.normalizedName}|${normalizeUrl(override.facebookUrl)}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    result.push(override);
+  }
+  return result;
+}
+
 function getResolverConfig(): ResolverConfig {
   return {
     enabled: parseBooleanEnv(process.env.UNKNOWN_VENUE_RESOLVER_ENABLED, false),
@@ -288,6 +388,7 @@ function getResolverConfig(): ResolverConfig {
     apifyActorId: String(process.env.UNKNOWN_VENUE_APIFY_ACTOR_ID || '').trim(),
     apifyToken: String(process.env.APIFY_TOKEN || '').trim(),
     apifyResultsLimit: Math.max(1, Math.min(Number(process.env.UNKNOWN_VENUE_APIFY_RESULTS_LIMIT || 10), 20)),
+    facebookUrlOverrides: parseFacebookUrlOverrides(process.env.UNKNOWN_VENUE_FACEBOOK_URL_OVERRIDES),
     emailWebhookUrl: String(process.env.UNKNOWN_VENUE_EMAIL_WEBHOOK_URL || '').trim(),
     emailWebhookKey: String(process.env.UNKNOWN_VENUE_EMAIL_WEBHOOK_KEY || '').trim(),
   };
@@ -507,6 +608,151 @@ function dedupeSuggestions(
   }
   result.sort((a, b) => b.confidence - a.confidence);
   return result.slice(0, 10);
+}
+
+function recordMatchesFacebookUrlOverride(
+  record: UnrecognizedVenueRecord,
+  override: FacebookUrlOverride
+): boolean {
+  const candidateNames = Array.from(new Set([
+    String(record.establishment || '').trim(),
+    ...(Array.isArray(record.aliasCandidates) ? record.aliasCandidates : []),
+  ].filter(Boolean)));
+
+  for (const name of candidateNames) {
+    const normalized = normalizeVenueName(name);
+    if (!normalized) continue;
+    if (normalized === override.normalizedName) return true;
+    if (calculateEnhancedSimilarity(name, override.venueName) >= 0.92) return true;
+  }
+
+  return false;
+}
+
+async function collectConfiguredFacebookUrlSuggestions(
+  record: UnrecognizedVenueRecord,
+  cfg: ResolverConfig
+): Promise<UnrecognizedVenueSuggestedMatch[]> {
+  const overrides = cfg.facebookUrlOverrides.filter((override) => recordMatchesFacebookUrlOverride(record, override));
+  if (!overrides.length) return [];
+
+  const rawName = String(record.establishment || '').trim();
+  const suggestions: UnrecognizedVenueSuggestedMatch[] = [];
+  for (const override of overrides) {
+    const displayUrl = (await resolveFacebookUrlForDisplay(override.facebookUrl, {
+      pageLabel: override.venueName || rawName,
+    })) || override.facebookUrl;
+
+    let suggestion: UnrecognizedVenueSuggestedMatch = {
+      venueName: rawName || override.venueName,
+      confidence: 1,
+      matchType: 'manual',
+      facebookUrl: displayUrl,
+      note: buildSuggestionNote([
+        ['facebookUrlSource', 'configured_override'],
+        ['facebookUrlVenueName', override.venueName],
+      ]),
+    };
+
+    suggestion = await linkSuggestionToExistingVenueByFacebookUrl(suggestion, {
+      docId: record.id,
+      unknownVenueName: rawName,
+      source: 'configured_facebook_url',
+    });
+
+    suggestions.push(suggestion);
+  }
+
+  return dedupeSuggestions(suggestions);
+}
+
+function mergeFacebookCandidateSuggestions(
+  baseSuggestions: UnrecognizedVenueSuggestedMatch[],
+  facebookCandidates: UnrecognizedVenueSuggestedMatch[],
+  options?: { appendUnmatched?: boolean }
+): UnrecognizedVenueSuggestedMatch[] {
+  if (!facebookCandidates.length) return baseSuggestions;
+
+  const merged = baseSuggestions.map((suggestion) => ({ ...suggestion }));
+  const appendUnmatched = Boolean(options?.appendUnmatched);
+
+  for (const candidate of facebookCandidates) {
+    const facebookUrl = String(candidate.facebookUrl || '').trim();
+    if (!facebookUrl) {
+      if (appendUnmatched) merged.push(candidate);
+      continue;
+    }
+
+    let bestIndex = -1;
+    let bestScore = 0;
+    for (let index = 0; index < merged.length; index += 1) {
+      const suggestion = merged[index];
+      const score = scoreFacebookCandidateSuggestionNameMatch(candidate.venueName, suggestion.venueName);
+      if (score > bestScore) {
+        bestIndex = index;
+        bestScore = score;
+      }
+    }
+
+    if (bestIndex >= 0 && bestScore >= 0.72) {
+      const target = merged[bestIndex];
+      const updatedNote = mergeSuggestionNotes(target.note, [
+        ['facebookUrlSource', candidate.matchType],
+        ['facebookUrlCandidate', candidate.venueName],
+      ]);
+      merged[bestIndex] = {
+        ...target,
+        facebookUrl: target.facebookUrl || facebookUrl,
+        venueId: target.venueId || candidate.venueId,
+        address: target.address || candidate.address,
+        confidence: Math.max(target.confidence, Math.min(1, candidate.confidence)),
+        note: updatedNote,
+      };
+      continue;
+    }
+
+    if (appendUnmatched) {
+      merged.push(candidate);
+    }
+  }
+
+  return dedupeSuggestions(merged);
+}
+
+function suggestionsNeedFacebookUrlEnrichment(suggestions: UnrecognizedVenueSuggestedMatch[]): boolean {
+  return suggestions.length > 0 && !suggestions.some((suggestion) => String(suggestion.facebookUrl || '').trim());
+}
+
+function scoreFacebookCandidateSuggestionNameMatch(candidateName: string, suggestionName: string): number {
+  const candidateNames = getFacebookCandidateNameVariants(candidateName);
+  const suggestionNames = getFacebookCandidateNameVariants(suggestionName);
+  let best = 0;
+  for (const candidate of candidateNames) {
+    for (const suggestion of suggestionNames) {
+      best = Math.max(best, calculateEnhancedSimilarity(candidate, suggestion));
+    }
+  }
+  return best;
+}
+
+function getFacebookCandidateNameVariants(value: string): string[] {
+  const raw = String(value || '').trim();
+  if (!raw) return [];
+
+  const variants = new Set<string>([raw]);
+  for (const separator of ['|', ' - ', ' – ', ' — ']) {
+    const [first] = raw.split(separator);
+    const trimmed = String(first || '').trim();
+    if (trimmed) variants.add(trimmed);
+  }
+
+  const withoutCitySuffix = raw
+    .replace(/\s+\|\s+.*$/g, '')
+    .replace(/\s+(?:charlottetown|summerside|stratford|cornwall|montague|souris)\s+(?:pe|pei|prince edward island)$/i, '')
+    .trim();
+  if (withoutCitySuffix) variants.add(withoutCitySuffix);
+
+  return Array.from(variants);
 }
 
 function getVenueDisplayName(venue: Record<string, unknown>): string {
@@ -1049,7 +1295,7 @@ async function linkSuggestionToExistingVenueByFacebookUrl(
   params: {
     docId?: string;
     unknownVenueName?: string;
-    source: 'places' | 'apify';
+    source: 'places' | 'apify' | 'configured_facebook_url';
   }
 ): Promise<UnrecognizedVenueSuggestedMatch> {
   const facebookUrl = String(suggestion.facebookUrl || '').trim();
@@ -4007,12 +4253,26 @@ export async function resolveUnrecognizedVenueById(docId: string): Promise<Resol
 
   const existingSuggestions = await collectExistingVenueSuggestions(latest, cfg);
   const placesSuggestions = await collectPlacesSuggestion(latest);
+  const configuredFacebookUrlSuggestions = await collectConfiguredFacebookUrlSuggestions(latest, cfg);
   const forceApifyForPageSubmission = isPageSubmissionVenueDiscoveryRecord(latest);
+  const baseSuggestions = mergeFacebookCandidateSuggestions(
+    dedupeSuggestions([
+      ...existingSuggestions,
+      ...placesSuggestions,
+    ]),
+    configuredFacebookUrlSuggestions,
+    { appendUnmatched: true }
+  );
   const shouldRunAutoApifySuggestions = cfg.apifyEnabled && (cfg.apifyAutoSuggestionsEnabled || forceApifyForPageSubmission);
+  const shouldRunFacebookUrlEnrichment =
+    cfg.apifyEnabled &&
+    !shouldRunAutoApifySuggestions &&
+    suggestionsNeedFacebookUrlEnrichment(baseSuggestions);
   if (cfg.apifyEnabled && !cfg.apifyAutoSuggestionsEnabled && !forceApifyForPageSubmission) {
     logger.info('Automatic Apify suggestions disabled for queued unknown-venue resolver pass', {
       docId: normalizedId,
       venueName: latest.establishment,
+      facebookUrlEnrichmentEnabled: shouldRunFacebookUrlEnrichment,
     });
   }
   if (cfg.apifyEnabled && forceApifyForPageSubmission) {
@@ -4021,16 +4281,24 @@ export async function resolveUnrecognizedVenueById(docId: string): Promise<Resol
       venueName: latest.establishment,
     });
   }
-  const apifySuggestions = shouldRunAutoApifySuggestions
+  if (shouldRunFacebookUrlEnrichment) {
+    logger.info('Running Apify as missing-Facebook-URL enrichment for unknown venue suggestions', {
+      docId: normalizedId,
+      venueName: latest.establishment,
+    });
+  }
+  const apifySuggestions = (shouldRunAutoApifySuggestions || shouldRunFacebookUrlEnrichment)
     ? await collectApifySuggestions(latest, cfg)
     : [];
   const pageSubmissionSourceSuggestion = await buildPageSubmissionApprovedUrlSuggestion(latest);
-  const suggestions = dedupeSuggestions([
-    ...(pageSubmissionSourceSuggestion ? [pageSubmissionSourceSuggestion] : []),
-    ...existingSuggestions,
-    ...placesSuggestions,
-    ...apifySuggestions,
-  ]);
+  const suggestionsWithPageSubmission = pageSubmissionSourceSuggestion
+    ? dedupeSuggestions([pageSubmissionSourceSuggestion, ...baseSuggestions])
+    : baseSuggestions;
+  const suggestions = mergeFacebookCandidateSuggestions(
+    suggestionsWithPageSubmission,
+    apifySuggestions,
+    { appendUnmatched: shouldRunAutoApifySuggestions }
+  );
 
   const decision = chooseNextStatusAndResolution(latest, suggestions, cfg);
 
@@ -4042,8 +4310,12 @@ export async function resolveUnrecognizedVenueById(docId: string): Promise<Resol
     lookupSummary: {
       existingSuggestions: existingSuggestions.length,
       placesSuggestions: placesSuggestions.length,
+      configuredFacebookUrlSuggestions: configuredFacebookUrlSuggestions.length,
       apifySuggestions: apifySuggestions.length,
-      apifyUsed: shouldRunAutoApifySuggestions,
+      apifyUsed: shouldRunAutoApifySuggestions || shouldRunFacebookUrlEnrichment,
+      apifyMode: shouldRunAutoApifySuggestions
+        ? 'suggestions'
+        : (shouldRunFacebookUrlEnrichment ? 'facebook_url_enrichment' : 'disabled'),
       note: decision.note,
     },
     ...(decision.status === 'manual_review' ? { manualReviewRequiredAt: new Date() } : {}),
