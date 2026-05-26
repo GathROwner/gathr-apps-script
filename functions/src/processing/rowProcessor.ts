@@ -3635,11 +3635,6 @@ function buildDuplicateEventUpdates(
     setField('externalLinks', mergedExternalLinks);
   }
 
-  const mergedMediaUrls = mergeDuplicateMediaUrls(existing, incoming);
-  if (mergedMediaUrls.length > 0 && valuesDiffer(existing.mediaUrls, mergedMediaUrls)) {
-    setField('mediaUrls', mergedMediaUrls);
-  }
-
   const normalizedIncomingMediaUrls = normalizeUrlList(incoming.mediaUrls);
   const incomingPreferredMediaUrl =
     normalizedIncomingMediaUrls.find((url) => isStorageManagedUrl(url)) ||
@@ -3651,11 +3646,21 @@ function buildDuplicateEventUpdates(
     asTrimmedString(incoming.relevantImageUrl) ||
     canonicalIncomingImage ||
     incomingPreferredMediaUrl;
+  const mergedMediaUrls = mergeDuplicateMediaUrls(existing, incoming);
+  if (mergedMediaUrls.length > 0 && valuesDiffer(existing.mediaUrls, mergedMediaUrls)) {
+    setField('mediaUrls', mergedMediaUrls);
+  }
 
   const promoteImages =
     descriptionImproved ||
     timeImproved ||
-    shouldPromoteCanonicalImageFromNewerDuplicate(existing, incoming, hasNewerSourceTimestamp);
+    shouldPromoteCanonicalImageFromNewerDuplicate(existing, incoming, hasNewerSourceTimestamp) ||
+    shouldAlignStructuredFacebookEventManagedImage(
+      existing,
+      incoming,
+      mergedMediaUrls,
+      incomingPreferredMediaUrl
+    );
 
   if (
     shouldReplaceImageUrl(
@@ -5262,6 +5267,34 @@ function mergeDuplicateMediaUrls(existing: EventData, incoming: EventData): stri
   }
 
   return mergeUniqueUrls(existing.mediaUrls, incoming.mediaUrls);
+}
+
+function shouldAlignStructuredFacebookEventManagedImage(
+  existing: EventData,
+  incoming: EventData,
+  mergedMediaUrls: string[],
+  incomingPreferredMediaUrl: string
+): boolean {
+  if (!isStructuredFacebookEventSource(incoming)) return false;
+  if (!incomingPreferredMediaUrl || !isStorageManagedUrl(incomingPreferredMediaUrl)) return false;
+
+  const mergedIncludesIncoming = mergedMediaUrls.includes(incomingPreferredMediaUrl);
+  const existingIncludesIncoming = normalizeUrlList(existing.mediaUrls).includes(incomingPreferredMediaUrl);
+  if (!mergedIncludesIncoming && !existingIncludesIncoming) return false;
+
+  if (mergedIncludesIncoming && valuesDiffer(existing.mediaUrls, mergedMediaUrls)) {
+    return true;
+  }
+
+  const existingCanonicalImages = [
+    asTrimmedString(existing.image),
+    asTrimmedString(existing.imageUrl),
+    asTrimmedString(existing.relevantImageUrl),
+  ].filter(Boolean);
+
+  return existingCanonicalImages.some(
+    (url) => isStorageManagedUrl(url) && url !== incomingPreferredMediaUrl
+  );
 }
 
 function isStorageManagedUrl(url: string): boolean {

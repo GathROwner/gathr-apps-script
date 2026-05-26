@@ -180,6 +180,53 @@ test('promotes a structured Facebook Events end date and end time over an older 
   assert.ok(preview.changedFields.includes('endTime'));
 });
 
+test('keeps structured Facebook Events managed media and canonical image fields aligned', () => {
+  const oldImage =
+    'https://storage.googleapis.com/gathr-uploaded-images/postimages/old-goju.webp';
+  const newImage =
+    'https://storage.googleapis.com/gathr-uploaded-images/postimages/new-goju.webp';
+
+  const preview = previewDuplicateMerge({
+    existingEvent: buildEvent({
+      uniqueId: '1552494202718548_1',
+      image: oldImage,
+      imageUrl: oldImage,
+      relevantImageUrl: oldImage,
+      mediaUrls: [oldImage],
+      sourceContentSignature: 'old-signature',
+      isRecurring: true,
+      recurringPattern: 'weekly_custom',
+      recurringDaysOfWeek: ['monday', 'wednesday'],
+      totalOccurrences: 4,
+      recurrenceUntilDate: '2026-06-03',
+    }),
+    incomingEvent: buildEvent({
+      uniqueId: '1552494199385215_1',
+      image: newImage,
+      imageUrl: newImage,
+      relevantImageUrl: newImage,
+      mediaUrls: [newImage],
+      sourceContentSignature: 'new-signature',
+      isRecurring: true,
+      recurringPattern: 'weekly_custom',
+      recurringDaysOfWeek: ['monday', 'wednesday'],
+      totalOccurrences: 3,
+      recurrenceUntilDate: '2026-06-03',
+      _sourceType: 'facebook_events_scraper_structured_row',
+    }),
+    venue: buildVenue(),
+  });
+
+  assert.deepEqual(preview.updates.mediaUrls, [newImage]);
+  assert.equal(preview.updates.image, newImage);
+  assert.equal(preview.updates.imageUrl, newImage);
+  assert.equal(preview.updates.relevantImageUrl, newImage);
+  assert.ok(preview.changedFields.includes('mediaUrls'));
+  assert.ok(preview.changedFields.includes('image'));
+  assert.ok(preview.changedFields.includes('imageUrl'));
+  assert.ok(preview.changedFields.includes('relevantImageUrl'));
+});
+
 test('routes explicit Downtown Charlottetown Facebook location as area review', () => {
   const row = buildRawRow('Location: Downtown Charlottetown');
   row.userName = 'Downtown Charlottetown';
