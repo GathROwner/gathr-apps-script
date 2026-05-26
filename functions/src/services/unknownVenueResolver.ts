@@ -3410,7 +3410,7 @@ type UnknownVenueRowReplayTarget = {
   fileId: string;
   fileName?: string;
   parserMode: 'legacy' | 'full5stage';
-  rowIndex: number;
+  rowIndex?: number;
   sourceUniqueId?: string;
 };
 
@@ -3435,9 +3435,12 @@ function extractReplayTargetsFromSamples(
   for (const sample of sampleEvents) {
     const fileId = String(sample.fileId || '').trim();
     const rowIndex = Math.trunc(Number(sample.rowIndex));
-    if (!fileId || !Number.isFinite(rowIndex) || rowIndex < 0) continue;
+    const hasRowIndex = Number.isFinite(rowIndex) && rowIndex >= 0;
+    const sourceUniqueId =
+      String(sample.sourceUniqueId || '').trim() ||
+      extractFacebookStableContentIdForHydration(sample.topLevelUrl);
+    if (!fileId || (!sourceUniqueId && !hasRowIndex)) continue;
     const parserMode = normalizeSampleParserMode(sample.parserMode);
-    const sourceUniqueId = String(sample.sourceUniqueId || '').trim() || undefined;
     const key = `${fileId}|${parserMode}|${sourceUniqueId || rowIndex}`;
     if (seen.has(key)) continue;
     seen.add(key);
@@ -3445,8 +3448,8 @@ function extractReplayTargetsFromSamples(
       fileId,
       fileName: String(sample.fileName || '').trim() || undefined,
       parserMode,
-      rowIndex,
-      sourceUniqueId,
+      ...(sourceUniqueId ? {} : { rowIndex }),
+      sourceUniqueId: sourceUniqueId || undefined,
     });
   }
 
@@ -3474,7 +3477,7 @@ function groupReplayTargets(
     const key = `${target.fileId}|${target.parserMode}`;
     const existing = groups.get(key);
     if (existing) {
-      existing.rowIndexes.push(target.rowIndex);
+      if (target.rowIndex !== undefined) existing.rowIndexes.push(target.rowIndex);
       if (target.sourceUniqueId) existing.sourceUniqueIds.push(target.sourceUniqueId);
       if (!existing.fileName && target.fileName) existing.fileName = target.fileName;
       continue;
@@ -3483,7 +3486,7 @@ function groupReplayTargets(
       fileId: target.fileId,
       fileName: target.fileName,
       parserMode: target.parserMode,
-      rowIndexes: [target.rowIndex],
+      rowIndexes: target.rowIndex !== undefined ? [target.rowIndex] : [],
       sourceUniqueIds: target.sourceUniqueId ? [target.sourceUniqueId] : [],
     });
   }
@@ -3507,7 +3510,7 @@ async function queueSampleEventRowReplays(
   if (!targets.length) {
     return {
       attempted: false,
-      warning: 'No sampled fileId/rowIndex entries were available to replay',
+      warning: 'No sampled fileId/rowIndex/sourceUniqueId entries were available to replay',
     };
   }
 
