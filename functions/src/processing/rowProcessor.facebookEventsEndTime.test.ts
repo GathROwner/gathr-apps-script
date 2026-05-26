@@ -6,6 +6,7 @@ import {
   isCityLevelFacebookEventLocation,
   previewDuplicateMerge,
   resolveFacebookEventEndDateTime,
+  resolveFacebookEventRecurrence,
 } from './rowProcessor.js';
 import { EventData, RawRowData, VenueData } from '../types/index.js';
 
@@ -93,6 +94,60 @@ test('resolves Facebook Events day-month end dates like 7 Jun', () => {
   assert.equal(result?.source, 'dateTimeSentence');
   assert.equal(result?.endDate, '2026-06-07');
   assert.equal(result?.endTime, '15:00');
+});
+
+test('detects multi-week Facebook Events class recurrence from description text', () => {
+  const row = buildRawRow(
+    'When: Wednesday, May 27, 2026 at 6:15 PM - 7:15 PM ADT\n' +
+      'Description:\n' +
+      "These classes take place at the Carrefour de L'Ile St. Jean at 5 Acadian Drive, Charlottetown on Monday and Wednesday nights from 6:15 to 7:15\n\n" +
+      'Winter session March 16th to April 8th, 2026\n' +
+      'Spring session April 13th to June 3rd, 2026'
+  );
+  row.facebookEventDescription =
+    "These classes take place at the Carrefour de L'Ile St. Jean at 5 Acadian Drive, Charlottetown on Monday and Wednesday nights from 6:15 to 7:15\n\n" +
+    'Winter session March 16th to April 8th, 2026\n' +
+    'Spring session April 13th to June 3rd, 2026';
+
+  const result = resolveFacebookEventRecurrence(row, { date: '2026-05-27', time: '18:15' });
+
+  assert.equal(result?.isRecurring, true);
+  assert.equal(result?.recurringPattern, 'weekly_custom');
+  assert.deepEqual(result?.recurringDaysOfWeek, ['monday', 'wednesday']);
+  assert.equal(result?.recurringWeekInterval, 1);
+  assert.equal(result?.totalOccurrences, 3);
+  assert.equal(result?.recurrenceUntilDate, '2026-06-03');
+});
+
+test('counts Facebook Events recurrence occurrences from the current occurrence forward', () => {
+  const row = buildRawRow(
+    'When: Monday, May 25, 2026 at 6:15 PM - 7:15 PM ADT\n' +
+      'Description:\n' +
+      "These classes take place at the Carrefour de L'Ile St. Jean at 5 Acadian Drive, Charlottetown on Monday and Wednesday nights from 6:15 to 7:15\n\n" +
+      'Spring session April 13th to June 3rd, 2026'
+  );
+  row.facebookEventDescription =
+    "These classes take place at the Carrefour de L'Ile St. Jean at 5 Acadian Drive, Charlottetown on Monday and Wednesday nights from 6:15 to 7:15\n\n" +
+    'Spring session April 13th to June 3rd, 2026';
+
+  const result = resolveFacebookEventRecurrence(row, { date: '2026-05-25', time: '18:15' });
+
+  assert.equal(result?.totalOccurrences, 4);
+  assert.equal(result?.recurrenceUntilDate, '2026-06-03');
+});
+
+test('does not infer recurrence from a single Facebook Events date range without weekday series cues', () => {
+  const row = buildRawRow(
+    'When: Saturday, May 30, 2026 at 1:00 PM - 4:00 PM ADT\n' +
+      'Description:\n' +
+      'Date: Saturday, May 30, 2026\nTime: 1 - 4 p.m.\nLocation: Victoria Park Cultural Pavillion'
+  );
+  row.facebookEventDescription =
+    'Date: Saturday, May 30, 2026\nTime: 1 - 4 p.m.\nLocation: Victoria Park Cultural Pavillion';
+
+  const result = resolveFacebookEventRecurrence(row, { date: '2026-05-30', time: '13:00' });
+
+  assert.equal(result, null);
 });
 
 test('promotes a structured Facebook Events end date and end time over an older single-day keeper', () => {

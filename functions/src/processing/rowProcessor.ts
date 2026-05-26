@@ -240,6 +240,16 @@ type FacebookEventEndResolution = {
   source: 'dateTimeSentence' | 'duration';
 };
 
+type FacebookEventRecurrenceResolution = {
+  isRecurring: true;
+  recurringPattern: ParserProcessedEvent['recurringPattern'];
+  recurringDaysOfWeek?: RecurringWeekday[];
+  recurringWeekInterval?: number;
+  totalOccurrences?: number;
+  recurrenceUntilDate?: string;
+  evidence: string;
+};
+
 function normalizeFacebookEventTimeText(value: unknown): string {
   return String(value || '')
     .replace(/[\u00a0\u202f]/g, ' ')
@@ -373,6 +383,270 @@ export function resolveFacebookEventEndDateTime(
   }
 
   return null;
+}
+
+const FACEBOOK_EVENT_WEEKDAY_TOKENS: Record<string, RecurringWeekday> = {
+  mon: 'monday',
+  monday: 'monday',
+  mondays: 'monday',
+  tue: 'tuesday',
+  tues: 'tuesday',
+  tuesday: 'tuesday',
+  tuesdays: 'tuesday',
+  wed: 'wednesday',
+  wednesday: 'wednesday',
+  wednesdays: 'wednesday',
+  thu: 'thursday',
+  thur: 'thursday',
+  thurs: 'thursday',
+  thursday: 'thursday',
+  thursdays: 'thursday',
+  fri: 'friday',
+  friday: 'friday',
+  fridays: 'friday',
+  sat: 'saturday',
+  saturday: 'saturday',
+  saturdays: 'saturday',
+  sun: 'sunday',
+  sunday: 'sunday',
+  sundays: 'sunday',
+};
+
+const FACEBOOK_EVENT_WEEKDAYS: RecurringWeekday[] = [
+  'sunday',
+  'monday',
+  'tuesday',
+  'wednesday',
+  'thursday',
+  'friday',
+  'saturday',
+];
+
+function normalizeFacebookEventRecurrenceText(value: unknown): string {
+  return normalizeFacebookEventTimeText(value)
+    .replace(/[\u2018\u2019]/g, "'")
+    .replace(/[(){}\[\]]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function normalizeFacebookEventWeekdayToken(value: unknown): RecurringWeekday | undefined {
+  const normalized = String(value || '')
+    .toLowerCase()
+    .replace(/[^a-z]/g, '');
+  return FACEBOOK_EVENT_WEEKDAY_TOKENS[normalized];
+}
+
+function extractFacebookEventRecurringDays(text: string): RecurringWeekday[] {
+  const normalized = normalizeFacebookEventRecurrenceText(text).toLowerCase();
+  const dayToken =
+    '(?:mondays?|tuesdays?|wednesdays?|thursdays?|fridays?|saturdays?|sundays?|mon|tue|tues|wed|thu|thur|thurs|fri|sat|sun)';
+  const listPattern = new RegExp(
+    `\\b(?:on\\s+|every\\s+|each\\s+|weekly\\s+)?(${dayToken}(?:\\s*,\\s*${dayToken})*(?:\\s*(?:and|&)\\s*${dayToken})+)\\b`,
+    'i'
+  );
+  const listMatch = normalized.match(listPattern);
+  const source = listMatch?.[1] || '';
+  if (!source) return [];
+
+  const tokenPattern = new RegExp(`\\b${dayToken}\\b`, 'gi');
+  const days = Array.from(source.matchAll(tokenPattern))
+    .map((match) => normalizeFacebookEventWeekdayToken(match[0]))
+    .filter((day): day is RecurringWeekday => Boolean(day));
+
+  return Array.from(new Set(days));
+}
+
+function buildFacebookEventDateFromParts(
+  monthToken: string,
+  dayToken: string,
+  year: number
+): string {
+  const month = FACEBOOK_EVENT_MONTHS[monthToken.replace(/\.$/, '').toLowerCase()] || 0;
+  const day = Number(dayToken);
+  if (!month || !Number.isFinite(day)) return '';
+  const parsed = DateTime.fromObject({ year, month, day }, { zone: FACEBOOK_EVENT_TIMEZONE });
+  return parsed.isValid ? parsed.toFormat('yyyy-MM-dd') : '';
+}
+
+function extractFacebookEventDateRanges(
+  text: string,
+  fallbackYear: number
+): Array<{ startDate: string; endDate: string; evidence: string }> {
+  const normalized = normalizeFacebookEventRecurrenceText(text);
+  if (!normalized) return [];
+
+  const month =
+    '(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:t|tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\\.?';
+  const day = '(\\d{1,2})(?:st|nd|rd|th)?';
+  const separator = '(?:-|to|through|thru|until|till)';
+  const pattern = new RegExp(
+    `\\b${month}\\s+${day}\\s*${separator}\\s*(?:${month}\\s+)?${day}(?:,?\\s*(20\\d{2}))?\\b`,
+    'gi'
+  );
+
+  const ranges: Array<{ startDate: string; endDate: string; evidence: string }> = [];
+  for (const match of normalized.matchAll(pattern)) {
+    const startMonth = match[1];
+    const startDay = match[2];
+    const endMonth = match[3] || startMonth;
+    const endDay = match[4];
+    const year = match[5] ? Number(match[5]) : fallbackYear;
+    const startDate = buildFacebookEventDateFromParts(startMonth, startDay, year);
+    let endDate = buildFacebookEventDateFromParts(endMonth, endDay, year);
+    if (startDate && endDate && endDate < startDate) {
+      endDate = buildFacebookEventDateFromParts(endMonth, endDay, year + 1);
+    }
+    if (startDate && endDate) {
+      ranges.push({
+        startDate,
+        endDate,
+        evidence: match[0],
+      });
+    }
+  }
+
+  return ranges;
+}
+
+function hasFacebookEventRecurringCue(text: string): boolean {
+  const normalized = normalizeFacebookEventRecurrenceText(text).toLowerCase();
+  return /\b(every|each|weekly|recurring|classes?|sessions?|program(?:me)?|course|takes?\s+place|take\s+place|nights?|evenings?|mornings?|afternoons?)\b/.test(normalized);
+}
+
+function patternFromRecurringWeekday(day: RecurringWeekday): ParserProcessedEvent['recurringPattern'] {
+  return `weekly_${day}` as ParserProcessedEvent['recurringPattern'];
+}
+
+function chooseFacebookEventDateRange(
+  ranges: Array<{ startDate: string; endDate: string; evidence: string }>,
+  occurrenceDate: string
+): { startDate: string; endDate: string; evidence: string } | undefined {
+  return ranges.find((range) => range.startDate <= occurrenceDate && occurrenceDate <= range.endDate) ||
+    ranges
+      .filter((range) => range.endDate >= occurrenceDate)
+      .sort((left, right) => left.startDate.localeCompare(right.startDate))[0];
+}
+
+function countFacebookEventOccurrences(
+  occurrenceDate: string,
+  recurrenceUntilDate: string | undefined,
+  recurringDaysOfWeek: RecurringWeekday[]
+): number | undefined {
+  if (!recurrenceUntilDate || recurringDaysOfWeek.length === 0) return undefined;
+
+  let cursor = DateTime.fromISO(occurrenceDate, { zone: FACEBOOK_EVENT_TIMEZONE }).startOf('day');
+  const end = DateTime.fromISO(recurrenceUntilDate, { zone: FACEBOOK_EVENT_TIMEZONE }).startOf('day');
+  if (!cursor.isValid || !end.isValid || end < cursor) return undefined;
+
+  const daySet = new Set(recurringDaysOfWeek);
+  let count = 0;
+  for (let guard = 0; guard < 3660 && cursor <= end; guard += 1) {
+    const weekday = FACEBOOK_EVENT_WEEKDAYS[cursor.weekday % 7];
+    if (weekday && daySet.has(weekday)) {
+      count += 1;
+    }
+    cursor = cursor.plus({ days: 1 });
+  }
+
+  return count > 0 ? count : undefined;
+}
+
+export function resolveFacebookEventRecurrence(
+  row: RawRowData,
+  localDateTime: { date: string; time: string }
+): FacebookEventRecurrenceResolution | null {
+  if (row.sourceScraperType !== 'events') return null;
+
+  const occurrenceDate = String(localDateTime.date || '').trim();
+  if (!occurrenceDate) return null;
+
+  const sourceText = [
+    row.facebookEventDescription,
+    row.text,
+  ]
+    .map((value) => String(value || '').trim())
+    .filter(Boolean)
+    .join('\n');
+  if (!sourceText || !hasFacebookEventRecurringCue(sourceText)) return null;
+
+  const recurringDaysOfWeek = extractFacebookEventRecurringDays(sourceText);
+  if (recurringDaysOfWeek.length === 0) return null;
+
+  const occurrence = DateTime.fromISO(occurrenceDate, { zone: FACEBOOK_EVENT_TIMEZONE });
+  const fallbackYear = occurrence.isValid ? occurrence.year : DateTime.now().setZone(FACEBOOK_EVENT_TIMEZONE).year;
+  const selectedRange = chooseFacebookEventDateRange(
+    extractFacebookEventDateRanges(sourceText, fallbackYear),
+    occurrenceDate
+  );
+
+  const recurrenceUntilDate =
+    selectedRange?.endDate && selectedRange.endDate >= occurrenceDate
+      ? selectedRange.endDate
+      : undefined;
+  const orderedRecurringDaysOfWeek = recurringDaysOfWeek.sort(
+    (left, right) => FACEBOOK_EVENT_WEEKDAYS.indexOf(left) - FACEBOOK_EVENT_WEEKDAYS.indexOf(right)
+  );
+  const totalOccurrences = countFacebookEventOccurrences(
+    occurrenceDate,
+    recurrenceUntilDate,
+    orderedRecurringDaysOfWeek
+  );
+
+  if (orderedRecurringDaysOfWeek.length === 1) {
+    return {
+      isRecurring: true,
+      recurringPattern: patternFromRecurringWeekday(orderedRecurringDaysOfWeek[0]),
+      recurringWeekInterval: 1,
+      totalOccurrences,
+      recurrenceUntilDate,
+      evidence: selectedRange?.evidence || orderedRecurringDaysOfWeek[0],
+    };
+  }
+
+  return {
+    isRecurring: true,
+    recurringPattern: 'weekly_custom',
+    recurringDaysOfWeek: orderedRecurringDaysOfWeek,
+    recurringWeekInterval: 1,
+    totalOccurrences,
+    recurrenceUntilDate,
+    evidence: selectedRange?.evidence || orderedRecurringDaysOfWeek.join(', '),
+  };
+}
+
+function facebookEventRecurrenceNeedsUpdate(
+  existingEvent: EventData | null | undefined,
+  recurrence: FacebookEventRecurrenceResolution | null
+): boolean {
+  if (!existingEvent || !recurrence) return false;
+
+  if (normalizeFlagState(existingEvent.isRecurring) !== 'yes') return true;
+
+  const existingPattern = normalizeRecurringPatternToken(existingEvent.recurringPattern);
+  if (existingPattern !== recurrence.recurringPattern) return true;
+
+  const expectedDays = normalizeRecurringWeekdayListValue(recurrence.recurringDaysOfWeek) || [];
+  if (expectedDays.length > 0) {
+    const existingDays = normalizeRecurringWeekdayListValue(existingEvent.recurringDaysOfWeek) || [];
+    if (existingDays.join('|') !== expectedDays.join('|')) return true;
+  }
+
+  const expectedInterval = normalizeRecurringWeekIntervalValue(recurrence.recurringWeekInterval) || 1;
+  const existingInterval = normalizeRecurringWeekIntervalValue(existingEvent.recurringWeekInterval) || 1;
+  if (existingInterval !== expectedInterval) return true;
+
+  const expectedTotal = parsePositiveIntegerValue(recurrence.totalOccurrences);
+  const existingTotal = parsePositiveIntegerValue(existingEvent.totalOccurrences);
+  if (expectedTotal !== undefined && (existingTotal === undefined || existingTotal < expectedTotal)) {
+    return true;
+  }
+
+  const expectedUntil = normalizeIsoDateValue(recurrence.recurrenceUntilDate);
+  const existingUntil = normalizeIsoDateValue(existingEvent.recurrenceUntilDate);
+  if (expectedUntil && (!existingUntil || existingUntil < expectedUntil)) return true;
+
+  return false;
 }
 
 function inferFacebookEventCategory(row: RawRowData): ParserProcessedEvent['category'] {
@@ -704,6 +978,7 @@ async function buildStructuredFacebookEventScraperEvents(
   const ticketSummary = extractFacebookEventTextValue(row.text, 'Tickets');
   const cleanDescription = String(row.facebookEventDescription || row.text || title).trim();
   const endResolution = resolveFacebookEventEndDateTime(row, localDateTime);
+  const recurrenceResolution = resolveFacebookEventRecurrence(row, localDateTime);
 
   const event: ParserProcessedEvent = {
     id: row.uniqueId,
@@ -725,8 +1000,12 @@ async function buildStructuredFacebookEventScraperEvents(
     relevantImageIndex: primaryImageUrl ? 0 : -1,
     venue: venueName || establishment,
     additionalLocation: '',
-    isRecurring: false,
-    recurringPattern: 'none',
+    isRecurring: recurrenceResolution?.isRecurring || false,
+    recurringPattern: recurrenceResolution?.recurringPattern || 'none',
+    recurringDaysOfWeek: recurrenceResolution?.recurringDaysOfWeek,
+    recurringWeekInterval: recurrenceResolution?.recurringWeekInterval,
+    totalOccurrences: recurrenceResolution?.totalOccurrences,
+    recurrenceUntilDate: recurrenceResolution?.recurrenceUntilDate,
     image: primaryImageUrl,
     relevantImageUrl: primaryImageUrl,
     mediaUrls: normalizedMediaUrls,
@@ -783,6 +1062,12 @@ async function buildStructuredFacebookEventScraperEvents(
     startTime: event.startTime,
     endDate: event.endDate,
     endTime: event.endTime,
+    isRecurring: event.isRecurring,
+    recurringPattern: event.recurringPattern,
+    recurringDaysOfWeek: event.recurringDaysOfWeek,
+    totalOccurrences: event.totalOccurrences,
+    recurrenceUntilDate: event.recurrenceUntilDate,
+    recurrenceEvidence: recurrenceResolution?.evidence,
     mediaCount: normalizedMediaUrls.length,
     sourceMediaCount: sourceMediaUrls.length,
     managedMediaCount: normalizedMediaUrls.length,
@@ -1213,6 +1498,8 @@ export async function processRow(
     if (!isDryRun && parserMode === 'full5stage' && row.sourceScraperType === 'events') {
       facebookEventSourceContentSignature = buildFacebookEventSourceContentSignature(row);
       if (facebookEventSourceContentSignature) {
+        const facebookEventLocalDateTime = utcToLocal(row.utcStartDate || row.timestamp || '');
+        const facebookEventRecurrence = resolveFacebookEventRecurrence(row, facebookEventLocalDateTime);
         if (venue) {
           const storedUniqueId = getStructuredFacebookEventStoredUniqueId(row);
           const existingEvent = storedUniqueId
@@ -1220,10 +1507,15 @@ export async function processRow(
             : null;
           reusableFacebookEventMediaUrls = getManagedMediaUrlsFromEvent(existingEvent);
           const existingSignature = asTrimmedString(existingEvent?.sourceContentSignature);
+          const needsRecurrenceUpdate = facebookEventRecurrenceNeedsUpdate(
+            existingEvent,
+            facebookEventRecurrence
+          );
           if (
             existingEvent &&
             existingSignature === facebookEventSourceContentSignature &&
-            reusableFacebookEventMediaUrls.length > 0
+            reusableFacebookEventMediaUrls.length > 0 &&
+            !needsRecurrenceUpdate
           ) {
             logger.info('Skipping unchanged Facebook Events source row', {
               rowIndex,
@@ -1237,6 +1529,18 @@ export async function processRow(
             result.skipped = true;
             batchManager.markRowSkipped(rowIndex, 'facebook_event_source_unchanged');
             return result;
+          }
+          if (needsRecurrenceUpdate) {
+            logger.info('Reprocessing unchanged Facebook Events row to apply recurrence metadata', {
+              rowIndex,
+              uniqueId: row.uniqueId,
+              storedUniqueId,
+              venueId: venue.id,
+              eventId: existingEvent?.id,
+              recurringPattern: facebookEventRecurrence?.recurringPattern,
+              recurringDaysOfWeek: facebookEventRecurrence?.recurringDaysOfWeek,
+              recurrenceUntilDate: facebookEventRecurrence?.recurrenceUntilDate,
+            });
           }
         } else if (cityLevelFacebookEventLocation) {
           const existingReview = await firestoreService.findCityLevelEventReviewByUniqueId(row.uniqueId || '');
