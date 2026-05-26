@@ -487,6 +487,7 @@ function isLikelyAddress(str: string): boolean {
     'restaurant',
     'bar',
     'pub',
+    'landing',
   ];
 
   return (
@@ -594,7 +595,7 @@ function isLikelyCitySegment(value: string): boolean {
 }
 
 function hasVenueHintKeyword(value: string): boolean {
-  return /\b(company|brewing|brewery|taproom|centre|center|hall|arena|stadium|theatre|theater|cafe|restaurant|bar|pub|club|church|school|college|university|hotel|inn|market|gallery|museum|library|studio|plaza|room|house|legion|park)\b/i.test(value);
+  return /\b(company|brewing|brewery|taproom|centre|center|hall|arena|stadium|theatre|theater|cafe|restaurant|bar|pub|club|church|school|college|university|hotel|inn|market|gallery|museum|library|studio|plaza|room|house|legion|park|landing)\b/i.test(value);
 }
 
 function normalizeVenueHintForComparison(value: string): string {
@@ -660,7 +661,7 @@ function extractVenueHintFromFacebookEventDescription(description: string, organ
   if (!raw) return '';
 
   const venueKeyword =
-    'company|brewing|brewery|taproom|centre|center|hall|arena|stadium|theatre|theater|cafe|restaurant|bar|pub|club|church|school|college|university|hotel|inn|market|gallery|museum|library|studio|plaza|room|house|legion|park';
+    'company|brewing|brewery|taproom|centre|center|hall|arena|stadium|theatre|theater|cafe|restaurant|bar|pub|club|church|school|college|university|hotel|inn|market|gallery|museum|library|studio|plaza|room|house|legion|park|landing';
   const pattern = new RegExp(
     `\\b(?:at|@)\\s+(?:the\\s+)?([A-Z][A-Za-z0-9&'\\u2019(). /-]{2,80}?\\b(?:${venueKeyword})\\b[A-Za-z0-9&'\\u2019(). /-]{0,40})(?=\\s+in\\s+|\\s+on\\s+|[,.;!?\\n]|$)`,
     'gi'
@@ -973,7 +974,9 @@ function extractRowData(
       `row_${rowIndex}_${Date.now()}`
   );
   const locationAddress =
-    isFacebookEvent && isLikelyAddress(contextualLocationName)
+    isFacebookEvent && inferredVenueHint && !specificEventLocationName
+      ? ''
+      : isFacebookEvent && isLikelyAddress(contextualLocationName)
       ? contextualLocationName
       : isFacebookEvent && isLikelyAddress(locationName)
         ? locationName

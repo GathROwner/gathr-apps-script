@@ -95,3 +95,27 @@ test('keeps organizer-only city Facebook Events rows in city-level review', asyn
   assert.equal(rows[0].facebookEventLocationIsCityLevel, true);
   assert.equal(rows[0].facebookEventOrganizerName, 'Discover Charlottetown');
 });
+
+test('uses a description venue ending in Landing instead of an organizer address', async () => {
+  const { rows } = await parseXlsxFile(buildFacebookEventsWorkbookBuffer({
+    id: '2002636110657952',
+    name: 'Hospice PEI Hike + Bike',
+    organizerName: 'Hospice PEI',
+    locationName: '119 Water Street, Charlottetown, PE, Canada, Prince Edward Island C1A 1A8',
+    contextualLocationName: '',
+    description: [
+      'Hospice PEI is thrilled to welcome you back to our in-person Hike & Bike on Saturday, June 6, 2026,',
+      'at Confederation Landing in Charlottetown from 1:00-3:00 PM.',
+      'Join us for an uplifting afternoon centered on movement, community, and connection.',
+    ].join(' '),
+  }));
+
+  assert.equal(rows.length, 1);
+  assert.equal(rows[0].sourceScraperType, 'events');
+  assert.equal(rows[0].userName, 'Confederation Landing');
+  assert.equal(rows[0].facebookEventLocationName, 'Confederation Landing');
+  assert.equal(rows[0].facebookEventLocationIsCityLevel, false);
+  assert.equal(rows[0].facebookEventOrganizerName, 'Hospice PEI');
+  assert.equal(rows[0].address, '');
+  assert.match(rows[0].text, /Location: 119 Water Street/);
+});
