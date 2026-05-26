@@ -250,6 +250,13 @@ type FacebookEventRecurrenceResolution = {
   evidence: string;
 };
 
+type SuspiciousFacebookEventTimeResolution = {
+  reason: string;
+  startTime: string;
+  endTime?: string;
+  evidence: string;
+};
+
 function normalizeFacebookEventTimeText(value: unknown): string {
   return String(value || '')
     .replace(/[\u00a0\u202f]/g, ' ')
@@ -612,6 +619,52 @@ export function resolveFacebookEventRecurrence(
     totalOccurrences,
     recurrenceUntilDate,
     evidence: selectedRange?.evidence || orderedRecurringDaysOfWeek.join(', '),
+  };
+}
+
+function parseNormalizedHour(value: unknown): number | null {
+  const match = String(value || '').trim().match(/^(\d{1,2}):([0-5]\d)$/);
+  if (!match) return null;
+
+  const hour = Number(match[1]);
+  return Number.isInteger(hour) && hour >= 0 && hour <= 23 ? hour : null;
+}
+
+const FACEBOOK_EVENT_EVENING_TIME_CUE_PATTERN =
+  /\b(?:night|tonight|evening|gala|dinner|supper|party|ball|concert|show|performance|reception|social|trivia|karaoke|dance|live music|open mic|paint night|art night|after dark|late night)\b/i;
+
+const FACEBOOK_EVENT_VALID_MORNING_CUE_PATTERN =
+  /\b(?:breakfast|brunch|morning|sunrise|run|walk|race|5k|10k|marathon|market|farmers market|yoga|fitness|workout|bootcamp|hike|bird|cleanup|clean-up|volunteer|coffee)\b/i;
+
+export function detectSuspiciousEarlyMorningFacebookEventTime(
+  row: RawRowData,
+  localDateTime = utcToLocal(row.utcStartDate || row.timestamp || '')
+): SuspiciousFacebookEventTimeResolution | null {
+  if (row.sourceScraperType !== 'events') return null;
+
+  const startHour = parseNormalizedHour(localDateTime.time);
+  if (startHour === null || startHour >= 8) return null;
+
+  const text = normalizeFacebookEventTimeText([
+    row.sharedPostText,
+    row.facebookEventDescription,
+    row.text,
+    row.userName,
+    row.pageName,
+  ].join('\n'));
+  if (!FACEBOOK_EVENT_EVENING_TIME_CUE_PATTERN.test(text)) return null;
+  if (FACEBOOK_EVENT_VALID_MORNING_CUE_PATTERN.test(text)) return null;
+
+  const endResolution = resolveFacebookEventEndDateTime(row, localDateTime);
+  const endHour = parseNormalizedHour(endResolution?.endTime);
+  if (endHour !== null && endHour > 10) return null;
+
+  const whenText = normalizeFacebookEventTimeText(extractFacebookEventTextValue(row.text, 'When'));
+  return {
+    reason: 'facebook_event_suspicious_early_morning_time',
+    startTime: localDateTime.time,
+    endTime: endResolution?.endTime,
+    evidence: whenText || `UTC start: ${row.utcStartDate || row.timestamp || ''}`,
   };
 }
 
@@ -1440,6 +1493,23 @@ export async function processRow(
 
     const parserMode = config?.parserMode || 'legacy';
     const isDryRun = config?.dryRun === true;
+
+    const suspiciousFacebookEventTime = detectSuspiciousEarlyMorningFacebookEventTime(row);
+    if (suspiciousFacebookEventTime) {
+      logger.warn('Skipping Facebook Events row with suspicious early-morning source time', {
+        rowIndex,
+        uniqueId: row.uniqueId,
+        facebookUrl: row.facebookUrl,
+        title: row.sharedPostText,
+        startTime: suspiciousFacebookEventTime.startTime,
+        endTime: suspiciousFacebookEventTime.endTime,
+        evidence: suspiciousFacebookEventTime.evidence,
+      });
+      result.success = true;
+      result.skipped = true;
+      batchManager.markRowSkipped(rowIndex, suspiciousFacebookEventTime.reason);
+      return result;
+    }
 
     const cityLevelFacebookEventLocation = isCityLevelFacebookEventLocation(row);
 
