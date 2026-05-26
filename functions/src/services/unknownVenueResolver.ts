@@ -1305,10 +1305,33 @@ async function linkSuggestionToExistingVenueByFacebookUrl(
   if (!existingVenue) return suggestion;
 
   const venueAny = existingVenue as unknown as Record<string, unknown>;
+  const existingVenueName = getVenueDisplayName(venueAny) || existingVenue.name || '';
+  if (shouldSkipFacebookUrlLinkDueToNameConflict(suggestion, existingVenueName, params)) {
+    logger.info('Skipped unknown-venue Facebook URL link due to candidate/existing name conflict', {
+      docId: params.docId,
+      unknownVenueName: params.unknownVenueName,
+      source: params.source,
+      candidateVenueName: suggestion.venueName,
+      existingVenueId: existingVenue.id,
+      existingVenueName,
+      facebookUrl,
+    });
+    return {
+      ...suggestion,
+      note: mergeSuggestionNotes(suggestion.note, [
+        ['facebookUrlLinkSkipped', 'candidate_existing_name_conflict'],
+        ['existingVenueId', existingVenue.id],
+        ['existingVenueName', existingVenueName],
+        ['facebookUrl', facebookUrl],
+        ['source', params.source],
+      ]) || suggestion.note,
+    };
+  }
+
   const linkedSuggestion: UnrecognizedVenueSuggestedMatch = {
     ...suggestion,
     venueId: existingVenue.id,
-    venueName: getVenueDisplayName(venueAny) || existingVenue.name || suggestion.venueName,
+    venueName: existingVenueName || suggestion.venueName,
     address: getVenueAddress(venueAny) || suggestion.address,
     facebookUrl: getVenueFacebookUrl(venueAny) || facebookUrl,
   };
@@ -1323,6 +1346,36 @@ async function linkSuggestionToExistingVenueByFacebookUrl(
   });
 
   return linkedSuggestion;
+}
+
+function shouldSkipFacebookUrlLinkDueToNameConflict(
+  suggestion: UnrecognizedVenueSuggestedMatch,
+  existingVenueName: string,
+  params: {
+    unknownVenueName?: string;
+    source: 'places' | 'apify' | 'configured_facebook_url';
+  }
+): boolean {
+  if (params.source === 'configured_facebook_url') return false;
+
+  const unknownName = String(params.unknownVenueName || '').trim();
+  const candidateName = String(suggestion.venueName || '').trim();
+  const matchedVenueName = String(existingVenueName || '').trim();
+  if (!unknownName || !candidateName || !matchedVenueName) return false;
+
+  const candidateLooksLikeUnknown =
+    calculateEnhancedSimilarity(unknownName, candidateName) >= 0.72 ||
+    candidateContainsUnknownNameTokens(unknownName, candidateName) ||
+    candidateExtendsUnknownNameByTokens(unknownName, candidateName);
+  if (!candidateLooksLikeUnknown) return false;
+
+  const matchedLooksLikeUnknown =
+    calculateEnhancedSimilarity(unknownName, matchedVenueName) >= 0.68 ||
+    candidateContainsUnknownNameTokens(unknownName, matchedVenueName) ||
+    candidateExtendsUnknownNameByTokens(unknownName, matchedVenueName);
+  if (matchedLooksLikeUnknown) return false;
+
+  return calculateEnhancedSimilarity(candidateName, matchedVenueName) < 0.55;
 }
 
 async function linkSuggestionToExistingVenueByPlaceId(
@@ -4082,6 +4135,118 @@ function deriveAggregatorAddressFromRowForHydration(
   return undefined;
 }
 
+function extractFacebookStableContentIdForHydration(value: unknown): string | undefined {
+  const raw = String(value || '').trim();
+  if (!raw) return undefined;
+  if (/^\d{8,}$/.test(raw)) return raw;
+
+  try {
+    const withProtocol = /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
+    const parsed = new URL(withProtocol);
+    if (!/(\.|^)facebook\.com$/i.test(parsed.hostname)) return undefined;
+    const path = String(parsed.pathname || '');
+    const pathMatch = path.match(/\/events\/(\d+)/i)
+      || path.match(/\/posts\/(\d+)/i)
+      || path.match(/\/videos\/(\d+)/i)
+      || path.match(/\/photos\/(?:[^/]+\/)?(\d+)/i);
+    if (pathMatch?.[1]) return pathMatch[1];
+
+    const storyFbid = parsed.searchParams.get('story_fbid') || parsed.searchParams.get('fbid');
+    if (storyFbid && /^\d{8,}$/.test(storyFbid)) return storyFbid;
+  } catch {
+    return undefined;
+  }
+
+  return undefined;
+}
+
+function addHydrationIdentityKey(keys: Set<string>, value: unknown): void {
+  const raw = String(value || '').trim();
+  if (!raw) return;
+
+  const stableId = extractFacebookStableContentIdForHydration(raw);
+  if (stableId) {
+    keys.add(`id:${stableId}`);
+  }
+
+  if (isLikelyFacebookPostPermalink(raw)) {
+    const normalized = normalizeUrl(raw);
+    if (normalized) keys.add(`url:${normalized}`);
+  }
+}
+
+function getSampleHydrationIdentityKeys(sample: UnrecognizedVenueSampleEvent): Set<string> {
+  const keys = new Set<string>();
+  addHydrationIdentityKey(keys, sample.sourceUniqueId);
+  addHydrationIdentityKey(keys, sample.topLevelUrl);
+  return keys;
+}
+
+function getRowHydrationIdentityKeys(row: Record<string, unknown>): Set<string> {
+  const keys = new Set<string>();
+  for (const key of ['uniqueId', 'facebookId', 'feedbackId', 'id', 'topLevelUrl', 'facebookUrl', 'url', 'inputUrl']) {
+    addHydrationIdentityKey(keys, row[key]);
+  }
+  return keys;
+}
+
+function setsIntersect(left: Set<string>, right: Set<string>): boolean {
+  for (const value of left) {
+    if (right.has(value)) return true;
+  }
+  return false;
+}
+
+function findHydrationRowForSample(
+  rows: Record<string, unknown>[] | undefined,
+  sample: UnrecognizedVenueSampleEvent,
+  rowIndex: number
+): { row?: Record<string, unknown>; matchedBy: 'stable_identity' | 'row_index' | 'none' } {
+  if (!rows?.length) return { matchedBy: 'none' };
+
+  const sampleKeys = getSampleHydrationIdentityKeys(sample);
+  if (sampleKeys.size > 0) {
+    for (const row of rows) {
+      if (setsIntersect(sampleKeys, getRowHydrationIdentityKeys(row))) {
+        return { row, matchedBy: 'stable_identity' };
+      }
+    }
+    return { matchedBy: 'none' };
+  }
+
+  const row = rows[rowIndex];
+  return row ? { row, matchedBy: 'row_index' } : { matchedBy: 'none' };
+}
+
+function deriveAggregatorAddressFromSampleTextForHydration(
+  sample: UnrecognizedVenueSampleEvent
+): string | undefined {
+  for (const value of [sample.descriptionPreview, sample.eventName]) {
+    const extracted = extractResolverCivicAddressFromText(value);
+    const normalized = normalizeAggregatorAddressForHydration(extracted);
+    if (normalized) return normalized;
+  }
+  return undefined;
+}
+
+function hydrationAddressesMatch(left: string | undefined, right: string | undefined): boolean {
+  const leftLoose = normalizeAddressLooseMatchKey(left);
+  const rightLoose = normalizeAddressLooseMatchKey(right);
+  if (leftLoose && rightLoose) return leftLoose === rightLoose;
+
+  const leftKey = normalizeAddressMatchKey(left);
+  const rightKey = normalizeAddressMatchKey(right);
+  return Boolean(leftKey && rightKey && leftKey === rightKey);
+}
+
+function shouldRepairHydratedAggregatorAddress(sample: UnrecognizedVenueSampleEvent): boolean {
+  const aggregatorAddress = String(sample.aggregatorAddress || '').trim();
+  if (!aggregatorAddress) return false;
+
+  const textAddress = deriveAggregatorAddressFromSampleTextForHydration(sample);
+  return Boolean(textAddress && !hydrationAddressesMatch(aggregatorAddress, textAddress));
+}
+
 async function hydrateSampleTopLevelUrls(
   record: UnrecognizedVenueRecord
 ): Promise<UnrecognizedVenueRecord> {
@@ -4096,7 +4261,10 @@ async function hydrateSampleTopLevelUrls(
     const aggregatorAddress = String(sample.aggregatorAddress || '').trim();
     const fileId = String(sample.fileId || '').trim();
     const rowIndex = Math.trunc(Number(sample.rowIndex));
-    return (!topLevelUrl || !aggregatorAddress) && Boolean(fileId) && Number.isFinite(rowIndex) && rowIndex >= 0;
+    return (!topLevelUrl || !aggregatorAddress || shouldRepairHydratedAggregatorAddress(sample))
+      && Boolean(fileId)
+      && Number.isFinite(rowIndex)
+      && rowIndex >= 0;
   });
   if (!needsBackfill) return record;
 
@@ -4107,7 +4275,9 @@ async function hydrateSampleTopLevelUrls(
   for (const sample of samples) {
     const topLevelUrl = String(sample.topLevelUrl || '').trim();
     const aggregatorAddress = String(sample.aggregatorAddress || '').trim();
-    if (topLevelUrl && aggregatorAddress) {
+    const textAggregatorAddress = deriveAggregatorAddressFromSampleTextForHydration(sample);
+    const shouldRepairAggregatorAddress = shouldRepairHydratedAggregatorAddress(sample);
+    if (topLevelUrl && aggregatorAddress && !shouldRepairAggregatorAddress) {
       hydratedSamples.push(sample);
       continue;
     }
@@ -4135,12 +4305,24 @@ async function hydrateSampleTopLevelUrls(
     }
 
     const parsed = rowCache.get(fileId);
-    const row = parsed?.rows?.[rowIndex] as Record<string, unknown> | undefined;
+    const { row, matchedBy } = findHydrationRowForSample(
+      parsed?.rows as Record<string, unknown>[] | undefined,
+      sample,
+      rowIndex
+    );
     const candidateTopLevelUrl = String(row?.topLevelUrl || row?.facebookUrl || '').trim();
     const candidateAggregatorAddress = deriveAggregatorAddressFromRowForHydration(row);
     const shouldHydrateTopLevelUrl = !topLevelUrl && isLikelyFacebookPostPermalink(candidateTopLevelUrl);
-    const shouldHydrateAggregatorAddress = !aggregatorAddress && Boolean(candidateAggregatorAddress);
-    if (!shouldHydrateTopLevelUrl && !shouldHydrateAggregatorAddress) {
+    const nextAggregatorAddress =
+      candidateAggregatorAddress ||
+      (matchedBy === 'none' ? textAggregatorAddress : undefined);
+    const shouldHydrateAggregatorAddress = !aggregatorAddress && Boolean(nextAggregatorAddress);
+    const shouldReplaceAggregatorAddress = Boolean(
+      aggregatorAddress &&
+      nextAggregatorAddress &&
+      !hydrationAddressesMatch(aggregatorAddress, nextAggregatorAddress)
+    );
+    if (!shouldHydrateTopLevelUrl && !shouldHydrateAggregatorAddress && !shouldReplaceAggregatorAddress) {
       hydratedSamples.push(sample);
       continue;
     }
@@ -4149,7 +4331,9 @@ async function hydrateSampleTopLevelUrls(
     hydratedSamples.push({
       ...sample,
       ...(shouldHydrateTopLevelUrl ? { topLevelUrl: candidateTopLevelUrl } : {}),
-      ...(shouldHydrateAggregatorAddress ? { aggregatorAddress: candidateAggregatorAddress } : {}),
+      ...(shouldHydrateAggregatorAddress || shouldReplaceAggregatorAddress
+        ? { aggregatorAddress: nextAggregatorAddress || textAggregatorAddress }
+        : {}),
     });
   }
 
