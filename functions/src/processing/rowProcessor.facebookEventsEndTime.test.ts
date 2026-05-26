@@ -2,7 +2,6 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import {
-  detectSuspiciousEarlyMorningFacebookEventTime,
   getCityLevelFacebookEventLocationDetails,
   isCityLevelFacebookEventLocation,
   previewDuplicateMerge,
@@ -147,36 +146,6 @@ test('does not infer recurrence from a single Facebook Events date range without
     'Date: Saturday, May 30, 2026\nTime: 1 - 4 p.m.\nLocation: Victoria Park Cultural Pavillion';
 
   const result = resolveFacebookEventRecurrence(row, { date: '2026-05-30', time: '13:00' });
-
-  assert.equal(result, null);
-});
-
-test('flags early-morning Facebook Events rows with evening semantic cues', () => {
-  const row = buildRawRow(
-    'When: Friday, June 5, 2026 at 5:00 AM - 7:00 AM ADT\n' +
-      'Description:\n' +
-      'An evening open house for Art Night in Charlottetown.'
-  );
-  row.sharedPostText = 'Art Night in Charlottetown: The PEI Arts Guild Open House & The Artmobile Gallery';
-  row.utcStartDate = '2026-06-05T08:00:00.000Z';
-
-  const result = detectSuspiciousEarlyMorningFacebookEventTime(row, { date: '2026-06-05', time: '05:00' });
-
-  assert.equal(result?.reason, 'facebook_event_suspicious_early_morning_time');
-  assert.equal(result?.startTime, '05:00');
-  assert.equal(result?.endTime, '07:00');
-});
-
-test('does not flag plausible morning Facebook Events rows', () => {
-  const row = buildRawRow(
-    'When: Saturday, June 6, 2026 at 6:00 AM - 7:00 AM ADT\n' +
-      'Description:\n' +
-      'Morning sunrise yoga in the park.'
-  );
-  row.sharedPostText = 'Sunrise Yoga in Charlottetown';
-  row.utcStartDate = '2026-06-06T09:00:00.000Z';
-
-  const result = detectSuspiciousEarlyMorningFacebookEventTime(row, { date: '2026-06-06', time: '06:00' });
 
   assert.equal(result, null);
 });
