@@ -4585,7 +4585,7 @@ export async function processPendingUnrecognizedVenues(
   // Do not auto-retry `failed` docs in the scheduler loop.
   // Repeated retries can repeatedly trigger external lookups (Places/Apify) and create cost.
   // Failed docs should be retried manually or re-queued after operator review.
-  const actionableStatuses = ['pending', 'candidate_found'] as const;
+  const actionableStatuses = ['pending', 'candidate_found', 'lookup_running'] as const;
   const candidates: UnrecognizedVenueRecord[] = [];
   const seen = new Set<string>();
 

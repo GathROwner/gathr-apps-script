@@ -640,7 +640,7 @@ export const scheduledUnknownVenueResolver = onSchedule(
   {
     schedule: 'every 5 minutes',
     region: 'northamerica-northeast1',
-    memory: '256MiB',
+    memory: '512MiB',
     timeoutSeconds: 300,
   },
   async () => {
