@@ -15,11 +15,16 @@ Current queue snapshot after Batch B:
 - `pending`, `candidate_found`, `lookup_running`: 0
 
 Review rules I am using:
+- Use the Gmail unknown-venue email as the intake and decision record; the cluster reports are secondary grouping tools only.
+- Before applying an email action or scripted equivalent, cross-check current Firestore state because old emails may be stale after a venue or alias has been created.
 - Do not create or resolve normal venues for city-level, street-level, route-level, or broad-area Facebook Event locations.
 - Do not accept fuzzy venue suggestions when the parsed venue is really the organizer, a city, a road route, or a nearby unrelated business.
 - Resolve existing venue aliases only when the observed venue text, address, Facebook URL, or source description clearly supports the match.
 - If the event itself is a store promo, recurring retail post, closure notice, or otherwise likely not app-worthy, do not resolve it just because the venue can be matched.
 - Keep uncertain items in `manual_review` until Craig confirms or we research them separately.
+
+Email-first packet log:
+- `docs/unknown-venue-email-first-review-packets-2026-05-27.md`
 
 ## Completed Actions
 
@@ -342,6 +347,47 @@ These are not safe to bulk-resolve even when the report bucket says `likely_exis
 - Verification: one-row `processDataset` replay for row `273` processed `1`, created `0`, updated `1`; event kept corrected venue address/coordinates.
 - Follow-up still pending: resolve safe remaining Evermoore unknown docs to this venue; hold `uv_d0b1032bd9cb181584a1729d` because its Georgetown/route wording is ambiguous.
 
+#### APM Centre
+- Unknown venue id: `uv_a63da539fc1d738b0e191342`
+- Action: `create_new`
+- Created venue id: `ItWg0uH2yXtETbhlepAJ`
+- Created venue: `APM Centre`, `35 Mercedes Dr, Cornwall, PE C0A 1H0, Canada`
+- Venue coordinates: `46.2357393, -63.2052504`
+- Venue Facebook: `https://www.facebook.com/p/APM-Centre-100063625111310`
+- Original post: `https://www.facebook.com/100043320621129/posts/1791809775606359`
+- Event result:
+  - Created `venues/ItWg0uH2yXtETbhlepAJ/events/mCsVC5ZCJGvhV6ZPyReC`
+  - Event: `APM Bylaws Meeting`
+  - Start/end: `2026-05-27 19:00-21:00`
+  - Managed image URL present.
+- Backups:
+  - `firebase/unknown-venue-apm-stratford-create-backup-2026-05-27T21-16-46-075Z.json`
+  - `firebase/unknown-venue-apm-stratford-event-address-repair-backup-2026-05-27T21-23-35-319Z.json`
+- Replay task: `uvreplay-e0d70f1b2ebadb249a4b3783b855a52f`
+- Verification: selected-row replay created one APM event. The replay initially carried the Milton Community Hall source-page address; the event was repaired to the APM venue address and the parser was patched so selected-row venue replays prefer the approved venue address when the row address is still an organizer fallback.
+- Follow-up: same source post also generated a separate `CMP` / `Car Show` unknown venue. Keep it on hold until the original context proves what `CMP` means.
+
+#### Stratford Town Centre
+- Unknown venue id: `uv_25358b4a9bcf7c001f6c63f3`
+- Action: `create_new`
+- Created venue id: `31MHpCb7juuQkKD5N98q`
+- Created venue: `Stratford Town Centre`, `234 Shakespeare Drive, Stratford, PE C1B 2V8`
+- Venue coordinates: `46.2265862, -63.08734429999999`
+- Venue Facebook/page URL: `https://facebook.com/townofstratford`
+- Added aliases: `Stratford Town Centre Gymnasium`, `Stratford Town Centre`, `Stratford Town Hall Gymnasium`, `Stratford Recreation Centre`
+- Original post: `https://www.facebook.com/100064856313650/posts/1453285933509937`
+- Event result:
+  - Created `venues/31MHpCb7juuQkKD5N98q/events/qKmR3jNE6mo56KFsH4Bk`
+  - Event: `Community Flea Market`
+  - Start/end: `2026-05-30 08:00-12:00`
+  - Ticket price: `$2.00`
+  - Managed image URLs present.
+- Backups:
+  - `firebase/unknown-venue-apm-stratford-create-backup-2026-05-27T21-16-46-075Z.json`
+  - `firebase/unknown-venue-apm-stratford-event-address-repair-backup-2026-05-27T21-23-35-319Z.json`
+- Replay task: `uvreplay-dc899a88c2cc6022112e18d7eeb6ea51`
+- Verification: selected-row replay created one event under Stratford Town Centre. The replay initially carried the Stratford Youth Centre organizer address; the event and venue coordinates were repaired to the Town Centre address, and the parser was patched to prevent this replay-address mismatch from recurring.
+
 #### Confederation Bridge work-zone update
 - Unknown venue id: `uv_8f0920358b9d1440a58a2769`
 - Action: `ignore`
@@ -357,6 +403,29 @@ These are not safe to bulk-resolve even when the report bucket says `likely_exis
 - Result: finalizer returned success; status is now `ignored`.
 - Status: finalized.
 
+#### Downtown Charlottetown participating locations discount-card promo
+- Unknown venue id: `uv_bce57c76fba91a9ce74261da`
+- Action: `ignore`
+- Email id: `19e6a8250a722d94`
+- Event: `Downtown Discount Card - minimum 10% off/savings`
+- Original post: `https://www.facebook.com/100064726384797/posts/1430608865773313`
+- Decision rationale: This is a discount-card/participating-locations promo, not a normal venue event. It should not create a city-level venue or a Downtown Charlottetown venue alias.
+- Backup: `firebase/unknown-venue-email-first-ignore-backup-2026-05-27T19-53-49-522Z.json`
+- Result: email ignore action returned success; status moved from `manual_review` to `ignored`.
+- Status: finalized.
+
+#### Glasgow Square Nova Scotia event
+- Unknown venue id: `uv_914500289a0fef992bdc174c`
+- Action: `ignore`
+- Email id: `19e6a8a5eb2596d1`
+- Event: `Luka Hall & Irish Millie Summer 2026`
+- Original post: `https://www.facebook.com/100063597751828/posts/1556648323131745`
+- Suggested candidate: `Glasgow Square Theatre`, `155 Riverside Pkwy, New Glasgow, NS B2H 5E1, Canada`
+- Decision rationale: The venue candidate appears real, but it is in Nova Scotia. Creating out-of-market venues from PEI artist travel posts would pollute the PEI app venue/event set.
+- Backup: `firebase/unknown-venue-email-first-ignore-backup-2026-05-27T19-53-49-522Z.json`
+- Result: email ignore action returned success; status moved from `manual_review` to `ignored`.
+- Status: finalized.
+
 ### Hold / Research
 
 #### APM Centre
@@ -365,7 +434,11 @@ These are not safe to bulk-resolve even when the report bucket says `likely_exis
 - Event: `APM Bylaws Meeting`
 - Date/time: `2026-05-27 19:00`
 - Suggested match: Google Places `APM Centre`, address `35 Mercedes Dr, Cornwall, PE C0A 1H0, Canada`
-- Hold reason: Looks like a legitimate venue, but the suggestion has no existing Firestore venue id. This is a likely create-new or data-linking case, not an alias resolution.
+- Original post review: schedule image explicitly says `APM Bylaws Meeting - APM Centre - 7 p.m.`, so APM Centre is the physical venue, not a Milton Community Hall organizer fallback.
+- Current Firestore venue search: no existing APM venue found.
+- Recommendation: `create_new`
+- Status: finalized; see Completed Actions.
+- Caveat: the meeting itself is a low-interest governance/community event. If those should be filtered from the app, that should be handled by content-quality filtering after venue resolution, not by pretending the venue is invalid.
 
 #### Farmers Bank at Rustico / Doucet House Museums
 - Unknown venue id: `uv_230eacdeaa564d7210c0ba05`
@@ -402,6 +475,20 @@ These are not safe to bulk-resolve even when the report bucket says `likely_exis
 - Event date/time: `2026-05-28 18:00`
 - Suggested match: `Stratford Town Hall`, address `234 Shakespeare Drive, Stratford, PE`
 - Hold reason: Likely legitimate venue, but no existing Firestore venue id. Needs create-new review or existing venue search.
+
+#### Stratford Town Centre Gymnasium
+- Unknown venue id: `uv_25358b4a9bcf7c001f6c63f3`
+- Observed venue: `Stratford Town Centre Gymnasium`
+- Event: `Community Flea Market`
+- Date/time: `2026-05-30 08:00`
+- Original post: `https://www.facebook.com/100064856313650/posts/1453285933509937`
+- Original post review: post text says the yard sale includes a massive flea market at Stratford Town Centre; embedded image says `Community Flea Market`, `Stratford Town Centre Gymnasium`, `8:00am to 12:00pm`, `Over 70 tables`.
+- Current Firestore venue search: existing `Stratford Youth Centre` is only the organizer and is located at `57 Bunbury Road`; no existing venue found for the Town Centre/Gymnasium at `234 Shakespeare Drive`.
+- Recommendation: `create_new`
+- Proposed canonical venue: `Stratford Town Centre`
+- Proposed aliases: `Stratford Town Centre Gymnasium`, `Stratford Town Hall Gymnasium`, `Stratford Recreation Centre`
+- Status: finalized; see Completed Actions.
+- Caveat: current email has no candidate suggestions and only an ignore button, so creation likely needs a manual/synthetic create flow rather than the current email action.
 
 #### The Lady Ball Charlottetown
 - Unknown venue id: `uv_23e0fafe201386f0dd0a3cc5`

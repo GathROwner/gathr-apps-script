@@ -87,6 +87,18 @@ test('uses the resolved venue address when an event-specific venue differs from 
   assert.equal(result, '192 Water St, Summerside, PE C1N 1B1');
 });
 
+test('uses the resolved venue address when selected-row replay overrides the row establishment', () => {
+  const result = resolveEventAddressForVenue({
+    itemAddress: '57 Bunbury Road, Stratford, PE, Canada',
+    rowAddress: '57 Bunbury Road, Stratford, PE, Canada',
+    venueAddress: '234 Shakespeare Drive, Stratford, PE C1B 2V8',
+    rowEstablishment: 'Stratford Town Centre Gymnasium',
+    canonicalVenueName: 'Stratford Town Centre',
+  });
+
+  assert.equal(result, '234 Shakespeare Drive, Stratford, PE C1B 2V8');
+});
+
 test('keeps an explicit event address when it does not look like the source row page address', () => {
   const result = resolveEventAddressForVenue({
     itemAddress: '192 Water St, Summerside, PE C1N 1B1',

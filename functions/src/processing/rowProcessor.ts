@@ -782,8 +782,13 @@ export function resolveEventAddressForVenue(params: {
     normalizedRowAddress &&
     normalizedItemAddress === normalizedRowAddress
   );
+  const venueAddressDiffersFromRowAddress = Boolean(
+    normalizedRowAddress &&
+    normalizeAddressForFallbackComparison(venueAddress) &&
+    normalizeAddressForFallbackComparison(venueAddress) !== normalizedRowAddress
+  );
 
-  if (resolvedToDifferentVenue && itemAddressLooksLikeRowFallback) {
+  if (itemAddressLooksLikeRowFallback && (resolvedToDifferentVenue || venueAddressDiffersFromRowAddress)) {
     return venueAddress;
   }
 
