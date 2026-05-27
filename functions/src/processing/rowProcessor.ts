@@ -738,6 +738,58 @@ function normalizeSignatureText(value: unknown): string {
   return String(value || '').replace(/\s+/g, ' ').trim();
 }
 
+function normalizeAddressForFallbackComparison(value: unknown): string {
+  return String(value || '')
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/\b[a-z]\d[a-z]\s*\d[a-z]\d\b/gi, ' ')
+    .replace(/\b(street|st)\b/g, 'st')
+    .replace(/\b(road|rd)\b/g, 'rd')
+    .replace(/\b(avenue|ave)\b/g, 'ave')
+    .replace(/\b(drive|dr)\b/g, 'dr')
+    .replace(/\b(lane|ln)\b/g, 'ln')
+    .replace(/\b(canada)\b/g, ' ')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+export function resolveEventAddressForVenue(params: {
+  itemAddress?: unknown;
+  rowAddress?: unknown;
+  venueAddress?: unknown;
+  rowEstablishment?: unknown;
+  canonicalVenueName?: unknown;
+}): string | undefined {
+  const itemAddress = String(params.itemAddress || '').trim();
+  const rowAddress = String(params.rowAddress || '').trim();
+  const venueAddress = String(params.venueAddress || '').trim();
+  if (!venueAddress) return itemAddress || undefined;
+  if (!itemAddress) return venueAddress;
+
+  const normalizedItemAddress = normalizeAddressForFallbackComparison(itemAddress);
+  const normalizedRowAddress = normalizeAddressForFallbackComparison(rowAddress);
+  const normalizedRowEstablishment = normalizeVenueName(String(params.rowEstablishment || '').trim());
+  const normalizedCanonicalVenueName = normalizeVenueName(String(params.canonicalVenueName || '').trim());
+  const resolvedToDifferentVenue = Boolean(
+    normalizedRowEstablishment &&
+    normalizedCanonicalVenueName &&
+    normalizedRowEstablishment !== normalizedCanonicalVenueName
+  );
+  const itemAddressLooksLikeRowFallback = Boolean(
+    normalizedItemAddress &&
+    normalizedRowAddress &&
+    normalizedItemAddress === normalizedRowAddress
+  );
+
+  if (resolvedToDifferentVenue && itemAddressLooksLikeRowFallback) {
+    return venueAddress;
+  }
+
+  return itemAddress;
+}
+
 function normalizeSignatureStringList(values: unknown): string[] {
   return normalizeUrlList(Array.isArray(values) ? values.map(String) : [])
     .map((value) => normalizeSignatureText(value))
@@ -2614,6 +2666,41 @@ async function processFullParserEvent(
         ? parsedEstablishment
         : ''
     );
+  const venueAddress = String((venue as unknown as Record<string, unknown>).address || '').trim();
+  const resolvedAddress = resolveEventAddressForVenue({
+    itemAddress: item.address,
+    rowAddress: row.address,
+    venueAddress,
+    rowEstablishment: establishment,
+    canonicalVenueName,
+  });
+  const rawItemAddress = String(item.address || '').trim();
+  if (rawItemAddress && venueAddress && resolvedAddress === venueAddress && rawItemAddress !== venueAddress) {
+    logger.info('Using resolved venue address instead of row fallback address', {
+      rowIndex,
+      itemName: name,
+      rowEstablishment: establishment,
+      resolvedVenueId: venue.id,
+      resolvedVenueName: canonicalVenueName,
+      rowAddress: row.address || '',
+      itemAddress: rawItemAddress,
+      venueAddress,
+    });
+  }
+  const venueLatitude = (venue as unknown as Record<string, unknown>).latitude;
+  const venueLongitude = (venue as unknown as Record<string, unknown>).longitude;
+  const resolvedLatitude =
+    item.latitude !== undefined && item.latitude !== null && item.latitude !== ''
+      ? item.latitude
+      : resolvedAddress && venueAddress && resolvedAddress === venueAddress
+        ? venueLatitude
+        : undefined;
+  const resolvedLongitude =
+    item.longitude !== undefined && item.longitude !== null && item.longitude !== ''
+      ? item.longitude
+      : resolvedAddress && venueAddress && resolvedAddress === venueAddress
+        ? venueLongitude
+        : undefined;
 
   const eventData = {
     uniqueId: `${row.uniqueId || item.id || ''}_${item._pipelineIndex || itemIndex + 1}`,
@@ -2656,7 +2743,7 @@ async function processFullParserEvent(
     isEvent: item.isEvent || undefined,
     isFoodSpecial: item.isFoodSpecial || undefined,
     name: name || undefined,
-    address: String(item.address || '').trim() || undefined,
+    address: resolvedAddress,
     ticketPrice: String(item.ticketPrice || '').trim() || undefined,
     ticketLink: String(item.ticketLink || '').trim() || undefined,
     ticketsBuyUrl: String(item.ticketsBuyUrl || row.ticketsBuyUrl || '').trim() || undefined,
@@ -2679,8 +2766,8 @@ async function processFullParserEvent(
     relevantImageUrl: resolvedRelevantImage,
     sharedPostThumbnail: String(item.sharedPostThumbnail || '').trim() || undefined,
     cleanedFacebookUrl: String(item.cleanedFacebookUrl || '').trim() || undefined,
-    latitude: item.latitude,
-    longitude: item.longitude,
+    latitude: resolvedLatitude,
+    longitude: resolvedLongitude,
     city: String(item.city || '').trim() || undefined,
     streetAddress: String(item.streetAddress || '').trim() || undefined,
     timeResolution: item.timeResolution,

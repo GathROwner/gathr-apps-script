@@ -5,6 +5,7 @@ import {
   getCityLevelFacebookEventLocationDetails,
   isCityLevelFacebookEventLocation,
   previewDuplicateMerge,
+  resolveEventAddressForVenue,
   resolveFacebookEventEndDateTime,
   resolveFacebookEventRecurrence,
 } from './rowProcessor.js';
@@ -72,6 +73,30 @@ test('resolves a Facebook Events explicit multi-day range from the structured Wh
   assert.equal(result?.source, 'dateTimeSentence');
   assert.equal(result?.endDate, '2026-05-23');
   assert.equal(result?.endTime, '20:00');
+});
+
+test('uses the resolved venue address when an event-specific venue differs from the source row page', () => {
+  const result = resolveEventAddressForVenue({
+    itemAddress: '125 Heather Moyse Dr, Summerside, PE C1N 5Y8, Canada',
+    rowAddress: '125 Heather Moyse Drive, Summerside, PE C1N 5Y8, Canada',
+    venueAddress: '192 Water St, Summerside, PE C1N 1B1',
+    rowEstablishment: 'Downtown Summerside',
+    canonicalVenueName: 'Evermoore Brewing Co.',
+  });
+
+  assert.equal(result, '192 Water St, Summerside, PE C1N 1B1');
+});
+
+test('keeps an explicit event address when it does not look like the source row page address', () => {
+  const result = resolveEventAddressForVenue({
+    itemAddress: '192 Water St, Summerside, PE C1N 1B1',
+    rowAddress: '125 Heather Moyse Drive, Summerside, PE C1N 5Y8, Canada',
+    venueAddress: '200 Water St, Summerside, PE',
+    rowEstablishment: 'Downtown Summerside',
+    canonicalVenueName: 'Evermoore Brewing Co.',
+  });
+
+  assert.equal(result, '192 Water St, Summerside, PE C1N 1B1');
 });
 
 test('uses Facebook Events duration as a fallback when the structured When text lacks an end time', () => {
