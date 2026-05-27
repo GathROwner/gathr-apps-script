@@ -149,6 +149,21 @@ Short-link token documents used by the backend email action route.
 - `UNKNOWN_VENUE_EMAIL_WEBHOOK_KEY`
 - `PEI_RESTAURANTS_GDRIVE_FILE_ID`
 
+### Resolver Throughput Note
+
+As of May 27, 2026, production intentionally uses:
+
+- `UNKNOWN_VENUE_RESOLVER_BATCH_LIMIT=15`
+- `scheduledUnknownVenueResolver` still runs every 5 minutes
+
+Operational meaning:
+
+- The resolver still sends one manual-review email per unknown venue; the batch size only changes how quickly those emails arrive.
+- `15` is suitable for normal daily volume and for moderate catch-up bursts.
+- A one-time backlog catch-up of roughly 200 old `lookup_running` docs drained successfully after raising the scheduled batch size from `3` to `15`.
+- Do not casually raise this to `25`: a manual 25-item batch hit the 300-second upstream timeout, even though some docs still moved to `manual_review` before the timeout.
+- If another large backfill creates a big backlog, prefer controlled single-doc/manual waves with limited concurrency over pushing the scheduled batch size past `15`.
+
 ### Backend (email bridge / action route)
 
 - `BASE_URL`
