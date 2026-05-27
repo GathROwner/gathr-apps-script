@@ -198,6 +198,70 @@ Email-first packet log:
   - Original row top-level URL: `https://www.facebook.com/100063704492205/posts/1596693799130755`
 - Status: finalized and replay verified.
 
+### Batch C - Email-first venue creation, aliasing, and stale-address repair
+
+#### Farmers Bank / Doucet House Museums
+- Unknown venue id: `uv_230eacdeaa564d7210c0ba05`
+- Action: `create_new`
+- Created venue id: `xYWyGtI1ymMdlEB81QHP`
+- Venue name: `The Farmers' Bank of Rustico & Doucet House Museums`
+- Address: `2188 Church Rd, Rustico, PE C0A 1N0, Canada`
+- Facebook: `https://www.facebook.com/farmers.rustico`
+- Result: venue created and selected-row replay queued. No event doc was created from the replayed row, so this remains a venue-only creation for now.
+
+#### Crapaud Public Library
+- Unknown venue id: `uv_bf97847c06731379dd9f5296`
+- Action: `create_new`
+- Created venue id: `taUCO5DyhUoJiX0whx2X`
+- Venue name: `Crapaud Public Library`
+- Address: `20424 PE-1, Crapaud, PE C0A 1J0, Canada`
+- Result: venue created and two selected-row replays queued. No event doc was created from the replayed rows, so this remains a venue-only creation for now.
+
+#### Stratford Town Hall variants
+- Unknown venue ids: `uv_e44457f825c084ac074193a7`, `uv_8c5e6523e5a2409167f533b4`
+- Action: `resolve_existing`
+- Resolved venue id: `31MHpCb7juuQkKD5N98q`
+- Aliases added include `Stratford Town Hall` and `Stratford Town Hall, 234 Shakespeare Drive, Stratford`.
+- Repair result:
+  - `venues/31MHpCb7juuQkKD5N98q/events/TP4f97oJpyCZhC0B1xbY`
+  - Event: `Chronic Pain Strategy Focus Group (Queens County)`
+  - Address corrected from the stale PEI Preserve address to `234 Shakespeare Drive, Stratford, PE C1B 2V8`
+  - `additionalLocation` cleared because `Stratford Town Hall` is a venue alias, not a separate sub-location.
+- Guardrail: `Stratford Town Centre Gymnasium` is still preserved as a sub-location label when present.
+
+#### Salt & Soul
+- Unknown venue id: `uv_cd5309d9d172fb4f782733eb`
+- Action: `resolve_existing`
+- Resolved venue id: `slug_saltandsolpei`
+- Alias added: `Salt & Soul`
+- Code fix: duplicate-event merges can now replace stale source-page addresses with the resolved venue address, and exact venue aliases are not kept as fake `additionalLocation` values.
+- Verified event docs now use Salt & Sol's venue address and have blank `additionalLocation`:
+  - `venues/slug_saltandsolpei/events/IH1qX7hiB6HAyTEzV8GF` - `Salsa Night`, `2026-05-28`
+  - `venues/slug_saltandsolpei/events/VB5GGEk54qd5RXQGUHSH` - `Salsa Night`, `2026-05-21`
+  - `venues/slug_saltandsolpei/events/M8E5rOpFiu6PVvzH1bng` - `DJ Mojo`, `2026-05-16`
+
+#### PEI Preserve Company
+- Unknown venue ids: `uv_ff7068cff1bf182bfa8726ae`, `uv_00b14eb846caa5a0c0db26ff`
+- Action: `resolve_existing`
+- Resolved venue id: `fb_100064655410415`
+- Metadata repaired:
+  - PEI Preserve Facebook URL corrected to `https://www.facebook.com/PEIPreserveCompany`
+  - PEI Preserve address corrected to `2841 New Glasgow Rd, New Glasgow, PE C0A 1N0, Canada`
+  - New Glasgow Lobster Suppers Facebook URL restored to its own page/profile instead of PEI Preserve.
+- Verified Brunch for Wishes docs under PEI Preserve now use the correct venue address and blank `additionalLocation`.
+- Deleted false doc:
+  - `venues/fb_100064655410415/events/CjPoC60EtcmW05KCICSf`
+  - Reason: GovPE virtual consultation was incorrectly attached to PEI Preserve while the venue carried stale GovPE metadata.
+
+#### Batch C backups and replay notes
+- Unknown-venue finalization backup: `firebase/unknown-venue-batch-c-backup-2026-05-27T22-29-08-412Z.json`
+- Stale-doc cleanup backup: `firebase/stale-venue-address-doc-cleanup-backup-2026-05-27T23-29-51-184Z.json`
+- Selected-row queue status after repairs: empty.
+- Test coverage added:
+  - venue alias with source-page fallback address resolves to the venue address.
+  - duplicate merge replaces stale source-page addresses when the incoming parse has the resolved venue address.
+  - sub-location aliases such as `Gymnasium` are preserved.
+
 ## Current / Future Items Not Auto-Resolved
 
 These are not safe to bulk-resolve even when the report bucket says `likely_existing_alias_or_match`.

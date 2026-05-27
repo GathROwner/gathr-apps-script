@@ -99,6 +99,79 @@ test('uses the resolved venue address when selected-row replay overrides the row
   assert.equal(result, '234 Shakespeare Drive, Stratford, PE C1B 2V8');
 });
 
+test('uses the resolved venue address when the item names a known venue alias but carries a source-page address', () => {
+  const result = resolveEventAddressForVenue({
+    itemAddress: '1 Weymouth Street, Charlottetown, PE, Canada, C1A7M8',
+    rowAddress: '',
+    venueAddress: '2 Pownal Street 2nd Floor, Charlottetown, PE, Canada, Prince Edward Island',
+    rowEstablishment: 'Downtown Charlottetown Inc',
+    canonicalVenueName: 'Salt & Sol Restaurant and Lounge | Charlottetown PE',
+    itemVenueName: 'Salt & Soul',
+    venueAliases: ['Salt & Soul'],
+  });
+
+  assert.equal(result, '2 Pownal Street 2nd Floor, Charlottetown, PE, Canada, Prince Edward Island');
+});
+
+test('duplicate merge replaces stale source-page address with resolved venue address', () => {
+  const venue = {
+    id: 'slug_saltandsolpei',
+    name: 'Salt & Sol Restaurant and Lounge | Charlottetown PE',
+    normalizedName: 'salt sol restaurant and lounge charlottetown pe',
+    address: '2 Pownal Street 2nd Floor, Charlottetown, PE, Canada, Prince Edward Island',
+    aliases: ['Salt & Soul'],
+    latitude: 46.232,
+    longitude: -63.126,
+  } as VenueData;
+  const existing = buildEvent({
+    venueId: venue.id,
+    establishment: venue.name,
+    address: '1 Weymouth Street, Charlottetown, PE, Canada, C1A7M8',
+    additionalLocation: 'Salt & Soul',
+  });
+  const incoming = buildEvent({
+    venueId: venue.id,
+    establishment: venue.name,
+    address: venue.address,
+    additionalLocation: undefined,
+    latitude: venue.latitude,
+    longitude: venue.longitude,
+  });
+
+  const result = previewDuplicateMerge({ existingEvent: existing, incomingEvent: incoming, venue });
+
+  assert.equal(result.updates.address, venue.address);
+  assert.equal(result.updates.additionalLocation, '');
+  assert.equal(result.updates.latitude, venue.latitude);
+  assert.equal(result.updates.longitude, venue.longitude);
+});
+
+test('duplicate merge keeps sub-location aliases like gymnasium labels', () => {
+  const venue = {
+    id: '31MHpCb7juuQkKD5N98q',
+    name: 'Stratford Town Centre',
+    normalizedName: 'stratford town centre',
+    address: '234 Shakespeare Drive, Stratford, PE C1B 2V8',
+    aliases: ['Stratford Town Centre Gymnasium'],
+  } as VenueData;
+  const existing = buildEvent({
+    venueId: venue.id,
+    establishment: venue.name,
+    address: venue.address,
+    additionalLocation: 'Stratford Town Centre Gymnasium',
+  });
+  const incoming = buildEvent({
+    venueId: venue.id,
+    establishment: venue.name,
+    address: venue.address,
+    additionalLocation: undefined,
+  });
+
+  const result = previewDuplicateMerge({ existingEvent: existing, incomingEvent: incoming, venue });
+
+  assert.equal(result.updates.additionalLocation, undefined);
+});
+
 test('keeps an explicit event address when it does not look like the source row page address', () => {
   const result = resolveEventAddressForVenue({
     itemAddress: '192 Water St, Summerside, PE C1N 1B1',

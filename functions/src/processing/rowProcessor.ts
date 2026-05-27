@@ -755,12 +755,78 @@ function normalizeAddressForFallbackComparison(value: unknown): string {
     .trim();
 }
 
+function extractNormalizedCivicAddressKey(value: unknown): string {
+  const normalized = normalizeAddressForFallbackComparison(value);
+  const match = normalized.match(
+    /\b\d{1,6}\s+[a-z0-9][a-z0-9]*(?:\s+[a-z0-9][a-z0-9]*){0,5}\s+(?:st|rd|ave|dr|ln|blvd|ct|way|hwy|route|rte|pl|terrace|ter)\b/
+  );
+  return match?.[0] || '';
+}
+
+function normalizedVenueNamesForResolution(params: {
+  canonicalVenueName?: unknown;
+  venueAliases?: unknown;
+}): Set<string> {
+  return new Set([
+    normalizeVenueName(String(params.canonicalVenueName || '').trim()),
+    ...(Array.isArray(params.venueAliases)
+      ? params.venueAliases.map((value) => normalizeVenueName(String(value || '').trim()))
+      : []),
+  ].filter(Boolean));
+}
+
+function normalizedVenueNamesForVenue(venue?: VenueData | null): Set<string> {
+  if (!venue) return new Set();
+  const venueRecord = venue as unknown as Record<string, unknown>;
+  return normalizedVenueNamesForResolution({
+    canonicalVenueName:
+      venue.name ||
+      venueRecord.pagename ||
+      venueRecord.displayName ||
+      venueRecord.title ||
+      '',
+    venueAliases: venueRecord.aliases,
+  });
+}
+
+const SUB_LOCATION_NAME_HINT_REGEX =
+  /\b(gymnasium|gym|room|suite|studio|stage|field|rink|auditorium|theatre|theater|patio|upstairs|downstairs|basement)\b/i;
+
+function candidateNamesResolvedVenue(params: {
+  candidate?: unknown;
+  normalizedVenueNames: Set<string>;
+  venueAddress?: unknown;
+}): boolean {
+  const candidate = String(params.candidate || '').trim();
+  if (!candidate) return false;
+
+  const normalizedCandidate = normalizeVenueName(candidate);
+  if (!normalizedCandidate) return false;
+
+  const exactVenueName = params.normalizedVenueNames.has(normalizedCandidate);
+  if (exactVenueName && !SUB_LOCATION_NAME_HINT_REGEX.test(candidate)) {
+    return true;
+  }
+
+  const candidateAddress = normalizeAddressForFallbackComparison(candidate);
+  const venueCivicKey = extractNormalizedCivicAddressKey(params.venueAddress);
+  const includesVenueCivic =
+    Boolean(venueCivicKey) && candidateAddress.includes(venueCivicKey);
+  if (!includesVenueCivic) return false;
+
+  return Array.from(params.normalizedVenueNames).some((venueName) =>
+    venueName.length >= 6 && normalizedCandidate.includes(venueName)
+  );
+}
+
 export function resolveEventAddressForVenue(params: {
   itemAddress?: unknown;
   rowAddress?: unknown;
   venueAddress?: unknown;
   rowEstablishment?: unknown;
   canonicalVenueName?: unknown;
+  itemVenueName?: unknown;
+  venueAliases?: unknown;
 }): string | undefined {
   const itemAddress = String(params.itemAddress || '').trim();
   const rowAddress = String(params.rowAddress || '').trim();
@@ -772,6 +838,16 @@ export function resolveEventAddressForVenue(params: {
   const normalizedRowAddress = normalizeAddressForFallbackComparison(rowAddress);
   const normalizedRowEstablishment = normalizeVenueName(String(params.rowEstablishment || '').trim());
   const normalizedCanonicalVenueName = normalizeVenueName(String(params.canonicalVenueName || '').trim());
+  const normalizedVenueAddress = normalizeAddressForFallbackComparison(venueAddress);
+  const normalizedVenueNames = normalizedVenueNamesForResolution({
+    canonicalVenueName: params.canonicalVenueName,
+    venueAliases: params.venueAliases,
+  });
+  const itemNamesResolvedVenue = candidateNamesResolvedVenue({
+    candidate: params.itemVenueName,
+    normalizedVenueNames,
+    venueAddress,
+  });
   const resolvedToDifferentVenue = Boolean(
     normalizedRowEstablishment &&
     normalizedCanonicalVenueName &&
@@ -784,9 +860,13 @@ export function resolveEventAddressForVenue(params: {
   );
   const venueAddressDiffersFromRowAddress = Boolean(
     normalizedRowAddress &&
-    normalizeAddressForFallbackComparison(venueAddress) &&
-    normalizeAddressForFallbackComparison(venueAddress) !== normalizedRowAddress
+    normalizedVenueAddress &&
+    normalizedVenueAddress !== normalizedRowAddress
   );
+
+  if (itemNamesResolvedVenue && normalizedItemAddress && normalizedVenueAddress && normalizedItemAddress !== normalizedVenueAddress) {
+    return venueAddress;
+  }
 
   if (itemAddressLooksLikeRowFallback && (resolvedToDifferentVenue || venueAddressDiffersFromRowAddress)) {
     return venueAddress;
@@ -2661,6 +2741,7 @@ async function processFullParserEvent(
   const parsedEstablishment = String(item.establishment || '').trim();
   const parsedAdditionalLocation = String(item.additionalLocation || '').trim();
   const normalizedCanonicalVenueName = normalizeVenueName(canonicalVenueName);
+  const normalizedVenueAliasNames = normalizedVenueNamesForVenue(venue);
   const normalizedParsedEstablishment = normalizeVenueName(parsedEstablishment);
   const additionalLocationCandidate =
     parsedAdditionalLocation ||
@@ -2678,6 +2759,8 @@ async function processFullParserEvent(
     venueAddress,
     rowEstablishment: establishment,
     canonicalVenueName,
+    itemVenueName: additionalLocationCandidate || parsedEstablishment,
+    venueAliases: (venue as unknown as Record<string, unknown>).aliases,
   });
   const rawItemAddress = String(item.address || '').trim();
   if (rawItemAddress && venueAddress && resolvedAddress === venueAddress && rawItemAddress !== venueAddress) {
@@ -2706,6 +2789,11 @@ async function processFullParserEvent(
       : resolvedAddress && venueAddress && resolvedAddress === venueAddress
         ? venueLongitude
         : undefined;
+  const additionalLocationIsResolvedVenue = candidateNamesResolvedVenue({
+    candidate: additionalLocationCandidate,
+    normalizedVenueNames: normalizedVenueAliasNames,
+    venueAddress,
+  });
 
   const eventData = {
     uniqueId: `${row.uniqueId || item.id || ''}_${item._pipelineIndex || itemIndex + 1}`,
@@ -2716,7 +2804,7 @@ async function processFullParserEvent(
     locationReviewStatus: 'not_needed',
     additionalLocation:
       additionalLocationCandidate &&
-      normalizeVenueName(additionalLocationCandidate) !== normalizeVenueName(canonicalVenueName)
+      !additionalLocationIsResolvedVenue
         ? additionalLocationCandidate
         : undefined,
     subVenue: undefined,
@@ -3361,6 +3449,7 @@ async function updateDuplicateEventIfNeeded(
   const mergeOutcome = buildDuplicateEventUpdates(existingEvent, incomingEvent, {
     existingSourceScore: computeCategorySourceConfidence(existingEvent, venue),
     incomingSourceScore: computeCategorySourceConfidence(incomingEvent, venue),
+    venue,
   });
   const mergedEvent: EventData = { ...existingEvent, ...mergeOutcome.updates };
 
@@ -3473,6 +3562,7 @@ function buildDuplicateEventUpdates(
   categoryPromotionContext?: {
     existingSourceScore: number;
     incomingSourceScore: number;
+    venue?: VenueData;
   }
 ): {
   updates: Partial<EventData>;
@@ -3529,6 +3619,38 @@ function buildDuplicateEventUpdates(
     if (!isMeaningfulValue(existing[field]) && isMeaningfulValue(incoming[field])) {
       setField(field, incoming[field]);
     }
+  }
+
+  const venue = categoryPromotionContext?.venue;
+  const venueAddress = String((venue as unknown as Record<string, unknown> | undefined)?.address || '').trim();
+  const normalizedVenueAddress = normalizeAddressForFallbackComparison(venueAddress);
+  const normalizedIncomingAddress = normalizeAddressForFallbackComparison(incoming.address);
+  if (
+    venueAddress &&
+    normalizedIncomingAddress &&
+    normalizedIncomingAddress === normalizedVenueAddress &&
+    normalizeAddressForFallbackComparison(existing.address) !== normalizedVenueAddress
+  ) {
+    setField('address', incoming.address);
+    if (isMeaningfulValue(incoming.latitude)) {
+      setField('latitude', incoming.latitude);
+    }
+    if (isMeaningfulValue(incoming.longitude)) {
+      setField('longitude', incoming.longitude);
+    }
+  }
+
+  if (
+    venue &&
+    !isMeaningfulValue(incoming.additionalLocation) &&
+    isMeaningfulValue(existing.additionalLocation) &&
+    candidateNamesResolvedVenue({
+      candidate: existing.additionalLocation,
+      normalizedVenueNames: normalizedVenueNamesForVenue(venue),
+      venueAddress,
+    })
+  ) {
+    setField('additionalLocation', '' as EventData['additionalLocation']);
   }
 
   const recurringMerge = selectRecurringLifecycleMerge(existing, incoming);
@@ -3847,6 +3969,7 @@ export function previewDuplicateMerge(params: {
     {
       existingSourceScore: sourceScores.existing,
       incomingSourceScore: sourceScores.incoming,
+      venue: params.venue,
     }
   );
 
