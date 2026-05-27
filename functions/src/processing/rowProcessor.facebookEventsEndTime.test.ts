@@ -136,6 +136,48 @@ test('counts Facebook Events recurrence occurrences from the current occurrence 
   assert.equal(result?.recurrenceUntilDate, '2026-06-03');
 });
 
+test('detects every-second Friday Facebook Events recurrence from description text', () => {
+  const row = buildRawRow(
+    'When: Friday, May 29, 2026 at 8:00 PM - 11:00 PM ADT\n' +
+      'Description:\n' +
+      'We are excited to announce that starting Friday, May 29th and every second Friday unless otherwise stated we will be hosting a ladies and femme night.'
+  );
+  row.facebookEventDescription =
+    'We are excited to announce that starting Friday, May 29th and every second Friday unless otherwise stated we will be hosting a ladies and femme night.';
+
+  const result = resolveFacebookEventRecurrence(row, { date: '2026-05-29', time: '20:00' });
+
+  assert.equal(result?.isRecurring, true);
+  assert.equal(result?.recurringPattern, 'weekly_friday');
+  assert.equal(result?.recurringWeekInterval, 2);
+});
+
+test('promotes structured Facebook Events biweekly interval through duplicate merge', () => {
+  const preview = previewDuplicateMerge({
+    existingEvent: buildEvent({
+      eventName: 'Ladies and Femmes Night',
+      name: 'Ladies and Femmes Night',
+      isRecurring: false,
+      recurringPattern: 'none',
+      recurringWeekInterval: 1,
+    }),
+    incomingEvent: buildEvent({
+      eventName: 'Ladies and Femmes Night',
+      name: 'Ladies and Femmes Night',
+      isRecurring: true,
+      recurringPattern: 'weekly_friday',
+      recurringWeekInterval: 2,
+      _sourceType: 'facebook_events_scraper_structured_row',
+    }),
+    venue: buildVenue(),
+  });
+
+  assert.equal(preview.updates.recurringPattern, 'weekly_friday');
+  assert.equal(preview.updates.recurringWeekInterval, 2);
+  assert.equal(preview.updates.isRecurring, true);
+  assert.ok(preview.changedFields.includes('recurringWeekInterval'));
+});
+
 test('does not infer recurrence from a single Facebook Events date range without weekday series cues', () => {
   const row = buildRawRow(
     'When: Saturday, May 30, 2026 at 1:00 PM - 4:00 PM ADT\n' +

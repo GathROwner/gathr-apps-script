@@ -447,14 +447,40 @@ function extractFacebookEventRecurringDays(text: string): RecurringWeekday[] {
   );
   const listMatch = normalized.match(listPattern);
   const source = listMatch?.[1] || '';
-  if (!source) return [];
+  if (source) {
+    const tokenPattern = new RegExp(`\\b${dayToken}\\b`, 'gi');
+    const days = Array.from(source.matchAll(tokenPattern))
+      .map((match) => normalizeFacebookEventWeekdayToken(match[0]))
+      .filter((day): day is RecurringWeekday => Boolean(day));
 
-  const tokenPattern = new RegExp(`\\b${dayToken}\\b`, 'gi');
-  const days = Array.from(source.matchAll(tokenPattern))
-    .map((match) => normalizeFacebookEventWeekdayToken(match[0]))
-    .filter((day): day is RecurringWeekday => Boolean(day));
+    return Array.from(new Set(days));
+  }
 
-  return Array.from(new Set(days));
+  const singleDayPatterns = [
+    new RegExp(`\\b(?:every|each)\\s+(?:(?:other|second|2nd)\\s+)?(${dayToken})\\b`, 'i'),
+    new RegExp(`\\bevery\\s+(?:2|two)\\s+weeks?\\s+(?:on\\s+)?(${dayToken})\\b`, 'i'),
+    new RegExp(`\\b(?:weekly|bi[-\\s]?weekly|fortnightly)\\s+(?:on\\s+)?(${dayToken})\\b`, 'i'),
+  ];
+  for (const pattern of singleDayPatterns) {
+    const match = normalized.match(pattern);
+    const day = normalizeFacebookEventWeekdayToken(match?.[1]);
+    if (day) return [day];
+  }
+
+  return [];
+}
+
+function extractFacebookEventRecurringWeekInterval(text: string): number {
+  const normalized = normalizeFacebookEventRecurrenceText(text).toLowerCase();
+  if (
+    /\b(?:bi[-\s]?weekly|fortnightly)\b/.test(normalized) ||
+    /\bevery\s+(?:other|second|2nd)\s+(?:mondays?|tuesdays?|wednesdays?|thursdays?|fridays?|saturdays?|sundays?|mon|tue|tues|wed|thu|thur|thurs|fri|sat|sun)\b/.test(normalized) ||
+    /\bevery\s+(?:2|two)\s+weeks?\b/.test(normalized)
+  ) {
+    return 2;
+  }
+
+  return 1;
 }
 
 function buildFacebookEventDateFromParts(
@@ -531,7 +557,8 @@ function chooseFacebookEventDateRange(
 function countFacebookEventOccurrences(
   occurrenceDate: string,
   recurrenceUntilDate: string | undefined,
-  recurringDaysOfWeek: RecurringWeekday[]
+  recurringDaysOfWeek: RecurringWeekday[],
+  recurringWeekInterval = 1
 ): number | undefined {
   if (!recurrenceUntilDate || recurringDaysOfWeek.length === 0) return undefined;
 
@@ -540,10 +567,19 @@ function countFacebookEventOccurrences(
   if (!cursor.isValid || !end.isValid || end < cursor) return undefined;
 
   const daySet = new Set(recurringDaysOfWeek);
+  const anchorWeek = cursor.startOf('week');
+  const safeWeekInterval = Math.max(1, Math.floor(recurringWeekInterval));
   let count = 0;
   for (let guard = 0; guard < 3660 && cursor <= end; guard += 1) {
     const weekday = FACEBOOK_EVENT_WEEKDAYS[cursor.weekday % 7];
-    if (weekday && daySet.has(weekday)) {
+    const weekOffset = Math.floor(cursor.startOf('week').diff(anchorWeek, 'weeks').weeks);
+    if (
+      weekday &&
+      daySet.has(weekday) &&
+      Number.isFinite(weekOffset) &&
+      weekOffset >= 0 &&
+      weekOffset % safeWeekInterval === 0
+    ) {
       count += 1;
     }
     cursor = cursor.plus({ days: 1 });
@@ -572,6 +608,7 @@ export function resolveFacebookEventRecurrence(
 
   const recurringDaysOfWeek = extractFacebookEventRecurringDays(sourceText);
   if (recurringDaysOfWeek.length === 0) return null;
+  const recurringWeekInterval = extractFacebookEventRecurringWeekInterval(sourceText);
 
   const occurrence = DateTime.fromISO(occurrenceDate, { zone: FACEBOOK_EVENT_TIMEZONE });
   const fallbackYear = occurrence.isValid ? occurrence.year : DateTime.now().setZone(FACEBOOK_EVENT_TIMEZONE).year;
@@ -590,14 +627,15 @@ export function resolveFacebookEventRecurrence(
   const totalOccurrences = countFacebookEventOccurrences(
     occurrenceDate,
     recurrenceUntilDate,
-    orderedRecurringDaysOfWeek
+    orderedRecurringDaysOfWeek,
+    recurringWeekInterval
   );
 
   if (orderedRecurringDaysOfWeek.length === 1) {
     return {
       isRecurring: true,
       recurringPattern: patternFromRecurringWeekday(orderedRecurringDaysOfWeek[0]),
-      recurringWeekInterval: 1,
+      recurringWeekInterval,
       totalOccurrences,
       recurrenceUntilDate,
       evidence: selectedRange?.evidence || orderedRecurringDaysOfWeek[0],
@@ -608,7 +646,7 @@ export function resolveFacebookEventRecurrence(
     isRecurring: true,
     recurringPattern: 'weekly_custom',
     recurringDaysOfWeek: orderedRecurringDaysOfWeek,
-    recurringWeekInterval: 1,
+    recurringWeekInterval,
     totalOccurrences,
     recurrenceUntilDate,
     evidence: selectedRange?.evidence || orderedRecurringDaysOfWeek.join(', '),
@@ -4066,8 +4104,11 @@ function selectRecurringLifecycleMerge(
   );
   const existingRecurringWeekInterval =
     normalizeRecurringWeekIntervalValue(existing.recurringWeekInterval) || 1;
+  const incomingExplicitRecurringWeekInterval = normalizeRecurringWeekIntervalValue(
+    incoming.recurringWeekInterval
+  );
   const incomingRecurringWeekInterval =
-    normalizeRecurringWeekIntervalValue(incoming.recurringWeekInterval) || 1;
+    incomingExplicitRecurringWeekInterval || 1;
   const existingTotal = parsePositiveIntegerValue(existing.totalOccurrences);
   const incomingTotal = parsePositiveIntegerValue(incoming.totalOccurrences);
   const existingUntil = normalizeIsoDateValue(existing.recurrenceUntilDate);
@@ -4171,6 +4212,14 @@ function selectRecurringLifecycleMerge(
     )
   ) {
     recurringPattern = incomingPattern;
+  }
+
+  if (
+    (incomingHasPattern || incomingHasCustomSchedule) &&
+    incomingExplicitRecurringWeekInterval !== undefined &&
+    incomingRecurringWeekInterval !== existingRecurringWeekInterval
+  ) {
+    recurringWeekInterval = incomingRecurringWeekInterval;
   }
 
   if (incomingTotal !== undefined && (existingTotal === undefined || incomingTotal > existingTotal)) {
