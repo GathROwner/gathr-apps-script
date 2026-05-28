@@ -6,11 +6,12 @@ Source reports:
 - `tmp/unknown-venue-manual-review-rich-2026-05-27T18-27-38-205Z.json`
 - `tmp/unknown-venue-manual-review-rich-2026-05-27T18-41-47-296Z.json`
 - `tmp/unknown-venue-manual-review-rich-2026-05-28T11-09-54-155Z.json`
+- `tmp/unknown-venue-manual-review-rich-2026-05-28T11-22-11-055Z.json`
 
-Current queue snapshot after Batch H:
-- `manual_review`: 441
-- `resolved_existing`: 145
-- `ignored`: 17
+Current queue snapshot after Batch I:
+- `manual_review`: 435
+- `resolved_existing`: 150
+- `ignored`: 19
 - `created_new`: 63
 - `failed`: 150
 - `pending`, `candidate_found`, `lookup_running`: 0
@@ -626,6 +627,46 @@ Email-first packet log:
 #### Batch H notes
 - Several replays hit `selected_rows_replay_lock_active` while another selected-row task was processing the same spreadsheet. I waited for locks to release, then reran remaining tasks. Final queue state was empty.
 - This batch reinforces that selected-row replay should not be used casually for broad multi-event calendar rows. When resolving aliases from old backlog emails, source IDs with many generated suffixes need side-effect audit immediately after replay.
+
+### Batch I - Existing aliases plus retail-promo ignores
+
+#### Finalizer actions
+- Finalizer backup: `firebase/unknown-venue-batch-i-backup-2026-05-28T11-15-05-443Z.json`
+- Side-effect repair backup: `firebase/batch-i-side-effect-repair-backup-2026-05-28T11-21-45-997Z.json`
+- Actions applied:
+  - `uv_68d43da5ce28d24d4f1515c4`: `The Comedy Cave (downstairs at The Factory)` -> `venues/V7zQ5unfTY1GtNKUvR7c`
+  - `uv_3f668ca20de789510c2dcfe0`: `The Dali Cafe (in The Arts Hotel)` -> `venues/slug_thedalicafe`
+  - `uv_ddba05023aab377ddaf8d910`: `Timothy's Coffee` -> `venues/slug_timothyscharlottetown`
+  - `uv_d2bc96a451f13b25d16256f8`: `Ruby's Cafe` -> `venues/ZDUj9euh7NVJ6INSlHM8`
+  - `uv_bd32fa3d47c10f4d5e9c58a6`: `Salt & Sol` -> `venues/slug_saltandsolpei`
+- Ignored:
+  - `uv_11bdb425b959e58e53dd58ed`: ANNE Chocolates gift-basket/free COW Chips retail promotion
+  - `uv_35402002b75412e1d0f64065`: Island Style opening-weekend denim sale
+- Queue verification: `processDatasetSelectedRows` drained to empty after serial dispatch. The Salt & Sol task initially returned HTTP 500, then retried and wrote events before disappearing from the queue.
+- Current queue snapshot after refresh: `manual_review` dropped from `441` to `435`.
+
+#### Direct target writes after side-effect repair
+- `venues/V7zQ5unfTY1GtNKUvR7c/events/7mjiaQrrIBlja5ln1Swx`
+  - `Live Stand-Up in The Comedy Cave`, `20:00-22:00`, source `1663601968466048_1`
+- `venues/slug_thedalicafe/events/Z4RNlSmB1j4HwvOMQJfo`
+  - `Tango Club, PEI (Argentine Tango Practica/Jam)`, `14:00-01:00`, source `122131154907035455_1`
+- `venues/slug_timothyscharlottetown/events/JPAKTSIUukse7KmA4qKj`
+  - `Franco-vendredis a Charlottetown`, `10:00-23:00`, source `1377474464420529_1`
+- `venues/ZDUj9euh7NVJ6INSlHM8/events/TvLccJfpgq0XpgGPVCG1`
+  - `Coffee with a Cop`, `09:00-23:00`, source `122288672570189551_1`
+- `venues/slug_saltandsolpei/events/xmV0zaeKpn7OO6O48Omu`
+  - `Street Feast After Hours: DJ MOJO`, `22:00-01:00`, source `122221814792376645_8`
+
+#### Replay skips and side effects
+- The Salt & Sol / Discover Charlottetown source row extracted multiple Street Feast items. The direct Salt & Sol target was kept, but seven unintended sibling docs were deleted:
+  - `venues/slug_discovercharlottetown/events/E6yXdDwOQkXWO7c5zRC6`
+  - `venues/slug_discovercharlottetown/events/tulXkRvxjrJiNXz15W0L`
+  - `venues/DZ4nQZQnOKCkTotuKYVv/events/XkBVzAr4xImtKCFqejmh`
+  - `venues/fb_100063464116222/events/yiWR4jMElt52gACH5sOd`
+  - `venues/slug_ponyboat.socialclub/events/CWk5Dx3A6YpFoA6ivH7C`
+  - `venues/fb_100057766283684/events/r9pGmZytd5zxzcxszTPL`
+  - `venues/slug_ponyboat.socialclub/events/aX9sDrDrI5piNxAkBKua`
+- Batch I reinforces the same risk as Batch H: selected-row replay can legally expand one old multi-event source row into many event docs. Keep using immediate post-replay audit before moving on.
 
 ## Current / Future Items Not Auto-Resolved
 
