@@ -7,10 +7,11 @@ Source reports:
 - `tmp/unknown-venue-manual-review-rich-2026-05-27T18-41-47-296Z.json`
 - `tmp/unknown-venue-manual-review-rich-2026-05-28T11-09-54-155Z.json`
 - `tmp/unknown-venue-manual-review-rich-2026-05-28T11-22-11-055Z.json`
+- `tmp/unknown-venue-manual-review-rich-2026-05-28T11-35-01-157Z.json`
 
-Current queue snapshot after Batch I:
-- `manual_review`: 435
-- `resolved_existing`: 150
+Current queue snapshot after Batch J:
+- `manual_review`: 429
+- `resolved_existing`: 157
 - `ignored`: 19
 - `created_new`: 63
 - `failed`: 150
@@ -667,6 +668,51 @@ Email-first packet log:
   - `venues/fb_100057766283684/events/r9pGmZytd5zxzcxszTPL`
   - `venues/slug_ponyboat.socialclub/events/aX9sDrDrI5piNxAkBKua`
 - Batch I reinforces the same risk as Batch H: selected-row replay can legally expand one old multi-event source row into many event docs. Keep using immediate post-replay audit before moving on.
+
+### Batch J - Strict existing aliases, with large replay cleanup
+
+#### Finalizer actions
+- Finalizer backup: `firebase/unknown-venue-batch-j-backup-2026-05-28T11-25-36-104Z.json`
+- Side-effect repair backup: `firebase/batch-j-side-effect-repair-backup-2026-05-28T11-34-26-189Z.json`
+- Actions applied:
+  - `uv_31259fec2d68508df3c2c6d1`: `Charlottetown Farmers' Market, 614 North River Rd` -> `venues/slug_charlottetownfarmersmarket`
+  - `uv_8478cacef71d2f77cf7d66a1`: `Milton Hall` -> `venues/nvQTJXSbDsSfJTCxDKCH`
+  - `uv_9d76f9d0801e5bb8a8eb3603`: `The Milton Hall` -> `venues/nvQTJXSbDsSfJTCxDKCH`
+  - `uv_b0c6d79cc231fe5a3beb4322`: `Loyalist Country (195 Heather Moyse Drive, Summerside)` -> `venues/slug_loyalistcountryinn`
+  - `uv_7d9a8fbdc5e39287220ca0ae`: `Loyalist Country Inn, 195 Heather Moyse Drive, Summerside` -> `venues/slug_loyalistcountryinn`
+  - `uv_0b2dedc87436ab3f040f80c6`: `Founders' Food Hall & Makret` typo -> `venues/slug_foundersfoodhall`
+  - `uv_7d3bb58931cec8b357734749`: `O'Briens` -> `venues/fb_100052606604879`
+- Queue verification: `processDatasetSelectedRows` drained to empty after serial dispatch. Fifteen tasks were queued; six returned HTTP 500 on first attempt and were rerun after the retry window.
+- Current queue snapshot after refresh: `manual_review` dropped from `435` to `429`, not `428`, because one replay created a new `Virtual (online)` unknown-venue record.
+
+#### Direct target writes after side-effect repair
+- `venues/slug_charlottetownfarmersmarket/events/7BbrHk3gYR6qEHtvV6lI`
+  - Existing `Charlottetown Farmers' Market (Saturday market hours)` doc was updated by dedupe; retained source `1551026647033010_1`.
+- `venues/nvQTJXSbDsSfJTCxDKCH/events/DFLkhXcrZbL3Sg7eGf16`
+  - `Yard & Craft Sale`, `08:00-14:00`, source `1783617376425599_1`.
+- `venues/nvQTJXSbDsSfJTCxDKCH/events/CTR6fStvgVxRwqvRb8kh`
+  - `An Evening with Elvis`, `19:30-01:00`, source `1764540015000002_1`.
+- `venues/slug_loyalistcountryinn/events/Mggb6LNKkQ4cXOmnnROT`
+  - `Chronic Pain Strategy - Community Consultation Session (Prince County)`, `18:00-20:00`, source `1783098003144203_1`.
+- `venues/slug_foundersfoodhall/events/fm6pEV2uXp2A87HA9m5K`
+  - `Lilo & Stitch`, `14:00-16:00`, source `1382515020582698_7`.
+- `Loyalist Country` craft-fair source `122136090356997321` produced no post-repair event doc in the Batch J audit.
+- `O'Briens` source `1614826196947585` produced no new post-repair event doc; existing Red Shores food-special docs remain.
+
+#### Replay skips and side effects
+- The Founders/Downtown sampled rows expanded into a large Downtown Charlottetown calendar scrape. I deleted 75 newly-created side-effect event docs and kept only the direct Founders `Lilo & Stitch` target. Full deleted path list is in the side-effect backup.
+- The same repair deleted:
+  - two newly-created Red Shores duplicate `Theme Night - Pub Favourites` docs from source `1595350725561799`
+  - one duplicate Elvis doc from sampled source `1755748262545844`
+  - one Queens County chronic-pain session created under the wrong Rodd Charlottetown venue from source `1783098003144203_2`
+- One pre-existing Queens County chronic-pain event was updated by dedupe and was not deleted: `venues/31MHpCb7juuQkKD5N98q/events/TP4f97oJpyCZhC0B1xbY`.
+- Replays also refreshed manual-review unknown venue docs that were not finalized in this batch:
+  - `uv_236ac869a6073539d620c27f`: `Virtual (online)`, new manual-review record from the chronic-pain source
+  - `uv_39e82ff63d1e160bda38e591`: `Microtel Inn and Suites, 515 Notre Dame Street, Summerside`
+  - `uv_605903dde90518d7961cd209`: `Montague High School cafeteria, 274 Valleyfield Road, Montague`
+  - `uv_37da59a2cb5fb0f19bcc50ba`: `John Brown`
+  - `uv_67e727818b3e352626fb9371`: `The Oak`
+- Batch J confirms the selected-row finalizer is too aggressive for records with sampled sibling posts. For future batches, prefer one-source rows or use a replay path that does not enqueue sampled sibling source IDs.
 
 ## Current / Future Items Not Auto-Resolved
 
