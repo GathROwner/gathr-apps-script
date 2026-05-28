@@ -81,6 +81,16 @@ type CreateNewFacebookLookupResult = {
   warning?: string;
 };
 
+export type UnknownVenueReplayScope = 'primary_sample' | 'all_samples';
+
+export type UnknownVenueRowReplayTarget = {
+  fileId: string;
+  fileName?: string;
+  parserMode: 'legacy' | 'full5stage';
+  rowIndex?: number;
+  sourceUniqueId?: string;
+};
+
 type FinalizeUnknownVenueRowReplayGroup = {
   fileId: string;
   fileName?: string;
@@ -94,6 +104,9 @@ type FinalizeUnknownVenueRowReplayGroup = {
 
 type FinalizeUnknownVenueRowReplaySummary = {
   attempted: boolean;
+  replayScope?: UnknownVenueReplayScope;
+  sampleCount?: number;
+  skippedSampleCount?: number;
   rowCount?: number;
   fileCount?: number;
   queuedTaskCount?: number;
@@ -107,6 +120,7 @@ export type FinalizeUnknownVenueAction = 'resolve_existing' | 'create_new' | 'ig
 export type FinalizeUnknownVenueInput = {
   docId: string;
   action: FinalizeUnknownVenueAction;
+  replayScope?: UnknownVenueReplayScope;
   venueId?: string;
   candidateIndex?: number;
   manual?: {
@@ -178,6 +192,10 @@ function getRecordRowReplaySummary(
   if (!rowReplay || typeof rowReplay !== 'object') return undefined;
 
   const attempted = Boolean(rowReplay.attempted);
+  const replayScopeRaw = String(rowReplay.replayScope || '').trim();
+  const replayScope = replayScopeRaw === 'all_samples' ? 'all_samples' : 'primary_sample';
+  const sampleCount = Number(rowReplay.sampleCount);
+  const skippedSampleCount = Number(rowReplay.skippedSampleCount);
   const rowCount = Number(rowReplay.rowCount);
   const fileCount = Number(rowReplay.fileCount);
   const queuedTaskCount = Number(rowReplay.queuedTaskCount);
@@ -217,6 +235,9 @@ function getRecordRowReplaySummary(
 
   return {
     attempted,
+    replayScope,
+    sampleCount: Number.isFinite(sampleCount) ? sampleCount : undefined,
+    skippedSampleCount: Number.isFinite(skippedSampleCount) ? skippedSampleCount : undefined,
     rowCount: Number.isFinite(rowCount) ? rowCount : undefined,
     fileCount: Number.isFinite(fileCount) ? fileCount : undefined,
     queuedTaskCount: Number.isFinite(queuedTaskCount) ? queuedTaskCount : undefined,
@@ -3406,14 +3427,6 @@ const DATASET_SELECTED_ROWS_TASK_QUEUE_LOCATION = 'northamerica-northeast1';
 const DATASET_SELECTED_ROWS_TASK_QUEUE_PATH =
   `locations/${DATASET_SELECTED_ROWS_TASK_QUEUE_LOCATION}/functions/processDatasetSelectedRows`;
 
-type UnknownVenueRowReplayTarget = {
-  fileId: string;
-  fileName?: string;
-  parserMode: 'legacy' | 'full5stage';
-  rowIndex?: number;
-  sourceUniqueId?: string;
-};
-
 function isTaskAlreadyExistsError(error: unknown): boolean {
   const msg = error instanceof Error ? error.message : String(error);
   return /task-already-exists|already exists|ALREADY_EXISTS/i.test(msg);
@@ -3423,37 +3436,67 @@ function normalizeSampleParserMode(value: unknown): 'legacy' | 'full5stage' {
   return String(value || '').trim() === 'legacy' ? 'legacy' : 'full5stage';
 }
 
-function extractReplayTargetsFromSamples(
-  record: UnrecognizedVenueRecord
-): UnknownVenueRowReplayTarget[] {
+function normalizeReplayScope(value: unknown): UnknownVenueReplayScope {
+  return String(value || '').trim() === 'all_samples' ? 'all_samples' : 'primary_sample';
+}
+
+function extractReplayTargetFromSample(
+  sample: UnrecognizedVenueSampleEvent
+): UnknownVenueRowReplayTarget | null {
+  const fileId = String(sample.fileId || '').trim();
+  const rowIndex = Math.trunc(Number(sample.rowIndex));
+  const hasRowIndex = Number.isFinite(rowIndex) && rowIndex >= 0;
+  const sourceUniqueId =
+    String(sample.sourceUniqueId || '').trim() ||
+    extractFacebookStableContentIdForHydration(sample.topLevelUrl);
+  if (!fileId || (!sourceUniqueId && !hasRowIndex)) return null;
+
+  return {
+    fileId,
+    fileName: String(sample.fileName || '').trim() || undefined,
+    parserMode: normalizeSampleParserMode(sample.parserMode),
+    ...(sourceUniqueId ? {} : { rowIndex }),
+    sourceUniqueId: sourceUniqueId || undefined,
+  };
+}
+
+export function extractReplayTargetsFromSamples(
+  record: UnrecognizedVenueRecord,
+  options?: {
+    replayScope?: UnknownVenueReplayScope;
+  }
+): {
+  replayScope: UnknownVenueReplayScope;
+  sampleCount: number;
+  skippedSampleCount: number;
+  targets: UnknownVenueRowReplayTarget[];
+} {
   const sampleEvents = Array.isArray(record.sampleEvents)
     ? (record.sampleEvents.filter((value) => value && typeof value === 'object') as UnrecognizedVenueSampleEvent[])
     : [];
 
+  const replayScope = normalizeReplayScope(options?.replayScope);
+  const replayableTargets = sampleEvents
+    .map(extractReplayTargetFromSample)
+    .filter((target): target is UnknownVenueRowReplayTarget => Boolean(target));
+  const selectedTargets =
+    replayScope === 'all_samples' ? replayableTargets : replayableTargets.slice(0, 1);
+
   const seen = new Set<string>();
   const targets: UnknownVenueRowReplayTarget[] = [];
-  for (const sample of sampleEvents) {
-    const fileId = String(sample.fileId || '').trim();
-    const rowIndex = Math.trunc(Number(sample.rowIndex));
-    const hasRowIndex = Number.isFinite(rowIndex) && rowIndex >= 0;
-    const sourceUniqueId =
-      String(sample.sourceUniqueId || '').trim() ||
-      extractFacebookStableContentIdForHydration(sample.topLevelUrl);
-    if (!fileId || (!sourceUniqueId && !hasRowIndex)) continue;
-    const parserMode = normalizeSampleParserMode(sample.parserMode);
-    const key = `${fileId}|${parserMode}|${sourceUniqueId || rowIndex}`;
+  for (const target of selectedTargets) {
+    const key = `${target.fileId}|${target.parserMode}|${target.sourceUniqueId || target.rowIndex}`;
     if (seen.has(key)) continue;
     seen.add(key);
-    targets.push({
-      fileId,
-      fileName: String(sample.fileName || '').trim() || undefined,
-      parserMode,
-      ...(sourceUniqueId ? {} : { rowIndex }),
-      sourceUniqueId: sourceUniqueId || undefined,
-    });
+    targets.push(target);
   }
 
-  return targets;
+  return {
+    replayScope,
+    sampleCount: replayableTargets.length,
+    skippedSampleCount: Math.max(0, replayableTargets.length - selectedTargets.length),
+    targets,
+  };
 }
 
 function groupReplayTargets(
@@ -3503,13 +3546,20 @@ async function queueSampleEventRowReplays(
   params: {
     action: 'resolve_existing' | 'create_new';
     venueId?: string;
+    replayScope?: UnknownVenueReplayScope;
   }
 ): Promise<FinalizeUnknownVenueRowReplaySummary> {
   const docId = String(record.id || '').trim();
-  const targets = extractReplayTargetsFromSamples(record);
+  const selection = extractReplayTargetsFromSamples(record, {
+    replayScope: params.replayScope,
+  });
+  const { targets } = selection;
   if (!targets.length) {
     return {
       attempted: false,
+      replayScope: selection.replayScope,
+      sampleCount: selection.sampleCount,
+      skippedSampleCount: selection.skippedSampleCount,
       warning: 'No sampled fileId/rowIndex/sourceUniqueId entries were available to replay',
     };
   }
@@ -3602,17 +3652,25 @@ async function queueSampleEventRowReplays(
   }
 
   const failedCount = groups.filter((group) => group.status === 'failed').length;
-  const warning = failedCount > 0
-    ? `${failedCount} row replay task${failedCount === 1 ? '' : 's'} failed to queue`
-    : undefined;
+  const warnings = [
+    selection.skippedSampleCount > 0
+      ? `Replayed primary sample only; skipped ${selection.skippedSampleCount} additional sampled occurrence${selection.skippedSampleCount === 1 ? '' : 's'}`
+      : '',
+    failedCount > 0
+      ? `${failedCount} row replay task${failedCount === 1 ? '' : 's'} failed to queue`
+      : '',
+  ].filter(Boolean);
 
   return {
     attempted: true,
+    replayScope: selection.replayScope,
+    sampleCount: selection.sampleCount,
+    skippedSampleCount: selection.skippedSampleCount,
     rowCount: targets.length,
     fileCount: grouped.length,
     queuedTaskCount,
     dedupedTaskCount,
-    warning,
+    warning: warnings.length ? warnings.join('; ') : undefined,
     groups,
   };
 }
@@ -3738,6 +3796,7 @@ async function finalizeResolveExisting(
     rowReplay = await queueSampleEventRowReplays(record, {
       action: 'resolve_existing',
       venueId,
+      replayScope: input.replayScope,
     });
   } catch (error) {
     const warning = error instanceof Error ? error.message : String(error);
@@ -3995,6 +4054,7 @@ async function finalizeCreateNew(
     rowReplay = await queueSampleEventRowReplays(record, {
       action: 'create_new',
       venueId,
+      replayScope: input.replayScope,
     });
   } catch (error) {
     const warning = error instanceof Error ? error.message : String(error);

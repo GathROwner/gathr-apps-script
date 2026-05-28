@@ -328,6 +328,7 @@ export const finalizeUnrecognizedVenueTrigger = onRequest(
       const body = (request.body || {}) as {
         docId?: string;
         action?: 'resolve_existing' | 'create_new' | 'ignore';
+        replayScope?: 'primary_sample' | 'all_samples';
         venueId?: string;
         candidateIndex?: number;
         manual?: Record<string, unknown>;
@@ -338,6 +339,7 @@ export const finalizeUnrecognizedVenueTrigger = onRequest(
       const result = await finalizeUnrecognizedVenue({
         docId: String(body.docId || '').trim(),
         action: body.action || 'ignore',
+        replayScope: body.replayScope === 'all_samples' ? 'all_samples' : 'primary_sample',
         venueId: typeof body.venueId === 'string' ? body.venueId.trim() : undefined,
         candidateIndex: Number.isFinite(Number(body.candidateIndex))
           ? Number(body.candidateIndex)
