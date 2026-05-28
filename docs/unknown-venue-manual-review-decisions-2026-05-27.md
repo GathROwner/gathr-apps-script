@@ -6,9 +6,9 @@ Source reports:
 - `tmp/unknown-venue-manual-review-rich-2026-05-27T18-27-38-205Z.json`
 - `tmp/unknown-venue-manual-review-rich-2026-05-27T18-41-47-296Z.json`
 
-Current queue snapshot after Batch F:
-- `manual_review`: 474
-- `resolved_existing`: 120
+Current queue snapshot after Batch G:
+- `manual_review`: 464
+- `resolved_existing`: 130
 - `ignored`: 9
 - `created_new`: 63
 - `failed`: 150
@@ -479,6 +479,80 @@ Email-first packet log:
   - `node --test lib/processing/rowProcessor.startTimeExplicitMerge.test.js`
 - Deployment: `firebase deploy --only functions` completed after both parser fixes.
 - Important operating note: selected-row replay can still replay an entire multi-event source row. For noisy calendar/list posts, apply finalizer actions cautiously and inspect side effects before moving to the next batch.
+
+### Batch G - High-confidence existing venue aliases
+
+#### Finalizer actions
+- Backup: `firebase/unknown-venue-batch-g-backup-2026-05-28T00-53-21-740Z.json`
+- Actions applied:
+  - `uv_0c3ff7a8b05871e851209329`: `APM center, Cornwall` -> `venues/ItWg0uH2yXtETbhlepAJ` (`APM Centre`)
+  - `uv_1bd8cde85fb58521c87f841c`: `Farmers Bank at Rustico` -> `venues/xYWyGtI1ymMdlEB81QHP` (`The Farmers' Bank of Rustico & Doucet House Museums`)
+  - `uv_f6bcb2e087a2612bf6d812a8`: `Evermoore` -> `venues/Ty6yXQ3VwbKRlpnU7J9x` (`Evermoore Brewing Co.`)
+  - `uv_1c0c18bdfc4029ce5b5a8ba2`: `Evermoore Brewing Co` -> `venues/Ty6yXQ3VwbKRlpnU7J9x`
+  - `uv_f4eaf964568ea60ecd0a6830`: `Evermoore Brewing Co.` -> `venues/Ty6yXQ3VwbKRlpnU7J9x`
+  - `uv_d95d82b460f3951039d57898`: `Buenos Island Dance Studios` -> `venues/0F6W6IBgJqlKQ8AmaTGC` (`Buenos Island Studio`)
+  - `uv_43714526dfe8296773491ae4`: `Buenos Island Studio, 135 Great George St. Charlottetown` -> `venues/0F6W6IBgJqlKQ8AmaTGC`
+  - `uv_dab2c31cbd8ba0e58d9d8e3e`: `Tekila Mexican Restaurant` -> `venues/fb_100075997661092` (`Tekila`)
+  - `uv_df5330089beef9d6039c3e8d`: `Tekila Mexican Restaurant` -> `venues/fb_100075997661092`
+  - `uv_0c2c48a0017fb171680cb936`: `Carrefour - Charlottetown` -> `venues/slug_carrefourdelislesaintjean` (`Carrefour ISJ`)
+- Queue verification: `processDatasetSelectedRows` drained to empty after manual serial dispatch of stuck tasks.
+- Current queue snapshot after refresh: `manual_review` dropped from `474` to `464`.
+
+#### Direct target writes
+- `venues/ItWg0uH2yXtETbhlepAJ/events/wczvzbVGWn89cWLU7xfn`
+  - `Island Pro Wrestling: Game On (Island Rumble Season 2)`
+  - `2026-05-16 18:00-23:00`
+  - Source: `1532901155515354_1`
+  - Original/source URL stored: `https://www.facebook.com/SamsFamilyRestaurantPub`
+  - Address: `35 Mercedes Dr, Cornwall, PE C0A 1H0`
+- `venues/xYWyGtI1ymMdlEB81QHP/events/l1SNXgO5DFQd0HKYbQUe`
+  - `Natural History Walk and Feast`
+  - `2026-05-27 20:30-23:00`
+  - Source: `1571174074807782_1`
+  - Original/source URL stored: `https://www.facebook.com/TheSandsAtDarnley`
+  - Address: `2188 Church Rd, Rustico, PE C0A 1N0`
+- Evermoore target writes under `venues/Ty6yXQ3VwbKRlpnU7J9x/events`:
+  - `8I0IuK6RfykecvJ0ivja`: `Live Music: Geoffrey Charlton`, `2026-05-19 18:00-20:00`, source `1659320682324224_1`
+  - `N1vBwqItYzFBYGoN0ChV`: `Evermoore's Celtic Jam`, `2026-05-16 13:30-16:00`, source `1655317712724521_2`
+  - `X9IlnrWpv9jbASLuWvGb`: `Evermoore Brewing Company 5 Miler (presented by the PEI Marathon)`, `2026-05-05 09:00-23:00`, source `1380292854120884_1`
+  - `bB4IKDmt815pIE1x5jJX`: `Traditional Celtic music circle`, `2026-05-23 13:30-16:00`, source `1570234235102553_6`
+- Buenos target writes under `venues/0F6W6IBgJqlKQ8AmaTGC/events`:
+  - `BGFhuNySWdLopSUkTUFu`: `Latin Mix Class!`, `2026-04-19 13:00-15:00`, source `122131956003035455_1`
+  - `tjFsMzGOrZWeD7LKCDXW`: `OPEN MODEL CALL`, `2026-04-19 15:00-17:00`, source `122131956003035455_3`
+  - `MRg0BnTyxZCtKyeKGRTH`: `LATIN NIGHT (SOLD OUT)`, `2026-04-19 19:00-22:00`, source `122131956003035455_4`
+  - `AeIyB9ZRrq9TfVr9FfuL`: `Ken's Rueda Club`, `2026-03-22 16:00-17:00`, source `122129427837035455_1`, updated by replay
+- Tekila target writes under `venues/fb_100075997661092/events`:
+  - `oK30WbQY6j9ZZpQz3MDx`: `Live Music Saturday Night - David "Dave" Woodside`, `2026-05-09 18:00-21:00`, source `995058876370692_1`
+  - `IKtAlYlYii7XKUlihhjX`: `Live Music: Jerry Laird`, `2026-04-10 18:00-21:00`, source `971893485353898_1`
+  - `swJ8hsirMP1R5hnYDhET`: `Friday Night Live at Tekila (Jerry Laird)`, `2026-05-08 18:00-21:00`, source `995060563037190_1`
+  - `uKQLiBtXi0xIbrRRumIH`: `Live Music with Brian Dunn`, `2026-04-04 18:00-21:00`, source `965163849360195_1`
+- `venues/slug_carrefourdelislesaintjean/events/10I2nDDLIXpVaT1yxxoo`
+  - `Je grandis en francais - Des la naissance (Phase 2)`
+  - `2026-04-15 18:00-19:00`
+  - Source: `1372605281574114_1`
+  - Address: `5 Acadian Dr, Charlottetown, PE C1C 1M2`
+
+#### Replay side effects and repairs
+- The Evermoore/Downtown Summerside replay expanded an Open City style row into additional venue events. I kept these because the rows resolved to real venues and event content, but recorded them as side effects rather than direct target writes:
+  - `venues/slug_holmansicecream/events/Mw0sUQpZmVH65NVrBzZE`: `ADL Music Series: Roger Stone`, `2026-05-09 18:00-20:00`
+  - `venues/slug_artbudspei/events/o3srwUGypJcNMsKBsw8t`: `Tiny Landscape + Wildflower Suncatcher Drop-In`, `2026-05-23 10:00-17:00`
+  - `venues/slug_bogsidebrewco/events/e0GHvG2Q5hTW8ElAW8OD`: `Live music with Madjoy`, `2026-05-23 18:00-21:00`
+  - `venues/fb_100063593349606/events/hYaSeHtmr33sMsEdHxHL`: `Downtown Summerside Community Cleanup Day`, `2026-05-23 09:00-11:00`
+  - `venues/Ty6yXQ3VwbKRlpnU7J9x/events/ndF3BEfl04ku07sJPEYu`: `FREE Ice Cream (Community Cleanup Day volunteers)`, `2026-05-23 11:00-21:00`, category `Food Special`
+- Repair backup: `firebase/batch-g-replay-audit-repair-backup-2026-05-28T01-10-25-737Z.json`
+- Deleted false side-effect doc:
+  - `venues/0F6W6IBgJqlKQ8AmaTGC/events/k24qWNDa1UfHoKm3PAe0`
+  - Name was `Latino Association of PEI (with)`.
+  - Rationale: this was a collaborator/host line, not an event.
+- Repaired duplicated title:
+  - `venues/slug_holmansicecream/events/PZ6dXxKLqJfwuI5DWNnK`
+  - Before: `ADL Music Series with Shane Pendergast - ADL Music Series with Shane Pendergast`
+  - After: `ADL Music Series with Shane Pendergast`
+  - Content, date/time, image, and venue were left unchanged.
+
+#### Batch G notes
+- The selected-row replay queue still sometimes leaves tasks scheduled in the past until manually dispatched; several eventually disappeared on their own, and one manual run hit `selected_rows_replay_lock_active` while another task for the same file was active.
+- Attempted to create an `events.updatedAt` collection-group audit index, but the Firestore CLI/API path only manipulated the collection-scope field config and did not satisfy the `COLLECTION_GROUP_ASC` requirement. I cleared the field exemption back toward inherited/default settings and used a client-side collection-group scan for this audit.
 
 ## Current / Future Items Not Auto-Resolved
 
