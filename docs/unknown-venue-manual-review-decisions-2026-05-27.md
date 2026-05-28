@@ -714,6 +714,103 @@ Email-first packet log:
   - `uv_67e727818b3e352626fb9371`: `The Oak`
 - Batch J confirms the selected-row finalizer is too aggressive for records with sampled sibling posts. For future batches, prefer one-source rows or use a replay path that does not enqueue sampled sibling source IDs.
 
+### Batch K - Primary-sample replay aliases
+
+#### Replay guard deployed before applying
+- Code commit: `74af07f Guard unknown venue replay scope`
+- Deployed function: `gathr-functions:finalizeUnrecognizedVenueTrigger(northamerica-northeast2)`
+- Function URL: `https://finalizeunrecognizedvenuetrigger-6ju7yi5g2a-pd.a.run.app`
+- Behavior change: unknown-venue finalizer now defaults to `replayScope: primary_sample`.
+- Why it matters: resolving one unknown-venue doc no longer replays every sampled sibling row by default. It queues only the primary replayable sample unless a caller explicitly passes `replayScope: all_samples`.
+- Remaining limitation: one primary source row can still parse into multiple events if the post itself is a multi-event calendar or schedule image. That is expected parser behavior and still requires post-replay audit.
+- Verification:
+  - `npm run build`
+  - `node --test lib/services/unknownVenueResolver.replayTargets.test.js`
+
+#### Finalizer actions
+- Finalizer backup: `firebase/unknown-venue-batch-k-backup-2026-05-28T11-54-55-621Z.json`
+- Alias repair backup: `firebase/batch-k-alias-repair-backup-2026-05-28T12-05-43-771Z.json`
+- All finalizer responses returned `replayScope: primary_sample`.
+- Actions applied:
+  - `uv_6c1f27b6db070e3678ba203b`: `Milton Hall` -> `venues/nvQTJXSbDsSfJTCxDKCH`
+    - sample count `5`, skipped sampled sibling rows `4`, queued source `1774366857350651`
+  - `uv_b3647d71417297d5ec6fde9c`: `Confederation Court Mall Holman entrance` -> `venues/name_2lgcnn`
+    - sample count `2`, skipped sampled sibling row `1`, queued source `928149306914141`
+  - `uv_de1d9525acf89203ad84cc26`: `Rodd Charlottetown Hotel` alias -> `venues/fb_100063479865570`
+    - queued source `1405635061589581`
+  - `uv_95f55e5d5bcdf7bbe9de395d`: `Razzy's Roadhouse` -> `venues/slug_razzys.house`
+    - queued source `1392881492880091`
+  - `uv_7b5565726525003cf0037070`: `Famous Peppers Charlottetown` alias -> `venues/fb_100063642936644`
+    - queued source `1571041301693953`
+  - `uv_e9c782243299a2886d77c522`: `Carrefour de L'Isle Saint-Jean` -> `venues/slug_carrefourdelislesaintjean`
+    - queued source `1343540547813921`
+  - `uv_a8752b45f714ab20dcc79eb6`: `Farm Centre back parking lot` -> initially resolved to duplicate `venues/Wg9ldWt2KHK85iCoGWi7`
+    - queued source `1588076283320054`
+    - later repaired to canonical `venues/slug_peifarmcentre`
+  - `uv_229258f98f791ac9eb994c3e`: `The 5th Wave` -> `venues/fb_100063680584674`
+    - queued source `1594159769383361`
+  - `uv_29f5e31531c8b2cb1a8ddb8e`: `The 5th Wave` address alias -> `venues/fb_100063680584674`
+    - queued source `1594049046061100`
+
+#### Direct target writes and skips
+- `venues/nvQTJXSbDsSfJTCxDKCH/events/YmEQzFJrDpiveFuT4L5H`
+  - `Yoga`, source `1774366857350651_1`, `2026-05-08 09:15-11:15`.
+- `venues/nvQTJXSbDsSfJTCxDKCH/events/2vnkOPpsS6BEFz0OcWCu`
+  - `Chronic Pain`, source `1774366857350651_3`, `2026-05-11 07:15-09:15`.
+- `venues/nvQTJXSbDsSfJTCxDKCH/events/l1Eomp6PfbFH2B9EOccQ`
+  - `Blankets`, source `1774366857350651_4`, `2026-05-13 10:15-12:15`.
+- `venues/nvQTJXSbDsSfJTCxDKCH/events/B0HglnQ1xDE8yQUf5x5e`
+  - `Yard Sale`, source `1774366857350651_5`, `2026-05-16 08:00-10:00`.
+- `venues/nvQTJXSbDsSfJTCxDKCH/events/znS7ntmQPnqz0DjRYxfq`
+  - `Lentils`, source `1774366857350651_6`, `2026-05-19 13:00-15:00`.
+- `venues/nvQTJXSbDsSfJTCxDKCH/events/ii8SSNLIKWNltM6KI6nu`
+  - `Flowers`, source `1774366857350651_7`, `2026-05-21 19:00-21:00`.
+- `venues/name_2lgcnn/events/qOsmHWRruVEi77KxJ4S3`
+  - `Beginner Linocut Printmaking Workshop`, source `928149306914141_1`, `2026-05-26 18:30-20:30`.
+  - Snapshot row venue was `name_6387om` Blank Canvas, but the parsed event item resolved to Confederation Court Mall.
+- `venues/slug_razzys.house/events/GxkV0BlxyxtxUSykn9DC`
+  - `No Big Dill (Burger Love burger) - Razzy's Roadhouse`, source `1392881492880091_1`, `2026-04-21 11:00-21:00`.
+- `venues/slug_razzys.house/events/DNW8tZVw64YsqBszG9C2`
+  - `$1 from each burger sold supports Anderson House`, source `1392881492880091_2`, `2026-04-21 11:00-21:00`.
+- `venues/fb_100063642936644/events/vgzSnlhzioKpgbtE0HnY`
+  - Burger Passport stamp promo, source `1571041301693953_1`, `2026-04-20 11:30-21:00`.
+- `venues/slug_carrefourdelislesaintjean/events/BbbQ38ks5bPNhJREqOtU`
+  - `Libre-Service (Self-Service) - 500g portion`, source `1343540547813921_1`, `2026-03-05 08:30-21:00`.
+- `Rodd Charlottetown Hotel` source `1405635061589581` produced a fresh parse snapshot, but `eventCount=0`.
+  - Parser error: `Due to failing Stage 4 secondary validation`.
+  - Snapshot establishment was `St. Paul's Anglican Church, Charlottetown`, venue id `slug_stpaulschurchinpei`.
+  - No Rodd event doc was created.
+- `The 5th Wave` source `1594159769383361` skipped because the source row had empty post content.
+
+#### Alias and canonical repairs
+- Farm Centre:
+  - Added aliases to canonical venue `venues/slug_peifarmcentre`:
+    - `PEI Farm Centre`
+    - `Farm Centre`
+    - `Back parking lot of the Farm Centre (Prince Edward Island Farm Centre)`
+    - `Prince Edward Island Farm Centre (back parking lot)`
+    - `Farm Centre back parking lot`
+  - Removed only the just-added long exact alias from duplicate `venues/Wg9ldWt2KHK85iCoGWi7` to avoid an exact-alias conflict.
+  - Corrected `unrecognized_venues/uv_a8752b45f714ab20dcc79eb6` from duplicate venue `Wg9ldWt2KHK85iCoGWi7` to canonical venue `slug_peifarmcentre`.
+  - Replayed row `218` from file `1XN-tJRA4E3jidJpR_P000Nfj85l0vOMi`.
+  - Result: `venues/slug_peifarmcentre/events/omy66Ak18dzqE8oVigFF`
+    - `Fruit Tree Order Pickup Begins`, source `1588076283320054_1`, `2026-05-19 09:00-23:00`.
+- Red Island Cider / The 5th Wave:
+  - Added aliases to `venues/fb_100063680584674`:
+    - `The 5th Wave`
+    - `The 5th Wave Espresso & Tea Bar`
+  - Replayed row `18` from file `1bFQ2h9A7iF_IQ4F64KCIRotFXCkGC8mb`.
+  - Result: `venues/fb_100063680584674/events/0Al3MYedxQtUQeDi94W3`
+    - `The 5th Wave Grand Opening`, source `1594049046061100_1`, `2026-05-04 07:30-23:00`.
+
+#### Held items from this pass
+- Do not bulk-resolve these without more review:
+  - `Street Feast` -> suggested `PonyBoat Social Club`; likely wrong because Street Feast is a downtown area event.
+  - `TBC` -> suggested `Milton Community Hall`; abbreviation is not enough evidence.
+  - `Sterling WI Hall` -> suggested `Stanley Bridge Hall`; name similarity is not enough evidence.
+  - A broad `A&W` multi-location record; needs per-location handling if it is a real app event.
+  - `Virtual` / online records; should not create normal venues.
+
 ## Current / Future Items Not Auto-Resolved
 
 These are not safe to bulk-resolve even when the report bucket says `likely_existing_alias_or_match`.
