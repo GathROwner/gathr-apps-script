@@ -8,10 +8,12 @@ Source reports:
 - `tmp/unknown-venue-manual-review-rich-2026-05-28T11-09-54-155Z.json`
 - `tmp/unknown-venue-manual-review-rich-2026-05-28T11-22-11-055Z.json`
 - `tmp/unknown-venue-manual-review-rich-2026-05-28T11-35-01-157Z.json`
+- `tmp/unknown-venue-manual-review-rich-2026-05-28T12-11-09-464Z.json`
+- `tmp/unknown-venue-manual-review-rich-2026-05-28T12-28-30-000Z.json`
 
-Current queue snapshot after Batch J:
-- `manual_review`: 429
-- `resolved_existing`: 157
+Current queue snapshot after Batch L:
+- `manual_review`: 414
+- `resolved_existing`: 174
 - `ignored`: 19
 - `created_new`: 63
 - `failed`: 150
@@ -810,6 +812,88 @@ Email-first packet log:
   - `Sterling WI Hall` -> suggested `Stanley Bridge Hall`; name similarity is not enough evidence.
   - A broad `A&W` multi-location record; needs per-location handling if it is a real app event.
   - `Virtual` / online records; should not create normal venues.
+
+### Batch L - Strict existing aliases with direct replay audit
+
+#### Finalizer actions
+- Queue snapshot before batch: `tmp/unknown-venue-manual-review-rich-2026-05-28T12-11-09-464Z.json`
+  - `manual_review`: `422`
+- Queue snapshot after batch: `tmp/unknown-venue-manual-review-rich-2026-05-28T12-28-30-000Z.json`
+  - `manual_review`: `414`
+- Finalizer backup: `firebase/unknown-venue-batch-l-backup-2026-05-28T12-14-19-553Z.json`
+- Event-placement repair backup: `firebase/batch-l-event-placement-repair-backup-2026-05-28T12-26-40-909Z.json`
+- All finalizer responses returned `replayScope: primary_sample`.
+- Actions applied:
+  - `uv_d409aadb743aab0e7874d65f`: `Charlottetown Farmers' Market, 614 North River Road` -> `venues/slug_charlottetownfarmersmarket`
+    - sample count `4`, skipped sampled sibling rows `3`, queued source `1628616635940677`
+  - `uv_daada02af1d5f5024ae81a45`: `O'Briens` -> `venues/fb_100052606604879`
+    - sample count `5`, skipped sampled sibling rows `4`, queued source `1626750482421823`
+  - `uv_dc31ea6c0e286b2df93e5c1b`: `Prince Edward Island Farm Centre (back parking lot)` -> `venues/slug_peifarmcentre`
+    - queued source `1588076283320054`
+  - `uv_a1872f8df24c88647d4ea110`: `The 5th Wave` -> `venues/fb_100063680584674`
+    - queued source `1594049046061100`
+  - `uv_090712dc3e25ec51e953d4f9`: `Charlottetown Farmers' Market (temporary location), 614 North River Road` -> `venues/slug_charlottetownfarmersmarket`
+    - sample count `2`, skipped sampled sibling row `1`, queued source `1600039285465079`
+  - `uv_980d1987631cdc845b7cc825`: `Summerside Waterfront Cafe & Training Center` -> `venues/RJ9iYyEWcYUr91hcGSeL`
+    - queued source `950849441028341`
+  - `uv_f4e40f0d0cd3c989fc837f95`: `Charlottetown Mitsubishi (showroom)` -> `venues/luyMgWB1DMUHPUxvuxvO`
+    - sample count `5`, skipped sampled sibling rows `4`, queued source `1389324513215570`
+  - `uv_acffad063d9fca8c60efb388`: `Confederation Court Mall (Buenos Island Studio...)` -> `venues/0F6W6IBgJqlKQ8AmaTGC`
+    - queued source `122132972169035455`
+
+#### Direct replay audit
+- The finalizer queued Cloud Task replays, but several source-id replays did not force fresh parse snapshots. I then replayed selected rows directly by `fileId` + `rowIndex`:
+  - `12SyL08Juv1bNcNWSOE7o7nOAdjpohvhG`, row `209`: processed `1`, created `1`, updated `4`.
+  - `1hG60uHGLZc8viuqzNxkWSIPFyIZJX7uP`, row `227`: processed `1`, created `0`, updated `1`.
+  - `18ENh2qDumYVp30Wx6mBLRAN-sbKHnybU`, row `224`: skipped `1`; latest parse now correctly rejects it as a holiday greeting / closure notice with `eventCount=0`.
+  - `14uFDS_Rs5SVJRthbDIXb3ff_cvpYZnaz`, row `246`: processed `1`, created `0`, updated `1`.
+  - `12boS5aufaDzkDcehchylIiytoAPHbXoF`, row `317`: processed `1`, duplicate `1`; this still updated the old parent-mall doc, so I repaired placement manually.
+
+#### Event writes and repairs
+- `venues/fb_100052606604879/events/W6xawAOcRqbTR1GryLrf`
+  - `3 Course Menu Special`, source `1626750482421823_1`, `2026-04-10 17:00-21:00`.
+  - Existing doc updated by dedupe.
+- `venues/slug_peifarmcentre/events/omy66Ak18dzqE8oVigFF`
+  - `Fruit Tree Order Pickup Begins`, source `1588076283320054_1`, `2026-05-19 09:00-23:00`.
+  - Existing doc updated by dedupe.
+- `venues/fb_100063680584674/events/0Al3MYedxQtUQeDi94W3`
+  - `The 5th Wave Grand Opening`, source `1594049046061100_1`, `2026-05-04 07:30-23:00`.
+  - Existing doc updated by dedupe.
+- `venues/luyMgWB1DMUHPUxvuxvO/events/2WtnXhOVdHsMFoDCxCGI`
+  - `Meet Gerard Murphy (Ocean 100) at Charlottetown Mitsubishi`, source `1389324513215570_1`, `2026-05-23 10:00-14:00`.
+  - New doc created then updated by direct replay.
+- `venues/0F6W6IBgJqlKQ8AmaTGC/events/mTXXNWDNdHxG8aInnL3B`
+  - `Sass Class (Sexy High Heels Dance Classes)`, source `122132972169035455_1`, `2026-04-25 13:00-15:00`.
+  - Repaired from old parent path `venues/name_2lgcnn/events/mTXXNWDNdHxG8aInnL3B` to specific venue `Buenos Island Studio`.
+- `venues/slug_charlottetownfarmersmarket/events/wLPCwUURFbQQVl8Z8iyK`
+  - `Visit Alex of @riverdaleorchard at the Market (temporary location)`, source `1600039285465079_1`, `2026-05-02 09:00-14:00`.
+- `venues/slug_charlottetownfarmersmarket/events/I8wSzrjsfBNgpsj1Z2ka`
+  - `Chocolate Croissant`, repaired source `1628616635940677_2`, `2026-05-26 13:00-21:00`.
+- `venues/slug_charlottetownfarmersmarket/events/uPAwtZUWC6QQp3is2eiB`
+  - `Chocolate Explosion`, source `1628616635940677_3`, `2026-05-26 13:00-21:00`.
+- `venues/slug_charlottetownfarmersmarket/events/aIxo73dg3Ma2rsDl6vNR`
+  - `Eclair`, source `1628616635940677_4`, `2026-05-26 13:00-21:00`.
+- `venues/slug_charlottetownfarmersmarket/events/BbmHRWR6pqZbTuYMwxw5`
+  - `Tiramisu`, source `1628616635940677_5`, `2026-05-26 13:00-21:00`.
+- Deleted duplicate/unstable Farmers Market doc:
+  - `venues/slug_charlottetownfarmersmarket/events/LCOHxAA14HHCotIXrA7j`
+  - Reason: duplicate Chocolate Explosion item from an earlier parser ordering; it occupied source suffix `_2` after the later replay used `_2` for Chocolate Croissant.
+- Updated existing market-hours keeper:
+  - `venues/slug_charlottetownfarmersmarket/events/7BbrHk3gYR6qEHtvV6lI`
+  - Existing recurring market-hours doc retained source `1551026647033010_1`; dedupe refreshed its media/details from the new source.
+
+#### Issues found
+- Batch L found a real duplicate-ID risk: when a multi-item source row is re-parsed and the item order changes, semantic dedupe can update an old item while a later item creates a second doc with the same `uniqueId`. I repaired the live Farmers Market docs and added a write-path guard so incompatible exact-`uniqueId` collisions are logged and skipped instead of creating a second Firestore doc with the same `uniqueId`.
+  - Deployed guard to `gathr-functions:processDataset(northamerica-northeast2)`.
+  - Deployed guard to `gathr-functions:processDatasetSelectedRows(northamerica-northeast1)`.
+- Batch L also found a parent-vs-specific placement issue: the Buenos Island parser snapshot said `venueId=0F6W6IBgJqlKQ8AmaTGC`, but the write path updated the old event under the parent mall venue. I repaired the live doc, but similar sublocation cases should be audited after replay.
+- Several old post-derived events still have no managed event image even after replay:
+  - `Fruit Tree Order Pickup Begins`
+  - `The 5th Wave Grand Opening`
+  - `Visit Alex of @riverdaleorchard at the Market`
+  - `Meet Gerard Murphy (Ocean 100) at Charlottetown Mitsubishi`
+  - These are not fixed in Batch L; they should be handled by a separate media backfill or parser image investigation.
+- Remaining likely-existing bucket is not safe to bulk-apply. The next report still includes risky rows such as `CMP`, `TBC`, city/route-level Charlottetown rows, broad multi-location records, and organizer-vs-venue cases.
 
 ## Current / Future Items Not Auto-Resolved
 

@@ -3135,6 +3135,22 @@ export async function checkDuplicate(
           existingEvent: compatibleExactMatch,
         };
       }
+
+      logger.warn('Exact uniqueId collision is incompatible; skipping duplicate event create', {
+        venueId,
+        uniqueId: normalizedUniqueId,
+        incomingTitle: event.eventName || event.name || '',
+        incomingStartDate: event.startDate || '',
+        existingCandidates: exactMatches.map((candidate) => ({
+          eventId: candidate.id || '',
+          title: candidate.eventName || candidate.name || '',
+          startDate: candidate.startDate || '',
+          startTime: candidate.startTime || '',
+        })),
+      });
+      return {
+        isDuplicate: true,
+      };
     }
   }
 
