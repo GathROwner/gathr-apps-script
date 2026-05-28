@@ -5,11 +5,12 @@ This is the running operator log for the large Facebook Events / post-parser unk
 Source reports:
 - `tmp/unknown-venue-manual-review-rich-2026-05-27T18-27-38-205Z.json`
 - `tmp/unknown-venue-manual-review-rich-2026-05-27T18-41-47-296Z.json`
+- `tmp/unknown-venue-manual-review-rich-2026-05-28T11-09-54-155Z.json`
 
-Current queue snapshot after Batch G:
-- `manual_review`: 464
-- `resolved_existing`: 130
-- `ignored`: 9
+Current queue snapshot after Batch H:
+- `manual_review`: 441
+- `resolved_existing`: 145
+- `ignored`: 17
 - `created_new`: 63
 - `failed`: 150
 - `pending`, `candidate_found`, `lookup_running`: 0
@@ -553,6 +554,78 @@ Email-first packet log:
 #### Batch G notes
 - The selected-row replay queue still sometimes leaves tasks scheduled in the past until manually dispatched; several eventually disappeared on their own, and one manual run hit `selected_rows_replay_lock_active` while another task for the same file was active.
 - Attempted to create an `events.updatedAt` collection-group audit index, but the Firestore CLI/API path only manipulated the collection-scope field config and did not satisfy the `COLLECTION_GROUP_ASC` requirement. I cleared the field exemption back toward inherited/default settings and used a client-side collection-group scan for this audit.
+
+### Batch H - Existing aliases plus non-event ignores
+
+#### Finalizer actions
+- Finalizer backup: `firebase/unknown-venue-batch-h-backup-2026-05-28T10-49-36-028Z.json`
+- Side-effect repair backup: `firebase/batch-h-side-effect-repair-backup-2026-05-28T11-08-20-161Z.json`
+- Actions applied:
+  - `uv_4d62762c75b1288a55417365`: `Emerald` -> `venues/slug_boxcarpub` (`Boxcar Pub & Grill`)
+  - `uv_74535d54c49996cb5bd0c48e`: `O'Brien's Social Bar & Kitchen (Red Shores Charlottetown)` -> `venues/fb_100052606604879`
+  - `uv_917c5b372edb2ce7f6bd5b22`: Souris Show Hall address variant -> `venues/slug_sourisshowhall`
+  - `uv_87434be1c54c8c05c2df6ccf`: Souris Show Hall town variant -> `venues/slug_sourisshowhall`
+  - `uv_de1471e4c20db457c1bb63e8`: Souris Show Hall province variant -> `venues/slug_sourisshowhall`
+  - `uv_8ff3444bfab65fda031e78b2`: `St. Paul's Church` -> `venues/slug_stpaulschurchinpei`
+  - `uv_ece60a8d162ff2d85079bb02`: `Blank Canvas Art Supplies (Confederation Court Mall, Charlottetown)` -> `venues/name_6387om`
+  - `uv_dac52e397ec585836284858d`: DownStreet Dance address variant -> `venues/slug_downstreetdance`
+  - `uv_0f5449e73325baa822ac9cca`: Harbourfront short alias -> `venues/slug_harbourfronttheatre`
+  - `uv_5811978b9b4accd47bddc206`: Inspire Learning Centre room/address variant -> `venues/JJafK6aSGGv8vxNxvJdK`
+  - `uv_9beffbcd472a4ef0ca5885fd`: `PEERS Aliance Inc` typo -> `venues/slug_peersalliance`
+  - `uv_f28929bd092b783b85eab234`: `PEERS Alliance Office @ 250B Queen St` -> `venues/slug_peersalliance`
+  - `uv_c4fe85212aebb996a22b9d0b`: `Summerside Raceway` -> `venues/3f8DZiSSgoL1mQ5kMxSN`
+  - `uv_4fdd2858ce1ea9043beed265`: `Timothy's Cafe (154 Great George St, Charlottetown, PE)` -> `venues/slug_timothyscharlottetown`
+  - `uv_b10a842f1f0d1c4b21056e2e`: `Wheelhouse` -> `venues/fb_100063721472778`
+- Ignored:
+  - `uv_0d88b9ac65ecbe13b2091694`: Charlottetown Mitsubishi service-department discount
+  - `uv_a7672b83960b82ac24500a9b`: Confederation Bridge Aquatics maintenance closure
+  - `uv_ab214bf05f1028bdc66a4893`: Kool Breeze retail product bundle
+  - `uv_aceb01a966bda5f882040be1`: PetSmart online same-day delivery offer
+  - `uv_ad037aa2d1178135313cb059`: PetSmart.ca same-day delivery offer
+  - `uv_2cf102617ab9f67482d836bc`: PetSmart Canada delivery offer
+  - `uv_29c6040cfc8fc0dcc4ac28e3`: Rxtra Care Clinic service notice
+  - `uv_6146802a141a8785ffff93d0`: Rxtra Care Clinics service notice
+- Queue verification: `processDatasetSelectedRows` drained to empty after serial dispatch and lock waits.
+- Current queue snapshot after refresh: `manual_review` dropped from `464` to `441`.
+
+#### Direct target writes after side-effect repair
+- `venues/fb_100052606604879/events/j1CNQS00NdQbSdPiwi5X`
+  - `2 for 1 Fish & Chips`, `2026-03-02 16:00-19:00`, source `1595350725561799_4`, updated by replay
+- `venues/fb_100052606604879/events/I6NiYVawdNnuFD0A5eol`
+  - `Wing Night`, `2026-03-02 17:00-20:00`, source `1595350725561799_5`, updated by replay
+- `venues/fb_100052606604879/events/YwucwqDKIUADzx2o5F0g`
+  - `3-Course Menu Special`, `2026-02-27 17:00-22:00`, source `1587906202972918_3`, created by replay
+- `venues/name_6387om/events/11KAtsA6rMcbglvWmhzk`
+  - `Oil Pastel Workshop with Dave`, `2026-05-15 18:30-20:30`, source `917997967929275_1`
+- `venues/slug_downstreetdance/events/CXB6Fksq9AHKAaxwRtWp`
+  - `Beginner Belly Dance Class (Drop-in)`, `2026-05-05 18:30-20:30`, source `1615247680606133_1`
+- `venues/slug_harbourfronttheatre/events/DV0HEA01nMt4qljoR4hO`
+  - `EPiC Movie Night: Elvis`, `2026-05-04 19:00-23:00`, source `1567844625346502_1`
+- `venues/JJafK6aSGGv8vxNxvJdK/events/oYkAFe4xCAFTxUz6917w`
+  - `Summerside Rainbow Youth Club: Fibre Arts 101 Workshop`, `2026-05-05 18:00-20:00`, source `1389018029931236_1`
+- `venues/slug_peersalliance/events/jt9jxrPUgleUl8xTlgny`
+  - `Queer Poetry Club`, `2026-05-02 14:00-16:00`, source `1410438631123670_22`
+- `venues/slug_peersalliance/events/yhbXRBbhuH3ytN2zttJD`
+  - `Square Dance (PEI's Rainbow Youth Club - Charlottetown)`, `2026-05-26 18:00-20:00`, source `1410442317788807_1`
+- `venues/3f8DZiSSgoL1mQ5kMxSN/events/P1jNYbOxvOdyPUJocNvg`
+  - `Racing Returns to Summerside Raceway (Season Opener)`, `2026-05-18 12:30-23:00`, source `1658829589213912_1`
+- `venues/slug_timothyscharlottetown/events/GvmADTqEAPJY72c0lGD2`
+  - `Live Music: Kendra Lyttle`, `2026-05-23 12:30-2026-05-24 01:00`, source `1628490159278800_1`
+- `venues/fb_100063721472778/events/Uf4CyikrF4XFe5rnQzdB`
+  - `Opening for the 2026 season`, `2026-05-22 17:00-21:00`, source `1591641739636527_1`
+- Souris duplicate-only replay under `venues/slug_sourisshowhall/events`:
+  - `hBsCqVnsOg8L07RaEzvI`: `Family Movie Series: Charlotte's Web`, `2026-03-01 14:00-23:00`, source `1518483866951749_1`
+  - `87FhEER1bjhulBkJV0j2`: `Family Movie Series: Darby O'Gill`, `2026-03-15 14:00-23:00`, source `1518483866951749_2`
+
+#### Replay skips and side effects
+- `Emerald` / Boxcar replay (`fileId=1OBkpqt-PKK02Ud8eC7w5M1X8rICDkoTv`, source `1517427593718798`) reached row 87 but wrote no event: Stage 4 secondary validation failed.
+- Blank Canvas second replay (`fileId=12DvqvGpvHToTqW1v9MRP70wzhhOydEQE`, row 351) wrote no event: Stage 1 validation failed.
+- St. Paul's replay (`fileId=1fQNRn-t1s6XQUdDKdglkCcJ5iO7RO-8b`, row 228) wrote no event: Stage 4 secondary validation failed.
+- The PEERS typo replay expanded two Downtown Charlottetown multi-event source rows (`1410438631123670_*`, `1411261657708034_*`) into 47 unintended, newly-created old May 1-3 event docs across multiple venues. I deleted those side-effect docs and kept only the direct PEERS target `venues/slug_peersalliance/events/jt9jxrPUgleUl8xTlgny`.
+
+#### Batch H notes
+- Several replays hit `selected_rows_replay_lock_active` while another selected-row task was processing the same spreadsheet. I waited for locks to release, then reran remaining tasks. Final queue state was empty.
+- This batch reinforces that selected-row replay should not be used casually for broad multi-event calendar rows. When resolving aliases from old backlog emails, source IDs with many generated suffixes need side-effect audit immediately after replay.
 
 ## Current / Future Items Not Auto-Resolved
 
