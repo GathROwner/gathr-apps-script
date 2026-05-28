@@ -412,6 +412,41 @@ function getComparableEventName(value: { eventName?: string; name?: string }): s
   return String(value.name || '').trim();
 }
 
+function extractExplicitAgeGroupMarkers(value: string): string[] {
+  const normalized = String(value || '')
+    .toLowerCase()
+    .replace(/[\u2010-\u2015\u2212]/g, '-')
+    .replace(/\s+/g, ' ');
+  const markers = new Set<string>();
+  const pattern =
+    /\b(?:age|ages|aged)\s*:?\s*(\d{1,2})(?:\s*(?:-|to)\s*(\d{1,2})|\s*(\+|plus))?/g;
+
+  let match: RegExpExecArray | null;
+  while ((match = pattern.exec(normalized)) !== null) {
+    const start = match[1];
+    const end = match[2];
+    const plus = match[3];
+    if (!start) continue;
+    if (end) {
+      markers.add(`age:${start}-${end}`);
+    } else if (plus) {
+      markers.add(`age:${start}+`);
+    } else {
+      markers.add(`age:${start}`);
+    }
+  }
+
+  return Array.from(markers);
+}
+
+function hasConflictingExplicitAgeGroups(left: string, right: string): boolean {
+  const leftMarkers = extractExplicitAgeGroupMarkers(left);
+  const rightMarkers = extractExplicitAgeGroupMarkers(right);
+  if (!leftMarkers.length || !rightMarkers.length) return false;
+  const rightSet = new Set(rightMarkers);
+  return !leftMarkers.some((marker) => rightSet.has(marker));
+}
+
 /**
  * Check if two events are potential duplicates
  * Uses the 3-point matching system from the original code
@@ -498,6 +533,13 @@ export function isDuplicateEntry(
   const normalizedNewName = normalizeEventText(getComparableEventName(newData));
   const normalizedExistingName = normalizeEventText(getComparableEventName(existingData));
   const hasBothNames = Boolean(normalizedNewName && normalizedExistingName);
+
+  if (
+    hasBothNames &&
+    hasConflictingExplicitAgeGroups(normalizedNewName, normalizedExistingName)
+  ) {
+    return false;
+  }
 
   const nameSimilarity = hasBothNames
     ? calculateSimilarity(normalizedNewName, normalizedExistingName)

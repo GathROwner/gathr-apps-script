@@ -114,3 +114,40 @@ test('reuses an existing unknown venue doc for the same Facebook event source an
 
   assert.equal(picked, 'uv_island_hill_existing');
 });
+
+test('does not collapse same-source age-group sibling events', () => {
+  const incoming = buildEvent({
+    uniqueId: '1507911641334813_2',
+    venueId: '5fxwonYWZbp95kOOjdfF',
+    establishment: "Veteran's Memorial Park",
+    eventName: 'Downtown Summerside Easter Egg Hunt (Age 7+)',
+    name: 'Downtown Summerside Easter Egg Hunt (Age 7+)',
+    description:
+      'Downtown Summerside Easter Egg Hunt. Age 7+ Easter Egg Hunt 12:30 - 1:00 P.M.',
+    startDate: '2026-03-28',
+    endDate: '2026-03-28',
+    startTime: '12:30',
+    endTime: '13:00',
+  });
+
+  const youngerSibling = buildEvent({
+    id: 'age_0_6_keeper',
+    uniqueId: '1507911641334813_1',
+    venueId: '5fxwonYWZbp95kOOjdfF',
+    establishment: "Veteran's Memorial Park",
+    eventName: 'Downtown Summerside Easter Egg Hunt (Age 0-6 Hunt)',
+    name: 'Downtown Summerside Easter Egg Hunt (Age 0-6 Hunt)',
+    description:
+      'Downtown Summerside Easter Egg Hunt. Age 0 - 6 Hunt 11 - 11:30.',
+    startDate: '2026-03-28',
+    endDate: '2026-03-28',
+    startTime: '11:00',
+    endTime: '11:30',
+  });
+
+  assert.equal(
+    isDuplicateEntry(incoming, youngerSibling, { requireEstablishmentMatch: false }),
+    false
+  );
+  assert.equal(shouldSkipSiblingUniqueIdDuplicateCheck(incoming, youngerSibling), true);
+});

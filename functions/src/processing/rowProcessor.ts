@@ -5010,10 +5010,12 @@ function extractComparableTimesFromEvidence(
     if (resolvedRange) return resolvedRange;
   }
 
-  const bareRangeMatch = normalized.match(
-    /\b(\d{1,2}(?::\d{2})?)\s*(?:-|to)\s*(\d{1,2}(?::\d{2})?)\b/i
+  const bareRangeMatches = Array.from(
+    normalized.matchAll(/\b(\d{1,2}(?::\d{2})?)\s*(?:-|to)\s*(\d{1,2}(?::\d{2})?)\b/gi)
   );
-  if (bareRangeMatch && (context?.expectedStart || context?.expectedEnd)) {
+  for (const bareRangeMatch of bareRangeMatches) {
+    if (!(context?.expectedStart || context?.expectedEnd)) break;
+    if (isLikelyAgeRangeEvidenceMatch(normalized, bareRangeMatch.index || 0)) continue;
     const resolvedRange = resolveComparableRangeTimesFromEvidence(
       bareRangeMatch[1],
       '',
@@ -5028,6 +5030,11 @@ function extractComparableTimesFromEvidence(
   return explicitTokens
     .map((token) => normalizeComparableEvidenceTimeToken(token))
     .filter(Boolean);
+}
+
+function isLikelyAgeRangeEvidenceMatch(evidence: string, matchIndex: number): boolean {
+  const before = evidence.slice(Math.max(0, matchIndex - 16), matchIndex);
+  return /\b(?:age|ages|aged)\s*:?\s*$/.test(before);
 }
 
 function resolveComparableRangeTimesFromEvidence(

@@ -6,12 +6,12 @@ Source reports:
 - `tmp/unknown-venue-manual-review-rich-2026-05-27T18-27-38-205Z.json`
 - `tmp/unknown-venue-manual-review-rich-2026-05-27T18-41-47-296Z.json`
 
-Current queue snapshot after Batch B:
-- `manual_review`: 502
-- `resolved_existing`: 92
-- `ignored`: 5
-- `created_new`: 58
-- `failed`: 152
+Current queue snapshot after Batch F:
+- `manual_review`: 474
+- `resolved_existing`: 120
+- `ignored`: 9
+- `created_new`: 63
+- `failed`: 150
 - `pending`, `candidate_found`, `lookup_running`: 0
 
 Review rules I am using:
@@ -261,6 +261,224 @@ Email-first packet log:
   - venue alias with source-page fallback address resolves to the venue address.
   - duplicate merge replaces stale source-page addresses when the incoming parse has the resolved venue address.
   - sub-location aliases such as `Gymnasium` are preserved.
+
+### Batch D - Exact existing venue aliases and Farmers Market address repair
+
+#### St. Paul's Anglican Church, Charlottetown
+- Unknown venue id: `uv_c344782ebec3ad546383fb65`
+- Observed venue: `101 Prince St, Charlottetown`
+- Action: `resolve_existing`
+- Resolved venue id: `slug_stpaulschurchinpei`
+- Evidence: source Facebook page is `https://www.facebook.com/stpaulschurchinpei/`; existing venue address and Facebook URL match.
+- Replay result: recent Firestore check found `St. Paul's Yard Sale`.
+  - Event doc: `venues/slug_stpaulschurchinpei/events/7XzibOzRd5tZYo8LTrES`
+  - Start/end: `2026-05-23 08:00` to `2026-05-23 12:00`
+  - Address: `101 Prince St, Charlottetown, PE, Canada, C1A 4R5`
+- Status: finalized.
+
+#### Boxcar Pub & Grill
+- Unknown venue id: `uv_a92cbb2767b3f45198706045`
+- Observed venue: `1910 Nodd Rd Emerald`
+- Action: `resolve_existing`
+- Resolved venue id: `slug_boxcarpub`
+- Evidence: source Facebook page is `https://www.facebook.com/boxcarpub`; existing venue address and Facebook URL match.
+- Replay result: recent Firestore check found `Emergency Preparedness Workshop`.
+  - Event doc: `venues/slug_boxcarpub/events/ti9MGrsPb9J0slzUpc33`
+  - Start/end: `2026-05-06 18:30` to `2026-05-06 20:00`
+  - Address: `1910 Nodd Rd, Emerald Junction, PE C0B 1M0, Canada`
+- Status: finalized.
+
+#### The Local Pub and Oyster Bar
+- Unknown venue id: `uv_a4b95eaf61ec0f807f0a9259`
+- Observed venue: `202 Buchanan Dr, Charlottetown`
+- Action: `resolve_existing`
+- Resolved venue id: `slug_thelocalpubpei`
+- Evidence: source Facebook page is `https://www.facebook.com/TheLocalPubPEI`; existing venue address and Facebook URL match.
+- Replay result: recent Firestore check found two docs:
+  - `Paint & Pride Night in the Brae (Pride & Paint Experience)`, `2026-05-14 18:00` to `20:00`
+  - `Paint & Pride Night ticket (includes drink)`, categorized as `Food Special`, `2026-05-14 11:00` to `21:00`
+- Status: finalized.
+
+#### Charlottetown Farmers' Market Co-operative
+- Unknown venue ids:
+  - `uv_023706888fe4a4b46c1fea7a`
+  - `uv_05ab4595c69fb7d8b20e9182`
+  - `uv_8d71932d14bda7a6e3b954ee`
+  - `uv_e531eb10bfef5d8857f350cd`
+- Observed venue variants: `614 North River Rd`, `614 North River Road`, and Charlottetown Farmers Market wording.
+- Action: `resolve_existing`
+- Resolved venue id: `slug_charlottetownfarmersmarket`
+- Venue repair applied before replay:
+  - Address corrected from the old `100 Belvedere Ave` value to `614 North River Road, Charlottetown, PE, Canada`.
+  - Coordinates set to `46.2632686`, `-63.1571917`.
+  - Website set to `https://charlottetownfarmersmarket.com/`.
+  - Phone set to `+1 902-626-3373`.
+  - Aliases added for the 614 North River Road variants and temporary-location wording.
+- Replay result: queue drained successfully after manual force-run of initially stuck Cloud Tasks. Recent Firestore check found 10 newly-created or updated docs under `venues/slug_charlottetownfarmersmarket/events`.
+- Important quality note: this was a correct venue-resolution batch, but the source rows are noisy. Several old vendor/market-hours posts became dated events or food specials, most with no media, and several dates are already in the past. Do not treat this as proof that every Farmers Market source row is app-worthy; future cleanup may need content-quality filtering for recurring market-hours/vendor posts.
+- Status: finalized with caveat.
+
+#### Batch D backups and replay notes
+- Backup: `firebase/unknown-venue-batch-d-backup-2026-05-27T23-47-42-806Z.json`
+- Queue verification: `processDatasetSelectedRows` was empty after replay follow-up.
+- Notable replay behavior: multiple same-file row replays briefly hit `selected_rows_replay_lock_active`, then retried or completed after the queue cleared.
+
+### Batch E - Exact existing venue aliases with side-effect repairs
+
+#### Beaconsfield Carriage House
+- Unknown venue ids: `uv_41522b0c4333a39ad11eac1d`, `uv_8972d741adabd655974ccb07`
+- Action: `resolve_existing`
+- Resolved venue id: `DqhaDw4xcuBFIm6WCQSq`
+- Evidence:
+  - `Fascinating Ladies of Country` source row names `Beaconsfield Carriage House`.
+  - `Around the Table` source row names `Beaconsfield Carriage House` for the April 10 screening.
+  - Existing venue has canonical address `2 Kent St, Charlottetown, PE C1A 1M6`.
+- Replay result:
+  - Created `Around the Table - Film Screening + Conversation` under Beaconsfield for `2026-04-10 18:00-20:00`.
+  - The Souris Show Hall source row expanded into a multi-event calendar; most events remained correctly under Souris Show Hall, but one related `Around the Table` screening for `2026-04-17` was incorrectly written under Souris with PEI Farm Centre's address.
+- Side-effect repair:
+  - Moved `venues/slug_sourisshowhall/events/cySMNw9bO0wYKmWrTmUZ` to `venues/slug_peifarmcentre/events/cySMNw9bO0wYKmWrTmUZ`.
+  - Deleted the bad Souris copy.
+  - Repaired Beaconsfield event addresses/coordinates for:
+    - `venues/DqhaDw4xcuBFIm6WCQSq/events/9Z0H42ZVQpY1W4jHN6zL`
+    - `venues/DqhaDw4xcuBFIm6WCQSq/events/JrmRNaN82ySUk0fgrw5V`
+- Status: finalized with repair.
+
+#### Buenos Island Studio
+- Unknown venue id: `uv_afc098dc0ae7be98f46c9e4a`
+- Observed venue: `Buenos Island Studios, 135 Great George St., Charlottetown`
+- Action: `resolve_existing`
+- Resolved venue id: `0F6W6IBgJqlKQ8AmaTGC`
+- Replay result: created or updated the `Flow to Fierce` recurring dance-class series under Buenos Island Studio.
+- Status: finalized.
+
+#### Claddagh Oyster House
+- Unknown venue id: `uv_d62782d7c985b0465f5617b4`
+- Action: `resolve_existing`
+- Resolved venue id: `jcY0JhgnTqiQ8qbwAZTB`
+- Replay result: created `Carter MacLellan` and `Luka Hall & Ray Knorr` live-music docs under Claddagh Oyster House.
+- Caveat: the parser inferred overnight `01:00` end times from venue hours for these old March live-music rows. I did not change those times because the source row is old and the event is already past.
+- Status: finalized.
+
+#### Confederation Court Mall Food Court
+- Unknown venue id: `uv_0a9b977d5753a9b65dc57f8b`
+- Action: `resolve_existing`
+- Resolved venue id: `name_2lgcnn`
+- Replay result: the row expanded into four mall activities on `2026-03-21`:
+  - `Spring Thaw Market Pop-Up Market`
+  - `Juggler & Balloon Animals`
+  - `Free Face Painting`
+  - `Create an Art Mural with Blank Canvas`
+- Caveat: several same-day mall sub-events have weak end times from fallback/hours inference. These are past events, so I recorded the behavior but did not repair times.
+- Status: finalized.
+
+#### Ellen's Creek Gallery & Framing
+- Unknown venue id: `uv_1f2c27fab8d33be18740b66e`
+- Action: `resolve_existing`
+- Resolved venue id: `JZsTzan084I8e4isQGx1`
+- Replay result:
+  - Updated existing `"The Time Of Our Lives" (PEI Seniors' College) Group Art Show and Sale`.
+  - Created/updated `"The Time Of Our Lives" opening reception`.
+- Status: finalized.
+
+#### Batch E backups and replay notes
+- Finalizer backup: `firebase/unknown-venue-batch-e-backup-2026-05-27T23-57-45-266Z.json`
+- Side-effect repair backup: `firebase/batch-e-side-effect-repair-backup-2026-05-28T00-08-09-318Z.json`
+- Queue verification: `processDatasetSelectedRows` was empty after retry/lock follow-up.
+- Index note: a collection-group audit query for `events.updatedAt`/`events.createdAt` still requires a Firestore collection-group single-field index. I briefly tried the `gcloud firestore indexes fields update` route, but it produced only collection-scope field exemptions, so I cleared those exemptions immediately. Current field configs are restored to ancestor/default single-field settings.
+
+### Batch F - Exact venue aliases plus replay side-effect cleanup
+
+#### Ellen's Creek Gallery duplicate queue entry
+- Unknown venue id: `uv_dfc1e649bd096dc1ef589915`
+- Action: `resolve_existing`
+- Resolved venue id: `JZsTzan084I8e4isQGx1`
+- Replay result:
+  - Created `"The Time Of Our Lives" - Art Show (Open Hours)`, `2026-04-27 09:00-17:00`.
+  - Updated `"The Time Of Our Lives" opening reception`, `2026-04-30 19:00-21:00`.
+  - Both landed under Ellen's Creek Gallery & Framing with address `525 N River Rd, Charlottetown, PE C1E 1J6`.
+- Status: finalized.
+
+#### Milton Hall Upstairs
+- Unknown venue id: `uv_fc08c1e8585ccac56f6a39dc`
+- Action: `resolve_existing`
+- Resolved venue id: `nvQTJXSbDsSfJTCxDKCH`
+- Replay result:
+  - Created `Crochet & Knit Drop-In (with Izzy Dolls project option)`.
+  - Start/end: `2026-04-15 13:30-15:30`.
+  - Address: `7 New Glasgow Rd #224, North Milton, PE C1E 0X5`.
+  - Additional location preserved: `Milton Hall (Upstairs)`.
+- Status: finalized.
+
+#### Rodd Charlottetown
+- Unknown venue id: `uv_f8ed585196217c9a06537705`
+- Action: `resolve_existing`
+- Resolved venue id: `fb_100063479865570`
+- Replay result: selected-row replay did not create or update a recent Rodd event doc during this verification pass.
+- Status: venue alias finalized; no event write verified from the replay.
+
+#### Salvador Dali Cafe typo variant
+- Unknown venue id: `uv_ce99fc740e2dde5c8eb12631`
+- Action: `resolve_existing`
+- Resolved venue id: `slug_thedalicafe`
+- Replay result:
+  - Created `Experience Dali`, `2026-04-11 18:30-20:30`.
+  - Address: `155 Kent St, Charlottetown, PE C1A 4K9`.
+- Side-effect cleanup:
+  - The source row was a Downtown Charlottetown multi-event calendar. Replaying the whole row created unrelated April 10-12 calendar docs with fallback addresses and mismatched sublocations.
+  - Deleted 37 noisy side-effect event docs from the two Downtown Charlottetown source ids, keeping only the targeted `Experience Dali` doc.
+- Status: finalized with side-effect cleanup.
+
+#### The Arts Hotel
+- Unknown venue id: `uv_6b29b5fbb7d13abeef6b12e3`
+- Action: `resolve_existing`
+- Resolved venue id: `vCb3rgvHFkPbpiVdksN8`
+- Replay result: no Arts Hotel event doc remained after verification. The queued replay source was part of the same noisy Downtown calendar class, so the side-effect docs were removed rather than kept.
+- Status: venue alias finalized; event write held/cleaned as noisy replay output.
+
+#### Cavendish Farms Community Events Centre - Tyne Valley
+- Unknown venue id: `uv_21d08c89da663923e0653743`
+- Action: `resolve_existing`
+- Resolved venue id: `LglliE42SPFssmoU01su`
+- Replay result:
+  - Created or touched `Adult Learn-to-Play League`, `2026-03-15 13:00-23:00`, under the Tyne Valley venue.
+  - Address: `7085 PE-12, Tyne Valley, PE C0B 2C0`.
+- Caveat: this is a past row and the `23:00` end came from hours/default resolution; recorded, not repaired.
+- Status: finalized.
+
+#### Veterans Memorial Park
+- Unknown venue id: `uv_3207c7d09aa2bf1dccdadab9`
+- Action: `resolve_existing`
+- Resolved venue id: `5fxwonYWZbp95kOOjdfF`
+- Initial replay issue:
+  - The parser collapsed the `Age 0-6` and `Age 7+` Easter egg hunts into one event, then read `Age 0 - 6` as a `00:00-06:00` time range.
+- Code fixes deployed:
+  - `functions/src/utils/similarity.ts`: explicit conflicting age groups now prevent same-root sibling events from being treated as duplicates.
+  - `functions/src/processing/rowProcessor.ts`: explicit age ranges in evidence text are ignored by time-evidence extraction, so `Age 0 - 6 Hunt 11 - 11:30` resolves to `11:00-11:30`, not `00:00-06:00`.
+- Final replay verification:
+  - Replay source unique id: `1507911641334813`.
+  - Final task result: `Created 0 new events, updated 0 through dedup`, with `duplicate-only: 2 item(s)`.
+  - `venues/5fxwonYWZbp95kOOjdfF/events/RYUrJXsDTdJ16Dsk25MN`
+    - `Downtown Summerside Easter Egg Hunt (Age 0-6 Hunt)`
+    - `2026-03-28 11:00-11:30`
+    - Address: `89 Summer St, Summerside, PE C1N 3H9`
+  - `venues/5fxwonYWZbp95kOOjdfF/events/ExAdl9kqxsNjbzuu8wPK`
+    - `Downtown Summerside Easter Egg Hunt (Age 7+)`
+    - `2026-03-28 12:30-13:00`
+    - Address: `89 Summer St, Summerside, PE C1N 3H9`
+- Status: finalized after code fix, data repair, and stable replay.
+
+#### Batch F backups and replay notes
+- Finalizer backup: `firebase/unknown-venue-batch-f-backup-2026-05-28T00-12-12-248Z.json`
+- Downtown calendar side-effect cleanup backup: `firebase/batch-f-side-effect-repair-backup-2026-05-28T00-29-18-977Z.json`
+- Veterans age-group repair backup: `firebase/veterans-age-group-repair-backup-2026-05-28T00-41-24-270Z.json`
+- Queue verification: `processDatasetSelectedRows` was empty after final replay.
+- Tests run:
+  - `npm run build`
+  - `node --test lib/services/firestoreService.siblingSkip.test.js`
+  - `node --test lib/processing/rowProcessor.startTimeExplicitMerge.test.js`
+- Deployment: `firebase deploy --only functions` completed after both parser fixes.
+- Important operating note: selected-row replay can still replay an entire multi-event source row. For noisy calendar/list posts, apply finalizer actions cautiously and inspect side effects before moving to the next batch.
 
 ## Current / Future Items Not Auto-Resolved
 
