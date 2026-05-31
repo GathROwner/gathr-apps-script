@@ -2,6 +2,35 @@
 
 This is the running operator log for the large Facebook Events / post-parser unknown-venue backlog.
 
+## Backlog Reset - 2026-05-31
+
+Decision: stop working the old unknown-venue backlog and switch to a go-forward-only workflow.
+
+Reason:
+- Most old unknown-venue approvals replayed stale rows and produced low-value old events.
+- Leaving old docs in `unrecognized_venues` can suppress fresh emails because the queue reuses normalized venue-name doc IDs and source IDs.
+- Marking old docs `ignored` is not enough for a true reset; future rows with the same normalized unknown venue could update the old terminal doc instead of creating a fresh review email.
+
+Action taken:
+- Archived all live `unrecognized_venues` docs to Firestore collection `unrecognized_venues_archive_2026_05_31`.
+- Wrote local backup `firebase/unrecognized-venues-live-reset-backup-2026-05-31T12-01-53-929Z.json`.
+- Deleted all originals from live collection `unrecognized_venues`.
+
+Counts:
+- Before reset: `850`
+  - `manual_review`: `444`
+  - `failed`: `150`
+  - `resolved_existing`: `174`
+  - `created_new`: `63`
+  - `ignored`: `19`
+- After reset: `0` live docs in `unrecognized_venues`.
+- Archive count: `850`.
+
+Future workflow:
+- Do not continue applying old unknown-venue backlog emails or old report batches.
+- Treat any new unknown-venue email after this reset as a fresh go-forward case.
+- If a future row fails to match a known venue, diagnose that individual new case rather than replaying old backlog rows.
+
 Source reports:
 - `tmp/unknown-venue-manual-review-rich-2026-05-27T18-27-38-205Z.json`
 - `tmp/unknown-venue-manual-review-rich-2026-05-27T18-41-47-296Z.json`
