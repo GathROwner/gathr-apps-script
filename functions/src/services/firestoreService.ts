@@ -6383,6 +6383,7 @@ async function deleteManagedImage(
       return false;
     }
 
+    logger.debug('Deleted expired event image', { attempt, imageUrl });
     return true;
   } catch (error) {
     logger.warn('Error deleting expired event image', {
