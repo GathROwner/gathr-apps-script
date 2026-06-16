@@ -186,6 +186,79 @@ function isTimeBoundHappyHourSpecial(item: ExtractedItem | undefined): boolean {
   return hasStartTime || hasEndTime || hasToCloseFlag || hasExplicitStartEvidence || hasTimeRangeInText;
 }
 
+function isOperatingHoursOnlyItem(item: ExtractedItem | undefined): boolean {
+  if (!item) return false;
+
+  const name = String((item as any).name || '').trim();
+  const description = String((item as any).description || '').trim();
+  const category = String((item as any).category || '').trim();
+  const sourceType = String((item as any)._sourceType || '').trim().toLowerCase();
+  const text = `${name} ${description} ${category}`.replace(/\s+/g, ' ').trim();
+  if (!text) return false;
+
+  const normalized = text.toLowerCase();
+
+  if (
+    /\b(happy\s*hour|specials?|deals?|discount|sale|bogo|free\s+with|live\s+music|trivia|karaoke|open\s*mic|concert|comedy|class|workshop|program|drop[-\s]?in|swim|pool|public\s+skate|movie|screening|show|party|festival|fundraiser|open\s+house)\b/i.test(
+      text
+    )
+  ) {
+    return false;
+  }
+
+  if (sourceType === 'special' && hasPricingOrDiscount(item)) {
+    return false;
+  }
+
+  const hoursTitle =
+    /\b(?:updated\s+)?(?:operating|business|regular|restaurant|store|shop|kitchen|bar|lounge|weekend|holiday|summer|winter)\s+hours\b/i.test(
+      name
+    ) ||
+    /\bhours\s*\((?:monday|tuesday|wednesday|thursday|friday|saturday|sunday|mon|tue|wed|thu|fri|sat|sun)/i.test(
+      name
+    );
+  const hoursBody =
+    /\b(?:updated\s+)?(?:operating|business|regular|restaurant|store|shop|kitchen|bar|lounge|weekend|holiday|summer|winter)\s+hours\b/i.test(
+      text
+    ) ||
+    /\b(?:open|closed)\s+(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday|mon|tue|wed|thu|fri|sat|sun)\b/i.test(
+      normalized
+    );
+  const weekdaySchedule =
+    /\b(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday|mon|tue|wed|thu|fri|sat|sun)(?:\s*(?:-|–|—|to|thru|through|&)\s*(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday|mon|tue|wed|thu|fri|sat|sun))?\b/i.test(
+      text
+    );
+  const timeRange =
+    /\b\d{1,2}(?::\d{2})?\s*(?:a\.?m\.?|p\.?m\.?)?\s*(?:-|–|—|to|until|til|till)\s*\d{1,2}(?::\d{2})?\s*(?:a\.?m\.?|p\.?m\.?)\b/i.test(
+      text
+    );
+
+  return Boolean((hoursTitle || hoursBody) && weekdaySchedule && timeRange);
+}
+
+export function isOperatingHoursOnlyItemForRegression(item: ExtractedItem | undefined): boolean {
+  return isOperatingHoursOnlyItem(item);
+}
+
+function applyDeterministicStage4Rejects(
+  items: ExtractedItem[],
+  reasonPrefix: string
+): { kept: ExtractedItem[]; rejectedCount: number } {
+  const kept: ExtractedItem[] = [];
+  let rejectedCount = 0;
+
+  for (const item of items) {
+    if (isOperatingHoursOnlyItem(item)) {
+      rejectedCount++;
+      logger.info(`${reasonPrefix}: rejected operating-hours-only item "${(item as any).name || ''}"`);
+      continue;
+    }
+    kept.push(item);
+  }
+
+  return { kept, rejectedCount };
+}
+
 function hasDealBenefitSignal(text: string): boolean {
   const normalized = String(text || '');
   return /\b(\$\s*\d+|\d+\s*%+\s*off|\d+x\s*points?|bonus\s*points?|bogo|buy\s*one|get\s+\d+|free\b|combo(?:s)?\b|with\s+purchase|\boff\b)\b/i.test(
@@ -369,10 +442,19 @@ export async function performSecondaryValidation(
       logger.info(
         `Stage 4 Calendar deal all-day normalizations (parse fallback): ${fallbackNormalizationCount}`
       );
-      (fallbackItems as any)._calendarDealAllDayNormalizationCount = fallbackNormalizationCount;
-      (fallbackItems as any)._calendarDealAllDayOverrideCount = 0;
-      (fallbackItems as any)._happyHourNoPriceOverrideCount = 0;
-      return fallbackItems;
+      const deterministicFallback = applyDeterministicStage4Rejects(
+        fallbackItems,
+        'Stage 4 deterministic parse fallback'
+      );
+      logger.info(
+        `Stage 4 deterministic parse fallback rejects: ${deterministicFallback.rejectedCount}`
+      );
+      (deterministicFallback.kept as any)._calendarDealAllDayNormalizationCount = fallbackNormalizationCount;
+      (deterministicFallback.kept as any)._calendarDealAllDayOverrideCount = 0;
+      (deterministicFallback.kept as any)._happyHourNoPriceOverrideCount = 0;
+      (deterministicFallback.kept as any)._operatingHoursOnlyRejectCount =
+        deterministicFallback.rejectedCount;
+      return deterministicFallback.kept;
     }
 
     // Log validation summary
@@ -392,6 +474,7 @@ export async function performSecondaryValidation(
     let happyHourNoPriceOverrideCount = 0;
     let calendarDealAllDayOverrideCount = 0;
     let calendarDealAllDayNormalizationCount = 0;
+    let operatingHoursOnlyRejectCount = 0;
 
     if (validationResult.validatedItems) {
       validationResult.validatedItems.forEach((validatedItem, index) => {
@@ -460,6 +543,12 @@ export async function performSecondaryValidation(
           calendarDealAllDayNormalizationCount++;
         }
 
+        if (decision === 'KEPT' && isOperatingHoursOnlyItem(item)) {
+          logger.info(`Stage 4 deterministic operating-hours reject for "${item.name}"`);
+          decision = 'REJECTED';
+          operatingHoursOnlyRejectCount++;
+        }
+
         logger.debug(`Item ${index + 1}: "${item.name}"`, {
           decision,
           reason: reason?.substring(0, 100),
@@ -508,21 +597,31 @@ export async function performSecondaryValidation(
       happyHourNoPriceOverrides: happyHourNoPriceOverrideCount,
       calendarDealAllDayOverrides: calendarDealAllDayOverrideCount,
       calendarDealAllDayNormalizations: calendarDealAllDayNormalizationCount,
+      operatingHoursOnlyRejects: operatingHoursOnlyRejectCount,
     });
     logger.info(`Stage 4 Happy Hour no-price overrides: ${happyHourNoPriceOverrideCount}`);
     logger.info(`Stage 4 Calendar deal all-day overrides: ${calendarDealAllDayOverrideCount}`);
     logger.info(`Stage 4 Calendar deal all-day normalizations: ${calendarDealAllDayNormalizationCount}`);
+    logger.info(`Stage 4 operating-hours-only rejects: ${operatingHoursOnlyRejectCount}`);
 
     // Attach count so Stage 4 summary in postParser can include it in one-line logs.
     (keptItems as any)._happyHourNoPriceOverrideCount = happyHourNoPriceOverrideCount;
     (keptItems as any)._calendarDealAllDayOverrideCount = calendarDealAllDayOverrideCount;
     (keptItems as any)._calendarDealAllDayNormalizationCount = calendarDealAllDayNormalizationCount;
+    (keptItems as any)._operatingHoursOnlyRejectCount = operatingHoursOnlyRejectCount;
 
     return keptItems;
   } catch (error) {
     logger.error('Stage 4 validation error', error);
     logger.warn('Returning original data due to validation error');
-    return rawData;
+    const deterministicFallback = applyDeterministicStage4Rejects(
+      rawData.map(item => ({ ...item })),
+      'Stage 4 deterministic error fallback'
+    );
+    logger.info(
+      `Stage 4 deterministic error fallback rejects: ${deterministicFallback.rejectedCount}`
+    );
+    return deterministicFallback.kept;
   }
 }
 

@@ -2600,6 +2600,13 @@ function normalizeTimeHHMM(value: unknown): string {
   const raw = String(value || '').trim();
   if (!raw) return '';
 
+  if (/^midnight$/i.test(raw)) {
+    return '00:00';
+  }
+  if (/^noon$/i.test(raw)) {
+    return '12:00';
+  }
+
   const m24 = raw.match(/^([01]?\d|2[0-3]):([0-5]\d)(?::\d{2})?$/);
   if (m24) {
     return `${String(parseInt(m24[1], 10)).padStart(2, '0')}:${m24[2]}`;
@@ -2622,6 +2629,9 @@ function extractStandaloneExplicitTime(value: unknown): string {
   const raw = String(value || '').trim();
   if (!raw) return '';
 
+  if (/\bmidnight\b/i.test(raw)) return '00:00';
+  if (/\bnoon\b/i.test(raw)) return '12:00';
+
   const match = raw.match(/\b(\d{1,2}(?::\d{2})?)\s*(AM|PM)\b/i);
   if (!match) return '';
   return normalizeTimeHHMM(`${match[1]} ${match[2]}`);
@@ -2643,6 +2653,12 @@ function resolveExplicitRangeTimes(
   const endPeriod = String(endPeriodRaw || '').trim().toUpperCase();
 
   if (!normalizedStartRaw || !normalizedEndRaw) return null;
+
+  const normalizeEndpoint = (raw: string, period: string): string => {
+    if (/^midnight$/i.test(raw)) return '00:00';
+    if (/^noon$/i.test(raw)) return '12:00';
+    return normalizeTimeHHMM(`${raw} ${period}`.trim());
+  };
 
   const startCandidates = startPeriod
     ? [{ period: startPeriod, inferred: false }]
@@ -2672,15 +2688,11 @@ function resolveExplicitRangeTimes(
     | null = null;
 
   for (const startCandidate of startCandidates) {
-    const explicitStart = normalizeTimeHHMM(
-      `${normalizedStartRaw} ${startCandidate.period}`.trim()
-    );
+    const explicitStart = normalizeEndpoint(normalizedStartRaw, startCandidate.period);
     if (!explicitStart) continue;
 
     for (const endCandidate of endCandidates) {
-      const explicitEnd = normalizeTimeHHMM(
-        `${normalizedEndRaw} ${endCandidate.period}`.trim()
-      );
+      const explicitEnd = normalizeEndpoint(normalizedEndRaw, endCandidate.period);
       if (!explicitEnd) continue;
 
       const startMinutes = hhmmToMinutes(explicitStart);
@@ -2732,8 +2744,11 @@ function extractExplicitTimeRangeFromEvidence(
   const candidates = [startRawEvidence, endRawEvidence].filter(Boolean);
   if (candidates.length === 0) return null;
 
-  const rangePattern =
-    /(\d{1,2}(?::\d{2})?)\s*(AM|PM)?\s*(?:[-\u2013\u2014]|to|until|til|till)\s*(\d{1,2}(?::\d{2})?)\s*(AM|PM)?/i;
+  const endpointPattern = String.raw`(?:\d{1,2}(?::\d{2})?|midnight|noon)`;
+  const rangePattern = new RegExp(
+    `(${endpointPattern})\\s*(AM|PM)?\\s*(?:[-\\u2013\\u2014]|to|until|til|till)\\s*(${endpointPattern})\\s*(AM|PM)?`,
+    'i'
+  );
 
   for (const raw of candidates) {
     const rangeMatch = raw.match(rangePattern);
@@ -2765,7 +2780,7 @@ function extractExplicitEndTimeFromEvidence(value: unknown): string {
   if (!raw) return '';
 
   const rangeMatch = raw.match(
-    /(\d{1,2}(?::\d{2})?)\s*(AM|PM)?\s*[-\u2013\u2014]\s*(\d{1,2}(?::\d{2})?)\s*(AM|PM)?/i
+    /(\d{1,2}(?::\d{2})?|midnight|noon)\s*(AM|PM)?\s*[-\u2013\u2014]\s*(\d{1,2}(?::\d{2})?|midnight|noon)\s*(AM|PM)?/i
   );
   if (rangeMatch) {
     const resolvedRange = resolveExplicitRangeTimes(
@@ -2778,10 +2793,10 @@ function extractExplicitEndTimeFromEvidence(value: unknown): string {
   }
 
   const untilMatch = raw.match(
-    /\b(?:to|until|til|till)\s*(\d{1,2}(?::\d{2})?)\s*(AM|PM)\b/i
+    /\b(?:to|until|til|till)\s*(\d{1,2}(?::\d{2})?|midnight|noon)\s*(AM|PM)?\b/i
   );
   if (untilMatch) {
-    return normalizeTimeHHMM(`${untilMatch[1]} ${untilMatch[2]}`);
+    return normalizeTimeHHMM(`${untilMatch[1]} ${untilMatch[2] || ''}`.trim());
   }
 
   return extractStandaloneExplicitTime(raw);

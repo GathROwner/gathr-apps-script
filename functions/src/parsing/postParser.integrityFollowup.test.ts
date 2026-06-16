@@ -278,3 +278,37 @@ test('lunch special shorthand ranges recover the intended daytime window', () =>
   assert.equal(resolved.startTime, '11:00');
   assert.equal(resolved.endTime, '14:00');
 });
+
+test('single-night explicit midnight ranges do not become false 24-hour events', () => {
+  const description =
+    'WERK NIGHT is a queer and trans inclusive mix-tape dance party. When? Saturday, June 13th. 9 PM - Midnight.';
+  const [resolved] = enforceDateTimeCompleteness(
+    [
+      buildEvent({
+        category: 'Gatherings & Parties',
+        name: 'WERK NIGHT',
+        description,
+        startDate: '2026-06-13',
+        endDate: '2026-06-13',
+        startTime: '21:00',
+        endTime: '21:00',
+        timeResolution: {
+          hoursUsed: false,
+          endFromHours: 'category_default',
+        },
+      }),
+    ],
+    '2026-06-13T14:29:36.165Z',
+    'America/Halifax',
+    description
+  );
+
+  assert.deepEqual(extractExplicitTimeRangeForRegression(description, ''), {
+    startTime: '21:00',
+    endTime: '00:00',
+  });
+  assert.equal(resolved.startTime, '21:00');
+  assert.equal(resolved.endTime, '00:00');
+  assert.equal(resolved.startDate, '2026-06-13');
+  assert.equal(resolved.endDate, '2026-06-14');
+});

@@ -666,6 +666,8 @@ FORMAT REQUIREMENTS:
    recurringPattern MUST be one of:
    "none", "daily", "weekly_monday", "weekly_tuesday", "weekly_wednesday", "weekly_thursday", "weekly_friday", "weekly_saturday", "weekly_sunday"
    Never return plain "weekly"; use the specific weekday form when recurrence is weekly.
+   Do not mark an item as recurring just because it names a weekday or explicit date such as "Saturday, May 30".
+   Only mark recurring when the text explicitly says every/weekly/daily/repeats, lists multiple occurrence dates, or gives a date range for a series.
 8. If recurrence lifecycle is explicit in text, include:
    - totalOccurrences: positive integer when text says "for X weeks/days/months"
    - recurrenceUntilDate: YYYY-MM-DD when text says "until/through/thru/till <date>"
@@ -3018,6 +3020,70 @@ function shouldForceSingleExplicitDateOneOff(
   return true;
 }
 
+function isSimpleWeeklyRecurringPattern(pattern: RecurringPattern): boolean {
+  return pattern.startsWith('weekly_') && pattern !== 'weekly_custom';
+}
+
+function hasGenericSingularWeekdaySpecialCue(text: string): boolean {
+  const normalized = normalizeWeekdayExtractionText(text);
+  if (!normalized) return false;
+
+  const singularWeekday =
+    '(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday|mon|tue|tues|wed|thu|thur|thurs|fri|sat|sun)';
+  const specialNoun =
+    '(?:special|specials|deal|deals|feature|features|lunch\\s+special|dinner\\s+special|soup\\s+special)';
+
+  return (
+    new RegExp(`\\b${singularWeekday}\\b\\s*(?:[-:|]|\\s+)\\s*${specialNoun}\\b`, 'i').test(
+      normalized
+    ) ||
+    new RegExp(`\\b${specialNoun}\\b\\s*(?:for|on)?\\s*\\b${singularWeekday}\\b`, 'i').test(
+      normalized
+    )
+  );
+}
+
+function shouldForceWeakWeekdaySpecialOneOff(
+  event: Pick<FormattedEvent, 'category' | 'startDate' | 'endDate' | 'startTime' | 'endTime'>,
+  sourceText: string,
+  recurringPattern: RecurringPattern,
+  recurrenceUntilDate: string | undefined,
+  totalOccurrences: number | undefined,
+  customRecurringConfiguration?:
+    | {
+        recurringDaysOfWeek?: RecurringWeekday[];
+        recurringWeekdaySequence?: RecurringWeekday[];
+        recurringWeekInterval?: number;
+      }
+    | undefined
+): boolean {
+  if (
+    !isSimpleWeeklyRecurringPattern(recurringPattern) ||
+    customRecurringConfiguration ||
+    recurrenceUntilDate ||
+    totalOccurrences !== undefined
+  ) {
+    return false;
+  }
+
+  if (!FOOD_CATEGORIES.includes(event.category)) return false;
+  if (hasRecurringCue(sourceText)) return false;
+  if (extractFoodSpecialNamedPattern(sourceText) !== 'none') return false;
+  if (!hasGenericSingularWeekdaySpecialCue(sourceText)) return false;
+
+  const startDate = String(event.startDate || '').trim();
+  const endDate = String(event.endDate || '').trim() || startDate;
+  if (!startDate) return false;
+
+  const startDatePattern = patternFromIsoDate(startDate);
+  if (!startDatePattern || startDatePattern !== recurringPattern) return false;
+
+  const expectedOccurrenceEndDate =
+    resolveOccurrenceLocalEndDate(startDate, event.startTime, event.endTime) ||
+    startDate;
+  return endDate === startDate || endDate === expectedOccurrenceEndDate;
+}
+
 function extractRecurrenceUntilDateFromText(
   text: string,
   startDate: string | undefined
@@ -3573,6 +3639,29 @@ function normalizeRecurringForFormattedEvent(
     )
   ) {
     logger.debug(`Forced single explicit-date weekly item to one-off for "${event.name}"`, {
+      recurringPatternFrom: recurringPattern,
+      startDate: event.startDate,
+      sourceText: sourceText.slice(0, 220),
+    });
+    recurringPattern = 'none';
+    customRecurringConfiguration = undefined;
+    totalOccurrences = undefined;
+    recurrenceUntilDate = undefined;
+    forcedFiniteRunOneOff = true;
+  }
+
+  if (
+    !forcedFiniteRunOneOff &&
+    shouldForceWeakWeekdaySpecialOneOff(
+      event,
+      sourceText,
+      recurringPattern,
+      recurrenceUntilDate,
+      totalOccurrences,
+      customRecurringConfiguration
+    )
+  ) {
+    logger.debug(`Forced weak weekday special to one-off for "${event.name}"`, {
       recurringPatternFrom: recurringPattern,
       startDate: event.startDate,
       sourceText: sourceText.slice(0, 220),
@@ -4673,7 +4762,7 @@ function patternFromIsoDate(dateValue: string | undefined): RecurringPattern | n
 function detectRecurringPatternFromText(text: string): RecurringPattern {
   const t = String(text || '').toLowerCase();
 
-  if (/\b(everyday|daily)\b/.test(t)) {
+  if (/\b(every\s+single\s+day|every\s+day|everyday|daily)\b/.test(t)) {
     return 'daily';
   }
 
@@ -4769,19 +4858,13 @@ function inferImplicitWeeklyPatternForSpecial(
   const weekdayPattern = mapWeekdayTokenToPattern(weekdayMatch?.[1]);
   if (!weekdayPattern) return 'none';
 
-  const hasRecurringCue = /\b(every|each|weekly|daily)\b/.test(text);
-  if (hasRecurringCue) return weekdayPattern;
+  if (hasRecurringCue(text)) return weekdayPattern;
+
+  const namedPattern = extractFoodSpecialNamedPattern(text);
+  if (namedPattern !== 'none') return namedPattern;
 
   const isFoodCategory = FOOD_CATEGORIES.includes(event.category);
   const hasBrunchCue = /\bbrunch\b/.test(text);
-  const hasSpecialCue =
-    /\b(special|deal|happy hour|wing|wings|taco|drink|cocktail|beer|wine|brunch|burger|pizza)\b/.test(
-      text
-    );
-
-  if (isFoodCategory && hasSpecialCue) {
-    return weekdayPattern;
-  }
 
   if (isFoodCategory && hasBrunchCue) {
     return weekdayPattern;
