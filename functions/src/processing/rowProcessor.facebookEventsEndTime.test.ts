@@ -358,6 +358,15 @@ test('keeps structured Facebook Events managed media and canonical image fields 
       imageUrl: newImage,
       relevantImageUrl: newImage,
       mediaUrls: [newImage],
+      imageProvenance: {
+        version: 1,
+        primarySource: 'post_media',
+        primaryField: 'image',
+        primaryUrl: newImage,
+        isFallback: false,
+        selectionReason: 'facebook_events_scraper_media_upload',
+        updatedBy: 'structured_facebook_event_adapter',
+      },
       sourceContentSignature: 'new-signature',
       isRecurring: true,
       recurringPattern: 'weekly_custom',
@@ -373,10 +382,52 @@ test('keeps structured Facebook Events managed media and canonical image fields 
   assert.equal(preview.updates.image, newImage);
   assert.equal(preview.updates.imageUrl, newImage);
   assert.equal(preview.updates.relevantImageUrl, newImage);
+  assert.equal(preview.updates.imageProvenance?.primarySource, 'post_media');
+  assert.equal(preview.updates.imageProvenance?.primaryUrl, newImage);
+  assert.equal(preview.updates.imageProvenance?.updatedBy, 'duplicate_merge');
   assert.ok(preview.changedFields.includes('mediaUrls'));
   assert.ok(preview.changedFields.includes('image'));
   assert.ok(preview.changedFields.includes('imageUrl'));
   assert.ok(preview.changedFields.includes('relevantImageUrl'));
+  assert.ok(preview.changedFields.includes('imageProvenance'));
+});
+
+test('backfills image provenance when duplicate merge re-sees a legacy event', () => {
+  const image =
+    'https://storage.googleapis.com/gathr-uploaded-images/postimages/under-spire.webp';
+
+  const preview = previewDuplicateMerge({
+    existingEvent: buildEvent({
+      image,
+      imageUrl: image,
+      relevantImageUrl: image,
+      mediaUrls: [image],
+    }),
+    incomingEvent: buildEvent({
+      image,
+      imageUrl: image,
+      relevantImageUrl: image,
+      mediaUrls: [image],
+      imageProvenance: {
+        version: 1,
+        primarySource: 'post_media',
+        primaryField: 'relevantImageUrl',
+        primaryUrl: image,
+        isFallback: false,
+        selectionReason: 'full_parser_event_media',
+        updatedBy: 'parser',
+      },
+    }),
+    venue: buildVenue(),
+  });
+
+  assert.equal(preview.updates.image, undefined);
+  assert.equal(preview.updates.imageUrl, undefined);
+  assert.equal(preview.updates.relevantImageUrl, undefined);
+  assert.equal(preview.updates.imageProvenance?.primarySource, 'post_media');
+  assert.equal(preview.updates.imageProvenance?.primaryUrl, image);
+  assert.equal(preview.updates.imageProvenance?.updatedBy, 'duplicate_merge');
+  assert.ok(preview.changedFields.includes('imageProvenance'));
 });
 
 test('routes explicit Downtown Charlottetown Facebook location as area review', () => {

@@ -491,6 +491,48 @@ export interface TimeResolvedEvent extends FormattedEvent {
 // Final Output Types
 // ===================
 
+export type ImageProvenanceSource =
+  | 'post_media'
+  | 'profile_image'
+  | 'ticket_image'
+  | 'app_fallback'
+  | 'venue_media_fallback'
+  | 'dedupe_existing'
+  | 'city_level_review'
+  | 'manual'
+  | 'no_image'
+  | 'unknown';
+
+export type ImageProvenanceField =
+  | 'image'
+  | 'imageUrl'
+  | 'relevantImageUrl'
+  | 'mediaUrls'
+  | 'icon'
+  | 'sharedPostThumbnail'
+  | 'cachedImageUrl';
+
+export interface ImageProvenanceMediaRef {
+  url: string;
+  source: ImageProvenanceSource;
+  field?: ImageProvenanceField;
+  isPrimary?: boolean;
+  isFallback?: boolean;
+}
+
+export interface ImageProvenance {
+  version: 1;
+  primarySource: ImageProvenanceSource;
+  primaryField?: ImageProvenanceField;
+  primaryUrl?: string;
+  isFallback: boolean;
+  sourceFields?: ImageProvenanceField[];
+  media?: ImageProvenanceMediaRef[];
+  selectionReason?: string;
+  updatedBy?: string;
+  setAt?: unknown;
+}
+
 export interface ProcessedEvent extends TimeResolvedEvent {
   // Core identification
   id?: string;
@@ -515,6 +557,7 @@ export interface ProcessedEvent extends TimeResolvedEvent {
   relevantImageUrl?: string;
   sharedPostThumbnail?: string;
   mediaUrls?: string[];
+  imageProvenance?: ImageProvenance;
 
   // Facebook metadata
   organizedBy?: string;
@@ -570,6 +613,8 @@ export interface ExtractedDataInput {
   shares?: number;
   comments?: number;
   topReactionsCount?: number;
+  imageMediaSource?: ImageProvenanceSource;
+  imageMediaSourceReason?: string;
 }
 
 export interface EstablishmentInfo {

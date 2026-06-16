@@ -94,6 +94,48 @@ export type RecurringWeekday =
   | 'friday'
   | 'saturday';
 
+export type EventImageProvenanceSource =
+  | 'post_media'
+  | 'profile_image'
+  | 'ticket_image'
+  | 'app_fallback'
+  | 'venue_media_fallback'
+  | 'dedupe_existing'
+  | 'city_level_review'
+  | 'manual'
+  | 'no_image'
+  | 'unknown';
+
+export type EventImageProvenanceField =
+  | 'image'
+  | 'imageUrl'
+  | 'relevantImageUrl'
+  | 'mediaUrls'
+  | 'icon'
+  | 'sharedPostThumbnail'
+  | 'cachedImageUrl';
+
+export interface EventImageProvenanceMediaRef {
+  url: string;
+  source: EventImageProvenanceSource;
+  field?: EventImageProvenanceField;
+  isPrimary?: boolean;
+  isFallback?: boolean;
+}
+
+export interface EventImageProvenance {
+  version: 1;
+  primarySource: EventImageProvenanceSource;
+  primaryField?: EventImageProvenanceField;
+  primaryUrl?: string;
+  isFallback: boolean;
+  sourceFields?: EventImageProvenanceField[];
+  media?: EventImageProvenanceMediaRef[];
+  selectionReason?: string;
+  updatedBy?: string;
+  setAt?: unknown;
+}
+
 export interface EventData {
   id?: string;
   uniqueId: string;
@@ -138,6 +180,7 @@ export interface EventData {
   relevantImageUrl?: string;
   sharedPostThumbnail?: string;
   mediaUrls?: string[];
+  imageProvenance?: EventImageProvenance;
   facebookUrl?: string;
   cleanedFacebookUrl?: string;
   address?: string;

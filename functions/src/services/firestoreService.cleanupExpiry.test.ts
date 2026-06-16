@@ -2,9 +2,12 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import {
+  buildEventImageProvenanceForRegression,
+  buildEventUpdatePayloadForRegression,
   buildExpiredCityLevelReviewPointerUpdateForRegression,
   evaluateExpiredDeleteDecisionForRegression,
   evaluateExpiredImageCleanupTargetsForRegression,
+  sanitizeEventManagedImageReferencesForRegression,
 } from './firestoreService.js';
 
 const NOW_MS = Date.parse('2026-06-11T06:00:00.000Z'); // 3:00 AM Atlantic
@@ -264,4 +267,173 @@ test('skips all expired event image deletion when reference scan has query failu
       skippedDueToReferenceQueryFailure: 2,
     }
   );
+});
+
+test('strips only confirmed-missing managed image references before event writes', () => {
+  const missingPostImage = 'https://storage.googleapis.com/gathr-uploaded-images/postimages/missing.webp?token=abc';
+  const missingProfileImage = 'https://storage.googleapis.com/gathr-uploaded-images/profilepictures/missing.webp';
+  const livePostImage = 'https://storage.googleapis.com/gathr-uploaded-images/postimages/live.webp';
+  const fallbackImage = 'https://example.com/fallback.png';
+  const original = {
+    image: missingPostImage,
+    imageUrl: livePostImage,
+    relevantImageUrl: missingPostImage,
+    icon: missingProfileImage,
+    mediaUrls: [missingPostImage, livePostImage, fallbackImage],
+  };
+
+  const result = sanitizeEventManagedImageReferencesForRegression(original, [
+    missingPostImage,
+    missingProfileImage,
+  ]);
+
+  assert.equal(result.payload.image, undefined);
+  assert.equal(result.payload.imageUrl, livePostImage);
+  assert.equal(result.payload.relevantImageUrl, undefined);
+  assert.equal(result.payload.icon, undefined);
+  assert.deepEqual(result.payload.mediaUrls, [livePostImage, fallbackImage]);
+  assert.deepEqual(result.removedFields, ['icon', 'image', 'mediaUrls', 'relevantImageUrl']);
+  assert.deepEqual(result.removedUrls, [
+    'https://storage.googleapis.com/gathr-uploaded-images/postimages/missing.webp',
+    'https://storage.googleapis.com/gathr-uploaded-images/profilepictures/missing.webp',
+  ]);
+  assert.deepEqual(original.mediaUrls, [missingPostImage, livePostImage, fallbackImage]);
+});
+
+test('omits all-missing managed media arrays instead of writing empty replacement arrays', () => {
+  const missingPostImage = 'https://storage.googleapis.com/gathr-uploaded-images/postimages/missing.webp';
+
+  const result = sanitizeEventManagedImageReferencesForRegression(
+    {
+      image: missingPostImage,
+      mediaUrls: [missingPostImage],
+    },
+    [missingPostImage]
+  );
+
+  assert.equal('image' in result.payload, false);
+  assert.equal('mediaUrls' in result.payload, false);
+  assert.deepEqual(result.removedFields, ['image', 'mediaUrls']);
+});
+
+test('also sanitizes managed image references nested in metadata', () => {
+  const missingPostImage = 'https://storage.googleapis.com/gathr-uploaded-images/postimages/missing.webp';
+  const livePostImage = 'https://storage.googleapis.com/gathr-uploaded-images/postimages/live.webp';
+
+  const result = sanitizeEventManagedImageReferencesForRegression(
+    {
+      metadata: {
+        imageUrl: missingPostImage,
+        mediaUrls: [missingPostImage, livePostImage],
+        source: 'parser',
+      },
+    },
+    [missingPostImage]
+  );
+
+  assert.deepEqual(result.payload.metadata, {
+    mediaUrls: [livePostImage],
+    source: 'parser',
+  });
+  assert.deepEqual(result.removedFields, ['metadata.imageUrl', 'metadata.mediaUrls']);
+});
+
+test('builds image provenance from final event image fields', () => {
+  const imageUrl = 'https://storage.googleapis.com/gathr-uploaded-images/postimages/live.webp?token=abc';
+  const iconUrl = 'https://storage.googleapis.com/gathr-uploaded-images/profilepictures/profile.webp';
+
+  const provenance = buildEventImageProvenanceForRegression(
+    {
+      image: imageUrl,
+      imageUrl,
+      relevantImageUrl: imageUrl,
+      icon: iconUrl,
+      mediaUrls: [imageUrl],
+    },
+    {
+      defaultPrimarySource: 'post_media',
+      defaultMediaSource: 'post_media',
+      selectionReason: 'event_create_write',
+      updatedBy: 'firestore_create',
+    }
+  );
+
+  assert.equal(provenance.primarySource, 'post_media');
+  assert.equal(provenance.primaryField, 'relevantImageUrl');
+  assert.equal(
+    provenance.primaryUrl,
+    'https://storage.googleapis.com/gathr-uploaded-images/postimages/live.webp'
+  );
+  assert.equal(provenance.setAt, 'serverTimestamp');
+  assert.deepEqual(provenance.sourceFields, ['relevantImageUrl', 'image', 'imageUrl', 'icon', 'mediaUrls']);
+  assert.ok(provenance.media?.some((entry) => entry.field === 'icon' && entry.source === 'profile_image'));
+});
+
+test('preserves parser supplied ticket-image provenance while rebuilding final refs', () => {
+  const ticketImage = 'https://storage.googleapis.com/gathr-uploaded-images/postimages/ticket.webp';
+  const postImage = 'https://storage.googleapis.com/gathr-uploaded-images/postimages/post.webp';
+
+  const provenance = buildEventImageProvenanceForRegression(
+    {
+      image: ticketImage,
+      relevantImageUrl: ticketImage,
+      mediaUrls: [postImage],
+      imageProvenance: {
+        version: 1,
+        primarySource: 'ticket_image',
+        primaryField: 'relevantImageUrl',
+        primaryUrl: ticketImage,
+        isFallback: true,
+        selectionReason: 'hero_image_fallback_for_unusable_source_media',
+        media: [
+          { url: ticketImage, source: 'ticket_image', field: 'relevantImageUrl', isPrimary: true },
+          { url: postImage, source: 'post_media', field: 'mediaUrls' },
+        ],
+      },
+    },
+    {
+      defaultPrimarySource: 'unknown',
+      defaultMediaSource: 'unknown',
+      selectionReason: 'event_update_write',
+      updatedBy: 'firestore_update',
+    }
+  );
+
+  assert.equal(provenance.primarySource, 'ticket_image');
+  assert.equal(provenance.primaryUrl, ticketImage);
+  assert.equal(provenance.isFallback, true);
+  assert.ok(provenance.media?.some((entry) => entry.url === postImage && entry.source === 'post_media'));
+});
+
+test('preserves provenance-only event update payloads without rebuilding as no_image', () => {
+  const image =
+    'https://storage.googleapis.com/gathr-uploaded-images/postimages/under-spire.webp';
+  const imageProvenance = {
+    version: 1,
+    primarySource: 'post_media',
+    primaryField: 'relevantImageUrl',
+    primaryUrl: image,
+    isFallback: false,
+    sourceFields: ['relevantImageUrl', 'image', 'mediaUrls'],
+    media: [
+      {
+        url: image,
+        source: 'post_media',
+        field: 'relevantImageUrl',
+        isPrimary: true,
+        isFallback: false,
+      },
+    ],
+    selectionReason: 'full_parser_event_media; duplicate_merge_image_update',
+    updatedBy: 'duplicate_merge',
+  };
+
+  const payload = buildEventUpdatePayloadForRegression({
+    imageProvenance,
+  });
+
+  assert.deepEqual(payload.imageProvenance, imageProvenance);
+  assert.equal((payload.imageProvenance as any).primarySource, 'post_media');
+  assert.equal((payload.imageProvenance as any).primaryUrl, image);
+  assert.equal((payload.imageProvenance as any).updatedBy, 'duplicate_merge');
 });

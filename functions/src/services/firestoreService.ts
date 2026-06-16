@@ -8,6 +8,9 @@ import { createHash, randomUUID } from 'crypto';
 import { DateTime } from 'luxon';
 import {
   EventData,
+  EventImageProvenance,
+  EventImageProvenanceField,
+  EventImageProvenanceSource,
   VenueData,
   OperatingHours,
   BatchState,
@@ -115,6 +118,16 @@ const UNKNOWN_VENUE_SAMPLE_LIMIT = 5;
 const UNKNOWN_VENUE_DESCRIPTION_PREVIEW_LEN = 240;
 const CITY_LEVEL_EVENT_REVIEW_SAMPLE_LIMIT = 10;
 const CITY_LEVEL_EVENT_REVIEW_DESCRIPTION_PREVIEW_LEN = 360;
+const MANAGED_IMAGE_BUCKET = 'gathr-uploaded-images';
+const EVENT_MANAGED_IMAGE_SCALAR_FIELDS = [
+  'image',
+  'imageUrl',
+  'relevantImageUrl',
+  'cachedImageUrl',
+  'sharedPostThumbnail',
+  'icon',
+] as const;
+const EVENT_MANAGED_IMAGE_ARRAY_FIELDS = ['mediaUrls'] as const;
 const NON_VENUE_LABEL_EXACT_BLOCKLIST = new Set(
   [
     'Aquafit',
@@ -1728,8 +1741,22 @@ async function writePublishedCityLevelEvent(
   const eventId = asOptionalTrimmedString(record.publishedEventId) || reviewId;
   const eventRef = db.collection(COLLECTIONS.EVENTS).doc(eventId);
   const mediaFields = await buildPublishedCityLevelMediaFields(manual, record);
+  const rawEventData = buildPublishedCityLevelEventData(reviewId, record, manual, mediaFields);
+  const sanitizedEventData = await sanitizeEventManagedImageReferencesForWrite(rawEventData, {
+    operation: 'writePublishedCityLevelEvent',
+    reviewId,
+    eventId,
+    eventName: rawEventData.eventName || rawEventData.name,
+    uniqueId: rawEventData.uniqueId,
+  });
   const eventData = normalizeRecurringBaseWritePayload(
-    buildPublishedCityLevelEventData(reviewId, record, manual, mediaFields)
+    withEventImageProvenanceForWrite(sanitizedEventData, {
+      force: true,
+      defaultPrimarySource: 'city_level_review',
+      defaultMediaSource: 'city_level_review',
+      selectionReason: 'published_city_level_event_review',
+      updatedBy: 'city_level_event_review_publish',
+    })
   ) as EventData & Record<string, unknown>;
 
   if (options.preserveCreatedAt) {
@@ -3269,8 +3296,14 @@ export async function createEvent(
   venueId: string,
   event: Omit<EventData, 'id' | 'createdAt' | 'venueId'>
 ): Promise<string> {
-  const normalizedMediaUrls = Array.isArray(event.mediaUrls)
-    ? event.mediaUrls
+  const sanitizedEvent = await sanitizeEventManagedImageReferencesForWrite({ ...event }, {
+    operation: 'createEvent',
+    venueId,
+    eventName: event.eventName || event.name,
+    uniqueId: event.uniqueId,
+  });
+  const normalizedMediaUrls = Array.isArray(sanitizedEvent.mediaUrls)
+    ? sanitizedEvent.mediaUrls
         .map((url) => String(url || '').trim())
         .filter((url) => url.length > 0)
     : [];
@@ -3278,13 +3311,13 @@ export async function createEvent(
     normalizedMediaUrls.find((url) => isManagedImageUrl(url)) ||
     normalizedMediaUrls[0] ||
     undefined;
-  const resolvedImage = String(event.image || event.imageUrl || '').trim() || preferredMediaUrl;
+  const resolvedImage = String(sanitizedEvent.image || sanitizedEvent.imageUrl || '').trim() || preferredMediaUrl;
   const resolvedRelevantImage =
-    String(event.relevantImageUrl || '').trim() || resolvedImage || preferredMediaUrl;
-  const resolvedImageUrl = String(event.imageUrl || '').trim() || resolvedImage || preferredMediaUrl;
+    String(sanitizedEvent.relevantImageUrl || '').trim() || resolvedImage || preferredMediaUrl;
+  const resolvedImageUrl = String(sanitizedEvent.imageUrl || '').trim() || resolvedImage || preferredMediaUrl;
 
-  const data = normalizeRecurringBaseWritePayload({
-    ...event,
+  const data = normalizeRecurringBaseWritePayload(withEventImageProvenanceForWrite({
+    ...sanitizedEvent,
     imageUrl: resolvedImageUrl,
     image: resolvedImage,
     relevantImageUrl: resolvedRelevantImage,
@@ -3293,7 +3326,13 @@ export async function createEvent(
     createdAt: admin.firestore.FieldValue.serverTimestamp(),
     updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     lastSeenAt: admin.firestore.FieldValue.serverTimestamp(),
-  });
+  }, {
+    force: true,
+    defaultPrimarySource: 'post_media',
+    defaultMediaSource: 'post_media',
+    selectionReason: 'event_create_write',
+    updatedBy: 'firestore_create',
+  }));
 
   const docRef = await db
     .collection(COLLECTIONS.VENUES)
@@ -3313,11 +3352,24 @@ export async function updateEvent(
   eventId: string,
   updates: Partial<EventData>
 ): Promise<void> {
-  const data = normalizeRecurringBaseWritePayload({
-    ...updates,
+  const sanitizedUpdates = await sanitizeEventManagedImageReferencesForWrite({ ...updates }, {
+    operation: 'updateEvent',
+    venueId,
+    eventId,
+    eventName: updates.eventName || updates.name,
+    uniqueId: updates.uniqueId,
+  });
+  const data = normalizeRecurringBaseWritePayload(withEventImageProvenanceForWrite({
+    ...sanitizedUpdates,
     updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     lastSeenAt: admin.firestore.FieldValue.serverTimestamp(),
-  });
+  }, {
+    force: false,
+    defaultPrimarySource: 'unknown',
+    defaultMediaSource: 'unknown',
+    selectionReason: 'event_update_write',
+    updatedBy: 'firestore_update',
+  }));
 
   await db
     .collection(COLLECTIONS.VENUES)
@@ -4023,6 +4075,503 @@ function normalizeRecurringBaseWritePayload<T extends Record<string, unknown>>(p
   }
 
   return payload;
+}
+
+interface EventManagedImageSanitizeResult<T extends object> {
+  payload: T;
+  removedFields: string[];
+  removedUrls: string[];
+}
+
+interface EventManagedImageWriteContext {
+  operation: string;
+  venueId?: string;
+  eventId?: string;
+  reviewId?: string;
+  eventName?: string;
+  uniqueId?: string;
+}
+
+function sanitizeEventManagedImageReferences<T extends object>(
+  payload: T,
+  missingManagedUrls: Iterable<string>
+): EventManagedImageSanitizeResult<T> {
+  const missing = new Set(
+    Array.from(missingManagedUrls)
+      .map((url) => normalizeManagedImageUrl(url))
+      .filter((url): url is string => Boolean(url))
+  );
+  const sanitized: Record<string, unknown> = { ...(payload as Record<string, unknown>) };
+  const removedFields = new Set<string>();
+  const removedUrls: string[] = [];
+
+  if (missing.size === 0) {
+    return {
+      payload: sanitized as T,
+      removedFields: [],
+      removedUrls: [],
+    };
+  }
+
+  const sanitizeScalarField = (target: Record<string, unknown>, field: string, path: string): void => {
+    const normalized = typeof target[field] === 'string' ? normalizeManagedImageUrl(String(target[field])) : null;
+    if (!normalized || !missing.has(normalized)) return;
+
+    delete target[field];
+    removedFields.add(path);
+    removedUrls.push(normalized);
+  };
+
+  const sanitizeArrayField = (target: Record<string, unknown>, field: string, path: string): void => {
+    const value = target[field];
+    if (!Array.isArray(value)) return;
+
+    const next = value.filter((entry) => {
+      const normalized = typeof entry === 'string' ? normalizeManagedImageUrl(entry) : null;
+      if (!normalized || !missing.has(normalized)) return true;
+      removedUrls.push(normalized);
+      return false;
+    });
+
+    if (next.length === value.length) return;
+
+    if (next.length > 0) {
+      target[field] = next;
+    } else {
+      delete target[field];
+    }
+    removedFields.add(path);
+  };
+
+  const sanitizeRecord = (target: Record<string, unknown>, prefix = ''): void => {
+    for (const field of EVENT_MANAGED_IMAGE_SCALAR_FIELDS) {
+      sanitizeScalarField(target, field, prefix ? `${prefix}.${field}` : field);
+    }
+    for (const field of EVENT_MANAGED_IMAGE_ARRAY_FIELDS) {
+      sanitizeArrayField(target, field, prefix ? `${prefix}.${field}` : field);
+    }
+  };
+
+  sanitizeRecord(sanitized);
+
+  if (isPlainRecord(sanitized.metadata)) {
+    const metadata = { ...(sanitized.metadata as Record<string, unknown>) };
+    sanitizeRecord(metadata, 'metadata');
+    sanitized.metadata = metadata;
+  }
+
+  return {
+    payload: sanitized as T,
+    removedFields: Array.from(removedFields).sort(),
+    removedUrls: dedupeUrls(removedUrls),
+  };
+}
+
+export function sanitizeEventManagedImageReferencesForRegression(
+  payload: Record<string, unknown>,
+  missingManagedUrls: string[]
+): EventManagedImageSanitizeResult<Record<string, unknown>> {
+  return sanitizeEventManagedImageReferences(payload, missingManagedUrls);
+}
+
+async function sanitizeEventManagedImageReferencesForWrite<T extends object>(
+  payload: T,
+  context: EventManagedImageWriteContext
+): Promise<T> {
+  const managedUrls = collectManagedImageUrlsFromEventPayload(payload);
+  if (managedUrls.length === 0) return payload;
+
+  const missingUrls = await findMissingManagedImageUrls(managedUrls, context);
+  if (missingUrls.size === 0) return payload;
+
+  const result = sanitizeEventManagedImageReferences(payload, missingUrls);
+  if (result.removedUrls.length > 0) {
+    logger.warn('Dropped missing managed event image refs before Firestore write', {
+      ...context,
+      checkedManagedUrls: managedUrls.length,
+      removedFields: result.removedFields,
+      removedUrls: result.removedUrls,
+    });
+  }
+
+  return result.payload;
+}
+
+function collectManagedImageUrlsFromEventPayload(payload: object): string[] {
+  const urls = new Set<string>();
+
+  const addValue = (value: unknown): void => {
+    if (typeof value !== 'string') return;
+    const normalized = normalizeManagedImageUrl(value);
+    if (normalized) urls.add(normalized);
+  };
+
+  const collectFromRecord = (record: Record<string, unknown>): void => {
+    for (const field of EVENT_MANAGED_IMAGE_SCALAR_FIELDS) {
+      addValue(record[field]);
+    }
+    for (const field of EVENT_MANAGED_IMAGE_ARRAY_FIELDS) {
+      const value = record[field];
+      if (!Array.isArray(value)) continue;
+      for (const entry of value) {
+        addValue(entry);
+      }
+    }
+  };
+
+  const record = payload as Record<string, unknown>;
+  collectFromRecord(record);
+  if (isPlainRecord(record.metadata)) {
+    collectFromRecord(record.metadata as Record<string, unknown>);
+  }
+
+  return Array.from(urls);
+}
+
+async function findMissingManagedImageUrls(
+  urls: string[],
+  context: EventManagedImageWriteContext
+): Promise<Set<string>> {
+  const missingUrls = new Set<string>();
+  const bucket = admin.storage().bucket(MANAGED_IMAGE_BUCKET);
+
+  await Promise.all(
+    dedupeUrls(urls).map(async (url) => {
+      const normalized = normalizeManagedImageUrl(url);
+      const objectPath = normalized ? getManagedImageObjectPath(normalized) : null;
+      if (!normalized || !objectPath) return;
+
+      try {
+        const [exists] = await bucket.file(objectPath).exists();
+        if (!exists) {
+          missingUrls.add(normalized);
+        }
+      } catch (error) {
+        logger.warn('Could not verify managed event image before Firestore write; preserving URL', {
+          ...context,
+          imageUrl: normalized,
+          objectPath,
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+    })
+  );
+
+  return missingUrls;
+}
+
+function normalizeManagedImageUrl(url: string): string | null {
+  const raw = String(url || '').trim();
+  if (!raw) return null;
+
+  try {
+    const parsed = new URL(raw);
+    const bucketMarker = `/${MANAGED_IMAGE_BUCKET}/`;
+    if (parsed.hostname !== 'storage.googleapis.com' || !parsed.pathname.includes(bucketMarker)) {
+      return null;
+    }
+    return `${parsed.protocol}//${parsed.hostname}${parsed.pathname}`;
+  } catch {
+    return null;
+  }
+}
+
+function getManagedImageObjectPath(url: string): string | null {
+  const normalized = normalizeManagedImageUrl(url);
+  if (!normalized) return null;
+
+  try {
+    const parsed = new URL(normalized);
+    const bucketMarker = `/${MANAGED_IMAGE_BUCKET}/`;
+    const markerIndex = parsed.pathname.indexOf(bucketMarker);
+    if (markerIndex < 0) return null;
+
+    const encodedObjectPath = parsed.pathname.slice(markerIndex + bucketMarker.length);
+    if (!encodedObjectPath) return null;
+
+    try {
+      return decodeURIComponent(encodedObjectPath);
+    } catch {
+      return encodedObjectPath;
+    }
+  } catch {
+    return null;
+  }
+}
+
+function isPlainRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === 'object' && !Array.isArray(value) && !(value instanceof Date);
+}
+
+interface EventImageProvenanceWriteOptions {
+  force: boolean;
+  defaultPrimarySource: EventImageProvenanceSource;
+  defaultMediaSource: EventImageProvenanceSource;
+  selectionReason: string;
+  updatedBy: string;
+  setAtFactory?: () => unknown;
+}
+
+function withEventImageProvenanceForWrite<T extends Record<string, unknown>>(
+  payload: T,
+  options: EventImageProvenanceWriteOptions
+): T {
+  const hasExplicitProvenance = isPlainRecord(payload.imageProvenance);
+  const hasImageFieldUpdate =
+    EVENT_MANAGED_IMAGE_SCALAR_FIELDS.some((field) => Object.prototype.hasOwnProperty.call(payload, field)) ||
+    EVENT_MANAGED_IMAGE_ARRAY_FIELDS.some((field) => Object.prototype.hasOwnProperty.call(payload, field));
+  const shouldWrite =
+    options.force ||
+    hasExplicitProvenance ||
+    hasImageFieldUpdate;
+
+  if (!shouldWrite) return payload;
+
+  if (hasExplicitProvenance && !options.force && !hasImageFieldUpdate) {
+    return payload;
+  }
+
+  return {
+    ...payload,
+    imageProvenance: buildEventImageProvenanceFromPayload(payload, options),
+  };
+}
+
+export function buildEventUpdatePayloadForRegression(
+  updates: Record<string, unknown>
+): Record<string, unknown> {
+  return normalizeRecurringBaseWritePayload(withEventImageProvenanceForWrite({
+    ...updates,
+    updatedAt: 'serverTimestamp',
+    lastSeenAt: 'serverTimestamp',
+  }, {
+    force: false,
+    defaultPrimarySource: 'unknown',
+    defaultMediaSource: 'unknown',
+    selectionReason: 'event_update_write',
+    updatedBy: 'firestore_update',
+    setAtFactory: () => 'serverTimestamp',
+  }));
+}
+
+export function buildEventImageProvenanceForRegression(
+  payload: Record<string, unknown>,
+  options: Partial<Omit<EventImageProvenanceWriteOptions, 'setAtFactory'>> = {}
+): EventImageProvenance {
+  return buildEventImageProvenanceFromPayload(payload, {
+    force: true,
+    defaultPrimarySource: options.defaultPrimarySource || 'unknown',
+    defaultMediaSource: options.defaultMediaSource || 'unknown',
+    selectionReason: options.selectionReason || 'regression',
+    updatedBy: options.updatedBy || 'regression',
+    setAtFactory: () => 'serverTimestamp',
+  });
+}
+
+function buildEventImageProvenanceFromPayload(
+  payload: Record<string, unknown>,
+  options: EventImageProvenanceWriteOptions
+): EventImageProvenance {
+  const existing = isPlainRecord(payload.imageProvenance)
+    ? payload.imageProvenance as Partial<EventImageProvenance> & Record<string, unknown>
+    : {};
+  const finalRefs = collectFinalImageRefs(payload);
+  const primary = choosePrimaryImageRef(finalRefs, existing);
+  const existingMediaSource = buildExistingImageProvenanceSourceLookup(existing);
+  const media: NonNullable<EventImageProvenance['media']> = [];
+  const sourceFields = new Set<EventImageProvenanceField>();
+  const seenRefs = new Set<string>();
+
+  const addRef = (
+    ref: { url: string; field: EventImageProvenanceField },
+    fallbackSource: EventImageProvenanceSource,
+    isPrimary = false,
+    isFallback = false
+  ): void => {
+    if (!ref.url) return;
+    const lookupKey = `${ref.field}:${ref.url}`;
+    const source = existingMediaSource.get(lookupKey) || existingMediaSource.get(ref.url) || fallbackSource;
+    const key = `${ref.field}:${source}:${ref.url}`;
+    if (seenRefs.has(key)) return;
+    seenRefs.add(key);
+    sourceFields.add(ref.field);
+    media.push({
+      url: ref.url,
+      source,
+      field: ref.field,
+      isPrimary,
+      isFallback,
+    });
+  };
+
+  const primarySource = resolvePrimaryImageSource(primary?.url || '', existing, options);
+  const primaryIsFallback =
+    typeof existing.isFallback === 'boolean'
+      ? existing.isFallback
+      : primarySource !== 'post_media' && primarySource !== 'city_level_review';
+
+  if (primary) {
+    addRef(primary, primarySource, true, primaryIsFallback);
+  }
+
+  for (const ref of finalRefs) {
+    if (primary && ref.field === primary.field && ref.url === primary.url) continue;
+    const fallbackSource =
+      ref.field === 'icon'
+        ? 'profile_image'
+        : ref.field === 'sharedPostThumbnail'
+          ? 'post_media'
+          : options.defaultMediaSource;
+    addRef(ref, fallbackSource, false, fallbackSource !== 'post_media' && fallbackSource !== 'city_level_review');
+  }
+
+  return compactRecord({
+    version: 1,
+    primarySource,
+    primaryField: primary?.field,
+    primaryUrl: primary?.url,
+    isFallback: primaryIsFallback,
+    sourceFields: Array.from(sourceFields),
+    media,
+    selectionReason: String(existing.selectionReason || options.selectionReason || '').trim() || undefined,
+    updatedBy: String(existing.updatedBy || options.updatedBy || '').trim() || undefined,
+    setAt: typeof options.setAtFactory === 'function'
+      ? options.setAtFactory()
+      : admin.firestore.FieldValue.serverTimestamp(),
+  }) as EventImageProvenance;
+}
+
+function collectFinalImageRefs(payload: Record<string, unknown>): Array<{
+  url: string;
+  field: EventImageProvenanceField;
+}> {
+  const refs: Array<{ url: string; field: EventImageProvenanceField }> = [];
+  const push = (value: unknown, field: EventImageProvenanceField): void => {
+    const normalized = normalizeImageProvenanceUrl(value);
+    if (normalized) refs.push({ url: normalized, field });
+  };
+
+  push(payload.relevantImageUrl, 'relevantImageUrl');
+  push(payload.image, 'image');
+  push(payload.imageUrl, 'imageUrl');
+  push(payload.cachedImageUrl, 'cachedImageUrl');
+  push(payload.sharedPostThumbnail, 'sharedPostThumbnail');
+  push(payload.icon, 'icon');
+  for (const url of tokenizeMediaUrls(payload.mediaUrls)) {
+    push(url, 'mediaUrls');
+  }
+
+  return refs;
+}
+
+function choosePrimaryImageRef(
+  refs: Array<{ url: string; field: EventImageProvenanceField }>,
+  existing: Partial<EventImageProvenance> & Record<string, unknown>
+): { url: string; field: EventImageProvenanceField } | null {
+  const existingPrimaryUrl = normalizeImageProvenanceUrl(existing.primaryUrl);
+  if (existingPrimaryUrl) {
+    const matchingExistingPrimary = refs.find((ref) => ref.url === existingPrimaryUrl);
+    if (matchingExistingPrimary && matchingExistingPrimary.field !== 'icon') {
+      return matchingExistingPrimary;
+    }
+  }
+
+  const preferredFields: EventImageProvenanceField[] = [
+    'relevantImageUrl',
+    'image',
+    'imageUrl',
+    'mediaUrls',
+    'cachedImageUrl',
+    'sharedPostThumbnail',
+  ];
+  for (const field of preferredFields) {
+    const ref = refs.find((candidate) => candidate.field === field);
+    if (ref) return ref;
+  }
+
+  return null;
+}
+
+function resolvePrimaryImageSource(
+  primaryUrl: string,
+  existing: Partial<EventImageProvenance> & Record<string, unknown>,
+  options: EventImageProvenanceWriteOptions
+): EventImageProvenanceSource {
+  if (!primaryUrl) return 'no_image';
+
+  const existingSource = normalizeImageProvenanceSource(existing.primarySource);
+  if (existingSource && existingSource !== 'no_image') {
+    return existingSource;
+  }
+
+  return options.defaultPrimarySource;
+}
+
+function buildExistingImageProvenanceSourceLookup(
+  existing: Partial<EventImageProvenance> & Record<string, unknown>
+): Map<string, EventImageProvenanceSource> {
+  const lookup = new Map<string, EventImageProvenanceSource>();
+  if (!Array.isArray(existing.media)) return lookup;
+
+  for (const entry of existing.media) {
+    if (!isPlainRecord(entry)) continue;
+    const url = normalizeImageProvenanceUrl(entry.url);
+    const source = normalizeImageProvenanceSource(entry.source);
+    const field = normalizeImageProvenanceField(entry.field);
+    if (!url || !source) continue;
+    lookup.set(url, source);
+    if (field) {
+      lookup.set(`${field}:${url}`, source);
+    }
+  }
+
+  return lookup;
+}
+
+function normalizeImageProvenanceUrl(value: unknown): string {
+  const raw = String(value || '').trim();
+  if (!raw) return '';
+  try {
+    const parsed = new URL(raw);
+    return `${parsed.protocol}//${parsed.hostname}${parsed.pathname}`;
+  } catch {
+    return raw;
+  }
+}
+
+function normalizeImageProvenanceSource(value: unknown): EventImageProvenanceSource | null {
+  const normalized = String(value || '').trim();
+  const allowed = new Set<EventImageProvenanceSource>([
+    'post_media',
+    'profile_image',
+    'ticket_image',
+    'app_fallback',
+    'venue_media_fallback',
+    'dedupe_existing',
+    'city_level_review',
+    'manual',
+    'no_image',
+    'unknown',
+  ]);
+  return allowed.has(normalized as EventImageProvenanceSource)
+    ? normalized as EventImageProvenanceSource
+    : null;
+}
+
+function normalizeImageProvenanceField(value: unknown): EventImageProvenanceField | null {
+  const normalized = String(value || '').trim();
+  const allowed = new Set<EventImageProvenanceField>([
+    'image',
+    'imageUrl',
+    'relevantImageUrl',
+    'mediaUrls',
+    'icon',
+    'sharedPostThumbnail',
+    'cachedImageUrl',
+  ]);
+  return allowed.has(normalized as EventImageProvenanceField)
+    ? normalized as EventImageProvenanceField
+    : null;
 }
 
 function resolveLastSeenTimestampMs(eventData: Record<string, unknown>): number | null {

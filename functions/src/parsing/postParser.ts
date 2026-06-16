@@ -2841,6 +2841,15 @@ function processEvents(
   const normalizedDisplayMediaUrls = (displayMediaUrls || [])
     .map((url) => String(url || '').trim())
     .filter((url) => Boolean(url) && isManagedImageUrl(url));
+  const mediaProvenanceSource =
+    extractedData?.imageMediaSource === 'venue_media_fallback'
+      ? 'venue_media_fallback'
+      : 'post_media';
+  const mediaProvenanceReason =
+    extractedData?.imageMediaSourceReason ||
+    (mediaProvenanceSource === 'venue_media_fallback'
+      ? 'recovered_managed_media_from_existing_venue_events'
+      : 'source_post_media');
 
   const result = parsedData.flatMap((event, index) => {
     try {
@@ -2856,6 +2865,9 @@ function processEvents(
       );
       const imageOverride = canUseTicketImageOverride ? ticketImageOverride : heroImageOverride;
       const primaryMediaUrl = displayMediaUrls[0] || mapOcrImageUrlToManaged(analysisMediaUrls[0] || '');
+      let primaryImageSource = mediaProvenanceSource;
+      let primaryImageReason = mediaProvenanceReason;
+      let primaryIsFallback = mediaProvenanceSource !== 'post_media';
 
       // Add metadata
       const processedEvent = addMetadata(
@@ -2872,6 +2884,11 @@ function processEvents(
       if (imageOverride) {
         processedEvent.relevantImageUrl =
           mapOcrImageUrlToManaged(imageOverride) || processedEvent.image || '';
+        primaryImageSource = 'ticket_image';
+        primaryImageReason = canUseTicketImageOverride
+          ? 'ticket_image_override_with_ticket_link'
+          : 'hero_image_fallback_for_unusable_source_media';
+        primaryIsFallback = true;
       } else if (
         event.relevantImageIndex >= 0 &&
         event.relevantImageIndex < analysisMediaUrls.length
@@ -2881,8 +2898,19 @@ function processEvents(
           analysisMediaUrls[event.relevantImageIndex]
         );
         processedEvent.relevantImageUrl = fromDisplay || fromAnalysis || processedEvent.image || '';
+        primaryImageSource = mediaProvenanceSource;
+        primaryImageReason =
+          mediaProvenanceSource === 'venue_media_fallback'
+            ? mediaProvenanceReason
+            : 'model_selected_relevant_image_index';
+        primaryIsFallback = mediaProvenanceSource !== 'post_media';
       } else {
         processedEvent.relevantImageUrl = processedEvent.image || '';
+        primaryImageSource = processedEvent.image ? mediaProvenanceSource : 'no_image';
+        primaryImageReason = processedEvent.image
+          ? mediaProvenanceReason
+          : 'no_usable_event_image_provided';
+        primaryIsFallback = mediaProvenanceSource !== 'post_media';
       }
       processedEvent.mediaUrls = normalizedDisplayMediaUrls;
       if (!processedEvent.image && normalizedDisplayMediaUrls.length > 0) {
@@ -2891,6 +2919,17 @@ function processEvents(
       if (!processedEvent.relevantImageUrl && processedEvent.image) {
         processedEvent.relevantImageUrl = processedEvent.image;
       }
+      processedEvent.imageProvenance = buildProcessedEventImageProvenance({
+        primaryUrl: processedEvent.relevantImageUrl || processedEvent.image || '',
+        primaryField: processedEvent.relevantImageUrl ? 'relevantImageUrl' : processedEvent.image ? 'image' : undefined,
+        primarySource: primaryImageSource,
+        isFallback: primaryIsFallback,
+        selectionReason: primaryImageReason,
+        mediaUrls: normalizedDisplayMediaUrls,
+        mediaSource: mediaProvenanceSource,
+        icon: processedEvent.icon,
+        sharedPostThumbnail: processedEvent.sharedPostThumbnail,
+      });
 
       return [processedEvent];
     } catch (error) {
@@ -2905,6 +2944,85 @@ function processEvents(
     logger.info(`${skippedUnrecognizedVenue} event(s) skipped due to unrecognized venue`);
   }
 
+  return result;
+}
+
+function buildProcessedEventImageProvenance(params: {
+  primaryUrl: string;
+  primaryField?: string;
+  primarySource: string;
+  isFallback: boolean;
+  selectionReason: string;
+  mediaUrls: string[];
+  mediaSource: string;
+  icon?: string;
+  sharedPostThumbnail?: string;
+}) {
+  const primaryUrl = normalizeProvenanceUrl(params.primaryUrl);
+  const media = [];
+  const sourceFields = new Set();
+  const seenRefs = new Set();
+
+  const addRef = (url: string, source: string, field: string, isPrimary = false, isFallback = false) => {
+    const normalized = normalizeProvenanceUrl(url);
+    if (!normalized) return;
+    const key = `${field}:${normalized}:${source}`;
+    if (seenRefs.has(key)) return;
+    seenRefs.add(key);
+    sourceFields.add(field);
+    media.push({
+      url: normalized,
+      source,
+      field,
+      isPrimary,
+      isFallback,
+    });
+  };
+
+  if (primaryUrl && params.primaryField) {
+    addRef(primaryUrl, params.primarySource, params.primaryField, true, params.isFallback);
+  }
+  for (const url of params.mediaUrls || []) {
+    addRef(url, params.mediaSource, 'mediaUrls', normalizeProvenanceUrl(url) === primaryUrl, params.mediaSource !== 'post_media');
+  }
+  if (params.icon) {
+    addRef(params.icon, 'profile_image', 'icon', false, false);
+  }
+  if (params.sharedPostThumbnail) {
+    addRef(params.sharedPostThumbnail, 'post_media', 'sharedPostThumbnail', false, false);
+  }
+
+  return compactImageProvenanceRecord({
+    version: 1,
+    primarySource: primaryUrl ? params.primarySource : 'no_image',
+    primaryField: primaryUrl ? params.primaryField : undefined,
+    primaryUrl: primaryUrl || undefined,
+    isFallback: params.isFallback,
+    sourceFields: Array.from(sourceFields),
+    media,
+    selectionReason: params.selectionReason,
+    updatedBy: 'parser',
+  });
+}
+
+function normalizeProvenanceUrl(url: string): string {
+  const raw = String(url || '').trim();
+  if (!raw) return '';
+  try {
+    const parsed = new URL(raw);
+    return `${parsed.protocol}//${parsed.hostname}${parsed.pathname}`;
+  } catch {
+    return raw;
+  }
+}
+
+function compactImageProvenanceRecord(value: Record<string, unknown>) {
+  const result: Record<string, unknown> = {};
+  for (const [key, entry] of Object.entries(value)) {
+    if (entry === undefined) continue;
+    if (Array.isArray(entry) && entry.length === 0) continue;
+    result[key] = entry;
+  }
   return result;
 }
 

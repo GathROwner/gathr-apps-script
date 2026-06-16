@@ -6,6 +6,7 @@
 import {
   RawRowData,
   EventData,
+  EventImageProvenanceSource,
   CityLevelEventReviewRecord,
   RecurringWeekday,
   VenueData,
@@ -57,6 +58,9 @@ export interface RowProcessingResult {
   error?: string;
   events?: EventData[];
 }
+
+type EventImageProvenance = NonNullable<EventData['imageProvenance']>;
+type EventImageProvenanceField = NonNullable<EventImageProvenance['primaryField']>;
 
 function logTiming(
   step: string,
@@ -939,6 +943,88 @@ function getManagedMediaUrlsFromCityReview(review?: CityLevelEventReviewRecord |
   ).filter((url) => isStorageManagedUrl(url));
 }
 
+function buildEventImageProvenance(params: {
+  primaryUrl?: string;
+  primaryField?: EventImageProvenanceField;
+  primarySource: EventImageProvenanceSource;
+  isFallback: boolean;
+  selectionReason: string;
+  mediaUrls?: string[];
+  mediaSource?: EventImageProvenanceSource;
+  icon?: string;
+  sharedPostThumbnail?: string;
+  updatedBy: string;
+}): EventData['imageProvenance'] {
+  const primaryUrl = normalizeProvenanceUrl(params.primaryUrl);
+  const media: NonNullable<EventImageProvenance['media']> = [];
+  const sourceFields = new Set<EventImageProvenanceField>();
+  const seenRefs = new Set<string>();
+  const addRef = (
+    rawUrl: unknown,
+    source: EventImageProvenanceSource,
+    field: EventImageProvenanceField,
+    isPrimary = false,
+    isFallback = false
+  ): void => {
+    const url = normalizeProvenanceUrl(rawUrl);
+    if (!url) return;
+    const key = `${field}:${source}:${url}`;
+    if (seenRefs.has(key)) return;
+    seenRefs.add(key);
+    sourceFields.add(field);
+    media.push({ url, source, field, isPrimary, isFallback });
+  };
+
+  if (primaryUrl && params.primaryField) {
+    addRef(primaryUrl, params.primarySource, params.primaryField, true, params.isFallback);
+  }
+  for (const url of params.mediaUrls || []) {
+    const normalized = normalizeProvenanceUrl(url);
+    addRef(
+      normalized,
+      params.mediaSource || params.primarySource,
+      'mediaUrls',
+      Boolean(primaryUrl && normalized === primaryUrl),
+      (params.mediaSource || params.primarySource) !== 'post_media'
+    );
+  }
+  addRef(params.icon, 'profile_image', 'icon');
+  addRef(params.sharedPostThumbnail, 'post_media', 'sharedPostThumbnail');
+
+  return compactRecord({
+    version: 1,
+    primarySource: primaryUrl ? params.primarySource : 'no_image',
+    primaryField: primaryUrl ? params.primaryField : undefined,
+    primaryUrl: primaryUrl || undefined,
+    isFallback: params.isFallback,
+    sourceFields: Array.from(sourceFields).filter(Boolean),
+    media,
+    selectionReason: params.selectionReason,
+    updatedBy: params.updatedBy,
+  }) as EventData['imageProvenance'];
+}
+
+function normalizeProvenanceUrl(value: unknown): string {
+  const raw = String(value || '').trim();
+  if (!raw) return '';
+  try {
+    const parsed = new URL(raw);
+    return `${parsed.protocol}//${parsed.hostname}${parsed.pathname}`;
+  } catch {
+    return raw;
+  }
+}
+
+function compactRecord<T extends Record<string, unknown>>(value: T): T {
+  const result: Record<string, unknown> = {};
+  for (const [key, entry] of Object.entries(value)) {
+    if (entry === undefined) continue;
+    if (Array.isArray(entry) && entry.length === 0) continue;
+    result[key] = entry;
+  }
+  return result as T;
+}
+
 function isUnresolvedUnknownVenueReview(record?: UnrecognizedVenueRecord | null): boolean {
   const status = String(record?.status || '').trim();
   return ['pending', 'lookup_running', 'candidate_found', 'manual_review'].includes(status);
@@ -1095,7 +1181,11 @@ async function buildStructuredFacebookEventScraperEvents(
   establishment: string,
   mediaUrls: string[],
   matchedVenue?: VenueData | null,
-  options: { managedMediaUrls?: string[] } = {}
+  options: {
+    managedMediaUrls?: string[];
+    managedMediaSource?: EventImageProvenanceSource;
+    managedMediaSourceReason?: string;
+  } = {}
 ): Promise<ParserProcessedEvent[] | null> {
   if (row.sourceScraperType !== 'events') {
     return null;
@@ -1149,6 +1239,14 @@ async function buildStructuredFacebookEventScraperEvents(
   }
   const normalizedMediaUrls = managedMediaUrls;
   const primaryImageUrl = normalizedMediaUrls[0] || '';
+  const primaryImageSource: EventImageProvenanceSource =
+    reusableManagedMediaUrls.length > 0
+      ? options.managedMediaSource || 'dedupe_existing'
+      : 'post_media';
+  const primaryImageReason =
+    reusableManagedMediaUrls.length > 0
+      ? options.managedMediaSourceReason || 'reused_existing_structured_facebook_event_media'
+      : 'facebook_events_scraper_media_upload';
   const ticketLink = extractFacebookEventTextValue(row.text, 'Ticket link');
   const ticketSummary = extractFacebookEventTextValue(row.text, 'Tickets');
   const cleanDescription = String(row.facebookEventDescription || row.text || title).trim();
@@ -1184,6 +1282,16 @@ async function buildStructuredFacebookEventScraperEvents(
     image: primaryImageUrl,
     relevantImageUrl: primaryImageUrl,
     mediaUrls: normalizedMediaUrls,
+    imageProvenance: buildEventImageProvenance({
+      primaryUrl: primaryImageUrl,
+      primaryField: primaryImageUrl ? 'image' : undefined,
+      primarySource: primaryImageSource,
+      isFallback: primaryImageSource !== 'post_media',
+      selectionReason: primaryImageReason,
+      mediaUrls: normalizedMediaUrls,
+      mediaSource: primaryImageSource,
+      updatedBy: 'structured_facebook_event_adapter',
+    }),
     utcStartDate,
     usersResponded: row.usersResponded,
     usersGoing: row.usersGoing,
@@ -1669,6 +1777,8 @@ export async function processRow(
     const matchedVenueId = venue?.id;
     let facebookEventSourceContentSignature: string | undefined;
     let reusableFacebookEventMediaUrls: string[] = [];
+    let reusableFacebookEventMediaSource: EventImageProvenanceSource = 'dedupe_existing';
+    let reusableFacebookEventMediaSourceReason = 'reused_existing_structured_facebook_event_media';
 
     if (!isDryRun && parserMode === 'full5stage' && row.sourceScraperType === 'events') {
       facebookEventSourceContentSignature = buildFacebookEventSourceContentSignature(row);
@@ -1681,6 +1791,8 @@ export async function processRow(
             ? await firestoreService.findVenueEventByUniqueId(venue.id, storedUniqueId)
             : null;
           reusableFacebookEventMediaUrls = getManagedMediaUrlsFromEvent(existingEvent);
+          reusableFacebookEventMediaSource = 'dedupe_existing';
+          reusableFacebookEventMediaSourceReason = 'reused_existing_event_media_for_same_facebook_event';
           const existingSignature = asTrimmedString(existingEvent?.sourceContentSignature);
           const needsRecurrenceUpdate = facebookEventRecurrenceNeedsUpdate(
             existingEvent,
@@ -1720,6 +1832,8 @@ export async function processRow(
         } else if (cityLevelFacebookEventLocation) {
           const existingReview = await firestoreService.findCityLevelEventReviewByUniqueId(row.uniqueId || '');
           reusableFacebookEventMediaUrls = getManagedMediaUrlsFromCityReview(existingReview);
+          reusableFacebookEventMediaSource = 'city_level_review';
+          reusableFacebookEventMediaSourceReason = 'reused_existing_city_level_review_media';
           const existingSignature = asTrimmedString(existingReview?.sourceContentSignature);
           if (
             existingReview &&
@@ -1799,6 +1913,8 @@ export async function processRow(
     if (parserMode === 'full5stage') {
       let parserMediaUrls = normalizeUrlList(row.mediaUrls);
       const parserSharedPostThumbnails = normalizeUrlList(row.sharedPostThumbnails);
+      let parserMediaSource: EventImageProvenanceSource = 'post_media';
+      let parserMediaSourceReason = 'source_post_media';
       const hasUsableParserMedia =
         parserMediaUrls.length > 0 || parserSharedPostThumbnails.length > 0;
       if (venue && !hasUsableParserMedia) {
@@ -1812,6 +1928,8 @@ export async function processRow(
         );
         if (fallbackMediaUrls.length > 0) {
           parserMediaUrls = mergeUniqueUrls(fallbackMediaUrls, parserMediaUrls).slice(0, 4);
+          parserMediaSource = 'venue_media_fallback';
+          parserMediaSourceReason = 'recovered_managed_media_from_existing_venue_events';
           logger.info('Recovered managed media for parser rerun', {
             rowIndex,
             venueId: venue.id,
@@ -1844,6 +1962,8 @@ export async function processRow(
           shares: row.shares,
           comments: row.comments,
           topReactionsCount: row.topReactionsCount,
+          imageMediaSource: parserMediaSource,
+          imageMediaSourceReason: parserMediaSourceReason,
         },
       };
 
@@ -1893,7 +2013,11 @@ export async function processRow(
         establishment,
         parserMediaUrls,
         venue,
-        { managedMediaUrls: reusableFacebookEventMediaUrls }
+        {
+          managedMediaUrls: reusableFacebookEventMediaUrls,
+          managedMediaSource: reusableFacebookEventMediaSource,
+          managedMediaSourceReason: reusableFacebookEventMediaSourceReason,
+        }
       );
       if (fullParserEvents) {
         logTiming('parse_facebook_events_structured_row', parseStart, {
@@ -2819,6 +2943,19 @@ async function processFullParserEvent(
     ageRestriction: undefined,
     imageUrl: resolvedImage,
     mediaUrls: eventMediaUrls,
+    imageProvenance: (item.imageProvenance as EventData['imageProvenance']) ||
+      buildEventImageProvenance({
+        primaryUrl: resolvedRelevantImage || resolvedImage,
+        primaryField: resolvedRelevantImage ? 'relevantImageUrl' : resolvedImage ? 'image' : undefined,
+        primarySource: resolvedImage ? 'post_media' : 'no_image',
+        isFallback: false,
+        selectionReason: resolvedImage ? 'full_parser_event_media' : 'no_usable_event_image_provided',
+        mediaUrls: eventMediaUrls,
+        mediaSource: 'post_media',
+        icon: String(item.icon || '').trim() || undefined,
+        sharedPostThumbnail: String(item.sharedPostThumbnail || '').trim() || undefined,
+        updatedBy: 'row_processor_full5stage',
+      }),
     facebookUrl: row.facebookUrl,
     sourceScraperType: row.sourceScraperType,
     sourceTimestamp: row.timestamp ? new Date(row.timestamp) : undefined,
@@ -3031,6 +3168,16 @@ async function processExtractedItem(
     image: legacyPreferredMediaUrl || undefined,
     relevantImageUrl: legacyPreferredMediaUrl || undefined,
     mediaUrls: legacyMediaUrls,
+    imageProvenance: buildEventImageProvenance({
+      primaryUrl: legacyPreferredMediaUrl,
+      primaryField: legacyPreferredMediaUrl ? 'image' : undefined,
+      primarySource: legacyPreferredMediaUrl ? 'post_media' : 'no_image',
+      isFallback: false,
+      selectionReason: legacyPreferredMediaUrl ? 'legacy_row_media' : 'no_usable_event_image_provided',
+      mediaUrls: legacyMediaUrls,
+      mediaSource: 'post_media',
+      updatedBy: 'row_processor_legacy',
+    }),
     facebookUrl: row.facebookUrl,
     sourceTimestamp: row.timestamp ? new Date(row.timestamp) : undefined,
     usersResponded: item.usersResponded || row.usersResponded,
@@ -3936,12 +4083,79 @@ function buildDuplicateEventUpdates(
     setField('icon', incoming.icon);
   }
 
+  const imageFieldChanged = changedFields.some((field) =>
+    ['mediaUrls', 'image', 'imageUrl', 'relevantImageUrl', 'icon', 'sharedPostThumbnail'].includes(field)
+  );
+  const shouldBackfillImageProvenance = !existing.imageProvenance && Boolean(incoming.imageProvenance);
+  if (imageFieldChanged || shouldBackfillImageProvenance) {
+    setField('imageProvenance', buildDuplicateMergeImageProvenance(existing, incoming, updates));
+  }
+
   return {
     updates,
     changedFields,
     descriptionImproved,
     timeImproved,
   };
+}
+
+function buildDuplicateMergeImageProvenance(
+  existing: EventData,
+  incoming: EventData,
+  updates: Partial<EventData>
+): EventData['imageProvenance'] {
+  const existingProvenance = existing.imageProvenance;
+  const incomingProvenance = incoming.imageProvenance;
+  const primaryUrl =
+    asTrimmedString(updates.relevantImageUrl) ||
+    asTrimmedString(updates.image) ||
+    asTrimmedString(updates.imageUrl) ||
+    asTrimmedString(existing.relevantImageUrl) ||
+    asTrimmedString(existing.image) ||
+    asTrimmedString(existing.imageUrl);
+  const primaryField: EventImageProvenanceField | undefined =
+    asTrimmedString(updates.relevantImageUrl) || asTrimmedString(existing.relevantImageUrl)
+      ? 'relevantImageUrl'
+      : asTrimmedString(updates.image) || asTrimmedString(existing.image)
+        ? 'image'
+        : asTrimmedString(updates.imageUrl) || asTrimmedString(existing.imageUrl)
+          ? 'imageUrl'
+          : undefined;
+  const incomingSource = incomingProvenance?.primarySource;
+  const existingSource = existingProvenance?.primarySource;
+  const primarySource: EventImageProvenanceSource =
+    incomingSource && incomingSource !== 'no_image'
+      ? incomingSource
+      : existingSource && existingSource !== 'no_image'
+        ? existingSource
+        : primaryUrl
+          ? 'dedupe_existing'
+          : 'no_image';
+  const mediaUrls = Array.isArray(updates.mediaUrls)
+    ? updates.mediaUrls
+    : Array.isArray(incoming.mediaUrls) && incoming.mediaUrls.length > 0
+      ? incoming.mediaUrls
+      : existing.mediaUrls;
+  const selectionReason =
+    incomingProvenance?.selectionReason ||
+    existingProvenance?.selectionReason ||
+    'duplicate_merge_image_update';
+
+  return buildEventImageProvenance({
+    primaryUrl,
+    primaryField,
+    primarySource,
+    isFallback: Boolean(incomingProvenance?.isFallback) || primarySource !== 'post_media',
+    selectionReason: `${selectionReason}; duplicate_merge_image_update`,
+    mediaUrls,
+    mediaSource: primarySource === 'no_image' ? 'unknown' : primarySource,
+    icon: asTrimmedString(updates.icon) || asTrimmedString(incoming.icon) || asTrimmedString(existing.icon),
+    sharedPostThumbnail:
+      asTrimmedString(updates.sharedPostThumbnail) ||
+      asTrimmedString(incoming.sharedPostThumbnail) ||
+      asTrimmedString(existing.sharedPostThumbnail),
+    updatedBy: 'duplicate_merge',
+  });
 }
 
 export function previewDuplicateMerge(params: {
@@ -5725,6 +5939,7 @@ export function summarizeFullParserEvents(
     image: event.image || '',
     relevantImageUrl: event.relevantImageUrl || '',
     sharedPostThumbnail: event.sharedPostThumbnail || '',
+    imageProvenance: event.imageProvenance || null,
     timeResolution: event.timeResolution || null,
     timeFlags: event.timeFlags || null,
     _sourceType: (event as unknown as Record<string, unknown>)._sourceType || null,
