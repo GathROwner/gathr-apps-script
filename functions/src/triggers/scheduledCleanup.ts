@@ -38,6 +38,16 @@ function normalizeVenueIds(input: unknown): string[] {
   return normalized;
 }
 
+function normalizeBooleanOption(input: unknown, fallback: boolean): boolean {
+  if (typeof input === 'boolean') return input;
+  if (typeof input === 'string') {
+    const normalized = input.trim().toLowerCase();
+    if (['true', '1', 'yes', 'y'].includes(normalized)) return true;
+    if (['false', '0', 'no', 'n'].includes(normalized)) return false;
+  }
+  return fallback;
+}
+
 // Configuration
 const CLEANUP_CONFIG = {
   // Delete events older than this many days
@@ -45,7 +55,12 @@ const CLEANUP_CONFIG = {
   // Keep recurring series for this many days after computed recurrence end
   recurringGraceDays: 30,
   // Delete recurring series with no lifecycle metadata when unseen this long
-  staleRecurringDays: 90,
+  staleRecurringDays: 30,
+  // Include city-level/root events in global cleanup runs
+  includeTopLevelEvents: normalizeBooleanOption(
+    process.env.CLEANUP_INCLUDE_TOP_LEVEL_EVENTS,
+    true
+  ),
   // Delete processed dataset records older than this many days
   processedRecordsDays: 30,
   // Maximum events to delete per run (to avoid timeout)
@@ -90,6 +105,7 @@ export const scheduledCleanup = onSchedule(
         maxEvents: CLEANUP_CONFIG.maxEventsPerRun,
         recurringGraceDays: CLEANUP_CONFIG.recurringGraceDays,
         staleRecurringDays: CLEANUP_CONFIG.staleRecurringDays,
+        includeTopLevelEvents: CLEANUP_CONFIG.includeTopLevelEvents,
         venueIdsCount: scheduledVenueIds.length,
         venueIds: scheduledVenueIds.length > 0 ? scheduledVenueIds : undefined,
       });
@@ -101,6 +117,7 @@ export const scheduledCleanup = onSchedule(
           {
             recurringGraceDays: CLEANUP_CONFIG.recurringGraceDays,
             staleRecurringDays: CLEANUP_CONFIG.staleRecurringDays,
+            includeTopLevelEvents: CLEANUP_CONFIG.includeTopLevelEvents,
             venueIds: scheduledVenueIds,
           }
         );
@@ -188,6 +205,8 @@ export const manualCleanup = onRequest(
       expiredEventsDays?: number;
       recurringGraceDays?: number;
       staleRecurringDays?: number;
+      includeTopLevelEvents?: boolean;
+      dryRun?: boolean;
       processedRecordsDays?: number;
       maxEventsPerRun?: number;
       venueIds?: string[] | string;
@@ -308,6 +327,11 @@ export const manualCleanup = onRequest(
       expiredEventsDays: body.expiredEventsDays ?? CLEANUP_CONFIG.expiredEventsDays,
       recurringGraceDays: body.recurringGraceDays ?? CLEANUP_CONFIG.recurringGraceDays,
       staleRecurringDays: body.staleRecurringDays ?? CLEANUP_CONFIG.staleRecurringDays,
+      includeTopLevelEvents: normalizeBooleanOption(
+        body.includeTopLevelEvents,
+        CLEANUP_CONFIG.includeTopLevelEvents
+      ),
+      dryRun: normalizeBooleanOption(body.dryRun, false),
       processedRecordsDays: body.processedRecordsDays ?? CLEANUP_CONFIG.processedRecordsDays,
       maxEventsPerRun: body.maxEventsPerRun ?? CLEANUP_CONFIG.maxEventsPerRun,
       venueIds: resolvedVenueIds,
@@ -318,7 +342,9 @@ export const manualCleanup = onRequest(
 
     const results = {
       expiredEventsDeleted: 0,
+      expiredEventsWouldDelete: 0,
       processedRecordsDeleted: 0,
+      dryRun: config.dryRun,
       errors: [] as string[],
     };
 
@@ -335,14 +361,22 @@ export const manualCleanup = onRequest(
         {
           recurringGraceDays: config.recurringGraceDays,
           staleRecurringDays: config.staleRecurringDays,
+          includeTopLevelEvents: config.includeTopLevelEvents,
+          dryRun: config.dryRun,
           venueIds: config.venueIds,
         }
       );
+      if (config.dryRun) {
+        results.expiredEventsWouldDelete = results.expiredEventsDeleted;
+        results.expiredEventsDeleted = 0;
+      }
 
       // Clean up old processed records
-      results.processedRecordsDeleted = await firestoreService.cleanupOldProcessedRecords(
-        config.processedRecordsDays
-      );
+      if (!config.dryRun) {
+        results.processedRecordsDeleted = await firestoreService.cleanupOldProcessedRecords(
+          config.processedRecordsDays
+        );
+      }
 
       logger.info('Manual cleanup complete', results);
       response.json({

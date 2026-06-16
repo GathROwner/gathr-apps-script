@@ -5,6 +5,7 @@
 
 import * as admin from 'firebase-admin';
 import { createHash, randomUUID } from 'crypto';
+import { DateTime } from 'luxon';
 import {
   EventData,
   VenueData,
@@ -936,6 +937,9 @@ export interface DeleteExpiredEventsOptions {
   recurringGraceDays?: number;
   staleRecurringDays?: number;
   maxScannedPerVenue?: number;
+  maxScannedTopLevelEvents?: number;
+  includeTopLevelEvents?: boolean;
+  dryRun?: boolean;
   venueIds?: string[];
 }
 
@@ -966,6 +970,7 @@ const DEFAULT_RECURRING_STALE_DAYS = 90;
 const DAY_MS = 24 * 60 * 60 * 1000;
 const MAX_EVENTS_SCAN_CAP = 20000;
 const MIN_EVENTS_SCAN_CAP = 250;
+const EVENT_CLEANUP_TIMEZONE = 'America/Halifax';
 
 const TOTAL_OCCURRENCE_FIELD_CANDIDATES = [
   'totalOccurrences',
@@ -991,6 +996,28 @@ function parseTimestampMillis(value: unknown): number | null {
   if (!value) return null;
   if (value instanceof admin.firestore.Timestamp) {
     return value.toMillis();
+  }
+  if (typeof value === 'object') {
+    const maybeTimestamp = value as {
+      toMillis?: () => number;
+      toDate?: () => Date;
+      _seconds?: number;
+      _nanoseconds?: number;
+    };
+    if (typeof maybeTimestamp.toMillis === 'function') {
+      const millis = maybeTimestamp.toMillis();
+      return Number.isFinite(millis) ? millis : null;
+    }
+    if (typeof maybeTimestamp.toDate === 'function') {
+      const millis = maybeTimestamp.toDate().getTime();
+      return Number.isFinite(millis) ? millis : null;
+    }
+    if (typeof maybeTimestamp._seconds === 'number') {
+      return (
+        maybeTimestamp._seconds * 1000 +
+        Math.floor((maybeTimestamp._nanoseconds || 0) / 1e6)
+      );
+    }
   }
   if (value instanceof Date) {
     return value.getTime();
@@ -4017,10 +4044,55 @@ function normalizeCleanupDays(
   return Math.max(min, Math.min(Math.trunc(parsed), max));
 }
 
+function parseClockMinutes(value: unknown): number | null {
+  const match = String(value || '').trim().match(/^(\d{1,2}):(\d{2})(?::\d{2})?$/);
+  if (!match) return null;
+
+  const hours = Number(match[1]);
+  const minutes = Number(match[2]);
+  if (!Number.isInteger(hours) || !Number.isInteger(minutes)) return null;
+  if (minutes < 0 || minutes > 59) return null;
+  if (hours === 24 && minutes === 0) return 24 * 60;
+  if (hours < 0 || hours > 23) return null;
+
+  return hours * 60 + minutes;
+}
+
+function resolveNonRecurringLocalEndMs(eventData: Record<string, unknown>): number | null {
+  const startDate = parseDateOnlyValue(eventData.startDate);
+  let effectiveEndDate = parseDateOnlyValue(eventData.endDate) || startDate;
+  if (!effectiveEndDate) return null;
+
+  const startMinutes = parseClockMinutes(eventData.startTime);
+  const endMinutes = parseClockMinutes(eventData.endTime);
+
+  if (
+    startDate &&
+    effectiveEndDate === startDate &&
+    startMinutes !== null &&
+    endMinutes !== null &&
+    endMinutes < startMinutes
+  ) {
+    effectiveEndDate = addDaysToIsoDate(startDate, 1) || effectiveEndDate;
+  }
+
+  const localEndDate = DateTime.fromISO(effectiveEndDate, {
+    zone: EVENT_CLEANUP_TIMEZONE,
+  });
+  if (!localEndDate.isValid) return null;
+
+  const localEnd =
+    endMinutes === null
+      ? localEndDate.endOf('day')
+      : localEndDate.startOf('day').plus({ minutes: endMinutes });
+
+  return localEnd.isValid ? localEnd.toMillis() : null;
+}
+
 type ExpiredDeleteReason =
   | 'deleted_non_recurring_ended'
   | 'deleted_recurring_ended'
-  | 'deleted_recurring_stale'
+  | 'review_recurring_stale_open_ended'
   | 'skipped_recurring_active'
   | 'skipped_recurring_missing_lifecycle'
   | 'skipped_non_recurring_not_expired'
@@ -4040,15 +4112,14 @@ function evaluateExpiredDeleteDecision(
     staleRecurringDays: number;
   }
 ): ExpiredDeleteDecision {
-  const effectiveEndDate =
-    parseDateOnlyValue(eventData.endDate) || parseDateOnlyValue(eventData.startDate);
   const isRecurring = isRecurringEventRecord(eventData);
 
   if (!isRecurring) {
-    if (!effectiveEndDate) {
+    const localEndMs = resolveNonRecurringLocalEndMs(eventData);
+    if (localEndMs === null) {
       return { shouldDelete: false, reason: 'skipped_non_recurring_invalid_dates' };
     }
-    if (effectiveEndDate < beforeDate) {
+    if (localEndMs < nowMs) {
       return { shouldDelete: true, reason: 'deleted_non_recurring_ended' };
     }
     return { shouldDelete: false, reason: 'skipped_non_recurring_not_expired' };
@@ -4067,12 +4138,96 @@ function evaluateExpiredDeleteDecision(
   if (lastSeenAtMs != null) {
     const staleCutoffMs = nowMs - policy.staleRecurringDays * DAY_MS;
     if (lastSeenAtMs < staleCutoffMs) {
-      return { shouldDelete: true, reason: 'deleted_recurring_stale' };
+      return { shouldDelete: false, reason: 'review_recurring_stale_open_ended' };
     }
     return { shouldDelete: false, reason: 'skipped_recurring_active' };
   }
 
   return { shouldDelete: false, reason: 'skipped_recurring_missing_lifecycle' };
+}
+
+export function evaluateExpiredDeleteDecisionForRegression(
+  eventData: Record<string, unknown>,
+  beforeDate: string,
+  nowMs: number,
+  policy: {
+    recurringGraceDays: number;
+    staleRecurringDays: number;
+  }
+): ExpiredDeleteDecision {
+  return evaluateExpiredDeleteDecision(eventData, beforeDate, nowMs, policy);
+}
+
+export function evaluateExpiredImageCleanupTargetsForRegression(
+  candidateUrls: string[],
+  referencedUrls: string[],
+  referenceQueryFailures: number
+): {
+  shouldSkipDeletion: boolean;
+  unreferencedUrls: string[];
+  skippedDueToReferenceQueryFailure: number;
+} {
+  const uniqueCandidates = dedupeUrls(candidateUrls);
+  if (referenceQueryFailures > 0) {
+    return {
+      shouldSkipDeletion: true,
+      unreferencedUrls: [],
+      skippedDueToReferenceQueryFailure: uniqueCandidates.length,
+    };
+  }
+
+  const referenced = new Set(dedupeUrls(referencedUrls));
+  return {
+    shouldSkipDeletion: false,
+    unreferencedUrls: uniqueCandidates.filter((url) => !referenced.has(url)),
+    skippedDueToReferenceQueryFailure: 0,
+  };
+}
+
+interface ExpiredCityLevelReviewPointerUpdate {
+  reviewId: string;
+  update: Record<string, unknown>;
+}
+
+function buildExpiredCityLevelReviewPointerUpdate(
+  eventId: string,
+  eventPath: string,
+  eventData: Record<string, unknown>,
+  timestampValue: unknown,
+  deleteValue: unknown
+): ExpiredCityLevelReviewPointerUpdate | null {
+  const reviewId = asOptionalTrimmedString(eventData.cityLevelReviewId);
+  if (!reviewId) return null;
+
+  return {
+    reviewId,
+    update: compactRecord({
+      status: 'approved',
+      locationReviewStatus: 'approved',
+      publishedEventId: deleteValue,
+      publishedEventPath: deleteValue,
+      expiredPublishedEventId: asOptionalTrimmedString(eventId),
+      expiredPublishedEventPath: asOptionalTrimmedString(eventPath),
+      publishedEventExpiredAt: timestampValue,
+      publishedEventExpiredBy: 'deleteExpiredEvents',
+      publishedEventExpiredReason: 'expired_top_level_event_cleanup',
+      updatedAt: timestampValue,
+    }),
+  };
+}
+
+export function buildExpiredCityLevelReviewPointerUpdateForRegression(
+  eventId: string,
+  eventPath: string,
+  eventData: Record<string, unknown>
+): ExpiredCityLevelReviewPointerUpdate | null {
+  return buildExpiredCityLevelReviewPointerUpdate(
+    eventId,
+    eventPath,
+    eventData,
+    'serverTimestamp',
+    'deleteField'
+  );
 }
 
 /**
@@ -4130,6 +4285,14 @@ export async function deleteExpiredEvents(
     Math.max(maxDeletesPerRun * 5, MIN_EVENTS_SCAN_CAP),
     MAX_EVENTS_SCAN_CAP
   );
+  const includeTopLevelEvents =
+    requestedVenueIds.length === 0 && options.includeTopLevelEvents !== false;
+  const maxScannedTopLevelEvents = normalizeBackfillLimit(
+    options.maxScannedTopLevelEvents,
+    maxScannedPerVenue,
+    MAX_EVENTS_SCAN_CAP
+  );
+  const dryRun = options.dryRun === true;
   const pageSize = Math.min(200, Math.max(25, maxDeletesPerRun));
   const nowMs = Date.now();
 
@@ -4142,11 +4305,15 @@ export async function deleteExpiredEvents(
     scanCapHits: 0,
     deletedNonRecurring: 0,
     deletedRecurringEnded: 0,
-    deletedRecurringStale: 0,
+    reviewRecurringStaleOpenEnded: 0,
     skippedRecurringActive: 0,
     skippedRecurringMissingLifecycle: 0,
     skippedNonRecurringNotExpired: 0,
     skippedNonRecurringInvalidDates: 0,
+    topLevelPagesScanned: 0,
+    topLevelCandidateDocsScanned: 0,
+    topLevelScanCapHit: false,
+    expiredCityLevelReviewPointers: 0,
   };
 
   for (const venue of venues) {
@@ -4158,7 +4325,7 @@ export async function deleteExpiredEvents(
       scanCapHit: false,
       deletedNonRecurring: 0,
       deletedRecurringEnded: 0,
-      deletedRecurringStale: 0,
+      reviewRecurringStaleOpenEnded: 0,
       skippedRecurringActive: 0,
       skippedRecurringMissingLifecycle: 0,
       skippedNonRecurringNotExpired: 0,
@@ -4177,7 +4344,7 @@ export async function deleteExpiredEvents(
         .collection(COLLECTIONS.VENUES)
         .doc(venue.id)
         .collection(COLLECTIONS.EVENTS)
-        .where('startDate', '<', beforeDate)
+        .where('startDate', '<=', beforeDate)
         .orderBy('startDate', 'asc')
         .limit(pageSize);
 
@@ -4211,12 +4378,14 @@ export async function deleteExpiredEvents(
         });
 
         if (decision.shouldDelete) {
-          const managedPostImages = collectEventPostImageUrls(eventData);
-          for (const imageUrl of managedPostImages) {
-            candidatePostImageUrls.add(imageUrl);
+          if (!dryRun) {
+            const managedPostImages = collectEventPostImageUrls(eventData);
+            for (const imageUrl of managedPostImages) {
+              candidatePostImageUrls.add(imageUrl);
+            }
+            batch.delete(doc.ref);
+            venuePageDeleteCount += 1;
           }
-          batch.delete(doc.ref);
-          venuePageDeleteCount += 1;
           deletedCount += 1;
         }
 
@@ -4229,9 +4398,9 @@ export async function deleteExpiredEvents(
             venueStats.deletedRecurringEnded += 1;
             aggregateStats.deletedRecurringEnded += 1;
             break;
-          case 'deleted_recurring_stale':
-            venueStats.deletedRecurringStale += 1;
-            aggregateStats.deletedRecurringStale += 1;
+          case 'review_recurring_stale_open_ended':
+            venueStats.reviewRecurringStaleOpenEnded += 1;
+            aggregateStats.reviewRecurringStaleOpenEnded += 1;
             break;
           case 'skipped_recurring_active':
             venueStats.skippedRecurringActive += 1;
@@ -4265,11 +4434,11 @@ export async function deleteExpiredEvents(
       aggregateStats.scanCapHits += 1;
     }
 
-    logger.info('Deleted expired events', {
+    logger.info('Processed expired venue events', {
       venueId: venue.id,
       deletedNonRecurring: venueStats.deletedNonRecurring,
       deletedRecurringEnded: venueStats.deletedRecurringEnded,
-      deletedRecurringStale: venueStats.deletedRecurringStale,
+      reviewRecurringStaleOpenEnded: venueStats.reviewRecurringStaleOpenEnded,
       skippedRecurringActive: venueStats.skippedRecurringActive,
       skippedRecurringMissingLifecycle: venueStats.skippedRecurringMissingLifecycle,
       skippedNonRecurringNotExpired: venueStats.skippedNonRecurringNotExpired,
@@ -4280,15 +4449,168 @@ export async function deleteExpiredEvents(
     });
   }
 
-  const cleanupResult = await cleanupUnreferencedExpiredEventImages(
-    Array.from(candidatePostImageUrls)
-  );
-  if (cleanupResult.candidateUrls > 0 || cleanupResult.deletedUrls > 0) {
-    logger.info('Expired event image cleanup complete', { ...cleanupResult });
+  if (includeTopLevelEvents && deletedCount < maxDeletesPerRun) {
+    const topLevelStats = {
+      pagesScanned: 0,
+      candidateDocsScanned: 0,
+      scanCapHit: false,
+      deletedNonRecurring: 0,
+      deletedRecurringEnded: 0,
+      reviewRecurringStaleOpenEnded: 0,
+      skippedRecurringActive: 0,
+      skippedRecurringMissingLifecycle: 0,
+      skippedNonRecurringNotExpired: 0,
+      skippedNonRecurringInvalidDates: 0,
+      expiredCityLevelReviewPointers: 0,
+    };
+
+    let lastDoc: admin.firestore.QueryDocumentSnapshot | null = null;
+    let hasMore = true;
+
+    while (
+      hasMore &&
+      deletedCount < maxDeletesPerRun &&
+      topLevelStats.candidateDocsScanned < maxScannedTopLevelEvents
+    ) {
+      let query: admin.firestore.Query = db
+        .collection(COLLECTIONS.EVENTS)
+        .where('startDate', '<=', beforeDate)
+        .orderBy('startDate', 'asc')
+        .limit(pageSize);
+
+      if (lastDoc) {
+        query = query.startAfter(lastDoc);
+      }
+
+      const expiredEvents = await query.get();
+      if (expiredEvents.empty) break;
+
+      topLevelStats.pagesScanned += 1;
+      aggregateStats.pagesScanned += 1;
+      aggregateStats.topLevelPagesScanned += 1;
+
+      const batch = db.batch();
+      let topLevelPageDeleteCount = 0;
+
+      for (const doc of expiredEvents.docs) {
+        if (deletedCount >= maxDeletesPerRun) break;
+        if (topLevelStats.candidateDocsScanned >= maxScannedTopLevelEvents) {
+          topLevelStats.scanCapHit = true;
+          break;
+        }
+
+        topLevelStats.candidateDocsScanned += 1;
+        aggregateStats.candidateDocsScanned += 1;
+        aggregateStats.topLevelCandidateDocsScanned += 1;
+
+        const eventData = (doc.data() || {}) as Record<string, unknown>;
+        const decision = evaluateExpiredDeleteDecision(eventData, beforeDate, nowMs, {
+          recurringGraceDays,
+          staleRecurringDays,
+        });
+
+        if (decision.shouldDelete) {
+          const reviewPointerUpdate = buildExpiredCityLevelReviewPointerUpdate(
+            doc.id,
+            doc.ref.path,
+            eventData,
+            admin.firestore.FieldValue.serverTimestamp(),
+            admin.firestore.FieldValue.delete()
+          );
+          if (!dryRun) {
+            const managedPostImages = collectEventPostImageUrls(eventData);
+            for (const imageUrl of managedPostImages) {
+              candidatePostImageUrls.add(imageUrl);
+            }
+            if (reviewPointerUpdate) {
+              batch.set(
+                db.collection(COLLECTIONS.CITY_LEVEL_EVENT_REVIEWS).doc(reviewPointerUpdate.reviewId),
+                reviewPointerUpdate.update,
+                { merge: true }
+              );
+            }
+            batch.delete(doc.ref);
+            topLevelPageDeleteCount += 1;
+          }
+          if (reviewPointerUpdate) {
+            topLevelStats.expiredCityLevelReviewPointers += 1;
+            aggregateStats.expiredCityLevelReviewPointers += 1;
+          }
+          deletedCount += 1;
+        }
+
+        switch (decision.reason) {
+          case 'deleted_non_recurring_ended':
+            topLevelStats.deletedNonRecurring += 1;
+            aggregateStats.deletedNonRecurring += 1;
+            break;
+          case 'deleted_recurring_ended':
+            topLevelStats.deletedRecurringEnded += 1;
+            aggregateStats.deletedRecurringEnded += 1;
+            break;
+          case 'review_recurring_stale_open_ended':
+            topLevelStats.reviewRecurringStaleOpenEnded += 1;
+            aggregateStats.reviewRecurringStaleOpenEnded += 1;
+            break;
+          case 'skipped_recurring_active':
+            topLevelStats.skippedRecurringActive += 1;
+            aggregateStats.skippedRecurringActive += 1;
+            break;
+          case 'skipped_recurring_missing_lifecycle':
+            topLevelStats.skippedRecurringMissingLifecycle += 1;
+            aggregateStats.skippedRecurringMissingLifecycle += 1;
+            break;
+          case 'skipped_non_recurring_not_expired':
+            topLevelStats.skippedNonRecurringNotExpired += 1;
+            aggregateStats.skippedNonRecurringNotExpired += 1;
+            break;
+          case 'skipped_non_recurring_invalid_dates':
+            topLevelStats.skippedNonRecurringInvalidDates += 1;
+            aggregateStats.skippedNonRecurringInvalidDates += 1;
+            break;
+        }
+      }
+
+      if (topLevelPageDeleteCount > 0) {
+        await batch.commit();
+      }
+
+      lastDoc = expiredEvents.docs[expiredEvents.docs.length - 1] || null;
+      hasMore = expiredEvents.size === pageSize && Boolean(lastDoc);
+    }
+
+    if (topLevelStats.scanCapHit) {
+      aggregateStats.topLevelScanCapHit = true;
+      aggregateStats.scanCapHits += 1;
+    }
+
+    logger.info('Processed expired top-level events', {
+      deletedNonRecurring: topLevelStats.deletedNonRecurring,
+      deletedRecurringEnded: topLevelStats.deletedRecurringEnded,
+      reviewRecurringStaleOpenEnded: topLevelStats.reviewRecurringStaleOpenEnded,
+      skippedRecurringActive: topLevelStats.skippedRecurringActive,
+      skippedRecurringMissingLifecycle: topLevelStats.skippedRecurringMissingLifecycle,
+      skippedNonRecurringNotExpired: topLevelStats.skippedNonRecurringNotExpired,
+      skippedNonRecurringInvalidDates: topLevelStats.skippedNonRecurringInvalidDates,
+      expiredCityLevelReviewPointers: topLevelStats.expiredCityLevelReviewPointers,
+      candidateDocsScanned: topLevelStats.candidateDocsScanned,
+      pagesScanned: topLevelStats.pagesScanned,
+      scanCapHit: topLevelStats.scanCapHit,
+    });
+  }
+
+  if (!dryRun) {
+    const cleanupResult = await cleanupUnreferencedExpiredEventImages(
+      Array.from(candidatePostImageUrls)
+    );
+    if (cleanupResult.candidateUrls > 0 || cleanupResult.deletedUrls > 0) {
+      logger.info('Expired event image cleanup complete', { ...cleanupResult });
+    }
   }
 
   logger.info('Expired event delete filters applied', {
     beforeDate,
+    dryRun,
     requestedVenueCount: requestedVenueIds.length,
     missingRequestedVenueCount: missingRequestedVenueIds.length,
     missingRequestedVenueIds,
@@ -4296,6 +4618,8 @@ export async function deleteExpiredEvents(
     recurringGraceDays,
     staleRecurringDays,
     maxScannedPerVenue,
+    includeTopLevelEvents,
+    maxScannedTopLevelEvents,
     ...aggregateStats,
   });
 
@@ -5270,6 +5594,14 @@ interface ExpiredImageCleanupResult {
   deletedUrls: number;
   failedDeletes: number;
   skippedWithoutDeleteUrl: number;
+  skippedDueToReferenceQueryFailure: number;
+  referenceQueryFailures: number;
+}
+
+interface ImageReferenceScanResult {
+  referenced: Set<string>;
+  failedQueries: number;
+  failedFields: string[];
 }
 
 async function cleanupUnreferencedExpiredEventImages(
@@ -5282,6 +5614,8 @@ async function cleanupUnreferencedExpiredEventImages(
     deletedUrls: 0,
     failedDeletes: 0,
     skippedWithoutDeleteUrl: 0,
+    skippedDueToReferenceQueryFailure: 0,
+    referenceQueryFailures: 0,
   };
 
   if (uniqueCandidates.length === 0) {
@@ -5295,10 +5629,29 @@ async function cleanupUnreferencedExpiredEventImages(
     return result;
   }
 
-  const referenced = await findReferencedEventImageUrls(uniqueCandidates);
+  const referenceScan = await findReferencedEventImageUrls(uniqueCandidates);
+  const referenced = referenceScan.referenced;
   result.referencedUrls = referenced.size;
+  result.referenceQueryFailures = referenceScan.failedQueries;
+  const cleanupDecision = evaluateExpiredImageCleanupTargetsForRegression(
+    uniqueCandidates,
+    Array.from(referenced),
+    referenceScan.failedQueries
+  );
 
-  const unreferenced = uniqueCandidates.filter((url) => !referenced.has(url));
+  if (cleanupDecision.shouldSkipDeletion) {
+    result.skippedDueToReferenceQueryFailure =
+      cleanupDecision.skippedDueToReferenceQueryFailure;
+    logger.error('Skipping expired image cleanup: reference scan failed', {
+      candidateUrls: uniqueCandidates.length,
+      referencedUrls: referenced.size,
+      failedQueries: referenceScan.failedQueries,
+      failedFields: referenceScan.failedFields,
+    });
+    return result;
+  }
+
+  const unreferenced = cleanupDecision.unreferencedUrls;
   for (const imageUrl of unreferenced) {
     const deleted = await deleteManagedImageWithRetry(imageUrl, deleteUrl);
     if (deleted) {
@@ -5332,57 +5685,72 @@ function collectEventPostImageUrls(data: Record<string, unknown>): string[] {
   return Array.from(urls);
 }
 
-async function findReferencedEventImageUrls(candidateUrls: string[]): Promise<Set<string>> {
+async function findReferencedEventImageUrls(candidateUrls: string[]): Promise<ImageReferenceScanResult> {
   const referenced = new Set<string>();
-  if (candidateUrls.length === 0) return referenced;
+  const failedFields = new Set<string>();
+  let failedQueries = 0;
+  if (candidateUrls.length === 0) {
+    return { referenced, failedQueries, failedFields: [] };
+  }
 
-  const collection = db.collectionGroup(COLLECTIONS.EVENTS);
+  const collections: Array<{ label: string; query: admin.firestore.Query }> = [
+    { label: 'event_collection_group', query: db.collectionGroup(COLLECTIONS.EVENTS) },
+    { label: 'top_level_events', query: db.collection(COLLECTIONS.EVENTS) },
+  ];
   const chunks = chunkValues(candidateUrls, IMAGE_CLEANUP.QUERY_CHUNK_SIZE);
 
   for (const chunk of chunks) {
     const chunkSet = new Set(chunk);
 
-    for (const field of EVENT_IMAGE_REFERENCE_FIELDS) {
-      try {
-        const snapshot = await collection.where(field, 'in', chunk).get();
-        for (const doc of snapshot.docs) {
-          const normalized = normalizeManagedPostImageUrl(String(doc.get(field) || ''));
-          if (normalized && chunkSet.has(normalized)) {
-            referenced.add(normalized);
-          }
-        }
-      } catch (error) {
-        logger.warn('Image reference query failed', {
-          field,
-          operator: 'in',
-          error: error instanceof Error ? error.message : String(error),
-        });
-      }
-    }
-
-    for (const field of EVENT_IMAGE_ARRAY_REFERENCE_FIELDS) {
-      try {
-        const snapshot = await collection.where(field, 'array-contains-any', chunk).get();
-        for (const doc of snapshot.docs) {
-          const mediaUrls = tokenizeMediaUrls(doc.get(field));
-          for (const mediaUrl of mediaUrls) {
-            const normalized = normalizeManagedPostImageUrl(mediaUrl);
+    for (const collection of collections) {
+      for (const field of EVENT_IMAGE_REFERENCE_FIELDS) {
+        try {
+          const snapshot = await collection.query.where(field, 'in', chunk).get();
+          for (const doc of snapshot.docs) {
+            const normalized = normalizeManagedPostImageUrl(String(doc.get(field) || ''));
             if (normalized && chunkSet.has(normalized)) {
               referenced.add(normalized);
             }
           }
+        } catch (error) {
+          failedQueries += 1;
+          failedFields.add(`${collection.label}:${field}:in`);
+          logger.warn('Image reference query failed', {
+            collection: collection.label,
+            field,
+            operator: 'in',
+            error: error instanceof Error ? error.message : String(error),
+          });
         }
-      } catch (error) {
-        logger.warn('Image reference query failed', {
-          field,
-          operator: 'array-contains-any',
-          error: error instanceof Error ? error.message : String(error),
-        });
+      }
+
+      for (const field of EVENT_IMAGE_ARRAY_REFERENCE_FIELDS) {
+        try {
+          const snapshot = await collection.query.where(field, 'array-contains-any', chunk).get();
+          for (const doc of snapshot.docs) {
+            const mediaUrls = tokenizeMediaUrls(doc.get(field));
+            for (const mediaUrl of mediaUrls) {
+              const normalized = normalizeManagedPostImageUrl(mediaUrl);
+              if (normalized && chunkSet.has(normalized)) {
+                referenced.add(normalized);
+              }
+            }
+          }
+        } catch (error) {
+          failedQueries += 1;
+          failedFields.add(`${collection.label}:${field}:array-contains-any`);
+          logger.warn('Image reference query failed', {
+            collection: collection.label,
+            field,
+            operator: 'array-contains-any',
+            error: error instanceof Error ? error.message : String(error),
+          });
+        }
       }
     }
   }
 
-  return referenced;
+  return { referenced, failedQueries, failedFields: Array.from(failedFields) };
 }
 
 function getNestedValue(data: Record<string, unknown>, path: string): unknown {
