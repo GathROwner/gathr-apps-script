@@ -13,6 +13,14 @@ service cloud.firestore {
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
+    function requestOwnerMatches(userId) {
+      return request.resource.data.ownerUid == userId;
+    }
+
+    function resourceOwnerMatches(userId) {
+      return resource.data.ownerUid == userId;
+    }
+
     // Venues collection - public read, admin write
     match /venues/{venueId} {
       allow read: if true;
@@ -28,6 +36,20 @@ service cloud.firestore {
     // Users collection - users can only access their own data
     match /users/{userId} {
       allow read, write: if isAuthenticated() && request.auth.uid == userId;
+
+      // User-private shared event records. Do not name this subcollection
+      // "events"; public event collection-group rules can expose that name.
+      match /privateSharedEvents/{eventId} {
+        allow read: if isAuthenticated() && request.auth.uid == userId && resourceOwnerMatches(userId);
+        allow create, update: if isAuthenticated() && request.auth.uid == userId && requestOwnerMatches(userId);
+        allow delete: if isAuthenticated() && request.auth.uid == userId && resourceOwnerMatches(userId);
+      }
+
+      // Raw share ingest/status records are written by Cloud Functions admin SDK.
+      match /sharedEventIngests/{ingestId} {
+        allow read: if isAuthenticated() && request.auth.uid == userId && resourceOwnerMatches(userId);
+        allow write: if false;
+      }
     }
 
     // Processing state collections - admin only
@@ -44,6 +66,12 @@ service cloud.firestore {
     }
 
     match /apify_webhooks/{docId} {
+      allow read, write: if isAdmin();
+    }
+
+    // Public-source candidates from user shares require admin validation before
+    // promotion to public event collections.
+    match /public_shared_event_candidates/{candidateId} {
       allow read, write: if isAdmin();
     }
 

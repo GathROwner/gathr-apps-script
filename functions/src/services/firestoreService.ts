@@ -43,6 +43,13 @@ import {
 import { getVenueAliasCandidates } from './venueAliases.js';
 import { pickCompatibleExactUniqueIdMatch } from './exactUniqueIdCompatibility.js';
 import { pickRecurringFamilyFallbackMatch } from './recurringFamilyFallback.js';
+import {
+  ParsedSharedEvent,
+  PrivateSharedEventRecord,
+  PublicSharedEventCandidateRecord,
+  SharedEventIngestRecord,
+  SharedEventSubmitPayload,
+} from '../types/sharedEvent.js';
 
 // Initialize Firebase Admin if not already initialized
 if (!admin.apps.length) {
@@ -64,6 +71,9 @@ const COLLECTIONS = {
   UNRECOGNIZED_VENUES: 'unrecognized_venues',
   CITY_LEVEL_EVENT_REVIEWS: 'city_level_event_reviews',
   EVENT_UPDATE_AUDITS: 'event_update_audits',
+  PRIVATE_SHARED_EVENTS: 'privateSharedEvents',
+  SHARED_EVENT_INGESTS: 'sharedEventIngests',
+  PUBLIC_SHARED_EVENT_CANDIDATES: 'public_shared_event_candidates',
 } as const;
 
 const MAX_SNAPSHOT_TEXT_LENGTH = 20000;
@@ -3287,6 +3297,165 @@ export async function checkDuplicate(
   }
 
   return { isDuplicate: false };
+}
+
+/**
+ * Create a raw shared-event ingest under the owning user.
+ * This is intentionally outside public event collections and is not scanned by
+ * public map queries, venue cleanup, unknown venue review, or city-level review.
+ */
+export async function createSharedEventIngest(params: {
+  ownerUid: string;
+  payload: SharedEventSubmitPayload;
+  parsedEvent: ParsedSharedEvent;
+  parserVersion: string;
+}): Promise<string> {
+  const { ownerUid, payload, parsedEvent, parserVersion } = params;
+  const record: SharedEventIngestRecord = {
+    ownerUid,
+    payload,
+    normalizedSourceUrl: parsedEvent.sourceUrl,
+    sourcePlatform: parsedEvent.sourcePlatform,
+    sourceVisibility: parsedEvent.sourceVisibility,
+    visibilityEvidence: parsedEvent.visibilityEvidence,
+    parserVersion,
+    status: parsedEvent.status,
+    routing: parsedEvent.routing,
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+  };
+
+  const docRef = await db
+    .collection('users')
+    .doc(ownerUid)
+    .collection(COLLECTIONS.SHARED_EVENT_INGESTS)
+    .add(record);
+
+  logger.info('Created shared event ingest', {
+    ownerUid,
+    ingestId: docRef.id,
+    sourceVisibility: parsedEvent.sourceVisibility,
+    routing: parsedEvent.routing,
+  });
+
+  return docRef.id;
+}
+
+/**
+ * Save the parsed event to the user's private event area.
+ */
+export async function createPrivateSharedEvent(params: {
+  ownerUid: string;
+  ingestId: string;
+  parsedEvent: ParsedSharedEvent;
+}): Promise<string> {
+  const { ownerUid, ingestId, parsedEvent } = params;
+  const record: PrivateSharedEventRecord = {
+    ...parsedEvent,
+    ownerUid,
+    ingestId,
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+  };
+
+  const docRef = await db
+    .collection('users')
+    .doc(ownerUid)
+    .collection(COLLECTIONS.PRIVATE_SHARED_EVENTS)
+    .add(record);
+
+  await db
+    .collection('users')
+    .doc(ownerUid)
+    .collection(COLLECTIONS.SHARED_EVENT_INGESTS)
+    .doc(ingestId)
+    .set({
+      privateEventId: docRef.id,
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    }, { merge: true });
+
+  logger.info('Created private shared event', {
+    ownerUid,
+    ingestId,
+    privateEventId: docRef.id,
+    status: parsedEvent.status,
+  });
+
+  return docRef.id;
+}
+
+/**
+ * Queue a public candidate from a verified public source.
+ * Raw private share payload is deliberately not copied here.
+ */
+export async function createPublicSharedEventCandidate(params: {
+  ownerUid: string;
+  ingestId: string;
+  privateEventId: string;
+  parsedEvent: ParsedSharedEvent;
+}): Promise<string> {
+  const { ownerUid, ingestId, privateEventId, parsedEvent } = params;
+  if (parsedEvent.sourceVisibility !== 'public_verified') {
+    throw new Error('Only public_verified shared events can create public candidates.');
+  }
+
+  const record: PublicSharedEventCandidateRecord = {
+    ownerUid,
+    ingestId,
+    privateEventId,
+    sourceUrl: parsedEvent.sourceUrl,
+    sourcePlatform: parsedEvent.sourcePlatform,
+    sourceVisibility: 'public_verified',
+    visibilityEvidence: parsedEvent.visibilityEvidence,
+    title: parsedEvent.title,
+    description: parsedEvent.description,
+    startDate: parsedEvent.startDate,
+    endDate: parsedEvent.endDate,
+    startTime: parsedEvent.startTime,
+    endTime: parsedEvent.endTime,
+    locationName: parsedEvent.locationName,
+    address: parsedEvent.address,
+    mediaUrls: parsedEvent.mediaUrls,
+    timezone: parsedEvent.timezone,
+    sourceContentSignature: parsedEvent.sourceContentSignature,
+    status: parsedEvent.needsUserReview ? 'needs_user_review' : 'pending_validation',
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+  };
+
+  const docRef = await db
+    .collection(COLLECTIONS.PUBLIC_SHARED_EVENT_CANDIDATES)
+    .add(record);
+
+  const linkage = {
+    publicCandidateId: docRef.id,
+    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+  };
+
+  await Promise.all([
+    db
+      .collection('users')
+      .doc(ownerUid)
+      .collection(COLLECTIONS.PRIVATE_SHARED_EVENTS)
+      .doc(privateEventId)
+      .set(linkage, { merge: true }),
+    db
+      .collection('users')
+      .doc(ownerUid)
+      .collection(COLLECTIONS.SHARED_EVENT_INGESTS)
+      .doc(ingestId)
+      .set(linkage, { merge: true }),
+  ]);
+
+  logger.info('Created public shared event candidate', {
+    ownerUid,
+    ingestId,
+    privateEventId,
+    publicCandidateId: docRef.id,
+    candidateStatus: record.status,
+  });
+
+  return docRef.id;
 }
 
 /**

@@ -39,6 +39,9 @@ export { retryApifyWebhook } from './triggers/apifyWebhook.js';
 // Facebook Events - Start capped test scrapes through Apify
 export { startFacebookEventsScrape } from './triggers/facebookEvents.js';
 
+// Shared Event Ingest - User shares Facebook/social event content into GathR
+export { submitSharedEvent } from './triggers/sharedEventIngest.js';
+
 // Unknown Venues - Queue inspection and resolver controls
 export {
   listUnrecognizedVenues,

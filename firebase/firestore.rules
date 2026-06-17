@@ -22,6 +22,14 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.token.admin == true;
     }
 
+    function requestOwnerMatches(userId) {
+      return request.resource.data.ownerUid == userId;
+    }
+
+    function resourceOwnerMatches(userId) {
+      return resource.data.ownerUid == userId;
+    }
+
     // =========================================================================
     // EXISTING APP COLLECTIONS
     // =========================================================================
@@ -29,6 +37,20 @@ service cloud.firestore {
     // Users collection - each user can read/write only their own document
     match /users/{userId} {
       allow read, write: if isAuthenticated() && isAccessingOwnData(userId);
+
+      // User-private shared event records. Do not name this subcollection
+      // "events"; collection-group events are publicly readable below.
+      match /privateSharedEvents/{eventId} {
+        allow read: if isAuthenticated() && isAccessingOwnData(userId) && resourceOwnerMatches(userId);
+        allow create, update: if isAuthenticated() && isAccessingOwnData(userId) && requestOwnerMatches(userId);
+        allow delete: if isAuthenticated() && isAccessingOwnData(userId) && resourceOwnerMatches(userId);
+      }
+
+      // Raw share ingest/status records are written by Cloud Functions admin SDK.
+      match /sharedEventIngests/{ingestId} {
+        allow read: if isAuthenticated() && isAccessingOwnData(userId) && resourceOwnerMatches(userId);
+        allow write: if false;
+      }
     }
 
     // Interests collection - authenticated users can read, but not modify
@@ -104,6 +126,12 @@ service cloud.firestore {
 
     // State for resumable batch processing
     match /processing_state/{stateId} {
+      allow read, write: if isAdmin();
+    }
+
+    // Verified public-source candidates from user shares. Admin validation must
+    // promote these before they can enter public event collections.
+    match /public_shared_event_candidates/{candidateId} {
       allow read, write: if isAdmin();
     }
 
