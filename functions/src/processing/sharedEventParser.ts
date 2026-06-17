@@ -333,6 +333,187 @@ function resolveMaybeRelativeUrl(raw: string, baseUrl: string): string | undefin
   }
 }
 
+function decodeHtmlAndJsonString(value: string, maxLength = MAX_SHORT_FIELD_LENGTH): string {
+  const decoded = String(value || '')
+    .replace(/\\u([0-9a-fA-F]{4})/g, (_, hex: string) =>
+      String.fromCharCode(Number.parseInt(hex, 16))
+    )
+    .replace(/\\\//g, '/')
+    .replace(/\\"/g, '"')
+    .replace(/\\n/g, '\n')
+    .replace(/\\r/g, '\n')
+    .replace(/\\t/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&quot;/g, '"')
+    .replace(/&#039;/g, "'")
+    .replace(/&#x27;/g, "'")
+    .replace(/\u202f/g, ' ');
+  return maxLength === MAX_TEXT_LENGTH ? cleanLongText(decoded) : cleanString(decoded, maxLength);
+}
+
+function extractEmbeddedJsonString(source: string, key: string, maxLength = MAX_SHORT_FIELD_LENGTH): string {
+  const escaped = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const match = source.match(new RegExp(`"${escaped}"\\s*:\\s*"((?:\\\\.|[^"\\\\])*)"`, 'i'));
+  return match?.[1] ? decodeHtmlAndJsonString(match[1], maxLength) : '';
+}
+
+function extractEmbeddedJsonNumber(source: string, key: string): number | undefined {
+  const escaped = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const match = source.match(new RegExp(`"${escaped}"\\s*:\\s*(-?\\d+(?:\\.\\d+)?)`, 'i'));
+  if (!match?.[1]) return undefined;
+  const parsed = Number(match[1]);
+  return Number.isFinite(parsed) ? parsed : undefined;
+}
+
+function extractBalancedObjectAfterKey(source: string, key: string): string {
+  const keyToken = `"${key}"`;
+  const keyIndex = source.indexOf(keyToken);
+  if (keyIndex < 0) return '';
+
+  const start = source.indexOf('{', keyIndex + keyToken.length);
+  if (start < 0) return '';
+
+  let depth = 0;
+  let inString = false;
+  let escaped = false;
+
+  for (let index = start; index < source.length; index += 1) {
+    const char = source[index];
+    if (escaped) {
+      escaped = false;
+      continue;
+    }
+    if (char === '\\') {
+      escaped = true;
+      continue;
+    }
+    if (char === '"') {
+      inString = !inString;
+      continue;
+    }
+    if (inString) continue;
+
+    if (char === '{') depth += 1;
+    if (char === '}') {
+      depth -= 1;
+      if (depth === 0) return source.slice(start, index + 1);
+    }
+  }
+
+  return '';
+}
+
+function extractFacebookEventId(value: string): string | undefined {
+  const raw = cleanString(value, 2000);
+  if (!raw) return undefined;
+
+  const direct = raw.match(/[?&]event_id=(\d{8,})\b/i) ||
+    raw.match(/\/events\/(?:[^/?#]+\/)*(\d{8,})(?:[/?#]|$)/i);
+  return direct?.[1];
+}
+
+function extractMainFacebookEventWindow(html: string, finalUrl: string): string {
+  const eventId = extractFacebookEventId(finalUrl) || extractFacebookEventId(extractMetaContent(html, 'og:url'));
+  if (!eventId) return html;
+
+  const candidates: Array<{ score: number; start: number; value: string }> = [];
+  const token = `"id":"${eventId}"`;
+  let index = html.indexOf(token);
+  while (index >= 0) {
+    const start = Math.max(0, index - 9000);
+    const end = Math.min(html.length, index + 45000);
+    const value = html.slice(start, end);
+    const lowered = value.toLowerCase();
+    const score = [
+      lowered.includes('"event_place"') ? 4 : 0,
+      lowered.includes('"start_timestamp"') ? 4 : 0,
+      lowered.includes('"day_time_sentence"') ? 3 : 0,
+      lowered.includes('"cover_media_renderer"') ? 3 : 0,
+      lowered.includes('"event_description"') ? 2 : 0,
+    ].reduce((sum, entry) => sum + entry, 0);
+    candidates.push({ score, start, value });
+    index = html.indexOf(token, index + token.length);
+  }
+
+  candidates.sort((a, b) => b.score - a.score || a.start - b.start);
+  return candidates[0]?.score ? candidates[0].value : html;
+}
+
+function timestampToDateTime(timestamp: number | undefined): { date?: string; time?: string } {
+  if (!timestamp || timestamp < 0) return {};
+
+  const value = timestamp > 9999999999 ? timestamp / 1000 : timestamp;
+  const parsed = DateTime.fromSeconds(value, { zone: DEFAULT_TIMEZONE });
+  if (!parsed.isValid) return {};
+
+  return {
+    date: parsed.toFormat('yyyy-MM-dd'),
+    time: parsed.toFormat('HH:mm'),
+  };
+}
+
+function looksLikeStreetAddress(value: string): boolean {
+  const normalized = cleanString(value, 260);
+  return /\b\d{1,6}\s+[A-Za-z]/.test(normalized) ||
+    /\b(street|st\.?|road|rd\.?|avenue|ave\.?|drive|dr\.?|lane|ln\.?|boulevard|blvd\.?|highway|hwy\.?|route|place|pl\.?)\b/i
+      .test(normalized);
+}
+
+function isFacebookLookasideCrawlerUrl(value: string | undefined): boolean {
+  if (!value) return false;
+  try {
+    const parsed = new URL(value);
+    return parsed.hostname.toLowerCase() === 'lookaside.fbsbx.com' &&
+      parsed.pathname.toLowerCase().includes('/lookaside/crawler/media');
+  } catch {
+    return false;
+  }
+}
+
+function extractFacebookCoverImageUrl(block: string, finalUrl: string): string | undefined {
+  const cover = extractBalancedObjectAfterKey(block, 'cover_media_renderer');
+  const fullImage = cover ? extractBalancedObjectAfterKey(cover, 'full_image') : '';
+  const imageCandidate =
+    extractEmbeddedJsonString(fullImage, 'uri', 2000) ||
+    extractEmbeddedJsonString(cover, 'uri', 2000);
+  return resolveMaybeRelativeUrl(imageCandidate, finalUrl);
+}
+
+export function extractFacebookEmbeddedEventData(
+  html: string,
+  finalUrl: string
+): Pick<SharedEventVisibilityEvidence, 'title' | 'description' | 'imageUrl' | 'startDate' | 'endDate' | 'startTime' | 'endTime' | 'locationName' | 'address'> {
+  const block = extractMainFacebookEventWindow(html, finalUrl);
+  const start = timestampToDateTime(
+    extractEmbeddedJsonNumber(block, 'start_timestamp') ||
+    extractEmbeddedJsonNumber(block, 'current_start_timestamp')
+  );
+  const end = timestampToDateTime(extractEmbeddedJsonNumber(block, 'end_timestamp'));
+  const eventDescription = extractBalancedObjectAfterKey(block, 'event_description');
+  const eventPlace = extractBalancedObjectAfterKey(block, 'event_place');
+  const placeName =
+    extractEmbeddedJsonString(eventPlace, 'contextual_name', 260) ||
+    extractEmbeddedJsonString(eventPlace, 'name', 260);
+  const oneLineAddress = extractEmbeddedJsonString(block, 'one_line_address', 260);
+  const address = oneLineAddress || (looksLikeStreetAddress(placeName) ? placeName : '');
+  const locationName = placeName && !looksLikeStreetAddress(placeName) ? placeName : '';
+
+  return {
+    title: extractEmbeddedJsonString(block, 'name', 180) || undefined,
+    description: extractEmbeddedJsonString(eventDescription, 'text', MAX_TEXT_LENGTH) || undefined,
+    imageUrl: extractFacebookCoverImageUrl(block, finalUrl),
+    startDate: start.date,
+    startTime: start.time || normalizeTime(
+      extractEmbeddedJsonString(block, 'start_time_formatted') ||
+      extractEmbeddedJsonString(block, 'day_time_sentence')
+    ),
+    endDate: end.date,
+    endTime: end.time,
+    locationName: locationName || undefined,
+    address: address || undefined,
+  };
+}
+
 function hasFacebookLoginPrompt(html: string): boolean {
   const lowered = html.toLowerCase();
   return lowered.includes('you must log in') ||
@@ -366,7 +547,7 @@ async function probePublicUrl(url: string): Promise<SharedEventVisibilityEvidenc
     });
     const finalUrl = response.url || url;
     const html = await response.text();
-    const clipped = html.slice(0, 250000);
+    const clipped = html.slice(0, 1500000);
     const ogTitle = extractMetaContent(clipped, 'og:title');
     const ogDescription = extractMetaContent(clipped, 'og:description') ||
       extractMetaContent(clipped, 'description');
@@ -374,11 +555,16 @@ async function probePublicUrl(url: string): Promise<SharedEventVisibilityEvidenc
       extractMetaContent(clipped, 'twitter:image');
     const ogImageUrl = resolveMaybeRelativeUrl(imageCandidate, finalUrl || url);
     const ogType = extractMetaContent(clipped, 'og:type');
+    const embeddedEventData = extractFacebookEmbeddedEventData(clipped, finalUrl || url);
+    const imageUrl = embeddedEventData.imageUrl ||
+      (isFacebookLookasideCrawlerUrl(ogImageUrl) ? undefined : ogImageUrl);
+    const bestTitle = embeddedEventData.title || ogTitle;
+    const bestDescription = embeddedEventData.description || ogDescription;
     const hasLogin = hasFacebookLoginPrompt(clipped);
     const isUnavailable = looksLikeUnavailableFacebookResponse(clipped);
     const hasUsefulMetadata =
-      Boolean(ogTitle && ogTitle.toLowerCase() !== 'facebook') &&
-      (Boolean(ogDescription) || Boolean(ogType));
+      Boolean(bestTitle && bestTitle.toLowerCase() !== 'facebook') &&
+      (Boolean(bestDescription) || Boolean(ogType));
 
     if (response.ok && hasUsefulMetadata) {
       return {
@@ -389,11 +575,17 @@ async function probePublicUrl(url: string): Promise<SharedEventVisibilityEvidenc
         finalUrl,
         httpStatus: response.status,
         reason: 'Public URL returned usable metadata without user credentials.',
-        titleFound: Boolean(ogTitle),
-        descriptionFound: Boolean(ogDescription),
-        title: ogTitle || undefined,
-        description: ogDescription || undefined,
-        imageUrl: ogImageUrl,
+        titleFound: Boolean(bestTitle),
+        descriptionFound: Boolean(bestDescription),
+        title: bestTitle || undefined,
+        description: bestDescription || undefined,
+        imageUrl,
+        startDate: embeddedEventData.startDate,
+        endDate: embeddedEventData.endDate,
+        startTime: embeddedEventData.startTime,
+        endTime: embeddedEventData.endTime,
+        locationName: embeddedEventData.locationName,
+        address: embeddedEventData.address,
         ogType: ogType || undefined,
       };
     }
@@ -412,11 +604,17 @@ async function probePublicUrl(url: string): Promise<SharedEventVisibilityEvidenc
         : hasLogin
           ? 'Public probe reached a login response without enough event metadata.'
         : 'Public probe did not return enough usable event metadata.',
-      titleFound: Boolean(ogTitle),
-      descriptionFound: Boolean(ogDescription),
-      title: ogTitle || undefined,
-      description: ogDescription || undefined,
-      imageUrl: ogImageUrl,
+      titleFound: Boolean(bestTitle),
+      descriptionFound: Boolean(bestDescription),
+      title: bestTitle || undefined,
+      description: bestDescription || undefined,
+      imageUrl,
+      startDate: embeddedEventData.startDate,
+      endDate: embeddedEventData.endDate,
+      startTime: embeddedEventData.startTime,
+      endTime: embeddedEventData.endTime,
+      locationName: embeddedEventData.locationName,
+      address: embeddedEventData.address,
       ogType: ogType || undefined,
     };
   } catch (error) {
@@ -521,11 +719,22 @@ export async function parseSharedEventPayload(
   const title = extractTitle(payload, combinedText);
   const description = extractDescription(payload, combinedText, title);
   const startDate = normalizeIsoDate(payload.startDate, timezone) ||
+    normalizeIsoDate(visibilityEvidence.startDate, timezone) ||
     extractDateFromText(combinedText, timezone);
-  const endDate = normalizeIsoDate(payload.endDate, timezone) || startDate;
-  const startTime = normalizeTime(payload.startTime) || normalizeTime(combinedText);
-  const endTime = normalizeTime(payload.endTime);
-  const { locationName, address } = extractLocation(payload, combinedText);
+  const endDate = normalizeIsoDate(payload.endDate, timezone) ||
+    normalizeIsoDate(visibilityEvidence.endDate, timezone) ||
+    startDate;
+  const startTime = normalizeTime(payload.startTime) ||
+    normalizeTime(visibilityEvidence.startTime) ||
+    normalizeTime(combinedText);
+  const endTime = normalizeTime(payload.endTime) || normalizeTime(visibilityEvidence.endTime);
+  const extractedLocation = extractLocation(payload, combinedText);
+  const locationName = extractedLocation.locationName ||
+    cleanString(visibilityEvidence.locationName, 180) ||
+    undefined;
+  const address = extractedLocation.address ||
+    cleanString(visibilityEvidence.address, 260) ||
+    undefined;
   const mediaUrls = normalizeMediaUrls([
     ...(Array.isArray(payload.mediaUrls) ? payload.mediaUrls : []),
     visibilityEvidence.imageUrl,

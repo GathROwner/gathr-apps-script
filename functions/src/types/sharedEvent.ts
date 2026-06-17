@@ -46,6 +46,12 @@ export interface SharedEventVisibilityEvidence {
   title?: string;
   description?: string;
   imageUrl?: string;
+  startDate?: string;
+  endDate?: string;
+  startTime?: string;
+  endTime?: string;
+  locationName?: string;
+  address?: string;
   ogType?: string;
   visibilityHint?: string;
 }
