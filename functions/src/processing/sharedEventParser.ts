@@ -52,6 +52,10 @@ const PRIVATE_VISIBILITY_HINTS = new Set([
   'group',
   'members',
 ]);
+const PUBLIC_PROBE_USER_AGENTS = [
+  'GathR shared-event public-access probe/1.0',
+  'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
+] as const;
 
 function cleanString(value: unknown, maxLength = MAX_SHORT_FIELD_LENGTH): string {
   return String(value ?? '')
@@ -530,11 +534,13 @@ function looksLikeUnavailableFacebookResponse(html: string): boolean {
     lowered.includes('not available right now');
 }
 
-async function probePublicUrl(url: string): Promise<SharedEventVisibilityEvidence & { visibility: SharedEventSourceVisibility }> {
-  const checkedAt = new Date().toISOString();
+async function fetchPublicProbeHtml(url: string, userAgent: string): Promise<{
+  response: Response;
+  finalUrl: string;
+  clippedHtml: string;
+}> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 6000);
-
   try {
     const response = await fetch(url, {
       method: 'GET',
@@ -542,68 +548,56 @@ async function probePublicUrl(url: string): Promise<SharedEventVisibilityEvidenc
       signal: controller.signal,
       headers: {
         accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-        'user-agent': 'GathR shared-event public-access probe/1.0',
+        'user-agent': userAgent,
       },
     });
     const finalUrl = response.url || url;
     const html = await response.text();
-    const clipped = html.slice(0, 1500000);
-    const ogTitle = extractMetaContent(clipped, 'og:title');
-    const ogDescription = extractMetaContent(clipped, 'og:description') ||
-      extractMetaContent(clipped, 'description');
-    const imageCandidate = extractMetaContent(clipped, 'og:image') ||
-      extractMetaContent(clipped, 'twitter:image');
-    const ogImageUrl = resolveMaybeRelativeUrl(imageCandidate, finalUrl || url);
-    const ogType = extractMetaContent(clipped, 'og:type');
-    const embeddedEventData = extractFacebookEmbeddedEventData(clipped, finalUrl || url);
-    const imageUrl = embeddedEventData.imageUrl ||
-      (isFacebookLookasideCrawlerUrl(ogImageUrl) ? undefined : ogImageUrl);
-    const bestTitle = embeddedEventData.title || ogTitle;
-    const bestDescription = embeddedEventData.description || ogDescription;
-    const hasLogin = hasFacebookLoginPrompt(clipped);
-    const isUnavailable = looksLikeUnavailableFacebookResponse(clipped);
-    const hasUsefulMetadata =
-      Boolean(bestTitle && bestTitle.toLowerCase() !== 'facebook') &&
-      (Boolean(bestDescription) || Boolean(ogType));
-
-    if (response.ok && hasUsefulMetadata) {
-      return {
-        visibility: 'public_verified',
-        method: 'public_url_probe',
-        checkedAt,
-        url,
-        finalUrl,
-        httpStatus: response.status,
-        reason: 'Public URL returned usable metadata without user credentials.',
-        titleFound: Boolean(bestTitle),
-        descriptionFound: Boolean(bestDescription),
-        title: bestTitle || undefined,
-        description: bestDescription || undefined,
-        imageUrl,
-        startDate: embeddedEventData.startDate,
-        endDate: embeddedEventData.endDate,
-        startTime: embeddedEventData.startTime,
-        endTime: embeddedEventData.endTime,
-        locationName: embeddedEventData.locationName,
-        address: embeddedEventData.address,
-        ogType: ogType || undefined,
-      };
-    }
-
     return {
-      visibility: response.status === 401 || response.status === 403 || hasLogin || isUnavailable
-        ? 'restricted_unverified'
-        : 'unknown',
+      response,
+      finalUrl,
+      clippedHtml: html.slice(0, 1500000),
+    };
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+function buildPublicProbeEvidence(params: {
+  checkedAt: string;
+  url: string;
+  response: Response;
+  finalUrl: string;
+  clippedHtml: string;
+}): SharedEventVisibilityEvidence & { visibility: SharedEventSourceVisibility } {
+  const { checkedAt, url, response, finalUrl, clippedHtml } = params;
+  const ogTitle = extractMetaContent(clippedHtml, 'og:title');
+  const ogDescription = extractMetaContent(clippedHtml, 'og:description') ||
+    extractMetaContent(clippedHtml, 'description');
+  const imageCandidate = extractMetaContent(clippedHtml, 'og:image') ||
+    extractMetaContent(clippedHtml, 'twitter:image');
+  const ogImageUrl = resolveMaybeRelativeUrl(imageCandidate, finalUrl || url);
+  const ogType = extractMetaContent(clippedHtml, 'og:type');
+  const embeddedEventData = extractFacebookEmbeddedEventData(clippedHtml, finalUrl || url);
+  const imageUrl = embeddedEventData.imageUrl ||
+    (isFacebookLookasideCrawlerUrl(ogImageUrl) ? undefined : ogImageUrl);
+  const bestTitle = embeddedEventData.title || ogTitle;
+  const bestDescription = embeddedEventData.description || ogDescription;
+  const hasLogin = hasFacebookLoginPrompt(clippedHtml);
+  const isUnavailable = looksLikeUnavailableFacebookResponse(clippedHtml);
+  const hasUsefulMetadata =
+    Boolean(bestTitle && bestTitle.toLowerCase() !== 'facebook') &&
+    (Boolean(bestDescription) || Boolean(ogType));
+
+  if (response.ok && hasUsefulMetadata) {
+    return {
+      visibility: 'public_verified',
       method: 'public_url_probe',
       checkedAt,
       url,
       finalUrl,
       httpStatus: response.status,
-      reason: isUnavailable
-        ? 'Public probe reached a checkpoint or unavailable-content response.'
-        : hasLogin
-          ? 'Public probe reached a login response without enough event metadata.'
-        : 'Public probe did not return enough usable event metadata.',
+      reason: 'Public URL returned usable metadata without user credentials.',
       titleFound: Boolean(bestTitle),
       descriptionFound: Boolean(bestDescription),
       title: bestTitle || undefined,
@@ -617,17 +611,62 @@ async function probePublicUrl(url: string): Promise<SharedEventVisibilityEvidenc
       address: embeddedEventData.address,
       ogType: ogType || undefined,
     };
-  } catch (error) {
-    return {
-      visibility: 'restricted_unverified',
-      method: 'public_url_probe',
-      checkedAt,
-      url,
-      reason: error instanceof Error ? error.message : 'Public probe failed.',
-    };
-  } finally {
-    clearTimeout(timeout);
   }
+
+  return {
+    visibility: response.status === 401 || response.status === 403 || hasLogin || isUnavailable
+      ? 'restricted_unverified'
+      : 'unknown',
+    method: 'public_url_probe',
+    checkedAt,
+    url,
+    finalUrl,
+    httpStatus: response.status,
+    reason: isUnavailable
+      ? 'Public probe reached a checkpoint or unavailable-content response.'
+      : hasLogin
+        ? 'Public probe reached a login response without enough event metadata.'
+      : 'Public probe did not return enough usable event metadata.',
+    titleFound: Boolean(bestTitle),
+    descriptionFound: Boolean(bestDescription),
+    title: bestTitle || undefined,
+    description: bestDescription || undefined,
+    imageUrl,
+    startDate: embeddedEventData.startDate,
+    endDate: embeddedEventData.endDate,
+    startTime: embeddedEventData.startTime,
+    endTime: embeddedEventData.endTime,
+    locationName: embeddedEventData.locationName,
+    address: embeddedEventData.address,
+    ogType: ogType || undefined,
+  };
+}
+
+async function probePublicUrl(url: string): Promise<SharedEventVisibilityEvidence & { visibility: SharedEventSourceVisibility }> {
+  const checkedAt = new Date().toISOString();
+  let fallback: (SharedEventVisibilityEvidence & { visibility: SharedEventSourceVisibility }) | undefined;
+  let lastError: unknown;
+
+  for (const userAgent of PUBLIC_PROBE_USER_AGENTS) {
+    try {
+      const probe = await fetchPublicProbeHtml(url, userAgent);
+      const evidence = buildPublicProbeEvidence({ checkedAt, url, ...probe });
+      if (evidence.visibility === 'public_verified') {
+        return evidence;
+      }
+      fallback = fallback || evidence;
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  return fallback || {
+    visibility: 'restricted_unverified',
+    method: 'public_url_probe',
+    checkedAt,
+    url,
+    reason: lastError instanceof Error ? lastError.message : 'Public probe failed.',
+  };
 }
 
 export async function verifySharedEventSourceVisibility(
