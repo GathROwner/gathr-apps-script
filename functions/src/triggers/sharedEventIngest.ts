@@ -3,7 +3,7 @@ import { onRequest } from 'firebase-functions/v2/https';
 import {
   extractFirstUrl,
   normalizeSharedEventUrl,
-  parseSharedEventPayload,
+  parseSharedEventPayloads,
   SHARED_EVENT_PARSER_VERSION,
   verifySharedEventSourceVisibility,
 } from '../processing/sharedEventParser.js';
@@ -102,6 +102,33 @@ function resolveSourceUrl(payload: SharedEventSubmitPayload): string | undefined
     normalizeSharedEventUrl(extractFirstUrl(String(payload.sharedText || payload.text || '')));
 }
 
+function eventResponse(parsedEvent: Awaited<ReturnType<typeof parseSharedEventPayloads>>[number], ids?: {
+  privateEventId?: string;
+  publicCandidateId?: string;
+}) {
+  return {
+    privateEventId: ids?.privateEventId,
+    publicCandidateId: ids?.publicCandidateId,
+    title: parsedEvent.title,
+    description: parsedEvent.description,
+    startDate: parsedEvent.startDate,
+    endDate: parsedEvent.endDate,
+    startTime: parsedEvent.startTime,
+    endTime: parsedEvent.endTime,
+    locationName: parsedEvent.locationName,
+    address: parsedEvent.address,
+    mediaUrls: parsedEvent.mediaUrls,
+    imageUrl: parsedEvent.mediaUrls[0],
+    sourceUrl: parsedEvent.sourceUrl,
+    sourcePlatform: parsedEvent.sourcePlatform,
+    confidence: parsedEvent.confidence,
+    needsUserReview: parsedEvent.needsUserReview,
+    reviewReasons: parsedEvent.reviewReasons,
+    sequenceIndex: parsedEvent.sequenceIndex,
+    extractedFromShare: parsedEvent.extractedFromShare,
+  };
+}
+
 export const submitSharedEvent = onRequest(
   {
     timeoutSeconds: 60,
@@ -143,10 +170,11 @@ export const submitSharedEvent = onRequest(
 
       const sourceUrl = resolveSourceUrl(payload);
       const visibility = await verifySharedEventSourceVisibility(payload, sourceUrl);
-      const parsedEvent = await parseSharedEventPayload(payload, {
+      const parsedEvents = await parseSharedEventPayloads(payload, {
         sourceVisibility: visibility.visibility,
         visibilityEvidence: visibility.evidence,
       });
+      const parsedEvent = parsedEvents[0];
 
       const ingestId = await firestoreService.createSharedEventIngest({
         ownerUid,
@@ -154,55 +182,72 @@ export const submitSharedEvent = onRequest(
         parsedEvent,
         parserVersion: SHARED_EVENT_PARSER_VERSION,
       });
-      const privateEventId = await firestoreService.createPrivateSharedEvent({
-        ownerUid,
-        ingestId,
-        parsedEvent,
-      });
-      const publicCandidateId = parsedEvent.routing === 'public_candidate'
-        ? await firestoreService.createPublicSharedEventCandidate({
+
+      const eventLinks: Array<{ privateEventId: string; publicCandidateId?: string }> = [];
+      for (const currentParsedEvent of parsedEvents) {
+        const privateEventId = await firestoreService.createPrivateSharedEvent({
           ownerUid,
           ingestId,
-          privateEventId,
-          parsedEvent,
-        })
-        : undefined;
+          parsedEvent: currentParsedEvent,
+          updateIngestLink: eventLinks.length === 0,
+        });
+        const publicCandidateId = currentParsedEvent.routing === 'public_candidate'
+          ? await firestoreService.createPublicSharedEventCandidate({
+            ownerUid,
+            ingestId,
+            privateEventId,
+            parsedEvent: currentParsedEvent,
+            updateIngestLink: eventLinks.length === 0,
+          })
+          : undefined;
+        eventLinks.push({ privateEventId, publicCandidateId });
+      }
+
+      await firestoreService.updateSharedEventIngestExtractedEvents({
+        ownerUid,
+        ingestId,
+        privateEventIds: eventLinks.map((link) => link.privateEventId),
+        publicCandidateIds: eventLinks
+          .map((link) => link.publicCandidateId)
+          .filter((id): id is string => Boolean(id)),
+        extractedEventCount: parsedEvents.length,
+      });
+
+      const privateEventId = eventLinks[0]?.privateEventId;
+      const publicCandidateId = eventLinks[0]?.publicCandidateId;
+      const needsUserReview = parsedEvents.some((event) => event.needsUserReview);
+      const reviewReasons = Array.from(new Set(parsedEvents.flatMap((event) => event.reviewReasons)));
+      const confidence = Math.min(...parsedEvents.map((event) => event.confidence));
 
       logger.info('submitSharedEvent complete', {
         ownerUid,
         ingestId,
         privateEventId,
         publicCandidateId,
+        extractedEventCount: parsedEvents.length,
         sourceVisibility: parsedEvent.sourceVisibility,
         routing: parsedEvent.routing,
-        needsUserReview: parsedEvent.needsUserReview,
+        needsUserReview,
       });
 
       response.json({
         success: true,
         ingestId,
         privateEventId,
+        privateEventIds: eventLinks.map((link) => link.privateEventId),
         publicCandidateId,
+        publicCandidateIds: eventLinks
+          .map((link) => link.publicCandidateId)
+          .filter((id): id is string => Boolean(id)),
         routing: parsedEvent.routing,
         sourceVisibility: parsedEvent.sourceVisibility,
         status: parsedEvent.status,
-        needsUserReview: parsedEvent.needsUserReview,
-        reviewReasons: parsedEvent.reviewReasons,
-        confidence: parsedEvent.confidence,
-        event: {
-          title: parsedEvent.title,
-          description: parsedEvent.description,
-          startDate: parsedEvent.startDate,
-          endDate: parsedEvent.endDate,
-          startTime: parsedEvent.startTime,
-          endTime: parsedEvent.endTime,
-          locationName: parsedEvent.locationName,
-          address: parsedEvent.address,
-          mediaUrls: parsedEvent.mediaUrls,
-          imageUrl: parsedEvent.mediaUrls[0],
-          sourceUrl: parsedEvent.sourceUrl,
-          sourcePlatform: parsedEvent.sourcePlatform,
-        },
+        extractedEventCount: parsedEvents.length,
+        needsUserReview,
+        reviewReasons,
+        confidence,
+        event: eventResponse(parsedEvent, eventLinks[0]),
+        events: parsedEvents.map((event, index) => eventResponse(event, eventLinks[index])),
         visibilityEvidence: parsedEvent.visibilityEvidence,
       });
     } catch (error) {

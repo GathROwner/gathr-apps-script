@@ -77,6 +77,8 @@ export interface ParsedSharedEvent {
   needsUserReview: boolean;
   reviewReasons: string[];
   sourceContentSignature: string;
+  sequenceIndex?: number;
+  extractedFromShare?: boolean;
 }
 
 export interface SharedEventIngestRecord {
@@ -91,6 +93,9 @@ export interface SharedEventIngestRecord {
   routing: SharedEventRouting;
   privateEventId?: string;
   publicCandidateId?: string;
+  privateEventIds?: string[];
+  publicCandidateIds?: string[];
+  extractedEventCount?: number;
   createdAt?: unknown;
   updatedAt?: unknown;
 }

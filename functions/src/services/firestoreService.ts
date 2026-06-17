@@ -3348,8 +3348,9 @@ export async function createPrivateSharedEvent(params: {
   ownerUid: string;
   ingestId: string;
   parsedEvent: ParsedSharedEvent;
+  updateIngestLink?: boolean;
 }): Promise<string> {
-  const { ownerUid, ingestId, parsedEvent } = params;
+  const { ownerUid, ingestId, parsedEvent, updateIngestLink = true } = params;
   const record: PrivateSharedEventRecord = {
     ...parsedEvent,
     ownerUid,
@@ -3364,15 +3365,17 @@ export async function createPrivateSharedEvent(params: {
     .collection(COLLECTIONS.PRIVATE_SHARED_EVENTS)
     .add(record);
 
-  await db
-    .collection('users')
-    .doc(ownerUid)
-    .collection(COLLECTIONS.SHARED_EVENT_INGESTS)
-    .doc(ingestId)
-    .set({
-      privateEventId: docRef.id,
-      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-    }, { merge: true });
+  if (updateIngestLink) {
+    await db
+      .collection('users')
+      .doc(ownerUid)
+      .collection(COLLECTIONS.SHARED_EVENT_INGESTS)
+      .doc(ingestId)
+      .set({
+        privateEventId: docRef.id,
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      }, { merge: true });
+  }
 
   logger.info('Created private shared event', {
     ownerUid,
@@ -3393,8 +3396,9 @@ export async function createPublicSharedEventCandidate(params: {
   ingestId: string;
   privateEventId: string;
   parsedEvent: ParsedSharedEvent;
+  updateIngestLink?: boolean;
 }): Promise<string> {
-  const { ownerUid, ingestId, privateEventId, parsedEvent } = params;
+  const { ownerUid, ingestId, privateEventId, parsedEvent, updateIngestLink = true } = params;
   if (parsedEvent.sourceVisibility !== 'public_verified') {
     throw new Error('Only public_verified shared events can create public candidates.');
   }
@@ -3432,20 +3436,25 @@ export async function createPublicSharedEventCandidate(params: {
     updatedAt: admin.firestore.FieldValue.serverTimestamp(),
   };
 
-  await Promise.all([
+  const writes: Array<Promise<unknown>> = [
     db
       .collection('users')
       .doc(ownerUid)
       .collection(COLLECTIONS.PRIVATE_SHARED_EVENTS)
       .doc(privateEventId)
       .set(linkage, { merge: true }),
-    db
+  ];
+
+  if (updateIngestLink) {
+    writes.push(db
       .collection('users')
       .doc(ownerUid)
       .collection(COLLECTIONS.SHARED_EVENT_INGESTS)
       .doc(ingestId)
-      .set(linkage, { merge: true }),
-  ]);
+      .set(linkage, { merge: true }));
+  }
+
+  await Promise.all(writes);
 
   logger.info('Created public shared event candidate', {
     ownerUid,
@@ -3456,6 +3465,26 @@ export async function createPublicSharedEventCandidate(params: {
   });
 
   return docRef.id;
+}
+
+export async function updateSharedEventIngestExtractedEvents(params: {
+  ownerUid: string;
+  ingestId: string;
+  privateEventIds: string[];
+  publicCandidateIds: string[];
+  extractedEventCount: number;
+}): Promise<void> {
+  await db
+    .collection('users')
+    .doc(params.ownerUid)
+    .collection(COLLECTIONS.SHARED_EVENT_INGESTS)
+    .doc(params.ingestId)
+    .set({
+      privateEventIds: params.privateEventIds,
+      publicCandidateIds: params.publicCandidateIds,
+      extractedEventCount: params.extractedEventCount,
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    }, { merge: true });
 }
 
 /**

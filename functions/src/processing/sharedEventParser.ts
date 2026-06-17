@@ -71,6 +71,21 @@ function cleanLongText(value: unknown): string {
   return cleanString(value, MAX_TEXT_LENGTH);
 }
 
+function decodeHtmlEntities(value: string): string {
+  return String(value || '')
+    .replace(/&#x([0-9a-fA-F]+);/g, (_, hex: string) =>
+      String.fromCodePoint(Number.parseInt(hex, 16))
+    )
+    .replace(/&#(\d+);/g, (_, decimal: string) =>
+      String.fromCodePoint(Number.parseInt(decimal, 10))
+    )
+    .replace(/&amp;/g, '&')
+    .replace(/&quot;/g, '"')
+    .replace(/&#039;/g, "'")
+    .replace(/&#x27;/g, "'")
+    .replace(/&apos;/g, "'");
+}
+
 function normalizeMediaUrls(value: unknown): string[] {
   if (!Array.isArray(value)) return [];
   const seen = new Set<string>();
@@ -234,6 +249,10 @@ function buildDate(monthRaw: string, dayRaw: string, yearRaw: string | undefined
   return parsed.isValid ? parsed.toFormat('yyyy-MM-dd') : undefined;
 }
 
+function buildDateInTimezone(monthRaw: string, dayRaw: string, yearRaw: string | undefined, timezone: string): string | undefined {
+  return buildDate(monthRaw, dayRaw, yearRaw, DateTime.now().setZone(timezone));
+}
+
 function extractDateFromText(text: string, timezone: string): string | undefined {
   const now = DateTime.now().setZone(timezone);
   const monthNamePattern = Object.keys(MONTH_LOOKUP).join('|');
@@ -321,14 +340,7 @@ function extractMetaContent(html: string, property: string, maxLength = 300): st
   for (const pattern of patterns) {
     const match = html.match(pattern);
     if (match?.[1]) {
-      return cleanString(
-        match[1]
-          .replace(/&amp;/g, '&')
-          .replace(/&#039;/g, "'")
-          .replace(/&#x27;/g, "'")
-          .replace(/&quot;/g, '"'),
-        maxLength
-      );
+      return cleanString(decodeHtmlEntities(match[1]), maxLength);
     }
   }
   return '';
@@ -354,12 +366,9 @@ function decodeHtmlAndJsonString(value: string, maxLength = MAX_SHORT_FIELD_LENG
     .replace(/\\n/g, '\n')
     .replace(/\\r/g, '\n')
     .replace(/\\t/g, ' ')
-    .replace(/&amp;/g, '&')
-    .replace(/&quot;/g, '"')
-    .replace(/&#039;/g, "'")
-    .replace(/&#x27;/g, "'")
     .replace(/\u202f/g, ' ');
-  return maxLength === MAX_TEXT_LENGTH ? cleanLongText(decoded) : cleanString(decoded, maxLength);
+  const entityDecoded = decodeHtmlEntities(decoded);
+  return maxLength === MAX_TEXT_LENGTH ? cleanLongText(entityDecoded) : cleanString(entityDecoded, maxLength);
 }
 
 function extractEmbeddedJsonString(source: string, key: string, maxLength = MAX_SHORT_FIELD_LENGTH): string {
@@ -525,6 +534,62 @@ export function extractFacebookEmbeddedEventData(
   };
 }
 
+function extractFacebookPostId(value: string): string | undefined {
+  const raw = cleanString(value, 2200);
+  if (!raw) return undefined;
+
+  const direct = raw.match(/[?&]story_fbid=(\d{8,})\b/i) ||
+    raw.match(/\/posts\/(?:[^/?#]+\/)?(\d{8,})(?:[/?#]|$)/i);
+  return direct?.[1];
+}
+
+function extractMainFacebookPostWindow(html: string, finalUrl: string): string {
+  const postId = extractFacebookPostId(finalUrl) ||
+    extractFacebookPostId(extractMetaContent(html, 'og:url', 2200)) ||
+    extractEmbeddedJsonString(html, 'post_id', 80);
+  if (!postId) return html;
+
+  const token = `"post_id":"${postId}"`;
+  const index = html.indexOf(token);
+  if (index >= 0) {
+    return html.slice(Math.max(0, index - 16000), Math.min(html.length, index + 90000));
+  }
+
+  const fallbackIndex = html.indexOf(postId);
+  return fallbackIndex >= 0
+    ? html.slice(Math.max(0, fallbackIndex - 16000), Math.min(html.length, fallbackIndex + 90000))
+    : html;
+}
+
+function looksLikeFacebookPostUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    const path = parsed.pathname.toLowerCase();
+    return path.includes('/share/p') ||
+      path.includes('/posts/') ||
+      path.includes('/story.php') ||
+      Boolean(parsed.searchParams.get('story_fbid'));
+  } catch {
+    return /facebook\.com\/share\/p|facebook\.com\/.+\/posts\/|story\.php/i.test(url);
+  }
+}
+
+function extractFacebookPostData(
+  html: string,
+  finalUrl: string
+): Pick<SharedEventVisibilityEvidence, 'description'> {
+  if (!looksLikeFacebookPostUrl(finalUrl) && !looksLikeFacebookPostUrl(extractMetaContent(html, 'og:url', 2200))) {
+    return {};
+  }
+
+  const block = extractMainFacebookPostWindow(html, finalUrl);
+  const messageBlock = extractBalancedObjectAfterKey(block, 'message_container') ||
+    extractBalancedObjectAfterKey(block, 'message') ||
+    block;
+  const text = extractEmbeddedJsonString(messageBlock, 'text', MAX_TEXT_LENGTH);
+  return text ? { description: text } : {};
+}
+
 function hasFacebookLoginPrompt(html: string): boolean {
   const lowered = html.toLowerCase();
   return lowered.includes('you must log in') ||
@@ -586,10 +651,11 @@ function buildPublicProbeEvidence(params: {
   const ogImageUrl = resolveMaybeRelativeUrl(imageCandidate, finalUrl || url);
   const ogType = extractMetaContent(clippedHtml, 'og:type');
   const embeddedEventData = extractFacebookEmbeddedEventData(clippedHtml, finalUrl || url);
+  const embeddedPostData = extractFacebookPostData(clippedHtml, finalUrl || url);
   const imageUrl = embeddedEventData.imageUrl ||
     (isFacebookLookasideCrawlerUrl(ogImageUrl) ? undefined : ogImageUrl);
   const bestTitle = embeddedEventData.title || ogTitle;
-  const bestDescription = embeddedEventData.description || ogDescription;
+  const bestDescription = embeddedEventData.description || embeddedPostData.description || ogDescription;
   const hasLogin = hasFacebookLoginPrompt(clippedHtml);
   const isUnavailable = looksLikeUnavailableFacebookResponse(clippedHtml);
   const hasUsefulMetadata =
@@ -649,9 +715,21 @@ function buildPublicProbeEvidence(params: {
   };
 }
 
+function publicEvidenceScore(evidence: SharedEventVisibilityEvidence): number {
+  return [
+    evidence.title ? 100 : 0,
+    evidence.description ? Math.min(cleanLongText(evidence.description).length, 2000) : 0,
+    evidence.imageUrl ? 150 : 0,
+    evidence.startDate ? 300 : 0,
+    evidence.startTime ? 150 : 0,
+    evidence.locationName || evidence.address ? 200 : 0,
+  ].reduce((sum, value) => sum + value, 0);
+}
+
 async function probePublicUrl(url: string): Promise<SharedEventVisibilityEvidence & { visibility: SharedEventSourceVisibility }> {
   const checkedAt = new Date().toISOString();
   let fallback: (SharedEventVisibilityEvidence & { visibility: SharedEventSourceVisibility }) | undefined;
+  let bestPublic: (SharedEventVisibilityEvidence & { visibility: SharedEventSourceVisibility }) | undefined;
   let lastError: unknown;
 
   for (const userAgent of PUBLIC_PROBE_USER_AGENTS) {
@@ -659,13 +737,20 @@ async function probePublicUrl(url: string): Promise<SharedEventVisibilityEvidenc
       const probe = await fetchPublicProbeHtml(url, userAgent);
       const evidence = buildPublicProbeEvidence({ checkedAt, url, ...probe });
       if (evidence.visibility === 'public_verified') {
-        return evidence;
+        const currentScore = publicEvidenceScore(evidence);
+        const bestScore = bestPublic ? publicEvidenceScore(bestPublic) : -1;
+        if (!bestPublic || currentScore > bestScore) {
+          bestPublic = evidence;
+        }
+        continue;
       }
       fallback = fallback || evidence;
     } catch (error) {
       lastError = error;
     }
   }
+
+  if (bestPublic) return bestPublic;
 
   return fallback || {
     visibility: 'restricted_unverified',
@@ -729,6 +814,169 @@ export async function verifySharedEventSourceVisibility(
       visibilityHint: hint || undefined,
     },
   };
+}
+
+const DAY_NAME_PATTERN = '(?:mon(?:day)?|tue(?:s|sday)?|wed(?:nesday)?|thu(?:r|rs|rsday|rday)?|fri(?:day)?|sat(?:urday)?|sun(?:day)?)';
+
+type ExtractedShareEventLine = {
+  title: string;
+  description: string;
+  startDate: string;
+  startTime?: string;
+};
+
+function normalizeTimeText(value: string): string {
+  return cleanString(value, 500)
+    .replace(/\b(\d{1,2})\.(?=\s*[ap]\.?m\.?\b)/gi, '$1')
+    .replace(/\b([ap])\.m\.?\b/gi, '$1m');
+}
+
+function cleanExtractedEventTitle(value: string): string {
+  let title = decodeHtmlEntities(value)
+    .replace(/https?:\/\/\S+/gi, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  title = title
+    .replace(/\s*\([^)]*\)\s*$/g, '')
+    .replace(/\s*(?:@|at|from|[-\u2013\u2014])\s*\d{1,2}(?::\d{2})?\s*\.?\s*[ap]\.?m\.?.*$/i, '')
+    .replace(/[\.\u2026]+$/g, '')
+    .trim();
+
+  return cleanString(title, 160);
+}
+
+function extractEventLinesFromShareText(text: string, timezone: string): ExtractedShareEventLine[] {
+  const source = decodeHtmlEntities(text)
+    .replace(/\r\n/g, '\n')
+    .replace(/[ \t]+/g, ' ')
+    .replace(/\u2013|\u2014/g, '-')
+    .trim();
+  if (!source) return [];
+
+  const monthNamePattern = Object.keys(MONTH_LOOKUP)
+    .sort((a, b) => b.length - a.length)
+    .join('|');
+  const pattern = new RegExp(
+    `^\\s*(?:[^\\w\\d\\n]{0,8}\\s*)?(?:${DAY_NAME_PATTERN}\\.?\\s+)?` +
+    `(${monthNamePattern})\\.?\\s+(\\d{1,2})(?:st|nd|rd|th)?(?:,?\\s+(\\d{4}))?\\s*` +
+    `(?:[-\\u2014:|]\\s*)?(.+?)$`,
+    'i'
+  );
+
+  const results: ExtractedShareEventLine[] = [];
+  const seen = new Set<string>();
+  for (const line of source.split('\n')) {
+    const match = cleanString(line, 700).match(pattern);
+    if (!match) continue;
+
+    const startDate = buildDateInTimezone(match[1], match[2], match[3], timezone);
+    const rawDetails = cleanString(match[4], 600);
+    if (!startDate || !rawDetails) continue;
+
+    const firstLine = rawDetails;
+    const normalizedDetails = normalizeTimeText(firstLine);
+    const title = cleanExtractedEventTitle(firstLine);
+    if (!title) continue;
+
+    const key = `${startDate}|${normalizeTime(normalizedDetails) || ''}|${title.toLowerCase()}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+
+    results.push({
+      title,
+      description: cleanString(`${match[0]}`.replace(/^\s+/, ''), 600),
+      startDate,
+      startTime: normalizeTime(normalizedDetails),
+    });
+  }
+
+  return results.slice(0, 12);
+}
+
+function reviewReasonsForEvent(params: {
+  title: string;
+  startDate?: string;
+  locationName?: string;
+  address?: string;
+}): string[] {
+  const reviewReasons: string[] = [];
+  if (!params.title) reviewReasons.push('missing_title');
+  if (!params.startDate) reviewReasons.push('missing_start_date');
+  if (!params.locationName && !params.address) reviewReasons.push('missing_location');
+  return reviewReasons;
+}
+
+function buildExtractedParsedEventsFromShareText(primary: ParsedSharedEvent): ParsedSharedEvent[] {
+  if (!looksLikeFacebookPostUrl(primary.sourceUrl || '') && !/video|article/i.test(String(primary.visibilityEvidence.ogType || ''))) {
+    return [];
+  }
+
+  const lines = extractEventLinesFromShareText(primary.description || '', primary.timezone);
+  if (lines.length === 0) return [];
+
+  const inferredVenue = cleanString(primary.visibilityEvidence.locationName, 180) ||
+    cleanString(primary.locationName, 180) ||
+    cleanString(primary.visibilityEvidence.title, 180);
+  const inferredAddress = cleanString(primary.visibilityEvidence.address, 260) ||
+    cleanString(primary.address, 260);
+  const routing = primary.sourceVisibility === 'public_verified' ? 'public_candidate' : 'private_only';
+
+  return lines.map((line, index) => {
+    const locationName = inferredVenue || undefined;
+    const address = inferredAddress || undefined;
+    const reviewReasons = reviewReasonsForEvent({
+      title: line.title,
+      startDate: line.startDate,
+      locationName,
+      address,
+    });
+    const confidence = confidenceScore({
+      title: line.title,
+      startDate: line.startDate,
+      startTime: line.startTime,
+      locationName,
+      address,
+      sourceUrl: primary.sourceUrl,
+    });
+    const needsUserReview = reviewReasons.includes('missing_title') ||
+      reviewReasons.includes('missing_start_date') ||
+      confidence < 55;
+    const status = routing === 'public_candidate'
+      ? 'submitted_public_candidate'
+      : needsUserReview
+        ? 'needs_user_review'
+        : 'saved';
+
+    return {
+      ...primary,
+      title: line.title,
+      description: line.description,
+      startDate: line.startDate,
+      endDate: line.startDate,
+      startTime: line.startTime,
+      endTime: undefined,
+      locationName,
+      address,
+      routing,
+      status,
+      confidence,
+      needsUserReview,
+      reviewReasons,
+      sequenceIndex: index,
+      extractedFromShare: true,
+      sourceContentSignature: sourceContentSignature([
+        primary.sourceUrl,
+        line.title,
+        line.description,
+        line.startDate,
+        line.startTime,
+        locationName,
+        address,
+        String(index),
+      ]),
+    };
+  });
 }
 
 export async function parseSharedEventPayload(
@@ -841,4 +1089,16 @@ export async function parseSharedEventPayload(
       address,
     ]),
   };
+}
+
+export async function parseSharedEventPayloads(
+  payload: SharedEventSubmitPayload,
+  visibility?: {
+    sourceVisibility: SharedEventSourceVisibility;
+    visibilityEvidence: SharedEventVisibilityEvidence;
+  }
+): Promise<ParsedSharedEvent[]> {
+  const primary = await parseSharedEventPayload(payload, visibility);
+  const extractedEvents = buildExtractedParsedEventsFromShareText(primary);
+  return extractedEvents.length > 0 ? extractedEvents : [primary];
 }

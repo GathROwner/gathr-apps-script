@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import {
   extractFacebookEmbeddedEventData,
   parseSharedEventPayload,
+  parseSharedEventPayloads,
   verifySharedEventSourceVisibility,
 } from './sharedEventParser.js';
 
@@ -154,4 +155,74 @@ test('facebook embedded public event data supplies time address and real cover i
   assert.equal(parsed.locationName, undefined);
   assert.equal(parsed.address, '29 Cornwall Rd, Cornwall, PE C0A, Canada');
   assert.deepEqual(parsed.mediaUrls, ['https://scontent.fyhz1-1.fna.fbcdn.net/v/event-cover.jpg?oh=abc']);
+});
+
+test('facebook public post text can expand into multiple event candidates', async () => {
+  const parsedEvents = await parseSharedEventPayloads({
+    sourceUrl: 'https://www.facebook.com/share/p/example',
+    sharedText: 'https://www.facebook.com/share/p/example',
+  }, {
+    sourceVisibility: 'public_verified',
+    visibilityEvidence: {
+      method: 'public_url_probe',
+      checkedAt: '2026-06-17T00:00:00.000Z',
+      url: 'https://www.facebook.com/share/p/example',
+      finalUrl: 'https://www.facebook.com/huntersalehouse/posts/123456789',
+      httpStatus: 200,
+      reason: 'Public URL returned usable metadata without user credentials.',
+      titleFound: true,
+      descriptionFound: true,
+      title: "Hunter's Ale House",
+      description: [
+        'the week is loaded and we are ready for it. &#x1f3b8;&#x1f37a;',
+        '&#x1f5d3; Thur June 18 &#x2014; Travis & Juline Acoustic Night &#064; 10pm (Trivia w/ Darcy from 9)',
+        '&#x1f5d3; Fri June 19 &#x2014; Mat & Ryan Live Music &#064; 10pm',
+        '&#x1f5d3; Sat June 20 &#x2014; Gin N Tonic Live Music Night &#064; 10pm',
+        '&#x1f5d3; Sun June 21 &#x2014; Music Trivia w/ Andrew Rollins &#064; 9pm',
+      ].join('\n'),
+      imageUrl: 'https://example.com/hunters.jpg',
+      ogType: 'video.other',
+    },
+  });
+
+  assert.equal(parsedEvents.length, 4);
+  assert.deepEqual(
+    parsedEvents.map((event) => ({
+      title: event.title,
+      startDate: event.startDate,
+      startTime: event.startTime,
+      locationName: event.locationName,
+      reviewReasons: event.reviewReasons,
+    })),
+    [
+      {
+        title: 'Travis & Juline Acoustic Night',
+        startDate: '2026-06-18',
+        startTime: '22:00',
+        locationName: "Hunter's Ale House",
+        reviewReasons: [],
+      },
+      {
+        title: 'Mat & Ryan Live Music',
+        startDate: '2026-06-19',
+        startTime: '22:00',
+        locationName: "Hunter's Ale House",
+        reviewReasons: [],
+      },
+      {
+        title: 'Gin N Tonic Live Music Night',
+        startDate: '2026-06-20',
+        startTime: '22:00',
+        locationName: "Hunter's Ale House",
+        reviewReasons: [],
+      },
+      {
+        title: 'Music Trivia w/ Andrew Rollins',
+        startDate: '2026-06-21',
+        startTime: '21:00',
+        locationName: "Hunter's Ale House",
+        reviewReasons: [],
+      },
+    ]
+  );
 });
