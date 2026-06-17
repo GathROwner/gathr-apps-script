@@ -310,7 +310,7 @@ function confidenceScore(params: {
   return Math.min(score, 100);
 }
 
-function extractMetaContent(html: string, property: string): string {
+function extractMetaContent(html: string, property: string, maxLength = 300): string {
   const escaped = property.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const patterns = [
     new RegExp(`<meta[^>]+property=["']${escaped}["'][^>]+content=["']([^"']+)["'][^>]*>`, 'i'),
@@ -321,7 +321,14 @@ function extractMetaContent(html: string, property: string): string {
   for (const pattern of patterns) {
     const match = html.match(pattern);
     if (match?.[1]) {
-      return cleanString(match[1].replace(/&amp;/g, '&').replace(/&#039;/g, "'"), 300);
+      return cleanString(
+        match[1]
+          .replace(/&amp;/g, '&')
+          .replace(/&#039;/g, "'")
+          .replace(/&#x27;/g, "'")
+          .replace(/&quot;/g, '"'),
+        maxLength
+      );
     }
   }
   return '';
@@ -574,8 +581,8 @@ function buildPublicProbeEvidence(params: {
   const ogTitle = extractMetaContent(clippedHtml, 'og:title');
   const ogDescription = extractMetaContent(clippedHtml, 'og:description') ||
     extractMetaContent(clippedHtml, 'description');
-  const imageCandidate = extractMetaContent(clippedHtml, 'og:image') ||
-    extractMetaContent(clippedHtml, 'twitter:image');
+  const imageCandidate = extractMetaContent(clippedHtml, 'og:image', 2000) ||
+    extractMetaContent(clippedHtml, 'twitter:image', 2000);
   const ogImageUrl = resolveMaybeRelativeUrl(imageCandidate, finalUrl || url);
   const ogType = extractMetaContent(clippedHtml, 'og:type');
   const embeddedEventData = extractFacebookEmbeddedEventData(clippedHtml, finalUrl || url);
