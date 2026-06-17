@@ -169,6 +169,79 @@ test('facebook share post probes can derive canonical story url', () => {
   );
 });
 
+test('facebook login probes with story ids do not verify as public', async () => {
+  const originalFetch = globalThis.fetch;
+  const loginFinalUrl = 'https://m.facebook.com/login/?next=https%3A%2F%2Fwww.facebook.com%2Fstory.php%3Fstory_fbid%3D1456024579878094%26id%3D100064116963888';
+  globalThis.fetch = (async () => ({
+    ok: true,
+    status: 200,
+    url: loginFinalUrl,
+    text: async () => `
+      <html>
+        <head>
+          <title>Log into Facebook | Facebook</title>
+          <meta name="description" content="Log into Facebook to start sharing and connecting with your friends, family, and people you know." />
+        </head>
+        <body>Log in to Facebook</body>
+      </html>
+    `,
+  })) as unknown as typeof fetch;
+
+  try {
+    const visibility = await verifySharedEventSourceVisibility({
+      sourceUrl: 'https://www.facebook.com/share/p/1FMVSgHJsz/?mibextid=wwXIfr',
+      sharedText: 'https://www.facebook.com/share/p/1FMVSgHJsz/?mibextid=wwXIfr',
+    }, 'https://www.facebook.com/share/p/1FMVSgHJsz/?mibextid=wwXIfr');
+
+    assert.equal(visibility.visibility, 'restricted_unverified');
+    assert.equal(visibility.evidence.sourcePostId, '1456024579878094');
+    assert.equal(visibility.evidence.sourceOwnerId, '100064116963888');
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test('facebook public post pages with checkpoint route strings can still expand events', async () => {
+  const originalFetch = globalThis.fetch;
+  const finalUrl = 'https://www.facebook.com/permalink.php?story_fbid=1456024579878094&id=100064116963888';
+  globalThis.fetch = (async () => ({
+    ok: true,
+    status: 200,
+    url: finalUrl,
+    text: async () => `
+      <html>
+        <head>
+          <title>the week is loaded and we are ready... - Hunter&#039;s Ale House</title>
+          <meta property="og:title" content="Hunter&#039;s Ale House" />
+          <meta property="og:description" content="the week is loaded and we are ready for it. &#x1f3b8;&#x1f37a;&#x1f5d3; Thur June 18 &#x2014; Travis &amp; Juline Acoustic Night &#064; 10pm..." />
+          <meta property="og:type" content="video.other" />
+        </head>
+        <body>
+          <script>{"allowlist":["\\/checkpoint\\/block\\/"],"post_id":"1456024579878094","message_container":{"story":{"message":{"text":"the week is loaded and we are ready for it. \\ud83c\\udfb8\\ud83c\\udf7a\\n\\ud83d\\uddd3 Thur June 18 \\u2014 Travis & Juline Acoustic Night \\u0040 10pm (Trivia w\\/ Darcy from 9)\\n\\ud83d\\uddd3 Fri June 19 \\u2014 Mat & Ryan Live Music \\u0040 10pm\\n\\ud83d\\uddd3 Sat June 20 \\u2014 Gin N Tonic Live Music \\u0040 10pm\\n\\ud83d\\uddd3 Sun June 21 \\u2014 Music Trivia w\\/ Andrew Rollins \\u0040 9pm"}}}}</script>
+        </body>
+      </html>
+    `,
+  })) as unknown as typeof fetch;
+
+  try {
+    const payload = {
+      sourceUrl: finalUrl,
+      sharedText: finalUrl,
+    };
+    const visibility = await verifySharedEventSourceVisibility(payload, finalUrl);
+    const parsedEvents = await parseSharedEventPayloads(payload, {
+      sourceVisibility: visibility.visibility,
+      visibilityEvidence: visibility.evidence,
+    });
+
+    assert.equal(visibility.visibility, 'public_verified');
+    assert.match(visibility.evidence.description || '', /Sun June 21/);
+    assert.equal(parsedEvents.length, 4);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
 test('facebook public post text can expand into multiple event candidates', async () => {
   const parsedEvents = await parseSharedEventPayloads({
     sourceUrl: 'https://www.facebook.com/share/p/example',

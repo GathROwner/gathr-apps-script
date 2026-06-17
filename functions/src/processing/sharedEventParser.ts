@@ -54,6 +54,9 @@ const PRIVATE_VISIBILITY_HINTS = new Set([
 ]);
 const PUBLIC_PROBE_USER_AGENTS = [
   'GathR shared-event public-access probe/1.0',
+  'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)',
+  'Facebot',
+  'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
   'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
 ] as const;
 
@@ -599,6 +602,20 @@ export function extractFacebookCanonicalStoryUrl(html: string, finalUrl: string)
   return undefined;
 }
 
+function facebookCanonicalPostProbeUrls(value: string): string[] {
+  const ids = extractFacebookStoryIds(value);
+  if (!ids.postId || !ids.ownerId) {
+    return [];
+  }
+
+  return [
+    `https://www.facebook.com/permalink.php?story_fbid=${ids.postId}&id=${ids.ownerId}`,
+    `https://www.facebook.com/${ids.ownerId}/posts/${ids.postId}`,
+    `https://m.facebook.com/permalink.php?story_fbid=${ids.postId}&id=${ids.ownerId}`,
+    `https://www.facebook.com/story.php?story_fbid=${ids.postId}&id=${ids.ownerId}`,
+  ];
+}
+
 function extractMainFacebookPostWindow(html: string, finalUrl: string): string {
   const postId = extractFacebookPostId(finalUrl) ||
     extractFacebookPostId(extractMetaContent(html, 'og:url', 2200)) ||
@@ -652,14 +669,36 @@ function hasFacebookLoginPrompt(html: string): boolean {
     lowered.includes('log in to facebook');
 }
 
+function looksLikeFacebookLoginUrl(url: string): boolean {
+  try {
+    return new URL(url).pathname.toLowerCase().includes('/login');
+  } catch {
+    return /facebook\.com\/login/i.test(url);
+  }
+}
+
+function looksLikeFacebookLoginPage(html: string, finalUrl: string, title: string): boolean {
+  if (looksLikeFacebookLoginUrl(finalUrl)) return true;
+  const normalizedTitle = cleanString(decodeHtmlEntities(title), 140).toLowerCase();
+  if (!hasFacebookLoginPrompt(html) && !normalizedTitle.startsWith('log in')) return false;
+  return normalizedTitle.startsWith('log in or sign up') ||
+    normalizedTitle === 'facebook' ||
+    normalizedTitle.startsWith('log into facebook') ||
+    normalizedTitle.startsWith('log in to facebook');
+}
+
 function looksLikeUnavailableFacebookResponse(html: string): boolean {
   const lowered = html.toLowerCase();
-  return lowered.includes("this content isn't") ||
-    lowered.includes('this content is not') ||
-    lowered.includes('content not found') ||
-    lowered.includes('checkpoint') ||
-    lowered.includes('temporarily unavailable') ||
-    lowered.includes('not available right now');
+  const title = cleanString(decodeHtmlEntities((html.match(/<title[^>]*>([^<]*)/i) || [])[1]), 180).toLowerCase();
+  const earlyPageText = lowered.slice(0, 40000);
+  return title.includes('content not found') ||
+    title.includes('not available') ||
+    title.includes('checkpoint') ||
+    earlyPageText.includes("this content isn't") ||
+    earlyPageText.includes('this content is not') ||
+    earlyPageText.includes('content not found') ||
+    earlyPageText.includes('temporarily unavailable') ||
+    earlyPageText.includes('not available right now');
 }
 
 async function fetchPublicProbeHtml(url: string, userAgent: string): Promise<{
@@ -713,13 +752,13 @@ function buildPublicProbeEvidence(params: {
     (isFacebookLookasideCrawlerUrl(ogImageUrl) ? undefined : ogImageUrl);
   const bestTitle = embeddedEventData.title || ogTitle;
   const bestDescription = embeddedEventData.description || embeddedPostData.description || ogDescription;
-  const hasLogin = hasFacebookLoginPrompt(clippedHtml);
+  const isLoginPage = looksLikeFacebookLoginPage(clippedHtml, finalUrl || url, bestTitle || ogTitle || '');
   const isUnavailable = looksLikeUnavailableFacebookResponse(clippedHtml);
   const hasUsefulMetadata =
     Boolean(bestTitle && bestTitle.toLowerCase() !== 'facebook') &&
     (Boolean(bestDescription) || Boolean(ogType));
 
-  if (response.ok && hasUsefulMetadata) {
+  if (response.ok && hasUsefulMetadata && !isLoginPage && !isUnavailable) {
     return {
       visibility: 'public_verified',
       method: 'public_url_probe',
@@ -746,7 +785,7 @@ function buildPublicProbeEvidence(params: {
   }
 
   return {
-    visibility: response.status === 401 || response.status === 403 || hasLogin || isUnavailable
+    visibility: response.status === 401 || response.status === 403 || isLoginPage || isUnavailable
       ? 'restricted_unverified'
       : 'unknown',
     method: 'public_url_probe',
@@ -756,7 +795,7 @@ function buildPublicProbeEvidence(params: {
     httpStatus: response.status,
     reason: isUnavailable
       ? 'Public probe reached a checkpoint or unavailable-content response.'
-      : hasLogin
+      : isLoginPage
         ? 'Public probe reached a login response without enough event metadata.'
       : 'Public probe did not return enough usable event metadata.',
     titleFound: Boolean(bestTitle),
@@ -777,13 +816,18 @@ function buildPublicProbeEvidence(params: {
 }
 
 function publicEvidenceScore(evidence: SharedEventVisibilityEvidence): number {
+  const description = evidence.description ? cleanLongText(evidence.description) : '';
+  const descriptionLooksTruncated = /(?:\.\.\.|…)$/u.test(description);
   return [
     evidence.title ? 100 : 0,
-    evidence.description ? Math.min(cleanLongText(evidence.description).length, 2000) : 0,
+    description ? Math.min(description.length * 2, 4000) : 0,
+    descriptionLooksTruncated ? -500 : 0,
     evidence.imageUrl ? 150 : 0,
     evidence.startDate ? 300 : 0,
     evidence.startTime ? 150 : 0,
     evidence.locationName || evidence.address ? 200 : 0,
+    evidence.sourcePostId ? 200 : 0,
+    evidence.sourceOwnerId ? 800 : 0,
   ].reduce((sum, value) => sum + value, 0);
 }
 
@@ -795,7 +839,7 @@ async function probePublicUrl(url: string): Promise<SharedEventVisibilityEvidenc
   const urlsToProbe = [url];
   const seenUrls = new Set<string>();
 
-  for (let urlIndex = 0; urlIndex < urlsToProbe.length && urlIndex < 3; urlIndex += 1) {
+  for (let urlIndex = 0; urlIndex < urlsToProbe.length && urlIndex < 5; urlIndex += 1) {
     const currentUrl = urlsToProbe[urlIndex];
     if (seenUrls.has(currentUrl)) continue;
     seenUrls.add(currentUrl);
@@ -804,8 +848,10 @@ async function probePublicUrl(url: string): Promise<SharedEventVisibilityEvidenc
       try {
         const probe = await fetchPublicProbeHtml(currentUrl, userAgent);
         const canonicalStoryUrl = extractFacebookCanonicalStoryUrl(probe.clippedHtml, probe.finalUrl);
-        if (canonicalStoryUrl && !seenUrls.has(canonicalStoryUrl) && !urlsToProbe.includes(canonicalStoryUrl)) {
-          urlsToProbe.push(canonicalStoryUrl);
+        for (const canonicalUrl of canonicalStoryUrl ? facebookCanonicalPostProbeUrls(canonicalStoryUrl) : []) {
+          if (!seenUrls.has(canonicalUrl) && !urlsToProbe.includes(canonicalUrl)) {
+            urlsToProbe.push(canonicalUrl);
+          }
         }
 
         const evidence = buildPublicProbeEvidence({ checkedAt, url: currentUrl, ...probe });
