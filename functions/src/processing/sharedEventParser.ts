@@ -539,8 +539,64 @@ function extractFacebookPostId(value: string): string | undefined {
   if (!raw) return undefined;
 
   const direct = raw.match(/[?&]story_fbid=(\d{8,})\b/i) ||
-    raw.match(/\/posts\/(?:[^/?#]+\/)?(\d{8,})(?:[/?#]|$)/i);
+    raw.match(/\/posts\/(?:[^/?#]+\/)?(\d{8,})(?:[/?#]|$)/i) ||
+    raw.match(/"post_id"\s*:\s*"(\d{8,})"/i) ||
+    raw.match(/\bstory_fbid[=\\"':]+(\d{8,})\b/i);
   return direct?.[1];
+}
+
+function extractFacebookOwnerId(value: string): string | undefined {
+  const raw = cleanString(value, 4000);
+  if (!raw) return undefined;
+
+  const direct = raw.match(/[?&]id=(\d{8,})\b/i) ||
+    raw.match(/"owning_profile_id"\s*:\s*"(\d{8,})"/i) ||
+    raw.match(/"actor_id"\s*:\s*"(\d{8,})"/i) ||
+    raw.match(/"profile_id"\s*:\s*"(\d{8,})"/i);
+  return direct?.[1];
+}
+
+function normalizeFacebookEscapedUrlText(value: string): string {
+  return decodeHtmlEntities(String(value || ''))
+    .replace(/\\\//g, '/')
+    .replace(/\\u0025/g, '%')
+    .replace(/\\u0026/g, '&')
+    .replace(/\\u003d/gi, '=')
+    .replace(/%3A/gi, ':')
+    .replace(/%2F/gi, '/')
+    .replace(/%3F/gi, '?')
+    .replace(/%3D/gi, '=')
+    .replace(/%26/gi, '&');
+}
+
+function extractFacebookStoryIds(value: string): { postId?: string; ownerId?: string } {
+  const raw = normalizeFacebookEscapedUrlText(value);
+  const storyUrl = raw.match(/facebook\.com\/story\.php\?[^"' <>\n\\]*story_fbid=(\d{8,})[^"' <>\n\\]*[?&]id=(\d{8,})/i);
+  if (storyUrl) {
+    return { postId: storyUrl[1], ownerId: storyUrl[2] };
+  }
+
+  return {
+    postId: extractFacebookPostId(raw),
+    ownerId: extractFacebookOwnerId(raw),
+  };
+}
+
+export function extractFacebookCanonicalStoryUrl(html: string, finalUrl: string): string | undefined {
+  const sources = [
+    finalUrl,
+    extractMetaContent(html, 'og:url', 2200),
+    html,
+  ];
+
+  for (const source of sources) {
+    const ids = extractFacebookStoryIds(source);
+    if (ids.postId && ids.ownerId) {
+      return `https://www.facebook.com/story.php?story_fbid=${ids.postId}&id=${ids.ownerId}`;
+    }
+  }
+
+  return undefined;
 }
 
 function extractMainFacebookPostWindow(html: string, finalUrl: string): string {
@@ -652,6 +708,7 @@ function buildPublicProbeEvidence(params: {
   const ogType = extractMetaContent(clippedHtml, 'og:type');
   const embeddedEventData = extractFacebookEmbeddedEventData(clippedHtml, finalUrl || url);
   const embeddedPostData = extractFacebookPostData(clippedHtml, finalUrl || url);
+  const facebookStoryIds = extractFacebookStoryIds(`${finalUrl}\n${extractMetaContent(clippedHtml, 'og:url', 2200)}\n${clippedHtml.slice(0, 250000)}`);
   const imageUrl = embeddedEventData.imageUrl ||
     (isFacebookLookasideCrawlerUrl(ogImageUrl) ? undefined : ogImageUrl);
   const bestTitle = embeddedEventData.title || ogTitle;
@@ -683,6 +740,8 @@ function buildPublicProbeEvidence(params: {
       locationName: embeddedEventData.locationName,
       address: embeddedEventData.address,
       ogType: ogType || undefined,
+      sourcePostId: facebookStoryIds.postId,
+      sourceOwnerId: facebookStoryIds.ownerId,
     };
   }
 
@@ -712,6 +771,8 @@ function buildPublicProbeEvidence(params: {
     locationName: embeddedEventData.locationName,
     address: embeddedEventData.address,
     ogType: ogType || undefined,
+    sourcePostId: facebookStoryIds.postId,
+    sourceOwnerId: facebookStoryIds.ownerId,
   };
 }
 
@@ -731,22 +792,35 @@ async function probePublicUrl(url: string): Promise<SharedEventVisibilityEvidenc
   let fallback: (SharedEventVisibilityEvidence & { visibility: SharedEventSourceVisibility }) | undefined;
   let bestPublic: (SharedEventVisibilityEvidence & { visibility: SharedEventSourceVisibility }) | undefined;
   let lastError: unknown;
+  const urlsToProbe = [url];
+  const seenUrls = new Set<string>();
 
-  for (const userAgent of PUBLIC_PROBE_USER_AGENTS) {
-    try {
-      const probe = await fetchPublicProbeHtml(url, userAgent);
-      const evidence = buildPublicProbeEvidence({ checkedAt, url, ...probe });
-      if (evidence.visibility === 'public_verified') {
-        const currentScore = publicEvidenceScore(evidence);
-        const bestScore = bestPublic ? publicEvidenceScore(bestPublic) : -1;
-        if (!bestPublic || currentScore > bestScore) {
-          bestPublic = evidence;
+  for (let urlIndex = 0; urlIndex < urlsToProbe.length && urlIndex < 3; urlIndex += 1) {
+    const currentUrl = urlsToProbe[urlIndex];
+    if (seenUrls.has(currentUrl)) continue;
+    seenUrls.add(currentUrl);
+
+    for (const userAgent of PUBLIC_PROBE_USER_AGENTS) {
+      try {
+        const probe = await fetchPublicProbeHtml(currentUrl, userAgent);
+        const canonicalStoryUrl = extractFacebookCanonicalStoryUrl(probe.clippedHtml, probe.finalUrl);
+        if (canonicalStoryUrl && !seenUrls.has(canonicalStoryUrl) && !urlsToProbe.includes(canonicalStoryUrl)) {
+          urlsToProbe.push(canonicalStoryUrl);
         }
-        continue;
+
+        const evidence = buildPublicProbeEvidence({ checkedAt, url: currentUrl, ...probe });
+        if (evidence.visibility === 'public_verified') {
+          const currentScore = publicEvidenceScore(evidence);
+          const bestScore = bestPublic ? publicEvidenceScore(bestPublic) : -1;
+          if (!bestPublic || currentScore > bestScore) {
+            bestPublic = evidence;
+          }
+          continue;
+        }
+        fallback = fallback || evidence;
+      } catch (error) {
+        lastError = error;
       }
-      fallback = fallback || evidence;
-    } catch (error) {
-      lastError = error;
     }
   }
 

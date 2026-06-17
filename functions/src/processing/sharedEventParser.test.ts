@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 
 import {
   extractFacebookEmbeddedEventData,
+  extractFacebookCanonicalStoryUrl,
   parseSharedEventPayload,
   parseSharedEventPayloads,
   verifySharedEventSourceVisibility,
@@ -155,6 +156,17 @@ test('facebook embedded public event data supplies time address and real cover i
   assert.equal(parsed.locationName, undefined);
   assert.equal(parsed.address, '29 Cornwall Rd, Cornwall, PE C0A, Canada');
   assert.deepEqual(parsed.mediaUrls, ['https://scontent.fyhz1-1.fna.fbcdn.net/v/event-cover.jpg?oh=abc']);
+});
+
+test('facebook share post probes can derive canonical story url', () => {
+  const html = `
+    <script>{"post_id":"1456024579878094","url":"https:\\/\\/www.facebook.com\\/story.php?story_fbid=1456024579878094&id=100064116963888&mibextid=wwXIfr"}</script>
+  `;
+
+  assert.equal(
+    extractFacebookCanonicalStoryUrl(html, 'https://www.facebook.com/share/p/1CHRa6u6wB/?mibextid=wwXIfr'),
+    'https://www.facebook.com/story.php?story_fbid=1456024579878094&id=100064116963888'
+  );
 });
 
 test('facebook public post text can expand into multiple event candidates', async () => {

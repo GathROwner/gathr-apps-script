@@ -53,6 +53,8 @@ export interface SharedEventVisibilityEvidence {
   locationName?: string;
   address?: string;
   ogType?: string;
+  sourcePostId?: string;
+  sourceOwnerId?: string;
   visibilityHint?: string;
 }
 
