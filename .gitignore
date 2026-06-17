@@ -1,0 +1,65 @@
+# Dependencies
+**/node_modules/
+
+# Local environment and service account files
+.env
+.env.*
+!.env.example
+service-account*.json
+*-service-account*.json
+
+# Logs and local runtime output
+*.log
+npm-debug.log*
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+.firebase/
+
+# OS, editor, and local scratch files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+~$*
+nul
+.codex_tmp_deploy*/
+
+# Local spreadsheets and one-off root scratch captures
+*.xlsx
+Log*.txt
+log*.txt
+tmp_*
+tmp-*
+
+# One-off scratch and backup workspaces
+tmp/
+backups/
+
+# Nested backend checkout; keep managed by its own git repository.
+gathr-backend/
+
+# Generated validation and tool outputs
+validation/reports/
+tools/**/results/
+tools/**/tmp/
+
+# Firebase audit/review generated outputs
+firebase/*-audit-*.json
+firebase/*-report-*.json
+firebase/*-backup-*.json
+firebase/*-review-*.json
+firebase/*-reviewed-*.json
+firebase/*-reviewed-*.csv
+firebase/*-images/
+firebase/*-image-review*/
+firebase/*-review-assets*/
+firebase/tmp_delete_review_images_*/
+firebase/tmp_inspect_images/
+
+# Functions temporary outputs and backup copies
+functions/tmp/
+functions/tmp_*
+functions/sandbox/
+functions/**/*.bak
+functions/**/*.bak_*
