@@ -3487,6 +3487,76 @@ export async function updateSharedEventIngestExtractedEvents(params: {
     }, { merge: true });
 }
 
+function firestoreTimestampMillis(value: unknown): number {
+  if (value && typeof value === 'object' && 'toMillis' in value && typeof value.toMillis === 'function') {
+    return Number(value.toMillis()) || 0;
+  }
+  if (value && typeof value === 'object' && 'toDate' in value && typeof value.toDate === 'function') {
+    return Number(value.toDate()?.getTime?.()) || 0;
+  }
+  return 0;
+}
+
+export async function findReusableSharedEventIngest(params: {
+  ownerUid: string;
+  normalizedSourceUrl: string;
+}): Promise<{
+  ingestId: string;
+  record: SharedEventIngestRecord;
+  privateEvents: PrivateSharedEventRecord[];
+  eventLinks: Array<{ privateEventId: string; publicCandidateId?: string }>;
+} | undefined> {
+  const snapshot = await db
+    .collection('users')
+    .doc(params.ownerUid)
+    .collection(COLLECTIONS.SHARED_EVENT_INGESTS)
+    .where('normalizedSourceUrl', '==', params.normalizedSourceUrl)
+    .limit(20)
+    .get();
+
+  const candidates = snapshot.docs
+    .map((doc) => ({
+      ingestId: doc.id,
+      record: doc.data() as SharedEventIngestRecord,
+    }))
+    .filter((candidate) => Array.isArray(candidate.record.privateEventIds) && candidate.record.privateEventIds.length > 0)
+    .sort((a, b) => {
+      const eventCountDelta = Number(b.record.extractedEventCount || 0) - Number(a.record.extractedEventCount || 0);
+      if (eventCountDelta !== 0) return eventCountDelta;
+      return firestoreTimestampMillis(b.record.createdAt) - firestoreTimestampMillis(a.record.createdAt);
+    });
+
+  for (const candidate of candidates) {
+    const privateEventIds = candidate.record.privateEventIds || [];
+    const publicCandidateIds = candidate.record.publicCandidateIds || [];
+    const docs = await Promise.all(privateEventIds.map((eventId) =>
+      db
+        .collection('users')
+        .doc(params.ownerUid)
+        .collection(COLLECTIONS.PRIVATE_SHARED_EVENTS)
+        .doc(eventId)
+        .get()
+    ));
+
+    if (docs.some((doc) => !doc.exists)) continue;
+
+    const privateEvents = docs.map((doc) => doc.data() as PrivateSharedEventRecord);
+    if (privateEvents.length === 0) continue;
+
+    return {
+      ingestId: candidate.ingestId,
+      record: candidate.record,
+      privateEvents,
+      eventLinks: privateEventIds.map((privateEventId, index) => ({
+        privateEventId,
+        publicCandidateId: publicCandidateIds[index],
+      })),
+    };
+  }
+
+  return undefined;
+}
+
 /**
  * Create a new event
  */

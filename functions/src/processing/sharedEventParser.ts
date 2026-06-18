@@ -14,6 +14,8 @@ const DEFAULT_TIMEZONE = 'America/Halifax';
 const MAX_TEXT_LENGTH = 12000;
 const MAX_SHORT_FIELD_LENGTH = 500;
 const MAX_MEDIA_URLS = 8;
+const PUBLIC_PROBE_FETCH_TIMEOUT_MS = 3000;
+const PUBLIC_PROBE_TOTAL_BUDGET_MS = 7000;
 const MONTH_LOOKUP: Record<string, number> = {
   jan: 1,
   january: 1,
@@ -707,7 +709,7 @@ async function fetchPublicProbeHtml(url: string, userAgent: string): Promise<{
   clippedHtml: string;
 }> {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 6000);
+  const timeout = setTimeout(() => controller.abort(), PUBLIC_PROBE_FETCH_TIMEOUT_MS);
   try {
     const response = await fetch(url, {
       method: 'GET',
@@ -862,6 +864,7 @@ function publicEvidenceScore(evidence: SharedEventVisibilityEvidence): number {
 
 async function probePublicUrl(url: string): Promise<SharedEventVisibilityEvidence & { visibility: SharedEventSourceVisibility }> {
   const checkedAt = new Date().toISOString();
+  const startedAt = Date.now();
   let fallback: (SharedEventVisibilityEvidence & { visibility: SharedEventSourceVisibility }) | undefined;
   let bestPublic: (SharedEventVisibilityEvidence & { visibility: SharedEventSourceVisibility }) | undefined;
   let lastError: unknown;
@@ -869,11 +872,13 @@ async function probePublicUrl(url: string): Promise<SharedEventVisibilityEvidenc
   const seenUrls = new Set<string>();
 
   for (let urlIndex = 0; urlIndex < urlsToProbe.length && urlIndex < 5; urlIndex += 1) {
+    if (Date.now() - startedAt > PUBLIC_PROBE_TOTAL_BUDGET_MS) break;
     const currentUrl = urlsToProbe[urlIndex];
     if (seenUrls.has(currentUrl)) continue;
     seenUrls.add(currentUrl);
 
     for (const userAgent of PUBLIC_PROBE_USER_AGENTS) {
+      if (Date.now() - startedAt > PUBLIC_PROBE_TOTAL_BUDGET_MS) break;
       try {
         const probe = await fetchPublicProbeHtml(currentUrl, userAgent);
         const canonicalStoryUrl = extractFacebookCanonicalStoryUrl(probe.clippedHtml, probe.finalUrl);

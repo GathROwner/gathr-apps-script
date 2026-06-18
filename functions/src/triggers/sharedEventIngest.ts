@@ -8,7 +8,7 @@ import {
   verifySharedEventSourceVisibility,
 } from '../processing/sharedEventParser.js';
 import * as firestoreService from '../services/firestoreService.js';
-import { SharedEventSubmitPayload } from '../types/sharedEvent.js';
+import { ParsedSharedEvent, SharedEventSubmitPayload } from '../types/sharedEvent.js';
 import { logger } from '../utils/logger.js';
 
 if (!admin.apps.length) {
@@ -102,7 +102,21 @@ function resolveSourceUrl(payload: SharedEventSubmitPayload): string | undefined
     normalizeSharedEventUrl(extractFirstUrl(String(payload.sharedText || payload.text || '')));
 }
 
-function eventResponse(parsedEvent: Awaited<ReturnType<typeof parseSharedEventPayloads>>[number], ids?: {
+function canReuseSharedSource(payload: SharedEventSubmitPayload): boolean {
+  return !(
+    payload.title ||
+    payload.description ||
+    payload.startDate ||
+    payload.endDate ||
+    payload.startTime ||
+    payload.endTime ||
+    payload.locationName ||
+    payload.venueName ||
+    payload.address
+  );
+}
+
+function eventResponse(parsedEvent: ParsedSharedEvent, ids?: {
   privateEventId?: string;
   publicCandidateId?: string;
 }) {
@@ -126,6 +140,41 @@ function eventResponse(parsedEvent: Awaited<ReturnType<typeof parseSharedEventPa
     reviewReasons: parsedEvent.reviewReasons,
     sequenceIndex: parsedEvent.sequenceIndex,
     extractedFromShare: parsedEvent.extractedFromShare,
+  };
+}
+
+function successResponse(params: {
+  ingestId: string;
+  parsedEvents: ParsedSharedEvent[];
+  eventLinks: Array<{ privateEventId: string; publicCandidateId?: string }>;
+}) {
+  const { ingestId, parsedEvents, eventLinks } = params;
+  const parsedEvent = parsedEvents[0];
+  const privateEventId = eventLinks[0]?.privateEventId;
+  const publicCandidateId = eventLinks[0]?.publicCandidateId;
+  const needsUserReview = parsedEvents.some((event) => event.needsUserReview);
+  const reviewReasons = Array.from(new Set(parsedEvents.flatMap((event) => event.reviewReasons)));
+  const confidence = Math.min(...parsedEvents.map((event) => event.confidence));
+
+  return {
+    success: true,
+    ingestId,
+    privateEventId,
+    privateEventIds: eventLinks.map((link) => link.privateEventId),
+    publicCandidateId,
+    publicCandidateIds: eventLinks
+      .map((link) => link.publicCandidateId)
+      .filter((id): id is string => Boolean(id)),
+    routing: parsedEvent.routing,
+    sourceVisibility: parsedEvent.sourceVisibility,
+    status: parsedEvent.status,
+    extractedEventCount: parsedEvents.length,
+    needsUserReview,
+    reviewReasons,
+    confidence,
+    event: eventResponse(parsedEvent, eventLinks[0]),
+    events: parsedEvents.map((event, index) => eventResponse(event, eventLinks[index])),
+    visibilityEvidence: parsedEvent.visibilityEvidence,
   };
 }
 
@@ -169,6 +218,28 @@ export const submitSharedEvent = onRequest(
       }
 
       const sourceUrl = resolveSourceUrl(payload);
+      if (sourceUrl && canReuseSharedSource(payload)) {
+        const reusable = await firestoreService.findReusableSharedEventIngest({
+          ownerUid,
+          normalizedSourceUrl: sourceUrl,
+        });
+        if (reusable) {
+          logger.info('submitSharedEvent reused existing ingest', {
+            ownerUid,
+            ingestId: reusable.ingestId,
+            extractedEventCount: reusable.privateEvents.length,
+            sourceVisibility: reusable.record.sourceVisibility,
+            routing: reusable.record.routing,
+          });
+          response.json(successResponse({
+            ingestId: reusable.ingestId,
+            parsedEvents: reusable.privateEvents,
+            eventLinks: reusable.eventLinks,
+          }));
+          return;
+        }
+      }
+
       const visibility = await verifySharedEventSourceVisibility(payload, sourceUrl);
       const parsedEvents = await parseSharedEventPayloads(payload, {
         sourceVisibility: visibility.visibility,
@@ -213,43 +284,24 @@ export const submitSharedEvent = onRequest(
         extractedEventCount: parsedEvents.length,
       });
 
-      const privateEventId = eventLinks[0]?.privateEventId;
-      const publicCandidateId = eventLinks[0]?.publicCandidateId;
       const needsUserReview = parsedEvents.some((event) => event.needsUserReview);
-      const reviewReasons = Array.from(new Set(parsedEvents.flatMap((event) => event.reviewReasons)));
-      const confidence = Math.min(...parsedEvents.map((event) => event.confidence));
 
       logger.info('submitSharedEvent complete', {
         ownerUid,
         ingestId,
-        privateEventId,
-        publicCandidateId,
+        privateEventId: eventLinks[0]?.privateEventId,
+        publicCandidateId: eventLinks[0]?.publicCandidateId,
         extractedEventCount: parsedEvents.length,
         sourceVisibility: parsedEvent.sourceVisibility,
         routing: parsedEvent.routing,
         needsUserReview,
       });
 
-      response.json({
-        success: true,
+      response.json(successResponse({
         ingestId,
-        privateEventId,
-        privateEventIds: eventLinks.map((link) => link.privateEventId),
-        publicCandidateId,
-        publicCandidateIds: eventLinks
-          .map((link) => link.publicCandidateId)
-          .filter((id): id is string => Boolean(id)),
-        routing: parsedEvent.routing,
-        sourceVisibility: parsedEvent.sourceVisibility,
-        status: parsedEvent.status,
-        extractedEventCount: parsedEvents.length,
-        needsUserReview,
-        reviewReasons,
-        confidence,
-        event: eventResponse(parsedEvent, eventLinks[0]),
-        events: parsedEvents.map((event, index) => eventResponse(event, eventLinks[index])),
-        visibilityEvidence: parsedEvent.visibilityEvidence,
-      });
+        parsedEvents,
+        eventLinks,
+      }));
     } catch (error) {
       logger.error('submitSharedEvent failed', error, { ownerUid });
       response.status(500).json({
