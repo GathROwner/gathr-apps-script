@@ -3314,7 +3314,7 @@ export async function createSharedEventIngest(params: {
   const record: SharedEventIngestRecord = {
     ownerUid,
     payload,
-    normalizedSourceUrl: parsedEvent.sourceUrl,
+    normalizedSourceUrl: parsedEvent.visibilityEvidence.url || parsedEvent.sourceUrl,
     sourcePlatform: parsedEvent.sourcePlatform,
     sourceVisibility: parsedEvent.sourceVisibility,
     visibilityEvidence: parsedEvent.visibilityEvidence,
@@ -3506,15 +3506,28 @@ export async function findReusableSharedEventIngest(params: {
   privateEvents: PrivateSharedEventRecord[];
   eventLinks: Array<{ privateEventId: string; publicCandidateId?: string }>;
 } | undefined> {
-  const snapshot = await db
+  const collection = db
     .collection('users')
     .doc(params.ownerUid)
-    .collection(COLLECTIONS.SHARED_EVENT_INGESTS)
-    .where('normalizedSourceUrl', '==', params.normalizedSourceUrl)
-    .limit(20)
-    .get();
+    .collection(COLLECTIONS.SHARED_EVENT_INGESTS);
+  const snapshots = await Promise.all([
+    collection
+      .where('normalizedSourceUrl', '==', params.normalizedSourceUrl)
+      .limit(20)
+      .get(),
+    collection
+      .where('visibilityEvidence.url', '==', params.normalizedSourceUrl)
+      .limit(20)
+      .get(),
+  ]);
+  const docsById = new Map<string, FirebaseFirestore.QueryDocumentSnapshot>();
+  for (const snapshot of snapshots) {
+    for (const doc of snapshot.docs) {
+      docsById.set(doc.id, doc);
+    }
+  }
 
-  const candidates = snapshot.docs
+  const candidates = [...docsById.values()]
     .map((doc) => ({
       ingestId: doc.id,
       record: doc.data() as SharedEventIngestRecord,
