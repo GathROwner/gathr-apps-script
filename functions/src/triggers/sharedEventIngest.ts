@@ -132,7 +132,7 @@ function eventResponse(parsedEvent: Awaited<ReturnType<typeof parseSharedEventPa
 export const submitSharedEvent = onRequest(
   {
     timeoutSeconds: 60,
-    memory: '256MiB',
+    memory: '512MiB',
     region: 'northamerica-northeast2',
     cors: true,
   },
