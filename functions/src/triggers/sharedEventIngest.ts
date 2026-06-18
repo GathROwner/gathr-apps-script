@@ -1,4 +1,5 @@
 import * as admin from 'firebase-admin';
+import { randomUUID } from 'node:crypto';
 import { defineSecret } from 'firebase-functions/params';
 import { onRequest } from 'firebase-functions/v2/https';
 import {
@@ -20,6 +21,15 @@ if (!admin.apps.length) {
 const openAiApiKey = defineSecret('OPENAI_API_KEY');
 const apifyApiToken = defineSecret('APIFY_TOKEN');
 const DEFAULT_FB_POSTS_SCRAPER_ACTOR_ID = 'KoJrdxJCTtpon81KY';
+const MAX_SHARED_EVENT_UPLOAD_BYTES = 8 * 1024 * 1024;
+const ALLOWED_SHARED_EVENT_IMAGE_TYPES = new Set([
+  'image/jpeg',
+  'image/jpg',
+  'image/png',
+  'image/webp',
+  'image/heic',
+  'image/heif',
+]);
 
 function readBearerToken(authHeader: unknown): string {
   const raw = Array.isArray(authHeader) ? authHeader[0] : String(authHeader || '');
@@ -63,6 +73,44 @@ function stringArrayValue(value: unknown): string[] | undefined {
     .map((entry) => String(entry ?? '').trim())
     .filter(Boolean);
   return normalized.length > 0 ? normalized : undefined;
+}
+
+function sanitizeStorageFileName(value: unknown, fallback: string): string {
+  const normalized = String(value || '')
+    .replace(/[^A-Za-z0-9._-]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 90);
+  return normalized || fallback;
+}
+
+function extensionForContentType(value: string): string {
+  const contentType = value.toLowerCase();
+  if (contentType.includes('png')) return 'png';
+  if (contentType.includes('webp')) return 'webp';
+  if (contentType.includes('heic')) return 'heic';
+  if (contentType.includes('heif')) return 'heif';
+  return 'jpg';
+}
+
+function storageDownloadUrl(bucketName: string, filePath: string, token: string): string {
+  return `https://firebasestorage.googleapis.com/v0/b/${encodeURIComponent(bucketName)}/o/${encodeURIComponent(filePath)}?alt=media&token=${encodeURIComponent(token)}`;
+}
+
+function sharedEventUploadsBucketName(): string {
+  const firebaseConfig = (() => {
+    try {
+      return JSON.parse(process.env.FIREBASE_CONFIG || '{}') as { storageBucket?: string };
+    } catch {
+      return {};
+    }
+  })();
+
+  return String(
+    process.env.SHARED_EVENT_UPLOADS_BUCKET ||
+    process.env.FIREBASE_STORAGE_BUCKET ||
+    firebaseConfig.storageBucket ||
+    'gathr-m1.firebasestorage.app'
+  ).trim();
 }
 
 function normalizePayload(body: Record<string, unknown>): SharedEventSubmitPayload {
@@ -440,6 +488,112 @@ async function maybeQueueSharedEventScrapeEnrichment(params: {
     });
   }
 }
+
+export const uploadSharedEventImage = onRequest(
+  {
+    timeoutSeconds: 60,
+    memory: '512MiB',
+    region: 'northamerica-northeast2',
+    cors: true,
+  },
+  async (request, response) => {
+    if (request.method === 'OPTIONS') {
+      response.status(204).send('');
+      return;
+    }
+
+    if (request.method !== 'POST') {
+      response.status(405).json({ success: false, error: 'Method not allowed' });
+      return;
+    }
+
+    let ownerUid = '';
+    try {
+      ownerUid = await requireUserId(request.headers.authorization);
+    } catch (error) {
+      response.status(401).json({
+        success: false,
+        error: error instanceof Error ? error.message : 'Unauthorized',
+      });
+      return;
+    }
+
+    try {
+      const body = asBodyObject(request.body);
+      const rawContentType = stringValue(body.contentType)?.toLowerCase() || 'image/jpeg';
+      const contentType = rawContentType === 'image/jpg' ? 'image/jpeg' : rawContentType;
+      if (!ALLOWED_SHARED_EVENT_IMAGE_TYPES.has(contentType)) {
+        response.status(400).json({
+          success: false,
+          error: 'Only image uploads are supported.',
+        });
+        return;
+      }
+
+      const rawBase64 = stringValue(body.base64Data);
+      const base64Data = rawBase64?.replace(/^data:[^;]+;base64,/i, '') || '';
+      if (!base64Data) {
+        response.status(400).json({
+          success: false,
+          error: 'Missing image data.',
+        });
+        return;
+      }
+
+      const buffer = Buffer.from(base64Data, 'base64');
+      if (buffer.length === 0 || buffer.length > MAX_SHARED_EVENT_UPLOAD_BYTES) {
+        response.status(413).json({
+          success: false,
+          error: `Image must be smaller than ${Math.round(MAX_SHARED_EVENT_UPLOAD_BYTES / 1024 / 1024)} MB.`,
+        });
+        return;
+      }
+
+      const extension = extensionForContentType(contentType);
+      const fileName = sanitizeStorageFileName(body.fileName, `image.${extension}`);
+      const uploadId = randomUUID();
+      const filePath = `sharedEventUploads/${ownerUid}/${Date.now()}-${uploadId}-${fileName}`;
+      const bucketName = sharedEventUploadsBucketName();
+      const bucket = admin.storage().bucket(bucketName);
+      const downloadToken = randomUUID();
+
+      await bucket.file(filePath).save(buffer, {
+        resumable: false,
+        contentType,
+        metadata: {
+          cacheControl: 'private, max-age=31536000',
+          metadata: {
+            firebaseStorageDownloadTokens: downloadToken,
+            ownerUid,
+            source: 'shared_event_upload_function',
+          },
+        },
+      });
+
+      const mediaUrl = storageDownloadUrl(bucket.name, filePath, downloadToken);
+      logger.info('Uploaded shared event image', {
+        ownerUid,
+        filePath,
+        contentType,
+        byteLength: buffer.length,
+      });
+
+      response.json({
+        success: true,
+        mediaUrl,
+        path: filePath,
+        contentType,
+        byteLength: buffer.length,
+      });
+    } catch (error) {
+      logger.error('uploadSharedEventImage failed', error, { ownerUid });
+      response.status(500).json({
+        success: false,
+        error: error instanceof Error ? error.message : 'Image upload failed.',
+      });
+    }
+  }
+);
 
 export const submitSharedEvent = onRequest(
   {
