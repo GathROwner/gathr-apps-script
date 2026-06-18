@@ -289,7 +289,7 @@ export const submitSharedEvent = onRequest(
           ownerUid,
           normalizedSourceUrl: sourceUrl,
           parserVersion: SHARED_EVENT_PARSER_VERSION,
-          allowIncomplete: true,
+          allowIncomplete: false,
         });
         if (reusable) {
           logger.info('submitSharedEvent reused existing ingest', {
@@ -321,6 +321,35 @@ export const submitSharedEvent = onRequest(
         descriptionFound: visibility.evidence.descriptionFound,
         sourcePostId: visibility.evidence.sourcePostId,
       });
+
+      if (sourceUrl && canReuseSharedSource(payload)) {
+        const canonicalSourceUrl = visibility.evidence.finalUrl
+          ? normalizeSharedEventUrl(visibility.evidence.finalUrl)
+          : undefined;
+        const reusable = await firestoreService.findReusableSharedEventIngest({
+          ownerUid,
+          normalizedSourceUrl: canonicalSourceUrl || sourceUrl,
+          parserVersion: SHARED_EVENT_PARSER_VERSION,
+          allowIncomplete: true,
+          sourcePostId: visibility.evidence.sourcePostId,
+        });
+        if (reusable) {
+          logger.info('submitSharedEvent reused existing ingest after visibility probe', {
+            ownerUid,
+            ingestId: reusable.ingestId,
+            extractedEventCount: reusable.privateEvents.length,
+            sourceVisibility: reusable.record.sourceVisibility,
+            routing: reusable.record.routing,
+            sourcePostId: visibility.evidence.sourcePostId,
+          });
+          response.json(successResponse({
+            ingestId: reusable.ingestId,
+            parsedEvents: reusable.privateEvents,
+            eventLinks: reusable.eventLinks,
+          }));
+          return;
+        }
+      }
 
       const parsedEvents = await parseSharedEventPayloads(payload, {
         sourceVisibility: visibility.visibility,

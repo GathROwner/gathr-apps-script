@@ -3517,6 +3517,7 @@ export async function findReusableSharedEventIngest(params: {
   normalizedSourceUrl: string;
   parserVersion: string;
   allowIncomplete?: boolean;
+  sourcePostId?: string;
 }): Promise<{
   ingestId: string;
   record: SharedEventIngestRecord;
@@ -3527,7 +3528,7 @@ export async function findReusableSharedEventIngest(params: {
     .collection('users')
     .doc(params.ownerUid)
     .collection(COLLECTIONS.SHARED_EVENT_INGESTS);
-  const snapshots = await Promise.all([
+  const queries: Array<Promise<FirebaseFirestore.QuerySnapshot>> = [
     collection
       .where('normalizedSourceUrl', '==', params.normalizedSourceUrl)
       .limit(20)
@@ -3536,7 +3537,18 @@ export async function findReusableSharedEventIngest(params: {
       .where('visibilityEvidence.url', '==', params.normalizedSourceUrl)
       .limit(20)
       .get(),
-  ]);
+    collection
+      .where('visibilityEvidence.finalUrl', '==', params.normalizedSourceUrl)
+      .limit(20)
+      .get(),
+  ];
+  if (params.sourcePostId) {
+    queries.push(collection
+      .where('visibilityEvidence.sourcePostId', '==', params.sourcePostId)
+      .limit(20)
+      .get());
+  }
+  const snapshots = await Promise.all(queries);
   const docsById = new Map<string, FirebaseFirestore.QueryDocumentSnapshot>();
   for (const snapshot of snapshots) {
     for (const doc of snapshot.docs) {
@@ -3555,6 +3567,9 @@ export async function findReusableSharedEventIngest(params: {
       candidate.record.privateEventIds.length > 0
     ))
     .sort((a, b) => {
+      const publicCandidateDelta =
+        Number(b.record.routing === 'public_candidate') - Number(a.record.routing === 'public_candidate');
+      if (publicCandidateDelta !== 0) return publicCandidateDelta;
       const eventCountDelta = Number(b.record.extractedEventCount || 0) - Number(a.record.extractedEventCount || 0);
       if (eventCountDelta !== 0) return eventCountDelta;
       return firestoreTimestampMillis(b.record.createdAt) - firestoreTimestampMillis(a.record.createdAt);
