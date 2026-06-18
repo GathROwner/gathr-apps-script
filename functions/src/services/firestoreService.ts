@@ -48,6 +48,8 @@ import {
   PrivateSharedEventRecord,
   PublicSharedEventCandidateRecord,
   SharedEventIngestRecord,
+  SharedEventRouting,
+  SharedEventStatus,
   SharedEventSubmitPayload,
 } from '../types/sharedEvent.js';
 
@@ -3472,7 +3474,12 @@ export async function updateSharedEventIngestExtractedEvents(params: {
   ingestId: string;
   privateEventIds: string[];
   publicCandidateIds: string[];
+  eventLinks: Array<{ privateEventId: string; publicCandidateId?: string }>;
   extractedEventCount: number;
+  status: SharedEventStatus;
+  routing: SharedEventRouting;
+  privateEventId?: string;
+  publicCandidateId?: string;
 }): Promise<void> {
   await db
     .collection('users')
@@ -3482,7 +3489,15 @@ export async function updateSharedEventIngestExtractedEvents(params: {
     .set({
       privateEventIds: params.privateEventIds,
       publicCandidateIds: params.publicCandidateIds,
+      eventLinks: params.eventLinks.map((link) => ({
+        privateEventId: link.privateEventId,
+        ...(link.publicCandidateId ? { publicCandidateId: link.publicCandidateId } : {}),
+      })),
       extractedEventCount: params.extractedEventCount,
+      status: params.status,
+      routing: params.routing,
+      ...(params.privateEventId ? { privateEventId: params.privateEventId } : {}),
+      publicCandidateId: params.publicCandidateId || admin.firestore.FieldValue.delete(),
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     }, { merge: true });
 }
@@ -3546,7 +3561,9 @@ export async function findReusableSharedEventIngest(params: {
 
   for (const candidate of candidates) {
     const privateEventIds = candidate.record.privateEventIds || [];
-    const publicCandidateIds = candidate.record.publicCandidateIds || [];
+    const storedEventLinks = Array.isArray(candidate.record.eventLinks)
+      ? candidate.record.eventLinks
+      : [];
     const docs = await Promise.all(privateEventIds.map((eventId) =>
       db
         .collection('users')
@@ -3566,10 +3583,16 @@ export async function findReusableSharedEventIngest(params: {
       ingestId: candidate.ingestId,
       record: candidate.record,
       privateEvents,
-      eventLinks: privateEventIds.map((privateEventId, index) => ({
-        privateEventId,
-        publicCandidateId: publicCandidateIds[index],
-      })),
+      eventLinks: privateEventIds.map((privateEventId, index) => {
+        const stored = storedEventLinks[index];
+        if (stored?.privateEventId === privateEventId) {
+          return {
+            privateEventId,
+            publicCandidateId: stored.publicCandidateId,
+          };
+        }
+        return { privateEventId };
+      }),
     };
   }
 

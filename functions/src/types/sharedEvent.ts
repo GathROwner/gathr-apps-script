@@ -100,6 +100,10 @@ export interface SharedEventIngestRecord {
   publicCandidateId?: string;
   privateEventIds?: string[];
   publicCandidateIds?: string[];
+  eventLinks?: Array<{
+    privateEventId: string;
+    publicCandidateId?: string;
+  }>;
   extractedEventCount?: number;
   createdAt?: unknown;
   updatedAt?: unknown;

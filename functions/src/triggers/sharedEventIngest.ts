@@ -155,6 +155,35 @@ function successResponse(params: {
   eventLinks: Array<{ privateEventId: string; publicCandidateId?: string }>;
 }) {
   const { ingestId, parsedEvents, eventLinks } = params;
+  const summary = summarizeSharedEventResult(parsedEvents, eventLinks);
+  const parsedEvent = summary.parsedEvent;
+
+  return {
+    success: true,
+    ingestId,
+    privateEventId: summary.privateEventId,
+    privateEventIds: eventLinks.map((link) => link.privateEventId),
+    publicCandidateId: summary.publicCandidateId,
+    publicCandidateIds: eventLinks
+      .map((link) => link.publicCandidateId)
+      .filter((id): id is string => Boolean(id)),
+    routing: summary.routing,
+    sourceVisibility: parsedEvent.sourceVisibility,
+    status: summary.status,
+    extractedEventCount: parsedEvents.length,
+    needsUserReview: summary.needsUserReview,
+    reviewReasons: summary.reviewReasons,
+    confidence: summary.confidence,
+    event: eventResponse(parsedEvent, eventLinks[summary.summaryIndex]),
+    events: parsedEvents.map((event, index) => eventResponse(event, eventLinks[index])),
+    visibilityEvidence: parsedEvent.visibilityEvidence,
+  };
+}
+
+function summarizeSharedEventResult(
+  parsedEvents: ParsedSharedEvent[],
+  eventLinks: Array<{ privateEventId: string; publicCandidateId?: string }>
+) {
   const summaryIndex = Math.max(
     parsedEvents.findIndex((event) => event.routing === 'public_candidate' && !event.isExpired),
     parsedEvents.findIndex((event) => !event.isExpired),
@@ -181,24 +210,15 @@ function successResponse(params: {
       : parsedEvent.status;
 
   return {
-    success: true,
-    ingestId,
+    summaryIndex,
+    parsedEvent,
     privateEventId,
-    privateEventIds: eventLinks.map((link) => link.privateEventId),
     publicCandidateId,
-    publicCandidateIds: eventLinks
-      .map((link) => link.publicCandidateId)
-      .filter((id): id is string => Boolean(id)),
     routing: summaryRouting,
-    sourceVisibility: parsedEvent.sourceVisibility,
     status: summaryStatus,
-    extractedEventCount: parsedEvents.length,
     needsUserReview,
     reviewReasons,
     confidence,
-    event: eventResponse(parsedEvent, eventLinks[0]),
-    events: parsedEvents.map((event, index) => eventResponse(event, eventLinks[index])),
-    visibilityEvidence: parsedEvent.visibilityEvidence,
   };
 }
 
@@ -300,6 +320,8 @@ export const submitSharedEvent = onRequest(
         eventLinks.push({ privateEventId, publicCandidateId });
       }
 
+      const summary = summarizeSharedEventResult(parsedEvents, eventLinks);
+
       await firestoreService.updateSharedEventIngestExtractedEvents({
         ownerUid,
         ingestId,
@@ -307,20 +329,23 @@ export const submitSharedEvent = onRequest(
         publicCandidateIds: eventLinks
           .map((link) => link.publicCandidateId)
           .filter((id): id is string => Boolean(id)),
+        eventLinks,
         extractedEventCount: parsedEvents.length,
+        status: summary.status,
+        routing: summary.routing,
+        privateEventId: summary.privateEventId,
+        publicCandidateId: summary.publicCandidateId,
       });
-
-      const needsUserReview = parsedEvents.some((event) => event.needsUserReview);
 
       logger.info('submitSharedEvent complete', {
         ownerUid,
         ingestId,
-        privateEventId: eventLinks[0]?.privateEventId,
-        publicCandidateId: eventLinks[0]?.publicCandidateId,
+        privateEventId: summary.privateEventId,
+        publicCandidateId: summary.publicCandidateId,
         extractedEventCount: parsedEvents.length,
         sourceVisibility: parsedEvent.sourceVisibility,
-        routing: parsedEvent.routing,
-        needsUserReview,
+        routing: summary.routing,
+        needsUserReview: summary.needsUserReview,
       });
 
       response.json(successResponse({
