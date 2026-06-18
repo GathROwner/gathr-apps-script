@@ -1,4 +1,5 @@
 import * as admin from 'firebase-admin';
+import { defineSecret } from 'firebase-functions/params';
 import { onRequest } from 'firebase-functions/v2/https';
 import {
   extractFirstUrl,
@@ -14,6 +15,8 @@ import { logger } from '../utils/logger.js';
 if (!admin.apps.length) {
   admin.initializeApp();
 }
+
+const openAiApiKey = defineSecret('OPENAI_API_KEY');
 
 function readBearerToken(authHeader: unknown): string {
   const raw = Array.isArray(authHeader) ? authHeader[0] : String(authHeader || '');
@@ -205,6 +208,7 @@ export const submitSharedEvent = onRequest(
     memory: '512MiB',
     region: 'northamerica-northeast2',
     cors: true,
+    secrets: [openAiApiKey],
   },
   async (request, response) => {
     if (request.method === 'OPTIONS') {
