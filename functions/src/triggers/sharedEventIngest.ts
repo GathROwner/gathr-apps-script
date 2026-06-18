@@ -135,6 +135,8 @@ function eventResponse(parsedEvent: ParsedSharedEvent, ids?: {
     imageUrl: parsedEvent.mediaUrls[0],
     sourceUrl: parsedEvent.sourceUrl,
     sourcePlatform: parsedEvent.sourcePlatform,
+    routing: parsedEvent.routing,
+    status: parsedEvent.status,
     confidence: parsedEvent.confidence,
     needsUserReview: parsedEvent.needsUserReview,
     reviewReasons: parsedEvent.reviewReasons,
@@ -150,12 +152,30 @@ function successResponse(params: {
   eventLinks: Array<{ privateEventId: string; publicCandidateId?: string }>;
 }) {
   const { ingestId, parsedEvents, eventLinks } = params;
-  const parsedEvent = parsedEvents[0];
-  const privateEventId = eventLinks[0]?.privateEventId;
-  const publicCandidateId = eventLinks[0]?.publicCandidateId;
+  const summaryIndex = Math.max(
+    parsedEvents.findIndex((event) => event.routing === 'public_candidate' && !event.isExpired),
+    parsedEvents.findIndex((event) => !event.isExpired),
+    0
+  );
+  const parsedEvent = parsedEvents[summaryIndex] || parsedEvents[0];
+  const privateEventId = eventLinks[summaryIndex]?.privateEventId;
+  const publicCandidateId = eventLinks[summaryIndex]?.publicCandidateId;
+  const currentEvents = parsedEvents.filter((event) => !event.isExpired);
+  const hasCurrentPublicCandidate = currentEvents.some((event) => event.routing === 'public_candidate');
+  const allEventsExpired = parsedEvents.length > 0 && parsedEvents.every((event) => event.isExpired);
   const needsUserReview = parsedEvents.some((event) => event.needsUserReview);
   const reviewReasons = Array.from(new Set(parsedEvents.flatMap((event) => event.reviewReasons)));
   const confidence = Math.min(...parsedEvents.map((event) => event.confidence));
+  const summaryRouting = hasCurrentPublicCandidate
+    ? 'public_candidate'
+    : allEventsExpired
+      ? 'not_public_candidate'
+      : parsedEvent.routing;
+  const summaryStatus = hasCurrentPublicCandidate
+    ? 'submitted_public_candidate'
+    : allEventsExpired
+      ? 'expired'
+      : parsedEvent.status;
 
   return {
     success: true,
@@ -166,9 +186,9 @@ function successResponse(params: {
     publicCandidateIds: eventLinks
       .map((link) => link.publicCandidateId)
       .filter((id): id is string => Boolean(id)),
-    routing: parsedEvent.routing,
+    routing: summaryRouting,
     sourceVisibility: parsedEvent.sourceVisibility,
-    status: parsedEvent.status,
+    status: summaryStatus,
     extractedEventCount: parsedEvents.length,
     needsUserReview,
     reviewReasons,
