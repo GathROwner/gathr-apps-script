@@ -815,9 +815,38 @@ function buildPublicProbeEvidence(params: {
   };
 }
 
+function textLooksTruncated(value: string): boolean {
+  const text = cleanLongText(value);
+  return text.endsWith('...') || text.endsWith(String.fromCharCode(8230));
+}
+
+function countDatedFacebookPostLines(value: string): number {
+  const matches = cleanLongText(value).match(
+    /\b(?:mon|tue|tues|wed|thu|thur|thurs|fri|sat|sun)(?:day)?\s+(?:jan|january|feb|february|mar|march|apr|april|may|jun|june|jul|july|aug|august|sep|sept|september|oct|october|nov|november|dec|december)\s+\d{1,2}\b/gi
+  );
+  return matches?.length || 0;
+}
+
+function isStrongPublicEvidence(evidence: SharedEventVisibilityEvidence): boolean {
+  const description = evidence.description ? cleanLongText(evidence.description) : '';
+  const eventMetadataLooksComplete = Boolean(
+    evidence.title &&
+    (evidence.startDate || evidence.startTime) &&
+    (evidence.locationName || evidence.address)
+  );
+  const facebookPostLooksComplete = Boolean(
+    evidence.sourcePostId &&
+    evidence.sourceOwnerId &&
+    description.length >= 280 &&
+    !textLooksTruncated(description) &&
+    countDatedFacebookPostLines(description) >= 2
+  );
+  return eventMetadataLooksComplete || facebookPostLooksComplete;
+}
+
 function publicEvidenceScore(evidence: SharedEventVisibilityEvidence): number {
   const description = evidence.description ? cleanLongText(evidence.description) : '';
-  const descriptionLooksTruncated = /(?:\.\.\.|…)$/u.test(description);
+  const descriptionLooksTruncated = textLooksTruncated(description);
   return [
     evidence.title ? 100 : 0,
     description ? Math.min(description.length * 2, 4000) : 0,
@@ -848,14 +877,19 @@ async function probePublicUrl(url: string): Promise<SharedEventVisibilityEvidenc
       try {
         const probe = await fetchPublicProbeHtml(currentUrl, userAgent);
         const canonicalStoryUrl = extractFacebookCanonicalStoryUrl(probe.clippedHtml, probe.finalUrl);
+        let addedCanonicalProbeUrl = false;
         for (const canonicalUrl of canonicalStoryUrl ? facebookCanonicalPostProbeUrls(canonicalStoryUrl) : []) {
           if (!seenUrls.has(canonicalUrl) && !urlsToProbe.includes(canonicalUrl)) {
             urlsToProbe.push(canonicalUrl);
+            addedCanonicalProbeUrl = true;
           }
         }
 
         const evidence = buildPublicProbeEvidence({ checkedAt, url: currentUrl, ...probe });
         if (evidence.visibility === 'public_verified') {
+          if (isStrongPublicEvidence(evidence)) {
+            return evidence;
+          }
           const currentScore = publicEvidenceScore(evidence);
           const bestScore = bestPublic ? publicEvidenceScore(bestPublic) : -1;
           if (!bestPublic || currentScore > bestScore) {
@@ -864,6 +898,14 @@ async function probePublicUrl(url: string): Promise<SharedEventVisibilityEvidenc
           continue;
         }
         fallback = fallback || evidence;
+        if (
+          addedCanonicalProbeUrl &&
+          evidence.sourcePostId &&
+          evidence.sourceOwnerId &&
+          looksLikeFacebookPostUrl(currentUrl)
+        ) {
+          break;
+        }
       } catch (error) {
         lastError = error;
       }
