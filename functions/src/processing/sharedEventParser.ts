@@ -8,7 +8,7 @@ import {
   SharedEventVisibilityEvidence,
 } from '../types/sharedEvent.js';
 
-export const SHARED_EVENT_PARSER_VERSION = 'shared-event-parser-v2';
+export const SHARED_EVENT_PARSER_VERSION = 'shared-event-parser-v3';
 
 const DEFAULT_TIMEZONE = 'America/Halifax';
 const MAX_TEXT_LENGTH = 12000;
@@ -41,6 +41,26 @@ const MONTH_LOOKUP: Record<string, number> = {
   november: 11,
   dec: 12,
   december: 12,
+};
+const DAY_NAME_PATTERN = '(?:mon(?:day)?|tue(?:s|sday)?|wed(?:nesday)?|thu(?:r|rs|rsday|rday)?|fri(?:day)?|sat(?:urday)?|sun(?:day)?)';
+const WEEKDAY_LOOKUP: Record<string, number> = {
+  mon: 1,
+  monday: 1,
+  tue: 2,
+  tues: 2,
+  tuesday: 2,
+  wed: 3,
+  wednesday: 3,
+  thu: 4,
+  thur: 4,
+  thurs: 4,
+  thursday: 4,
+  fri: 5,
+  friday: 5,
+  sat: 6,
+  saturday: 6,
+  sun: 7,
+  sunday: 7,
 };
 
 const PRIVATE_VISIBILITY_HINTS = new Set([
@@ -215,7 +235,7 @@ function normalizeIsoDate(value: unknown, timezone: string): string | undefined 
 }
 
 function normalizeTime(value: unknown): string | undefined {
-  const raw = cleanString(value, 100).toLowerCase();
+  const raw = cleanString(value, 2000).toLowerCase();
   if (!raw) return undefined;
 
   const hhmm = raw.match(/^([01]?\d|2[0-3]):([0-5]\d)$/);
@@ -279,6 +299,57 @@ function extractDateFromText(text: string, timezone: string): string | undefined
   return undefined;
 }
 
+function normalizeWeekdayToken(value: string): number | undefined {
+  return WEEKDAY_LOOKUP[value.toLowerCase().replace(/\.$/, '')];
+}
+
+function resolveRelativeWeekdayDateFromText(
+  text: string,
+  timezone: string,
+  startTime?: string
+): string | undefined {
+  const normalized = decodeHtmlEntities(text).replace(/\u2013|\u2014/g, '-');
+  const match = normalized.match(new RegExp(`\\b(?:(this|next|every)\\s+)?(${DAY_NAME_PATTERN})\\b`, 'i'));
+  if (!match?.[2]) return undefined;
+
+  const modifier = cleanString(match[1], 20).toLowerCase();
+  if (!modifier && !startTime) return undefined;
+
+  const targetWeekday = normalizeWeekdayToken(match[2]);
+  if (!targetWeekday) return undefined;
+
+  const now = DateTime.now().setZone(timezone);
+  let daysToAdd = targetWeekday - now.weekday;
+  if (daysToAdd < 0) daysToAdd += 7;
+  if (modifier === 'next' && daysToAdd === 0) daysToAdd = 7;
+
+  let resolved = now.plus({ days: daysToAdd });
+  if (daysToAdd === 0 && startTime) {
+    const [hourRaw, minuteRaw] = startTime.split(':');
+    const eventStart = resolved.set({
+      hour: Number(hourRaw),
+      minute: Number(minuteRaw),
+      second: 0,
+      millisecond: 0,
+    });
+    if (eventStart.isValid && eventStart < now.minus({ hours: 2 })) {
+      resolved = resolved.plus({ days: 7 });
+    }
+  }
+
+  return resolved.toFormat('yyyy-MM-dd');
+}
+
+function cleanVenueCandidate(value: string): string | undefined {
+  const cleaned = cleanString(value, 180)
+    .replace(/\s+(?:this|next|every)\s+$/i, '')
+    .replace(/[,.;:!?]+$/g, '')
+    .trim();
+  if (!cleaned || /^\d/.test(cleaned)) return undefined;
+  if (/^\d{1,2}(?::\d{2})?\s*(?:am|pm)?$/i.test(cleaned)) return undefined;
+  return cleaned;
+}
+
 function extractLocation(payload: SharedEventSubmitPayload, combinedText: string): { locationName?: string; address?: string } {
   const directLocation = cleanString(payload.locationName || payload.venueName, 180);
   const directAddress = cleanString(payload.address, 260);
@@ -299,6 +370,16 @@ function extractLocation(payload: SharedEventSubmitPayload, combinedText: string
     if (match?.[2]) {
       return { locationName: cleanString(match[2], 180) || undefined };
     }
+  }
+
+  const venueBeforeWeekdayPattern = new RegExp(
+    `\\bat\\s+([A-Z][A-Za-z0-9&'’., -]{2,90}?)(?=\\s+(?:(?:this|next|every)\\s+)?${DAY_NAME_PATTERN}\\b|[.!?]|$)`,
+    'i'
+  );
+  for (const line of lines) {
+    const match = line.match(venueBeforeWeekdayPattern);
+    const venue = match?.[1] ? cleanVenueCandidate(match[1]) : undefined;
+    if (venue) return { locationName: venue };
   }
 
   const eventInMatch = combinedText.match(/\b(?:event|festival|concert|show|party)\s+in\s+([^,.]+?)(?:\s+by\b|[,.]|$)/i);
@@ -983,8 +1064,6 @@ export async function verifySharedEventSourceVisibility(
   };
 }
 
-const DAY_NAME_PATTERN = '(?:mon(?:day)?|tue(?:s|sday)?|wed(?:nesday)?|thu(?:r|rs|rsday|rday)?|fri(?:day)?|sat(?:urday)?|sun(?:day)?)';
-
 type ExtractedShareEventLine = {
   title: string;
   description: string;
@@ -1179,15 +1258,16 @@ export async function parseSharedEventPayload(
 
   const title = extractTitle(payload, combinedText);
   const description = extractDescription(payload, combinedText, title);
-  const startDate = normalizeIsoDate(payload.startDate, timezone) ||
-    normalizeIsoDate(visibilityEvidence.startDate, timezone) ||
-    extractDateFromText(combinedText, timezone);
-  const endDate = normalizeIsoDate(payload.endDate, timezone) ||
-    normalizeIsoDate(visibilityEvidence.endDate, timezone) ||
-    startDate;
   const startTime = normalizeTime(payload.startTime) ||
     normalizeTime(visibilityEvidence.startTime) ||
     normalizeTime(combinedText);
+  const startDate = normalizeIsoDate(payload.startDate, timezone) ||
+    normalizeIsoDate(visibilityEvidence.startDate, timezone) ||
+    extractDateFromText(combinedText, timezone) ||
+    resolveRelativeWeekdayDateFromText(combinedText, timezone, startTime);
+  const endDate = normalizeIsoDate(payload.endDate, timezone) ||
+    normalizeIsoDate(visibilityEvidence.endDate, timezone) ||
+    startDate;
   const endTime = normalizeTime(payload.endTime) || normalizeTime(visibilityEvidence.endTime);
   const extractedLocation = extractLocation(payload, combinedText);
   const locationName = extractedLocation.locationName ||

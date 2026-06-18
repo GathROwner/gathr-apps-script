@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { Settings } from 'luxon';
 
 import {
   extractFacebookEmbeddedEventData,
@@ -112,6 +113,45 @@ test('facebook public metadata description can provide a city location fallback'
   assert.equal(parsed.title, 'DiverseCity Festival - Charlottetown 2026');
   assert.equal(parsed.startDate, '2026-06-28');
   assert.equal(parsed.locationName, 'Charlottetown');
+});
+
+test('facebook post text can infer venue and same-day weekday date from natural wording', async () => {
+  const originalNow = Settings.now;
+  Settings.now = () => new Date('2026-06-18T22:08:00.000Z').getTime();
+
+  try {
+    const parsed = await parseSharedEventPayload({
+      sourceUrl: 'https://www.facebook.com/share/p/trivia-example',
+      sharedText: 'https://www.facebook.com/share/p/trivia-example',
+    }, {
+      sourceVisibility: 'public_verified',
+      visibilityEvidence: {
+        method: 'public_url_probe',
+        checkedAt: '2026-06-18T22:08:00.000Z',
+        url: 'https://www.facebook.com/share/p/trivia-example',
+        finalUrl: 'https://www.facebook.com/darcystrivia/posts/123456789',
+        httpStatus: 200,
+        reason: 'Public URL returned usable metadata without user credentials.',
+        titleFound: true,
+        descriptionFound: true,
+        title: "Darcy's Trivia & Entertainment",
+        description: [
+          "Thursday night plans? We've got you covered.",
+          "Trivia is back at Hunter's Ale House this Thursday at 9pm - bring your smartest friends.",
+          "Great questions, big laughs, cold drinks, and full bragging rights on the line.",
+        ].join('\n'),
+        ogType: 'article',
+      },
+    });
+
+    assert.equal(parsed.title, "Darcy's Trivia & Entertainment");
+    assert.equal(parsed.startDate, '2026-06-18');
+    assert.equal(parsed.startTime, '21:00');
+    assert.equal(parsed.locationName, "Hunter's Ale House");
+    assert.deepEqual(parsed.reviewReasons, []);
+  } finally {
+    Settings.now = originalNow;
+  }
 });
 
 test('facebook embedded public event data supplies time address and real cover image', async () => {
