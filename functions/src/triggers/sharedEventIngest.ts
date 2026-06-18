@@ -499,6 +499,15 @@ export const submitSharedEvent = onRequest(
           allowIncomplete: false,
         });
         if (reusable) {
+          const reusableSummary = summarizeSharedEventResult(reusable.privateEvents, reusable.eventLinks);
+          await maybeQueueSharedEventScrapeEnrichment({
+            ownerUid,
+            ingestId: reusable.ingestId,
+            payload,
+            sourceUrl,
+            parsedEvents: reusable.privateEvents,
+            summary: reusableSummary,
+          });
           logger.info('submitSharedEvent reused existing ingest', {
             ownerUid,
             ingestId: reusable.ingestId,
@@ -541,6 +550,15 @@ export const submitSharedEvent = onRequest(
           sourcePostId: visibility.evidence.sourcePostId,
         });
         if (reusable) {
+          const reusableSummary = summarizeSharedEventResult(reusable.privateEvents, reusable.eventLinks);
+          await maybeQueueSharedEventScrapeEnrichment({
+            ownerUid,
+            ingestId: reusable.ingestId,
+            payload,
+            sourceUrl,
+            parsedEvents: reusable.privateEvents,
+            summary: reusableSummary,
+          });
           logger.info('submitSharedEvent reused existing ingest after visibility probe', {
             ownerUid,
             ingestId: reusable.ingestId,
