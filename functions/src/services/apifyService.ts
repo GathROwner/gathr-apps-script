@@ -272,6 +272,45 @@ export function formatRunUrl(actorId: string, actorRunId: string): string {
   return `https://console.apify.com/actors/${actorId}/runs/${actorRunId}`;
 }
 
+export async function startActorRunNoWait(
+  actorId: string,
+  token: string,
+  input: Record<string, unknown>
+): Promise<{ actorRunId: string; datasetId?: string; runUrl: string }> {
+  const normalizedActorId = String(actorId || '').trim();
+  const normalizedToken = String(token || '').trim();
+  if (!normalizedActorId || !normalizedToken) {
+    throw new Error('Apify actorId and token are required');
+  }
+
+  const startUrl = `https://api.apify.com/v2/acts/${encodeURIComponent(normalizedActorId)}/runs?token=${encodeURIComponent(normalizedToken)}&waitForFinish=0`;
+  const res = await fetch(startUrl, {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify(input || {}),
+  });
+
+  if (!res.ok) {
+    const body = await res.text().catch(() => '');
+    throw new Error(`Apify start failed (${res.status}): ${body.slice(0, 500)}`);
+  }
+
+  const json = await res.json() as { data?: Record<string, unknown> } & Record<string, unknown>;
+  const data = (json.data || json) as Record<string, unknown>;
+  const actorRunId = String(data.id || '').trim();
+  if (!actorRunId) {
+    throw new Error('Apify run did not return actor run id');
+  }
+
+  return {
+    actorRunId,
+    datasetId: String(data.defaultDatasetId || '').trim() || undefined,
+    runUrl: formatRunUrl(normalizedActorId, actorRunId),
+  };
+}
+
 async function fetchApifyDatasetItems(datasetUrl: string): Promise<Array<Record<string, unknown>>> {
   const datasetRes = await fetch(datasetUrl, {
     method: 'GET',

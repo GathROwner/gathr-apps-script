@@ -76,6 +76,7 @@ const COLLECTIONS = {
   PRIVATE_SHARED_EVENTS: 'privateSharedEvents',
   SHARED_EVENT_INGESTS: 'sharedEventIngests',
   PUBLIC_SHARED_EVENT_CANDIDATES: 'public_shared_event_candidates',
+  SHARED_EVENT_SCRAPE_ENRICHMENTS: 'shared_event_scrape_enrichments',
 } as const;
 
 const MAX_SNAPSHOT_TEXT_LENGTH = 20000;
@@ -3500,6 +3501,184 @@ export async function updateSharedEventIngestExtractedEvents(params: {
       publicCandidateId: params.publicCandidateId || admin.firestore.FieldValue.delete(),
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     }, { merge: true });
+}
+
+function sharedEventScrapeEnrichmentId(sourceKey: string): string {
+  return createHash('sha256').update(sourceKey).digest('hex').slice(0, 40);
+}
+
+export async function reserveSharedEventScrapeEnrichment(params: {
+  ownerUid: string;
+  ingestId: string;
+  normalizedSourceUrl: string;
+  sourcePostId?: string;
+  parserVersion: string;
+  reason: string;
+  dedupeHours?: number;
+}): Promise<{
+  reserved: boolean;
+  enrichmentId: string;
+  existingStatus?: string;
+  existingActorRunId?: string;
+}> {
+  const sourceKey = String(params.sourcePostId || params.normalizedSourceUrl || '').trim();
+  if (!sourceKey) {
+    throw new Error('sourcePostId or normalizedSourceUrl is required for scrape enrichment dedupe');
+  }
+
+  const enrichmentId = sharedEventScrapeEnrichmentId(sourceKey);
+  const enrichmentRef = db.collection(COLLECTIONS.SHARED_EVENT_SCRAPE_ENRICHMENTS).doc(enrichmentId);
+  const ingestRef = db
+    .collection('users')
+    .doc(params.ownerUid)
+    .collection(COLLECTIONS.SHARED_EVENT_INGESTS)
+    .doc(params.ingestId);
+  const dedupeMs = Math.max(1, Number(params.dedupeHours || 24)) * 60 * 60 * 1000;
+
+  return db.runTransaction(async (tx) => {
+    const snapshot = await tx.get(enrichmentRef);
+    const existing = snapshot.exists ? snapshot.data() as Record<string, unknown> : undefined;
+    const existingStatus = String(existing?.status || '').trim();
+    const existingUpdatedAtMs = firestoreTimestampMillis(existing?.updatedAt || existing?.queuedAt || existing?.reservedAt);
+    const statusDedupeMs = existingStatus === 'reserved' ? 10 * 60 * 1000 : dedupeMs;
+    const recent = existingUpdatedAtMs > 0 && Date.now() - existingUpdatedAtMs < statusDedupeMs;
+    const shouldReuse = Boolean(existing) &&
+      recent &&
+      ['reserved', 'queued', 'running', 'completed'].includes(existingStatus);
+
+    if (shouldReuse) {
+      tx.set(enrichmentRef, {
+        linkedIngestIds: admin.firestore.FieldValue.arrayUnion(params.ingestId),
+        linkedOwnerUids: admin.firestore.FieldValue.arrayUnion(params.ownerUid),
+        lastDuplicateAt: admin.firestore.FieldValue.serverTimestamp(),
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      }, { merge: true });
+      tx.set(ingestRef, {
+        scrapeEnrichment: {
+          status: 'duplicate',
+          enrichmentId,
+          existingStatus,
+          actorRunId: String(existing?.actorRunId || '').trim() || undefined,
+          checkedAt: admin.firestore.FieldValue.serverTimestamp(),
+        },
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      }, { merge: true });
+
+      return {
+        reserved: false,
+        enrichmentId,
+        existingStatus,
+        existingActorRunId: String(existing?.actorRunId || '').trim() || undefined,
+      };
+    }
+
+    const reservedAt = admin.firestore.FieldValue.serverTimestamp();
+    tx.set(enrichmentRef, {
+      sourcePostId: params.sourcePostId,
+      normalizedSourceUrl: params.normalizedSourceUrl,
+      parserVersion: params.parserVersion,
+      reason: params.reason,
+      status: 'reserved',
+      latestOwnerUid: params.ownerUid,
+      latestIngestId: params.ingestId,
+      linkedIngestIds: admin.firestore.FieldValue.arrayUnion(params.ingestId),
+      linkedOwnerUids: admin.firestore.FieldValue.arrayUnion(params.ownerUid),
+      reservedAt,
+      updatedAt: reservedAt,
+      ...(snapshot.exists ? {} : { createdAt: reservedAt }),
+    }, { merge: true });
+    tx.set(ingestRef, {
+      scrapeEnrichment: {
+        status: 'reserved',
+        enrichmentId,
+        reason: params.reason,
+        reservedAt,
+      },
+      updatedAt: reservedAt,
+    }, { merge: true });
+
+    return {
+      reserved: true,
+      enrichmentId,
+    };
+  });
+}
+
+export async function markSharedEventScrapeEnrichmentQueued(params: {
+  ownerUid: string;
+  ingestId: string;
+  enrichmentId: string;
+  actorId: string;
+  actorRunId: string;
+  datasetId?: string;
+  runUrl: string;
+  input: Record<string, unknown>;
+}): Promise<void> {
+  const queuedAt = admin.firestore.FieldValue.serverTimestamp();
+  await Promise.all([
+    db.collection(COLLECTIONS.SHARED_EVENT_SCRAPE_ENRICHMENTS)
+      .doc(params.enrichmentId)
+      .set({
+        status: 'queued',
+        actorId: params.actorId,
+        actorRunId: params.actorRunId,
+        datasetId: params.datasetId,
+        runUrl: params.runUrl,
+        input: params.input,
+        queuedAt,
+        updatedAt: queuedAt,
+      }, { merge: true }),
+    db
+      .collection('users')
+      .doc(params.ownerUid)
+      .collection(COLLECTIONS.SHARED_EVENT_INGESTS)
+      .doc(params.ingestId)
+      .set({
+        scrapeEnrichment: {
+          status: 'queued',
+          enrichmentId: params.enrichmentId,
+          actorId: params.actorId,
+          actorRunId: params.actorRunId,
+          datasetId: params.datasetId,
+          runUrl: params.runUrl,
+          queuedAt,
+        },
+        updatedAt: queuedAt,
+      }, { merge: true }),
+  ]);
+}
+
+export async function markSharedEventScrapeEnrichmentFailed(params: {
+  ownerUid: string;
+  ingestId: string;
+  enrichmentId: string;
+  error: string;
+}): Promise<void> {
+  const failedAt = admin.firestore.FieldValue.serverTimestamp();
+  await Promise.all([
+    db.collection(COLLECTIONS.SHARED_EVENT_SCRAPE_ENRICHMENTS)
+      .doc(params.enrichmentId)
+      .set({
+        status: 'failed',
+        error: params.error,
+        failedAt,
+        updatedAt: failedAt,
+      }, { merge: true }),
+    db
+      .collection('users')
+      .doc(params.ownerUid)
+      .collection(COLLECTIONS.SHARED_EVENT_INGESTS)
+      .doc(params.ingestId)
+      .set({
+        scrapeEnrichment: {
+          status: 'failed',
+          enrichmentId: params.enrichmentId,
+          error: params.error,
+          failedAt,
+        },
+        updatedAt: failedAt,
+      }, { merge: true }),
+  ]);
 }
 
 function firestoreTimestampMillis(value: unknown): number {

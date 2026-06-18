@@ -105,6 +105,21 @@ export interface SharedEventIngestRecord {
     publicCandidateId?: string;
   }>;
   extractedEventCount?: number;
+  scrapeEnrichment?: {
+    status: 'reserved' | 'queued' | 'duplicate' | 'failed';
+    enrichmentId?: string;
+    reason?: string;
+    actorId?: string;
+    actorRunId?: string;
+    datasetId?: string;
+    runUrl?: string;
+    existingStatus?: string;
+    error?: string;
+    checkedAt?: unknown;
+    reservedAt?: unknown;
+    queuedAt?: unknown;
+    failedAt?: unknown;
+  };
   createdAt?: unknown;
   updatedAt?: unknown;
 }

@@ -8,6 +8,7 @@ import {
   SHARED_EVENT_PARSER_VERSION,
   verifySharedEventSourceVisibility,
 } from '../processing/sharedEventParser.js';
+import { startActorRunNoWait } from '../services/apifyService.js';
 import * as firestoreService from '../services/firestoreService.js';
 import { ParsedSharedEvent, SharedEventSubmitPayload } from '../types/sharedEvent.js';
 import { logger } from '../utils/logger.js';
@@ -17,6 +18,7 @@ if (!admin.apps.length) {
 }
 
 const openAiApiKey = defineSecret('OPENAI_API_KEY');
+const DEFAULT_FB_POSTS_SCRAPER_ACTOR_ID = 'KoJrdxJCTtpon81KY';
 
 function readBearerToken(authHeader: unknown): string {
   const raw = Array.isArray(authHeader) ? authHeader[0] : String(authHeader || '');
@@ -130,6 +132,48 @@ function hostForLog(value: string | undefined): string | undefined {
   }
 }
 
+function envFlagEnabled(value: string | undefined, fallback: boolean): boolean {
+  const raw = String(value || '').trim().toLowerCase();
+  if (!raw) return fallback;
+  if (['1', 'true', 'yes', 'y', 'on'].includes(raw)) return true;
+  if (['0', 'false', 'no', 'n', 'off'].includes(raw)) return false;
+  return fallback;
+}
+
+function parsePositiveInt(value: unknown, fallback: number, min: number, max: number): number {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return fallback;
+  return Math.max(min, Math.min(Math.trunc(parsed), max));
+}
+
+function isFacebookUrl(value: string | undefined): boolean {
+  if (!value) return false;
+  try {
+    return new URL(value).hostname.toLowerCase().includes('facebook.com');
+  } catch {
+    return false;
+  }
+}
+
+function looksLikeFacebookEventUrl(value: string | undefined): boolean {
+  if (!value) return false;
+  try {
+    const url = new URL(value);
+    return url.hostname.toLowerCase().includes('facebook.com') &&
+      url.pathname.toLowerCase().split('/').filter(Boolean).includes('events');
+  } catch {
+    return false;
+  }
+}
+
+function getSharedEventPostScrapeActorId(): string {
+  return String(
+    process.env.SHARED_EVENT_FACEBOOK_POSTS_SCRAPE_ACTOR_ID ||
+    process.env.UNKNOWN_VENUE_POSTS_SCRAPE_ACTOR_ID ||
+    DEFAULT_FB_POSTS_SCRAPER_ACTOR_ID
+  ).trim();
+}
+
 function eventResponse(parsedEvent: ParsedSharedEvent, ids?: {
   privateEventId?: string;
   publicCandidateId?: string;
@@ -231,6 +275,169 @@ function summarizeSharedEventResult(
     reviewReasons,
     confidence,
   };
+}
+
+function resolveScrapeEnrichmentUrl(sourceUrl: string | undefined, parsedEvent: ParsedSharedEvent): string | undefined {
+  return normalizeSharedEventUrl(parsedEvent.visibilityEvidence.finalUrl) ||
+    normalizeSharedEventUrl(parsedEvent.visibilityEvidence.url) ||
+    normalizeSharedEventUrl(parsedEvent.sourceUrl) ||
+    normalizeSharedEventUrl(sourceUrl);
+}
+
+function shouldQueueSharedEventScrapeEnrichment(params: {
+  payload: SharedEventSubmitPayload;
+  sourceUrl?: string;
+  parsedEvents: ParsedSharedEvent[];
+  summary: ReturnType<typeof summarizeSharedEventResult>;
+}): { shouldQueue: true; reason: string; scrapeUrl: string; sourcePostId: string } | { shouldQueue: false; reason: string } {
+  if (!envFlagEnabled(process.env.SHARED_EVENT_APIFY_ENRICHMENT_ENABLED, true)) {
+    return { shouldQueue: false, reason: 'disabled' };
+  }
+
+  const { payload, sourceUrl, parsedEvents, summary } = params;
+  const parsedEvent = summary.parsedEvent;
+  if (parsedEvent.sourceVisibility !== 'public_verified') {
+    return { shouldQueue: false, reason: 'source_not_public_verified' };
+  }
+
+  const mediaUrls = Array.isArray(payload.mediaUrls) ? payload.mediaUrls.filter(Boolean) : [];
+  if (mediaUrls.length > 0) {
+    return { shouldQueue: false, reason: 'share_payload_already_has_media' };
+  }
+
+  const scrapeUrl = resolveScrapeEnrichmentUrl(sourceUrl, parsedEvent);
+  if (!scrapeUrl || !isFacebookUrl(scrapeUrl)) {
+    return { shouldQueue: false, reason: 'not_facebook_url' };
+  }
+  if (looksLikeFacebookEventUrl(scrapeUrl)) {
+    return { shouldQueue: false, reason: 'facebook_event_url_uses_event_flow' };
+  }
+
+  const sourcePostId = String(parsedEvent.visibilityEvidence.sourcePostId || '').trim();
+  if (!sourcePostId) {
+    return { shouldQueue: false, reason: 'missing_source_post_id' };
+  }
+
+  const hasOnlyShareUrl = canReuseSharedSource(payload);
+  const hasWeakResult = summary.needsUserReview ||
+    summary.confidence < 85 ||
+    parsedEvents.length <= 1 ||
+    parsedEvents.some((event) =>
+      event.reviewReasons.includes('missing_title') ||
+      event.reviewReasons.includes('missing_start_date') ||
+      event.reviewReasons.includes('missing_location')
+    );
+
+  if (!hasOnlyShareUrl && !hasWeakResult) {
+    return { shouldQueue: false, reason: 'share_payload_specific_enough' };
+  }
+
+  return {
+    shouldQueue: true,
+    reason: hasWeakResult ? 'public_facebook_post_weak_share_parse' : 'public_facebook_post_link_only',
+    scrapeUrl,
+    sourcePostId,
+  };
+}
+
+async function maybeQueueSharedEventScrapeEnrichment(params: {
+  ownerUid: string;
+  ingestId: string;
+  payload: SharedEventSubmitPayload;
+  sourceUrl?: string;
+  parsedEvents: ParsedSharedEvent[];
+  summary: ReturnType<typeof summarizeSharedEventResult>;
+}): Promise<void> {
+  const decision = shouldQueueSharedEventScrapeEnrichment(params);
+  if (!decision.shouldQueue) {
+    logger.info('Shared event scrape enrichment skipped', {
+      ownerUid: params.ownerUid,
+      ingestId: params.ingestId,
+      reason: decision.reason,
+    });
+    return;
+  }
+
+  const apifyToken = String(process.env.APIFY_TOKEN || '').trim();
+  const actorId = getSharedEventPostScrapeActorId();
+  if (!apifyToken || !actorId) {
+    logger.warn('Shared event scrape enrichment not configured', {
+      ownerUid: params.ownerUid,
+      ingestId: params.ingestId,
+      hasApifyToken: Boolean(apifyToken),
+      actorId: actorId || undefined,
+    });
+    return;
+  }
+
+  const dedupeHours = parsePositiveInt(process.env.SHARED_EVENT_APIFY_ENRICHMENT_DEDUPE_HOURS, 24, 1, 168);
+  const reservation = await firestoreService.reserveSharedEventScrapeEnrichment({
+    ownerUid: params.ownerUid,
+    ingestId: params.ingestId,
+    normalizedSourceUrl: decision.scrapeUrl,
+    sourcePostId: decision.sourcePostId,
+    parserVersion: SHARED_EVENT_PARSER_VERSION,
+    reason: decision.reason,
+    dedupeHours,
+  });
+
+  if (!reservation.reserved) {
+    logger.info('Shared event scrape enrichment duplicate suppressed', {
+      ownerUid: params.ownerUid,
+      ingestId: params.ingestId,
+      enrichmentId: reservation.enrichmentId,
+      existingStatus: reservation.existingStatus,
+      existingActorRunId: reservation.existingActorRunId,
+      sourcePostId: decision.sourcePostId,
+    });
+    return;
+  }
+
+  const resultsLimit = parsePositiveInt(process.env.SHARED_EVENT_APIFY_ENRICHMENT_RESULTS_LIMIT, 1, 1, 5);
+  const input: Record<string, unknown> = {
+    startUrls: [{ url: decision.scrapeUrl }],
+    resultsLimit,
+    captionText: false,
+  };
+
+  try {
+    const run = await startActorRunNoWait(actorId, apifyToken, input);
+    await firestoreService.markSharedEventScrapeEnrichmentQueued({
+      ownerUid: params.ownerUid,
+      ingestId: params.ingestId,
+      enrichmentId: reservation.enrichmentId,
+      actorId,
+      actorRunId: run.actorRunId,
+      datasetId: run.datasetId,
+      runUrl: run.runUrl,
+      input,
+    });
+    logger.info('Shared event scrape enrichment queued', {
+      ownerUid: params.ownerUid,
+      ingestId: params.ingestId,
+      enrichmentId: reservation.enrichmentId,
+      actorId,
+      actorRunId: run.actorRunId,
+      datasetId: run.datasetId,
+      sourcePostId: decision.sourcePostId,
+      scrapeHost: hostForLog(decision.scrapeUrl),
+    });
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown Apify start failure';
+    await firestoreService.markSharedEventScrapeEnrichmentFailed({
+      ownerUid: params.ownerUid,
+      ingestId: params.ingestId,
+      enrichmentId: reservation.enrichmentId,
+      error: errorMessage,
+    });
+    logger.warn('Shared event scrape enrichment failed to queue', {
+      ownerUid: params.ownerUid,
+      ingestId: params.ingestId,
+      enrichmentId: reservation.enrichmentId,
+      sourcePostId: decision.sourcePostId,
+      error: errorMessage,
+    });
+  }
 }
 
 export const submitSharedEvent = onRequest(
@@ -399,6 +606,15 @@ export const submitSharedEvent = onRequest(
         routing: summary.routing,
         privateEventId: summary.privateEventId,
         publicCandidateId: summary.publicCandidateId,
+      });
+
+      await maybeQueueSharedEventScrapeEnrichment({
+        ownerUid,
+        ingestId,
+        payload,
+        sourceUrl,
+        parsedEvents,
+        summary,
       });
 
       logger.info('submitSharedEvent complete', {
