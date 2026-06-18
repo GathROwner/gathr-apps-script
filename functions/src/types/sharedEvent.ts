@@ -6,12 +6,13 @@ export type SharedEventSourceVisibility =
   | 'user_private'
   | 'unknown';
 
-export type SharedEventRouting = 'private_only' | 'public_candidate';
+export type SharedEventRouting = 'private_only' | 'public_candidate' | 'not_public_candidate';
 
 export type SharedEventStatus =
   | 'needs_user_review'
   | 'saved'
-  | 'submitted_public_candidate';
+  | 'submitted_public_candidate'
+  | 'expired';
 
 export interface SharedEventSubmitPayload {
   sourceUrl?: string;
@@ -55,6 +56,7 @@ export interface SharedEventVisibilityEvidence {
   ogType?: string;
   sourcePostId?: string;
   sourceOwnerId?: string;
+  sourcePublishedAt?: string;
   visibilityHint?: string;
 }
 
@@ -78,6 +80,7 @@ export interface ParsedSharedEvent {
   confidence: number;
   needsUserReview: boolean;
   reviewReasons: string[];
+  isExpired?: boolean;
   sourceContentSignature: string;
   sequenceIndex?: number;
   extractedFromShare?: boolean;

@@ -8,7 +8,7 @@ import {
   SharedEventVisibilityEvidence,
 } from '../types/sharedEvent.js';
 
-export const SHARED_EVENT_PARSER_VERSION = 'shared-event-parser-v3';
+export const SHARED_EVENT_PARSER_VERSION = 'shared-event-parser-v4';
 
 const DEFAULT_TIMEZONE = 'America/Halifax';
 const MAX_TEXT_LENGTH = 12000;
@@ -306,8 +306,12 @@ function normalizeWeekdayToken(value: string): number | undefined {
 function resolveRelativeWeekdayDateFromText(
   text: string,
   timezone: string,
-  startTime?: string
+  startTime?: string,
+  referenceIsoDateTime?: string
 ): string | undefined {
+  const reference = normalizeIsoDateTime(referenceIsoDateTime, timezone);
+  if (!reference) return undefined;
+
   const normalized = decodeHtmlEntities(text).replace(/\u2013|\u2014/g, '-');
   const match = normalized.match(new RegExp(`\\b(?:(this|next|every)\\s+)?(${DAY_NAME_PATTERN})\\b`, 'i'));
   if (!match?.[2]) return undefined;
@@ -318,7 +322,9 @@ function resolveRelativeWeekdayDateFromText(
   const targetWeekday = normalizeWeekdayToken(match[2]);
   if (!targetWeekday) return undefined;
 
-  const now = DateTime.now().setZone(timezone);
+  const now = DateTime.fromISO(reference, { zone: timezone }).setZone(timezone);
+  if (!now.isValid) return undefined;
+
   let daysToAdd = targetWeekday - now.weekday;
   if (daysToAdd < 0) daysToAdd += 7;
   if (modifier === 'next' && daysToAdd === 0) daysToAdd = 7;
@@ -558,6 +564,24 @@ function timestampToDateTime(timestamp: number | undefined): { date?: string; ti
   };
 }
 
+function timestampToIso(timestamp: number | undefined, timezone: string = DEFAULT_TIMEZONE): string | undefined {
+  if (!timestamp || timestamp < 0) return undefined;
+  const value = timestamp > 9999999999 ? timestamp / 1000 : timestamp;
+  const parsed = DateTime.fromSeconds(value, { zone: timezone });
+  return parsed.isValid ? parsed.toISO() || undefined : undefined;
+}
+
+function normalizeIsoDateTime(value: unknown, timezone: string): string | undefined {
+  const raw = cleanString(value, 200);
+  if (!raw) return undefined;
+  const numeric = Number(raw);
+  if (Number.isFinite(numeric) && numeric > 1000000000) {
+    return timestampToIso(numeric, timezone);
+  }
+  const parsed = DateTime.fromISO(raw, { zone: timezone });
+  return parsed.isValid ? parsed.setZone(timezone).toISO() || undefined : undefined;
+}
+
 function looksLikeStreetAddress(value: string): boolean {
   const normalized = cleanString(value, 260);
   return /\b\d{1,6}\s+[A-Za-z]/.test(normalized) ||
@@ -733,7 +757,7 @@ function looksLikeFacebookPostUrl(url: string): boolean {
 function extractFacebookPostData(
   html: string,
   finalUrl: string
-): Pick<SharedEventVisibilityEvidence, 'description'> {
+): Pick<SharedEventVisibilityEvidence, 'description' | 'sourcePublishedAt'> {
   if (!looksLikeFacebookPostUrl(finalUrl) && !looksLikeFacebookPostUrl(extractMetaContent(html, 'og:url', 2200))) {
     return {};
   }
@@ -743,7 +767,17 @@ function extractFacebookPostData(
     extractBalancedObjectAfterKey(block, 'message') ||
     block;
   const text = extractEmbeddedJsonString(messageBlock, 'text', MAX_TEXT_LENGTH);
-  return text ? { description: text } : {};
+  const sourcePublishedAt = timestampToIso(
+    extractEmbeddedJsonNumber(block, 'creation_time') ||
+    extractEmbeddedJsonNumber(block, 'publish_time') ||
+    extractEmbeddedJsonNumber(block, 'published_time') ||
+    extractEmbeddedJsonNumber(block, 'created_time')
+  );
+
+  return {
+    ...(text ? { description: text } : {}),
+    ...(sourcePublishedAt ? { sourcePublishedAt } : {}),
+  };
 }
 
 function hasFacebookLoginPrompt(html: string): boolean {
@@ -828,6 +862,11 @@ function buildPublicProbeEvidence(params: {
     extractMetaContent(clippedHtml, 'twitter:image', 2000);
   const ogImageUrl = resolveMaybeRelativeUrl(imageCandidate, finalUrl || url);
   const ogType = extractMetaContent(clippedHtml, 'og:type');
+  const metaPublishedAt = normalizeIsoDateTime(
+    extractMetaContent(clippedHtml, 'article:published_time') ||
+    extractMetaContent(clippedHtml, 'og:updated_time'),
+    DEFAULT_TIMEZONE
+  );
   const embeddedEventData = extractFacebookEmbeddedEventData(clippedHtml, finalUrl || url);
   const embeddedPostData = extractFacebookPostData(clippedHtml, finalUrl || url);
   const facebookStoryIds = extractFacebookStoryIds(`${finalUrl}\n${extractMetaContent(clippedHtml, 'og:url', 2200)}\n${clippedHtml.slice(0, 250000)}`);
@@ -835,6 +874,7 @@ function buildPublicProbeEvidence(params: {
     (isFacebookLookasideCrawlerUrl(ogImageUrl) ? undefined : ogImageUrl);
   const bestTitle = embeddedEventData.title || ogTitle;
   const bestDescription = embeddedEventData.description || embeddedPostData.description || ogDescription;
+  const sourcePublishedAt = embeddedPostData.sourcePublishedAt || metaPublishedAt;
   const isLoginPage = looksLikeFacebookLoginPage(clippedHtml, finalUrl || url, bestTitle || ogTitle || '');
   const isUnavailable = looksLikeUnavailableFacebookResponse(clippedHtml);
   const hasUsefulMetadata =
@@ -864,6 +904,7 @@ function buildPublicProbeEvidence(params: {
       ogType: ogType || undefined,
       sourcePostId: facebookStoryIds.postId,
       sourceOwnerId: facebookStoryIds.ownerId,
+      sourcePublishedAt,
     };
   }
 
@@ -895,6 +936,7 @@ function buildPublicProbeEvidence(params: {
     ogType: ogType || undefined,
     sourcePostId: facebookStoryIds.postId,
     sourceOwnerId: facebookStoryIds.ownerId,
+    sourcePublishedAt,
   };
 }
 
@@ -1145,12 +1187,34 @@ function reviewReasonsForEvent(params: {
   startDate?: string;
   locationName?: string;
   address?: string;
+  isExpired?: boolean;
 }): string[] {
   const reviewReasons: string[] = [];
   if (!params.title) reviewReasons.push('missing_title');
   if (!params.startDate) reviewReasons.push('missing_start_date');
   if (!params.locationName && !params.address) reviewReasons.push('missing_location');
+  if (params.isExpired) reviewReasons.push('event_expired');
   return reviewReasons;
+}
+
+function eventLooksExpired(startDate: string | undefined, startTime: string | undefined, timezone: string): boolean {
+  if (!startDate) return false;
+  const eventDate = DateTime.fromFormat(startDate, 'yyyy-MM-dd', { zone: timezone });
+  if (!eventDate.isValid) return false;
+
+  const now = DateTime.now().setZone(timezone);
+  if (eventDate.startOf('day') < now.startOf('day')) return true;
+  if (eventDate.startOf('day') > now.startOf('day')) return false;
+  if (!startTime) return false;
+
+  const [hourRaw, minuteRaw] = startTime.split(':');
+  const start = eventDate.set({
+    hour: Number(hourRaw),
+    minute: Number(minuteRaw),
+    second: 0,
+    millisecond: 0,
+  });
+  return start.isValid && start < now.minus({ hours: 8 });
 }
 
 function buildExtractedParsedEventsFromShareText(primary: ParsedSharedEvent): ParsedSharedEvent[] {
@@ -1166,16 +1230,22 @@ function buildExtractedParsedEventsFromShareText(primary: ParsedSharedEvent): Pa
     cleanString(primary.visibilityEvidence.title, 180);
   const inferredAddress = cleanString(primary.visibilityEvidence.address, 260) ||
     cleanString(primary.address, 260);
-  const routing = primary.sourceVisibility === 'public_verified' ? 'public_candidate' : 'private_only';
 
   return lines.map((line, index) => {
     const locationName = inferredVenue || undefined;
     const address = inferredAddress || undefined;
+    const isExpired = eventLooksExpired(line.startDate, line.startTime, primary.timezone);
+    const routing = isExpired
+      ? 'not_public_candidate'
+      : primary.sourceVisibility === 'public_verified'
+        ? 'public_candidate'
+        : 'private_only';
     const reviewReasons = reviewReasonsForEvent({
       title: line.title,
       startDate: line.startDate,
       locationName,
       address,
+      isExpired,
     });
     const confidence = confidenceScore({
       title: line.title,
@@ -1187,8 +1257,11 @@ function buildExtractedParsedEventsFromShareText(primary: ParsedSharedEvent): Pa
     });
     const needsUserReview = reviewReasons.includes('missing_title') ||
       reviewReasons.includes('missing_start_date') ||
+      reviewReasons.includes('event_expired') ||
       confidence < 55;
-    const status = routing === 'public_candidate'
+    const status = isExpired
+      ? 'expired'
+      : routing === 'public_candidate'
       ? 'submitted_public_candidate'
       : needsUserReview
         ? 'needs_user_review'
@@ -1209,6 +1282,7 @@ function buildExtractedParsedEventsFromShareText(primary: ParsedSharedEvent): Pa
       confidence,
       needsUserReview,
       reviewReasons,
+      isExpired,
       sequenceIndex: index,
       extractedFromShare: true,
       sourceContentSignature: sourceContentSignature([
@@ -1264,7 +1338,12 @@ export async function parseSharedEventPayload(
   const startDate = normalizeIsoDate(payload.startDate, timezone) ||
     normalizeIsoDate(visibilityEvidence.startDate, timezone) ||
     extractDateFromText(combinedText, timezone) ||
-    resolveRelativeWeekdayDateFromText(combinedText, timezone, startTime);
+    resolveRelativeWeekdayDateFromText(
+      combinedText,
+      timezone,
+      startTime,
+      visibilityEvidence.sourcePublishedAt
+    );
   const endDate = normalizeIsoDate(payload.endDate, timezone) ||
     normalizeIsoDate(visibilityEvidence.endDate, timezone) ||
     startDate;
@@ -1281,10 +1360,12 @@ export async function parseSharedEventPayload(
     visibilityEvidence.imageUrl,
   ]);
   const reviewReasons: string[] = [];
+  const isExpired = eventLooksExpired(startDate, startTime, timezone);
 
   if (!title) reviewReasons.push('missing_title');
   if (!startDate) reviewReasons.push('missing_start_date');
   if (!locationName && !address) reviewReasons.push('missing_location');
+  if (isExpired) reviewReasons.push('event_expired');
 
   const confidence = confidenceScore({
     title,
@@ -1296,9 +1377,16 @@ export async function parseSharedEventPayload(
   });
   const needsUserReview = reviewReasons.includes('missing_title') ||
     reviewReasons.includes('missing_start_date') ||
+    reviewReasons.includes('event_expired') ||
     confidence < 55;
-  const routing = sourceVisibility === 'public_verified' ? 'public_candidate' : 'private_only';
-  const status = routing === 'public_candidate'
+  const routing = isExpired
+    ? 'not_public_candidate'
+    : sourceVisibility === 'public_verified'
+      ? 'public_candidate'
+      : 'private_only';
+  const status = isExpired
+    ? 'expired'
+    : routing === 'public_candidate'
     ? 'submitted_public_candidate'
     : needsUserReview
       ? 'needs_user_review'
@@ -1324,6 +1412,7 @@ export async function parseSharedEventPayload(
     confidence,
     needsUserReview,
     reviewReasons,
+    isExpired,
     sourceContentSignature: sourceContentSignature([
       sourceUrl,
       title,

@@ -138,6 +138,7 @@ function eventResponse(parsedEvent: ParsedSharedEvent, ids?: {
     confidence: parsedEvent.confidence,
     needsUserReview: parsedEvent.needsUserReview,
     reviewReasons: parsedEvent.reviewReasons,
+    isExpired: parsedEvent.isExpired,
     sequenceIndex: parsedEvent.sequenceIndex,
     extractedFromShare: parsedEvent.extractedFromShare,
   };

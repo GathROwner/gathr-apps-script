@@ -141,6 +141,7 @@ test('facebook post text can infer venue and same-day weekday date from natural 
           "Great questions, big laughs, cold drinks, and full bragging rights on the line.",
         ].join('\n'),
         ogType: 'article',
+        sourcePublishedAt: '2026-06-18T12:00:00.000-03:00',
       },
     });
 
@@ -149,6 +150,48 @@ test('facebook post text can infer venue and same-day weekday date from natural 
     assert.equal(parsed.startTime, '21:00');
     assert.equal(parsed.locationName, "Hunter's Ale House");
     assert.deepEqual(parsed.reviewReasons, []);
+  } finally {
+    Settings.now = originalNow;
+  }
+});
+
+test('facebook post text uses source post date to mark old relative weekday events expired', async () => {
+  const originalNow = Settings.now;
+  Settings.now = () => new Date('2026-06-18T22:58:00.000Z').getTime();
+
+  try {
+    const parsed = await parseSharedEventPayload({
+      sourceUrl: 'https://www.facebook.com/share/p/old-trivia-example',
+      sharedText: 'https://www.facebook.com/share/p/old-trivia-example',
+    }, {
+      sourceVisibility: 'public_verified',
+      visibilityEvidence: {
+        method: 'public_url_probe',
+        checkedAt: '2026-06-18T22:58:00.000Z',
+        url: 'https://www.facebook.com/share/p/old-trivia-example',
+        finalUrl: 'https://www.facebook.com/darcystrivia/posts/987654321',
+        httpStatus: 200,
+        reason: 'Public URL returned usable metadata without user credentials.',
+        titleFound: true,
+        descriptionFound: true,
+        title: "Darcy's Trivia & Entertainment",
+        description: [
+          "Thursday night plans? We've got you covered.",
+          "Trivia is back at Hunter's Ale House this Thursday at 9pm - bring your smartest friends.",
+          "Great questions, big laughs, cold drinks, and full bragging rights on the line.",
+        ].join('\n'),
+        ogType: 'article',
+        sourcePublishedAt: '2026-06-07T12:00:00.000-03:00',
+      },
+    });
+
+    assert.equal(parsed.startDate, '2026-06-11');
+    assert.equal(parsed.startTime, '21:00');
+    assert.equal(parsed.locationName, "Hunter's Ale House");
+    assert.equal(parsed.status, 'expired');
+    assert.equal(parsed.routing, 'not_public_candidate');
+    assert.equal(parsed.isExpired, true);
+    assert.deepEqual(parsed.reviewReasons, ['event_expired']);
   } finally {
     Settings.now = originalNow;
   }
