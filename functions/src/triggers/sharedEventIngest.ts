@@ -18,6 +18,7 @@ if (!admin.apps.length) {
 }
 
 const openAiApiKey = defineSecret('OPENAI_API_KEY');
+const apifyApiToken = defineSecret('APIFY_TOKEN');
 const DEFAULT_FB_POSTS_SCRAPER_ACTOR_ID = 'KoJrdxJCTtpon81KY';
 
 function readBearerToken(authHeader: unknown): string {
@@ -358,7 +359,7 @@ async function maybeQueueSharedEventScrapeEnrichment(params: {
     return;
   }
 
-  const apifyToken = String(process.env.APIFY_TOKEN || '').trim();
+  const apifyToken = String(apifyApiToken.value() || process.env.APIFY_TOKEN || '').trim();
   const actorId = getSharedEventPostScrapeActorId();
   if (!apifyToken || !actorId) {
     logger.warn('Shared event scrape enrichment not configured', {
@@ -446,7 +447,7 @@ export const submitSharedEvent = onRequest(
     memory: '512MiB',
     region: 'northamerica-northeast2',
     cors: true,
-    secrets: [openAiApiKey],
+    secrets: [openAiApiKey, apifyApiToken],
   },
   async (request, response) => {
     if (request.method === 'OPTIONS') {
