@@ -96,7 +96,8 @@ function hasUsablePayload(payload: SharedEventSubmitPayload): boolean {
     payload.sharedText ||
     payload.text ||
     payload.title ||
-    payload.description
+    payload.description ||
+    (Array.isArray(payload.mediaUrls) && payload.mediaUrls.length > 0)
   );
 }
 
@@ -107,6 +108,7 @@ function resolveSourceUrl(payload: SharedEventSubmitPayload): string | undefined
 
 function canReuseSharedSource(payload: SharedEventSubmitPayload): boolean {
   return !(
+    (Array.isArray(payload.mediaUrls) && payload.mediaUrls.length > 0) ||
     payload.title ||
     payload.description ||
     payload.startDate ||
@@ -268,6 +270,7 @@ export const submitSharedEvent = onRequest(
           ownerUid,
           normalizedSourceUrl: sourceUrl,
           parserVersion: SHARED_EVENT_PARSER_VERSION,
+          allowIncomplete: true,
         });
         if (reusable) {
           logger.info('submitSharedEvent reused existing ingest', {

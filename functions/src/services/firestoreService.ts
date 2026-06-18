@@ -3516,6 +3516,7 @@ export async function findReusableSharedEventIngest(params: {
   ownerUid: string;
   normalizedSourceUrl: string;
   parserVersion: string;
+  allowIncomplete?: boolean;
 }): Promise<{
   ingestId: string;
   record: SharedEventIngestRecord;
@@ -3577,7 +3578,7 @@ export async function findReusableSharedEventIngest(params: {
 
     const privateEvents = docs.map((doc) => doc.data() as PrivateSharedEventRecord);
     if (privateEvents.length === 0) continue;
-    if (!privateEvents.some(isReusableSharedEventResult)) continue;
+    if (!privateEvents.some(isReusableSharedEventResult) && !params.allowIncomplete) continue;
 
     return {
       ingestId: candidate.ingestId,
