@@ -3500,6 +3500,7 @@ function firestoreTimestampMillis(value: unknown): number {
 export async function findReusableSharedEventIngest(params: {
   ownerUid: string;
   normalizedSourceUrl: string;
+  parserVersion: string;
 }): Promise<{
   ingestId: string;
   record: SharedEventIngestRecord;
@@ -3532,7 +3533,11 @@ export async function findReusableSharedEventIngest(params: {
       ingestId: doc.id,
       record: doc.data() as SharedEventIngestRecord,
     }))
-    .filter((candidate) => Array.isArray(candidate.record.privateEventIds) && candidate.record.privateEventIds.length > 0)
+    .filter((candidate) => (
+      candidate.record.parserVersion === params.parserVersion &&
+      Array.isArray(candidate.record.privateEventIds) &&
+      candidate.record.privateEventIds.length > 0
+    ))
     .sort((a, b) => {
       const eventCountDelta = Number(b.record.extractedEventCount || 0) - Number(a.record.extractedEventCount || 0);
       if (eventCountDelta !== 0) return eventCountDelta;
@@ -3555,6 +3560,7 @@ export async function findReusableSharedEventIngest(params: {
 
     const privateEvents = docs.map((doc) => doc.data() as PrivateSharedEventRecord);
     if (privateEvents.length === 0) continue;
+    if (!privateEvents.some(isReusableSharedEventResult)) continue;
 
     return {
       ingestId: candidate.ingestId,
@@ -3568,6 +3574,21 @@ export async function findReusableSharedEventIngest(params: {
   }
 
   return undefined;
+}
+
+function isReusableSharedEventResult(event: PrivateSharedEventRecord): boolean {
+  const title = String(event.title || '').trim().toLowerCase();
+  const hasSpecificTitle = Boolean(title) &&
+    !['facebook post', 'facebook event', 'share received', 'possible event'].includes(title);
+  const hasDate = Boolean(event.startDate || event.startTime);
+  const hasPlace = Boolean(event.locationName || event.address);
+  const hasMedia = Array.isArray(event.mediaUrls) && event.mediaUrls.length > 0;
+  const hasDescription = String(event.description || '').trim().length >= 40;
+
+  if (event.extractedFromShare && hasSpecificTitle) return true;
+  if (!hasSpecificTitle) return false;
+
+  return hasDate || hasPlace || hasMedia || hasDescription;
 }
 
 /**

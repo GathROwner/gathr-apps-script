@@ -222,6 +222,7 @@ export const submitSharedEvent = onRequest(
         const reusable = await firestoreService.findReusableSharedEventIngest({
           ownerUid,
           normalizedSourceUrl: sourceUrl,
+          parserVersion: SHARED_EVENT_PARSER_VERSION,
         });
         if (reusable) {
           logger.info('submitSharedEvent reused existing ingest', {

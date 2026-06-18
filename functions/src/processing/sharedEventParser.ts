@@ -8,7 +8,7 @@ import {
   SharedEventVisibilityEvidence,
 } from '../types/sharedEvent.js';
 
-export const SHARED_EVENT_PARSER_VERSION = 'shared-event-parser-v1';
+export const SHARED_EVENT_PARSER_VERSION = 'shared-event-parser-v2';
 
 const DEFAULT_TIMEZONE = 'America/Halifax';
 const MAX_TEXT_LENGTH = 12000;
