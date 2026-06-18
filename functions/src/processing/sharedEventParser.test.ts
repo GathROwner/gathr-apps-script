@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { Settings } from 'luxon';
 
 import {
+  buildCalendarImageParsedEventsForRegression,
   extractFacebookEmbeddedEventData,
   extractFacebookCanonicalStoryUrl,
   parseSharedEventPayload,
@@ -449,6 +450,108 @@ test('facebook public schedule posts expire old extracted events without blockin
           status: 'submitted_public_candidate',
           routing: 'public_candidate',
           isExpired: false,
+          reviewReasons: [],
+        },
+      ]
+    );
+  } finally {
+    Settings.now = originalNow;
+  }
+});
+
+test('calendar image extraction conversion keeps expired events, future events, and specials', async () => {
+  const originalNow = Settings.now;
+  Settings.now = () => new Date('2026-06-18T22:58:00.000Z').getTime();
+
+  try {
+    const primary = await parseSharedEventPayload({
+      sourceUrl: 'https://www.facebook.com/share/p/babas-calendar',
+      sharedText: 'June!!',
+      mediaUrls: ['https://example.com/babas-june-calendar.jpg'],
+      timezone: 'America/Halifax',
+    }, {
+      sourceVisibility: 'public_verified',
+      visibilityEvidence: {
+        method: 'public_url_probe',
+        checkedAt: '2026-06-18T22:58:00.000Z',
+        url: 'https://www.facebook.com/share/p/babas-calendar',
+        finalUrl: 'https://www.facebook.com/babaslounge/posts/123456789',
+        httpStatus: 200,
+        reason: 'Public URL returned usable metadata without user credentials.',
+        titleFound: true,
+        descriptionFound: true,
+        title: "Baba's Lounge",
+        description: 'June!!',
+        imageUrl: 'https://example.com/babas-june-calendar.jpg',
+        ogType: 'article',
+        sourcePublishedAt: '2026-05-26T12:00:00.000-03:00',
+      },
+    });
+
+    const parsedEvents = buildCalendarImageParsedEventsForRegression(primary, [
+      {
+        name: 'Rat Tales Comedy Night',
+        type: 'event',
+        date: '2026-06-15',
+        startTime: '10pm',
+        venue: '',
+        description: 'Extracted from June calendar image.',
+      },
+      {
+        name: 'Island Jazz ft. Sean Ferris',
+        type: 'event',
+        date: '2026-06-25',
+        startTime: '8pm',
+        venue: '',
+        description: 'Extracted from June calendar image.',
+      },
+      {
+        name: 'Happy Hour: $6 Pint w/ Appetizer',
+        type: 'special',
+        date: '2026-06-30',
+        startTime: '',
+        venue: '',
+        description: 'Drink special.',
+      },
+    ]);
+
+    assert.equal(parsedEvents.length, 3);
+    assert.deepEqual(
+      parsedEvents.map((event) => ({
+        title: event.title,
+        startDate: event.startDate,
+        startTime: event.startTime,
+        locationName: event.locationName,
+        status: event.status,
+        routing: event.routing,
+        reviewReasons: event.reviewReasons,
+      })),
+      [
+        {
+          title: 'Rat Tales Comedy Night',
+          startDate: '2026-06-15',
+          startTime: '22:00',
+          locationName: "Baba's Lounge",
+          status: 'expired',
+          routing: 'not_public_candidate',
+          reviewReasons: ['event_expired'],
+        },
+        {
+          title: 'Island Jazz ft. Sean Ferris',
+          startDate: '2026-06-25',
+          startTime: '20:00',
+          locationName: "Baba's Lounge",
+          status: 'submitted_public_candidate',
+          routing: 'public_candidate',
+          reviewReasons: [],
+        },
+        {
+          title: 'Happy Hour: $6 Pint w/ Appetizer',
+          startDate: '2026-06-30',
+          startTime: undefined,
+          locationName: "Baba's Lounge",
+          status: 'submitted_public_candidate',
+          routing: 'public_candidate',
           reviewReasons: [],
         },
       ]

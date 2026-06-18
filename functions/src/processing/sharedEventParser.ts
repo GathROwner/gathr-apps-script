@@ -1,5 +1,7 @@
 import { createHash } from 'crypto';
 import { DateTime } from 'luxon';
+import { extractContentByType } from '../parsing/eventExtractor.js';
+import type { ExtractedItem } from '../parsing/types.js';
 import {
   ParsedSharedEvent,
   SharedEventSourcePlatform,
@@ -8,12 +10,13 @@ import {
   SharedEventVisibilityEvidence,
 } from '../types/sharedEvent.js';
 
-export const SHARED_EVENT_PARSER_VERSION = 'shared-event-parser-v4';
+export const SHARED_EVENT_PARSER_VERSION = 'shared-event-parser-v5';
 
 const DEFAULT_TIMEZONE = 'America/Halifax';
 const MAX_TEXT_LENGTH = 12000;
 const MAX_SHORT_FIELD_LENGTH = 500;
 const MAX_MEDIA_URLS = 8;
+const MAX_CALENDAR_IMAGE_EXTRACTION_URLS = 2;
 const PUBLIC_PROBE_FETCH_TIMEOUT_MS = 3000;
 const PUBLIC_PROBE_TOTAL_BUDGET_MS = 7000;
 const MONTH_LOOKUP: Record<string, number> = {
@@ -1299,6 +1302,152 @@ function buildExtractedParsedEventsFromShareText(primary: ParsedSharedEvent): Pa
   });
 }
 
+function shouldAttemptCalendarImageExtraction(primary: ParsedSharedEvent): boolean {
+  if (primary.mediaUrls.length === 0) return false;
+  if (String(process.env.ENABLE_SHARED_EVENT_IMAGE_CALENDAR_EXTRACTION || 'true').toLowerCase() === 'false') {
+    return false;
+  }
+
+  const hasStructuredEvent = Boolean(primary.startDate && (primary.locationName || primary.address));
+  if (hasStructuredEvent) return false;
+
+  const text = [
+    primary.title,
+    primary.description,
+    primary.visibilityEvidence.title,
+    primary.visibilityEvidence.description,
+  ].filter(Boolean).join('\n');
+
+  return primary.reviewReasons.includes('missing_start_date') ||
+    /\b(calendar|schedule|line[-\s]?up|coming up|this month|next month)\b/i.test(text) ||
+    /\b(?:jan|feb|mar|apr|may|jun|june|jul|july|aug|sep|sept|oct|nov|dec)[a-z]*\s*!{0,2}\b/i.test(text);
+}
+
+function buildExtractedParsedEventsFromCalendarItems(
+  primary: ParsedSharedEvent,
+  items: ExtractedItem[]
+): ParsedSharedEvent[] {
+  const inferredVenue = cleanString(primary.locationName, 180) ||
+    cleanString(primary.visibilityEvidence.locationName, 180) ||
+    cleanString(primary.visibilityEvidence.title, 180);
+  const inferredAddress = cleanString(primary.address, 260) ||
+    cleanString(primary.visibilityEvidence.address, 260);
+
+  return items
+    .map((item, index): ParsedSharedEvent | undefined => {
+      const title = cleanString(item.name, 220);
+      const startDate = normalizeIsoDate(item.date, primary.timezone);
+      const startTime = normalizeTime(item.startTime);
+      const endTime = normalizeTime('endTime' in item ? item.endTime : undefined);
+      const locationName = cleanString(item.venue, 180) || inferredVenue || undefined;
+      const address = inferredAddress || undefined;
+      const description = cleanLongText('description' in item ? item.description : '') ||
+        `Extracted from shared calendar image.`;
+
+      if (!title && !startDate) return undefined;
+
+      const isExpired = eventLooksExpired(startDate, startTime, primary.timezone);
+      const routing = isExpired
+        ? 'not_public_candidate'
+        : primary.sourceVisibility === 'public_verified'
+          ? 'public_candidate'
+          : 'private_only';
+      const reviewReasons = reviewReasonsForEvent({
+        title,
+        startDate,
+        locationName,
+        address,
+        isExpired,
+      });
+      const confidence = confidenceScore({
+        title,
+        startDate,
+        startTime,
+        locationName,
+        address,
+        sourceUrl: primary.sourceUrl,
+      });
+      const needsUserReview = reviewReasons.includes('missing_title') ||
+        reviewReasons.includes('missing_start_date') ||
+        reviewReasons.includes('event_expired') ||
+        confidence < 55;
+      const status = isExpired
+        ? 'expired'
+        : routing === 'public_candidate'
+        ? 'submitted_public_candidate'
+        : needsUserReview
+          ? 'needs_user_review'
+          : 'saved';
+
+      return {
+        ...primary,
+        title,
+        description,
+        startDate,
+        endDate: startDate,
+        startTime,
+        endTime,
+        locationName,
+        address,
+        routing,
+        status,
+        confidence,
+        needsUserReview,
+        reviewReasons,
+        isExpired,
+        sequenceIndex: index,
+        extractedFromShare: true,
+        sourceContentSignature: sourceContentSignature([
+          primary.sourceUrl,
+          title,
+          description,
+          startDate,
+          startTime,
+          locationName,
+          address,
+          String(index),
+          'calendar_image',
+        ]),
+      };
+    })
+    .filter((event): event is ParsedSharedEvent => Boolean(event));
+}
+
+async function buildExtractedParsedEventsFromCalendarImage(primary: ParsedSharedEvent): Promise<ParsedSharedEvent[]> {
+  if (!shouldAttemptCalendarImageExtraction(primary)) return [];
+
+  try {
+    const combinedText = [
+      primary.title,
+      primary.description,
+      primary.visibilityEvidence.title,
+      primary.visibilityEvidence.description,
+    ].filter(Boolean).join('\n');
+    const timestamp = primary.visibilityEvidence.sourcePublishedAt ||
+      DateTime.now().setZone(primary.timezone).toISO() ||
+      new Date().toISOString();
+    const items = await extractContentByType(
+      'CALENDAR',
+      combinedText,
+      primary.mediaUrls.slice(0, MAX_CALENDAR_IMAGE_EXTRACTION_URLS),
+      primary.locationName || primary.title || 'Facebook share',
+      timestamp,
+      {}
+    );
+
+    return buildExtractedParsedEventsFromCalendarItems(primary, items);
+  } catch {
+    return [];
+  }
+}
+
+export function buildCalendarImageParsedEventsForRegression(
+  primary: ParsedSharedEvent,
+  items: ExtractedItem[]
+): ParsedSharedEvent[] {
+  return buildExtractedParsedEventsFromCalendarItems(primary, items);
+}
+
 export async function parseSharedEventPayload(
   payload: SharedEventSubmitPayload,
   visibility?: {
@@ -1436,5 +1585,8 @@ export async function parseSharedEventPayloads(
 ): Promise<ParsedSharedEvent[]> {
   const primary = await parseSharedEventPayload(payload, visibility);
   const extractedEvents = buildExtractedParsedEventsFromShareText(primary);
-  return extractedEvents.length > 0 ? extractedEvents : [primary];
+  if (extractedEvents.length > 0) return extractedEvents;
+
+  const calendarImageEvents = await buildExtractedParsedEventsFromCalendarImage(primary);
+  return calendarImageEvents.length > 0 ? calendarImageEvents : [primary];
 }
