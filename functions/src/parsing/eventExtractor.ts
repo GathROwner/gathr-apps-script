@@ -3997,6 +3997,10 @@ async function callGPT(
     logger.info('GPT extraction response received', {
       model,
       tokens: usage.totalTokens,
+      inputTokens: usage.inputTokens,
+      outputTokens: usage.outputTokens,
+      totalTokens: usage.totalTokens,
+      cachedInputTokens: usage.cachedInputTokens,
       finishReason,
       responsePreview: messageContent?.slice(0, 500),
       responseTail: messageContent?.slice(-200),
@@ -4061,6 +4065,10 @@ async function callGPT(
     logger.info('GPT extraction response received (responses)', {
       model,
       tokens: usage.totalTokens,
+      inputTokens: usage.inputTokens,
+      outputTokens: usage.outputTokens,
+      totalTokens: usage.totalTokens,
+      cachedInputTokens: usage.cachedInputTokens,
       stopReason,
       responsePreview: messageContent?.slice(0, 500),
       responseTail: messageContent?.slice(-200),

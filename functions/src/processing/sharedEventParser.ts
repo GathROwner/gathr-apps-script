@@ -9,6 +9,7 @@ import {
   SharedEventSubmitPayload,
   SharedEventVisibilityEvidence,
 } from '../types/sharedEvent.js';
+import { logger } from '../utils/logger.js';
 
 export const SHARED_EVENT_PARSER_VERSION = 'shared-event-parser-v5';
 
@@ -1426,14 +1427,35 @@ async function buildExtractedParsedEventsFromCalendarImage(primary: ParsedShared
     const timestamp = primary.visibilityEvidence.sourcePublishedAt ||
       DateTime.now().setZone(primary.timezone).toISO() ||
       new Date().toISOString();
+    const calendarImageUrls = primary.mediaUrls.slice(0, MAX_CALENDAR_IMAGE_EXTRACTION_URLS);
     const items = await extractContentByType(
       'CALENDAR',
       combinedText,
-      primary.mediaUrls.slice(0, MAX_CALENDAR_IMAGE_EXTRACTION_URLS),
+      calendarImageUrls,
       primary.locationName || primary.title || 'Facebook share',
       timestamp,
-      {}
+      {
+        gptUsageHandler: async (usage) => {
+          logger.info('Shared event calendar image GPT usage', {
+            tag: 'shared_event_calendar_image',
+            parserVersion: SHARED_EVENT_PARSER_VERSION,
+            sourcePlatform: primary.sourcePlatform,
+            sourceVisibility: primary.sourceVisibility,
+            imageCount: calendarImageUrls.length,
+            ...usage,
+          });
+        },
+      }
     );
+
+    logger.info('Shared event calendar image extraction complete', {
+      tag: 'shared_event_calendar_image',
+      parserVersion: SHARED_EVENT_PARSER_VERSION,
+      sourcePlatform: primary.sourcePlatform,
+      sourceVisibility: primary.sourceVisibility,
+      imageCount: calendarImageUrls.length,
+      itemCount: items.length,
+    });
 
     return buildExtractedParsedEventsFromCalendarItems(primary, items);
   } catch {
