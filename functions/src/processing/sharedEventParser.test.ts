@@ -394,3 +394,66 @@ test('facebook public post text can expand into multiple event candidates', asyn
     ]
   );
 });
+
+test('facebook public schedule posts expire old extracted events without blocking future ones', async () => {
+  const originalNow = Settings.now;
+  Settings.now = () => new Date('2026-06-18T22:58:00.000Z').getTime();
+
+  try {
+    const parsedEvents = await parseSharedEventPayloads({
+      sourceUrl: 'https://www.facebook.com/share/p/mixed-schedule-example',
+      sharedText: 'https://www.facebook.com/share/p/mixed-schedule-example',
+    }, {
+      sourceVisibility: 'public_verified',
+      visibilityEvidence: {
+        method: 'public_url_probe',
+        checkedAt: '2026-06-18T22:58:00.000Z',
+        url: 'https://www.facebook.com/share/p/mixed-schedule-example',
+        finalUrl: 'https://www.facebook.com/huntersalehouse/posts/987654321',
+        httpStatus: 200,
+        reason: 'Public URL returned usable metadata without user credentials.',
+        titleFound: true,
+        descriptionFound: true,
+        title: "Hunter's Ale House",
+        description: [
+          'More events this week at Hunter\'s Ale House.',
+          'Wed June 17 - Already Done Band @ 10pm',
+          'Fri June 19 - Still Coming Band @ 10pm',
+        ].join('\n'),
+        ogType: 'article',
+      },
+    });
+
+    assert.equal(parsedEvents.length, 2);
+    assert.deepEqual(
+      parsedEvents.map((event) => ({
+        title: event.title,
+        startDate: event.startDate,
+        status: event.status,
+        routing: event.routing,
+        isExpired: event.isExpired,
+        reviewReasons: event.reviewReasons,
+      })),
+      [
+        {
+          title: 'Already Done Band',
+          startDate: '2026-06-17',
+          status: 'expired',
+          routing: 'not_public_candidate',
+          isExpired: true,
+          reviewReasons: ['event_expired'],
+        },
+        {
+          title: 'Still Coming Band',
+          startDate: '2026-06-19',
+          status: 'submitted_public_candidate',
+          routing: 'public_candidate',
+          isExpired: false,
+          reviewReasons: [],
+        },
+      ]
+    );
+  } finally {
+    Settings.now = originalNow;
+  }
+});
