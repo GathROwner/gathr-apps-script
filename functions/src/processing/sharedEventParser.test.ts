@@ -156,6 +156,49 @@ test('facebook post text can infer venue and same-day weekday date from natural 
   }
 });
 
+test('facebook post metadata avoids possessive event phrases as venue names', async () => {
+  const originalNow = Settings.now;
+  Settings.now = () => new Date('2026-06-18T16:22:00.000Z').getTime();
+
+  try {
+    const parsed = await parseSharedEventPayload({
+      sourceUrl: 'https://www.facebook.com/share/p/founders-example',
+      sharedText: 'https://www.facebook.com/share/p/founders-example',
+    }, {
+      sourceVisibility: 'public_verified',
+      visibilityEvidence: {
+        method: 'public_url_probe',
+        checkedAt: '2026-06-18T16:22:00.000Z',
+        url: 'https://www.facebook.com/share/p/founders-example',
+        finalUrl: 'https://www.facebook.com/100063765871700/posts/1600420268760154',
+        httpStatus: 200,
+        reason: 'Public URL returned usable metadata without user credentials.',
+        titleFound: true,
+        descriptionFound: true,
+        title: 'Founders\u2019 Food Hall and Market',
+        description: [
+          'Summer starts here! \u2600\ufe0f',
+          'Join us this week for Wellness Wednesday, then celebrate the start of summer at our Summer Kick-Off Night Market on Saturday, June 20! Shop local vendors, enjoy great food and drinks, and soak up the summer atmosphere!',
+          'Plus, catch all the FIFA action on our screens throughout the week.',
+        ].join('\n'),
+        imageUrl: 'https://example.com/founders-cover.jpg',
+        ogType: 'video.other',
+        sourcePostId: '1600420268760154',
+        sourceOwnerId: '100063765871700',
+        sourcePublishedAt: '2026-06-15T14:56:28.000-03:00',
+      },
+    });
+
+    assert.equal(parsed.title, 'Summer Kick-Off Night Market');
+    assert.equal(parsed.startDate, '2026-06-20');
+    assert.equal(parsed.locationName, 'Founders\u2019 Food Hall and Market');
+    assert.notEqual(parsed.locationName, 'our Summer Kick-Off Night Market on');
+    assert.deepEqual(parsed.reviewReasons, []);
+  } finally {
+    Settings.now = originalNow;
+  }
+});
+
 test('facebook post text uses source post date to mark old relative weekday events expired', async () => {
   const originalNow = Settings.now;
   Settings.now = () => new Date('2026-06-18T22:58:00.000Z').getTime();
@@ -349,7 +392,6 @@ test('facebook public post text can expand into multiple event candidates', asyn
         '&#x1f5d3; Sat June 20 &#x2014; Gin N Tonic Live Music Night &#064; 10pm',
         '&#x1f5d3; Sun June 21 &#x2014; Music Trivia w/ Andrew Rollins &#064; 9pm',
       ].join('\n'),
-      imageUrl: 'https://example.com/hunters.jpg',
       ogType: 'video.other',
     },
   });

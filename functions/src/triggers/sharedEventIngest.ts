@@ -121,6 +121,15 @@ function canReuseSharedSource(payload: SharedEventSubmitPayload): boolean {
   );
 }
 
+function hostForLog(value: string | undefined): string | undefined {
+  if (!value) return undefined;
+  try {
+    return new URL(value).hostname;
+  } catch {
+    return undefined;
+  }
+}
+
 function eventResponse(parsedEvent: ParsedSharedEvent, ids?: {
   privateEventId?: string;
   publicCandidateId?: string;
@@ -265,6 +274,16 @@ export const submitSharedEvent = onRequest(
       }
 
       const sourceUrl = resolveSourceUrl(payload);
+      logger.info('submitSharedEvent normalized payload', {
+        ownerUid,
+        sourceHost: hostForLog(sourceUrl),
+        sourceApp: payload.sourceApp,
+        hasTitle: Boolean(payload.title),
+        hasDescription: Boolean(payload.description),
+        sharedTextLength: String(payload.sharedText || payload.text || '').length,
+        mediaUrlCount: Array.isArray(payload.mediaUrls) ? payload.mediaUrls.length : 0,
+      });
+
       if (sourceUrl && canReuseSharedSource(payload)) {
         const reusable = await firestoreService.findReusableSharedEventIngest({
           ownerUid,
@@ -290,6 +309,19 @@ export const submitSharedEvent = onRequest(
       }
 
       const visibility = await verifySharedEventSourceVisibility(payload, sourceUrl);
+      logger.info('submitSharedEvent visibility evidence', {
+        ownerUid,
+        sourceHost: hostForLog(sourceUrl),
+        visibility: visibility.visibility,
+        method: visibility.evidence.method,
+        httpStatus: visibility.evidence.httpStatus,
+        hasImageUrl: Boolean(visibility.evidence.imageUrl),
+        ogType: visibility.evidence.ogType,
+        titleFound: visibility.evidence.titleFound,
+        descriptionFound: visibility.evidence.descriptionFound,
+        sourcePostId: visibility.evidence.sourcePostId,
+      });
+
       const parsedEvents = await parseSharedEventPayloads(payload, {
         sourceVisibility: visibility.visibility,
         visibilityEvidence: visibility.evidence,
