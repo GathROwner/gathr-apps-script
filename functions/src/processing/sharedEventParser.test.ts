@@ -602,3 +602,47 @@ test('calendar image extraction conversion keeps expired events, future events, 
     Settings.now = originalNow;
   }
 });
+
+test('image-only calendar shares stay private while preserving extracted event details', async () => {
+  const originalNow = Settings.now;
+  Settings.now = () => new Date('2026-06-18T22:58:00.000Z').getTime();
+
+  try {
+    const primary = await parseSharedEventPayload({
+      mediaUrls: ['https://example.com/downloaded-schedule.jpg'],
+      sourceApp: 'native_share_sheet',
+      timezone: 'America/Halifax',
+    }, {
+      sourceVisibility: 'unknown',
+      visibilityEvidence: {
+        method: 'no_url',
+        checkedAt: '2026-06-18T22:58:00.000Z',
+        reason: 'No public URL was included with the share payload.',
+      },
+    });
+
+    const parsedEvents = buildCalendarImageParsedEventsForRegression(primary, [
+      {
+        name: 'Summer Kickoff Market',
+        type: 'event',
+        date: '2026-06-20',
+        startTime: '3pm',
+        venue: 'Founders Food Hall and Market',
+        description: 'Extracted from downloaded schedule image.',
+      },
+    ]);
+
+    assert.equal(parsedEvents.length, 1);
+    assert.equal(parsedEvents[0].sourcePlatform, 'unknown');
+    assert.equal(parsedEvents[0].sourceVisibility, 'unknown');
+    assert.equal(parsedEvents[0].routing, 'private_only');
+    assert.equal(parsedEvents[0].status, 'saved');
+    assert.equal(parsedEvents[0].title, 'Summer Kickoff Market');
+    assert.equal(parsedEvents[0].startDate, '2026-06-20');
+    assert.equal(parsedEvents[0].startTime, '15:00');
+    assert.equal(parsedEvents[0].locationName, 'Founders Food Hall and Market');
+    assert.deepEqual(parsedEvents[0].reviewReasons, []);
+  } finally {
+    Settings.now = originalNow;
+  }
+});
