@@ -128,11 +128,30 @@ export interface PrivateSharedEventRecord extends ParsedSharedEvent {
   ownerUid: string;
   ingestId: string;
   publicCandidateId?: string;
+  publicPromotionStatus?: PublicSharedEventCandidateStatus;
+  publicVenueId?: string;
+  publicEventId?: string;
+  publicEventPath?: string;
+  publicUnknownVenueDocId?: string;
+  publicCityLevelReviewDocId?: string;
   createdAt?: unknown;
   updatedAt?: unknown;
 }
 
+export type PublicSharedEventCandidateStatus =
+  | 'pending_validation'
+  | 'needs_user_review'
+  | 'processing'
+  | 'promoted'
+  | 'duplicate_existing'
+  | 'venue_unresolved'
+  | 'queued_city_level_review'
+  | 'queued_unknown_venue'
+  | 'rejected_expired'
+  | 'failed';
+
 export interface PublicSharedEventCandidateRecord {
+  id?: string;
   ownerUid: string;
   privateEventId: string;
   ingestId: string;
@@ -151,7 +170,29 @@ export interface PublicSharedEventCandidateRecord {
   mediaUrls: string[];
   timezone: string;
   sourceContentSignature: string;
-  status: 'pending_validation' | 'needs_user_review';
+  status: PublicSharedEventCandidateStatus;
+  promotedVenueId?: string;
+  promotedEventId?: string;
+  promotedEventPath?: string;
+  duplicateVenueId?: string;
+  duplicateEventId?: string;
+  duplicateEventPath?: string;
+  unknownVenueDocId?: string;
+  cityLevelReviewDocId?: string;
+  promotionAttemptCount?: number;
+  promotionLastAttemptAt?: unknown;
+  promotionError?: string;
+  promotionResult?: {
+    status: PublicSharedEventCandidateStatus;
+    reason?: string;
+    venueId?: string;
+    venueName?: string;
+    eventId?: string;
+    eventPath?: string;
+    unknownVenueDocId?: string;
+    cityLevelReviewDocId?: string;
+    duplicateEventId?: string;
+  };
   createdAt?: unknown;
   updatedAt?: unknown;
 }
