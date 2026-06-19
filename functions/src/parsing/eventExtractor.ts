@@ -2782,13 +2782,25 @@ function parseCalendarOcrText(
     july: 7,
     august: 8,
     september: 9,
+    sept: 9,
     october: 10,
     november: 11,
     december: 12,
+    jan: 1,
+    feb: 2,
+    mar: 3,
+    apr: 4,
+    jun: 6,
+    jul: 7,
+    aug: 8,
+    sep: 9,
+    oct: 10,
+    nov: 11,
+    dec: 12,
   };
 
   const monthMatch = ocrText.match(
-    /\b(january|february|march|april|may|june|july|august|september|october|november|december)\b/i
+    /\b(january|jan|february|feb|march|mar|april|apr|may|june|jun|july|jul|august|aug|september|sept|sep|october|oct|november|nov|december|dec)\b/i
   );
   const yearMatch = ocrText.match(/\b(20\d{2})\b/);
   const fallbackDate = DateTime.fromISO(postedLocalDate);
@@ -2800,6 +2812,18 @@ function parseCalendarOcrText(
     .map((line) => line.trim())
     .filter(Boolean);
 
+  const standaloneDayLineRe = /^(?:[1-9]|[12]\d|3[01])$/;
+  const explicitDateLineItems = parseExplicitDateLineCalendarOcrItems(
+    lines,
+    monthMap,
+    fallbackDate,
+    userName
+  );
+  const hasStandaloneDayLines = lines.some((line) => standaloneDayLineRe.test(line));
+  if (explicitDateLineItems.length > 0 && !hasStandaloneDayLines) {
+    return explicitDateLineItems;
+  }
+
   const events: CalendarItem[] = [];
   let currentDay: number | null = null;
   let pendingNameParts: string[] = [];
@@ -2807,6 +2831,8 @@ function parseCalendarOcrText(
 
   const dayHeaderRe =
     /^(sun|mon|tue|wed|thu|fri|sat)(\s+(sun|mon|tue|wed|thu|fri|sat))*$/i;
+  const explicitDateRe =
+    /\b(?:sun(?:day)?|mon(?:day)?|tue(?:s|sday)?|wed(?:nesday)?|thu(?:r|rs|rsday)?|fri(?:day)?|sat(?:urday)?)?\s*(january|jan|february|feb|march|mar|april|apr|may|june|jun|july|jul|august|aug|september|sept|sep|october|oct|november|nov|december|dec)\.?\s+([1-9]|[12]\d|3[01])(?:st|nd|rd|th)?(?:,?\s+(20\d{2}))?\b/i;
 
   for (const rawLine of lines) {
     const line = rawLine.replace(/[\u2013\u2014]/g, '-');
@@ -2818,7 +2844,7 @@ function parseCalendarOcrText(
     if (/^(am|pm)$/i.test(line)) continue;
     if (/^no\b/i.test(line)) continue;
 
-    const dayMatch = line.match(/^(?:[1-9]|[12]\d|3[01])$/);
+    const dayMatch = line.match(standaloneDayLineRe);
     if (dayMatch) {
       currentDay = Number(dayMatch[0]);
       pendingNameParts = [];
@@ -2826,7 +2852,60 @@ function parseCalendarOcrText(
       continue;
     }
 
-    if (!currentDay || !month || !year) continue;
+    const explicitDateMatch = line.match(explicitDateRe);
+    if (explicitDateMatch) {
+      const explicitMonth = monthMap[String(explicitDateMatch[1] || '').toLowerCase()];
+      const explicitDay = Number(explicitDateMatch[2]);
+      const explicitYear = explicitDateMatch[3]
+        ? Number(explicitDateMatch[3])
+        : resolveCalendarOcrYear(fallbackDate, explicitMonth, explicitDay);
+      const rangeMatch = line.match(
+        /(\d{1,2}(?::\d{2})?|\d{3,4})\s*(am|pm)?\s*-\s*(\d{1,2}(?::\d{2})?|\d{3,4})\s*(am|pm)\b/i
+      );
+      const explicitDate = explicitMonth && Number.isFinite(explicitDay) && Number.isFinite(explicitYear)
+        ? formatDateFromParts(explicitYear, explicitMonth, explicitDay)
+        : '';
+      const resolvedRange = rangeMatch
+        ? resolveTimeRangeTokens(
+            rangeMatch[1],
+            rangeMatch[2] || '',
+            rangeMatch[3],
+            rangeMatch[4] || ''
+          )
+        : null;
+      const lineWithoutDate = stripTimeTokens(line.replace(explicitDateMatch[0], ' '));
+      const previousName = pendingNameParts.length > 0
+        ? pendingNameParts[pendingNameParts.length - 1]
+        : '';
+      const name = cleanOcrEventName(lineWithoutDate || previousName || lastEventName || 'Event');
+
+      if (explicitDate && name && (resolvedRange?.startTime || extractTimeTokens(line).length > 0)) {
+        const timeTokens = resolvedRange?.startTime ? [] : extractTimeTokens(line);
+        const startTimes = resolvedRange?.startTime ? [resolvedRange.startTime] : timeTokens;
+        for (const startTime of startTimes) {
+          events.push({
+            name,
+            type: 'event',
+            date: explicitDate,
+            startTime,
+            endTime: resolvedRange?.endTime || '',
+            venue: userName,
+            description: '',
+            extractionReason: 'calendar_ocr_explicit_date_line',
+            _sourceType: 'calendar',
+          });
+        }
+        currentDay = explicitDay;
+        pendingNameParts = [];
+        lastEventName = name;
+        continue;
+      }
+    }
+
+    if (!currentDay || !month || !year) {
+      pendingNameParts.push(line);
+      continue;
+    }
 
     const rangeMatch = line.match(
       /(\d{1,2}(?::\d{2})?|\d{3,4})\s*(am|pm)?\s*-\s*(\d{1,2}(?::\d{2})?|\d{3,4})\s*(am|pm)\b/i
@@ -2897,6 +2976,96 @@ function parseCalendarOcrText(
   return events;
 }
 
+function parseExplicitDateLineCalendarOcrItems(
+  lines: string[],
+  monthMap: Record<string, number>,
+  fallbackDate: DateTime,
+  userName: string
+): CalendarItem[] {
+  const explicitDateRe =
+    /\b(?:sun(?:day)?|mon(?:day)?|tue(?:s|sday)?|wed(?:nesday)?|thu(?:r|rs|rsday)?|fri(?:day)?|sat(?:urday)?)?\s*(january|jan|february|feb|march|mar|april|apr|may|june|jun|july|jul|august|aug|september|sept|sep|october|oct|november|nov|december|dec)\.?\s+([1-9]|[12]\d|3[01])(?:st|nd|rd|th)?(?:,?\s+(20\d{2}))?\b/i;
+  const rangeRe =
+    /(\d{1,2}(?::\d{2})?|\d{3,4})\s*(am|pm)?\s*-\s*(\d{1,2}(?::\d{2})?|\d{3,4})\s*(am|pm)\b/i;
+  const items: CalendarItem[] = [];
+
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = lines[index].replace(/[\u2013\u2014]/g, '-');
+    const explicitDateMatch = line.match(explicitDateRe);
+    const rangeMatch = line.match(rangeRe);
+    if (!explicitDateMatch || !rangeMatch) continue;
+
+    const explicitMonth = monthMap[String(explicitDateMatch[1] || '').toLowerCase()];
+    const explicitDay = Number(explicitDateMatch[2]);
+    const explicitYear = explicitDateMatch[3]
+      ? Number(explicitDateMatch[3])
+      : resolveCalendarOcrYear(fallbackDate, explicitMonth, explicitDay);
+    const explicitDate = explicitMonth && Number.isFinite(explicitDay) && Number.isFinite(explicitYear)
+      ? formatDateFromParts(explicitYear, explicitMonth, explicitDay)
+      : '';
+    const resolvedRange = resolveTimeRangeTokens(
+      rangeMatch[1],
+      rangeMatch[2] || '',
+      rangeMatch[3],
+      rangeMatch[4] || ''
+    );
+    if (!explicitDate || !resolvedRange?.startTime) continue;
+
+    const lineName = cleanOcrEventName(stripTimeTokens(line.replace(explicitDateMatch[0], ' ')));
+    const previousName = findPreviousOcrName(lines, index);
+    const name = lineName || previousName || 'Event';
+    items.push({
+      name,
+      type: 'event',
+      date: explicitDate,
+      startTime: resolvedRange.startTime,
+      endTime: resolvedRange.endTime,
+      venue: userName,
+      description: '',
+      extractionReason: 'calendar_ocr_explicit_date_line',
+      _sourceType: 'calendar',
+    });
+  }
+
+  return items;
+}
+
+function findPreviousOcrName(lines: string[], beforeIndex: number): string {
+  for (let index = beforeIndex - 1; index >= 0; index -= 1) {
+    const candidate = cleanOcrEventName(lines[index]);
+    if (!candidate) continue;
+    if (/^(?:est\.?\s*)?\d{4}$/i.test(candidate)) continue;
+    if (/^(?:restaurant|bar|restaurant bar|venue|event|events)$/i.test(candidate)) continue;
+    return candidate;
+  }
+  return '';
+}
+
+export function parseCalendarOcrTextForRegression(
+  ocrText: string,
+  postedLocalDate: string,
+  userName: string
+): CalendarItem[] {
+  return parseCalendarOcrText(ocrText, postedLocalDate, userName);
+}
+
+function resolveCalendarOcrYear(postedDate: DateTime, month: number, day: number): number {
+  let year = postedDate.isValid ? postedDate.year : DateTime.now().year;
+  if (!month || !day) return year;
+
+  const candidate = DateTime.fromObject({ year, month, day });
+  if (candidate.isValid && postedDate.isValid && candidate < postedDate.minus({ days: 30 })) {
+    year += 1;
+  }
+  return year;
+}
+
+function cleanOcrEventName(value: string): string {
+  return String(value || '')
+    .replace(/[|]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 function normalizeCalendarKey(value: string): string {
   return String(value || '')
     .toLowerCase()
@@ -2910,6 +3079,12 @@ function buildCalendarKey(item: CalendarItem): string {
   const time = item.startTime || '';
   const name = normalizeCalendarKey(item.name || '');
   return `${date}|${time}|${name}`;
+}
+
+function buildCalendarKeyWithoutDate(item: CalendarItem): string {
+  const time = item.startTime || '';
+  const name = normalizeCalendarKey(item.name || '');
+  return `${time}|${name}`;
 }
 
 function mergeCalendarItems(
@@ -2927,6 +3102,28 @@ function mergeCalendarItems(
   }
 
   for (const item of supplemental || []) {
+    const looseKey = buildCalendarKeyWithoutDate(item);
+    const replacementIndex = merged.findIndex((existing) =>
+      !String(existing.date || '').trim() &&
+      String(item.date || '').trim() &&
+      looseKey &&
+      buildCalendarKeyWithoutDate(existing) === looseKey
+    );
+    if (replacementIndex >= 0) {
+      const existing = merged[replacementIndex];
+      const mergedItem = {
+        ...existing,
+        ...item,
+        description: existing.description || item.description,
+        extractionReason: [existing.extractionReason, item.extractionReason]
+          .filter(Boolean)
+          .join('; '),
+      };
+      merged[replacementIndex] = mergedItem;
+      seen.add(buildCalendarKey(mergedItem));
+      continue;
+    }
+
     const key = buildCalendarKey(item);
     if (seen.has(key)) continue;
     seen.add(key);
