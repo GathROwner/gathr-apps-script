@@ -11,7 +11,7 @@ import {
 } from '../types/sharedEvent.js';
 import { logger } from '../utils/logger.js';
 
-export const SHARED_EVENT_PARSER_VERSION = 'shared-event-parser-v6';
+export const SHARED_EVENT_PARSER_VERSION = 'shared-event-parser-v7';
 
 const DEFAULT_TIMEZONE = 'America/Halifax';
 const MAX_TEXT_LENGTH = 12000;
