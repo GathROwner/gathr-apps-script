@@ -11,7 +11,7 @@ import {
 } from '../types/sharedEvent.js';
 import { logger } from '../utils/logger.js';
 
-export const SHARED_EVENT_PARSER_VERSION = 'shared-event-parser-v7';
+export const SHARED_EVENT_PARSER_VERSION = 'shared-event-parser-v8';
 
 const DEFAULT_TIMEZONE = 'America/Halifax';
 const MAX_TEXT_LENGTH = 12000;
@@ -1300,6 +1300,35 @@ function extractedEventSemanticKey(event: ParsedSharedEvent): string {
   return [dateKey, timeKey, titleKey].join('|');
 }
 
+function extractedEventLocationKey(event: ParsedSharedEvent): string {
+  return normalizeEventKeyPart(event.locationName || event.address);
+}
+
+function normalizedLocationKeysAreCompatible(first: string, second: string): boolean {
+  if (!first || !second) return true;
+  return first === second || first.includes(second) || second.includes(first);
+}
+
+function extractedEventsLikelyDuplicate(first: ParsedSharedEvent, second: ParsedSharedEvent): boolean {
+  const firstTitle = normalizeEventKeyPart(first.title);
+  const secondTitle = normalizeEventKeyPart(second.title);
+  if (!firstTitle || firstTitle !== secondTitle) return false;
+
+  const firstDate = cleanString(first.startDate, 40).toLowerCase();
+  const secondDate = cleanString(second.startDate, 40).toLowerCase();
+  if (firstDate && secondDate && firstDate !== secondDate) return false;
+
+  const firstTime = cleanString(first.startTime, 20).toLowerCase();
+  const secondTime = cleanString(second.startTime, 20).toLowerCase();
+  if (firstTime && secondTime && firstTime !== secondTime) return false;
+
+  const firstLocation = extractedEventLocationKey(first);
+  const secondLocation = extractedEventLocationKey(second);
+  if (!normalizedLocationKeysAreCompatible(firstLocation, secondLocation)) return false;
+
+  return Boolean(firstDate || secondDate) && Boolean(firstTime || secondTime);
+}
+
 function parsedEventCompletenessScore(event: ParsedSharedEvent): number {
   let score = 0;
   if (event.title) score += 30;
@@ -1320,13 +1349,16 @@ function mergeExtractedParsedEvents(...groups: ParsedSharedEvent[][]): ParsedSha
 
   for (const event of groups.flat()) {
     const key = extractedEventSemanticKey(event);
-    const existingIndex = indexByKey.get(key);
+    const existingIndex = indexByKey.get(key) ??
+      merged.findIndex((existing) => extractedEventsLikelyDuplicate(event, existing));
 
-    if (existingIndex !== undefined) {
+    if (existingIndex !== undefined && existingIndex >= 0) {
       const existing = merged[existingIndex];
       if (parsedEventCompletenessScore(event) > parsedEventCompletenessScore(existing)) {
         merged[existingIndex] = event;
+        indexByKey.set(extractedEventSemanticKey(event), existingIndex);
       }
+      indexByKey.set(key, existingIndex);
       continue;
     }
 

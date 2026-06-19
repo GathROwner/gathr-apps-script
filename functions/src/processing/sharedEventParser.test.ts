@@ -704,6 +704,61 @@ test('shared event merge collapses same title date and time with better venue', 
   assert.equal(merged[0].locationName, "Peake's Quay Restaurant & Bar");
 });
 
+test('shared event merge collapses same title and time when one candidate is missing date', async () => {
+  const primary = await parseSharedEventPayload({
+    sourceUrl: 'https://www.facebook.com/share/p/peakes-kim-albert',
+    title: 'Kim Albert',
+    sharedText: 'Saturday June 20 | 7-10 PM',
+    timezone: 'America/Halifax',
+  }, {
+    sourceVisibility: 'public_verified',
+    visibilityEvidence: {
+      method: 'public_url_probe',
+      checkedAt: '2026-06-19T10:00:00.000Z',
+      url: 'https://www.facebook.com/share/p/peakes-kim-albert',
+      finalUrl: 'https://www.facebook.com/peakesquay/posts/123456789',
+      httpStatus: 200,
+      reason: 'Public URL returned usable metadata without user credentials.',
+      titleFound: true,
+      descriptionFound: true,
+      title: "Peake's Quay",
+      description: "Peake's Quay added a new photo.",
+      ogType: 'article',
+      locationName: "Peake's Quay Restaurant & Bar",
+    },
+  });
+
+  const datedCandidate = {
+    ...primary,
+    title: 'Kim Albert',
+    startDate: '2026-06-20',
+    endDate: '2026-06-20',
+    startTime: '19:00',
+    locationName: "Peake's Quay",
+    reviewReasons: [],
+    confidence: 95,
+  };
+  const missingDateCandidate = {
+    ...primary,
+    title: 'Kim Albert',
+    startDate: undefined,
+    endDate: undefined,
+    startTime: '19:00',
+    locationName: "Peake's Quay Restaurant & Bar",
+    reviewReasons: ['missing_start_date'],
+    confidence: 80,
+  };
+
+  const merged = mergeExtractedParsedEventsForRegression([datedCandidate], [missingDateCandidate]);
+
+  assert.equal(merged.length, 1);
+  assert.equal(merged[0].title, 'Kim Albert');
+  assert.equal(merged[0].startDate, '2026-06-20');
+  assert.equal(merged[0].startTime, '19:00');
+  assert.equal(merged[0].locationName, "Peake's Quay");
+  assert.deepEqual(merged[0].reviewReasons, []);
+});
+
 test('image-only calendar shares stay private while preserving extracted event details', async () => {
   const originalNow = Settings.now;
   Settings.now = () => new Date('2026-06-18T22:58:00.000Z').getTime();
