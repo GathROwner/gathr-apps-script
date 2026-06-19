@@ -362,6 +362,15 @@ function cleanVenueCandidate(value: string): string | undefined {
   return cleaned;
 }
 
+function cleanExtractedVenueCandidate(value: unknown): string | undefined {
+  const withoutFacebookActivity = cleanString(value, 220)
+    .replace(/\s*[-–—]\s*[^-–—]*\b(?:added|shared|posted|updated)\s+(?:a\s+)?(?:new\s+)?(?:photo|post|event|video)\b.*$/i, '')
+    .replace(/\b(?:added|shared|posted|updated)\s+(?:a\s+)?(?:new\s+)?(?:photo|post|event|video)\b.*$/i, '')
+    .trim();
+
+  return cleanVenueCandidate(withoutFacebookActivity);
+}
+
 function extractLocation(payload: SharedEventSubmitPayload, combinedText: string): { locationName?: string; address?: string } {
   const directLocation = cleanString(payload.locationName || payload.venueName, 180);
   const directAddress = cleanString(payload.address, 260);
@@ -1237,6 +1246,23 @@ function facebookPostVenueFromEvidence(sourceUrl: string | undefined, evidence: 
     undefined;
 }
 
+function normalizeEventKeyPart(value: unknown): string {
+  return decodeHtmlEntities(cleanString(value, 300))
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[’‘`]/g, "'")
+    .replace(/&/g, ' and ')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
+function locationLooksLikeFacebookActivity(value: unknown): boolean {
+  return /\b(?:added|shared|posted|updated)\s+(?:a\s+)?(?:new\s+)?(?:photo|post|event|video)\b/i.test(
+    cleanString(value, 300)
+  );
+}
+
 function extractPossessiveEventTitleFromPostDescription(text: string): string | undefined {
   const source = cleanLongText(text);
   if (!source) return undefined;
@@ -1265,14 +1291,46 @@ function extractedEventKey(event: ParsedSharedEvent): string {
   ].join('|');
 }
 
+function extractedEventSemanticKey(event: ParsedSharedEvent): string {
+  const titleKey = normalizeEventKeyPart(event.title);
+  const dateKey = cleanString(event.startDate, 40).toLowerCase();
+  const timeKey = cleanString(event.startTime, 20).toLowerCase();
+
+  if (!titleKey || !dateKey) return extractedEventKey(event);
+  return [dateKey, timeKey, titleKey].join('|');
+}
+
+function parsedEventCompletenessScore(event: ParsedSharedEvent): number {
+  let score = 0;
+  if (event.title) score += 30;
+  if (event.startDate) score += 35;
+  if (event.startTime) score += 10;
+  if (event.endTime) score += 4;
+  if (event.address) score += 8;
+  if (event.locationName) score += locationLooksLikeFacebookActivity(event.locationName) ? -25 : 12;
+  if (event.description) score += Math.min(8, Math.ceil(event.description.length / 80));
+  score += Math.min(10, Math.max(0, Math.round(event.confidence / 10)));
+  score -= event.reviewReasons.length * 6;
+  return score;
+}
+
 function mergeExtractedParsedEvents(...groups: ParsedSharedEvent[][]): ParsedSharedEvent[] {
-  const seen = new Set<string>();
+  const indexByKey = new Map<string, number>();
   const merged: ParsedSharedEvent[] = [];
 
   for (const event of groups.flat()) {
-    const key = extractedEventKey(event);
-    if (seen.has(key)) continue;
-    seen.add(key);
+    const key = extractedEventSemanticKey(event);
+    const existingIndex = indexByKey.get(key);
+
+    if (existingIndex !== undefined) {
+      const existing = merged[existingIndex];
+      if (parsedEventCompletenessScore(event) > parsedEventCompletenessScore(existing)) {
+        merged[existingIndex] = event;
+      }
+      continue;
+    }
+
+    indexByKey.set(key, merged.length);
     merged.push(event);
   }
 
@@ -1403,7 +1461,7 @@ function buildExtractedParsedEventsFromCalendarItems(
       const startDate = normalizeIsoDate(item.date, primary.timezone);
       const startTime = normalizeTime(item.startTime);
       const endTime = normalizeTime('endTime' in item ? item.endTime : undefined);
-      const locationName = cleanString(item.venue, 180) || inferredVenue || undefined;
+      const locationName = cleanExtractedVenueCandidate(item.venue) || inferredVenue || undefined;
       const address = inferredAddress || undefined;
       const description = cleanLongText('description' in item ? item.description : '') ||
         `Extracted from shared calendar image.`;
@@ -1531,6 +1589,12 @@ export function buildCalendarImageParsedEventsForRegression(
   items: ExtractedItem[]
 ): ParsedSharedEvent[] {
   return buildExtractedParsedEventsFromCalendarItems(primary, items);
+}
+
+export function mergeExtractedParsedEventsForRegression(
+  ...groups: ParsedSharedEvent[][]
+): ParsedSharedEvent[] {
+  return mergeExtractedParsedEvents(...groups);
 }
 
 export async function parseSharedEventPayload(

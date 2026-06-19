@@ -6,6 +6,7 @@ import {
   buildCalendarImageParsedEventsForRegression,
   extractFacebookEmbeddedEventData,
   extractFacebookCanonicalStoryUrl,
+  mergeExtractedParsedEventsForRegression,
   parseSharedEventPayload,
   parseSharedEventPayloads,
   verifySharedEventSourceVisibility,
@@ -608,6 +609,99 @@ test('calendar image extraction conversion keeps expired events, future events, 
   } finally {
     Settings.now = originalNow;
   }
+});
+
+test('calendar image venue cleanup removes Facebook activity text', async () => {
+  const primary = await parseSharedEventPayload({
+    sourceUrl: 'https://www.facebook.com/share/p/peakes-kim-albert',
+    sharedText: 'Kim Albert',
+    mediaUrls: ['https://example.com/peakes-kim-albert.jpg'],
+    timezone: 'America/Halifax',
+  }, {
+    sourceVisibility: 'public_verified',
+    visibilityEvidence: {
+      method: 'public_url_probe',
+      checkedAt: '2026-06-19T10:00:00.000Z',
+      url: 'https://www.facebook.com/share/p/peakes-kim-albert',
+      finalUrl: 'https://www.facebook.com/peakesquay/posts/123456789',
+      httpStatus: 200,
+      reason: 'Public URL returned usable metadata without user credentials.',
+      titleFound: true,
+      descriptionFound: true,
+      title: "Peake's Quay",
+      description: "Peake's Quay added a new photo.",
+      imageUrl: 'https://example.com/peakes-kim-albert.jpg',
+      ogType: 'article',
+      locationName: "Peake's Quay Restaurant & Bar",
+    },
+  });
+
+  const parsedEvents = buildCalendarImageParsedEventsForRegression(primary, [
+    {
+      name: 'Kim Albert',
+      type: 'event',
+      date: '2026-06-20',
+      startTime: '7pm',
+      venue: "Peake's Quay - Peake's Quay added a new photo.",
+      description: 'Extracted from shared calendar image.',
+    },
+  ]);
+
+  assert.equal(parsedEvents.length, 1);
+  assert.equal(parsedEvents[0].locationName, "Peake's Quay");
+  assert.notEqual(parsedEvents[0].locationName, "Peake's Quay - Peake's Quay added a new photo.");
+});
+
+test('shared event merge collapses same title date and time with better venue', async () => {
+  const primary = await parseSharedEventPayload({
+    sourceUrl: 'https://www.facebook.com/share/p/peakes-kim-albert',
+    title: 'Kim Albert',
+    sharedText: 'Saturday June 20 | 7-10 PM',
+    timezone: 'America/Halifax',
+  }, {
+    sourceVisibility: 'public_verified',
+    visibilityEvidence: {
+      method: 'public_url_probe',
+      checkedAt: '2026-06-19T10:00:00.000Z',
+      url: 'https://www.facebook.com/share/p/peakes-kim-albert',
+      finalUrl: 'https://www.facebook.com/peakesquay/posts/123456789',
+      httpStatus: 200,
+      reason: 'Public URL returned usable metadata without user credentials.',
+      titleFound: true,
+      descriptionFound: true,
+      title: "Peake's Quay",
+      description: "Peake's Quay added a new photo.",
+      ogType: 'article',
+      locationName: "Peake's Quay Restaurant & Bar",
+    },
+  });
+
+  const weakVenue = {
+    ...primary,
+    title: 'Kim Albert',
+    startDate: '2026-06-20',
+    endDate: '2026-06-20',
+    startTime: '19:00',
+    locationName: "Peake's Quay - Peake's Quay added a new photo.",
+    confidence: 85,
+  };
+  const betterVenue = {
+    ...primary,
+    title: 'Kim Albert',
+    startDate: '2026-06-20',
+    endDate: '2026-06-20',
+    startTime: '19:00',
+    locationName: "Peake's Quay Restaurant & Bar",
+    confidence: 95,
+  };
+
+  const merged = mergeExtractedParsedEventsForRegression([weakVenue], [betterVenue]);
+
+  assert.equal(merged.length, 1);
+  assert.equal(merged[0].title, 'Kim Albert');
+  assert.equal(merged[0].startDate, '2026-06-20');
+  assert.equal(merged[0].startTime, '19:00');
+  assert.equal(merged[0].locationName, "Peake's Quay Restaurant & Bar");
 });
 
 test('image-only calendar shares stay private while preserving extracted event details', async () => {
