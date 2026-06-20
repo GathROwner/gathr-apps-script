@@ -32,6 +32,41 @@ Private shared events do not enter:
 
 Public candidates require validation/promotion before public publication.
 
+## Public Review / Promotion Boundary
+
+The app label "Public review" means "eligible for backend public validation." It does not mean the user chose to make the event public, and it does not guarantee that a human has reviewed it yet.
+
+Public eligibility is determined server-side:
+
+- `public_verified`: GathR could independently fetch usable public source metadata from the URL without user cookies or Facebook credentials.
+- `restricted_unverified`, `user_private`, or `unknown`: the share stays user-private unless a later explicit promotion flow is built.
+- A share payload hint can force private handling, but it cannot force public handling.
+
+All shared events are first saved to the submitting user's private area:
+
+- `users/{uid}/sharedEventIngests/{ingestId}` stores the raw ingest record and routing/status metadata.
+- `users/{uid}/privateSharedEvents/{eventId}` stores the parsed user-visible private copy.
+
+Only `public_verified` parsed events with `routing: "public_candidate"` also create:
+
+- `public_shared_event_candidates/{candidateId}`
+
+Public candidates are then processed by `processSharedEventPublicCandidates` or the scheduled `scheduledSharedEventPublicCandidateProcessor`. The scheduled processor only runs when the deployed environment has `SHARED_EVENT_PUBLIC_PROMOTION_ENABLED` enabled.
+
+Promotion outcomes:
+
+- `promoted`: the candidate was converted into the normal public event shape and written to the public venue/event collections.
+- `duplicate_existing`: the candidate matched an existing public event and was not duplicated.
+- `needs_user_review`: required details such as title, date, or location were missing.
+- `rejected_expired`: the candidate event date had already passed.
+- `queued_unknown_venue`: the venue could not be matched and was handed to the unknown-venue pipeline.
+- `queued_city_level_review`: the location was city/area-level rather than a specific venue.
+- `venue_unresolved` or `failed`: promotion could not safely complete.
+
+When a candidate is promoted, the public event is intended to look like a normal parsed event from the larger pipeline. It carries shared-event provenance fields such as `sharedEventCandidateId`, `sharedEventPrivateEventId`, `sharedEventIngestId`, `sharedEventOwnerUid`, and `sharedEventSource: "public_shared_event_candidate"` so the app can show a "Shared by you" badge to the submitting user.
+
+Public Facebook posts with weak initial share payloads may also queue Apify scrape enrichment. The share screen may show only the initial matches while the full Facebook post scrape runs later through the normal parser/webhook flow.
+
 ## Native App Boundary
 
 The Facebook "Share to" row requires a native app build. The mobile branch adds `expo-share-intent` and configures:
