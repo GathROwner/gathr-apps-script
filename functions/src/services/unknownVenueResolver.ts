@@ -946,6 +946,23 @@ function candidateContainsUnknownNameTokens(
   return unknownTokens.every((token) => candidateTokens.has(token));
 }
 
+export function sourcePageIdentitySupportsExistingVenueSuggestion(
+  unknownName: string,
+  candidateName: string
+): boolean {
+  const unknownTokens = getMeaningfulVenueTokens(unknownName);
+  if (!unknownTokens.length) return false;
+
+  const candidateTokens = new Set(getMeaningfulVenueTokens(candidateName));
+  const sharedTokens = unknownTokens.filter((token) => candidateTokens.has(token));
+  if (sharedTokens.length >= 2) return true;
+
+  // A source-page slug is already a strong identity signal. Allow one distinctive
+  // shared token so "Havenwood Studio Theatre" can suggest "Havenwood Dance Studio"
+  // while generic source pages such as "Downtown Charlottetown" still fail.
+  return sharedTokens.some((token) => token.length >= 8);
+}
+
 function candidateExtendsUnknownNameByTokens(
   unknownName: string,
   candidateName: string
@@ -1028,6 +1045,32 @@ function getSampleAggregatorFacebookUrls(record: UnrecognizedVenueRecord): strin
     if (seen.has(key)) continue;
     seen.add(key);
     result.push(url);
+  }
+  return result;
+}
+
+function getSampleAggregatorFacebookIdentityUrls(record: UnrecognizedVenueRecord): string[] {
+  const sampleEvents = Array.isArray(record.sampleEvents) ? record.sampleEvents : [];
+  const result: string[] = [];
+  const seen = new Set<string>();
+  for (const sample of sampleEvents) {
+    const raw = String(sample?.aggregatorName || '').trim().replace(/^@+/, '');
+    if (!raw) continue;
+
+    const asUrl = /^https?:\/\//i.test(raw)
+      ? raw
+      : (/^[a-z0-9._-]{3,}$/i.test(raw) ? `https://www.facebook.com/${raw}` : '');
+    if (!asUrl) continue;
+
+    const slug = extractFacebookSlug(asUrl);
+    if (!slug || ['events', 'groups', 'posts', 'photos', 'videos', 'reel', 'reels'].includes(slug)) {
+      continue;
+    }
+
+    const key = normalizeUrl(asUrl) || asUrl.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    result.push(asUrl);
   }
   return result;
 }
@@ -2392,6 +2435,57 @@ async function collectExistingVenueSuggestions(
                 ? 'Aggregator Facebook URL matched existing venue (address-like civic support)'
                 : 'Aggregator Facebook URL matched existing venue (token-contained alias)'
       ),
+    });
+    break;
+  }
+
+  for (const sourceIdentityUrl of getSampleAggregatorFacebookIdentityUrls(record)) {
+    let sourceIdentityMatch:
+      | Awaited<ReturnType<typeof firestoreService.findMatchingVenue>>
+      | null = null;
+    let matchedInputName = rawName;
+    for (const matchName of matchNameCandidates) {
+      const attempted = await firestoreService.findMatchingVenue(matchName, sourceIdentityUrl);
+      if (!attempted.isMatch || !attempted.matchedVenue) continue;
+      sourceIdentityMatch = attempted;
+      matchedInputName = matchName;
+      break;
+    }
+    if (!sourceIdentityMatch?.isMatch || !sourceIdentityMatch.matchedVenue) continue;
+
+    const venueAny = sourceIdentityMatch.matchedVenue as unknown as Record<string, unknown>;
+    const matchedVenueName = getVenueDisplayName(venueAny) || sourceIdentityMatch.matchedVenue.name || '';
+    if (!matchedVenueName) continue;
+    const matchedVenueAddress = getVenueAddress(venueAny);
+    const matchedVenueAddressKey = normalizeAddressMatchKey(matchedVenueAddress);
+    const matchedVenueAddressLooseKey = normalizeAddressLooseMatchKey(matchedVenueAddress);
+
+    const exactName = normalizeVenueName(matchedVenueName) === normalizeVenueName(rawName);
+    const tokenAlias = candidateContainsUnknownNameTokens(rawName, matchedVenueName);
+    const sourcePageTokenSupport = sourcePageIdentitySupportsExistingVenueSuggestion(rawName, matchedVenueName);
+    const addressExact = Boolean(matchedVenueAddressKey && recordAddressKeys.has(matchedVenueAddressKey));
+    const addressLoose = Boolean(matchedVenueAddressLooseKey && recordAddressLooseKeys.has(matchedVenueAddressLooseKey));
+    if (!exactName && !tokenAlias && !sourcePageTokenSupport && !addressExact && !addressLoose) continue;
+    if ((cityHint || provinceHint) && !venueMatchesResolverGeoHints(record, venueAny)) continue;
+
+    suggestions.push({
+      venueId: sourceIdentityMatch.matchedVenue.id,
+      venueName: matchedVenueName,
+      confidence: exactName || tokenAlias || addressExact || addressLoose ? 0.98 : 0.96,
+      matchType: exactName ? 'exact' : 'alias',
+      address: matchedVenueAddress,
+      facebookUrl: getVenueFacebookUrl(venueAny),
+      note: buildSuggestionNote([
+        ['matcher', 'sourcePageIdentity'],
+        ['sourceIdentityUrl', sourceIdentityUrl],
+        ['inputName', matchedInputName],
+        ['exactName', exactName ? '1' : '0'],
+        ['tokenAlias', tokenAlias ? '1' : '0'],
+        ['sourcePageTokenSupport', sourcePageTokenSupport ? '1' : '0'],
+        ['addressExact', addressExact ? '1' : '0'],
+        ['addressLoose', addressLoose ? '1' : '0'],
+        ['matchedVenueAddress', matchedVenueAddress],
+      ]) || 'Source page identity matched existing venue',
     });
     break;
   }

@@ -2,7 +2,10 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import { UnrecognizedVenueRecord, UnrecognizedVenueSampleEvent } from '../types/index.js';
-import { extractReplayTargetsFromSamples } from './unknownVenueResolver.js';
+import {
+  extractReplayTargetsFromSamples,
+  sourcePageIdentitySupportsExistingVenueSuggestion,
+} from './unknownVenueResolver.js';
 
 function sample(
   overrides: Partial<UnrecognizedVenueSampleEvent>
@@ -117,4 +120,38 @@ test('unknown venue finalizer can explicitly replay all sampled rows', () => {
       sourceUniqueId: undefined,
     },
   ]);
+});
+
+test('source page identity suggestion guard allows distinctive shared venue tokens', () => {
+  assert.equal(
+    sourcePageIdentitySupportsExistingVenueSuggestion(
+      'Havenwood Studio Theatre',
+      'Havenwood Dance Studio'
+    ),
+    true
+  );
+  assert.equal(
+    sourcePageIdentitySupportsExistingVenueSuggestion(
+      "Peake's Quay",
+      "Peake's Quay Restaurant & Bar"
+    ),
+    true
+  );
+});
+
+test('source page identity suggestion guard rejects generic organizer context', () => {
+  assert.equal(
+    sourcePageIdentitySupportsExistingVenueSuggestion(
+      'Parking Lot',
+      'Milton Community Hall'
+    ),
+    false
+  );
+  assert.equal(
+    sourcePageIdentitySupportsExistingVenueSuggestion(
+      'Havenwood Studio Theatre',
+      'Charlottetown Beer Garden'
+    ),
+    false
+  );
 });
