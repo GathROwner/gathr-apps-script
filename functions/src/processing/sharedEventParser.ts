@@ -4,6 +4,8 @@ import { extractContentByType } from '../parsing/eventExtractor.js';
 import type { ExtractedItem } from '../parsing/types.js';
 import {
   ParsedSharedEvent,
+  SharedEventFieldSource,
+  SharedEventFieldSources,
   SharedEventSourcePlatform,
   SharedEventSourceVisibility,
   SharedEventSubmitPayload,
@@ -98,6 +100,33 @@ function cleanString(value: unknown, maxLength = MAX_SHORT_FIELD_LENGTH): string
 
 function cleanLongText(value: unknown): string {
   return cleanString(value, MAX_TEXT_LENGTH);
+}
+
+function textContainsValue(text: string | undefined, value: string | undefined): boolean {
+  const normalizedText = cleanLongText(text).toLowerCase();
+  const normalizedValue = cleanLongText(value).toLowerCase();
+  return Boolean(normalizedText && normalizedValue && normalizedText.includes(normalizedValue));
+}
+
+function sourceForTextValue(params: {
+  value?: string;
+  publicTexts?: Array<string | undefined>;
+  payloadTexts?: Array<string | undefined>;
+  sharedText?: string;
+  fallback?: SharedEventFieldSource;
+}): SharedEventFieldSource | undefined {
+  const value = cleanLongText(params.value);
+  if (!value) return undefined;
+  if ((params.publicTexts || []).some((text) => textContainsValue(text, value))) return 'public_source';
+  if ((params.payloadTexts || []).some((text) => textContainsValue(text, value))) return 'share_payload';
+  if (textContainsValue(params.sharedText, value)) return 'shared_text';
+  return params.fallback;
+}
+
+function compactFieldSources(value: SharedEventFieldSources): SharedEventFieldSources {
+  return Object.fromEntries(
+    Object.entries(value).filter(([, source]) => Boolean(source))
+  ) as SharedEventFieldSources;
 }
 
 function decodeHtmlEntities(value: string): string {
@@ -348,6 +377,97 @@ function resolveRelativeWeekdayDateFromText(
   }
 
   return resolved.toFormat('yyyy-MM-dd');
+}
+
+function extractDateCandidateFromText(text: string, timezone: string, startTime?: string, sourcePublishedAt?: string): string | undefined {
+  return extractDateFromText(text, timezone) ||
+    resolveRelativeWeekdayDateFromText(text, timezone, startTime, sourcePublishedAt);
+}
+
+function chooseDateField(params: {
+  payloadValue?: string;
+  evidenceValue?: string;
+  payloadText?: string;
+  sharedText?: string;
+  evidenceText?: string;
+  timezone: string;
+  startTime?: string;
+  sourcePublishedAt?: string;
+  preferPublicEvidence: boolean;
+}): { value?: string; source?: SharedEventFieldSource } {
+  const payloadDate = normalizeIsoDate(params.payloadValue, params.timezone);
+  const evidenceDate = normalizeIsoDate(params.evidenceValue, params.timezone);
+  const evidenceTextDate = extractDateCandidateFromText(
+    params.evidenceText || '',
+    params.timezone,
+    params.startTime,
+    params.sourcePublishedAt
+  );
+  const payloadTextDate = extractDateCandidateFromText(
+    params.payloadText || '',
+    params.timezone,
+    params.startTime,
+    params.sourcePublishedAt
+  );
+  const sharedTextDate = extractDateCandidateFromText(
+    params.sharedText || '',
+    params.timezone,
+    params.startTime,
+    params.sourcePublishedAt
+  );
+
+  const ordered = params.preferPublicEvidence
+    ? [
+        { value: evidenceDate, source: 'public_source' as SharedEventFieldSource },
+        { value: evidenceTextDate, source: 'public_source' as SharedEventFieldSource },
+        { value: payloadDate, source: 'share_payload' as SharedEventFieldSource },
+        { value: payloadTextDate, source: 'share_payload' as SharedEventFieldSource },
+        { value: sharedTextDate, source: 'shared_text' as SharedEventFieldSource },
+      ]
+    : [
+        { value: payloadDate, source: 'share_payload' as SharedEventFieldSource },
+        { value: evidenceDate, source: 'public_source' as SharedEventFieldSource },
+        { value: payloadTextDate, source: 'share_payload' as SharedEventFieldSource },
+        { value: sharedTextDate, source: 'shared_text' as SharedEventFieldSource },
+        { value: evidenceTextDate, source: 'public_source' as SharedEventFieldSource },
+      ];
+
+  const selected = ordered.find((candidate) => Boolean(candidate.value));
+  return selected || {};
+}
+
+function chooseTimeField(params: {
+  payloadValue?: string;
+  evidenceValue?: string;
+  payloadText?: string;
+  sharedText?: string;
+  evidenceText?: string;
+  preferPublicEvidence: boolean;
+}): { value?: string; source?: SharedEventFieldSource } {
+  const payloadTime = normalizeTime(params.payloadValue);
+  const evidenceTime = normalizeTime(params.evidenceValue);
+  const payloadTextTime = normalizeTime(params.payloadText);
+  const sharedTextTime = normalizeTime(params.sharedText);
+  const evidenceTextTime = normalizeTime(params.evidenceText);
+
+  const ordered = params.preferPublicEvidence
+    ? [
+        { value: evidenceTime, source: 'public_source' as SharedEventFieldSource },
+        { value: evidenceTextTime, source: 'public_source' as SharedEventFieldSource },
+        { value: payloadTime, source: 'share_payload' as SharedEventFieldSource },
+        { value: payloadTextTime, source: 'share_payload' as SharedEventFieldSource },
+        { value: sharedTextTime, source: 'shared_text' as SharedEventFieldSource },
+      ]
+    : [
+        { value: payloadTime, source: 'share_payload' as SharedEventFieldSource },
+        { value: evidenceTime, source: 'public_source' as SharedEventFieldSource },
+        { value: payloadTextTime, source: 'share_payload' as SharedEventFieldSource },
+        { value: sharedTextTime, source: 'shared_text' as SharedEventFieldSource },
+        { value: evidenceTextTime, source: 'public_source' as SharedEventFieldSource },
+      ];
+
+  const selected = ordered.find((candidate) => Boolean(candidate.value));
+  return selected || {};
 }
 
 function cleanVenueCandidate(value: string): string | undefined {
@@ -1486,6 +1606,8 @@ function buildExtractedParsedEventsFromCalendarItems(
     cleanString(primary.visibilityEvidence.title, 180);
   const inferredAddress = cleanString(primary.address, 260) ||
     cleanString(primary.visibilityEvidence.address, 260);
+  const extractionSource: SharedEventFieldSource =
+    primary.fieldSources?.mediaUrls === 'public_source' ? 'public_source' : 'uploaded_media';
 
   return items
     .map((item, index): ParsedSharedEvent | undefined => {
@@ -1548,6 +1670,19 @@ function buildExtractedParsedEventsFromCalendarItems(
         confidence,
         needsUserReview,
         reviewReasons,
+        fieldSources: compactFieldSources({
+          ...primary.fieldSources,
+          title: extractionSource,
+          description: extractionSource,
+          startDate: extractionSource,
+          endDate: extractionSource,
+          startTime: extractionSource,
+          endTime: extractionSource,
+          locationName: cleanExtractedVenueCandidate(item.venue)
+            ? extractionSource
+            : primary.fieldSources?.locationName,
+          address: inferredAddress ? primary.fieldSources?.address : undefined,
+        }),
         isExpired,
         sequenceIndex: index,
         extractedFromShare: true,
@@ -1652,6 +1787,14 @@ export async function parseSharedEventPayload(
   const sourcePlatform = detectSharedEventPlatform(sourceUrl, payload.sourcePlatform || payload.sourceApp);
   const evidenceTitle = cleanString(visibilityEvidence.title, 300);
   const evidenceDescription = cleanLongText(visibilityEvidence.description);
+  const evidenceText = [
+    evidenceTitle,
+    evidenceDescription,
+  ].filter(Boolean).join('\n');
+  const payloadText = [
+    cleanString(payload.title, 300),
+    cleanLongText(payload.description),
+  ].filter(Boolean).join('\n');
   const combinedText = [
     cleanString(payload.title, 300),
     cleanLongText(payload.description),
@@ -1659,6 +1802,7 @@ export async function parseSharedEventPayload(
     evidenceTitle,
     evidenceDescription,
   ].filter(Boolean).join('\n');
+  const preferPublicEvidence = sourceVisibility === 'public_verified';
 
   const initialTitle = extractTitle(payload, combinedText);
   const postDerivedTitle = !payload.title && evidenceTitle && initialTitle === evidenceTitle
@@ -1666,11 +1810,27 @@ export async function parseSharedEventPayload(
     : undefined;
   const title = postDerivedTitle || initialTitle;
   const description = extractDescription(payload, combinedText, title);
-  const startTime = normalizeTime(payload.startTime) ||
-    normalizeTime(visibilityEvidence.startTime) ||
-    normalizeTime(combinedText);
-  const startDate = normalizeIsoDate(payload.startDate, timezone) ||
-    normalizeIsoDate(visibilityEvidence.startDate, timezone) ||
+  const startTimeChoice = chooseTimeField({
+    payloadValue: payload.startTime,
+    evidenceValue: visibilityEvidence.startTime,
+    payloadText,
+    sharedText,
+    evidenceText,
+    preferPublicEvidence,
+  });
+  const startTime = startTimeChoice.value;
+  const startDateChoice = chooseDateField({
+    payloadValue: payload.startDate,
+    evidenceValue: visibilityEvidence.startDate,
+    payloadText,
+    sharedText,
+    evidenceText,
+    timezone,
+    startTime,
+    sourcePublishedAt: visibilityEvidence.sourcePublishedAt,
+    preferPublicEvidence,
+  });
+  const startDate = startDateChoice.value ||
     extractDateFromText(combinedText, timezone) ||
     resolveRelativeWeekdayDateFromText(
       combinedText,
@@ -1678,10 +1838,28 @@ export async function parseSharedEventPayload(
       startTime,
       visibilityEvidence.sourcePublishedAt
     );
-  const endDate = normalizeIsoDate(payload.endDate, timezone) ||
-    normalizeIsoDate(visibilityEvidence.endDate, timezone) ||
+  const endDateChoice = chooseDateField({
+    payloadValue: payload.endDate,
+    evidenceValue: visibilityEvidence.endDate,
+    payloadText,
+    sharedText,
+    evidenceText,
+    timezone,
+    startTime,
+    sourcePublishedAt: visibilityEvidence.sourcePublishedAt,
+    preferPublicEvidence,
+  });
+  const endDate = endDateChoice.value ||
     startDate;
-  const endTime = normalizeTime(payload.endTime) || normalizeTime(visibilityEvidence.endTime);
+  const endTimeChoice = chooseTimeField({
+    payloadValue: payload.endTime,
+    evidenceValue: visibilityEvidence.endTime,
+    payloadText,
+    sharedText,
+    evidenceText,
+    preferPublicEvidence,
+  });
+  const endTime = endTimeChoice.value;
   const extractedLocation = extractLocation(payload, combinedText);
   const locationName = extractedLocation.locationName ||
     cleanString(visibilityEvidence.locationName, 180) ||
@@ -1690,10 +1868,70 @@ export async function parseSharedEventPayload(
   const address = extractedLocation.address ||
     cleanString(visibilityEvidence.address, 260) ||
     undefined;
+  const payloadMediaUrls = normalizeMediaUrls(Array.isArray(payload.mediaUrls) ? payload.mediaUrls : []);
   const mediaUrls = normalizeMediaUrls([
-    ...(Array.isArray(payload.mediaUrls) ? payload.mediaUrls : []),
+    ...payloadMediaUrls,
     visibilityEvidence.imageUrl,
   ]);
+  const titleSource = postDerivedTitle
+    ? 'public_source'
+    : sourceForTextValue({
+        value: title,
+        publicTexts: [evidenceTitle, evidenceDescription],
+        payloadTexts: [payload.title, payload.description],
+        sharedText,
+        fallback: title ? 'unknown' : undefined,
+      });
+  const descriptionSource = sourceForTextValue({
+    value: description,
+    publicTexts: [evidenceDescription],
+    payloadTexts: [payload.description, payload.title],
+    sharedText,
+    fallback: description ? 'unknown' : undefined,
+  });
+  const locationSource: SharedEventFieldSource | undefined =
+    (locationName && cleanString(visibilityEvidence.locationName, 180) === locationName)
+      ? 'public_source'
+      : (locationName && facebookPostVenueFromEvidence(sourceUrl, visibilityEvidence) === locationName)
+        ? 'public_source'
+        : sourceForTextValue({
+            value: locationName,
+            publicTexts: [evidenceTitle, evidenceDescription],
+            payloadTexts: [payload.locationName, payload.venueName, payload.description, payload.title],
+            sharedText,
+            fallback: locationName ? 'unknown' : undefined,
+          });
+  const addressSource: SharedEventFieldSource | undefined =
+    (address && cleanString(visibilityEvidence.address, 260) === address)
+      ? 'public_source'
+      : sourceForTextValue({
+          value: address,
+          publicTexts: [evidenceDescription],
+          payloadTexts: [payload.address, payload.description],
+          sharedText,
+          fallback: address ? 'unknown' : undefined,
+        });
+  const mediaSource: SharedEventFieldSource | undefined = mediaUrls.length > 0
+    ? (payloadMediaUrls.length > 0 ? 'share_payload' : 'public_source')
+    : undefined;
+  const rawFieldSources: SharedEventFieldSources = {
+    title: titleSource,
+    description: descriptionSource,
+    startDate: startDateChoice.source || (startDate ? sourceForTextValue({
+      value: startDate,
+      publicTexts: [evidenceText],
+      payloadTexts: [payloadText],
+      sharedText,
+      fallback: 'unknown',
+    }) : undefined),
+    endDate: endDateChoice.source || startDateChoice.source,
+    startTime: startTimeChoice.source,
+    endTime: endTimeChoice.source,
+    locationName: locationSource,
+    address: addressSource,
+    mediaUrls: mediaSource,
+  };
+  const fieldSources = compactFieldSources(rawFieldSources);
   const reviewReasons: string[] = [];
   const isExpired = eventLooksExpired(startDate, startTime, timezone);
 
@@ -1747,6 +1985,7 @@ export async function parseSharedEventPayload(
     confidence,
     needsUserReview,
     reviewReasons,
+    fieldSources,
     isExpired,
     sourceContentSignature: sourceContentSignature([
       sourceUrl,

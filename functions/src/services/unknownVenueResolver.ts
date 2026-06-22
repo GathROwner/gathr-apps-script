@@ -4,6 +4,8 @@ import * as firestoreService from './firestoreService.js';
 import * as placesService from './placesService.js';
 import * as apifyService from './apifyService.js';
 import * as driveService from './driveService.js';
+import * as sharedEventCandidateStore from './sharedEventCandidateStore.js';
+import { processPublicSharedEventCandidateById } from './sharedEventPublicPromotion.js';
 import { getVenueAliasCandidates } from './venueAliases.js';
 import { logger } from '../utils/logger.js';
 import {
@@ -115,6 +117,19 @@ type FinalizeUnknownVenueRowReplaySummary = {
   groups?: FinalizeUnknownVenueRowReplayGroup[];
 };
 
+type FinalizeUnknownVenueSharedEventResumeSummary = {
+  attempted: boolean;
+  candidateIds?: string[];
+  processedCount?: number;
+  skippedCount?: number;
+  results?: Array<{
+    candidateId: string;
+    status: string;
+    reason?: string;
+  }>;
+  warning?: string;
+};
+
 export type FinalizeUnknownVenueAction = 'resolve_existing' | 'create_new' | 'ignore';
 
 export type FinalizeUnknownVenueInput = {
@@ -157,6 +172,7 @@ export type FinalizeUnknownVenueResult = {
     warning?: string;
   };
   rowReplay?: FinalizeUnknownVenueRowReplaySummary;
+  sharedEventResume?: FinalizeUnknownVenueSharedEventResumeSummary;
 };
 
 function isFinalizedStatus(status: unknown): status is 'resolved_existing' | 'created_new' | 'ignored' {
@@ -3534,10 +3550,15 @@ function normalizeReplayScope(value: unknown): UnknownVenueReplayScope {
   return String(value || '').trim() === 'all_samples' ? 'all_samples' : 'primary_sample';
 }
 
+function isSharedEventSyntheticFileId(value: unknown): boolean {
+  return String(value || '').trim().startsWith('shared-event:');
+}
+
 function extractReplayTargetFromSample(
   sample: UnrecognizedVenueSampleEvent
 ): UnknownVenueRowReplayTarget | null {
   const fileId = String(sample.fileId || '').trim();
+  if (isSharedEventSyntheticFileId(fileId)) return null;
   const rowIndex = Math.trunc(Number(sample.rowIndex));
   const hasRowIndex = Number.isFinite(rowIndex) && rowIndex >= 0;
   const sourceUniqueId =
@@ -3769,6 +3790,152 @@ async function queueSampleEventRowReplays(
   };
 }
 
+function extractSharedEventIngestIdFromSample(sample: UnrecognizedVenueSampleEvent): string {
+  const explicit = String(sample.sharedEventIngestId || '').trim();
+  if (explicit) return explicit;
+  const fileId = String(sample.fileId || '').trim();
+  return isSharedEventSyntheticFileId(fileId)
+    ? fileId.replace(/^shared-event:/, '').trim()
+    : '';
+}
+
+function sampleMatchesSharedEventCandidate(
+  sample: UnrecognizedVenueSampleEvent,
+  candidate: Awaited<ReturnType<typeof sharedEventCandidateStore.listPublicSharedEventCandidatesForIngest>>[number]
+): boolean {
+  const sampleSignature = String(sample.sourceContentSignature || '').trim();
+  if (sampleSignature && sampleSignature === String(candidate.sourceContentSignature || '').trim()) {
+    return true;
+  }
+
+  const sampleSourceUniqueId = String(sample.sourceUniqueId || '').trim();
+  if (sampleSourceUniqueId) {
+    if (sampleSourceUniqueId === String(candidate.sourceContentSignature || '').trim()) return true;
+    const candidateSourcePostId = String(candidate.visibilityEvidence?.sourcePostId || '').trim();
+    if (candidateSourcePostId && candidateSourcePostId === sampleSourceUniqueId) return true;
+  }
+
+  const sampleEventName = normalizeVenueName(String(sample.eventName || ''));
+  const candidateTitle = normalizeVenueName(String(candidate.title || ''));
+  const sampleEventDate = String(sample.eventDate || '').trim();
+  const candidateStartDate = String(candidate.startDate || '').trim();
+  return Boolean(sampleEventName && candidateTitle && sampleEventName === candidateTitle &&
+    sampleEventDate && candidateStartDate && sampleEventDate === candidateStartDate);
+}
+
+async function extractSharedEventCandidateIdsFromSamples(record: UnrecognizedVenueRecord): Promise<string[]> {
+  const sampleEvents = Array.isArray(record.sampleEvents)
+    ? (record.sampleEvents.filter((value) => value && typeof value === 'object') as UnrecognizedVenueSampleEvent[])
+    : [];
+  const ids = new Set<string>();
+  const ingestCache = new Map<string, Awaited<ReturnType<typeof sharedEventCandidateStore.listPublicSharedEventCandidatesForIngest>>>();
+
+  for (const sample of sampleEvents) {
+    const directCandidateId = String(sample.sharedEventCandidateId || '').trim();
+    if (directCandidateId) {
+      ids.add(directCandidateId);
+      continue;
+    }
+
+    const ingestId = extractSharedEventIngestIdFromSample(sample);
+    if (!ingestId) continue;
+    if (!ingestCache.has(ingestId)) {
+      ingestCache.set(ingestId, await sharedEventCandidateStore.listPublicSharedEventCandidatesForIngest(ingestId));
+    }
+    const candidates = ingestCache.get(ingestId) || [];
+    for (const candidate of candidates) {
+      if (candidate.id && sampleMatchesSharedEventCandidate(sample, candidate)) {
+        ids.add(candidate.id);
+      }
+    }
+  }
+
+  return Array.from(ids).sort();
+}
+
+function isTerminalSharedEventCandidateStatus(status: unknown): boolean {
+  return ['promoted', 'duplicate_existing', 'rejected_expired', 'failed'].includes(
+    String(status || '').trim()
+  );
+}
+
+async function resumeSharedEventCandidatesForUnknownVenue(
+  record: UnrecognizedVenueRecord,
+  params: {
+    action: 'resolve_existing' | 'create_new';
+    venueId: string;
+  }
+): Promise<FinalizeUnknownVenueSharedEventResumeSummary> {
+  const docId = String(record.id || '').trim();
+  const venueId = String(params.venueId || '').trim();
+  const candidateIds = await extractSharedEventCandidateIdsFromSamples(record);
+  if (!candidateIds.length) {
+    return {
+      attempted: false,
+      warning: 'No shared-event candidate ids were available to resume',
+    };
+  }
+
+  const results: NonNullable<FinalizeUnknownVenueSharedEventResumeSummary['results']> = [];
+  let processedCount = 0;
+  let skippedCount = 0;
+
+  for (const candidateId of candidateIds) {
+    const candidate = await sharedEventCandidateStore.getPublicSharedEventCandidate(candidateId);
+    if (!candidate) {
+      skippedCount += 1;
+      results.push({ candidateId, status: 'skipped', reason: 'candidate_not_found' });
+      continue;
+    }
+    if (isTerminalSharedEventCandidateStatus(candidate.status)) {
+      skippedCount += 1;
+      results.push({
+        candidateId,
+        status: 'skipped',
+        reason: `candidate_already_${candidate.status}`,
+      });
+      continue;
+    }
+
+    await sharedEventCandidateStore.updatePublicSharedEventCandidate(candidateId, {
+      status: 'pending_validation',
+      resolvedVenueId: venueId,
+      resolvedViaUnknownVenueDocId: docId || undefined,
+      promotionResult: {
+        status: 'pending_validation',
+        reason: `unknown_venue_${params.action}`,
+        venueId,
+        unknownVenueDocId: docId || undefined,
+      },
+    });
+    await sharedEventCandidateStore.updatePrivateSharedEventPublicPromotion({
+      ownerUid: candidate.ownerUid,
+      privateEventId: candidate.privateEventId,
+      publicCandidateId: candidateId,
+      publicPromotionStatus: 'pending_validation',
+      publicVenueId: venueId,
+      publicUnknownVenueDocId: docId || undefined,
+    });
+
+    const outcome = await processPublicSharedEventCandidateById(candidateId);
+    processedCount += outcome.status === 'skipped' ? 0 : 1;
+    if (outcome.status === 'skipped') skippedCount += 1;
+    results.push({
+      candidateId,
+      status: outcome.status,
+      reason: 'reason' in outcome ? outcome.reason : undefined,
+    });
+  }
+
+  return {
+    attempted: true,
+    candidateIds,
+    processedCount,
+    skippedCount,
+    results,
+  };
+}
+
 async function finalizeResolveExisting(
   record: UnrecognizedVenueRecord,
   input: FinalizeUnknownVenueInput
@@ -3886,6 +4053,7 @@ async function finalizeResolveExisting(
 
   const driveAppend = await appendVenueUrlToDriveList(selectedUrl);
   let rowReplay: FinalizeUnknownVenueRowReplaySummary | undefined;
+  let sharedEventResume: FinalizeUnknownVenueSharedEventResumeSummary | undefined;
   try {
     rowReplay = await queueSampleEventRowReplays(record, {
       action: 'resolve_existing',
@@ -3900,6 +4068,24 @@ async function finalizeResolveExisting(
       error: warning,
     });
     rowReplay = {
+      attempted: true,
+      warning,
+    };
+  }
+  try {
+    const resumeResult = await resumeSharedEventCandidatesForUnknownVenue(record, {
+      action: 'resolve_existing',
+      venueId,
+    });
+    if (resumeResult.attempted) sharedEventResume = resumeResult;
+  } catch (error) {
+    const warning = error instanceof Error ? error.message : String(error);
+    logger.warn('Unknown-venue resolve_existing shared-event resume failed', {
+      docId,
+      venueId,
+      error: warning,
+    });
+    sharedEventResume = {
       attempted: true,
       warning,
     };
@@ -3924,6 +4110,7 @@ async function finalizeResolveExisting(
       ...(category ? { selectedCategory: category } : {}),
       driveAppend,
       ...(rowReplay ? { rowReplay } : {}),
+      ...(sharedEventResume ? { sharedEventResume } : {}),
     },
   });
 
@@ -3935,6 +4122,7 @@ async function finalizeResolveExisting(
     venueId,
     driveAppend,
     ...(rowReplay ? { rowReplay } : {}),
+    ...(sharedEventResume ? { sharedEventResume } : {}),
   };
 }
 
@@ -4144,6 +4332,7 @@ async function finalizeCreateNew(
 
   const driveAppend = await appendVenueUrlToDriveList(facebookUrl);
   let rowReplay: FinalizeUnknownVenueRowReplaySummary | undefined;
+  let sharedEventResume: FinalizeUnknownVenueSharedEventResumeSummary | undefined;
   try {
     rowReplay = await queueSampleEventRowReplays(record, {
       action: 'create_new',
@@ -4158,6 +4347,24 @@ async function finalizeCreateNew(
       error: warning,
     });
     rowReplay = {
+      attempted: true,
+      warning,
+    };
+  }
+  try {
+    const resumeResult = await resumeSharedEventCandidatesForUnknownVenue(record, {
+      action: 'create_new',
+      venueId,
+    });
+    if (resumeResult.attempted) sharedEventResume = resumeResult;
+  } catch (error) {
+    const warning = error instanceof Error ? error.message : String(error);
+    logger.warn('Unknown-venue create_new shared-event resume failed', {
+      docId,
+      venueId,
+      error: warning,
+    });
+    sharedEventResume = {
       attempted: true,
       warning,
     };
@@ -4186,6 +4393,7 @@ async function finalizeCreateNew(
         : undefined,
       driveAppend,
       ...(rowReplay ? { rowReplay } : {}),
+      ...(sharedEventResume ? { sharedEventResume } : {}),
     },
   });
 
@@ -4199,6 +4407,7 @@ async function finalizeCreateNew(
     facebookUrl,
     driveAppend,
     ...(rowReplay ? { rowReplay } : {}),
+    ...(sharedEventResume ? { sharedEventResume } : {}),
   };
 }
 

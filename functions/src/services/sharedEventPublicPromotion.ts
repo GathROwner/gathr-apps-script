@@ -8,6 +8,7 @@ import { logger } from '../utils/logger.js';
 import { normalizeVenueName } from '../utils/similarity.js';
 import * as sharedEventCandidateStore from './sharedEventCandidateStore.js';
 import * as firestoreService from './firestoreService.js';
+import { getUntrustedPublicPromotionReason } from './sharedEventPublicTrust.js';
 
 export type SharedEventPromotionOutcome =
   | {
@@ -288,6 +289,20 @@ function buildPromotionUniqueId(candidate: PublicSharedEventCandidateRecord): st
 }
 
 async function resolveVenue(candidate: PublicSharedEventCandidateRecord): Promise<CandidateVenueResolution> {
+  const resolvedVenueId = firstText(candidate.resolvedVenueId);
+  if (resolvedVenueId) {
+    const resolvedVenue = await firestoreService.getVenue(resolvedVenueId);
+    if (resolvedVenue?.id) {
+      const canonicalName = getVenueDisplayName(resolvedVenue);
+      const locationName = firstText(candidate.locationName, candidate.visibilityEvidence?.locationName);
+      return {
+        venue: resolvedVenue,
+        matchType: 'resolved_unknown_venue',
+        subVenue: extractSharedEventSubVenue(locationName, canonicalName),
+      };
+    }
+  }
+
   const locationName = firstText(candidate.locationName, candidate.visibilityEvidence?.locationName);
   const address = firstText(candidate.address, candidate.visibilityEvidence?.address);
 
@@ -416,6 +431,8 @@ function getRequiredCandidateReviewReason(candidate: PublicSharedEventCandidateR
   if (!firstText(candidate.locationName, candidate.address, candidate.visibilityEvidence?.locationName)) {
     return 'missing_location';
   }
+  const untrustedPublicFields = getUntrustedPublicPromotionReason(candidate);
+  if (untrustedPublicFields) return untrustedPublicFields;
   return '';
 }
 
@@ -517,15 +534,8 @@ async function queueUnresolvedPublicCandidate(
 ): Promise<SharedEventPromotionOutcome> {
   const candidateId = firstText(candidate.id);
   const venueName = firstText(candidate.locationName, candidate.visibilityEvidence?.locationName, candidate.title);
-  const previousUnknownVenuePipelineFlag = process.env.UNKNOWN_VENUE_PIPELINE_ENABLED;
-  if (!previousUnknownVenuePipelineFlag) {
-    process.env.UNKNOWN_VENUE_PIPELINE_ENABLED = 'true';
-  }
-
-  const queueResult = await (async () => {
-    try {
-      return venueName
-        ? await firestoreService.queueUnrecognizedVenue({
+  const queueResult = venueName
+    ? await firestoreService.queueUnrecognizedVenue({
         venueName,
         source: 'full5stage_event',
         parserMode: 'full5stage',
@@ -541,18 +551,19 @@ async function queueUnresolvedPublicCandidate(
           candidate.sourceUrl
         ),
         sourceContentSignature: candidate.sourceContentSignature,
+        sharedEventCandidateId: candidateId,
+        sharedEventPrivateEventId: candidate.privateEventId,
+        sharedEventIngestId: candidate.ingestId,
+        sharedEventOwnerUid: candidate.ownerUid,
         eventName: candidate.title,
         eventDate: candidate.startDate,
         eventTime: candidate.startTime,
         description: firstText(candidate.description, candidate.visibilityEvidence?.description),
+      }, {
+        force: true,
+        forceReason: 'public_shared_event_promotion',
       })
-        : { queued: false, reason: 'missing_venue_name' };
-    } finally {
-      if (!previousUnknownVenuePipelineFlag) {
-        delete process.env.UNKNOWN_VENUE_PIPELINE_ENABLED;
-      }
-    }
-  })();
+    : { queued: false, reason: 'missing_venue_name' };
 
   const status: PublicSharedEventCandidateStatus = queueResult.queued
     ? 'queued_unknown_venue'

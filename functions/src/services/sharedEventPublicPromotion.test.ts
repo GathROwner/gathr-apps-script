@@ -6,6 +6,7 @@ import {
   buildPublicSharedEventData,
   extractSharedEventSubVenue,
 } from './sharedEventPublicPromotion.js';
+import { getUntrustedPublicPromotionReason } from './sharedEventPublicTrust.js';
 
 test('extractSharedEventSubVenue preserves a venue-scoped stage label', () => {
   assert.equal(
@@ -74,4 +75,35 @@ test('buildPublicSharedEventData writes canonical venue event fields and private
   assert.equal(event.imageUrl, 'https://example.com/poster.jpg');
   assert.equal(event.sharedEventCandidateId, 'candidate_123');
   assert.equal(event.sharedEventPrivateEventId, 'private_123');
+});
+
+test('public shared-event promotion trust requires public-sourced event facts', () => {
+  const trustedCandidate = {
+    title: 'Kim Albert',
+    startDate: '2026-06-20',
+    startTime: '19:00',
+    locationName: "Peake's Quay Restaurant & Bar",
+    fieldSources: {
+      title: 'public_source',
+      startDate: 'public_source',
+      startTime: 'public_source',
+      locationName: 'public_source',
+    },
+  } as PublicSharedEventCandidateRecord;
+
+  const untrustedCandidate = {
+    ...trustedCandidate,
+    fieldSources: {
+      title: 'share_payload',
+      startDate: 'uploaded_media',
+      startTime: 'uploaded_media',
+      locationName: 'public_source',
+    },
+  } as PublicSharedEventCandidateRecord;
+
+  assert.equal(getUntrustedPublicPromotionReason(trustedCandidate), '');
+  assert.equal(
+    getUntrustedPublicPromotionReason(untrustedCandidate),
+    'untrusted_public_fields:title,startDate,startTime'
+  );
 });

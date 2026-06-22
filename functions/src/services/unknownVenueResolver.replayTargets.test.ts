@@ -122,6 +122,25 @@ test('unknown venue finalizer can explicitly replay all sampled rows', () => {
   ]);
 });
 
+test('unknown venue finalizer does not replay synthetic shared-event samples as dataset rows', () => {
+  const selection = extractReplayTargetsFromSamples(
+    record([
+      sample({
+        fileId: 'shared-event:ingest_123',
+        sourceUniqueId: 'facebook-post-123',
+        sharedEventCandidateId: 'candidate_123',
+        rowIndex: 0,
+      }),
+    ]),
+    { replayScope: 'all_samples' }
+  );
+
+  assert.equal(selection.replayScope, 'all_samples');
+  assert.equal(selection.sampleCount, 0);
+  assert.equal(selection.skippedSampleCount, 0);
+  assert.deepEqual(selection.targets, []);
+});
+
 test('source page identity suggestion guard allows distinctive shared venue tokens', () => {
   assert.equal(
     sourcePageIdentitySupportsExistingVenueSuggestion(

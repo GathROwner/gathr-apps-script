@@ -51,6 +51,15 @@ Only `public_verified` parsed events with `routing: "public_candidate"` also cre
 
 - `public_shared_event_candidates/{candidateId}`
 
+Important trust boundary: `public_verified` only proves that the source URL can be fetched publicly. It does not prove that event facts supplied by the client share payload are correct. Public auto-promotion requires the critical event facts to be attributed to backend-fetched public source metadata:
+
+- title
+- start date
+- start time, when present
+- location name or address
+
+The parser stores this attribution in `fieldSources`. Facts from direct share payload fields, shared text, or user-uploaded/shared images are saved for the user's private copy, but public candidates using those facts are marked `needs_user_review` instead of being auto-promoted. This prevents a user from attaching incorrect title/date/location data to a real public Facebook URL and publishing it to the public map.
+
 Public candidates are then processed by `processSharedEventPublicCandidates` or the scheduled `scheduledSharedEventPublicCandidateProcessor`. The scheduled processor only runs when the deployed environment has `SHARED_EVENT_PUBLIC_PROMOTION_ENABLED` enabled.
 
 Promotion outcomes:
@@ -62,6 +71,8 @@ Promotion outcomes:
 - `queued_unknown_venue`: the venue could not be matched and was handed to the unknown-venue pipeline.
 - `queued_city_level_review`: the location was city/area-level rather than a specific venue.
 - `venue_unresolved` or `failed`: promotion could not safely complete.
+
+Unknown-venue handoff for shared-event candidates is not dataset row replay. Shared-event unknown-venue samples carry `sharedEventCandidateId`, `sharedEventPrivateEventId`, `sharedEventIngestId`, and `sharedEventOwnerUid`. When an unknown venue is finalized as an existing venue or a new venue, the resolver writes the resolved venue id back to the candidate and re-runs the shared-event promotion path directly. Synthetic `shared-event:{ingestId}` samples are deliberately excluded from `processDatasetSelectedRows`.
 
 When a candidate is promoted, the public event is intended to look like a normal parsed event from the larger pipeline. It carries shared-event provenance fields such as `sharedEventCandidateId`, `sharedEventPrivateEventId`, `sharedEventIngestId`, `sharedEventOwnerUid`, and `sharedEventSource: "public_shared_event_candidate"` so the app can show a "Shared by you" badge to the submitting user.
 

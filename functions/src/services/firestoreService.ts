@@ -52,6 +52,9 @@ import {
   SharedEventStatus,
   SharedEventSubmitPayload,
 } from '../types/sharedEvent.js';
+import {
+  getUntrustedPublicPromotionReviewReasons,
+} from './sharedEventPublicTrust.js';
 
 // Initialize Firebase Admin if not already initialized
 if (!admin.apps.length) {
@@ -648,6 +651,10 @@ function buildUnrecognizedVenueSample(
     topLevelUrl: input.topLevelUrl,
     sourceUniqueId: input.sourceUniqueId,
     sourceContentSignature: input.sourceContentSignature,
+    sharedEventCandidateId: input.sharedEventCandidateId,
+    sharedEventPrivateEventId: input.sharedEventPrivateEventId,
+    sharedEventIngestId: input.sharedEventIngestId,
+    sharedEventOwnerUid: input.sharedEventOwnerUid,
     eventName: input.eventName,
     eventDate: input.eventDate,
     eventTime: input.eventTime,
@@ -1902,7 +1909,11 @@ export async function finalizeCityLevelEventReview(
  * This is gated by env flags so we can safely enable it for targeted wet runs first.
  */
 export async function queueUnrecognizedVenue(
-  input: QueueUnrecognizedVenueInput
+  input: QueueUnrecognizedVenueInput,
+  options?: {
+    force?: boolean;
+    forceReason?: string;
+  }
 ): Promise<QueueUnrecognizedVenueResult> {
   const venueName = String(input.venueName || '').trim();
   const establishmentNormalized = normalizeVenueName(venueName);
@@ -1925,7 +1936,9 @@ export async function queueUnrecognizedVenue(
     return { queued: false, reason: 'suspected_non_venue_label' };
   }
 
-  const gate = shouldQueueUnknownVenue(venueName);
+  const gate = options?.force
+    ? { allowed: true, reason: options.forceReason || 'forced_by_trusted_backend_caller', testMode: false }
+    : shouldQueueUnknownVenue(venueName);
   if (!gate.allowed) {
     logger.debug('Unknown venue queue skipped by config gate', {
       venueName,
@@ -3405,6 +3418,11 @@ export async function createPublicSharedEventCandidate(params: {
   if (parsedEvent.sourceVisibility !== 'public_verified') {
     throw new Error('Only public_verified shared events can create public candidates.');
   }
+  const publicTrustReviewReasons = getUntrustedPublicPromotionReviewReasons(parsedEvent);
+  const reviewReasons = Array.from(new Set([
+    ...(Array.isArray(parsedEvent.reviewReasons) ? parsedEvent.reviewReasons : []),
+    ...publicTrustReviewReasons,
+  ]));
 
   const record: PublicSharedEventCandidateRecord = {
     ownerUid,
@@ -3425,7 +3443,11 @@ export async function createPublicSharedEventCandidate(params: {
     mediaUrls: parsedEvent.mediaUrls,
     timezone: parsedEvent.timezone,
     sourceContentSignature: parsedEvent.sourceContentSignature,
-    status: parsedEvent.needsUserReview ? 'needs_user_review' : 'pending_validation',
+    fieldSources: parsedEvent.fieldSources,
+    reviewReasons,
+    status: parsedEvent.needsUserReview || publicTrustReviewReasons.length > 0
+      ? 'needs_user_review'
+      : 'pending_validation',
     createdAt: admin.firestore.FieldValue.serverTimestamp(),
     updatedAt: admin.firestore.FieldValue.serverTimestamp(),
   };

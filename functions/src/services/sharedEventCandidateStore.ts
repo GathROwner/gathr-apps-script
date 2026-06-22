@@ -144,6 +144,43 @@ export async function claimPublicSharedEventCandidate(
   });
 }
 
+export async function getPublicSharedEventCandidate(
+  candidateId: string
+): Promise<PublicSharedEventCandidateRecord | null> {
+  const normalizedCandidateId = String(candidateId || '').trim();
+  if (!normalizedCandidateId) return null;
+
+  const snapshot = await getSourceDb()
+    .collection(COLLECTIONS.PUBLIC_SHARED_EVENT_CANDIDATES)
+    .doc(normalizedCandidateId)
+    .get();
+  if (!snapshot.exists) return null;
+
+  return {
+    id: snapshot.id,
+    ...(snapshot.data() as PublicSharedEventCandidateRecord),
+  };
+}
+
+export async function listPublicSharedEventCandidatesForIngest(
+  ingestId: string,
+  limit = 50
+): Promise<PublicSharedEventCandidateRecord[]> {
+  const normalizedIngestId = String(ingestId || '').trim();
+  if (!normalizedIngestId) return [];
+
+  const snapshot = await getSourceDb()
+    .collection(COLLECTIONS.PUBLIC_SHARED_EVENT_CANDIDATES)
+    .where('ingestId', '==', normalizedIngestId)
+    .limit(Math.max(1, Math.min(Number(limit || 50), 100)))
+    .get();
+
+  return snapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...(doc.data() as PublicSharedEventCandidateRecord),
+  }));
+}
+
 export async function updatePublicSharedEventCandidate(
   candidateId: string,
   updates: Partial<PublicSharedEventCandidateRecord> & Record<string, unknown>

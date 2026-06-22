@@ -580,6 +580,10 @@ export interface UnrecognizedVenueSampleEvent {
   topLevelUrl?: string;
   sourceUniqueId?: string;
   sourceContentSignature?: string;
+  sharedEventCandidateId?: string;
+  sharedEventPrivateEventId?: string;
+  sharedEventIngestId?: string;
+  sharedEventOwnerUid?: string;
   eventName?: string;
   eventDate?: string;
   eventTime?: string;
@@ -636,6 +640,10 @@ export interface QueueUnrecognizedVenueInput {
   topLevelUrl?: string;
   sourceUniqueId?: string;
   sourceContentSignature?: string;
+  sharedEventCandidateId?: string;
+  sharedEventPrivateEventId?: string;
+  sharedEventIngestId?: string;
+  sharedEventOwnerUid?: string;
   eventName?: string;
   eventDate?: string;
   eventTime?: string;

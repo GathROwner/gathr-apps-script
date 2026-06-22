@@ -14,6 +14,27 @@ export type SharedEventStatus =
   | 'submitted_public_candidate'
   | 'expired';
 
+export type SharedEventFieldSource =
+  | 'public_source'
+  | 'share_payload'
+  | 'shared_text'
+  | 'uploaded_media'
+  | 'derived'
+  | 'unknown';
+
+export type SharedEventFieldSources = Partial<Record<
+  | 'title'
+  | 'description'
+  | 'startDate'
+  | 'endDate'
+  | 'startTime'
+  | 'endTime'
+  | 'locationName'
+  | 'address'
+  | 'mediaUrls',
+  SharedEventFieldSource
+>>;
+
 export interface SharedEventSubmitPayload {
   sourceUrl?: string;
   url?: string;
@@ -80,6 +101,7 @@ export interface ParsedSharedEvent {
   confidence: number;
   needsUserReview: boolean;
   reviewReasons: string[];
+  fieldSources?: SharedEventFieldSources;
   isExpired?: boolean;
   sourceContentSignature: string;
   sequenceIndex?: number;
@@ -170,7 +192,12 @@ export interface PublicSharedEventCandidateRecord {
   mediaUrls: string[];
   timezone: string;
   sourceContentSignature: string;
+  fieldSources?: SharedEventFieldSources;
+  reviewReasons?: string[];
   status: PublicSharedEventCandidateStatus;
+  resolvedVenueId?: string;
+  resolvedVenueName?: string;
+  resolvedViaUnknownVenueDocId?: string;
   promotedVenueId?: string;
   promotedEventId?: string;
   promotedEventPath?: string;
