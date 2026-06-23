@@ -65,6 +65,26 @@ const firstFiniteNumber = (...values: unknown[]): number | undefined => {
 const toTitleCase = (value: string): string =>
   value.replace(/\b[a-z]/g, (letter) => letter.toUpperCase());
 
+function normalizeTitleForReview(value: unknown): string {
+  return firstText(value)
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[â€™â€˜`]/g, "'")
+    .replace(/&/g, ' and ')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
+function isPlaceholderCandidateTitle(value: unknown): boolean {
+  const title = normalizeTitleForReview(value);
+  return title === 'event' ||
+    title === 'facebook event' ||
+    title === 'facebook post' ||
+    title === 'possible event found' ||
+    title === 'shared event';
+}
+
 function getVenueDisplayName(venue: VenueData): string {
   const record = venue as unknown as Record<string, unknown>;
   return firstText(
@@ -425,8 +445,9 @@ export function buildPublicSharedEventData(
   } as EventData;
 }
 
-function getRequiredCandidateReviewReason(candidate: PublicSharedEventCandidateRecord): string {
+export function getRequiredCandidateReviewReason(candidate: PublicSharedEventCandidateRecord): string {
   if (!firstText(candidate.title)) return 'missing_title';
+  if (isPlaceholderCandidateTitle(candidate.title)) return 'generic_placeholder_title';
   if (!firstText(candidate.startDate)) return 'missing_date';
   if (!firstText(candidate.locationName, candidate.address, candidate.visibilityEvidence?.locationName)) {
     return 'missing_location';

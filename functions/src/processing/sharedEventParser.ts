@@ -1449,6 +1449,29 @@ function extractedEventsLikelyDuplicate(first: ParsedSharedEvent, second: Parsed
   return Boolean(firstDate || secondDate) && Boolean(firstTime || secondTime);
 }
 
+function extractedEventTitleIsPlaceholder(event: ParsedSharedEvent): boolean {
+  const title = normalizeEventKeyPart(event.title);
+  return title === 'event' ||
+    title === 'facebook event' ||
+    title === 'facebook post' ||
+    title === 'possible event found' ||
+    title === 'shared event';
+}
+
+function extractedEventsShareSpecificSlot(first: ParsedSharedEvent, second: ParsedSharedEvent): boolean {
+  const firstDate = cleanString(first.startDate, 40).toLowerCase();
+  const secondDate = cleanString(second.startDate, 40).toLowerCase();
+  if (!firstDate || !secondDate || firstDate !== secondDate) return false;
+
+  const firstTime = cleanString(first.startTime, 20).toLowerCase();
+  const secondTime = cleanString(second.startTime, 20).toLowerCase();
+  if (!firstTime || !secondTime || firstTime !== secondTime) return false;
+
+  const firstLocation = extractedEventLocationKey(first);
+  const secondLocation = extractedEventLocationKey(second);
+  return normalizedLocationKeysAreCompatible(firstLocation, secondLocation);
+}
+
 function parsedEventCompletenessScore(event: ParsedSharedEvent): number {
   let score = 0;
   if (event.title) score += 30;
@@ -1469,6 +1492,20 @@ function mergeExtractedParsedEvents(...groups: ParsedSharedEvent[][]): ParsedSha
 
   for (const event of groups.flat()) {
     const key = extractedEventSemanticKey(event);
+    const placeholderSlotIndex = merged.findIndex((existing) =>
+      extractedEventsShareSpecificSlot(event, existing) &&
+      extractedEventTitleIsPlaceholder(event) !== extractedEventTitleIsPlaceholder(existing)
+    );
+
+    if (placeholderSlotIndex >= 0) {
+      const existing = merged[placeholderSlotIndex];
+      if (!extractedEventTitleIsPlaceholder(event) && extractedEventTitleIsPlaceholder(existing)) {
+        merged[placeholderSlotIndex] = event;
+        indexByKey.set(key, placeholderSlotIndex);
+      }
+      continue;
+    }
+
     const existingIndex = indexByKey.get(key) ??
       merged.findIndex((existing) => extractedEventsLikelyDuplicate(event, existing));
 

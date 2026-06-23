@@ -759,6 +759,57 @@ test('shared event merge collapses same title and time when one candidate is mis
   assert.deepEqual(merged[0].reviewReasons, []);
 });
 
+test('shared event merge drops same-slot placeholder when a better titled candidate exists', async () => {
+  const primary = await parseSharedEventPayload({
+    sourceUrl: 'https://www.facebook.com/share/p/founders-trivia',
+    title: 'Trivia Night',
+    sharedText: 'Trivia - Prizes - Family Friendly. Saturday June 27 at 5 PM',
+    timezone: 'America/Halifax',
+  }, {
+    sourceVisibility: 'public_verified',
+    visibilityEvidence: {
+      method: 'public_url_probe',
+      checkedAt: '2026-06-23T10:00:00.000Z',
+      url: 'https://www.facebook.com/share/p/founders-trivia',
+      finalUrl: 'https://www.facebook.com/founders/posts/123456789',
+      httpStatus: 200,
+      reason: 'Public URL returned usable metadata without user credentials.',
+      titleFound: true,
+      descriptionFound: true,
+      title: 'Trivia Night',
+      description: 'Join us for Trivia Fun! Trivia - Prizes - Family Friendly.',
+      ogType: 'article',
+      locationName: "Founders' Food Hall & Market",
+    },
+  });
+
+  const placeholder = {
+    ...primary,
+    title: 'Event',
+    description: 'Extracted from shared calendar image.',
+    startDate: '2026-06-27',
+    endDate: '2026-06-27',
+    startTime: '17:00',
+    endTime: '18:30',
+    locationName: "Founders' Food Hall & Market",
+    confidence: 82,
+  };
+  const specific = {
+    ...placeholder,
+    title: 'Trivia Night',
+    description: 'Join us for Trivia Fun! Trivia - Prizes - Family Friendly.',
+    confidence: 96,
+  };
+
+  const genericFirst = mergeExtractedParsedEventsForRegression([placeholder], [specific]);
+  const specificFirst = mergeExtractedParsedEventsForRegression([specific], [placeholder]);
+
+  assert.equal(genericFirst.length, 1);
+  assert.equal(genericFirst[0].title, 'Trivia Night');
+  assert.equal(specificFirst.length, 1);
+  assert.equal(specificFirst[0].title, 'Trivia Night');
+});
+
 test('image-only calendar shares stay private while preserving extracted event details', async () => {
   const originalNow = Settings.now;
   Settings.now = () => new Date('2026-06-18T22:58:00.000Z').getTime();

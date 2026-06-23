@@ -5,6 +5,7 @@ import { PublicSharedEventCandidateRecord } from '../types/sharedEvent.js';
 import {
   buildPublicSharedEventData,
   extractSharedEventSubVenue,
+  getRequiredCandidateReviewReason,
 } from './sharedEventPublicPromotion.js';
 import { getUntrustedPublicPromotionReason } from './sharedEventPublicTrust.js';
 
@@ -106,4 +107,21 @@ test('public shared-event promotion trust requires public-sourced event facts', 
     getUntrustedPublicPromotionReason(untrustedCandidate),
     'untrusted_public_fields:title,startDate,startTime'
   );
+});
+
+test('public shared-event promotion requires a real event title', () => {
+  const placeholderCandidate = {
+    title: 'Event',
+    startDate: '2026-06-27',
+    startTime: '17:00',
+    locationName: "Founders' Food Hall & Market",
+    fieldSources: {
+      title: 'public_source',
+      startDate: 'public_source',
+      startTime: 'public_source',
+      locationName: 'public_source',
+    },
+  } as PublicSharedEventCandidateRecord;
+
+  assert.equal(getRequiredCandidateReviewReason(placeholderCandidate), 'generic_placeholder_title');
 });
