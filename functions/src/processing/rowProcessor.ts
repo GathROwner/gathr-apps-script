@@ -2629,6 +2629,24 @@ function normalizeFullParserEventType(item: ParserProcessedEvent): string {
   return normalizeCategoryToEventType(raw);
 }
 
+export function resolveFullParserEventImageUrls(
+  item: Pick<ParserProcessedEvent, 'image' | 'relevantImageUrl' | 'mediaUrls'>
+): { image?: string; imageUrl?: string; relevantImageUrl?: string } {
+  const eventMediaUrls = normalizeUrlList(Array.isArray(item.mediaUrls) ? item.mediaUrls : []);
+  const preferredMediaUrl =
+    eventMediaUrls.find((url) => isStorageManagedUrl(url)) || eventMediaUrls[0] || '';
+  const incomingImage = String(item.image || '').trim();
+  const incomingRelevantImage = String(item.relevantImageUrl || '').trim();
+  const resolvedRelevantImage = incomingRelevantImage || incomingImage || preferredMediaUrl || undefined;
+  const resolvedImage = resolvedRelevantImage || incomingImage || preferredMediaUrl || undefined;
+
+  return {
+    image: resolvedImage,
+    imageUrl: resolvedImage,
+    relevantImageUrl: resolvedRelevantImage,
+  };
+}
+
 async function resolveVenueForFullParserEvent(
   item: ParserProcessedEvent,
   rowVenue: VenueData | null,
@@ -2844,12 +2862,9 @@ async function processFullParserEvent(
   const name = String(item.name || '').trim();
   const normalizedIncomingCategory = normalizeCategoryAlias(String(item.category || '').trim());
   const eventMediaUrls = normalizeUrlList(Array.isArray(item.mediaUrls) ? item.mediaUrls : []);
-  const preferredMediaUrl =
-    eventMediaUrls.find((url) => isStorageManagedUrl(url)) || eventMediaUrls[0] || '';
-  const incomingImage = String(item.image || '').trim();
-  const incomingRelevantImage = String(item.relevantImageUrl || '').trim();
-  const resolvedImage = incomingImage || preferredMediaUrl || undefined;
-  const resolvedRelevantImage = incomingRelevantImage || incomingImage || preferredMediaUrl || undefined;
+  const resolvedImageFields = resolveFullParserEventImageUrls(item);
+  const resolvedImage = resolvedImageFields.image;
+  const resolvedRelevantImage = resolvedImageFields.relevantImageUrl;
   const recurrenceLifecycle = extractRecurrenceLifecycleFields(
     item as unknown as Record<string, unknown>
   );

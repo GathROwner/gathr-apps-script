@@ -8,6 +8,7 @@ import {
   resolveEventAddressForVenue,
   resolveFacebookEventEndDateTime,
   resolveFacebookEventRecurrence,
+  resolveFullParserEventImageUrls,
 } from './rowProcessor.js';
 import { EventData, RawRowData, VenueData } from '../types/index.js';
 
@@ -390,6 +391,23 @@ test('keeps structured Facebook Events managed media and canonical image fields 
   assert.ok(preview.changedFields.includes('imageUrl'));
   assert.ok(preview.changedFields.includes('relevantImageUrl'));
   assert.ok(preview.changedFields.includes('imageProvenance'));
+});
+
+test('full parser events use the model-selected relevant image as the card image', () => {
+  const postDefaultImage =
+    'https://storage.googleapis.com/gathr-uploaded-images/postimages/founders-post-default.webp';
+  const wellnessImage =
+    'https://storage.googleapis.com/gathr-uploaded-images/postimages/wellness-waterfront.webp';
+
+  const resolved = resolveFullParserEventImageUrls({
+    image: postDefaultImage,
+    relevantImageUrl: wellnessImage,
+    mediaUrls: [postDefaultImage, wellnessImage],
+  });
+
+  assert.equal(resolved.image, wellnessImage);
+  assert.equal(resolved.imageUrl, wellnessImage);
+  assert.equal(resolved.relevantImageUrl, wellnessImage);
 });
 
 test('backfills image provenance when duplicate merge re-sees a legacy event', () => {
