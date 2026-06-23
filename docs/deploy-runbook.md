@@ -12,6 +12,16 @@ Use this for parser/logging code changes in this repo.
 3. Deploy the functions codebase:
    - `firebase deploy --only functions:gathr-functions --project gathr-migrated`
 
+## Shared-Event Mobile Test Target
+- 2026-06-23 observation: iOS preview app shared-event traffic for `submitSharedEvent` and `uploadSharedEventImage` landed in Firebase project `gathr-m1`, not `gathr-migrated`.
+- This appears consistent with private shared-event/user-profile writes living with the app's user data in `gathr-m1`, while the public parser/project runbooks often target `gathr-migrated`.
+- Before testing or deploying shared-event changes from a phone, verify the live target with:
+  - `gcloud logging read 'resource.type="cloud_run_revision" AND (resource.labels.service_name="submitsharedevent" OR resource.labels.service_name="uploadsharedeventimage")' --project gathr-m1 --freshness=2h --limit=20 --format='table(timestamp,resource.labels.service_name,jsonPayload.message)'`
+- If phone traffic is hitting `gathr-m1`, deploy shared-event functions there as well:
+  - `firebase deploy --only functions:gathr-functions --project gathr-m1`
+- After any `gathr-m1` deploy, verify parser guardrails explicitly:
+  - `node scripts/verify-parser-env.mjs --project gathr-m1`
+
 ## Why this is the default
 - The Firebase project config (`firebase.json`) is inside `functions/`, not repo root.
 - Deploying from repo root fails with:

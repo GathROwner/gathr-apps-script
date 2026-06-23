@@ -47,6 +47,8 @@ All shared events are first saved to the submitting user's private area:
 - `users/{uid}/sharedEventIngests/{ingestId}` stores the raw ingest record and routing/status metadata.
 - `users/{uid}/privateSharedEvents/{eventId}` stores the parsed user-visible private copy.
 
+Deployment/testing note: on 2026-06-23, iOS preview app share traffic for `submitSharedEvent` and `uploadSharedEventImage` was observed in Firebase project `gathr-m1`. This likely reflects private shared-event/profile data living with the app's user data there, even though public parser deploy runbooks often target `gathr-migrated`. Future shared-event testing should verify the active phone target in Cloud Run logs before assuming which Firebase project needs deployment.
+
 Only `public_verified` parsed events with `routing: "public_candidate"` also create:
 
 - `public_shared_event_candidates/{candidateId}`
