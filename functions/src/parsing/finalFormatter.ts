@@ -637,6 +637,10 @@ Do NOT convert "to close" or "all day" into clock times here. Just set the flags
 
 Do NOT leave additionalLocation blank if the original item had venue information.
 
+CRITICAL IMAGE INDEX PRESERVATION:
+If an input item already has relevantImageIndex, copy that exact integer into the formatted output.
+Do NOT reselect, guess, or change relevantImageIndex during final formatting; the image-aware extraction stage chose it.
+
 ITEMS TO FORMAT:
 ${JSON.stringify(items, null, 2)}
 
@@ -967,6 +971,18 @@ export function rehydrateFormattedEventMetadata(
   const originalSourceType = String((originalItem as Record<string, unknown> | undefined)?._sourceType || '').trim();
   if (!existingSourceType && originalSourceType) {
     nextEvent._sourceType = originalSourceType;
+    changed = true;
+  }
+
+  const originalRelevantImageIndex = (originalItem as Record<string, unknown> | undefined)
+    ?.relevantImageIndex;
+  if (
+    typeof originalRelevantImageIndex === 'number' &&
+    Number.isInteger(originalRelevantImageIndex) &&
+    originalRelevantImageIndex >= 0 &&
+    nextEvent.relevantImageIndex !== originalRelevantImageIndex
+  ) {
+    nextEvent.relevantImageIndex = originalRelevantImageIndex;
     changed = true;
   }
 

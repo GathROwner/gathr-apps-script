@@ -100,3 +100,18 @@ test('formatted metadata rehydration restores a recovered ticket link when Stage
     'https://locarius.io/events/3817/beach-boys-may-7'
   );
 });
+
+test('formatted metadata rehydration preserves image-aware relevant image index', () => {
+  const rehydrated = rehydrateFormattedEventMetadata(
+    buildFormattedEvent({
+      name: 'Wellness on the Waterfront',
+      relevantImageIndex: 3,
+    }),
+    buildOriginalItem({
+      name: 'Wellness on the Waterfront',
+      relevantImageIndex: 1,
+    })
+  );
+
+  assert.equal(rehydrated.relevantImageIndex, 1);
+});

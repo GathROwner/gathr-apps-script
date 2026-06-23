@@ -3430,6 +3430,7 @@ For each EVENT found, extract:
 - endTime: End time (only if shown), If no end time is shown, set endTime="" (empty string).
 - venue: Venue name if different from ${userName}
 - price: if no specific price mentioned, use empty string
+- relevantImageIndex: 0-based index of the provided image that visibly contains this exact event, performer, date, or time. The first attached image is 0, the second is 1, etc. If no attached image clearly matches this specific event, use 0.
 - recurringPattern: Set to "daily" ONLY if text says "Everyday" or "Daily". Set to "weekly_monday" through "weekly_sunday" ONLY if text says "Every Monday", "Every Tuesday", etc. Otherwise set to "none".
 - extractionReason: Why this was identified as an event
 - timeFlags: {
@@ -3510,6 +3511,7 @@ For each SPECIAL found, extract:
 - endTime: End time
 - venue: Venue name if different from ${userName} (look for location names, venue names, "at [location]")
 - pricing: Specific prices/discounts. - price: if no specific price mentioned, use empty string.
+- relevantImageIndex: 0-based index of the provided image that visibly contains this exact special, date, or time. The first attached image is 0, the second is 1, etc. If no attached image clearly matches this specific special, use 0.
 - recurringPattern: Set to "daily" ONLY if text says "Everyday" or "Daily". Set to "weekly_monday" through "weekly_sunday" ONLY if text says "Every Monday", "Every Tuesday", etc. Otherwise set to "none".
 - extractionReason: Why this was identified as a valid special with cost savings
 
@@ -3582,6 +3584,7 @@ For each item found, extract:
 - price: if no specific price mentioned, use empty string
 - description: Any additional details
 - extractionReason: Why this was identified as a calendar item
+- relevantImageIndex: 0-based index of the provided image that visibly contains this exact calendar item, date, or time. The first attached image is 0, the second is 1, etc. If no attached image clearly matches this item, use 0.
 
 Pay special attention to:
 - Calendar grids in images
@@ -3632,6 +3635,7 @@ For each item found, extract:
 - price: if no specific price mentioned, use empty string
 - description: Any additional details
 - extractionReason: Why this was identified as a scheduled item
+- relevantImageIndex: 0-based index of the provided image that visibly contains this exact scheduled item, performer, date, or time. The first attached image is 0, the second is 1, etc. If no attached image clearly matches this item, use 0.
 - timeFlags: {
     start: { source: "explicit" | "implied" | "semantic" | "none", evidence: "exact timing substring or empty string" },
     end: { source: "explicit" | "implied" | "semantic" | "none", toClose: boolean, evidence: "exact timing substring or empty string" }
