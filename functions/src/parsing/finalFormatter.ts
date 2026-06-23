@@ -1793,7 +1793,62 @@ function applyCategoryCorrections(
 /**
  * Handle establishment mapping with venue override logic
  */
+export function repairGenericTitleFragmentVenue(
+  event: FormattedEvent,
+  userName: string
+): FormattedEvent {
+  const pageVenue = String(userName || '').trim();
+  if (!pageVenue) return event;
+
+  const title = normalizeLooseText(event.name || '');
+  const venue = normalizeLooseText(event.venue || event.establishment || event.additionalLocation || '');
+  const additionalLocation = normalizeLooseText(event.additionalLocation || '');
+  if (!title || !venue) return event;
+
+  const genericFragments = new Set([
+    'waterfront',
+    'the waterfront',
+    'patio',
+    'the patio',
+    'rooftop',
+    'the rooftop',
+    'lawn',
+    'the lawn',
+    'green',
+    'greenspace',
+    'green space',
+    'courtyard',
+    'the courtyard',
+    'beer garden',
+    'the beer garden',
+    'parking lot',
+    'rear parking lot',
+  ]);
+  const isGenericTitleFragment =
+    genericFragments.has(venue) &&
+    title.includes(venue) &&
+    normalizeLooseText(pageVenue) !== venue;
+  if (!isGenericTitleFragment) return event;
+
+  logger.debug('Repairing generic title-fragment venue', {
+    eventName: event.name,
+    fromVenue: event.venue,
+    fromEstablishment: event.establishment,
+    fromAdditionalLocation: event.additionalLocation,
+    to: pageVenue,
+  });
+
+  return {
+    ...event,
+    establishment: pageVenue,
+    venue: pageVenue,
+    additionalLocation: additionalLocation === venue ? '' : event.additionalLocation,
+  };
+}
+
 function handleEstablishmentMapping(event: FormattedEvent, userName: string): FormattedEvent {
+  event = repairGenericTitleFragmentVenue(event, userName);
+
   // If establishment matches page name and we have an additionalLocation, use that instead
   if (
     event.establishment &&

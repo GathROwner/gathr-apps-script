@@ -80,6 +80,25 @@ When a candidate is promoted, the public event is intended to look like a normal
 
 Public Facebook posts with weak initial share payloads may also queue Apify scrape enrichment. The share screen may show only the initial matches while the full Facebook post scrape runs later through the normal parser/webhook flow.
 
+## Multi-Image Facebook Posts
+
+Facebook share payloads often expose only a weak preview of a multi-image post. For public posts, GathR can queue Apify scrape enrichment so the normal parser sees the full post and its images.
+
+When a Facebook carousel has a generic first image followed by event-specific posters, OCR/model image indexes can collapse to the first uploaded image even though later carousel images contain the actual event poster. The parser now prefers event-specific display images when:
+
+- image analysis explicitly matches the event text to a later display image, or
+- image analysis is degenerate/missing per-image detail and the event text strongly matches a common carousel poster type.
+
+The conservative fallback currently covers these common cases:
+
+- Wellness / Waterfront events -> second carousel image.
+- Group Stage, FIFA, soccer, or "team vs team" events -> third carousel image.
+- Trivia, prizes, or family-friendly trivia events -> fourth carousel image when present.
+
+This fallback is intentionally narrow. It should not replace proper image provenance from the scraper/parser. If future posts introduce more carousel patterns, add focused tests in `functions/src/parsing/postParser.imageSelection.test.ts` before extending the heuristic.
+
+Validation case from 2026-06-23: Founders' Food Hall and Market post `1607294141406100` produced 13 events under `slug_foundersfoodhall`. Wellness used the Wellness poster, soccer events used the blue Group Stage schedule image, and Trivia Night used the Trivia poster instead of the generic first image.
+
 ## Native App Boundary
 
 The Facebook "Share to" row requires a native app build. The mobile branch adds `expo-share-intent` and configures:

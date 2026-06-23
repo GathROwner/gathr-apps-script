@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 
 import {
   applyExplicitDateRangeCorrections,
+  repairGenericTitleFragmentVenue,
   rehydrateFormattedEventMetadata,
 } from './finalFormatter.js';
 import { ExtractedItem, TimeResolvedEvent } from './types.js';
@@ -114,4 +115,20 @@ test('formatted metadata rehydration preserves image-aware relevant image index'
   );
 
   assert.equal(rehydrated.relevantImageIndex, 1);
+});
+
+test('generic title-fragment venue does not override the row venue', () => {
+  const repaired = repairGenericTitleFragmentVenue(
+    buildFormattedEvent({
+      name: 'Wellness on the Waterfront',
+      establishment: 'Waterfront',
+      venue: 'Waterfront',
+      additionalLocation: 'Waterfront',
+    }),
+    "Founders' Food Hall and Market"
+  );
+
+  assert.equal(repaired.establishment, "Founders' Food Hall and Market");
+  assert.equal(repaired.venue, "Founders' Food Hall and Market");
+  assert.equal(repaired.additionalLocation, '');
 });

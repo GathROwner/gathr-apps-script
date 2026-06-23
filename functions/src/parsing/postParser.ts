@@ -981,7 +981,8 @@ export async function replayPostDataFromArtifacts(
       ticketsBuyUrl: extractedData?.ticketsBuyUrl || stage37TicketUrl || '',
     },
     heroImageOverrides,
-    managedTicketImageHints
+    managedTicketImageHints,
+    []
   );
 
   await cleanupUnusedOcrImages(Array.from(cleanupImageUrls), processedEvents);
@@ -1744,7 +1745,8 @@ export async function parsePostData(
         ticketsBuyUrl: extractedData?.ticketsBuyUrl || stage37TicketUrl || '',
       },
       heroImageOverrides,
-      managedTicketImageHints
+      managedTicketImageHints,
+      validation.imageAnalysis || []
     );
 
     await cleanupUnusedOcrImages(Array.from(cleanupImageUrls), processedEvents);
@@ -1881,6 +1883,216 @@ function normalizeComparableName(value: string): string {
     .replace(/[^a-z0-9\s]+/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
+}
+
+function tokenizeImageMatchText(value: string): string[] {
+  const stopWords = new Set([
+    'with',
+    'from',
+    'this',
+    'that',
+    'then',
+    'into',
+    'onto',
+    'event',
+    'events',
+    'food',
+    'hall',
+    'market',
+    'founders',
+    'founder',
+    'live',
+  ]);
+  return normalizeComparableName(value)
+    .split(' ')
+    .map((token) => token.trim())
+    .filter((token) => token.length >= 4 && !stopWords.has(token));
+}
+
+export function selectDisplayImageFromAnalysis(
+  event: Pick<TimeResolvedEvent, 'name' | 'description' | 'category'>,
+  imageAnalysis: Array<{ imageIndex?: number; description?: string; relevanceToPost?: string }>,
+  displayMediaUrls: string[]
+): string {
+  if (!Array.isArray(imageAnalysis) || imageAnalysis.length === 0) return '';
+  if (!Array.isArray(displayMediaUrls) || displayMediaUrls.length === 0) return '';
+
+  const eventText = normalizeComparableName(
+    `${event?.name || ''} ${event?.description || ''} ${event?.category || ''}`
+  );
+  if (!eventText) return '';
+
+  const tokens = tokenizeImageMatchText(eventText);
+  let best: { score: number; url: string; index: number } | null = null;
+
+  for (const image of imageAnalysis) {
+    const imageIndex = Number(image?.imageIndex);
+    if (!Number.isInteger(imageIndex) || imageIndex < 0 || imageIndex >= displayMediaUrls.length) {
+      continue;
+    }
+    const imageText = normalizeComparableName(
+      `${image?.description || ''} ${image?.relevanceToPost || ''}`
+    );
+    if (!imageText) continue;
+
+    let score = 0;
+    for (const token of tokens) {
+      if (imageText.includes(token)) score += 1;
+    }
+
+    if (eventText.includes('wellness') && imageText.includes('wellness')) score += 5;
+    if (eventText.includes('waterfront') && imageText.includes('waterfront')) score += 5;
+    if (eventText.includes('trivia') && imageText.includes('trivia')) score += 5;
+    if (eventText.includes('group stage') && imageText.includes('group stage')) score += 4;
+    if (eventText.includes('soccer') && /\b(fifa|match|matches|schedule)\b/.test(imageText)) {
+      score += 4;
+    }
+    if (/\b[a-z]+\s+vs\s+[a-z]+\b/.test(eventText) && /\b(group stage|fifa|match|matches|schedule)\b/.test(imageText)) {
+      score += 4;
+    }
+
+    const url = String(displayMediaUrls[imageIndex] || '').trim();
+    if (!url || !isManagedImageUrl(url)) continue;
+    if (!best || score > best.score) {
+      best = { score, url, index: imageIndex };
+    }
+  }
+
+  return best && best.score >= 3 ? best.url : '';
+}
+
+function hasUsefulPerImageAnalysis(
+  imageAnalysis: Array<{ imageIndex?: number; description?: string; relevanceToPost?: string }>,
+  displayMediaUrls: string[]
+): boolean {
+  if (!Array.isArray(imageAnalysis) || !Array.isArray(displayMediaUrls)) return false;
+
+  const usableIndexes = new Set<number>();
+  for (const image of imageAnalysis) {
+    const imageIndex = Number(image?.imageIndex);
+    const text = normalizeComparableName(`${image?.description || ''} ${image?.relevanceToPost || ''}`);
+    if (
+      Number.isInteger(imageIndex) &&
+      imageIndex >= 0 &&
+      imageIndex < displayMediaUrls.length &&
+      text.length >= 16
+    ) {
+      usableIndexes.add(imageIndex);
+    }
+  }
+
+  return usableIndexes.size >= Math.min(2, displayMediaUrls.length);
+}
+
+export function selectDisplayImageFromCarouselOrder(
+  event: Pick<TimeResolvedEvent, 'name' | 'description' | 'category'>,
+  displayMediaUrls: string[]
+): { url: string; reason: string } {
+  if (!Array.isArray(displayMediaUrls) || displayMediaUrls.length < 3) {
+    return { url: '', reason: '' };
+  }
+
+  const eventText = normalizeComparableName(
+    `${event?.name || ''} ${event?.description || ''} ${event?.category || ''}`
+  );
+  if (!eventText) return { url: '', reason: '' };
+
+  const urlAt = (index: number): string => {
+    const url = String(displayMediaUrls[index] || '').trim();
+    return url && isManagedImageUrl(url) ? url : '';
+  };
+
+  // Common Facebook carousel pattern: first image is a generic post cover, followed by
+  // individual posters/cards in the same order as the caption summary.
+  if (/\bwellness\b/.test(eventText) || /\bwaterfront\b/.test(eventText)) {
+    const url = urlAt(1);
+    if (url) return { url, reason: 'carousel_order_keyword_match_wellness' };
+  }
+
+  if (
+    /\btrivia\b/.test(eventText) ||
+    /\bfamily friendly\b/.test(eventText) ||
+    /\bprizes\b/.test(eventText)
+  ) {
+    const index = displayMediaUrls.length >= 4 ? 3 : displayMediaUrls.length - 1;
+    const url = urlAt(index);
+    if (url) return { url, reason: 'carousel_order_keyword_match_trivia' };
+  }
+
+  if (
+    /\b(group stage|soccer|fifa|match|matches)\b/.test(eventText) ||
+    /\b[a-z]+\s+vs\s+[a-z]+\b/.test(eventText)
+  ) {
+    const index = displayMediaUrls.length >= 3 ? 2 : displayMediaUrls.length - 1;
+    const url = urlAt(index);
+    if (url) return { url, reason: 'carousel_order_keyword_match_schedule' };
+  }
+
+  return { url: '', reason: '' };
+}
+
+export function resolveRelevantImageUrlForEvent(
+  event: TimeResolvedEvent,
+  analysisMediaUrls: string[],
+  displayMediaUrls: string[],
+  imageAnalysis: Array<{ imageIndex?: number; description?: string; relevanceToPost?: string }>
+): { url: string; reason: string } {
+  const rawIndex = Number(event.relevantImageIndex);
+  const hasValidIndex = Number.isInteger(rawIndex) && rawIndex >= 0;
+  const fromDisplay =
+    hasValidIndex && rawIndex < displayMediaUrls.length
+      ? String(displayMediaUrls[rawIndex] || '').trim()
+      : '';
+  const fromImageAnalysis = selectDisplayImageFromAnalysis(event, imageAnalysis, displayMediaUrls);
+  const selectedDifferentImageFromAnalysis =
+    fromDisplay &&
+    fromImageAnalysis &&
+    normalizeProvenanceUrl(fromImageAnalysis) !== normalizeProvenanceUrl(fromDisplay);
+  if (rawIndex === 0 && selectedDifferentImageFromAnalysis) {
+    return { url: fromImageAnalysis, reason: 'image_analysis_match_over_default_first_image_index' };
+  }
+
+  const hasDegenerateImageAnalysis = !hasUsefulPerImageAnalysis(imageAnalysis, displayMediaUrls);
+  if (rawIndex === 0 && fromDisplay && hasDegenerateImageAnalysis) {
+    const carouselSelection = selectDisplayImageFromCarouselOrder(event, displayMediaUrls);
+    if (
+      carouselSelection.url &&
+      normalizeProvenanceUrl(carouselSelection.url) !== normalizeProvenanceUrl(fromDisplay)
+    ) {
+      return carouselSelection;
+    }
+  }
+
+  if (fromDisplay) {
+    return { url: fromDisplay, reason: 'model_selected_original_image_index' };
+  }
+
+  const fromAnalysis =
+    hasValidIndex && rawIndex < analysisMediaUrls.length
+      ? mapOcrImageUrlToManaged(analysisMediaUrls[rawIndex])
+      : '';
+  const selectedTileMappedToFallback =
+    hasValidIndex &&
+    rawIndex >= displayMediaUrls.length &&
+    fromAnalysis &&
+    displayMediaUrls[0] &&
+    normalizeProvenanceUrl(fromAnalysis) === normalizeProvenanceUrl(displayMediaUrls[0]) &&
+    fromImageAnalysis &&
+    normalizeProvenanceUrl(fromImageAnalysis) !== normalizeProvenanceUrl(fromAnalysis);
+
+  if (selectedTileMappedToFallback) {
+    return { url: fromImageAnalysis, reason: 'image_analysis_match_for_tiled_ocr_index' };
+  }
+
+  if (fromAnalysis) {
+    return { url: fromAnalysis, reason: 'model_selected_relevant_image_index' };
+  }
+
+  if (fromImageAnalysis && hasValidIndex && rawIndex >= displayMediaUrls.length) {
+    return { url: fromImageAnalysis, reason: 'image_analysis_match_for_unmapped_tiled_ocr_index' };
+  }
+
+  return { url: '', reason: '' };
 }
 
 function analyzeHeroImageSources(mediaUrls: string[]): {
@@ -2833,7 +3045,8 @@ function processEvents(
   sharedPostThumbnails: string[],
   extractedData?: ParsePostInput['extractedData'],
   heroImageOverrides: string[] = [],
-  ticketImageOverrides: string[] = []
+  ticketImageOverrides: string[] = [],
+  imageAnalysis: Array<{ imageIndex?: number; description?: string; relevanceToPost?: string }> = []
 ): ProcessedEvent[] {
   logger.debug(`Processing ${parsedData.length} events`);
 
@@ -2889,27 +3102,29 @@ function processEvents(
           ? 'ticket_image_override_with_ticket_link'
           : 'hero_image_fallback_for_unusable_source_media';
         primaryIsFallback = true;
-      } else if (
-        event.relevantImageIndex >= 0 &&
-        event.relevantImageIndex < analysisMediaUrls.length
-      ) {
-        const fromDisplay = displayMediaUrls[event.relevantImageIndex] || '';
-        const fromAnalysis = mapOcrImageUrlToManaged(
-          analysisMediaUrls[event.relevantImageIndex]
+      } else {
+        const resolvedRelevantImage = resolveRelevantImageUrlForEvent(
+          event,
+          analysisMediaUrls,
+          displayMediaUrls,
+          imageAnalysis
         );
-        processedEvent.relevantImageUrl = fromDisplay || fromAnalysis || processedEvent.image || '';
+        if (resolvedRelevantImage.url) {
+          processedEvent.relevantImageUrl = resolvedRelevantImage.url;
+        } else {
+          processedEvent.relevantImageUrl = processedEvent.image || '';
+        }
         primaryImageSource = mediaProvenanceSource;
         primaryImageReason =
           mediaProvenanceSource === 'venue_media_fallback'
             ? mediaProvenanceReason
-            : 'model_selected_relevant_image_index';
-        primaryIsFallback = mediaProvenanceSource !== 'post_media';
-      } else {
-        processedEvent.relevantImageUrl = processedEvent.image || '';
-        primaryImageSource = processedEvent.image ? mediaProvenanceSource : 'no_image';
-        primaryImageReason = processedEvent.image
-          ? mediaProvenanceReason
-          : 'no_usable_event_image_provided';
+            : resolvedRelevantImage.reason || 'model_selected_relevant_image_index';
+        if (!resolvedRelevantImage.url) {
+          primaryImageSource = processedEvent.image ? mediaProvenanceSource : 'no_image';
+          primaryImageReason = processedEvent.image
+            ? mediaProvenanceReason
+            : 'no_usable_event_image_provided';
+        }
         primaryIsFallback = mediaProvenanceSource !== 'post_media';
       }
       processedEvent.mediaUrls = normalizedDisplayMediaUrls;
