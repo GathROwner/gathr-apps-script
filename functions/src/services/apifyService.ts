@@ -272,10 +272,20 @@ export function formatRunUrl(actorId: string, actorRunId: string): string {
   return `https://console.apify.com/actors/${actorId}/runs/${actorRunId}`;
 }
 
+export type ApifyAdHocWebhook = {
+  eventTypes: string[];
+  requestUrl: string;
+  payloadTemplate?: string;
+  idempotencyKey?: string;
+};
+
 export async function startActorRunNoWait(
   actorId: string,
   token: string,
-  input: Record<string, unknown>
+  input: Record<string, unknown>,
+  options?: {
+    webhooks?: ApifyAdHocWebhook[];
+  }
 ): Promise<{ actorRunId: string; datasetId?: string; runUrl: string }> {
   const normalizedActorId = String(actorId || '').trim();
   const normalizedToken = String(token || '').trim();
@@ -283,7 +293,17 @@ export async function startActorRunNoWait(
     throw new Error('Apify actorId and token are required');
   }
 
-  const startUrl = `https://api.apify.com/v2/acts/${encodeURIComponent(normalizedActorId)}/runs?token=${encodeURIComponent(normalizedToken)}&waitForFinish=0`;
+  const params = new URLSearchParams({
+    token: normalizedToken,
+    waitForFinish: '0',
+  });
+  const webhooks = (options?.webhooks || [])
+    .filter((webhook) => webhook && webhook.requestUrl && Array.isArray(webhook.eventTypes) && webhook.eventTypes.length > 0);
+  if (webhooks.length > 0) {
+    params.set('webhooks', Buffer.from(JSON.stringify(webhooks)).toString('base64'));
+  }
+
+  const startUrl = `https://api.apify.com/v2/acts/${encodeURIComponent(normalizedActorId)}/runs?${params.toString()}`;
   const res = await fetch(startUrl, {
     method: 'POST',
     headers: {

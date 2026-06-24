@@ -3529,6 +3529,49 @@ function sharedEventScrapeEnrichmentId(sourceKey: string): string {
   return createHash('sha256').update(sourceKey).digest('hex').slice(0, 40);
 }
 
+function sharedEventScrapeEnrichmentDedupeAnchorMillis(
+  existing: Record<string, unknown> | undefined,
+  status: string
+): number {
+  if (!existing) return 0;
+  switch (status) {
+    case 'reserved':
+      return firestoreTimestampMillis(existing.reservedAt || existing.createdAt);
+    case 'queued':
+      return firestoreTimestampMillis(existing.queuedAt || existing.reservedAt || existing.createdAt);
+    case 'running':
+      return firestoreTimestampMillis(existing.startedAt || existing.queuedAt || existing.reservedAt || existing.createdAt);
+    case 'completed':
+      return firestoreTimestampMillis(
+        existing.completedAt ||
+        existing.updatedAt ||
+        existing.queuedAt ||
+        existing.reservedAt ||
+        existing.createdAt
+      );
+    default:
+      return firestoreTimestampMillis(existing.updatedAt || existing.queuedAt || existing.reservedAt || existing.createdAt);
+  }
+}
+
+function sharedEventScrapeEnrichmentDedupeWindowMs(params: {
+  status: string;
+  dedupeMs: number;
+  activeDedupeMinutes?: number;
+}): number {
+  const activeDedupeMs = Math.max(1, Number(params.activeDedupeMinutes || 30)) * 60 * 1000;
+  if (params.status === 'reserved') {
+    return Math.min(activeDedupeMs, 10 * 60 * 1000);
+  }
+  if (params.status === 'queued' || params.status === 'running') {
+    return activeDedupeMs;
+  }
+  if (params.status === 'completed') {
+    return params.dedupeMs;
+  }
+  return 0;
+}
+
 export async function reserveSharedEventScrapeEnrichment(params: {
   ownerUid: string;
   ingestId: string;
@@ -3537,6 +3580,7 @@ export async function reserveSharedEventScrapeEnrichment(params: {
   parserVersion: string;
   reason: string;
   dedupeHours?: number;
+  activeDedupeMinutes?: number;
 }): Promise<{
   reserved: boolean;
   enrichmentId: string;
@@ -3561,9 +3605,13 @@ export async function reserveSharedEventScrapeEnrichment(params: {
     const snapshot = await tx.get(enrichmentRef);
     const existing = snapshot.exists ? snapshot.data() as Record<string, unknown> : undefined;
     const existingStatus = String(existing?.status || '').trim();
-    const existingUpdatedAtMs = firestoreTimestampMillis(existing?.updatedAt || existing?.queuedAt || existing?.reservedAt);
-    const statusDedupeMs = existingStatus === 'reserved' ? 10 * 60 * 1000 : dedupeMs;
-    const recent = existingUpdatedAtMs > 0 && Date.now() - existingUpdatedAtMs < statusDedupeMs;
+    const existingAnchorMs = sharedEventScrapeEnrichmentDedupeAnchorMillis(existing, existingStatus);
+    const statusDedupeMs = sharedEventScrapeEnrichmentDedupeWindowMs({
+      status: existingStatus,
+      dedupeMs,
+      activeDedupeMinutes: params.activeDedupeMinutes,
+    });
+    const recent = existingAnchorMs > 0 && statusDedupeMs > 0 && Date.now() - existingAnchorMs < statusDedupeMs;
     const shouldReuse = Boolean(existing) &&
       recent &&
       ['reserved', 'queued', 'running', 'completed'].includes(existingStatus);
@@ -3573,7 +3621,6 @@ export async function reserveSharedEventScrapeEnrichment(params: {
         linkedIngestIds: admin.firestore.FieldValue.arrayUnion(params.ingestId),
         linkedOwnerUids: admin.firestore.FieldValue.arrayUnion(params.ownerUid),
         lastDuplicateAt: admin.firestore.FieldValue.serverTimestamp(),
-        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
       }, { merge: true });
       tx.set(ingestRef, {
         scrapeEnrichment: {

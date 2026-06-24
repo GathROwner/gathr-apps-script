@@ -90,6 +90,39 @@ test('overrides default first-image index when analysis strongly matches another
   assert.equal(resolved.reason, 'image_analysis_match_over_default_first_image_index');
 });
 
+test('keeps selected first image when alternate image only matches broad family or park terms', () => {
+  const displayMediaUrls = [
+    'https://storage.googleapis.com/gathr-uploaded-images/postimages/pei-nerf-wars.webp',
+    'https://storage.googleapis.com/gathr-uploaded-images/postimages/playground.webp',
+  ];
+
+  const resolved = resolveRelevantImageUrlForEvent(
+    {
+      name: 'End of School Year Bash',
+      description: 'PEI Nerf Wars outdoor games for kids and families.',
+      category: 'Family Friendly',
+      relevantImageIndex: 0,
+    } as any,
+    [],
+    displayMediaUrls,
+    [
+      {
+        imageIndex: 0,
+        description: 'PEI Nerf Wars poster with foam blasters and outdoor game branding.',
+        relevanceToPost: 'Specific promotional image for the End of School Year Bash.',
+      },
+      {
+        imageIndex: 1,
+        description: 'Generic community park playground with families and children outside.',
+        relevanceToPost: 'General family friendly park image.',
+      },
+    ]
+  );
+
+  assert.equal(resolved.url, displayMediaUrls[0]);
+  assert.equal(resolved.reason, 'model_selected_original_image_index');
+});
+
 test('uses carousel order when image analysis collapses to the first source image', () => {
   const displayMediaUrls = [
     'https://storage.googleapis.com/gathr-uploaded-images/postimages/generic-cover.webp',
@@ -130,6 +163,36 @@ test('uses carousel order when image analysis collapses to the first source imag
 
   assert.equal(resolved.url, displayMediaUrls[1]);
   assert.equal(resolved.reason, 'carousel_order_keyword_match_wellness');
+});
+
+test('does not use family-friendly category alone to select a trivia carousel image', () => {
+  const displayMediaUrls = [
+    'https://storage.googleapis.com/gathr-uploaded-images/postimages/pei-nerf-wars.webp',
+    'https://storage.googleapis.com/gathr-uploaded-images/postimages/wellness.webp',
+    'https://storage.googleapis.com/gathr-uploaded-images/postimages/soccer.webp',
+    'https://storage.googleapis.com/gathr-uploaded-images/postimages/trivia.webp',
+  ];
+
+  const resolved = resolveRelevantImageUrlForEvent(
+    {
+      name: 'End of School Year Bash',
+      description: 'Outdoor activities and games for families.',
+      category: 'Family Friendly',
+      relevantImageIndex: 0,
+    } as any,
+    [],
+    displayMediaUrls,
+    [
+      {
+        imageIndex: 0,
+        description: 'PEI Nerf Wars poster with outdoor game branding.',
+        relevanceToPost: 'Specific promotional image for the End of School Year Bash.',
+      },
+    ]
+  );
+
+  assert.equal(resolved.url, displayMediaUrls[0]);
+  assert.equal(resolved.reason, 'model_selected_original_image_index');
 });
 
 test('uses carousel order for schedule and trivia cards when analysis is degenerate', () => {

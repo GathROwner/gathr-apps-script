@@ -1909,56 +1909,147 @@ function tokenizeImageMatchText(value: string): string[] {
     .filter((token) => token.length >= 4 && !stopWords.has(token));
 }
 
+const WEAK_IMAGE_OVERRIDE_TOKENS = new Set([
+  'ages',
+  'bash',
+  'child',
+  'children',
+  'community',
+  'event',
+  'events',
+  'family',
+  'free',
+  'friendly',
+  'guardian',
+  'guardians',
+  'open',
+  'parent',
+  'parents',
+  'park',
+  'party',
+  'resident',
+  'residents',
+  'school',
+  'year',
+  'youth',
+]);
+
+const DATE_IMAGE_TOKENS = new Set([
+  'monday',
+  'tuesday',
+  'wednesday',
+  'thursday',
+  'friday',
+  'saturday',
+  'sunday',
+  'january',
+  'february',
+  'march',
+  'april',
+  'may',
+  'june',
+  'july',
+  'august',
+  'september',
+  'october',
+  'november',
+  'december',
+]);
+
+function tokenizeStrongTitleImageMatchText(value: string): string[] {
+  return tokenizeImageMatchText(value).filter((token) => !WEAK_IMAGE_OVERRIDE_TOKENS.has(token));
+}
+
+function countTokenMatches(tokens: string[], imageText: string): number {
+  let count = 0;
+  for (const token of tokens) {
+    if (imageText.includes(token)) count += 1;
+  }
+  return count;
+}
+
+function countDateImageMatches(eventText: string, imageText: string): number {
+  let count = 0;
+  for (const token of DATE_IMAGE_TOKENS) {
+    if (eventText.includes(token) && imageText.includes(token)) count += 1;
+  }
+  return count;
+}
+
+function scoreDisplayImageAnalysisMatch(
+  event: Pick<TimeResolvedEvent, 'name' | 'description' | 'category'>,
+  image: { imageIndex?: number; description?: string; relevanceToPost?: string },
+  displayMediaUrls: string[]
+): { score: number; url: string; index: number; strongEvidence: boolean } | null {
+  const imageIndex = Number(image?.imageIndex);
+  if (!Number.isInteger(imageIndex) || imageIndex < 0 || imageIndex >= displayMediaUrls.length) {
+    return null;
+  }
+
+  const url = String(displayMediaUrls[imageIndex] || '').trim();
+  if (!url || !isManagedImageUrl(url)) return null;
+
+  const titleText = normalizeComparableName(event?.name || '');
+  const detailText = normalizeComparableName(`${event?.description || ''} ${event?.category || ''}`);
+  const eventText = normalizeComparableName(`${titleText} ${detailText}`);
+  const imageText = normalizeComparableName(`${image?.description || ''} ${image?.relevanceToPost || ''}`);
+  if (!eventText || !imageText) return null;
+
+  const titleTokens = tokenizeStrongTitleImageMatchText(titleText);
+  const detailTokens = tokenizeImageMatchText(detailText).filter(
+    (token) => !WEAK_IMAGE_OVERRIDE_TOKENS.has(token)
+  );
+
+  const titleMatches = countTokenMatches(titleTokens, imageText);
+  const detailMatches = countTokenMatches(detailTokens, imageText);
+  const dateMatches = countDateImageMatches(eventText, imageText);
+
+  let cueScore = 0;
+  if (eventText.includes('wellness') && imageText.includes('wellness')) cueScore += 6;
+  if (eventText.includes('waterfront') && imageText.includes('waterfront')) cueScore += 6;
+  if (eventText.includes('trivia') && imageText.includes('trivia')) cueScore += 6;
+  if (eventText.includes('group stage') && imageText.includes('group stage')) cueScore += 5;
+  if (eventText.includes('soccer') && /\b(fifa|match|matches|schedule)\b/.test(imageText)) {
+    cueScore += 5;
+  }
+  if (/\b[a-z]+\s+vs\s+[a-z]+\b/.test(eventText) && /\b(group stage|fifa|match|matches|schedule)\b/.test(imageText)) {
+    cueScore += 5;
+  }
+
+  const score = titleMatches * 3 + Math.min(detailMatches, 3) + dateMatches * 2 + cueScore;
+  const strongEvidence =
+    cueScore >= 6 ||
+    titleMatches >= 2 ||
+    (titleMatches >= 1 && dateMatches >= 1);
+
+  return { score, url, index: imageIndex, strongEvidence };
+}
+
+function findBestDisplayImageAnalysisMatch(
+  event: Pick<TimeResolvedEvent, 'name' | 'description' | 'category'>,
+  imageAnalysis: Array<{ imageIndex?: number; description?: string; relevanceToPost?: string }>,
+  displayMediaUrls: string[]
+): { score: number; url: string; index: number; strongEvidence: boolean } | null {
+  if (!Array.isArray(imageAnalysis) || imageAnalysis.length === 0) return null;
+  if (!Array.isArray(displayMediaUrls) || displayMediaUrls.length === 0) return null;
+
+  let best: { score: number; url: string; index: number; strongEvidence: boolean } | null = null;
+
+  for (const image of imageAnalysis) {
+    const scored = scoreDisplayImageAnalysisMatch(event, image, displayMediaUrls);
+    if (!scored) continue;
+    if (!best || scored.score > best.score) best = scored;
+  }
+
+  return best && best.score >= 5 && best.strongEvidence ? best : null;
+}
+
 export function selectDisplayImageFromAnalysis(
   event: Pick<TimeResolvedEvent, 'name' | 'description' | 'category'>,
   imageAnalysis: Array<{ imageIndex?: number; description?: string; relevanceToPost?: string }>,
   displayMediaUrls: string[]
 ): string {
-  if (!Array.isArray(imageAnalysis) || imageAnalysis.length === 0) return '';
-  if (!Array.isArray(displayMediaUrls) || displayMediaUrls.length === 0) return '';
-
-  const eventText = normalizeComparableName(
-    `${event?.name || ''} ${event?.description || ''} ${event?.category || ''}`
-  );
-  if (!eventText) return '';
-
-  const tokens = tokenizeImageMatchText(eventText);
-  let best: { score: number; url: string; index: number } | null = null;
-
-  for (const image of imageAnalysis) {
-    const imageIndex = Number(image?.imageIndex);
-    if (!Number.isInteger(imageIndex) || imageIndex < 0 || imageIndex >= displayMediaUrls.length) {
-      continue;
-    }
-    const imageText = normalizeComparableName(
-      `${image?.description || ''} ${image?.relevanceToPost || ''}`
-    );
-    if (!imageText) continue;
-
-    let score = 0;
-    for (const token of tokens) {
-      if (imageText.includes(token)) score += 1;
-    }
-
-    if (eventText.includes('wellness') && imageText.includes('wellness')) score += 5;
-    if (eventText.includes('waterfront') && imageText.includes('waterfront')) score += 5;
-    if (eventText.includes('trivia') && imageText.includes('trivia')) score += 5;
-    if (eventText.includes('group stage') && imageText.includes('group stage')) score += 4;
-    if (eventText.includes('soccer') && /\b(fifa|match|matches|schedule)\b/.test(imageText)) {
-      score += 4;
-    }
-    if (/\b[a-z]+\s+vs\s+[a-z]+\b/.test(eventText) && /\b(group stage|fifa|match|matches|schedule)\b/.test(imageText)) {
-      score += 4;
-    }
-
-    const url = String(displayMediaUrls[imageIndex] || '').trim();
-    if (!url || !isManagedImageUrl(url)) continue;
-    if (!best || score > best.score) {
-      best = { score, url, index: imageIndex };
-    }
-  }
-
-  return best && best.score >= 3 ? best.url : '';
+  return findBestDisplayImageAnalysisMatch(event, imageAnalysis, displayMediaUrls)?.url || '';
 }
 
 function hasUsefulPerImageAnalysis(
@@ -2011,8 +2102,8 @@ export function selectDisplayImageFromCarouselOrder(
 
   if (
     /\btrivia\b/.test(eventText) ||
-    /\bfamily friendly\b/.test(eventText) ||
-    /\bprizes\b/.test(eventText)
+    /\bquiz\b/.test(eventText) ||
+    (/\bprizes\b/.test(eventText) && /\b(trivia|quiz|game)\b/.test(eventText))
   ) {
     const index = displayMediaUrls.length >= 4 ? 3 : displayMediaUrls.length - 1;
     const url = urlAt(index);
@@ -2043,12 +2134,28 @@ export function resolveRelevantImageUrlForEvent(
     hasValidIndex && rawIndex < displayMediaUrls.length
       ? String(displayMediaUrls[rawIndex] || '').trim()
       : '';
-  const fromImageAnalysis = selectDisplayImageFromAnalysis(event, imageAnalysis, displayMediaUrls);
+  const bestImageAnalysis = findBestDisplayImageAnalysisMatch(event, imageAnalysis, displayMediaUrls);
+  const fromImageAnalysis = bestImageAnalysis?.url || '';
   const selectedDifferentImageFromAnalysis =
     fromDisplay &&
     fromImageAnalysis &&
     normalizeProvenanceUrl(fromImageAnalysis) !== normalizeProvenanceUrl(fromDisplay);
-  if (rawIndex === 0 && selectedDifferentImageFromAnalysis) {
+  const firstImageAnalysis = rawIndex === 0
+    ? imageAnalysis
+        .map((image) => scoreDisplayImageAnalysisMatch(event, image, displayMediaUrls))
+        .find((match) => match?.index === 0) || null
+    : null;
+  const firstImageHasComparableEvidence = Boolean(
+    firstImageAnalysis &&
+    firstImageAnalysis.strongEvidence &&
+    firstImageAnalysis.score >= Math.max(5, (bestImageAnalysis?.score || 0) - 2)
+  );
+  if (
+    rawIndex === 0 &&
+    selectedDifferentImageFromAnalysis &&
+    bestImageAnalysis?.strongEvidence &&
+    !firstImageHasComparableEvidence
+  ) {
     return { url: fromImageAnalysis, reason: 'image_analysis_match_over_default_first_image_index' };
   }
 

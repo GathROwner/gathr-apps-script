@@ -9,7 +9,7 @@ import {
   SHARED_EVENT_PARSER_VERSION,
   verifySharedEventSourceVisibility,
 } from '../processing/sharedEventParser.js';
-import { startActorRunNoWait } from '../services/apifyService.js';
+import { ApifyAdHocWebhook, startActorRunNoWait } from '../services/apifyService.js';
 import * as firestoreService from '../services/firestoreService.js';
 import { ParsedSharedEvent, SharedEventSubmitPayload } from '../types/sharedEvent.js';
 import { logger } from '../utils/logger.js';
@@ -223,6 +223,65 @@ function getSharedEventPostScrapeActorId(): string {
   ).trim();
 }
 
+function getFirebaseProjectId(): string {
+  const explicit = String(
+    process.env.GCLOUD_PROJECT ||
+    process.env.GCP_PROJECT ||
+    process.env.PROJECT_ID ||
+    ''
+  ).trim();
+  if (explicit) {
+    return explicit;
+  }
+
+  try {
+    const firebaseConfig = JSON.parse(String(process.env.FIREBASE_CONFIG || '{}')) as { projectId?: unknown };
+    return String(firebaseConfig.projectId || '').trim();
+  } catch {
+    return '';
+  }
+}
+
+function getSharedEventApifyWebhookUrl(): string {
+  const explicit = String(
+    process.env.SHARED_EVENT_APIFY_WEBHOOK_URL ||
+    process.env.APIFY_WEBHOOK_URL ||
+    ''
+  ).trim();
+  if (explicit) {
+    return explicit;
+  }
+
+  const projectId = getFirebaseProjectId();
+  if (!projectId) {
+    return '';
+  }
+  const region = String(
+    process.env.SHARED_EVENT_APIFY_WEBHOOK_REGION ||
+    process.env.FUNCTION_REGION ||
+    'northamerica-northeast2'
+  ).trim();
+  return `https://${region}-${projectId}.cloudfunctions.net/apifyWebhook`;
+}
+
+function buildSharedEventApifyWebhooks(enrichmentId: string): ApifyAdHocWebhook[] {
+  const requestUrl = getSharedEventApifyWebhookUrl();
+  if (!requestUrl) {
+    return [];
+  }
+
+  return [{
+    eventTypes: [
+      'ACTOR.RUN.SUCCEEDED',
+      'ACTOR.RUN.FAILED',
+      'ACTOR.RUN.ABORTED',
+      'ACTOR.RUN.TIMED_OUT',
+    ],
+    requestUrl,
+    idempotencyKey: `shared-event-scrape-${enrichmentId}`,
+  }];
+}
+
 function eventResponse(parsedEvent: ParsedSharedEvent, ids?: {
   privateEventId?: string;
   publicCandidateId?: string;
@@ -420,6 +479,12 @@ async function maybeQueueSharedEventScrapeEnrichment(params: {
   }
 
   const dedupeHours = parsePositiveInt(process.env.SHARED_EVENT_APIFY_ENRICHMENT_DEDUPE_HOURS, 24, 1, 168);
+  const activeDedupeMinutes = parsePositiveInt(
+    process.env.SHARED_EVENT_APIFY_ACTIVE_DEDUPE_MINUTES,
+    30,
+    5,
+    1440
+  );
   const reservation = await firestoreService.reserveSharedEventScrapeEnrichment({
     ownerUid: params.ownerUid,
     ingestId: params.ingestId,
@@ -428,6 +493,7 @@ async function maybeQueueSharedEventScrapeEnrichment(params: {
     parserVersion: SHARED_EVENT_PARSER_VERSION,
     reason: decision.reason,
     dedupeHours,
+    activeDedupeMinutes,
   });
 
   if (!reservation.reserved) {
@@ -448,9 +514,18 @@ async function maybeQueueSharedEventScrapeEnrichment(params: {
     resultsLimit,
     captionText: false,
   };
+  const webhooks = buildSharedEventApifyWebhooks(reservation.enrichmentId);
+  if (webhooks.length === 0) {
+    logger.warn('Shared event scrape enrichment has no Apify completion webhook configured', {
+      ownerUid: params.ownerUid,
+      ingestId: params.ingestId,
+      enrichmentId: reservation.enrichmentId,
+      sourcePostId: decision.sourcePostId,
+    });
+  }
 
   try {
-    const run = await startActorRunNoWait(actorId, apifyToken, input);
+    const run = await startActorRunNoWait(actorId, apifyToken, input, { webhooks });
     await firestoreService.markSharedEventScrapeEnrichmentQueued({
       ownerUid: params.ownerUid,
       ingestId: params.ingestId,
@@ -470,6 +545,7 @@ async function maybeQueueSharedEventScrapeEnrichment(params: {
       datasetId: run.datasetId,
       sourcePostId: decision.sourcePostId,
       scrapeHost: hostForLog(decision.scrapeUrl),
+      webhookCount: webhooks.length,
     });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown Apify start failure';
