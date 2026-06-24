@@ -30,6 +30,184 @@ const SCRAPER_TYPE_PATTERNS: Array<{ pattern: RegExp; type: ScraperType }> = [
   { pattern: /facebook.*event/i, type: 'events' },
 ];
 
+const DEFAULT_APIFY_UPLOADS_DRIVE_FOLDER_ID = '1CiAw97ur95UVAWWLfmcY3ERbjxMrK7Ij';
+export const APIFY_DATASET_FILE_PREFIX = 'apify-dataset:';
+
+function asString(value: unknown): string {
+  if (value === null || value === undefined) return '';
+  return String(value).trim();
+}
+
+function getNestedString(value: unknown, path: string[]): string {
+  let current: unknown = value;
+  for (const segment of path) {
+    if (!current || typeof current !== 'object') return '';
+    current = (current as Record<string, unknown>)[segment];
+  }
+  return asString(current);
+}
+
+function isLikelyImageUrl(value: unknown): boolean {
+  const url = asString(value);
+  if (!/^https?:\/\//i.test(url)) return false;
+  if (/facebook\.com\/.+\/posts\//i.test(url)) return false;
+  if (/\bfbcdn\.net\b/i.test(url)) return true;
+  if (/\bscontent-[^/]+\.xx\.fbcdn\.net\b/i.test(url)) return true;
+  return /\.(jpg|jpeg|png|webp|gif)(?:[?#].*)?$/i.test(url);
+}
+
+function getMediaImageUrl(media: Record<string, unknown>): string {
+  const candidates = [
+    getNestedString(media, ['image', 'uri']),
+    getNestedString(media, ['large_share_image', 'uri']),
+    getNestedString(media, ['photo_image', 'uri']),
+    getNestedString(media, ['flexible_height_image', 'uri']),
+    getNestedString(media, ['flexible_height_share_image', 'uri']),
+    getNestedString(media, ['preferred_thumbnail', 'image', 'uri']),
+    getNestedString(media, ['thumbnailImage', 'uri']),
+    getNestedString(media, ['thumbnail']),
+    getNestedString(media, ['url']),
+  ];
+
+  return candidates.find(isLikelyImageUrl) || '';
+}
+
+function getMediaOcrText(media: Record<string, unknown>): string {
+  return asString(media.ocrText) || asString((media as Record<string, unknown>).ocr_text);
+}
+
+function getApifyItemMedia(item: Record<string, unknown>): Record<string, unknown>[] {
+  const rawMedia = Array.isArray(item.media)
+    ? item.media
+    : Array.isArray(item.attachments)
+      ? item.attachments
+      : [];
+
+  return rawMedia
+    .filter((media): media is Record<string, unknown> => Boolean(media) && typeof media === 'object');
+}
+
+function decodeVirtualFilePart(value: string): string {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+}
+
+export function buildApifyDatasetVirtualFileId(datasetId: string, actorRunId?: string): string {
+  const normalizedDatasetId = asString(datasetId);
+  if (!normalizedDatasetId) {
+    throw new Error('Apify dataset id is required');
+  }
+
+  const normalizedActorRunId = asString(actorRunId);
+  return `${APIFY_DATASET_FILE_PREFIX}${encodeURIComponent(normalizedDatasetId)}` +
+    (normalizedActorRunId ? `:run:${encodeURIComponent(normalizedActorRunId)}` : '');
+}
+
+export function parseApifyDatasetVirtualFileId(
+  fileId: string
+): { datasetId: string; actorRunId?: string } | null {
+  const raw = asString(fileId);
+  if (!raw.startsWith(APIFY_DATASET_FILE_PREFIX)) return null;
+
+  const remainder = raw.slice(APIFY_DATASET_FILE_PREFIX.length);
+  const runMarker = ':run:';
+  const runMarkerIndex = remainder.indexOf(runMarker);
+  const encodedDatasetId = runMarkerIndex >= 0
+    ? remainder.slice(0, runMarkerIndex)
+    : remainder;
+  const encodedActorRunId = runMarkerIndex >= 0
+    ? remainder.slice(runMarkerIndex + runMarker.length)
+    : '';
+
+  const datasetId = decodeVirtualFilePart(encodedDatasetId);
+  const actorRunId = decodeVirtualFilePart(encodedActorRunId);
+  if (!datasetId) return null;
+  return actorRunId ? { datasetId, actorRunId } : { datasetId };
+}
+
+export function getApifyDatasetFallbackLimit(): number {
+  const parsed = Number(process.env.APIFY_WEBHOOK_DIRECT_DATASET_LIMIT || 10);
+  if (!Number.isFinite(parsed) || parsed <= 0) return 10;
+  return Math.max(1, Math.min(Math.floor(parsed), 100));
+}
+
+export function mapApifyDatasetItemToDriveRow(item: Record<string, unknown>): Record<string, unknown> | null {
+  const postText = asString(item.text || item.description || item.caption);
+  const pageName =
+    getNestedString(item, ['user', 'name']) ||
+    asString(item.pageName || item.userName || item.authorName);
+  const postUrl = asString(item.url || item.facebookUrl || item.inputUrl);
+  const topLevelUrl = asString(item.topLevelUrl || item.topLevelPostUrl) || postUrl;
+  const profilePicUrl =
+    getNestedString(item, ['user', 'profilePic']) ||
+    asString(item.profilePicUrl || item.profilePic);
+  const postId = asString(item.postId || item.id || item.facebookId);
+  const timestamp = asString(item.time || item.timestamp || item.createdAt || item.date);
+  const uniqueId = postId || postUrl || topLevelUrl;
+
+  const mediaUrls: string[] = [];
+  const row: Record<string, unknown> = {
+    Text: postText,
+    'Sharedpost Text': postText,
+    'User Name': pageName,
+    Pagename: pageName,
+    Time: timestamp,
+    Facebookurl: postUrl,
+    topLevelUrl,
+    profilePicUrl,
+    uniqueId,
+    postId,
+    likes: asString(item.likes || item.likeCount),
+    shares: asString(item.shares || item.shareCount),
+    comments: asString(item.comments || item.commentCount),
+    topReactionsCount: asString(item.topReactionsCount || item.reactionCount),
+  };
+
+  for (const media of getApifyItemMedia(item)) {
+    const imageUrl = getMediaImageUrl(media);
+    if (!imageUrl || mediaUrls.includes(imageUrl)) {
+      continue;
+    }
+
+    const mediaIndex = mediaUrls.length;
+    mediaUrls.push(imageUrl);
+    row[`media/${mediaIndex}/image/uri`] = imageUrl;
+    row[`media/${mediaIndex}/thumbnail`] = getNestedString(media, ['thumbnail']) || imageUrl;
+
+    const ocrText = getMediaOcrText(media);
+    if (ocrText) {
+      row[`media/${mediaIndex}/ocrText`] = ocrText;
+    }
+  }
+
+  if (mediaUrls.length > 0) {
+    row.mediaUrls = JSON.stringify(mediaUrls);
+  }
+
+  const hasContent =
+    postText ||
+    pageName ||
+    postUrl ||
+    mediaUrls.length > 0 ||
+    Object.keys(row).some((key) => key.includes('/ocrText') && asString(row[key]));
+  return hasContent ? row : null;
+}
+
+export function parseMediaUrlCount(value: unknown): number {
+  if (Array.isArray(value)) return value.length;
+  const raw = asString(value);
+  if (!raw) return 0;
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed.length : 0;
+  } catch {
+    return raw ? 1 : 0;
+  }
+}
+
 /**
  * Verify Apify webhook signature using HMAC-SHA256
  *
@@ -181,7 +359,9 @@ export function buildDriveSearchQuery(
   // Search for XLSX files with Apify-related names
   // Note: Drive's 'contains' is case-sensitive, so we search for 'Apify' (actual file naming)
   const folderId = String(
-    process.env.APIFY_DRIVE_FOLDER_ID || process.env.APIFY_UPLOADS_DRIVE_FOLDER_ID || ''
+    process.env.APIFY_DRIVE_FOLDER_ID ||
+    process.env.APIFY_UPLOADS_DRIVE_FOLDER_ID ||
+    DEFAULT_APIFY_UPLOADS_DRIVE_FOLDER_ID
   ).trim();
   const startedAt = String(eventData.startedAt || '').trim();
   const finishedAt = String(eventData.finishedAt || '').trim();
@@ -331,9 +511,14 @@ export async function startActorRunNoWait(
   };
 }
 
-async function fetchApifyDatasetItems(datasetUrl: string): Promise<Array<Record<string, unknown>>> {
+async function fetchApifyDatasetItems(
+  datasetUrl: string,
+  token?: string
+): Promise<Array<Record<string, unknown>>> {
+  const normalizedToken = String(token || '').trim();
   const datasetRes = await fetch(datasetUrl, {
     method: 'GET',
+    ...(normalizedToken ? { headers: { authorization: `Bearer ${normalizedToken}` } } : {}),
   });
 
   if (!datasetRes.ok) {
@@ -347,6 +532,24 @@ async function fetchApifyDatasetItems(datasetUrl: string): Promise<Array<Record<
   }
 
   return datasetItems.filter((item) => item && typeof item === 'object') as Array<Record<string, unknown>>;
+}
+
+export async function fetchApifyDatasetItemsById(
+  datasetId: string,
+  token: string,
+  options?: {
+    limit?: number;
+  }
+): Promise<Array<Record<string, unknown>>> {
+  const normalizedDatasetId = String(datasetId || '').trim();
+  const normalizedToken = String(token || '').trim();
+  if (!normalizedDatasetId || !normalizedToken) {
+    throw new Error('Apify datasetId and token are required');
+  }
+
+  const limit = Math.max(1, Math.min(Number(options?.limit || 10), 100));
+  const datasetUrl = `https://api.apify.com/v2/datasets/${encodeURIComponent(normalizedDatasetId)}/items?clean=1&format=json&limit=${limit}`;
+  return fetchApifyDatasetItems(datasetUrl, normalizedToken);
 }
 
 export async function runActorAndFetchDatasetItems(

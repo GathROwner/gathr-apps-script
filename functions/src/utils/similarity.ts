@@ -63,6 +63,12 @@ export function normalizeVenueName(name: string): string {
 
   return name
     .toLowerCase()
+    // Source scrapers can replace curly apostrophes/accents with '?'. Do not let
+    // that split a known venue token such as "Founders? Food".
+    .replace(/\?\s*s\b/g, 's')
+    .replace(/\?/g, '')
+    // Treat "&" as "and" so parser/output variants resolve to the same venue.
+    .replace(/&/g, ' and ')
     // Remove apostrophes (straight + common Unicode variants) without spacing
     .replace(/['\u2019\u2018\u02bc\u2032\uff07]/g, '')
     // Replace punctuation with spaces

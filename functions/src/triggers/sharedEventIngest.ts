@@ -256,12 +256,16 @@ function getSharedEventApifyWebhookUrl(): string {
   if (!projectId) {
     return '';
   }
+  const targetProjectId = String(
+    process.env.SHARED_EVENT_PUBLIC_PARSER_PROJECT_ID ||
+    (projectId === 'gathr-m1' ? 'gathr-migrated' : projectId)
+  ).trim();
   const region = String(
     process.env.SHARED_EVENT_APIFY_WEBHOOK_REGION ||
     process.env.FUNCTION_REGION ||
     'northamerica-northeast2'
   ).trim();
-  return `https://${region}-${projectId}.cloudfunctions.net/apifyWebhook`;
+  return `https://${region}-${targetProjectId}.cloudfunctions.net/apifyWebhook`;
 }
 
 function buildSharedEventApifyWebhooks(enrichmentId: string): ApifyAdHocWebhook[] {

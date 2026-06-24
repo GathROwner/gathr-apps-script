@@ -25,6 +25,11 @@ import {
   buildDriveSearchQuery,
   isRecentWebhook,
   formatRunUrl,
+  buildApifyDatasetVirtualFileId,
+  fetchApifyDatasetItemsById,
+  getApifyDatasetFallbackLimit,
+  mapApifyDatasetItemToDriveRow,
+  parseMediaUrlCount,
 } from '../services/apifyService.js';
 import { listFiles } from '../services/driveService.js';
 import * as firestoreService from '../services/firestoreService.js';
@@ -232,15 +237,38 @@ async function handleRunSucceeded(
 
   await updateWebhookStatus(webhookDocRef, 'processing');
 
-  // Wait a short time for the Drive export to complete
-  // Apify exports to Drive can take a few seconds after run completion
-  await delay(5000);
+  const isSharedEventRun = await isSharedEventScrapeRun(actorRunId);
+  let file: { id: string; name: string } | null = null;
+  let fileSource = 'drive_export';
 
-  // Find the exported file in Drive
-  const file = await findExportedFile(payload, scraperType);
+  if (isSharedEventRun) {
+    logger.info('Shared event scrape run detected; using exact Apify dataset fallback', {
+      actorRunId,
+      datasetId: defaultDatasetId,
+    });
+    file = await createVirtualFileFromApifyDataset(payload);
+    fileSource = 'apify_dataset_fallback';
+  } else {
+    // Wait a short time for the Drive export to complete.
+    // Apify exports to Drive can take a few seconds after run completion.
+    await delay(5000);
+
+    // Find the exported file in Drive. Non-share webhook paths still use Drive
+    // exports as the primary handoff, with an exact dataset fallback if missing.
+    file = await findExportedFile(payload, scraperType);
+
+    if (!file || !file.id) {
+      logger.warn('Could not find exported file in Google Drive; trying Apify dataset fallback', {
+        actorRunId,
+        datasetId: defaultDatasetId,
+      });
+      file = await createVirtualFileFromApifyDataset(payload);
+      fileSource = 'apify_dataset_fallback';
+    }
+  }
 
   if (!file || !file.id) {
-    const error = 'Could not find exported file in Google Drive';
+    const error = 'Could not find exported file in Google Drive or Apify dataset fallback';
     logger.warn(error, { actorRunId, datasetId: defaultDatasetId });
     await updateWebhookStatus(webhookDocRef, 'failed', { error });
     return;
@@ -249,6 +277,7 @@ async function handleRunSucceeded(
   logger.info('Found exported file', {
     fileId: file.id,
     fileName: file.name,
+    fileSource,
   });
 
   // Update webhook record with file info
@@ -399,6 +428,79 @@ async function findExportedFile(
     logger.error('Drive search failed', error);
     return null;
   }
+}
+
+async function isSharedEventScrapeRun(actorRunId: string | undefined): Promise<boolean> {
+  const normalizedActorRunId = asString(actorRunId);
+  if (!normalizedActorRunId) return false;
+
+  try {
+    const snapshot = await db
+      .collection('shared_event_scrape_enrichments')
+      .where('actorRunId', '==', normalizedActorRunId)
+      .limit(1)
+      .get();
+    return !snapshot.empty;
+  } catch (error) {
+    logger.error('Failed to check shared event scrape enrichment run', error, {
+      actorRunId: normalizedActorRunId,
+    });
+    return false;
+  }
+}
+
+function asString(value: unknown): string {
+  if (value === null || value === undefined) return '';
+  return String(value).trim();
+}
+
+async function createVirtualFileFromApifyDataset(
+  payload: ApifyWebhookPayload
+): Promise<{ id: string; name: string } | null> {
+  const datasetId = asString(payload.eventData?.defaultDatasetId);
+  const actorRunId = asString(payload.eventData?.actorRunId);
+  if (!datasetId) {
+    logger.warn('Cannot create Apify dataset fallback file without Apify dataset id', { actorRunId });
+    return null;
+  }
+
+  const token = asString(process.env.APIFY_TOKEN);
+  if (!token) {
+    logger.warn('Cannot create Apify dataset fallback file without APIFY_TOKEN', { actorRunId, datasetId });
+    return null;
+  }
+
+  const datasetItems = await fetchApifyDatasetItemsById(datasetId, token, {
+    limit: getApifyDatasetFallbackLimit(),
+  });
+  const rows = datasetItems
+    .map(mapApifyDatasetItemToDriveRow)
+    .filter((row): row is Record<string, unknown> => Boolean(row));
+
+  if (rows.length === 0) {
+    logger.warn('Apify dataset fallback had no usable rows', {
+      actorRunId,
+      datasetId,
+      datasetItemCount: datasetItems.length,
+    });
+    return null;
+  }
+
+  const file = {
+    id: buildApifyDatasetVirtualFileId(datasetId, actorRunId || undefined),
+    name: `APIFY Dataset ${datasetId}${actorRunId ? ` run ${actorRunId}` : ''}.xlsx`,
+  };
+
+  logger.info('Created virtual Apify dataset file from Apify dataset', {
+    actorRunId,
+    datasetId,
+    fileId: file.id,
+    fileName: file.name,
+    rowCount: rows.length,
+    mediaCounts: rows.map((row) => parseMediaUrlCount(row.mediaUrls)),
+  });
+
+  return file;
 }
 
 /**

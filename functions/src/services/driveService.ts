@@ -4,9 +4,17 @@
  */
 
 import { google, drive_v3 } from 'googleapis';
+import { Readable } from 'node:stream';
 import * as XLSX from 'xlsx';
 import { RawRowData } from '../types/index.js';
 import { logger } from '../utils/logger.js';
+import {
+  fetchApifyDatasetItemsById,
+  getApifyDatasetFallbackLimit,
+  mapApifyDatasetItemToDriveRow,
+  parseApifyDatasetVirtualFileId,
+  parseMediaUrlCount,
+} from './apifyService.js';
 
 let driveClient: drive_v3.Drive | null = null;
 
@@ -107,6 +115,53 @@ export async function downloadFile(fileId: string): Promise<Buffer> {
     logger.error('Drive downloadFile failed', error, { fileId });
     throw error;
   }
+}
+
+export async function uploadXlsxRows(
+  fileName: string,
+  rows: Array<Record<string, unknown>>,
+  options?: {
+    folderId?: string;
+    sheetName?: string;
+  }
+): Promise<{ id: string; name: string }> {
+  const normalizedFileName = String(fileName || '').trim() || `APIFY Dataset ${Date.now()}.xlsx`;
+  const finalFileName = normalizedFileName.toLowerCase().endsWith('.xlsx')
+    ? normalizedFileName
+    : `${normalizedFileName}.xlsx`;
+
+  const workbook = XLSX.utils.book_new();
+  const worksheet = XLSX.utils.json_to_sheet(rows);
+  XLSX.utils.book_append_sheet(workbook, worksheet, String(options?.sheetName || 'Data').trim() || 'Data');
+  const buffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' }) as Buffer;
+
+  const drive = await getClient();
+  const response = await drive.files.create({
+    requestBody: {
+      name: finalFileName,
+      ...(options?.folderId ? { parents: [options.folderId] } : {}),
+    },
+    media: {
+      mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      body: Readable.from([buffer]),
+    } as any,
+    fields: 'id,name',
+    supportsAllDrives: true,
+  });
+
+  const id = String(response.data.id || '').trim();
+  const name = String(response.data.name || '').trim();
+  if (!id || !name) {
+    throw new Error('Drive upload did not return file id and name');
+  }
+
+  logger.info('Uploaded XLSX rows to Drive', {
+    fileId: id,
+    fileName: name,
+    rowCount: rows.length,
+  });
+
+  return { id, name };
 }
 
 function normalizeDriveListUrl(value: string): string {
@@ -1139,6 +1194,47 @@ export async function downloadAndParseDataset(
   totalRows: number;
   fileName: string;
 }> {
+  const apifyDatasetFile = parseApifyDatasetVirtualFileId(fileId);
+  if (apifyDatasetFile) {
+    const token = String(process.env.APIFY_TOKEN || '').trim();
+    if (!token) {
+      throw new Error('APIFY_TOKEN environment variable not set');
+    }
+
+    const datasetItems = await fetchApifyDatasetItemsById(apifyDatasetFile.datasetId, token, {
+      limit: getApifyDatasetFallbackLimit(),
+    });
+    const rowObjects = datasetItems
+      .map(mapApifyDatasetItemToDriveRow)
+      .filter((row): row is Record<string, unknown> => Boolean(row));
+
+    if (rowObjects.length === 0) {
+      throw new Error(`Apify dataset ${apifyDatasetFile.datasetId} had no usable rows`);
+    }
+
+    const workbook = XLSX.utils.book_new();
+    const worksheet = XLSX.utils.json_to_sheet(rowObjects);
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Data');
+    const buffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' }) as Buffer;
+    const fileName = `APIFY Dataset ${apifyDatasetFile.datasetId}` +
+      (apifyDatasetFile.actorRunId ? ` run ${apifyDatasetFile.actorRunId}` : '') +
+      '.xlsx';
+    const { rows, totalRows } = await parseXlsxFile(buffer);
+
+    logger.info('Parsed virtual Apify dataset file', {
+      fileId,
+      fileName,
+      datasetId: apifyDatasetFile.datasetId,
+      actorRunId: apifyDatasetFile.actorRunId,
+      totalRows,
+      validRows: rows.length,
+      datasetItemCount: datasetItems.length,
+      mediaCounts: rowObjects.map((row) => parseMediaUrlCount(row.mediaUrls)),
+    });
+
+    return { rows, totalRows, fileName };
+  }
+
   const drive = await getClient();
 
   // Get file metadata
