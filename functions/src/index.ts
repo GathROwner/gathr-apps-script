@@ -76,3 +76,6 @@ export { processDatasetResume } from './triggers/processDataset.js';
 
 // Process Dataset Selected Rows - Targeted row replays from unknown-venue finalization
 export { processDatasetSelectedRows } from './triggers/processDataset.js';
+
+// Shared Event Ingest - Processes queued media-heavy share ingests
+export { processSharedEventIngest } from './triggers/sharedEventIngest.js';

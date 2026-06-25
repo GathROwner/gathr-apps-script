@@ -1,7 +1,9 @@
 import * as admin from 'firebase-admin';
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
+import { getFunctions } from 'firebase-admin/functions';
 import { defineSecret } from 'firebase-functions/params';
 import { onRequest } from 'firebase-functions/v2/https';
+import { onTaskDispatched } from 'firebase-functions/v2/tasks';
 import {
   extractFirstUrl,
   normalizeSharedEventUrl,
@@ -20,6 +22,7 @@ if (!admin.apps.length) {
 
 const openAiApiKey = defineSecret('OPENAI_API_KEY');
 const apifyApiToken = defineSecret('APIFY_TOKEN');
+const TASK_QUEUE_LOCATION = 'northamerica-northeast1';
 const DEFAULT_FB_POSTS_SCRAPER_ACTOR_ID = 'KoJrdxJCTtpon81KY';
 const MAX_SHARED_EVENT_UPLOAD_BYTES = 8 * 1024 * 1024;
 const ALLOWED_SHARED_EVENT_IMAGE_TYPES = new Set([
@@ -170,6 +173,23 @@ function canReuseSharedSource(payload: SharedEventSubmitPayload): boolean {
     payload.venueName ||
     payload.address
   );
+}
+
+function shouldQueueSharedEventProcessing(payload: SharedEventSubmitPayload): boolean {
+  if (!envFlagEnabled(process.env.SHARED_EVENT_ASYNC_MEDIA_PROCESSING_ENABLED, true)) {
+    return false;
+  }
+  return Array.isArray(payload.mediaUrls) && payload.mediaUrls.filter(Boolean).length > 0;
+}
+
+function sourcePlatformForQueuedIngest(payload: SharedEventSubmitPayload, sourceUrl: string | undefined) {
+  const explicit = String(payload.sourcePlatform || '').trim().toLowerCase();
+  if (explicit === 'facebook' || explicit === 'instagram' || explicit === 'web' || explicit === 'unknown') {
+    return explicit;
+  }
+  if (isFacebookUrl(sourceUrl)) return 'facebook';
+  if (sourceUrl) return 'web';
+  return 'unknown';
 }
 
 function hostForLog(value: string | undefined): string | undefined {
@@ -345,6 +365,69 @@ function successResponse(params: {
     events: parsedEvents.map((event, index) => eventResponse(event, eventLinks[index])),
     visibilityEvidence: parsedEvent.visibilityEvidence,
   };
+}
+
+function queuedResponse(params: { ingestId: string }) {
+  return {
+    success: true,
+    ingestId: params.ingestId,
+    processingStatus: 'queued',
+    routing: 'private_only',
+    sourceVisibility: 'unknown',
+    status: 'needs_user_review',
+    extractedEventCount: 0,
+    needsUserReview: false,
+    reviewReasons: [],
+    events: [],
+  };
+}
+
+function isTaskAlreadyExistsError(error: unknown): boolean {
+  const code = Number((error as { code?: unknown })?.code);
+  const message = error instanceof Error ? error.message : String(error || '');
+  return code === 6 || /already exists/i.test(message);
+}
+
+async function enqueueSharedEventIngestProcessing(params: {
+  ownerUid: string;
+  ingestId: string;
+}): Promise<void> {
+  const queue = getFunctions().taskQueue(
+    `locations/${TASK_QUEUE_LOCATION}/functions/processSharedEventIngest`
+  );
+  const taskId = `shared-event-${createHash('sha1')
+    .update(`${params.ownerUid}|${params.ingestId}`)
+    .digest('hex')
+    .slice(0, 40)}`;
+
+  try {
+    await queue.enqueue(
+      {
+        ownerUid: params.ownerUid,
+        ingestId: params.ingestId,
+      },
+      {
+        scheduleDelaySeconds: 0,
+        id: taskId,
+      }
+    );
+    logger.info('Queued shared event ingest task', {
+      ownerUid: params.ownerUid,
+      ingestId: params.ingestId,
+      queueLocation: TASK_QUEUE_LOCATION,
+      taskId,
+    });
+  } catch (error) {
+    if (isTaskAlreadyExistsError(error)) {
+      logger.info('Shared event ingest task already queued', {
+        ownerUid: params.ownerUid,
+        ingestId: params.ingestId,
+        taskId,
+      });
+      return;
+    }
+    throw error;
+  }
 }
 
 function countByString(values: string[]): Record<string, number> {
@@ -608,6 +691,186 @@ async function maybeQueueSharedEventScrapeEnrichment(params: {
   }
 }
 
+async function processSharedEventPayloadToFirestore(params: {
+  ownerUid: string;
+  payload: SharedEventSubmitPayload;
+  sourceUrl?: string;
+  ingestId?: string;
+  visibility?: Awaited<ReturnType<typeof verifySharedEventSourceVisibility>>;
+}): Promise<{
+  ingestId: string;
+  parsedEvents: ParsedSharedEvent[];
+  eventLinks: Array<{ privateEventId: string; publicCandidateId?: string }>;
+}> {
+  const sourceUrl = params.sourceUrl || resolveSourceUrl(params.payload);
+  const visibility = params.visibility || await verifySharedEventSourceVisibility(params.payload, sourceUrl);
+  if (!params.visibility) {
+    logger.info('submitSharedEvent visibility evidence', {
+      ownerUid: params.ownerUid,
+      ingestId: params.ingestId,
+      sourceHost: hostForLog(sourceUrl),
+      visibility: visibility.visibility,
+      method: visibility.evidence.method,
+      httpStatus: visibility.evidence.httpStatus,
+      hasImageUrl: Boolean(visibility.evidence.imageUrl),
+      ogType: visibility.evidence.ogType,
+      titleFound: visibility.evidence.titleFound,
+      descriptionFound: visibility.evidence.descriptionFound,
+      sourcePostId: visibility.evidence.sourcePostId,
+    });
+  }
+
+  const parsedEvents = await parseSharedEventPayloads(params.payload, {
+    sourceVisibility: visibility.visibility,
+    visibilityEvidence: visibility.evidence,
+  });
+  const parsedEvent = parsedEvents[0];
+  const normalizedSourceUrl = visibility.evidence.finalUrl
+    ? normalizeSharedEventUrl(visibility.evidence.finalUrl)
+    : sourceUrl;
+
+  const ingestId = params.ingestId || await firestoreService.createSharedEventIngest({
+    ownerUid: params.ownerUid,
+    payload: params.payload,
+    parsedEvent,
+    parserVersion: SHARED_EVENT_PARSER_VERSION,
+  });
+
+  if (params.ingestId) {
+    await firestoreService.updateSharedEventIngestParsedSource({
+      ownerUid: params.ownerUid,
+      ingestId,
+      parsedEvent,
+      parserVersion: SHARED_EVENT_PARSER_VERSION,
+      normalizedSourceUrl,
+    });
+  }
+
+  logger.info('submitSharedEvent parsed event summary', {
+    ownerUid: params.ownerUid,
+    ingestId,
+    sourceHost: hostForLog(sourceUrl),
+    sourceApp: params.payload.sourceApp,
+    mediaUrlCount: Array.isArray(params.payload.mediaUrls) ? params.payload.mediaUrls.length : 0,
+    sourceVisibility: visibility.visibility,
+    ...summarizeParsedEventsForLog(parsedEvents),
+  });
+
+  const eventLinks = await Promise.all(parsedEvents.map(async (currentParsedEvent, index) => {
+    const updateIngestLink = index === 0;
+    const privateEventId = await firestoreService.createPrivateSharedEvent({
+      ownerUid: params.ownerUid,
+      ingestId,
+      parsedEvent: currentParsedEvent,
+      updateIngestLink,
+    });
+    const publicCandidateId = currentParsedEvent.routing === 'public_candidate'
+      ? await firestoreService.createPublicSharedEventCandidate({
+        ownerUid: params.ownerUid,
+        ingestId,
+        privateEventId,
+        parsedEvent: currentParsedEvent,
+        updateIngestLink,
+      })
+      : undefined;
+    return { privateEventId, publicCandidateId };
+  }));
+
+  const summary = summarizeSharedEventResult(parsedEvents, eventLinks);
+
+  await firestoreService.updateSharedEventIngestExtractedEvents({
+    ownerUid: params.ownerUid,
+    ingestId,
+    privateEventIds: eventLinks.map((link) => link.privateEventId),
+    publicCandidateIds: eventLinks
+      .map((link) => link.publicCandidateId)
+      .filter((id): id is string => Boolean(id)),
+    eventLinks,
+    extractedEventCount: parsedEvents.length,
+    status: summary.status,
+    routing: summary.routing,
+    privateEventId: summary.privateEventId,
+    publicCandidateId: summary.publicCandidateId,
+    parsedEvents,
+    processingStatus: 'completed',
+  });
+
+  await maybeQueueSharedEventScrapeEnrichment({
+    ownerUid: params.ownerUid,
+    ingestId,
+    payload: params.payload,
+    sourceUrl,
+    parsedEvents,
+    summary,
+  });
+
+  logger.info('submitSharedEvent complete', {
+    ownerUid: params.ownerUid,
+    ingestId,
+    privateEventId: summary.privateEventId,
+    publicCandidateId: summary.publicCandidateId,
+    extractedEventCount: parsedEvents.length,
+    sourceVisibility: parsedEvent.sourceVisibility,
+    routing: summary.routing,
+    needsUserReview: summary.needsUserReview,
+  });
+
+  return { ingestId, parsedEvents, eventLinks };
+}
+
+export const processSharedEventIngest = onTaskDispatched(
+  {
+    retryConfig: {
+      maxAttempts: 1,
+    },
+    rateLimits: {
+      maxConcurrentDispatches: 2,
+    },
+    timeoutSeconds: 540,
+    memory: '1GiB',
+    region: TASK_QUEUE_LOCATION,
+    secrets: [openAiApiKey, apifyApiToken],
+  },
+  async (request) => {
+    const ownerUid = String(request.data?.ownerUid || '').trim();
+    const ingestId = String(request.data?.ingestId || '').trim();
+    logger.setContext({ functionName: 'processSharedEventIngest', ownerUid, ingestId });
+
+    if (!ownerUid || !ingestId) {
+      logger.warn('processSharedEventIngest missing ownerUid or ingestId', { ownerUid, ingestId });
+      return;
+    }
+
+    const existing = await firestoreService.getSharedEventIngest({ ownerUid, ingestId });
+    if (!existing) {
+      logger.warn('processSharedEventIngest ingest not found', { ownerUid, ingestId });
+      return;
+    }
+    if (existing.processingStatus === 'completed' && Number(existing.extractedEventCount || 0) > 0) {
+      logger.info('processSharedEventIngest already completed', {
+        ownerUid,
+        ingestId,
+        extractedEventCount: existing.extractedEventCount,
+      });
+      return;
+    }
+
+    try {
+      await firestoreService.markSharedEventIngestProcessing({ ownerUid, ingestId });
+      await processSharedEventPayloadToFirestore({
+        ownerUid,
+        ingestId,
+        payload: existing.payload,
+        sourceUrl: existing.normalizedSourceUrl || resolveSourceUrl(existing.payload),
+      });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown shared event processing error';
+      await firestoreService.markSharedEventIngestFailed({ ownerUid, ingestId, error: errorMessage });
+      logger.error('processSharedEventIngest failed', error, { ownerUid, ingestId });
+    }
+  }
+);
+
 export const uploadSharedEventImage = onRequest(
   {
     timeoutSeconds: 60,
@@ -798,6 +1061,25 @@ export const submitSharedEvent = onRequest(
         }
       }
 
+      if (shouldQueueSharedEventProcessing(payload)) {
+        const ingestId = await firestoreService.createQueuedSharedEventIngest({
+          ownerUid,
+          payload,
+          normalizedSourceUrl: sourceUrl,
+          sourcePlatform: sourcePlatformForQueuedIngest(payload, sourceUrl),
+          parserVersion: SHARED_EVENT_PARSER_VERSION,
+        });
+        await enqueueSharedEventIngestProcessing({ ownerUid, ingestId });
+        logger.info('submitSharedEvent queued async media processing', {
+          ownerUid,
+          ingestId,
+          sourceHost: hostForLog(sourceUrl),
+          mediaUrlCount: Array.isArray(payload.mediaUrls) ? payload.mediaUrls.length : 0,
+        });
+        response.json(queuedResponse({ ingestId }));
+        return;
+      }
+
       const visibility = await verifySharedEventSourceVisibility(payload, sourceUrl);
       logger.info('submitSharedEvent visibility evidence', {
         ownerUid,
@@ -850,90 +1132,17 @@ export const submitSharedEvent = onRequest(
         }
       }
 
-      const parsedEvents = await parseSharedEventPayloads(payload, {
-        sourceVisibility: visibility.visibility,
-        visibilityEvidence: visibility.evidence,
-      });
-      const parsedEvent = parsedEvents[0];
-
-      const ingestId = await firestoreService.createSharedEventIngest({
+      const processed = await processSharedEventPayloadToFirestore({
         ownerUid,
-        payload,
-        parsedEvent,
-        parserVersion: SHARED_EVENT_PARSER_VERSION,
-      });
-
-      logger.info('submitSharedEvent parsed event summary', {
-        ownerUid,
-        ingestId,
-        sourceHost: hostForLog(sourceUrl),
-        sourceApp: payload.sourceApp,
-        mediaUrlCount: Array.isArray(payload.mediaUrls) ? payload.mediaUrls.length : 0,
-        sourceVisibility: visibility.visibility,
-        ...summarizeParsedEventsForLog(parsedEvents),
-      });
-
-      const eventLinks = await Promise.all(parsedEvents.map(async (currentParsedEvent, index) => {
-        const updateIngestLink = index === 0;
-        const privateEventId = await firestoreService.createPrivateSharedEvent({
-          ownerUid,
-          ingestId,
-          parsedEvent: currentParsedEvent,
-          updateIngestLink,
-        });
-        const publicCandidateId = currentParsedEvent.routing === 'public_candidate'
-          ? await firestoreService.createPublicSharedEventCandidate({
-            ownerUid,
-            ingestId,
-            privateEventId,
-            parsedEvent: currentParsedEvent,
-            updateIngestLink,
-          })
-          : undefined;
-        return { privateEventId, publicCandidateId };
-      }));
-
-      const summary = summarizeSharedEventResult(parsedEvents, eventLinks);
-
-      await firestoreService.updateSharedEventIngestExtractedEvents({
-        ownerUid,
-        ingestId,
-        privateEventIds: eventLinks.map((link) => link.privateEventId),
-        publicCandidateIds: eventLinks
-          .map((link) => link.publicCandidateId)
-          .filter((id): id is string => Boolean(id)),
-        eventLinks,
-        extractedEventCount: parsedEvents.length,
-        status: summary.status,
-        routing: summary.routing,
-        privateEventId: summary.privateEventId,
-        publicCandidateId: summary.publicCandidateId,
-      });
-
-      await maybeQueueSharedEventScrapeEnrichment({
-        ownerUid,
-        ingestId,
         payload,
         sourceUrl,
-        parsedEvents,
-        summary,
-      });
-
-      logger.info('submitSharedEvent complete', {
-        ownerUid,
-        ingestId,
-        privateEventId: summary.privateEventId,
-        publicCandidateId: summary.publicCandidateId,
-        extractedEventCount: parsedEvents.length,
-        sourceVisibility: parsedEvent.sourceVisibility,
-        routing: summary.routing,
-        needsUserReview: summary.needsUserReview,
+        visibility,
       });
 
       response.json(successResponse({
-        ingestId,
-        parsedEvents,
-        eventLinks,
+        ingestId: processed.ingestId,
+        parsedEvents: processed.parsedEvents,
+        eventLinks: processed.eventLinks,
       }));
     } catch (error) {
       logger.error('submitSharedEvent failed', error, { ownerUid });

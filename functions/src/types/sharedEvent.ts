@@ -14,6 +14,12 @@ export type SharedEventStatus =
   | 'submitted_public_candidate'
   | 'expired';
 
+export type SharedEventProcessingStatus =
+  | 'queued'
+  | 'processing'
+  | 'completed'
+  | 'failed';
+
 export type SharedEventFieldSource =
   | 'public_source'
   | 'share_payload'
@@ -118,6 +124,12 @@ export interface SharedEventIngestRecord {
   parserVersion: string;
   status: SharedEventStatus;
   routing: SharedEventRouting;
+  processingStatus?: SharedEventProcessingStatus;
+  processingError?: string;
+  queuedAt?: unknown;
+  startedAt?: unknown;
+  completedAt?: unknown;
+  failedAt?: unknown;
   privateEventId?: string;
   publicCandidateId?: string;
   privateEventIds?: string[];
@@ -126,6 +138,7 @@ export interface SharedEventIngestRecord {
     privateEventId: string;
     publicCandidateId?: string;
   }>;
+  eventsPreview?: ParsedSharedEvent[];
   extractedEventCount?: number;
   scrapeEnrichment?: {
     status: 'reserved' | 'queued' | 'duplicate' | 'failed';

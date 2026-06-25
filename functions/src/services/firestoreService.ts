@@ -48,7 +48,10 @@ import {
   PrivateSharedEventRecord,
   PublicSharedEventCandidateRecord,
   SharedEventIngestRecord,
+  SharedEventProcessingStatus,
   SharedEventRouting,
+  SharedEventSourcePlatform,
+  SharedEventSourceVisibility,
   SharedEventStatus,
   SharedEventSubmitPayload,
 } from '../types/sharedEvent.js';
@@ -3337,6 +3340,8 @@ export async function createSharedEventIngest(params: {
     parserVersion,
     status: parsedEvent.status,
     routing: parsedEvent.routing,
+    processingStatus: 'completed',
+    completedAt: admin.firestore.FieldValue.serverTimestamp(),
     createdAt: admin.firestore.FieldValue.serverTimestamp(),
     updatedAt: admin.firestore.FieldValue.serverTimestamp(),
   };
@@ -3355,6 +3360,126 @@ export async function createSharedEventIngest(params: {
   });
 
   return docRef.id;
+}
+
+export async function createQueuedSharedEventIngest(params: {
+  ownerUid: string;
+  payload: SharedEventSubmitPayload;
+  normalizedSourceUrl?: string;
+  sourcePlatform?: SharedEventSourcePlatform;
+  parserVersion: string;
+}): Promise<string> {
+  const now = admin.firestore.FieldValue.serverTimestamp();
+  const record: SharedEventIngestRecord = {
+    ownerUid: params.ownerUid,
+    payload: params.payload,
+    normalizedSourceUrl: params.normalizedSourceUrl,
+    sourcePlatform: params.sourcePlatform || 'unknown',
+    sourceVisibility: 'unknown',
+    visibilityEvidence: {
+      method: 'not_checked',
+      checkedAt: new Date().toISOString(),
+      url: params.normalizedSourceUrl,
+      reason: 'Queued for async shared event processing.',
+    },
+    parserVersion: params.parserVersion,
+    status: 'needs_user_review',
+    routing: 'private_only',
+    processingStatus: 'queued',
+    queuedAt: now,
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  const docRef = await db
+    .collection('users')
+    .doc(params.ownerUid)
+    .collection(COLLECTIONS.SHARED_EVENT_INGESTS)
+    .add(record);
+
+  logger.info('Created queued shared event ingest', {
+    ownerUid: params.ownerUid,
+    ingestId: docRef.id,
+    sourcePlatform: record.sourcePlatform,
+    hasSourceUrl: Boolean(params.normalizedSourceUrl),
+  });
+
+  return docRef.id;
+}
+
+export async function getSharedEventIngest(params: {
+  ownerUid: string;
+  ingestId: string;
+}): Promise<SharedEventIngestRecord | undefined> {
+  const snapshot = await db
+    .collection('users')
+    .doc(params.ownerUid)
+    .collection(COLLECTIONS.SHARED_EVENT_INGESTS)
+    .doc(params.ingestId)
+    .get();
+  return snapshot.exists ? snapshot.data() as SharedEventIngestRecord : undefined;
+}
+
+export async function markSharedEventIngestProcessing(params: {
+  ownerUid: string;
+  ingestId: string;
+}): Promise<void> {
+  await db
+    .collection('users')
+    .doc(params.ownerUid)
+    .collection(COLLECTIONS.SHARED_EVENT_INGESTS)
+    .doc(params.ingestId)
+    .set({
+      processingStatus: 'processing' satisfies SharedEventProcessingStatus,
+      startedAt: admin.firestore.FieldValue.serverTimestamp(),
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      processingError: admin.firestore.FieldValue.delete(),
+    }, { merge: true });
+}
+
+export async function updateSharedEventIngestParsedSource(params: {
+  ownerUid: string;
+  ingestId: string;
+  parsedEvent: ParsedSharedEvent;
+  parserVersion: string;
+  normalizedSourceUrl?: string;
+}): Promise<void> {
+  await db
+    .collection('users')
+    .doc(params.ownerUid)
+    .collection(COLLECTIONS.SHARED_EVENT_INGESTS)
+    .doc(params.ingestId)
+    .set({
+      normalizedSourceUrl: params.normalizedSourceUrl ||
+        params.parsedEvent.visibilityEvidence.finalUrl ||
+        params.parsedEvent.visibilityEvidence.url ||
+        params.parsedEvent.sourceUrl,
+      sourcePlatform: params.parsedEvent.sourcePlatform,
+      sourceVisibility: params.parsedEvent.sourceVisibility satisfies SharedEventSourceVisibility,
+      visibilityEvidence: params.parsedEvent.visibilityEvidence,
+      parserVersion: params.parserVersion,
+      status: params.parsedEvent.status,
+      routing: params.parsedEvent.routing,
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    }, { merge: true });
+}
+
+export async function markSharedEventIngestFailed(params: {
+  ownerUid: string;
+  ingestId: string;
+  error: string;
+}): Promise<void> {
+  await db
+    .collection('users')
+    .doc(params.ownerUid)
+    .collection(COLLECTIONS.SHARED_EVENT_INGESTS)
+    .doc(params.ingestId)
+    .set({
+      processingStatus: 'failed' satisfies SharedEventProcessingStatus,
+      processingError: params.error,
+      failedAt: admin.firestore.FieldValue.serverTimestamp(),
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    }, { merge: true });
 }
 
 /**
@@ -3503,6 +3628,8 @@ export async function updateSharedEventIngestExtractedEvents(params: {
   routing: SharedEventRouting;
   privateEventId?: string;
   publicCandidateId?: string;
+  parsedEvents?: ParsedSharedEvent[];
+  processingStatus?: SharedEventProcessingStatus;
 }): Promise<void> {
   await db
     .collection('users')
@@ -3519,6 +3646,15 @@ export async function updateSharedEventIngestExtractedEvents(params: {
       extractedEventCount: params.extractedEventCount,
       status: params.status,
       routing: params.routing,
+      ...(params.parsedEvents
+        ? { eventsPreview: params.parsedEvents.slice(0, 100) }
+        : {}),
+      ...(params.processingStatus ? {
+        processingStatus: params.processingStatus,
+        ...(params.processingStatus === 'completed'
+          ? { completedAt: admin.firestore.FieldValue.serverTimestamp() }
+          : {}),
+      } : {}),
       ...(params.privateEventId ? { privateEventId: params.privateEventId } : {}),
       publicCandidateId: params.publicCandidateId || admin.firestore.FieldValue.delete(),
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
