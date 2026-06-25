@@ -103,6 +103,22 @@ Validation case from 2026-06-23: Founders' Food Hall and Market post `1607294141
 
 Expanded child events from a multi-event post/photo must not use `sourcePostId_index` as their durable identity. OCR/model ordering can change between the fast local share scan, Apify enrichment, row replays, and daily parser runs. The row processor now keeps the legacy `_1` unique id for structured single Facebook Event rows, but expanded post/photo events use a stable hash of source id plus normalized event facts such as title, date, time, venue, and sub-location. This prevents an event like Wellness from colliding with a soccer event only because it moved from item 6 to item 8 in another parse.
 
+## Photo Share Calendar Behavior
+
+Photo-only shares have no independently public source URL, so they route `user_private` and save only under the submitting user's private shared-event area unless a later explicit promotion flow is built.
+
+Long-running photo calendar OCR/model work is queued through `processSharedEventIngest`. The receipt screen can return before parsing finishes; the task worker keeps processing the upload and updates `users/{uid}/sharedEventIngests/{ingestId}` when complete.
+
+The parser currently keeps all non-expired parsed events after extraction. It marks missing title, missing start date, missing location, and expired events as review reasons. A missing start time alone is not currently a review reason. That means a dated, titled, located private event can be saved with a blank `startTime` when the image does not show an explicit or safely inferrable time.
+
+Validation case from 2026-06-25: a wall-photo month calendar for The Factory Downtown produced 44 raw extracted calendar items. After expiry filtering, 8 current/future private records were saved. Three late-night/DJ cells were saved with blank `startTime` because the image did not show a clock time for those cells:
+
+- `Late Night with DJ Douce` — 2026-06-26, no start time.
+- `Top 40 DJ Dance Party (DJ Douce)` — 2026-06-27, no start time.
+- `Fiesta Latina Dance Night (DJ Douce)` — 2026-06-27, no start time.
+
+If product behavior changes so date-only nightlife entries are considered too weak for the map, tighten this deliberately in the shared-event parser by adding a missing-time review/suppression rule for relevant event categories. Do not add a blanket missing-time rejection without considering food specials, all-day specials, and semantic open/close events.
+
 ## Native App Boundary
 
 The Facebook "Share to" row requires a native app build. The mobile branch adds `expo-share-intent` and configures:
