@@ -716,7 +716,7 @@ export const uploadSharedEventImage = onRequest(
 
 export const submitSharedEvent = onRequest(
   {
-    timeoutSeconds: 60,
+    timeoutSeconds: 180,
     memory: '512MiB',
     region: 'northamerica-northeast2',
     cors: true,
@@ -873,13 +873,13 @@ export const submitSharedEvent = onRequest(
         ...summarizeParsedEventsForLog(parsedEvents),
       });
 
-      const eventLinks: Array<{ privateEventId: string; publicCandidateId?: string }> = [];
-      for (const currentParsedEvent of parsedEvents) {
+      const eventLinks = await Promise.all(parsedEvents.map(async (currentParsedEvent, index) => {
+        const updateIngestLink = index === 0;
         const privateEventId = await firestoreService.createPrivateSharedEvent({
           ownerUid,
           ingestId,
           parsedEvent: currentParsedEvent,
-          updateIngestLink: eventLinks.length === 0,
+          updateIngestLink,
         });
         const publicCandidateId = currentParsedEvent.routing === 'public_candidate'
           ? await firestoreService.createPublicSharedEventCandidate({
@@ -887,11 +887,11 @@ export const submitSharedEvent = onRequest(
             ingestId,
             privateEventId,
             parsedEvent: currentParsedEvent,
-            updateIngestLink: eventLinks.length === 0,
+            updateIngestLink,
           })
           : undefined;
-        eventLinks.push({ privateEventId, publicCandidateId });
-      }
+        return { privateEventId, publicCandidateId };
+      }));
 
       const summary = summarizeSharedEventResult(parsedEvents, eventLinks);
 

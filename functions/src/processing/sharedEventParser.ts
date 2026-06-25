@@ -1801,6 +1801,17 @@ export function mergeExtractedParsedEventsForRegression(
   return mergeExtractedParsedEvents(...groups);
 }
 
+function selectParsedEventsForSubmission(events: ParsedSharedEvent[]): ParsedSharedEvent[] {
+  const currentEvents = events.filter((event) => !event.isExpired);
+  return currentEvents.length > 0 ? currentEvents : events;
+}
+
+export function selectParsedEventsForSubmissionForRegression(
+  events: ParsedSharedEvent[]
+): ParsedSharedEvent[] {
+  return selectParsedEventsForSubmission(events);
+}
+
 export async function parseSharedEventPayload(
   payload: SharedEventSubmitPayload,
   visibility?: {
@@ -2049,6 +2060,7 @@ export async function parseSharedEventPayloads(
   const calendarImageEvents = await buildExtractedParsedEventsFromCalendarImage(primary);
   const textEvents = buildExtractedParsedEventsFromShareText(primary);
   const extractedEvents = mergeExtractedParsedEvents(calendarImageEvents, textEvents);
+  const parsedEvents = extractedEvents.length > 0 ? extractedEvents : [primary];
 
-  return extractedEvents.length > 0 ? extractedEvents : [primary];
+  return selectParsedEventsForSubmission(parsedEvents);
 }

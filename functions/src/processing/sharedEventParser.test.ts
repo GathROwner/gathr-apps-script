@@ -9,6 +9,7 @@ import {
   mergeExtractedParsedEventsForRegression,
   parseSharedEventPayload,
   parseSharedEventPayloads,
+  selectParsedEventsForSubmissionForRegression,
   verifySharedEventSourceVisibility,
 } from './sharedEventParser.js';
 
@@ -446,7 +447,7 @@ test('facebook public post text can expand into multiple event candidates', asyn
   }
 });
 
-test('facebook public schedule posts expire old extracted events without blocking future ones', async () => {
+test('facebook public schedule posts submit current events without old extracted rows', async () => {
   const originalNow = Settings.now;
   Settings.now = () => new Date('2026-06-18T22:58:00.000Z').getTime();
 
@@ -475,7 +476,7 @@ test('facebook public schedule posts expire old extracted events without blockin
       },
     });
 
-    assert.equal(parsedEvents.length, 2);
+    assert.equal(parsedEvents.length, 1);
     assert.deepEqual(
       parsedEvents.map((event) => ({
         title: event.title,
@@ -486,14 +487,6 @@ test('facebook public schedule posts expire old extracted events without blockin
         reviewReasons: event.reviewReasons,
       })),
       [
-        {
-          title: 'Already Done Band',
-          startDate: '2026-06-17',
-          status: 'expired',
-          routing: 'not_public_candidate',
-          isExpired: true,
-          reviewReasons: ['event_expired'],
-        },
         {
           title: 'Still Coming Band',
           startDate: '2026-06-19',
@@ -605,6 +598,12 @@ test('calendar image extraction conversion keeps expired events, future events, 
           reviewReasons: [],
         },
       ]
+    );
+
+    const submissionEvents = selectParsedEventsForSubmissionForRegression(parsedEvents);
+    assert.deepEqual(
+      submissionEvents.map((event) => event.title),
+      ['Island Jazz ft. Sean Ferris', 'Happy Hour: $6 Pint w/ Appetizer']
     );
   } finally {
     Settings.now = originalNow;
