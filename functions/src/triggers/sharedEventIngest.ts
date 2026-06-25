@@ -347,6 +347,45 @@ function successResponse(params: {
   };
 }
 
+function countByString(values: string[]): Record<string, number> {
+  const counts: Record<string, number> = {};
+  for (const value of values) {
+    const key = String(value || 'unknown').trim() || 'unknown';
+    counts[key] = (counts[key] || 0) + 1;
+  }
+  return counts;
+}
+
+function summarizeParsedEventsForLog(parsedEvents: ParsedSharedEvent[]): Record<string, unknown> {
+  const reviewReasons = parsedEvents.flatMap((event) => (
+    Array.isArray(event.reviewReasons) && event.reviewReasons.length > 0
+      ? event.reviewReasons
+      : ['none']
+  ));
+  const currentCount = parsedEvents.filter((event) => !event.isExpired).length;
+  const expiredCount = parsedEvents.length - currentCount;
+
+  return {
+    parsedEventCount: parsedEvents.length,
+    currentCount,
+    expiredCount,
+    routingCounts: countByString(parsedEvents.map((event) => event.routing)),
+    statusCounts: countByString(parsedEvents.map((event) => event.status)),
+    reviewReasonCounts: countByString(reviewReasons),
+    sampleEvents: parsedEvents.slice(0, 8).map((event, index) => ({
+      index,
+      title: event.title,
+      startDate: event.startDate,
+      startTime: event.startTime,
+      locationName: event.locationName,
+      routing: event.routing,
+      status: event.status,
+      isExpired: event.isExpired,
+      reviewReasons: event.reviewReasons,
+    })),
+  };
+}
+
 function summarizeSharedEventResult(
   parsedEvents: ParsedSharedEvent[],
   eventLinks: Array<{ privateEventId: string; publicCandidateId?: string }>
@@ -822,6 +861,16 @@ export const submitSharedEvent = onRequest(
         payload,
         parsedEvent,
         parserVersion: SHARED_EVENT_PARSER_VERSION,
+      });
+
+      logger.info('submitSharedEvent parsed event summary', {
+        ownerUid,
+        ingestId,
+        sourceHost: hostForLog(sourceUrl),
+        sourceApp: payload.sourceApp,
+        mediaUrlCount: Array.isArray(payload.mediaUrls) ? payload.mediaUrls.length : 0,
+        sourceVisibility: visibility.visibility,
+        ...summarizeParsedEventsForLog(parsedEvents),
       });
 
       const eventLinks: Array<{ privateEventId: string; publicCandidateId?: string }> = [];
