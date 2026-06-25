@@ -738,6 +738,82 @@ function getStructuredFacebookEventStoredUniqueId(row: RawRowData): string {
   return sourceId ? `${sourceId}_1` : '';
 }
 
+function normalizeStableUniqueIdFact(value: unknown): string {
+  return String(value || '')
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/&/g, ' and ')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function compactUniqueIdSource(value: unknown): string {
+  const source = String(value || '').trim();
+  if (!source) return 'source';
+  if (source.length <= 80) return source;
+
+  const hash = createHash('sha1').update(source).digest('hex').slice(0, 12);
+  return `${source.slice(0, 40)}_${hash}`;
+}
+
+export function buildExpandedEventStoredUniqueId(params: {
+  row: Pick<RawRowData, 'uniqueId' | 'facebookUrl' | 'sourceScraperType'>;
+  item?: Partial<ParserProcessedEvent> & { id?: unknown; _pipelineIndex?: unknown };
+  itemIndex?: number;
+  eventName?: unknown;
+  startDate?: unknown;
+  endDate?: unknown;
+  startTime?: unknown;
+  endTime?: unknown;
+  venueName?: unknown;
+  additionalLocation?: unknown;
+}): string {
+  if (params.row.sourceScraperType === 'events') {
+    return getStructuredFacebookEventStoredUniqueId(params.row as RawRowData);
+  }
+
+  const item = params.item || {};
+  const sourceBase = compactUniqueIdSource(
+    params.row.uniqueId || item.id || params.row.facebookUrl
+  );
+  const facts = {
+    schema: 'expanded_event_v2',
+    eventName: normalizeStableUniqueIdFact(
+      params.eventName || item.name || (item as { eventName?: unknown }).eventName
+    ),
+    startDate: normalizeStableUniqueIdFact(params.startDate || item.startDate),
+    endDate: normalizeStableUniqueIdFact(params.endDate || item.endDate),
+    startTime: normalizeStableUniqueIdFact(params.startTime || item.startTime),
+    endTime: normalizeStableUniqueIdFact(params.endTime || item.endTime),
+    venueName: normalizeStableUniqueIdFact(
+      params.venueName || item.establishment || (item as { venue?: unknown }).venue
+    ),
+    additionalLocation: normalizeStableUniqueIdFact(
+      params.additionalLocation || item.additionalLocation
+    ),
+  };
+
+  const hasStableFacts = Boolean(
+    facts.eventName ||
+    facts.startDate ||
+    facts.startTime ||
+    facts.venueName ||
+    facts.additionalLocation
+  );
+  const payload = hasStableFacts
+    ? facts
+    : {
+        ...facts,
+        fallbackIndex: String(
+          item._pipelineIndex || ((params.itemIndex ?? 0) + 1)
+        ),
+      };
+  const hash = createHash('sha1').update(JSON.stringify(payload)).digest('hex').slice(0, 16);
+  return `${sourceBase}_${hash}`;
+}
+
 function normalizeSignatureText(value: unknown): string {
   return String(value || '').replace(/\s+/g, ' ').trim();
 }
@@ -2935,7 +3011,18 @@ async function processFullParserEvent(
   });
 
   const eventData = {
-    uniqueId: `${row.uniqueId || item.id || ''}_${item._pipelineIndex || itemIndex + 1}`,
+    uniqueId: buildExpandedEventStoredUniqueId({
+      row,
+      item,
+      itemIndex,
+      eventName: name,
+      startDate,
+      endDate,
+      startTime,
+      endTime,
+      venueName: canonicalVenueName || parsedEstablishment || establishment,
+      additionalLocation: additionalLocationCandidate,
+    }),
     establishment: canonicalVenueName || parsedEstablishment || String(establishment || '').trim(),
     locationScope: 'venue',
     locationLabel: canonicalVenueName || parsedEstablishment || String(establishment || '').trim(),
@@ -3164,7 +3251,18 @@ async function processExtractedItem(
 
   // Build event data
   const eventData: EventData = {
-    uniqueId: `${row.uniqueId || ''}_${item._pipelineIndex || 1}`,
+    uniqueId: buildExpandedEventStoredUniqueId({
+      row,
+      item,
+      itemIndex: Number(item._pipelineIndex || 1) - 1,
+      eventName: item.eventName,
+      startDate: resolvedDates.startDate,
+      endDate: resolvedDates.endDate,
+      startTime: resolvedDates.startTime,
+      endTime: resolvedDates.endTime,
+      venueName,
+      additionalLocation,
+    }),
     establishment: String(venueName).trim(),
     additionalLocation: additionalLocation || undefined,
     subVenue: subVenue || undefined,
