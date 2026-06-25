@@ -101,6 +101,8 @@ This fallback is intentionally narrow. It should not replace proper image proven
 
 Validation case from 2026-06-23: Founders' Food Hall and Market post `1607294141406100` produced 13 events under `slug_foundersfoodhall`. Wellness used the Wellness poster, soccer events used the blue Group Stage schedule image, and Trivia Night used the Trivia poster instead of the generic first image.
 
+Expanded child events from a multi-event post/photo must not use `sourcePostId_index` as their durable identity. OCR/model ordering can change between the fast local share scan, Apify enrichment, row replays, and daily parser runs. The row processor now keeps the legacy `_1` unique id for structured single Facebook Event rows, but expanded post/photo events use a stable hash of source id plus normalized event facts such as title, date, time, venue, and sub-location. This prevents an event like Wellness from colliding with a soccer event only because it moved from item 6 to item 8 in another parse.
+
 ## Native App Boundary
 
 The Facebook "Share to" row requires a native app build. The mobile branch adds `expo-share-intent` and configures:
