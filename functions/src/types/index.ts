@@ -211,6 +211,26 @@ export interface EventData {
   venueId?: string | null;
 }
 
+export type FacebookEventTitleSource = 'name' | 'sharedpost_text' | 'unknown';
+export type FacebookEventDateTimeSource = 'utcStartDate' | 'childEvents/0/utcStartDate' | 'startDate' | 'unknown';
+export type FacebookEventLocationSource =
+  | 'location/name'
+  | 'location/contextualName'
+  | 'description_venue_hint'
+  | 'inferred_venue_hint'
+  | 'unknown';
+
+export type CityLevelAutoPublishSource =
+  | 'structured_facebook_event'
+  | 'parser_fallback'
+  | 'unknown';
+
+export interface CityLevelAutoPublishFieldSources {
+  title?: 'facebook_event_name' | 'shared_post_text' | 'unknown';
+  dateTime?: 'facebook_event_utc_start_date' | 'non_structured_date' | 'unknown';
+  location?: 'facebook_event_location_name' | 'non_structured_location' | 'unknown';
+}
+
 export interface RawRowData {
   uniqueId?: string;
   text: string;
@@ -226,8 +246,11 @@ export interface RawRowData {
   profilePicUrl?: string;
   utcStartDate?: string;
   sourceScraperType?: ScraperType;
+  facebookEventTitleSource?: FacebookEventTitleSource;
+  facebookEventDateTimeSource?: FacebookEventDateTimeSource;
   facebookEventLocationName?: string;
   facebookEventLocationIsCityLevel?: boolean;
+  facebookEventLocationSource?: FacebookEventLocationSource;
   facebookEventOrganizerName?: string;
   facebookEventDescription?: string;
   externalLinks?: string[];
@@ -279,6 +302,9 @@ export interface QueueCityLevelEventReviewInput {
   topLevelUrl?: string;
   sourceScraperType?: ScraperType;
   sourceContentSignature?: string;
+  autoPublishSource?: CityLevelAutoPublishSource;
+  autoPublishFieldSources?: CityLevelAutoPublishFieldSources;
+  autoPublishReviewReasons?: string[];
 }
 
 export interface CityLevelEventReviewSample {
@@ -322,6 +348,9 @@ export interface CityLevelEventReviewRecord {
   lastSeenRowIndex?: number;
   sourceScraperType?: ScraperType;
   sourceContentSignature?: string;
+  autoPublishSource?: CityLevelAutoPublishSource;
+  autoPublishFieldSources?: CityLevelAutoPublishFieldSources;
+  autoPublishReviewReasons?: string[];
   locationScope: 'city' | 'area';
   locationLabel: string;
   locationCity?: string;

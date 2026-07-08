@@ -15,6 +15,8 @@ import {
   ParseSnapshotStage,
   MatchInfo,
   UnrecognizedVenueRecord,
+  CityLevelAutoPublishFieldSources,
+  CityLevelAutoPublishSource,
 } from '../types/index.js';
 import {
   ParsePostInput,
@@ -1019,6 +1021,34 @@ function getManagedMediaUrlsFromCityReview(review?: CityLevelEventReviewRecord |
   ).filter((url) => isStorageManagedUrl(url));
 }
 
+function getCityLevelAutoPublishSource(parserSourceType?: string): CityLevelAutoPublishSource {
+  return parserSourceType === 'facebook_events_scraper_structured_row'
+    ? 'structured_facebook_event'
+    : 'parser_fallback';
+}
+
+function buildCityLevelAutoPublishFieldSources(row: RawRowData): CityLevelAutoPublishFieldSources {
+  const title = row.facebookEventTitleSource === 'name'
+    ? 'facebook_event_name'
+    : String(row.sharedPostText || '').trim()
+      ? 'shared_post_text'
+      : 'unknown';
+  const dateTime = row.facebookEventDateTimeSource === 'utcStartDate' ||
+    row.facebookEventDateTimeSource === 'childEvents/0/utcStartDate'
+    ? 'facebook_event_utc_start_date'
+    : String(row.utcStartDate || '').trim()
+      ? 'non_structured_date'
+      : 'unknown';
+  const location = row.facebookEventLocationSource === 'location/name' ||
+    row.facebookEventLocationSource === 'location/contextualName'
+    ? 'facebook_event_location_name'
+    : String(row.facebookEventLocationName || '').trim()
+      ? 'non_structured_location'
+      : 'unknown';
+
+  return { title, dateTime, location };
+}
+
 function buildEventImageProvenance(params: {
   primaryUrl?: string;
   primaryField?: EventImageProvenanceField;
@@ -1602,6 +1632,7 @@ async function queueCityLevelFacebookEventForReview(params: {
   rowIndex: number;
   batchManager: BatchManager;
   parserMode: 'legacy' | 'full5stage';
+  parserSourceType?: string;
   eventName?: string;
   eventDate?: string;
   eventTime?: string;
@@ -1666,6 +1697,8 @@ async function queueCityLevelFacebookEventForReview(params: {
       sourceScraperType: params.row.sourceScraperType,
       sourceContentSignature: params.sourceContentSignature ||
         buildFacebookEventSourceContentSignature(params.row),
+      autoPublishSource: getCityLevelAutoPublishSource(params.parserSourceType),
+      autoPublishFieldSources: buildCityLevelAutoPublishFieldSources(params.row),
     });
 
     if (!result.queued) {
@@ -1674,11 +1707,56 @@ async function queueCityLevelFacebookEventForReview(params: {
         locationLabel: location.locationLabel,
         reason: result.reason,
       });
+      return;
     }
+
+    await autoPublishQueuedCityLevelEvent({
+      reviewDocId: result.docId,
+      rowIndex: params.rowIndex,
+      location,
+      eventName: params.eventName,
+    });
   } catch (error) {
     logger.warn('Failed to queue city-level event candidate', {
       rowIndex: params.rowIndex,
       locationLabel: location.locationLabel,
+      eventName: params.eventName,
+      error: error instanceof Error ? error.message : String(error),
+    });
+  }
+}
+
+/**
+ * Attempt to publish a just-queued city-level event without manual review.
+ * Service-level gates decide whether the review has enough structured
+ * Facebook Event provenance; failures leave it queued for manual review.
+ */
+async function autoPublishQueuedCityLevelEvent(params: {
+  reviewDocId?: string;
+  rowIndex: number;
+  location: NonNullable<ReturnType<typeof getCityLevelFacebookEventLocationDetails>>;
+  eventName?: string;
+}): Promise<void> {
+  if (!params.reviewDocId) {
+    return;
+  }
+
+  try {
+    const result = await firestoreService.autoPublishCityLevelEventReview(params.reviewDocId);
+    if (!result.published) {
+      logger.info('City-level event auto-publish skipped', {
+        rowIndex: params.rowIndex,
+        reviewDocId: params.reviewDocId,
+        locationLabel: params.location.locationLabel,
+        eventName: params.eventName,
+        reason: result.reason,
+      });
+    }
+  } catch (error) {
+    logger.warn('City-level event auto-publish failed; leaving queued for review', {
+      rowIndex: params.rowIndex,
+      reviewDocId: params.reviewDocId,
+      locationLabel: params.location.locationLabel,
       eventName: params.eventName,
       error: error instanceof Error ? error.message : String(error),
     });
@@ -2855,6 +2933,7 @@ async function processFullParserEvent(
         rowIndex,
         batchManager,
         parserMode: 'full5stage',
+        parserSourceType: String((item as unknown as { _sourceType?: string })._sourceType || ''),
         eventName: String(item.name || (item as unknown as { eventName?: string }).eventName || '').trim() || undefined,
         eventDate: String(item.startDate || '').trim() || undefined,
         eventTime: String(item.startTime || '').trim() || undefined,

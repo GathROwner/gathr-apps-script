@@ -6,7 +6,12 @@
 import { google, drive_v3 } from 'googleapis';
 import { Readable } from 'node:stream';
 import * as XLSX from 'xlsx';
-import { RawRowData } from '../types/index.js';
+import {
+  FacebookEventDateTimeSource,
+  FacebookEventLocationSource,
+  FacebookEventTitleSource,
+  RawRowData,
+} from '../types/index.js';
 import { logger } from '../utils/logger.js';
 import {
   fetchApifyDatasetItemsById,
@@ -461,6 +466,45 @@ function getFirstNonEmptyColumnValue(
   }
 
   return null;
+}
+
+function getFirstNonEmptyColumnValueWithHeader(
+  row: unknown[],
+  headerMap: HeaderIndexMap,
+  possibleHeaders: string[]
+): { value: unknown; header: string } | null {
+  for (const header of possibleHeaders) {
+    const index = headerMap[normalizeHeader(header)];
+    if (index === undefined || index < 0 || index >= row.length) {
+      continue;
+    }
+
+    const value = row[index];
+    if (value === null || value === undefined) {
+      continue;
+    }
+
+    if (String(value).trim()) {
+      return { value, header };
+    }
+  }
+
+  return null;
+}
+
+function classifyFacebookEventTitleSource(header: string | undefined): FacebookEventTitleSource {
+  const normalized = normalizeHeader(header || '');
+  if (normalized === 'name') return 'name';
+  if (normalized === 'sharedposttext') return 'sharedpost_text';
+  return 'unknown';
+}
+
+function classifyFacebookEventDateTimeSource(header: string | undefined): FacebookEventDateTimeSource {
+  const normalized = normalizeHeader(header || '');
+  if (normalized === 'utcstartdate') return 'utcStartDate';
+  if (normalized === 'childevents0utcstartdate') return 'childEvents/0/utcStartDate';
+  if (normalized === 'startdate') return 'startDate';
+  return 'unknown';
 }
 
 function hasHeader(headerMap: HeaderIndexMap, header: string): boolean {
@@ -919,9 +963,15 @@ function extractRowData(
   const text = isFacebookEvent
     ? buildFacebookEventText(row, headerMap, description)
     : description;
-  const sharedPostText = String(
-    getFirstNonEmptyColumnValue(row, headerMap, ['Sharedpost Text', 'sharedPost/text', 'name']) || ''
+  const sharedPostTextMatch = getFirstNonEmptyColumnValueWithHeader(
+    row,
+    headerMap,
+    ['Sharedpost Text', 'sharedPost/text', 'name']
   );
+  const sharedPostText = String(sharedPostTextMatch?.value || '');
+  const facebookEventTitleSource = isFacebookEvent
+    ? classifyFacebookEventTitleSource(sharedPostTextMatch?.header)
+    : undefined;
   const mediaUrls = collectMediaUrls(row, headerMap);
   const ocrText = isFacebookEvent ? '' : collectOcrText(row, headerMap);
   const externalLinks = isFacebookEvent ? collectExternalLinks(row, headerMap) : [];
@@ -951,6 +1001,12 @@ function extractRowData(
   const locationNameIsReviewLevel = locationNameIsCityLevel || locationNameIsAreaLevel;
   const contextualLocationNameIsReviewLevel =
     contextualLocationNameIsCityLevel || contextualLocationNameIsAreaLevel;
+  const structuredLocationSource: FacebookEventLocationSource | undefined =
+    locationName
+      ? 'location/name'
+      : contextualLocationName
+        ? 'location/contextualName'
+        : undefined;
   const specificEventLocationName =
     isFacebookEvent && locationName && !locationNameIsReviewLevel && !isLikelyAddress(locationName)
       ? locationName
@@ -977,6 +1033,17 @@ function extractRowData(
       : '';
   const preferredEventLocationName =
     specificEventLocationName || inferredVenueHint || cityLevelLocationName || locationName || contextualLocationName;
+  const facebookEventLocationSource: FacebookEventLocationSource | undefined = isFacebookEvent
+    ? specificEventLocationName
+      ? structuredLocationSource
+      : explicitVenueHintFromCityLevelLocation
+        ? 'description_venue_hint'
+        : inferredVenueHint
+          ? 'inferred_venue_hint'
+          : cityLevelLocationName || locationName || contextualLocationName
+            ? structuredLocationSource
+            : undefined
+    : undefined;
   const eventVenueName = specificEventLocationName || inferredVenueHint;
   const userName = eventVenueName ||
     (eventLocationIsCityLevel
@@ -1014,15 +1081,17 @@ function extractRowData(
     getFirstNonEmptyColumnValue(row, headerMap, ['user/profilePic', 'sharedPost/user/profilePic', 'profilePicUrl']) || ''
   );
 
-  const utcStartDate = String(
-    getFirstNonEmptyColumnValue(row, headerMap, [
+  const utcStartDateMatch = getFirstNonEmptyColumnValueWithHeader(row, headerMap, [
       'utcStartDate',
       'UTC Start Date',
       'childEvents/0/utcStartDate',
       'startDate',
       'start date',
-    ]) || ''
-  );
+    ]);
+  const utcStartDate = String(utcStartDateMatch?.value || '');
+  const facebookEventDateTimeSource = isFacebookEvent
+    ? classifyFacebookEventDateTimeSource(utcStartDateMatch?.header)
+    : undefined;
 
   const uniqueId = String(
     getFirstNonEmptyColumnValue(row, headerMap, ['id', 'ID', 'postId', 'post_id', 'eventId', 'childEvents/0/id']) ||
@@ -1086,8 +1155,11 @@ function extractRowData(
     profilePicUrl,
     utcStartDate,
     sourceScraperType: isFacebookEvent ? 'events' : undefined,
+    facebookEventTitleSource,
+    facebookEventDateTimeSource,
     facebookEventLocationName: isFacebookEvent ? preferredEventLocationName || undefined : undefined,
     facebookEventLocationIsCityLevel: isFacebookEvent ? eventLocationIsCityLevel : undefined,
+    facebookEventLocationSource,
     facebookEventOrganizerName: isFacebookEvent ? organizerName || undefined : undefined,
     facebookEventDescription: isFacebookEvent ? description.trim() || undefined : undefined,
     externalLinks,

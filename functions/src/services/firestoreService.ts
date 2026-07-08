@@ -42,6 +42,12 @@ import {
 } from '../utils/similarity.js';
 import { getVenueAliasCandidates } from './venueAliases.js';
 import { pickCompatibleExactUniqueIdMatch } from './exactUniqueIdCompatibility.js';
+import {
+  isCityLevelAutoPublishEnabled,
+  normalizePeiPlaceName,
+  PeiPlaceCentroid,
+  resolvePeiCentroid,
+} from './peiLocations.js';
 import { pickRecurringFamilyFallbackMatch } from './recurringFamilyFallback.js';
 import {
   ParsedSharedEvent,
@@ -1410,6 +1416,12 @@ export async function queueCityLevelEventReview(
         lastSeenRowIndex: Number.isFinite(Number(input.rowIndex)) ? Number(input.rowIndex) : undefined,
         sourceScraperType: input.sourceScraperType,
         sourceContentSignature: asOptionalTrimmedString(input.sourceContentSignature),
+        autoPublishSource: input.autoPublishSource,
+        autoPublishFieldSources: input.autoPublishFieldSources,
+        autoPublishReviewReasons: Array.isArray(input.autoPublishReviewReasons) &&
+          input.autoPublishReviewReasons.length > 0
+          ? Array.from(new Set(input.autoPublishReviewReasons.filter(Boolean)))
+          : undefined,
         locationScope,
         locationLabel,
         locationCity: String(input.locationCity || '').trim() || undefined,
@@ -1487,6 +1499,17 @@ export async function queueCityLevelEventReview(
         sourceScraperType: existing.sourceScraperType || input.sourceScraperType,
         sourceContentSignature: asOptionalTrimmedString(input.sourceContentSignature) ||
           asOptionalTrimmedString(existing.sourceContentSignature),
+        autoPublishSource: input.autoPublishSource || existing.autoPublishSource,
+        autoPublishFieldSources: {
+          ...(existing.autoPublishFieldSources || {}),
+          ...(input.autoPublishFieldSources || {}),
+        },
+        autoPublishReviewReasons: Array.isArray(existing.autoPublishReviewReasons) &&
+          existing.autoPublishReviewReasons.length > 0
+          ? existing.autoPublishReviewReasons
+          : Array.isArray(input.autoPublishReviewReasons) && input.autoPublishReviewReasons.length > 0
+            ? Array.from(new Set(input.autoPublishReviewReasons.filter(Boolean)))
+            : undefined,
         locationScope: existing.locationScope || locationScope,
         locationLabel: String(existing.locationLabel || locationLabel).trim(),
         locationCity: String(existing.locationCity || input.locationCity || '').trim() || undefined,
@@ -1701,6 +1724,10 @@ function buildPublishedCityLevelEventData(
   const startTime = asOptionalTrimmedString(manual.eventTime || record.eventTime);
   const endDate = asOptionalTrimmedString(manual.endDate || record.endDate) || startDate;
   const description = asOptionalTrimmedString(manual.description || record.descriptionPreview);
+  const locationCity = asOptionalTrimmedString(manual.locationCity || record.locationCity);
+  // Centroid coordinates let the app place the event on the map; unresolved
+  // places publish without coordinates (client keeps them list-only).
+  const centroid = resolvePeiCentroid({ locationScope, locationCity, locationLabel });
   const engagement = normalizePublishedCityLevelEngagement(manual, record);
   const externalLinks = dedupeUrls([
     ...tokenizeMediaUrls(manual.externalLinks),
@@ -1727,9 +1754,11 @@ function buildPublishedCityLevelEventData(
     endTime: asOptionalTrimmedString(manual.endTime || record.endTime),
     ...mediaFields,
     venueId: null,
+    latitude: centroid?.latitude,
+    longitude: centroid?.longitude,
     locationScope,
     locationLabel,
-    locationCity: asOptionalTrimmedString(manual.locationCity || record.locationCity),
+    locationCity,
     locationProvince: asOptionalTrimmedString(manual.locationProvince || record.locationProvince),
     locationPrecision,
     locationReviewStatus: 'approved',
@@ -1904,6 +1933,154 @@ export async function finalizeCityLevelEventReview(
     status: 'published',
     publishedEventId: eventRef.id,
     publishedEventPath: eventRef.path,
+  };
+}
+
+type CityLevelAutoPublishEligibility = {
+  eligible: boolean;
+  reasons: string[];
+  centroid?: PeiPlaceCentroid;
+};
+
+function isProvinceOnlyPeiLocation(record: CityLevelEventReviewRecord): boolean {
+  const candidates = [record.locationLabel, record.locationCity];
+  return candidates.some((candidate) => {
+    const normalized = normalizePeiPlaceName(candidate);
+    return normalized === 'pei' || normalized === 'pe';
+  });
+}
+
+function isRouteLikeBroadLocation(record: CityLevelEventReviewRecord): boolean {
+  const text = normalizePeiPlaceName([
+    record.locationLabel,
+    record.locationCity,
+  ].filter(Boolean).join(' '));
+  return /\b(route|rte|highway|hwy|road|rd|street|st|trail|waterfront|bridge)\b/.test(text) || /\d/.test(text);
+}
+
+function evaluateCityLevelAutoPublishEligibility(
+  record: CityLevelEventReviewRecord
+): CityLevelAutoPublishEligibility {
+  const reasons: string[] = [];
+
+  if (!isCityLevelAutoPublishEnabled()) {
+    reasons.push('auto_publish_disabled');
+  }
+
+  if (record.autoPublishSource !== 'structured_facebook_event') {
+    reasons.push('not_structured_facebook_event_source');
+  }
+
+  const fieldSources = record.autoPublishFieldSources || {};
+  if (fieldSources.title !== 'facebook_event_name') {
+    reasons.push('untrusted_title_source');
+  }
+  if (fieldSources.dateTime !== 'facebook_event_utc_start_date') {
+    reasons.push('untrusted_datetime_source');
+  }
+  if (fieldSources.location !== 'facebook_event_location_name') {
+    reasons.push('untrusted_location_source');
+  }
+
+  if (isProvinceOnlyPeiLocation(record)) {
+    reasons.push('province_only_location');
+  }
+
+  const centroid = resolvePeiCentroid({
+    locationScope: record.locationScope,
+    locationCity: record.locationCity,
+    locationLabel: record.locationLabel,
+  });
+  if (!centroid) {
+    reasons.push(isRouteLikeBroadLocation(record)
+      ? 'route_like_or_unsupported_location'
+      : 'unsupported_city_or_area');
+  }
+
+  return {
+    eligible: reasons.length === 0,
+    reasons,
+    centroid: reasons.length === 0 ? centroid || undefined : undefined,
+  };
+}
+
+export interface AutoPublishCityLevelEventReviewResult {
+  published: boolean;
+  reason?: string;
+  publishedEventId?: string;
+  publishedEventPath?: string;
+}
+
+/**
+ * Auto-publish a queued city-level event review only when it passes the
+ * structured Facebook Event trust gates and resolves to a canonical PEI
+ * centroid. Failed gates are recorded on the review for manual follow-up.
+ */
+export async function autoPublishCityLevelEventReview(
+  reviewId: string
+): Promise<AutoPublishCityLevelEventReviewResult> {
+  const normalizedReviewId = String(reviewId || '').trim();
+  if (!normalizedReviewId) {
+    return { published: false, reason: 'empty_review_id' };
+  }
+
+  const docRef = db.collection(COLLECTIONS.CITY_LEVEL_EVENT_REVIEWS).doc(normalizedReviewId);
+  const snapshot = await docRef.get();
+  if (!snapshot.exists) {
+    return { published: false, reason: 'review_not_found' };
+  }
+
+  const record = {
+    id: snapshot.id,
+    ...(snapshot.data() || {}),
+  } as CityLevelEventReviewRecord;
+
+  const status = normalizeCityLevelReviewStatus(String(record.status || 'needs_review'));
+  if (status !== 'needs_review') {
+    return { published: false, reason: `status_${status}` };
+  }
+
+  const eligibility = evaluateCityLevelAutoPublishEligibility(record);
+  if (!eligibility.eligible) {
+    await docRef.set(
+      compactRecord({
+        autoPublishReviewReasons: eligibility.reasons,
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      }),
+      { merge: true }
+    );
+
+    logger.info('City-level event left in review queue by auto-publish gates', {
+      reviewId: normalizedReviewId,
+      eventName: record.eventName || '',
+      locationLabel: record.locationLabel || '',
+      locationCity: record.locationCity || '',
+      reasons: eligibility.reasons,
+    });
+
+    return { published: false, reason: eligibility.reasons[0] || 'not_auto_publish_eligible' };
+  }
+
+  const result = await finalizeCityLevelEventReview({
+    reviewId: normalizedReviewId,
+    action: 'approve_publish',
+    resolvedBy: 'city_level_auto_publish',
+    notes: 'auto_published_at_ingestion',
+  });
+
+  logger.info('Auto-published city-level event', {
+    reviewId: normalizedReviewId,
+    eventId: result.publishedEventId,
+    eventName: record.eventName || '',
+    locationLabel: record.locationLabel || '',
+    locationCity: record.locationCity || '',
+    centroidLabel: eligibility.centroid?.label,
+  });
+
+  return {
+    published: true,
+    publishedEventId: result.publishedEventId,
+    publishedEventPath: result.publishedEventPath,
   };
 }
 
@@ -5502,6 +5679,21 @@ export function buildExpiredCityLevelReviewPointerUpdateForRegression(
     'serverTimestamp',
     'deleteField'
   );
+}
+
+export function buildPublishedCityLevelEventDataForRegression(
+  reviewId: string,
+  record: CityLevelEventReviewRecord,
+  manual: FinalizeCityLevelEventReviewInput['manual'] = {},
+  mediaFields: Partial<EventData> = {}
+): EventData & Record<string, unknown> {
+  return buildPublishedCityLevelEventData(reviewId, record, manual, mediaFields);
+}
+
+export function evaluateCityLevelAutoPublishEligibilityForRegression(
+  record: CityLevelEventReviewRecord
+): CityLevelAutoPublishEligibility {
+  return evaluateCityLevelAutoPublishEligibility(record);
 }
 
 /**

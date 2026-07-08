@@ -93,7 +93,51 @@ test('keeps organizer-only city Facebook Events rows in city-level review', asyn
   assert.equal(rows[0].userName, 'Charlottetown, PEI');
   assert.equal(rows[0].facebookEventLocationName, 'Charlottetown, PEI');
   assert.equal(rows[0].facebookEventLocationIsCityLevel, true);
+  assert.equal(rows[0].facebookEventTitleSource, 'name');
+  assert.equal(rows[0].facebookEventDateTimeSource, 'utcStartDate');
+  assert.equal(rows[0].facebookEventLocationSource, 'location/name');
   assert.equal(rows[0].facebookEventOrganizerName, 'Discover Charlottetown');
+});
+
+test('distinguishes loose shared post text from structured Facebook Event name', async () => {
+  const headers = [
+    'id',
+    'Sharedpost Text',
+    'name',
+    'description',
+    'location/name',
+    'organizators/0/name',
+    'utcStartDate',
+    'dateTimeSentence',
+    'eventFrequency',
+    'usersResponded',
+    'url',
+  ];
+  const rows = [
+    headers,
+    [
+      'event_123',
+      'Loose reshared post copy',
+      'Structured Event Name',
+      'Festival details from the event page.',
+      'Charlottetown, Prince Edward Island',
+      'Discover Charlottetown',
+      '2099-05-29T23:00:00.000Z',
+      'Friday, May 29, 2099 at 8:00 PM - 11:00 PM ADT',
+      'ONCE',
+      '1',
+      'https://www.facebook.com/events/event_123/',
+    ],
+  ];
+  const workbook = XLSX.utils.book_new();
+  const worksheet = XLSX.utils.aoa_to_sheet(rows);
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'Data');
+
+  const parsed = await parseXlsxFile(XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' }) as Buffer);
+
+  assert.equal(parsed.rows.length, 1);
+  assert.equal(parsed.rows[0].sharedPostText, 'Loose reshared post copy');
+  assert.equal(parsed.rows[0].facebookEventTitleSource, 'sharedpost_text');
 });
 
 test('uses a description venue ending in Landing instead of an organizer address', async () => {

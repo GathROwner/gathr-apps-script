@@ -7,7 +7,10 @@ import {
   extractSharedEventSubVenue,
   getRequiredCandidateReviewReason,
 } from './sharedEventPublicPromotion.js';
-import { getUntrustedPublicPromotionReason } from './sharedEventPublicTrust.js';
+import {
+  getUntrustedPublicPromotionReason,
+  getUntrustedPublicPromotionReviewReasons,
+} from './sharedEventPublicTrust.js';
 
 test('extractSharedEventSubVenue preserves a venue-scoped stage label', () => {
   assert.equal(
@@ -106,6 +109,26 @@ test('public shared-event promotion trust requires public-sourced event facts', 
   assert.equal(
     getUntrustedPublicPromotionReason(untrustedCandidate),
     'untrusted_public_fields:title,startDate,startTime'
+  );
+});
+
+test('public shared-event city-like candidates still require public-source trust checks', () => {
+  const cityLikeCandidate = {
+    title: 'Downtown Festival',
+    startDate: '2026-07-25',
+    startTime: '10:00',
+    locationName: 'Charlottetown, PEI',
+    fieldSources: {
+      title: 'share_payload',
+      startDate: 'public_source',
+      startTime: 'public_source',
+      locationName: 'public_source',
+    },
+  } as PublicSharedEventCandidateRecord;
+
+  assert.deepEqual(
+    getUntrustedPublicPromotionReviewReasons(cityLikeCandidate),
+    ['untrusted_public_title']
   );
 });
 
