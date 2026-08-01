@@ -198,6 +198,80 @@ test('explicit one-off dates are not kept as simple weekly recurring events', ()
   }
 });
 
+test('single-date concerts with duration-only each wording are not kept as weekly recurring', () => {
+  const examples = [
+    {
+      name: "Progressive Organ Concert (Trinity United Church)",
+      description:
+        'Annual Progressive Organ Concert on Sun, June 28. Proceed to Trinity United Church (Prince Street) for a 2:30 p.m. concert. Each concert is about 30 minutes. Admission is free. Donations accepted to support the Dr. Alan Reesor Memorial Scholarship Fund.',
+      startTime: '14:30',
+    },
+    {
+      name: "Progressive Organ Concert (St. Dunstan's Basilica)",
+      description:
+        "Annual Progressive Organ Concert on Sun, June 28. Conclude the afternoon of music at St. Dunstan's Basilica (Great George Street) at 3:30 p.m. Each concert is about 30 minutes. Admission is free. Donations accepted to support the Dr. Alan Reesor Memorial Scholarship Fund.",
+      startTime: '15:30',
+    },
+  ];
+
+  for (const example of examples) {
+    const normalized = applyRecurrenceNormalizationForRegression(
+      buildEvent({
+        category: 'Live Music',
+        name: example.name,
+        description: example.description,
+        startDate: '2026-06-28',
+        endDate: '2026-06-29',
+        startTime: example.startTime,
+        endTime: '01:00',
+        isRecurring: 'Yes',
+        recurringPattern: 'weekly_sunday',
+      }),
+      buildOriginalItem({
+        name: example.name,
+        description: example.description,
+        date: '2026-06-28',
+        startTime: example.startTime,
+        endTime: '01:00',
+        recurringPattern: 'weekly_sunday',
+      })
+    );
+
+    assert.equal(normalized.isRecurring, false, example.name);
+    assert.equal(normalized.recurringPattern, 'none', example.name);
+  }
+});
+
+test('actual recurring concerts still keep every Sunday wording with duration details', () => {
+  const description =
+    'Community Organ Concerts every Sunday at 3:30 p.m. Each concert is about 30 minutes. Admission is free.';
+
+  const normalized = applyRecurrenceNormalizationForRegression(
+    buildEvent({
+      category: 'Live Music',
+      name: 'Community Organ Concerts',
+      description,
+      startDate: '2026-06-28',
+      endDate: '2026-06-29',
+      startTime: '15:30',
+      endTime: '01:00',
+      isRecurring: 'Yes',
+      recurringPattern: 'weekly_sunday',
+    }),
+    buildOriginalItem({
+      name: 'Community Organ Concerts',
+      description,
+      date: '2026-06-28',
+      startTime: '15:30',
+      endTime: '01:00',
+      recurringPattern: 'weekly_sunday',
+    })
+  );
+
+  assert.equal(normalized.isRecurring, true);
+  assert.equal(normalized.recurringPattern, 'weekly_sunday');
+});
+
 test('generic singular weekday food specials are not inferred as weekly recurring', () => {
   const normalized = applyRecurrenceNormalizationForRegression(
     buildEvent({
@@ -362,4 +436,163 @@ test('dated performer weekday live posts are not kept as weekly recurring', () =
 
   assert.equal(normalized.isRecurring, false);
   assert.equal(normalized.recurringPattern, 'none');
+});
+
+test('this-week every-night performer lineups are not kept as open-ended weekly recurrence', () => {
+  const normalized = applyRecurrenceNormalizationForRegression(
+    buildEvent({
+      category: 'Live Music',
+      name: 'We 3',
+      description: 'Live music every night this week.',
+      establishment: 'Peake’s Quay',
+      venue: 'Peake’s Quay',
+      startDate: '2026-07-19',
+      endDate: '2026-07-19',
+      startTime: '19:00',
+      endTime: '22:00',
+      isRecurring: 'Yes',
+      recurringPattern: 'weekly_sunday',
+    }),
+    buildOriginalItem({
+      name: 'We 3',
+      description: 'Live music every night this week.',
+      date: '2026-07-19',
+      startTime: '19:00',
+      endTime: '22:00',
+      venue: 'Peake’s Quay',
+      recurringPattern: 'weekly_sunday',
+      _sourceType: 'schedule',
+    })
+  );
+
+  assert.equal(normalized.isRecurring, false);
+  assert.equal(normalized.recurringPattern, 'none');
+  assert.equal(normalized.recurrenceUntilDate, undefined);
+});
+
+test('dated performer rows do not inherit a Friday and Saturday series header as open-ended recurrence', () => {
+  const normalized = applyRecurrenceNormalizationForRegression(
+    buildEvent({
+      category: 'Live Music',
+      name: 'Billy White',
+      description:
+        'Red Shores Unplugged Entertainment Series (acoustic weekend entertainment series). Friday & Saturday evenings.',
+      startDate: '2026-07-17',
+      endDate: '2026-07-18',
+      startTime: '22:00',
+      endTime: '01:00',
+      isRecurring: 'Yes',
+      recurringPattern: 'weekly_custom',
+      recurringDaysOfWeek: ['friday', 'saturday'],
+    }),
+    buildOriginalItem({
+      name: 'Billy White',
+      description:
+        'Red Shores Unplugged Entertainment Series (acoustic weekend entertainment series). Friday & Saturday evenings.',
+      date: '2026-07-17',
+      startTime: '22:00',
+      endTime: '01:00',
+      recurringPattern: 'weekly_custom',
+      recurringDaysOfWeek: ['friday', 'saturday'],
+    })
+  );
+
+  assert.equal(normalized.isRecurring, false);
+  assert.equal(normalized.recurringPattern, 'none');
+  assert.equal(normalized.recurringDaysOfWeek, undefined);
+});
+
+test('true multi-day live music series containers can still stay recurring', () => {
+  const normalized = applyRecurrenceNormalizationForRegression(
+    buildEvent({
+      category: 'Live Music',
+      name: 'Red Shores Unplugged Entertainment Series',
+      description:
+        'Red Shores Unplugged Entertainment Series. Friday & Saturday evenings at 10pm.',
+      startDate: '2026-07-03',
+      endDate: '2026-07-03',
+      startTime: '22:00',
+      endTime: '01:00',
+      isRecurring: 'Yes',
+      recurringPattern: 'weekly_custom',
+      recurringDaysOfWeek: ['friday', 'saturday'],
+    }),
+    buildOriginalItem({
+      name: 'Red Shores Unplugged Entertainment Series',
+      description:
+        'Red Shores Unplugged Entertainment Series. Friday & Saturday evenings at 10pm.',
+      date: '2026-07-03',
+      startTime: '22:00',
+      endTime: '01:00',
+      recurringPattern: 'weekly_custom',
+      recurringDaysOfWeek: ['friday', 'saturday'],
+    })
+  );
+
+  assert.equal(normalized.isRecurring, true);
+  assert.equal(normalized.recurringPattern, 'weekly_custom');
+  assert.deepEqual(normalized.recurringDaysOfWeek, ['friday', 'saturday']);
+});
+
+test('an explicit every-Tuesday source corrects a bad daily model result and anchor date', () => {
+  const normalized = applyRecurrenceNormalizationForRegression(
+    buildEvent({
+      category: 'Trivia Night',
+      name: 'Trivia Night',
+      description: 'Trivia Night every Tuesday at 5pm.',
+      establishment: 'Bogside Brewing',
+      venue: 'Bogside Brewing',
+      startDate: '2026-08-01',
+      endDate: '2026-08-01',
+      startTime: '17:00',
+      endTime: '19:00',
+      isRecurring: 'Yes',
+      recurringPattern: 'daily',
+    }),
+    buildOriginalItem({
+      name: 'Trivia Night',
+      description: 'Trivia Night every Tuesday at 5pm.',
+      date: '2026-08-01',
+      startTime: '17:00',
+      endTime: '19:00',
+      venue: 'Bogside Brewing',
+      recurringPattern: 'daily',
+    })
+  );
+
+  assert.equal(normalized.isRecurring, true);
+  assert.equal(normalized.recurringPattern, 'weekly_tuesday');
+  assert.equal(normalized.startDate, '2026-08-04');
+  assert.equal(normalized.endDate, '2026-08-04');
+});
+
+test('a singular weekday listing cannot remain an open-ended daily recurrence', () => {
+  const normalized = applyRecurrenceNormalizationForRegression(
+    buildEvent({
+      category: 'Family Friendly',
+      name: 'Family Rates Available (Day on the Farm)',
+      description: 'Sunday - Family Rates Available. Bring the whole family.',
+      establishment: 'Island Hill Farm',
+      venue: 'Island Hill Farm',
+      startDate: '2026-07-26',
+      endDate: '2026-07-26',
+      startTime: '10:00',
+      endTime: '18:00',
+      isRecurring: 'Yes',
+      recurringPattern: 'daily',
+    }),
+    buildOriginalItem({
+      name: 'Family Rates Available (Day on the Farm)',
+      description: 'Sunday - Family Rates Available. Bring the whole family.',
+      date: '2026-07-26',
+      startTime: '10:00',
+      endTime: '18:00',
+      venue: 'Island Hill Farm',
+      recurringPattern: 'daily',
+    })
+  );
+
+  assert.equal(normalized.isRecurring, false);
+  assert.equal(normalized.recurringPattern, 'none');
+  assert.equal(normalized.recurrenceUntilDate, undefined);
 });

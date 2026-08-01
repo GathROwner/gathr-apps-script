@@ -278,7 +278,8 @@ export async function performFinalFormatting(
 
   const batchHeader = `BATCH COUNT ENFORCEMENT: You are formatting exactly ${expectedCount} validated items.
 Return exactly ${expectedCount} objects in formattedEvents (one-to-one with the input order).
-Do not drop, merge, or reorder items. Never return arrays of values for an item; each must be a JSON object.`;
+Copy each input sourceItemIndex to the matching formatted event. Do not drop, merge, or reorder items.
+Never return arrays of values for an item; each must be a JSON object.`;
 
   const prompt = batchHeader + '\n\n' + createFormattingPrompt(validatedData, userName, partialAddress, timestamp);
   const schema = createFormattingSchema();
@@ -294,11 +295,21 @@ Do not drop, merge, or reorder items. Never return arrays of values for an item;
       return [];
     }
 
-    // Filter out malformed entries
-    const validFormattedEvents: FormattedEvent[] = [];
+    const alignedFormattedEvents = alignFormattedEventsToValidatedData(
+      response.formattedEvents,
+      validatedData
+    );
+
+    // Filter out malformed entries without losing their source-row association.
+    const validFormattedEvents: Array<{
+      event: FormattedEvent;
+      originalItem: ExtractedItem;
+      inputIndex: number;
+    }> = [];
     const malformedIndices: number[] = [];
 
-    response.formattedEvents.forEach((event, idx) => {
+    alignedFormattedEvents.forEach((entry, idx) => {
+      const event = entry.event;
       const keys = Object.keys(event || {});
       const hasNumericKeys = keys.some((k) => /^\d+$/.test(k));
       const hasProperKeys = keys.includes('name') && keys.includes('category');
@@ -307,7 +318,7 @@ Do not drop, merge, or reorder items. Never return arrays of values for an item;
         logger.error(`Item ${idx} is malformed`, { keys: keys.join(', ') });
         malformedIndices.push(idx);
       } else {
-        validFormattedEvents.push(event);
+        validFormattedEvents.push(entry);
       }
     });
 
@@ -326,8 +337,9 @@ Do not drop, merge, or reorder items. Never return arrays of values for an item;
     const categoryNormalizationStats = createCategoryNormalizationStats();
 
     // Process each formatted event
-    const processedEvents = validFormattedEvents.map((event, index) => {
-      const originalItem = validatedData[index];
+    const processedEvents = validFormattedEvents.map(({ event: alignedEvent, originalItem }) => {
+      let event = { ...alignedEvent } as FormattedEvent & { sourceItemIndex?: number };
+      delete event.sourceItemIndex;
 
       // Restore venue information from validated data if GPT changed it
       if (originalItem && 'venue' in originalItem && originalItem.venue && originalItem.venue.trim() !== '') {
@@ -395,7 +407,9 @@ Do not drop, merge, or reorder items. Never return arrays of values for an item;
       workshopGroundedEvents,
       combinedText
     );
-    const cruiseFilteredEvents = filterCruiseShipLogisticsEvents(sourceGroundedEvents, combinedText);
+    const discreteEvents = filterOperationalHoursOnlyEvents(sourceGroundedEvents);
+    const advisoryFilteredEvents = filterTrafficAdvisoryLogisticsEvents(discreteEvents, combinedText);
+    const cruiseFilteredEvents = filterCruiseShipLogisticsEvents(advisoryFilteredEvents, combinedText);
     const promotedFiniteWeeklyEvents = promoteFiniteWeeklyOneOffSequences(cruiseFilteredEvents);
     const collapsedProcessedEvents = collapseRecurringSeriesEvents(promotedFiniteWeeklyEvents);
 
@@ -611,6 +625,11 @@ function createFormattingPrompt(
   partialAddress: string,
   timestamp: string
 ): string {
+  const indexedItems = items.map((item, sourceItemIndex) => ({
+    ...item,
+    sourceItemIndex,
+  }));
+
   return `Format these validated items into standardized event records.
 
 CONTEXT:
@@ -642,7 +661,7 @@ If an input item already has relevantImageIndex, copy that exact integer into th
 Do NOT reselect, guess, or change relevantImageIndex during final formatting; the image-aware extraction stage chose it.
 
 ITEMS TO FORMAT:
-${JSON.stringify(items, null, 2)}
+${JSON.stringify(indexedItems, null, 2)}
 
 CRITICAL CATEGORIZATION INSTRUCTION:
 Before formatting each event, assess the full event name/description and choose the category that best matches the observable context.
@@ -707,9 +726,10 @@ Return a JSON object with:
 
 HARD SHAPE & COUNT INVARIANTS:
 - The length of formattedEvents MUST equal items.length (one output object per input), and the order MUST be identical.
+- Every formatted event MUST copy the integer sourceItemIndex from its matching input item.
 - Every formattedEvents[i] MUST be a JSON OBJECT (not an array/tuple).
 - Required keys for each formattedEvents[i]:
-  isEvent, isFoodSpecial, category, name, description, establishment, address, startDate, endDate, startTime, endTime, ticketPrice, ticketLink, relevantImageIndex, venue, additionalLocation, isRecurring, recurringPattern, totalOccurrences, recurrenceUntilDate`;
+  sourceItemIndex, isEvent, isFoodSpecial, category, name, description, establishment, address, startDate, endDate, startTime, endTime, ticketPrice, ticketLink, relevantImageIndex, venue, additionalLocation, isRecurring, recurringPattern, totalOccurrences, recurrenceUntilDate`;
 }
 
 /**
@@ -731,6 +751,7 @@ function createFormattingSchema(): GPTFunctionSchema[] {
               type: 'object',
               additionalProperties: false,
               properties: {
+                sourceItemIndex: { type: 'integer', minimum: 0 },
                 isEvent: { type: 'string', enum: ['Yes', 'No'] },
                 isFoodSpecial: { type: 'string', enum: ['Yes', 'No'] },
                 category: {
@@ -786,6 +807,7 @@ function createFormattingSchema(): GPTFunctionSchema[] {
                 recurrenceUntilDate: { type: 'string' },
               },
               required: [
+                'sourceItemIndex',
                 'isEvent',
                 'isFoodSpecial',
                 'category',
@@ -867,7 +889,11 @@ function normalizeFormattingResponse(
       const normName = String(item.name || '').toLowerCase().trim();
       const date = String(item.startDate || '').trim();
       const time = String(item.startTime || '').trim();
-      const key = `${normName}|${date}|${time}`;
+      const sourceItemIndex = parseSourceItemIndex(item);
+      const venue = normalizeAlignmentText(item.venue || item.additionalLocation || '');
+      const key = sourceItemIndex === null
+        ? `${normName}|${date}|${time}|${venue}`
+        : `source-item-${sourceItemIndex}`;
 
       if (!seen.has(key)) {
         seen.set(key, true);
@@ -878,12 +904,6 @@ function normalizeFormattingResponse(
     }
 
     formattedEvents = deduplicated;
-  }
-
-  // Truncate extras if still more than expected
-  if (formattedEvents.length > expectedCount) {
-    logger.debug(`Truncating extras: ${formattedEvents.length} → ${expectedCount}`);
-    formattedEvents = formattedEvents.slice(0, expectedCount);
   }
 
   // Soft-coerce: add any missing keys with safe defaults
@@ -910,54 +930,151 @@ function normalizeFormattingResponse(
     if (!('totalOccurrences' in e)) e.totalOccurrences = 0;
     if (!('recurrenceUntilDate' in e)) e.recurrenceUntilDate = '';
 
-    if (ENABLE_RECURRENCE_LIFECYCLE_NORMALIZATION) {
-      e = normalizeRecurringForFormattedEvent(
-        e,
-        validatedData[i]
-      );
-    } else {
-      e = applyLegacyRecurringNormalization(e);
-    }
-
     formattedEvents[i] = e;
-  }
-
-  // Top-off: if fewer than expected, append placeholders
-  if (formattedEvents.length < expectedCount) {
-    const missing = expectedCount - formattedEvents.length;
-    logger.debug(`Adding ${missing} placeholder items`);
-
-    for (let i = formattedEvents.length; i < expectedCount; i++) {
-      const src = validatedData[i] || ({} as ExtractedItem);
-      formattedEvents.push({
-        isEvent: 'Yes',
-        isFoodSpecial: 'No',
-        category: 'Gatherings & Parties',
-        name: src.name || '',
-        description: src.description || '',
-        establishment: 'venue' in src ? src.venue || '' : '',
-        address: '',
-        startDate: src.date || '',
-        endDate: src.date || '',
-        startTime: src.startTime || '',
-        endTime: src.endTime || '',
-        ticketPrice: '',
-        ticketLink: '',
-        relevantImageIndex: 0,
-        venue: 'venue' in src ? src.venue || '' : '',
-        additionalLocation: 'venue' in src ? src.venue || '' : '',
-        isRecurring: false,
-        recurringPattern: 'none',
-        totalOccurrences: 0,
-        recurrenceUntilDate: '',
-      });
-    }
   }
 
   return {
     formattedEvents,
     formattingDecisions: response.formattingDecisions || [],
   };
+}
+
+function parseSourceItemIndex(value: unknown): number | null {
+  const candidate = Number((value as Record<string, unknown> | null)?.sourceItemIndex);
+  return Number.isInteger(candidate) && candidate >= 0 ? candidate : null;
+}
+
+function normalizeAlignmentText(value: unknown): string {
+  return String(value || '')
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
+function scoreFormattedEventInputAlignment(
+  event: FormattedEvent,
+  item: ExtractedItem
+): number {
+  const eventName = normalizeAlignmentText(event.name);
+  const itemName = normalizeAlignmentText(item.name);
+  const eventVenue = normalizeAlignmentText(event.venue || event.additionalLocation);
+  const itemVenue = normalizeAlignmentText((item as Record<string, unknown>).venue);
+  const eventDescription = normalizeAlignmentText(event.description);
+  const itemDescription = normalizeAlignmentText(item.description);
+  let score = 0;
+
+  if (eventName && itemName) {
+    if (eventName === itemName) score += 100;
+    else if (eventName.includes(itemName) || itemName.includes(eventName)) score += 45;
+  }
+  if (eventVenue && itemVenue) {
+    if (eventVenue === itemVenue) score += 80;
+    else if (eventVenue.includes(itemVenue) || itemVenue.includes(eventVenue)) score += 35;
+  }
+  if (String(event.startDate || '').trim() === String(item.date || '').trim()) score += 30;
+  if (String(event.startTime || '').trim() === String(item.startTime || '').trim()) score += 20;
+  if (String(event.endTime || '').trim() === String(item.endTime || '').trim()) score += 10;
+  if (eventDescription && itemDescription && eventDescription === itemDescription) score += 40;
+
+  return score;
+}
+
+function buildFormattedEventPlaceholder(
+  item: ExtractedItem,
+  sourceItemIndex: number
+): FormattedEvent & { sourceItemIndex: number } {
+  const venue = String((item as Record<string, unknown>).venue || '').trim();
+  return {
+    sourceItemIndex,
+    isEvent: 'Yes',
+    isFoodSpecial: 'No',
+    category: 'Gatherings & Parties',
+    name: item.name || '',
+    description: item.description || '',
+    establishment: venue,
+    address: '',
+    startDate: item.date || '',
+    endDate: item.date || '',
+    startTime: item.startTime || '',
+    endTime: item.endTime || '',
+    ticketPrice: '',
+    ticketLink: '',
+    relevantImageIndex: Number((item as Record<string, unknown>).relevantImageIndex) || 0,
+    venue,
+    additionalLocation: venue,
+    isRecurring: false,
+    recurringPattern: 'none',
+    totalOccurrences: 0,
+    recurrenceUntilDate: '',
+  };
+}
+
+function alignFormattedEventsToValidatedData(
+  formattedEvents: FormattedEvent[],
+  validatedData: ExtractedItem[]
+): Array<{ event: FormattedEvent; originalItem: ExtractedItem; inputIndex: number }> {
+  const assigned = new Map<number, FormattedEvent>();
+  const unresolved: FormattedEvent[] = [];
+
+  for (const event of formattedEvents) {
+    const declaredIndex = parseSourceItemIndex(event);
+    if (declaredIndex !== null && declaredIndex < validatedData.length) {
+      if (!assigned.has(declaredIndex)) {
+        assigned.set(declaredIndex, event);
+      } else {
+        logger.warn('Dropped duplicate Stage 5 sourceItemIndex', {
+          sourceItemIndex: declaredIndex,
+          eventName: event?.name || '',
+        });
+      }
+      continue;
+    }
+    unresolved.push(event);
+  }
+
+  for (const event of unresolved) {
+    const candidates = validatedData
+      .map((item, inputIndex) => ({
+        inputIndex,
+        score: assigned.has(inputIndex)
+          ? -1
+          : scoreFormattedEventInputAlignment(event, item),
+      }))
+      .filter((candidate) => candidate.score >= 0)
+      .sort((left, right) => right.score - left.score);
+    const best = candidates[0];
+    const runnerUp = candidates[1];
+    const hasConfidentMatch = Boolean(
+      best &&
+      best.score >= 80 &&
+      (!runnerUp || best.score - runnerUp.score >= 20)
+    );
+
+    if (hasConfidentMatch) {
+      assigned.set(best.inputIndex, event);
+    } else {
+      logger.warn('Dropped unaligned Stage 5 formatted event', {
+        eventName: event?.name || '',
+        bestScore: best?.score ?? -1,
+        runnerUpScore: runnerUp?.score ?? -1,
+      });
+    }
+  }
+
+  return validatedData.map((originalItem, inputIndex) => ({
+    event: assigned.get(inputIndex) || buildFormattedEventPlaceholder(originalItem, inputIndex),
+    originalItem,
+    inputIndex,
+  }));
+}
+
+export function alignFormattedEventsToValidatedDataForRegression(
+  formattedEvents: FormattedEvent[],
+  validatedData: ExtractedItem[]
+): Array<{ event: FormattedEvent; originalItem: ExtractedItem; inputIndex: number }> {
+  return alignFormattedEventsToValidatedData(formattedEvents, validatedData);
 }
 
 export function rehydrateFormattedEventMetadata(
@@ -1073,9 +1190,13 @@ function detectExplicitFoodSpecialCategory(
 
   const hasTwoCanDine = /\btwo\s+can\s+dine\b/.test(text) || /\b\d+\s*can\s+dine\b/.test(text);
   const hasPrice = /\$\s*\d+/.test(text);
+  // Venue names such as "Beer Garden" are location evidence, not an offer.
+  // Remove that phrase before looking for standalone beer/menu cues so a
+  // schedule row like "Beer Garden: Adam & The Foes" stays an event.
+  const foodOfferText = text.replace(/\bbeer\s+garden\b/g, ' ');
   const hasNamedFoodCue =
     /\b(brunch|breakfast|lunch|dinner|menu|appetizer|mains?|dessert|prix fixe|set menu|deal|cocktail|cocktails|beer|wine|wines|mimosa|mimosas|burger|burgers|pizza|pizzas|taco|tacos|wing|wings)\b/.test(
-      text
+      foodOfferText
     );
   const hasPriceNearFoodCue = hasPrice && hasNamedFoodCue;
   const hasFoodOfferSignals =
@@ -2091,6 +2212,54 @@ function filterUnsupportedClosureFoodBleed(
   return filtered;
 }
 
+function isOperationalHoursOnlyTitle(value: unknown): boolean {
+  const normalized = normalizeWorkshopSupportText(String(value || ''));
+  if (!normalized) return false;
+  return (
+    /\bopen\s+(?:every\s+day|daily)\b/.test(normalized) ||
+    /\bregular\s+(?:farm\s+)?hours\b/.test(normalized) ||
+    /\b(?:business|store|summer|winter|festival)\s+hours\b/.test(normalized) ||
+    /\ball\s+pools\s+open\b/.test(normalized) ||
+    /^casino\s+gaming$/.test(normalized) ||
+    /^poker\s+(?:and\s+)?roulette\s+tables$/.test(normalized)
+  );
+}
+
+function hasOperationalHoursCue(value: unknown): boolean {
+  const normalized = normalizeWorkshopSupportText(String(value || ''));
+  if (!normalized) return false;
+  return (
+    /\bopen\s+(?:every\s+day|daily)\b/.test(normalized) ||
+    /\bregular\s+(?:farm\s+)?hours\b/.test(normalized) ||
+    /\b(?:hours|open)\s*(?:are|:|-)?\s*\d{1,2}(?::\d{2})?\s*(?:am|pm)?\s*(?:to|until|-)\s*\d{1,2}/.test(normalized) ||
+    /\b(?:casino\s+gaming|poker\s+(?:and\s+)?roulette\s+tables|all\s+pools\s+open)\b/.test(normalized)
+  );
+}
+
+export function filterOperationalHoursOnlyEvents(
+  events: FormattedEvent[]
+): FormattedEvent[] {
+  return events.filter((event) => {
+    if (!isRecurringFlagEnabled(event.isEvent)) return true;
+
+    const eventText = normalizeCruiseLogisticsText([
+      event.name,
+      event.description,
+    ].join(' '));
+    if (!isOperationalHoursOnlyTitle(event.name) || !hasOperationalHoursCue(eventText)) {
+      return true;
+    }
+    if (hasPublicEventCue(eventText)) return true;
+
+    logger.debug(`Dropped operating-hours-only listing "${event.name}"`, {
+      startDate: event.startDate,
+      startTime: event.startTime,
+      venue: event.venue || event.establishment,
+    });
+    return false;
+  });
+}
+
 function normalizeCruiseLogisticsText(value: unknown): string {
   return String(value || '')
     .toLowerCase()
@@ -2129,6 +2298,78 @@ function hasPortCharlottetownCue(text: string): boolean {
 
 function hasPublicEventCue(text: string): boolean {
   return /\b(concert|live music|festival|market|vendors?|fundraiser|workshops?|classes|show|performance|trivia|karaoke|comedy|movie|tickets?|register|registration|run|walk|race|parade|food trucks?)\b/.test(text);
+}
+
+function hasTrafficAdvisoryCue(text: string): boolean {
+  return (
+    /\btraffic advisory\b/.test(text) ||
+    /\btemporary traffic disruption\b/.test(text) ||
+    /\btraffic impacts?\b/.test(text) ||
+    /\btraffic control personnel\b/.test(text) ||
+    /\b(lane|road|street)\s+closures?\b/.test(text) ||
+    /\b(detour|road work|roadwork|construction notice)\b/.test(text)
+  );
+}
+
+function hasUtilityRepairCue(text: string): boolean {
+  return (
+    /\b(leaking water service|water service repair|water and sewer utility|water sewer utility)\b/.test(text) ||
+    /\bcrews?\s+(?:will be\s+)?(?:completing|doing|performing)\s+repairs?\b/.test(text)
+  );
+}
+
+function eventNameLooksLikeTrafficAdvisory(eventName: string): boolean {
+  const normalizedName = normalizeCruiseLogisticsText(eventName);
+  return (
+    /\btraffic advisory\b/.test(normalizedName) ||
+    /\btemporary traffic disruption\b/.test(normalizedName) ||
+    /\b(lane|road|street)\s+closures?\b/.test(normalizedName) ||
+    /\bdetour\b/.test(normalizedName)
+  );
+}
+
+function isTrafficAdvisoryLogisticsEvent(event: FormattedEvent, combinedText: string): boolean {
+  const sourceText = normalizeCruiseLogisticsText(combinedText);
+  const eventText = normalizeCruiseLogisticsText([
+    event.name,
+    event.description,
+    event.venue,
+    event.establishment,
+    event.address,
+  ].join(' '));
+
+  const sourceHasAdvisory = hasTrafficAdvisoryCue(sourceText) || hasUtilityRepairCue(sourceText);
+  const eventHasAdvisory = hasTrafficAdvisoryCue(eventText) || hasUtilityRepairCue(eventText);
+  if (!sourceHasAdvisory && !eventHasAdvisory) return false;
+
+  const nameIsAdvisory = eventNameLooksLikeTrafficAdvisory(String(event.name || ''));
+  const eventHasPublicSignal = hasPublicEventCue(eventText);
+  if (eventHasPublicSignal && !nameIsAdvisory) return false;
+
+  return nameIsAdvisory || (
+    sourceHasAdvisory &&
+    eventHasAdvisory &&
+    !eventHasPublicSignal
+  );
+}
+
+export function filterTrafficAdvisoryLogisticsEvents(
+  events: FormattedEvent[],
+  combinedText: string
+): FormattedEvent[] {
+  if (events.length === 0) return events;
+
+  return events.filter((event) => {
+    const shouldDrop = isTrafficAdvisoryLogisticsEvent(event, combinedText);
+    if (shouldDrop) {
+      logger.debug(`Dropped traffic advisory logistics listing "${event.name}"`, {
+        venue: event.venue || event.establishment,
+        startDate: event.startDate,
+        startTime: event.startTime,
+      });
+    }
+    return !shouldDrop;
+  });
 }
 
 function eventNameLooksLikeShipScheduleEntry(eventName: string, sourceText: string): boolean {
@@ -2447,6 +2688,20 @@ function hasStrongRecurringCue(text: string): boolean {
   return /\b(every|each|weekly|daily|biweekly|every other|recurring|repeats?|weekdays|monthly)\b/.test(
     normalized
   );
+}
+
+function removeDurationOnlyEachCue(text: string): string {
+  return normalizeWeekdayExtractionText(text)
+    .replace(
+      /\beach\s+(?:concert|show|performance|set|event|screening|presentation|reading|service)\s+(?:is|will\s+be|lasts?|runs?|takes)\s+(?:about|approximately|approx\.?|around|roughly)?\s*\d+(?:\.\d+)?\s*(?:minutes?|mins?|hours?|hrs?)\b/g,
+      ' '
+    )
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function hasStrongRecurringCueForSingleDateDemotion(text: string): boolean {
+  return hasStrongRecurringCue(removeDurationOnlyEachCue(text));
 }
 
 function hasSingleDayMultiSessionOneOffCue(
@@ -3080,7 +3335,7 @@ function shouldForceSingleExplicitDateOneOff(
     return false;
   }
 
-  if (hasStrongRecurringCue(normalizedSource)) {
+  if (hasStrongRecurringCueForSingleDateDemotion(normalizedSource)) {
     return false;
   }
 
@@ -3101,6 +3356,134 @@ function shouldForceSingleExplicitDateOneOff(
   }
 
   return true;
+}
+
+function isSingleOccurrenceDateWindow(
+  event: Pick<FormattedEvent, 'startDate' | 'endDate' | 'startTime' | 'endTime'>
+): boolean {
+  const startDate = String(event.startDate || '').trim();
+  const endDate = String(event.endDate || '').trim() || startDate;
+  if (!startDate) return false;
+
+  const expectedOccurrenceEndDate =
+    resolveOccurrenceLocalEndDate(startDate, event.startTime, event.endTime) ||
+    startDate;
+  return endDate === startDate || endDate === expectedOccurrenceEndDate;
+}
+
+function hasScheduleHeaderContext(text: string): boolean {
+  const normalized = normalizeWeekdayExtractionText(text);
+  if (!normalized) return false;
+  return /\b(series|program|programs|lineup|calendar|schedule|poster|roster)\b/.test(
+    normalized
+  );
+}
+
+function hasStrongCustomRecurrenceCue(text: string): boolean {
+  const normalized = normalizeWeekdayExtractionText(text);
+  if (!normalized) return false;
+  return /\b(every|each|weekly|recurring|repeats?|every other|biweekly)\b/.test(
+    normalized
+  );
+}
+
+function isSpecificPerformerScheduleRow(
+  event: Pick<FormattedEvent, 'category' | 'name'>
+): boolean {
+  if (event.category !== 'Live Music') return false;
+
+  const normalizedName = normalizeWeekdayExtractionText(event.name);
+  if (!normalizedName || !looksPerformerLikeTitle(event.name || '')) return false;
+
+  return !/\b(series|program|lineup|calendar|schedule|festival|entertainment|open\s*mic|karaoke|trivia|quiz|session|sessions)\b/.test(
+    normalizedName
+  );
+}
+
+function isSpecificLineupActRow(
+  event: Pick<FormattedEvent, 'category' | 'name'>
+): boolean {
+  if (isSpecificPerformerScheduleRow(event)) return true;
+  if (event.category !== 'Live Music') return false;
+
+  const rawName = String(event.name || '').trim();
+  const normalizedName = normalizeWeekdayExtractionText(rawName);
+  if (!rawName || !normalizedName) return false;
+  if (
+    /\b(series|program|lineup|calendar|schedule|festival|entertainment|open\s*mic|karaoke|trivia|quiz|session|sessions)\b/.test(
+      normalizedName
+    )
+  ) {
+    return false;
+  }
+
+  const tokens = rawName.split(/\s+/).filter(Boolean);
+  return tokens.length <= 4 && /[A-Za-z]/.test(rawName) && /\d/.test(rawName);
+}
+
+function shouldForceScheduleHeaderCustomRecurrenceOneOff(
+  event: Pick<FormattedEvent, 'category' | 'name' | 'startDate' | 'endDate' | 'startTime' | 'endTime'>,
+  sourceText: string,
+  recurringPattern: RecurringPattern,
+  customRecurringConfiguration?:
+    | {
+        recurringDaysOfWeek?: RecurringWeekday[];
+        recurringWeekdaySequence?: RecurringWeekday[];
+        recurringWeekInterval?: number;
+      }
+    | undefined
+): boolean {
+  if (recurringPattern !== 'weekly_custom' || !customRecurringConfiguration) {
+    return false;
+  }
+
+  const recurringDayCount =
+    customRecurringConfiguration.recurringDaysOfWeek?.length ||
+    customRecurringConfiguration.recurringWeekdaySequence?.length ||
+    0;
+  if (recurringDayCount < 2) return false;
+  if (!isSingleOccurrenceDateWindow(event)) return false;
+  if (!hasScheduleHeaderContext(sourceText)) return false;
+  if (hasStrongCustomRecurrenceCue(sourceText)) return false;
+
+  return isSpecificPerformerScheduleRow(event);
+}
+
+function hasEveryNightThisWeekLineupCue(text: string): boolean {
+  const normalized = normalizeWeekdayExtractionText(text);
+  if (!normalized) return false;
+  return (
+    /\bevery\s+night\s+(?:this\s+week|for\s+the\s+week)\b/.test(normalized) ||
+    /\bthis\s+week\b.{0,120}\bevery\s+night\b/.test(normalized)
+  );
+}
+
+function shouldForceThisWeekLineupRecurringOneOff(
+  event: Pick<FormattedEvent, 'category' | 'name' | 'startDate' | 'endDate' | 'startTime' | 'endTime'>,
+  sourceText: string,
+  recurringPattern: RecurringPattern,
+  recurrenceUntilDate: string | undefined,
+  totalOccurrences: number | undefined,
+  customRecurringConfiguration?:
+    | {
+        recurringDaysOfWeek?: RecurringWeekday[];
+        recurringWeekdaySequence?: RecurringWeekday[];
+        recurringWeekInterval?: number;
+      }
+    | undefined
+): boolean {
+  if (
+    !isSimpleWeeklyRecurringPattern(recurringPattern) ||
+    customRecurringConfiguration ||
+    recurrenceUntilDate ||
+    totalOccurrences !== undefined
+  ) {
+    return false;
+  }
+
+  if (!isSingleOccurrenceDateWindow(event)) return false;
+  if (!isSpecificLineupActRow(event)) return false;
+  return hasEveryNightThisWeekLineupCue(sourceText);
 }
 
 function isSimpleWeeklyRecurringPattern(pattern: RecurringPattern): boolean {
@@ -3407,14 +3790,21 @@ function shouldAcceptSourceDerivedSpecificWeeklyPattern(
   candidatePattern: RecurringPattern,
   candidateSource: 'standalone_weekday' | 'explicit_date_sequence' | 'none',
   sourceWeekdayPatterns: Set<RecurringPattern>,
-  itemLocalPattern: RecurringPattern
+  itemLocalPattern: RecurringPattern,
+  sourceText: string
 ): boolean {
   if (candidatePattern === 'none' || candidateSource === 'none') return false;
   if (candidateSource === 'explicit_date_sequence') return true;
 
   const startDatePattern = patternFromIsoDate(event.startDate);
   if (startDatePattern && candidatePattern !== startDatePattern) {
-    return false;
+    const hasSingleExplicitRecurringWeekday =
+      candidateSource === 'standalone_weekday' &&
+      sourceWeekdayPatterns.size === 1 &&
+      hasRecurringCue(sourceText);
+    if (!hasSingleExplicitRecurringWeekday) {
+      return false;
+    }
   }
 
   if (
@@ -3550,7 +3940,8 @@ function normalizeRecurringForFormattedEvent(
       specificWeeklyPatternCandidate,
       specificWeeklyPatternSource,
       sourceWeekdayPatterns,
-      itemLocalRecurringPattern
+      itemLocalRecurringPattern,
+      sourceText
     )
   ) {
     specificWeeklyPatternCandidate = 'none';
@@ -3610,6 +4001,40 @@ function normalizeRecurringForFormattedEvent(
       });
       recurringPattern = specificWeeklyPatternCandidate;
     }
+  }
+
+  if (
+    recurringPattern === 'daily' &&
+    !customRecurringConfiguration &&
+    detectRecurringPatternFromText(sourceText) !== 'daily' &&
+    !hasFiniteEventDateWindow(event) &&
+    !hasSeriesCue
+  ) {
+    logger.debug(`Removed unsupported daily recurrence for "${event.name}"`, {
+      sourceWeekdayPatterns: Array.from(sourceWeekdayPatterns),
+      sourceText: sourceText.slice(0, 220),
+    });
+    recurringPattern = 'none';
+  }
+
+  let forcedScheduleHeaderCustomOneOff = false;
+  if (
+    shouldForceScheduleHeaderCustomRecurrenceOneOff(
+      event,
+      sourceText,
+      recurringPattern,
+      customRecurringConfiguration
+    )
+  ) {
+    logger.debug(`Forced schedule-header custom recurrence to one-off for "${event.name}"`, {
+      recurringPatternFrom: recurringPattern,
+      recurringDaysOfWeek: customRecurringConfiguration?.recurringDaysOfWeek || [],
+      startDate: event.startDate,
+      sourceText: sourceText.slice(0, 220),
+    });
+    recurringPattern = 'none';
+    customRecurringConfiguration = undefined;
+    forcedScheduleHeaderCustomOneOff = true;
   }
 
   let totalOccurrences =
@@ -3722,6 +4147,29 @@ function normalizeRecurringForFormattedEvent(
     )
   ) {
     logger.debug(`Forced single explicit-date weekly item to one-off for "${event.name}"`, {
+      recurringPatternFrom: recurringPattern,
+      startDate: event.startDate,
+      sourceText: sourceText.slice(0, 220),
+    });
+    recurringPattern = 'none';
+    customRecurringConfiguration = undefined;
+    totalOccurrences = undefined;
+    recurrenceUntilDate = undefined;
+    forcedFiniteRunOneOff = true;
+  }
+
+  if (
+    !forcedFiniteRunOneOff &&
+    shouldForceThisWeekLineupRecurringOneOff(
+      event,
+      sourceText,
+      recurringPattern,
+      recurrenceUntilDate,
+      totalOccurrences,
+      customRecurringConfiguration
+    )
+  ) {
+    logger.debug(`Forced this-week performer lineup row to one-off for "${event.name}"`, {
       recurringPatternFrom: recurringPattern,
       startDate: event.startDate,
       sourceText: sourceText.slice(0, 220),
@@ -3852,6 +4300,12 @@ function normalizeRecurringForFormattedEvent(
     isRecurring = false;
   }
   if (forcedFiniteRunOneOff) {
+    recurringPattern = 'none';
+    totalOccurrences = undefined;
+    recurrenceUntilDate = undefined;
+    isRecurring = false;
+  }
+  if (forcedScheduleHeaderCustomOneOff) {
     recurringPattern = 'none';
     totalOccurrences = undefined;
     recurrenceUntilDate = undefined;

@@ -453,6 +453,126 @@ function hasConflictingExplicitAgeGroups(left: string, right: string): boolean {
   return !leftMarkers.some((marker) => rightSet.has(marker));
 }
 
+const GENERIC_EVENT_TITLE_TOKENS = new Set([
+  'author',
+  'book',
+  'celebration',
+  'community',
+  'discuss',
+  'entertainment',
+  'event',
+  'featuring',
+  'free',
+  'ft',
+  'inperson',
+  'live',
+  'meet',
+  'morning',
+  'music',
+  'night',
+  'performance',
+  'performances',
+  'person',
+  'show',
+  'signing',
+]);
+
+function getComparableEventCoreSequence(value: string): string[] {
+  return normalizeEventText(value)
+    .split(' ')
+    .map((token) => token.trim())
+    .filter((token) =>
+      token.length > 1 &&
+      !COMMON_WORDS.has(token) &&
+      !GENERIC_EVENT_TITLE_TOKENS.has(token) &&
+      !/^\d{4}$/.test(token)
+    );
+}
+
+function getComparableEventCoreTokens(value: string): Set<string> {
+  return new Set(getComparableEventCoreSequence(value));
+}
+
+function hasContainedDistinctiveEventCore(left: string, right: string): boolean {
+  const leftSequence = getComparableEventCoreSequence(left);
+  const rightSequence = getComparableEventCoreSequence(right);
+  const leftCollapsed = leftSequence.join('');
+  const rightCollapsed = rightSequence.join('');
+  if (
+    leftCollapsed.length >= 6 &&
+    rightCollapsed.length >= 6 &&
+    (
+      leftCollapsed === rightCollapsed ||
+      (
+        Math.abs(leftCollapsed.length - rightCollapsed.length) <= 1 &&
+        levenshteinDistance(leftCollapsed, rightCollapsed) <= 1
+      )
+    )
+  ) {
+    return true;
+  }
+
+  const leftTokens = getComparableEventCoreTokens(left);
+  const rightTokens = getComparableEventCoreTokens(right);
+  if (!leftTokens.size || !rightTokens.size) return false;
+
+  const [smaller, larger] = leftTokens.size <= rightTokens.size
+    ? [leftTokens, rightTokens]
+    : [rightTokens, leftTokens];
+  if (!Array.from(smaller).every((token) => larger.has(token))) return false;
+  if (smaller.size >= 2) return true;
+
+  const onlyToken = Array.from(smaller)[0];
+  // A one-token identity is only safe when both titles reduce to that same
+  // token after generic event wording is removed. This keeps names such as
+  // "MadJoy" / "MadJoy Live Music", but rejects "Pressure" / "Pressure
+  // Cooker Showcase", where the longer title has a different distinctive
+  // core.
+  return larger.size === 1 && onlyToken.length >= 6;
+}
+
+export function isHighConfidenceSameOccurrenceDuplicate(
+  newData: {
+    establishment: string;
+    additionalLocation?: string;
+    subVenue?: string;
+    startDate: string;
+    startTime?: string;
+    eventName?: string;
+    name?: string;
+  },
+  existingData: {
+    establishment: string;
+    additionalLocation?: string;
+    subVenue?: string;
+    startDate: string;
+    startTime?: string;
+    eventName?: string;
+    name?: string;
+  }
+): boolean {
+  if (newData.startDate !== existingData.startDate) return false;
+  if (!newData.startTime || !existingData.startTime) return false;
+  if (calculateTimeDifferenceHours(newData.startTime, existingData.startTime) !== 0) {
+    return false;
+  }
+
+  const newLocation = normalizeVenueName(
+    newData.additionalLocation || newData.subVenue || newData.establishment
+  );
+  const existingLocation = normalizeVenueName(
+    existingData.additionalLocation || existingData.subVenue || existingData.establishment
+  );
+  if (newLocation && existingLocation && newLocation !== existingLocation) return false;
+
+  const newName = getComparableEventName(newData);
+  const existingName = getComparableEventName(existingData);
+  if (!newName || !existingName) return false;
+  if (hasConflictingExplicitAgeGroups(newName, existingName)) return false;
+
+  return hasContainedDistinctiveEventCore(newName, existingName);
+}
+
 /**
  * Check if two events are potential duplicates
  * Uses the 3-point matching system from the original code

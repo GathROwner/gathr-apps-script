@@ -38,6 +38,7 @@ import {
   extractFacebookSlug,
   calculateEnhancedSimilarity,
   isDuplicateEntry,
+  isHighConfidenceSameOccurrenceDuplicate,
   normalizeUrl,
 } from '../utils/similarity.js';
 import { getVenueAliasCandidates } from './venueAliases.js';
@@ -3518,7 +3519,10 @@ export async function checkDuplicate(
     if (sameVenue && shouldSkipSiblingUniqueIdDuplicateCheck(event, existing)) {
       continue;
     }
-    if (isDuplicateEntry(event, existing, { requireEstablishmentMatch: !sameVenue })) {
+    if (
+      isDuplicateEntry(event, existing, { requireEstablishmentMatch: !sameVenue }) ||
+      (sameVenue && isHighConfidenceSameOccurrenceDuplicate(event, existing))
+    ) {
       return { isDuplicate: true, existingEvent: existing };
     }
   }
@@ -3533,7 +3537,10 @@ export async function checkDuplicate(
     if (shouldSkipSiblingUniqueIdDuplicateCheck(event, existing)) {
       continue;
     }
-    if (isDuplicateEntry(event, existing, { requireEstablishmentMatch: false })) {
+    if (
+      isDuplicateEntry(event, existing, { requireEstablishmentMatch: false }) ||
+      isHighConfidenceSameOccurrenceDuplicate(event, existing)
+    ) {
       return { isDuplicate: true, existingEvent: existing };
     }
   }

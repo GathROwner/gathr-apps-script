@@ -311,8 +311,15 @@ function buildDateInTimezone(monthRaw: string, dayRaw: string, yearRaw: string |
   return buildDate(monthRaw, dayRaw, yearRaw, DateTime.now().setZone(timezone));
 }
 
-function extractDateFromText(text: string, timezone: string): string | undefined {
-  const now = DateTime.now().setZone(timezone);
+function extractDateFromText(
+  text: string,
+  timezone: string,
+  referenceIsoDateTime?: string
+): string | undefined {
+  const normalizedReference = normalizeIsoDateTime(referenceIsoDateTime, timezone);
+  const now = normalizedReference
+    ? DateTime.fromISO(normalizedReference, { zone: timezone }).setZone(timezone)
+    : DateTime.now().setZone(timezone);
   const monthNamePattern = Object.keys(MONTH_LOOKUP).join('|');
   const monthFirst = new RegExp(
     `\\b(${monthNamePattern})\\.?\\s+(\\d{1,2})(?:st|nd|rd|th)?(?:,?\\s+(\\d{4}))?\\b`,
@@ -380,7 +387,7 @@ function resolveRelativeWeekdayDateFromText(
 }
 
 function extractDateCandidateFromText(text: string, timezone: string, startTime?: string, sourcePublishedAt?: string): string | undefined {
-  return extractDateFromText(text, timezone) ||
+  return extractDateFromText(text, timezone, sourcePublishedAt) ||
     resolveRelativeWeekdayDateFromText(text, timezone, startTime, sourcePublishedAt);
 }
 
@@ -1851,6 +1858,7 @@ export async function parseSharedEventPayload(
     evidenceDescription,
   ].filter(Boolean).join('\n');
   const preferPublicEvidence = sourceVisibility === 'public_verified';
+  const sourceDateReference = visibilityEvidence.sourcePublishedAt || visibilityEvidence.checkedAt;
 
   const initialTitle = extractTitle(payload, combinedText);
   const postDerivedTitle = !payload.title && evidenceTitle && initialTitle === evidenceTitle
@@ -1875,16 +1883,16 @@ export async function parseSharedEventPayload(
     evidenceText,
     timezone,
     startTime,
-    sourcePublishedAt: visibilityEvidence.sourcePublishedAt,
+    sourcePublishedAt: sourceDateReference,
     preferPublicEvidence,
   });
   const startDate = startDateChoice.value ||
-    extractDateFromText(combinedText, timezone) ||
+    extractDateFromText(combinedText, timezone, sourceDateReference) ||
     resolveRelativeWeekdayDateFromText(
       combinedText,
       timezone,
       startTime,
-      visibilityEvidence.sourcePublishedAt
+      sourceDateReference
     );
   const endDateChoice = chooseDateField({
     payloadValue: payload.endDate,
@@ -1894,7 +1902,7 @@ export async function parseSharedEventPayload(
     evidenceText,
     timezone,
     startTime,
-    sourcePublishedAt: visibilityEvidence.sourcePublishedAt,
+    sourcePublishedAt: sourceDateReference,
     preferPublicEvidence,
   });
   const endDate = endDateChoice.value ||
