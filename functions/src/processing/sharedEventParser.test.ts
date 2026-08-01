@@ -40,27 +40,34 @@ test('private visibility hints keep shared Facebook events user-private', async 
 });
 
 test('public verified source routes to a public candidate while retaining user status', async () => {
-  const parsed = await parseSharedEventPayload({
-    sourceUrl: 'https://example.com/events/music-night',
-    title: 'Music Night',
-    sharedText: 'When: June 25 at 7 PM\nLocation: Founders Hall',
-  }, {
-    sourceVisibility: 'public_verified',
-    visibilityEvidence: {
-      method: 'public_url_probe',
-      checkedAt: '2026-06-17T00:00:00.000Z',
-      url: 'https://example.com/events/music-night',
-      httpStatus: 200,
-      reason: 'Public URL returned usable metadata without user credentials.',
-      titleFound: true,
-      descriptionFound: true,
-    },
-  });
+  const originalNow = Settings.now;
+  Settings.now = () => new Date('2026-06-17T12:00:00.000Z').getTime();
 
-  assert.equal(parsed.routing, 'public_candidate');
-  assert.equal(parsed.status, 'submitted_public_candidate');
-  assert.equal(parsed.needsUserReview, false);
-  assert.equal(parsed.sourceVisibility, 'public_verified');
+  try {
+    const parsed = await parseSharedEventPayload({
+      sourceUrl: 'https://example.com/events/music-night',
+      title: 'Music Night',
+      sharedText: 'When: June 25 at 7 PM\nLocation: Founders Hall',
+    }, {
+      sourceVisibility: 'public_verified',
+      visibilityEvidence: {
+        method: 'public_url_probe',
+        checkedAt: '2026-06-17T00:00:00.000Z',
+        url: 'https://example.com/events/music-night',
+        httpStatus: 200,
+        reason: 'Public URL returned usable metadata without user credentials.',
+        titleFound: true,
+        descriptionFound: true,
+      },
+    });
+
+    assert.equal(parsed.routing, 'public_candidate');
+    assert.equal(parsed.status, 'submitted_public_candidate');
+    assert.equal(parsed.needsUserReview, false);
+    assert.equal(parsed.sourceVisibility, 'public_verified');
+  } finally {
+    Settings.now = originalNow;
+  }
 });
 
 test('public probe metadata fills event fields when the share payload only has a URL', async () => {

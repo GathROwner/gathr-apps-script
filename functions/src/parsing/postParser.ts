@@ -2390,6 +2390,36 @@ export function enforceDateTimeCompleteness(
     ev.startTime = normalizeTimeHHMM(ev.startTime);
     ev.endTime = normalizeTimeHHMM(ev.endTime);
 
+    const bareNightlifeRange = events.length === 1
+      ? inferBareNightlifeEveningRange(ev, combinedText)
+      : null;
+    if (bareNightlifeRange) {
+      ev.startTime = bareNightlifeRange.startTime;
+      ev.endTime = bareNightlifeRange.endTime;
+      ev.timeFlags = ev.timeFlags || {
+        start: { source: 'none', evidence: '' },
+        end: { source: 'none', toClose: false, evidence: '' },
+      };
+      ev.timeFlags.start = {
+        source: 'semantic',
+        evidence: `nightlife evening range ${bareNightlifeRange.evidence}`,
+      };
+      ev.timeFlags.end = {
+        source: 'semantic',
+        toClose: false,
+        evidence: `nightlife evening range ${bareNightlifeRange.evidence}`,
+      };
+      delete ev.timeResolution.startFromHours;
+      delete ev.timeResolution.startFromPostTime;
+      delete ev.timeResolution.endFromHours;
+
+      logger.debug(`Corrected bare nightlife range for "${ev.name}"`, {
+        evidence: bareNightlifeRange.evidence,
+        startTime: bareNightlifeRange.startTime,
+        endTime: bareNightlifeRange.endTime,
+      });
+    }
+
     const explicitEvidenceRange =
       ev.timeFlags?.start?.source === 'explicit' || ev.timeFlags?.end?.source === 'explicit'
         ? extractExplicitTimeRangeFromEvidence(
@@ -3119,6 +3149,55 @@ function extractExplicitEndTimeFromEvidence(value: unknown): string {
   }
 
   return extractStandaloneExplicitTime(raw);
+}
+
+function inferBareNightlifeEveningRange(
+  event: Pick<TimeResolvedEvent, 'name' | 'description' | 'category' | 'startTime' | 'endTime'>,
+  combinedText: string
+): { startTime: string; endTime: string; evidence: string } | null {
+  const eventContext = `${event.name || ''} ${event.description || ''} ${event.category || ''}`;
+  const nightlifeLike =
+    /\b(live\s+music|concert|band|dj|nightlife|karaoke|open\s+mic|pub|bar|lounge|dance\s+party|live\s+show)\b/i.test(
+      eventContext
+    );
+  if (!nightlifeLike) return null;
+
+  const rangePattern = /\b(\d{1,2})(?::([0-5]\d))?\s*[-\u2013\u2014]\s*(\d{1,2})(?::([0-5]\d))?\b/g;
+  for (const match of combinedText.matchAll(rangePattern)) {
+    const evidence = String(match[0] || '');
+    const matchIndex = match.index || 0;
+    const nearby = combinedText.slice(Math.max(0, matchIndex - 12), matchIndex + evidence.length + 12);
+    if (/\b(?:am|pm)\b/i.test(nearby)) continue;
+    if (/\b(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:tember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\s*$/i.test(
+      combinedText.slice(Math.max(0, matchIndex - 15), matchIndex)
+    )) continue;
+
+    const startHour = Number(match[1]);
+    const startMinute = Number(match[2] || 0);
+    const endHour = Number(match[3]);
+    const endMinute = Number(match[4] || 0);
+    if (
+      !Number.isFinite(startHour) ||
+      !Number.isFinite(endHour) ||
+      startHour < 5 ||
+      startHour > 11 ||
+      endHour < 1 ||
+      endHour > 12
+    ) continue;
+
+    const morningStart = `${String(startHour).padStart(2, '0')}:${String(startMinute).padStart(2, '0')}`;
+    if (event.startTime && normalizeTimeHHMM(event.startTime) !== morningStart) continue;
+
+    const resolvedStartHour = startHour + 12;
+    const resolvedEndHour = endHour > startHour && endHour < 12 ? endHour + 12 : endHour % 12;
+    return {
+      startTime: `${String(resolvedStartHour).padStart(2, '0')}:${String(startMinute).padStart(2, '0')}`,
+      endTime: `${String(resolvedEndHour).padStart(2, '0')}:${String(endMinute).padStart(2, '0')}`,
+      evidence,
+    };
+  }
+
+  return null;
 }
 
 function hhmmToMinutes(hhmm: string): number | null {
