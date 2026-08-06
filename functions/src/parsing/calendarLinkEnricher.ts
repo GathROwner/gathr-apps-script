@@ -570,7 +570,18 @@ function parseDrupalFeedItems(
       extractionReason: `Stage 3.8 linked calendar feed (${new URL(sourceUrl).hostname})`,
       _sourceType: 'event',
     };
-    if (detailUrl) item.ticketLink = detailUrl;
+    if (detailUrl) {
+      item.actionLinks = [
+        {
+          url: detailUrl,
+          role: 'event_info',
+          label: 'Event Info',
+          confidence: 0.85,
+          source: 'calendar',
+          evidence: 'calendar event detail page',
+        },
+      ];
+    }
 
     items.push(item);
   }
@@ -621,7 +632,7 @@ async function enrichDetailImagesForCalendarItems(
 ): Promise<{ attempted: number; fetched: number; extracted: number; applied: number }> {
   const detailUrlToItems = new Map<string, ExtractedItem[]>();
   for (const item of items || []) {
-    const detailUrl = String((item as any).ticketLink || '').trim();
+    const detailUrl = getCalendarDetailUrl(item);
     if (!detailUrl) continue;
     const bucket = detailUrlToItems.get(detailUrl) || [];
     bucket.push(item);
@@ -658,6 +669,12 @@ async function enrichDetailImagesForCalendarItems(
   }
 
   return stats;
+}
+
+function getCalendarDetailUrl(item: ExtractedItem): string {
+  const actionLinks = Array.isArray(item.actionLinks) ? item.actionLinks : [];
+  const detailLink = actionLinks.find((entry) => entry?.role === 'event_info' && entry?.url);
+  return String(detailLink?.url || (item as any).ticketLink || '').trim();
 }
 
 function extractDetailPageImageUrl(html: string, pageUrl: string): string {

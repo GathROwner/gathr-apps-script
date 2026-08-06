@@ -7,7 +7,8 @@
  */
 
 import { DateTime } from 'luxon';
-import { EstablishmentInfo, ExtractedItem, ParsingConfig } from './types.js';
+import { EstablishmentInfo, EventActionLink, ExtractedItem, ParsingConfig } from './types.js';
+import { classifyActionLinkPage } from './actionLinkClassifier.js';
 import { logger } from '../utils/logger.js';
 
 type VenueWebsiteEnrichmentSummary = {
@@ -29,6 +30,7 @@ type VenueWebsiteEnrichmentSummary = {
     times: number;
     descriptions: number;
     links: number;
+    actionLinks: number;
     images: number;
   };
   reason?: string;
@@ -45,6 +47,7 @@ type WebsiteCandidate = {
   imageUrl?: string;
   sourceUrl: string;
   source: 'detail_page' | 'locarius_api';
+  actionLink?: EventActionLink;
 };
 
 const DEFAULT_TIMEOUT_MS = 12000;
@@ -141,6 +144,7 @@ export async function enrichEventsFromVenueWebsite(
       times: 0,
       descriptions: 0,
       links: 0,
+      actionLinks: 0,
       images: 0,
     },
   };
@@ -489,6 +493,16 @@ function normalizeLocariusRecord(record: any, fallbackTimezone: string): Website
     imageUrl: normalizeCandidateUrl(String(record?.logo || '')) || '',
     sourceUrl: normalizeCandidateUrl(String(record?.url || '')) || '',
     source: 'locarius_api',
+    actionLink: normalizeCandidateUrl(String(record?.url || ''))
+      ? {
+          url: normalizeCandidateUrl(String(record?.url || '')) || '',
+          role: 'ticket_purchase',
+          label: 'Buy Tickets',
+          confidence: 0.9,
+          source: 'ticket_provider',
+          evidence: 'Locarius ticket-provider event record',
+        }
+      : undefined,
   };
 }
 
@@ -629,6 +643,7 @@ function parseDetailPageCandidate(
   );
   const dateInfo = extractDateInfoFromText(text, yearHint);
   const timeInfo = extractTimeInfoFromText(text);
+  const actionLink = classifyActionLinkPage(detailUrl, html, 'venue_website');
 
   if (!title && !dateInfo.date && !dateInfo.dateRangeStart) {
     return null;
@@ -645,6 +660,7 @@ function parseDetailPageCandidate(
     imageUrl,
     sourceUrl: detailUrl,
     source: 'detail_page',
+    actionLink,
   };
 }
 
@@ -747,21 +763,33 @@ function applyWebsiteCandidates(
     if (!shouldAttemptForItem(item)) return item;
 
     const bestCandidate = findBestCandidateForItem(item, candidates);
-    if (
-      !bestCandidate ||
-      (!hasUsableFieldValue(bestCandidate.startTime) && !hasUsableFieldValue(bestCandidate.date))
-    ) {
+    if (!bestCandidate) {
       return item;
     }
 
     const updated = { ...item } as any;
     let changed = false;
-    if (!hasUsableFieldValue(updated.date) && hasUsableFieldValue(bestCandidate.date)) {
+    const role = bestCandidate.actionLink?.role || 'unknown';
+    const isTransactional = role === 'ticket_purchase' || role === 'registration';
+    const isMatchingInfoPage =
+      role === 'event_info' &&
+      scoreTokenOverlap(tokenize(String(item.name || '')), tokenize(bestCandidate.title || '')) > 0;
+    const canEnrichEventDetails = isTransactional || isMatchingInfoPage;
+
+    if (
+      canEnrichEventDetails &&
+      !hasUsableFieldValue(updated.date) &&
+      hasUsableFieldValue(bestCandidate.date)
+    ) {
       updated.date = bestCandidate.date;
       summary.updatedFields.dates += 1;
       changed = true;
     }
-    if (!hasUsableFieldValue(updated.startTime) && hasUsableFieldValue(bestCandidate.startTime)) {
+    if (
+      canEnrichEventDetails &&
+      !hasUsableFieldValue(updated.startTime) &&
+      hasUsableFieldValue(bestCandidate.startTime)
+    ) {
       updated.startTime = bestCandidate.startTime;
       updated.timeFlags = updated.timeFlags || {
         start: { source: 'none', evidence: '' },
@@ -774,21 +802,37 @@ function applyWebsiteCandidates(
       summary.updatedFields.times += 1;
       changed = true;
     }
-    if (!hasUsableFieldValue(updated.endTime) && hasUsableFieldValue(bestCandidate.endTime)) {
+    if (
+      canEnrichEventDetails &&
+      !hasUsableFieldValue(updated.endTime) &&
+      hasUsableFieldValue(bestCandidate.endTime)
+    ) {
       updated.endTime = bestCandidate.endTime;
       changed = true;
     }
-    if (!hasValue(updated.description) && bestCandidate.description) {
+    if (canEnrichEventDetails && !hasValue(updated.description) && bestCandidate.description) {
       updated.description = bestCandidate.description;
       summary.updatedFields.descriptions += 1;
       changed = true;
     }
-    if (!hasValue((updated as any).ticketLink) && bestCandidate.sourceUrl) {
-      updated.ticketLink = bestCandidate.sourceUrl;
+    if (
+      isTransactional &&
+      !hasValue((updated as any).ticketLink) &&
+      bestCandidate.actionLink?.url
+    ) {
+      updated.ticketLink = bestCandidate.actionLink.url;
       summary.updatedFields.links += 1;
       changed = true;
     }
-    if (!hasValue(updated._ticketImageUrl) && bestCandidate.imageUrl) {
+    if (
+      bestCandidate.actionLink?.url &&
+      bestCandidate.actionLink.role !== 'unknown' &&
+      mergeActionLink(updated, bestCandidate.actionLink)
+    ) {
+      summary.updatedFields.actionLinks += 1;
+      changed = true;
+    }
+    if (isTransactional && !hasValue(updated._ticketImageUrl) && bestCandidate.imageUrl) {
       updated._ticketImageUrl = bestCandidate.imageUrl;
       summary.updatedFields.images += 1;
       changed = true;
@@ -796,7 +840,9 @@ function applyWebsiteCandidates(
 
     if (changed) {
       summary.appliedCount += 1;
-      summary.reason = 'merged_venue_website_details';
+      summary.reason = canEnrichEventDetails
+        ? 'merged_venue_website_details'
+        : 'classified_venue_website_action_link';
       return updated;
     }
 
@@ -866,6 +912,22 @@ function scoreTokenOverlap(left: string[], right: string[]): number {
     if (rightSet.has(token)) score += 1;
   }
   return score;
+}
+
+function mergeActionLink(item: ExtractedItem, actionLink: EventActionLink): boolean {
+  const existing = Array.isArray(item.actionLinks) ? item.actionLinks : [];
+  const normalizedUrl = String(actionLink.url || '').trim();
+  if (!normalizedUrl) return false;
+
+  const duplicate = existing.some(
+    (entry) =>
+      String(entry?.url || '').trim() === normalizedUrl &&
+      String(entry?.role || '').trim() === actionLink.role
+  );
+  if (duplicate) return false;
+
+  item.actionLinks = [...existing, { ...actionLink, url: normalizedUrl }];
+  return true;
 }
 
 async function fetchHtml(url: string, timeoutMs: number, maxBytes: number): Promise<string | null> {

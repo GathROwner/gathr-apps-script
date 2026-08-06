@@ -102,6 +102,26 @@ test('formatted metadata rehydration restores a recovered ticket link when Stage
   );
 });
 
+test('formatted metadata rehydration preserves classified non-ticket action links', () => {
+  const formatted = buildFormattedEvent({ actionLinks: [] });
+  const original = buildOriginalItem({
+    actionLinks: [
+      {
+        url: 'https://hpibet.com/Racing/Schedule',
+        role: 'schedule',
+        label: 'View Schedule',
+        confidence: 0.98,
+        source: 'venue_website',
+      },
+    ],
+  });
+
+  const result = rehydrateFormattedEventMetadata(formatted, original);
+
+  assert.equal(result.ticketLink, formatted.ticketLink);
+  assert.deepEqual(result.actionLinks, original.actionLinks);
+});
+
 test('formatted metadata rehydration preserves image-aware relevant image index', () => {
   const rehydrated = rehydrateFormattedEventMetadata(
     buildFormattedEvent({

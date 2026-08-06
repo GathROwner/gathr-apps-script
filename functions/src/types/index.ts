@@ -136,6 +136,24 @@ export interface EventImageProvenance {
   setAt?: unknown;
 }
 
+export type EventActionLinkRole =
+  | 'ticket_purchase'
+  | 'registration'
+  | 'event_info'
+  | 'schedule'
+  | 'livestream'
+  | 'wagering'
+  | 'unknown';
+
+export interface EventActionLink {
+  url: string;
+  role: EventActionLinkRole;
+  label: string;
+  confidence: number;
+  source: 'venue_website' | 'calendar' | 'ticket_provider' | 'source_post' | 'manual';
+  evidence?: string;
+}
+
 export interface EventData {
   id?: string;
   uniqueId: string;
@@ -193,6 +211,7 @@ export interface EventData {
   ticketsBuyUrl?: string;
   ticketProvider?: string;
   externalLinks?: string[];
+  actionLinks?: EventActionLink[];
   timeResolution?: unknown;
   timeFlags?: unknown;
   sourceTimestamp?: Date;

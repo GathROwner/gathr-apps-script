@@ -943,6 +943,7 @@ function normalizeFormattingResponse(
         endTime: src.endTime || '',
         ticketPrice: '',
         ticketLink: '',
+        actionLinks: Array.isArray(src.actionLinks) ? src.actionLinks.map((entry) => ({ ...entry })) : [],
         relevantImageIndex: 0,
         venue: 'venue' in src ? src.venue || '' : '',
         additionalLocation: 'venue' in src ? src.venue || '' : '',
@@ -992,6 +993,13 @@ export function rehydrateFormattedEventMetadata(
   ).trim();
   if (!existingTicketLink && originalTicketLink) {
     nextEvent.ticketLink = originalTicketLink;
+    changed = true;
+  }
+
+  const existingActionLinks = Array.isArray(event.actionLinks) ? event.actionLinks : [];
+  const originalActionLinks = Array.isArray(originalItem?.actionLinks) ? originalItem.actionLinks : [];
+  if (existingActionLinks.length === 0 && originalActionLinks.length > 0) {
+    nextEvent.actionLinks = originalActionLinks.map((entry) => ({ ...entry }));
     changed = true;
   }
 

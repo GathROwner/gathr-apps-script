@@ -151,7 +151,7 @@ test('Trailside-style website follow-up recovers explicit start times from locar
   }
 });
 
-test('Tivoli-style website follow-up attempts the venue site but fails closed when no showtimes exist on detail pages', async () => {
+test('Tivoli-style website follow-up preserves an informational link but fails closed on missing showtimes', async () => {
   const restoreFetch = installFetchMap({
     'https://tivolicinema.com/': htmlResponse(
       '<html><body><a href="/events/">Events</a><a href="/about-us/">About</a></body></html>'
@@ -189,9 +189,59 @@ test('Tivoli-style website follow-up attempts the venue site but fails closed wh
     assert.equal(result.summary.attemptedUrls, 1);
     assert.equal(result.summary.listingPagesAttempted, 2);
     assert.equal(result.summary.detailPagesAttempted, 1);
-    assert.equal(result.summary.appliedCount, 0);
-    assert.equal(result.summary.reason, 'no_high_confidence_time_matches');
+    assert.equal(result.summary.appliedCount, 7);
     assert.equal(result.items.every((item) => !item.startTime), true);
+    assert.equal(result.items.every((item) => !(item as any).ticketLink), true);
+    assert.equal(result.items.every((item) => item.actionLinks?.[0]?.role === 'event_info'), true);
+  } finally {
+    restoreFetch();
+  }
+});
+
+test('HPI racing schedule is retained as View Schedule but cannot supply ticket, time, or ticket image fields', async () => {
+  const restoreFetch = installFetchMap({
+    'https://redshores.ca/racing': htmlResponse(
+      '<html><head><title>Red Shores Racing</title></head><body>Watch racing online.</body></html>'
+    ),
+    'https://hpibet.com/': htmlResponse(
+      '<html><body><a href="/Racing/Schedule">Two Week Schedule</a></body></html>'
+    ),
+    'https://hpibet.com/Racing/Schedule': htmlResponse(
+      '<html><head><title>HPIbet.com - Two Week Schedule</title><meta property="og:image" content="https://hpibet.com/schedule.jpg"></head><body><h1>Racing Schedule</h1><p>July 1 to July 31</p><div>7:58 AM</div></body></html>'
+    ),
+  });
+
+  try {
+    const result = await enrichEventsFromVenueWebsite(
+      [
+        buildEventItem({
+          name: 'Live Race Nights (Thursdays at Top of the Park)',
+          date: '2026-07-09',
+          startTime: '',
+        }),
+      ],
+      'Watch online at redshores.ca/racing. Wager online at hpibet.com 19+.',
+      '',
+      '2026-07-09T14:00:00.000Z',
+      { name: 'Red Shores Racetrack & Casino', website: 'https://hpibet.com/' },
+      DEFAULT_PARSING_CONFIG
+    );
+
+    assert.equal(result.summary.appliedCount, 1);
+    assert.equal(result.summary.reason, 'classified_venue_website_action_link');
+    assert.equal(result.items[0].startTime, '');
+    assert.equal((result.items[0] as any).ticketLink, undefined);
+    assert.equal((result.items[0] as any)._ticketImageUrl, undefined);
+    assert.deepEqual(result.items[0].actionLinks, [
+      {
+        url: 'https://hpibet.com/Racing/Schedule',
+        role: 'schedule',
+        label: 'View Schedule',
+        confidence: 0.98,
+        source: 'venue_website',
+        evidence: 'schedule page: HPIbet.com - Two Week Schedule; no purchase action',
+      },
+    ]);
   } finally {
     restoreFetch();
   }

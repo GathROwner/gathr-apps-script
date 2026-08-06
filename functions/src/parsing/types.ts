@@ -290,6 +290,7 @@ export interface ExtractedEvent extends RecurrenceScheduleFields {
   _dateSourcedFromUtcStartDate?: boolean;
   _timeSourcedFromUtcStartDate?: boolean;
   _ticketImageUrl?: string;
+  actionLinks?: EventActionLink[];
 }
 
 export interface ExtractedSpecial extends RecurrenceScheduleFields {
@@ -313,6 +314,7 @@ export interface ExtractedSpecial extends RecurrenceScheduleFields {
   _pipelineIndex?: number;
   _pipelineTotalStage3?: number;
   _ticketImageUrl?: string;
+  actionLinks?: EventActionLink[];
 }
 
 export interface CalendarItem extends RecurrenceScheduleFields {
@@ -332,6 +334,7 @@ export interface CalendarItem extends RecurrenceScheduleFields {
   timeFlags?: TimeFlags;
   _sourceType?: 'calendar' | 'schedule';
   _ticketImageUrl?: string;
+  actionLinks?: EventActionLink[];
 }
 
 export interface ExtractionSummary {
@@ -343,6 +346,24 @@ export interface ExtractionSummary {
 }
 
 export type ExtractedItem = ExtractedEvent | ExtractedSpecial | CalendarItem;
+
+export type EventActionLinkRole =
+  | 'ticket_purchase'
+  | 'registration'
+  | 'event_info'
+  | 'schedule'
+  | 'livestream'
+  | 'wagering'
+  | 'unknown';
+
+export interface EventActionLink {
+  url: string;
+  role: EventActionLinkRole;
+  label: string;
+  confidence: number;
+  source: 'venue_website' | 'calendar' | 'ticket_provider' | 'source_post' | 'manual';
+  evidence?: string;
+}
 
 // ===================
 // Stage 4: Validation Types
@@ -446,6 +467,7 @@ export interface FormattedEvent extends RecurrenceScheduleFields {
   totalOccurrences?: number;
   recurrenceUntilDate?: string;
   timeFlags?: TimeFlags;
+  actionLinks?: EventActionLink[];
   // Metadata fields
   _pipelineIndex?: number;
   _pipelineTotalStage3?: number;

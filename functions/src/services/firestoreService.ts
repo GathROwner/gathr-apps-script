@@ -105,6 +105,7 @@ const EVENT_UPDATE_AUDIT_BASE_FIELDS = [
   'cleanedFacebookUrl',
   'ticketsBuyUrl',
   'ticketLink',
+  'actionLinks',
   'ticketPrice',
   'price',
   'mediaUrls',
