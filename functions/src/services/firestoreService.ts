@@ -64,6 +64,11 @@ import {
 import {
   getUntrustedPublicPromotionReviewReasons,
 } from './sharedEventPublicTrust.js';
+import {
+  AddressSource,
+  choosePreferredAddress,
+  normalizeCanadianAddress,
+} from '../utils/addressNormalization.js';
 
 // Initialize Firebase Admin if not already initialized
 if (!admin.apps.length) {
@@ -1942,6 +1947,43 @@ type CityLevelAutoPublishEligibility = {
   centroid?: PeiPlaceCentroid;
 };
 
+function inferAddressSource(record: Record<string, unknown>): AddressSource {
+  const explicit = String(record.addressSource || '').trim() as AddressSource;
+  if (
+    [
+      'manual',
+      'google_places',
+      'contact_info',
+      'venue',
+      'facebook_page',
+      'facebook_event',
+      'parser',
+      'unknown',
+    ].includes(explicit)
+  ) {
+    return explicit;
+  }
+  if (String(record.googlePlaceId || record.placeId || '').trim()) return 'google_places';
+  if (String(record.sourceSheet || '').trim().toLowerCase() === 'contact info') return 'contact_info';
+  return 'unknown';
+}
+
+function withNormalizedEventAddressForWrite<T extends Partial<EventData>>(event: T): T {
+  const rawAddress = String(event.rawAddress || event.address || '').trim();
+  if (!rawAddress) return event;
+
+  const normalized = normalizeCanadianAddress(rawAddress);
+  return {
+    ...event,
+    address: normalized.normalizedAddress,
+    rawAddress,
+    normalizedAddress: normalized.normalizedAddress,
+    addressSource: event.addressSource || 'unknown',
+    addressNormalizationIssues: normalized.issues,
+    addressUpdatedAt: admin.firestore.FieldValue.serverTimestamp(),
+  };
+}
+
 function isProvinceOnlyPeiLocation(record: CityLevelEventReviewRecord): boolean {
   const candidates = [record.locationLabel, record.locationCity];
   return candidates.some((candidate) => {
@@ -3015,19 +3057,75 @@ export async function findMatchingVenue(
  * Create or update a venue
  */
 export async function upsertVenue(venue: Partial<VenueData>): Promise<string> {
-  const normalizedName = normalizeVenueName(venue.name || '');
-  const slug = venue.facebookUrl ? extractFacebookSlug(venue.facebookUrl) : null;
+  let venueForWrite: Partial<VenueData> = { ...venue };
+  const incomingRawAddress = String(venue.rawAddress || venue.address || '').trim();
+  if (incomingRawAddress) {
+    const incomingSource = inferAddressSource(venue as Record<string, unknown>);
+    const incomingNormalization = normalizeCanadianAddress(incomingRawAddress);
+    venueForWrite = {
+      ...venueForWrite,
+      address: incomingNormalization.normalizedAddress,
+      rawAddress: incomingRawAddress,
+      normalizedAddress: incomingNormalization.normalizedAddress,
+      addressSource: incomingSource,
+      addressNormalizationIssues: incomingNormalization.issues,
+      addressUpdatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    };
+
+    if (venue.id) {
+      const existingSnapshot = await db.collection(COLLECTIONS.VENUES).doc(venue.id).get();
+      if (existingSnapshot.exists) {
+        const existing = existingSnapshot.data() || {};
+        const preferred = choosePreferredAddress(
+          {
+            address: existing.address,
+            source: inferAddressSource(existing),
+            googlePlaceId: existing.googlePlaceId || existing.placeId,
+          },
+          {
+            address: incomingRawAddress,
+            source: incomingSource,
+            googlePlaceId: venue.googlePlaceId,
+          }
+        );
+
+        if (preferred.selected === 'existing') {
+          venueForWrite = {
+            ...venueForWrite,
+            address: preferred.address,
+            rawAddress: String(existing.rawAddress || existing.address || preferred.address).trim(),
+            normalizedAddress: preferred.address,
+            addressSource: preferred.source,
+            addressNormalizationIssues: Array.isArray(existing.addressNormalizationIssues)
+              ? existing.addressNormalizationIssues
+              : preferred.normalization.issues,
+            addressUpdatedAt: existing.addressUpdatedAt,
+          };
+          logger.info('Preserved higher-confidence canonical venue address', {
+            venueId: venue.id,
+            existingAddress: existing.address,
+            existingAddressSource: preferred.source,
+            rejectedIncomingAddress: incomingRawAddress,
+            rejectedIncomingAddressSource: incomingSource,
+          });
+        }
+      }
+    }
+  }
+
+  const normalizedName = normalizeVenueName(venueForWrite.name || '');
+  const slug = venueForWrite.facebookUrl ? extractFacebookSlug(venueForWrite.facebookUrl) : null;
 
   const data = {
-    ...venue,
+    ...venueForWrite,
     normalizedName,
     facebookSlug: slug,
     updatedAt: admin.firestore.FieldValue.serverTimestamp(),
   };
 
-  if (venue.id) {
-    await db.collection(COLLECTIONS.VENUES).doc(venue.id).set(data, { merge: true });
-    return venue.id;
+  if (venueForWrite.id) {
+    await db.collection(COLLECTIONS.VENUES).doc(venueForWrite.id).set(data, { merge: true });
+    return venueForWrite.id;
   }
 
   // Create new venue
@@ -4198,7 +4296,8 @@ export async function createEvent(
   venueId: string,
   event: Omit<EventData, 'id' | 'createdAt' | 'venueId'>
 ): Promise<string> {
-  const sanitizedEvent = await sanitizeEventManagedImageReferencesForWrite({ ...event }, {
+  const normalizedEvent = withNormalizedEventAddressForWrite({ ...event });
+  const sanitizedEvent = await sanitizeEventManagedImageReferencesForWrite(normalizedEvent, {
     operation: 'createEvent',
     venueId,
     eventName: event.eventName || event.name,
@@ -4254,7 +4353,8 @@ export async function updateEvent(
   eventId: string,
   updates: Partial<EventData>
 ): Promise<void> {
-  const sanitizedUpdates = await sanitizeEventManagedImageReferencesForWrite({ ...updates }, {
+  const normalizedUpdates = withNormalizedEventAddressForWrite({ ...updates });
+  const sanitizedUpdates = await sanitizeEventManagedImageReferencesForWrite(normalizedUpdates, {
     operation: 'updateEvent',
     venueId,
     eventId,

@@ -302,8 +302,32 @@ function parseFeatures(featuresStr) {
  */
 function cleanAddress(address) {
   if (!address) return '';
-  // Remove any URLs that might be in the address field
-  return String(address).split('https://')[0].trim();
+  const raw = String(address).split('https://')[0].trim();
+  if ((raw.match(/\bCanada\b/gi) || []).length > 1) return raw;
+  let normalized = raw.replace(/\s+/g, ' ').replace(/\s*,\s*/g, ', ');
+  const parts = normalized.split(',').map(part => part.trim());
+  const civicStreet = /^\d+[A-Z]?(?:[-–]\d+[A-Z]?)?\s+.+\b(?:street|st|avenue|ave|road|rd|lane|ln|drive|dr|route|rte|highway|hwy|boulevard|blvd|court|ct|place|pl|way|parkway|pkwy|trail|terrace|crescent|cres)\.?$/i;
+  if (parts.some(part => civicStreet.test(part))) {
+    normalized = parts.map((part, index) => {
+      const match = part.match(/^Downtown\s+([A-Za-z][A-Za-z .'-]*[A-Za-z])$/i);
+      const next = parts[index + 1] || '';
+      return match && /^(?:PE|PEI|P\.E\.I\.|Prince Edward Island)(?:\s|$)/i.test(next)
+        ? match[1].trim()
+        : part;
+    }).join(', ');
+  }
+  normalized = normalized.replace(
+    /,\s*(?:PE|PEI|P\.E\.I\.)\s*,\s*Canada\s*,\s*Prince Edward Island\s*$/i,
+    ', PE, Canada'
+  );
+  normalized = normalized.replace(
+    /,\s*(?:PE|PEI|P\.E\.I\.)\s*,\s*Canada\s*,\s*([A-Z]\d[A-Z]\s*\d[A-Z]\d)\s*$/i,
+    (_, postal) => {
+      const compact = String(postal).toUpperCase().replace(/\s+/g, '');
+      return `, PE ${compact.slice(0, 3)} ${compact.slice(3)}, Canada`;
+    }
+  );
+  return normalized;
 }
 
 /**

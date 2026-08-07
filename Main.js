@@ -301,6 +301,8 @@ function appendToDestinationSheet(sheet, data, spreadsheet) {
   return withErrorHandling(function() {
     console.log('Starting appendToDestinationSheet function');
     console.log('Input data:', JSON.stringify(data, null, 2));
+    data.rawAddress = String(data.address || '').trim();
+    data.address = normalizeCanonicalAddress(data.address);
 
     // 1) Check if the existing parsed address is acceptable
     if (!isAddressAcceptable(data.address)) {
@@ -318,7 +320,8 @@ function appendToDestinationSheet(sheet, data, spreadsheet) {
             try {
               const det = fetchPlaceDetails(data.placeId);
               if (det && det.formatted_address) {
-                data.address = det.formatted_address;
+                data.address = normalizeCanonicalAddress(det.formatted_address);
+                data.addressSource = 'google_places';
                 console.log(`appendToDestinationSheet : Filled address from Place Details: "${data.address}"`);
               }
             } catch (e) {
@@ -365,7 +368,7 @@ function appendToDestinationSheet(sheet, data, spreadsheet) {
 
           if (existingEntry) {
             const rowValues    = existingEntry.data;
-            const foundAddress = rowValues[4];   // "Address" column
+            const foundAddress = normalizeCanonicalAddress(rowValues[4]);   // "Address" column
             const foundLat     = rowValues[19];  // "Latitude" column
             const foundLng     = rowValues[21];  // "Longitude" column
 
@@ -373,6 +376,7 @@ function appendToDestinationSheet(sheet, data, spreadsheet) {
             if (isAddressAcceptable(foundAddress)) {
               // Always trust CI for the canonical ADDRESS text, but prefer Places GEOMETRY if we already have it.
               data.address = foundAddress;
+              data.addressSource = data.addressSource || 'contact_info';
 
               const hasPlacesCoords =
                 (typeof data.latitude  !== 'undefined' && data.latitude  !== null && String(data.latitude).trim()  !== '') &&
@@ -419,7 +423,8 @@ function appendToDestinationSheet(sheet, data, spreadsheet) {
         }
 
         if (placeDetails) {
-          data.address   = placeDetails.formatted_address;
+          data.address   = normalizeCanonicalAddress(placeDetails.formatted_address);
+          data.addressSource = 'google_places';
           data.latitude  = placeDetails.geometry.location.lat;
           data.longitude = placeDetails.geometry.location.lng;
           console.log(
@@ -528,8 +533,44 @@ function appendToDestinationSheet(sheet, data, spreadsheet) {
  * @param {string} address - The address to validate.
  * @return {boolean} True if the address is acceptable, false otherwise.
  */
+function normalizeCanonicalAddress(address) {
+  const raw = String(address || '').trim();
+  if (!raw) return '';
+  const canadaCount = (raw.match(/\bCanada\b/gi) || []).length;
+  if (canadaCount > 1) return raw;
+  let normalized = raw.replace(/\s+/g, ' ').replace(/\s*,\s*/g, ', ');
+  normalized = normalizeDowntownLocalityQualifier_(normalized);
+  normalized = normalized.replace(
+    /,\s*(?:PE|PEI|P\.E\.I\.)\s*,\s*Canada\s*,\s*Prince Edward Island\s*$/i,
+    ', PE, Canada'
+  );
+  normalized = normalized.replace(
+    /,\s*(?:PE|PEI|P\.E\.I\.)\s*,\s*Canada\s*,\s*([A-Z]\d[A-Z]\s*\d[A-Z]\d)\s*$/i,
+    function(_, postal) {
+      const compact = String(postal).toUpperCase().replace(/\s+/g, '');
+      return ', PE ' + compact.substring(0, 3) + ' ' + compact.substring(3) + ', Canada';
+    }
+  );
+  return normalized;
+}
+
+function normalizeDowntownLocalityQualifier_(address) {
+  const parts = String(address || '').split(',').map(function(part) { return part.trim(); });
+  const civicStreet = /^\d+[A-Z]?(?:[-–]\d+[A-Z]?)?\s+.+\b(?:street|st|avenue|ave|road|rd|lane|ln|drive|dr|route|rte|highway|hwy|boulevard|blvd|court|ct|place|pl|way|parkway|pkwy|trail|terrace|crescent|cres)\.?$/i;
+  const hasCivicStreet = parts.some(function(part) { return civicStreet.test(part); });
+  if (!hasCivicStreet) return address;
+  return parts.map(function(part, index) {
+    const match = part.match(/^Downtown\s+([A-Za-z][A-Za-z .'-]*[A-Za-z])$/i);
+    const next = parts[index + 1] || '';
+    return match && /^(?:PE|PEI|P\.E\.I\.|Prince Edward Island)(?:\s|$)/i.test(next)
+      ? match[1].trim()
+      : part;
+  }).join(', ');
+}
+
 function isAddressAcceptable(address) {
   console.log('Checking address acceptability:', address);
+  address = normalizeCanonicalAddress(address);
   
   if (!address || address.trim() === '' || address.toLowerCase() === 'n/a') {
     console.log('Address is empty or N/A');
@@ -686,7 +727,7 @@ function updateExistingContactInfoEntry(sheet, existingEntry, newData) {
     console.log('updateExistingContactInfoEntry : header indices used = ' + JSON.stringify(idx));
 
     if (newData.address && idx.Address >= 0) {
-      data[idx.Address] = newData.address;
+      data[idx.Address] = normalizeCanonicalAddress(newData.address);
     }
     if (newData.cleanedFacebookUrl) {
       if (idx.Facebookurl >= 0) data[idx.Facebookurl] = newData.cleanedFacebookUrl;

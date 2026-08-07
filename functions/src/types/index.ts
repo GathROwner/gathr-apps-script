@@ -2,6 +2,11 @@
  * GathR Cloud Functions Type Definitions
  */
 
+import type {
+  AddressNormalizationIssue,
+  AddressSource,
+} from '../utils/addressNormalization.js';
+
 // ===================
 // Configuration Types
 // ===================
@@ -184,6 +189,11 @@ export interface EventData {
   facebookUrl?: string;
   cleanedFacebookUrl?: string;
   address?: string;
+  rawAddress?: string;
+  normalizedAddress?: string;
+  addressSource?: AddressSource;
+  addressNormalizationIssues?: AddressNormalizationIssue[];
+  addressUpdatedAt?: Date | unknown;
   latitude?: number | string;
   longitude?: number | string;
   city?: string;
@@ -459,6 +469,11 @@ export interface VenueData {
   instagramUrl?: string;
   website?: string;
   address?: string;
+  rawAddress?: string;
+  normalizedAddress?: string;
+  addressSource?: AddressSource;
+  addressNormalizationIssues?: AddressNormalizationIssue[];
+  addressUpdatedAt?: Date | unknown;
   city?: string;
   province?: string;
   postalCode?: string;

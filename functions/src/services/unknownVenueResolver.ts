@@ -20,6 +20,7 @@ import {
   UnrecognizedVenueSuggestedMatch,
   UnrecognizedVenueStatus,
 } from '../types/index.js';
+import type { AddressSource } from '../utils/addressNormalization.js';
 
 type ResolverConfig = {
   enabled: boolean;
@@ -4149,7 +4150,10 @@ async function finalizeCreateNew(
   }
 
   let facebookUrl = String(manual.facebookUrl || suggestion?.facebookUrl || '').trim() || undefined;
-  let address = String(manual.address || suggestion?.address || '').trim() || undefined;
+  const manualAddress = String(manual.address || '').trim();
+  const suggestedAddress = String(suggestion?.address || '').trim();
+  let address = manualAddress || suggestedAddress || undefined;
+  let addressSource: AddressSource = manualAddress ? 'manual' : 'unknown';
   const createWebsiteRaw = String(manual.website || suggestionNoteMeta.website || relatedSuggestionMeta.website || '').trim();
   let website = (normalizeWebsiteUrlForDisplay(createWebsiteRaw) || createWebsiteRaw) || undefined;
   let phone = String(manual.phone || suggestionNoteMeta.phone || relatedSuggestionMeta.phone || '').trim() || undefined;
@@ -4157,6 +4161,15 @@ async function finalizeCreateNew(
   let latitude = parseOptionalNumber(manual.latitude) ?? suggestionNoteMeta.latitude ?? relatedSuggestionMeta.latitude;
   let longitude = parseOptionalNumber(manual.longitude) ?? suggestionNoteMeta.longitude ?? relatedSuggestionMeta.longitude;
   let googlePlaceId = String(suggestionNoteMeta.placeId || relatedSuggestionMeta.placeId || '').trim() || undefined;
+  if (!manualAddress) {
+    addressSource = googlePlaceId
+      ? 'google_places'
+      : suggestion?.facebookUrl
+        ? 'facebook_page'
+        : suggestedAddress
+          ? 'parser'
+          : 'unknown';
+  }
   let googlePlaceTypes = Array.from(new Set([
     ...(suggestionNoteMeta.placeTypes || []),
     ...(relatedSuggestionMeta.placeTypes || []),
@@ -4170,7 +4183,11 @@ async function finalizeCreateNew(
     try {
       const livePlaceDetails = await placesService.getPlaceDetails(googlePlaceId);
       if (livePlaceDetails) {
-        address = String(address || livePlaceDetails.formattedAddress || '').trim() || undefined;
+        const liveFormattedAddress = String(livePlaceDetails.formattedAddress || '').trim();
+        if (!manualAddress && liveFormattedAddress) {
+          address = liveFormattedAddress;
+          addressSource = 'google_places';
+        }
         const liveWebsiteRaw = String(website || livePlaceDetails.website || '').trim();
         website = (normalizeWebsiteUrlForDisplay(liveWebsiteRaw) || liveWebsiteRaw) || undefined;
         phone = String(phone || livePlaceDetails.formattedPhoneNumber || '').trim() || undefined;
@@ -4271,6 +4288,8 @@ async function finalizeCreateNew(
     facebookUrl,
     pageurl: facebookUrl,
     address,
+    rawAddress: address,
+    addressSource,
     city,
     province,
     postalCode,

@@ -42,7 +42,12 @@ import { DateTime } from 'luxon';
 import { createHash } from 'crypto';
 import { normalizeVenueName, normalizeUrl, extractFacebookSlug } from '../utils/similarity.js';
 import { getVenueAliasEntry } from '../services/venueAliases.js';
+import { KNOWN_PEI_CITY_NAMES, normalizePeiPlaceName } from '../services/peiLocations.js';
 import { BatchManager } from './batchManager.js';
+import {
+  AddressSource,
+  normalizeCanadianAddress,
+} from '../utils/addressNormalization.js';
 
 /**
  * Result of processing a single row
@@ -3056,6 +3061,15 @@ async function processFullParserEvent(
     itemVenueName: additionalLocationCandidate || parsedEstablishment,
     venueAliases: (venue as unknown as Record<string, unknown>).aliases,
   });
+  const normalizedResolvedAddress = normalizeCanadianAddress(resolvedAddress);
+  const venueAddressSource = String(
+    (venue as unknown as Record<string, unknown>).addressSource || ''
+  ).trim() as AddressSource;
+  const resolvedAddressSource: AddressSource = resolvedAddress && resolvedAddress === venueAddress
+    ? venueAddressSource || 'venue'
+    : row.sourceScraperType === 'events'
+      ? 'facebook_event'
+      : 'parser';
   const rawItemAddress = String(item.address || '').trim();
   if (rawItemAddress && venueAddress && resolvedAddress === venueAddress && rawItemAddress !== venueAddress) {
     logger.info('Using resolved venue address instead of row fallback address', {
@@ -3154,7 +3168,14 @@ async function processFullParserEvent(
     isEvent: item.isEvent || undefined,
     isFoodSpecial: item.isFoodSpecial || undefined,
     name: name || undefined,
-    address: resolvedAddress,
+    address: normalizedResolvedAddress.normalizedAddress || undefined,
+    rawAddress: normalizedResolvedAddress.rawAddress || undefined,
+    normalizedAddress: normalizedResolvedAddress.normalizedAddress || undefined,
+    addressSource: resolvedAddress ? resolvedAddressSource : undefined,
+    addressNormalizationIssues: normalizedResolvedAddress.issues.length
+      ? normalizedResolvedAddress.issues
+      : undefined,
+    addressUpdatedAt: resolvedAddress ? new Date() : undefined,
     ticketPrice: String(item.ticketPrice || '').trim() || undefined,
     ticketLink: String(item.ticketLink || '').trim() || undefined,
     ticketsBuyUrl: String(item.ticketsBuyUrl || row.ticketsBuyUrl || '').trim() || undefined,
@@ -3938,6 +3959,11 @@ function buildDuplicateEventUpdates(
     'facebookUrl',
     'cleanedFacebookUrl',
     'address',
+    'rawAddress',
+    'normalizedAddress',
+    'addressSource',
+    'addressNormalizationIssues',
+    'addressUpdatedAt',
     'city',
     'streetAddress',
     'latitude',
@@ -3971,6 +3997,21 @@ function buildDuplicateEventUpdates(
     normalizeAddressForFallbackComparison(existing.address) !== normalizedVenueAddress
   ) {
     setField('address', incoming.address);
+    if (isMeaningfulValue(incoming.rawAddress)) {
+      setField('rawAddress', incoming.rawAddress);
+    }
+    if (isMeaningfulValue(incoming.normalizedAddress)) {
+      setField('normalizedAddress', incoming.normalizedAddress);
+    }
+    if (isMeaningfulValue(incoming.addressSource)) {
+      setField('addressSource', incoming.addressSource);
+    }
+    if (isMeaningfulValue(incoming.addressNormalizationIssues)) {
+      setField('addressNormalizationIssues', incoming.addressNormalizationIssues);
+    }
+    if (isMeaningfulValue(incoming.addressUpdatedAt)) {
+      setField('addressUpdatedAt', incoming.addressUpdatedAt);
+    }
     if (isMeaningfulValue(incoming.latitude)) {
       setField('latitude', incoming.latitude);
     }

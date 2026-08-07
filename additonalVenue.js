@@ -472,10 +472,23 @@ function cleanVenueName(name) {
  */
 function cleanAddress(address) {
   if (!address) return '';
-  
-  // Remove any URLs that might be in the address field
-  // The pattern is to split by "https://" and take only the first part
-  return address.split('https://')[0].trim();
+
+  const raw = String(address).split('https://')[0].trim();
+  if ((raw.match(/\bCanada\b/gi) || []).length > 1) return raw;
+  let normalized = raw.replace(/\s+/g, ' ').replace(/\s*,\s*/g, ', ');
+  normalized = normalizeDowntownLocalityQualifier_(normalized);
+  normalized = normalized.replace(
+    /,\s*(?:PE|PEI|P\.E\.I\.)\s*,\s*Canada\s*,\s*Prince Edward Island\s*$/i,
+    ', PE, Canada'
+  );
+  normalized = normalized.replace(
+    /,\s*(?:PE|PEI|P\.E\.I\.)\s*,\s*Canada\s*,\s*([A-Z]\d[A-Z]\s*\d[A-Z]\d)\s*$/i,
+    function(_, postal) {
+      const compact = String(postal).toUpperCase().replace(/\s+/g, '');
+      return ', PE ' + compact.substring(0, 3) + ' ' + compact.substring(3) + ', Canada';
+    }
+  );
+  return normalized;
 }
 
 // === APIFY INTEGRATION (ANCHOR) — helpers and poller ===
@@ -821,7 +834,7 @@ function processSearchResultsForRow_(sheet, rowIdx, venueName, datasetItems, tok
   datasetItems.forEach(item => {
     const url = item.facebookUrl || item.pageUrl || item.url || '';
     const name = item.title || item.pageName || item.name || '';
-    const address = item.address || item.fullAddress || '';
+    const address = cleanAddress(item.address || item.fullAddress || '');
     if (!url || !/facebook\.com\//i.test(url)) return;
 
     const cleanedTitle = String(name || '')
@@ -968,7 +981,9 @@ function processPagesResultsForRow_(sheet, rowIdx, datasetItems, targetUrl) {
 
   const phone   = pick(pageInfo, 'phone');
   const email   = pick(pageInfo, 'email');
-  const address = pick(pageInfo, 'address') || pick(pageInfo, 'fullAddress') || pick(item, 'address') || '';
+  const address = cleanAddress(
+    pick(pageInfo, 'address') || pick(pageInfo, 'fullAddress') || pick(item, 'address') || ''
+  );
   const lat     = pick(pageInfo, 'lat') || pick(pageInfo, 'latitude') || pick(item, 'lat') || pick(item, 'latitude');
   const lng     = pick(pageInfo, 'lng') || pick(pageInfo, 'longitude') || pick(item, 'lng') || pick(item, 'longitude');
 
