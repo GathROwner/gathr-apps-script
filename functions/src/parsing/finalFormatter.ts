@@ -380,7 +380,7 @@ Never return arrays of values for an item; each must be a JSON object.`;
 
       // Normalize recurrence pattern/flags/lifecycle fields after category/date corrections.
       if (ENABLE_RECURRENCE_LIFECYCLE_NORMALIZATION) {
-        event = normalizeRecurringForFormattedEvent(event, originalItem);
+        event = normalizeRecurringForFormattedEvent(event, originalItem, combinedText);
       } else {
         event = applyLegacyRecurringNormalization(event);
       }
@@ -3486,6 +3486,233 @@ function shouldForceThisWeekLineupRecurringOneOff(
   return hasEveryNightThisWeekLineupCue(sourceText);
 }
 
+function buildEventAnchoredSourceContext(
+  eventName: string | undefined,
+  fullSourceText: string
+): string {
+  const normalizedSource = normalizeWeekdayExtractionText(fullSourceText);
+  if (!normalizedSource) return '';
+
+  const rawName = String(eventName || '').trim();
+  if (!rawName) return '';
+
+  const normalizedNameTokens = normalizeWeekdayExtractionText(
+    rawName.replace(/\s*\([^)]*\)\s*$/g, '').replace(/\b(?:ft\.?|feat\.?|featuring)\b.*$/i, '')
+  )
+    .split(/\s+/)
+    .filter(Boolean);
+  const distinctiveTailToken = normalizedNameTokens.at(-1) || '';
+  const genericTailTokens = new Set([
+    'event',
+    'class',
+    'club',
+    'festival',
+    'music',
+    'night',
+    'session',
+    'show',
+    'special',
+  ]);
+
+  const candidates = [
+    rawName.replace(/\s*\([^)]*\)\s*$/g, ''),
+    rawName.replace(/\b(?:ft\.?|feat\.?|featuring)\b.*$/i, ''),
+    rawName,
+    /\bwith\b/i.test(rawName) &&
+    distinctiveTailToken.length >= 5 &&
+    !genericTailTokens.has(distinctiveTailToken)
+      ? distinctiveTailToken
+      : '',
+  ]
+    .map((value) => normalizeWeekdayExtractionText(value))
+    .filter((value, index, values) => value.length >= 4 && values.indexOf(value) === index)
+    .sort((left, right) => right.length - left.length);
+
+  const normalizedLines = String(fullSourceText || '')
+    .split(/\r?\n/)
+    .map((line) => normalizeWeekdayExtractionText(line))
+    .filter(Boolean);
+  const lineContexts: string[] = [];
+  for (const candidate of candidates) {
+    for (let index = 0; index < normalizedLines.length; index += 1) {
+      if (!normalizedLines[index].includes(candidate)) continue;
+      lineContexts.push(
+        normalizedLines.slice(Math.max(0, index - 2), index + 1).join(' ')
+      );
+    }
+  }
+
+  if (lineContexts.length > 0) {
+    const recurringContext = lineContexts.find((context) =>
+      hasAnchoredExplicitRecurringCadenceCue(context)
+    );
+    if (recurringContext) return recurringContext;
+
+    const sourceHeader = normalizedLines.slice(0, 2).join(' ');
+    const firstContext = lineContexts[0];
+    return hasSourceWideOneOffScheduleCue(sourceHeader)
+      ? `${sourceHeader} ${firstContext}`
+      : firstContext;
+  }
+
+  const contexts: string[] = [];
+  for (const candidate of candidates) {
+    let searchFrom = 0;
+    while (searchFrom < normalizedSource.length) {
+      const matchIndex = normalizedSource.indexOf(candidate, searchFrom);
+      if (matchIndex < 0) break;
+
+      const contextStart = Math.max(0, matchIndex - 180);
+      const contextEnd = Math.min(
+        normalizedSource.length,
+        matchIndex + candidate.length + 180
+      );
+      contexts.push(normalizedSource.slice(contextStart, contextEnd));
+      searchFrom = matchIndex + candidate.length;
+    }
+
+  }
+
+  if (contexts.length > 0) {
+    return (
+      contexts.find((context) =>
+        hasAnchoredExplicitRecurringCadenceCue(context)
+      ) || contexts[0]
+    );
+  }
+
+  return '';
+}
+
+function hasExplicitRecurringCadenceCue(text: string): boolean {
+  const normalized = normalizeWeekdayExtractionText(text);
+  if (!normalized) return false;
+  return (
+    /\b(every|each|daily|biweekly|fortnightly|every other|recurring|repeats?)\b/.test(
+      normalized
+    ) ||
+    /\bweekly\b(?!\s+(?:special|specials|menu|menus|feature|features)\b)/.test(
+      normalized
+    ) ||
+    /\b(mondays|tuesdays|wednesdays|thursdays|fridays|saturdays|sundays)\b/.test(
+      normalized
+    ) ||
+    /\b(?:m|tu|tue|w|th|thu|f|sa|sat|su|sun)(?:\s*\/\s*(?:m|tu|tue|w|th|thu|f|sa|sat|su|sun)){1,6}\b/.test(
+      normalized
+    ) ||
+    /\b\d+\s+weeks?\b/.test(normalized)
+  );
+}
+
+function hasAnchoredExplicitRecurringCadenceCue(text: string): boolean {
+  const normalized = normalizeWeekdayExtractionText(text);
+  if (!normalized) return false;
+  return (
+    /\b(every|each|daily|biweekly|fortnightly|every other|recurring|repeats?)\b/.test(
+      normalized
+    ) ||
+    /\bweekly\b(?!\s+(?:special|specials|menu|menus|feature|features)\b)/.test(
+      normalized
+    ) ||
+    /\b(?:m|tu|tue|w|th|thu|f|sa|sat|su|sun)(?:\s*\/\s*(?:m|tu|tue|w|th|thu|f|sa|sat|su|sun)){1,6}\b/.test(
+      normalized
+    ) ||
+    /\b\d+\s+weeks?\b/.test(normalized)
+  );
+}
+
+function hasAnchoredOneOffLineupCue(text: string): boolean {
+  const normalized = normalizeWeekdayExtractionText(text);
+  if (!normalized) return false;
+  return (
+    /\b(today|tonight|tomorrow|this morning|this afternoon|this evening|this week|this weekend|this monday|this tuesday|this wednesday|this thursday|this friday|this saturday|this sunday|holiday monday|weekend lineup|this week s lineup|this weekend s lineup|last of|final class|one night only|for this week only|only on monday|only on tuesday|only on wednesday|only on thursday|only on friday|only on saturday|only on sunday)\b/.test(
+      normalized
+    ) ||
+    hasExplicitCalendarDateCue(normalized)
+  );
+}
+
+function hasSourceWideOneOffScheduleCue(text: string): boolean {
+  const normalized = normalizeWeekdayExtractionText(text);
+  if (!normalized) return false;
+  return /\b(this week|this weekend|weekend lineup|this week s lineup|this weekend s lineup)\b/.test(
+    normalized
+  );
+}
+
+function hasExplicitCalendarDateCue(text: string): boolean {
+  const normalized = normalizeWeekdayExtractionText(text);
+  if (!normalized) return false;
+  return (
+    /\b(january|february|march|april|may|june|july|august|september|october|november|december)\s+\d{1,2}(?:st|nd|rd|th)?\b/.test(
+      normalized
+    ) ||
+    /\b20\d{2}\s+\d{2}\s+\d{2}\b/.test(normalized)
+  );
+}
+
+function isShortOccurrenceDateWindow(
+  event: Pick<FormattedEvent, 'startDate' | 'endDate'>,
+  maximumDays = 7
+): boolean {
+  const startDate = String(event.startDate || '').trim();
+  const endDate = String(event.endDate || '').trim() || startDate;
+  const start = Date.parse(`${startDate}T00:00:00Z`);
+  const end = Date.parse(`${endDate}T00:00:00Z`);
+  if (!Number.isFinite(start) || !Number.isFinite(end) || end < start) return false;
+  return end - start <= maximumDays * 24 * 60 * 60 * 1000;
+}
+
+function shouldForceSourceGroundedLineupOneOff(
+  event: Pick<FormattedEvent, 'name' | 'startDate' | 'endDate' | 'startTime' | 'endTime'>,
+  itemSourceText: string,
+  fullSourceText: string,
+  recurringPattern: RecurringPattern,
+  recurrenceUntilDate: string | undefined,
+  totalOccurrences: number | undefined,
+  customRecurringConfiguration?:
+    | {
+        recurringDaysOfWeek?: RecurringWeekday[];
+        recurringWeekdaySequence?: RecurringWeekday[];
+        recurringWeekInterval?: number;
+      }
+    | undefined
+): boolean {
+  if (
+    !isSimpleWeeklyRecurringPattern(recurringPattern) ||
+    customRecurringConfiguration ||
+    recurrenceUntilDate ||
+    totalOccurrences !== undefined
+  ) {
+    return false;
+  }
+
+  if (hasExplicitRecurringCadenceCue(itemSourceText)) return false;
+
+  const anchoredSourceContext = buildEventAnchoredSourceContext(event.name, fullSourceText);
+  const itemHasOneOffCue = hasAnchoredOneOffLineupCue(itemSourceText);
+  const anchoredHasOneOffCue = hasAnchoredOneOffLineupCue(anchoredSourceContext);
+  if (!itemHasOneOffCue && !anchoredHasOneOffCue) return false;
+  if (
+    !isSingleOccurrenceDateWindow(event) &&
+    !(
+      anchoredSourceContext &&
+      hasExplicitCalendarDateCue(anchoredSourceContext) &&
+      isShortOccurrenceDateWindow(event)
+    )
+  ) {
+    return false;
+  }
+  if (
+    anchoredSourceContext &&
+    hasAnchoredExplicitRecurringCadenceCue(anchoredSourceContext)
+  ) {
+    return false;
+  }
+
+  return true;
+}
+
 function isSimpleWeeklyRecurringPattern(pattern: RecurringPattern): boolean {
   return pattern.startsWith('weekly_') && pattern !== 'weekly_custom';
 }
@@ -3819,7 +4046,8 @@ function shouldAcceptSourceDerivedSpecificWeeklyPattern(
 
 function normalizeRecurringForFormattedEvent(
   event: FormattedEvent,
-  originalItem?: ExtractedItem
+  originalItem?: ExtractedItem,
+  fullSourceText = ''
 ): FormattedEvent {
   const sourceText = buildRecurrenceSourceText(event, originalItem);
   const sourceWeekdayPatterns = collectDistinctWeekdayPatternsFromText(sourceText);
@@ -4183,6 +4411,30 @@ function normalizeRecurringForFormattedEvent(
 
   if (
     !forcedFiniteRunOneOff &&
+    shouldForceSourceGroundedLineupOneOff(
+      event,
+      sourceText,
+      fullSourceText,
+      recurringPattern,
+      recurrenceUntilDate,
+      totalOccurrences,
+      customRecurringConfiguration
+    )
+  ) {
+    logger.debug(`Forced source-grounded lineup row to one-off for "${event.name}"`, {
+      recurringPatternFrom: recurringPattern,
+      startDate: event.startDate,
+      sourceContext: buildEventAnchoredSourceContext(event.name, fullSourceText).slice(0, 260),
+    });
+    recurringPattern = 'none';
+    customRecurringConfiguration = undefined;
+    totalOccurrences = undefined;
+    recurrenceUntilDate = undefined;
+    forcedFiniteRunOneOff = true;
+  }
+
+  if (
+    !forcedFiniteRunOneOff &&
     shouldForceWeakWeekdaySpecialOneOff(
       event,
       sourceText,
@@ -4407,7 +4659,8 @@ function normalizeRecurringForFormattedEvent(
 
 export function applyRecurrenceNormalizationForRegression(
   event: FormattedEvent,
-  originalItem?: ExtractedItem
+  originalItem?: ExtractedItem,
+  fullSourceText = ''
 ): FormattedEvent {
   const normalizedEvent = {
     ...event,
@@ -4431,7 +4684,11 @@ export function applyRecurrenceNormalizationForRegression(
       } as ExtractedItem)
     : undefined;
 
-  return normalizeRecurringForFormattedEvent(normalizedEvent, normalizedOriginalItem);
+  return normalizeRecurringForFormattedEvent(
+    normalizedEvent,
+    normalizedOriginalItem,
+    fullSourceText
+  );
 }
 
 function applyLegacyRecurringNormalization(event: FormattedEvent): FormattedEvent {
@@ -4512,6 +4769,7 @@ function normalizeWeekdayToken(token: string | undefined): string {
 function normalizeWeekdayExtractionText(text: string): string {
   return String(text || '')
     .toLowerCase()
+    .replace(/\\[rnt]/g, ' ')
     .replace(/\u2012|\u2013|\u2014|\u2015|â€“|â€”/g, '-')
     .replace(/\s+/g, ' ')
     .trim();
