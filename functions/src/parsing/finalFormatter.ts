@@ -1123,7 +1123,6 @@ function detectExplicitWorkshopCategory(
     /\bclass(es)?\b/,
     /\blesson(s)?\b/,
     /\bseminar(s)?\b/,
-    /\bcourse(s)?\b/,
     /\btraining\b/,
     /\bmasterclass\b/,
     /\bbootcamp\b/,
@@ -1139,7 +1138,13 @@ function detectExplicitWorkshopCategory(
     /\bdrop\s*in\s*class(?:es)?\b/,
   ];
 
-  const hasWorkshopSignal = workshopIndicators.some((re) => re.test(text));
+  const courseMeansMealOffer =
+    /\b(?:\d+|one|two|three|four|five)\s*-?\s*course\b/.test(text) &&
+    /\b(menu|meal|dinner|lunch|appetizer|appetiser|entree|dessert|prix\s*fixe|special)\b/.test(text) &&
+    (/\$\s*\d+/.test(text) || /\bspecial\b/.test(text) || /\b(appetizer|appetiser|entree|dessert)\b/.test(text));
+  const hasCourseTrainingSignal = /\bcourse(s)?\b/.test(text) && !courseMeansMealOffer;
+  const hasWorkshopSignal =
+    workshopIndicators.some((re) => re.test(text)) || hasCourseTrainingSignal;
   if (!hasWorkshopSignal) return null;
 
   const socialGatheringOnlySignals =
@@ -1911,6 +1916,13 @@ function validateEventTypeFlags(event: FormattedEvent): FormattedEvent {
   }
 
   return event;
+}
+
+export function applyCategoryCorrectionsForRegression(
+  event: FormattedEvent,
+  originalItem?: ExtractedItem
+): FormattedEvent {
+  return validateEventTypeFlags(applyCategoryCorrections({ ...event }, originalItem));
 }
 
 /**

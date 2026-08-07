@@ -343,3 +343,9 @@ Purpose: capture parser, ingestion, and cleanup weaknesses found during Firestor
 - Evidence: the June 15 post-parse scheduled-cleanup audit reported 51 delete candidates, but 28 were events from June 15 that had ended earlier that same day. The manual operating rule is to let same-day docs age out at the overnight cleanup instead of preempting them during the evening.
 - Impact: review output can look more urgent than it is and could lead to deleting same-day event cards before the intended 3 a.m. cleanup boundary.
 - Follow-up: make scheduled-cleanup review reports split `previous_day_or_older_delete_candidates` from `same_day_wait_for_overnight_cleanup` so manual cleanup focuses on docs that should already have been removed.
+
+### Meal-course wording can be misread as workshop-course wording
+
+- Evidence: Red Shores / O'Brien's `3 Course Menu Special` (`venues/fb_100052606604879/events/W6xawAOcRqbTR1GryLrf`) was stored as `Workshops & Classes` even though the title, price, and description say it is a $34.99 appetizer/entree/dessert menu special.
+- Impact: food specials can appear under the wrong app category chip when the parser treats `course` as an educational-course signal instead of a meal-course signal.
+- Follow-up: keep deterministic category guardrails that distinguish meal-course phrases such as `3 course menu`, appetizers, entrees, desserts, and prices from true workshop/class/training courses.
