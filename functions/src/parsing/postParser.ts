@@ -1629,7 +1629,7 @@ export async function parsePostData(
       partialAddress,
       timestamp,
       cfg,
-      input.combinedText
+      extractionText
     );
     logTiming('stage5_format', stage5Start, {
       postId,

@@ -470,6 +470,239 @@ test('this-week every-night performer lineups are not kept as open-ended weekly 
   assert.equal(normalized.recurrenceUntilDate, undefined);
 });
 
+test('weekend lineup tonight rows cannot remain open-ended weekly recurrence', () => {
+  const normalized = applyRecurrenceNormalizationForRegression(
+    buildEvent({
+      category: 'Live Music',
+      name: 'After Dinner Social Club (ft. DJ Noah)',
+      description: 'Friday: After Dinner Social Club ft Sundrift Festival with DJ Noah',
+      establishment: 'Salt & Sol Restaurant and Lounge',
+      venue: 'Salt & Sol Restaurant and Lounge',
+      startDate: '2026-07-03',
+      endDate: '2026-07-04',
+      startTime: '21:00',
+      endTime: '01:00',
+      isRecurring: 'Yes',
+      recurringPattern: 'weekly_friday',
+    }),
+    buildOriginalItem({
+      name: 'After Dinner Social Club (ft. DJ Noah)',
+      description: 'Friday: After Dinner Social Club ft Sundrift Festival with DJ Noah',
+      date: '2026-07-03',
+      startTime: '21:00',
+      endTime: '01:00',
+      venue: 'Salt & Sol Restaurant and Lounge',
+      recurringPattern: 'weekly_friday',
+    }),
+    'WEEKEND LINEUP. Tonight: After Dinner Social Club, a late aperitivo vibe with Noah O Connor. Tomorrow: Salty Saturdays with Dexter Shea and Jeremie Boutilier.'
+  );
+
+  assert.equal(normalized.isRecurring, false);
+  assert.equal(normalized.recurringPattern, 'none');
+  assert.equal(normalized.recurrenceUntilDate, undefined);
+});
+
+test('explicit weekly cadence near a lineup event remains recurring', () => {
+  const normalized = applyRecurrenceNormalizationForRegression(
+    buildEvent({
+      category: 'Live Music',
+      name: 'After Dinner Social Club (ft. DJ Noah)',
+      description: 'After Dinner Social Club ft DJ Noah every Friday.',
+      startDate: '2026-07-03',
+      endDate: '2026-07-04',
+      startTime: '21:00',
+      endTime: '01:00',
+      isRecurring: 'Yes',
+      recurringPattern: 'weekly_friday',
+    }),
+    buildOriginalItem({
+      name: 'After Dinner Social Club (ft. DJ Noah)',
+      description: 'After Dinner Social Club ft DJ Noah every Friday.',
+      date: '2026-07-03',
+      startTime: '21:00',
+      endTime: '01:00',
+      recurringPattern: 'weekly_friday',
+    }),
+    'WEEKEND LINEUP. After Dinner Social Club with DJ Noah every Friday at 9 PM.'
+  );
+
+  assert.equal(normalized.isRecurring, true);
+  assert.equal(normalized.recurringPattern, 'weekly_friday');
+});
+
+test('last class tomorrow cannot remain an open-ended weekly recurrence', () => {
+  const description =
+    'Last of the FREE exercise classes with Michele for the summer tomorrow - Wednesday at 9 a.m.';
+  const normalized = applyRecurrenceNormalizationForRegression(
+    buildEvent({
+      category: 'Workshops & Classes',
+      name: 'FREE exercise class with Michele (Senior fitness)',
+      description,
+      startDate: '2026-06-24',
+      endDate: '2026-06-24',
+      startTime: '09:00',
+      endTime: '11:00',
+      isRecurring: 'Yes',
+      recurringPattern: 'weekly_wednesday',
+    }),
+    buildOriginalItem({
+      name: 'FREE exercise class with Michele (Senior fitness)',
+      description,
+      date: '2026-06-24',
+      startTime: '09:00',
+      endTime: '11:00',
+      recurringPattern: 'weekly_wednesday',
+    })
+  );
+
+  assert.equal(normalized.isRecurring, false);
+  assert.equal(normalized.recurringPattern, 'none');
+});
+
+test('this-week class announcements cannot become open-ended weekly recurrence', () => {
+  const normalized = applyRecurrenceNormalizationForRegression(
+    buildEvent({
+      category: 'Workshops & Classes',
+      name: 'DanceFit with Rhonda',
+      description: 'Thursday - DanceFit with Rhonda. Drop ins welcome!',
+      startDate: '2026-07-23',
+      endDate: '2026-07-23',
+      startTime: '10:00',
+      endTime: '12:00',
+      isRecurring: 'Yes',
+      recurringPattern: 'weekly_thursday',
+    }),
+    buildOriginalItem({
+      name: 'DanceFit with Rhonda',
+      description: 'Thursday - DanceFit with Rhonda. Drop ins welcome!',
+      date: '2026-07-23',
+      startTime: '10:00',
+      endTime: '12:00',
+      recurringPattern: 'weekly_thursday',
+    }),
+    'This week at EKCC: DanceFit with Rhonda Thursday at 10am. Yoga with Krista Friday at 8am.'
+  );
+
+  assert.equal(normalized.isRecurring, false);
+  assert.equal(normalized.recurringPattern, 'none');
+});
+
+test('a rotating weekly special mentioned in a this-week menu stays one-off', () => {
+  const normalized = applyRecurrenceNormalizationForRegression(
+    buildEvent({
+      category: 'Food Special',
+      isFoodSpecial: 'Yes',
+      name: 'Poutine Flight ($14)',
+      description: 'Thursday: Try a poutine flight for $14.',
+      startDate: '2026-05-28',
+      endDate: '2026-05-28',
+      startTime: '16:00',
+      endTime: '22:00',
+      isRecurring: 'Yes',
+      recurringPattern: 'weekly_thursday',
+    }),
+    buildOriginalItem({
+      name: 'Poutine Flight ($14)',
+      description: 'Thursday: Try a poutine flight for $14.',
+      date: '2026-05-28',
+      startTime: '16:00',
+      endTime: '22:00',
+      recurringPattern: 'weekly_thursday',
+    }),
+    'Lots of things cooking at Hop this week! Thursday: Try a poutine flight for $14 and come check out our weekly special.'
+  );
+
+  assert.equal(normalized.isRecurring, false);
+  assert.equal(normalized.recurringPattern, 'none');
+});
+
+test('a source-anchored calendar date cannot become open-ended weekly recurrence', () => {
+  const normalized = applyRecurrenceNormalizationForRegression(
+    buildEvent({
+      category: 'Sports',
+      name: "Noah Dobson's Hockey Fest",
+      description: "Don't miss Noah Dobson's Hockey Fest.",
+      startDate: '2026-06-19',
+      endDate: '2026-06-21',
+      startTime: '09:00',
+      endTime: '17:00',
+      isRecurring: 'Yes',
+      recurringPattern: 'weekly_friday',
+    }),
+    buildOriginalItem({
+      name: "Noah Dobson's Hockey Fest",
+      description: "Don't miss Noah Dobson's Hockey Fest.",
+      date: '2026-06-19',
+      startTime: '09:00',
+      endTime: '17:00',
+      recurringPattern: 'weekly_friday',
+    }),
+    "Don't miss your chance to meet Noah at the 2026 Noah Dobson's Hockey Fest June 19-21, 2026."
+  );
+
+  assert.equal(normalized.isRecurring, false);
+  assert.equal(normalized.recurringPattern, 'none');
+});
+
+test('a this-Friday solo show remains a one-off', () => {
+  const description =
+    'Solo acoustic show 4-7pm Friday at The Club, Sydney! Drop in after work for a cool one and some tunes, get your weekend vibe goin!\\n\\nThis Friday';
+  const normalized = applyRecurrenceNormalizationForRegression(
+    buildEvent({
+      category: 'Live Music',
+      name: 'Solo acoustic show',
+      description,
+      startDate: '2026-07-10',
+      endDate: '2026-07-10',
+      startTime: '16:00',
+      endTime: '19:00',
+      isRecurring: 'Yes',
+      recurringPattern: 'weekly_friday',
+    }),
+    buildOriginalItem({
+      name: 'Solo acoustic show',
+      description,
+      date: '2026-07-10',
+      startTime: '16:00',
+      endTime: '19:00',
+      recurringPattern: 'weekly_friday',
+    }),
+    `${description}\n\nOCR TEXT:\nMay be an image of guitar`
+  );
+
+  assert.equal(normalized.isRecurring, false);
+  assert.equal(normalized.recurringPattern, 'none');
+});
+
+test('an explicit eight-week Fridays class remains recurring', () => {
+  const description = 'Yoga with Krista. Fridays at 8:00am for 8 weeks.';
+  const normalized = applyRecurrenceNormalizationForRegression(
+    buildEvent({
+      category: 'Workshops & Classes',
+      name: 'Yoga with Krista',
+      description,
+      startDate: '2026-07-03',
+      endDate: '2026-07-03',
+      startTime: '08:00',
+      endTime: '10:00',
+      isRecurring: 'Yes',
+      recurringPattern: 'weekly_friday',
+    }),
+    buildOriginalItem({
+      name: 'Yoga with Krista',
+      description,
+      date: '2026-07-03',
+      startTime: '08:00',
+      endTime: '10:00',
+      recurringPattern: 'weekly_friday',
+    }),
+    'This week at EKCC: Yoga with Krista Friday at 8am. Poster: Fridays at 8:00am, July 3-August 21 (8 weeks).'
+  );
+
+  assert.equal(normalized.isRecurring, true);
+  assert.equal(normalized.recurringPattern, 'weekly_friday');
+});
+
 test('dated performer rows do not inherit a Friday and Saturday series header as open-ended recurrence', () => {
   const normalized = applyRecurrenceNormalizationForRegression(
     buildEvent({
