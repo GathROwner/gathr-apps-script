@@ -43,6 +43,7 @@ import { createHash } from 'crypto';
 import { normalizeVenueName, normalizeUrl, extractFacebookSlug } from '../utils/similarity.js';
 import { getVenueAliasEntry } from '../services/venueAliases.js';
 import { KNOWN_PEI_CITY_NAMES, normalizePeiPlaceName } from '../services/peiLocations.js';
+import { checkEventCoordinatesAgainstAllowedRegions } from '../services/eventIngestJurisdictions.js';
 import { BatchManager } from './batchManager.js';
 import {
   AddressSource,
@@ -1869,6 +1870,38 @@ export async function processRow(
       result.error = 'No text content';
       batchManager.markRowInvalid(rowIndex, 'No text content');
       return result;
+    }
+
+    if (row.sourceScraperType === 'events') {
+      const coordinateCheck = checkEventCoordinatesAgainstAllowedRegions({
+        latitude: row.facebookEventLocationLatitude,
+        longitude: row.facebookEventLocationLongitude,
+      });
+      if (coordinateCheck.unknownRegionCodes.length > 0) {
+        logger.warn('Ignoring unknown configured event ingest regions', {
+          rowIndex,
+          uniqueId: row.uniqueId,
+          unknownRegionCodes: coordinateCheck.unknownRegionCodes,
+          allowedRegionCodes: coordinateCheck.allowedRegionCodes,
+        });
+      }
+      if (coordinateCheck.decision === 'reject') {
+        const reason = 'facebook_event_coordinates_outside_allowed_regions';
+        logger.warn('Rejecting Facebook Event outside configured ingest regions', {
+          rowIndex,
+          uniqueId: row.uniqueId,
+          facebookUrl: row.facebookUrl,
+          locationName: row.facebookEventLocationName,
+          countryCode: row.facebookEventLocationCountryCode,
+          latitude: coordinateCheck.latitude,
+          longitude: coordinateCheck.longitude,
+          allowedRegionCodes: coordinateCheck.allowedRegionCodes,
+        });
+        result.isInvalid = true;
+        result.error = reason;
+        batchManager.markRowInvalid(rowIndex, reason);
+        return result;
+      }
     }
 
     // Determine establishment from page name or user name

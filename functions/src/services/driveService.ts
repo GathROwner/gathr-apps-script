@@ -990,6 +990,17 @@ function extractRowData(
   const contextualLocationName = String(
     getFirstNonEmptyColumnValue(row, headerMap, ['location/contextualName']) || ''
   );
+  const facebookEventLocationLatitude = isFacebookEvent
+    ? parseMetricNumber(getFirstNonEmptyColumnValue(row, headerMap, ['location/latitude']))
+    : undefined;
+  const facebookEventLocationLongitude = isFacebookEvent
+    ? parseMetricNumber(getFirstNonEmptyColumnValue(row, headerMap, ['location/longitude']))
+    : undefined;
+  const facebookEventLocationCountryCode = isFacebookEvent
+    ? String(getFirstNonEmptyColumnValue(row, headerMap, ['location/countryCode']) || '')
+      .trim()
+      .toUpperCase() || undefined
+    : undefined;
   const organizerName = String(
     getFirstNonEmptyColumnValue(row, headerMap, ['organizators/0/name', 'organizedBy']) || ''
   );
@@ -1160,6 +1171,9 @@ function extractRowData(
     facebookEventLocationName: isFacebookEvent ? preferredEventLocationName || undefined : undefined,
     facebookEventLocationIsCityLevel: isFacebookEvent ? eventLocationIsCityLevel : undefined,
     facebookEventLocationSource,
+    facebookEventLocationLatitude,
+    facebookEventLocationLongitude,
+    facebookEventLocationCountryCode,
     facebookEventOrganizerName: isFacebookEvent ? organizerName || undefined : undefined,
     facebookEventDescription: isFacebookEvent ? description.trim() || undefined : undefined,
     externalLinks,

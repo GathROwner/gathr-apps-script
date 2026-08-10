@@ -12,6 +12,9 @@ type FacebookEventRowInput = {
   locationName?: string;
   contextualLocationName?: string;
   organizerName?: string;
+  latitude?: number;
+  longitude?: number;
+  countryCode?: string;
 };
 
 function buildFacebookEventsWorkbookBuffer(input: FacebookEventRowInput): Buffer {
@@ -21,6 +24,9 @@ function buildFacebookEventsWorkbookBuffer(input: FacebookEventRowInput): Buffer
     'description',
     'location/name',
     'location/contextualName',
+    'location/latitude',
+    'location/longitude',
+    'location/countryCode',
     'organizators/0/name',
     'organizedBy',
     'utcStartDate',
@@ -39,6 +45,9 @@ function buildFacebookEventsWorkbookBuffer(input: FacebookEventRowInput): Buffer
       input.description,
       input.locationName || 'Charlottetown, Prince Edward Island',
       input.contextualLocationName || 'Charlottetown, PE',
+      input.latitude ?? 46.2382,
+      input.longitude ?? -63.1311,
+      input.countryCode || 'CA',
       organizerName,
       organizerName ? `Event by ${organizerName}` : '',
       '2099-05-29T23:00:00.000Z',
@@ -97,6 +106,24 @@ test('keeps organizer-only city Facebook Events rows in city-level review', asyn
   assert.equal(rows[0].facebookEventDateTimeSource, 'utcStartDate');
   assert.equal(rows[0].facebookEventLocationSource, 'location/name');
   assert.equal(rows[0].facebookEventOrganizerName, 'Discover Charlottetown');
+});
+
+test('preserves structured Facebook Event coordinates for jurisdiction checks', async () => {
+  const { rows } = await parseXlsxFile(buildFacebookEventsWorkbookBuffer({
+    name: 'Souris dans l\'herbe',
+    organizerName: 'Musée des mômes',
+    description: 'Atelier peinture en parent-enfant.',
+    locationName: 'Musée des mômes',
+    contextualLocationName: '',
+    latitude: 48.387715750251,
+    longitude: -4.4854892711642,
+    countryCode: 'FR',
+  }));
+
+  assert.equal(rows.length, 1);
+  assert.equal(rows[0].facebookEventLocationLatitude, 48.387715750251);
+  assert.equal(rows[0].facebookEventLocationLongitude, -4.4854892711642);
+  assert.equal(rows[0].facebookEventLocationCountryCode, 'FR');
 });
 
 test('distinguishes loose shared post text from structured Facebook Event name', async () => {

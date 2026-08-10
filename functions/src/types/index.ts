@@ -261,6 +261,9 @@ export interface RawRowData {
   facebookEventLocationName?: string;
   facebookEventLocationIsCityLevel?: boolean;
   facebookEventLocationSource?: FacebookEventLocationSource;
+  facebookEventLocationLatitude?: number;
+  facebookEventLocationLongitude?: number;
+  facebookEventLocationCountryCode?: string;
   facebookEventOrganizerName?: string;
   facebookEventDescription?: string;
   externalLinks?: string[];
