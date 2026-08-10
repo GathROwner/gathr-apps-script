@@ -5,6 +5,7 @@
 
 import { onRequest } from 'firebase-functions/v2/https';
 import { defineSecret } from 'firebase-functions/params';
+import { coreRuntimeSecrets } from '../config/globalRuntimeSecrets.js';
 import * as admin from 'firebase-admin';
 import { getFunctions } from 'firebase-admin/functions';
 import { createHash } from 'crypto';
@@ -78,7 +79,7 @@ export const apifyWebhook = onRequest(
     memory: '256MiB',
     region: 'northamerica-northeast2',
     cors: false, // Webhooks don't need CORS
-    secrets: [apifyWebhookSecret],
+    secrets: [apifyWebhookSecret, ...coreRuntimeSecrets],
   },
   async (request, response) => {
     // Only accept POST requests
@@ -700,7 +701,7 @@ export const listApifyWebhooks = onRequest(
     memory: '256MiB',
     region: 'northamerica-northeast2',
     cors: true,
-    secrets: [adminApiKey],
+    secrets: [adminApiKey, ...coreRuntimeSecrets],
   },
   async (request, response) => {
     // Check for admin authorization
@@ -759,7 +760,7 @@ export const retryApifyWebhook = onRequest(
     memory: '256MiB',
     region: 'northamerica-northeast2',
     cors: true,
-    secrets: [adminApiKey],
+    secrets: [adminApiKey, ...coreRuntimeSecrets],
   },
   async (request, response) => {
     if (request.method !== 'POST') {

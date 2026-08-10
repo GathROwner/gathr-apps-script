@@ -1,5 +1,6 @@
 import { onRequest } from 'firebase-functions/v2/https';
 import { defineSecret } from 'firebase-functions/params';
+import { coreRuntimeSecrets } from '../config/globalRuntimeSecrets.js';
 import { logger } from '../utils/logger.js';
 import { formatRunUrl } from '../services/apifyService.js';
 
@@ -108,7 +109,7 @@ export const startFacebookEventsScrape = onRequest(
     memory: '256MiB',
     region: 'northamerica-northeast2',
     cors: true,
-    secrets: [adminApiKey],
+    secrets: [adminApiKey, ...coreRuntimeSecrets],
   },
   async (request, response) => {
     if (request.method !== 'POST') {

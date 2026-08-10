@@ -3,6 +3,7 @@
  * Main entry point - exports all Cloud Functions triggers
  */
 
+import './config/globalRuntimeSecrets.js';
 import * as admin from 'firebase-admin';
 
 // Initialize Firebase Admin SDK

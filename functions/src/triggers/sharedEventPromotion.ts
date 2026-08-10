@@ -1,6 +1,7 @@
 import { onRequest } from 'firebase-functions/v2/https';
 import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { defineSecret } from 'firebase-functions/params';
+import { coreRuntimeSecrets } from '../config/globalRuntimeSecrets.js';
 import { logger } from '../utils/logger.js';
 import {
   processPendingPublicSharedEventCandidates,
@@ -32,7 +33,7 @@ export const processSharedEventPublicCandidates = onRequest(
     memory: '512MiB',
     region: 'northamerica-northeast2',
     cors: true,
-    secrets: [adminApiKey],
+    secrets: [adminApiKey, ...coreRuntimeSecrets],
   },
   async (request, response) => {
     if (request.method !== 'POST') {

@@ -1,7 +1,6 @@
 import * as admin from 'firebase-admin';
 import { createHash, randomUUID } from 'node:crypto';
 import { getFunctions } from 'firebase-admin/functions';
-import { defineSecret } from 'firebase-functions/params';
 import { onRequest } from 'firebase-functions/v2/https';
 import { onTaskDispatched } from 'firebase-functions/v2/tasks';
 import {
@@ -20,8 +19,6 @@ if (!admin.apps.length) {
   admin.initializeApp();
 }
 
-const openAiApiKey = defineSecret('OPENAI_API_KEY');
-const apifyApiToken = defineSecret('APIFY_TOKEN');
 const TASK_QUEUE_LOCATION = 'northamerica-northeast1';
 const DEFAULT_FB_POSTS_SCRAPER_ACTOR_ID = 'KoJrdxJCTtpon81KY';
 const MAX_SHARED_EVENT_UPLOAD_BYTES = 8 * 1024 * 1024;
@@ -592,7 +589,7 @@ async function maybeQueueSharedEventScrapeEnrichment(params: {
     return;
   }
 
-  const apifyToken = String(apifyApiToken.value() || process.env.APIFY_TOKEN || '').trim();
+  const apifyToken = String(process.env.APIFY_TOKEN || '').trim();
   const actorId = getSharedEventPostScrapeActorId();
   if (!apifyToken || !actorId) {
     logger.warn('Shared event scrape enrichment not configured', {
@@ -829,7 +826,6 @@ export const processSharedEventIngest = onTaskDispatched(
     timeoutSeconds: 540,
     memory: '1GiB',
     region: TASK_QUEUE_LOCATION,
-    secrets: [openAiApiKey, apifyApiToken],
   },
   async (request) => {
     const ownerUid = String(request.data?.ownerUid || '').trim();
@@ -983,7 +979,6 @@ export const submitSharedEvent = onRequest(
     memory: '512MiB',
     region: 'northamerica-northeast2',
     cors: true,
-    secrets: [openAiApiKey, apifyApiToken],
   },
   async (request, response) => {
     if (request.method === 'OPTIONS') {
