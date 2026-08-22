@@ -905,6 +905,43 @@ test('shared photo specials preserve address, price, and finite multi-day recurr
   }
 });
 
+test('shared photo specials recover structured price from title text when image extraction omits price', async () => {
+  const primary = await parseSharedEventPayload({
+    mediaUrls: ['https://example.com/happy-hour.jpg'],
+    sourceApp: 'native_share_sheet',
+    timezone: 'America/Halifax',
+  }, {
+    sourceVisibility: 'user_private',
+    visibilityEvidence: {
+      method: 'no_url',
+      checkedAt: '2026-08-22T15:00:00.000Z',
+      reason: 'User photo.',
+    },
+  });
+
+  const parsed = buildCalendarImageParsedEventsForRegression(primary, [
+    {
+      name: '$8 Island Mussels',
+      type: 'special',
+      date: '2026-08-25',
+      startTime: '16:00',
+      venue: 'Harbour House Bistro',
+      description: 'Tuesday-Friday happy hour.',
+    },
+    {
+      name: 'Half-Price Mocktails',
+      type: 'special',
+      date: '2026-08-25',
+      startTime: '16:00',
+      venue: 'Harbour House Bistro',
+      description: 'Tuesday-Friday happy hour.',
+    },
+  ]);
+
+  assert.equal(parsed[0].price, '$8');
+  assert.equal(parsed[1].price, 'Half-Price');
+});
+
 test('route-like shared photos remain private review items with approximate geometry', async () => {
   const originalNow = Settings.now;
   Settings.now = () => new Date('2026-08-22T15:00:00.000Z').getTime();

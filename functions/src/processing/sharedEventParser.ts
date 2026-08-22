@@ -1375,6 +1375,21 @@ function cleanExtractedPrice(value: unknown): string | undefined {
   return cleanString(value, 180) || undefined;
 }
 
+function inferSpecialPriceFromText(...values: unknown[]): string | undefined {
+  const text = values.map((value) => cleanLongText(value)).filter(Boolean).join(' ');
+  if (!text) return undefined;
+
+  const currency = text.match(/(?:C\$|\$)\s*\d+(?:[.,]\d{1,2})?/i)?.[0];
+  if (currency) return currency.replace(/\s+/g, '');
+
+  const percentOff = text.match(/\b\d{1,3}\s*%\s*off\b/i)?.[0];
+  if (percentOff) return percentOff.replace(/\s+/g, ' ').trim();
+
+  if (/\bhalf[-\s]?price\b/i.test(text)) return 'Half-Price';
+  if (/\b(?:two|2)[-\s]?for[-\s]?(?:one|1)\b/i.test(text)) return '2-for-1';
+  return undefined;
+}
+
 function extractPrintedStreetAddress(value: unknown): string | undefined {
   const text = cleanLongText(value);
   if (!text) return undefined;
@@ -1740,9 +1755,12 @@ function buildExtractedParsedEventsFromCalendarItems(
       const contentKind = (
         ('type' in item && item.type === 'special') || item._sourceType === 'special'
       ) ? 'special' as const : 'event' as const;
-      const price = cleanExtractedPrice(
+      const explicitPrice = cleanExtractedPrice(
         'pricing' in item ? item.pricing : ('price' in item ? item.price : ''),
       );
+      const price = explicitPrice || (contentKind === 'special'
+        ? inferSpecialPriceFromText(title, description)
+        : undefined);
       let recurringPattern = normalizedRecurringPattern(
         'recurringPattern' in item ? item.recurringPattern : undefined
       );
