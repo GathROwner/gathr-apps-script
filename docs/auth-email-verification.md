@@ -8,6 +8,7 @@ The production Firebase project is `gathr-m1`. Its account-action callback is ho
 
 - Hosted account page: `functions/hosting/public/auth/action/`
 - Verification email body: `functions/config/auth-email/verify-email.html`
+- Official globe/wordmark asset: `https://www.gathrapp.ca/assets/logos/icon.png` (the same artwork is versioned in the app as `assets/icon3.png`)
 - Firebase Hosting configuration and security headers: `functions/firebase.json`
 - Mobile verification request and return URL: `lib/accountVerification.ts` in the SDK54 app repository
 

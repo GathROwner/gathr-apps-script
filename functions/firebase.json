@@ -39,7 +39,7 @@
           },
           {
             "key": "Content-Security-Policy",
-            "value": "default-src 'self'; script-src 'self'; connect-src https://identitytoolkit.googleapis.com; img-src 'self' data:; style-src 'self'; font-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'"
+            "value": "default-src 'self'; script-src 'self'; connect-src https://identitytoolkit.googleapis.com; img-src 'self' data: https://www.gathrapp.ca; style-src 'self'; font-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'"
           },
           {
             "key": "Referrer-Policy",
