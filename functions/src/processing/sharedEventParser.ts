@@ -1370,9 +1370,17 @@ function normalizedRecurringPattern(value: unknown): string | undefined {
 function cleanExtractedPrice(value: unknown): string | undefined {
   if (value && typeof value === 'object') {
     const record = value as Record<string, unknown>;
-    return cleanString(record.price || record.amount || record.discount || record.details, 180) || undefined;
+    return cleanExtractedPrice(record.price || record.amount || record.discount || record.details);
   }
-  return cleanString(value, 180) || undefined;
+  const cleaned = cleanString(value, 180);
+  if (!cleaned) return undefined;
+
+  const currencyOffer = cleaned.match(/^(?:C\$|\$)\s*\d+(?:[.,]\d{1,2})?/i)?.[0];
+  if (currencyOffer && !/(?:C\$|\$)\s*\d+(?:[.,]\d{1,2})?/i.test(cleaned.slice(currencyOffer.length))) {
+    return currencyOffer.replace(/\s+/g, '');
+  }
+  if (/^half[-\s]?price\b/i.test(cleaned)) return 'Half-Price';
+  return cleaned;
 }
 
 function inferSpecialPriceFromText(...values: unknown[]): string | undefined {
