@@ -32,7 +32,7 @@ if (!admin.apps.length) {
 
 const openAiApiKey = defineSecret('OPENAI_API_KEY');
 const apifyApiToken = defineSecret('APIFY_TOKEN');
-const googlePlacesApiKey = defineSecret('GOOGLE_PLACES_API_KEY');
+const googlePlacesApiKey = defineSecret('GATHR_GOOGLE_PLACES_API_KEY_SECRET');
 const TASK_QUEUE_LOCATION = 'northamerica-northeast1';
 const DEFAULT_FB_POSTS_SCRAPER_ACTOR_ID = 'KoJrdxJCTtpon81KY';
 const MAX_SHARED_EVENT_UPLOAD_BYTES = 8 * 1024 * 1024;

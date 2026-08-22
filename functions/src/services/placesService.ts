@@ -98,7 +98,7 @@ function scorePlaceForVenueMatch(place: {
 
 function getClient(): ReturnType<typeof google.places> {
   if (!placesClient) {
-    const apiKey = process.env.GOOGLE_PLACES_API_KEY;
+    const apiKey = process.env.GATHR_GOOGLE_PLACES_API_KEY_SECRET || process.env.GOOGLE_PLACES_API_KEY;
     if (!apiKey) {
       throw new Error('GOOGLE_PLACES_API_KEY environment variable not set');
     }
