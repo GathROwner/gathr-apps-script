@@ -9,6 +9,8 @@ import { normalizeVenueName } from '../utils/similarity.js';
 import * as sharedEventCandidateStore from './sharedEventCandidateStore.js';
 import * as firestoreService from './firestoreService.js';
 import { getUntrustedPublicPromotionReason } from './sharedEventPublicTrust.js';
+import { markCrowdCandidateOutcome } from './sharedEventCrowdStore.js';
+import { SHARED_EVENT_CROWD_THRESHOLD } from './sharedEventCrowdConsensus.js';
 
 export type SharedEventPromotionOutcome =
   | {
@@ -440,8 +442,12 @@ export function buildPublicSharedEventData(
     sharedEventCandidateId: candidate.id,
     sharedEventPrivateEventId: candidate.privateEventId,
     sharedEventIngestId: candidate.ingestId,
-    sharedEventOwnerUid: candidate.ownerUid,
-    sharedEventSource: 'public_shared_event_candidate',
+    ...(candidate.promotionBasis === 'crowd_consensus'
+      ? {}
+      : { sharedEventOwnerUid: candidate.ownerUid }),
+    sharedEventSource: candidate.promotionBasis === 'crowd_consensus'
+      ? 'crowd_shared_event_candidate'
+      : 'public_shared_event_candidate',
   } as EventData;
 }
 
@@ -452,8 +458,31 @@ export function getRequiredCandidateReviewReason(candidate: PublicSharedEventCan
   if (!firstText(candidate.locationName, candidate.address, candidate.visibilityEvidence?.locationName)) {
     return 'missing_location';
   }
-  const untrustedPublicFields = getUntrustedPublicPromotionReason(candidate);
-  if (untrustedPublicFields) return untrustedPublicFields;
+  if (candidate.promotionBasis === 'crowd_consensus') {
+    const consensus = candidate.crowdConsensus;
+    if (!consensus?.aggregateId) return 'missing_crowd_aggregate';
+    if (
+      consensus.threshold < SHARED_EVENT_CROWD_THRESHOLD ||
+      consensus.contributorCount < consensus.threshold
+    ) {
+      return 'crowd_threshold_not_met';
+    }
+    const uniqueContributors = new Set(
+      (consensus.contributorRefs || []).map((ref) => String(ref.ownerUid || '').trim()).filter(Boolean)
+    );
+    if (uniqueContributors.size < consensus.threshold) return 'crowd_contributors_not_independent';
+    const consensusFields = candidate.fieldSources || {};
+    if (
+      consensusFields.title !== 'crowd_consensus' ||
+      consensusFields.startDate !== 'crowd_consensus' ||
+      (consensusFields.locationName !== 'crowd_consensus' && consensusFields.address !== 'crowd_consensus')
+    ) {
+      return 'crowd_consensus_fields_untrusted';
+    }
+  } else {
+    const untrustedPublicFields = getUntrustedPublicPromotionReason(candidate);
+    if (untrustedPublicFields) return untrustedPublicFields;
+  }
   return '';
 }
 
@@ -483,6 +512,31 @@ async function markCandidateAndPrivateEvent(params: {
     publicUnknownVenueDocId: params.publicUnknownVenueDocId,
     publicCityLevelReviewDocId: params.publicCityLevelReviewDocId,
   });
+  const crowdRefs = params.candidate.crowdConsensus?.contributorRefs || [];
+  if (params.candidate.promotionBasis === 'crowd_consensus' && crowdRefs.length > 0) {
+    await Promise.all(crowdRefs
+      .filter((ref) => (
+        ref.ownerUid !== params.candidate.ownerUid ||
+        ref.privateEventId !== params.candidate.privateEventId
+      ))
+      .map((ref) => sharedEventCandidateStore.updatePrivateSharedEventPublicPromotion({
+        ownerUid: ref.ownerUid,
+        privateEventId: ref.privateEventId,
+        publicCandidateId: candidateId,
+        publicPromotionStatus: params.status,
+        publicVenueId: params.publicVenueId,
+        publicEventId: params.publicEventId,
+        publicEventPath: params.publicEventPath,
+        publicUnknownVenueDocId: params.publicUnknownVenueDocId,
+        publicCityLevelReviewDocId: params.publicCityLevelReviewDocId,
+      })));
+    await markCrowdCandidateOutcome({
+      candidate: params.candidate,
+      status: params.status,
+      publicEventId: params.publicEventId,
+      publicEventPath: params.publicEventPath,
+    });
+  }
 }
 
 async function queueCityLevelPublicCandidate(

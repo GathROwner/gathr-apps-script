@@ -50,6 +50,11 @@ service cloud.firestore {
         allow read: if isAuthenticated() && request.auth.uid == userId && resourceOwnerMatches(userId);
         allow write: if false;
       }
+
+      // Server-owned anti-abuse counters. Clients cannot inspect or alter them.
+      match /crowdContributionDays/{dayId} {
+        allow read, write: if false;
+      }
     }
 
     // Processing state collections - admin only
@@ -73,6 +78,12 @@ service cloud.firestore {
     // promotion to public event collections.
     match /public_shared_event_candidates/{candidateId} {
       allow read, write: if isAdmin();
+    }
+
+    // Contains private contributor references and consensus audit state. Only
+    // Cloud Functions admin SDK code may access this collection.
+    match /crowdsourced_shared_event_candidates/{aggregateId} {
+      allow read, write: if false;
     }
 
     // Interest categories - public read

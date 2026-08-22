@@ -25,8 +25,39 @@ export type SharedEventFieldSource =
   | 'share_payload'
   | 'shared_text'
   | 'uploaded_media'
+  | 'crowd_consensus'
   | 'derived'
   | 'unknown';
+
+export type SharedEventCrowdPromotionStatus =
+  | 'ineligible'
+  | 'collecting'
+  | 'candidate_pending'
+  | 'promoted'
+  | 'duplicate_existing'
+  | 'needs_review'
+  | 'failed';
+
+export interface SharedEventCrowdEventStatus {
+  privateEventId: string;
+  aggregateId?: string;
+  publicCandidateId?: string;
+  contributorCount: number;
+  threshold: number;
+  status: SharedEventCrowdPromotionStatus;
+  reason?: string;
+}
+
+export interface SharedEventCrowdPromotionSummary {
+  eligibleEventCount: number;
+  collectingEventCount: number;
+  candidateEventCount: number;
+  reviewEventCount: number;
+  promotedEventCount: number;
+  threshold: number;
+  maxContributorCount: number;
+  events: SharedEventCrowdEventStatus[];
+}
 
 export type SharedEventFieldSources = Partial<Record<
   | 'title'
@@ -138,6 +169,7 @@ export interface SharedEventIngestRecord {
     privateEventId: string;
     publicCandidateId?: string;
   }>;
+  crowdPromotion?: SharedEventCrowdPromotionSummary;
   eventsPreview?: ParsedSharedEvent[];
   extractedEventCount?: number;
   scrapeEnrichment?: {
@@ -169,6 +201,7 @@ export interface PrivateSharedEventRecord extends ParsedSharedEvent {
   publicEventPath?: string;
   publicUnknownVenueDocId?: string;
   publicCityLevelReviewDocId?: string;
+  crowdPromotion?: SharedEventCrowdEventStatus;
   createdAt?: unknown;
   updatedAt?: unknown;
 }
@@ -192,7 +225,8 @@ export interface PublicSharedEventCandidateRecord {
   ingestId: string;
   sourceUrl?: string;
   sourcePlatform: SharedEventSourcePlatform;
-  sourceVisibility: 'public_verified';
+  sourceVisibility: 'public_verified' | 'user_private';
+  promotionBasis?: 'public_source' | 'crowd_consensus';
   visibilityEvidence: SharedEventVisibilityEvidence;
   title: string;
   description?: string;
@@ -206,6 +240,16 @@ export interface PublicSharedEventCandidateRecord {
   timezone: string;
   sourceContentSignature: string;
   fieldSources?: SharedEventFieldSources;
+  crowdConsensus?: {
+    aggregateId: string;
+    contributorCount: number;
+    threshold: number;
+    contributorRefs: Array<{
+      ownerUid: string;
+      ingestId: string;
+      privateEventId: string;
+    }>;
+  };
   reviewReasons?: string[];
   status: PublicSharedEventCandidateStatus;
   resolvedVenueId?: string;

@@ -64,7 +64,7 @@ Important trust boundary: `public_verified` only proves that the source URL can 
 
 The parser stores this attribution in `fieldSources`. Facts from direct share payload fields, shared text, or user-uploaded/shared images are saved for the user's private copy, but public candidates using those facts are marked `needs_user_review` instead of being auto-promoted. This prevents a user from attaching incorrect title/date/location data to a real public Facebook URL and publishing it to the public map.
 
-Public candidates are then processed by `processSharedEventPublicCandidates` or the scheduled `scheduledSharedEventPublicCandidateProcessor`. The scheduled processor only runs when the deployed environment has `SHARED_EVENT_PUBLIC_PROMOTION_ENABLED` enabled.
+Public candidates are then processed by `processSharedEventPublicCandidates` or the scheduled `scheduledSharedEventPublicCandidateProcessor`. The scheduled processor defaults on only in `gathr-migrated`, where public venue/event writes belong, and defaults off in `gathr-m1`, where private share records live. `SHARED_EVENT_PUBLIC_PROMOTION_ENABLED` can explicitly override either default.
 
 Promotion outcomes:
 
@@ -105,7 +105,22 @@ Expanded child events from a multi-event post/photo must not use `sourcePostId_i
 
 ## Photo Share Calendar Behavior
 
-Photo-only shares have no independently public source URL, so they route `user_private` and save only under the submitting user's private shared-event area unless a later explicit promotion flow is built.
+Photo-only shares have no independently public source URL, so they route `user_private` and are always saved under the submitting user's private shared-event area first.
+
+Photo-only shares can now contribute event facts to a separate crowd-consensus path. This does not make the source photo public. A photo event remains private until all of these gates pass:
+
+- the contributor has a verified, non-anonymous account that is at least 24 hours old;
+- the uploaded image belongs to that user's private `sharedEventUploads/{uid}` path;
+- the parser found a specific title, current/future date, location, and confidence of at least 80;
+- three distinct users independently submitted matching title/date/location facts;
+- conflicting locations, dates, or start times did not enter the same aggregate;
+- the normal venue-resolution, city/area routing, expiration, and public duplicate checks pass.
+
+One account counts once per event aggregate, and a server-only daily contribution limit reduces automated flooding. Consensus candidates publish only the agreed event facts. They never copy user photo URLs, raw OCR text, contributor IDs, or a representative owner ID into the public event. Contributor IDs remain server-only for abuse prevention and auditability.
+
+All contributing private records and their original ingest receipts receive progress updates as the independent count changes. Pending and terminal aggregates stop storing new contributor rows; later matching submissions can see the aggregate outcome without growing the server-only audit document indefinitely.
+
+The server-only aggregate collection is `crowdsourced_shared_event_candidates/{aggregateId}`. Once its threshold is met, it creates the deterministic `public_shared_event_candidates/crowd_{aggregateId}` record with `promotionBasis: "crowd_consensus"`. That candidate then uses the existing public promotion pipeline rather than bypassing venue and duplicate safeguards.
 
 Long-running photo calendar OCR/model work is queued through `processSharedEventIngest`. The receipt screen can return before parsing finishes; the task worker keeps processing the upload and updates `users/{uid}/sharedEventIngests/{ingestId}` when complete.
 

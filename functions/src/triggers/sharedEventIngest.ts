@@ -13,7 +13,13 @@ import {
 } from '../processing/sharedEventParser.js';
 import { ApifyAdHocWebhook, startActorRunNoWait } from '../services/apifyService.js';
 import * as firestoreService from '../services/firestoreService.js';
-import { ParsedSharedEvent, SharedEventSubmitPayload } from '../types/sharedEvent.js';
+import { contributeSharedEventPhoto } from '../services/sharedEventCrowdStore.js';
+import { crowdStatusSummary } from '../services/sharedEventCrowdConsensus.js';
+import {
+  ParsedSharedEvent,
+  SharedEventCrowdEventStatus,
+  SharedEventSubmitPayload,
+} from '../types/sharedEvent.js';
 import { logger } from '../utils/logger.js';
 
 if (!admin.apps.length) {
@@ -50,6 +56,52 @@ async function requireUserId(authHeader: unknown): Promise<string> {
     throw new Error('Firebase ID token did not include a user id.');
   }
   return decoded.uid;
+}
+
+async function isCrowdContributorAccountEligible(ownerUid: string): Promise<boolean> {
+  try {
+    const user = await admin.auth().getUser(ownerUid);
+    if (user.disabled || user.providerData.length === 0) return false;
+    const createdAt = Date.parse(user.metadata.creationTime || '');
+    const accountAgeMs = Number.isFinite(createdAt) ? Date.now() - createdAt : 0;
+    const hasVerifiedIdentity = user.emailVerified || Boolean(user.phoneNumber);
+    return hasVerifiedIdentity && accountAgeMs >= 24 * 60 * 60 * 1000;
+  } catch (error) {
+    logger.warn('Could not verify shared-photo contributor account', {
+      ownerUid,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return false;
+  }
+}
+
+async function payloadHasOwnedPhoto(payload: SharedEventSubmitPayload, ownerUid: string): Promise<boolean> {
+  const expectedPath = `sharedEventUploads/${ownerUid}/`;
+  const candidatePaths = (payload.mediaUrls || []).map((mediaUrl) => {
+    try {
+      const decoded = decodeURIComponent(String(mediaUrl || ''));
+      const start = decoded.indexOf(expectedPath);
+      return start >= 0 ? decoded.slice(start).split(/[?#]/, 1)[0] : '';
+    } catch {
+      return '';
+    }
+  }).filter(Boolean);
+  if (candidatePaths.length === 0) return false;
+
+  const bucket = admin.storage().bucket(sharedEventUploadsBucketName());
+  for (const filePath of candidatePaths) {
+    try {
+      const [metadata] = await bucket.file(filePath).getMetadata();
+      if (String(metadata.metadata?.ownerUid || '') === ownerUid) return true;
+    } catch (error) {
+      logger.warn('Could not verify shared photo ownership', {
+        ownerUid,
+        filePath,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+  return false;
 }
 
 function asBodyObject(value: unknown): Record<string, unknown> {
@@ -700,7 +752,11 @@ async function processSharedEventPayloadToFirestore(params: {
 }): Promise<{
   ingestId: string;
   parsedEvents: ParsedSharedEvent[];
-  eventLinks: Array<{ privateEventId: string; publicCandidateId?: string }>;
+  eventLinks: Array<{
+    privateEventId: string;
+    publicCandidateId?: string;
+    crowdPromotion?: SharedEventCrowdEventStatus;
+  }>;
 }> {
   const sourceUrl = params.sourceUrl || resolveSourceUrl(params.payload);
   const visibility = params.visibility || await verifySharedEventSourceVisibility(params.payload, sourceUrl);
@@ -756,6 +812,10 @@ async function processSharedEventPayloadToFirestore(params: {
     ...summarizeParsedEventsForLog(parsedEvents),
   });
 
+  const hasOwnedPhoto = await payloadHasOwnedPhoto(params.payload, params.ownerUid);
+  const contributorEligible = hasOwnedPhoto
+    ? await isCrowdContributorAccountEligible(params.ownerUid)
+    : false;
   const eventLinks = await Promise.all(parsedEvents.map(async (currentParsedEvent, index) => {
     const updateIngestLink = index === 0;
     const privateEventId = await firestoreService.createPrivateSharedEvent({
@@ -764,7 +824,7 @@ async function processSharedEventPayloadToFirestore(params: {
       parsedEvent: currentParsedEvent,
       updateIngestLink,
     });
-    const publicCandidateId = currentParsedEvent.routing === 'public_candidate'
+    let publicCandidateId = currentParsedEvent.routing === 'public_candidate'
       ? await firestoreService.createPublicSharedEventCandidate({
         ownerUid: params.ownerUid,
         ingestId,
@@ -773,10 +833,24 @@ async function processSharedEventPayloadToFirestore(params: {
         updateIngestLink,
       })
       : undefined;
-    return { privateEventId, publicCandidateId };
+    const crowdPromotion = currentParsedEvent.routing !== 'public_candidate' && hasOwnedPhoto
+      ? await contributeSharedEventPhoto({
+        ownerUid: params.ownerUid,
+        ingestId,
+        privateEventId,
+        event: currentParsedEvent,
+        contributorEligible,
+        hasUserPhoto: hasOwnedPhoto,
+      })
+      : undefined;
+    publicCandidateId = publicCandidateId || crowdPromotion?.publicCandidateId;
+    return { privateEventId, publicCandidateId, crowdPromotion };
   }));
 
   const summary = summarizeSharedEventResult(parsedEvents, eventLinks);
+  const crowdEvents = eventLinks
+    .map((link) => link.crowdPromotion)
+    .filter((status): status is SharedEventCrowdEventStatus => Boolean(status));
 
   await firestoreService.updateSharedEventIngestExtractedEvents({
     ownerUid: params.ownerUid,
@@ -792,6 +866,7 @@ async function processSharedEventPayloadToFirestore(params: {
     privateEventId: summary.privateEventId,
     publicCandidateId: summary.publicCandidateId,
     parsedEvents,
+    crowdPromotion: crowdEvents.length > 0 ? crowdStatusSummary(crowdEvents) : undefined,
     processingStatus: 'completed',
   });
 

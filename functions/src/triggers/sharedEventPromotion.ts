@@ -23,7 +23,25 @@ function parsePositiveInt(value: unknown, fallback: number, min: number, max: nu
 
 function isScheduledPromotionEnabled(): boolean {
   const raw = String(process.env.SHARED_EVENT_PUBLIC_PROMOTION_ENABLED || '').trim().toLowerCase();
-  return ['1', 'true', 'yes', 'y', 'on'].includes(raw);
+  if (raw) return ['1', 'true', 'yes', 'y', 'on'].includes(raw);
+
+  let firebaseProjectId = '';
+  try {
+    firebaseProjectId = process.env.FIREBASE_CONFIG
+      ? String(JSON.parse(process.env.FIREBASE_CONFIG).projectId || '').trim()
+      : '';
+  } catch {
+    firebaseProjectId = '';
+  }
+  const currentProjectId = String(
+    process.env.GCLOUD_PROJECT ||
+    process.env.GCP_PROJECT ||
+    firebaseProjectId ||
+    ''
+  ).trim();
+  // Public venue/event writes belong in the migrated parser project. The app
+  // project hosts private share records and must never auto-publish them.
+  return currentProjectId === 'gathr-migrated';
 }
 
 export const processSharedEventPublicCandidates = onRequest(

@@ -43,7 +43,7 @@ export function getSharedEventSourceProjectId(): string {
   return currentProjectId;
 }
 
-function getSourceDb(): admin.firestore.Firestore {
+export function getSharedEventSourceDb(): admin.firestore.Firestore {
   if (!admin.apps.length) {
     admin.initializeApp();
   }
@@ -56,15 +56,19 @@ function getSourceDb(): admin.firestore.Firestore {
 
   const appName = `shared-event-source-${sourceProjectId}`;
   const existingApp = admin.apps.find((app) => app?.name === appName);
-  const app = existingApp || admin.initializeApp({ projectId: sourceProjectId }, appName);
-  return admin.firestore(app);
+  if (existingApp) return admin.firestore(existingApp);
+
+  const app = admin.initializeApp({ projectId: sourceProjectId }, appName);
+  const sourceDb = admin.firestore(app);
+  sourceDb.settings({ ignoreUndefinedProperties: true });
+  return sourceDb;
 }
 
 export async function listPublicSharedEventCandidates(options?: {
   statuses?: PublicSharedEventCandidateStatus[];
   limit?: number;
 }): Promise<PublicSharedEventCandidateRecord[]> {
-  const db = getSourceDb();
+  const db = getSharedEventSourceDb();
   const statuses = (options?.statuses || [])
     .map((status) => String(status || '').trim())
     .filter((status): status is PublicSharedEventCandidateStatus => Boolean(status));
@@ -110,7 +114,7 @@ export async function listPublicSharedEventCandidates(options?: {
 export async function claimPublicSharedEventCandidate(
   candidateId: string
 ): Promise<PublicSharedEventCandidateRecord | null> {
-  const db = getSourceDb();
+  const db = getSharedEventSourceDb();
   const normalizedCandidateId = String(candidateId || '').trim();
   if (!normalizedCandidateId) return null;
 
@@ -150,7 +154,7 @@ export async function getPublicSharedEventCandidate(
   const normalizedCandidateId = String(candidateId || '').trim();
   if (!normalizedCandidateId) return null;
 
-  const snapshot = await getSourceDb()
+  const snapshot = await getSharedEventSourceDb()
     .collection(COLLECTIONS.PUBLIC_SHARED_EVENT_CANDIDATES)
     .doc(normalizedCandidateId)
     .get();
@@ -169,7 +173,7 @@ export async function listPublicSharedEventCandidatesForIngest(
   const normalizedIngestId = String(ingestId || '').trim();
   if (!normalizedIngestId) return [];
 
-  const snapshot = await getSourceDb()
+  const snapshot = await getSharedEventSourceDb()
     .collection(COLLECTIONS.PUBLIC_SHARED_EVENT_CANDIDATES)
     .where('ingestId', '==', normalizedIngestId)
     .limit(Math.max(1, Math.min(Number(limit || 50), 100)))
@@ -188,7 +192,7 @@ export async function updatePublicSharedEventCandidate(
   const normalizedCandidateId = String(candidateId || '').trim();
   if (!normalizedCandidateId) return;
 
-  await getSourceDb()
+  await getSharedEventSourceDb()
     .collection(COLLECTIONS.PUBLIC_SHARED_EVENT_CANDIDATES)
     .doc(normalizedCandidateId)
     .set({
@@ -223,7 +227,7 @@ export async function updatePrivateSharedEventPublicPromotion(params: {
     updatedAt: admin.firestore.FieldValue.serverTimestamp(),
   };
 
-  await getSourceDb()
+  await getSharedEventSourceDb()
     .collection('users')
     .doc(ownerUid)
     .collection(COLLECTIONS.PRIVATE_SHARED_EVENTS)

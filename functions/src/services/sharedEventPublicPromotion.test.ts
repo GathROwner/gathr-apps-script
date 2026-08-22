@@ -78,6 +78,60 @@ test('buildPublicSharedEventData writes canonical venue event fields and private
   assert.equal(event.sharedEventPrivateEventId, 'private_123');
 });
 
+test('crowd consensus candidates require independent contributors and never publish an owner uid', () => {
+  const candidate = {
+    id: 'crowd_abc',
+    ownerUid: 'user-1',
+    ingestId: 'ingest-1',
+    privateEventId: 'private-1',
+    sourcePlatform: 'unknown',
+    sourceVisibility: 'user_private',
+    promotionBasis: 'crowd_consensus',
+    visibilityEvidence: {
+      method: 'no_url',
+      checkedAt: '2026-08-22T12:00:00.000Z',
+      reason: 'crowd consensus',
+    },
+    title: 'Harbour Lights Concert',
+    startDate: '2026-09-12',
+    locationName: 'Victoria Park Cultural Pavilion',
+    mediaUrls: [],
+    timezone: 'America/Halifax',
+    sourceContentSignature: 'crowd:abc',
+    fieldSources: {
+      title: 'crowd_consensus',
+      startDate: 'crowd_consensus',
+      locationName: 'crowd_consensus',
+    },
+    crowdConsensus: {
+      aggregateId: 'abc',
+      contributorCount: 3,
+      threshold: 3,
+      contributorRefs: [
+        { ownerUid: 'user-1', ingestId: 'ingest-1', privateEventId: 'private-1' },
+        { ownerUid: 'user-2', ingestId: 'ingest-2', privateEventId: 'private-2' },
+        { ownerUid: 'user-3', ingestId: 'ingest-3', privateEventId: 'private-3' },
+      ],
+    },
+    status: 'pending_validation',
+  } as PublicSharedEventCandidateRecord;
+  assert.equal(getRequiredCandidateReviewReason(candidate), '');
+
+  const venue = {
+    id: 'venue-victoria-park',
+    name: 'Victoria Park Cultural Pavilion',
+    latitude: 46.23,
+    longitude: -63.14,
+  } as VenueData;
+  const event = buildPublicSharedEventData(candidate, venue) as EventData & Record<string, unknown>;
+  assert.equal(event.sharedEventSource, 'crowd_shared_event_candidate');
+  assert.equal('sharedEventOwnerUid' in event, false);
+  assert.equal(event.imageUrl, '');
+
+  candidate.crowdConsensus!.contributorRefs[2] = candidate.crowdConsensus!.contributorRefs[1];
+  assert.equal(getRequiredCandidateReviewReason(candidate), 'crowd_contributors_not_independent');
+});
+
 test('public shared-event promotion trust requires public-sourced event facts', () => {
   const trustedCandidate = {
     title: 'Kim Albert',

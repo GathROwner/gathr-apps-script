@@ -49,6 +49,7 @@ import {
   PublicSharedEventCandidateRecord,
   SharedEventIngestRecord,
   SharedEventProcessingStatus,
+  SharedEventCrowdPromotionSummary,
   SharedEventRouting,
   SharedEventSourcePlatform,
   SharedEventSourceVisibility,
@@ -3629,6 +3630,7 @@ export async function updateSharedEventIngestExtractedEvents(params: {
   privateEventId?: string;
   publicCandidateId?: string;
   parsedEvents?: ParsedSharedEvent[];
+  crowdPromotion?: SharedEventCrowdPromotionSummary;
   processingStatus?: SharedEventProcessingStatus;
 }): Promise<void> {
   await db
@@ -3649,6 +3651,7 @@ export async function updateSharedEventIngestExtractedEvents(params: {
       ...(params.parsedEvents
         ? { eventsPreview: params.parsedEvents.slice(0, 100) }
         : {}),
+      ...(params.crowdPromotion ? { crowdPromotion: params.crowdPromotion } : {}),
       ...(params.processingStatus ? {
         processingStatus: params.processingStatus,
         ...(params.processingStatus === 'completed'
