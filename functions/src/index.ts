@@ -46,6 +46,9 @@ export {
   scheduledSharedEventPublicCandidateProcessor,
 } from './triggers/sharedEventPromotion.js';
 
+// Account verification - authenticated, rate-limited branded delivery
+export { sendBrandedEmailVerification } from './triggers/accountVerification.js';
+
 // Unknown Venues - Queue inspection and resolver controls
 export {
   listUnrecognizedVenues,
