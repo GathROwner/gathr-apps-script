@@ -858,3 +858,85 @@ test('image-only calendar shares stay private while preserving extracted event d
     Settings.now = originalNow;
   }
 });
+
+test('shared photo specials preserve address, price, and finite multi-day recurrence', async () => {
+  const originalNow = Settings.now;
+  Settings.now = () => new Date('2026-08-22T15:00:00.000Z').getTime();
+
+  try {
+    const primary = await parseSharedEventPayload({
+      mediaUrls: ['https://example.com/happy-hour.jpg'],
+      sourceApp: 'native_share_sheet',
+      timezone: 'America/Halifax',
+    }, {
+      sourceVisibility: 'user_private',
+      visibilityEvidence: {
+        method: 'no_url',
+        checkedAt: '2026-08-22T15:00:00.000Z',
+        reason: 'User photo.',
+      },
+    });
+
+    const [special] = buildCalendarImageParsedEventsForRegression(primary, [{
+      name: 'Happy Hour - Island Mussels',
+      type: 'special',
+      date: '2026-08-25',
+      startTime: '16:00',
+      endTime: '18:00',
+      venue: 'Harbour House Bistro',
+      address: '10 Water Street, Charlottetown, PE',
+      description: 'Tuesday-Friday happy hour through September 30.',
+      price: '$8',
+      recurringPattern: 'weekly_custom',
+      recurringDaysOfWeek: ['tuesday', 'wednesday', 'thursday', 'friday'],
+      recurrenceUntilDate: '2026-09-30',
+    }]);
+
+    assert.equal(special.contentKind, 'special');
+    assert.equal(special.address, '10 Water Street, Charlottetown, PE');
+    assert.equal(special.price, '$8');
+    assert.equal(special.recurringPattern, 'weekly_custom');
+    assert.deepEqual(special.recurringDaysOfWeek, ['tuesday', 'wednesday', 'thursday', 'friday']);
+    assert.equal(special.recurrenceUntilDate, '2026-09-30');
+    assert.equal(special.isExpired, false);
+    assert.equal(special.fieldSources?.address, 'uploaded_media');
+  } finally {
+    Settings.now = originalNow;
+  }
+});
+
+test('route-like shared photos remain private review items with approximate geometry', async () => {
+  const originalNow = Settings.now;
+  Settings.now = () => new Date('2026-08-22T15:00:00.000Z').getTime();
+  try {
+    const primary = await parseSharedEventPayload({
+      mediaUrls: ['https://example.com/route.jpg'],
+      timezone: 'America/Halifax',
+    }, {
+      sourceVisibility: 'user_private',
+      visibilityEvidence: {
+        method: 'no_url',
+        checkedAt: '2026-08-22T15:00:00.000Z',
+        reason: 'User photo.',
+      },
+    });
+    const [route] = buildCalendarImageParsedEventsForRegression(primary, [{
+      name: 'Lantern Walk',
+      type: 'event',
+      date: '2026-09-19',
+      startTime: '19:30',
+      endTime: '21:00',
+      venue: "Founders' Hall",
+      description: "Start at Founders' Hall. Route follows the boardwalk. Finish at Victoria Park.",
+    }]);
+
+    assert.equal(route.routing, 'private_only');
+    assert.equal(route.needsUserReview, true);
+    assert.equal(route.locationScope, 'route');
+    assert.equal(route.mapMode, 'route');
+    assert.equal(route.locationPrecision, 'approximate');
+    assert.ok(route.reviewReasons.includes('route_event_requires_review'));
+  } finally {
+    Settings.now = originalNow;
+  }
+});

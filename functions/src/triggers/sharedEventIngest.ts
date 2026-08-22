@@ -15,6 +15,7 @@ import { ApifyAdHocWebhook, startActorRunNoWait } from '../services/apifyService
 import * as firestoreService from '../services/firestoreService.js';
 import { contributeSharedEventPhoto } from '../services/sharedEventCrowdStore.js';
 import { crowdStatusSummary } from '../services/sharedEventCrowdConsensus.js';
+import { enrichPrivateSharedEventLocation } from '../services/sharedEventPrivateLocation.js';
 import {
   ParsedSharedEvent,
   SharedEventCrowdEventStatus,
@@ -776,10 +777,13 @@ async function processSharedEventPayloadToFirestore(params: {
     });
   }
 
-  const parsedEvents = await parseSharedEventPayloads(params.payload, {
+  const extractedEvents = await parseSharedEventPayloads(params.payload, {
     sourceVisibility: visibility.visibility,
     visibilityEvidence: visibility.evidence,
   });
+  const parsedEvents = await Promise.all(extractedEvents.map((event) =>
+    enrichPrivateSharedEventLocation(event)
+  ));
   const parsedEvent = parsedEvents[0];
   const normalizedSourceUrl = visibility.evidence.finalUrl
     ? normalizeSharedEventUrl(visibility.evidence.finalUrl)

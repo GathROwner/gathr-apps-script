@@ -277,6 +277,7 @@ export interface ExtractedEvent extends RecurrenceScheduleFields {
   startTime: string;
   endTime: string;
   venue: string;
+  address?: string;
   price: string;
   recurringPattern: RecurringPattern;
   relevantImageIndex?: number;
@@ -299,6 +300,7 @@ export interface ExtractedSpecial extends RecurrenceScheduleFields {
   startTime: string;
   endTime: string;
   venue: string;
+  address?: string;
   pricing: string;
   price?: string;
   discount?: string;
@@ -322,6 +324,7 @@ export interface CalendarItem extends RecurrenceScheduleFields {
   startTime: string;
   endTime?: string;
   venue: string;
+  address?: string;
   price?: string;
   description?: string;
   extractionReason?: string;

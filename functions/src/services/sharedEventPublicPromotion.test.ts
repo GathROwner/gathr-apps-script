@@ -132,6 +132,60 @@ test('crowd consensus candidates require independent contributors and never publ
   assert.equal(getRequiredCandidateReviewReason(candidate), 'crowd_contributors_not_independent');
 });
 
+test('crowd-promoted specials retain price and finite recurrence metadata', () => {
+  const venue = {
+    id: 'venue_harbour_house',
+    name: 'Harbour House Bistro',
+    address: '18 Queen Street, Charlottetown, PE',
+    latitude: 46.23,
+    longitude: -63.13,
+  } as VenueData;
+  const candidate = {
+    id: 'crowd_special',
+    ownerUid: 'user-1',
+    ingestId: 'ingest-1',
+    privateEventId: 'private-1',
+    sourcePlatform: 'unknown',
+    sourceVisibility: 'user_private',
+    promotionBasis: 'crowd_consensus',
+    visibilityEvidence: {
+      method: 'no_url',
+      checkedAt: '2026-08-22T12:00:00Z',
+      reason: 'crowd',
+    },
+    title: 'Half-Price Mocktails',
+    description: 'Tuesday-Friday happy hour.',
+    contentKind: 'special',
+    price: 'Half-Price',
+    startDate: '2026-08-25',
+    endDate: '2026-08-25',
+    startTime: '16:00',
+    endTime: '18:00',
+    recurringPattern: 'weekly_custom',
+    recurringDaysOfWeek: ['tuesday', 'wednesday', 'thursday', 'friday'],
+    recurrenceUntilDate: '2026-09-30',
+    locationName: 'Harbour House Bistro',
+    mediaUrls: [],
+    timezone: 'America/Halifax',
+    sourceContentSignature: 'crowd:special',
+    crowdConsensus: {
+      aggregateId: 'aggregate-special',
+      contributorCount: 3,
+      threshold: 3,
+      contributorRefs: [],
+    },
+    status: 'pending_validation',
+  } as PublicSharedEventCandidateRecord;
+
+  const event = buildPublicSharedEventData(candidate, venue) as EventData & Record<string, unknown>;
+  assert.equal(event.isFoodSpecial, true);
+  assert.equal(event.ticketPrice, 'Half-Price');
+  assert.equal(event.isRecurring, true);
+  assert.equal(event.recurringPattern, 'weekly_custom');
+  assert.deepEqual(event.recurringDaysOfWeek, candidate.recurringDaysOfWeek);
+  assert.equal(event.recurrenceUntilDate, '2026-09-30');
+});
+
 test('public shared-event promotion trust requires public-sourced event facts', () => {
   const trustedCandidate = {
     title: 'Kim Albert',

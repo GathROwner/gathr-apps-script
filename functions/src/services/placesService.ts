@@ -84,6 +84,7 @@ export async function searchPlace(
     location?: { lat: number; lng: number };
     radius?: number;
     types?: string[];
+    preferFirstResult?: boolean;
   }
 ): Promise<PlaceSearchResult | null> {
   const client = getClient();
@@ -116,16 +117,18 @@ export async function searchPlace(
       return null;
     }
 
-    const place = places
-      .map((candidate, index) => ({
-        candidate,
-        index,
-        score: scorePlaceForVenueMatch(candidate),
-      }))
-      .sort((a, b) => {
-        if (b.score !== a.score) return b.score - a.score;
-        return a.index - b.index;
-      })[0]?.candidate || places[0];
+    const place = options?.preferFirstResult
+      ? places[0]
+      : places
+        .map((candidate, index) => ({
+          candidate,
+          index,
+          score: scorePlaceForVenueMatch(candidate),
+        }))
+        .sort((a, b) => {
+          if (b.score !== a.score) return b.score - a.score;
+          return a.index - b.index;
+        })[0]?.candidate || places[0];
 
     return {
       placeId: place.id || '',

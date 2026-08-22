@@ -218,6 +218,13 @@ async function extractEvents(
       const processedEvents = parsed.extractedEvents.map((event: ExtractedEvent) => {
         // Sanitize recurringPattern
         event.recurringPattern = sanitizeRecurringPattern(event.recurringPattern);
+        if (
+          event.recurringPattern === 'none' &&
+          Array.isArray(event.recurringDaysOfWeek) &&
+          event.recurringDaysOfWeek.length > 1
+        ) {
+          event.recurringPattern = 'weekly_custom';
+        }
 
         // Date correction based on weekday prefix
         const dateInfo = extractDateFromText(event.description, postedLocalDate);
@@ -297,6 +304,13 @@ async function extractFoodSpecials(
       const processedSpecials = parsed.extractedSpecials.map((special: ExtractedSpecial) => {
         // Sanitize recurringPattern
         special.recurringPattern = sanitizeRecurringPattern(special.recurringPattern);
+        if (
+          special.recurringPattern === 'none' &&
+          Array.isArray(special.recurringDaysOfWeek) &&
+          special.recurringDaysOfWeek.length > 1
+        ) {
+          special.recurringPattern = 'weekly_custom';
+        }
 
         // Date correction based on weekday prefix
         const dateInfo = extractDateFromText(special.description, postedLocalDate);
@@ -3429,9 +3443,12 @@ For each EVENT found, extract:
 - startTime: Start time.
 - endTime: End time (only if shown), If no end time is shown, set endTime="" (empty string).
 - venue: Venue name if different from ${userName}
+- address: Full printed street address, including city/province/postal code when visible. Keep this separate from venue. Never omit a printed address.
 - price: if no specific price mentioned, use empty string
 - relevantImageIndex: 0-based index of the provided image that visibly contains this exact event, performer, date, or time. The first attached image is 0, the second is 1, etc. If no attached image clearly matches this specific event, use 0.
-- recurringPattern: Set to "daily" ONLY if text says "Everyday" or "Daily". Set to "weekly_monday" through "weekly_sunday" ONLY if text says "Every Monday", "Every Tuesday", etc. Otherwise set to "none".
+- recurringPattern: Set to "daily" only for "Everyday" or "Daily". Use "weekly_monday" through "weekly_sunday" for one explicit repeating weekday. Use "weekly_custom" when two or more repeating weekdays are explicit (for example "Tue-Fri" or "Tuesdays and Thursdays"). Otherwise use "none".
+- recurringDaysOfWeek: For "weekly_custom", list every explicit weekday in lowercase. Otherwise use an empty array.
+- recurrenceUntilDate: If an explicit validity end date is printed (for example "through Sep 30"), return it as YYYY-MM-DD. Otherwise use an empty string.
 - extractionReason: Why this was identified as an event
 - timeFlags: {
       start: { source: "explicit" | "implied" | "semantic", evidence: "string" },
@@ -3510,9 +3527,12 @@ For each SPECIAL found, extract:
 - startTime: Start time
 - endTime: End time
 - venue: Venue name if different from ${userName} (look for location names, venue names, "at [location]")
+- address: Full printed street address, including city/province/postal code when visible. Keep this separate from venue. Never omit a printed address.
 - pricing: Specific prices/discounts. - price: if no specific price mentioned, use empty string.
 - relevantImageIndex: 0-based index of the provided image that visibly contains this exact special, date, or time. The first attached image is 0, the second is 1, etc. If no attached image clearly matches this specific special, use 0.
-- recurringPattern: Set to "daily" ONLY if text says "Everyday" or "Daily". Set to "weekly_monday" through "weekly_sunday" ONLY if text says "Every Monday", "Every Tuesday", etc. Otherwise set to "none".
+- recurringPattern: Set to "daily" only for "Everyday" or "Daily". Use "weekly_monday" through "weekly_sunday" for one explicit repeating weekday. Use "weekly_custom" when two or more repeating weekdays are explicit (for example "Tue-Fri" or "Tuesdays and Thursdays"). Otherwise use "none".
+- recurringDaysOfWeek: For "weekly_custom", list every explicit weekday in lowercase. Otherwise use an empty array.
+- recurrenceUntilDate: If an explicit validity end date is printed (for example "through Sep 30"), return it as YYYY-MM-DD. Otherwise use an empty string.
 - extractionReason: Why this was identified as a valid special with cost savings
 
 SERIES SPLITTING RULE:
@@ -3581,10 +3601,12 @@ For each item found, extract:
 - startTime: Time if shown
 - endTime: End time if shown
 - venue: Venue name if different from ${userName} (look for location names, venue names, "at [location]")
+- address: Full printed street address, including city/province/postal code when visible. Keep this separate from venue.
 - price: if no specific price mentioned, use empty string
 - description: Any additional details
 - extractionReason: Why this was identified as a calendar item
 - relevantImageIndex: 0-based index of the provided image that visibly contains this exact calendar item, date, or time. The first attached image is 0, the second is 1, etc. If no attached image clearly matches this item, use 0.
+- recurringPattern, recurringDaysOfWeek, recurrenceUntilDate: Preserve explicit recurrence only; never invent it from repeated calendar cells.
 
 Pay special attention to:
 - Calendar grids in images
@@ -3632,6 +3654,7 @@ For each item found, extract:
 - startTime: Performance start time
 - endTime: Performance end time ONLY when the same schedule line shows an explicit range (otherwise use "")
 - venue: Venue name if different from ${userName} (look for location names, venue names, "at [location]")
+- address: Full printed street address, including city/province/postal code when visible. Keep this separate from venue.
 - price: if no specific price mentioned, use empty string
 - description: Any additional details
 - extractionReason: Why this was identified as a scheduled item

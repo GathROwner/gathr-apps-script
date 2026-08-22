@@ -63,3 +63,6 @@ functions/tmp_*
 functions/sandbox/
 functions/**/*.bak
 functions/**/*.bak_*
+
+# Local synthetic image-sharing QA corpus (may contain tester-supplied private addresses)
+functions/test-fixtures/generated-shared-event-posters/

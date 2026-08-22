@@ -43,6 +43,7 @@ const BLOCKING_REVIEW_REASONS = new Set([
   'missing_location',
   'missing_start_date',
   'missing_title',
+  'route_event_requires_review',
 ]);
 
 export interface SharedEventCrowdContribution {
@@ -56,6 +57,11 @@ export interface SharedEventCrowdContribution {
   endTime?: string;
   locationName?: string;
   address?: string;
+  contentKind?: 'event' | 'special';
+  price?: string;
+  recurringPattern?: string;
+  recurringDaysOfWeek?: string[];
+  recurrenceUntilDate?: string;
   timezone: string;
   confidence: number;
   titleKey: string;
@@ -72,6 +78,11 @@ export interface SharedEventCrowdConsensusFields {
   endTime?: string;
   locationName?: string;
   address?: string;
+  contentKind?: 'event' | 'special';
+  price?: string;
+  recurringPattern?: string;
+  recurringDaysOfWeek?: string[];
+  recurrenceUntilDate?: string;
   timezone: string;
 }
 
@@ -222,6 +233,11 @@ export function buildCrowdContribution(params: {
     endTime: params.event.endTime,
     locationName: params.event.locationName,
     address: params.event.address,
+    contentKind: params.event.contentKind,
+    price: params.event.price,
+    recurringPattern: params.event.recurringPattern,
+    recurringDaysOfWeek: params.event.recurringDaysOfWeek,
+    recurrenceUntilDate: params.event.recurrenceUntilDate,
     timezone: params.event.timezone || 'America/Halifax',
     confidence: Number(params.event.confidence || 0),
     titleKey,
@@ -320,6 +336,9 @@ export function buildCrowdConsensus(
   if (rows.some((row) => !timesAreCompatible(row.startTime, anchor.startTime))) {
     return { ready: false, reason: 'start_time_conflict' };
   }
+  if (rows.some((row) => (row.contentKind || 'event') !== (anchor.contentKind || 'event'))) {
+    return { ready: false, reason: 'content_kind_conflict' };
+  }
 
   const title = mostTrustedText(rows, (row) => row.title);
   const locationName = mostTrustedText(rows, (row) => row.locationName);
@@ -338,6 +357,13 @@ export function buildCrowdConsensus(
       endTime: consensusTime(rows, (row) => row.endTime),
       locationName,
       address,
+      contentKind: anchor.contentKind || 'event',
+      price: mostTrustedText(rows, (row) => row.price),
+      recurringPattern: mostTrustedText(rows, (row) => row.recurringPattern),
+      recurringDaysOfWeek: mostTrustedText(rows, (row) => row.recurringDaysOfWeek?.join(','))
+        ?.split(',')
+        .filter(Boolean),
+      recurrenceUntilDate: mostTrustedText(rows, (row) => row.recurrenceUntilDate),
       timezone: mostTrustedText(rows, (row) => row.timezone) || 'America/Halifax',
     },
   };

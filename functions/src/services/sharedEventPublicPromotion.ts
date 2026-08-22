@@ -122,6 +122,7 @@ export function extractSharedEventSubVenue(
 function inferCategory(candidate: PublicSharedEventCandidateRecord): string {
   const text = normalizeVenueName(`${candidate.title || ''} ${candidate.description || ''}`);
   if (/\b(happy hour|drink special|cocktail|beer|wine)\b/.test(text)) return 'Happy Hour';
+  if (candidate.contentKind === 'special') return 'Food Special';
   if (/\b(food special|bbq|burger|brunch|patio|menu|tasting|dinner|lunch)\b/.test(text)) {
     return 'Food Special';
   }
@@ -418,6 +419,13 @@ export function buildPublicSharedEventData(
     endDate: firstText(candidate.endDate, candidate.startDate),
     startTime: firstText(candidate.startTime),
     endTime: firstText(candidate.endTime),
+    ticketPrice: firstText(candidate.price),
+    isRecurring: Boolean(candidate.recurringPattern && candidate.recurringPattern !== 'none'),
+    recurringPattern: firstText(candidate.recurringPattern, 'none'),
+    recurringDaysOfWeek: Array.isArray(candidate.recurringDaysOfWeek)
+      ? candidate.recurringDaysOfWeek
+      : undefined,
+    recurrenceUntilDate: firstText(candidate.recurrenceUntilDate),
     address,
     latitude,
     longitude,

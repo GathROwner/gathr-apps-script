@@ -91,6 +91,13 @@ test('only strong, current photo-derived event facts are crowd eligible', () => 
     }).reason,
     'date_out_of_range'
   );
+  assert.equal(
+    getCrowdEligibility(photoEvent({ reviewReasons: ['route_event_requires_review'] }), {
+      hasUserPhoto: true,
+      nowIso: '2026-08-22T12:00:00-03:00',
+    }).reason,
+    'route_event_requires_review'
+  );
 });
 
 test('minor OCR title differences match while different events do not', () => {
@@ -121,6 +128,27 @@ test('three independent compatible submissions create consensus without exposing
   assert.equal(consensus.fields?.locationName, 'Victoria Park Cultural Pavilion');
   assert.ok(consensus.fields?.startTime === '19:00' || consensus.fields?.startTime === '19:15');
   assert.equal('mediaUrls' in (consensus.fields || {}), false);
+});
+
+test('crowd consensus preserves special and recurrence semantics', () => {
+  const recurringSpecial = {
+    contentKind: 'special' as const,
+    price: '$8',
+    recurringPattern: 'weekly_custom',
+    recurringDaysOfWeek: ['tuesday', 'wednesday', 'thursday', 'friday'],
+    recurrenceUntilDate: '2026-09-30',
+  };
+  const consensus = buildCrowdConsensus([
+    contribution('user-1', recurringSpecial),
+    contribution('user-2', recurringSpecial),
+    contribution('user-3', recurringSpecial),
+  ]);
+  assert.equal(consensus.ready, true);
+  assert.equal(consensus.fields?.contentKind, 'special');
+  assert.equal(consensus.fields?.price, '$8');
+  assert.equal(consensus.fields?.recurringPattern, 'weekly_custom');
+  assert.deepEqual(consensus.fields?.recurringDaysOfWeek, recurringSpecial.recurringDaysOfWeek);
+  assert.equal(consensus.fields?.recurrenceUntilDate, '2026-09-30');
 });
 
 test('conflicting times and locations stay in separate aggregates', () => {

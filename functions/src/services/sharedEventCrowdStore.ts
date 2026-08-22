@@ -156,6 +156,11 @@ async function ensureCrowdPublicCandidate(
     endTime: consensus.fields.endTime,
     locationName: consensus.fields.locationName,
     address: consensus.fields.address,
+    contentKind: consensus.fields.contentKind,
+    price: consensus.fields.price,
+    recurringPattern: consensus.fields.recurringPattern,
+    recurringDaysOfWeek: consensus.fields.recurringDaysOfWeek,
+    recurrenceUntilDate: consensus.fields.recurrenceUntilDate,
     mediaUrls: [],
     timezone: consensus.fields.timezone,
     sourceContentSignature: `crowd:${aggregateId}`,
@@ -292,6 +297,11 @@ export async function contributeSharedEventPhoto(params: {
       endTime: existing?.endTime || contribution.endTime,
       locationName: existing?.locationName || contribution.locationName,
       address: existing?.address || contribution.address,
+      contentKind: existing?.contentKind || contribution.contentKind,
+      price: existing?.price || contribution.price,
+      recurringPattern: existing?.recurringPattern || contribution.recurringPattern,
+      recurringDaysOfWeek: existing?.recurringDaysOfWeek || contribution.recurringDaysOfWeek,
+      recurrenceUntilDate: existing?.recurrenceUntilDate || contribution.recurrenceUntilDate,
       timezone: existing?.timezone || contribution.timezone,
     };
     const status = existing && TERMINAL_CROWD_STATUSES.has(existing.status)

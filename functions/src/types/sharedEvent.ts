@@ -133,6 +133,16 @@ export interface ParsedSharedEvent {
   endTime?: string;
   locationName?: string;
   address?: string;
+  latitude?: number;
+  longitude?: number;
+  locationPrecision?: 'exact' | 'approximate' | 'none';
+  locationScope?: 'venue' | 'route' | 'unknown';
+  mapMode?: 'venue' | 'route' | 'none';
+  contentKind?: 'event' | 'special';
+  price?: string;
+  recurringPattern?: string;
+  recurringDaysOfWeek?: string[];
+  recurrenceUntilDate?: string;
   mediaUrls: string[];
   timezone: string;
   confidence: number;
@@ -236,6 +246,11 @@ export interface PublicSharedEventCandidateRecord {
   endTime?: string;
   locationName?: string;
   address?: string;
+  contentKind?: 'event' | 'special';
+  price?: string;
+  recurringPattern?: string;
+  recurringDaysOfWeek?: string[];
+  recurrenceUntilDate?: string;
   mediaUrls: string[];
   timezone: string;
   sourceContentSignature: string;

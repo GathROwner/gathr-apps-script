@@ -1,7 +1,8 @@
 import { createHash } from 'crypto';
 import { DateTime } from 'luxon';
 import { extractContentByType } from '../parsing/eventExtractor.js';
-import type { ExtractedItem } from '../parsing/types.js';
+import { classifyContent } from '../parsing/contentClassifier.js';
+import type { ContentType, ExtractedItem } from '../parsing/types.js';
 import {
   ParsedSharedEvent,
   SharedEventFieldSource,
@@ -13,13 +14,13 @@ import {
 } from '../types/sharedEvent.js';
 import { logger } from '../utils/logger.js';
 
-export const SHARED_EVENT_PARSER_VERSION = 'shared-event-parser-v8';
+export const SHARED_EVENT_PARSER_VERSION = 'shared-event-parser-v9';
 
 const DEFAULT_TIMEZONE = 'America/Halifax';
 const MAX_TEXT_LENGTH = 12000;
 const MAX_SHORT_FIELD_LENGTH = 500;
 const MAX_MEDIA_URLS = 8;
-const MAX_CALENDAR_IMAGE_EXTRACTION_URLS = 6;
+const MAX_SHARED_EVENT_IMAGE_EXTRACTION_URLS = 6;
 const PUBLIC_PROBE_FETCH_TIMEOUT_MS = 3000;
 const PUBLIC_PROBE_TOTAL_BUDGET_MS = 7000;
 const MONTH_LOOKUP: Record<string, number> = {
@@ -1339,6 +1340,73 @@ function reviewReasonsForEvent(params: {
   return reviewReasons;
 }
 
+const RECURRING_WEEKDAYS = new Set([
+  'monday',
+  'tuesday',
+  'wednesday',
+  'thursday',
+  'friday',
+  'saturday',
+  'sunday',
+]);
+
+function normalizedRecurringDays(value: unknown): string[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  const days = [...new Set(value
+    .map((day) => cleanString(day, 20).toLowerCase())
+    .filter((day) => RECURRING_WEEKDAYS.has(day)))];
+  return days.length > 0 ? days : undefined;
+}
+
+function normalizedRecurringPattern(value: unknown): string | undefined {
+  const pattern = cleanString(value, 40).toLowerCase();
+  if (!pattern || pattern === 'none') return undefined;
+  if (pattern === 'daily' || pattern === 'weekly_custom' || /^weekly_(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday)$/.test(pattern)) {
+    return pattern;
+  }
+  return undefined;
+}
+
+function cleanExtractedPrice(value: unknown): string | undefined {
+  if (value && typeof value === 'object') {
+    const record = value as Record<string, unknown>;
+    return cleanString(record.price || record.amount || record.discount || record.details, 180) || undefined;
+  }
+  return cleanString(value, 180) || undefined;
+}
+
+function extractPrintedStreetAddress(value: unknown): string | undefined {
+  const text = cleanLongText(value);
+  if (!text) return undefined;
+  const match = text.match(
+    /\b\d{1,6}\s+[a-z0-9][a-z0-9 .'-]{1,70}\s+(?:street|st\.?|road|rd\.?|drive|dr\.?|avenue|ave\.?|lane|ln\.?|court|ct\.?|boulevard|blvd\.?|highway|hwy\.?|route)\b(?:\s*,?\s*[a-z .'-]{2,50})?(?:\s*,?\s*(?:pe|pei|prince edward island))?(?:\s+[a-z]\d[a-z]\s?\d[a-z]\d)?/i
+  );
+  return match ? cleanString(match[0], 260) : undefined;
+}
+
+function extractVenuePrefixFromPrintedAddress(value: unknown): string | undefined {
+  const text = cleanString(value, 260);
+  const streetAddress = extractPrintedStreetAddress(text);
+  if (!text || !streetAddress) return undefined;
+  const streetIndex = text.toLowerCase().indexOf(streetAddress.toLowerCase());
+  if (streetIndex <= 0) return undefined;
+  return cleanExtractedVenueCandidate(
+    text.slice(0, streetIndex).replace(/[,;:\s-]+$/g, '')
+  ) || undefined;
+}
+
+function itemLooksLikeRoute(item: ExtractedItem): boolean {
+  const text = cleanLongText([
+    item.name,
+    'description' in item ? item.description : '',
+    'extractionReason' in item ? item.extractionReason : '',
+  ].filter(Boolean).join('\n'));
+  const hasRouteWord = /\b(route|parade|walk|march|procession|run course|ride course)\b/i.test(text);
+  const hasRouteStructure = /\b(start|starting point|meet at)\b/i.test(text) &&
+    /\b(finish|ends? at|follow|via|along|through)\b/i.test(text);
+  return hasRouteWord && hasRouteStructure;
+}
+
 function eventLooksExpired(startDate: string | undefined, startTime: string | undefined, timezone: string): boolean {
   if (!startDate) return false;
   const eventDate = DateTime.fromFormat(startDate, 'yyyy-MM-dd', { zone: timezone });
@@ -1659,14 +1727,45 @@ function buildExtractedParsedEventsFromCalendarItems(
       const startDate = normalizeIsoDate(item.date, primary.timezone);
       const startTime = normalizeTime(item.startTime);
       const endTime = normalizeTime('endTime' in item ? item.endTime : undefined);
-      const locationName = cleanExtractedVenueCandidate(item.venue) || inferredVenue || undefined;
-      const address = inferredAddress || undefined;
       const description = cleanLongText('description' in item ? item.description : '') ||
         `Extracted from shared calendar image.`;
+      const rawExtractedAddress = cleanString('address' in item ? item.address : '', 260);
+      const locationName = cleanExtractedVenueCandidate(item.venue) ||
+        extractVenuePrefixFromPrintedAddress(rawExtractedAddress) ||
+        inferredVenue ||
+        undefined;
+      const extractedAddress = extractPrintedStreetAddress(rawExtractedAddress) || rawExtractedAddress ||
+        extractPrintedStreetAddress(description);
+      const address = extractedAddress || inferredAddress || undefined;
+      const contentKind = (
+        ('type' in item && item.type === 'special') || item._sourceType === 'special'
+      ) ? 'special' as const : 'event' as const;
+      const price = cleanExtractedPrice(
+        'pricing' in item ? item.pricing : ('price' in item ? item.price : ''),
+      );
+      let recurringPattern = normalizedRecurringPattern(
+        'recurringPattern' in item ? item.recurringPattern : undefined
+      );
+      const recurringDaysOfWeek = normalizedRecurringDays(
+        'recurringDaysOfWeek' in item ? item.recurringDaysOfWeek : undefined
+      );
+      if (!recurringPattern && (recurringDaysOfWeek?.length || 0) > 1) {
+        recurringPattern = 'weekly_custom';
+      }
+      const recurrenceUntilDate = normalizeIsoDate(
+        'recurrenceUntilDate' in item ? item.recurrenceUntilDate : undefined,
+        primary.timezone
+      );
+      const routeLike = itemLooksLikeRoute(item);
 
       if (!title && !startDate) return undefined;
 
-      const isExpired = eventLooksExpired(startDate, startTime, primary.timezone);
+      const expiryDate = recurrenceUntilDate || startDate;
+      const isExpired = eventLooksExpired(
+        expiryDate,
+        expiryDate === startDate ? startTime : undefined,
+        primary.timezone
+      );
       const routing = isExpired
         ? 'not_public_candidate'
         : primary.sourceVisibility === 'public_verified'
@@ -1679,6 +1778,7 @@ function buildExtractedParsedEventsFromCalendarItems(
         address,
         isExpired,
       });
+      if (routeLike) reviewReasons.push('route_event_requires_review');
       const confidence = confidenceScore({
         title,
         startDate,
@@ -1687,7 +1787,7 @@ function buildExtractedParsedEventsFromCalendarItems(
         address,
         sourceUrl: primary.sourceUrl,
       });
-      const needsUserReview = reviewReasons.includes('missing_title') ||
+      const needsUserReview = routeLike || reviewReasons.includes('missing_title') ||
         reviewReasons.includes('missing_start_date') ||
         reviewReasons.includes('event_expired') ||
         confidence < 55;
@@ -1709,6 +1809,14 @@ function buildExtractedParsedEventsFromCalendarItems(
         endTime,
         locationName,
         address,
+        contentKind,
+        price,
+        recurringPattern,
+        recurringDaysOfWeek,
+        recurrenceUntilDate,
+        locationScope: routeLike ? 'route' : 'venue',
+        mapMode: routeLike ? 'route' : 'venue',
+        locationPrecision: routeLike ? 'approximate' : undefined,
         routing,
         status,
         confidence,
@@ -1725,7 +1833,7 @@ function buildExtractedParsedEventsFromCalendarItems(
           locationName: cleanExtractedVenueCandidate(item.venue)
             ? extractionSource
             : primary.fieldSources?.locationName,
-          address: inferredAddress ? primary.fieldSources?.address : undefined,
+          address: extractedAddress ? extractionSource : (inferredAddress ? primary.fieldSources?.address : undefined),
         }),
         isExpired,
         sequenceIndex: index,
@@ -1759,40 +1867,89 @@ async function buildExtractedParsedEventsFromCalendarImage(primary: ParsedShared
     const timestamp = primary.visibilityEvidence.sourcePublishedAt ||
       DateTime.now().setZone(primary.timezone).toISO() ||
       new Date().toISOString();
-    const calendarImageUrls = primary.mediaUrls.slice(0, MAX_CALENDAR_IMAGE_EXTRACTION_URLS);
-    const items = await extractContentByType(
-      'CALENDAR',
+    const imageUrls = primary.mediaUrls.slice(0, MAX_SHARED_EVENT_IMAGE_EXTRACTION_URLS);
+    const extraction = await extractSharedEventImageItems(
       combinedText,
-      calendarImageUrls,
-      primary.locationName || primary.title || 'Facebook share',
+      imageUrls,
+      primary.locationName || primary.title || 'Shared photo',
       timestamp,
-      {
-        gptUsageHandler: async (usage) => {
-          logger.info('Shared event calendar image GPT usage', {
-            tag: 'shared_event_calendar_image',
-            parserVersion: SHARED_EVENT_PARSER_VERSION,
-            sourcePlatform: primary.sourcePlatform,
-            sourceVisibility: primary.sourceVisibility,
-            imageCount: calendarImageUrls.length,
-            ...usage,
-          });
-        },
-      }
+      primary
     );
 
-    logger.info('Shared event calendar image extraction complete', {
-      tag: 'shared_event_calendar_image',
+    logger.info('Shared event image extraction complete', {
+      tag: 'shared_event_image',
       parserVersion: SHARED_EVENT_PARSER_VERSION,
       sourcePlatform: primary.sourcePlatform,
       sourceVisibility: primary.sourceVisibility,
-      imageCount: calendarImageUrls.length,
-      itemCount: items.length,
+      contentType: extraction.contentType,
+      classificationConfidence: extraction.classificationConfidence,
+      imageCount: imageUrls.length,
+      itemCount: extraction.items.length,
     });
 
-    return buildExtractedParsedEventsFromCalendarItems(primary, items);
+    return buildExtractedParsedEventsFromCalendarItems(primary, extraction.items);
   } catch {
     return [];
   }
+}
+
+async function extractSharedEventImageItems(
+  combinedText: string,
+  imageUrls: string[],
+  sourceName: string,
+  timestamp: string,
+  primary?: ParsedSharedEvent
+): Promise<{ contentType: ContentType; classificationConfidence: number; items: ExtractedItem[] }> {
+  let contentType: ContentType = 'CALENDAR';
+  let classificationConfidence = 0;
+  try {
+    const classification = await classifyContent(combinedText, imageUrls, sourceName);
+    if (classification.contentType !== 'unknown') {
+      contentType = classification.contentType;
+    }
+    classificationConfidence = Number(classification.confidence || 0);
+  } catch (error) {
+    logger.warn('Shared event image classification failed; using calendar fallback', {
+      tag: 'shared_event_image_classification',
+      error: error instanceof Error ? error.message : String(error),
+    });
+  }
+
+  const items = await extractContentByType(
+    contentType,
+    combinedText,
+    imageUrls,
+    sourceName,
+    timestamp,
+    {
+      gptUsageHandler: async (usage) => {
+        logger.info('Shared event image GPT usage', {
+          tag: 'shared_event_image',
+          parserVersion: SHARED_EVENT_PARSER_VERSION,
+          sourcePlatform: primary?.sourcePlatform || 'qa_fixture',
+          sourceVisibility: primary?.sourceVisibility || 'user_private',
+          contentType,
+          imageCount: imageUrls.length,
+          ...usage,
+        });
+      },
+    }
+  );
+  return { contentType, classificationConfidence, items };
+}
+
+export async function extractSharedEventImageItemsForRegression(params: {
+  combinedText?: string;
+  imageUrls: string[];
+  sourceName?: string;
+  timestamp: string;
+}): Promise<{ contentType: ContentType; classificationConfidence: number; items: ExtractedItem[] }> {
+  return extractSharedEventImageItems(
+    params.combinedText || '',
+    params.imageUrls,
+    params.sourceName || 'Shared photo QA fixture',
+    params.timestamp
+  );
 }
 
 export function buildCalendarImageParsedEventsForRegression(
