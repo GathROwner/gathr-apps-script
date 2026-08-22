@@ -1177,9 +1177,11 @@ export const searchSharedEventVenueCandidates = onRequest(
       });
     } catch (error) {
       logger.error('searchSharedEventVenueCandidates failed', error, { ownerUid });
-      response.status(500).json({
+      response.status(ownerUid ? 500 : 401).json({
         success: false,
-        error: error instanceof Error ? error.message : 'Venue search failed.',
+        error: ownerUid
+          ? error instanceof Error ? error.message : 'Venue search failed.'
+          : 'Unauthorized',
       });
     }
   }
@@ -1274,9 +1276,11 @@ export const confirmSharedEventVenue = onRequest(
       });
     } catch (error) {
       logger.error('confirmSharedEventVenue failed', error, { ownerUid });
-      response.status(500).json({
+      response.status(ownerUid ? 500 : 401).json({
         success: false,
-        error: error instanceof Error ? error.message : 'Venue confirmation failed.',
+        error: ownerUid
+          ? error instanceof Error ? error.message : 'Venue confirmation failed.'
+          : 'Unauthorized',
       });
     }
   }
