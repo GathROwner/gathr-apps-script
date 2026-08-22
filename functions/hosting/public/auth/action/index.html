@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#17283a" />
+    <meta name="robots" content="noindex,nofollow" />
+    <title>GathR account</title>
+    <link rel="stylesheet" href="/auth/action/styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="card" aria-live="polite" aria-busy="true" id="card">
+        <header class="brand" aria-label="GathR">
+          <span class="brand-mark" aria-hidden="true">G</span>
+          <span class="brand-name">GathR</span>
+        </header>
+
+        <div class="status-icon status-icon--working" id="status-icon" aria-hidden="true">
+          <span class="spinner"></span>
+        </div>
+
+        <p class="eyebrow" id="eyebrow">Account security</p>
+        <h1 id="title">Checking your link…</h1>
+        <p class="message" id="message">This should only take a moment.</p>
+
+        <form class="password-form" id="password-form" hidden>
+          <input type="email" name="username" autocomplete="username" tabindex="-1" hidden />
+          <label for="new-password">New password</label>
+          <div class="password-field">
+            <input id="new-password" name="new-password" type="password" minlength="6" autocomplete="new-password" required aria-describedby="password-help" />
+            <button class="show-password" id="show-password" type="button" aria-label="Show password">Show</button>
+          </div>
+          <p class="field-help" id="password-help">Use at least 6 characters.</p>
+          <button class="button button--primary" id="save-password" type="submit">Save new password</button>
+        </form>
+
+        <div class="actions" id="actions" hidden>
+          <a class="button button--primary" id="primary-action" href="https://www.gathrapp.ca/app">Open GathR</a>
+          <button class="button button--secondary" id="retry-action" type="button" hidden>Try again</button>
+        </div>
+
+        <p class="help" id="help" hidden>
+          Need another link? Open GathR and repeat the action that sent this email.
+        </p>
+      </section>
+      <footer>Discover what’s happening nearby.</footer>
+    </main>
+    <script type="module" src="/auth/action/action.js"></script>
+  </body>
+</html>

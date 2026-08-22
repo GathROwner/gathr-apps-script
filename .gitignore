@@ -40,6 +40,7 @@ backups/
 gathr-backend/
 
 # Generated validation and tool outputs
+qa-artifacts/
 validation/reports/
 tools/**/results/
 tools/**/tmp/
