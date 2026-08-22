@@ -55,6 +55,7 @@ import {
   SharedEventSourceVisibility,
   SharedEventStatus,
   SharedEventSubmitPayload,
+  SharedEventVenueSuggestion,
 } from '../types/sharedEvent.js';
 import {
   getUntrustedPublicPromotionReviewReasons,
@@ -3419,6 +3420,153 @@ export async function getSharedEventIngest(params: {
     .doc(params.ingestId)
     .get();
   return snapshot.exists ? snapshot.data() as SharedEventIngestRecord : undefined;
+}
+
+export async function getPrivateSharedEvent(params: {
+  ownerUid: string;
+  privateEventId: string;
+}): Promise<PrivateSharedEventRecord | undefined> {
+  const snapshot = await db
+    .collection('users')
+    .doc(params.ownerUid)
+    .collection(COLLECTIONS.PRIVATE_SHARED_EVENTS)
+    .doc(params.privateEventId)
+    .get();
+  return snapshot.exists ? snapshot.data() as PrivateSharedEventRecord : undefined;
+}
+
+export async function cacheSharedEventVenueSuggestions(params: {
+  ownerUid: string;
+  privateEventId: string;
+  suggestions: SharedEventVenueSuggestion[];
+}): Promise<void> {
+  await db
+    .collection('users')
+    .doc(params.ownerUid)
+    .collection(COLLECTIONS.PRIVATE_SHARED_EVENTS)
+    .doc(params.privateEventId)
+    .set({
+      venueResolutionSuggestions: params.suggestions,
+      venueResolutionSuggestionsAt: admin.firestore.FieldValue.serverTimestamp(),
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    }, { merge: true });
+}
+
+export async function applySharedEventVenueResolution(params: {
+  ownerUid: string;
+  ingestId: string;
+  originalLocationName: string;
+  suggestion?: SharedEventVenueSuggestion;
+  noMatch?: boolean;
+}): Promise<Array<{ privateEventId: string; event: PrivateSharedEventRecord }>> {
+  const collectionRef = db
+    .collection('users')
+    .doc(params.ownerUid)
+    .collection(COLLECTIONS.PRIVATE_SHARED_EVENTS);
+  const ingestRef = db
+    .collection('users')
+    .doc(params.ownerUid)
+    .collection(COLLECTIONS.SHARED_EVENT_INGESTS)
+    .doc(params.ingestId);
+  const ingestSnapshot = await ingestRef.get();
+  const ingest = ingestSnapshot.data() as SharedEventIngestRecord | undefined;
+  const ids = ingest?.privateEventIds || [];
+  const normalizedTarget = normalizeVenueName(params.originalLocationName);
+  const targetIds = ids.filter((privateEventId, index) => (
+    normalizeVenueName(ingest?.eventsPreview?.[index]?.locationName || '') === normalizedTarget
+  ));
+  const matches = (await Promise.all(targetIds.map((privateEventId) => (
+    collectionRef.doc(privateEventId).get()
+  )))).filter((docSnapshot) => docSnapshot.exists);
+  if (matches.length === 0) return [];
+
+  const batch = db.batch();
+  const updated: Array<{ privateEventId: string; event: PrivateSharedEventRecord }> = [];
+  for (const docSnapshot of matches) {
+    const sourceIndex = ids.indexOf(docSnapshot.id);
+    const sourceEvent = ingest?.eventsPreview?.[sourceIndex];
+    if (!sourceEvent) continue;
+    const privateMetadata = docSnapshot.data() as PrivateSharedEventRecord;
+    const event: PrivateSharedEventRecord = {
+      ...sourceEvent,
+      ownerUid: params.ownerUid,
+      ingestId: params.ingestId,
+      publicCandidateId: privateMetadata.publicCandidateId,
+      crowdPromotion: privateMetadata.crowdPromotion,
+    };
+    const reviewReasons = (event.reviewReasons || [])
+      .filter((reason) => reason !== 'venue_selection_required');
+    const remainingReviewReasons = params.noMatch
+      ? Array.from(new Set([...reviewReasons, 'venue_not_confirmed']))
+      : reviewReasons;
+    const update: Partial<PrivateSharedEventRecord> & Record<string, unknown> = params.noMatch
+      ? {
+        venueResolutionStatus: 'no_match',
+        needsUserReview: true,
+        status: event.isExpired ? 'expired' : 'needs_user_review',
+        reviewReasons: remainingReviewReasons,
+      }
+      : {
+        locationName: params.suggestion!.name,
+        address: params.suggestion!.formattedAddress,
+        latitude: params.suggestion!.latitude,
+        longitude: params.suggestion!.longitude,
+        googlePlaceId: params.suggestion!.placeId,
+        venueResolutionStatus: 'confirmed',
+        locationScope: 'venue',
+        locationPrecision: 'exact',
+        mapMode: 'venue',
+        needsUserReview: remainingReviewReasons.length > 0,
+        status: event.isExpired
+          ? 'expired'
+          : remainingReviewReasons.length > 0 ? 'needs_user_review' : 'saved',
+        reviewReasons: remainingReviewReasons,
+        fieldSources: {
+          ...(event.fieldSources || {}),
+          address: 'user_confirmation',
+        },
+      };
+    batch.set(docSnapshot.ref, {
+      ...update,
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    }, { merge: true });
+    updated.push({
+      privateEventId: docSnapshot.id,
+      event: { ...event, ...update } as PrivateSharedEventRecord,
+    });
+  }
+
+  const updatedById = new Map(updated.map((entry) => [entry.privateEventId, entry.event]));
+  const nextPreview = (ingest?.eventsPreview || []).map((event, index) => {
+    const privateEventId = ids[index];
+    const resolved = privateEventId ? updatedById.get(privateEventId) : undefined;
+    if (!resolved) return event;
+    return {
+      ...event,
+      locationName: resolved.locationName,
+      address: resolved.address,
+      latitude: resolved.latitude,
+      longitude: resolved.longitude,
+      googlePlaceId: resolved.googlePlaceId,
+      venueResolutionStatus: resolved.venueResolutionStatus,
+      locationScope: resolved.locationScope,
+      locationPrecision: resolved.locationPrecision,
+      mapMode: resolved.mapMode,
+      needsUserReview: resolved.needsUserReview,
+      status: resolved.status,
+      reviewReasons: resolved.reviewReasons,
+      fieldSources: resolved.fieldSources,
+    };
+  });
+  const allReviewReasons = Array.from(new Set(nextPreview.flatMap((event) => event.reviewReasons || [])));
+  batch.set(ingestRef, {
+    eventsPreview: nextPreview,
+    needsUserReview: nextPreview.some((event) => event.needsUserReview),
+    reviewReasons: allReviewReasons,
+    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+  }, { merge: true });
+  await batch.commit();
+  return updated;
 }
 
 export async function markSharedEventIngestProcessing(params: {

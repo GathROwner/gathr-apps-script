@@ -3101,6 +3101,33 @@ function buildCalendarKeyWithoutDate(item: CalendarItem): string {
   return `${time}|${name}`;
 }
 
+function normalizeCalendarTitleForMerge(value: string): string {
+  return normalizeCalendarKey(value)
+    .replace(/\b(?:free|admission free|no cover)\b/g, ' ')
+    .replace(/\b(?:cad|cdn|c)\s*\d+(?:\s+\d{1,2})?\b/g, ' ')
+    .replace(/\b\d+(?:\s+\d{1,2})?\s*(?:dollars?|bucks?)\b/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function calendarItemsDescribeSameListing(first: CalendarItem, second: CalendarItem): boolean {
+  const firstDate = String(first.date || '').trim();
+  const secondDate = String(second.date || '').trim();
+  if (!firstDate || !secondDate || firstDate !== secondDate) return false;
+
+  const firstTime = String(first.startTime || '').trim();
+  const secondTime = String(second.startTime || '').trim();
+  if (!firstTime || !secondTime || firstTime !== secondTime) return false;
+
+  const firstTitle = normalizeCalendarTitleForMerge(first.name || '');
+  const secondTitle = normalizeCalendarTitleForMerge(second.name || '');
+  if (!firstTitle || !secondTitle) return false;
+
+  return firstTitle === secondTitle ||
+    (firstTitle.length >= 8 && secondTitle.includes(firstTitle)) ||
+    (secondTitle.length >= 8 && firstTitle.includes(secondTitle));
+}
+
 function mergeCalendarItems(
   primary: CalendarItem[],
   supplemental: CalendarItem[]
@@ -3116,6 +3143,26 @@ function mergeCalendarItems(
   }
 
   for (const item of supplemental || []) {
+    const semanticDuplicateIndex = merged.findIndex((existing) =>
+      calendarItemsDescribeSameListing(existing, item)
+    );
+    if (semanticDuplicateIndex >= 0) {
+      const existing = merged[semanticDuplicateIndex];
+      merged[semanticDuplicateIndex] = {
+        ...item,
+        ...existing,
+        venue: existing.venue || item.venue,
+        address: existing.address || item.address,
+        description: existing.description || item.description,
+        price: existing.price || item.price,
+        extractionReason: [existing.extractionReason, item.extractionReason]
+          .filter(Boolean)
+          .join('; '),
+      };
+      seen.add(buildCalendarKey(merged[semanticDuplicateIndex]));
+      continue;
+    }
+
     const looseKey = buildCalendarKeyWithoutDate(item);
     const replacementIndex = merged.findIndex((existing) =>
       !String(existing.date || '').trim() &&
@@ -3145,6 +3192,13 @@ function mergeCalendarItems(
   }
 
   return merged;
+}
+
+export function mergeCalendarItemsForRegression(
+  primary: CalendarItem[],
+  supplemental: CalendarItem[]
+): CalendarItem[] {
+  return mergeCalendarItems(primary, supplemental);
 }
 
 async function supplementCalendarWithOcr(

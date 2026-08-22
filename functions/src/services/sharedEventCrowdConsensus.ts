@@ -44,6 +44,7 @@ const BLOCKING_REVIEW_REASONS = new Set([
   'missing_start_date',
   'missing_title',
   'route_event_requires_review',
+  'venue_selection_required',
 ]);
 
 export interface SharedEventCrowdContribution {

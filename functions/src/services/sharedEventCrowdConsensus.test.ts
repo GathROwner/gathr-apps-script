@@ -98,6 +98,13 @@ test('only strong, current photo-derived event facts are crowd eligible', () => 
     }).reason,
     'route_event_requires_review'
   );
+  assert.equal(
+    getCrowdEligibility(photoEvent({ reviewReasons: ['venue_selection_required'] }), {
+      hasUserPhoto: true,
+      nowIso: '2026-08-22T12:00:00-03:00',
+    }).reason,
+    'venue_selection_required'
+  );
 });
 
 test('minor OCR title differences match while different events do not', () => {

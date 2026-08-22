@@ -16,9 +16,12 @@ import * as firestoreService from '../services/firestoreService.js';
 import { contributeSharedEventPhoto } from '../services/sharedEventCrowdStore.js';
 import { crowdStatusSummary } from '../services/sharedEventCrowdConsensus.js';
 import { enrichPrivateSharedEventLocation } from '../services/sharedEventPrivateLocation.js';
+import { resolveOrRequireSharedEventVenue } from '../services/sharedEventVenueResolution.js';
+import { searchPlaceCandidates } from '../services/placesService.js';
 import {
   ParsedSharedEvent,
   SharedEventCrowdEventStatus,
+  SharedEventVenueSuggestion,
   SharedEventSubmitPayload,
 } from '../types/sharedEvent.js';
 import { logger } from '../utils/logger.js';
@@ -29,6 +32,7 @@ if (!admin.apps.length) {
 
 const openAiApiKey = defineSecret('OPENAI_API_KEY');
 const apifyApiToken = defineSecret('APIFY_TOKEN');
+const googlePlacesApiKey = defineSecret('GOOGLE_PLACES_API_KEY');
 const TASK_QUEUE_LOCATION = 'northamerica-northeast1';
 const DEFAULT_FB_POSTS_SCRAPER_ACTOR_ID = 'KoJrdxJCTtpon81KY';
 const MAX_SHARED_EVENT_UPLOAD_BYTES = 8 * 1024 * 1024;
@@ -374,6 +378,18 @@ function eventResponse(parsedEvent: ParsedSharedEvent, ids?: {
     endTime: parsedEvent.endTime,
     locationName: parsedEvent.locationName,
     address: parsedEvent.address,
+    latitude: parsedEvent.latitude,
+    longitude: parsedEvent.longitude,
+    resolvedVenueId: parsedEvent.resolvedVenueId,
+    googlePlaceId: parsedEvent.googlePlaceId,
+    venueResolutionStatus: parsedEvent.venueResolutionStatus,
+    locationScope: parsedEvent.locationScope,
+    mapMode: parsedEvent.mapMode,
+    contentKind: parsedEvent.contentKind,
+    price: parsedEvent.price,
+    recurringPattern: parsedEvent.recurringPattern,
+    recurringDaysOfWeek: parsedEvent.recurringDaysOfWeek,
+    recurrenceUntilDate: parsedEvent.recurrenceUntilDate,
     mediaUrls: parsedEvent.mediaUrls,
     imageUrl: parsedEvent.mediaUrls[0],
     sourceUrl: parsedEvent.sourceUrl,
@@ -781,9 +797,10 @@ async function processSharedEventPayloadToFirestore(params: {
     sourceVisibility: visibility.visibility,
     visibilityEvidence: visibility.evidence,
   });
-  const parsedEvents = await Promise.all(extractedEvents.map((event) =>
-    enrichPrivateSharedEventLocation(event)
-  ));
+  const parsedEvents = await Promise.all(extractedEvents.map(async (event) => {
+    const enriched = await enrichPrivateSharedEventLocation(event);
+    return resolveOrRequireSharedEventVenue(enriched);
+  }));
   const parsedEvent = parsedEvents[0];
   const normalizedSourceUrl = visibility.evidence.finalUrl
     ? normalizeSharedEventUrl(visibility.evidence.finalUrl)
@@ -908,7 +925,7 @@ export const processSharedEventIngest = onTaskDispatched(
     timeoutSeconds: 540,
     memory: '1GiB',
     region: TASK_QUEUE_LOCATION,
-    secrets: [openAiApiKey, apifyApiToken],
+    secrets: [openAiApiKey, apifyApiToken, googlePlacesApiKey],
   },
   async (request) => {
     const ownerUid = String(request.data?.ownerUid || '').trim();
@@ -1056,13 +1073,222 @@ export const uploadSharedEventImage = onRequest(
   }
 );
 
+function sharedEventVenueSuggestionsFromRecord(value: unknown): SharedEventVenueSuggestion[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter((entry): entry is SharedEventVenueSuggestion => {
+    if (!entry || typeof entry !== 'object') return false;
+    const candidate = entry as Record<string, unknown>;
+    return Boolean(String(candidate.placeId || '').trim()) &&
+      Boolean(String(candidate.name || '').trim()) &&
+      Number.isFinite(Number(candidate.latitude)) &&
+      Number.isFinite(Number(candidate.longitude));
+  });
+}
+
+async function loadSharedEventVenueSuggestions(params: {
+  ownerUid: string;
+  privateEventId: string;
+  refresh?: boolean;
+}): Promise<{
+  event: Awaited<ReturnType<typeof firestoreService.getPrivateSharedEvent>>;
+  sourceEvent?: ParsedSharedEvent;
+  suggestions: SharedEventVenueSuggestion[];
+}> {
+  const event = await firestoreService.getPrivateSharedEvent(params);
+  if (!event) return { event, suggestions: [] };
+  const ingest = event.ingestId
+    ? await firestoreService.getSharedEventIngest({ ownerUid: params.ownerUid, ingestId: event.ingestId })
+    : undefined;
+  const sourceIndex = ingest?.privateEventIds?.indexOf(params.privateEventId) ?? -1;
+  const sourceEvent = sourceIndex >= 0 ? ingest?.eventsPreview?.[sourceIndex] : undefined;
+  if (!sourceEvent) return { event, suggestions: [] };
+  const cached = sharedEventVenueSuggestionsFromRecord(event.venueResolutionSuggestions);
+  if (!params.refresh && event.venueResolutionSuggestionsAt && Array.isArray(event.venueResolutionSuggestions)) {
+    return { event, sourceEvent, suggestions: cached };
+  }
+
+  const locationName = String(sourceEvent.locationName || '').trim();
+  if (!locationName || sourceEvent.venueResolutionStatus !== 'selection_required') {
+    return { event, sourceEvent, suggestions: [] };
+  }
+  const places = await searchPlaceCandidates(locationName, {
+    queryName: locationName,
+    limit: 4,
+  });
+  const suggestions = places
+    .filter((place) => place.placeId && place.name && place.formattedAddress)
+    .map((place) => ({
+      placeId: place.placeId,
+      name: place.name,
+      formattedAddress: place.formattedAddress,
+      latitude: place.location.lat,
+      longitude: place.location.lng,
+      confidence: place.confidence,
+    }));
+  await firestoreService.cacheSharedEventVenueSuggestions({
+    ownerUid: params.ownerUid,
+    privateEventId: params.privateEventId,
+    suggestions,
+  });
+  return { event, sourceEvent, suggestions };
+}
+
+export const searchSharedEventVenueCandidates = onRequest(
+  {
+    timeoutSeconds: 30,
+    memory: '256MiB',
+    region: 'northamerica-northeast2',
+    cors: true,
+    secrets: [googlePlacesApiKey],
+  },
+  async (request, response) => {
+    if (request.method === 'OPTIONS') {
+      response.status(204).send('');
+      return;
+    }
+    if (request.method !== 'POST') {
+      response.status(405).json({ success: false, error: 'Method not allowed' });
+      return;
+    }
+    let ownerUid = '';
+    try {
+      ownerUid = await requireUserId(request.headers.authorization);
+      const body = asBodyObject(request.body);
+      const privateEventId = String(body.privateEventId || '').trim();
+      if (!privateEventId) {
+        response.status(400).json({ success: false, error: 'privateEventId is required.' });
+        return;
+      }
+      const loaded = await loadSharedEventVenueSuggestions({ ownerUid, privateEventId });
+      if (!loaded.event) {
+        response.status(404).json({ success: false, error: 'Shared event not found.' });
+        return;
+      }
+      if (!loaded.sourceEvent) {
+        response.status(409).json({ success: false, error: 'The server-owned share result could not be verified.' });
+        return;
+      }
+      response.json({
+        success: true,
+        privateEventId,
+        venueName: loaded.sourceEvent?.locationName,
+        venueResolutionStatus: loaded.sourceEvent?.venueResolutionStatus,
+        candidates: loaded.suggestions,
+      });
+    } catch (error) {
+      logger.error('searchSharedEventVenueCandidates failed', error, { ownerUid });
+      response.status(500).json({
+        success: false,
+        error: error instanceof Error ? error.message : 'Venue search failed.',
+      });
+    }
+  }
+);
+
+export const confirmSharedEventVenue = onRequest(
+  {
+    timeoutSeconds: 60,
+    memory: '256MiB',
+    region: 'northamerica-northeast2',
+    cors: true,
+    secrets: [googlePlacesApiKey],
+  },
+  async (request, response) => {
+    if (request.method === 'OPTIONS') {
+      response.status(204).send('');
+      return;
+    }
+    if (request.method !== 'POST') {
+      response.status(405).json({ success: false, error: 'Method not allowed' });
+      return;
+    }
+    let ownerUid = '';
+    try {
+      ownerUid = await requireUserId(request.headers.authorization);
+      const body = asBodyObject(request.body);
+      const privateEventId = String(body.privateEventId || '').trim();
+      const placeId = String(body.placeId || '').trim();
+      const noMatch = body.noMatch === true;
+      if (!privateEventId || (!placeId && !noMatch)) {
+        response.status(400).json({ success: false, error: 'Choose a venue or select none of these.' });
+        return;
+      }
+      const loaded = await loadSharedEventVenueSuggestions({
+        ownerUid,
+        privateEventId,
+        refresh: !noMatch,
+      });
+      const event = loaded.event;
+      if (!event) {
+        response.status(404).json({ success: false, error: 'Shared event not found.' });
+        return;
+      }
+      const sourceEvent = loaded.sourceEvent;
+      if (!event.ingestId || !sourceEvent?.locationName) {
+        response.status(409).json({ success: false, error: 'This share has no venue to confirm.' });
+        return;
+      }
+      const suggestion = noMatch
+        ? undefined
+        : loaded.suggestions.find((candidate) => candidate.placeId === placeId);
+      if (!noMatch && !suggestion) {
+        response.status(400).json({ success: false, error: 'That venue is no longer in the suggested list.' });
+        return;
+      }
+
+      const updated = await firestoreService.applySharedEventVenueResolution({
+        ownerUid,
+        ingestId: event.ingestId,
+        originalLocationName: sourceEvent.locationName,
+        suggestion,
+        noMatch,
+      });
+      if (updated.length === 0) {
+        response.status(409).json({ success: false, error: 'No matching events remained to update.' });
+        return;
+      }
+
+      const ingest = await firestoreService.getSharedEventIngest({ ownerUid, ingestId: event.ingestId });
+      const hasOwnedPhoto = ingest ? await payloadHasOwnedPhoto(ingest.payload, ownerUid) : false;
+      const contributorEligible = hasOwnedPhoto
+        ? await isCrowdContributorAccountEligible(ownerUid)
+        : false;
+      const crowdEvents = noMatch ? [] : await Promise.all(updated.map((entry) =>
+        contributeSharedEventPhoto({
+          ownerUid,
+          ingestId: event.ingestId,
+          privateEventId: entry.privateEventId,
+          event: entry.event,
+          contributorEligible,
+          hasUserPhoto: hasOwnedPhoto,
+        })
+      ));
+
+      response.json({
+        success: true,
+        ingestId: event.ingestId,
+        privateEventIds: updated.map((entry) => entry.privateEventId),
+        venueResolutionStatus: noMatch ? 'no_match' : 'confirmed',
+        venue: suggestion,
+        crowdPromotion: crowdEvents.length ? crowdStatusSummary(crowdEvents) : undefined,
+      });
+    } catch (error) {
+      logger.error('confirmSharedEventVenue failed', error, { ownerUid });
+      response.status(500).json({
+        success: false,
+        error: error instanceof Error ? error.message : 'Venue confirmation failed.',
+      });
+    }
+  }
+);
+
 export const submitSharedEvent = onRequest(
   {
     timeoutSeconds: 180,
     memory: '512MiB',
     region: 'northamerica-northeast2',
     cors: true,
-    secrets: [openAiApiKey, apifyApiToken],
+    secrets: [openAiApiKey, apifyApiToken, googlePlacesApiKey],
   },
   async (request, response) => {
     if (request.method === 'OPTIONS') {

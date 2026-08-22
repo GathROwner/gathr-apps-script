@@ -41,6 +41,38 @@ const VENUE_DEPRIORITIZED_TYPES = new Set([
   'hardware_store',
 ]);
 
+export interface SharedEventPlaceCandidate extends PlaceSearchResult {
+  confidence: number;
+}
+
+function normalizePlaceName(value: unknown): string {
+  return String(value || '')
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/&/g, ' and ')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim()
+    .replace(/\s+/g, ' ');
+}
+
+function placeNameConfidence(queryName: string, candidateName: string, typeScore: number): number {
+  const expected = normalizePlaceName(queryName);
+  const actual = normalizePlaceName(candidateName);
+  if (!expected || !actual) return 0.35;
+  if (expected === actual) return Math.min(0.99, 0.96 + Math.max(0, typeScore) * 0.005);
+  if (expected.includes(actual) || actual.includes(expected)) {
+    return Math.min(0.94, 0.86 + Math.max(0, typeScore) * 0.01);
+  }
+
+  const expectedTokens = new Set(expected.split(' ').filter((token) => token.length > 1));
+  const actualTokens = new Set(actual.split(' ').filter((token) => token.length > 1));
+  const shared = [...expectedTokens].filter((token) => actualTokens.has(token)).length;
+  const union = new Set([...expectedTokens, ...actualTokens]).size || 1;
+  const overlap = shared / union;
+  return Math.max(0.3, Math.min(0.85, 0.42 + overlap * 0.38 + Math.max(-2, typeScore) * 0.015));
+}
+
 function scorePlaceForVenueMatch(place: {
   types?: string[] | null;
   displayName?: { text?: string | null } | null;
@@ -87,6 +119,25 @@ export async function searchPlace(
     preferFirstResult?: boolean;
   }
 ): Promise<PlaceSearchResult | null> {
+  const candidates = await searchPlaceCandidates(query, {
+    ...options,
+    queryName: query,
+  });
+  if (candidates.length === 0) return null;
+  return candidates[0];
+}
+
+export async function searchPlaceCandidates(
+  query: string,
+  options?: {
+    location?: { lat: number; lng: number };
+    radius?: number;
+    types?: string[];
+    preferFirstResult?: boolean;
+    queryName?: string;
+    limit?: number;
+  }
+): Promise<SharedEventPlaceCandidate[]> {
   const client = getClient();
   const location = options?.location || DEFAULT_LOCATION;
   const radius = options?.radius || DEFAULT_RADIUS;
@@ -106,7 +157,7 @@ export async function searchPlace(
           },
         },
         includedType: options?.types?.[0], // New API accepts single type
-        maxResultCount: 5,
+        maxResultCount: Math.max(1, Math.min(5, options?.limit || 5)),
       },
       fields: 'places.id,places.displayName,places.formattedAddress,places.location,places.types,places.businessStatus',
     });
@@ -114,36 +165,47 @@ export async function searchPlace(
     const places = response.data.places;
     if (!places || places.length === 0) {
       logger.debug('No places found for query', { query });
-      return null;
+      return [];
     }
 
-    const place = options?.preferFirstResult
-      ? places[0]
-      : places
-        .map((candidate, index) => ({
-          candidate,
-          index,
-          score: scorePlaceForVenueMatch(candidate),
-        }))
-        .sort((a, b) => {
-          if (b.score !== a.score) return b.score - a.score;
-          return a.index - b.index;
-        })[0]?.candidate || places[0];
+    const ranked = places.map((place, index) => {
+      const typeScore = scorePlaceForVenueMatch(place);
+      return {
+        index,
+        typeScore,
+        result: {
+          placeId: place.id || '',
+          name: place.displayName?.text || '',
+          formattedAddress: place.formattedAddress || '',
+          location: {
+            lat: place.location?.latitude || 0,
+            lng: place.location?.longitude || 0,
+          },
+          types: place.types || [],
+          businessStatus: place.businessStatus ?? undefined,
+          confidence: placeNameConfidence(
+            options?.queryName || query,
+            place.displayName?.text || '',
+            typeScore
+          ),
+        } satisfies SharedEventPlaceCandidate,
+      };
+    });
 
-    return {
-      placeId: place.id || '',
-      name: place.displayName?.text || '',
-      formattedAddress: place.formattedAddress || '',
-      location: {
-        lat: place.location?.latitude || 0,
-        lng: place.location?.longitude || 0,
-      },
-      types: place.types || [],
-      businessStatus: place.businessStatus ?? undefined,
-    };
+    if (!options?.preferFirstResult) {
+      ranked.sort((left, right) => {
+        if (right.result.confidence !== left.result.confidence) {
+          return right.result.confidence - left.result.confidence;
+        }
+        if (right.typeScore !== left.typeScore) return right.typeScore - left.typeScore;
+        return left.index - right.index;
+      });
+    }
+
+    return ranked.map(({ result }) => result);
   } catch (error) {
     logger.error('Places search failed', error, { query });
-    return null;
+    return [];
   }
 }
 

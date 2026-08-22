@@ -25,6 +25,7 @@ export type SharedEventFieldSource =
   | 'share_payload'
   | 'shared_text'
   | 'uploaded_media'
+  | 'user_confirmation'
   | 'crowd_consensus'
   | 'derived'
   | 'unknown';
@@ -135,6 +136,9 @@ export interface ParsedSharedEvent {
   address?: string;
   latitude?: number;
   longitude?: number;
+  resolvedVenueId?: string;
+  googlePlaceId?: string;
+  venueResolutionStatus?: 'not_needed' | 'selection_required' | 'confirmed' | 'no_match';
   locationPrecision?: 'exact' | 'approximate' | 'none';
   locationScope?: 'venue' | 'route' | 'unknown';
   mapMode?: 'venue' | 'route' | 'none';
@@ -153,6 +157,15 @@ export interface ParsedSharedEvent {
   sourceContentSignature: string;
   sequenceIndex?: number;
   extractedFromShare?: boolean;
+}
+
+export interface SharedEventVenueSuggestion {
+  placeId: string;
+  name: string;
+  formattedAddress: string;
+  latitude: number;
+  longitude: number;
+  confidence: number;
 }
 
 export interface SharedEventIngestRecord {
@@ -212,6 +225,8 @@ export interface PrivateSharedEventRecord extends ParsedSharedEvent {
   publicUnknownVenueDocId?: string;
   publicCityLevelReviewDocId?: string;
   crowdPromotion?: SharedEventCrowdEventStatus;
+  venueResolutionSuggestions?: SharedEventVenueSuggestion[];
+  venueResolutionSuggestionsAt?: unknown;
   createdAt?: unknown;
   updatedAt?: unknown;
 }
