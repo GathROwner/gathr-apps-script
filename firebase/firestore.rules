@@ -51,6 +51,17 @@ service cloud.firestore {
         allow read: if isAuthenticated() && isAccessingOwnData(userId) && resourceOwnerMatches(userId);
         allow write: if false;
       }
+
+      // Server-owned anti-abuse counters. Clients cannot inspect or alter them.
+      match /crowdContributionDays/{dayId} {
+        allow read, write: if false;
+      }
+    }
+
+    // Contains private contributor references and consensus audit state. Only
+    // Cloud Functions admin SDK code may access this collection.
+    match /crowdsourced_shared_event_candidates/{aggregateId} {
+      allow read, write: if false;
     }
 
     // Interests collection - authenticated users can read, but not modify
