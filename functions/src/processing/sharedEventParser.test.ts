@@ -1013,3 +1013,84 @@ test('route-like shared photos remain private review items with approximate geom
     Settings.now = originalNow;
   }
 });
+
+test('priced calendar activities remain events when a validator tags them as specials', async () => {
+  const primary = await parseSharedEventPayload({
+    mediaUrls: ['https://example.com/community-calendar.jpg'],
+    timezone: 'America/Halifax',
+  }, {
+    sourceVisibility: 'user_private',
+    visibilityEvidence: {
+      method: 'no_url',
+      checkedAt: '2026-08-22T15:00:00.000Z',
+      reason: 'User photo.',
+    },
+  });
+
+  const parsed = buildCalendarImageParsedEventsForRegression(primary, [
+    {
+      name: 'Island Comedy Night',
+      description: 'Friday September 11 at 7:30 PM. $18.',
+      date: '2026-09-11',
+      startTime: '19:30',
+      endTime: '',
+      venue: 'Harbourlight Community Hall',
+      address: '9 Dale Drive, Charlottetown, PE',
+      pricing: '$18',
+      recurringPattern: 'none',
+      extractionReason: 'Printed calendar row with ticket price.',
+      _sourceType: 'special',
+    },
+    {
+      name: 'Watercolour Workshop',
+      description: 'Thursday September 17 at 6 PM. $35.',
+      date: '2026-09-17',
+      startTime: '18:00',
+      endTime: '',
+      venue: 'Harbourlight Community Hall',
+      address: '9 Dale Drive, Charlottetown, PE',
+      pricing: '$35',
+      recurringPattern: 'none',
+      extractionReason: 'Printed calendar row with ticket price.',
+      _sourceType: 'special',
+    },
+  ]);
+
+  assert.equal(parsed.length, 2);
+  assert.equal(parsed[0].contentKind, 'event');
+  assert.equal(parsed[0].price, '$18');
+  assert.equal(parsed[1].contentKind, 'event');
+  assert.equal(parsed[1].price, '$35');
+});
+
+test('route photo recovers its printed start landmark without claiming an exact route', async () => {
+  const primary = await parseSharedEventPayload({
+    mediaUrls: ['https://example.com/lantern-route.jpg'],
+    timezone: 'America/Halifax',
+  }, {
+    sourceVisibility: 'user_private',
+    visibilityEvidence: {
+      method: 'no_url',
+      checkedAt: '2026-08-22T15:00:00.000Z',
+      reason: 'User photo.',
+    },
+  });
+
+  const [route] = buildCalendarImageParsedEventsForRegression(primary, [{
+    name: 'Moonlight Lantern Walk',
+    type: 'event',
+    date: '2026-10-03',
+    startTime: '19:00',
+    venue: '',
+    address: '',
+    description: 'Start: Confederation Landing Gazebo. Follow the boardwalk. Finish: Victoria Park Pavilion.',
+  }]);
+
+  assert.equal(route.locationName, 'Confederation Landing Gazebo');
+  assert.equal(route.locationScope, 'route');
+  assert.equal(route.mapMode, 'route');
+  assert.equal(route.locationPrecision, 'approximate');
+  assert.equal(route.needsUserReview, true);
+  assert.ok(route.reviewReasons.includes('route_event_requires_review'));
+  assert.ok(!route.reviewReasons.includes('missing_location'));
+});

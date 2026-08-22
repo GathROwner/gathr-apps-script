@@ -1430,6 +1430,36 @@ function itemLooksLikeRoute(item: ExtractedItem): boolean {
   return hasRouteWord && hasRouteStructure;
 }
 
+function itemLooksLikePromotionalSpecial(item: ExtractedItem): boolean {
+  const text = cleanLongText([
+    item.name,
+    'description' in item ? item.description : '',
+    'category' in item ? item.category : '',
+  ].filter(Boolean).join('\n'));
+  if (!text) return false;
+
+  const hasEventCue = /\b(live|concert|comedy|ceilidh|workshop|class|market|dance|karaoke|trivia|show|festival|tournament|screening|performance)\b/i.test(text);
+  if (hasEventCue) return false;
+
+  return /\b(happy\s*hour|daily\s+special|food\s+special|drink\s+special|specials?|deal|discount|half[-\s]?price|two[-\s]?for[-\s]?(?:one|1)|2[-\s]?for[-\s]?1|bogo)\b/i.test(text) ||
+    /\b(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday)s?\b[^\n]{0,50}\b(?:wing|taco|burger|pizza|pint|cocktail|oyster|mussel)s?\b/i.test(text) ||
+    /\b(?:wing|taco|burger|pizza|pint|cocktail|oyster|mussel)s?\b[^\n]{0,50}\b(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday)s?\b/i.test(text);
+}
+
+function extractRouteStartLocation(item: ExtractedItem): string | undefined {
+  const description = cleanLongText('description' in item ? item.description : '');
+  if (!description) return undefined;
+
+  const match = description.match(
+    /(?:^|[.!?]\s+|\n)\s*(?:start|starting point|meet)\s*(?::|at)\s*([^.!?\n]{3,120})/i
+  );
+  const candidate = cleanExtractedVenueCandidate(match?.[1]);
+  if (!candidate || !/[a-z]/i.test(candidate) || /^\d{1,2}(?::\d{2})?\s*(?:am|pm)?$/i.test(candidate)) {
+    return undefined;
+  }
+  return candidate;
+}
+
 function eventLooksExpired(startDate: string | undefined, startTime: string | undefined, timezone: string): boolean {
   if (!startDate) return false;
   const eventDate = DateTime.fromFormat(startDate, 'yyyy-MM-dd', { zone: timezone });
@@ -1753,16 +1783,18 @@ function buildExtractedParsedEventsFromCalendarItems(
       const description = cleanLongText('description' in item ? item.description : '') ||
         `Extracted from shared calendar image.`;
       const rawExtractedAddress = cleanString('address' in item ? item.address : '', 260);
+      const routeLike = itemLooksLikeRoute(item);
       const locationName = cleanExtractedVenueCandidate(item.venue) ||
         extractVenuePrefixFromPrintedAddress(rawExtractedAddress) ||
+        (routeLike ? extractRouteStartLocation(item) : undefined) ||
         inferredVenue ||
         undefined;
       const extractedAddress = extractPrintedStreetAddress(rawExtractedAddress) || rawExtractedAddress ||
         extractPrintedStreetAddress(description);
       const address = extractedAddress || inferredAddress || undefined;
-      const contentKind = (
-        ('type' in item && item.type === 'special') || item._sourceType === 'special'
-      ) ? 'special' as const : 'event' as const;
+      const contentKind = itemLooksLikePromotionalSpecial(item)
+        ? 'special' as const
+        : 'event' as const;
       const explicitPrice = cleanExtractedPrice(
         'pricing' in item ? item.pricing : ('price' in item ? item.price : ''),
       );
@@ -1782,8 +1814,6 @@ function buildExtractedParsedEventsFromCalendarItems(
         'recurrenceUntilDate' in item ? item.recurrenceUntilDate : undefined,
         primary.timezone
       );
-      const routeLike = itemLooksLikeRoute(item);
-
       if (!title && !startDate) return undefined;
 
       const expiryDate = recurrenceUntilDate || startDate;
