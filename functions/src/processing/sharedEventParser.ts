@@ -14,7 +14,7 @@ import {
 } from '../types/sharedEvent.js';
 import { logger } from '../utils/logger.js';
 
-export const SHARED_EVENT_PARSER_VERSION = 'shared-event-parser-v12';
+export const SHARED_EVENT_PARSER_VERSION = 'shared-event-parser-v13';
 
 const DEFAULT_TIMEZONE = 'America/Halifax';
 const MAX_TEXT_LENGTH = 12000;
@@ -1438,10 +1438,10 @@ function itemLooksLikePromotionalSpecial(item: ExtractedItem): boolean {
   ].filter(Boolean).join('\n'));
   if (!text) return false;
 
-  const hasEventCue = /\b(live|concert|comedy|ceilidh|workshop|class|market|dance|karaoke|trivia|show|festival|tournament|screening|performance)\b/i.test(text);
+  const hasEventCue = /\b(live|music|dj|concert|comedy|ceilidh|workshop|class|market|dance|party|karaoke|trivia|show|release|festival|tournament|screening|performance)\b/i.test(text);
   if (hasEventCue) return false;
 
-  return /\b(happy\s*hour|daily\s+special|food\s+special|drink\s+special|specials?|deal|discount|half[-\s]?price|two[-\s]?for[-\s]?(?:one|1)|2[-\s]?for[-\s]?1|bogo)\b/i.test(text) ||
+  return /\b(happy\s*hour|(?:daily|weekly|food|drink|lunch|dinner|brunch|wing|taco|burger|pizza|pint|cocktail)\s+specials?|deal|discount|half[-\s]?price|two[-\s]?for[-\s]?(?:one|1)|2[-\s]?for[-\s]?1|bogo)\b/i.test(text) ||
     /\b(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday)s?\b[^\n]{0,50}\b(?:wing|taco|burger|pizza|pint|cocktail|oyster|mussel)s?\b/i.test(text) ||
     /\b(?:wing|taco|burger|pizza|pint|cocktail|oyster|mussel)s?\b[^\n]{0,50}\b(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday)s?\b/i.test(text);
 }
@@ -2009,14 +2009,46 @@ async function extractSharedEventImageItems(
       ...sharedPhotoConfig,
     }
   );
+  const dominantPosterItems = keepDominantSharedPhotoSeries(extractedItems);
   const items = reconcileSingleSharedPhotoEventDate(
-    extractedItems,
+    dominantPosterItems,
     contentType,
     ocrText,
     timestamp,
     sharedPhotoConfig.timezone
   );
   return { contentType, classificationConfidence, items };
+}
+
+function sharedPhotoSeriesTitleKey(item: ExtractedItem): string {
+  const withoutLocationSuffix = cleanString(item.name, 220)
+    .replace(/\s*\([^)]{2,80}\)\s*$/g, '')
+    .trim();
+  return normalizeEventKeyPart(withoutLocationSuffix);
+}
+
+function keepDominantSharedPhotoSeries(items: ExtractedItem[]): ExtractedItem[] {
+  if (items.length < 4) return items;
+  const groups = new Map<string, number[]>();
+  items.forEach((item, index) => {
+    const key = sharedPhotoSeriesTitleKey(item);
+    if (!key) return;
+    groups.set(key, [...(groups.get(key) || []), index]);
+  });
+  const ranked = [...groups.entries()].sort((left, right) => right[1].length - left[1].length);
+  const dominant = ranked[0];
+  if (!dominant || dominant[1].length < 3) return items;
+  if (dominant[1].length / items.length < 0.75) return items;
+  if (ranked.slice(1).some((entry) => entry[1].length > 1)) return items;
+
+  logger.info('Dropped isolated neighbouring-poster extraction from shared photo', {
+    tag: 'shared_event_image_dominant_poster',
+    parserVersion: SHARED_EVENT_PARSER_VERSION,
+    inputCount: items.length,
+    keptCount: dominant[1].length,
+  });
+  const keep = new Set(dominant[1]);
+  return items.filter((_item, index) => keep.has(index));
 }
 
 function unwrapSharedPhotoOcrText(raw: string): string {
@@ -2109,6 +2141,10 @@ export function reconcileSingleSharedPhotoEventDateForRegression(params: {
     params.referenceIso,
     params.timezone
   );
+}
+
+export function keepDominantSharedPhotoSeriesForRegression(items: ExtractedItem[]): ExtractedItem[] {
+  return keepDominantSharedPhotoSeries(items);
 }
 
 export async function extractSharedEventImageItemsForRegression(params: {

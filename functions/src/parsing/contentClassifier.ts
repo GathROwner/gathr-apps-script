@@ -198,6 +198,7 @@ ${isSharedPhoto ? `SHARED-PHOTO SAFETY:
 - The upload time is not the poster's publication date and is not event-date evidence.
 - Do not count an internal itinerary as multiple items.
 - A poster with one headline, one admission/CTA, one venue and one date is normally one EVENT even when several times are printed.
+- Treat the dominant, centered poster as the submission. Do not combine text from partially visible neighbouring posters, bulletin-board notices, app chrome, social-story chrome, or background signs.
 ` : ''}
 
 ANALYSIS REQUIREMENTS:

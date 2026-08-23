@@ -3506,6 +3506,7 @@ ${isSharedPhoto ? `SHARED-PHOTO DATE AND GROUPING SAFETY:
 - Never use ${postedLocalDate}, today's date, or a relative weekday merely because the poster has no explicit calendar date. Leave date="" so the user can resolve it.
 - When a month/day is visible but no year is printed, choose the nearest plausible occurrence to the upload date (past or future); do not automatically roll a recently passed poster into next year.
 - A single headline event may list doors, a class, performances, party segments, DJs, intermission, or an after-party. Return ONE parent event using the headline title, the poster's event date, the earliest admission/start time and latest explicit end time. Preserve the run-of-show in description; do not emit its agenda lines as separate events.
+- Extract only the dominant centered poster. Ignore partially visible neighbouring posters, bulletin-board notices, social/app chrome and background signage.
 ` : ''}
 
 EXTRACT ONLY:
@@ -3670,6 +3671,7 @@ ${isSharedPhoto ? `SHARED-PHOTO SAFETY GATE (apply before extracting rows):
 - If the image actually advertises ONE headline/ticketed event and the time rows are its internal run-of-show, return one parent item, not one item per agenda row. Use the headline, explicit event date, earliest start and latest explicit end; preserve the itinerary in description.
 - If no calendar date is visible, leave date="". Never substitute today/upload date.
 - For a visible month/day without a year, choose the nearest plausible occurrence to the upload date, including a recently passed date; do not always roll forward.
+- Extract only the dominant centered poster. Ignore partially visible neighbouring posters, bulletin-board notices, social/app chrome and background signage.
 ` : ''}
 
 IMPORTANT (Calendar grids with lineups):
@@ -3746,6 +3748,7 @@ ${isSharedPhoto ? `SHARED-PHOTO SAFETY GATE (apply before splitting):
 - Split only independently attendable/bookable events (for example different dates, acts in a venue calendar, or clearly separate tickets).
 - If no explicit calendar date is visible, leave date="". Never substitute today/upload date.
 - For a visible month/day without a year, choose the nearest plausible occurrence to the upload date, including a recently passed date; do not always roll forward.
+- Extract only the dominant centered poster. Ignore partially visible neighbouring posters, bulletin-board notices, social/app chrome and background signage.
 ` : ''}
 
 For each item found, extract:

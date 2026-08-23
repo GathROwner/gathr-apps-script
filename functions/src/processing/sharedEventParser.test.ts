@@ -7,12 +7,54 @@ import {
   extractFacebookEmbeddedEventData,
   extractFacebookCanonicalStoryUrl,
   mergeExtractedParsedEventsForRegression,
+  keepDominantSharedPhotoSeriesForRegression,
   parseSharedEventPayload,
   parseSharedEventPayloads,
   reconcileSingleSharedPhotoEventDateForRegression,
   selectParsedEventsForSubmissionForRegression,
   verifySharedEventSourceVisibility,
 } from './sharedEventParser.js';
+
+test('dominant centered poster drops one isolated neighbouring poster extraction', () => {
+  const makeItem = (name: string, date: string) => ({
+    name,
+    description: name,
+    date,
+    startTime: '',
+    endTime: '',
+    venue: '',
+    price: '',
+    recurringPattern: 'none' as const,
+    extractionReason: 'visible poster text',
+  });
+  const filtered = keepDominantSharedPhotoSeriesForRegression([
+    makeItem('Cubby Bear and the Adventure Home (Charlottetown)', '2026-06-18'),
+    makeItem('Cubby Bear and the Adventure Home (Charlottetown)', '2026-06-19'),
+    makeItem('Cubby Bear and the Adventure Home (Summerside)', '2026-06-27'),
+    makeItem('Cubby Bear and the Adventure Home (Summerside)', '2026-06-28'),
+    makeItem('CESP / ANTIPHE / C.A.B.L.E.', '2026-07-23'),
+  ]);
+
+  assert.equal(filtered.length, 4);
+  assert.ok(filtered.every((item) => item.name.startsWith('Cubby Bear')));
+});
+
+test('diverse monthly calendar is not collapsed to one repeated act', () => {
+  const items = ['Carter MacLellan', 'Carter MacLellan', 'Carter MacLellan', 'Kim Albert Trio', 'Richie & Brian', 'Adam & The Foes']
+    .map((name, index) => ({
+      name,
+      description: name,
+      date: `2026-07-${String(index + 1).padStart(2, '0')}`,
+      startTime: '18:00',
+      endTime: '22:00',
+      venue: 'Charlottetown Beer Garden',
+      price: '',
+      recurringPattern: 'none' as const,
+      extractionReason: 'monthly calendar cell',
+    }));
+
+  assert.equal(keepDominantSharedPhotoSeriesForRegression(items).length, items.length);
+});
 
 test('single shared-photo event uses explicit OCR month and day instead of a rolled weekday', () => {
   const [item] = reconcileSingleSharedPhotoEventDateForRegression({
@@ -56,6 +98,28 @@ test('single shared-photo event with no printed date stays unresolved', () => {
   });
 
   assert.equal(item.date, '');
+});
+
+test('DJ admission price and special-guest wording remain an event', async () => {
+  const primary = await parseSharedEventPayload({
+    title: 'Give Me House Music',
+    mediaUrls: ['https://example.com/babas-dj-poster.jpg'],
+    timezone: 'America/Halifax',
+  });
+  const [event] = buildCalendarImageParsedEventsForRegression(primary, [{
+    name: 'Give Me House Music',
+    type: 'special',
+    date: '2026-06-19',
+    startTime: '22:00',
+    endTime: '02:00',
+    venue: "Baba's Lounge",
+    price: '$10',
+    description: 'House music with local DJ support and special guest DJ Dale Mannette.',
+    extractionReason: 'nightlife poster with admission price',
+  }]);
+
+  assert.equal(event.contentKind, 'event');
+  assert.equal(event.price, '$10');
 });
 
 test('private visibility hints keep shared Facebook events user-private', async () => {
