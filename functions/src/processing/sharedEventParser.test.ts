@@ -9,9 +9,54 @@ import {
   mergeExtractedParsedEventsForRegression,
   parseSharedEventPayload,
   parseSharedEventPayloads,
+  reconcileSingleSharedPhotoEventDateForRegression,
   selectParsedEventsForSubmissionForRegression,
   verifySharedEventSourceVisibility,
 } from './sharedEventParser.js';
+
+test('single shared-photo event uses explicit OCR month and day instead of a rolled weekday', () => {
+  const [item] = reconcileSingleSharedPhotoEventDateForRegression({
+    items: [{
+      name: 'A Gozar!! Fiesta Latina',
+      description: 'Latin thank-you party',
+      date: '2026-08-28',
+      startTime: '20:00',
+      endTime: '01:00',
+      venue: 'The Night Cap',
+      price: '$8 online / $10 door',
+      recurringPattern: 'none',
+      extractionReason: 'single headline event',
+    }],
+    contentType: 'EVENT',
+    ocrText: 'A GOZAR!! FIESTA LATINA\nFRI JUL 31\n8pm-1am\n185 Kent St',
+    referenceIso: '2026-08-22T20:00:00-03:00',
+    timezone: 'America/Halifax',
+  });
+
+  assert.equal(item.date, '2026-07-31');
+});
+
+test('single shared-photo event with no printed date stays unresolved', () => {
+  const [item] = reconcileSingleSharedPhotoEventDateForRegression({
+    items: [{
+      name: 'Lovebite Release Show',
+      description: 'With Kendra Lyttle and Dream of Leaves at 10pm',
+      date: '2026-08-22',
+      startTime: '22:00',
+      endTime: '',
+      venue: "Baba's Lounge",
+      price: '$10',
+      recurringPattern: 'none',
+      extractionReason: 'single headline event',
+    }],
+    contentType: 'EVENT',
+    ocrText: 'LOVE BITE RELEASE SHOW\nKENDRA LYTTLE\nDREAM OF LEAVES\n@10pm $10\nBABAS LOUNGE',
+    referenceIso: '2026-08-22T20:00:00-03:00',
+    timezone: 'America/Halifax',
+  });
+
+  assert.equal(item.date, '');
+});
 
 test('private visibility hints keep shared Facebook events user-private', async () => {
   const visibility = await verifySharedEventSourceVisibility({

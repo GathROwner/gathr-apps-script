@@ -1,6 +1,6 @@
 import { createHash } from 'crypto';
 import { DateTime } from 'luxon';
-import { extractContentByType } from '../parsing/eventExtractor.js';
+import { extractContentByType, extractOcrDebugText } from '../parsing/eventExtractor.js';
 import { classifyContent } from '../parsing/contentClassifier.js';
 import type { ContentType, ExtractedItem } from '../parsing/types.js';
 import {
@@ -14,7 +14,7 @@ import {
 } from '../types/sharedEvent.js';
 import { logger } from '../utils/logger.js';
 
-export const SHARED_EVENT_PARSER_VERSION = 'shared-event-parser-v11';
+export const SHARED_EVENT_PARSER_VERSION = 'shared-event-parser-v12';
 
 const DEFAULT_TIMEZONE = 'America/Halifax';
 const MAX_TEXT_LENGTH = 12000;
@@ -1956,18 +1956,26 @@ async function extractSharedEventImageItems(
   timestamp: string,
   primary?: ParsedSharedEvent
 ): Promise<{ contentType: ContentType; classificationConfidence: number; items: ExtractedItem[] }> {
+  const sharedPhotoConfig = {
+    sourceMode: 'shared_photo' as const,
+    timezone: primary?.timezone || DEFAULT_TIMEZONE,
+  };
+  const ocrResult = await extractOcrDebugText(imageUrls, sharedPhotoConfig);
+  const ocrText = unwrapSharedPhotoOcrText(ocrResult.text);
+  const authoritativeText = [
+    combinedText,
+    ocrText ? `OCR TEXT:\n${ocrText}` : '',
+  ].filter(Boolean).join('\n\n');
+
   let contentType: ContentType = 'CALENDAR';
   let classificationConfidence = 0;
   try {
     const classification = await classifyContent(
-      combinedText,
+      authoritativeText,
       imageUrls,
       sourceName,
       undefined,
-      {
-        sourceMode: 'shared_photo',
-        timezone: primary?.timezone || DEFAULT_TIMEZONE,
-      }
+      sharedPhotoConfig
     );
     if (classification.contentType !== 'unknown') {
       contentType = classification.contentType;
@@ -1980,9 +1988,9 @@ async function extractSharedEventImageItems(
     });
   }
 
-  const items = await extractContentByType(
+  const extractedItems = await extractContentByType(
     contentType,
-    combinedText,
+    authoritativeText,
     imageUrls,
     sourceName,
     timestamp,
@@ -1998,11 +2006,109 @@ async function extractSharedEventImageItems(
           ...usage,
         });
       },
-      sourceMode: 'shared_photo',
-      timezone: primary?.timezone || DEFAULT_TIMEZONE,
+      ...sharedPhotoConfig,
     }
   );
+  const items = reconcileSingleSharedPhotoEventDate(
+    extractedItems,
+    contentType,
+    ocrText,
+    timestamp,
+    sharedPhotoConfig.timezone
+  );
   return { contentType, classificationConfidence, items };
+}
+
+function unwrapSharedPhotoOcrText(raw: string): string {
+  const value = String(raw || '').trim();
+  if (!value) return '';
+  try {
+    const parsed = JSON.parse(value) as { images?: Array<{ text?: unknown }> };
+    const text = (parsed.images || [])
+      .map((image) => cleanLongText(image?.text))
+      .filter(Boolean)
+      .join('\n');
+    return text || value;
+  } catch {
+    return value;
+  }
+}
+
+function nearestSharedPhotoYear(month: number, day: number, reference: DateTime): number | undefined {
+  const candidates = [reference.year - 1, reference.year, reference.year + 1]
+    .map((year) => DateTime.fromObject({ year, month, day }, { zone: reference.zoneName || DEFAULT_TIMEZONE }))
+    .filter((candidate) => candidate.isValid)
+    .sort((left, right) =>
+      Math.abs(left.diff(reference, 'days').days) - Math.abs(right.diff(reference, 'days').days)
+    );
+  return candidates[0]?.year;
+}
+
+function explicitSingleSharedPhotoDate(
+  ocrText: string,
+  referenceIso: string,
+  timezone: string
+): string | undefined {
+  const text = String(ocrText || '').replace(/[\u2012-\u2015]/g, '-');
+  if (!text) return undefined;
+  const reference = DateTime.fromISO(referenceIso, { zone: timezone }).setZone(timezone);
+  const effectiveReference = reference.isValid ? reference : DateTime.now().setZone(timezone);
+  const monthPattern = Object.keys(MONTH_LOOKUP)
+    .sort((left, right) => right.length - left.length)
+    .join('|');
+  const patterns = [
+    new RegExp(`\\b(${monthPattern})\\.?\\s+(\\d{1,2})(?:st|nd|rd|th)?(?:,?\\s+(\\d{4}))?\\b`, 'i'),
+    new RegExp(`\\b(\\d{1,2})(?:st|nd|rd|th)?\\s+(${monthPattern})\\.?(?:,?\\s+(\\d{4}))?\\b`, 'i'),
+  ];
+
+  for (const [index, pattern] of patterns.entries()) {
+    const match = text.match(pattern);
+    if (!match) continue;
+    const monthToken = index === 0 ? match[1] : match[2];
+    const dayToken = index === 0 ? match[2] : match[1];
+    const yearToken = match[3];
+    const month = MONTH_LOOKUP[String(monthToken || '').toLowerCase()];
+    const day = Number(dayToken);
+    const year = yearToken
+      ? Number(yearToken)
+      : nearestSharedPhotoYear(month, day, effectiveReference);
+    if (!(month && day && year)) continue;
+    const candidate = DateTime.fromObject({ year, month, day }, { zone: timezone });
+    if (candidate.isValid) return candidate.toFormat('yyyy-MM-dd');
+  }
+
+  return undefined;
+}
+
+function reconcileSingleSharedPhotoEventDate(
+  items: ExtractedItem[],
+  contentType: ContentType,
+  ocrText: string,
+  referenceIso: string,
+  timezone: string
+): ExtractedItem[] {
+  if (contentType !== 'EVENT' || items.length !== 1) return items;
+  const explicitDate = explicitSingleSharedPhotoDate(ocrText, referenceIso, timezone);
+  return [{
+    ...items[0],
+    date: explicitDate || '',
+  }];
+}
+
+export function reconcileSingleSharedPhotoEventDateForRegression(params: {
+  items: ExtractedItem[];
+  contentType: ContentType;
+  ocrText: string;
+  referenceIso: string;
+  timezone: string;
+}): ExtractedItem[] {
+  return reconcileSingleSharedPhotoEventDate(
+    params.items,
+    params.contentType,
+    params.ocrText,
+    params.referenceIso,
+    params.timezone
+  );
 }
 
 export async function extractSharedEventImageItemsForRegression(params: {
