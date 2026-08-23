@@ -130,6 +130,11 @@ export interface ParsingConfig {
   replayArtifacts?: Stage45ReplayArtifacts;
   stage4ModelOverride?: string;
   stage5ModelOverride?: string;
+  /**
+   * A shared photo has no trustworthy publication timestamp. Parsers must not
+   * turn the upload time into an event date when the poster omits one.
+   */
+  sourceMode?: 'feed' | 'shared_photo';
 }
 
 export const DEFAULT_PARSING_CONFIG: ParsingConfig = {

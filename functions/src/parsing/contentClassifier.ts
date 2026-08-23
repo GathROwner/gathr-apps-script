@@ -60,7 +60,8 @@ export async function classifyContent(
     combinedText,
     imageUrls.length > 0,
     userName,
-    extractedData
+    extractedData,
+    cfg.sourceMode === 'shared_photo'
   );
   const schema = createClassificationSchema();
 
@@ -146,7 +147,8 @@ function createClassificationPrompt(
   combinedText: string,
   hasImages: boolean,
   userName: string,
-  extractedData?: ExtractedDataInput
+  extractedData?: ExtractedDataInput,
+  isSharedPhoto = false
 ): string {
   // Build Facebook Events context if available
   let facebookEventContext = '';
@@ -172,6 +174,11 @@ CLASSIFICATION CATEGORIES:
 1. EVENT - Single or few entertainment activities
    Examples: "Live music tonight 8pm", "Trivia Tuesday at 7"
    NOTE: If FACEBOOK EVENT DATA is present above, this is likely an EVENT even if the text is promotional/biographical.
+   IMPORTANT: A single named/ticketed occasion can contain a run-of-show (class,
+   performance, party, DJ set, doors, intermission, after-party, etc.). Those
+   agenda segments are details of ONE EVENT, not separate events and not a
+   SCHEDULE. Classify that poster as EVENT and estimate one independently
+   attendable event.
 
 2. FOOD_SPECIAL - Food/drink deals only
    Examples: "Happy hour 5-7pm half price apps", "$0.50 wings tonight"
@@ -184,6 +191,14 @@ CLASSIFICATION CATEGORIES:
 
 5. SCHEDULE - Time-organized content with many events
    Examples: "Monday: Band A, Tuesday: Band B", performance lineups
+   Use SCHEDULE only when the rows are independently attendable/bookable
+   happenings, not when they are sequential stages inside one headline event.
+
+${isSharedPhoto ? `SHARED-PHOTO SAFETY:
+- The upload time is not the poster's publication date and is not event-date evidence.
+- Do not count an internal itinerary as multiple items.
+- A poster with one headline, one admission/CTA, one venue and one date is normally one EVENT even when several times are printed.
+` : ''}
 
 ANALYSIS REQUIREMENTS:
 1. Analyze what content elements are present

@@ -14,7 +14,7 @@ import {
 } from '../types/sharedEvent.js';
 import { logger } from '../utils/logger.js';
 
-export const SHARED_EVENT_PARSER_VERSION = 'shared-event-parser-v10';
+export const SHARED_EVENT_PARSER_VERSION = 'shared-event-parser-v11';
 
 const DEFAULT_TIMEZONE = 'America/Halifax';
 const MAX_TEXT_LENGTH = 12000;
@@ -1959,7 +1959,16 @@ async function extractSharedEventImageItems(
   let contentType: ContentType = 'CALENDAR';
   let classificationConfidence = 0;
   try {
-    const classification = await classifyContent(combinedText, imageUrls, sourceName);
+    const classification = await classifyContent(
+      combinedText,
+      imageUrls,
+      sourceName,
+      undefined,
+      {
+        sourceMode: 'shared_photo',
+        timezone: primary?.timezone || DEFAULT_TIMEZONE,
+      }
+    );
     if (classification.contentType !== 'unknown') {
       contentType = classification.contentType;
     }
@@ -1989,6 +1998,8 @@ async function extractSharedEventImageItems(
           ...usage,
         });
       },
+      sourceMode: 'shared_photo',
+      timezone: primary?.timezone || DEFAULT_TIMEZONE,
     }
   );
   return { contentType, classificationConfidence, items };

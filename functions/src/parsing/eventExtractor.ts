@@ -205,7 +205,8 @@ async function extractEvents(
     timestamp,
     tz,
     postedLocalPretty,
-    postedLocalDate
+    postedLocalDate,
+    config.sourceMode === 'shared_photo'
   );
 
   const response = await callGPT(prompt, imageUrls, config);
@@ -841,7 +842,12 @@ async function extractCalendarContent(
 ): Promise<CalendarItem[]> {
   logger.debug('Extracting calendar content', { imageCount: imageUrls.length });
 
-  const prompt = createCalendarExtractionPrompt(combinedText, userName, timestamp);
+  const prompt = createCalendarExtractionPrompt(
+    combinedText,
+    userName,
+    timestamp,
+    config.sourceMode === 'shared_photo'
+  );
 
   const response = await callGPT(prompt, imageUrls, config);
   let items: CalendarItem[] = [];
@@ -923,7 +929,12 @@ async function extractScheduleContent(
 ): Promise<CalendarItem[]> {
   logger.debug('Extracting schedule content');
 
-  const prompt = createScheduleExtractionPrompt(combinedText, userName, timestamp);
+  const prompt = createScheduleExtractionPrompt(
+    combinedText,
+    userName,
+    timestamp,
+    config.sourceMode === 'shared_photo'
+  );
 
   const response = await callGPT(prompt, imageUrls, config);
 
@@ -1250,7 +1261,8 @@ async function extractFallbackItems(
     tz,
     postedLocalPretty,
     postedLocalDate,
-    contentType
+    contentType,
+    config.sourceMode === 'shared_photo'
   );
 
   let response = '';
@@ -1264,7 +1276,10 @@ async function extractFallbackItems(
   try {
     response = await callGPT(prompt, imageUrls, config);
     parsedItems = parseFallbackItems(response);
-    normalized = normalizeFallbackItems(parsedItems, postedLocalDate);
+    normalized = normalizeFallbackItems(
+      parsedItems,
+      config.sourceMode === 'shared_photo' ? '' : postedLocalDate
+    );
     if (normalized.length > 0) {
       selected = normalized;
       usedParser = 'gpt_json';
@@ -1408,6 +1423,13 @@ function normalizeFallbackItems(
   }
 
   return normalized;
+}
+
+export function normalizeFallbackItemsForRegression(
+  items: Array<Record<string, unknown>>,
+  defaultDate: string
+): ExtractedItem[] {
+  return normalizeFallbackItems(items, defaultDate);
 }
 
 function normalizeSplitCandidateText(value: string): string {
@@ -3439,7 +3461,8 @@ function createEventExtractionPrompt(
   timestamp: string,
   tz: string,
   postedLocalPretty: string,
-  postedLocalDate: string
+  postedLocalDate: string,
+  isSharedPhoto = false
 ): string {
   return `Extract ONLY EVENTS (entertainment/activities) from this content. IGNORE all food/drink specials.
 
@@ -3477,6 +3500,13 @@ TIME ASSOCIATION RULES (MANDATORY — PER-DAY REGION):
 - Evidence requirement: set timeFlags.start.source="explicit" and timeFlags.start.evidence to the exact substring you read.
 - **If your evidence does not contain a time token from the SAME region, set startTime="unknown" and timeFlags.start.source="none". Do not guess or copy a global time in this case.**
 - Never fabricate an end time. If none is visible, set endTime="unknown" and timeFlags.end.toClose=false.
+
+${isSharedPhoto ? `SHARED-PHOTO DATE AND GROUPING SAFETY:
+- The Posted at/upload timestamp is transport metadata, NOT event-date evidence.
+- Never use ${postedLocalDate}, today's date, or a relative weekday merely because the poster has no explicit calendar date. Leave date="" so the user can resolve it.
+- When a month/day is visible but no year is printed, choose the nearest plausible occurrence to the upload date (past or future); do not automatically roll a recently passed poster into next year.
+- A single headline event may list doors, a class, performances, party segments, DJs, intermission, or an after-party. Return ONE parent event using the headline title, the poster's event date, the earliest admission/start time and latest explicit end time. Preserve the run-of-show in description; do not emit its agenda lines as separate events.
+` : ''}
 
 EXTRACT ONLY:
 ✓ Live music, bands, DJs
@@ -3622,7 +3652,8 @@ Return pure JSON with specials and extraction reasoning.`;
 function createCalendarExtractionPrompt(
   combinedText: string,
   userName: string,
-  timestamp: string
+  timestamp: string,
+  isSharedPhoto = false
 ): string {
   return `Extract ALL events and specials from this CALENDAR content, ensure you process all attached images.
 
@@ -3633,6 +3664,13 @@ CONTENT:
 
 This appears to be a calendar with multiple dates and activities.
 Extract EVERY event/special listed for EVERY date shown.
+
+${isSharedPhoto ? `SHARED-PHOTO SAFETY GATE (apply before extracting rows):
+- The upload timestamp is not event-date evidence.
+- If the image actually advertises ONE headline/ticketed event and the time rows are its internal run-of-show, return one parent item, not one item per agenda row. Use the headline, explicit event date, earliest start and latest explicit end; preserve the itinerary in description.
+- If no calendar date is visible, leave date="". Never substitute today/upload date.
+- For a visible month/day without a year, choose the nearest plausible occurrence to the upload date, including a recently passed date; do not always roll forward.
+` : ''}
 
 IMPORTANT (Calendar grids with lineups):
 - Images may include day-cell crops from the SAME calendar. Treat all images as parts of one calendar.
@@ -3689,7 +3727,8 @@ Return pure JSON with ALL calendar items.`;
 function createScheduleExtractionPrompt(
   combinedText: string,
   userName: string,
-  timestamp: string
+  timestamp: string,
+  isSharedPhoto = false
 ): string {
   return `Extract ALL events from this SCHEDULE content.
 
@@ -3700,6 +3739,14 @@ CONTENT:
 
 This appears to be a schedule/lineup with multiple performances.
 Extract EVERY performance/event listed.
+
+${isSharedPhoto ? `SHARED-PHOTO SAFETY GATE (apply before splitting):
+- The upload timestamp is not event-date evidence.
+- One headline/ticketed event with sequential rows such as class, performance, party, DJ set, doors, intermission or after-party is ONE event with an itinerary. Return one parent item using the headline title, explicit event date, earliest start and latest explicit end, and preserve the itinerary in description.
+- Split only independently attendable/bookable events (for example different dates, acts in a venue calendar, or clearly separate tickets).
+- If no explicit calendar date is visible, leave date="". Never substitute today/upload date.
+- For a visible month/day without a year, choose the nearest plausible occurrence to the upload date, including a recently passed date; do not always roll forward.
+` : ''}
 
 For each item found, extract:
 - name: Performer/event name
@@ -3834,7 +3881,8 @@ function createFallbackExtractionPrompt(
   tz: string,
   postedLocalPretty: string,
   postedLocalDate: string,
-  contentType: ContentType
+  contentType: ContentType,
+  isSharedPhoto = false
 ): string {
   const calendarRules =
     contentType === 'CALENDAR'
@@ -3853,14 +3901,15 @@ CONTENT:
 - Posted at (UTC ISO): ${timestamp}
 - Reference timezone: ${tz}
 - Posted at (local): ${postedLocalPretty}
-- Default date if none is explicit: ${postedLocalDate}
+- Default date if none is explicit: ${isSharedPhoto ? 'NONE - leave date empty' : postedLocalDate}
 - Original classification: ${contentType}
 - Text: "${combinedText}"
 ${calendarRules}
 
 RULES:
 - Use image text (OCR) when available; otherwise rely on the text.
-- If a date is not explicit, use ${postedLocalDate}.
+- If a date is not explicit, ${isSharedPhoto ? 'leave date=""; the upload time is not event-date evidence' : `use ${postedLocalDate}`}.
+- ${isSharedPhoto ? 'Do not split one headline event into its internal class, performance, party, DJ, doors, intermission, or after-party agenda segments.' : 'Preserve independently listed events.'}
 - If a time is not explicit, leave startTime/endTime as empty strings.
 - Do NOT return an empty list if you see any hint of events, schedules, classes, lineups, or specials.
 

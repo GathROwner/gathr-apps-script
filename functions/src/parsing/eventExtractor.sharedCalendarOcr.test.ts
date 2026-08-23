@@ -3,8 +3,31 @@ import assert from 'node:assert/strict';
 
 import {
   mergeCalendarItemsForRegression,
+  normalizeFallbackItemsForRegression,
   parseCalendarOcrTextForRegression,
 } from './eventExtractor.js';
+
+test('shared-photo fallback leaves a missing poster date unresolved', () => {
+  const [item] = normalizeFallbackItemsForRegression([{
+    name: 'Lovebite Release Show',
+    description: 'With Kendra Lyttle and Dream of Leaves at 10pm',
+    startTime: '22:00',
+    venue: "Baba's Lounge",
+  }], '');
+
+  assert.equal(item.date, '');
+  assert.equal(item.name, 'Lovebite Release Show');
+});
+
+test('feed fallback can still use its trusted publication date', () => {
+  const [item] = normalizeFallbackItemsForRegression([{
+    name: 'Tonight at the Cave',
+    description: 'Live comedy tonight at 8pm',
+    startTime: '20:00',
+  }], '2026-08-22');
+
+  assert.equal(item.date, '2026-08-22');
+});
 
 test('calendar OCR fallback extracts single flyer date line without explicit year', () => {
   const items = parseCalendarOcrTextForRegression(
