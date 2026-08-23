@@ -53,6 +53,12 @@ export {
 // Account verification - authenticated, rate-limited branded delivery
 export { sendBrandedEmailVerification } from './triggers/accountVerification.js';
 
+// Shared-event push notifications - token registration and terminal ingest alerts
+export {
+  registerSharedEventPushToken,
+  sendSharedEventCompletionPush,
+} from './triggers/sharedEventNotifications.js';
+
 // Unknown Venues - Queue inspection and resolver controls
 export {
   listUnrecognizedVenues,
