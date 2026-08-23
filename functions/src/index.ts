@@ -40,7 +40,11 @@ export { retryApifyWebhook } from './triggers/apifyWebhook.js';
 export { startFacebookEventsScrape } from './triggers/facebookEvents.js';
 
 // Shared Event Ingest - User shares Facebook/social event content into GathR
-export { submitSharedEvent, uploadSharedEventImage } from './triggers/sharedEventIngest.js';
+export {
+  prepareSharedEventUpload,
+  submitSharedEvent,
+  uploadSharedEventImage,
+} from './triggers/sharedEventIngest.js';
 export {
   searchSharedEventVenueCandidates,
   confirmSharedEventVenue,

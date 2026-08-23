@@ -1,9 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
+  normalizeExpectedSharedEventUploadIds,
   normalizeSharedEventUploadId,
   sharedEventClientIngestId,
   sharedEventUploadPath,
+  sharedEventUploadsReady,
 } from '../utils/sharedEventUpload.js';
 
 test('accepts only bounded upload ids safe for storage paths', () => {
@@ -30,4 +32,27 @@ test('uses an idempotent storage path when the client supplies an upload id', ()
     'sharedEventUploads/user-123/share_abc-12345678-poster.jpg'
   );
   assert.equal(sharedEventUploadPath(params), sharedEventUploadPath(params));
+});
+
+test('prepared uploads accept only bounded ids owned by the client submission', () => {
+  assert.deepEqual(
+    normalizeExpectedSharedEventUploadIds('share_abc-12345678', [
+      'share_abc-12345678_0',
+      'share_abc-12345678_1',
+      'share_abc-12345678_1',
+    ]),
+    ['share_abc-12345678_0', 'share_abc-12345678_1']
+  );
+  assert.deepEqual(
+    normalizeExpectedSharedEventUploadIds('share_abc-12345678', ['another_share_12345678_0']),
+    []
+  );
+});
+
+test('prepared uploads become ready only after every expected receipt exists', () => {
+  assert.equal(sharedEventUploadsReady(['upload_12345678_0'], []), false);
+  assert.equal(sharedEventUploadsReady(
+    ['upload_12345678_0', 'upload_12345678_1'],
+    ['upload_12345678_1', 'upload_12345678_0']
+  ), true);
 });

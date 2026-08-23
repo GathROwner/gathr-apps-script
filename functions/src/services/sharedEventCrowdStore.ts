@@ -395,6 +395,31 @@ export async function contributeSharedEventPhoto(params: {
   return result;
 }
 
+export async function findExistingOwnerCrowdContribution(params: {
+  ownerUid: string;
+  event: ParsedSharedEvent;
+}): Promise<SharedEventCrowdContribution | undefined> {
+  const probe = buildCrowdContribution({
+    ownerUid: params.ownerUid,
+    ingestId: 'dedupe-probe',
+    privateEventId: 'dedupe-probe',
+    event: params.event,
+  });
+  const possible = await db()
+    .collection(CROWD_COLLECTION)
+    .where('dateLocationKey', '==', probe.dateLocationKey)
+    .limit(20)
+    .get();
+  const matched = possible.docs
+    .map((snapshot) => snapshot.data() as SharedEventCrowdAggregateRecord)
+    .filter((aggregate) => crowdContributionMatchesAggregate(probe, aggregate))
+    .sort((left, right) => (
+      crowdTitleSimilarity(probe.title, right.title) -
+      crowdTitleSimilarity(probe.title, left.title)
+    ))[0];
+  return matched?.contributions?.find((entry) => entry.ownerUid === params.ownerUid);
+}
+
 export async function markCrowdCandidateOutcome(params: {
   candidate: PublicSharedEventCandidateRecord;
   status: PublicSharedEventCandidateStatus;

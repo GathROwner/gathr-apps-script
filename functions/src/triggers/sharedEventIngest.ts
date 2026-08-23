@@ -13,7 +13,10 @@ import {
 } from '../processing/sharedEventParser.js';
 import { ApifyAdHocWebhook, startActorRunNoWait } from '../services/apifyService.js';
 import * as firestoreService from '../services/firestoreService.js';
-import { contributeSharedEventPhoto } from '../services/sharedEventCrowdStore.js';
+import {
+  contributeSharedEventPhoto,
+  findExistingOwnerCrowdContribution,
+} from '../services/sharedEventCrowdStore.js';
 import { crowdStatusSummary } from '../services/sharedEventCrowdConsensus.js';
 import { enrichPrivateSharedEventLocation } from '../services/sharedEventPrivateLocation.js';
 import { resolveOrRequireSharedEventVenue } from '../services/sharedEventVenueResolution.js';
@@ -26,6 +29,7 @@ import {
 } from '../types/sharedEvent.js';
 import { logger } from '../utils/logger.js';
 import {
+  normalizeExpectedSharedEventUploadIds,
   normalizeSharedEventUploadId,
   sharedEventClientIngestId,
   sharedEventUploadPath,
@@ -459,6 +463,21 @@ function queuedResponse(params: { ingestId: string }) {
   };
 }
 
+function awaitingUploadResponse(params: { ingestId: string; processingStatus?: string }) {
+  return {
+    success: true,
+    ingestId: params.ingestId,
+    processingStatus: params.processingStatus || 'awaiting_upload',
+    routing: 'private_only',
+    sourceVisibility: 'unknown',
+    status: 'needs_user_review',
+    extractedEventCount: 0,
+    needsUserReview: false,
+    reviewReasons: [],
+    events: [],
+  };
+}
+
 function isTaskAlreadyExistsError(error: unknown): boolean {
   const code = Number((error as { code?: unknown })?.code);
   const message = error instanceof Error ? error.message : String(error || '');
@@ -847,12 +866,26 @@ async function processSharedEventPayloadToFirestore(params: {
     : false;
   const eventLinks = await Promise.all(parsedEvents.map(async (currentParsedEvent, index) => {
     const updateIngestLink = index === 0;
-    const privateEventId = await firestoreService.createPrivateSharedEvent({
-      ownerUid: params.ownerUid,
-      ingestId,
-      parsedEvent: currentParsedEvent,
-      updateIngestLink,
-    });
+    const reusableContribution = currentParsedEvent.routing !== 'public_candidate' && hasOwnedPhoto
+      ? await findExistingOwnerCrowdContribution({
+        ownerUid: params.ownerUid,
+        event: currentParsedEvent,
+      })
+      : undefined;
+    const privateEventId = reusableContribution?.privateEventId || await firestoreService.createPrivateSharedEvent({
+        ownerUid: params.ownerUid,
+        ingestId,
+        parsedEvent: currentParsedEvent,
+        updateIngestLink,
+      });
+    if (reusableContribution?.privateEventId) {
+      await firestoreService.refreshReusedPrivateSharedEvent({
+        ownerUid: params.ownerUid,
+        ingestId,
+        privateEventId,
+        parsedEvent: currentParsedEvent,
+      });
+    }
     let publicCandidateId = currentParsedEvent.routing === 'public_candidate'
       ? await firestoreService.createPublicSharedEventCandidate({
         ownerUid: params.ownerUid,
@@ -975,6 +1008,76 @@ export const processSharedEventIngest = onTaskDispatched(
   }
 );
 
+export const prepareSharedEventUpload = onRequest(
+  {
+    timeoutSeconds: 30,
+    memory: '256MiB',
+    region: 'northamerica-northeast2',
+    cors: true,
+  },
+  async (request, response) => {
+    if (request.method === 'OPTIONS') {
+      response.status(204).send('');
+      return;
+    }
+    if (request.method !== 'POST') {
+      response.status(405).json({ success: false, error: 'Method not allowed' });
+      return;
+    }
+
+    let ownerUid = '';
+    try {
+      ownerUid = await requireUserId(request.headers.authorization);
+      const body = asBodyObject(request.body);
+      const payload = normalizePayload(body);
+      const clientSubmissionId = normalizeSharedEventUploadId(payload.clientSubmissionId);
+      const expectedUploadIds = normalizeExpectedSharedEventUploadIds(
+        clientSubmissionId,
+        body.expectedUploadIds
+      );
+      if (!clientSubmissionId || expectedUploadIds.length === 0) {
+        response.status(400).json({
+          success: false,
+          error: 'A valid shared-photo upload reservation is required.',
+        });
+        return;
+      }
+      const ingestId = sharedEventClientIngestId(ownerUid, clientSubmissionId);
+      if (!ingestId) {
+        response.status(400).json({ success: false, error: 'The shared-photo identifier was invalid.' });
+        return;
+      }
+
+      const record = await firestoreService.createAwaitingSharedEventUpload({
+        ownerUid,
+        ingestId,
+        payload,
+        expectedUploadIds,
+        sourcePlatform: sourcePlatformForQueuedIngest(payload, resolveSourceUrl(payload)),
+        parserVersion: SHARED_EVENT_PARSER_VERSION,
+      });
+      logger.info('Prepared durable shared event upload', {
+        ownerUid,
+        ingestId,
+        expectedUploadCount: expectedUploadIds.length,
+        processingStatus: record.processingStatus,
+      });
+      response.json(awaitingUploadResponse({
+        ingestId,
+        processingStatus: record.processingStatus,
+      }));
+    } catch (error) {
+      logger.error('prepareSharedEventUpload failed', error, { ownerUid });
+      response.status(ownerUid ? 500 : 401).json({
+        success: false,
+        error: ownerUid
+          ? error instanceof Error ? error.message : 'Could not prepare the shared-photo upload.'
+          : 'Unauthorized',
+      });
+    }
+  }
+);
+
 export const uploadSharedEventImage = onRequest(
   {
     timeoutSeconds: 60,
@@ -1053,6 +1156,7 @@ export const uploadSharedEventImage = onRequest(
         `image.${extension}`
       );
       const uploadId = normalizeSharedEventUploadId(request.headers['x-gathr-upload-id']);
+      const ingestId = normalizeSharedEventUploadId(request.headers['x-gathr-ingest-id']);
       const filePath = sharedEventUploadPath({ ownerUid, uploadId, fileName });
       const bucketName = sharedEventUploadsBucketName();
       const bucket = admin.storage().bucket(bucketName);
@@ -1085,11 +1189,29 @@ export const uploadSharedEventImage = onRequest(
       });
 
       const mediaUrl = storageDownloadUrl(bucket.name, filePath, downloadToken);
+      let durableProcessingStatus: string | undefined;
+      if (ingestId && uploadId) {
+        const recorded = await firestoreService.recordSharedEventUpload({
+          ownerUid,
+          ingestId,
+          uploadId,
+          mediaUrl,
+          filePath,
+          contentType,
+          byteLength: buffer.length,
+        });
+        durableProcessingStatus = recorded.processingStatus;
+        if (recorded.ready && recorded.processingStatus !== 'completed' && recorded.processingStatus !== 'processing') {
+          await enqueueSharedEventIngestProcessing({ ownerUid, ingestId });
+        }
+      }
       logger.info('Uploaded shared event image', {
         ownerUid,
+        ingestId,
         filePath,
         contentType,
         byteLength: buffer.length,
+        processingStatus: durableProcessingStatus,
       });
 
       response.json({
@@ -1098,6 +1220,8 @@ export const uploadSharedEventImage = onRequest(
         path: filePath,
         contentType,
         byteLength: buffer.length,
+        ingestId,
+        processingStatus: durableProcessingStatus,
       });
     } catch (error) {
       logger.error('uploadSharedEventImage failed', error, { ownerUid });

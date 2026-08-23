@@ -60,6 +60,7 @@ import {
 import {
   getUntrustedPublicPromotionReviewReasons,
 } from './sharedEventPublicTrust.js';
+import { sharedEventUploadsReady } from '../utils/sharedEventUpload.js';
 
 // Initialize Firebase Admin if not already initialized
 if (!admin.apps.length) {
@@ -3421,6 +3422,120 @@ export async function createQueuedSharedEventIngest(params: {
   return docRef.id;
 }
 
+export async function createAwaitingSharedEventUpload(params: {
+  ownerUid: string;
+  ingestId: string;
+  payload: SharedEventSubmitPayload;
+  expectedUploadIds: string[];
+  sourcePlatform?: SharedEventSourcePlatform;
+  parserVersion: string;
+}): Promise<SharedEventIngestRecord> {
+  const now = admin.firestore.FieldValue.serverTimestamp();
+  const docRef = db
+    .collection('users')
+    .doc(params.ownerUid)
+    .collection(COLLECTIONS.SHARED_EVENT_INGESTS)
+    .doc(params.ingestId);
+  const record: SharedEventIngestRecord = {
+    ownerUid: params.ownerUid,
+    payload: params.payload,
+    sourcePlatform: params.sourcePlatform || 'unknown',
+    sourceVisibility: 'unknown',
+    visibilityEvidence: {
+      method: 'not_checked',
+      checkedAt: new Date().toISOString(),
+      reason: 'Waiting for the durable shared-photo upload.',
+    },
+    parserVersion: params.parserVersion,
+    status: 'needs_user_review',
+    routing: 'private_only',
+    processingStatus: 'awaiting_upload',
+    expectedUploadIds: params.expectedUploadIds,
+    receivedUploads: [],
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  await db.runTransaction(async (transaction) => {
+    const existing = await transaction.get(docRef);
+    if (!existing.exists) transaction.create(docRef, record);
+  });
+
+  const snapshot = await docRef.get();
+  return snapshot.data() as SharedEventIngestRecord;
+}
+
+export async function recordSharedEventUpload(params: {
+  ownerUid: string;
+  ingestId: string;
+  uploadId: string;
+  mediaUrl: string;
+  filePath: string;
+  contentType: string;
+  byteLength: number;
+}): Promise<{ ready: boolean; processingStatus: SharedEventProcessingStatus }> {
+  const docRef = db
+    .collection('users')
+    .doc(params.ownerUid)
+    .collection(COLLECTIONS.SHARED_EVENT_INGESTS)
+    .doc(params.ingestId);
+
+  return db.runTransaction(async (transaction) => {
+    const snapshot = await transaction.get(docRef);
+    if (!snapshot.exists) throw new Error('The prepared shared-photo upload was not found.');
+    const existing = snapshot.data() as SharedEventIngestRecord;
+    const expectedUploadIds = Array.isArray(existing.expectedUploadIds)
+      ? existing.expectedUploadIds
+      : [];
+    if (!expectedUploadIds.includes(params.uploadId)) {
+      throw new Error('This photo does not belong to the prepared share.');
+    }
+
+    const receivedUploads = Array.isArray(existing.receivedUploads)
+      ? [...existing.receivedUploads]
+      : [];
+    const receipt = {
+      uploadId: params.uploadId,
+      mediaUrl: params.mediaUrl,
+      filePath: params.filePath,
+      contentType: params.contentType,
+      byteLength: params.byteLength,
+    };
+    const existingIndex = receivedUploads.findIndex((entry) => entry.uploadId === params.uploadId);
+    if (existingIndex >= 0) receivedUploads[existingIndex] = receipt;
+    else receivedUploads.push(receipt);
+
+    const ready = sharedEventUploadsReady(
+      expectedUploadIds,
+      receivedUploads.map((entry) => entry.uploadId)
+    );
+    const currentStatus = existing.processingStatus || 'awaiting_upload';
+    const nextStatus: SharedEventProcessingStatus = currentStatus === 'completed' || currentStatus === 'processing'
+      ? currentStatus
+      : ready ? 'queued' : 'awaiting_upload';
+    const mediaUrls = Array.from(new Set([
+      ...(existing.payload.mediaUrls || []),
+      ...receivedUploads.map((entry) => entry.mediaUrl),
+    ])).filter(Boolean);
+
+    transaction.set(docRef, {
+      receivedUploads,
+      payload: {
+        ...existing.payload,
+        mediaUrls,
+      },
+      processingStatus: nextStatus,
+      ...(ready ? {
+        uploadReadyAt: admin.firestore.FieldValue.serverTimestamp(),
+        queuedAt: existing.queuedAt || admin.firestore.FieldValue.serverTimestamp(),
+      } : {}),
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    }, { merge: true });
+
+    return { ready, processingStatus: nextStatus };
+  });
+}
+
 export async function getSharedEventIngest(params: {
   ownerUid: string;
   ingestId: string;
@@ -3687,6 +3802,31 @@ export async function createPrivateSharedEvent(params: {
   });
 
   return docRef.id;
+}
+
+export async function refreshReusedPrivateSharedEvent(params: {
+  ownerUid: string;
+  ingestId: string;
+  privateEventId: string;
+  parsedEvent: ParsedSharedEvent;
+}): Promise<void> {
+  await db
+    .collection('users')
+    .doc(params.ownerUid)
+    .collection(COLLECTIONS.PRIVATE_SHARED_EVENTS)
+    .doc(params.privateEventId)
+    .set({
+      ...params.parsedEvent,
+      ownerUid: params.ownerUid,
+      ingestId: params.ingestId,
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    }, { merge: true });
+  logger.info('Reused private shared event for repeat owner submission', {
+    ownerUid: params.ownerUid,
+    ingestId: params.ingestId,
+    privateEventId: params.privateEventId,
+    status: params.parsedEvent.status,
+  });
 }
 
 /**

@@ -15,6 +15,7 @@ export type SharedEventStatus =
   | 'expired';
 
 export type SharedEventProcessingStatus =
+  | 'awaiting_upload'
   | 'queued'
   | 'processing'
   | 'completed'
@@ -183,6 +184,15 @@ export interface SharedEventIngestRecord {
   routing: SharedEventRouting;
   processingStatus?: SharedEventProcessingStatus;
   processingError?: string;
+  expectedUploadIds?: string[];
+  receivedUploads?: Array<{
+    uploadId: string;
+    mediaUrl: string;
+    filePath: string;
+    contentType: string;
+    byteLength: number;
+  }>;
+  uploadReadyAt?: unknown;
   queuedAt?: unknown;
   startedAt?: unknown;
   completedAt?: unknown;
