@@ -52,6 +52,7 @@ export interface SharedEventCrowdContribution {
   ingestId: string;
   privateEventId: string;
   title: string;
+  description?: string;
   startDate: string;
   endDate?: string;
   startTime?: string;
@@ -75,6 +76,7 @@ export interface SharedEventCrowdContribution {
 
 export interface SharedEventCrowdConsensusFields {
   title: string;
+  description?: string;
   startDate: string;
   endDate?: string;
   startTime?: string;
@@ -232,6 +234,7 @@ export function buildCrowdContribution(params: {
     ingestId: params.ingestId,
     privateEventId: params.privateEventId,
     title: params.event.title.trim(),
+    description: params.event.description,
     startDate,
     endDate: params.event.endDate,
     startTime: params.event.startTime,
@@ -358,6 +361,7 @@ export function buildCrowdConsensus(
     ready: true,
     fields: {
       title,
+      description: mostTrustedText(rows, (row) => row.description),
       startDate: anchor.startDate,
       endDate: mostTrustedText(rows, (row) => row.endDate) || anchor.startDate,
       startTime: consensusTime(rows, (row) => row.startTime),

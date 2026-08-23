@@ -143,6 +143,54 @@ function inferCategory(candidate: PublicSharedEventCandidateRecord): string {
   return 'Gatherings & Parties';
 }
 
+function inferSharedEventFamilyFriendlyFields(candidate: PublicSharedEventCandidateRecord) {
+  const rawText = `${candidate.title || ''} ${candidate.description || ''} ${candidate.parentEventTitle || ''}`;
+  const text = normalizeVenueName(rawText);
+  const hasAdultRestriction =
+    /\b(18|19|21)\s*\+/.test(rawText) ||
+    /\b(adults? only|no minors?|mature audiences?|burlesque|striptease)\b/.test(text);
+  if (hasAdultRestriction) {
+    return {
+      familyFriendlyScore: 0,
+      familyFriendlyLevel: 'unlikely',
+      familyFriendlyReasons: ['adult_restriction'],
+      familyFriendlyScoringVersion: 'shared-event-family-v1',
+    };
+  }
+
+  const hasExplicitFamilyEvidence =
+    /\b(family friendly|family fun|families welcome|whole family|all ages|kids?|children|youth|toddler)\b/.test(text);
+  if (hasExplicitFamilyEvidence) {
+    return {
+      familyFriendlyScore: 90,
+      familyFriendlyLevel: 'high',
+      familyFriendlyReasons: ['explicit_family_audience'],
+      familyFriendlyScoringVersion: 'shared-event-family-v1',
+    };
+  }
+
+  const startHour = Number(String(candidate.startTime || '').split(':', 1)[0]);
+  const isDaytime = Number.isInteger(startHour) && startHour >= 6 && startHour < 19;
+  const hasCommunityMarketContext =
+    /\b(community market|farmers? market|inside market|craft market|markets trail|vendors?)\b/.test(text);
+  const hasAlcoholFocus = /\b(beer|wine|cocktail|spirits?|brewery|pub crawl)\b/.test(text);
+  if (isDaytime && hasCommunityMarketContext && !hasAlcoholFocus) {
+    return {
+      familyFriendlyScore: 70,
+      familyFriendlyLevel: 'likely',
+      familyFriendlyReasons: ['daytime_community_market'],
+      familyFriendlyScoringVersion: 'shared-event-family-v1',
+    };
+  }
+
+  return {
+    familyFriendlyScore: 15,
+    familyFriendlyLevel: 'unlikely',
+    familyFriendlyReasons: ['insufficient_family_evidence'],
+    familyFriendlyScoringVersion: 'shared-event-family-v1',
+  };
+}
+
 function isFoodSpecialCategory(category: string): boolean {
   return ['happy hour', 'food special', 'drink special', 'wing night'].includes(
     String(category || '').trim().toLowerCase()
@@ -407,6 +455,7 @@ export function buildPublicSharedEventData(
     : [];
   const imageUrl = firstText(mediaUrls[0], candidate.visibilityEvidence?.imageUrl);
   const description = firstText(candidate.description);
+  const familyFriendly = inferSharedEventFamilyFriendlyFields(candidate);
 
   return {
     uniqueId: buildPromotionUniqueId(candidate),
@@ -415,6 +464,7 @@ export function buildPublicSharedEventData(
     eventName: title,
     name: title,
     description,
+    ...familyFriendly,
     category,
     isEvent: !isFoodSpecial,
     isFoodSpecial,

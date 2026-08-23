@@ -132,6 +132,44 @@ test('crowd consensus candidates require independent contributors and never publ
   assert.equal(getRequiredCandidateReviewReason(candidate), 'crowd_contributors_not_independent');
 });
 
+test('crowd-promoted events preserve explicit family-friendly evidence', () => {
+  const candidate = {
+    id: 'crowd_family',
+    ownerUid: 'user-1',
+    ingestId: 'ingest-1',
+    privateEventId: 'private-1',
+    sourcePlatform: 'unknown',
+    sourceVisibility: 'user_private',
+    promotionBasis: 'crowd_consensus',
+    visibilityEvidence: {
+      method: 'no_url',
+      checkedAt: '2026-08-23T12:00:00Z',
+      reason: 'crowd',
+    },
+    title: 'GathR QA Sunset Sessions',
+    description: 'Free family friendly live music for all ages.',
+    startDate: '2026-08-26',
+    startTime: '19:00',
+    locationName: "Peake's Quay Restaurant & Bar",
+    mediaUrls: [],
+    timezone: 'America/Halifax',
+    sourceContentSignature: 'crowd:family',
+    status: 'pending_validation',
+  } as PublicSharedEventCandidateRecord;
+  const venue = {
+    id: 'venue-peakes-quay',
+    name: "Peake's Quay Restaurant & Bar",
+    latitude: 46.23,
+    longitude: -63.12,
+  } as VenueData;
+
+  const event = buildPublicSharedEventData(candidate, venue) as EventData & Record<string, unknown>;
+  assert.equal(event.familyFriendlyScore, 90);
+  assert.equal(event.familyFriendlyLevel, 'high');
+  assert.deepEqual(event.familyFriendlyReasons, ['explicit_family_audience']);
+  assert.equal(event.familyFriendlyScoringVersion, 'shared-event-family-v1');
+});
+
 test('crowd-promoted specials retain price and finite recurrence metadata', () => {
   const venue = {
     id: 'venue_harbour_house',

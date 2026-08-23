@@ -24,6 +24,7 @@ function photoEvent(overrides: Partial<ParsedSharedEvent> = {}): ParsedSharedEve
     routing: 'private_only',
     status: 'saved',
     title: 'Harbour Lights Concert',
+    description: 'Free family friendly live music for all ages.',
     startDate: '2026-09-12',
     startTime: '19:00',
     locationName: 'Victoria Park Cultural Pavilion',
@@ -133,6 +134,7 @@ test('three independent compatible submissions create consensus without exposing
   assert.equal(consensus.ready, true);
   assert.equal(consensus.fields?.startDate, '2026-09-12');
   assert.equal(consensus.fields?.locationName, 'Victoria Park Cultural Pavilion');
+  assert.equal(consensus.fields?.description, 'Free family friendly live music for all ages.');
   assert.ok(consensus.fields?.startTime === '19:00' || consensus.fields?.startTime === '19:15');
   assert.equal('mediaUrls' in (consensus.fields || {}), false);
 });

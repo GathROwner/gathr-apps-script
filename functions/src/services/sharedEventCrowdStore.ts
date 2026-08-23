@@ -150,6 +150,7 @@ async function ensureCrowdPublicCandidate(
       reason: 'independently_corroborated_private_photo_submissions',
     },
     title: consensus.fields.title,
+    description: consensus.fields.description,
     startDate: consensus.fields.startDate,
     endDate: consensus.fields.endDate,
     startTime: consensus.fields.startTime,
@@ -293,6 +294,7 @@ export async function contributeSharedEventPhoto(params: {
     const consensus = buildCrowdConsensus(contributions, SHARED_EVENT_CROWD_THRESHOLD);
     const fields = consensus.fields || {
       title: existing?.title || contribution.title,
+      description: existing?.description || contribution.description,
       startDate: contribution.startDate,
       endDate: existing?.endDate || contribution.endDate,
       startTime: existing?.startTime || contribution.startTime,
