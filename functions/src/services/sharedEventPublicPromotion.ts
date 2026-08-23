@@ -121,7 +121,10 @@ export function extractSharedEventSubVenue(
 
 function inferCategory(candidate: PublicSharedEventCandidateRecord): string {
   const text = normalizeVenueName(`${candidate.title || ''} ${candidate.description || ''}`);
-  if (/\b(happy hour|drink special|cocktail|beer|wine)\b/.test(text)) return 'Happy Hour';
+  if (/\bhappy hour\b/.test(text)) return 'Happy Hour';
+  if (/\b(drink special|cocktail|mocktail|beer|wine|cider|pint|shot|shots|highball|mimosa|margarita|martini)\b/.test(text)) {
+    return 'Drink Special';
+  }
   if (candidate.contentKind === 'special') return 'Food Special';
   if (/\b(food special|bbq|burger|brunch|patio|menu|tasting|dinner|lunch)\b/.test(text)) {
     return 'Food Special';
@@ -450,6 +453,8 @@ export function buildPublicSharedEventData(
     sharedEventCandidateId: candidate.id,
     sharedEventPrivateEventId: candidate.privateEventId,
     sharedEventIngestId: candidate.ingestId,
+    sharedEventRelationshipType: candidate.relationshipType,
+    sharedEventParentEventTitle: candidate.parentEventTitle,
     ...(candidate.promotionBasis === 'crowd_consensus'
       ? {}
       : { sharedEventOwnerUid: candidate.ownerUid }),

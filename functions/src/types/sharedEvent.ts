@@ -144,6 +144,8 @@ export interface ParsedSharedEvent {
   mapMode?: 'venue' | 'route' | 'none';
   contentKind?: 'event' | 'special';
   price?: string;
+  relationshipType?: 'component_of' | 'supporting_special_for';
+  parentEventTitle?: string;
   recurringPattern?: string;
   recurringDaysOfWeek?: string[];
   recurrenceUntilDate?: string;
@@ -263,6 +265,8 @@ export interface PublicSharedEventCandidateRecord {
   address?: string;
   contentKind?: 'event' | 'special';
   price?: string;
+  relationshipType?: 'component_of' | 'supporting_special_for';
+  parentEventTitle?: string;
   recurringPattern?: string;
   recurringDaysOfWeek?: string[];
   recurrenceUntilDate?: string;

@@ -141,6 +141,8 @@ test('crowd consensus preserves special and recurrence semantics', () => {
   const recurringSpecial = {
     contentKind: 'special' as const,
     price: '$8',
+    relationshipType: 'supporting_special_for' as const,
+    parentEventTitle: 'Friday Dance Party - DJ Derek',
     recurringPattern: 'weekly_custom',
     recurringDaysOfWeek: ['tuesday', 'wednesday', 'thursday', 'friday'],
     recurrenceUntilDate: '2026-09-30',
@@ -153,6 +155,8 @@ test('crowd consensus preserves special and recurrence semantics', () => {
   assert.equal(consensus.ready, true);
   assert.equal(consensus.fields?.contentKind, 'special');
   assert.equal(consensus.fields?.price, '$8');
+  assert.equal(consensus.fields?.relationshipType, 'supporting_special_for');
+  assert.equal(consensus.fields?.parentEventTitle, 'Friday Dance Party - DJ Derek');
   assert.equal(consensus.fields?.recurringPattern, 'weekly_custom');
   assert.deepEqual(consensus.fields?.recurringDaysOfWeek, recurringSpecial.recurringDaysOfWeek);
   assert.equal(consensus.fields?.recurrenceUntilDate, '2026-09-30');

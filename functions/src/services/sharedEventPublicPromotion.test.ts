@@ -186,6 +186,57 @@ test('crowd-promoted specials retain price and finite recurrence metadata', () =
   assert.equal(event.recurrenceUntilDate, '2026-09-30');
 });
 
+test('crowd-promoted shot offer stays a linked drink special', () => {
+  const venue = {
+    id: 'venue_beer_garden',
+    name: 'Charlottetown Beer Garden & Seafood Patio',
+    latitude: 46.23,
+    longitude: -63.13,
+  } as VenueData;
+  const candidate = {
+    id: 'crowd_shot_special',
+    ownerUid: 'user-1',
+    ingestId: 'ingest-1',
+    privateEventId: 'private-1',
+    sourcePlatform: 'facebook',
+    sourceVisibility: 'user_private',
+    promotionBasis: 'crowd_consensus',
+    visibilityEvidence: {
+      method: 'no_url',
+      checkedAt: '2026-08-22T12:00:00Z',
+      reason: 'crowd',
+    },
+    title: '$6 Burt Reynolds Shots',
+    description: 'Available during Friday Dance Party - DJ Derek.',
+    contentKind: 'special',
+    price: '$6',
+    relationshipType: 'supporting_special_for',
+    parentEventTitle: 'Friday Dance Party - DJ Derek',
+    startDate: '2026-08-21',
+    startTime: '22:00',
+    endTime: '02:00',
+    locationName: 'Charlottetown Beer Garden & Seafood Patio',
+    mediaUrls: [],
+    timezone: 'America/Halifax',
+    sourceContentSignature: 'crowd:shots',
+    crowdConsensus: {
+      aggregateId: 'aggregate-shots',
+      contributorCount: 3,
+      threshold: 3,
+      contributorRefs: [],
+    },
+    status: 'pending_validation',
+  } as PublicSharedEventCandidateRecord;
+
+  const event = buildPublicSharedEventData(candidate, venue) as EventData & Record<string, unknown>;
+  assert.equal(event.category, 'Drink Special');
+  assert.equal(event.eventType, 'food_special');
+  assert.equal(event.isFoodSpecial, true);
+  assert.equal(event.isEvent, false);
+  assert.equal(event.sharedEventRelationshipType, 'supporting_special_for');
+  assert.equal(event.sharedEventParentEventTitle, 'Friday Dance Party - DJ Derek');
+});
+
 test('public shared-event promotion trust requires public-sourced event facts', () => {
   const trustedCandidate = {
     title: 'Kim Albert',

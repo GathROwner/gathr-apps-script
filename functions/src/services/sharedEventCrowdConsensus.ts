@@ -60,6 +60,8 @@ export interface SharedEventCrowdContribution {
   address?: string;
   contentKind?: 'event' | 'special';
   price?: string;
+  relationshipType?: 'component_of' | 'supporting_special_for';
+  parentEventTitle?: string;
   recurringPattern?: string;
   recurringDaysOfWeek?: string[];
   recurrenceUntilDate?: string;
@@ -81,6 +83,8 @@ export interface SharedEventCrowdConsensusFields {
   address?: string;
   contentKind?: 'event' | 'special';
   price?: string;
+  relationshipType?: 'component_of' | 'supporting_special_for';
+  parentEventTitle?: string;
   recurringPattern?: string;
   recurringDaysOfWeek?: string[];
   recurrenceUntilDate?: string;
@@ -236,6 +240,8 @@ export function buildCrowdContribution(params: {
     address: params.event.address,
     contentKind: params.event.contentKind,
     price: params.event.price,
+    relationshipType: params.event.relationshipType,
+    parentEventTitle: params.event.parentEventTitle,
     recurringPattern: params.event.recurringPattern,
     recurringDaysOfWeek: params.event.recurringDaysOfWeek,
     recurrenceUntilDate: params.event.recurrenceUntilDate,
@@ -360,6 +366,8 @@ export function buildCrowdConsensus(
       address,
       contentKind: anchor.contentKind || 'event',
       price: mostTrustedText(rows, (row) => row.price),
+      relationshipType: anchor.relationshipType,
+      parentEventTitle: mostTrustedText(rows, (row) => row.parentEventTitle),
       recurringPattern: mostTrustedText(rows, (row) => row.recurringPattern),
       recurringDaysOfWeek: mostTrustedText(rows, (row) => row.recurringDaysOfWeek?.join(','))
         ?.split(',')

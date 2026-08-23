@@ -290,6 +290,8 @@ export interface ExtractedEvent extends RecurrenceScheduleFields {
   recurrenceUntilDate?: string;
   extractionReason: string;
   timeFlags?: TimeFlags;
+  relationshipType?: 'component_of' | 'supporting_special_for';
+  parentEventTitle?: string;
   _sourceType?: 'event' | 'special' | 'calendar' | 'schedule';
   _pipelineIndex?: number;
   _pipelineTotalStage3?: number;
@@ -316,6 +318,8 @@ export interface ExtractedSpecial extends RecurrenceScheduleFields {
   recurrenceUntilDate?: string;
   extractionReason: string;
   timeFlags?: TimeFlags;
+  relationshipType?: 'component_of' | 'supporting_special_for';
+  parentEventTitle?: string;
   _sourceType?: 'event' | 'special' | 'calendar' | 'schedule';
   _pipelineIndex?: number;
   _pipelineTotalStage3?: number;
@@ -338,6 +342,8 @@ export interface CalendarItem extends RecurrenceScheduleFields {
   totalOccurrences?: number;
   recurrenceUntilDate?: string;
   timeFlags?: TimeFlags;
+  relationshipType?: 'component_of' | 'supporting_special_for';
+  parentEventTitle?: string;
   _sourceType?: 'calendar' | 'schedule';
   _ticketImageUrl?: string;
 }

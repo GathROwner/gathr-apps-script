@@ -14,7 +14,7 @@ import {
 } from '../types/sharedEvent.js';
 import { logger } from '../utils/logger.js';
 
-export const SHARED_EVENT_PARSER_VERSION = 'shared-event-parser-v13';
+export const SHARED_EVENT_PARSER_VERSION = 'shared-event-parser-v14';
 
 const DEFAULT_TIMEZONE = 'America/Halifax';
 const MAX_TEXT_LENGTH = 12000;
@@ -1431,19 +1431,34 @@ function itemLooksLikeRoute(item: ExtractedItem): boolean {
 }
 
 function itemLooksLikePromotionalSpecial(item: ExtractedItem): boolean {
+  const name = cleanLongText(item.name);
   const text = cleanLongText([
-    item.name,
+    name,
     'description' in item ? item.description : '',
     'category' in item ? item.category : '',
+    'pricing' in item ? item.pricing : ('price' in item ? item.price : ''),
   ].filter(Boolean).join('\n'));
   if (!text) return false;
+
+  const consumableCue = /\b(beer|wine|cider|pint|drink|beverage|cocktail|mocktail|shot|shots|highball|mimosa|margarita|martini|wing|wings|taco|tacos|burger|burgers|pizza|oyster|oysters|mussel|mussels|appetizer|appetizers|food|meal|brunch|breakfast|lunch|dinner|poutine|nachos)\b/i;
+  const savingsCue = /(?:C\$|\$)\s*\d+(?:[.,]\d{1,2})?|\b(?:happy\s*hour|specials?|deal|discount|half[-\s]?price|two[-\s]?for[-\s]?(?:one|1)|2[-\s]?for[-\s]?1|bogo|free\s+(?:with|when))\b/i;
+  const namedPricedConsumable = consumableCue.test(name) && savingsCue.test(text);
+  if (namedPricedConsumable) return true;
 
   const hasEventCue = /\b(live|music|dj|concert|comedy|ceilidh|workshop|class|market|dance|party|karaoke|trivia|show|release|festival|tournament|screening|performance)\b/i.test(text);
   if (hasEventCue) return false;
 
-  return /\b(happy\s*hour|(?:daily|weekly|food|drink|lunch|dinner|brunch|wing|taco|burger|pizza|pint|cocktail)\s+specials?|deal|discount|half[-\s]?price|two[-\s]?for[-\s]?(?:one|1)|2[-\s]?for[-\s]?1|bogo)\b/i.test(text) ||
-    /\b(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday)s?\b[^\n]{0,50}\b(?:wing|taco|burger|pizza|pint|cocktail|oyster|mussel)s?\b/i.test(text) ||
-    /\b(?:wing|taco|burger|pizza|pint|cocktail|oyster|mussel)s?\b[^\n]{0,50}\b(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday)s?\b/i.test(text);
+  return /\b(happy\s*hour|(?:daily|weekly|food|drink|lunch|dinner|brunch|wing|taco|burger|pizza|pint|cocktail|shot)\s+specials?|deal|discount|half[-\s]?price|two[-\s]?for[-\s]?(?:one|1)|2[-\s]?for[-\s]?1|bogo)\b/i.test(text) ||
+    /\b(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday)s?\b[^\n]{0,50}\b(?:wing|taco|burger|pizza|pint|cocktail|shot|oyster|mussel)s?\b/i.test(text) ||
+    /\b(?:wing|taco|burger|pizza|pint|cocktail|shot|oyster|mussel)s?\b[^\n]{0,50}\b(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday)s?\b/i.test(text);
+}
+
+function normalizeSharedEventRelationshipType(
+  value: unknown
+): ParsedSharedEvent['relationshipType'] | undefined {
+  return value === 'component_of' || value === 'supporting_special_for'
+    ? value
+    : undefined;
 }
 
 function extractRouteStartLocation(item: ExtractedItem): string | undefined {
@@ -1801,6 +1816,12 @@ function buildExtractedParsedEventsFromCalendarItems(
       const price = explicitPrice || (contentKind === 'special'
         ? inferSpecialPriceFromText(title, description)
         : undefined);
+      const relationshipType = normalizeSharedEventRelationshipType(
+        'relationshipType' in item ? item.relationshipType : undefined
+      );
+      const parentEventTitle = relationshipType
+        ? cleanString('parentEventTitle' in item ? item.parentEventTitle : '', 220) || undefined
+        : undefined;
       let recurringPattern = normalizedRecurringPattern(
         'recurringPattern' in item ? item.recurringPattern : undefined
       );
@@ -1867,6 +1888,8 @@ function buildExtractedParsedEventsFromCalendarItems(
         address,
         contentKind,
         price,
+        relationshipType,
+        parentEventTitle,
         recurringPattern,
         recurringDaysOfWeek,
         recurrenceUntilDate,
@@ -1902,6 +1925,9 @@ function buildExtractedParsedEventsFromCalendarItems(
           startTime,
           locationName,
           address,
+          contentKind,
+          relationshipType,
+          parentEventTitle,
           String(index),
           'calendar_image',
         ]),
@@ -1988,6 +2014,21 @@ async function extractSharedEventImageItems(
     });
   }
 
+  const hasEntertainmentCue = /\b(dance|party|dj|live\s+music|concert|show|performance|karaoke|trivia)\b/i.test(authoritativeText);
+  const hasPricedFoodOrDrinkCue = /(?:C\$|\$)\s*\d+(?:[.,]\d{1,2})?[^\n]{0,55}\b(?:beer|wine|cider|pint|drink|cocktail|mocktail|shot|shots|wing|wings|taco|tacos|burger|pizza|oyster|mussel)s?\b|\b(?:beer|wine|cider|pint|drink|cocktail|mocktail|shot|shots|wing|wings|taco|tacos|burger|pizza|oyster|mussel)s?\b[^\n]{0,55}(?:C\$|\$)\s*\d+(?:[.,]\d{1,2})?/i.test(authoritativeText);
+  if (
+    hasEntertainmentCue &&
+    hasPricedFoodOrDrinkCue &&
+    (contentType === 'EVENT' || contentType === 'FOOD_SPECIAL')
+  ) {
+    logger.info('Promoted shared-photo extraction to mixed event and special', {
+      tag: 'shared_event_image_mixed_promotion',
+      parserVersion: SHARED_EVENT_PARSER_VERSION,
+      classifiedContentType: contentType,
+    });
+    contentType = 'MIXED_EVENTS_AND_SPECIALS';
+  }
+
   const extractedItems = await extractContentByType(
     contentType,
     authoritativeText,
@@ -2009,7 +2050,10 @@ async function extractSharedEventImageItems(
       ...sharedPhotoConfig,
     }
   );
-  const dominantPosterItems = keepDominantSharedPhotoSeries(extractedItems);
+  const dominantPosterItems = ensureNamedSharedPhotoParents(
+    keepDominantSharedPhotoSeries(extractedItems),
+    ocrText
+  );
   const items = reconcileSingleSharedPhotoEventDate(
     dominantPosterItems,
     contentType,
@@ -2018,6 +2062,121 @@ async function extractSharedEventImageItems(
     sharedPhotoConfig.timezone
   );
   return { contentType, classificationConfidence, items };
+}
+
+function minutesFromNormalizedTime(value: string | undefined): number | undefined {
+  const normalized = normalizeTime(value);
+  if (!normalized) return undefined;
+  const [hour, minute] = normalized.split(':').map(Number);
+  if (!Number.isFinite(hour) || !Number.isFinite(minute)) return undefined;
+  return hour * 60 + minute;
+}
+
+function sharedPhotoPrintedTimeRanges(ocrText: string): Array<{
+  startTime: string;
+  endTime: string;
+  durationMinutes: number;
+}> {
+  const ranges: Array<{ startTime: string; endTime: string; durationMinutes: number }> = [];
+  const pattern = /\b(\d{1,2}(?::\d{2})?\s*(?:a\.?m\.?|p\.?m\.?))\s*[-\u2012-\u2015]\s*(\d{1,2}(?::\d{2})?\s*(?:a\.?m\.?|p\.?m\.?))\b/gi;
+  for (const match of String(ocrText || '').matchAll(pattern)) {
+    const startTime = normalizeTime(match[1]);
+    const endTime = normalizeTime(match[2]);
+    const startMinutes = minutesFromNormalizedTime(startTime);
+    const endMinutes = minutesFromNormalizedTime(endTime);
+    if (!startTime || !endTime || startMinutes === undefined || endMinutes === undefined) continue;
+    const durationMinutes = endMinutes > startMinutes
+      ? endMinutes - startMinutes
+      : endMinutes + 24 * 60 - startMinutes;
+    if (durationMinutes <= 0 || durationMinutes > 18 * 60) continue;
+    ranges.push({ startTime, endTime, durationMinutes });
+  }
+  return ranges;
+}
+
+function sharedPhotoParentDescription(parentTitle: string, childTitle: string, ocrText: string): string {
+  const details = [
+    /\bfree admission\b/i.test(ocrText) ? 'Free admission' : '',
+    ocrText.match(/\b\d{1,3}\+\s*vendors(?:\s+and more)?\b/i)?.[0] || '',
+    /\bfood on site\b/i.test(ocrText) ? 'Food on site' : '',
+    /\b50\/50 sales\b/i.test(ocrText) ? '50/50 sales' : '',
+  ].filter(Boolean);
+  const suffix = details.length > 0 ? ` ${details.join('; ')}.` : '';
+  return `${parentTitle}, featuring ${childTitle}.${suffix}`;
+}
+
+function enrichSharedPhotoRelatedEventTitle(parentEventTitle: string, ocrText: string): string {
+  if (!/\bdance\s+party\b/i.test(parentEventTitle) || /\bdj\b/i.test(parentEventTitle)) {
+    return parentEventTitle;
+  }
+  const weekday = parentEventTitle.match(/\b(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/i)?.[0];
+  const source = String(ocrText || '');
+  const weekdayIndex = weekday ? source.toLowerCase().indexOf(weekday.toLowerCase()) : -1;
+  const scopedText = weekdayIndex >= 0 ? source.slice(weekdayIndex, weekdayIndex + 500) : source;
+  const djMatch = scopedText.match(/\bDJ[ \t]+([A-Za-z][A-Za-z'-]{1,30}(?:[ \t]+[A-Za-z][A-Za-z'-]{1,30})?)/i);
+  const djName = cleanString(djMatch?.[1], 70);
+  return djName ? `${parentEventTitle.replace(/[\s!,:;-]+$/g, '')} - DJ ${djName}` : parentEventTitle;
+}
+
+function ensureNamedSharedPhotoParents(items: ExtractedItem[], ocrText: string): ExtractedItem[] {
+  const output: ExtractedItem[] = [];
+  const known = new Set(items.map((item) => (
+    `${normalizeEventKeyPart(item.name)}|${cleanString(item.date, 40)}`
+  )));
+  const printedRanges = sharedPhotoPrintedTimeRanges(ocrText)
+    .sort((left, right) => right.durationMinutes - left.durationMinutes);
+
+  for (const item of items) {
+    const relationshipType = 'relationshipType' in item ? item.relationshipType : undefined;
+    const rawParentEventTitle = cleanString(
+      'parentEventTitle' in item ? item.parentEventTitle : '',
+      220
+    );
+    const parentEventTitle = enrichSharedPhotoRelatedEventTitle(rawParentEventTitle, ocrText);
+    const parentKey = `${normalizeEventKeyPart(parentEventTitle)}|${cleanString(item.date, 40)}`;
+    if (
+      (relationshipType === 'component_of' || relationshipType === 'supporting_special_for') &&
+      parentEventTitle &&
+      !known.has(parentKey)
+    ) {
+      const childStart = normalizeTime(item.startTime);
+      const childEnd = normalizeTime('endTime' in item ? item.endTime : undefined);
+      const parentRange = printedRanges.find((range) => (
+        range.startTime !== childStart || range.endTime !== childEnd
+      ));
+      const isSupportingSpecial = relationshipType === 'supporting_special_for';
+      output.push({
+        name: parentEventTitle,
+        date: cleanString(item.date, 40),
+        startTime: isSupportingSpecial ? childStart || '' : parentRange?.startTime || '',
+        endTime: isSupportingSpecial ? childEnd || '' : parentRange?.endTime || '',
+        venue: cleanString(item.venue, 180),
+        address: cleanString('address' in item ? item.address : '', 260) || undefined,
+        price: /\bfree admission\b/i.test(ocrText) ? 'Free admission' : '',
+        description: isSupportingSpecial
+          ? `${parentEventTitle}. Supporting offer: ${cleanString(item.name, 220)}.`
+          : sharedPhotoParentDescription(parentEventTitle, cleanString(item.name, 220), ocrText),
+        extractionReason: isSupportingSpecial
+          ? 'Materialized an explicitly named event that its supporting special referenced but the event extraction omitted.'
+          : 'Materialized an explicitly named parent event that the component extraction referenced but omitted.',
+        recurringPattern: 'none',
+        _sourceType: 'event',
+      });
+      known.add(parentKey);
+      logger.info('Materialized missing shared-photo parent event', {
+        tag: 'shared_event_image_parent_materialized',
+        parserVersion: SHARED_EVENT_PARSER_VERSION,
+        parentEventTitle,
+        relatedItemTitle: cleanString(item.name, 220),
+        relationshipType,
+        date: cleanString(item.date, 40),
+      });
+    }
+    output.push(parentEventTitle && parentEventTitle !== rawParentEventTitle
+      ? { ...item, parentEventTitle }
+      : item);
+  }
+  return output;
 }
 
 function sharedPhotoSeriesTitleKey(item: ExtractedItem): string {
@@ -2145,6 +2304,13 @@ export function reconcileSingleSharedPhotoEventDateForRegression(params: {
 
 export function keepDominantSharedPhotoSeriesForRegression(items: ExtractedItem[]): ExtractedItem[] {
   return keepDominantSharedPhotoSeries(items);
+}
+
+export function ensureNamedSharedPhotoParentsForRegression(
+  items: ExtractedItem[],
+  ocrText: string
+): ExtractedItem[] {
+  return ensureNamedSharedPhotoParents(items, ocrText);
 }
 
 export async function extractSharedEventImageItemsForRegression(params: {

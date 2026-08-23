@@ -1,9 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { Settings } from 'luxon';
+import { deduplicateMixedContentForRegression } from '../parsing/eventExtractor.js';
 
 import {
   buildCalendarImageParsedEventsForRegression,
+  ensureNamedSharedPhotoParentsForRegression,
   extractFacebookEmbeddedEventData,
   extractFacebookCanonicalStoryUrl,
   mergeExtractedParsedEventsForRegression,
@@ -120,6 +122,217 @@ test('DJ admission price and special-guest wording remain an event', async () =>
 
   assert.equal(event.contentKind, 'event');
   assert.equal(event.price, '$10');
+});
+
+test('market and its independently timed live performance remain two linked events', async () => {
+  const primary = await parseSharedEventPayload({
+    title: 'West Prince PEI Markets Trail',
+    mediaUrls: ['https://example.com/west-prince-market.jpg'],
+    timezone: 'America/Halifax',
+  });
+  const parsed = buildCalendarImageParsedEventsForRegression(primary, [
+    {
+      name: 'West Prince PEI Markets Trail - Inside Market',
+      type: 'event',
+      date: '2026-08-23',
+      startTime: '11:00',
+      endTime: '16:00',
+      venue: 'Jacques Cartier Memorial Arena',
+      address: '349 Church Street, Alberton, PE',
+      price: 'Free admission',
+      description: 'Inside market with 25+ vendors, food on site, and 50/50 sales.',
+    },
+    {
+      name: 'Live Entertainment by Floyd Gaudet',
+      type: 'event',
+      date: '2026-08-23',
+      startTime: '12:00',
+      endTime: '14:00',
+      venue: 'Jacques Cartier Memorial Arena',
+      address: '349 Church Street, Alberton, PE',
+      description: 'Live music during the West Prince PEI Markets Trail Inside Market.',
+      relationshipType: 'component_of',
+      parentEventTitle: 'West Prince PEI Markets Trail - Inside Market',
+    },
+  ]);
+
+  assert.equal(parsed.length, 2);
+  assert.deepEqual(parsed.map((item) => ({
+    title: item.title,
+    contentKind: item.contentKind,
+    startTime: item.startTime,
+    endTime: item.endTime,
+    relationshipType: item.relationshipType,
+    parentEventTitle: item.parentEventTitle,
+  })), [
+    {
+      title: 'West Prince PEI Markets Trail - Inside Market',
+      contentKind: 'event',
+      startTime: '11:00',
+      endTime: '16:00',
+      relationshipType: undefined,
+      parentEventTitle: undefined,
+    },
+    {
+      title: 'Live Entertainment by Floyd Gaudet',
+      contentKind: 'event',
+      startTime: '12:00',
+      endTime: '14:00',
+      relationshipType: 'component_of',
+      parentEventTitle: 'West Prince PEI Markets Trail - Inside Market',
+    },
+  ]);
+});
+
+test('named component materializes its omitted market parent from the poster-wide time range', () => {
+  const items = ensureNamedSharedPhotoParentsForRegression([{
+    name: 'Live Entertainment by Floyd Gaudet',
+    description: 'Live entertainment by Floyd Gaudet from 12 PM to 2 PM.',
+    date: '2026-08-23',
+    startTime: '12:00',
+    endTime: '14:00',
+    venue: 'Jacques Cartier Memorial Arena',
+    address: '349 Church Street, Alberton, PE',
+    price: '',
+    recurringPattern: 'none',
+    extractionReason: 'Named live performance.',
+    relationshipType: 'component_of',
+    parentEventTitle: 'West Prince PEI Markets Trail - Inside Market',
+  }], [
+    'WEST PRINCE PEI MARKETS TRAIL - INSIDE MARKET',
+    'AUGUST 23 11AM - 4PM',
+    'LIVE ENTERTAINMENT BY FLOYD GAUDET 12PM - 2PM',
+    'FREE ADMISSION',
+    '25+ VENDORS AND MORE',
+    'FOOD ON SITE',
+    '50/50 SALES',
+  ].join('\n'));
+
+  assert.equal(items.length, 2);
+  assert.equal(items[0].name, 'West Prince PEI Markets Trail - Inside Market');
+  assert.equal(items[0].startTime, '11:00');
+  assert.equal('endTime' in items[0] ? items[0].endTime : '', '16:00');
+  assert.match('description' in items[0] ? items[0].description || '' : '', /25\+ vendors/i);
+  assert.equal(items[1].name, 'Live Entertainment by Floyd Gaudet');
+});
+
+test('supporting drink special materializes its explicitly named omitted party event', () => {
+  const items = ensureNamedSharedPhotoParentsForRegression([{
+    name: '$6 Burt Reynolds Shots',
+    description: '$6 Burt Reynolds shots from 10 PM to 2 AM.',
+    date: '2026-08-22',
+    startTime: '22:00',
+    endTime: '02:00',
+    venue: 'Charlottetown Beer Garden & Seafood Patio',
+    pricing: '$6',
+    recurringPattern: 'none',
+    extractionReason: 'Priced drink offer.',
+    relationshipType: 'supporting_special_for',
+    parentEventTitle: 'Saturday Dance Party - DJ Jeramie',
+    _sourceType: 'special',
+  }], 'SATURDAY DANCE PARTY - DJ JERAMIE\n$6 BURT REYNOLDS SHOTS\n10PM - 2AM');
+
+  assert.equal(items.length, 2);
+  assert.equal(items[0].name, 'Saturday Dance Party - DJ Jeramie');
+  assert.equal(items[0].startTime, '22:00');
+  assert.equal('endTime' in items[0] ? items[0].endTime : '', '02:00');
+  assert.equal(items[1].name, '$6 Burt Reynolds Shots');
+});
+
+test('materialized dance party recovers its DJ name from the same weekday OCR panel', () => {
+  const items = ensureNamedSharedPhotoParentsForRegression([{
+    name: '$6 Burt Reynolds Shots',
+    description: '$6 Burt Reynolds shots from 10 PM to 2 AM.',
+    date: '2026-08-22',
+    startTime: '22:00',
+    endTime: '02:00',
+    venue: 'The Beer Garden',
+    pricing: '$6',
+    recurringPattern: 'none',
+    extractionReason: 'Priced drink offer.',
+    relationshipType: 'supporting_special_for',
+    parentEventTitle: 'SATURDAY! Dance Party',
+    _sourceType: 'special',
+  }], [
+    'SATURDAY! Dance Party',
+    'AUG. 22 // 10 P.M. - 2 A.M.',
+    'THE BEER GARDEN',
+    'DJ JERAMIE',
+    '$6 BURT REYNOLDS SHOTS',
+  ].join('\n'));
+
+  assert.equal(items[0].name, 'SATURDAY! Dance Party - DJ JERAMIE');
+  assert.equal(items[1].parentEventTitle, 'SATURDAY! Dance Party - DJ JERAMIE');
+});
+
+test('dance party and its priced shot offer remain one event plus one linked special', async () => {
+  const primary = await parseSharedEventPayload({
+    title: 'Charlottetown Beer Garden weekend',
+    mediaUrls: ['https://example.com/beer-garden-party.jpg'],
+    timezone: 'America/Halifax',
+  });
+  const parsed = buildCalendarImageParsedEventsForRegression(primary, [
+    {
+      name: 'Friday Dance Party - DJ Derek',
+      type: 'event',
+      date: '2026-08-21',
+      startTime: '22:00',
+      endTime: '02:00',
+      venue: 'Charlottetown Beer Garden & Seafood Patio',
+      description: 'Friday dance party with DJ Derek from 10 PM to 2 AM.',
+    },
+    {
+      name: '$6 Burt Reynolds Shots',
+      type: 'special',
+      date: '2026-08-21',
+      startTime: '22:00',
+      endTime: '02:00',
+      venue: 'Charlottetown Beer Garden & Seafood Patio',
+      price: '$6',
+      description: '$6 Burt Reynolds shots during Friday Dance Party - DJ Derek.',
+      relationshipType: 'supporting_special_for',
+      parentEventTitle: 'Friday Dance Party - DJ Derek',
+    },
+  ]);
+
+  assert.equal(parsed.length, 2);
+  assert.equal(parsed[0].title, 'Friday Dance Party - DJ Derek');
+  assert.equal(parsed[0].contentKind, 'event');
+  assert.equal(parsed[1].title, '$6 Burt Reynolds Shots');
+  assert.equal(parsed[1].contentKind, 'special');
+  assert.equal(parsed[1].price, '$6');
+  assert.equal(parsed[1].relationshipType, 'supporting_special_for');
+  assert.equal(parsed[1].parentEventTitle, 'Friday Dance Party - DJ Derek');
+});
+
+test('entertainment card survives mixed dedup when its description mentions a supporting drink special', () => {
+  const event = {
+    name: 'Saturday Dance Party - DJ Jeramie',
+    date: '2026-08-22',
+    startTime: '22:00',
+    endTime: '02:00',
+    venue: 'The Beer Garden',
+    price: '',
+    description: 'Dance party with DJ Jeramie; $6 Burt Reynolds shots available.',
+    recurringPattern: 'none' as const,
+    extractionReason: 'Named entertainment event.',
+    _sourceType: 'event' as const,
+  };
+  const special = {
+    name: '$6 Burt Reynolds Shots',
+    date: '2026-08-22',
+    startTime: '22:00',
+    endTime: '02:00',
+    venue: 'The Beer Garden',
+    pricing: '$6',
+    description: '$6 Burt Reynolds shots during Saturday Dance Party.',
+    recurringPattern: 'none' as const,
+    extractionReason: 'Priced drink offer.',
+    _sourceType: 'special' as const,
+  };
+
+  const parsed = deduplicateMixedContentForRegression([event], [special]);
+  assert.deepEqual(parsed.map((item) => item.name), [event.name, special.name]);
 });
 
 test('private visibility hints keep shared Facebook events user-private', async () => {

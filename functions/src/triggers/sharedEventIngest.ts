@@ -387,6 +387,8 @@ function eventResponse(parsedEvent: ParsedSharedEvent, ids?: {
     mapMode: parsedEvent.mapMode,
     contentKind: parsedEvent.contentKind,
     price: parsedEvent.price,
+    relationshipType: parsedEvent.relationshipType,
+    parentEventTitle: parsedEvent.parentEventTitle,
     recurringPattern: parsedEvent.recurringPattern,
     recurringDaysOfWeek: parsedEvent.recurringDaysOfWeek,
     recurrenceUntilDate: parsedEvent.recurrenceUntilDate,

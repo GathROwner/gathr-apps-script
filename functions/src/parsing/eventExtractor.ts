@@ -270,6 +270,19 @@ async function extractEvents(
       return processedEvents;
     }
 
+    const recoveredEvents = parseJSONFallback(response, 'events') as ExtractedEvent[];
+    if (recoveredEvents.length > 0) {
+      logger.warn('Recovered event extraction array from the original model response', {
+        recoveredCount: recoveredEvents.length,
+        parsedKeys: parsed ? Object.keys(parsed) : [],
+      });
+      return recoveredEvents.map((event) => ({
+        ...event,
+        recurringPattern: sanitizeRecurringPattern(event.recurringPattern),
+        _sourceType: 'event' as const,
+      }));
+    }
+
     return [];
   } catch (error) {
     logger.error('Error parsing event extraction response', error);
@@ -293,7 +306,13 @@ async function extractFoodSpecials(
   const postedDt = DateTime.fromISO(timestamp, { zone: tz });
   const postedLocalDate = postedDt.toFormat('yyyy-MM-dd');
 
-  const prompt = createFoodSpecialExtractionPrompt(combinedText, userName, timestamp, tz);
+  const prompt = createFoodSpecialExtractionPrompt(
+    combinedText,
+    userName,
+    timestamp,
+    tz,
+    config.sourceMode === 'shared_photo'
+  );
 
   const response = await callGPT(prompt, imageUrls, config);
 
@@ -3505,7 +3524,10 @@ ${isSharedPhoto ? `SHARED-PHOTO DATE AND GROUPING SAFETY:
 - The Posted at/upload timestamp is transport metadata, NOT event-date evidence.
 - Never use ${postedLocalDate}, today's date, or a relative weekday merely because the poster has no explicit calendar date. Leave date="" so the user can resolve it.
 - When a month/day is visible but no year is printed, choose the nearest plausible occurrence to the upload date (past or future); do not automatically roll a recently passed poster into next year.
-- A single headline event may list doors, a class, performances, party segments, DJs, intermission, or an after-party. Return ONE parent event using the headline title, the poster's event date, the earliest admission/start time and latest explicit end time. Preserve the run-of-show in description; do not emit its agenda lines as separate events.
+- Preserve BOTH a parent event and an independently discoverable named component when each has its own explicit public-facing identity and time window. Example: an 11 AM-4 PM market with "Live entertainment by Floyd Gaudet, 12 PM-2 PM" becomes (1) the market event, 11 AM-4 PM, and (2) the Floyd Gaudet live-music event, 12 PM-2 PM.
+- For a component item, set relationshipType="component_of" and parentEventTitle to the exact parent event name. Do not use the component as a replacement title for the parent.
+- Do NOT split operational agenda steps such as doors, check-in, intermission, awards, or an internal run-of-show that has no independently advertised name/time window.
+- A series label and its featured act can be one event when they describe the same entertainment program. Example: "Friday Dance Party - DJ Derek" is one event, not a parent party plus a second DJ event.
 - Extract only the dominant centered poster. Ignore partially visible neighbouring posters, bulletin-board notices, social/app chrome and background signage.
 ` : ''}
 
@@ -3535,6 +3557,8 @@ For each EVENT found, extract:
 - recurringDaysOfWeek: For "weekly_custom", list every explicit weekday in lowercase. Otherwise use an empty array.
 - recurrenceUntilDate: If an explicit validity end date is printed (for example "through Sep 30"), return it as YYYY-MM-DD. Otherwise use an empty string.
 - extractionReason: Why this was identified as an event
+- relationshipType: Use "component_of" only for an independently discoverable event inside a larger parent event; otherwise use "".
+- parentEventTitle: Exact parent event name when relationshipType="component_of"; otherwise use "".
 - timeFlags: {
       start: { source: "explicit" | "implied" | "semantic", evidence: "string" },
       end:   { source: "explicit" | "implied" | "semantic" | "none", toClose: boolean, evidence: "string" }
@@ -3569,7 +3593,8 @@ function createFoodSpecialExtractionPrompt(
   combinedText: string,
   userName: string,
   timestamp: string,
-  tz: string
+  tz: string,
+  isSharedPhoto = false
 ): string {
   return `Your job is to Extract ALL FOOD/DRINK SPECIALS that have cost savings from this content. IGNORE all events/entertainment.
 
@@ -3599,6 +3624,9 @@ TIME & EVIDENCE RULES (FOR SPECIALS — SAME AS EVENTS):
 ✓ Any cost savings on food/drinks
 
 CRITICAL: Extract ALL food/drink specials even if they say "Everyday", "Daily", or appear at the end of the post text.
+${isSharedPhoto ? `- A priced food/drink offer remains a separate special even when the same poster also advertises a party, DJ, concert, market, or other event. Example: "$6 Burt Reynolds shots" during "Friday Dance Party - DJ Derek" is a special supporting that event, not the event title.
+- When a special clearly supports a named event on the same poster, set relationshipType="supporting_special_for" and parentEventTitle to that event's exact title.
+` : ''}
 
 IGNORE COMPLETELY:
 ✗ Live music, trivia, entertainment
@@ -3619,6 +3647,8 @@ For each SPECIAL found, extract:
 - recurringDaysOfWeek: For "weekly_custom", list every explicit weekday in lowercase. Otherwise use an empty array.
 - recurrenceUntilDate: If an explicit validity end date is printed (for example "through Sep 30"), return it as YYYY-MM-DD. Otherwise use an empty string.
 - extractionReason: Why this was identified as a valid special with cost savings
+- relationshipType: Use "supporting_special_for" only when this offer is tied to a named event on the same poster; otherwise use "".
+- parentEventTitle: Exact related event title when relationshipType="supporting_special_for"; otherwise use "".
 
 SERIES SPLITTING RULE:
 - If one poster lists multiple named themed specials under an umbrella heading, output one item per named theme instead of one generic umbrella special.
@@ -3672,6 +3702,8 @@ ${isSharedPhoto ? `SHARED-PHOTO SAFETY GATE (apply before extracting rows):
 - If no calendar date is visible, leave date="". Never substitute today/upload date.
 - For a visible month/day without a year, choose the nearest plausible occurrence to the upload date, including a recently passed date; do not always roll forward.
 - Extract only the dominant centered poster. Ignore partially visible neighbouring posters, bulletin-board notices, social/app chrome and background signage.
+- Preserve independently discoverable parent and component events as separate items when both have their own explicit identity and time window. Example: output both an 11 AM-4 PM market and its named 12 PM-2 PM live performance. Mark the performance relationshipType="component_of" and parentEventTitle with the market name.
+- A named party plus its featured DJ is one entertainment event when they share the same advertised time block. A priced food/drink offer during that party is a separate special, not the party title.
 ` : ''}
 
 IMPORTANT (Calendar grids with lineups):
@@ -3699,6 +3731,8 @@ For each item found, extract:
 - price: if no specific price mentioned, use empty string
 - description: Any additional details
 - extractionReason: Why this was identified as a calendar item
+- relationshipType: "component_of" for a child event, "supporting_special_for" for a food/drink offer tied to an event, otherwise "".
+- parentEventTitle: Exact related parent event title when relationshipType is set, otherwise "".
 - relevantImageIndex: 0-based index of the provided image that visibly contains this exact calendar item, date, or time. The first attached image is 0, the second is 1, etc. If no attached image clearly matches this item, use 0.
 - recurringPattern, recurringDaysOfWeek, recurrenceUntilDate: Preserve explicit recurrence only; never invent it from repeated calendar cells.
 
@@ -3912,7 +3946,7 @@ ${calendarRules}
 RULES:
 - Use image text (OCR) when available; otherwise rely on the text.
 - If a date is not explicit, ${isSharedPhoto ? 'leave date=""; the upload time is not event-date evidence' : `use ${postedLocalDate}`}.
-- ${isSharedPhoto ? 'Do not split one headline event into its internal class, performance, party, DJ, doors, intermission, or after-party agenda segments.' : 'Preserve independently listed events.'}
+- ${isSharedPhoto ? 'Preserve a parent and an independently named/timed component as separate items; do not split mere doors, check-in, intermission, or unnamed agenda steps. Keep a party and its featured DJ together when they are the same advertised program. Emit a priced food/drink offer as a separate special.' : 'Preserve independently listed events.'}
 - If a time is not explicit, leave startTime/endTime as empty strings.
 - Do NOT return an empty list if you see any hint of events, schedules, classes, lineups, or specials.
 
@@ -3953,7 +3987,9 @@ function deduplicateMixedContent(
   specials: ExtractedItem[]
 ): ExtractedItem[] {
   const foodKeywordsRe =
-    /\b(wrap|soup|burger|pizza|wings|sandwich|salad|taco|tacos|fries|special|appetizer|entree|dinner|lunch|breakfast|brunch|steak|chicken|fish|seafood|pasta|nachos|quesadilla|burrito|poutine|platter|ribs|bbq|grill|happy hour|wing night)\b/i;
+    /\b(wrap|soup|burger|pizza|wings|sandwich|salad|taco|tacos|fries|appetizer|entree|dinner|lunch|breakfast|brunch|steak|chicken|fish|seafood|pasta|nachos|quesadilla|burrito|poutine|platter|ribs|bbq|grill|happy hour|wing night|beer|wine|cider|pint|drink|cocktail|mocktail|shot|shots|highball|mimosa|margarita|martini)\b/i;
+  const entertainmentTitleRe =
+    /\b(live|music|dj|concert|comedy|ceilidh|workshop|class|market|dance|party|karaoke|trivia|show|release|festival|tournament|screening|performance)\b/i;
   const genericTokens = new Set([
     'theme',
     'themes',
@@ -4024,6 +4060,9 @@ function deduplicateMixedContent(
     if (!event || !event.name) return true;
     const key = String(event.name).toLowerCase().trim();
     const desc = String(event.description || '').toLowerCase();
+    if (entertainmentTitleRe.test(key) && !foodKeywordsRe.test(key)) {
+      return true;
+    }
     const eventIsFoodRelated = foodKeywordsRe.test(key) || foodKeywordsRe.test(desc);
 
     if (specialNames.has(key) && specialNames.get(key) && eventIsFoodRelated) {
@@ -4054,6 +4093,13 @@ function deduplicateMixedContent(
   });
 
   return [...deduplicatedEvents, ...specials];
+}
+
+export function deduplicateMixedContentForRegression(
+  events: ExtractedItem[],
+  specials: ExtractedItem[]
+): ExtractedItem[] {
+  return deduplicateMixedContent(events, specials);
 }
 
 /**
