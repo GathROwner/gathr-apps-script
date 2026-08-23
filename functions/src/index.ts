@@ -81,6 +81,8 @@ export {
 
 // Scheduled Cleanup - Daily cleanup of expired events
 export { scheduledCleanup } from './triggers/scheduledCleanup.js';
+// Private shared-event cleanup - runs separately from the daily parser and global event cleanup
+export { scheduledSharedEventCleanup } from './triggers/sharedEventCleanup.js';
 // Scheduled Pipeline Cost Report - Daily parser usage summary and experiment tracking
 export { scheduledPipelineCostReport } from './triggers/pipelineCostReport.js';
 
