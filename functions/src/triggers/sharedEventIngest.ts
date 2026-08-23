@@ -25,6 +25,11 @@ import {
   SharedEventSubmitPayload,
 } from '../types/sharedEvent.js';
 import { logger } from '../utils/logger.js';
+import {
+  normalizeSharedEventUploadId,
+  sharedEventClientIngestId,
+  sharedEventUploadPath,
+} from '../utils/sharedEventUpload.js';
 
 if (!admin.apps.length) {
   admin.initializeApp();
@@ -179,6 +184,7 @@ function normalizePayload(body: Record<string, unknown>): SharedEventSubmitPaylo
     : body;
 
   return {
+    clientSubmissionId: normalizeSharedEventUploadId(rawPayload.clientSubmissionId),
     sourceUrl: stringValue(rawPayload.sourceUrl ?? rawPayload.url),
     url: stringValue(rawPayload.url),
     sharedText: stringValue(rawPayload.sharedText ?? rawPayload.text),
@@ -1000,7 +1006,16 @@ export const uploadSharedEventImage = onRequest(
 
     try {
       const body = asBodyObject(request.body);
-      const rawContentType = stringValue(body.contentType)?.toLowerCase() || 'image/jpeg';
+      const requestContentType = String(request.headers['content-type'] || '')
+        .split(';', 1)[0]
+        .trim()
+        .toLowerCase();
+      const isBinaryImageUpload = requestContentType.startsWith('image/');
+      const rawContentType = (
+        isBinaryImageUpload
+          ? requestContentType
+          : stringValue(body.contentType)?.toLowerCase()
+      ) || 'image/jpeg';
       const contentType = rawContentType === 'image/jpg' ? 'image/jpeg' : rawContentType;
       if (!ALLOWED_SHARED_EVENT_IMAGE_TYPES.has(contentType)) {
         response.status(400).json({
@@ -1012,7 +1027,11 @@ export const uploadSharedEventImage = onRequest(
 
       const rawBase64 = stringValue(body.base64Data);
       const base64Data = rawBase64?.replace(/^data:[^;]+;base64,/i, '') || '';
-      if (!base64Data) {
+      const rawBody = request.rawBody;
+      const buffer = isBinaryImageUpload && Buffer.isBuffer(rawBody)
+        ? rawBody
+        : Buffer.from(base64Data, 'base64');
+      if (buffer.length === 0) {
         response.status(400).json({
           success: false,
           error: 'Missing image data.',
@@ -1020,8 +1039,7 @@ export const uploadSharedEventImage = onRequest(
         return;
       }
 
-      const buffer = Buffer.from(base64Data, 'base64');
-      if (buffer.length === 0 || buffer.length > MAX_SHARED_EVENT_UPLOAD_BYTES) {
+      if (buffer.length > MAX_SHARED_EVENT_UPLOAD_BYTES) {
         response.status(413).json({
           success: false,
           error: `Image must be smaller than ${Math.round(MAX_SHARED_EVENT_UPLOAD_BYTES / 1024 / 1024)} MB.`,
@@ -1030,14 +1048,30 @@ export const uploadSharedEventImage = onRequest(
       }
 
       const extension = extensionForContentType(contentType);
-      const fileName = sanitizeStorageFileName(body.fileName, `image.${extension}`);
-      const uploadId = randomUUID();
-      const filePath = `sharedEventUploads/${ownerUid}/${Date.now()}-${uploadId}-${fileName}`;
+      const fileName = sanitizeStorageFileName(
+        request.headers['x-gathr-file-name'] || body.fileName,
+        `image.${extension}`
+      );
+      const uploadId = normalizeSharedEventUploadId(request.headers['x-gathr-upload-id']);
+      const filePath = sharedEventUploadPath({ ownerUid, uploadId, fileName });
       const bucketName = sharedEventUploadsBucketName();
       const bucket = admin.storage().bucket(bucketName);
-      const downloadToken = randomUUID();
+      const file = bucket.file(filePath);
+      let downloadToken: string = randomUUID();
+      if (uploadId) {
+        try {
+          const [existingMetadata] = await file.getMetadata();
+          const existingOwnerUid = String(existingMetadata.metadata?.ownerUid || '');
+          const existingToken = String(existingMetadata.metadata?.firebaseStorageDownloadTokens || '')
+            .split(',', 1)[0]
+            .trim();
+          if (existingOwnerUid === ownerUid && existingToken) downloadToken = existingToken;
+        } catch {
+          // The first attempt has no object yet. A retry reuses its existing token.
+        }
+      }
 
-      await bucket.file(filePath).save(buffer, {
+      await file.save(buffer, {
         resumable: false,
         contentType,
         metadata: {
@@ -1373,12 +1407,14 @@ export const submitSharedEvent = onRequest(
       }
 
       if (shouldQueueSharedEventProcessing(payload)) {
+        const requestedIngestId = sharedEventClientIngestId(ownerUid, payload.clientSubmissionId);
         const ingestId = await firestoreService.createQueuedSharedEventIngest({
           ownerUid,
           payload,
           normalizedSourceUrl: sourceUrl,
           sourcePlatform: sourcePlatformForQueuedIngest(payload, sourceUrl),
           parserVersion: SHARED_EVENT_PARSER_VERSION,
+          ingestId: requestedIngestId,
         });
         await enqueueSharedEventIngestProcessing({ ownerUid, ingestId });
         logger.info('submitSharedEvent queued async media processing', {

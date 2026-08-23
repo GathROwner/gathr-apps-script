@@ -74,6 +74,7 @@ export type SharedEventFieldSources = Partial<Record<
 >>;
 
 export interface SharedEventSubmitPayload {
+  clientSubmissionId?: string;
   sourceUrl?: string;
   url?: string;
   sharedText?: string;

@@ -3370,6 +3370,7 @@ export async function createQueuedSharedEventIngest(params: {
   normalizedSourceUrl?: string;
   sourcePlatform?: SharedEventSourcePlatform;
   parserVersion: string;
+  ingestId?: string;
 }): Promise<string> {
   const now = admin.firestore.FieldValue.serverTimestamp();
   const record: SharedEventIngestRecord = {
@@ -3393,11 +3394,22 @@ export async function createQueuedSharedEventIngest(params: {
     updatedAt: now,
   };
 
-  const docRef = await db
+  const collectionRef = db
     .collection('users')
     .doc(params.ownerUid)
-    .collection(COLLECTIONS.SHARED_EVENT_INGESTS)
-    .add(record);
+    .collection(COLLECTIONS.SHARED_EVENT_INGESTS);
+  const docRef = params.ingestId
+    ? collectionRef.doc(params.ingestId)
+    : collectionRef.doc();
+
+  if (params.ingestId) {
+    await db.runTransaction(async (transaction) => {
+      const existing = await transaction.get(docRef);
+      if (!existing.exists) transaction.create(docRef, record);
+    });
+  } else {
+    await docRef.create(record);
+  }
 
   logger.info('Created queued shared event ingest', {
     ownerUid: params.ownerUid,
