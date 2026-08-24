@@ -17,6 +17,111 @@ import {
   verifySharedEventSourceVisibility,
 } from './sharedEventParser.js';
 
+test('verified public route preserves official stops and street sequence', async () => {
+  const parsed = await parseSharedEventPayload({
+    sourceUrl: 'https://example.com/events/parade',
+    title: 'Harbour Parade',
+    description: 'Start: Victoria Park\nRoute: Brighton Road -> Queen Street\nFinish: Confederation Centre',
+    startDate: '2026-09-01',
+    startTime: '10:00',
+    locationName: 'Charlottetown, PEI',
+  }, {
+    sourceVisibility: 'public_verified',
+    visibilityEvidence: {
+      method: 'public_url_probe',
+      checkedAt: '2026-08-23T12:00:00.000Z',
+      reason: 'Public source verified.',
+      title: 'Harbour Parade',
+      description: 'Start: Victoria Park\nRoute: Brighton Road -> Queen Street\nFinish: Confederation Centre',
+      startDate: '2026-09-01',
+      startTime: '10:00',
+      locationName: 'Charlottetown, PEI',
+    },
+  });
+
+  assert.equal(parsed.spatialEvidence?.kind, 'route');
+  assert.equal(parsed.spatialEvidence?.routeEvidenceLevel, 'official_full_route');
+  assert.ok(parsed.reviewReasons.includes('route_candidate_requires_geometry_review'));
+  assert.equal(parsed.routing, 'public_candidate');
+});
+
+test('private share text cannot strengthen verified public spatial evidence', async () => {
+  const parsed = await parseSharedEventPayload({
+    sourceUrl: 'https://example.com/events/community-day',
+    title: 'Community Day',
+    description: 'Private note: route starts at Victoria Park, follows Brighton Road, and finishes at City Hall.',
+    startDate: '2026-09-01',
+    startTime: '10:00',
+    locationName: 'Charlottetown, PEI',
+  }, {
+    sourceVisibility: 'public_verified',
+    visibilityEvidence: {
+      method: 'public_url_probe',
+      checkedAt: '2026-08-23T12:00:00.000Z',
+      reason: 'Public source verified without route facts.',
+      title: 'Community Day',
+      description: 'A day of activities in Charlottetown.',
+      startDate: '2026-09-01',
+      startTime: '10:00',
+      locationName: 'Charlottetown, PEI',
+    },
+  });
+
+  assert.notEqual(parsed.spatialEvidence?.kind, 'route');
+  assert.equal(parsed.spatialEvidence?.locations.length, 0);
+});
+
+test('private image-share multi-location event remains an unordered point set', async () => {
+  const parsed = await parseSharedEventPayload({
+    title: 'Downtown Busker Weekend',
+    description: "Locations: Victoria Row; Founders Food Hall & Market; Peake's Quay",
+    startDate: '2026-09-05',
+    startTime: '12:00',
+    locationName: 'Downtown Charlottetown',
+    mediaUrls: ['file:///shared/busker-poster.jpg'],
+  }, {
+    sourceVisibility: 'user_private',
+    visibilityEvidence: {
+      method: 'share_payload_hint',
+      checkedAt: '2026-08-23T12:00:00.000Z',
+      reason: 'Private share.',
+    },
+  });
+
+  assert.equal(parsed.routing, 'private_only');
+  assert.equal(parsed.spatialEvidence?.kind, 'multi_location');
+  assert.equal(parsed.spatialEvidence?.ordered, false);
+  assert.equal(parsed.spatialEvidence?.locations.length, 3);
+});
+
+test('private image-share prose recovers unordered confirmed and possible locations', async () => {
+  const parsed = await parseSharedEventPayload({
+    title: 'Harbour Squares Busker Pop-Up',
+    description: "CONFIRMED LOCATIONS (NO SET ORDER): Confederation Landing; Victoria Row POSSIBLE WEATHER LOCATION: Founders Food Hall & Market. This is not a travel route.",
+    startDate: '2026-09-26',
+    startTime: '13:00',
+    locationName: 'Downtown Charlottetown, PEI',
+    mediaUrls: ['file:///shared/harbour-squares-poster.png'],
+  }, {
+    sourceVisibility: 'user_private',
+    visibilityEvidence: {
+      method: 'share_payload_hint',
+      checkedAt: '2026-08-24T12:00:00.000Z',
+      reason: 'Private image share.',
+    },
+  });
+
+  assert.equal(parsed.routing, 'private_only');
+  assert.equal(parsed.spatialEvidence?.kind, 'multi_location');
+  assert.equal(parsed.spatialEvidence?.ordered, false);
+  assert.deepEqual(parsed.spatialEvidence?.locations.map((entry) => [entry.label, entry.certainty]), [
+    ['Confederation Landing', 'confirmed'],
+    ['Victoria Row', 'confirmed'],
+    ['Founders Food Hall & Market', 'possible'],
+  ]);
+  assert.ok(parsed.reviewReasons.includes('multi_location_requires_point_resolution'));
+});
+
 test('dominant centered poster drops one isolated neighbouring poster extraction', () => {
   const makeItem = (name: string, date: string) => ({
     name,

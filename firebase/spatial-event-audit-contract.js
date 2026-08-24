@@ -13,6 +13,11 @@ function finding(severity, code, message, path) {
   return { severity, code, message, path };
 }
 
+function isTopLevelEventPath(path) {
+  const parts = String(path || '').split('/').filter(Boolean);
+  return parts.length === 2 && parts[0] === 'events';
+}
+
 function auditSpatialEventDocument(path, data) {
   const doc = data || {};
   const findings = [];
@@ -23,6 +28,9 @@ function auditSpatialEventDocument(path, data) {
   const multiLocation = spatialKind === 'multi_location' || Boolean(doc.areaData);
 
   if (routeLike) {
+    if (!isTopLevelEventPath(path)) {
+      findings.push(finding('High', 'SPATIAL_ROUTE_NOT_TOP_LEVEL', 'Route events must be stored at events/<eventId>, not under a venue.', path));
+    }
     if (doc.venueId !== null) {
       findings.push(finding('High', 'SPATIAL_ROUTE_VENUE_ID', 'Route events must have venueId: null.', path));
     }
@@ -47,6 +55,9 @@ function auditSpatialEventDocument(path, data) {
   }
 
   if (multiLocation) {
+    if (!isTopLevelEventPath(path)) {
+      findings.push(finding('High', 'SPATIAL_AREA_NOT_TOP_LEVEL', 'Multi-location events must be stored at events/<eventId>, not under one venue.', path));
+    }
     if (doc.venueId !== null) {
       findings.push(finding('High', 'SPATIAL_AREA_VENUE_ID', 'Multi-location events must have venueId: null.', path));
     }
@@ -67,6 +78,9 @@ function auditSpatialEventDocument(path, data) {
     }
     if (doc.routeData) {
       findings.push(finding('High', 'SPATIAL_AREA_HAS_ROUTE_DATA', 'An unordered multi-location event cannot carry routeData.', path));
+    }
+    if (doc.spatialEvidence?.ordered === true) {
+      findings.push(finding('High', 'SPATIAL_MULTI_LOCATION_ORDERED', 'An unordered multi-location event incorrectly claims an ordered path.', path));
     }
   }
 
@@ -96,6 +110,10 @@ function auditSpatialReviewDocument(path, data, publishedEventExists) {
   const manuallyApproved = review.locationReviewStatus === 'approved' &&
     Boolean(review.resolvedAt || review.resolvedBy) &&
     ['approve_publish', 'publish_route', 'publish_area'].includes(finalizationAction);
+
+  if (needsSpatialReview && !spatialKind) {
+    findings.push(finding('High', 'SPATIAL_REVIEW_EVIDENCE_MISSING', 'Spatial review reasons exist but the structured spatialEvidence record is missing.', path));
+  }
 
   if (needsSpatialReview && review.status === 'published' && !manuallyApproved) {
     findings.push(finding('Critical', 'SPATIAL_REVIEW_BYPASSED', 'A review-gated spatial candidate is marked published.', path));

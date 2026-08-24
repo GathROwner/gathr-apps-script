@@ -13,8 +13,9 @@ import {
   SharedEventVisibilityEvidence,
 } from '../types/sharedEvent.js';
 import { logger } from '../utils/logger.js';
+import { classifySpatialEvent } from '../parsing/spatialEventClassifier.js';
 
-export const SHARED_EVENT_PARSER_VERSION = 'shared-event-parser-v14';
+export const SHARED_EVENT_PARSER_VERSION = 'shared-event-parser-v15';
 
 const DEFAULT_TIMEZONE = 'America/Halifax';
 const MAX_TEXT_LENGTH = 12000;
@@ -1848,14 +1849,38 @@ function buildExtractedParsedEventsFromCalendarItems(
         : primary.sourceVisibility === 'public_verified'
           ? 'public_candidate'
           : 'private_only';
-      const reviewReasons = reviewReasonsForEvent({
-        title,
-        startDate,
-        locationName,
-        address,
-        isExpired,
+      const spatialEvidence = classifySpatialEvent({
+        name: title,
+        description,
+        location: locationName,
+        combinedText: [primary.description, description].filter(Boolean).join('\n'),
+        modelSpatialEvidence: item.spatial || (routeLike ? { kind: 'route' } : null),
       });
-      if (routeLike) reviewReasons.push('route_event_requires_review');
+      logger.info('Shared event spatial classification', {
+        tag: 'shared_event_spatial_classification',
+        parserVersion: SHARED_EVENT_PARSER_VERSION,
+        extractionMode: 'shared_photo_item',
+        sourceVisibility: primary.sourceVisibility,
+        spatialKind: spatialEvidence.kind,
+        representation: spatialEvidence.representation,
+        confidence: spatialEvidence.confidence,
+        confirmedLocationCount: spatialEvidence.locations.filter((location) => location.certainty === 'confirmed').length,
+        possibleLocationCount: spatialEvidence.locations.filter((location) => location.certainty === 'possible').length,
+        confirmedStreetCount: spatialEvidence.confirmedStreets.length,
+        routeEvidenceLevel: spatialEvidence.routeEvidenceLevel,
+        reviewReasons: spatialEvidence.reviewReasons,
+      });
+      const reviewReasons = Array.from(new Set([
+        ...reviewReasonsForEvent({
+          title,
+          startDate,
+          locationName,
+          address,
+          isExpired,
+        }),
+        ...spatialEvidence.reviewReasons,
+        ...(routeLike ? ['route_event_requires_review'] : []),
+      ]));
       const confidence = confidenceScore({
         title,
         startDate,
@@ -1864,7 +1889,8 @@ function buildExtractedParsedEventsFromCalendarItems(
         address,
         sourceUrl: primary.sourceUrl,
       });
-      const needsUserReview = routeLike || reviewReasons.includes('missing_title') ||
+      const needsUserReview = routeLike || spatialEvidence.kind === 'separate_occurrences' ||
+        reviewReasons.includes('missing_title') ||
         reviewReasons.includes('missing_start_date') ||
         reviewReasons.includes('event_expired') ||
         confidence < 55;
@@ -1893,9 +1919,9 @@ function buildExtractedParsedEventsFromCalendarItems(
         recurringPattern,
         recurringDaysOfWeek,
         recurrenceUntilDate,
-        locationScope: routeLike ? 'route' : 'venue',
-        mapMode: routeLike ? 'route' : 'venue',
-        locationPrecision: routeLike ? 'approximate' : undefined,
+        locationScope: spatialEvidence.kind === 'route' ? 'route' : 'venue',
+        mapMode: spatialEvidence.kind === 'route' ? 'route' : 'venue',
+        locationPrecision: spatialEvidence.kind === 'route' ? 'approximate' : undefined,
         routing,
         status,
         confidence,
@@ -1914,6 +1940,7 @@ function buildExtractedParsedEventsFromCalendarItems(
             : primary.fieldSources?.locationName,
           address: extractedAddress ? extractionSource : (inferredAddress ? primary.fieldSources?.address : undefined),
         }),
+        spatialEvidence,
         isExpired,
         sequenceIndex: index,
         extractedFromShare: true,
@@ -2520,12 +2547,44 @@ export async function parseSharedEventPayload(
     mediaUrls: mediaSource,
   };
   const fieldSources = compactFieldSources(rawFieldSources);
-  const reviewReasons: string[] = [];
+  // A verified public candidate may only use facts visible on the verified
+  // public source. Private share text and uploaded media remain useful for the
+  // owner's private event, but cannot silently strengthen a public route.
+  const spatialEvidence = sourceVisibility === 'public_verified'
+    ? classifySpatialEvent({
+        name: visibilityEvidence.title,
+        description: visibilityEvidence.description,
+        location: visibilityEvidence.locationName || visibilityEvidence.address,
+        combinedText: evidenceText,
+      })
+    : classifySpatialEvent({
+        name: title,
+        description,
+        location: locationName || address,
+        combinedText,
+      });
+  logger.info('Shared event spatial classification', {
+    tag: 'shared_event_spatial_classification',
+    parserVersion: SHARED_EVENT_PARSER_VERSION,
+    extractionMode: 'primary_share',
+    sourceVisibility,
+    spatialKind: spatialEvidence.kind,
+    representation: spatialEvidence.representation,
+    confidence: spatialEvidence.confidence,
+    confirmedLocationCount: spatialEvidence.locations.filter((location) => location.certainty === 'confirmed').length,
+    possibleLocationCount: spatialEvidence.locations.filter((location) => location.certainty === 'possible').length,
+    confirmedStreetCount: spatialEvidence.confirmedStreets.length,
+    routeEvidenceLevel: spatialEvidence.routeEvidenceLevel,
+    reviewReasons: spatialEvidence.reviewReasons,
+  });
+  const reviewReasons: string[] = [...spatialEvidence.reviewReasons];
   const isExpired = eventLooksExpired(startDate, startTime, timezone);
 
   if (!title) reviewReasons.push('missing_title');
   if (!startDate) reviewReasons.push('missing_start_date');
-  if (!locationName && !address) reviewReasons.push('missing_location');
+  if (!locationName && !address && spatialEvidence.locations.length === 0) {
+    reviewReasons.push('missing_location');
+  }
   if (isExpired) reviewReasons.push('event_expired');
 
   const confidence = confidenceScore({
@@ -2539,6 +2598,7 @@ export async function parseSharedEventPayload(
   const needsUserReview = reviewReasons.includes('missing_title') ||
     reviewReasons.includes('missing_start_date') ||
     reviewReasons.includes('event_expired') ||
+    spatialEvidence.kind === 'separate_occurrences' ||
     confidence < 55;
   const routing = isExpired
     ? 'not_public_candidate'
@@ -2574,6 +2634,7 @@ export async function parseSharedEventPayload(
     needsUserReview,
     reviewReasons,
     fieldSources,
+    spatialEvidence,
     isExpired,
     sourceContentSignature: sourceContentSignature([
       sourceUrl,

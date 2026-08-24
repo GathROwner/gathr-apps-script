@@ -51,8 +51,30 @@ test('route event must be top-level and carry route map data', () => {
   assert.deepEqual(findings.map((entry) => entry.code).sort(), [
     'SPATIAL_ROUTE_DATA_MISSING',
     'SPATIAL_ROUTE_MAP_MODE',
+    'SPATIAL_ROUTE_NOT_TOP_LEVEL',
     'SPATIAL_ROUTE_VENUE_ID',
   ]);
+});
+
+test('multi-location event must be top-level and cannot claim an order', () => {
+  const findings = auditSpatialEventDocument('venues/downtown/events/buskers', {
+    locationScope: 'area',
+    mapMode: 'area',
+    venueId: null,
+    spatialEvidence: { kind: 'multi_location', ordered: true },
+    areaData: { version: 1, status: 'verified', locations: [point('one', 'Victoria Row')] },
+  });
+  assert.ok(findings.some((entry) => entry.code === 'SPATIAL_AREA_NOT_TOP_LEVEL'));
+  assert.ok(findings.some((entry) => entry.code === 'SPATIAL_MULTI_LOCATION_ORDERED'));
+});
+
+test('spatial review reasons require structured spatial evidence', () => {
+  const findings = auditSpatialReviewDocument('city_level_event_reviews/legacy-route', {
+    status: 'needs_review',
+    locationScope: 'area',
+    autoPublishReviewReasons: ['multi_location_requires_point_resolution'],
+  });
+  assert.ok(findings.some((entry) => entry.code === 'SPATIAL_REVIEW_EVIDENCE_MISSING'));
 });
 
 test('confirmed routed street needs full official evidence', () => {

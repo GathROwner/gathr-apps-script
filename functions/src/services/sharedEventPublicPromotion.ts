@@ -350,6 +350,44 @@ function getCityLevelLocationDetails(locationName: string): {
   return null;
 }
 
+function getSpatialCandidateLocationDetails(candidate: PublicSharedEventCandidateRecord): {
+  locationScope: 'area' | 'route';
+  locationLabel: string;
+  locationCity?: string;
+  locationProvince?: string;
+  locationPrecision: 'approximate' | 'none';
+} | null {
+  const spatial = candidate.spatialEvidence;
+  if (!spatial || !['route', 'multi_location'].includes(spatial.kind)) return null;
+
+  const normalizedText = normalizeVenueName([
+    candidate.title,
+    candidate.locationName,
+    candidate.address,
+    candidate.description,
+    ...spatial.locations.map((entry) => entry.label),
+  ].filter(Boolean).join(' '));
+  const cityNames = [
+    'charlottetown', 'cornwall', 'stratford', 'summerside', 'montague',
+    'kensington', 'souris', 'alberton', 'georgetown', 'north rustico', 'cavendish',
+  ];
+  const cityKey = cityNames.find((city) => normalizedText.includes(city));
+
+  return {
+    locationScope: spatial.kind === 'route' ? 'route' : 'area',
+    locationLabel: `${candidate.title} ${spatial.kind === 'route' ? 'Route' : 'Locations'}`,
+    locationCity: cityKey ? toTitleCase(cityKey) : undefined,
+    locationProvince: 'PEI',
+    locationPrecision: spatial.locations.length > 0 ? 'approximate' : 'none',
+  };
+}
+
+export function getSpatialCandidateLocationDetailsForRegression(
+  candidate: PublicSharedEventCandidateRecord
+) {
+  return getSpatialCandidateLocationDetails(candidate);
+}
+
 function isExpiredCandidate(candidate: PublicSharedEventCandidateRecord): boolean {
   const endDate = firstText(candidate.endDate, candidate.startDate);
   if (!endDate) return false;
@@ -518,7 +556,10 @@ export function getRequiredCandidateReviewReason(candidate: PublicSharedEventCan
   if (!firstText(candidate.title)) return 'missing_title';
   if (isPlaceholderCandidateTitle(candidate.title)) return 'generic_placeholder_title';
   if (!firstText(candidate.startDate)) return 'missing_date';
-  if (!firstText(candidate.locationName, candidate.address, candidate.visibilityEvidence?.locationName)) {
+  if (
+    !firstText(candidate.locationName, candidate.address, candidate.visibilityEvidence?.locationName) &&
+    !(candidate.spatialEvidence?.locations?.length)
+  ) {
     return 'missing_location';
   }
   if (candidate.promotionBasis === 'crowd_consensus') {
@@ -604,7 +645,8 @@ async function markCandidateAndPrivateEvent(params: {
 
 async function queueCityLevelPublicCandidate(
   candidate: PublicSharedEventCandidateRecord,
-  location: NonNullable<ReturnType<typeof getCityLevelLocationDetails>>
+  location: NonNullable<ReturnType<typeof getCityLevelLocationDetails>> |
+    NonNullable<ReturnType<typeof getSpatialCandidateLocationDetails>>
 ): Promise<SharedEventPromotionOutcome> {
   const candidateId = firstText(candidate.id);
   const mediaUrls = Array.isArray(candidate.mediaUrls)
@@ -634,11 +676,23 @@ async function queueCityLevelPublicCandidate(
     locationProvince: location.locationProvince,
     locationScope: location.locationScope,
     locationPrecision: location.locationPrecision,
+    observedLocationName: candidate.spatialEvidence?.locations
+      ?.map((entry) => entry.label)
+      .filter(Boolean)
+      .join('; ') || undefined,
     organizerName: firstText(candidate.visibilityEvidence?.title),
     facebookUrl,
     topLevelUrl: facebookUrl,
     sourceScraperType: inferSourceScraperType(candidate),
     sourceContentSignature: candidate.sourceContentSignature,
+    autoPublishSource: 'parser_fallback',
+    autoPublishFieldSources: {
+      title: 'parser_event_name',
+      dateTime: 'parser_event_datetime',
+      location: 'parser_event_location',
+    },
+    autoPublishReviewReasons: candidate.spatialEvidence?.reviewReasons,
+    spatialEvidence: candidate.spatialEvidence,
   });
 
   const status: PublicSharedEventCandidateStatus = result.queued
@@ -765,6 +819,11 @@ async function promoteClaimedCandidate(
       candidateId,
       reason: 'candidate_event_date_has_passed',
     };
+  }
+
+  const spatialLocation = getSpatialCandidateLocationDetails(candidate);
+  if (spatialLocation) {
+    return queueCityLevelPublicCandidate(candidate, spatialLocation);
   }
 
   const resolvedVenue = await resolveVenue(candidate);

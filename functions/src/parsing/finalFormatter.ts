@@ -1005,6 +1005,15 @@ export function rehydrateFormattedEventMetadata(
     changed = true;
   }
 
+  // Stage 5 formats display fields but must not reinterpret or discard the
+  // spatial evidence extracted earlier. Clone it so later routing cannot
+  // mutate the source-stage artifact.
+  const originalSpatial = (originalItem as Record<string, unknown> | undefined)?.spatial;
+  if (!(event as Record<string, unknown>).spatial && originalSpatial && typeof originalSpatial === 'object') {
+    nextEvent.spatial = JSON.parse(JSON.stringify(originalSpatial));
+    changed = true;
+  }
+
   return changed ? nextEvent : event;
 }
 

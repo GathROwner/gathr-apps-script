@@ -157,6 +157,7 @@ export interface ParsedSharedEvent {
   needsUserReview: boolean;
   reviewReasons: string[];
   fieldSources?: SharedEventFieldSources;
+  spatialEvidence?: SpatialEventClassification;
   isExpired?: boolean;
   sourceContentSignature: string;
   sequenceIndex?: number;
@@ -285,6 +286,7 @@ export interface PublicSharedEventCandidateRecord {
   timezone: string;
   sourceContentSignature: string;
   fieldSources?: SharedEventFieldSources;
+  spatialEvidence?: SpatialEventClassification;
   crowdConsensus?: {
     aggregateId: string;
     contributorCount: number;
@@ -325,3 +327,4 @@ export interface PublicSharedEventCandidateRecord {
   createdAt?: unknown;
   updatedAt?: unknown;
 }
+import type { SpatialEventClassification } from '../parsing/spatialEventClassifier.js';

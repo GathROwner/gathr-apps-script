@@ -45,16 +45,14 @@ street order, coordinates, or a connecting line.
 | Multi-location event plus a separate parade/run component | distinct spatial occurrences | The festival area and route component must not overwrite or merge into each other. |
 | Location aliases with different punctuation/abbreviations | deduplicated points after address/canonical checks | Text similarity alone is insufficient to merge genuinely different places. |
 
-## Synthetic poster fixtures
+## Synthetic poster acceptance cases
 
-The two generated posters below are deliberately marked `TEST ONLY`. They are
-used to exercise the shared-image extraction path without contaminating live
-event results:
-
-- `validation/spatial-event-fixtures/test-only-harbour-lights-parade.png` —
-  confirmed start, ordered official streets, and confirmed finish.
-- `validation/spatial-event-fixtures/test-only-three-corners-busker-day.png` —
-  two confirmed unordered locations plus one weather-dependent possible point.
+Locally generated posters used for manual acceptance are deliberately marked
+`TEST ONLY - PARSER QA`. They cover a confirmed start plus an ordered street
+sequence, and an unordered arts/busker event with two confirmed locations plus
+one weather-dependent possible location. These bitmap artifacts remain outside
+the repository so they cannot be mistaken for application assets or production
+event inputs.
 
 The repeatable unit tests use the exact expected OCR facts rather than relying
 on nondeterministic model wording. A deployed smoke test may send these through
@@ -79,3 +77,15 @@ the private-share path, but it must not promote them as public candidates.
   source evidence are resolved.
 - Structured data may only publish automatically when the existing title,
   date/time, location, jurisdiction, and privacy gates all pass.
+
+## Ingest-path coverage
+
+Every spatial classification change must be exercised at three layers:
+
+1. deterministic classifier tests for exact extracted text and structured model evidence;
+2. regular scraped-post and shared-event parser routing tests, including the public/private evidence boundary;
+3. read-only live auditor checks for queue bypasses and invalid published map contracts.
+
+An image-share smoke test is a fourth, nondeterministic acceptance layer. A
+model/OCR success does not replace the deterministic tests, and a private test
+share must never be treated as public publication evidence.

@@ -41,6 +41,10 @@ import { createHash } from 'crypto';
 import { normalizeVenueName, normalizeUrl, extractFacebookSlug } from '../utils/similarity.js';
 import { getVenueAliasEntry } from '../services/venueAliases.js';
 import { BatchManager } from './batchManager.js';
+import {
+  classifySpatialEvent,
+  SpatialEventClassification,
+} from '../parsing/spatialEventClassifier.js';
 
 /**
  * Result of processing a single row
@@ -1249,6 +1253,82 @@ export function getCityLevelFacebookEventLocationDetails(row: RawRowData): {
     locationScope: 'area',
     locationLabel: cleaned || raw,
     locationPrecision: 'approximate',
+  };
+}
+
+type PostDerivedSpatialLocationDetails = {
+  locationScope: 'area' | 'route';
+  locationLabel: string;
+  locationCity?: string;
+  locationProvince?: string;
+  locationPrecision: 'approximate' | 'none';
+  observedLocationName: string;
+  autoPublishReviewReasons: string[];
+  detectionSource: 'spatial_event_classifier';
+  spatialEvidence: SpatialEventClassification;
+};
+
+const SPATIAL_PEI_CITY_NAMES = [
+  'charlottetown', 'cornwall', 'stratford', 'summerside', 'montague',
+  'kensington', 'souris', 'alberton', 'georgetown', 'north rustico', 'cavendish',
+];
+
+function titleCasePlace(value: string): string {
+  return value.split(/\s+/).map((part) => part.charAt(0).toUpperCase() + part.slice(1)).join(' ');
+}
+
+export function resolvePostDerivedCityLevelEventLocation(params: {
+  item?: Partial<ParserProcessedEvent> | Partial<ExtractedItem> | null;
+  row: RawRowData;
+  establishment?: string;
+}): PostDerivedSpatialLocationDetails | null {
+  if (isCityLevelFacebookEventLocation(params.row)) return null;
+
+  const item = (params.item || {}) as Record<string, unknown>;
+  const eventName = String(item.name || item.eventName || '').trim();
+  const description = String(item.description || params.row.text || '').trim();
+  const observedLocation = String(
+    item.additionalLocation || item.venue || item.establishment || ''
+  ).trim();
+  const contextText = [
+    eventName,
+    description,
+    params.row.sharedPostText,
+    params.row.text,
+    params.establishment,
+  ].filter(Boolean).join('\n');
+  const spatialEvidence = classifySpatialEvent({
+    name: eventName,
+    description,
+    location: observedLocation,
+    combinedText: contextText,
+    modelSpatialEvidence: (item.spatial || item.spatialEvidence || null) as any,
+  });
+  if (!['route', 'multi_location', 'separate_occurrences'].includes(spatialEvidence.kind)) {
+    return null;
+  }
+
+  const normalizedContext = normalizeVenueName(contextText);
+  const cityKey = SPATIAL_PEI_CITY_NAMES.find((city) => normalizedContext.includes(city));
+  const labels = spatialEvidence.locations.map((entry) => entry.label).filter(Boolean);
+  const eventLabel = eventName || observedLocation || String(params.establishment || '').trim() || 'Spatial event';
+  return {
+    locationScope: spatialEvidence.kind === 'route' ? 'route' : 'area',
+    locationLabel: spatialEvidence.kind === 'route'
+      ? `${eventLabel} Route`
+      : spatialEvidence.kind === 'multi_location'
+        ? `${eventLabel} Locations`
+        : `${eventLabel} — separate location occurrences`,
+    locationCity: cityKey ? titleCasePlace(cityKey) : undefined,
+    locationProvince: 'PEI',
+    locationPrecision: labels.length > 0 ? 'approximate' : 'none',
+    observedLocationName: labels.join('; ') || observedLocation || eventLabel,
+    autoPublishReviewReasons: Array.from(new Set([
+      'post_derived_area_candidate',
+      ...spatialEvidence.reviewReasons,
+    ])),
+    detectionSource: 'spatial_event_classifier',
+    spatialEvidence,
   };
 }
 
@@ -2730,6 +2810,97 @@ async function resolveVenueForFullParserEvent(
   establishment: string,
   rowIndex: number
 ): Promise<VenueData | null> {
+  return resolveVenueForFullParserEventWithMatcherForRegression({
+    item,
+    rowVenue,
+    row,
+    establishment,
+    rowIndex,
+    matcher: async (candidate, facebookUrl) =>
+      firestoreService.findMatchingVenue(candidate, facebookUrl),
+  });
+}
+
+async function queueSpatialEventForReview(params: {
+  location: PostDerivedSpatialLocationDetails;
+  item: ParserProcessedEvent;
+  row: RawRowData;
+  rowIndex: number;
+  batchManager: BatchManager;
+}): Promise<void> {
+  const state = params.batchManager.getState();
+  const item = params.item;
+  const eventName = String(item.name || '').trim();
+  const result = await firestoreService.queueCityLevelEventReview({
+    uniqueId: params.row.uniqueId,
+    fileId: state.fileId,
+    fileName: state.fileName,
+    rowIndex: params.rowIndex,
+    parserMode: 'full5stage',
+    eventName: eventName || undefined,
+    eventDate: String(item.startDate || '').trim() || undefined,
+    eventTime: String(item.startTime || '').trim() || undefined,
+    endDate: String(item.endDate || '').trim() || undefined,
+    endTime: String(item.endTime || '').trim() || undefined,
+    eventType: normalizeFullParserEventType(item),
+    category: String(item.category || '').trim() || undefined,
+    description: String(item.description || params.row.text || '').trim() || undefined,
+    imageUrl: String(item.image || item.relevantImageUrl || '').trim() || undefined,
+    mediaUrls: Array.isArray(item.mediaUrls) ? item.mediaUrls : params.row.mediaUrls,
+    ticketsBuyUrl: item.ticketsBuyUrl || params.row.ticketsBuyUrl,
+    externalLinks: params.row.externalLinks,
+    locationLabel: params.location.locationLabel,
+    locationCity: params.location.locationCity,
+    locationProvince: params.location.locationProvince,
+    locationScope: params.location.locationScope,
+    locationPrecision: params.location.locationPrecision,
+    observedLocationName: params.location.observedLocationName,
+    organizerName: selectEstablishment(params.row.pageName, params.row.userName) || undefined,
+    facebookUrl: String(params.row.facebookUrl || '').trim() || undefined,
+    topLevelUrl: deriveTopLevelPostUrlForUnknownQueue(params.row),
+    sourceScraperType: params.row.sourceScraperType,
+    sourceContentSignature: buildFacebookEventSourceContentSignature(params.row),
+    autoPublishSource: 'parser_fallback',
+    autoPublishFieldSources: {
+      title: eventName ? 'parser_event_name' : 'unknown',
+      dateTime: item.startDate || item.startTime ? 'parser_event_datetime' : 'unknown',
+      location: 'parser_event_location',
+    },
+    autoPublishReviewReasons: params.location.autoPublishReviewReasons,
+    spatialEvidence: params.location.spatialEvidence,
+  });
+
+  logger.info(result.queued ? 'Queued spatial event for review' : 'Spatial event review not queued', {
+    rowIndex: params.rowIndex,
+    reviewDocId: result.docId,
+    eventName,
+    locationLabel: params.location.locationLabel,
+    spatialKind: params.location.spatialEvidence.kind,
+    reason: result.reason,
+  });
+}
+
+type FullParserVenueMatcher = (
+  candidate: string,
+  facebookUrl?: string
+) => Promise<MatchInfo>;
+
+export async function resolveVenueForFullParserEventWithMatcherForRegression(params: {
+  item: ParserProcessedEvent;
+  rowVenue: VenueData | null;
+  row: RawRowData;
+  establishment: string;
+  rowIndex: number;
+  matcher: FullParserVenueMatcher;
+}): Promise<VenueData | null> {
+  const { item, rowVenue, row, establishment, rowIndex, matcher } = params;
+  const spatialLocation = resolvePostDerivedCityLevelEventLocation({
+    item,
+    row,
+    establishment,
+  });
+  if (spatialLocation) return null;
+
   // Get the event's own establishment/venue names
   const itemEstablishment = String(item.establishment || '').trim();
   const itemVenue = String(item.venue || '').trim();
@@ -2748,7 +2919,7 @@ async function resolveVenueForFullParserEvent(
 
     for (const candidate of uniqueCandidates) {
       const itemMatchStart = Date.now();
-      const itemMatch = await firestoreService.findMatchingVenue(candidate);
+      const itemMatch = await matcher(candidate);
       logTiming('venue_match_item', itemMatchStart, {
         rowIndex,
         candidateVenue: candidate,
@@ -2806,7 +2977,7 @@ async function resolveVenueForFullParserEvent(
       row.facebookUrl &&
       normalizeVenueName(candidate) === normalizedRowEstablishment;
     const itemMatchStart = Date.now();
-    const itemMatch = await firestoreService.findMatchingVenue(
+    const itemMatch = await matcher(
       candidate,
       useUrl ? row.facebookUrl : undefined
     );
@@ -2849,6 +3020,28 @@ async function processFullParserEvent(
   );
 
   if (!venue) {
+    const spatialLocation = resolvePostDerivedCityLevelEventLocation({
+      item,
+      row,
+      establishment,
+    });
+    if (spatialLocation) {
+      await queueSpatialEventForReview({
+        location: spatialLocation,
+        item,
+        row,
+        rowIndex,
+        batchManager,
+      });
+      logger.debug('Skipping venue write for spatial event review candidate', {
+        rowIndex,
+        itemName: item.name || '',
+        spatialKind: spatialLocation.spatialEvidence.kind,
+        locationLabel: spatialLocation.locationLabel,
+      });
+      return { created: false, updated: false, isDuplicate: false };
+    }
+
     if (isCityLevelFacebookEventLocation(row)) {
       await queueCityLevelFacebookEventForReview({
         row,

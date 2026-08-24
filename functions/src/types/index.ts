@@ -1,6 +1,7 @@
 /**
  * GathR Cloud Functions Type Definitions
  */
+import type { SpatialEventClassification } from '../parsing/spatialEventClassifier.js';
 
 // ===================
 // Configuration Types
@@ -272,8 +273,17 @@ export interface QueueCityLevelEventReviewInput {
   locationLabel: string;
   locationCity?: string;
   locationProvince?: string;
-  locationScope?: 'city' | 'area';
+  locationScope?: 'city' | 'area' | 'route';
   locationPrecision?: 'city_centroid' | 'approximate' | 'none';
+  observedLocationName?: string;
+  autoPublishSource?: 'structured_facebook_event' | 'parser_fallback';
+  autoPublishFieldSources?: {
+    title?: string;
+    dateTime?: string;
+    location?: string;
+  };
+  autoPublishReviewReasons?: string[];
+  spatialEvidence?: SpatialEventClassification;
   organizerName?: string;
   facebookUrl?: string;
   topLevelUrl?: string;
@@ -322,12 +332,21 @@ export interface CityLevelEventReviewRecord {
   lastSeenRowIndex?: number;
   sourceScraperType?: ScraperType;
   sourceContentSignature?: string;
-  locationScope: 'city' | 'area';
+  locationScope: 'city' | 'area' | 'route';
   locationLabel: string;
   locationCity?: string;
   locationProvince?: string;
   locationPrecision: 'city_centroid' | 'approximate' | 'none';
   locationReviewStatus: 'needs_review' | 'approved' | 'rejected';
+  observedLocationName?: string;
+  autoPublishSource?: 'structured_facebook_event' | 'parser_fallback';
+  autoPublishFieldSources?: {
+    title?: string;
+    dateTime?: string;
+    location?: string;
+  };
+  autoPublishReviewReasons?: string[];
+  spatialEvidence?: SpatialEventClassification;
   eventName?: string;
   eventDate?: string;
   eventTime?: string;
