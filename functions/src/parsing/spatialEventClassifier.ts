@@ -68,7 +68,7 @@ const TRAFFIC_NOTICE_PATTERN =
 const EVENT_OCCURRENCE_PATTERN =
   /\b(event|festival|parade|race|run|ride|walk|concert|performance|market|celebration|starts?|begins?|join\s+us|register)\b/i;
 const MULTI_LOCATION_PATTERN =
-  /\b(various\s+(?:locations|venues)|multiple\s+(?:locations|venues)|several\s+(?:locations|venues)|across\s+(?:the\s+)?(?:city|town|pei)|throughout\s+(?:the\s+)?(?:city|town|pei)|multi[-\s]?(?:location|venue|site)|at\s+all\s+locations)\b/i;
+  /\b(various\s+(?:locations|venues)|multiple\s+(?:locations|venues)|several\s+(?:locations|venues)|across\s+(?:the\s+)?(?:city|town|pei)|throughout\s+(?:the\s+)?(?:city|town|pei)|multi[-\s]?(?:location|venue|site)|at\s+all\s+locations|no\s+set\s+order)\b/i;
 const ONLINE_PATTERN = /\b(online|virtual|zoom|livestream|live\s*stream|webinar)\b/i;
 const PHYSICAL_LOCATION_PATTERN =
   /\b(at|inside|outside|located\s+at|address|street|road|avenue|drive|hall|centre|center|park|market|quay|wharf|school|arena)\b/i;
@@ -128,7 +128,7 @@ function stripLocationPrefix(value: string): string {
       ''
     ),
     220
-  );
+  ).replace(/[.!?]+$/g, '').trim();
 }
 
 function splitExplicitList(value: string): string[] {
@@ -223,7 +223,9 @@ function extractPrefixedLocations(text: string): SpatialLocationEvidence[] {
       /^(confirmed\s+|possible\s+|approximate\s+|estimated\s+)?(start(?:ing)?(?:\s+(?:at|near|from))?|finish(?:ing)?(?:\s+(?:at|near|on))?|stop|checkpoint|turnaround|location|venue|site)\s*[:\-–—]\s*(.+)$/i
     );
     if (single?.[3]) {
-      const label = stripLocationPrefix(single[3]);
+      const label = stripLocationPrefix(single[3].split(
+        /\b(?:(?:confirmed|possible|approximate|estimated|official)\s+)?(?:weather\s+)?(?:start(?:ing)?|finish(?:ing)?|locations?|venues?|sites?|stops?|checkpoints?|turnaround|route|course|street\s+sequence|streets?)\s*(?:\([^)]{1,80}\))?\s*[:\-–—]\s*/i
+      )[0]);
       if (label) {
         locations.push({
           label,
@@ -255,6 +257,54 @@ function extractPrefixedLocations(text: string): SpatialLocationEvidence[] {
   return dedupeLocations(locations);
 }
 
+/**
+ * Stage 3 often turns a poster into one prose paragraph. Preserve labelled
+ * spatial sections even when their original line breaks are gone, for example:
+ *
+ *   CONFIRMED LOCATIONS (NO SET ORDER): A; B POSSIBLE WEATHER LOCATION: C
+ *
+ * The next recognised spatial heading is the boundary. This intentionally does
+ * not infer an order or turn the point set into a connecting route.
+ */
+function extractInlineLabeledLocations(text: string): SpatialLocationEvidence[] {
+  const source = String(text || '');
+  const heading = /\b(?:(confirmed|possible|approximate|estimated|official)\s+)?(?:weather\s+)?(start(?:ing)?(?:\s+(?:at|near|from))?|finish(?:ing)?(?:\s+(?:at|near|on))?|locations?|venues?|sites?|stops?|checkpoints?|turnaround|route|course|street\s+sequence|streets?)\s*(?:\([^)]{1,80}\))?\s*[:\-–—]\s*/gi;
+  const matches = Array.from(source.matchAll(heading));
+  if (matches.length === 0) return [];
+
+  const locations: SpatialLocationEvidence[] = [];
+  for (let index = 0; index < matches.length; index += 1) {
+    const match = matches[index];
+    const start = (match.index || 0) + match[0].length;
+    const nextHeading = index + 1 < matches.length ? (matches[index + 1].index || source.length) : source.length;
+    const nextLineBreak = source.indexOf('\n', start);
+    const end = nextLineBreak >= 0 ? Math.min(nextHeading, nextLineBreak) : nextHeading;
+    let section = cleanText(source.slice(start, end), 600);
+    // Explanatory prose after the labelled value is not part of a place name.
+    section = section.split(/\.\s+(?=[A-Z])/)[0].trim();
+    if (!section) continue;
+
+    const headingCertainty = /possible|approximate|estimated/i.test(match[1] || '')
+      ? 'possible' as const
+      : 'confirmed' as const;
+    const rawType = String(match[2] || 'location');
+    if (/^(?:route|course|street\s+sequence|streets?)$/i.test(rawType)) continue;
+    const isList = /^(?:locations?|venues?|sites?|stops?|checkpoints?)$/i.test(rawType);
+    const labels = isList ? splitExplicitList(section) : [stripLocationPrefix(section)];
+    for (const label of labels) {
+      if (!label) continue;
+      locations.push({
+        label,
+        role: inferRole(rawType),
+        certainty: headingCertainty,
+        sourceText: cleanText(`${match[0]}${section}`, 300),
+      });
+    }
+  }
+
+  return dedupeLocations(locations);
+}
+
 function extractStreetSequence(text: string): string[] {
   const lines = String(text || '').split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
   const candidates: string[] = [];
@@ -265,6 +315,17 @@ function extractStreetSequence(text: string): string[] {
     if (!match?.[1]) continue;
     for (const part of splitExplicitList(match[1])) {
       if (STREET_SUFFIX_PATTERN.test(part)) candidates.push(part);
+    }
+  }
+  // The image extractor may flatten line breaks. Stop at the next explicit
+  // start/finish/location heading rather than swallowing the rest of the prose.
+  const inline = String(text || '').match(
+    /\b(?:confirmed\s+|official\s+)?(?:route|course|street\s+sequence|streets?)\s*[:\-–—]\s*([\s\S]*?)(?=\b(?:confirmed\s+|possible\s+|approximate\s+|estimated\s+)?(?:start(?:ing)?|finish(?:ing)?|locations?|venues?|sites?|stops?|checkpoints?|turnaround)\s*(?:\([^)]{1,80}\))?\s*[:\-–—]|$)/i
+  );
+  if (inline?.[1]) {
+    for (const part of splitExplicitList(inline[1].split(/\.\s+(?=[A-Z])/)[0])) {
+      const street = part.replace(/[.!?]+$/g, '').trim();
+      if (STREET_SUFFIX_PATTERN.test(street)) candidates.push(street);
     }
   }
   return uniqueStrings(candidates);
@@ -347,6 +408,7 @@ export function classifySpatialEvent(
     : [];
   const textLocations = [
     ...extractPrefixedLocations(corpus),
+    ...extractInlineLabeledLocations(corpus),
     ...extractInlineRoleLocations(location),
   ];
   const locations = dedupeLocations([...modelLocations, ...textLocations]);

@@ -13,6 +13,63 @@ import {
   getUntrustedPublicPromotionReviewReasons,
 } from './sharedEventPublicTrust.js';
 
+test('public route candidate is directed to a named route review target', () => {
+  const candidate = {
+    title: 'Gold Cup Parade',
+    description: 'Official route through Charlottetown.',
+    spatialEvidence: {
+      version: 1,
+      kind: 'route',
+      representation: 'route',
+      confidence: 'high',
+      ordered: true,
+      locations: [
+        { label: 'Queen Charlotte Intermediate School', role: 'start', certainty: 'confirmed' },
+        { label: 'Fitzroy Street', role: 'finish', certainty: 'confirmed' },
+      ],
+      confirmedStreets: ['North River Road', 'Brighton Road'],
+      routeEvidenceLevel: 'official_full_route',
+      reviewReasons: ['route_candidate_requires_geometry_review'],
+    },
+  } as unknown as PublicSharedEventCandidateRecord;
+
+  assert.deepEqual(getSpatialCandidateLocationDetailsForRegression(candidate), {
+    locationScope: 'route',
+    locationLabel: 'Gold Cup Parade Route',
+    locationCity: 'Charlottetown',
+    locationProvince: 'PEI',
+    locationPrecision: 'approximate',
+  });
+});
+
+test('multi-location candidate is directed to an unordered area review target', () => {
+  const candidate = {
+    title: 'Charlottetown Busker Festival',
+    description: 'Three official downtown locations.',
+    spatialEvidence: {
+      version: 1,
+      kind: 'multi_location',
+      representation: 'area',
+      confidence: 'high',
+      ordered: false,
+      locations: [
+        { label: 'Victoria Row', role: 'location', certainty: 'confirmed' },
+        { label: "Peake's Quay", role: 'location', certainty: 'confirmed' },
+      ],
+      confirmedStreets: [],
+      reviewReasons: ['multi_location_requires_point_resolution'],
+    },
+  } as unknown as PublicSharedEventCandidateRecord;
+
+  assert.deepEqual(getSpatialCandidateLocationDetailsForRegression(candidate), {
+    locationScope: 'area',
+    locationLabel: 'Charlottetown Busker Festival Locations',
+    locationCity: 'Charlottetown',
+    locationProvince: 'PEI',
+    locationPrecision: 'approximate',
+  });
+});
+
 test('extractSharedEventSubVenue preserves a venue-scoped stage label', () => {
   assert.equal(
     extractSharedEventSubVenue(

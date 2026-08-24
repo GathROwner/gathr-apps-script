@@ -73,6 +73,41 @@ test('official festival locations are unordered multi-location points', () => {
   ]);
 });
 
+test('flattened poster text preserves confirmed and weather-contingent multi-location points', () => {
+  const result = classifySpatialEvent({
+    name: 'Harbour Squares Busker Pop-Up',
+    description: "CONFIRMED LOCATIONS (NO SET ORDER): Confederation Landing; Victoria Row POSSIBLE WEATHER LOCATION: Founders Food Hall & Market. This is not a travel route.",
+    location: 'Downtown Charlottetown, PEI',
+  });
+
+  assert.equal(result.kind, 'multi_location');
+  assert.equal(result.representation, 'area');
+  assert.equal(result.ordered, false);
+  assert.equal(result.confidence, 'high');
+  assert.deepEqual(result.locations.map((entry) => [entry.label, entry.certainty]), [
+    ['Confederation Landing', 'confirmed'],
+    ['Victoria Row', 'confirmed'],
+    ['Founders Food Hall & Market', 'possible'],
+  ]);
+});
+
+test('flattened official route text preserves start, street sequence, and finish', () => {
+  const result = classifySpatialEvent({
+    name: 'Harbour Lights Parade',
+    description: 'START: Victoria Park Pavilion. OFFICIAL ROUTE: Brighton Road -> Euston Street -> Queen Street. FINISH: Confederation Centre of the Arts.',
+    location: 'Charlottetown, PEI',
+  });
+
+  assert.equal(result.kind, 'route');
+  assert.equal(result.ordered, true);
+  assert.equal(result.routeEvidenceLevel, 'official_full_route');
+  assert.deepEqual(result.confirmedStreets, ['Brighton Road', 'Euston Street', 'Queen Street']);
+  assert.deepEqual(result.locations.map((entry) => [entry.label, entry.role]), [
+    ['Victoria Park Pavilion', 'start'],
+    ['Confederation Centre of the Arts', 'finish'],
+  ]);
+});
+
 test('same physical location repeated by alias collapses to one point', () => {
   const result = classifySpatialEvent({
     name: 'Market Day',
