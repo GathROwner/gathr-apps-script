@@ -1,0 +1,459 @@
+/**
+ * Spatial event classification for events that are not a single durable venue.
+ *
+ * This module deliberately separates recognition from publication. It may say
+ * "this is a route" or "these are unordered locations", but it never invents
+ * coordinates, a street order, or a connecting line.
+ */
+
+export type SpatialEventKind =
+  | 'single_location'
+  | 'multi_location'
+  | 'route'
+  | 'separate_occurrences'
+  | 'online'
+  | 'unknown';
+
+export type SpatialEvidenceConfidence = 'high' | 'medium' | 'low';
+export type SpatialLocationRole = 'start' | 'finish' | 'stop' | 'location';
+export type SpatialLocationCertainty = 'confirmed' | 'possible';
+
+export interface SpatialLocationEvidence {
+  label: string;
+  address?: string;
+  role: SpatialLocationRole;
+  certainty: SpatialLocationCertainty;
+  sourceText?: string;
+}
+
+export interface ModelSpatialEvidence {
+  kind?: unknown;
+  locations?: unknown;
+  confirmedStreets?: unknown;
+  ordered?: unknown;
+  evidenceNotes?: unknown;
+}
+
+export interface SpatialEventClassification {
+  version: 1;
+  kind: SpatialEventKind;
+  representation: 'venue' | 'area' | 'route' | 'none';
+  confidence: SpatialEvidenceConfidence;
+  ordered: boolean;
+  locations: SpatialLocationEvidence[];
+  confirmedStreets: string[];
+  routeEvidenceLevel?:
+    | 'official_full_route'
+    | 'official_partial_route'
+    | 'stops_only'
+    | 'inferred';
+  reviewReasons: string[];
+  evidenceNotes?: string;
+}
+
+export interface ClassifySpatialEventInput {
+  name?: unknown;
+  description?: unknown;
+  location?: unknown;
+  combinedText?: unknown;
+  modelSpatialEvidence?: ModelSpatialEvidence | null;
+}
+
+const ROUTE_EVENT_PATTERN =
+  /\b(parade|procession|march|fun\s*run|road\s*race|race\s*route|marathon|half\s*marathon|5k|10k|walkathon|charity\s+walk|bike\s+ride|cycling\s+ride|gran\s+fondo|motorcade|boat\s+parade|trail\s+run)\b/i;
+const ROUTE_STRUCTURE_PATTERN =
+  /\b(route|course|street\s+sequence|start(?:s|ing)?\s+(?:at|near|from)|finish(?:es|ing)?\s+(?:at|near|on)|checkpoint|turnaround|proceed(?:s|ing)?\s+(?:along|via|down)|travels?\s+(?:along|via|down)|follows?\s+(?:the\s+)?(?:streets?|route)|along\s+[A-Z0-9])\b/i;
+const TRAFFIC_NOTICE_PATTERN =
+  /\b(traffic\s+(?:notice|advisory|impact)|road\s+closure|street\s+closure|expect\s+delays|detour|motorists?\s+are\s+advised)\b/i;
+const EVENT_OCCURRENCE_PATTERN =
+  /\b(event|festival|parade|race|run|ride|walk|concert|performance|market|celebration|starts?|begins?|join\s+us|register)\b/i;
+const MULTI_LOCATION_PATTERN =
+  /\b(various\s+(?:locations|venues)|multiple\s+(?:locations|venues)|several\s+(?:locations|venues)|across\s+(?:the\s+)?(?:city|town|pei)|throughout\s+(?:the\s+)?(?:city|town|pei)|multi[-\s]?(?:location|venue|site)|at\s+all\s+locations)\b/i;
+const ONLINE_PATTERN = /\b(online|virtual|zoom|livestream|live\s*stream|webinar)\b/i;
+const PHYSICAL_LOCATION_PATTERN =
+  /\b(at|inside|outside|located\s+at|address|street|road|avenue|drive|hall|centre|center|park|market|quay|wharf|school|arena)\b/i;
+const STREET_SUFFIX_PATTERN =
+  /\b(street|st\.?|road|rd\.?|avenue|ave\.?|drive|dr\.?|lane|ln\.?|boulevard|blvd\.?|highway|hwy\.?|route|trail|way)\b/i;
+const ROOM_PATTERN =
+  /\b(room|studio|auditorium|main\s+stage|side\s+stage|patio|kitchen|lobby|upstairs|downstairs|suite)\b/i;
+const DURABLE_HOST_PATTERN =
+  /\b(centre|center|hall|arena|school|hotel|market|theatre|theater|museum|gallery|library|complex|campus)\b/i;
+const ADDRESS_SIGNAL_PATTERN =
+  /\b\d{1,6}\s+[A-Za-z]|\b(charlottetown|summerside|montague|cornwall|stratford|georgetown|souris|kensington|pei|p\.e\.i\.)\b/i;
+const DATE_TOKEN_PATTERN =
+  /\b(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\s+\d{1,2}\b|\b20\d{2}-\d{2}-\d{2}\b/i;
+
+function cleanText(value: unknown, maxLength = 500): string {
+  return String(value || '')
+    .replace(/\s+/g, ' ')
+    .replace(/^[\s,;|/\-–—]+|[\s,;|/\-–—]+$/g, '')
+    .trim()
+    .slice(0, maxLength);
+}
+
+function normalizeKey(value: unknown): string {
+  return cleanText(value, 500)
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
+function uniqueStrings(values: unknown[]): string[] {
+  const result: string[] = [];
+  const seen = new Set<string>();
+  for (const value of values) {
+    const cleaned = cleanText(value, 180);
+    const key = normalizeKey(cleaned);
+    if (!cleaned || !key || seen.has(key)) continue;
+    seen.add(key);
+    result.push(cleaned);
+  }
+  return result;
+}
+
+function inferRole(value: unknown): SpatialLocationRole {
+  const text = cleanText(value, 240);
+  if (/\b(start|begin|depart|registration)\b/i.test(text)) return 'start';
+  if (/\b(finish|end)\b/i.test(text)) return 'finish';
+  if (/\b(stop|checkpoint|turnaround|waypoint)\b/i.test(text)) return 'stop';
+  return 'location';
+}
+
+function stripLocationPrefix(value: string): string {
+  return cleanText(
+    value.replace(
+      /^(?:confirmed\s+|possible\s+|approximate\s+)?(?:start(?:ing)?(?:\s+(?:at|near|from))?|finish(?:ing)?(?:\s+(?:at|near|on))?|stop|checkpoint|turnaround|location|venue|site)\s*[:\-–—]?\s*/i,
+      ''
+    ),
+    220
+  );
+}
+
+function splitExplicitList(value: string): string[] {
+  const normalized = String(value || '')
+    .replace(/\s+(?:and|then)\s+/gi, ' | ')
+    .replace(/\s*(?:→|->|>|;|\|)\s*/g, ' | ');
+
+  const commaParts = normalized.includes('|')
+    ? normalized.split('|')
+    : normalized.split(/\s*,\s*/);
+
+  return uniqueStrings(
+    commaParts
+      .map((part) => stripLocationPrefix(part))
+      .filter((part) => part.length >= 3)
+  );
+}
+
+function locationFromModel(value: unknown): SpatialLocationEvidence | null {
+  if (typeof value === 'string') {
+    const label = stripLocationPrefix(value);
+    if (!label) return null;
+    return {
+      label,
+      role: inferRole(value),
+      certainty: /\b(possible|approximate|estimated|unknown|tbc|to\s+be\s+confirmed)\b/i.test(value)
+        ? 'possible'
+        : 'confirmed',
+      sourceText: cleanText(value, 300),
+    };
+  }
+
+  const record = value && typeof value === 'object'
+    ? value as Record<string, unknown>
+    : null;
+  if (!record) return null;
+  const label = cleanText(record.label || record.name || record.location, 180);
+  if (!label) return null;
+  const rawRole = normalizeKey(record.role);
+  const role: SpatialLocationRole =
+    rawRole === 'start' || rawRole === 'finish' || rawRole === 'stop'
+      ? rawRole
+      : inferRole(`${record.role || ''} ${label}`);
+  const rawCertainty = normalizeKey(record.certainty);
+  return {
+    label,
+    address: cleanText(record.address, 260) || undefined,
+    role,
+    certainty: rawCertainty === 'possible' || rawCertainty === 'approximate'
+      ? 'possible'
+      : 'confirmed',
+    sourceText: cleanText(record.sourceText || record.evidence, 300) || undefined,
+  };
+}
+
+function dedupeLocations(values: SpatialLocationEvidence[]): SpatialLocationEvidence[] {
+  const result: SpatialLocationEvidence[] = [];
+  const byKey = new Map<string, number>();
+  for (const value of values) {
+    const key = normalizeKey(value.address || value.label);
+    if (!key) continue;
+    const existingIndex = byKey.get(key);
+    if (existingIndex === undefined) {
+      byKey.set(key, result.length);
+      result.push(value);
+      continue;
+    }
+    const existing = result[existingIndex];
+    result[existingIndex] = {
+      ...existing,
+      address: existing.address || value.address,
+      role: existing.role === 'location' ? value.role : existing.role,
+      certainty:
+        existing.certainty === 'confirmed' || value.certainty === 'confirmed'
+          ? 'confirmed'
+          : 'possible',
+      sourceText: existing.sourceText || value.sourceText,
+    };
+  }
+  return result;
+}
+
+function extractPrefixedLocations(text: string): SpatialLocationEvidence[] {
+  const lines = String(text || '')
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+  const locations: SpatialLocationEvidence[] = [];
+
+  for (const line of lines) {
+    const single = line.match(
+      /^(confirmed\s+|possible\s+|approximate\s+|estimated\s+)?(start(?:ing)?(?:\s+(?:at|near|from))?|finish(?:ing)?(?:\s+(?:at|near|on))?|stop|checkpoint|turnaround|location|venue|site)\s*[:\-–—]\s*(.+)$/i
+    );
+    if (single?.[3]) {
+      const label = stripLocationPrefix(single[3]);
+      if (label) {
+        locations.push({
+          label,
+          role: inferRole(single[2]),
+          certainty: /possible|approximate|estimated/i.test(single[1] || '')
+            ? 'possible'
+            : 'confirmed',
+          sourceText: cleanText(line, 300),
+        });
+      }
+      continue;
+    }
+
+    const list = line.match(/^(locations|venues|sites|stops|checkpoints)\s*[:\-–—]\s*(.+)$/i);
+    if (list?.[2]) {
+      for (const label of splitExplicitList(list[2])) {
+        locations.push({
+          label,
+          role: list[1].toLowerCase().startsWith('stop') ||
+            list[1].toLowerCase().startsWith('checkpoint') ? 'stop' : 'location',
+          certainty: /\b(possible|approximate|estimated|tbc)\b/i.test(label)
+            ? 'possible'
+            : 'confirmed',
+          sourceText: cleanText(line, 300),
+        });
+      }
+    }
+  }
+  return dedupeLocations(locations);
+}
+
+function extractStreetSequence(text: string): string[] {
+  const lines = String(text || '').split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+  const candidates: string[] = [];
+  for (const line of lines) {
+    const match = line.match(
+      /^(?:confirmed\s+)?(?:route|course|street\s+sequence|streets?)\s*[:\-–—]\s*(.+)$/i
+    );
+    if (!match?.[1]) continue;
+    for (const part of splitExplicitList(match[1])) {
+      if (STREET_SUFFIX_PATTERN.test(part)) candidates.push(part);
+    }
+  }
+  return uniqueStrings(candidates);
+}
+
+function extractInlineRoleLocations(value: string): SpatialLocationEvidence[] {
+  const parts = String(value || '').split(/\s*(?:\/|;)\s*/).filter(Boolean);
+  if (parts.length < 2) return [];
+
+  const locations = parts.map((part) => {
+    const match = part.match(/^(.+?)\s*\((start|finish|stop|checkpoint|turnaround)\)\s*$/i);
+    if (!match?.[1] || !match[2]) return null;
+    const label = cleanText(match[1], 180);
+    if (!label) return null;
+    return {
+      label,
+      role: inferRole(match[2]),
+      certainty: 'confirmed' as const,
+      sourceText: cleanText(part, 300),
+    };
+  }).filter(Boolean) as SpatialLocationEvidence[];
+
+  return locations.length >= 2 ? dedupeLocations(locations) : [];
+}
+
+function modelKind(value: unknown): SpatialEventKind | null {
+  const normalized = normalizeKey(value).replace(/\s+/g, '_');
+  if (normalized === 'route') return 'route';
+  if (normalized === 'multi_location' || normalized === 'multi_venue') return 'multi_location';
+  if (normalized === 'single_location' || normalized === 'single_venue') return 'single_location';
+  if (normalized === 'separate_occurrences') return 'separate_occurrences';
+  if (normalized === 'online' || normalized === 'virtual') return 'online';
+  if (normalized === 'unknown') return 'unknown';
+  return null;
+}
+
+function looksLikeSeparateLocationOccurrences(text: string): boolean {
+  const lines = String(text || '').split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+  const datedLocationLines = lines.filter((line) =>
+    DATE_TOKEN_PATTERN.test(line) && /\b(charlottetown|summerside|montague|cornwall|stratford|georgetown|souris|kensington)\b/i.test(line)
+  );
+  return datedLocationLines.length >= 2;
+}
+
+function chooseConfidence(params: {
+  kind: SpatialEventKind;
+  modelKind: SpatialEventKind | null;
+  locations: SpatialLocationEvidence[];
+  streets: string[];
+  routeStructure: boolean;
+  multiCue: boolean;
+}): SpatialEvidenceConfidence {
+  if (params.kind === 'route') {
+    if (params.streets.length >= 2 || params.locations.length >= 2) return 'high';
+    if (params.routeStructure || params.modelKind === 'route') return 'medium';
+    return 'low';
+  }
+  if (params.kind === 'multi_location') {
+    if (params.locations.length >= 2) return 'high';
+    if (params.multiCue || params.modelKind === 'multi_location') return 'medium';
+    return 'low';
+  }
+  if (params.kind === 'separate_occurrences') return 'high';
+  if (params.kind === 'online' || params.kind === 'single_location') return 'high';
+  return 'low';
+}
+
+export function classifySpatialEvent(
+  input: ClassifySpatialEventInput
+): SpatialEventClassification {
+  const name = cleanText(input.name, 300);
+  const description = String(input.description || '');
+  const location = cleanText(input.location, 300);
+  const combinedText = String(input.combinedText || '');
+  const corpus = [name, description, location, combinedText].filter(Boolean).join('\n');
+  const model = input.modelSpatialEvidence || null;
+  const normalizedModelKind = modelKind(model?.kind);
+  const modelLocations = Array.isArray(model?.locations)
+    ? model.locations.map(locationFromModel).filter(Boolean) as SpatialLocationEvidence[]
+    : [];
+  const textLocations = [
+    ...extractPrefixedLocations(corpus),
+    ...extractInlineRoleLocations(location),
+  ];
+  const locations = dedupeLocations([...modelLocations, ...textLocations]);
+  const confirmedStreets = uniqueStrings([
+    ...(Array.isArray(model?.confirmedStreets) ? model.confirmedStreets : []),
+    ...extractStreetSequence(corpus),
+  ]).filter((street) => STREET_SUFFIX_PATTERN.test(street));
+
+  const routeEvent = ROUTE_EVENT_PATTERN.test(`${name}\n${description}`);
+  const routeStructure = ROUTE_STRUCTURE_PATTERN.test(corpus);
+  const trafficNotice = TRAFFIC_NOTICE_PATTERN.test(corpus);
+  const trafficNoticeHeadline = /\b(traffic|road|street)\s+(?:notice|advisory|closure|impact)\b/i.test(name);
+  const nonEventTrafficNotice = trafficNotice && (trafficNoticeHeadline || !EVENT_OCCURRENCE_PATTERN.test(name));
+  const multiCue = MULTI_LOCATION_PATTERN.test(corpus);
+  const separateOccurrences = looksLikeSeparateLocationOccurrences(corpus);
+  const online = ONLINE_PATTERN.test(corpus);
+  const physical = PHYSICAL_LOCATION_PATTERN.test(corpus) || locations.length > 0;
+  const hasRouteRoles = locations.some((entry) => entry.role === 'start') &&
+    locations.some((entry) => entry.role === 'finish' || entry.role === 'stop');
+  const allLocationsAreRooms = locations.length > 0 && locations.every((entry) => ROOM_PATTERN.test(entry.label));
+  // A poster may list rooms, stages, or named performance spaces inside one
+  // durable host. Those are useful event metadata, but they must not become
+  // separate map pins. Requiring a specific host plus at least one obvious
+  // sublocation avoids collapsing a genuine multi-venue festival.
+  const locationsLookLikeHostSublocations = Boolean(location) &&
+    DURABLE_HOST_PATTERN.test(location) &&
+    locations.some((entry) => ROOM_PATTERN.test(entry.label)) &&
+    locations.every((entry) =>
+      !entry.address &&
+      !STREET_SUFFIX_PATTERN.test(entry.label) &&
+      !ADDRESS_SIGNAL_PATTERN.test(entry.label)
+    );
+
+  let kind: SpatialEventKind = 'unknown';
+  if (separateOccurrences || normalizedModelKind === 'separate_occurrences') {
+    kind = 'separate_occurrences';
+  } else if (online && !physical && normalizedModelKind !== 'route' && normalizedModelKind !== 'multi_location') {
+    kind = 'online';
+  } else if (
+    (normalizedModelKind === 'route' || (routeEvent && (routeStructure || hasRouteRoles))) &&
+    !nonEventTrafficNotice
+  ) {
+    kind = 'route';
+  } else if (
+    (normalizedModelKind === 'multi_location' || multiCue || locations.length >= 2) &&
+    !allLocationsAreRooms &&
+    !locationsLookLikeHostSublocations
+  ) {
+    kind = 'multi_location';
+  } else if (normalizedModelKind === 'single_location' || location || locations.length === 1) {
+    kind = 'single_location';
+  }
+
+  const confidence = chooseConfidence({
+    kind,
+    modelKind: normalizedModelKind,
+    locations,
+    streets: confirmedStreets,
+    routeStructure,
+    multiCue,
+  });
+  const reviewReasons = new Set<string>();
+  let routeEvidenceLevel: SpatialEventClassification['routeEvidenceLevel'];
+
+  if (nonEventTrafficNotice) reviewReasons.add('traffic_notice_not_event');
+  if (kind === 'route') {
+    reviewReasons.add('route_candidate_requires_geometry_review');
+    if (confirmedStreets.length >= 2 && locations.some((entry) => entry.role === 'start') &&
+      locations.some((entry) => entry.role === 'finish')) {
+      routeEvidenceLevel = 'official_full_route';
+    } else if (confirmedStreets.length > 0) {
+      routeEvidenceLevel = 'official_partial_route';
+    } else if (locations.length > 0) {
+      routeEvidenceLevel = 'stops_only';
+    } else {
+      routeEvidenceLevel = 'inferred';
+      reviewReasons.add('route_missing_explicit_stops_or_streets');
+    }
+  }
+  if (kind === 'multi_location') {
+    reviewReasons.add('multi_location_requires_point_resolution');
+    if (locations.length < 2) reviewReasons.add('multi_location_names_not_fully_extracted');
+  }
+  if (kind === 'separate_occurrences') {
+    reviewReasons.add('split_location_occurrences_before_publication');
+  }
+  if (kind === 'online') reviewReasons.add('online_non_venue');
+  if (kind === 'unknown' && trafficNotice) reviewReasons.add('traffic_notice_not_event');
+
+  const ordered = kind === 'route' && Boolean(
+    model?.ordered === true || confirmedStreets.length >= 2 ||
+    (locations.length >= 2 && locations.some((entry) => entry.role !== 'location'))
+  );
+
+  return {
+    version: 1,
+    kind,
+    representation:
+      kind === 'route' ? 'route' :
+        kind === 'multi_location' ? 'area' :
+          kind === 'single_location' ? 'venue' : 'none',
+    confidence,
+    ordered,
+    locations,
+    confirmedStreets,
+    routeEvidenceLevel,
+    reviewReasons: Array.from(reviewReasons),
+    evidenceNotes: cleanText(model?.evidenceNotes, 500) || undefined,
+  };
+}
