@@ -3,6 +3,8 @@
  * Types for the 5-stage parsing pipeline ported from postParser.js
  */
 
+import type { ModelSpatialEvidence, SpatialEventClassification } from './spatialEventClassifier.js';
+
 // ===================
 // Venue/Hours Types (also in main types, duplicated here for module independence)
 // ===================
@@ -284,6 +286,7 @@ export interface ExtractedEvent extends RecurrenceScheduleFields {
   recurrenceUntilDate?: string;
   extractionReason: string;
   timeFlags?: TimeFlags;
+  spatial?: ModelSpatialEvidence;
   _sourceType?: 'event' | 'special' | 'calendar' | 'schedule';
   _pipelineIndex?: number;
   _pipelineTotalStage3?: number;
@@ -309,6 +312,7 @@ export interface ExtractedSpecial extends RecurrenceScheduleFields {
   recurrenceUntilDate?: string;
   extractionReason: string;
   timeFlags?: TimeFlags;
+  spatial?: ModelSpatialEvidence;
   _sourceType?: 'event' | 'special' | 'calendar' | 'schedule';
   _pipelineIndex?: number;
   _pipelineTotalStage3?: number;
@@ -330,6 +334,7 @@ export interface CalendarItem extends RecurrenceScheduleFields {
   totalOccurrences?: number;
   recurrenceUntilDate?: string;
   timeFlags?: TimeFlags;
+  spatial?: ModelSpatialEvidence;
   _sourceType?: 'calendar' | 'schedule';
   _ticketImageUrl?: string;
 }
@@ -383,6 +388,8 @@ export type EventCategory =
   | 'Workshops & Classes'
   | 'Religious'
   | 'Sports'
+  // Read compatibility only. New parser output uses a primary category;
+  // family suitability is stored separately as a score.
   | 'Family Friendly'
   | 'Gatherings & Parties'
   | 'DJ/Nightlife'
@@ -413,7 +420,6 @@ export const ALLOWED_CATEGORIES: readonly Category[] = [
   'Workshops & Classes',
   'Religious',
   'Sports',
-  'Family Friendly',
   'Gatherings & Parties',
   'DJ/Nightlife',
   'Karaoke',
@@ -446,6 +452,8 @@ export interface FormattedEvent extends RecurrenceScheduleFields {
   totalOccurrences?: number;
   recurrenceUntilDate?: string;
   timeFlags?: TimeFlags;
+  spatial?: ModelSpatialEvidence;
+  spatialEvidence?: SpatialEventClassification;
   // Metadata fields
   _pipelineIndex?: number;
   _pipelineTotalStage3?: number;

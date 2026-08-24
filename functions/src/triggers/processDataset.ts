@@ -164,12 +164,25 @@ export const processDataset = onRequest(
         );
         if (result.success) {
           const stats = result.stats;
+          await firestoreService.markSharedEventPublicProcessingCompletedForFile({
+            fileId: body.fileId,
+            fileName: body.fileName,
+            runId: activeRunId,
+            stats,
+          });
           const summary = `Finished Processing Dataset (${body.fileId}) - ` +
             `Created ${stats?.newStandardEventsCreated ?? 0} new events, ` +
             `updated ${stats?.existingStandardEventsUpdated ?? 0} through dedup, ` +
             `Created ${stats?.newFoodSpecialsCreated ?? 0} Food Specials, ` +
             `Updated ${stats?.existingFoodSpecialsUpdated ?? 0} through dedup.`;
           logger.info(summary, { stats });
+        } else {
+          await firestoreService.markSharedEventPublicProcessingFailedForFile({
+            fileId: body.fileId,
+            fileName: body.fileName,
+            runId: activeRunId,
+            error: result.error || 'Dataset processing failed',
+          });
         }
       }
 
@@ -178,6 +191,11 @@ export const processDataset = onRequest(
       logger.error('Process dataset failed', error);
       if (lockAcquired && runId) {
         await firestoreService.releaseProcessingLock(body.fileId, runId, 'failed', 'processDataset');
+        await firestoreService.markSharedEventPublicProcessingFailedForFile({
+          fileId: body.fileId,
+          runId,
+          error: error instanceof Error ? error.message : 'Unknown error',
+        });
       }
       response.status(500).json({
         success: false,
@@ -322,12 +340,25 @@ export const processDatasetResume = onTaskDispatched(
 
         if (result.success) {
           const stats = result.stats;
+          await firestoreService.markSharedEventPublicProcessingCompletedForFile({
+            fileId,
+            fileName,
+            runId,
+            stats,
+          });
           const summary = `Finished Processing Dataset (${fileId}) - ` +
             `Created ${stats?.newStandardEventsCreated ?? 0} new events, ` +
             `updated ${stats?.existingStandardEventsUpdated ?? 0} through dedup, ` +
             `Created ${stats?.newFoodSpecialsCreated ?? 0} Food Specials, ` +
             `Updated ${stats?.existingFoodSpecialsUpdated ?? 0} through dedup.`;
           logger.info(summary, { stats });
+        } else {
+          await firestoreService.markSharedEventPublicProcessingFailedForFile({
+            fileId,
+            fileName,
+            runId,
+            error: result.error || 'Dataset resume processing failed',
+          });
         }
       }
 
@@ -338,6 +369,12 @@ export const processDatasetResume = onTaskDispatched(
         await firestoreService.refreshProcessingLock(fileId, runId, {
           status: 'running',
           source: 'processDatasetResume',
+        });
+        await firestoreService.markSharedEventPublicProcessingFailedForFile({
+          fileId,
+          fileName,
+          runId,
+          error: error instanceof Error ? error.message : 'Resume processing failed',
         });
       }
       throw error; // Re-throw to trigger retry

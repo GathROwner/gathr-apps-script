@@ -30,6 +30,7 @@ export function initializeStats(): ProcessingStats {
     existingStandardEventsUpdated: 0,
     newFoodSpecialsCreated: 0,
     existingFoodSpecialsUpdated: 0,
+    unknownVenueCount: 0,
   };
 }
 
@@ -219,6 +220,13 @@ export class BatchManager {
    */
   incrementUpdatedFoodSpecials(count: number = 1): void {
     this.state.stats.existingFoodSpecialsUpdated += count;
+  }
+
+  /**
+   * Increment unknown venue review counter
+   */
+  incrementUnknownVenues(count: number = 1): void {
+    this.state.stats.unknownVenueCount = (this.state.stats.unknownVenueCount || 0) + count;
   }
 
   /**

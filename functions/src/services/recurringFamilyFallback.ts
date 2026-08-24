@@ -57,8 +57,13 @@ type RecurringFamilyFallbackOptions = {
 export type RecurringFamilyFallbackDiagnostics = {
   sameVenue: boolean;
   existingRecurringLike: boolean;
+  incomingDatedScheduleOccurrence: boolean;
+  existingDatedScheduleOccurrence: boolean;
+  existingDurableRecurringLifecycle: boolean;
+  crossDateScheduleOccurrenceMergeBlocked: boolean;
   differentStartDate: boolean;
   differentUniqueId: boolean;
+  safeCrossSourceNonRecurringMatch: boolean;
   sameContentType: boolean;
   sameWeekdayIntent: boolean;
   closeStartTime: boolean;
@@ -94,6 +99,41 @@ function normalizeFlag(value: unknown): boolean | undefined {
   if (['yes', 'true', '1'].includes(normalized)) return true;
   if (['no', 'false', '0'].includes(normalized)) return false;
   return undefined;
+}
+
+function getSourceRoot(value: unknown): string {
+  if (Array.isArray(value)) {
+    for (const entry of value) {
+      const root = getSourceRoot(entry);
+      if (root) return root;
+    }
+    return '';
+  }
+
+  const normalized = asTrimmedString(value);
+  if (!normalized) return '';
+  return normalized.split('_')[0] || normalized;
+}
+
+function getEventSourceRoot(event: EventData): string {
+  const metadata = event as unknown as Record<string, unknown>;
+  return (
+    getSourceRoot(metadata.sourceUniqueId) ||
+    getSourceRoot(event.uniqueId) ||
+    getSourceRoot(event.id)
+  );
+}
+
+function hasDifferentSourceRoot(incoming: EventData, existing: EventData): boolean {
+  const incomingRoot = getEventSourceRoot(incoming);
+  const existingRoot = getEventSourceRoot(existing);
+  return Boolean(incomingRoot && existingRoot && incomingRoot !== existingRoot);
+}
+
+function hasSameKnownSourceRoot(incoming: EventData, existing: EventData): boolean {
+  const incomingRoot = getEventSourceRoot(incoming);
+  const existingRoot = getEventSourceRoot(existing);
+  return Boolean(incomingRoot && existingRoot && incomingRoot === existingRoot);
 }
 
 function normalizeDate(value: unknown): string {
@@ -174,6 +214,120 @@ function isRecurringLike(event: EventData): boolean {
     (Array.isArray(event.recurringDaysOfWeek) && event.recurringDaysOfWeek.length > 0) ||
     (Array.isArray(event.recurringWeekdaySequence) && event.recurringWeekdaySequence.length > 0)
   );
+}
+
+function parsePositiveInteger(value: unknown): number | undefined {
+  if (value == null) return undefined;
+  const parsed =
+    typeof value === 'number' ? value : Number(String(value).trim().replace(/,/g, ''));
+  if (!Number.isFinite(parsed)) return undefined;
+  const normalized = Math.trunc(parsed);
+  return normalized > 0 ? normalized : undefined;
+}
+
+function hasRecurringLifecycleSignal(event: EventData): boolean {
+  if (parsePositiveInteger(event.totalOccurrences) !== undefined) return true;
+  if (normalizeDate(event.recurrenceUntilDate)) return true;
+  if (Array.isArray(event.recurringDaysOfWeek) && event.recurringDaysOfWeek.length > 0) {
+    return true;
+  }
+  if (
+    Array.isArray(event.recurringWeekdaySequence) &&
+    event.recurringWeekdaySequence.length > 0
+  ) {
+    return true;
+  }
+  const interval = parsePositiveInteger(event.recurringWeekInterval);
+  return interval !== undefined && interval > 1;
+}
+
+function getRecurringSignalText(event: EventData): string {
+  return [
+    event.eventName,
+    event.name,
+    event.description,
+  ]
+    .map((value) => asTrimmedString(value))
+    .filter(Boolean)
+    .join(' ');
+}
+
+function getEventMetadataString(event: EventData, fieldName: string): string {
+  const metadata = event as unknown as Record<string, unknown>;
+  return asTrimmedString(metadata[fieldName]).toLowerCase();
+}
+
+function hasScheduleLikeSourceSignal(event: EventData): boolean {
+  const sourceType = getEventMetadataString(event, '_sourceType') ||
+    getEventMetadataString(event, 'sourceType') ||
+    getEventMetadataString(event, 'sourceScraperType');
+
+  return /\b(calendar|schedule)\b/.test(sourceType);
+}
+
+function hasExplicitScheduleWindowText(event: EventData): boolean {
+  const text = getRecurringSignalText(event);
+  if (!text) return false;
+
+  const hasScheduleWord = /\b(schedule|calendar|lineup|this week|weekly schedule)\b/i.test(text);
+  if (!hasScheduleWord) return false;
+
+  const hasIsoDateRange = /\b\d{4}-\d{2}-\d{2}\s*(?:-|to|through|thru|\u2013|\u2014)\s*\d{4}-\d{2}-\d{2}\b/i.test(text);
+  const hasMonthDateRange = /\b(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\.?\s+\d{1,2}\s*(?:-|to|through|thru|\u2013|\u2014)\s*(?:(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\.?\s+)?\d{1,2}\b/i.test(text);
+
+  return hasIsoDateRange || hasMonthDateRange || /\bthis week\b/i.test(text);
+}
+
+function isDatedScheduleOccurrence(event: EventData): boolean {
+  return hasScheduleLikeSourceSignal(event) || hasExplicitScheduleWindowText(event);
+}
+
+function hasStrongRecurringTextSignal(event: EventData): boolean {
+  const text = getRecurringSignalText(event);
+  if (!text) return false;
+
+  if (/\b(weekly|recurring|ongoing|every|each|most)\b/i.test(text)) return true;
+  if (/\b(mondays|tuesdays|wednesdays|thursdays|fridays|saturdays|sundays)\b/i.test(text)) {
+    return true;
+  }
+  return /\b(monday|tuesday|wednesday|thursday|friday|saturday|sunday)s?\s+(at|from|between|starting|starts|after|until|through|thru|to|\d{1,2}(?::\d{2})?\s*(am|pm)?|\d{1,2}\s*[-\u2013\u2014])/i.test(text);
+}
+
+function hasStrongRecurringFamilySignal(event: EventData): boolean {
+  return hasRecurringLifecycleSignal(event) || hasStrongRecurringTextSignal(event);
+}
+
+function isExplicitNonRecurringWithoutLifecycle(event: EventData): boolean {
+  if (hasRecurringLifecycleSignal(event)) return false;
+
+  const recurringPattern = asTrimmedString(event.recurringPattern).toLowerCase();
+  const hasPattern = Boolean(recurringPattern && recurringPattern !== 'none');
+  if (hasPattern) return false;
+
+  return normalizeFlag(event.isRecurring) === false || recurringPattern === 'none';
+}
+
+function hasSafeCrossSourceNonRecurringMatch(incoming: EventData, existing: EventData): boolean {
+  if (!hasDifferentSourceRoot(incoming, existing)) return true;
+  if (!isExplicitNonRecurringWithoutLifecycle(incoming)) return true;
+
+  return hasStrongRecurringFamilySignal(incoming) || hasStrongRecurringFamilySignal(existing);
+}
+
+function blocksCrossDateScheduleOccurrenceMerge(incoming: EventData, existing: EventData): boolean {
+  const incomingStartDate = normalizeDate(incoming.startDate);
+  const existingStartDate = normalizeDate(existing.startDate);
+  if (!incomingStartDate || !existingStartDate || incomingStartDate === existingStartDate) {
+    return false;
+  }
+
+  if (!isDatedScheduleOccurrence(incoming) || !isDatedScheduleOccurrence(existing)) {
+    return false;
+  }
+
+  // A weekly poster occurrence may refresh a real standing series, but not a
+  // different dated occurrence from last week's poster.
+  return !hasRecurringLifecycleSignal(existing);
 }
 
 function normalizeWeekdayToken(value: unknown): string {
@@ -424,6 +578,91 @@ function getDateDifferenceDays(leftDate: string, rightDate: string): number {
   return Math.abs(Math.floor((left.getTime() - right.getTime()) / (24 * 60 * 60 * 1000)));
 }
 
+function getSignedDateDifferenceDays(fromDate: string, toDate: string): number {
+  const from = new Date(`${fromDate}T00:00:00.000Z`);
+  const to = new Date(`${toDate}T00:00:00.000Z`);
+  if (Number.isNaN(from.getTime()) || Number.isNaN(to.getTime())) {
+    return Number.POSITIVE_INFINITY;
+  }
+
+  return Math.floor((to.getTime() - from.getTime()) / (24 * 60 * 60 * 1000));
+}
+
+function countWeeklyIntentOccurrencesThrough(
+  startDate: string,
+  occurrenceDate: string,
+  weekdays: Set<string>,
+  weekInterval: number
+): number {
+  const diffDays = getSignedDateDifferenceDays(startDate, occurrenceDate);
+  if (!Number.isFinite(diffDays) || diffDays < 0) return 0;
+
+  let count = 0;
+  const current = new Date(`${startDate}T00:00:00.000Z`);
+  if (Number.isNaN(current.getTime())) return 0;
+
+  for (let dayOffset = 0; dayOffset <= diffDays; dayOffset += 1) {
+    const currentDate = new Date(current);
+    currentDate.setUTCDate(current.getUTCDate() + dayOffset);
+    const weekday = WEEKDAY_NAMES[currentDate.getUTCDay()] || '';
+    const weekOffset = Math.floor(dayOffset / 7);
+    if (weekdays.has(weekday) && weekOffset % weekInterval === 0) {
+      count += 1;
+    }
+  }
+
+  return count;
+}
+
+function recurringFamilyIncludesOccurrenceDate(
+  recurringEvent: EventData,
+  occurrenceDate: string
+): boolean {
+  const recurringStartDate = normalizeDate(recurringEvent.startDate);
+  const normalizedOccurrenceDate = normalizeDate(occurrenceDate);
+  if (!recurringStartDate || !normalizedOccurrenceDate) return false;
+
+  const diffDays = getSignedDateDifferenceDays(recurringStartDate, normalizedOccurrenceDate);
+  if (!Number.isFinite(diffDays) || diffDays <= 0) return false;
+
+  const recurrenceUntilDate = normalizeDate(recurringEvent.recurrenceUntilDate);
+  if (recurrenceUntilDate && normalizedOccurrenceDate > recurrenceUntilDate) {
+    return false;
+  }
+
+  const totalOccurrences = parsePositiveInteger(recurringEvent.totalOccurrences);
+  const recurringPattern = asTrimmedString(recurringEvent.recurringPattern).toLowerCase();
+  const recurringWeekInterval = parsePositiveInteger(recurringEvent.recurringWeekInterval) || 1;
+
+  if (recurringPattern === 'daily') {
+    return totalOccurrences === undefined || diffDays < totalOccurrences;
+  }
+
+  const patternWeekday = getWeekdayFromPattern(recurringPattern);
+  if (patternWeekday) {
+    if (diffDays % (7 * recurringWeekInterval) !== 0) return false;
+    if (getWeekdayFromDate(normalizedOccurrenceDate) !== patternWeekday) return false;
+    const occurrenceIndex = Math.floor(diffDays / (7 * recurringWeekInterval)) + 1;
+    return totalOccurrences === undefined || occurrenceIndex <= totalOccurrences;
+  }
+
+  const weekdayIntent = collectWeekdayIntent(recurringEvent);
+  if (!weekdayIntent.size) return false;
+  if (!weekdayIntent.has(getWeekdayFromDate(normalizedOccurrenceDate))) return false;
+
+  if (totalOccurrences === undefined) {
+    return true;
+  }
+
+  const occurrenceCount = countWeeklyIntentOccurrencesThrough(
+    recurringStartDate,
+    normalizedOccurrenceDate,
+    weekdayIntent,
+    recurringWeekInterval
+  );
+  return occurrenceCount > 0 && occurrenceCount <= totalOccurrences;
+}
+
 function computeStartTimePenalty(incoming: EventData, existing: EventData): number {
   const incomingStartTime = asTrimmedString(incoming.startTime);
   const existingStartTime = asTrimmedString(existing.startTime);
@@ -442,6 +681,13 @@ export function getRecurringFamilyFallbackDiagnostics(
 ): RecurringFamilyFallbackDiagnostics {
   const sameVenue = hasCompatibleVenue(incoming, existing, options?.venueId);
   const existingRecurringLike = isRecurringLike(existing);
+  const incomingDatedScheduleOccurrence = isDatedScheduleOccurrence(incoming);
+  const existingDatedScheduleOccurrence = isDatedScheduleOccurrence(existing);
+  const existingDurableRecurringLifecycle = hasRecurringLifecycleSignal(existing);
+  const crossDateScheduleOccurrenceMergeBlocked = blocksCrossDateScheduleOccurrenceMerge(
+    incoming,
+    existing
+  );
   const incomingStartDate = normalizeDate(incoming.startDate);
   const existingStartDate = normalizeDate(existing.startDate);
   const differentStartDate =
@@ -453,6 +699,10 @@ export function getRecurringFamilyFallbackDiagnostics(
   const differentUniqueId =
     !incomingUniqueId || !existingUniqueId ? true : incomingUniqueId !== existingUniqueId;
   const sameContentType = hasCompatibleContentType(incoming, existing);
+  const safeCrossSourceNonRecurringMatch = hasSafeCrossSourceNonRecurringMatch(
+    incoming,
+    existing
+  );
   const sameWeekdayIntent = hasCompatibleWeekdayIntent(incoming, existing);
   const closeStartTime = hasCompatibleStartTime(
     incoming,
@@ -470,8 +720,10 @@ export function getRecurringFamilyFallbackDiagnostics(
   const compatible =
     sameVenue &&
     existingRecurringLike &&
+    !crossDateScheduleOccurrenceMergeBlocked &&
     differentStartDate &&
     differentUniqueId &&
+    safeCrossSourceNonRecurringMatch &&
     sameContentType &&
     sameWeekdayIntent &&
     closeStartTime &&
@@ -481,8 +733,13 @@ export function getRecurringFamilyFallbackDiagnostics(
   return {
     sameVenue,
     existingRecurringLike,
+    incomingDatedScheduleOccurrence,
+    existingDatedScheduleOccurrence,
+    existingDurableRecurringLifecycle,
+    crossDateScheduleOccurrenceMergeBlocked,
     differentStartDate,
     differentUniqueId,
+    safeCrossSourceNonRecurringMatch,
     sameContentType,
     sameWeekdayIntent,
     closeStartTime,
@@ -516,6 +773,10 @@ export function isRecurringFamilyFallbackCompatible(
     return false;
   }
 
+  if (blocksCrossDateScheduleOccurrenceMerge(incoming, existing)) {
+    return false;
+  }
+
   const incomingUniqueId = asTrimmedString(incoming.uniqueId);
   const existingUniqueId = asTrimmedString(existing.uniqueId);
   if (incomingUniqueId && existingUniqueId && incomingUniqueId === existingUniqueId) {
@@ -523,6 +784,10 @@ export function isRecurringFamilyFallbackCompatible(
   }
 
   if (!hasCompatibleContentType(incoming, existing)) {
+    return false;
+  }
+
+  if (!hasSafeCrossSourceNonRecurringMatch(incoming, existing)) {
     return false;
   }
 
@@ -548,6 +813,144 @@ export function pickRecurringFamilyFallbackMatch(
 ): EventData | undefined {
   const compatibleCandidates = candidates.filter((candidate) =>
     isRecurringFamilyFallbackCompatible(incoming, candidate, options)
+  );
+
+  if (!compatibleCandidates.length) {
+    return undefined;
+  }
+
+  const incomingStartDate = normalizeDate(incoming.startDate);
+  let bestCandidate = compatibleCandidates[0];
+  let bestFamilyAnchorScore = computeFamilyAnchorScore(incoming, bestCandidate).score;
+  let bestHostOverlap = computeHostOverlap(incoming, bestCandidate);
+  let bestBaseAlignment = getDateDifferenceDays(incomingStartDate, normalizeDate(bestCandidate.startDate));
+  let bestTimePenalty = computeStartTimePenalty(incoming, bestCandidate);
+
+  for (let index = 1; index < compatibleCandidates.length; index += 1) {
+    const candidate = compatibleCandidates[index];
+    const candidateFamilyAnchorScore = computeFamilyAnchorScore(incoming, candidate).score;
+    if (candidateFamilyAnchorScore > bestFamilyAnchorScore) {
+      bestCandidate = candidate;
+      bestFamilyAnchorScore = candidateFamilyAnchorScore;
+      bestHostOverlap = computeHostOverlap(incoming, candidate);
+      bestBaseAlignment = getDateDifferenceDays(incomingStartDate, normalizeDate(candidate.startDate));
+      bestTimePenalty = computeStartTimePenalty(incoming, candidate);
+      continue;
+    }
+    if (candidateFamilyAnchorScore < bestFamilyAnchorScore) {
+      continue;
+    }
+
+    const candidateHostOverlap = computeHostOverlap(incoming, candidate);
+    if (candidateHostOverlap.sharedCount > bestHostOverlap.sharedCount) {
+      bestCandidate = candidate;
+      bestFamilyAnchorScore = candidateFamilyAnchorScore;
+      bestHostOverlap = candidateHostOverlap;
+      bestBaseAlignment = getDateDifferenceDays(incomingStartDate, normalizeDate(candidate.startDate));
+      bestTimePenalty = computeStartTimePenalty(incoming, candidate);
+      continue;
+    }
+    if (candidateHostOverlap.sharedCount < bestHostOverlap.sharedCount) {
+      continue;
+    }
+    if (candidateHostOverlap.ratio > bestHostOverlap.ratio) {
+      bestCandidate = candidate;
+      bestFamilyAnchorScore = candidateFamilyAnchorScore;
+      bestHostOverlap = candidateHostOverlap;
+      bestBaseAlignment = getDateDifferenceDays(incomingStartDate, normalizeDate(candidate.startDate));
+      bestTimePenalty = computeStartTimePenalty(incoming, candidate);
+      continue;
+    }
+    if (candidateHostOverlap.ratio < bestHostOverlap.ratio) {
+      continue;
+    }
+
+    const candidateBaseAlignment = getDateDifferenceDays(
+      incomingStartDate,
+      normalizeDate(candidate.startDate)
+    );
+    if (candidateBaseAlignment < bestBaseAlignment) {
+      bestCandidate = candidate;
+      bestFamilyAnchorScore = candidateFamilyAnchorScore;
+      bestHostOverlap = candidateHostOverlap;
+      bestBaseAlignment = candidateBaseAlignment;
+      bestTimePenalty = computeStartTimePenalty(incoming, candidate);
+      continue;
+    }
+    if (candidateBaseAlignment > bestBaseAlignment) {
+      continue;
+    }
+
+    const candidateTimePenalty = computeStartTimePenalty(incoming, candidate);
+    if (candidateTimePenalty < bestTimePenalty) {
+      bestCandidate = candidate;
+      bestFamilyAnchorScore = candidateFamilyAnchorScore;
+      bestHostOverlap = candidateHostOverlap;
+      bestBaseAlignment = candidateBaseAlignment;
+      bestTimePenalty = candidateTimePenalty;
+    }
+  }
+
+  return bestCandidate;
+}
+
+export function isIncomingRecurringFamilyCompatibleWithExistingOccurrence(
+  incoming: EventData,
+  existing: EventData,
+  options?: RecurringFamilyFallbackOptions
+): boolean {
+  if (!hasCompatibleVenue(incoming, existing, options?.venueId)) {
+    return false;
+  }
+
+  if (!isRecurringLike(incoming) || !hasRecurringLifecycleSignal(incoming)) {
+    return false;
+  }
+
+  if (!isExplicitNonRecurringWithoutLifecycle(existing)) {
+    return false;
+  }
+
+  if (!hasSameKnownSourceRoot(incoming, existing)) {
+    return false;
+  }
+
+  const incomingStartDate = normalizeDate(incoming.startDate);
+  const existingStartDate = normalizeDate(existing.startDate);
+  if (!incomingStartDate || !existingStartDate || incomingStartDate === existingStartDate) {
+    return false;
+  }
+
+  if (!recurringFamilyIncludesOccurrenceDate(incoming, existingStartDate)) {
+    return false;
+  }
+
+  if (!hasCompatibleContentType(incoming, existing)) {
+    return false;
+  }
+
+  if (!hasCompatibleWeekdayIntent(incoming, existing)) {
+    return false;
+  }
+
+  if (!hasCompatibleStartTime(incoming, existing, options?.startTimeToleranceHours ?? 2)) {
+    return false;
+  }
+
+  if (!hasCompatibleHostTokens(incoming, existing)) {
+    return false;
+  }
+
+  return computeFamilyAnchorScore(incoming, existing).score >= 0.9;
+}
+
+export function pickIncomingRecurringFamilyExistingOccurrenceMatch(
+  incoming: EventData,
+  candidates: EventData[],
+  options?: RecurringFamilyFallbackOptions
+): EventData | undefined {
+  const compatibleCandidates = candidates.filter((candidate) =>
+    isIncomingRecurringFamilyCompatibleWithExistingOccurrence(incoming, candidate, options)
   );
 
   if (!compatibleCandidates.length) {

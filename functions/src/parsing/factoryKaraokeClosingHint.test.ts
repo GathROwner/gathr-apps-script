@@ -176,3 +176,69 @@ test('explicit event ranges are not overridden by a closing-hours hint', () => {
   assert.equal(resolved.timeFlags?.end?.source, 'explicit');
   assert.equal(resolved.timeFlags?.end?.toClose, false);
 });
+
+test('bare live-music evening range is not stored as a morning event', () => {
+  const [resolved] = enforceDateTimeCompleteness(
+    [
+      buildEvent({
+        category: 'Live Music',
+        name: 'Mad Joy',
+        description: 'Saturday, Mad Joy 8-11',
+        startTime: '08:00',
+        endTime: '11:00',
+        timeFlags: {
+          start: { source: 'semantic', evidence: '8-11' },
+          end: { source: 'semantic', toClose: false, evidence: '8-11' },
+        },
+      }),
+    ],
+    '2026-08-01T12:57:00.000Z',
+    'America/Halifax',
+    'Saturday, Mad Joy 8-11'
+  );
+
+  assert.equal(resolved.startTime, '20:00');
+  assert.equal(resolved.endTime, '23:00');
+  assert.match(String(resolved.timeFlags?.start?.evidence || ''), /nightlife evening range 8-11/i);
+});
+
+test('bare daytime ranges are not shifted for non-nightlife events', () => {
+  const [resolved] = enforceDateTimeCompleteness(
+    [
+      buildEvent({
+        category: 'Workshops & Classes',
+        name: 'Morning Pottery Workshop',
+        description: 'Saturday workshop 8-11',
+        startTime: '08:00',
+        endTime: '11:00',
+        timeResolution: { hoursUsed: false },
+      }),
+    ],
+    '2026-08-01T12:57:00.000Z',
+    'America/Halifax',
+    'Saturday workshop 8-11'
+  );
+
+  assert.equal(resolved.startTime, '08:00');
+  assert.equal(resolved.endTime, '11:00');
+});
+
+test('month date ranges are not treated as nightlife clock ranges', () => {
+  const [resolved] = enforceDateTimeCompleteness(
+    [
+      buildEvent({
+        category: 'Live Music',
+        name: 'Summer Concert Series',
+        description: 'Concert series August 8-11',
+        startTime: '08:00',
+        endTime: '11:00',
+      }),
+    ],
+    '2026-08-01T12:57:00.000Z',
+    'America/Halifax',
+    'Concert series August 8-11'
+  );
+
+  assert.equal(resolved.startTime, '08:00');
+  assert.equal(resolved.endTime, '11:00');
+});

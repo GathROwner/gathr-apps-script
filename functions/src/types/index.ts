@@ -6,6 +6,7 @@ import type {
   AddressNormalizationIssue,
   AddressSource,
 } from '../utils/addressNormalization.js';
+import type { SpatialEventClassification } from '../parsing/spatialEventClassifier.js';
 
 // ===================
 // Configuration Types
@@ -64,6 +65,7 @@ export interface ProcessingStats {
   existingStandardEventsUpdated: number;
   newFoodSpecialsCreated: number;
   existingFoodSpecialsUpdated: number;
+  unknownVenueCount?: number;
 }
 
 export interface CheckpointData {
@@ -151,7 +153,8 @@ export interface EventData {
   locationProvince?: string;
   locationPrecision?: 'exact' | 'approximate' | 'city_centroid' | 'none';
   locationReviewStatus?: 'not_needed' | 'needs_review' | 'approved' | 'rejected';
-  mapMode?: 'venue' | 'area' | 'none';
+  mapMode?: 'venue' | 'area' | 'route' | 'none';
+  spatialEvidence?: SpatialEventClassification;
   cityLevelReviewId?: string;
   sourceScraperType?: ScraperType;
   additionalLocation?: string;
@@ -161,6 +164,10 @@ export interface EventData {
   name?: string;
   description?: string;
   category?: string;
+  familyFriendlyScore?: number;
+  familyFriendlyLevel?: 'unlikely' | 'possible' | 'likely' | 'high';
+  familyFriendlyReasons?: string[];
+  familyFriendlyScoringVersion?: string;
   isEvent?: boolean | 'Yes' | 'No' | null;
   isFoodSpecial?: boolean | 'Yes' | 'No' | null;
   startDate: string;
@@ -236,9 +243,9 @@ export type CityLevelAutoPublishSource =
   | 'unknown';
 
 export interface CityLevelAutoPublishFieldSources {
-  title?: 'facebook_event_name' | 'shared_post_text' | 'unknown';
-  dateTime?: 'facebook_event_utc_start_date' | 'non_structured_date' | 'unknown';
-  location?: 'facebook_event_location_name' | 'non_structured_location' | 'unknown';
+  title?: 'facebook_event_name' | 'shared_post_text' | 'parser_event_name' | 'unknown';
+  dateTime?: 'facebook_event_utc_start_date' | 'non_structured_date' | 'parser_event_datetime' | 'unknown';
+  location?: 'facebook_event_location_name' | 'non_structured_location' | 'parser_event_location' | 'unknown';
 }
 
 export interface RawRowData {
@@ -306,9 +313,10 @@ export interface QueueCityLevelEventReviewInput {
   ticketsBuyUrl?: string;
   externalLinks?: string[];
   locationLabel: string;
+  observedLocationName?: string;
   locationCity?: string;
   locationProvince?: string;
-  locationScope?: 'city' | 'area';
+  locationScope?: 'city' | 'area' | 'route';
   locationPrecision?: 'city_centroid' | 'approximate' | 'none';
   organizerName?: string;
   facebookUrl?: string;
@@ -318,6 +326,7 @@ export interface QueueCityLevelEventReviewInput {
   autoPublishSource?: CityLevelAutoPublishSource;
   autoPublishFieldSources?: CityLevelAutoPublishFieldSources;
   autoPublishReviewReasons?: string[];
+  spatialEvidence?: SpatialEventClassification;
 }
 
 export interface CityLevelEventReviewSample {
@@ -347,6 +356,7 @@ export interface CityLevelEventReviewSample {
   topReactionsCount?: number;
   ticketsBuyUrl?: string;
   externalLinks?: string[];
+  spatialEvidence?: SpatialEventClassification;
   createdAt?: Date;
 }
 
@@ -364,7 +374,8 @@ export interface CityLevelEventReviewRecord {
   autoPublishSource?: CityLevelAutoPublishSource;
   autoPublishFieldSources?: CityLevelAutoPublishFieldSources;
   autoPublishReviewReasons?: string[];
-  locationScope: 'city' | 'area';
+  spatialEvidence?: SpatialEventClassification;
+  locationScope: 'city' | 'area' | 'route';
   locationLabel: string;
   locationCity?: string;
   locationProvince?: string;

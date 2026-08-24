@@ -909,6 +909,16 @@ async function extractScheduleContent(
 ): Promise<CalendarItem[]> {
   logger.debug('Extracting schedule content');
 
+  const postedLocalDate = DateTime.fromISO(timestamp, { zone: config.timezone }).toFormat('yyyy-MM-dd');
+  const scheduleTextItems = parseScheduleText(combinedText, postedLocalDate, userName, 'schedule');
+  if (shouldPreferAnchoredScheduleTextParser(combinedText, scheduleTextItems)) {
+    logger.info('Stage 3 schedule extraction used anchored text parser', {
+      extractedCount: scheduleTextItems.length,
+      anchoredLineCount: countAnchoredScheduleTextLines(combinedText),
+    });
+    return scheduleTextItems;
+  }
+
   const prompt = createScheduleExtractionPrompt(combinedText, userName, timestamp);
 
   const response = await callGPT(prompt, imageUrls, config);
@@ -1246,33 +1256,44 @@ async function extractFallbackItems(
   let usedParser: 'gpt_json' | 'schedule_text' | 'calendar_ocr' | 'none' = 'none';
   let notes = '';
 
-  let gptError: string | null = null;
-  try {
-    response = await callGPT(prompt, imageUrls, config);
-    parsedItems = parseFallbackItems(response);
-    normalized = normalizeFallbackItems(parsedItems, postedLocalDate);
-    if (normalized.length > 0) {
-      selected = normalized;
-      usedParser = 'gpt_json';
-    }
-  } catch (error) {
-    gptError = error instanceof Error ? error.message : String(error);
-    notes = gptError;
-    logger.warn('Fallback GPT call failed', { contentType, error: gptError });
-  }
-
   const shouldTryScheduleParser =
     contentType === 'CALENDAR' ||
     contentType === 'SCHEDULE' ||
     (contentType === 'MIXED_EVENTS_AND_SPECIALS' && looksLikeScheduleText(combinedText));
 
-  if (selected.length === 0 && shouldTryScheduleParser) {
-    const scheduleItems = parseScheduleText(
+  const scheduleItems = shouldTryScheduleParser
+    ? parseScheduleText(
       combinedText,
       postedLocalDate,
       userName,
       contentType === 'CALENDAR' ? 'calendar' : 'schedule'
-    );
+    )
+    : [];
+
+  if (shouldTryScheduleParser && shouldPreferAnchoredScheduleTextParser(combinedText, scheduleItems)) {
+    selected = scheduleItems;
+    usedParser = 'schedule_text';
+    notes = 'anchored_schedule_text_preferred';
+  }
+
+  let gptError: string | null = null;
+  if (selected.length === 0) {
+    try {
+      response = await callGPT(prompt, imageUrls, config);
+      parsedItems = parseFallbackItems(response);
+      normalized = normalizeFallbackItems(parsedItems, postedLocalDate);
+      if (normalized.length > 0) {
+        selected = normalized;
+        usedParser = 'gpt_json';
+      }
+    } catch (error) {
+      gptError = error instanceof Error ? error.message : String(error);
+      notes = gptError;
+      logger.warn('Fallback GPT call failed', { contentType, error: gptError });
+    }
+  }
+
+  if (selected.length === 0 && shouldTryScheduleParser) {
     if (scheduleItems.length > 0) {
       selected = scheduleItems;
       usedParser = 'schedule_text';
@@ -1374,6 +1395,7 @@ function normalizeFallbackItems(
         recurringPattern,
         extractionReason: String(item.extractionReason || 'fallback_extraction'),
         timeFlags,
+        spatial: item.spatial,
         _sourceType: 'special' as const,
       });
     } else {
@@ -1388,6 +1410,7 @@ function normalizeFallbackItems(
         recurringPattern,
         extractionReason: String(item.extractionReason || 'fallback_extraction'),
         timeFlags,
+        spatial: item.spatial,
         _sourceType: 'event' as const,
       });
     }
@@ -2540,6 +2563,26 @@ function looksLikeScheduleText(combinedText: string): boolean {
   return timeLines >= 3;
 }
 
+function countAnchoredScheduleTextLines(combinedText: string): number {
+  const baseText = stripOcrTextFromCombined(combinedText);
+  if (!baseText) return 0;
+  return baseText
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .filter((line) =>
+      /\b\d{1,2}:\d{2}\s*(?:am|pm)\s*-\s*(?=[^:\n]*[a-z])[^:\n]{2,120}:/i.test(line)
+    ).length;
+}
+
+function shouldPreferAnchoredScheduleTextParser(
+  combinedText: string,
+  scheduleItems: CalendarItem[]
+): boolean {
+  const anchoredLineCount = countAnchoredScheduleTextLines(combinedText);
+  return anchoredLineCount >= 3 && scheduleItems.length >= Math.min(anchoredLineCount, 3);
+}
+
 function parseDateHeader(line: string, postedLocalDate: string): string | null {
   const lower = line.toLowerCase();
   if (/\b(until|through|thru|ongoing|ends)\b/i.test(lower) && !/\bevents?\b/i.test(lower)) {
@@ -2729,7 +2772,7 @@ function extractScheduleNameVenue(
 
   const colonIndex = cleaned.indexOf(':');
   if (colonIndex !== -1) {
-    const left = cleaned.slice(0, colonIndex).trim();
+    const left = cleanScheduleVenueText(cleaned.slice(0, colonIndex));
     const right = cleaned.slice(colonIndex + 1).trim();
     if (right) {
       return { name: right, venue: left || defaultVenue, description: cleaned };
@@ -2738,7 +2781,11 @@ function extractScheduleNameVenue(
 
   const atMatch = cleaned.match(/(.+?)\s+(?:@|at)\s+(.+)/i);
   if (atMatch) {
-    return { name: atMatch[1].trim(), venue: atMatch[2].trim(), description: cleaned };
+    return {
+      name: atMatch[1].trim(),
+      venue: cleanScheduleVenueText(atMatch[2]),
+      description: cleaned,
+    };
   }
 
   const dashSplit = cleaned.split(/\s+-\s+/);
@@ -2748,14 +2795,22 @@ function extractScheduleNameVenue(
     const leftVenue = looksLikeVenue(left);
     const rightVenue = looksLikeVenue(right);
     if (leftVenue && !rightVenue) {
-      return { name: right, venue: left, description: cleaned };
+      return { name: right, venue: cleanScheduleVenueText(left), description: cleaned };
     }
     if (rightVenue && !leftVenue) {
-      return { name: left, venue: right, description: cleaned };
+      return { name: left, venue: cleanScheduleVenueText(right), description: cleaned };
     }
   }
 
   return { name: cleaned, venue: defaultVenue || '', description: cleaned };
+}
+
+function cleanScheduleVenueText(value: string): string {
+  return String(value || '')
+    .replace(/^[^\p{L}\p{N}]+/u, '')
+    .replace(/[^\p{L}\p{N})\]]+$/u, '')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 function looksLikeVenue(text: string): boolean {
@@ -3437,6 +3492,15 @@ For each EVENT found, extract:
       start: { source: "explicit" | "implied" | "semantic", evidence: "string" },
       end:   { source: "explicit" | "implied" | "semantic" | "none", toClose: boolean, evidence: "string" }
     }
+- spatial: Preserve only location structure that is explicit in the source:
+    {
+      kind: "single_location" | "multi_location" | "route" | "separate_occurrences" | "online" | "unknown",
+      locations: [{ label: "source location text", address: "source address or empty", role: "start" | "finish" | "stop" | "location", certainty: "confirmed" | "possible", sourceText: "exact supporting text" }],
+      confirmedStreets: ["street names explicitly listed in route order"],
+      ordered: boolean,
+      evidenceNotes: "brief source-based explanation"
+    }
+  Never guess coordinates, streets, stop order, or a connecting route. An organizer/page name is not automatically a location. Rooms or stages inside one host venue are not separate map locations. Different dates in different cities are separate occurrences, not one multi-location event.
 
 SERIES SPLITTING RULE:
 - If one post lists multiple named themed/program blocks under an umbrella heading, output one item per named block instead of one generic umbrella item.
@@ -3585,6 +3649,7 @@ For each item found, extract:
 - description: Any additional details
 - extractionReason: Why this was identified as a calendar item
 - relevantImageIndex: 0-based index of the provided image that visibly contains this exact calendar item, date, or time. The first attached image is 0, the second is 1, etc. If no attached image clearly matches this item, use 0.
+- spatial: Preserve explicit structure as { kind, locations, confirmedStreets, ordered, evidenceNotes }. Use kind "multi_location" only for one occurrence happening at multiple physical places; use "route" for an ordered movement path; use "separate_occurrences" when different dates are tied to different places. Never guess coordinates, streets, or order. Rooms/stages inside one host venue remain one location.
 
 Pay special attention to:
 - Calendar grids in images
@@ -3640,6 +3705,7 @@ For each item found, extract:
     start: { source: "explicit" | "implied" | "semantic" | "none", evidence: "exact timing substring or empty string" },
     end: { source: "explicit" | "implied" | "semantic" | "none", toClose: boolean, evidence: "exact timing substring or empty string" }
   }
+- spatial: Preserve explicit structure as { kind, locations, confirmedStreets, ordered, evidenceNotes }. Never invent coordinates or a connecting line. A sequence of route stops/streets is ordered; a festival location list is unordered; rooms/stages within one host are not separate map points.
 
 Look for patterns like:
 - "Monday: Band A at 8pm"
@@ -3700,6 +3766,13 @@ export function parseScheduleTextForRegression(
   sourceType: 'calendar' | 'schedule'
 ): CalendarItem[] {
   return parseScheduleText(combinedText, postedLocalDate, userName, sourceType);
+}
+
+export function shouldPreferAnchoredScheduleTextParserForRegression(
+  combinedText: string,
+  scheduleItems: CalendarItem[]
+): boolean {
+  return shouldPreferAnchoredScheduleTextParser(combinedText, scheduleItems);
 }
 
 function createOcrDebugPrompt(imageUrls: string[]): string {

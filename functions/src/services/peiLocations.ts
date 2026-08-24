@@ -53,6 +53,14 @@ const PEI_PLACE_CENTROIDS: Record<string, PeiPlaceCentroid> = {
     latitude: 46.3959,
     longitude: -63.7876,
   },
+  'downtown summerside': {
+    label: 'Downtown Summerside',
+    city: 'Summerside',
+    province: 'PEI',
+    scope: 'area',
+    latitude: 46.3909,
+    longitude: -63.7884,
+  },
   stratford: {
     label: 'Stratford, PEI',
     city: 'Stratford',

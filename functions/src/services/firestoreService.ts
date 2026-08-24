@@ -38,6 +38,7 @@ import {
   extractFacebookSlug,
   calculateEnhancedSimilarity,
   isDuplicateEntry,
+  isHighConfidenceSameOccurrenceDuplicate,
   normalizeUrl,
 } from '../utils/similarity.js';
 import { getVenueAliasCandidates } from './venueAliases.js';
@@ -48,14 +49,20 @@ import {
   PeiPlaceCentroid,
   resolvePeiCentroid,
 } from './peiLocations.js';
-import { pickRecurringFamilyFallbackMatch } from './recurringFamilyFallback.js';
+import {
+  pickIncomingRecurringFamilyExistingOccurrenceMatch,
+  pickRecurringFamilyFallbackMatch,
+} from './recurringFamilyFallback.js';
 import {
   ParsedSharedEvent,
   PrivateSharedEventRecord,
   PublicSharedEventCandidateRecord,
+  SharedEventPublicProcessingSummary,
+  SharedEventPublicProcessingStatus,
   SharedEventIngestRecord,
   SharedEventProcessingStatus,
   SharedEventRouting,
+  SharedEventScrapeEnrichmentStatus,
   SharedEventSourcePlatform,
   SharedEventSourceVisibility,
   SharedEventStatus,
@@ -69,6 +76,7 @@ import {
   choosePreferredAddress,
   normalizeCanadianAddress,
 } from '../utils/addressNormalization.js';
+import { withFamilyFriendlyScore } from '../utils/familyFriendlyScoring.js';
 
 // Initialize Firebase Admin if not already initialized
 if (!admin.apps.length) {
@@ -77,6 +85,50 @@ if (!admin.apps.length) {
 
 const db = admin.firestore();
 db.settings({ ignoreUndefinedProperties: true });
+
+function projectIdFromFirebaseConfig(): string {
+  try {
+    const config = process.env.FIREBASE_CONFIG
+      ? JSON.parse(process.env.FIREBASE_CONFIG)
+      : undefined;
+    return String(config?.projectId || '').trim();
+  } catch {
+    return '';
+  }
+}
+
+function getCurrentProjectId(): string {
+  return String(
+    process.env.GCLOUD_PROJECT ||
+    process.env.GCP_PROJECT ||
+    projectIdFromFirebaseConfig() ||
+    admin.app().options.projectId ||
+    ''
+  ).trim();
+}
+
+function getSharedEventSourceProjectId(): string {
+  const configured = String(process.env.SHARED_EVENT_SOURCE_PROJECT_ID || '').trim();
+  if (configured) return configured;
+
+  const currentProjectId = getCurrentProjectId();
+  if (currentProjectId === 'gathr-migrated') return 'gathr-m1';
+
+  return currentProjectId;
+}
+
+function getSharedEventSourceDb(): admin.firestore.Firestore {
+  const sourceProjectId = getSharedEventSourceProjectId();
+  const currentProjectId = getCurrentProjectId();
+  if (!sourceProjectId || sourceProjectId === currentProjectId) {
+    return db;
+  }
+
+  const appName = `shared-event-source-${sourceProjectId}`;
+  const existingApp = admin.apps.find((app) => app?.name === appName);
+  const app = existingApp || admin.initializeApp({ projectId: sourceProjectId }, appName);
+  return admin.firestore(app);
+}
 
 // Collection names
 const COLLECTIONS = {
@@ -775,7 +827,7 @@ function buildCityLevelEventReviewSample(
     eventTime: input.eventTime,
     endDate: input.endDate,
     endTime: input.endTime,
-    observedLocationName: input.locationLabel,
+    observedLocationName: asOptionalTrimmedString(input.observedLocationName) || input.locationLabel,
     organizerName: input.organizerName,
     facebookUrl: input.facebookUrl,
     topLevelUrl: input.topLevelUrl,
@@ -792,6 +844,7 @@ function buildCityLevelEventReviewSample(
     topReactionsCount: input.topReactionsCount,
     ticketsBuyUrl: asOptionalTrimmedString(input.ticketsBuyUrl),
     externalLinks: externalLinks.length > 0 ? externalLinks : undefined,
+    spatialEvidence: input.spatialEvidence,
     createdAt: new Date(),
   });
 }
@@ -1402,6 +1455,10 @@ export async function queueCityLevelEventReview(
   const usersGoing = asOptionalTrimmedString(input.usersGoing);
   const usersInterested = asOptionalTrimmedString(input.usersInterested);
   const facebookUsersResponded = asOptionalTrimmedString(input.facebookUsersResponded);
+  const autoPublishReviewReasons = Array.isArray(input.autoPublishReviewReasons) &&
+    input.autoPublishReviewReasons.length > 0
+    ? Array.from(new Set(input.autoPublishReviewReasons.filter(Boolean)))
+    : undefined;
   let created = false;
   let shouldRefreshPublishedEvent = false;
 
@@ -1423,10 +1480,8 @@ export async function queueCityLevelEventReview(
         sourceContentSignature: asOptionalTrimmedString(input.sourceContentSignature),
         autoPublishSource: input.autoPublishSource,
         autoPublishFieldSources: input.autoPublishFieldSources,
-        autoPublishReviewReasons: Array.isArray(input.autoPublishReviewReasons) &&
-          input.autoPublishReviewReasons.length > 0
-          ? Array.from(new Set(input.autoPublishReviewReasons.filter(Boolean)))
-          : undefined,
+        autoPublishReviewReasons,
+        spatialEvidence: input.spatialEvidence,
         locationScope,
         locationLabel,
         locationCity: String(input.locationCity || '').trim() || undefined,
@@ -1509,12 +1564,13 @@ export async function queueCityLevelEventReview(
           ...(existing.autoPublishFieldSources || {}),
           ...(input.autoPublishFieldSources || {}),
         },
-        autoPublishReviewReasons: Array.isArray(existing.autoPublishReviewReasons) &&
-          existing.autoPublishReviewReasons.length > 0
-          ? existing.autoPublishReviewReasons
-          : Array.isArray(input.autoPublishReviewReasons) && input.autoPublishReviewReasons.length > 0
-            ? Array.from(new Set(input.autoPublishReviewReasons.filter(Boolean)))
-            : undefined,
+        autoPublishReviewReasons: autoPublishReviewReasons || (
+          Array.isArray(existing.autoPublishReviewReasons) &&
+            existing.autoPublishReviewReasons.length > 0
+            ? existing.autoPublishReviewReasons
+            : undefined
+        ),
+        spatialEvidence: input.spatialEvidence || existing.spatialEvidence,
         locationScope: existing.locationScope || locationScope,
         locationLabel: String(existing.locationLabel || locationLabel).trim(),
         locationCity: String(existing.locationCity || input.locationCity || '').trim() || undefined,
@@ -1655,25 +1711,65 @@ function collectPublishedCityLevelSourceMedia(
   ]);
 }
 
+type CityLevelImageUrlConverter = (
+  sourceUrl: string,
+  folder: BackfillFolder,
+  uploadUrl: string,
+  cache: Map<string, string | null>
+) => Promise<string | null>;
+
+interface BuildPublishedCityLevelMediaFieldsOptions {
+  uploadUrl?: string;
+  convertImageUrlToManaged?: CityLevelImageUrlConverter;
+  deleteValue?: unknown;
+}
+
+function isFacebookLookasideCrawlerMediaUrl(url: string): boolean {
+  try {
+    const parsed = new URL(String(url || '').trim());
+    const host = parsed.hostname.toLowerCase();
+    const path = parsed.pathname.toLowerCase().replace(/\/+$/, '');
+    return (
+      (host === 'lookaside.fbsbx.com' || host.endsWith('.fbsbx.com')) &&
+      path === '/lookaside/crawler/media'
+    );
+  } catch {
+    return false;
+  }
+}
+
+function shouldOmitUnresolvedCityLevelSourceImageUrl(url: string): boolean {
+  return isFacebookLookasideCrawlerMediaUrl(url);
+}
+
 async function buildPublishedCityLevelMediaFields(
   manual: FinalizeCityLevelEventReviewInput['manual'] = {},
-  record: CityLevelEventReviewRecord
+  record: CityLevelEventReviewRecord,
+  options: BuildPublishedCityLevelMediaFieldsOptions = {}
 ): Promise<Partial<EventData>> {
   const sourceMediaUrls = collectPublishedCityLevelSourceMedia(manual, record);
   if (sourceMediaUrls.length === 0) {
     throw new Error('City-level event review is missing imageUrl/mediaUrls');
   }
 
-  const uploadUrl = String(process.env.IMAGE_UPLOAD_URL || '').trim();
+  const uploadUrl = String(options.uploadUrl ?? process.env.IMAGE_UPLOAD_URL ?? '').trim();
+  const convert = options.convertImageUrlToManaged || convertImageUrlToManaged;
   const cache = new Map<string, string | null>();
   const outputUrls: string[] = [];
 
   for (const sourceUrl of sourceMediaUrls) {
     let resolvedUrl = sourceUrl;
     if (uploadUrl) {
-      const managedUrl = await convertImageUrlToManaged(sourceUrl, 'postimages', uploadUrl, cache);
+      const managedUrl = await convert(sourceUrl, 'postimages', uploadUrl, cache);
       if (managedUrl) {
         resolvedUrl = managedUrl;
+      } else if (shouldOmitUnresolvedCityLevelSourceImageUrl(sourceUrl)) {
+        logger.warn('City-level event image upload failed; omitting non-direct source image URL', {
+          sourceUrl,
+          eventName: record.eventName || '',
+          reviewUniqueId: record.uniqueId || '',
+        });
+        continue;
       } else {
         logger.warn('City-level event image upload failed; preserving source image URL', {
           sourceUrl,
@@ -1681,6 +1777,13 @@ async function buildPublishedCityLevelMediaFields(
           reviewUniqueId: record.uniqueId || '',
         });
       }
+    } else if (shouldOmitUnresolvedCityLevelSourceImageUrl(sourceUrl)) {
+      logger.warn('City-level event image upload disabled; omitting non-direct source image URL', {
+        sourceUrl,
+        eventName: record.eventName || '',
+        reviewUniqueId: record.uniqueId || '',
+      });
+      continue;
     } else {
       logger.warn('City-level event image upload disabled (IMAGE_UPLOAD_URL not set); preserving source image URL', {
         sourceUrl,
@@ -1694,6 +1797,21 @@ async function buildPublishedCityLevelMediaFields(
 
   const mediaUrls = dedupeUrls(outputUrls);
   const primaryImageUrl = mediaUrls.find((url) => isManagedImageUrl(url)) || mediaUrls[0];
+  if (!primaryImageUrl) {
+    logger.warn('City-level event has no usable source media; app fallback image will be used', {
+      eventName: record.eventName || '',
+      reviewUniqueId: record.uniqueId || '',
+      sourceMediaCount: sourceMediaUrls.length,
+    });
+    const deleteValue = options.deleteValue ?? admin.firestore.FieldValue.delete();
+    return compactRecord({
+      imageUrl: deleteValue,
+      image: deleteValue,
+      relevantImageUrl: deleteValue,
+      mediaUrls: deleteValue,
+      imageProvenance: deleteValue,
+    }) as Partial<EventData>;
+  }
 
   return compactRecord({
     imageUrl: primaryImageUrl,
@@ -1739,7 +1857,7 @@ function buildPublishedCityLevelEventData(
     ...tokenizeMediaUrls(record.externalLinks),
   ]);
 
-  return compactRecord({
+  const eventData = compactRecord({
     uniqueId: `${asOptionalTrimmedString(record.uniqueId) || reviewId}_city`,
     cityLevelReviewId: reviewId,
     sourceScraperType: record.sourceScraperType,
@@ -1787,6 +1905,8 @@ function buildPublishedCityLevelEventData(
     updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     lastSeenAt: admin.firestore.FieldValue.serverTimestamp(),
   }) as unknown as EventData & Record<string, unknown>;
+
+  return withFamilyFriendlyScore(eventData);
 }
 
 async function writePublishedCityLevelEvent(
@@ -2000,6 +2120,156 @@ function isRouteLikeBroadLocation(record: CityLevelEventReviewRecord): boolean {
   return /\b(route|rte|highway|hwy|road|rd|street|st|trail|waterfront|bridge)\b/.test(text) || /\d/.test(text);
 }
 
+const HIGH_CONFIDENCE_POST_DERIVED_AREA_LOCATIONS = new Set([
+  'alberton town pond',
+  'main street alberton',
+  'town pond alberton',
+]);
+
+const HIGH_CONFIDENCE_POST_DERIVED_CITY_EVENTS = new Set<string>();
+
+const BLOCKING_POST_DERIVED_AREA_REVIEW_REASONS = new Set([
+  'multi_venue_area_candidate',
+  'multi_location_requires_point_resolution',
+  'multi_location_names_not_fully_extracted',
+  'province_only_location',
+  'route_candidate_requires_geometry_review',
+  'route_missing_explicit_stops_or_streets',
+  'route_like_or_unsupported_location',
+  'split_location_occurrences_before_publication',
+]);
+
+function uniqueAutoPublishReasons(reasons: string[]): string[] {
+  return Array.from(new Set(reasons.filter(Boolean)));
+}
+
+function getCityLevelAutoPublishReviewReasons(record: CityLevelEventReviewRecord): string[] {
+  return Array.isArray(record.autoPublishReviewReasons)
+    ? record.autoPublishReviewReasons.map((reason) => String(reason || '').trim()).filter(Boolean)
+    : [];
+}
+
+function normalizeCityLevelAutoPublishLocationKey(value: unknown): string {
+  return normalizePeiPlaceName(value)
+    .replace(/\s+(pei|pe)$/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function isHighConfidencePostDerivedAreaLocation(record: CityLevelEventReviewRecord): boolean {
+  const label = normalizeCityLevelAutoPublishLocationKey(record.locationLabel);
+  const city = normalizeCityLevelAutoPublishLocationKey(record.locationCity);
+  const labelWithCity = normalizeCityLevelAutoPublishLocationKey([
+    record.locationLabel,
+    record.locationCity,
+  ].filter(Boolean).join(' '));
+
+  return HIGH_CONFIDENCE_POST_DERIVED_AREA_LOCATIONS.has(label) ||
+    HIGH_CONFIDENCE_POST_DERIVED_AREA_LOCATIONS.has(labelWithCity) ||
+    (Boolean(label) && Boolean(city) &&
+      HIGH_CONFIDENCE_POST_DERIVED_AREA_LOCATIONS.has(`${label} ${city}`));
+}
+
+function isHighConfidencePostDerivedCityEvent(record: CityLevelEventReviewRecord): boolean {
+  const eventName = normalizeCityLevelAutoPublishLocationKey(record.eventName);
+  const city = normalizeCityLevelAutoPublishLocationKey(record.locationCity || record.locationLabel);
+  return HIGH_CONFIDENCE_POST_DERIVED_CITY_EVENTS.has(`${eventName}|${city}`);
+}
+
+function isPostDerivedCityOrAreaCandidate(record: CityLevelEventReviewRecord): boolean {
+  return record.autoPublishSource === 'parser_fallback' &&
+    (record.locationScope === 'area' || record.locationScope === 'city') &&
+    getCityLevelAutoPublishReviewReasons(record).includes('post_derived_area_candidate');
+}
+
+function evaluateHighConfidencePostDerivedAreaEligibility(
+  record: CityLevelEventReviewRecord
+): string[] {
+  const reasons: string[] = [];
+  const fieldSources = record.autoPublishFieldSources || {};
+  const reviewReasons = getCityLevelAutoPublishReviewReasons(record);
+
+  if (record.autoPublishSource !== 'parser_fallback') {
+    reasons.push('not_post_derived_parser_source');
+  }
+  if (record.locationScope !== 'area') {
+    reasons.push('not_area_scope');
+  }
+  if (!reviewReasons.includes('post_derived_area_candidate')) {
+    reasons.push('missing_post_derived_area_candidate_reason');
+  }
+  if (reviewReasons.some((reason) => BLOCKING_POST_DERIVED_AREA_REVIEW_REASONS.has(reason))) {
+    reasons.push('blocking_post_derived_area_reason');
+  }
+  if (fieldSources.title !== 'parser_event_name') {
+    reasons.push('untrusted_title_source');
+  }
+  if (fieldSources.dateTime !== 'parser_event_datetime') {
+    reasons.push('untrusted_datetime_source');
+  }
+  if (fieldSources.location !== 'parser_event_location') {
+    reasons.push('untrusted_location_source');
+  }
+  if (!String(record.eventName || '').trim()) {
+    reasons.push('missing_event_name');
+  }
+  if (!String(record.eventDate || '').trim()) {
+    reasons.push('missing_event_date');
+  }
+  if (!String(record.locationCity || '').trim()) {
+    reasons.push('missing_location_city');
+  }
+  if (!isHighConfidencePostDerivedAreaLocation(record)) {
+    reasons.push('not_high_confidence_post_derived_area_location');
+  }
+
+  return uniqueAutoPublishReasons(reasons);
+}
+
+function evaluateHighConfidencePostDerivedCityEligibility(
+  record: CityLevelEventReviewRecord
+): string[] {
+  const reasons: string[] = [];
+  const fieldSources = record.autoPublishFieldSources || {};
+  const reviewReasons = getCityLevelAutoPublishReviewReasons(record);
+
+  if (record.autoPublishSource !== 'parser_fallback') {
+    reasons.push('not_post_derived_parser_source');
+  }
+  if (record.locationScope !== 'city') {
+    reasons.push('not_city_scope');
+  }
+  if (!reviewReasons.includes('post_derived_area_candidate')) {
+    reasons.push('missing_post_derived_area_candidate_reason');
+  }
+  if (reviewReasons.some((reason) => BLOCKING_POST_DERIVED_AREA_REVIEW_REASONS.has(reason))) {
+    reasons.push('blocking_post_derived_area_reason');
+  }
+  if (fieldSources.title !== 'parser_event_name') {
+    reasons.push('untrusted_title_source');
+  }
+  if (fieldSources.dateTime !== 'parser_event_datetime') {
+    reasons.push('untrusted_datetime_source');
+  }
+  if (fieldSources.location !== 'parser_event_location') {
+    reasons.push('untrusted_location_source');
+  }
+  if (!String(record.eventName || '').trim()) {
+    reasons.push('missing_event_name');
+  }
+  if (!String(record.eventDate || '').trim()) {
+    reasons.push('missing_event_date');
+  }
+  if (!String(record.locationCity || '').trim()) {
+    reasons.push('missing_location_city');
+  }
+  if (!isHighConfidencePostDerivedCityEvent(record)) {
+    reasons.push('not_high_confidence_post_derived_city_event');
+  }
+
+  return uniqueAutoPublishReasons(reasons);
+}
+
 function evaluateCityLevelAutoPublishEligibility(
   record: CityLevelEventReviewRecord
 ): CityLevelAutoPublishEligibility {
@@ -2009,40 +2279,63 @@ function evaluateCityLevelAutoPublishEligibility(
     reasons.push('auto_publish_disabled');
   }
 
-  if (record.autoPublishSource !== 'structured_facebook_event') {
-    reasons.push('not_structured_facebook_event_source');
+  if (record.locationScope === 'route') {
+    reasons.push('route_candidate_requires_geometry_review');
+  }
+  if (
+    record.spatialEvidence &&
+    ['route', 'multi_location', 'separate_occurrences'].includes(record.spatialEvidence.kind)
+  ) {
+    reasons.push('spatial_event_requires_review');
   }
 
   const fieldSources = record.autoPublishFieldSources || {};
+  const structuredTrustReasons: string[] = [];
+  if (record.autoPublishSource !== 'structured_facebook_event') {
+    structuredTrustReasons.push('not_structured_facebook_event_source');
+  }
   if (fieldSources.title !== 'facebook_event_name') {
-    reasons.push('untrusted_title_source');
+    structuredTrustReasons.push('untrusted_title_source');
   }
   if (fieldSources.dateTime !== 'facebook_event_utc_start_date') {
-    reasons.push('untrusted_datetime_source');
+    structuredTrustReasons.push('untrusted_datetime_source');
   }
   if (fieldSources.location !== 'facebook_event_location_name') {
-    reasons.push('untrusted_location_source');
+    structuredTrustReasons.push('untrusted_location_source');
+  }
+
+  const postDerivedTrustReasons = record.locationScope === 'city'
+    ? evaluateHighConfidencePostDerivedCityEligibility(record)
+    : evaluateHighConfidencePostDerivedAreaEligibility(record);
+  if (structuredTrustReasons.length > 0 && postDerivedTrustReasons.length > 0) {
+    reasons.push(...structuredTrustReasons);
+    if (isPostDerivedCityOrAreaCandidate(record)) {
+      reasons.push(...postDerivedTrustReasons);
+    }
   }
 
   if (isProvinceOnlyPeiLocation(record)) {
     reasons.push('province_only_location');
   }
 
-  const centroid = resolvePeiCentroid({
-    locationScope: record.locationScope,
-    locationCity: record.locationCity,
-    locationLabel: record.locationLabel,
-  });
+  const centroid = record.locationScope === 'route'
+    ? null
+    : resolvePeiCentroid({
+      locationScope: record.locationScope,
+      locationCity: record.locationCity,
+      locationLabel: record.locationLabel,
+    });
   if (!centroid) {
     reasons.push(isRouteLikeBroadLocation(record)
       ? 'route_like_or_unsupported_location'
       : 'unsupported_city_or_area');
   }
 
+  const uniqueReasons = uniqueAutoPublishReasons(reasons);
   return {
-    eligible: reasons.length === 0,
-    reasons,
-    centroid: reasons.length === 0 ? centroid || undefined : undefined,
+    eligible: uniqueReasons.length === 0,
+    reasons: uniqueReasons,
+    centroid: uniqueReasons.length === 0 ? centroid || undefined : undefined,
   };
 }
 
@@ -2054,9 +2347,10 @@ export interface AutoPublishCityLevelEventReviewResult {
 }
 
 /**
- * Auto-publish a queued city-level event review only when it passes the
- * structured Facebook Event trust gates and resolves to a canonical PEI
- * centroid. Failed gates are recorded on the review for manual follow-up.
+ * Auto-publish a queued city-level event review whose location resolves to a
+ * canonical PEI centroid. Only touches reviews still in 'needs_review' —
+ * published reviews refresh via the existing occurrence path, and
+ * rejected/ignored reviews reflect a human decision that stands.
  */
 export async function autoPublishCityLevelEventReview(
   reviewId: string
@@ -2726,6 +3020,35 @@ export async function findVenueByName(name: string): Promise<VenueData | null> {
   return hydrateVenueNameFallback({ id: doc.id, ...doc.data() } as VenueData);
 }
 
+export interface VenueMatchContext {
+  cityHint?: string;
+  regionHint?: string;
+}
+
+async function findVenueExactNameCandidates(name: string): Promise<VenueData[]> {
+  const normalizedName = normalizeVenueName(name);
+  if (!normalizedName) return [];
+
+  const candidates = new Map<string, VenueData>();
+  const addSnapshot = (snapshot: admin.firestore.QuerySnapshot) => {
+    for (const doc of snapshot.docs) {
+      candidates.set(doc.id, hydrateVenueNameFallback({ id: doc.id, ...doc.data() } as VenueData));
+    }
+  };
+
+  addSnapshot(await db.collection(COLLECTIONS.VENUES)
+    .where('normalizedName', '==', normalizedName)
+    .get());
+  addSnapshot(await db.collection(COLLECTIONS.VENUES)
+    .where('pagenameNormalized', '==', normalizedName)
+    .get());
+  addSnapshot(await db.collection(COLLECTIONS.VENUES)
+    .where('aliasesNormalized', 'array-contains', normalizedName)
+    .get());
+
+  return Array.from(candidates.values());
+}
+
 const ADDRESS_CIVIC_REGEX =
   /\b\d{1,6}\s+[A-Za-z0-9][A-Za-z0-9'.#-]*(?:\s+[A-Za-z0-9][A-Za-z0-9'.#-]*){0,7}\s(?:street|st|road|rd|avenue|ave|drive|dr|lane|ln|boulevard|blvd|court|ct|way|highway|hwy|route|rte|place|pl|terrace|ter)\b/i;
 
@@ -2832,6 +3155,70 @@ function venueAddressMatchesHints(venue: VenueData, address: string): boolean {
   return true;
 }
 
+function getVenueProvinceHint(venue: VenueData): string | undefined {
+  const venueHints = parseAddressCityProvince(venue.address || '');
+  return normalizeProvinceToken(
+    String((venue as unknown as Record<string, unknown>).province || venueHints.province || '').trim()
+  );
+}
+
+function venueMatchesRegionHint(venue: VenueData, regionHint?: string): boolean {
+  const normalizedRegionHint = normalizeProvinceToken(regionHint || '');
+  if (!normalizedRegionHint) return true;
+
+  const venueProvince = getVenueProvinceHint(venue);
+  if (!venueProvince) return true;
+  return venueProvince === normalizedRegionHint;
+}
+
+function venueMatchesLocationHints(
+  venue: VenueData,
+  cityHint?: string,
+  regionHint?: string
+): boolean {
+  if (cityHint) {
+    return venueMatchesCityHint(venue, cityHint, regionHint);
+  }
+  return venueMatchesRegionHint(venue, regionHint);
+}
+
+function pickExactNameVenueMatch(params: {
+  candidates: VenueData[];
+  name: string;
+  cityHint?: string;
+  regionHint?: string;
+}): VenueData | null {
+  const candidates = params.candidates;
+  if (candidates.length === 0) return null;
+
+  const hasLocationHint = Boolean(params.cityHint || params.regionHint);
+  const locationCompatible = hasLocationHint
+    ? candidates.filter((venue) =>
+      venueMatchesLocationHints(venue, params.cityHint, params.regionHint)
+    )
+    : candidates;
+
+  if (locationCompatible.length === 1) {
+    return locationCompatible[0];
+  }
+
+  if (!hasLocationHint && candidates.length === 1) {
+    return candidates[0];
+  }
+
+  logger.info('Skipped exact venue-name match due to ambiguity or location mismatch', {
+    candidateName: params.name,
+    cityHint: params.cityHint || '',
+    regionHint: params.regionHint || '',
+    candidateCount: candidates.length,
+    compatibleCount: locationCompatible.length,
+    candidateVenueIds: candidates.map((venue) => venue.id).filter(Boolean),
+    compatibleVenueIds: locationCompatible.map((venue) => venue.id).filter(Boolean),
+  });
+
+  return null;
+}
+
 function pickUniqueAddressMatch(
   matches: VenueData[],
   address: string,
@@ -2905,7 +3292,8 @@ export async function findVenueByAddress(address: string): Promise<MatchInfo> {
  */
 export async function findMatchingVenue(
   name: string,
-  facebookUrl?: string
+  facebookUrl?: string,
+  context?: VenueMatchContext
 ): Promise<MatchInfo> {
   // Try exact Facebook URL match first
   if (facebookUrl) {
@@ -2948,8 +3336,17 @@ export async function findMatchingVenue(
 
   // Try exact name match (with alias/city variants)
   const { variants, cityHint, regionHint } = getVenueNameVariants(name);
+  const effectiveCityHint = cityHint || context?.cityHint;
+  const effectiveRegionHint = regionHint || context?.regionHint;
+  let sawUnresolvedExactNameCandidates = false;
   for (const variant of variants) {
-    const exactMatch = await findVenueByName(variant);
+    const exactCandidates = await findVenueExactNameCandidates(variant);
+    const exactMatch = pickExactNameVenueMatch({
+      candidates: exactCandidates,
+      name: variant,
+      cityHint: effectiveCityHint,
+      regionHint: effectiveRegionHint,
+    });
     if (exactMatch) {
       return {
         isMatch: true,
@@ -2958,6 +3355,22 @@ export async function findMatchingVenue(
         matchedVenue: exactMatch,
       };
     }
+    if (exactCandidates.length > 0) {
+      sawUnresolvedExactNameCandidates = true;
+    }
+  }
+
+  if (sawUnresolvedExactNameCandidates) {
+    logger.info('Skipped fuzzy venue-name matching after unresolved exact-name candidates', {
+      candidateName: name,
+      cityHint: effectiveCityHint || '',
+      regionHint: effectiveRegionHint || '',
+    });
+    return {
+      isMatch: false,
+      matchType: 'none',
+      similarity: 0,
+    };
   }
 
   const venues = await getAllVenues();
@@ -2996,8 +3409,14 @@ export async function findMatchingVenue(
     for (const candidate of candidateNames) {
       for (const venueName of venueNames) {
         let similarity = calculateEnhancedSimilarity(candidate, venueName);
-        const cityHintMatch = Boolean(cityHint && venueMatchesCityHint(venue, cityHint, regionHint));
-        if (cityHintMatch) {
+        const locationHintMatch = venueMatchesLocationHints(
+          venue,
+          effectiveCityHint,
+          effectiveRegionHint
+        );
+        const hasLocationHint = Boolean(effectiveCityHint || effectiveRegionHint);
+        if (hasLocationHint && !locationHintMatch) continue;
+        if (locationHintMatch && hasLocationHint) {
           similarity = Math.min(1, similarity + 0.03);
         }
 
@@ -3005,10 +3424,10 @@ export async function findMatchingVenue(
         const hasPerfectShortNameTokenContainment =
           tokenEvidence.minTokenCount >= 2 &&
           tokenEvidence.overlapRatio >= 0.999;
-        const tokenScoreThreshold = cityHintMatch
+        const tokenScoreThreshold = locationHintMatch && hasLocationHint
           ? 0.84
           : (hasPerfectShortNameTokenContainment ? 0.84 : 0.88);
-        const minSimilarityForTokenFallback = cityHintMatch ? 0.42 : 0.48;
+        const minSimilarityForTokenFallback = locationHintMatch && hasLocationHint ? 0.42 : 0.48;
         const tokenFallbackMatch = (
           tokenEvidence.overlapCount >= 2
           && tokenEvidence.meaningfulOverlapCount >= 1
@@ -3450,6 +3869,53 @@ export async function findCityLevelEventReviewByUniqueId(
   };
 }
 
+function isRecurringLikeForDuplicateSelection(event: EventData): boolean {
+  const recurringFlag = parseBooleanLike(event.isRecurring);
+  if (recurringFlag === true) return true;
+
+  const recurringPattern = String(event.recurringPattern || '').trim().toLowerCase();
+  return Boolean(recurringPattern && recurringPattern !== 'none');
+}
+
+async function pickPreferredRecurringFamilyKeeperOverExactMatch(
+  incoming: EventData,
+  venueId: string,
+  exactMatch: EventData,
+  currentRunEntries: EventData[]
+): Promise<EventData | undefined> {
+  if (isRecurringLikeForDuplicateSelection(exactMatch)) {
+    return undefined;
+  }
+
+  const currentRunMatch = pickRecurringFamilyFallbackMatch(
+    incoming,
+    currentRunEntries.filter((candidate) => candidate.id !== exactMatch.id),
+    { venueId }
+  );
+  if (currentRunMatch) {
+    return currentRunMatch;
+  }
+
+  const fallbackAnchorDate = parseDateOnlyValue(incoming.startDate);
+  const fallbackWindowStart = fallbackAnchorDate ? addDaysToIsoDate(fallbackAnchorDate, -120) : null;
+  const fallbackWindowEnd = fallbackAnchorDate ? addDaysToIsoDate(fallbackAnchorDate, 21) : null;
+  if (!fallbackWindowStart || !fallbackWindowEnd) {
+    return undefined;
+  }
+
+  const candidates = await getVenueEvents(venueId, {
+    startDate: fallbackWindowStart,
+    endDate: fallbackWindowEnd,
+    limit: 250,
+  });
+
+  return pickRecurringFamilyFallbackMatch(
+    incoming,
+    candidates.filter((candidate) => candidate.id !== exactMatch.id),
+    { venueId }
+  );
+}
+
 /**
  * Check if an event is a duplicate
  */
@@ -3471,6 +3937,24 @@ export async function checkDuplicate(
       venueId,
     });
     if (compatibleCurrentRunMatch) {
+      const preferredRecurringKeeper = await pickPreferredRecurringFamilyKeeperOverExactMatch(
+        event,
+        venueId,
+        compatibleCurrentRunMatch,
+        currentRunEntries
+      );
+      if (preferredRecurringKeeper) {
+        logger.info('Exact uniqueId current-run child deferred to recurring-family keeper', {
+          venueId,
+          incomingUniqueId: event.uniqueId,
+          incomingTitle: event.eventName || event.name,
+          exactEventId: compatibleCurrentRunMatch.id,
+          exactStartDate: compatibleCurrentRunMatch.startDate,
+          preferredEventId: preferredRecurringKeeper.id,
+          preferredStartDate: preferredRecurringKeeper.startDate,
+        });
+        return { isDuplicate: true, existingEvent: preferredRecurringKeeper };
+      }
       return { isDuplicate: true, existingEvent: compatibleCurrentRunMatch };
     }
 
@@ -3488,6 +3972,27 @@ export async function checkDuplicate(
       }));
       const compatibleExactMatch = pickCompatibleExactUniqueIdMatch(event, exactMatches, { venueId });
       if (compatibleExactMatch) {
+        const preferredRecurringKeeper = await pickPreferredRecurringFamilyKeeperOverExactMatch(
+          event,
+          venueId,
+          compatibleExactMatch,
+          currentRunEntries
+        );
+        if (preferredRecurringKeeper) {
+          logger.info('Exact uniqueId Firestore child deferred to recurring-family keeper', {
+            venueId,
+            incomingUniqueId: event.uniqueId,
+            incomingTitle: event.eventName || event.name,
+            exactEventId: compatibleExactMatch.id,
+            exactStartDate: compatibleExactMatch.startDate,
+            preferredEventId: preferredRecurringKeeper.id,
+            preferredStartDate: preferredRecurringKeeper.startDate,
+          });
+          return {
+            isDuplicate: true,
+            existingEvent: preferredRecurringKeeper,
+          };
+        }
         return {
           isDuplicate: true,
           existingEvent: compatibleExactMatch,
@@ -3518,9 +4023,31 @@ export async function checkDuplicate(
     if (sameVenue && shouldSkipSiblingUniqueIdDuplicateCheck(event, existing)) {
       continue;
     }
-    if (isDuplicateEntry(event, existing, { requireEstablishmentMatch: !sameVenue })) {
+    if (
+      isDuplicateEntry(event, existing, { requireEstablishmentMatch: !sameVenue }) ||
+      (sameVenue && isHighConfidenceSameOccurrenceDuplicate(event, existing))
+    ) {
       return { isDuplicate: true, existingEvent: existing };
     }
+  }
+
+  const currentRunExistingOccurrenceMatch = pickIncomingRecurringFamilyExistingOccurrenceMatch(
+    event,
+    currentRunEntries,
+    { venueId }
+  );
+  if (currentRunExistingOccurrenceMatch) {
+    logger.info('Incoming recurring-family parent matched current-run occurrence child', {
+      venueId,
+      incomingUniqueId: event.uniqueId,
+      incomingTitle: event.eventName || event.name,
+      incomingStartDate: event.startDate,
+      existingUniqueId: currentRunExistingOccurrenceMatch.uniqueId,
+      existingTitle: currentRunExistingOccurrenceMatch.eventName || currentRunExistingOccurrenceMatch.name,
+      existingStartDate: currentRunExistingOccurrenceMatch.startDate,
+      existingEventId: currentRunExistingOccurrenceMatch.id,
+    });
+    return { isDuplicate: true, existingEvent: currentRunExistingOccurrenceMatch };
   }
 
   // Check against Firestore events for this venue
@@ -3533,7 +4060,10 @@ export async function checkDuplicate(
     if (shouldSkipSiblingUniqueIdDuplicateCheck(event, existing)) {
       continue;
     }
-    if (isDuplicateEntry(event, existing, { requireEstablishmentMatch: false })) {
+    if (
+      isDuplicateEntry(event, existing, { requireEstablishmentMatch: false }) ||
+      isHighConfidenceSameOccurrenceDuplicate(event, existing)
+    ) {
       return { isDuplicate: true, existingEvent: existing };
     }
   }
@@ -3568,6 +4098,29 @@ export async function checkDuplicate(
       endDate: fallbackWindowEnd,
       limit: 250,
     });
+
+    const incomingRecurringExistingOccurrenceMatch =
+      pickIncomingRecurringFamilyExistingOccurrenceMatch(event, recurringFallbackCandidates, {
+        venueId,
+      });
+    if (incomingRecurringExistingOccurrenceMatch) {
+      logger.info('Incoming recurring-family parent matched Firestore occurrence child', {
+        venueId,
+        incomingUniqueId: event.uniqueId,
+        incomingTitle: event.eventName || event.name,
+        incomingStartDate: event.startDate,
+        existingUniqueId: incomingRecurringExistingOccurrenceMatch.uniqueId,
+        existingTitle:
+          incomingRecurringExistingOccurrenceMatch.eventName ||
+          incomingRecurringExistingOccurrenceMatch.name,
+        existingStartDate: incomingRecurringExistingOccurrenceMatch.startDate,
+        existingEventId: incomingRecurringExistingOccurrenceMatch.id,
+      });
+      return {
+        isDuplicate: true,
+        existingEvent: incomingRecurringExistingOccurrenceMatch,
+      };
+    }
 
     const recurringFallbackMatch = pickRecurringFamilyFallbackMatch(event, recurringFallbackCandidates, {
       venueId,
@@ -3844,6 +4397,7 @@ export async function createPublicSharedEventCandidate(params: {
     timezone: parsedEvent.timezone,
     sourceContentSignature: parsedEvent.sourceContentSignature,
     fieldSources: parsedEvent.fieldSources,
+    spatialEvidence: parsedEvent.spatialEvidence,
     reviewReasons,
     status: parsedEvent.needsUserReview || publicTrustReviewReasons.length > 0
       ? 'needs_user_review'
@@ -4028,9 +4582,17 @@ export async function reserveSharedEventScrapeEnrichment(params: {
       ['reserved', 'queued', 'running', 'completed'].includes(existingStatus);
 
     if (shouldReuse) {
+      const existingPublicProcessing = existing?.publicProcessing &&
+        typeof existing.publicProcessing === 'object'
+        ? existing.publicProcessing as Record<string, unknown>
+        : undefined;
       tx.set(enrichmentRef, {
         linkedIngestIds: admin.firestore.FieldValue.arrayUnion(params.ingestId),
         linkedOwnerUids: admin.firestore.FieldValue.arrayUnion(params.ownerUid),
+        linkedIngestRefs: admin.firestore.FieldValue.arrayUnion({
+          ownerUid: params.ownerUid,
+          ingestId: params.ingestId,
+        }),
         lastDuplicateAt: admin.firestore.FieldValue.serverTimestamp(),
       }, { merge: true });
       tx.set(ingestRef, {
@@ -4041,6 +4603,7 @@ export async function reserveSharedEventScrapeEnrichment(params: {
           actorRunId: String(existing?.actorRunId || '').trim() || undefined,
           checkedAt: admin.firestore.FieldValue.serverTimestamp(),
         },
+        ...(existingPublicProcessing ? { publicProcessing: existingPublicProcessing } : {}),
         updatedAt: admin.firestore.FieldValue.serverTimestamp(),
       }, { merge: true });
 
@@ -4063,6 +4626,10 @@ export async function reserveSharedEventScrapeEnrichment(params: {
       latestIngestId: params.ingestId,
       linkedIngestIds: admin.firestore.FieldValue.arrayUnion(params.ingestId),
       linkedOwnerUids: admin.firestore.FieldValue.arrayUnion(params.ownerUid),
+      linkedIngestRefs: admin.firestore.FieldValue.arrayUnion({
+        ownerUid: params.ownerUid,
+        ingestId: params.ingestId,
+      }),
       reservedAt,
       updatedAt: reservedAt,
       ...(snapshot.exists ? {} : { createdAt: reservedAt }),
@@ -4157,8 +4724,438 @@ export async function markSharedEventScrapeEnrichmentFailed(params: {
           failedAt,
         },
         updatedAt: failedAt,
-      }, { merge: true }),
+    }, { merge: true }),
   ]);
+}
+
+type SharedEventScrapeEnrichmentDoc = {
+  id: string;
+  ref: admin.firestore.DocumentReference;
+  data: Record<string, unknown>;
+};
+
+type SharedEventLinkedIngestRef = {
+  ownerUid: string;
+  ingestId: string;
+};
+
+function normalizeLinkedSharedEventIngestRefs(
+  enrichmentId: string,
+  data: Record<string, unknown>
+): SharedEventLinkedIngestRef[] {
+  const refs: SharedEventLinkedIngestRef[] = [];
+  const seen = new Set<string>();
+
+  const add = (ownerUid: unknown, ingestId: unknown) => {
+    const owner = String(ownerUid || '').trim();
+    const ingest = String(ingestId || '').trim();
+    if (!owner || !ingest) return;
+    const key = `${owner}|${ingest}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+    refs.push({ ownerUid: owner, ingestId: ingest });
+  };
+
+  add(data.latestOwnerUid, data.latestIngestId);
+
+  if (Array.isArray(data.linkedIngestRefs)) {
+    for (const ref of data.linkedIngestRefs) {
+      if (!ref || typeof ref !== 'object') continue;
+      const raw = ref as Record<string, unknown>;
+      add(raw.ownerUid, raw.ingestId);
+    }
+  }
+
+  const ownerUids = Array.isArray(data.linkedOwnerUids)
+    ? data.linkedOwnerUids.map((value) => String(value || '').trim()).filter(Boolean)
+    : [];
+  const ingestIds = Array.isArray(data.linkedIngestIds)
+    ? data.linkedIngestIds.map((value) => String(value || '').trim()).filter(Boolean)
+    : [];
+  if (ownerUids.length === 1) {
+    for (const ingestId of ingestIds) {
+      add(ownerUids[0], ingestId);
+    }
+  } else if (ownerUids.length === ingestIds.length) {
+    for (let index = 0; index < ownerUids.length; index += 1) {
+      add(ownerUids[index], ingestIds[index]);
+    }
+  }
+
+  if (refs.length === 0) {
+    logger.warn('Shared event scrape enrichment has no linked ingest refs', {
+      enrichmentId,
+    });
+  }
+
+  return refs;
+}
+
+function publicProcessingMessage(params: {
+  status: SharedEventPublicProcessingStatus;
+  createdEventCount?: number;
+  updatedEventCount?: number;
+  unknownVenueCount?: number;
+  errorCount?: number;
+  reason?: string;
+  error?: string;
+}): string {
+  if (params.status === 'processing' || params.status === 'queued') {
+    return 'Scanning the full Facebook post for additional public events.';
+  }
+  if (params.status === 'failed') {
+    return params.error || 'The full Facebook post scan could not finish.';
+  }
+  if (params.status === 'skipped') {
+    return params.reason || 'The full Facebook post scan was skipped.';
+  }
+
+  const created = Math.max(0, Number(params.createdEventCount || 0));
+  const updated = Math.max(0, Number(params.updatedEventCount || 0));
+  const unknown = Math.max(0, Number(params.unknownVenueCount || 0));
+  const errors = Math.max(0, Number(params.errorCount || 0));
+  const fragments: string[] = [];
+  if (created > 0) fragments.push(`${created} added`);
+  if (updated > 0) fragments.push(`${updated} updated`);
+  if (unknown > 0) fragments.push(`${unknown} need venue review`);
+  if (errors > 0) fragments.push(`${errors} failed`);
+  return fragments.length > 0
+    ? `Full Facebook post scan finished: ${fragments.join(', ')}.`
+    : 'Full Facebook post scan finished with no new public events.';
+}
+
+function buildPublicProcessingSummary(params: {
+  status: SharedEventPublicProcessingStatus;
+  fileId?: string;
+  fileName?: string;
+  runId?: string;
+  stats?: Partial<ProcessingStats>;
+  reason?: string;
+  error?: string;
+}): SharedEventPublicProcessingSummary {
+  const stats = params.stats || {};
+  const createdEventCount = Number(stats.newEventsCreated ?? (
+    Number(stats.newStandardEventsCreated || 0) + Number(stats.newFoodSpecialsCreated || 0)
+  ));
+  const updatedEventCount = Number(stats.existingEventsUpdated ?? (
+    Number(stats.existingStandardEventsUpdated || 0) + Number(stats.existingFoodSpecialsUpdated || 0)
+  ));
+  const duplicateEventCount = Number(stats.duplicateCount || 0);
+  const unknownVenueCount = Number(stats.unknownVenueCount || 0);
+  const skippedCount = Number(stats.skippedCount || 0) + Number(stats.invalidCount || 0);
+  const errorCount = Number(stats.errorCount || 0);
+
+  return compactRecord({
+    status: params.status,
+    source: 'apify_enrichment',
+    fileId: params.fileId,
+    fileName: params.fileName,
+    runId: params.runId,
+    createdEventCount: Number.isFinite(createdEventCount) ? createdEventCount : 0,
+    updatedEventCount: Number.isFinite(updatedEventCount) ? updatedEventCount : 0,
+    duplicateEventCount,
+    unknownVenueCount,
+    skippedCount,
+    errorCount,
+    message: publicProcessingMessage({
+      status: params.status,
+      createdEventCount,
+      updatedEventCount,
+      unknownVenueCount,
+      errorCount,
+      reason: params.reason,
+      error: params.error,
+    }),
+  }) as SharedEventPublicProcessingSummary;
+}
+
+async function findSharedEventScrapeEnrichmentDocs(params: {
+  enrichmentId?: string;
+  actorRunId?: string;
+  fileId?: string;
+  limit?: number;
+}): Promise<SharedEventScrapeEnrichmentDoc[]> {
+  const sourceDb = getSharedEventSourceDb();
+  const collection = sourceDb.collection(COLLECTIONS.SHARED_EVENT_SCRAPE_ENRICHMENTS);
+  const docs = new Map<string, SharedEventScrapeEnrichmentDoc>();
+  const addSnapshot = async (promise: Promise<FirebaseFirestore.QuerySnapshot | FirebaseFirestore.DocumentSnapshot>) => {
+    const snapshot = await promise;
+    if ('docs' in snapshot) {
+      for (const doc of snapshot.docs) {
+        docs.set(doc.id, { id: doc.id, ref: doc.ref, data: doc.data() as Record<string, unknown> });
+      }
+      return;
+    }
+    if (snapshot.exists) {
+      docs.set(snapshot.id, {
+        id: snapshot.id,
+        ref: snapshot.ref,
+        data: snapshot.data() as Record<string, unknown>,
+      });
+    }
+  };
+
+  const limit = Math.max(1, Math.min(Number(params.limit || 20), 50));
+  const enrichmentId = String(params.enrichmentId || '').trim();
+  const actorRunId = String(params.actorRunId || '').trim();
+  const fileId = String(params.fileId || '').trim();
+
+  if (enrichmentId) {
+    await addSnapshot(collection.doc(enrichmentId).get());
+  }
+  if (actorRunId) {
+    await addSnapshot(collection.where('actorRunId', '==', actorRunId).limit(limit).get());
+  }
+  if (fileId) {
+    await addSnapshot(collection.where('fileId', '==', fileId).limit(limit).get());
+  }
+
+  return [...docs.values()];
+}
+
+async function updateLinkedSharedEventIngests(params: {
+  enrichmentDocs: SharedEventScrapeEnrichmentDoc[];
+  scrapeStatus: SharedEventScrapeEnrichmentStatus;
+  publicProcessing: SharedEventPublicProcessingSummary;
+  scrapePatch?: Record<string, unknown>;
+}): Promise<void> {
+  const sourceDb = getSharedEventSourceDb();
+  const writes: Array<Promise<unknown>> = [];
+  const seen = new Set<string>();
+
+  for (const doc of params.enrichmentDocs) {
+    const linkedRefs = normalizeLinkedSharedEventIngestRefs(doc.id, doc.data);
+    for (const ref of linkedRefs) {
+      const key = `${ref.ownerUid}|${ref.ingestId}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      const ingestRef = sourceDb
+        .collection('users')
+        .doc(ref.ownerUid)
+        .collection(COLLECTIONS.SHARED_EVENT_INGESTS)
+        .doc(ref.ingestId);
+
+      writes.push(ingestRef.set(compactRecord({
+        scrapeEnrichment: compactRecord({
+          status: params.scrapeStatus,
+          enrichmentId: doc.id,
+          actorId: params.scrapePatch?.actorId || doc.data.actorId,
+          actorRunId: params.scrapePatch?.actorRunId || doc.data.actorRunId,
+          datasetId: params.scrapePatch?.datasetId || doc.data.datasetId,
+          fileId: params.scrapePatch?.fileId || doc.data.fileId || params.publicProcessing.fileId,
+          fileName: params.scrapePatch?.fileName || doc.data.fileName || params.publicProcessing.fileName,
+          runUrl: params.scrapePatch?.runUrl || doc.data.runUrl,
+          existingStatus: doc.data.status,
+          reason: params.scrapePatch?.reason || doc.data.reason,
+          error: params.scrapePatch?.error,
+          checkedAt: params.scrapePatch?.checkedAt,
+          reservedAt: doc.data.reservedAt,
+          queuedAt: doc.data.queuedAt,
+          startedAt: params.scrapePatch?.startedAt || doc.data.startedAt,
+          completedAt: params.scrapePatch?.completedAt,
+          failedAt: params.scrapePatch?.failedAt,
+        }),
+        publicProcessing: params.publicProcessing,
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      }), { merge: true }));
+    }
+  }
+
+  await Promise.all(writes);
+}
+
+export async function findSharedEventScrapeEnrichment(params: {
+  enrichmentId?: string;
+  actorRunId?: string;
+  fileId?: string;
+}): Promise<{ id: string; data: Record<string, unknown> } | undefined> {
+  const docs = await findSharedEventScrapeEnrichmentDocs({ ...params, limit: 1 });
+  const doc = docs[0];
+  return doc ? { id: doc.id, data: doc.data } : undefined;
+}
+
+export async function markSharedEventScrapeEnrichmentProcessing(params: {
+  enrichmentId?: string;
+  actorRunId?: string;
+  datasetId?: string;
+  fileId?: string;
+  fileName?: string;
+  runId?: string;
+  actorId?: string;
+  runUrl?: string;
+}): Promise<void> {
+  const docs = await findSharedEventScrapeEnrichmentDocs(params);
+  if (docs.length === 0) return;
+
+  const startedAt = admin.firestore.FieldValue.serverTimestamp();
+  const publicProcessing = {
+    ...buildPublicProcessingSummary({
+      status: 'processing',
+      fileId: params.fileId,
+      fileName: params.fileName,
+      runId: params.runId,
+    }),
+    startedAt,
+  } as SharedEventPublicProcessingSummary;
+  const scrapePatch = compactRecord({
+    status: 'processing',
+    actorId: params.actorId,
+    actorRunId: params.actorRunId,
+    datasetId: params.datasetId,
+    fileId: params.fileId,
+    fileName: params.fileName,
+    runUrl: params.runUrl,
+    publicProcessing,
+    startedAt,
+    updatedAt: startedAt,
+  });
+
+  await Promise.all(docs.map((doc) => doc.ref.set(scrapePatch, { merge: true })));
+  await updateLinkedSharedEventIngests({
+    enrichmentDocs: docs,
+    scrapeStatus: 'processing',
+    publicProcessing,
+    scrapePatch,
+  });
+
+  logger.info('Marked shared event scrape enrichment processing', {
+    enrichmentIds: docs.map((doc) => doc.id),
+    fileId: params.fileId,
+    runId: params.runId,
+  });
+}
+
+export async function markSharedEventScrapeEnrichmentSkipped(params: {
+  enrichmentId?: string;
+  actorRunId?: string;
+  fileId?: string;
+  fileName?: string;
+  runId?: string;
+  reason: string;
+}): Promise<void> {
+  const docs = await findSharedEventScrapeEnrichmentDocs(params);
+  if (docs.length === 0) return;
+
+  const skippedAt = admin.firestore.FieldValue.serverTimestamp();
+  const publicProcessing = {
+    ...buildPublicProcessingSummary({
+      status: 'skipped',
+      fileId: params.fileId,
+      fileName: params.fileName,
+      runId: params.runId,
+      reason: params.reason,
+    }),
+    completedAt: skippedAt,
+  } as SharedEventPublicProcessingSummary;
+  const scrapePatch = compactRecord({
+    status: 'skipped',
+    fileId: params.fileId,
+    fileName: params.fileName,
+    reason: params.reason,
+    publicProcessing,
+    completedAt: skippedAt,
+    updatedAt: skippedAt,
+  });
+
+  await Promise.all(docs.map((doc) => doc.ref.set(scrapePatch, { merge: true })));
+  await updateLinkedSharedEventIngests({
+    enrichmentDocs: docs,
+    scrapeStatus: 'skipped',
+    publicProcessing,
+    scrapePatch,
+  });
+}
+
+export async function markSharedEventPublicProcessingCompletedForFile(params: {
+  fileId: string;
+  fileName?: string;
+  runId?: string;
+  stats?: Partial<ProcessingStats>;
+}): Promise<void> {
+  const docs = await findSharedEventScrapeEnrichmentDocs({
+    fileId: params.fileId,
+    limit: 50,
+  });
+  if (docs.length === 0) return;
+
+  const completedAt = admin.firestore.FieldValue.serverTimestamp();
+  const publicProcessing = {
+    ...buildPublicProcessingSummary({
+      status: 'completed',
+      fileId: params.fileId,
+      fileName: params.fileName,
+      runId: params.runId,
+      stats: params.stats,
+    }),
+    completedAt,
+  } as SharedEventPublicProcessingSummary;
+  const scrapePatch = compactRecord({
+    status: 'completed',
+    fileId: params.fileId,
+    fileName: params.fileName,
+    runId: params.runId,
+    processingStats: params.stats || {},
+    publicProcessing,
+    completedAt,
+    updatedAt: completedAt,
+  });
+
+  await Promise.all(docs.map((doc) => doc.ref.set(scrapePatch, { merge: true })));
+  await updateLinkedSharedEventIngests({
+    enrichmentDocs: docs,
+    scrapeStatus: 'completed',
+    publicProcessing,
+    scrapePatch,
+  });
+
+  logger.info('Marked shared event public processing completed', {
+    fileId: params.fileId,
+    runId: params.runId,
+    enrichmentIds: docs.map((doc) => doc.id),
+    stats: params.stats,
+  });
+}
+
+export async function markSharedEventPublicProcessingFailedForFile(params: {
+  fileId?: string;
+  fileName?: string;
+  runId?: string;
+  enrichmentId?: string;
+  actorRunId?: string;
+  error: string;
+}): Promise<void> {
+  const docs = await findSharedEventScrapeEnrichmentDocs(params);
+  if (docs.length === 0) return;
+
+  const failedAt = admin.firestore.FieldValue.serverTimestamp();
+  const publicProcessing = {
+    ...buildPublicProcessingSummary({
+      status: 'failed',
+      fileId: params.fileId,
+      fileName: params.fileName,
+      runId: params.runId,
+      error: params.error,
+    }),
+    failedAt,
+  } as SharedEventPublicProcessingSummary;
+  const scrapePatch = compactRecord({
+    status: 'failed',
+    fileId: params.fileId,
+    fileName: params.fileName,
+    runId: params.runId,
+    error: params.error,
+    publicProcessing,
+    failedAt,
+    updatedAt: failedAt,
+  });
+
+  await Promise.all(docs.map((doc) => doc.ref.set(scrapePatch, { merge: true })));
+  await updateLinkedSharedEventIngests({
+    enrichmentDocs: docs,
+    scrapeStatus: 'failed',
+    publicProcessing,
+    scrapePatch,
+  });
 }
 
 function firestoreTimestampMillis(value: unknown): number {
@@ -4296,7 +5293,7 @@ export async function createEvent(
   venueId: string,
   event: Omit<EventData, 'id' | 'createdAt' | 'venueId'>
 ): Promise<string> {
-  const normalizedEvent = withNormalizedEventAddressForWrite({ ...event });
+  const normalizedEvent = withNormalizedEventAddressForWrite(withFamilyFriendlyScore({ ...event }));
   const sanitizedEvent = await sanitizeEventManagedImageReferencesForWrite(normalizedEvent, {
     operation: 'createEvent',
     venueId,
@@ -5788,6 +6785,14 @@ export function buildPublishedCityLevelEventDataForRegression(
   mediaFields: Partial<EventData> = {}
 ): EventData & Record<string, unknown> {
   return buildPublishedCityLevelEventData(reviewId, record, manual, mediaFields);
+}
+
+export async function buildPublishedCityLevelMediaFieldsForRegression(
+  record: CityLevelEventReviewRecord,
+  manual: FinalizeCityLevelEventReviewInput['manual'] = {},
+  options: BuildPublishedCityLevelMediaFieldsOptions = {}
+): Promise<Partial<EventData>> {
+  return buildPublishedCityLevelMediaFields(manual, record, options);
 }
 
 export function evaluateCityLevelAutoPublishEligibilityForRegression(
@@ -7490,6 +8495,7 @@ function looksLikeExternalImageUrl(url: string): boolean {
     const path = parsed.pathname.toLowerCase();
 
     if (/\.(jpg|jpeg|png|webp|gif|bmp)$/i.test(path)) return true;
+    if (isFacebookLookasideCrawlerMediaUrl(url)) return true;
     if (host.includes('fbcdn.net') || host.includes('scontent')) return true;
     if (host.includes('instagram.com') || host.includes('cdninstagram.com')) return true;
     if (host.includes('googleusercontent.com')) return true;

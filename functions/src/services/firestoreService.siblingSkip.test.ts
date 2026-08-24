@@ -65,6 +65,76 @@ test('allows a guarded sibling candidate through when it is a strong same-date d
   );
 });
 
+test('treats same-source parenthetical title variants as compatible exact unique id matches', () => {
+  const incoming = buildEvent({
+    uniqueId: '1392327566265948_1',
+    venueId: 'slug_confedcentre',
+    establishment: 'Confederation Centre of the Arts',
+    eventName: 'Come From Away (Charlottetown Festival)',
+    name: 'Come From Away (Charlottetown Festival)',
+    startDate: '2026-06-30',
+    endDate: '2026-09-26',
+    startTime: '08:00',
+    endTime: '18:00',
+    isRecurring: 'No',
+    recurringPattern: 'none',
+  });
+
+  const existing = buildEvent({
+    id: 'come_from_away_select_dates_keeper',
+    uniqueId: '1392327566265948_1',
+    venueId: 'slug_confedcentre',
+    establishment: 'Confederation Centre of the Arts',
+    eventName: 'Come From Away (Select Dates)',
+    name: 'Come From Away (Select Dates)',
+    startDate: '2026-06-30',
+    endDate: '2026-09-26',
+    startTime: '08:00',
+    endTime: '18:00',
+    isRecurring: 'No',
+    recurringPattern: 'none',
+  });
+
+  assert.equal(
+    pickCompatibleExactUniqueIdMatch(incoming, [existing], {
+      venueId: 'slug_confedcentre',
+    })?.id,
+    'come_from_away_select_dates_keeper'
+  );
+});
+
+test('does not treat short generic parenthetical title cores as compatible exact unique id matches', () => {
+  const incoming = buildEvent({
+    uniqueId: 'generic_short_core_1',
+    venueId: 'venue_books',
+    establishment: 'Book Store',
+    eventName: 'Book Club (Fantasy)',
+    name: 'Book Club (Fantasy)',
+    startDate: '2026-07-21',
+    startTime: '18:00',
+    endTime: '19:00',
+  });
+
+  const existing = buildEvent({
+    id: 'thriller_book_club',
+    uniqueId: 'generic_short_core_1',
+    venueId: 'venue_books',
+    establishment: 'Book Store',
+    eventName: 'Book Club (Thriller)',
+    name: 'Book Club (Thriller)',
+    startDate: '2026-07-21',
+    startTime: '18:00',
+    endTime: '19:00',
+  });
+
+  assert.equal(
+    pickCompatibleExactUniqueIdMatch(incoming, [existing], {
+      venueId: 'venue_books',
+    }),
+    undefined
+  );
+});
+
 test('keeps the sibling-skip guard for same-root same-date items that are not strong duplicates', () => {
   const incoming = buildEvent({
     eventName: 'Runway & Posing Workshop with Soli Coaching',

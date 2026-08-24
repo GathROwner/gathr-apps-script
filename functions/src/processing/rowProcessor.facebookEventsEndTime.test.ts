@@ -6,11 +6,14 @@ import {
   isCityLevelFacebookEventLocation,
   previewDuplicateMerge,
   resolveEventAddressForVenue,
+  resolveEventCoordinatesForVenue,
   resolveFacebookEventEndDateTime,
   resolveFacebookEventRecurrence,
   resolveFullParserEventImageUrls,
+  resolvePostDerivedCityLevelEventLocation,
 } from './rowProcessor.js';
 import { EventData, RawRowData, VenueData } from '../types/index.js';
+import { FAMILY_FRIENDLY_SCORING_VERSION } from '../utils/familyFriendlyScoring.js';
 
 function buildVenue(): VenueData {
   return {
@@ -112,6 +115,69 @@ test('uses the resolved venue address when the item names a known venue alias bu
   });
 
   assert.equal(result, '2 Pownal Street 2nd Floor, Charlottetown, PE, Canada, Prince Edward Island');
+});
+
+test('uses the Highland Storm venue address when a Holmans source-page address leaks into the parsed item', () => {
+  const result = resolveEventAddressForVenue({
+    itemAddress: '286 Fitzroy Street, Summerside, PE C1N 1J2, Canada',
+    rowAddress: '',
+    sourceVenueAddress: '286 Fitzroy Street, Summerside, PE C1N 1J2, Canada',
+    sourceVenueId: 'slug_holmansicecream',
+    resolvedVenueId: 'slug_thescottmacaulayperformingartscentre',
+    venueAddress: '619 Water Street East, Summerside, PE C1N 4H8, Canada',
+    rowEstablishment: "Holman's Ice Cream Parlour",
+    canonicalVenueName: 'The Scott MacAulay Performing Arts Centre at the College of Piping | Summerside PE',
+    itemVenueName: 'The Scott MacAulay Performing Arts Centre at the College of Piping',
+    venueAliases: ['The Scott MacAulay Performing Arts Centre'],
+  });
+
+  assert.equal(result, '619 Water Street East, Summerside, PE C1N 4H8, Canada');
+});
+
+test('uses target venue coordinates whenever its address replaces source-page metadata', () => {
+  const result = resolveEventCoordinatesForVenue({
+    usesVenueAddress: true,
+    itemLatitude: 46.393003,
+    itemLongitude: -63.7915259,
+    venueLatitude: 46.3942715,
+    venueLongitude: -63.7689742,
+  });
+
+  assert.deepEqual(result, {
+    latitude: 46.3942715,
+    longitude: -63.7689742,
+  });
+});
+
+test('keeps item coordinates when a distinct explicit event address is retained', () => {
+  const result = resolveEventCoordinatesForVenue({
+    usesVenueAddress: false,
+    itemLatitude: 46.391,
+    itemLongitude: -63.79,
+    venueLatitude: 46.3942715,
+    venueLongitude: -63.7689742,
+  });
+
+  assert.deepEqual(result, {
+    latitude: 46.391,
+    longitude: -63.79,
+  });
+});
+
+test('keeps a distinct explicit event address when it is not the source venue address', () => {
+  const result = resolveEventAddressForVenue({
+    itemAddress: '192 Water St, Summerside, PE C1N 1B1',
+    rowAddress: '',
+    sourceVenueAddress: '286 Fitzroy Street, Summerside, PE C1N 1J2, Canada',
+    sourceVenueId: 'slug_holmansicecream',
+    resolvedVenueId: 'slug_thescottmacaulayperformingartscentre',
+    venueAddress: '619 Water Street East, Summerside, PE C1N 4H8, Canada',
+    rowEstablishment: "Holman's Ice Cream Parlour",
+    canonicalVenueName: 'The Scott MacAulay Performing Arts Centre at the College of Piping',
+    itemVenueName: 'Temporary off-site stage',
+  });
+
+  assert.equal(result, '192 Water St, Summerside, PE C1N 1B1');
 });
 
 test('duplicate merge replaces stale source-page address with resolved venue address', () => {
@@ -463,6 +529,447 @@ test('routes explicit Downtown Charlottetown Facebook location as area review', 
     locationProvince: 'PEI',
     locationPrecision: 'approximate',
   });
+});
+
+test('duplicate merge backfills family-friendly scoring from merged event content', () => {
+  const venue = buildVenue();
+  const existing = buildEvent({
+    category: 'Live Music',
+    eventName: 'All Ages Summer Concert',
+    name: 'All Ages Summer Concert',
+    description: 'Suitable for all ages.',
+    familyFriendlyScore: undefined,
+    familyFriendlyLevel: undefined,
+    familyFriendlyReasons: undefined,
+    familyFriendlyScoringVersion: undefined,
+  });
+  const incoming = buildEvent({
+    category: 'Live Music',
+    eventName: 'All Ages Summer Concert',
+    name: 'All Ages Summer Concert',
+    description: 'Suitable for all ages.',
+  });
+
+  const result = previewDuplicateMerge({ existingEvent: existing, incomingEvent: incoming, venue });
+
+  assert.equal(Number(result.updates.familyFriendlyScore) >= 60, true);
+  assert.equal(result.updates.familyFriendlyLevel, 'high');
+  assert.equal(result.updates.familyFriendlyScoringVersion, FAMILY_FRIENDLY_SCORING_VERSION);
+});
+
+test('routes explicit Downtown Summerside Facebook location as area review', () => {
+  const row = buildRawRow('Location: Downtown Summerside, PEI (Water Street)');
+  row.userName = 'Downtown Summerside';
+  row.facebookEventLocationName = 'Downtown Summerside, PEI (Water Street)';
+  row.facebookEventOrganizerName = 'Downtown Summerside';
+  row.facebookEventLocationIsCityLevel = false;
+
+  assert.equal(isCityLevelFacebookEventLocation(row), true);
+  assert.deepEqual(getCityLevelFacebookEventLocationDetails(row), {
+    locationScope: 'area',
+    locationLabel: 'Downtown Summerside',
+    locationCity: 'Summerside',
+    locationProvince: 'PEI',
+    locationPrecision: 'approximate',
+  });
+});
+
+test('routes post-derived Downtown Summerside location to area review metadata', () => {
+  const row = buildRawRow('Classic Car Night on Water Street in Downtown Summerside.');
+  row.sourceScraperType = 'posts';
+  row.userName = 'Downtown Summerside';
+  row.pageName = 'Downtown Summerside';
+  row.facebookEventLocationName = undefined;
+  row.facebookEventLocationIsCityLevel = false;
+  row.sharedPostText = 'Classic Car Night';
+
+  const result = resolvePostDerivedCityLevelEventLocation({
+    row,
+    establishment: 'Downtown Summerside',
+    item: {
+      name: 'Classic Car Night',
+      venue: 'Downtown Summerside, PEI (Water Street)',
+      startDate: '2026-07-25',
+      startTime: '18:00',
+      description: 'Classic Car Night on Water Street.',
+    },
+  });
+
+  assert.deepEqual(result, {
+    locationScope: 'area',
+    locationLabel: 'Downtown Summerside',
+    locationCity: 'Summerside',
+    locationProvince: 'PEI',
+    locationPrecision: 'approximate',
+    observedLocationName: 'Downtown Summerside, PEI (Water Street)',
+    autoPublishReviewReasons: ['post_derived_area_candidate'],
+    detectionSource: 'item_venue',
+  });
+});
+
+test('routes post-derived Charlottetown Busker Festival to downtown area review metadata', () => {
+  const row = buildRawRow('Charlottetown Busker Festival returns downtown this summer.');
+  row.sourceScraperType = 'posts';
+  row.userName = 'Charlottetown Busker Festival';
+  row.pageName = 'Charlottetown Busker Festival';
+  row.facebookEventLocationName = undefined;
+  row.facebookEventLocationIsCityLevel = false;
+  row.sharedPostText = 'Charlottetown Busker Festival';
+
+  const result = resolvePostDerivedCityLevelEventLocation({
+    row,
+    establishment: 'Charlottetown Busker Festival',
+    item: {
+      name: 'Charlottetown Busker Festival',
+      startDate: '2026-07-31',
+      startTime: '12:00',
+      description: 'Performances throughout downtown Charlottetown.',
+    },
+  });
+
+  assert.deepEqual(result, {
+    locationScope: 'area',
+    locationLabel: 'Downtown Charlottetown',
+    locationCity: 'Charlottetown',
+    locationProvince: 'PEI',
+    locationPrecision: 'approximate',
+    observedLocationName: 'Charlottetown Busker Festival',
+    autoPublishReviewReasons: ['post_derived_area_candidate'],
+    detectionSource: 'event_text_area_hint',
+  });
+});
+
+test('routes post-derived Charlottetown Busker Festival even when parser produced no final event', () => {
+  const row = buildRawRow(
+    "No plans for Labour Day Weekend? Charlottetown Buskerfest is back with free street performances all weekend long in downtown Charlottetown."
+  );
+  row.sourceScraperType = 'posts';
+  row.userName = 'Charlottetown Busker Festival';
+  row.pageName = 'Charlottetown Busker Festival';
+  row.facebookEventLocationName = undefined;
+  row.facebookEventLocationIsCityLevel = false;
+  row.sharedPostText = '';
+
+  const result = resolvePostDerivedCityLevelEventLocation({
+    row,
+    establishment: 'Charlottetown Busker Festival',
+    item: {
+      name: 'Charlottetown Busker Festival',
+      description: row.text,
+    },
+  });
+
+  assert.deepEqual(result, {
+    locationScope: 'area',
+    locationLabel: 'Downtown Charlottetown',
+    locationCity: 'Charlottetown',
+    locationProvince: 'PEI',
+    locationPrecision: 'approximate',
+    observedLocationName: 'Charlottetown Busker Festival',
+    autoPublishReviewReasons: ['post_derived_area_candidate'],
+    detectionSource: 'event_text_area_hint',
+  });
+});
+
+test('routes post-derived province or route scope to review metadata without publish eligibility', () => {
+  const row = buildRawRow('PEI Marathon route information across PEI.');
+  row.sourceScraperType = 'posts';
+  row.userName = 'PEI Marathon';
+  row.pageName = 'PEI Marathon';
+  row.facebookEventLocationName = undefined;
+  row.facebookEventLocationIsCityLevel = false;
+  row.sharedPostText = 'PEI Marathon';
+
+  const result = resolvePostDerivedCityLevelEventLocation({
+    row,
+    establishment: 'PEI Marathon',
+    item: {
+      name: 'PEI Marathon',
+      venue: 'PEI',
+      startDate: '2026-10-18',
+      startTime: '08:00',
+      description: 'Marathon route across PEI.',
+    },
+  });
+
+  assert.equal(result?.locationLabel, 'PEI Marathon Route');
+  assert.equal(result?.locationScope, 'route');
+  assert.ok(result?.autoPublishReviewReasons.includes('post_derived_area_candidate'));
+  assert.ok(result?.autoPublishReviewReasons.includes('route_candidate_requires_geometry_review'));
+  assert.ok(result?.autoPublishReviewReasons.includes('route_missing_explicit_stops_or_streets'));
+});
+
+test('routes post-derived route labels to review metadata instead of venue matching', () => {
+  const row = buildRawRow('Community ride along Route 2.');
+  row.sourceScraperType = 'posts';
+  row.userName = 'Community Ride';
+  row.pageName = 'Community Ride';
+  row.facebookEventLocationName = undefined;
+  row.facebookEventLocationIsCityLevel = false;
+  row.sharedPostText = 'Community Ride';
+
+  const result = resolvePostDerivedCityLevelEventLocation({
+    row,
+    establishment: 'Community Ride',
+    item: {
+      name: 'Community Ride',
+      venue: 'Route 2, PEI',
+      startDate: '2026-08-01',
+      startTime: '09:00',
+      description: 'Ride route along Route 2.',
+    },
+  });
+
+  assert.equal(result?.locationLabel, 'Route 2, PEI');
+  assert.equal(result?.locationScope, 'area');
+  assert.ok(result?.autoPublishReviewReasons.includes('post_derived_area_candidate'));
+  assert.ok(result?.autoPublishReviewReasons.includes('route_like_or_unsupported_location'));
+});
+
+test('does not infer a downtown area event for specific venues inside a roundup post', () => {
+  const row = buildRawRow(
+    "What's happening today in Downtown Charlottetown? 12:00 pm - Founders Food Hall & Market: Caitlin Alexis."
+  );
+  row.sourceScraperType = 'posts';
+  row.userName = 'Downtown Charlottetown Inc';
+  row.pageName = 'Downtown Charlottetown Inc';
+  row.facebookEventLocationName = undefined;
+  row.facebookEventLocationIsCityLevel = false;
+  row.sharedPostText = "What's happening today in Downtown Charlottetown?";
+
+  assert.equal(resolvePostDerivedCityLevelEventLocation({
+    row,
+    establishment: 'Downtown Charlottetown Inc',
+    item: {
+      name: 'Caitlin Alexis',
+      venue: 'Founders Food Hall & Market',
+      startDate: '2026-07-25',
+      startTime: '12:00',
+      description: 'Sounds of the Waterfront',
+    },
+  }), null);
+});
+
+test('does not infer downtown area from post context when item location is an explicit venue', () => {
+  const row = buildRawRow(
+    "What's happening today in Downtown Charlottetown? 11:00 pm - Hunter's Ale House: Mat & Adam."
+  );
+  row.sourceScraperType = 'posts';
+  row.userName = 'Downtown Charlottetown Inc';
+  row.pageName = 'Downtown Charlottetown Inc';
+  row.facebookEventLocationName = undefined;
+  row.facebookEventLocationIsCityLevel = false;
+  row.sharedPostText = "What's happening today in Downtown Charlottetown?";
+
+  assert.equal(resolvePostDerivedCityLevelEventLocation({
+    row,
+    establishment: 'Downtown Charlottetown Inc',
+    item: {
+      name: 'Mat & Adam',
+      venue: "Hunter's Ale House",
+      startDate: '2026-07-30',
+      startTime: '23:00',
+      description: 'Live music at Hunter’s Ale House.',
+    },
+  }), null);
+});
+
+test('does not infer a nearby city from a venue-like hall location', () => {
+  const row = buildRawRow(
+    "Back Home Tonight at Stanley Bridge Hall, a cozy Women's Institute Hall near Kensington."
+  );
+  row.sourceScraperType = 'posts';
+  row.userName = 'Stanley Bridge Ceilidhs';
+  row.pageName = 'Stanley Bridge Ceilidhs';
+  row.facebookEventLocationName = undefined;
+  row.facebookEventLocationIsCityLevel = false;
+  row.sharedPostText = 'Back Home Tonight';
+
+  assert.equal(resolvePostDerivedCityLevelEventLocation({
+    row,
+    establishment: 'Stanley Bridge Ceilidhs',
+    item: {
+      name: 'Back Home Tonight: Gordon Belsher with Todd MacLean & Cynthia MacLeod',
+      venue: "Stanley Bridge Hall (Women's Institute Hall)",
+      startDate: '2026-07-27',
+      startTime: '19:30',
+      description: "Back home at the cozy Women's Institute Hall near Kensington.",
+    },
+  }), null);
+});
+
+test('routes audited post-derived local area labels to review metadata', () => {
+  const cases = [
+    {
+      venue: 'Greenwich & Stanhope Beaches (PEI National Park)',
+      name: 'Surfguard Services',
+      description: 'Multi-beach PEI National Park surfguard service schedule.',
+      locationLabel: 'Greenwich & Stanhope Beaches, PEI',
+      locationCity: undefined,
+      reason: 'multi_venue_area_candidate',
+    },
+    {
+      venue: 'Brackley & Cavendish Beaches (PEI National Park)',
+      name: 'Surfguard Services',
+      description: 'Multi-beach PEI National Park surfguard service schedule.',
+      locationLabel: 'Brackley & Cavendish Beaches, PEI',
+      locationCity: undefined,
+      reason: 'multi_venue_area_candidate',
+    },
+    {
+      venue: 'Richmond',
+      name: 'Kari rural expansion launch',
+      description: 'Kari ride-share service hours for Richmond.',
+      locationLabel: 'Richmond, PEI',
+      locationCity: 'Richmond',
+    },
+    {
+      venue: 'Various locations throughout Summerside',
+      name: 'Summerside Arts Fest',
+      description: 'City-wide festival throughout Summerside.',
+      locationScope: 'area',
+      locationLabel: 'Summerside Arts Fest Locations',
+      locationCity: 'Summerside',
+      reason: 'multi_location_names_not_fully_extracted',
+    },
+    {
+      venue: 'Georgetown CleanTech Park',
+      name: '10th Annual Georgetown CleanTech Park 5K & 10K Run/Walk',
+      description: 'Run/walk course in Georgetown.',
+      locationScope: 'route',
+      locationLabel: '10th Annual Georgetown CleanTech Park 5K & 10K Run/Walk Route',
+      locationCity: 'Georgetown',
+      reason: 'route_missing_explicit_stops_or_streets',
+    },
+    {
+      venue: 'Main Street',
+      name: 'Street Dance with Westbury 5.0',
+      description: 'Alberton Days street dance on Main Street.',
+      locationLabel: 'Main Street, Alberton, PEI',
+      locationCity: 'Alberton',
+    },
+    {
+      venue: 'Town pond',
+      name: 'Fishing Derby',
+      description: 'Alberton Days fishing derby at the town pond.',
+      locationLabel: 'Alberton Town Pond, PEI',
+      locationCity: 'Alberton',
+    },
+    {
+      venue: 'N. Rustico Boardwalk',
+      name: 'W.I. Walk',
+      description: 'Community walk from the boardwalk in North Rustico.',
+      locationLabel: 'North Rustico Boardwalk, PEI',
+      locationCity: 'North Rustico',
+      reason: 'route_like_or_unsupported_location',
+    },
+    {
+      venue: 'East Point Lighthouse (start) / Souris Lighthouse on MacPhee Avenue (finish)',
+      name: 'East Point Lighthouse Run/Relay',
+      description: 'Point-to-point race route from East Point Lighthouse to Souris Lighthouse.',
+      locationScope: 'route',
+      locationLabel: 'East Point Lighthouse Run/Relay Route',
+      locationCity: 'Souris',
+      observedLocationName: 'East Point Lighthouse; Souris Lighthouse on MacPhee Avenue',
+      reason: 'route_candidate_requires_geometry_review',
+    },
+    {
+      venue: 'Miltonvale Park',
+      name: 'Canada Day at the Park',
+      description: 'Rural Municipality of Miltonvale Park community events.',
+      locationLabel: 'Miltonvale Park, PEI',
+      locationCity: 'Miltonvale Park',
+    },
+    {
+      venue: 'Downtown Charlottetown (Parade Route)',
+      name: '2026 PEI Pride Parade',
+      description: 'Parade route through Downtown Charlottetown.',
+      locationScope: 'route',
+      locationLabel: '2026 PEI Pride Parade Route',
+      locationCity: 'Charlottetown',
+      reason: 'route_missing_explicit_stops_or_streets',
+    },
+  ];
+
+  for (const candidate of cases) {
+    const row = buildRawRow(candidate.description);
+    row.sourceScraperType = 'posts';
+    row.userName = candidate.venue;
+    row.pageName = candidate.venue;
+    row.facebookEventLocationName = undefined;
+    row.facebookEventLocationIsCityLevel = false;
+    row.sharedPostText = candidate.name;
+
+    const result = resolvePostDerivedCityLevelEventLocation({
+      row,
+      establishment: candidate.venue,
+      item: {
+        name: candidate.name,
+        venue: candidate.venue,
+        startDate: '2026-07-01',
+        startTime: '12:00',
+        description: candidate.description,
+      },
+    });
+
+    assert.equal(result?.locationScope, candidate.locationScope || 'area');
+    assert.equal(result?.locationLabel, candidate.locationLabel);
+    assert.equal(result?.locationCity, candidate.locationCity);
+    assert.equal(result?.observedLocationName, candidate.observedLocationName || candidate.venue);
+    assert.ok(result?.autoPublishReviewReasons.includes('post_derived_area_candidate'));
+    if (candidate.reason) {
+      assert.ok(result?.autoPublishReviewReasons.includes(candidate.reason));
+    }
+  }
+});
+
+test('keeps route-stop brands in review without inferring a nearby city', () => {
+  const routeStopRow = buildRawRow('Ride departure/route stop from Irving toward Souris.');
+  routeStopRow.sourceScraperType = 'posts';
+  routeStopRow.userName = 'Town of Souris';
+  routeStopRow.pageName = 'Town of Souris';
+  routeStopRow.facebookEventLocationName = undefined;
+  routeStopRow.facebookEventLocationIsCityLevel = false;
+  routeStopRow.sharedPostText = 'The Atlantic 911 Ride 2026 - Depart Irving';
+
+  const result = resolvePostDerivedCityLevelEventLocation({
+    row: routeStopRow,
+    establishment: 'Irving',
+    item: {
+      name: 'The Atlantic 911 Ride 2026 - Depart Irving',
+      venue: 'Irving',
+      startDate: '2026-06-07',
+      startTime: '08:00',
+      description: 'Ride departure/route stop from Irving toward Souris.',
+    },
+  });
+
+  assert.equal(result?.locationLabel, 'Irving');
+  assert.equal(result?.locationCity, undefined);
+  assert.equal(result?.locationScope, 'area');
+  assert.ok(result?.autoPublishReviewReasons.includes('route_like_or_unsupported_location'));
+});
+
+test('does not infer broad area review from concrete addresses', () => {
+  const addressRow = buildRawRow('Tug of War event at 20 Lea Crane Boulevard in Souris.');
+  addressRow.sourceScraperType = 'posts';
+  addressRow.userName = 'Souris Sea Glass Festival';
+  addressRow.pageName = 'Souris Sea Glass Festival';
+  addressRow.facebookEventLocationName = undefined;
+  addressRow.facebookEventLocationIsCityLevel = false;
+  addressRow.sharedPostText = 'Night 1 of Souris Tug of War';
+
+  assert.equal(resolvePostDerivedCityLevelEventLocation({
+    row: addressRow,
+    establishment: '20 Lea Crane Boulevard',
+    item: {
+      name: 'Night 1 of Souris Tug of War',
+      venue: '20 Lea Crane Boulevard',
+      startDate: '2026-07-23',
+      startTime: '19:00',
+      description: 'Tug of War event at 20 Lea Crane Boulevard in Souris.',
+    },
+  }), null);
 });
 
 test('does not treat Downtown Charlottetown Inc organizer/page text as an area venue', () => {

@@ -2,7 +2,19 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import * as exportedFunctions from '../index.js';
-import { applyRuntimeSecretAliases, coreRuntimeSecrets } from './globalRuntimeSecrets.js';
+import {
+  applyRuntimeSecretAliases,
+  coreRuntimeSecrets,
+  runtimeSecretNamesForProject,
+} from './globalRuntimeSecrets.js';
+
+test('uses each Firebase project existing Secret Manager contract', () => {
+  assert.deepEqual(runtimeSecretNamesForProject('gathr-m1'), ['OPENAI_API_KEY', 'APIFY_TOKEN']);
+  assert.deepEqual(runtimeSecretNamesForProject('gathr-migrated'), [
+    'GATHR_OPENAI_API_KEY',
+    'GATHR_APIFY_TOKEN',
+  ]);
+});
 
 test('maps collision-free runtime secrets to the established environment names', () => {
   const env: NodeJS.ProcessEnv = {

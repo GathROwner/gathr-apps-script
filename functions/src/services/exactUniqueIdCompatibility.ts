@@ -66,6 +66,46 @@ function normalizeTitle(value: unknown): string {
   return normalizeVenueName(asTrimmedString(value));
 }
 
+function getParentheticalTitleCore(value: unknown): string {
+  const raw = asTrimmedString(value);
+  if (!raw) return '';
+
+  const withoutTrailingParenthetical = raw.replace(/\s*\([^)]*\)\s*$/u, '').trim();
+  if (!withoutTrailingParenthetical || withoutTrailingParenthetical === raw) return '';
+
+  const normalized = normalizeTitle(withoutTrailingParenthetical);
+  const meaningfulTokens = normalized
+    .split(' ')
+    .map((token) => token.trim())
+    .filter((token) => token.length >= 3 && !/^\d+$/.test(token));
+  const compactLength = meaningfulTokens.join('').length;
+
+  return meaningfulTokens.length >= 2 && compactLength >= 10 ? normalized : '';
+}
+
+function hasCompatibleParentheticalTitleCore(incoming: EventData, existing: EventData): boolean {
+  const incomingTitle = getComparableTitle(incoming);
+  const existingTitle = getComparableTitle(existing);
+  const incomingNormalized = normalizeTitle(incomingTitle);
+  const existingNormalized = normalizeTitle(existingTitle);
+  const incomingCore = getParentheticalTitleCore(incomingTitle);
+  const existingCore = getParentheticalTitleCore(existingTitle);
+
+  if (incomingCore && existingCore && incomingCore === existingCore) {
+    return true;
+  }
+
+  if (incomingCore && existingNormalized === incomingCore) {
+    return true;
+  }
+
+  if (existingCore && incomingNormalized === existingCore) {
+    return true;
+  }
+
+  return false;
+}
+
 function getNormalizedTitleTokens(value: unknown): string[] {
   return normalizeTitle(value)
     .split(' ')
@@ -226,6 +266,10 @@ function hasCompatibleTitle(incoming: EventData, existing: EventData): boolean {
       return true;
     }
 
+    if (hasCompatibleParentheticalTitleCore(incoming, existing)) {
+      return true;
+    }
+
     if (computeSharedTitleAnchorScore(incoming, existing) > 0) {
       return true;
     }
@@ -321,6 +365,10 @@ function computeNormalizedTitleSimilarity(incoming: EventData, existing: EventDa
     let score = calculateEnhancedSimilarity(incomingTitle, existingTitle);
     if (shorterTitle.length >= 8 && longerTitle.includes(shorterTitle)) {
       score = Math.max(score, 0.9);
+    }
+
+    if (hasCompatibleParentheticalTitleCore(incoming, existing)) {
+      score = Math.max(score, 0.92);
     }
 
     score = Math.max(score, sharedAnchorScore);

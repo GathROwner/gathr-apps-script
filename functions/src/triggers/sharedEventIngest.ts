@@ -10,6 +10,7 @@ import {
   SHARED_EVENT_PARSER_VERSION,
   verifySharedEventSourceVisibility,
 } from '../processing/sharedEventParser.js';
+import { parseSharedEventImageUpload } from '../processing/sharedEventImageUpload.js';
 import { ApifyAdHocWebhook, startActorRunNoWait } from '../services/apifyService.js';
 import * as firestoreService from '../services/firestoreService.js';
 import { ParsedSharedEvent, SharedEventSubmitPayload } from '../types/sharedEvent.js';
@@ -22,14 +23,6 @@ if (!admin.apps.length) {
 const TASK_QUEUE_LOCATION = 'northamerica-northeast1';
 const DEFAULT_FB_POSTS_SCRAPER_ACTOR_ID = 'KoJrdxJCTtpon81KY';
 const MAX_SHARED_EVENT_UPLOAD_BYTES = 8 * 1024 * 1024;
-const ALLOWED_SHARED_EVENT_IMAGE_TYPES = new Set([
-  'image/jpeg',
-  'image/jpg',
-  'image/png',
-  'image/webp',
-  'image/heic',
-  'image/heif',
-]);
 
 function readBearerToken(authHeader: unknown): string {
   const raw = Array.isArray(authHeader) ? authHeader[0] : String(authHeader || '');
@@ -286,9 +279,18 @@ function getSharedEventApifyWebhookUrl(): string {
 }
 
 function buildSharedEventApifyWebhooks(enrichmentId: string): ApifyAdHocWebhook[] {
-  const requestUrl = getSharedEventApifyWebhookUrl();
-  if (!requestUrl) {
+  const baseRequestUrl = getSharedEventApifyWebhookUrl();
+  if (!baseRequestUrl) {
     return [];
+  }
+  let requestUrl = baseRequestUrl;
+  try {
+    const url = new URL(baseRequestUrl);
+    url.searchParams.set('sharedEventEnrichmentId', enrichmentId);
+    requestUrl = url.toString();
+  } catch {
+    const separator = baseRequestUrl.includes('?') ? '&' : '?';
+    requestUrl = `${baseRequestUrl}${separator}sharedEventEnrichmentId=${encodeURIComponent(enrichmentId)}`;
   }
 
   return [{
@@ -898,28 +900,23 @@ export const uploadSharedEventImage = onRequest(
 
     try {
       const body = asBodyObject(request.body);
-      const rawContentType = stringValue(body.contentType)?.toLowerCase() || 'image/jpeg';
-      const contentType = rawContentType === 'image/jpg' ? 'image/jpeg' : rawContentType;
-      if (!ALLOWED_SHARED_EVENT_IMAGE_TYPES.has(contentType)) {
+      let upload;
+      try {
+        upload = parseSharedEventImageUpload({
+          body: request.body,
+          rawBody: request.rawBody,
+          contentTypeHeader: request.headers['content-type'],
+          fileNameHeader: request.headers['x-gathr-file-name'],
+        });
+      } catch (error) {
         response.status(400).json({
           success: false,
-          error: 'Only image uploads are supported.',
+          error: error instanceof Error ? error.message : 'Invalid image upload.',
         });
         return;
       }
-
-      const rawBase64 = stringValue(body.base64Data);
-      const base64Data = rawBase64?.replace(/^data:[^;]+;base64,/i, '') || '';
-      if (!base64Data) {
-        response.status(400).json({
-          success: false,
-          error: 'Missing image data.',
-        });
-        return;
-      }
-
-      const buffer = Buffer.from(base64Data, 'base64');
-      if (buffer.length === 0 || buffer.length > MAX_SHARED_EVENT_UPLOAD_BYTES) {
+      const { contentType, buffer } = upload;
+      if (buffer.length > MAX_SHARED_EVENT_UPLOAD_BYTES) {
         response.status(413).json({
           success: false,
           error: `Image must be smaller than ${Math.round(MAX_SHARED_EVENT_UPLOAD_BYTES / 1024 / 1024)} MB.`,
@@ -928,7 +925,7 @@ export const uploadSharedEventImage = onRequest(
       }
 
       const extension = extensionForContentType(contentType);
-      const fileName = sanitizeStorageFileName(body.fileName, `image.${extension}`);
+      const fileName = sanitizeStorageFileName(upload.fileName || body.fileName, `image.${extension}`);
       const uploadId = randomUUID();
       const filePath = `sharedEventUploads/${ownerUid}/${Date.now()}-${uploadId}-${fileName}`;
       const bucketName = sharedEventUploadsBucketName();

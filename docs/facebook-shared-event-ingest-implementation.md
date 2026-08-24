@@ -82,6 +82,14 @@ When a candidate is promoted, the public event is intended to look like a normal
 
 Public Facebook posts with weak initial share payloads may also queue Apify scrape enrichment. The share screen may show only the initial matches while the full Facebook post scrape runs later through the normal parser/webhook flow.
 
+The immediate share receipt and the final parser result are deliberately different states:
+
+- `eventsPreview` and `extractedEventCount` are the fast initial scan result. They are useful user feedback, but they do not mean public events were created.
+- `scrapeEnrichment` tracks the Apify full-post enrichment lifecycle: `reserved`, `queued`, `processing`, `completed`, `duplicate`, `skipped`, or `failed`.
+- `publicProcessing` tracks the later public parser outcome for the full-post enrichment, including `createdEventCount`, `updatedEventCount`, `duplicateEventCount`, `unknownVenueCount`, `skippedCount`, and `errorCount`.
+
+When the Apify webhook runs in `gathr-migrated`, it writes final `publicProcessing` status back to the source shared-event ingest in `gathr-m1` through `SHARED_EVENT_SOURCE_PROJECT_ID` defaulting logic. The webhook URL also includes `sharedEventEnrichmentId` so the completion path can identify the user share even when actor-run lookup would cross Firebase projects. The mobile receipt watcher listens to `users/{uid}/sharedEventIngests/{ingestId}` and may update from "initial matches" to "added/updated/needs venue review" after the task worker finishes. Users can still leave the receipt screen; this status is durable for a later in-app notification flow.
+
 ## Multi-Image Facebook Posts
 
 Facebook share payloads often expose only a weak preview of a multi-image post. For public posts, GathR can queue Apify scrape enrichment so the normal parser sees the full post and its images.

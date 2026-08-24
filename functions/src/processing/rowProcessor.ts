@@ -49,6 +49,14 @@ import {
   AddressSource,
   normalizeCanadianAddress,
 } from '../utils/addressNormalization.js';
+import {
+  FAMILY_FRIENDLY_SCORING_VERSION,
+  scoreFamilyFriendly,
+} from '../utils/familyFriendlyScoring.js';
+import {
+  classifySpatialEvent,
+  SpatialEventClassification,
+} from '../parsing/spatialEventClassifier.js';
 
 /**
  * Result of processing a single row
@@ -710,9 +718,6 @@ function inferFacebookEventCategory(row: RawRowData): ParserProcessedEvent['cate
   if (/\b(concert|music|band|tribute|tour|singer|song|choir|acoustic)\b/.test(text)) {
     return 'Live Music';
   }
-  if (/\b(circus|family|kids|children|parade|festival|farm day)\b/.test(text)) {
-    return 'Family Friendly';
-  }
   if (/\b(conference|workshop|class|seminar|training|lecture)\b/.test(text)) {
     return 'Workshops & Classes';
   }
@@ -911,6 +916,9 @@ export function resolveEventAddressForVenue(params: {
   itemAddress?: unknown;
   rowAddress?: unknown;
   venueAddress?: unknown;
+  sourceVenueAddress?: unknown;
+  sourceVenueId?: unknown;
+  resolvedVenueId?: unknown;
   rowEstablishment?: unknown;
   canonicalVenueName?: unknown;
   itemVenueName?: unknown;
@@ -924,6 +932,11 @@ export function resolveEventAddressForVenue(params: {
 
   const normalizedItemAddress = normalizeAddressForFallbackComparison(itemAddress);
   const normalizedRowAddress = normalizeAddressForFallbackComparison(rowAddress);
+  const normalizedSourceVenueAddress = normalizeAddressForFallbackComparison(
+    params.sourceVenueAddress
+  );
+  const sourceVenueId = String(params.sourceVenueId || '').trim();
+  const resolvedVenueId = String(params.resolvedVenueId || '').trim();
   const normalizedRowEstablishment = normalizeVenueName(String(params.rowEstablishment || '').trim());
   const normalizedCanonicalVenueName = normalizeVenueName(String(params.canonicalVenueName || '').trim());
   const normalizedVenueAddress = normalizeAddressForFallbackComparison(venueAddress);
@@ -951,6 +964,20 @@ export function resolveEventAddressForVenue(params: {
     normalizedVenueAddress &&
     normalizedVenueAddress !== normalizedRowAddress
   );
+  const itemAddressIsFromDifferentSourceVenue = Boolean(
+    sourceVenueId &&
+    resolvedVenueId &&
+    sourceVenueId !== resolvedVenueId &&
+    normalizedItemAddress &&
+    normalizedSourceVenueAddress &&
+    normalizedItemAddress === normalizedSourceVenueAddress
+  );
+
+  // The row begins with its source Facebook Page venue. When the event resolves
+  // elsewhere, an unchanged source-venue address is inherited page metadata.
+  if (itemAddressIsFromDifferentSourceVenue) {
+    return venueAddress;
+  }
 
   if (itemNamesResolvedVenue && normalizedItemAddress && normalizedVenueAddress && normalizedItemAddress !== normalizedVenueAddress) {
     return venueAddress;
@@ -961,6 +988,36 @@ export function resolveEventAddressForVenue(params: {
   }
 
   return itemAddress;
+}
+
+export function resolveEventCoordinatesForVenue(params: {
+  usesVenueAddress: boolean;
+  itemLatitude?: number | string;
+  itemLongitude?: number | string;
+  venueLatitude?: number | string;
+  venueLongitude?: number | string;
+}): { latitude?: number | string; longitude?: number | string } {
+  const present = (value: unknown): value is number | string =>
+    value !== undefined && value !== null && value !== '';
+
+  return {
+    latitude:
+      params.usesVenueAddress && present(params.venueLatitude)
+        ? params.venueLatitude
+        : present(params.itemLatitude)
+          ? params.itemLatitude
+          : present(params.venueLatitude)
+            ? params.venueLatitude
+            : undefined,
+    longitude:
+      params.usesVenueAddress && present(params.venueLongitude)
+        ? params.venueLongitude
+        : present(params.itemLongitude)
+          ? params.itemLongitude
+          : present(params.venueLongitude)
+            ? params.venueLongitude
+            : undefined,
+  };
 }
 
 function normalizeSignatureStringList(values: unknown): string[] {
@@ -1116,6 +1173,53 @@ function buildEventImageProvenance(params: {
   }) as EventData['imageProvenance'];
 }
 
+function applyVenueMediaFallbacksToFullParserEvents(
+  events: ParserProcessedEvent[],
+  fallbackMediaUrls: string[],
+  selectionReason: string
+): ParserProcessedEvent[] {
+  const mediaUrls = normalizeUrlList(fallbackMediaUrls).slice(0, 4);
+  if (mediaUrls.length === 0) return events;
+
+  const primaryUrl = mediaUrls[0];
+  return events.map((event) => {
+    const eventHasMedia = normalizeUrlList([
+      event.image || '',
+      event.relevantImageUrl || '',
+      event.sharedPostThumbnail || '',
+      ...(Array.isArray(event.mediaUrls) ? event.mediaUrls : []),
+    ]).length > 0;
+    if (eventHasMedia) return event;
+
+    return {
+      ...event,
+      image: primaryUrl,
+      relevantImageUrl: primaryUrl,
+      mediaUrls,
+      imageProvenance: buildEventImageProvenance({
+        primaryUrl,
+        primaryField: 'relevantImageUrl',
+        primarySource: 'venue_media_fallback',
+        isFallback: true,
+        selectionReason,
+        mediaUrls,
+        mediaSource: 'venue_media_fallback',
+        icon: event.icon,
+        sharedPostThumbnail: event.sharedPostThumbnail,
+        updatedBy: 'row_processor_full5stage',
+      }),
+    };
+  });
+}
+
+export function applyVenueMediaFallbacksToFullParserEventsForRegression(
+  events: ParserProcessedEvent[],
+  fallbackMediaUrls: string[],
+  selectionReason = 'recovered_managed_media_from_existing_venue_events'
+): ParserProcessedEvent[] {
+  return applyVenueMediaFallbacksToFullParserEvents(events, fallbackMediaUrls, selectionReason);
+}
+
 function normalizeProvenanceUrl(value: unknown): string {
   const raw = String(value || '').trim();
   if (!raw) return '';
@@ -1201,23 +1305,15 @@ export function isCityLevelFacebookEventLocation(row: RawRowData): boolean {
 }
 
 function isAreaLevelFacebookEventLocationName(value: string): boolean {
-  const normalized = String(value || '')
-    .toLowerCase()
-    .replace(/\bcanada\b/g, '')
-    .replace(/\bprince edward island\b/g, 'pei')
-    .replace(/\bp\.?e\.?i\.?\b/g, 'pei')
-    .replace(/\s*,\s*/g, ',')
-    .replace(/\s+/g, ' ')
-    .replace(/[.,]+$/g, '')
-    .trim();
+  const normalized = normalizePostDerivedLocationCandidate(value);
 
   if (/\b(inc|incorporated|ltd|limited|corp|corporation)\b/i.test(normalized)) {
     return false;
   }
 
-  return normalized === 'downtown charlottetown' ||
-    normalized === 'downtown charlottetown,pei' ||
-    normalized === 'downtown charlottetown pei';
+  return Object.keys(KNOWN_AREA_LEVEL_LOCATIONS).some((areaName) =>
+    normalized === areaName || normalized.startsWith(`${areaName} `)
+  );
 }
 
 function normalizeFacebookEventProvinceDisplay(value: string): string {
@@ -1247,13 +1343,14 @@ export function getCityLevelFacebookEventLocationDetails(row: RawRowData): {
     .replace(/,+$/g, '')
     .trim();
 
-  if (isAreaLevelFacebookEventLocationName(cleaned)) {
+  const area = resolveKnownPostDerivedAreaLocation(cleaned);
+  if (area && area.locationScope !== 'route' && area.locationPrecision !== 'none') {
     return {
-      locationScope: 'area',
-      locationLabel: 'Downtown Charlottetown',
-      locationCity: 'Charlottetown',
-      locationProvince: 'PEI',
-      locationPrecision: 'approximate',
+      locationScope: area.locationScope,
+      locationLabel: area.locationLabel,
+      locationCity: area.locationCity,
+      locationProvince: area.locationProvince,
+      locationPrecision: area.locationPrecision,
     };
   }
 
@@ -1286,6 +1383,643 @@ export function getCityLevelFacebookEventLocationDetails(row: RawRowData): {
     locationLabel: cleaned || raw,
     locationPrecision: 'approximate',
   };
+}
+
+type CityLevelLocationDetails = {
+  locationScope: 'city' | 'area' | 'route';
+  locationLabel: string;
+  locationCity?: string;
+  locationProvince?: string;
+  locationPrecision: 'city_centroid' | 'approximate' | 'none';
+};
+
+type PostDerivedCityLevelLocationDetails = CityLevelLocationDetails & {
+  observedLocationName: string;
+  autoPublishReviewReasons: string[];
+  detectionSource: string;
+  spatialEvidence?: SpatialEventClassification;
+};
+
+const KNOWN_AREA_LEVEL_LOCATIONS: Record<string, CityLevelLocationDetails> = {
+  'downtown charlottetown': {
+    locationScope: 'area',
+    locationLabel: 'Downtown Charlottetown',
+    locationCity: 'Charlottetown',
+    locationProvince: 'PEI',
+    locationPrecision: 'approximate',
+  },
+  'downtown summerside': {
+    locationScope: 'area',
+    locationLabel: 'Downtown Summerside',
+    locationCity: 'Summerside',
+    locationProvince: 'PEI',
+    locationPrecision: 'approximate',
+  },
+};
+
+const KNOWN_POST_DERIVED_LOCAL_AREA_LOCATIONS: Array<{
+  keys: string[];
+  location: CityLevelLocationDetails;
+  reason?: string;
+}> = [
+  {
+    keys: ['richmond'],
+    location: {
+      locationScope: 'area',
+      locationLabel: 'Richmond, PEI',
+      locationCity: 'Richmond',
+      locationProvince: 'PEI',
+      locationPrecision: 'approximate',
+    },
+  },
+  {
+    keys: ['georgetown cleantech park', 'georgetown clean tech park'],
+    location: {
+      locationScope: 'area',
+      locationLabel: 'Georgetown CleanTech Park, PEI',
+      locationCity: 'Georgetown',
+      locationProvince: 'PEI',
+      locationPrecision: 'approximate',
+    },
+    reason: 'route_like_or_unsupported_location',
+  },
+  {
+    keys: ['n rustico boardwalk', 'north rustico boardwalk'],
+    location: {
+      locationScope: 'area',
+      locationLabel: 'North Rustico Boardwalk, PEI',
+      locationCity: 'North Rustico',
+      locationProvince: 'PEI',
+      locationPrecision: 'approximate',
+    },
+    reason: 'route_like_or_unsupported_location',
+  },
+  {
+    keys: ['miltonvale park'],
+    location: {
+      locationScope: 'area',
+      locationLabel: 'Miltonvale Park, PEI',
+      locationCity: 'Miltonvale Park',
+      locationProvince: 'PEI',
+      locationPrecision: 'approximate',
+    },
+  },
+  {
+    keys: ['greenwich & stanhope beaches', 'greenwich stanhope beaches', 'greenwich and stanhope beaches'],
+    location: {
+      locationScope: 'area',
+      locationLabel: 'Greenwich & Stanhope Beaches, PEI',
+      locationProvince: 'PEI',
+      locationPrecision: 'approximate',
+    },
+    reason: 'multi_venue_area_candidate',
+  },
+  {
+    keys: ['brackley & cavendish beaches', 'brackley cavendish beaches', 'brackley and cavendish beaches'],
+    location: {
+      locationScope: 'area',
+      locationLabel: 'Brackley & Cavendish Beaches, PEI',
+      locationProvince: 'PEI',
+      locationPrecision: 'approximate',
+    },
+    reason: 'multi_venue_area_candidate',
+  },
+  {
+    keys: ['downtown charlottetown parade route'],
+    location: {
+      locationScope: 'area',
+      locationLabel: 'Downtown Charlottetown (Parade Route)',
+      locationCity: 'Charlottetown',
+      locationProvince: 'PEI',
+      locationPrecision: 'approximate',
+    },
+    reason: 'route_like_or_unsupported_location',
+  },
+];
+
+const POST_DERIVED_CONTEXTUAL_AREA_LOCATIONS: Array<{
+  keys: string[];
+  contextPattern: RegExp;
+  location: CityLevelLocationDetails;
+}> = [
+  {
+    keys: ['main street', 'main st'],
+    contextPattern: /\balberton\b/i,
+    location: {
+      locationScope: 'area',
+      locationLabel: 'Main Street, Alberton, PEI',
+      locationCity: 'Alberton',
+      locationProvince: 'PEI',
+      locationPrecision: 'approximate',
+    },
+  },
+  {
+    keys: ['town pond'],
+    contextPattern: /\balberton\b/i,
+    location: {
+      locationScope: 'area',
+      locationLabel: 'Alberton Town Pond, PEI',
+      locationCity: 'Alberton',
+      locationProvince: 'PEI',
+      locationPrecision: 'approximate',
+    },
+  },
+];
+
+const UNSUPPORTED_BROAD_LOCATION_REASONS: Array<{
+  reason: string;
+  pattern: RegExp;
+}> = [
+  {
+    reason: 'route_like_or_unsupported_location',
+    pattern: /\b(route|rte|highway|hwy|trail|waterfront|bridge|boardwalk|relay|parade|walk(?:ing)?\s+route|parade\s+route|course)\b/i,
+  },
+  {
+    reason: 'route_like_or_unsupported_location',
+    pattern: /\b(marathon|run\/walk|walk\/run|fun\s+run|5k|10k|half\s+marathon|walk\s+of\s+freedom)\b/i,
+  },
+  {
+    reason: 'multi_venue_area_candidate',
+    pattern: /\b(beach|beaches|national\s+park)\b/i,
+  },
+  {
+    reason: 'multi_venue_area_candidate',
+    pattern: /\b(various\s+(?:locations|venues)|multiple\s+locations|multiple\s+venues|multi[-\s]?(?:venue|stop|location)|several\s+venues|several\s+locations|across\s+pei|throughout\s+pei|island[-\s]?wide|province[-\s]?wide)\b/i,
+  },
+];
+
+const POST_DERIVED_AREA_EVENT_HINTS: Array<{
+  pattern: RegExp;
+  location: CityLevelLocationDetails;
+}> = [
+  {
+    pattern: /\bcharlottetown\s+busker\s+festival\b/i,
+    location: KNOWN_AREA_LEVEL_LOCATIONS['downtown charlottetown'],
+  },
+  {
+    pattern: /\bdowntown\s+summerside\b.*\b(classic\s+car|car\s+night)\b/i,
+    location: KNOWN_AREA_LEVEL_LOCATIONS['downtown summerside'],
+  },
+];
+
+function normalizePostDerivedLocationCandidate(value: unknown): string {
+  return normalizePeiPlaceName(
+    String(value || '')
+      .replace(/\([^)]*\)/g, ' ')
+      .replace(/\bcanada\b/gi, ' ')
+  )
+    .replace(/\b(pe|pei)\b/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function normalizePostDerivedText(value: unknown): string {
+  return normalizePeiPlaceName(String(value || '').replace(/\([^)]*\)/g, ' '));
+}
+
+function locationLooksLikeOrganizerOrBusiness(value: unknown): boolean {
+  return /\b(inc|incorporated|ltd|limited|corp|corporation|association|society|festival|committee|marathon)\b/i.test(
+    String(value || '')
+  ) || /\b(?:town|city|municipality|rural\s+municipality)\s+of\b/i.test(
+    String(value || '')
+  );
+}
+
+function locationLooksLikeSpecificVenue(value: unknown): boolean {
+  return /\b(park|centre|center|hall|arena|stadium|theatre|theater|cafe|restaurant|bar|pub|club|church|school|hotel|inn|brewery|market|stage|room|patio|quay|wharf|pier|tent|courtyard|auditorium|gallery|museum|shop|store|parlour|studio|mall|amphitheatre|amphitheater|golf\s+course)\b/i.test(
+    String(value || '')
+  );
+}
+
+function locationLooksLikeRouteStopBrand(value: unknown): boolean {
+  return /^(irving|esso|shell|petro[-\s]?canada|circle\s+k|a\s*&\s*w|tim\s+hortons|mcdonald'?s|wendy'?s|sobeys|superstore|walmart)$/i.test(
+    String(value || '').trim()
+  );
+}
+
+function locationLooksLikeCompositeRouteLabel(value: unknown): boolean {
+  const raw = String(value || '');
+  return /\/|\\|\bstart\b.*\bfinish\b|\bfinish\b.*\bstart\b|\bdepart\b/i.test(raw);
+}
+
+function buildPostDerivedReviewReasons(
+  rawLocation: unknown,
+  combinedText: unknown,
+  extraReasons: string[] = []
+): string[] {
+  return Array.from(new Set([
+    'post_derived_area_candidate',
+    ...getUnsupportedBroadLocationReasons(rawLocation),
+    ...getUnsupportedBroadLocationReasons(combinedText),
+    ...extraReasons,
+  ]));
+}
+
+function withAdditionalPostDerivedReviewReasons(
+  location: PostDerivedCityLevelLocationDetails,
+  reasons: string[]
+): PostDerivedCityLevelLocationDetails {
+  return {
+    ...location,
+    autoPublishReviewReasons: Array.from(new Set([
+      ...location.autoPublishReviewReasons,
+      ...reasons,
+    ])),
+  };
+}
+
+function resolveKnownPostDerivedAreaLocation(
+  value: unknown
+): CityLevelLocationDetails | null {
+  const normalized = normalizePostDerivedLocationCandidate(value);
+  if (!normalized || locationLooksLikeOrganizerOrBusiness(value)) return null;
+
+  for (const [key, details] of Object.entries(KNOWN_AREA_LEVEL_LOCATIONS)) {
+    if (normalized === key || normalized.startsWith(`${key} `)) {
+      return details;
+    }
+  }
+
+  return null;
+}
+
+function resolveKnownPostDerivedLocalAreaLocation(params: {
+  rawLocation: unknown;
+  combinedText: string;
+}): (CityLevelLocationDetails & { extraReasons: string[] }) | null {
+  const normalized = normalizePostDerivedLocationCandidate(params.rawLocation);
+  if (!normalized || locationLooksLikeOrganizerOrBusiness(params.rawLocation)) return null;
+
+  if (
+    normalized === 'downtown charlottetown' &&
+    /\bparade\s+route\b/i.test(String(params.rawLocation || ''))
+  ) {
+    return {
+      locationScope: 'area',
+      locationLabel: 'Downtown Charlottetown (Parade Route)',
+      locationCity: 'Charlottetown',
+      locationProvince: 'PEI',
+      locationPrecision: 'approximate',
+      extraReasons: ['route_like_or_unsupported_location'],
+    };
+  }
+
+  for (const area of KNOWN_POST_DERIVED_LOCAL_AREA_LOCATIONS) {
+    if (!area.keys.includes(normalized)) continue;
+    return {
+      ...area.location,
+      extraReasons: area.reason ? [area.reason] : [],
+    };
+  }
+
+  for (const area of POST_DERIVED_CONTEXTUAL_AREA_LOCATIONS) {
+    if (!area.keys.includes(normalized) || !area.contextPattern.test(params.combinedText)) {
+      continue;
+    }
+    return {
+      ...area.location,
+      extraReasons: [],
+    };
+  }
+
+  return null;
+}
+
+function resolveKnownPostDerivedCityLocation(
+  value: unknown
+): CityLevelLocationDetails | null {
+  const normalized = normalizePostDerivedLocationCandidate(value);
+  if (!normalized || locationLooksLikeOrganizerOrBusiness(value)) return null;
+  if (!KNOWN_PEI_CITY_NAMES.has(normalized)) return null;
+
+  const city = normalized
+    .split(/\s+/)
+    .map((token) => token.charAt(0).toUpperCase() + token.slice(1))
+    .join(' ');
+
+  return {
+    locationScope: 'city',
+    locationLabel: `${city}, PEI`,
+    locationCity: city,
+    locationProvince: 'PEI',
+    locationPrecision: 'city_centroid',
+  };
+}
+
+function getUnsupportedBroadLocationReasons(value: unknown): string[] {
+  const raw = String(value || '').trim();
+  if (!raw) return [];
+  const reasons = new Set<string>();
+  const normalized = normalizePostDerivedText(raw);
+
+  if (/^(pe|pei)$/.test(normalized)) {
+    reasons.add('province_only_location');
+  }
+
+  for (const check of UNSUPPORTED_BROAD_LOCATION_REASONS) {
+    if (check.pattern.test(raw) || check.pattern.test(normalized)) {
+      reasons.add(check.reason);
+    }
+  }
+
+  return Array.from(reasons);
+}
+
+function resolveUnsupportedPostDerivedBroadLocation(params: {
+  rawLocation: string;
+  combinedText: string;
+  allowContextLocationFallback?: boolean;
+}): PostDerivedCityLevelLocationDetails | null {
+  const allowContextLocationFallback = params.allowContextLocationFallback !== false;
+  const rawReasons = getUnsupportedBroadLocationReasons(params.rawLocation);
+  const contextReasons = getUnsupportedBroadLocationReasons(params.combinedText);
+  const reasons = Array.from(new Set([
+    ...rawReasons,
+    ...contextReasons,
+  ]));
+  if (reasons.length === 0) return null;
+
+  const normalizedRaw = normalizePostDerivedText(params.rawLocation);
+  const normalizedCombined = allowContextLocationFallback
+    ? normalizePostDerivedText(params.combinedText)
+    : '';
+  const rawLooksLikeOrganizer = locationLooksLikeOrganizerOrBusiness(params.rawLocation);
+  const rawLooksLikeRouteStopBrand = locationLooksLikeRouteStopBrand(params.rawLocation);
+  const rawLooksLikeCompositeRoute = locationLooksLikeCompositeRouteLabel(params.rawLocation);
+  const rawLooksLikeVenue = locationLooksLikeSpecificVenue(params.rawLocation);
+  const rawHasUnsupportedSignal = rawReasons.length > 0 ||
+    rawLooksLikeRouteStopBrand ||
+    rawLooksLikeCompositeRoute;
+
+  if (!allowContextLocationFallback && !rawHasUnsupportedSignal) {
+    return null;
+  }
+
+  if (
+    !rawLooksLikeOrganizer &&
+    !rawLooksLikeRouteStopBrand &&
+    !rawLooksLikeCompositeRoute &&
+    !rawLooksLikeVenue
+  ) {
+    for (const [cityKey, place] of Object.entries(KNOWN_AREA_LEVEL_LOCATIONS)) {
+      if (normalizedRaw.includes(cityKey) || (
+        allowContextLocationFallback && normalizedCombined.includes(cityKey)
+      )) {
+        return {
+          ...place,
+          observedLocationName: params.rawLocation,
+          autoPublishReviewReasons: ['post_derived_area_candidate', ...reasons],
+          detectionSource: 'unsupported_broad_location',
+        };
+      }
+    }
+
+    for (const cityKey of KNOWN_PEI_CITY_NAMES) {
+      if (!(normalizedRaw.includes(cityKey) || (
+        allowContextLocationFallback && normalizedCombined.includes(cityKey)
+      ))) {
+        continue;
+      }
+      const city = cityKey
+        .split(/\s+/)
+        .map((token) => token.charAt(0).toUpperCase() + token.slice(1))
+        .join(' ');
+      return {
+        locationScope: 'city',
+        locationLabel: `${city}, PEI`,
+        locationCity: city,
+        locationProvince: 'PEI',
+        locationPrecision: 'city_centroid',
+        observedLocationName: params.rawLocation,
+        autoPublishReviewReasons: ['post_derived_area_candidate', ...reasons],
+        detectionSource: 'unsupported_broad_location',
+      };
+    }
+  }
+
+  if (
+    /^(pe|pei|prince edward island)$/.test(normalizedRaw) ||
+    (
+      allowContextLocationFallback &&
+      /\b(location\s+not\s+specified|across\s+pei|throughout\s+pei|island[-\s]?wide|province[-\s]?wide)\b/i.test(
+        params.combinedText
+      )
+    )
+  ) {
+    return {
+      locationScope: 'area',
+      locationLabel: 'PEI',
+      locationProvince: 'PEI',
+      locationPrecision: 'approximate',
+      observedLocationName: params.rawLocation,
+      autoPublishReviewReasons: ['post_derived_area_candidate', ...reasons],
+      detectionSource: 'unsupported_broad_location',
+    };
+  }
+
+  if (!rawLooksLikeOrganizer && !rawLooksLikeVenue) {
+    return {
+      locationScope: 'area',
+      locationLabel: params.rawLocation,
+      locationProvince: /\b(pe|pei|prince edward island)\b/i.test(params.rawLocation)
+        ? 'PEI'
+        : undefined,
+      locationPrecision: 'approximate',
+      observedLocationName: params.rawLocation,
+      autoPublishReviewReasons: ['post_derived_area_candidate', ...reasons],
+      detectionSource: 'unsupported_broad_location',
+    };
+  }
+
+  return null;
+}
+
+export function resolvePostDerivedCityLevelEventLocation(params: {
+  item?: Partial<ParserProcessedEvent> | Partial<ExtractedItem> | null;
+  row: RawRowData;
+  establishment?: string;
+}): PostDerivedCityLevelLocationDetails | null {
+  if (isCityLevelFacebookEventLocation(params.row)) {
+    return null;
+  }
+
+  const item = (params.item || {}) as Record<string, unknown>;
+  const eventName = String(item.name || item.eventName || '').trim();
+  const description = String(item.description || params.row.text || '').trim();
+  const rowEstablishment = String(params.establishment || params.row.userName || params.row.pageName || '').trim();
+  const observedCandidates = [
+    { value: item.additionalLocation, source: 'item_additional_location' },
+    { value: item.venue, source: 'item_venue' },
+    { value: item.establishment, source: 'item_establishment' },
+  ]
+    .map((candidate) => ({
+      value: String(candidate.value || '').trim(),
+      source: candidate.source,
+    }))
+    .filter((candidate) => candidate.value.length > 0);
+
+  const contextText = [
+    eventName,
+    description,
+    params.row.sharedPostText,
+    params.row.text,
+    rowEstablishment,
+  ].filter(Boolean).join('\n');
+
+  const spatialEvidence = classifySpatialEvent({
+    name: eventName,
+    description,
+    location: observedCandidates[0]?.value || '',
+    combinedText: contextText,
+    modelSpatialEvidence: (item.spatial || item.spatialEvidence || null) as any,
+  });
+  if (
+    spatialEvidence.kind === 'route' ||
+    spatialEvidence.kind === 'multi_location' ||
+    spatialEvidence.kind === 'separate_occurrences'
+  ) {
+    const normalizedContext = normalizePostDerivedText(contextText);
+    const inferredCityKey = Array.from(KNOWN_PEI_CITY_NAMES).find((city) =>
+      normalizedContext.includes(city)
+    );
+    const inferredCity = inferredCityKey
+      ? inferredCityKey.split(/\s+/).map((token) => token.charAt(0).toUpperCase() + token.slice(1)).join(' ')
+      : undefined;
+    const explicitLabels = spatialEvidence.locations.map((entry) => entry.label).filter(Boolean);
+    const eventLabel = eventName || observedCandidates[0]?.value || rowEstablishment || 'Spatial event';
+    const locationLabel = spatialEvidence.kind === 'route'
+      ? `${eventLabel} Route`
+      : spatialEvidence.kind === 'multi_location'
+        ? `${eventLabel} Locations`
+        : `${eventLabel} — separate location occurrences`;
+    return {
+      locationScope: spatialEvidence.kind === 'route' ? 'route' : 'area',
+      locationLabel,
+      locationCity: inferredCity,
+      locationProvince: 'PEI',
+      locationPrecision: explicitLabels.length > 0 ? 'approximate' : 'none',
+      observedLocationName: explicitLabels.join('; ') || observedCandidates[0]?.value || eventLabel,
+      autoPublishReviewReasons: Array.from(new Set([
+        'post_derived_area_candidate',
+        ...spatialEvidence.reviewReasons,
+      ])),
+      detectionSource: 'spatial_event_classifier',
+      spatialEvidence,
+    };
+  }
+
+  for (const candidate of observedCandidates) {
+    const localArea = resolveKnownPostDerivedLocalAreaLocation({
+      rawLocation: candidate.value,
+      combinedText: contextText,
+    });
+    if (localArea) {
+      const { extraReasons, ...location } = localArea;
+      return {
+        ...location,
+        observedLocationName: candidate.value,
+        autoPublishReviewReasons: buildPostDerivedReviewReasons(
+          candidate.value,
+          contextText,
+          extraReasons
+        ),
+        detectionSource: candidate.source,
+      };
+    }
+
+    const area = resolveKnownPostDerivedAreaLocation(candidate.value);
+    if (area) {
+      return {
+        ...area,
+        observedLocationName: candidate.value,
+        autoPublishReviewReasons: buildPostDerivedReviewReasons(candidate.value, contextText),
+        detectionSource: candidate.source,
+      };
+    }
+
+    const city = resolveKnownPostDerivedCityLocation(candidate.value);
+    if (city) {
+      return {
+        ...city,
+        observedLocationName: candidate.value,
+        autoPublishReviewReasons: buildPostDerivedReviewReasons(candidate.value, contextText),
+        detectionSource: candidate.source,
+      };
+    }
+
+    const unsupported = resolveUnsupportedPostDerivedBroadLocation({
+      rawLocation: candidate.value,
+      combinedText: contextText,
+      allowContextLocationFallback: false,
+    });
+    if (unsupported) return unsupported;
+  }
+
+  if (observedCandidates.length > 0) {
+    return null;
+  }
+
+  for (const hint of POST_DERIVED_AREA_EVENT_HINTS) {
+    if (!hint.pattern.test(contextText)) continue;
+    return {
+      ...hint.location,
+      observedLocationName: eventName || rowEstablishment || hint.location.locationLabel,
+      autoPublishReviewReasons: ['post_derived_area_candidate'],
+      detectionSource: 'event_text_area_hint',
+    };
+  }
+
+  const rowOnlyLocalArea = resolveKnownPostDerivedLocalAreaLocation({
+    rawLocation: rowEstablishment,
+    combinedText: contextText,
+  });
+  if (rowOnlyLocalArea && eventName) {
+    const { extraReasons, ...location } = rowOnlyLocalArea;
+    return {
+      ...location,
+      observedLocationName: rowEstablishment,
+      autoPublishReviewReasons: buildPostDerivedReviewReasons(
+        rowEstablishment,
+        contextText,
+        extraReasons
+      ),
+      detectionSource: 'row_establishment_area_hint',
+    };
+  }
+
+  const rowOnlyArea = resolveKnownPostDerivedAreaLocation(rowEstablishment);
+  if (rowOnlyArea && eventName) {
+    return {
+      ...rowOnlyArea,
+      observedLocationName: rowEstablishment,
+      autoPublishReviewReasons: buildPostDerivedReviewReasons(rowEstablishment, contextText),
+      detectionSource: 'row_establishment_area_hint',
+    };
+  }
+
+  const unsupportedRow = resolveUnsupportedPostDerivedBroadLocation({
+    rawLocation: rowEstablishment,
+    combinedText: contextText,
+  });
+  if (unsupportedRow && eventName) return unsupportedRow;
+
+  return null;
+}
+
+function rowEstablishmentLooksLikePostDerivedCityLevelSource(
+  row: RawRowData,
+  establishment: string
+): boolean {
+  if (isCityLevelFacebookEventLocation(row)) return false;
+  const details = resolvePostDerivedCityLevelEventLocation({
+    row,
+    establishment,
+    item: {
+      name: String(row.sharedPostText || '').trim(),
+      description: String(row.text || '').trim(),
+    } as Partial<ParserProcessedEvent>,
+  });
+  return Boolean(details);
 }
 
 async function buildStructuredFacebookEventScraperEvents(
@@ -1733,14 +2467,14 @@ async function queueCityLevelFacebookEventForReview(params: {
 }
 
 /**
- * Attempt to publish a just-queued city-level event without manual review.
- * Service-level gates decide whether the review has enough structured
- * Facebook Event provenance; failures leave it queued for manual review.
+ * Publish a just-queued city-level event without manual review when its
+ * location resolves to a canonical PEI centroid. Failures leave the review
+ * queued for the manual flow — never fatal to row processing.
  */
 async function autoPublishQueuedCityLevelEvent(params: {
   reviewDocId?: string;
   rowIndex: number;
-  location: NonNullable<ReturnType<typeof getCityLevelFacebookEventLocationDetails>>;
+  location: CityLevelLocationDetails;
   eventName?: string;
 }): Promise<void> {
   if (!params.reviewDocId) {
@@ -1763,6 +2497,151 @@ async function autoPublishQueuedCityLevelEvent(params: {
       rowIndex: params.rowIndex,
       reviewDocId: params.reviewDocId,
       locationLabel: params.location.locationLabel,
+      eventName: params.eventName,
+      error: error instanceof Error ? error.message : String(error),
+    });
+  }
+}
+
+function buildPostDerivedCityLevelSourceContentSignature(params: {
+  row: RawRowData;
+  eventName?: string;
+  eventDate?: string;
+  eventTime?: string;
+  locationLabel?: string;
+  observedLocationName?: string;
+}): string {
+  const payload = [
+    params.row.uniqueId,
+    params.row.facebookUrl,
+    params.row.topLevelUrl,
+    params.eventName,
+    params.eventDate,
+    params.eventTime,
+    params.locationLabel,
+    params.observedLocationName,
+    params.row.sharedPostText,
+    params.row.text,
+  ]
+    .map((value) => String(value || '').trim())
+    .filter(Boolean)
+    .join('|');
+  return payload
+    ? createHash('sha1').update(payload).digest('hex').slice(0, 40)
+    : '';
+}
+
+async function queuePostDerivedCityLevelEventForReview(params: {
+  location: PostDerivedCityLevelLocationDetails;
+  row: RawRowData;
+  rowIndex: number;
+  batchManager: BatchManager;
+  parserMode: 'legacy' | 'full5stage';
+  eventName?: string;
+  eventDate?: string;
+  eventTime?: string;
+  endDate?: string;
+  endTime?: string;
+  eventType?: string;
+  category?: string;
+  description?: string;
+  imageUrl?: string;
+  mediaUrls?: string[];
+  ticketsBuyUrl?: string;
+  externalLinks?: string[];
+}): Promise<void> {
+  const state = params.batchManager.getState();
+  const sourceContentSignature = buildPostDerivedCityLevelSourceContentSignature({
+    row: params.row,
+    eventName: params.eventName,
+    eventDate: params.eventDate,
+    eventTime: params.eventTime,
+    locationLabel: params.location.locationLabel,
+    observedLocationName: params.location.observedLocationName,
+  });
+
+  const descriptionParts = [
+    params.description,
+    params.location.observedLocationName &&
+      params.location.observedLocationName !== params.location.locationLabel
+      ? `Observed broad location: ${params.location.observedLocationName}`
+      : '',
+    params.location.autoPublishReviewReasons.length > 0
+      ? `Review reasons: ${params.location.autoPublishReviewReasons.join(', ')}`
+      : '',
+  ].filter(Boolean);
+
+  try {
+    const result = await firestoreService.queueCityLevelEventReview({
+      uniqueId: params.row.uniqueId,
+      fileId: state.fileId,
+      fileName: state.fileName,
+      rowIndex: params.rowIndex,
+      parserMode: params.parserMode,
+      eventName: params.eventName,
+      eventDate: params.eventDate,
+      eventTime: params.eventTime,
+      endDate: params.endDate,
+      endTime: params.endTime,
+      eventType: params.eventType,
+      category: params.category,
+      description: descriptionParts.join(' | ') || undefined,
+      imageUrl: params.imageUrl,
+      mediaUrls: params.mediaUrls,
+      ticketsBuyUrl: params.ticketsBuyUrl,
+      externalLinks: params.externalLinks,
+      locationLabel: params.location.locationLabel,
+      locationCity: params.location.locationCity,
+      locationProvince: params.location.locationProvince,
+      locationScope: params.location.locationScope,
+      locationPrecision: params.location.locationPrecision,
+      observedLocationName: params.location.observedLocationName,
+      organizerName: selectEstablishment(params.row.pageName, params.row.userName) || undefined,
+      facebookUrl: String(params.row.facebookUrl || '').trim() || undefined,
+      topLevelUrl: deriveTopLevelPostUrlForUnknownQueue(params.row),
+      sourceScraperType: params.row.sourceScraperType,
+      sourceContentSignature,
+      autoPublishSource: 'parser_fallback',
+      autoPublishFieldSources: {
+        title: params.eventName ? 'parser_event_name' : 'unknown',
+        dateTime: params.eventDate || params.eventTime ? 'parser_event_datetime' : 'unknown',
+        location: 'parser_event_location',
+      },
+      autoPublishReviewReasons: params.location.autoPublishReviewReasons,
+      spatialEvidence: params.location.spatialEvidence,
+    });
+
+    if (!result.queued) {
+      logger.debug('Post-derived city/area event candidate not queued', {
+        rowIndex: params.rowIndex,
+        locationLabel: params.location.locationLabel,
+        observedLocationName: params.location.observedLocationName,
+        eventName: params.eventName,
+        reason: result.reason,
+      });
+      return;
+    }
+
+    logger.info('Queued post-derived city/area event for review', {
+      rowIndex: params.rowIndex,
+      reviewDocId: result.docId,
+      locationLabel: params.location.locationLabel,
+      observedLocationName: params.location.observedLocationName,
+      eventName: params.eventName,
+      reasons: params.location.autoPublishReviewReasons,
+    });
+
+    await autoPublishQueuedCityLevelEvent({
+      reviewDocId: result.docId,
+      rowIndex: params.rowIndex,
+      location: params.location,
+      eventName: params.eventName,
+    });
+  } catch (error) {
+    logger.warn('Failed to queue post-derived city/area event candidate', {
+      rowIndex: params.rowIndex,
+      locationLabel: params.location.locationLabel,
+      observedLocationName: params.location.observedLocationName,
       eventName: params.eventName,
       error: error instanceof Error ? error.message : String(error),
     });
@@ -1820,6 +2699,8 @@ async function queueUnknownVenueForReview(params: {
         reason: result.reason,
         testMode: result.testMode,
       });
+    } else {
+      params.batchManager.incrementUnknownVenues();
     }
   } catch (error) {
     logger.warn('Failed to queue unknown venue candidate', {
@@ -1917,6 +2798,10 @@ export async function processRow(
     const isDryRun = config?.dryRun === true;
 
     const cityLevelFacebookEventLocation = isCityLevelFacebookEventLocation(row);
+    const postDerivedCityLevelRowSource = rowEstablishmentLooksLikePostDerivedCityLevelSource(
+      row,
+      establishment
+    );
 
     // Find matching venue
     let venueMatch: MatchInfo = {
@@ -1930,6 +2815,12 @@ export async function processRow(
         establishment,
         locationName: row.facebookEventLocationName || row.userName,
         organizerName: row.facebookEventOrganizerName,
+      });
+    } else if (postDerivedCityLevelRowSource) {
+      logger.info('Skipping row-level venue match for post-derived city/area source', {
+        rowIndex,
+        establishment,
+        sourceScraperType: row.sourceScraperType,
       });
     } else {
       const venueMatchStart = Date.now();
@@ -1945,7 +2836,7 @@ export async function processRow(
       });
     }
 
-    if (!cityLevelFacebookEventLocation && !venueMatch.isMatch && row.sourceScraperType === 'events' && String(row.address || '').trim()) {
+    if (!cityLevelFacebookEventLocation && !postDerivedCityLevelRowSource && !venueMatch.isMatch && row.sourceScraperType === 'events' && String(row.address || '').trim()) {
       const addressMatchStart = Date.now();
       const addressMatch = await firestoreService.findVenueByAddress(String(row.address || '').trim());
       logTiming('venue_match_row_address', addressMatchStart, {
@@ -2074,6 +2965,12 @@ export async function processRow(
         locationName: row.facebookEventLocationName || row.userName,
         organizerName: row.facebookEventOrganizerName,
       });
+    } else if (!venueMatch.isMatch && postDerivedCityLevelRowSource) {
+      logger.debug('Skipping row-level unknown-venue queue for post-derived city/area source', {
+        rowIndex,
+        establishment,
+        sourceScraperType: row.sourceScraperType,
+      });
     } else if (!venueMatch.isMatch) {
       logger.debug('No venue match found for row-level establishment', {
         rowIndex,
@@ -2105,6 +3002,7 @@ export async function processRow(
     if (parserMode === 'full5stage') {
       let parserMediaUrls = normalizeUrlList(row.mediaUrls);
       const parserSharedPostThumbnails = normalizeUrlList(row.sharedPostThumbnails);
+      let venueFallbackMediaUrls: string[] = [];
       let parserMediaSource: EventImageProvenanceSource = 'post_media';
       let parserMediaSourceReason = 'source_post_media';
       const hasUsableParserMedia =
@@ -2115,18 +3013,18 @@ export async function processRow(
           combinedText,
           {
             limit: 4,
-            facebookUrl: row.facebookUrl,
-          }
-        );
+          facebookUrl: row.facebookUrl,
+        }
+      );
         if (fallbackMediaUrls.length > 0) {
-          parserMediaUrls = mergeUniqueUrls(fallbackMediaUrls, parserMediaUrls).slice(0, 4);
+          venueFallbackMediaUrls = fallbackMediaUrls.slice(0, 4);
           parserMediaSource = 'venue_media_fallback';
           parserMediaSourceReason = 'recovered_managed_media_from_existing_venue_events';
-          logger.info('Recovered managed media for parser rerun', {
+          logger.info('Recovered managed media for event display fallback', {
             rowIndex,
             venueId: venue.id,
             originalMediaCount: normalizeUrlList(row.mediaUrls).length,
-            fallbackMediaCount: fallbackMediaUrls.length,
+            fallbackMediaCount: venueFallbackMediaUrls.length,
           });
         }
       }
@@ -2223,6 +3121,11 @@ export async function processRow(
           establishmentMap,
           parserConfig
         );
+        fullParserEvents = applyVenueMediaFallbacksToFullParserEvents(
+          fullParserEvents,
+          venueFallbackMediaUrls,
+          parserMediaSourceReason
+        );
         fullParserEvents = selectSingleFacebookEventScraperEvent(fullParserEvents, row, rowIndex);
       }
       logTiming('parse_full5stage', parseStart, {
@@ -2263,6 +3166,7 @@ export async function processRow(
           timestamp: row.timestamp,
           utcStartDate: row.utcStartDate,
           mediaUrls: parserMediaUrls,
+          venueFallbackMediaUrls,
               parserMode: 'full5stage',
               dryRun: isDryRun,
             },
@@ -2397,6 +3301,7 @@ export async function processRow(
             timestamp: row.timestamp,
             utcStartDate: row.utcStartDate,
             mediaUrls: parserMediaUrls,
+            venueFallbackMediaUrls,
             parserMode: 'full5stage',
             dryRun: isDryRun,
           },
@@ -2543,6 +3448,25 @@ export async function processRow(
             itemName: itemAny.name || '',
             candidateVenue,
           });
+          const cityLevelLocation = resolvePostDerivedCityLevelEventLocation({
+            item: item as Partial<ExtractedItem>,
+            row,
+            establishment,
+          });
+          if (cityLevelLocation) {
+            await queuePostDerivedCityLevelEventForReview({
+              location: cityLevelLocation,
+              row,
+              rowIndex,
+              batchManager,
+              parserMode: 'legacy',
+              eventName: String(itemAny.name || itemAny.eventName || '').trim() || undefined,
+              eventDate: String(itemAny.startDate || '').trim() || undefined,
+              eventTime: String(itemAny.startTime || '').trim() || undefined,
+              description: String(itemAny.description || '').trim() || undefined,
+            });
+            continue;
+          }
           await queueUnknownVenueForReview({
             venueName: candidateVenue,
             source: 'item_candidate',
@@ -2839,6 +3763,262 @@ export function resolveFullParserEventImageUrls(
   };
 }
 
+type FullParserVenueMatchContext = firestoreService.VenueMatchContext;
+
+type FullParserVenueMatcher = (
+  candidate: string,
+  facebookUrl?: string,
+  context?: FullParserVenueMatchContext
+) => Promise<MatchInfo>;
+
+function uniqueVenueCandidates(values: Array<unknown>): string[] {
+  const seen = new Set<string>();
+  const candidates: string[] = [];
+
+  for (const value of values) {
+    const candidate = String(value || '').trim();
+    if (!candidate) continue;
+
+    const key = normalizeVenueName(candidate);
+    if (!key || seen.has(key)) continue;
+
+    seen.add(key);
+    candidates.push(candidate);
+  }
+
+  return candidates;
+}
+
+function expandStageVenueCandidate(value: unknown): string[] {
+  const raw = String(value || '').trim();
+  if (!raw) return [];
+
+  const strippedStage = raw
+    .replace(/\s*[-–—:]?\s*(?:main\s+)?(?:stage|courtyard|patio|room|auditorium|theatre|theater)\s*$/i, '')
+    .trim();
+  const venueNameBeforeCity = locationLooksLikeSpecificVenue(raw)
+    ? raw.split(',')[0]?.trim()
+    : '';
+
+  return uniqueVenueCandidates([raw, strippedStage, venueNameBeforeCity]);
+}
+
+function candidateLooksLikeRowScopedSubLocation(
+  candidate: string,
+  rowVenue: VenueData | null,
+  rowEstablishment: string
+): boolean {
+  if (!SUB_LOCATION_NAME_HINT_REGEX.test(candidate)) return false;
+
+  const rowNames = new Set<string>([
+    normalizeVenueName(rowEstablishment),
+    ...Array.from(normalizedVenueNamesForVenue(rowVenue)),
+  ].filter(Boolean));
+  if (rowNames.size === 0) return false;
+
+  const normalizedCandidate = normalizeVenueName(candidate);
+  if (rowNames.has(normalizedCandidate)) return true;
+
+  const genericTokens = new Set([
+    'stage',
+    'main',
+    'room',
+    'hall',
+    'food',
+    'market',
+    'restaurant',
+    'bar',
+    'patio',
+    'courtyard',
+  ]);
+  const candidateTokens = normalizedCandidate
+    .split(/\s+/)
+    .filter((token) => token.length >= 4 && !genericTokens.has(token));
+  if (candidateTokens.length === 0) return false;
+
+  for (const rowName of rowNames) {
+    const rowTokens = rowName
+      .split(/\s+/)
+      .filter((token) => token.length >= 4 && !genericTokens.has(token));
+    if (rowTokens.some((token) => candidateTokens.includes(token))) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function differentVenueCandidatesForFullParserItem(params: {
+  candidates: string[];
+  rowVenue: VenueData | null;
+  rowEstablishment: string;
+}): string[] {
+  const normalizedRowEstablishment = normalizeVenueName(params.rowEstablishment);
+
+  return params.candidates.filter((candidate) => {
+    const normalizedCandidate = normalizeVenueName(candidate);
+    if (!normalizedCandidate || normalizedCandidate === normalizedRowEstablishment) {
+      return false;
+    }
+    return !candidateLooksLikeRowScopedSubLocation(
+      candidate,
+      params.rowVenue,
+      params.rowEstablishment
+    );
+  });
+}
+
+async function findFirstFullParserVenueMatch(params: {
+  candidates: string[];
+  matcher: FullParserVenueMatcher;
+  rowIndex: number;
+  reason: string;
+  context?: FullParserVenueMatchContext;
+}): Promise<VenueData | null> {
+  for (const candidate of params.candidates) {
+    const itemMatchStart = Date.now();
+    const itemMatch = await params.matcher(candidate, undefined, params.context);
+    logTiming('venue_match_item', itemMatchStart, {
+      rowIndex: params.rowIndex,
+      candidateVenue: candidate,
+      hasFacebookUrl: false,
+      matched: itemMatch.isMatch,
+      parserMode: 'full5stage',
+      reason: params.reason,
+      regionHint: params.context?.regionHint || '',
+      cityHint: params.context?.cityHint || '',
+    });
+    if (itemMatch.isMatch && itemMatch.matchedVenue) {
+      return itemMatch.matchedVenue;
+    }
+  }
+
+  return null;
+}
+
+function normalizeKnownVenueOverrideLocation(value: unknown): string {
+  return normalizePeiPlaceName(value)
+    .replace(/\s+(pei|pe)$/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function isShellfishOrganizerName(value: unknown): boolean {
+  const normalized = normalizeVenueName(String(value || ''));
+  return normalized === 'pei international shellfish festival' ||
+    normalized === 'pei international shellfish festival charlottetown pe' ||
+    normalized === 'peishellfish';
+}
+
+function isBroadCharlottetownLocation(value: unknown): boolean {
+  return normalizeKnownVenueOverrideLocation(value) === 'charlottetown';
+}
+
+function isSpecificVenueCandidateForKnownOverride(value: unknown): boolean {
+  const raw = String(value || '').trim();
+  if (!raw) return false;
+  if (isBroadCharlottetownLocation(raw) || isShellfishOrganizerName(raw)) return false;
+
+  const normalizedPlace = normalizeKnownVenueOverrideLocation(raw);
+  if (!normalizedPlace || normalizedPlace === 'pei') return false;
+
+  return true;
+}
+
+function knownPostDerivedVenueOverrideCandidates(params: {
+  item: ParserProcessedEvent;
+  row: RawRowData;
+  establishment: string;
+}): string[] {
+  const itemAny = params.item as unknown as Record<string, unknown>;
+  const contextText = [
+    params.item.name,
+    itemAny.eventName,
+    params.item.description,
+    params.row.sharedPostText,
+    params.row.text,
+  ].filter(Boolean).join(' ');
+  const eventText = normalizeVenueName([
+    contextText,
+  ].join(' '));
+  if (!eventText.includes('pei international shellfish festival')) {
+    return [];
+  }
+
+  const sourceIdentity = normalizeVenueName([
+    params.row.facebookUrl,
+    params.row.pageName,
+    params.row.userName,
+    params.establishment,
+  ].filter(Boolean).join(' '));
+  if (
+    !sourceIdentity.includes('peishellfish') &&
+    !sourceIdentity.includes('pei international shellfish festival')
+  ) {
+    return [];
+  }
+
+  const locationCandidates = [
+    params.item.additionalLocation,
+    itemAny.venue,
+    params.item.establishment,
+  ].filter((value) => String(value || '').trim().length > 0);
+  const hasBroadCharlottetownCandidate = locationCandidates.some((candidate) =>
+    isBroadCharlottetownLocation(candidate)
+  );
+  const hasOnlyShellfishOrganizerOrBroadLocationCandidates =
+    locationCandidates.length > 0 &&
+    locationCandidates.every((candidate) =>
+      isShellfishOrganizerName(candidate) || isBroadCharlottetownLocation(candidate)
+    );
+  const itemName = normalizeVenueName(String(params.item.name || itemAny.eventName || ''));
+  const contextHasGenericCharlottetownCue =
+    itemName === 'pei international shellfish festival' &&
+    /\breturns?\s+to\s+charlottetown\b/i.test(contextText);
+  if (
+    !hasBroadCharlottetownCandidate &&
+    !contextHasGenericCharlottetownCue &&
+    !hasOnlyShellfishOrganizerOrBroadLocationCandidates
+  ) {
+    return [];
+  }
+  if (locationCandidates.some((candidate) => isSpecificVenueCandidateForKnownOverride(candidate))) {
+    return [];
+  }
+
+  return ['Charlottetown Event Grounds'];
+}
+
+function sourceSuggestsPeiLibrarySystem(row: RawRowData, establishment: string): boolean {
+  const rowAny = row as unknown as Record<string, unknown>;
+  const rawCorpus = [
+    row.facebookUrl,
+    row.pageName,
+    row.userName,
+    rowAny.sourcePageUrl,
+    rowAny.cleanedFacebookUrl,
+    establishment,
+  ].filter(Boolean).join(' ');
+  const normalizedCorpus = normalizeVenueName(rawCorpus);
+
+  return (
+    /\bPEILibrary\b/i.test(rawCorpus) ||
+    normalizedCorpus.includes('pei public library service') ||
+    normalizedCorpus.includes('des bibliotheques publiques ipe')
+  );
+}
+
+function inferFullParserVenueMatchContext(
+  row: RawRowData,
+  establishment: string
+): FullParserVenueMatchContext | undefined {
+  if (sourceSuggestsPeiLibrarySystem(row, establishment)) {
+    return { regionHint: 'PE' };
+  }
+
+  return undefined;
+}
+
 async function resolveVenueForFullParserEvent(
   item: ParserProcessedEvent,
   rowVenue: VenueData | null,
@@ -2846,43 +4026,143 @@ async function resolveVenueForFullParserEvent(
   establishment: string,
   rowIndex: number
 ): Promise<VenueData | null> {
+  return resolveVenueForFullParserEventWithMatcherForRegression({
+    item,
+    rowVenue,
+    row,
+    establishment,
+    rowIndex,
+    matcher: async (candidate, facebookUrl, context) =>
+      firestoreService.findMatchingVenue(candidate, facebookUrl, context),
+  });
+}
+
+export async function resolveVenueForFullParserEventWithMatcherForRegression(params: {
+  item: ParserProcessedEvent;
+  rowVenue: VenueData | null;
+  row: RawRowData;
+  establishment: string;
+  rowIndex: number;
+  matcher: FullParserVenueMatcher;
+}): Promise<VenueData | null> {
+  const { item, rowVenue, row, establishment, rowIndex, matcher } = params;
   // Get the event's own establishment/venue names
   const itemEstablishment = String(item.establishment || '').trim();
   const itemVenue = String(item.venue || '').trim();
+  const itemAdditionalLocation = String(item.additionalLocation || '').trim();
   const normalizedRowEstablishment = normalizeVenueName(establishment);
+  const venueMatchContext = inferFullParserVenueMatchContext(row, establishment);
   const cityLevelFacebookEventLocation = isCityLevelFacebookEventLocation(row);
+  const postDerivedCityLevelLocation = resolvePostDerivedCityLevelEventLocation({
+    item,
+    row,
+    establishment,
+  });
+  const itemSpecificVenueCandidates = differentVenueCandidatesForFullParserItem({
+    candidates: uniqueVenueCandidates([
+      ...expandStageVenueCandidate(itemEstablishment),
+      ...expandStageVenueCandidate(itemVenue),
+    ]),
+    rowVenue,
+    rowEstablishment: establishment,
+  });
+  const additionalLocationVenueCandidates = differentVenueCandidatesForFullParserItem({
+    candidates: expandStageVenueCandidate(itemAdditionalLocation),
+    rowVenue,
+    rowEstablishment: establishment,
+  });
+
+  const knownOverrideCandidates = knownPostDerivedVenueOverrideCandidates({
+    item,
+    row,
+    establishment,
+  });
+  if (knownOverrideCandidates.length > 0) {
+    const knownOverrideMatch = await findFirstFullParserVenueMatch({
+      candidates: knownOverrideCandidates,
+      matcher,
+      rowIndex,
+      reason: 'known_post_derived_event_venue_override',
+      context: venueMatchContext,
+    });
+    if (knownOverrideMatch) {
+      logger.info('Resolved post-derived event to known venue override', {
+        rowIndex,
+        rowEstablishment: establishment,
+        itemName: item.name || '',
+        resolvedVenueId: knownOverrideMatch.id,
+        resolvedVenueName: knownOverrideMatch.name,
+      });
+      return knownOverrideMatch;
+    }
+  }
+
+  // A city hint such as "Kensington" can describe the town containing a
+  // durable source venue. Before treating that hint as the event's map scope,
+  // allow only an exact source-page identity match. Spatial route/multi-site
+  // evidence never takes this escape hatch, and city/area organizer pages are
+  // still held in the review queue.
+  if (
+    postDerivedCityLevelLocation &&
+    !postDerivedCityLevelLocation.spatialEvidence &&
+    row.facebookUrl &&
+    !rowEstablishmentLooksLikePostDerivedCityLevelSource(row, establishment)
+  ) {
+    const sourceIdentityMatch = await matcher(
+      establishment,
+      row.facebookUrl,
+      venueMatchContext
+    );
+    if (
+      sourceIdentityMatch.isMatch &&
+      sourceIdentityMatch.matchType === 'exact' &&
+      sourceIdentityMatch.matchedVenue
+    ) {
+      logger.info('Resolved durable source venue before applying post-derived city hint', {
+        rowIndex,
+        establishment,
+        itemName: item.name || '',
+        locationLabel: postDerivedCityLevelLocation.locationLabel,
+        resolvedVenueId: sourceIdentityMatch.matchedVenue.id,
+        resolvedVenueName: sourceIdentityMatch.matchedVenue.name,
+      });
+      return sourceIdentityMatch.matchedVenue;
+    }
+  }
+
+  if (postDerivedCityLevelLocation) {
+    logger.info('Skipping venue match for post-derived city/area event location', {
+      rowIndex,
+      establishment,
+      itemName: item.name || '',
+      locationLabel: postDerivedCityLevelLocation.locationLabel,
+      observedLocationName: postDerivedCityLevelLocation.observedLocationName,
+      detectionSource: postDerivedCityLevelLocation.detectionSource,
+    });
+    return null;
+  }
 
   // Check if the event specifies a different venue than the row-level establishment
-  const itemHasDifferentVenue =
-    (itemEstablishment && normalizeVenueName(itemEstablishment) !== normalizedRowEstablishment) ||
-    (itemVenue && normalizeVenueName(itemVenue) !== normalizedRowEstablishment);
+  const itemHasDifferentVenue = itemSpecificVenueCandidates.length > 0;
 
   // If event has a different venue, try to match it first before falling back to rowVenue
   if (itemHasDifferentVenue) {
-    const candidateNames = [itemEstablishment, itemVenue].filter(Boolean);
-    const uniqueCandidates = [...new Set(candidateNames)];
-
-    for (const candidate of uniqueCandidates) {
-      const itemMatchStart = Date.now();
-      const itemMatch = await firestoreService.findMatchingVenue(candidate);
-      logTiming('venue_match_item', itemMatchStart, {
+    const itemVenueMatch = await findFirstFullParserVenueMatch({
+      candidates: itemSpecificVenueCandidates,
+      matcher,
+      rowIndex,
+      reason: 'event_has_different_venue',
+      context: venueMatchContext,
+    });
+    if (itemVenueMatch) {
+      logger.debug('Resolved event to different venue than row', {
         rowIndex,
-        candidateVenue: candidate,
-        hasFacebookUrl: false,
-        matched: itemMatch.isMatch,
-        parserMode: 'full5stage',
-        reason: 'event_has_different_venue',
+        rowEstablishment: establishment,
+        eventEstablishment: itemEstablishment || itemVenue,
+        resolvedVenueId: itemVenueMatch.id,
+        resolvedVenueName: itemVenueMatch.name,
       });
-      if (itemMatch.isMatch && itemMatch.matchedVenue) {
-        logger.debug('Resolved event to different venue than row', {
-          rowIndex,
-          rowEstablishment: establishment,
-          eventEstablishment: itemEstablishment || itemVenue,
-          resolvedVenueId: itemMatch.matchedVenue.id,
-          resolvedVenueName: itemMatch.matchedVenue.name,
-        });
-        return itemMatch.matchedVenue;
-      }
+      return itemVenueMatch;
     }
 
     // If no match found for the event's specific venue, log and skip (don't fall back to rowVenue)
@@ -2893,6 +4173,26 @@ async function resolveVenueForFullParserEvent(
       eventVenue: itemVenue,
     });
     return null;
+  }
+
+  if (additionalLocationVenueCandidates.length > 0) {
+    const additionalLocationMatch = await findFirstFullParserVenueMatch({
+      candidates: additionalLocationVenueCandidates,
+      matcher,
+      rowIndex,
+      reason: 'event_has_different_additional_location',
+      context: venueMatchContext,
+    });
+    if (additionalLocationMatch) {
+      logger.debug('Resolved event to additionalLocation venue different than row', {
+        rowIndex,
+        rowEstablishment: establishment,
+        additionalLocation: itemAdditionalLocation,
+        resolvedVenueId: additionalLocationMatch.id,
+        resolvedVenueName: additionalLocationMatch.name,
+      });
+      return additionalLocationMatch;
+    }
   }
 
   if (cityLevelFacebookEventLocation) {
@@ -2913,25 +4213,25 @@ async function resolveVenueForFullParserEvent(
   const candidateNames = [
     itemEstablishment,
     itemVenue,
+    itemAdditionalLocation,
     establishment,
   ].filter(Boolean);
 
-  const uniqueCandidates = [...new Set(candidateNames)];
+  const uniqueCandidates = uniqueVenueCandidates(candidateNames);
   for (const candidate of uniqueCandidates) {
     const useUrl =
       row.facebookUrl &&
       normalizeVenueName(candidate) === normalizedRowEstablishment;
     const itemMatchStart = Date.now();
-    const itemMatch = await firestoreService.findMatchingVenue(
-      candidate,
-      useUrl ? row.facebookUrl : undefined
-    );
+    const itemMatch = await matcher(candidate, useUrl ? row.facebookUrl : undefined, venueMatchContext);
     logTiming('venue_match_item', itemMatchStart, {
       rowIndex,
       candidateVenue: candidate,
       hasFacebookUrl: Boolean(useUrl && row.facebookUrl),
       matched: itemMatch.isMatch,
       parserMode: 'full5stage',
+      regionHint: venueMatchContext?.regionHint || '',
+      cityHint: venueMatchContext?.cityHint || '',
     });
     if (itemMatch.isMatch && itemMatch.matchedVenue) {
       return itemMatch.matchedVenue;
@@ -2999,6 +4299,41 @@ async function processFullParserEvent(
         itemName: item.name || '',
         locationName: row.facebookEventLocationName || row.userName,
         organizerName: row.facebookEventOrganizerName,
+      });
+      return { created: false, updated: false, isDuplicate: false };
+    }
+
+    const postDerivedCityLevelLocation = resolvePostDerivedCityLevelEventLocation({
+      item,
+      row,
+      establishment,
+    });
+    if (postDerivedCityLevelLocation) {
+      await queuePostDerivedCityLevelEventForReview({
+        location: postDerivedCityLevelLocation,
+        row,
+        rowIndex,
+        batchManager,
+        parserMode: 'full5stage',
+        eventName: String(item.name || (item as unknown as { eventName?: string }).eventName || '').trim() || undefined,
+        eventDate: String(item.startDate || '').trim() || undefined,
+        eventTime: String(item.startTime || '').trim() || undefined,
+        endDate: String(item.endDate || '').trim() || undefined,
+        endTime: String(item.endTime || '').trim() || undefined,
+        eventType: normalizeFullParserEventType(item),
+        category: String(item.category || '').trim() || undefined,
+        description: String(item.description || row.text || '').trim() || undefined,
+        imageUrl: String(item.image || item.relevantImageUrl || '').trim() || undefined,
+        mediaUrls: Array.isArray(item.mediaUrls) ? item.mediaUrls : row.mediaUrls,
+        ticketsBuyUrl: item.ticketsBuyUrl || row.ticketsBuyUrl,
+        externalLinks: row.externalLinks,
+      });
+      logger.debug('Skipping unknown-venue queue for post-derived city/area event location', {
+        rowIndex,
+        itemName: item.name || '',
+        locationLabel: postDerivedCityLevelLocation.locationLabel,
+        observedLocationName: postDerivedCityLevelLocation.observedLocationName,
+        detectionSource: postDerivedCityLevelLocation.detectionSource,
       });
       return { created: false, updated: false, isDuplicate: false };
     }
@@ -3089,6 +4424,9 @@ async function processFullParserEvent(
     itemAddress: item.address,
     rowAddress: row.address,
     venueAddress,
+    sourceVenueAddress: rowVenue?.address,
+    sourceVenueId: rowVenue?.id,
+    resolvedVenueId: venue.id,
     rowEstablishment: establishment,
     canonicalVenueName,
     itemVenueName: additionalLocationCandidate || parsedEstablishment,
@@ -3109,6 +4447,8 @@ async function processFullParserEvent(
       rowIndex,
       itemName: name,
       rowEstablishment: establishment,
+      sourceVenueId: rowVenue?.id || '',
+      sourceVenueAddress: rowVenue?.address || '',
       resolvedVenueId: venue.id,
       resolvedVenueName: canonicalVenueName,
       rowAddress: row.address || '',
@@ -3118,18 +4458,13 @@ async function processFullParserEvent(
   }
   const venueLatitude = (venue as unknown as Record<string, unknown>).latitude;
   const venueLongitude = (venue as unknown as Record<string, unknown>).longitude;
-  const resolvedLatitude =
-    item.latitude !== undefined && item.latitude !== null && item.latitude !== ''
-      ? item.latitude
-      : resolvedAddress && venueAddress && resolvedAddress === venueAddress
-        ? venueLatitude
-        : undefined;
-  const resolvedLongitude =
-    item.longitude !== undefined && item.longitude !== null && item.longitude !== ''
-      ? item.longitude
-      : resolvedAddress && venueAddress && resolvedAddress === venueAddress
-        ? venueLongitude
-        : undefined;
+  const resolvedCoordinates = resolveEventCoordinatesForVenue({
+    usesVenueAddress: Boolean(resolvedAddress && venueAddress && resolvedAddress === venueAddress),
+    itemLatitude: item.latitude,
+    itemLongitude: item.longitude,
+    venueLatitude: venueLatitude as number | string | undefined,
+    venueLongitude: venueLongitude as number | string | undefined,
+  });
   const additionalLocationIsResolvedVenue = candidateNamesResolvedVenue({
     candidate: additionalLocationCandidate,
     normalizedVenueNames: normalizedVenueAliasNames,
@@ -3231,8 +4566,8 @@ async function processFullParserEvent(
     relevantImageUrl: resolvedRelevantImage,
     sharedPostThumbnail: String(item.sharedPostThumbnail || '').trim() || undefined,
     cleanedFacebookUrl: String(item.cleanedFacebookUrl || '').trim() || undefined,
-    latitude: resolvedLatitude,
-    longitude: resolvedLongitude,
+    latitude: resolvedCoordinates.latitude,
+    longitude: resolvedCoordinates.longitude,
     city: String(item.city || '').trim() || undefined,
     streetAddress: String(item.streetAddress || '').trim() || undefined,
     timeResolution: item.timeResolution,
@@ -3244,6 +4579,10 @@ async function processFullParserEvent(
   } as EventData & { _sourceType?: string };
 
   enforceCategoryTypeConsistency(eventData);
+  Object.assign(eventData, scoreFamilyFriendly({
+    ...eventData,
+    contextText: buildFamilyFriendlyScoringContext(row),
+  }));
 
   const canonicalIcon = await resolveCanonicalVenueIcon({
     venue,
@@ -3460,6 +4799,10 @@ async function processExtractedItem(
   };
 
   enforceCategoryTypeConsistency(eventData);
+  Object.assign(eventData, scoreFamilyFriendly({
+    ...eventData,
+    contextText: buildFamilyFriendlyScoringContext(row),
+  }));
 
   const canonicalIcon = await resolveCanonicalVenueIcon({
     venue,
@@ -3967,6 +5310,7 @@ function buildDuplicateEventUpdates(
   const changedFields: string[] = [];
   let descriptionImproved = false;
   let timeImproved = false;
+  const unsafeCrossSourceDateMerge = isUnsafeCrossSourceDateDuplicateMerge(existing, incoming);
 
   const setField = <K extends keyof EventData>(
     field: K,
@@ -4014,6 +5358,9 @@ function buildDuplicateEventUpdates(
   ];
 
   for (const field of fillWhenMissingFields) {
+    if (unsafeCrossSourceDateMerge && field === 'sharedPostThumbnail') {
+      continue;
+    }
     if (!isMeaningfulValue(existing[field]) && isMeaningfulValue(incoming[field])) {
       setField(field, incoming[field]);
     }
@@ -4172,8 +5519,14 @@ function buildDuplicateEventUpdates(
     existing,
     incoming
   );
+  const incomingRecurringFamilyShapePromoted = shouldPromoteIncomingRecurringFamilyShape(
+    existing,
+    incoming
+  );
+  const familyShapePromoted =
+    authoritativeFamilyShapePromoted || incomingRecurringFamilyShapePromoted;
 
-  if (authoritativeFamilyShapePromoted) {
+  if (familyShapePromoted) {
     if (isMeaningfulValue(incoming.eventName)) {
       setField('eventName', incoming.eventName);
     }
@@ -4194,14 +5547,14 @@ function buildDuplicateEventUpdates(
 
   if (shouldReplaceDateField(existing.startDate, incoming.startDate)) {
     setField('startDate', incoming.startDate);
-    if (!authoritativeFamilyShapePromoted) {
+    if (!familyShapePromoted) {
       timeImproved = true;
     }
   }
 
   if (shouldReplaceEndDateField(existing, incoming)) {
     setField('endDate', incoming.endDate);
-    if (!authoritativeFamilyShapePromoted) {
+    if (!familyShapePromoted) {
       timeImproved = true;
     }
   }
@@ -4245,7 +5598,9 @@ function buildDuplicateEventUpdates(
     setField('ticketPrice', incoming.ticketPrice);
   }
 
-  const newerSourceTimestamp = selectNewerDate(existing.sourceTimestamp, incoming.sourceTimestamp);
+  const newerSourceTimestamp = unsafeCrossSourceDateMerge
+    ? undefined
+    : selectNewerDate(existing.sourceTimestamp, incoming.sourceTimestamp);
   const hasNewerSourceTimestamp = Boolean(newerSourceTimestamp);
   if (newerSourceTimestamp) {
     setField('sourceTimestamp', newerSourceTimestamp);
@@ -4289,6 +5644,7 @@ function buildDuplicateEventUpdates(
   );
   if (
     incomingSourceContentSignature &&
+    !unsafeCrossSourceDateMerge &&
     asTrimmedString((existing as unknown as Record<string, unknown>).sourceContentSignature) !==
       incomingSourceContentSignature
   ) {
@@ -4311,23 +5667,33 @@ function buildDuplicateEventUpdates(
     asTrimmedString(incoming.relevantImageUrl) ||
     canonicalIncomingImage ||
     incomingPreferredMediaUrl;
-  const mergedMediaUrls = mergeDuplicateMediaUrls(existing, incoming);
-  if (mergedMediaUrls.length > 0 && valuesDiffer(existing.mediaUrls, mergedMediaUrls)) {
+  const mergedMediaUrls = unsafeCrossSourceDateMerge
+    ? normalizeUrlList(existing.mediaUrls)
+    : mergeDuplicateMediaUrls(existing, incoming);
+  if (
+    !unsafeCrossSourceDateMerge &&
+    mergedMediaUrls.length > 0 &&
+    valuesDiffer(existing.mediaUrls, mergedMediaUrls)
+  ) {
     setField('mediaUrls', mergedMediaUrls);
   }
 
   const promoteImages =
-    descriptionImproved ||
-    timeImproved ||
-    shouldPromoteCanonicalImageFromNewerDuplicate(existing, incoming, hasNewerSourceTimestamp) ||
-    shouldAlignStructuredFacebookEventManagedImage(
-      existing,
-      incoming,
-      mergedMediaUrls,
-      incomingPreferredMediaUrl
+    !unsafeCrossSourceDateMerge &&
+    (
+      descriptionImproved ||
+      timeImproved ||
+      shouldPromoteCanonicalImageFromNewerDuplicate(existing, incoming, hasNewerSourceTimestamp) ||
+      shouldAlignStructuredFacebookEventManagedImage(
+        existing,
+        incoming,
+        mergedMediaUrls,
+        incomingPreferredMediaUrl
+      )
     );
 
   if (
+    !unsafeCrossSourceDateMerge &&
     shouldReplaceImageUrl(
       existing.relevantImageUrl,
       canonicalIncomingRelevantImage,
@@ -4337,15 +5703,21 @@ function buildDuplicateEventUpdates(
     setField('relevantImageUrl', canonicalIncomingRelevantImage);
   }
 
-  if (shouldReplaceImageUrl(existing.image, canonicalIncomingImage, promoteImages)) {
+  if (
+    !unsafeCrossSourceDateMerge &&
+    shouldReplaceImageUrl(existing.image, canonicalIncomingImage, promoteImages)
+  ) {
     setField('image', canonicalIncomingImage);
   }
 
-  if (shouldReplaceImageUrl(existing.imageUrl, canonicalIncomingImage, promoteImages)) {
+  if (
+    !unsafeCrossSourceDateMerge &&
+    shouldReplaceImageUrl(existing.imageUrl, canonicalIncomingImage, promoteImages)
+  ) {
     setField('imageUrl', canonicalIncomingImage);
   }
 
-  if (shouldReplaceIconUrl(existing.icon, incoming.icon)) {
+  if (!unsafeCrossSourceDateMerge && shouldReplaceIconUrl(existing.icon, incoming.icon)) {
     setField('icon', incoming.icon);
   }
 
@@ -4353,9 +5725,34 @@ function buildDuplicateEventUpdates(
     ['mediaUrls', 'image', 'imageUrl', 'relevantImageUrl', 'icon', 'sharedPostThumbnail'].includes(field)
   );
   const shouldBackfillImageProvenance = !existing.imageProvenance && Boolean(incoming.imageProvenance);
-  if (imageFieldChanged || shouldBackfillImageProvenance) {
+  if (!unsafeCrossSourceDateMerge && (imageFieldChanged || shouldBackfillImageProvenance)) {
     setField('imageProvenance', buildDuplicateMergeImageProvenance(existing, incoming, updates));
   }
+
+  const mergedFamilyFriendlyScore = scoreFamilyFriendly({ ...existing, ...updates });
+  const incomingHasCurrentContextualScore =
+    incoming.familyFriendlyScoringVersion === FAMILY_FRIENDLY_SCORING_VERSION &&
+    typeof incoming.familyFriendlyScore === 'number' &&
+    typeof incoming.familyFriendlyLevel === 'string' &&
+    Array.isArray(incoming.familyFriendlyReasons);
+  const mergedHasHardAdultExclusion = mergedFamilyFriendlyScore.familyFriendlyReasons.some((reason) =>
+    reason === 'adult_age_restriction' || reason === 'adult_entertainment'
+  );
+  const familyFriendlyScore =
+    incomingHasCurrentContextualScore &&
+    !mergedHasHardAdultExclusion &&
+    Number(incoming.familyFriendlyScore) > mergedFamilyFriendlyScore.familyFriendlyScore
+      ? {
+          familyFriendlyScore: incoming.familyFriendlyScore as number,
+          familyFriendlyLevel: incoming.familyFriendlyLevel as NonNullable<EventData['familyFriendlyLevel']>,
+          familyFriendlyReasons: incoming.familyFriendlyReasons as string[],
+          familyFriendlyScoringVersion: incoming.familyFriendlyScoringVersion as string,
+        }
+      : mergedFamilyFriendlyScore;
+  setField('familyFriendlyScore', familyFriendlyScore.familyFriendlyScore);
+  setField('familyFriendlyLevel', familyFriendlyScore.familyFriendlyLevel);
+  setField('familyFriendlyReasons', familyFriendlyScore.familyFriendlyReasons);
+  setField('familyFriendlyScoringVersion', familyFriendlyScore.familyFriendlyScoringVersion);
 
   return {
     updates,
@@ -4588,6 +5985,16 @@ const VALID_RECURRING_WEEKDAYS = new Set<string>([
   'saturday',
 ]);
 
+const VALID_RECURRING_WEEKDAYS_ARRAY: RecurringWeekday[] = [
+  'sunday',
+  'monday',
+  'tuesday',
+  'wednesday',
+  'thursday',
+  'friday',
+  'saturday',
+];
+
 const RECURRING_WEEKDAY_TOKEN_TO_CANONICAL: Record<string, RecurringWeekday> = {
   sunday: 'sunday',
   sun: 'sunday',
@@ -4810,6 +6217,7 @@ function selectRecurringLifecycleMerge(
   const incomingUntil = normalizeIsoDateValue(incoming.recurrenceUntilDate);
   const existingRecurringState = normalizeFlagState(existing.isRecurring);
   const incomingRecurringState = normalizeFlagState(incoming.isRecurring);
+  const unsafeCrossSourceDateMerge = isUnsafeCrossSourceDateDuplicateMerge(existing, incoming);
 
   let recurringPattern: string | undefined;
   let recurringDaysOfWeek: RecurringWeekday[] | undefined;
@@ -4838,7 +6246,12 @@ function selectRecurringLifecycleMerge(
     incomingPattern !== 'weekly_custom' &&
     incomingPattern.startsWith('weekly_');
 
-  if (incomingRecurringState === 'no' && !incomingHasPattern && !incomingHasCustomSchedule) {
+  if (
+    incomingRecurringState === 'no' &&
+    !incomingHasPattern &&
+    !incomingHasCustomSchedule &&
+    !unsafeCrossSourceDateMerge
+  ) {
     const shouldClearRecurring =
       existingHasPattern ||
       existingHasCustomSchedule ||
@@ -5243,6 +6656,179 @@ function shouldPromoteAuthoritativeCurrentFamilyShape(
   return isMeaningfulValue(incomingEvent.description);
 }
 
+function hasSameKnownDuplicateMergeSourceRoot(existingEvent: EventData, incomingEvent: EventData): boolean {
+  const existingRoot = getEventDuplicateMergeSourceRoot(existingEvent);
+  const incomingRoot = getEventDuplicateMergeSourceRoot(incomingEvent);
+  return Boolean(existingRoot && incomingRoot && existingRoot === incomingRoot);
+}
+
+function getSignedDuplicateMergeDateDifferenceDays(fromDate: string, toDate: string): number {
+  const from = new Date(`${fromDate}T00:00:00.000Z`);
+  const to = new Date(`${toDate}T00:00:00.000Z`);
+  if (Number.isNaN(from.getTime()) || Number.isNaN(to.getTime())) {
+    return Number.POSITIVE_INFINITY;
+  }
+
+  return Math.floor((to.getTime() - from.getTime()) / (24 * 60 * 60 * 1000));
+}
+
+function getDuplicateMergeWeekdayFromDate(dateValue: unknown): RecurringWeekday | '' {
+  const normalizedDate = normalizeIsoDateValue(dateValue);
+  if (!normalizedDate) return '';
+
+  const date = new Date(`${normalizedDate}T00:00:00.000Z`);
+  if (Number.isNaN(date.getTime())) return '';
+
+  return VALID_RECURRING_WEEKDAYS_ARRAY[date.getUTCDay()] || '';
+}
+
+function getDuplicateMergeWeekdayFromPattern(pattern: unknown): RecurringWeekday | '' {
+  const normalizedPattern = normalizeRecurringPatternToken(pattern);
+  const match = normalizedPattern.match(
+    /^weekly_(sunday|monday|tuesday|wednesday|thursday|friday|saturday)$/
+  );
+  return (match?.[1] as RecurringWeekday | undefined) || '';
+}
+
+function collectDuplicateMergeWeekdayIntent(event: EventData): Set<RecurringWeekday> {
+  const weekdays = new Set<RecurringWeekday>();
+  const patternWeekday = getDuplicateMergeWeekdayFromPattern(event.recurringPattern);
+  if (patternWeekday) weekdays.add(patternWeekday);
+
+  for (const weekday of normalizeRecurringWeekdayListValue(event.recurringDaysOfWeek) || []) {
+    weekdays.add(weekday);
+  }
+
+  for (const weekday of normalizeRecurringWeekdayListValue(event.recurringWeekdaySequence) || []) {
+    weekdays.add(weekday);
+  }
+
+  const startWeekday = getDuplicateMergeWeekdayFromDate(event.startDate);
+  if (startWeekday) weekdays.add(startWeekday);
+
+  return weekdays;
+}
+
+function countDuplicateMergeWeeklyOccurrencesThrough(
+  startDate: string,
+  occurrenceDate: string,
+  weekdays: Set<RecurringWeekday>,
+  weekInterval: number
+): number {
+  const diffDays = getSignedDuplicateMergeDateDifferenceDays(startDate, occurrenceDate);
+  if (!Number.isFinite(diffDays) || diffDays < 0) return 0;
+
+  const start = new Date(`${startDate}T00:00:00.000Z`);
+  if (Number.isNaN(start.getTime())) return 0;
+
+  let count = 0;
+  for (let dayOffset = 0; dayOffset <= diffDays; dayOffset += 1) {
+    const current = new Date(start);
+    current.setUTCDate(start.getUTCDate() + dayOffset);
+    const weekday = VALID_RECURRING_WEEKDAYS_ARRAY[current.getUTCDay()] || '';
+    const weekOffset = Math.floor(dayOffset / 7);
+    if (weekdays.has(weekday) && weekOffset % weekInterval === 0) {
+      count += 1;
+    }
+  }
+
+  return count;
+}
+
+function incomingRecurringFamilyContainsExistingOccurrence(
+  incomingEvent: EventData,
+  existingEvent: EventData
+): boolean {
+  const incomingStartDate = normalizeIsoDateValue(incomingEvent.startDate);
+  const existingStartDate = normalizeIsoDateValue(existingEvent.startDate);
+  if (!incomingStartDate || !existingStartDate) return false;
+
+  const diffDays = getSignedDuplicateMergeDateDifferenceDays(incomingStartDate, existingStartDate);
+  if (!Number.isFinite(diffDays) || diffDays <= 0) return false;
+
+  const incomingUntil = normalizeIsoDateValue(incomingEvent.recurrenceUntilDate);
+  if (incomingUntil && existingStartDate > incomingUntil) {
+    return false;
+  }
+
+  const incomingTotal = parsePositiveIntegerValue(incomingEvent.totalOccurrences);
+  const incomingPattern = normalizeRecurringPatternToken(incomingEvent.recurringPattern);
+  const incomingWeekInterval = normalizeRecurringWeekIntervalValue(incomingEvent.recurringWeekInterval) || 1;
+
+  if (incomingPattern === 'daily') {
+    return incomingTotal === undefined || diffDays < incomingTotal;
+  }
+
+  const patternWeekday = getDuplicateMergeWeekdayFromPattern(incomingPattern);
+  if (patternWeekday) {
+    if (diffDays % (7 * incomingWeekInterval) !== 0) return false;
+    if (getDuplicateMergeWeekdayFromDate(existingStartDate) !== patternWeekday) return false;
+    const occurrenceIndex = Math.floor(diffDays / (7 * incomingWeekInterval)) + 1;
+    return incomingTotal === undefined || occurrenceIndex <= incomingTotal;
+  }
+
+  const weekdayIntent = collectDuplicateMergeWeekdayIntent(incomingEvent);
+  if (!weekdayIntent.size) return false;
+  const existingWeekday = getDuplicateMergeWeekdayFromDate(existingStartDate);
+  if (!existingWeekday || !weekdayIntent.has(existingWeekday)) return false;
+  if (incomingTotal === undefined) return true;
+
+  const occurrenceCount = countDuplicateMergeWeeklyOccurrencesThrough(
+    incomingStartDate,
+    existingStartDate,
+    weekdayIntent,
+    incomingWeekInterval
+  );
+  return occurrenceCount > 0 && occurrenceCount <= incomingTotal;
+}
+
+function shouldPromoteIncomingRecurringFamilyShape(
+  existingEvent: EventData,
+  incomingEvent: EventData
+): boolean {
+  if (!sourceTimestampIsNotOlder(existingEvent, incomingEvent)) {
+    return false;
+  }
+
+  if (!isRecurringLikeEvent(incomingEvent) || !hasDuplicateMergeRecurringLifecycleSignal(incomingEvent)) {
+    return false;
+  }
+
+  if (!isExplicitDuplicateMergeOneOff(existingEvent)) {
+    return false;
+  }
+
+  if (!hasSameKnownDuplicateMergeSourceRoot(existingEvent, incomingEvent)) {
+    return false;
+  }
+
+  if (getDuplicateMergeContentBucket(existingEvent) !== getDuplicateMergeContentBucket(incomingEvent)) {
+    return false;
+  }
+
+  if (!hasTightAuthoritativeFamilyTitleMatch(existingEvent, incomingEvent)) {
+    return false;
+  }
+
+  if (!incomingRecurringFamilyContainsExistingOccurrence(incomingEvent, existingEvent)) {
+    return false;
+  }
+
+  const existingStartTime = toComparableTime(asTrimmedString(existingEvent.startTime));
+  const incomingStartTime = toComparableTime(asTrimmedString(incomingEvent.startTime));
+  if (!existingStartTime || !incomingStartTime || existingStartTime !== incomingStartTime) {
+    return false;
+  }
+
+  const existingEndTime = toComparableTime(asTrimmedString(existingEvent.endTime));
+  const incomingEndTime = toComparableTime(asTrimmedString(incomingEvent.endTime));
+  if (existingEndTime && incomingEndTime && existingEndTime !== incomingEndTime) {
+    return false;
+  }
+
+  return true;
+}
+
 function normalizeDateToken(value: string): string {
   const trimmed = value.trim();
   const match = trimmed.match(/^(\d{4}-\d{2}-\d{2})/);
@@ -5265,6 +6851,115 @@ function isRecurringLikeEvent(event: Pick<EventData, 'isRecurring' | 'recurringP
   const pattern = normalizeRecurringPatternToken(event.recurringPattern);
   const recurringState = normalizeFlagState(event.isRecurring);
   return recurringState === 'yes' || (pattern.length > 0 && pattern !== 'none');
+}
+
+function getDuplicateMergeSourceRoot(value: unknown): string {
+  if (Array.isArray(value)) {
+    for (const entry of value) {
+      const root = getDuplicateMergeSourceRoot(entry);
+      if (root) return root;
+    }
+    return '';
+  }
+
+  const normalized = asTrimmedString(value);
+  if (!normalized) return '';
+  return normalized.split('_')[0] || normalized;
+}
+
+function getEventDuplicateMergeSourceRoot(event: EventData): string {
+  const metadata = event as unknown as Record<string, unknown>;
+  return (
+    getDuplicateMergeSourceRoot(metadata.sourceUniqueId) ||
+    getDuplicateMergeSourceRoot(metadata.sourceUniqueIds) ||
+    getDuplicateMergeSourceRoot(event.uniqueId) ||
+    getDuplicateMergeSourceRoot(event.id)
+  );
+}
+
+function hasDifferentDuplicateMergeSourceRoot(existingEvent: EventData, incomingEvent: EventData): boolean {
+  const existingRoot = getEventDuplicateMergeSourceRoot(existingEvent);
+  const incomingRoot = getEventDuplicateMergeSourceRoot(incomingEvent);
+  return Boolean(existingRoot && incomingRoot && existingRoot !== incomingRoot);
+}
+
+function hasDuplicateMergeRecurringLifecycleSignal(event: EventData): boolean {
+  if (parsePositiveIntegerValue(event.totalOccurrences) !== undefined) return true;
+  if (normalizeIsoDateValue(event.recurrenceUntilDate)) return true;
+  if (Array.isArray(event.recurringDaysOfWeek) && event.recurringDaysOfWeek.length > 0) {
+    return true;
+  }
+  if (
+    Array.isArray(event.recurringWeekdaySequence) &&
+    event.recurringWeekdaySequence.length > 0
+  ) {
+    return true;
+  }
+  const interval = parsePositiveIntegerValue(event.recurringWeekInterval);
+  return interval !== undefined && interval > 1;
+}
+
+function getDuplicateMergeRecurringSignalText(event: EventData): string {
+  return [
+    event.eventName,
+    event.name,
+    event.description,
+  ]
+    .map((value) => asTrimmedString(value))
+    .filter(Boolean)
+    .join(' ');
+}
+
+function hasDuplicateMergeRecurringTextSignal(event: EventData): boolean {
+  const text = getDuplicateMergeRecurringSignalText(event);
+  if (!text) return false;
+
+  if (/\b(weekly|recurring|ongoing|every|each|most)\b/i.test(text)) return true;
+  if (/\b(mondays|tuesdays|wednesdays|thursdays|fridays|saturdays|sundays)\b/i.test(text)) {
+    return true;
+  }
+  return /\b(monday|tuesday|wednesday|thursday|friday|saturday|sunday)s?\s+(at|from|between|starting|starts|after|until|through|thru|to|\d{1,2}(?::\d{2})?\s*(am|pm)?|\d{1,2}\s*[-\u2013\u2014])/i.test(text);
+}
+
+function hasStrongDuplicateMergeRecurringFamilySignal(event: EventData): boolean {
+  return hasDuplicateMergeRecurringLifecycleSignal(event) || hasDuplicateMergeRecurringTextSignal(event);
+}
+
+function isExplicitDuplicateMergeOneOff(event: EventData): boolean {
+  if (hasDuplicateMergeRecurringLifecycleSignal(event)) return false;
+
+  const pattern = normalizeRecurringPatternToken(event.recurringPattern);
+  if (pattern && pattern !== 'none') return false;
+
+  return normalizeFlagState(event.isRecurring) === 'no' || pattern === 'none';
+}
+
+function isUnsafeCrossSourceDateDuplicateMerge(
+  existingEvent: EventData,
+  incomingEvent: EventData
+): boolean {
+  const existingStartDate = normalizeIsoDateValue(existingEvent.startDate);
+  const incomingStartDate = normalizeIsoDateValue(incomingEvent.startDate);
+  if (!existingStartDate || !incomingStartDate || existingStartDate === incomingStartDate) {
+    return false;
+  }
+
+  if (!hasDifferentDuplicateMergeSourceRoot(existingEvent, incomingEvent)) {
+    return false;
+  }
+
+  if (!isExplicitDuplicateMergeOneOff(incomingEvent)) {
+    return false;
+  }
+
+  if (shouldPromoteAuthoritativeCurrentFamilyShape(existingEvent, incomingEvent)) {
+    return false;
+  }
+
+  return !(
+    hasStrongDuplicateMergeRecurringFamilySignal(existingEvent) ||
+    hasStrongDuplicateMergeRecurringFamilySignal(incomingEvent)
+  );
 }
 
 function resolveOccurrenceLocalEndDate(
@@ -6345,4 +8040,11 @@ export function combineTextContent(row: RawRowData): string {
   }
 
   return parts.join('\n\n');
+}
+
+function buildFamilyFriendlyScoringContext(row: RawRowData): string {
+  return [row.sharedPostText, row.text, row.ocrText]
+    .map((value) => String(value || '').trim())
+    .filter(Boolean)
+    .join('\n\n');
 }

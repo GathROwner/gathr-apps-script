@@ -12,8 +12,9 @@ import {
   SharedEventVisibilityEvidence,
 } from '../types/sharedEvent.js';
 import { logger } from '../utils/logger.js';
+import { classifySpatialEvent } from '../parsing/spatialEventClassifier.js';
 
-export const SHARED_EVENT_PARSER_VERSION = 'shared-event-parser-v8';
+export const SHARED_EVENT_PARSER_VERSION = 'shared-event-parser-v9';
 
 const DEFAULT_TIMEZONE = 'America/Halifax';
 const MAX_TEXT_LENGTH = 12000;
@@ -311,8 +312,15 @@ function buildDateInTimezone(monthRaw: string, dayRaw: string, yearRaw: string |
   return buildDate(monthRaw, dayRaw, yearRaw, DateTime.now().setZone(timezone));
 }
 
-function extractDateFromText(text: string, timezone: string): string | undefined {
-  const now = DateTime.now().setZone(timezone);
+function extractDateFromText(
+  text: string,
+  timezone: string,
+  referenceIsoDateTime?: string
+): string | undefined {
+  const normalizedReference = normalizeIsoDateTime(referenceIsoDateTime, timezone);
+  const now = normalizedReference
+    ? DateTime.fromISO(normalizedReference, { zone: timezone }).setZone(timezone)
+    : DateTime.now().setZone(timezone);
   const monthNamePattern = Object.keys(MONTH_LOOKUP).join('|');
   const monthFirst = new RegExp(
     `\\b(${monthNamePattern})\\.?\\s+(\\d{1,2})(?:st|nd|rd|th)?(?:,?\\s+(\\d{4}))?\\b`,
@@ -380,7 +388,7 @@ function resolveRelativeWeekdayDateFromText(
 }
 
 function extractDateCandidateFromText(text: string, timezone: string, startTime?: string, sourcePublishedAt?: string): string | undefined {
-  return extractDateFromText(text, timezone) ||
+  return extractDateFromText(text, timezone, sourcePublishedAt) ||
     resolveRelativeWeekdayDateFromText(text, timezone, startTime, sourcePublishedAt);
 }
 
@@ -1665,13 +1673,23 @@ function buildExtractedParsedEventsFromCalendarItems(
         : primary.sourceVisibility === 'public_verified'
           ? 'public_candidate'
           : 'private_only';
-      const reviewReasons = reviewReasonsForEvent({
+      const spatialEvidence = classifySpatialEvent({
+        name: title,
+        description,
+        location: locationName,
+        combinedText: [primary.description, description].filter(Boolean).join('\n'),
+        modelSpatialEvidence: item.spatial || null,
+      });
+      const reviewReasons = Array.from(new Set([
+        ...reviewReasonsForEvent({
         title,
         startDate,
         locationName,
         address,
         isExpired,
-      });
+        }),
+        ...spatialEvidence.reviewReasons,
+      ]));
       const confidence = confidenceScore({
         title,
         startDate,
@@ -1720,6 +1738,7 @@ function buildExtractedParsedEventsFromCalendarItems(
             : primary.fieldSources?.locationName,
           address: inferredAddress ? primary.fieldSources?.address : undefined,
         }),
+        spatialEvidence,
         isExpired,
         sequenceIndex: index,
         extractedFromShare: true,
@@ -1851,6 +1870,7 @@ export async function parseSharedEventPayload(
     evidenceDescription,
   ].filter(Boolean).join('\n');
   const preferPublicEvidence = sourceVisibility === 'public_verified';
+  const sourceDateReference = visibilityEvidence.sourcePublishedAt || visibilityEvidence.checkedAt;
 
   const initialTitle = extractTitle(payload, combinedText);
   const postDerivedTitle = !payload.title && evidenceTitle && initialTitle === evidenceTitle
@@ -1875,16 +1895,16 @@ export async function parseSharedEventPayload(
     evidenceText,
     timezone,
     startTime,
-    sourcePublishedAt: visibilityEvidence.sourcePublishedAt,
+    sourcePublishedAt: sourceDateReference,
     preferPublicEvidence,
   });
   const startDate = startDateChoice.value ||
-    extractDateFromText(combinedText, timezone) ||
+    extractDateFromText(combinedText, timezone, sourceDateReference) ||
     resolveRelativeWeekdayDateFromText(
       combinedText,
       timezone,
       startTime,
-      visibilityEvidence.sourcePublishedAt
+      sourceDateReference
     );
   const endDateChoice = chooseDateField({
     payloadValue: payload.endDate,
@@ -1894,7 +1914,7 @@ export async function parseSharedEventPayload(
     evidenceText,
     timezone,
     startTime,
-    sourcePublishedAt: visibilityEvidence.sourcePublishedAt,
+    sourcePublishedAt: sourceDateReference,
     preferPublicEvidence,
   });
   const endDate = endDateChoice.value ||
@@ -1980,12 +2000,31 @@ export async function parseSharedEventPayload(
     mediaUrls: mediaSource,
   };
   const fieldSources = compactFieldSources(rawFieldSources);
-  const reviewReasons: string[] = [];
+  // Public candidates may only derive their spatial model from the verified
+  // public evidence. Private share text and uploaded images can still help the
+  // user's private event, but must never silently strengthen a public route or
+  // multi-location candidate.
+  const spatialEvidence = sourceVisibility === 'public_verified'
+    ? classifySpatialEvent({
+        name: visibilityEvidence?.title,
+        description: visibilityEvidence?.description,
+        location: visibilityEvidence?.locationName || visibilityEvidence?.address,
+        combinedText: evidenceText,
+      })
+    : classifySpatialEvent({
+        name: title,
+        description,
+        location: locationName || address,
+        combinedText,
+      });
+  const reviewReasons: string[] = [...spatialEvidence.reviewReasons];
   const isExpired = eventLooksExpired(startDate, startTime, timezone);
 
   if (!title) reviewReasons.push('missing_title');
   if (!startDate) reviewReasons.push('missing_start_date');
-  if (!locationName && !address) reviewReasons.push('missing_location');
+  if (!locationName && !address && spatialEvidence.locations.length === 0) {
+    reviewReasons.push('missing_location');
+  }
   if (isExpired) reviewReasons.push('event_expired');
 
   const confidence = confidenceScore({
@@ -1999,6 +2038,7 @@ export async function parseSharedEventPayload(
   const needsUserReview = reviewReasons.includes('missing_title') ||
     reviewReasons.includes('missing_start_date') ||
     reviewReasons.includes('event_expired') ||
+    spatialEvidence.kind === 'separate_occurrences' ||
     confidence < 55;
   const routing = isExpired
     ? 'not_public_candidate'
@@ -2034,6 +2074,7 @@ export async function parseSharedEventPayload(
     needsUserReview,
     reviewReasons,
     fieldSources,
+    spatialEvidence,
     isExpired,
     sourceContentSignature: sourceContentSignature([
       sourceUrl,

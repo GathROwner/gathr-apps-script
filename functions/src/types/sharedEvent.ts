@@ -1,3 +1,5 @@
+import type { SpatialEventClassification } from '../parsing/spatialEventClassifier.js';
+
 export type SharedEventSourcePlatform = 'facebook' | 'instagram' | 'web' | 'unknown';
 
 export type SharedEventSourceVisibility =
@@ -19,6 +21,42 @@ export type SharedEventProcessingStatus =
   | 'processing'
   | 'completed'
   | 'failed';
+
+export type SharedEventScrapeEnrichmentStatus =
+  | 'reserved'
+  | 'queued'
+  | 'running'
+  | 'processing'
+  | 'completed'
+  | 'duplicate'
+  | 'skipped'
+  | 'failed';
+
+export type SharedEventPublicProcessingStatus =
+  | 'queued'
+  | 'processing'
+  | 'completed'
+  | 'skipped'
+  | 'failed';
+
+export interface SharedEventPublicProcessingSummary {
+  status: SharedEventPublicProcessingStatus;
+  source: 'apify_enrichment' | 'initial_share' | 'media_ingest';
+  fileId?: string;
+  fileName?: string;
+  runId?: string;
+  createdEventCount?: number;
+  updatedEventCount?: number;
+  duplicateEventCount?: number;
+  unknownVenueCount?: number;
+  skippedCount?: number;
+  errorCount?: number;
+  message?: string;
+  queuedAt?: unknown;
+  startedAt?: unknown;
+  completedAt?: unknown;
+  failedAt?: unknown;
+}
 
 export type SharedEventFieldSource =
   | 'public_source'
@@ -108,6 +146,7 @@ export interface ParsedSharedEvent {
   needsUserReview: boolean;
   reviewReasons: string[];
   fieldSources?: SharedEventFieldSources;
+  spatialEvidence?: SpatialEventClassification;
   isExpired?: boolean;
   sourceContentSignature: string;
   sequenceIndex?: number;
@@ -141,20 +180,25 @@ export interface SharedEventIngestRecord {
   eventsPreview?: ParsedSharedEvent[];
   extractedEventCount?: number;
   scrapeEnrichment?: {
-    status: 'reserved' | 'queued' | 'duplicate' | 'failed';
+    status: SharedEventScrapeEnrichmentStatus;
     enrichmentId?: string;
     reason?: string;
     actorId?: string;
     actorRunId?: string;
     datasetId?: string;
+    fileId?: string;
+    fileName?: string;
     runUrl?: string;
     existingStatus?: string;
     error?: string;
     checkedAt?: unknown;
     reservedAt?: unknown;
     queuedAt?: unknown;
+    startedAt?: unknown;
+    completedAt?: unknown;
     failedAt?: unknown;
   };
+  publicProcessing?: SharedEventPublicProcessingSummary;
   createdAt?: unknown;
   updatedAt?: unknown;
 }
@@ -206,6 +250,7 @@ export interface PublicSharedEventCandidateRecord {
   timezone: string;
   sourceContentSignature: string;
   fieldSources?: SharedEventFieldSources;
+  spatialEvidence?: SpatialEventClassification;
   reviewReasons?: string[];
   status: PublicSharedEventCandidateStatus;
   resolvedVenueId?: string;

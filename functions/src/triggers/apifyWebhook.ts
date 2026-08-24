@@ -112,6 +112,7 @@ export const apifyWebhook = onRequest(
     }
 
     const payload = request.body as ApifyWebhookPayload;
+    const sharedEventEnrichmentId = asString(request.query.sharedEventEnrichmentId);
 
     logger.setContext({ functionName: 'apifyWebhook' });
     logger.info('Apify webhook received', {
@@ -120,6 +121,7 @@ export const apifyWebhook = onRequest(
       actorRunId: payload.eventData?.actorRunId,
       datasetId: payload.eventData?.defaultDatasetId,
       createdAt: payload.createdAt,
+      sharedEventEnrichmentId: sharedEventEnrichmentId || undefined,
     });
 
     let webhookDocRef: admin.firestore.DocumentReference | null = null;
@@ -183,13 +185,13 @@ export const apifyWebhook = onRequest(
       // Handle based on event type
       switch (payload.eventType) {
         case 'ACTOR.RUN.SUCCEEDED':
-          await handleRunSucceeded(payload, webhookDocRef, scraperType);
+          await handleRunSucceeded(payload, webhookDocRef, scraperType, sharedEventEnrichmentId);
           break;
 
         case 'ACTOR.RUN.FAILED':
         case 'ACTOR.RUN.ABORTED':
         case 'ACTOR.RUN.TIMED_OUT':
-          await handleRunFailed(payload, webhookDocRef);
+          await handleRunFailed(payload, webhookDocRef, sharedEventEnrichmentId);
           break;
       }
 
@@ -224,7 +226,8 @@ export const apifyWebhook = onRequest(
 async function handleRunSucceeded(
   payload: ApifyWebhookPayload,
   webhookDocRef: admin.firestore.DocumentReference,
-  scraperType: ScraperType
+  scraperType: ScraperType,
+  sharedEventEnrichmentId?: string
 ): Promise<void> {
   const { actorId, actorRunId, defaultDatasetId } = payload.eventData;
 
@@ -238,7 +241,11 @@ async function handleRunSucceeded(
 
   await updateWebhookStatus(webhookDocRef, 'processing');
 
-  const isSharedEventRun = await isSharedEventScrapeRun(actorRunId);
+  const sharedEventEnrichment = await findSharedEventScrapeEnrichment({
+    enrichmentId: sharedEventEnrichmentId,
+    actorRunId,
+  });
+  const isSharedEventRun = Boolean(sharedEventEnrichmentId || sharedEventEnrichment);
   let file: { id: string; name: string } | null = null;
   let fileSource = 'drive_export';
 
@@ -281,6 +288,18 @@ async function handleRunSucceeded(
     fileSource,
   });
 
+  if (isSharedEventRun) {
+    await firestoreService.markSharedEventScrapeEnrichmentProcessing({
+      enrichmentId: sharedEventEnrichmentId || sharedEventEnrichment?.id,
+      actorId,
+      actorRunId,
+      datasetId: defaultDatasetId,
+      fileId: file.id,
+      fileName: file.name,
+      runUrl: formatRunUrl(actorId, actorRunId),
+    });
+  }
+
   // Update webhook record with file info
   await webhookDocRef.update({
     fileId: file.id,
@@ -288,6 +307,22 @@ async function handleRunSucceeded(
   });
 
   if (await hasActiveWebhookForFile(file.id, webhookDocRef.id)) {
+    logger.warn('Shared event scrape processing skipped after exported file found', {
+      isSharedEventRun,
+      actorRunId,
+      sharedEventEnrichmentId: sharedEventEnrichmentId || sharedEventEnrichment?.id,
+      fileId: file.id,
+      reason: 'duplicate_file_already_processing',
+    });
+    if (isSharedEventRun) {
+      await firestoreService.markSharedEventScrapeEnrichmentSkipped({
+        enrichmentId: sharedEventEnrichmentId || sharedEventEnrichment?.id,
+        actorRunId,
+        fileId: file.id,
+        fileName: file.name,
+        reason: 'Duplicate file already processing',
+      });
+    }
     await updateWebhookStatus(webhookDocRef, 'skipped', {
       error: 'Duplicate file already processing',
     });
@@ -303,6 +338,15 @@ async function handleRunSucceeded(
     });
 
     if (!lock.acquired || !lock.runId) {
+      if (isSharedEventRun) {
+        await firestoreService.markSharedEventScrapeEnrichmentSkipped({
+          enrichmentId: sharedEventEnrichmentId || sharedEventEnrichment?.id,
+          actorRunId,
+          fileId: file.id,
+          fileName: file.name,
+          reason: lock.reason || 'Processing already in progress',
+        });
+      }
       await updateWebhookStatus(webhookDocRef, 'skipped', {
         error: 'Processing already in progress',
       });
@@ -317,6 +361,19 @@ async function handleRunSucceeded(
     const activeRunId = lock.runId;
     runId = activeRunId;
     logger.setContext({ fileId: file.id, runId: activeRunId });
+
+    if (isSharedEventRun) {
+      await firestoreService.markSharedEventScrapeEnrichmentProcessing({
+        enrichmentId: sharedEventEnrichmentId || sharedEventEnrichment?.id,
+        actorId,
+        actorRunId,
+        datasetId: defaultDatasetId,
+        fileId: file.id,
+        fileName: file.name,
+        runId: activeRunId,
+        runUrl: formatRunUrl(actorId, actorRunId),
+      });
+    }
 
     // Do not process the dataset inside the webhook handler. Enqueue a task so
     // parsing runs in the task worker (higher memory/timeout) and webhook stays fast.
@@ -346,6 +403,16 @@ async function handleRunSucceeded(
     logger.error('Failed to trigger processing', error, { fileId: file.id });
     if (runId) {
       await firestoreService.releaseProcessingLock(file.id, runId, 'failed', 'apifyWebhook');
+    }
+    if (isSharedEventRun) {
+      await firestoreService.markSharedEventPublicProcessingFailedForFile({
+        enrichmentId: sharedEventEnrichmentId || sharedEventEnrichment?.id,
+        actorRunId,
+        fileId: file.id,
+        fileName: file.name,
+        runId,
+        error: error instanceof Error ? error.message : 'Processing trigger failed',
+      });
     }
     await updateWebhookStatus(webhookDocRef, 'failed', {
       error: error instanceof Error ? error.message : 'Processing trigger failed',
@@ -431,22 +498,18 @@ async function findExportedFile(
   }
 }
 
-async function isSharedEventScrapeRun(actorRunId: string | undefined): Promise<boolean> {
-  const normalizedActorRunId = asString(actorRunId);
-  if (!normalizedActorRunId) return false;
-
+async function findSharedEventScrapeEnrichment(params: {
+  enrichmentId?: string;
+  actorRunId?: string;
+}): Promise<{ id: string; data: Record<string, unknown> } | undefined> {
   try {
-    const snapshot = await db
-      .collection('shared_event_scrape_enrichments')
-      .where('actorRunId', '==', normalizedActorRunId)
-      .limit(1)
-      .get();
-    return !snapshot.empty;
+    return await firestoreService.findSharedEventScrapeEnrichment(params);
   } catch (error) {
     logger.error('Failed to check shared event scrape enrichment run', error, {
-      actorRunId: normalizedActorRunId,
+      enrichmentId: params.enrichmentId,
+      actorRunId: params.actorRunId,
     });
-    return false;
+    return undefined;
   }
 }
 
@@ -527,7 +590,8 @@ async function getProcessedFileIds(): Promise<Set<string>> {
  */
 async function handleRunFailed(
   payload: ApifyWebhookPayload,
-  webhookDocRef: admin.firestore.DocumentReference
+  webhookDocRef: admin.firestore.DocumentReference,
+  sharedEventEnrichmentId?: string
 ): Promise<void> {
   const { actorId, actorRunId, status, statusMessage } = payload.eventData;
 
@@ -538,6 +602,12 @@ async function handleRunFailed(
     statusMessage,
     eventType: payload.eventType,
     runUrl: formatRunUrl(actorId, actorRunId),
+  });
+
+  await firestoreService.markSharedEventPublicProcessingFailedForFile({
+    enrichmentId: sharedEventEnrichmentId,
+    actorRunId,
+    error: statusMessage || `Actor run ${payload.eventType.replace('ACTOR.RUN.', '').toLowerCase()}`,
   });
 
   await updateWebhookStatus(webhookDocRef, 'completed', {
