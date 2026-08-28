@@ -33,9 +33,50 @@ service cloud.firestore {
       }
     }
 
-    // Users collection - users can only access their own data
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function protectedSocialProfileFieldsChanged() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasAny([
+        'socialHandle',
+        'socialHandleNormalized',
+        'socialHandleUpdatedAt'
+      ]);
+    }
+
+    // Users collection - users can only access their own data. Social identity
+    // fields and all social projections are server-controlled.
     match /users/{userId} {
-      allow read, write: if isAuthenticated() && request.auth.uid == userId;
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId) &&
+        !request.resource.data.keys().hasAny([
+          'socialHandle',
+          'socialHandleNormalized',
+          'socialHandleUpdatedAt'
+        ]);
+      allow update: if isOwner(userId) && !protectedSocialProfileFieldsChanged();
+      allow delete: if isOwner(userId);
+
+      match /friends/{friendUid} {
+        allow read: if isOwner(userId);
+        allow write: if false;
+      }
+
+      match /friendRequests/{otherUid} {
+        allow read: if isOwner(userId);
+        allow write: if false;
+      }
+
+      match /friendActivity/{ownerUid} {
+        allow read: if isOwner(userId);
+        allow write: if false;
+      }
+
+      match /blocks/{blockedUid} {
+        allow read: if isOwner(userId);
+        allow write: if false;
+      }
 
       // User-private shared event records. Do not name this subcollection
       // "events"; public event collection-group rules can expose that name.
@@ -50,6 +91,32 @@ service cloud.firestore {
         allow read: if isAuthenticated() && request.auth.uid == userId && resourceOwnerMatches(userId);
         allow write: if false;
       }
+    }
+
+    // Canonical social state and abuse controls are written by Admin SDK only.
+    match /socialHandles/{handle} {
+      allow read, write: if false;
+    }
+
+    match /socialRelationships/{relationshipId} {
+      allow read, write: if false;
+    }
+
+    match /activeCheckIns/{ownerUid} {
+      allow read: if isOwner(ownerUid);
+      allow write: if false;
+    }
+
+    match /socialRateLimits/{rateLimitId} {
+      allow read, write: if false;
+    }
+
+    match /socialOperations/{operationId} {
+      allow read, write: if false;
+    }
+
+    match /userReports/{reportId} {
+      allow read, write: if false;
     }
 
     // Processing state collections - admin only

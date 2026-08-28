@@ -28,15 +28,34 @@ test('maps collision-free runtime secrets to the established environment names',
   assert.equal(env.APIFY_TOKEN, 'apify-test-value');
 });
 
-test('binds collision-free runtime secrets to every exported Cloud Function', () => {
+test('binds collision-free runtime secrets to every exported Gen 2 Cloud Function', () => {
+  // Firebase's Gen 1 Auth trigger builds its resource name lazily and therefore
+  // needs a project ID even when a test only inspects endpoint metadata.
+  const previousProjectId = process.env.GCLOUD_PROJECT;
+  process.env.GCLOUD_PROJECT ||= 'demo-gathr-social';
+
   const endpoints = Object.entries(exportedFunctions)
-    .filter(([, value]) => Boolean((value as { __endpoint?: unknown })?.__endpoint));
+    .map(([name, value]) => [name, (value as { __endpoint?: unknown })?.__endpoint] as const)
+    .filter(([, endpoint]) => Boolean(endpoint));
 
   assert.ok(endpoints.length > 0);
-  for (const [name, value] of endpoints) {
-    const endpoint = (value as {
-      __endpoint: { secretEnvironmentVariables?: Array<{ key?: string }> };
-    }).__endpoint;
+  for (const [name, rawEndpoint] of endpoints) {
+    const endpoint = rawEndpoint as {
+      platform?: string;
+      eventTrigger?: { eventType?: string };
+      secretEnvironmentVariables?: Array<{ key?: string }>;
+    };
+
+    // Auth user lifecycle triggers only exist on Gen 1 and cannot inherit the
+    // Gen 2 global secret binding. This cleanup trigger does not read secrets.
+    if (
+      endpoint.platform === 'gcfv1'
+      && endpoint.eventTrigger?.eventType === 'providers/firebase.auth/eventTypes/user.delete'
+    ) {
+      assert.deepEqual(endpoint.secretEnvironmentVariables || [], []);
+      continue;
+    }
+
     const keys = (endpoint.secretEnvironmentVariables || []).map((entry) => entry.key);
     for (const requiredSecret of coreRuntimeSecrets) {
       assert.ok(keys.includes(requiredSecret), `${name} is missing ${requiredSecret}`);
@@ -44,4 +63,7 @@ test('binds collision-free runtime secrets to every exported Cloud Function', ()
     assert.equal(keys.includes('OPENAI_API_KEY'), false, `${name} still binds OPENAI_API_KEY`);
     assert.equal(keys.includes('APIFY_TOKEN'), false, `${name} still binds APIFY_TOKEN`);
   }
+
+  if (previousProjectId === undefined) delete process.env.GCLOUD_PROJECT;
+  else process.env.GCLOUD_PROJECT = previousProjectId;
 });

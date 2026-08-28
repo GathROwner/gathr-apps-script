@@ -80,3 +80,26 @@ export { processDatasetSelectedRows } from './triggers/processDataset.js';
 
 // Shared Event Ingest - Processes queued media-heavy share ingests
 export { processSharedEventIngest } from './triggers/sharedEventIngest.js';
+
+// ===================
+// Social / Friends
+// ===================
+
+export {
+  claimSocialHandleCallable,
+  searchUserByHandleCallable,
+  sendFriendRequestCallable,
+  cancelFriendRequestCallable,
+  acceptFriendRequestCallable,
+  declineFriendRequestCallable,
+  removeFriendCallable,
+  blockUserCallable,
+  unblockUserCallable,
+  createCheckInCallable,
+  checkOutCallable,
+  deleteSocialAccountDataCallable,
+  reportUserCallable,
+} from './social/callables.js';
+export { scheduledSocialCheckInCleanup } from './social/cleanup.js';
+export { syncSocialProfileOnUpdate } from './social/profileSync.js';
+export { cleanupSocialDataOnAuthDelete } from './social/accountCleanup.js';
