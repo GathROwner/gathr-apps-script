@@ -2,13 +2,14 @@ import process from 'node:process';
 
 import { deleteApp, getApps, initializeApp } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
-import { getFirestore } from 'firebase-admin/firestore';
+import { getFirestore, Timestamp } from 'firebase-admin/firestore';
 
 import {
   acceptFriendRequest,
   blockUser,
   checkOut,
   claimSocialHandle,
+  cleanupExpiredCheckIns,
   createCheckIn,
   sendFriendRequest,
 } from '../lib/social/socialService.js';
@@ -24,6 +25,14 @@ const PERSONAS = {
   bob: { uid: 'friend-b-bob', email: 'bob@gathr.local', password: 'GathrTest!2026', displayName: 'Bob Friend B', handle: 'bob_friend' },
   casey: { uid: 'stranger-c-casey', email: 'casey@gathr.local', password: 'GathrTest!2026', displayName: 'Casey Stranger C', handle: 'casey_stranger' },
   dana: { uid: 'blocked-d-dana', email: 'dana@gathr.local', password: 'GathrTest!2026', displayName: 'Dana Blocked D', handle: 'dana_blocked' },
+};
+
+const MAP_QA_VENUE = {
+  id: process.env.SOCIAL_QA_VENUE_ID || 'fb_100063763432825',
+  pagename: process.env.SOCIAL_QA_VENUE_NAME || 'The Old Triangle Charlottetown',
+  address: process.env.SOCIAL_QA_VENUE_ADDRESS || '189 Great George St, Charlottetown, PE C1A 4L1, Canada',
+  latitude: Number(process.env.SOCIAL_QA_VENUE_LATITUDE || 46.23679),
+  longitude: Number(process.env.SOCIAL_QA_VENUE_LONGITUDE || -63.12878),
 };
 
 function requireEmulators() {
@@ -98,9 +107,45 @@ async function ensureFriends(first, second) {
   if (result.state === 'pending') await acceptFriendRequest(second, first, db);
 }
 
+async function seedMapQaVenue() {
+  await db.doc(`venues/${MAP_QA_VENUE.id}`).set({
+    pagename: MAP_QA_VENUE.pagename,
+    address: MAP_QA_VENUE.address,
+    latitude: MAP_QA_VENUE.latitude,
+    longitude: MAP_QA_VENUE.longitude,
+  });
+}
+
+async function expireBobCheckInSoon() {
+  const canonicalRef = db.doc(`activeCheckIns/${PERSONAS.bob.uid}`);
+  const aliceProjectionRef = db.doc(`users/${PERSONAS.alice.uid}/friendActivity/${PERSONAS.bob.uid}`);
+  const [canonical, aliceProjection] = await Promise.all([
+    canonicalRef.get(),
+    aliceProjectionRef.get(),
+  ]);
+  if (!canonical.exists || !aliceProjection.exists) {
+    throw new Error('Create Bob\'s map check-in for Alice before shortening its expiry.');
+  }
+  const expiresAt = Timestamp.fromMillis(Date.now() + 5_000);
+  const batch = db.batch();
+  batch.update(canonicalRef, { expiresAt });
+  batch.update(aliceProjectionRef, { expiresAt });
+  await batch.commit();
+  console.log(JSON.stringify({ command: 'expire-bob-checkin-soon', expiresAt: expiresAt.toDate().toISOString() }, null, 2));
+}
+
 async function status() {
   const relationships = await db.collection('socialRelationships').get();
   const checkIns = await db.collection('activeCheckIns').get();
+  const activeCheckInDetails = checkIns.docs.map((snapshot) => {
+    const data = snapshot.data();
+    return {
+      ownerUid: snapshot.id,
+      venueId: data.venueId || null,
+      viewerCount: data.viewerCount || 0,
+      viewerUids: Array.isArray(data.viewerUids) ? data.viewerUids : [],
+    };
+  });
   const summary = {};
   for (const [name, persona] of Object.entries(PERSONAS)) {
     const [friends, requests, activity, blocks] = await Promise.all([
@@ -117,7 +162,13 @@ async function status() {
       blocks: blocks.size,
     };
   }
-  console.log(JSON.stringify({ projectId, relationships: relationships.size, activeCheckIns: checkIns.size, summary }, null, 2));
+  console.log(JSON.stringify({
+    projectId,
+    relationships: relationships.size,
+    activeCheckIns: checkIns.size,
+    activeCheckInDetails,
+    summary,
+  }, null, 2));
 }
 
 async function run() {
@@ -147,8 +198,27 @@ async function run() {
         message: 'Emulator patio test',
       }, db);
       break;
+    case 'seed-map-venue':
+      await seedMapQaVenue();
+      break;
+    case 'bob-checkin-map-venue':
+      await ensureFriends(PERSONAS.alice.uid, PERSONAS.bob.uid);
+      await seedMapQaVenue();
+      await createCheckIn(PERSONAS.bob.uid, {
+        venueId: MAP_QA_VENUE.id,
+        durationMinutes: 60,
+        audienceMode: 'all_friends',
+        message: 'Map reaction QA',
+      }, db);
+      break;
     case 'bob-checkout':
       await checkOut(PERSONAS.bob.uid, db);
+      break;
+    case 'expire-bob-checkin-soon':
+      await expireBobCheckInSoon();
+      break;
+    case 'cleanup-expired':
+      console.log(JSON.stringify({ command: 'cleanup-expired', result: await cleanupExpiredCheckIns(Timestamp.now(), db) }, null, 2));
       break;
     case 'dana-block-alice':
       await blockUser(PERSONAS.dana.uid, PERSONAS.alice.uid, db);
@@ -167,4 +237,3 @@ try {
 } finally {
   await deleteApp(app);
 }
-
