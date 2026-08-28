@@ -485,10 +485,16 @@ export async function blockUser(
       activeCheckInRef(db, actorUid),
       activeCheckInRef(db, blockedUid)
     );
-    assertExisting(blockedSnapshot, 'User profile');
+    const blockedProfile = safeProfile(
+      blockedUid,
+      assertExisting(blockedSnapshot, 'User profile')
+    );
     transaction.set(blockRef(db, actorUid, blockedUid), {
       ownerUid: actorUid,
       blockedUid,
+      displayName: blockedProfile.displayName,
+      photoURL: blockedProfile.photoURL,
+      socialHandle: blockedProfile.socialHandle,
       createdAt: FieldValue.serverTimestamp(),
     });
     transaction.delete(relationshipRef(db, actorUid, blockedUid));

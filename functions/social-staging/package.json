@@ -1,0 +1,17 @@
+{
+  "name": "gathr-social-staging-functions",
+  "version": "1.0.0",
+  "description": "Isolated Firebase deployment source for GathR social preview functions",
+  "main": "index.js",
+  "scripts": {
+    "prepare-deploy": "npm --prefix .. run build && node ../scripts/prepare-social-staging-deploy.mjs"
+  },
+  "engines": {
+    "node": "22"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.0.0",
+    "firebase-functions": "^7.2.5"
+  },
+  "private": true
+}

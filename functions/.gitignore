@@ -9,6 +9,7 @@ node_modules/
 .env.local
 .env.*.local
 .secret.local
+.social-staging-personas.local.json
 
 # Service account keys
 *-service-account*.json

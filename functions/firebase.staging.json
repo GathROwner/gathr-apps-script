@@ -1,0 +1,22 @@
+{
+  "functions": [
+    {
+      "source": "social-staging",
+      "codebase": "gathr-social-staging",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
+      ],
+      "predeploy": [
+        "npm --prefix \"$RESOURCE_DIR\" run prepare-deploy"
+      ]
+    }
+  ],
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.staging.indexes.json"
+  }
+}

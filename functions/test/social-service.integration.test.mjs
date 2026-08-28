@@ -138,7 +138,20 @@ test('cancel, block, and unblock mutations are deterministic and safe to retry',
 
   await blockUser('alice', 'bob', db);
   await blockUser('alice', 'bob', db);
-  assert.equal((await db.doc('users/alice/blocks/bob').get()).exists, true);
+  const block = await db.doc('users/alice/blocks/bob').get();
+  assert.equal(block.exists, true);
+  assert.deepEqual(
+    {
+      displayName: block.data()?.displayName,
+      photoURL: block.data()?.photoURL,
+      socialHandle: block.data()?.socialHandle,
+    },
+    {
+      displayName: 'Bob',
+      photoURL: 'bob.jpg',
+      socialHandle: '',
+    }
+  );
   await unblockUser('alice', 'bob', db);
   await unblockUser('alice', 'bob', db);
   assert.equal((await db.doc('users/alice/blocks/bob').get()).exists, false);

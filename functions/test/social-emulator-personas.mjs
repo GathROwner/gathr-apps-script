@@ -160,6 +160,7 @@ async function status() {
       requests: requests.size,
       visibleCheckIns: activity.size,
       blocks: blocks.size,
+      blockProfiles: blocks.docs.map((snapshot) => ({ id: snapshot.id, ...snapshot.data() })),
     };
   }
   console.log(JSON.stringify({
@@ -211,6 +212,16 @@ async function run() {
         message: 'Map reaction QA',
       }, db);
       break;
+    case 'alice-checkin-map-venue':
+      await ensureFriends(PERSONAS.alice.uid, PERSONAS.bob.uid);
+      await seedMapQaVenue();
+      await createCheckIn(PERSONAS.alice.uid, {
+        venueId: MAP_QA_VENUE.id,
+        durationMinutes: 60,
+        audienceMode: 'all_friends',
+        message: 'On the patio',
+      }, db);
+      break;
     case 'bob-checkout':
       await checkOut(PERSONAS.bob.uid, db);
       break;
@@ -222,6 +233,9 @@ async function run() {
       break;
     case 'dana-block-alice':
       await blockUser(PERSONAS.dana.uid, PERSONAS.alice.uid, db);
+      break;
+    case 'alice-block-dana':
+      await blockUser(PERSONAS.alice.uid, PERSONAS.dana.uid, db);
       break;
     case 'status':
       await status();
