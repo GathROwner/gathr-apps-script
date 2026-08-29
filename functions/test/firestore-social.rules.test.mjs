@@ -10,7 +10,10 @@ import {
 import { collectionGroup, doc, getDoc, getDocs, setDoc, updateDoc } from 'firebase/firestore';
 
 const projectId = 'demo-gathr-social';
-const rules = fs.readFileSync(path.resolve('firestore.rules'), 'utf8');
+const rules = fs.readFileSync(
+  path.resolve(process.env.FIRESTORE_RULES_FILE || 'firestore.rules'),
+  'utf8'
+);
 let environment;
 
 before(async () => {
