@@ -18,5 +18,20 @@
   "firestore": {
     "rules": "firestore.social-production.rules",
     "indexes": "firestore.social-production.indexes.json"
+  },
+  "emulators": {
+    "auth": {
+      "port": 9099
+    },
+    "firestore": {
+      "port": 8080
+    },
+    "functions": {
+      "port": 5001
+    },
+    "ui": {
+      "enabled": false
+    },
+    "singleProjectMode": true
   }
 }

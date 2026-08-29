@@ -596,6 +596,15 @@ export async function createCheckIn(
     }
     const ownerData = assertExisting(baseSnapshots[0], 'Your user profile');
     const venueData = assertExisting(baseSnapshots[1], 'Venue');
+    if (venueData.socialVenueMirrorSource === 'gathr-event-api') {
+      const mirrorExpiresAt = venueData.socialVenueMirrorExpiresAt;
+      if (!(mirrorExpiresAt instanceof Timestamp) || mirrorExpiresAt.toMillis() <= createdAt.toMillis()) {
+        throw new SocialDomainError(
+          'failed-precondition',
+          'This venue is not currently available for check-in.'
+        );
+      }
+    }
     const previousCheckIn = baseSnapshots[2].data() || {};
     const relationshipSnapshots = relRefs.length
       ? await transaction.getAll(...relRefs)

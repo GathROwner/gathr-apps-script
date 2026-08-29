@@ -189,6 +189,26 @@ test('all-friends check-in fans out and checkout revokes every viewer', async ()
   assert.equal((await db.doc('activeCheckIns/alice').get()).exists, false);
 });
 
+test('check-in fails closed when an event-api venue mirror is stale', async () => {
+  await db.doc('venues/stale-venue').set({
+    pagename: 'Stale Venue',
+    socialVenueMirrorSource: 'gathr-event-api',
+    socialVenueMirrorExpiresAt: Timestamp.fromMillis(Date.now() - 1_000),
+  });
+  await assert.rejects(
+    () => createCheckIn(
+      'alice',
+      {
+        venueId: 'stale-venue',
+        durationMinutes: 30,
+        audienceMode: 'all_friends',
+      },
+      db
+    ),
+    (error) => error?.code === 'failed-precondition'
+  );
+});
+
 test('selected-friends audience does not disclose to excluded friends', async () => {
   await Promise.all([makeFriends('alice', 'bob'), makeFriends('alice', 'charlie')]);
   await createCheckIn(
