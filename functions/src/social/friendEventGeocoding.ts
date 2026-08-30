@@ -2,11 +2,20 @@ import { SocialDomainError } from './validation.js';
 
 type FetchLike = (input: string | URL | Request, init?: RequestInit) => Promise<Response>;
 
-export interface FriendEventAddressSuggestion {
+export interface FriendEventLocationSuggestion {
   id: string;
+  mapboxId: string;
   primaryText: string;
   secondaryText: string;
   fullAddress: string;
+  featureType: string;
+}
+
+export interface ResolvedFriendEventLocationSuggestion {
+  mapboxId: string;
+  primaryText: string;
+  fullAddress: string;
+  featureType: string;
   latitude: number;
   longitude: number;
 }
@@ -34,32 +43,49 @@ function featureText(value: unknown): string {
   return typeof value === 'string' ? value.trim().slice(0, 300) : '';
 }
 
+function searchSessionToken(value: unknown): string {
+  const token = typeof value === 'string' ? value.trim() : '';
+  if (!/^[A-Za-z0-9-]{8,100}$/.test(token)) {
+    throw new SocialDomainError('invalid-argument', 'The location search session is invalid.');
+  }
+  return token;
+}
+
+function mapboxId(value: unknown): string {
+  const id = featureText(value);
+  if (!id || id.length > 500 || !/^[A-Za-z0-9_:=.-]+$/.test(id)) {
+    throw new SocialDomainError('invalid-argument', 'The selected location is invalid.');
+  }
+  return id;
+}
+
 /**
  * Return a small, temporary autocomplete list for the authenticated event
- * creator. Address text, result labels, and coordinates are deliberately not
- * logged or written by this function.
+ * creator. Search Box supports businesses and other POIs as well as ordinary
+ * addresses. Result labels are deliberately not logged or written here.
  */
-export async function suggestFriendEventAddresses(
+export async function suggestFriendEventLocations(
   input: Record<string, unknown>,
   accessToken: string,
   options: { fetchImpl?: FetchLike } = {}
-): Promise<{ suggestions: FriendEventAddressSuggestion[] }> {
+): Promise<{ suggestions: FriendEventLocationSuggestion[] }> {
   const query = addressText(input.query).slice(0, 200);
   if (query.length < 3) return { suggestions: [] };
+  const sessionToken = searchSessionToken(input.sessionToken);
 
   const normalizedAccessToken = accessToken.trim();
   if (!normalizedAccessToken) {
     throw new SocialDomainError(
       'failed-precondition',
-      'Address suggestions are temporarily unavailable.'
+      'Location suggestions are temporarily unavailable.'
     );
   }
 
-  const url = new URL('https://api.mapbox.com/search/geocode/v6/forward');
+  const url = new URL('https://api.mapbox.com/search/searchbox/v1/suggest');
   url.searchParams.set('q', query);
-  url.searchParams.set('autocomplete', 'true');
   url.searchParams.set('limit', '5');
-  url.searchParams.set('types', 'address');
+  url.searchParams.set('types', 'poi,address,place,city,locality,neighborhood,street');
+  url.searchParams.set('session_token', sessionToken);
   url.searchParams.set('access_token', normalizedAccessToken);
 
   const proximityLatitude = finiteCoordinate(input.proximityLatitude, -90, 90);
@@ -77,68 +103,133 @@ export async function suggestFriendEventAddresses(
   } catch {
     throw new SocialDomainError(
       'unavailable',
-      'Address suggestions are temporarily unavailable.'
+      'Location suggestions are temporarily unavailable.'
     );
   }
   if (!response.ok) {
     throw new SocialDomainError(
       'unavailable',
-      'Address suggestions are temporarily unavailable.'
+      'Location suggestions are temporarily unavailable.'
     );
   }
 
   const body = await response.json() as {
+    suggestions?: Array<{
+      mapbox_id?: unknown;
+      name?: unknown;
+      name_preferred?: unknown;
+      address?: unknown;
+      place_formatted?: unknown;
+      full_address?: unknown;
+      feature_type?: unknown;
+    }>;
+  };
+  const seen = new Set<string>();
+  const suggestions: FriendEventLocationSuggestion[] = [];
+  for (const suggestion of body.suggestions || []) {
+    const id = featureText(suggestion.mapbox_id);
+    const primaryText = featureText(suggestion.name_preferred) || featureText(suggestion.name);
+    const featureType = featureText(suggestion.feature_type) || 'place';
+    const fullAddress = featureText(suggestion.full_address)
+      || [featureText(suggestion.address), featureText(suggestion.place_formatted)]
+        .filter(Boolean)
+        .join(', ')
+      || [primaryText, featureText(suggestion.place_formatted)].filter(Boolean).join(', ');
+    const secondaryText = featureType === 'poi'
+      ? fullAddress
+      : featureText(suggestion.place_formatted) || fullAddress;
+    const dedupeKey = `${primaryText}|${fullAddress}`.toLocaleLowerCase();
+    if (
+      !id || !primaryText
+      || !fullAddress
+      || seen.has(dedupeKey)
+    ) continue;
+    seen.add(dedupeKey);
+    suggestions.push({
+      id: `mapbox:${id}`,
+      mapboxId: id,
+      primaryText,
+      secondaryText,
+      fullAddress,
+      featureType,
+    });
+  }
+
+  return { suggestions: suggestions.slice(0, 5) };
+}
+
+/**
+ * Complete a Search Box session after the user deliberately selects a result.
+ * These coordinates are only a client preview; create/update replaces them via
+ * the permanent server geocode before anything is stored.
+ */
+export async function retrieveFriendEventLocationSuggestion(
+  input: Record<string, unknown>,
+  accessToken: string,
+  options: { fetchImpl?: FetchLike } = {}
+): Promise<ResolvedFriendEventLocationSuggestion> {
+  const id = mapboxId(input.mapboxId);
+  const sessionToken = searchSessionToken(input.sessionToken);
+  const normalizedAccessToken = accessToken.trim();
+  if (!normalizedAccessToken) {
+    throw new SocialDomainError(
+      'failed-precondition',
+      'Location suggestions are temporarily unavailable.'
+    );
+  }
+
+  const url = new URL(`https://api.mapbox.com/search/searchbox/v1/retrieve/${encodeURIComponent(id)}`);
+  url.searchParams.set('session_token', sessionToken);
+  url.searchParams.set('access_token', normalizedAccessToken);
+
+  let response: Response;
+  try {
+    response = await (options.fetchImpl || fetch)(url, {
+      headers: { Accept: 'application/json' },
+      signal: AbortSignal.timeout(8_000),
+    });
+  } catch {
+    throw new SocialDomainError('unavailable', 'That location could not be loaded right now.');
+  }
+  if (!response.ok) {
+    throw new SocialDomainError('unavailable', 'That location could not be loaded right now.');
+  }
+
+  const body = await response.json() as {
     features?: Array<{
-      id?: unknown;
       geometry?: { coordinates?: unknown[] };
       properties?: {
         mapbox_id?: unknown;
         name?: unknown;
         name_preferred?: unknown;
+        address?: unknown;
         place_formatted?: unknown;
         full_address?: unknown;
-        coordinates?: { latitude?: unknown; longitude?: unknown };
+        feature_type?: unknown;
       };
     }>;
   };
-  const seen = new Set<string>();
-  const suggestions: FriendEventAddressSuggestion[] = [];
-  for (const feature of body.features || []) {
-    const properties = feature.properties || {};
-    const primaryText = featureText(properties.name_preferred) || featureText(properties.name);
-    const secondaryText = featureText(properties.place_formatted);
-    const fullAddress = featureText(properties.full_address)
-      || [primaryText, secondaryText].filter(Boolean).join(', ');
-    const latitude = finiteCoordinate(
-      properties.coordinates?.latitude ?? feature.geometry?.coordinates?.[1],
-      -90,
-      90
-    );
-    const longitude = finiteCoordinate(
-      properties.coordinates?.longitude ?? feature.geometry?.coordinates?.[0],
-      -180,
-      180
-    );
-    const dedupeKey = fullAddress.toLocaleLowerCase();
-    if (
-      !primaryText
-      || !fullAddress
-      || latitude === null
-      || longitude === null
-      || seen.has(dedupeKey)
-    ) continue;
-    seen.add(dedupeKey);
-    suggestions.push({
-      id: featureText(properties.mapbox_id) || featureText(feature.id) || dedupeKey,
-      primaryText,
-      secondaryText,
-      fullAddress,
-      latitude,
-      longitude,
-    });
+  const feature = body.features?.[0];
+  const properties = feature?.properties || {};
+  const primaryText = featureText(properties.name_preferred) || featureText(properties.name);
+  const fullAddress = featureText(properties.full_address)
+    || [featureText(properties.address), featureText(properties.place_formatted)]
+      .filter(Boolean)
+      .join(', ')
+    || primaryText;
+  const latitude = finiteCoordinate(feature?.geometry?.coordinates?.[1], -90, 90);
+  const longitude = finiteCoordinate(feature?.geometry?.coordinates?.[0], -180, 180);
+  if (!primaryText || !fullAddress || latitude === null || longitude === null) {
+    throw new SocialDomainError('invalid-argument', 'That location could not be resolved.');
   }
-
-  return { suggestions: suggestions.slice(0, 5) };
+  return {
+    mapboxId: featureText(properties.mapbox_id) || id,
+    primaryText,
+    fullAddress,
+    featureType: featureText(properties.feature_type) || 'place',
+    latitude,
+    longitude,
+  };
 }
 
 /**

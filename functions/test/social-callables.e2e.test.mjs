@@ -84,6 +84,12 @@ test('deployed callable surface enforces Auth and completes the friend/check-in 
   );
   assert.equal(unauthenticatedSuggestion.response.ok, false);
   assert.equal(unauthenticatedSuggestion.json.error.status, 'UNAUTHENTICATED');
+  const unauthenticatedRetrieve = await call(
+    'retrieveFriendEventLocationSuggestionCallable',
+    { mapboxId: 'poi.hunters', sessionToken: '00000000-0000-4000-8000-000000000004' }
+  );
+  assert.equal(unauthenticatedRetrieve.response.ok, false);
+  assert.equal(unauthenticatedRetrieve.json.error.status, 'UNAUTHENTICATED');
 
   const [aliceToken, bobToken] = await Promise.all([
     signIn('alice@gathr.local', 'GathrTest!2026'),

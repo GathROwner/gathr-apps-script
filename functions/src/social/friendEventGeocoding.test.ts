@@ -2,8 +2,9 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import {
+  retrieveFriendEventLocationSuggestion,
   resolveFriendEventAddress,
-  suggestFriendEventAddresses,
+  suggestFriendEventLocations,
 } from './friendEventGeocoding.js';
 
 const customInput = {
@@ -65,49 +66,50 @@ test('non-address locations never call the geocoder', async () => {
   assert.equal(result, input);
 });
 
-test('address suggestions return a locally biased five-result autocomplete request', async () => {
+test('location suggestions use Search Box for locally biased POIs and addresses', async () => {
   let requestedUrl = '';
-  const result = await suggestFriendEventAddresses({
-    query: '  9  Dale Drive ',
+  const result = await suggestFriendEventLocations({
+    query: '  Hunters  ',
+    sessionToken: '00000000-0000-4000-8000-000000000001',
     proximityLatitude: 46.24,
     proximityLongitude: -63.13,
   }, ' test-token ', {
     fetchImpl: async (input) => {
       requestedUrl = String(input);
       return new Response(JSON.stringify({
-        features: [{
-          id: 'address.1',
-          properties: {
-            name_preferred: '9 Dale Drive',
-            place_formatted: 'Charlottetown, Prince Edward Island, Canada',
-            full_address: '9 Dale Drive, Charlottetown, Prince Edward Island, Canada',
-            coordinates: { latitude: 46.27233, longitude: -63.124694 },
-          },
+        suggestions: [{
+          mapbox_id: 'poi.hunters',
+          name_preferred: "Hunter's Ale House",
+          place_formatted: 'Charlottetown, Prince Edward Island, Canada',
+          full_address: '185 Kent St, Charlottetown, PE C1A 1P1, Canada',
+          feature_type: 'poi',
         }],
       }), { status: 200 });
     },
   });
 
   const url = new URL(requestedUrl);
-  assert.equal(url.searchParams.get('q'), '9 Dale Drive');
-  assert.equal(url.searchParams.get('autocomplete'), 'true');
+  assert.equal(url.pathname, '/search/searchbox/v1/suggest');
+  assert.equal(url.searchParams.get('q'), 'Hunters');
   assert.equal(url.searchParams.get('limit'), '5');
-  assert.equal(url.searchParams.get('types'), 'address');
+  assert.match(url.searchParams.get('types') || '', /poi/);
+  assert.match(url.searchParams.get('types') || '', /address/);
+  assert.equal(url.searchParams.get('session_token'), '00000000-0000-4000-8000-000000000001');
   assert.equal(url.searchParams.get('proximity'), '-63.13,46.24');
   assert.equal(url.searchParams.get('access_token'), 'test-token');
   assert.deepEqual(result.suggestions, [{
-    id: 'address.1',
-    primaryText: '9 Dale Drive',
-    secondaryText: 'Charlottetown, Prince Edward Island, Canada',
-    fullAddress: '9 Dale Drive, Charlottetown, Prince Edward Island, Canada',
-    latitude: 46.27233,
-    longitude: -63.124694,
+    id: 'mapbox:poi.hunters',
+    mapboxId: 'poi.hunters',
+    primaryText: "Hunter's Ale House",
+    secondaryText: '185 Kent St, Charlottetown, PE C1A 1P1, Canada',
+    fullAddress: '185 Kent St, Charlottetown, PE C1A 1P1, Canada',
+    featureType: 'poi',
   }]);
 });
 
-test('address suggestions skip short queries without calling Mapbox', async () => {
+test('location suggestions skip short queries without requiring a session or calling Mapbox', async () => {
   let called = false;
-  const result = await suggestFriendEventAddresses({ query: '9 ' }, 'test-token', {
+  const result = await suggestFriendEventLocations({ query: '9 ' }, 'test-token', {
     fetchImpl: async () => {
       called = true;
       throw new Error('should not run');
@@ -117,38 +119,68 @@ test('address suggestions skip short queries without calling Mapbox', async () =
   assert.equal(called, false);
 });
 
-test('address suggestions drop duplicate and malformed features', async () => {
-  const result = await suggestFriendEventAddresses({ query: '12 Water' }, 'test-token', {
+test('location suggestions drop duplicate and malformed results', async () => {
+  const result = await suggestFriendEventLocations({
+    query: '12 Water',
+    sessionToken: '00000000-0000-4000-8000-000000000002',
+  }, 'test-token', {
     fetchImpl: async () => new Response(JSON.stringify({
-      features: [
+      suggestions: [
         {
-          id: 'address.1',
-          properties: {
-            name: '12 Water Street',
-            place_formatted: 'Charlottetown, PE, Canada',
-            full_address: '12 Water Street, Charlottetown, PE, Canada',
-            coordinates: { latitude: 46.2, longitude: -63.1 },
-          },
+          mapbox_id: 'address.1',
+          name: '12 Water Street',
+          place_formatted: 'Charlottetown, PE, Canada',
+          full_address: '12 Water Street, Charlottetown, PE, Canada',
+          feature_type: 'address',
         },
         {
-          id: 'address.duplicate',
-          properties: {
-            name: '12 Water Street',
-            place_formatted: 'Charlottetown, PE, Canada',
-            full_address: '12 Water Street, Charlottetown, PE, Canada',
-            coordinates: { latitude: 46.2, longitude: -63.1 },
-          },
+          mapbox_id: 'address.duplicate',
+          name: '12 Water Street',
+          place_formatted: 'Charlottetown, PE, Canada',
+          full_address: '12 Water Street, Charlottetown, PE, Canada',
+          feature_type: 'address',
         },
         {
-          id: 'bad',
-          properties: {
-            name: 'Nowhere',
-            coordinates: { latitude: 999, longitude: 0 },
-          },
+          name: 'Missing identifier',
+          place_formatted: 'Nowhere',
         },
       ],
     }), { status: 200 }),
   });
   assert.equal(result.suggestions.length, 1);
-  assert.equal(result.suggestions[0]?.id, 'address.1');
+  assert.equal(result.suggestions[0]?.id, 'mapbox:address.1');
+});
+
+test('retrieving a selected POI returns preview coordinates and a complete address', async () => {
+  let requestedUrl = '';
+  const result = await retrieveFriendEventLocationSuggestion({
+    mapboxId: 'poi.hunters',
+    sessionToken: '00000000-0000-4000-8000-000000000003',
+  }, ' test-token ', {
+    fetchImpl: async (input) => {
+      requestedUrl = String(input);
+      return new Response(JSON.stringify({
+        features: [{
+          geometry: { coordinates: [-63.126066, 46.237417] },
+          properties: {
+            mapbox_id: 'poi.hunters',
+            name: "Hunter's Ale House",
+            full_address: '185 Kent St, Charlottetown, PE C1A 1P1, Canada',
+            feature_type: 'poi',
+          },
+        }],
+      }), { status: 200 });
+    },
+  });
+  const url = new URL(requestedUrl);
+  assert.equal(url.pathname, '/search/searchbox/v1/retrieve/poi.hunters');
+  assert.equal(url.searchParams.get('session_token'), '00000000-0000-4000-8000-000000000003');
+  assert.deepEqual(result, {
+    mapboxId: 'poi.hunters',
+    primaryText: "Hunter's Ale House",
+    fullAddress: '185 Kent St, Charlottetown, PE C1A 1P1, Canada',
+    featureType: 'poi',
+    latitude: 46.237417,
+    longitude: -63.126066,
+  });
 });

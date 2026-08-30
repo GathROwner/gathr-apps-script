@@ -29,8 +29,9 @@ import {
   updateFriendEvent,
 } from './friendEvents.js';
 import {
+  retrieveFriendEventLocationSuggestion,
   resolveFriendEventAddress,
-  suggestFriendEventAddresses,
+  suggestFriendEventLocations,
 } from './friendEventGeocoding.js';
 import { SOCIAL_REGION, SocialDomainError } from './validation.js';
 
@@ -212,8 +213,17 @@ export const suggestFriendEventAddressesCallable = onCall(friendEventOptions, as
   const uid = requireUid(request.auth);
   const data = asData(request.data);
   return run(async () => {
-    await enforceSocialRateLimit(uid, 'friend_event_address_suggest', 180, 60 * 60_000);
-    return suggestFriendEventAddresses(data, friendEventGeocodingToken.value());
+    await enforceSocialRateLimit(uid, 'friend_event_location_suggest', 180, 60 * 60_000);
+    return suggestFriendEventLocations(data, friendEventGeocodingToken.value());
+  });
+});
+
+export const retrieveFriendEventLocationSuggestionCallable = onCall(friendEventOptions, async (request) => {
+  const uid = requireUid(request.auth);
+  const data = asData(request.data);
+  return run(async () => {
+    await enforceSocialRateLimit(uid, 'friend_event_location_retrieve', 60, 60 * 60_000);
+    return retrieveFriendEventLocationSuggestion(data, friendEventGeocodingToken.value());
   });
 });
 
