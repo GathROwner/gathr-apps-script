@@ -28,6 +28,9 @@ test('server geocoding replaces client preview coordinates without changing the 
   assert.equal(location.latitude, 46.234);
   assert.equal(location.longitude, -63.126);
   assert.match(requestedUrl, /api\.mapbox\.com\/search\/geocode\/v6\/forward/);
+  const requestedTypes = new URL(requestedUrl).searchParams.get('types');
+  assert.equal(requestedTypes, 'address,street,place,locality');
+  assert.doesNotMatch(requestedTypes || '', /poi/);
 });
 
 test('production custom addresses fail closed without a server geocoding token', async () => {

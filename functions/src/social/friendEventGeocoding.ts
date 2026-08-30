@@ -43,7 +43,10 @@ export async function resolveFriendEventAddress(
   const url = new URL('https://api.mapbox.com/search/geocode/v6/forward');
   url.searchParams.set('q', address);
   url.searchParams.set('limit', '1');
-  url.searchParams.set('types', 'address,street,place,locality,poi');
+  // Mapbox Geocoding v6 rejects the legacy `poi` type. Event place names are
+  // still accepted as free-form query text, while these supported result types
+  // cover exact homes, streets, cities, and localities.
+  url.searchParams.set('types', 'address,street,place,locality');
   url.searchParams.set('access_token', accessToken);
 
   let response: Response;

@@ -19,6 +19,7 @@
     "staging:seed-social-venues": "node scripts/seed-social-staging-venues.mjs",
     "staging:seed-social-personas": "node scripts/seed-social-staging-personas.mjs",
     "social:personas": "node test/social-emulator-personas.mjs",
+    "social:prepare-local-secret": "node scripts/prepare-local-social-secret.mjs",
     "test:all": "npm run test:compiled && npm run test:rules && npm run test:social-integration",
     "verify:parser-env": "node scripts/verify-parser-env.mjs",
     "logs": "firebase functions:log",
