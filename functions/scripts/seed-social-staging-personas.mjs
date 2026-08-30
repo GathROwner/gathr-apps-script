@@ -1,5 +1,6 @@
 import { randomBytes } from 'node:crypto';
 import { readFile, writeFile } from 'node:fs/promises';
+import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -71,6 +72,53 @@ function stringValue(value) {
   return { stringValue: value };
 }
 
+function integerValue(value) {
+  return { integerValue: String(value) };
+}
+
+function booleanValue(value) {
+  return { booleanValue: value };
+}
+
+function timestampValue(value) {
+  return { timestampValue: new Date(value).toISOString() };
+}
+
+function stringArrayValue(values) {
+  return { arrayValue: { values: values.map(stringValue) } };
+}
+
+async function firebaseCliAccessToken() {
+  const configPath = path.join(os.homedir(), '.config', 'configstore', 'firebase-tools.json');
+  const config = JSON.parse(await readFile(configPath, 'utf8'));
+  if (!config.tokens?.access_token) throw new Error('Firebase CLI access token is unavailable.');
+  return config.tokens.access_token;
+}
+
+async function writeAdminFields(documentPath, fields) {
+  const updateMask = new URLSearchParams();
+  Object.keys(fields).forEach((name) => updateMask.append('updateMask.fieldPaths', name));
+  await jsonRequest(`${firestoreBase}/${documentPath}?${updateMask.toString()}`, {
+    method: 'PATCH',
+    headers: {
+      Authorization: `Bearer ${await firebaseCliAccessToken()}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ fields }),
+  });
+}
+
+async function getDocument(account, documentPath) {
+  return jsonRequest(`${firestoreBase}/${documentPath}`, {
+    headers: { Authorization: `Bearer ${account.idToken}` },
+  });
+}
+
+function numericField(document, name) {
+  const value = document?.fields?.[name];
+  return Number(value?.doubleValue ?? value?.integerValue);
+}
+
 async function writeProfile(account, displayName) {
   const updateMask = new URLSearchParams();
   for (const field of ['displayName', 'email', 'photoURL']) updateMask.append('updateMask.fieldPaths', field);
@@ -108,6 +156,12 @@ async function ensureFriends(alice, bob) {
 }
 
 const credentials = await loadCredentials();
+const credentialSuffix = credentials.aliceEmail
+  .match(/^preview\.alice\.([a-z0-9]+)@/i)?.[1]
+  ?.toLowerCase();
+if (!credentialSuffix) throw new Error('The Preview credential email format is invalid.');
+const aliceHandle = `preview_a_${credentialSuffix}`.slice(0, 24);
+const bobHandle = `preview_b_${credentialSuffix}`.slice(0, 24);
 const [alice, bob] = await Promise.all([
   authenticate(credentials.aliceEmail, credentials.password),
   authenticate(credentials.bobEmail, credentials.password),
@@ -122,13 +176,39 @@ if (command === 'cleanup') {
     writeProfile(bob, 'Preview Bob'),
   ]);
   await Promise.all([
-    call(alice, 'claimSocialHandleCallable', { handle: 'preview_alice' }),
-    call(bob, 'claimSocialHandleCallable', { handle: 'preview_bob' }),
+    call(alice, 'claimSocialHandleCallable', { handle: aliceHandle }),
+    call(bob, 'claimSocialHandleCallable', { handle: bobHandle }),
   ]);
   await ensureFriends(alice, bob);
   await call(alice, 'checkOutCallable');
+  const venue = await getDocument(bob, `venues/${venueId}`);
+  const latitude = numericField(venue, 'latitude');
+  const longitude = numericField(venue, 'longitude');
+  if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+    throw new Error('The Preview QA venue is missing recognized coordinates.');
+  }
+  const eligibilitySessionId = `preview-${Date.now().toString(36)}-dwell`;
+  const firstSample = await call(bob, 'recordCheckInEligibilitySampleCallable', {
+    sessionId: eligibilitySessionId,
+    venueId,
+    latitude,
+    longitude,
+    accuracyMeters: 8,
+    speedMetersPerSecond: 0,
+  });
+  if (firstSample.eligible !== false) throw new Error('A new dwell session was unexpectedly eligible.');
+  const completedAt = Date.now();
+  await writeAdminFields(`checkInEligibilitySessions/${bob.uid}_${eligibilitySessionId}`, {
+    eligible: booleanValue(true),
+    eligibleVenueIds: stringArrayValue([venueId]),
+    qualifyingMs: integerValue(90_000),
+    completedAt: timestampValue(completedAt),
+    completedExpiresAt: timestampValue(completedAt + 5 * 60_000),
+    expiresAt: timestampValue(completedAt + 5 * 60_000),
+  });
   const checkIn = await call(bob, 'createCheckInCallable', {
     operationId: `preview-${Date.now().toString(36)}`,
+    eligibilitySessionId,
     venueId,
     durationMinutes: 120,
     audienceMode: 'all_friends',
