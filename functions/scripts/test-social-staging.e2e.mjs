@@ -16,6 +16,7 @@ const password = `Qa!${randomBytes(18).toString('base64url')}`;
 
 let alice;
 let bob;
+let charlie;
 
 function delay(milliseconds) {
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
@@ -53,6 +54,26 @@ function stringValue(value) {
   return { stringValue: value };
 }
 
+function doubleValue(value) {
+  return { doubleValue: value };
+}
+
+function integerValue(value) {
+  return { integerValue: String(value) };
+}
+
+function booleanValue(value) {
+  return { booleanValue: value };
+}
+
+function timestampValue(value) {
+  return { timestampValue: new Date(value).toISOString() };
+}
+
+function stringArrayValue(values) {
+  return { arrayValue: { values: values.map(stringValue) } };
+}
+
 async function writeOwnProfile(account, displayName) {
   const updateMask = new URLSearchParams();
   updateMask.append('updateMask.fieldPaths', 'displayName');
@@ -84,21 +105,27 @@ async function firebaseCliAccessToken() {
   return config.tokens.access_token;
 }
 
-async function ensureQaVenue() {
+async function writeAdminFields(documentPath, fields) {
   const accessToken = await firebaseCliAccessToken();
-  await jsonRequest(`${firestoreBase}/venues/${qaVenueId}`, {
+  const updateMask = new URLSearchParams();
+  Object.keys(fields).forEach((name) => updateMask.append('updateMask.fieldPaths', name));
+  return jsonRequest(`${firestoreBase}/${documentPath}?${updateMask.toString()}`, {
     method: 'PATCH',
     headers: {
       Authorization: `Bearer ${accessToken}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      fields: {
-        pagename: stringValue('GathR Social QA Venue'),
-        address: stringValue('Staging only'),
-        environment: stringValue('staging'),
-      },
-    }),
+    body: JSON.stringify({ fields }),
+  });
+}
+
+async function ensureQaVenue() {
+  await writeAdminFields(`venues/${qaVenueId}`, {
+    pagename: stringValue('GathR Social QA Venue'),
+    address: stringValue('Staging only'),
+    environment: stringValue('staging'),
+    latitude: doubleValue(46.2382),
+    longitude: doubleValue(-63.1311),
   });
 }
 
@@ -131,6 +158,7 @@ function field(document, name) {
   if (!value) return undefined;
   return value.stringValue
     ?? value.integerValue
+    ?? value.doubleValue
     ?? value.booleanValue
     ?? value.timestampValue
     ?? value.arrayValue;
@@ -160,15 +188,19 @@ try {
   await ensureQaVenue();
   alice = await createAccount('alice');
   bob = await createAccount('bob');
+  charlie = await createAccount('charlie');
   await Promise.all([
     writeOwnProfile(alice, 'Staging Alice'),
     writeOwnProfile(bob, 'Staging Bob'),
+    writeOwnProfile(charlie, 'Staging Charlie'),
   ]);
 
   const aliceHandle = `qa_${runId}_a`.slice(0, 24);
   const bobHandle = `qa_${runId}_b`.slice(0, 24);
+  const charlieHandle = `qa_${runId}_c`.slice(0, 24);
   await call(alice, 'claimSocialHandleCallable', { handle: aliceHandle });
   await call(bob, 'claimSocialHandleCallable', { handle: bobHandle });
+  await call(charlie, 'claimSocialHandleCallable', { handle: charlieHandle });
   const search = await call(alice, 'searchUserByHandleCallable', { handle: bobHandle });
   assert.equal(search.user.uid, bob.uid);
 
@@ -177,6 +209,7 @@ try {
   await call(alice, 'sendFriendRequestCallable', { targetUid: bob.uid });
   await call(bob, 'declineFriendRequestCallable', { otherUid: alice.uid });
   await makeFriends(alice, bob);
+  await makeFriends(bob, charlie);
 
   await writeOwnProfile(alice, 'Staging Alice Updated');
   await waitFor('profile projection synchronization', async () => {
@@ -184,8 +217,29 @@ try {
     assert.equal(field(friend, 'displayName'), 'Staging Alice Updated');
   });
 
+  const dwellSessionId = `live-${runId}-dwell`;
+  const firstDwellSample = await call(alice, 'recordCheckInEligibilitySampleCallable', {
+    sessionId: dwellSessionId,
+    venueId: qaVenueId,
+    latitude: 46.2382,
+    longitude: -63.1311,
+    accuracyMeters: 8,
+    speedMetersPerSecond: 0,
+  });
+  assert.equal(firstDwellSample.eligible, false);
+  const completedAt = Date.now();
+  await writeAdminFields(`checkInEligibilitySessions/${alice.uid}_${dwellSessionId}`, {
+    eligible: booleanValue(true),
+    eligibleVenueIds: stringArrayValue([qaVenueId]),
+    qualifyingMs: integerValue(90_000),
+    completedAt: timestampValue(completedAt),
+    completedExpiresAt: timestampValue(completedAt + 5 * 60_000),
+    expiresAt: timestampValue(completedAt + 5 * 60_000),
+  });
+
   const checkIn = await call(alice, 'createCheckInCallable', {
     operationId: `live-${runId}-all`,
+    eligibilitySessionId: dwellSessionId,
     venueId: qaVenueId,
     durationMinutes: 30,
     audienceMode: 'all_friends',
@@ -213,6 +267,71 @@ try {
   await call(alice, 'checkOutCallable');
   assert.equal(await getDocument(bob, `users/${bob.uid}/friendActivity/${alice.uid}`), null);
 
+  const privateAddress = '1 Queen Street, Charlottetown, PE C1A 4A2';
+  const geocoded = await call(alice, 'geocodeFriendEventAddressCallable', {
+    address: privateAddress,
+  });
+  assert.equal(Number.isFinite(Number(geocoded.latitude)), true);
+  assert.equal(Number.isFinite(Number(geocoded.longitude)), true);
+
+  const startAtMs = Date.now() + 24 * 60 * 60_000;
+  const baseEventInput = {
+    title: 'Staging backyard movie night',
+    description: 'Private Release 2 staging smoke test.',
+    category: 'Cinema',
+    startAtMs,
+    endAtMs: startAtMs + 2 * 60 * 60_000,
+    visibility: 'selected_friends',
+    selectedUids: [bob.uid],
+    guestInviteMode: 'guests_can_invite',
+    guestListVisible: true,
+    location: {
+      type: 'custom_address',
+      address: privateAddress,
+      placeName: 'Staging private home',
+      revealAtMs: startAtMs,
+    },
+  };
+  const createdEvent = await call(alice, 'createFriendEventCallable', {
+    ...baseEventInput,
+    operationId: `live-${runId}-event`,
+  });
+  const eventId = createdEvent.eventId;
+  assert.ok(eventId);
+  const bobEventBeforeReveal = await getDocument(bob, `users/${bob.uid}/friendEvents/${eventId}`);
+  assert.equal(field(bobEventBeforeReveal, 'addressRevealed'), false);
+  assert.equal(await getDocument(bob, `users/${bob.uid}/friendEventLocations/${eventId}`), null);
+  assert.equal(await getDocument(charlie, `users/${charlie.uid}/friendEvents/${eventId}`), null);
+
+  await call(bob, 'inviteToFriendEventCallable', { eventId, targetUid: charlie.uid });
+  assert.ok(await getDocument(charlie, `users/${charlie.uid}/friendEvents/${eventId}`));
+  assert.equal(
+    (await call(charlie, 'respondToFriendEventCallable', { eventId, response: 'going' })).response,
+    'going'
+  );
+  await call(alice, 'removeFromFriendEventCallable', { eventId, memberUid: charlie.uid });
+  assert.equal(await getDocument(charlie, `users/${charlie.uid}/friendEvents/${eventId}`), null);
+
+  await call(alice, 'updateFriendEventCallable', {
+    ...baseEventInput,
+    eventId,
+    title: 'Staging backyard movie night updated',
+    location: { ...baseEventInput.location, revealAtMs: Date.now() },
+  });
+  const bobLocationAfterReveal = await getDocument(
+    bob,
+    `users/${bob.uid}/friendEventLocations/${eventId}`
+  );
+  assert.equal(field(bobLocationAfterReveal, 'address'), privateAddress);
+
+  await call(alice, 'cancelFriendEventCallable', {
+    eventId,
+    reason: 'Release 2 staging cancellation test',
+  });
+  assert.equal(await getDocument(bob, `users/${bob.uid}/friendEventLocations/${eventId}`), null);
+  await call(alice, 'deleteFriendEventCallable', { eventId });
+  assert.equal(await getDocument(bob, `users/${bob.uid}/friendEvents/${eventId}`), null);
+
   await call(bob, 'reportUserCallable', { reportedUid: alice.uid, reason: 'other' });
   await call(alice, 'removeFriendCallable', { otherUid: bob.uid });
   await makeFriends(alice, bob);
@@ -227,16 +346,26 @@ try {
   assert.equal(cleanup.handleReleased, true);
   await deleteAccount(alice);
   alice = null;
+  await deleteAccount(charlie);
+  charlie = null;
 
   console.log(JSON.stringify({
     projectId,
-    callableCountExercised: 13,
+    callableCountExercised: 22,
     profileSyncVerified: true,
     authDeleteCleanupVerified: true,
     blockDisplaySnapshotVerified: true,
     checkInVisibilityVerified: true,
+    contextualEligibilityVerified: true,
+    delayedPrivateAddressVerified: true,
+    guestInviteAndRsvpVerified: true,
+    eventCancellationAndDeletionVerified: true,
     status: 'passed',
   }, null, 2));
 } finally {
-  await Promise.allSettled([deleteAccount(alice), deleteAccount(bob)]);
+  await Promise.allSettled([
+    deleteAccount(alice),
+    deleteAccount(bob),
+    deleteAccount(charlie),
+  ]);
 }
