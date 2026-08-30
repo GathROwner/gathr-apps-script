@@ -168,6 +168,7 @@ export const recordCheckInEligibilitySampleCallable = onCall(releaseTwoOptions, 
     return recordCheckInEligibilitySample(uid, {
       sessionId: data.sessionId,
       venueId: data.venueId,
+      candidateVenueIds: data.candidateVenueIds,
       latitude: data.latitude,
       longitude: data.longitude,
       accuracyMeters: data.accuracyMeters,

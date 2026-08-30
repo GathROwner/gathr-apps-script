@@ -51,6 +51,7 @@ async function seedProfiles() {
     db.doc('users/charlie').set({ displayName: 'Charlie', photoURL: '' }),
     db.doc('users/dana').set({ displayName: 'Dana', photoURL: '' }),
     db.doc('venues/venue-1').set({ pagename: 'Venue One', latitude: 46.2382, longitude: -63.1311 }),
+    db.doc('venues/venue-neighbor').set({ pagename: 'Venue Next Door', latitude: 46.23827, longitude: -63.1311 }),
     db.doc('venues/venue-2').set({ pagename: 'Venue Two', latitude: 46.2401, longitude: -63.1298 }),
   ]);
 }
@@ -223,6 +224,45 @@ test('dwell eligibility rejects movement and completes only after stationary qua
   assert.equal(stored?.qualifyingMs, CHECK_IN_DWELL_TARGET_MS);
   assert.equal(Object.hasOwn(stored || {}, 'latitude'), false);
   assert.equal(Object.hasOwn(stored || {}, 'longitude'), false);
+});
+
+test('one dwell session exposes only server-validated overlapping venue choices', async () => {
+  const sessionId = 'nearby-venues-001';
+  const start = Date.now();
+  let result;
+  for (let elapsed = 0; elapsed <= 100_000; elapsed += 20_000) {
+    result = await recordCheckInEligibilitySample('alice', {
+      sessionId,
+      venueId: 'venue-1',
+      candidateVenueIds: ['venue-1', 'venue-neighbor', 'venue-2'],
+      latitude: 46.2382,
+      longitude: -63.1311,
+      accuracyMeters: 8,
+      speedMetersPerSecond: 0,
+    }, db, Timestamp.fromMillis(start + elapsed));
+  }
+  assert.equal(result?.eligible, true);
+  assert.deepEqual(result?.eligibleVenueIds.sort(), ['venue-1', 'venue-neighbor']);
+  const stored = (await db.doc(`checkInEligibilitySessions/alice_${sessionId}`).get()).data();
+  assert.deepEqual(stored?.eligibleVenueIds.sort(), ['venue-1', 'venue-neighbor']);
+  assert.equal(Object.hasOwn(stored || {}, 'latitude'), false);
+  assert.equal(Object.hasOwn(stored || {}, 'longitude'), false);
+
+  await assert.rejects(() => createCheckIn('alice', {
+    operationId: 'nearby-forged-far-venue',
+    eligibilitySessionId: sessionId,
+    venueId: 'venue-2',
+    durationMinutes: 30,
+    audienceMode: 'all_friends',
+  }, db), (error) => error?.code === 'failed-precondition');
+  const checkIn = await createCheckIn('alice', {
+    operationId: 'nearby-approved-venue',
+    eligibilitySessionId: sessionId,
+    venueId: 'venue-neighbor',
+    durationMinutes: 30,
+    audienceMode: 'all_friends',
+  }, db);
+  assert.equal(checkIn.venueId, 'venue-neighbor');
 });
 
 test('short walk-bys, poor accuracy, outside resets, and expired sessions never unlock check-in', async () => {

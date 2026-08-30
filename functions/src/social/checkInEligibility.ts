@@ -24,6 +24,7 @@ export const CHECK_IN_SESSION_TTL_MS = 10 * 60_000;
 export interface CheckInEligibilitySampleInput {
   sessionId: unknown;
   venueId: unknown;
+  candidateVenueIds?: unknown;
   latitude: unknown;
   longitude: unknown;
   accuracyMeters: unknown;
@@ -33,6 +34,7 @@ export interface CheckInEligibilitySampleInput {
 export interface CheckInEligibilityResult {
   sessionId: string;
   venueId: string;
+  eligibleVenueIds: string[];
   eligible: boolean;
   qualifyingMs: number;
   requiredMs: number;
@@ -40,6 +42,21 @@ export interface CheckInEligibilityResult {
   distanceMetres: number;
   reason: 'qualifying' | 'eligible' | 'outside' | 'low_accuracy' | 'moving_too_fast';
   expiresAt: Timestamp;
+}
+
+function parseCandidateVenueIds(value: unknown, primaryVenueId: string): string[] {
+  const values = Array.isArray(value) ? value : [];
+  if (values.length > 3) {
+    throw new SocialDomainError('invalid-argument', 'Too many nearby venue candidates.');
+  }
+  const venueIds = [...new Set([
+    primaryVenueId,
+    ...values.map((candidate) => validateVenueId(candidate)),
+  ])];
+  if (venueIds.length > 4) {
+    throw new SocialDomainError('invalid-argument', 'Too many nearby venue candidates.');
+  }
+  return venueIds;
 }
 
 function finiteNumber(value: unknown, fieldName: string): number {
@@ -111,6 +128,7 @@ export async function recordCheckInEligibilitySample(
   const uid = validateUid(uidValue, 'uid');
   const sessionId = validateSocialOperationId(input.sessionId);
   const venueId = validateVenueId(input.venueId);
+  const candidateVenueIds = parseCandidateVenueIds(input.candidateVenueIds, venueId);
   const sampleLatitude = parseLatitude(input.latitude);
   const sampleLongitude = parseLongitude(input.longitude);
   const sampleAccuracy = finiteNumber(input.accuracyMeters, 'accuracyMeters');
@@ -122,19 +140,37 @@ export async function recordCheckInEligibilitySample(
     throw new SocialDomainError('invalid-argument', 'accuracyMeters is invalid.');
   }
 
-  const venueRef = db.collection('venues').doc(venueId);
+  const venueRefs = candidateVenueIds.map((candidateVenueId) =>
+    db.collection('venues').doc(candidateVenueId)
+  );
   const sessionRef = db
     .collection('checkInEligibilitySessions')
     .doc(checkInEligibilitySessionId(uid, sessionId));
 
   return db.runTransaction(async (transaction) => {
-    const [venueSnapshot, sessionSnapshot] = await transaction.getAll(venueRef, sessionRef);
+    const snapshots = await transaction.getAll(...venueRefs, sessionRef);
+    const venueSnapshots = snapshots.slice(0, venueRefs.length);
+    const venueSnapshot = venueSnapshots[0];
+    const sessionSnapshot = snapshots[snapshots.length - 1];
     if (!venueSnapshot.exists) {
       throw new SocialDomainError('not-found', 'This venue is not currently available for check-in.');
     }
     const venue = venueSnapshot.data() || {};
     const venueLatitude = parseLatitude(venue.latitude);
     const venueLongitude = parseLongitude(venue.longitude);
+    const candidateDistances = venueSnapshots.map((snapshot, index) => {
+      if (!snapshot.exists) return null;
+      const candidate = snapshot.data() || {};
+      return {
+        venueId: candidateVenueIds[index],
+        distance: distanceMetres(
+          sampleLatitude,
+          sampleLongitude,
+          parseLatitude(candidate.latitude),
+          parseLongitude(candidate.longitude)
+        ),
+      };
+    }).filter((candidate): candidate is { venueId: string; distance: number } => candidate !== null);
     const previous = sessionSnapshot.data() || {};
     if (sessionSnapshot.exists && previous.uid !== uid) {
       throw new SocialDomainError('permission-denied', 'This check-in session is unavailable.');
@@ -158,6 +194,9 @@ export async function recordCheckInEligibilitySample(
       return {
         sessionId,
         venueId,
+        eligibleVenueIds: Array.isArray(previous.eligibleVenueIds)
+          ? previous.eligibleVenueIds.map((candidate: unknown) => validateVenueId(candidate))
+          : [venueId],
         eligible: true,
         qualifyingMs: CHECK_IN_DWELL_TARGET_MS,
         requiredMs: CHECK_IN_DWELL_TARGET_MS,
@@ -177,6 +216,11 @@ export async function recordCheckInEligibilitySample(
     const accurate = sampleAccuracy <= CHECK_IN_MAX_ACCURACY_METRES;
     const stationaryEnough = sampleSpeed <= CHECK_IN_MAX_SPEED_METRES_PER_SECOND;
     const inside = accurate && distance <= CHECK_IN_BASE_RADIUS_METRES + sampleAccuracy;
+    const eligibleVenueIds = accurate && stationaryEnough
+      ? candidateDistances
+        .filter((candidate) => candidate.distance <= CHECK_IN_BASE_RADIUS_METRES + sampleAccuracy)
+        .map((candidate) => candidate.venueId)
+      : [];
     const lastSeenMs = expired ? null : timestampMillis(previous.lastSeenAt);
     const priorOutsideSinceMs = expired ? null : timestampMillis(previous.outsideSinceAt);
     let qualifyingMs = expired ? 0 : Math.max(0, Number(previous.qualifyingMs) || 0);
@@ -222,6 +266,7 @@ export async function recordCheckInEligibilitySample(
       uid,
       sessionId,
       venueId,
+      eligibleVenueIds: eligible ? eligibleVenueIds : [],
       eligible,
       qualifyingMs: Math.min(qualifyingMs, CHECK_IN_DWELL_TARGET_MS),
       qualifyingStartedAt: qualifyingStartedAt || null,
@@ -238,6 +283,7 @@ export async function recordCheckInEligibilitySample(
     return {
       sessionId,
       venueId,
+      eligibleVenueIds: eligible ? eligibleVenueIds : [],
       eligible,
       qualifyingMs: Math.min(qualifyingMs, CHECK_IN_DWELL_TARGET_MS),
       requiredMs: CHECK_IN_DWELL_TARGET_MS,
@@ -275,7 +321,10 @@ export function assertCompletedCheckInEligibility(
   const completedExpiresAt = session.completedExpiresAt;
   if (
     session.uid !== uid
-    || session.venueId !== venueId
+    || !(
+      session.venueId === venueId
+      || (Array.isArray(session.eligibleVenueIds) && session.eligibleVenueIds.includes(venueId))
+    )
     || session.eligible !== true
     || !(completedExpiresAt instanceof Timestamp)
     || completedExpiresAt.toMillis() <= now.toMillis()
