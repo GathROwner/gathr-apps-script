@@ -17,6 +17,7 @@ import {
   sendFriendRequest,
   unblockUser,
 } from './socialService.js';
+import { recordCheckInEligibilitySample } from './checkInEligibility.js';
 import { SOCIAL_REGION, SocialDomainError } from './validation.js';
 
 const options = {
@@ -125,11 +126,28 @@ export const createCheckInCallable = onCall(options, async (request) => {
     await enforceSocialRateLimit(uid, 'check_in', 20, 60 * 60_000);
     return createCheckIn(uid, {
       operationId: data.operationId,
+      eligibilitySessionId: data.eligibilitySessionId,
       venueId: data.venueId,
       durationMinutes: data.durationMinutes,
       audienceMode: data.audienceMode,
       selectedUids: data.selectedUids,
       message: data.message,
+    });
+  });
+});
+
+export const recordCheckInEligibilitySampleCallable = onCall(options, async (request) => {
+  const uid = requireUid(request.auth);
+  const data = asData(request.data);
+  return run(async () => {
+    await enforceSocialRateLimit(uid, 'check_in_eligibility', 360, 60 * 60_000);
+    return recordCheckInEligibilitySample(uid, {
+      sessionId: data.sessionId,
+      venueId: data.venueId,
+      latitude: data.latitude,
+      longitude: data.longitude,
+      accuracyMeters: data.accuracyMeters,
+      speedMetersPerSecond: data.speedMetersPerSecond,
     });
   });
 });

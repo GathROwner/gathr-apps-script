@@ -6,6 +6,7 @@ import {
   cleanupExpiredSocialOperations,
   cleanupExpiredSocialRateLimits,
 } from './socialService.js';
+import { cleanupExpiredCheckInEligibilitySessions } from './checkInEligibility.js';
 import { SOCIAL_REGION } from './validation.js';
 
 export const scheduledSocialCheckInCleanup = onSchedule(
@@ -17,11 +18,17 @@ export const scheduledSocialCheckInCleanup = onSchedule(
     memory: '256MiB',
   },
   async () => {
-    const [checkIns, operations, rateLimits] = await Promise.all([
+    const [checkIns, eligibilitySessions, operations, rateLimits] = await Promise.all([
       cleanupExpiredCheckIns(),
+      cleanupExpiredCheckInEligibilitySessions(),
       cleanupExpiredSocialOperations(),
       cleanupExpiredSocialRateLimits(),
     ]);
-    logger.info('Expired social records cleaned', { checkIns, operations, rateLimits });
+    logger.info('Expired social records cleaned', {
+      checkIns,
+      eligibilitySessions,
+      operations,
+      rateLimits,
+    });
   }
 );

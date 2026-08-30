@@ -26,6 +26,10 @@ import {
   validateUid,
   validateVenueId,
 } from './validation.js';
+import {
+  assertCompletedCheckInEligibility,
+  checkInEligibilitySessionId,
+} from './checkInEligibility.js';
 
 const COLLECTIONS = {
   ACTIVE_CHECK_INS: 'activeCheckIns',
@@ -54,6 +58,7 @@ export interface SafeProfile {
 
 export interface CheckInInput {
   operationId?: unknown;
+  eligibilitySessionId?: unknown;
   venueId: unknown;
   durationMinutes: unknown;
   audienceMode: unknown;
@@ -553,11 +558,13 @@ export async function createCheckIn(
   const audience = parseAudience(input.audienceMode, input.selectedUids);
   const message = normalizeCheckInMessage(input.message);
   const operationId = validateSocialOperationId(input.operationId ?? randomUUID());
+  const eligibilitySessionId = validateSocialOperationId(input.eligibilitySessionId);
   const inputHash = createHash('sha256').update(JSON.stringify({
     venueId,
     durationMinutes,
     audience,
     message,
+    eligibilitySessionId,
   })).digest('hex');
   const candidates = await candidateAudienceUids(db, ownerUid, audience);
   const relRefs = candidates.map((uid) => relationshipRef(db, ownerUid, uid));
@@ -567,6 +574,9 @@ export async function createCheckIn(
   const venueRef = db.collection(COLLECTIONS.VENUES).doc(venueId);
   const checkInRef = activeCheckInRef(db, ownerUid);
   const operationRef = socialOperationRef(db, ownerUid, operationId);
+  const eligibilityRef = db.collection('checkInEligibilitySessions').doc(
+    checkInEligibilitySessionId(ownerUid, eligibilitySessionId)
+  );
   const createdAt = Timestamp.now();
   const expiresAt = Timestamp.fromMillis(
     createdAt.toMillis() + durationMinutes * 60_000
@@ -578,7 +588,8 @@ export async function createCheckIn(
       ownerProfileRef,
       venueRef,
       checkInRef,
-      operationRef
+      operationRef,
+      eligibilityRef
     );
     const previousOperation = baseSnapshots[3].data() || {};
     if (baseSnapshots[3].exists) {
@@ -596,6 +607,8 @@ export async function createCheckIn(
     }
     const ownerData = assertExisting(baseSnapshots[0], 'Your user profile');
     const venueData = assertExisting(baseSnapshots[1], 'Venue');
+    const eligibilityData = assertExisting(baseSnapshots[4], 'Check-in eligibility');
+    assertCompletedCheckInEligibility(eligibilityData, ownerUid, venueId, createdAt);
     if (venueData.socialVenueMirrorSource === 'gathr-event-api') {
       const mirrorExpiresAt = venueData.socialVenueMirrorExpiresAt;
       if (!(mirrorExpiresAt instanceof Timestamp) || mirrorExpiresAt.toMillis() <= createdAt.toMillis()) {
@@ -663,6 +676,10 @@ export async function createCheckIn(
       revision,
     };
     transaction.set(checkInRef, checkIn);
+    transaction.update(eligibilityRef, {
+      consumedAt: createdAt,
+      consumedCheckInRevision: revision,
+    });
     for (const viewerUid of viewerUids) {
       transaction.set(activityRef(db, viewerUid, ownerUid), {
         ownerUid,

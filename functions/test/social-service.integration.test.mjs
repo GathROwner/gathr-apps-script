@@ -24,10 +24,15 @@ import {
   removeFriend,
   reportUser,
 } from '../lib/social/socialService.js';
+import {
+  CHECK_IN_DWELL_TARGET_MS,
+  recordCheckInEligibilitySample,
+} from '../lib/social/checkInEligibility.js';
 
 const projectId = 'demo-gathr-social';
 let app;
 let db;
+let eligibilitySequence = 0;
 
 async function clearFirestore() {
   const host = process.env.FIRESTORE_EMULATOR_HOST;
@@ -45,14 +50,34 @@ async function seedProfiles() {
     db.doc('users/bob').set({ displayName: 'Bob', photoURL: 'bob.jpg' }),
     db.doc('users/charlie').set({ displayName: 'Charlie', photoURL: '' }),
     db.doc('users/dana').set({ displayName: 'Dana', photoURL: '' }),
-    db.doc('venues/venue-1').set({ pagename: 'Venue One' }),
-    db.doc('venues/venue-2').set({ pagename: 'Venue Two' }),
+    db.doc('venues/venue-1').set({ pagename: 'Venue One', latitude: 46.2382, longitude: -63.1311 }),
+    db.doc('venues/venue-2').set({ pagename: 'Venue Two', latitude: 46.2401, longitude: -63.1298 }),
   ]);
 }
 
 async function makeFriends(firstUid, secondUid) {
   await sendFriendRequest(firstUid, secondUid, db);
   await acceptFriendRequest(secondUid, firstUid, db);
+}
+
+async function makeEligible(uid, venueId) {
+  eligibilitySequence += 1;
+  const sessionId = `eligible-${eligibilitySequence.toString().padStart(8, '0')}`;
+  await db.doc(`checkInEligibilitySessions/${uid}_${sessionId}`).set({
+    uid,
+    sessionId,
+    venueId,
+    eligible: true,
+    qualifyingMs: CHECK_IN_DWELL_TARGET_MS,
+    completedExpiresAt: Timestamp.fromMillis(Date.now() + 5 * 60_000),
+    expiresAt: Timestamp.fromMillis(Date.now() + 5 * 60_000),
+  });
+  return sessionId;
+}
+
+async function createEligibleCheckIn(uid, input) {
+  const eligibilitySessionId = await makeEligible(uid, input.venueId);
+  return createCheckIn(uid, { ...input, eligibilitySessionId }, db);
 }
 
 before(async () => {
@@ -167,17 +192,49 @@ test('rate limiting rejects the first request beyond the configured window allow
   );
 });
 
+test('dwell eligibility rejects movement and completes only after stationary qualifying time', async () => {
+  const sessionId = 'dwell-session-001';
+  const start = Date.now();
+  const moving = await recordCheckInEligibilitySample('alice', {
+    sessionId,
+    venueId: 'venue-1',
+    latitude: 46.2382,
+    longitude: -63.1311,
+    accuracyMeters: 8,
+    speedMetersPerSecond: 4,
+  }, db, Timestamp.fromMillis(start));
+  assert.equal(moving.eligible, false);
+  assert.equal(moving.reason, 'moving_too_fast');
+
+  let result;
+  for (let elapsed = 10_000; elapsed <= 110_000; elapsed += 20_000) {
+    result = await recordCheckInEligibilitySample('alice', {
+      sessionId,
+      venueId: 'venue-1',
+      latitude: 46.2382,
+      longitude: -63.1311,
+      accuracyMeters: 8,
+      speedMetersPerSecond: 0,
+    }, db, Timestamp.fromMillis(start + elapsed));
+  }
+  assert.equal(result?.eligible, true);
+  assert.equal(result?.remainingMs, 0);
+  const stored = (await db.doc(`checkInEligibilitySessions/alice_${sessionId}`).get()).data();
+  assert.equal(stored?.qualifyingMs, CHECK_IN_DWELL_TARGET_MS);
+  assert.equal(Object.hasOwn(stored || {}, 'latitude'), false);
+  assert.equal(Object.hasOwn(stored || {}, 'longitude'), false);
+});
+
 test('all-friends check-in fans out and checkout revokes every viewer', async () => {
   await Promise.all([makeFriends('alice', 'bob'), makeFriends('alice', 'charlie')]);
-  const checkIn = await createCheckIn(
+  const checkIn = await createEligibleCheckIn(
     'alice',
     {
       venueId: 'venue-1',
       durationMinutes: 60,
       audienceMode: 'all_friends',
       message: 'On the patio',
-    },
-    db
+    }
   );
   assert.equal(checkIn.viewerCount, 2);
   assert.equal((await db.doc('users/bob/friendActivity/alice').get()).data()?.venueLocationKey, 'venue:venue-1');
@@ -196,14 +253,13 @@ test('check-in fails closed when an event-api venue mirror is stale', async () =
     socialVenueMirrorExpiresAt: Timestamp.fromMillis(Date.now() - 1_000),
   });
   await assert.rejects(
-    () => createCheckIn(
+    async () => createEligibleCheckIn(
       'alice',
       {
         venueId: 'stale-venue',
         durationMinutes: 30,
         audienceMode: 'all_friends',
-      },
-      db
+      }
     ),
     (error) => error?.code === 'failed-precondition'
   );
@@ -211,15 +267,14 @@ test('check-in fails closed when an event-api venue mirror is stale', async () =
 
 test('selected-friends audience does not disclose to excluded friends', async () => {
   await Promise.all([makeFriends('alice', 'bob'), makeFriends('alice', 'charlie')]);
-  await createCheckIn(
+  await createEligibleCheckIn(
     'alice',
     {
       venueId: 'venue-2',
       durationMinutes: 30,
       audienceMode: 'selected_friends',
       selectedUids: ['bob'],
-    },
-    db
+    }
   );
   assert.equal((await db.doc('users/bob/friendActivity/alice').get()).exists, true);
   assert.equal((await db.doc('users/charlie/friendActivity/alice').get()).exists, false);
@@ -227,18 +282,19 @@ test('selected-friends audience does not disclose to excluded friends', async ()
 
 test('replacing a check-in revokes removed viewers before returning success', async () => {
   await Promise.all([makeFriends('alice', 'bob'), makeFriends('alice', 'charlie')]);
-  const first = await createCheckIn(
+  const first = await createEligibleCheckIn(
     'alice',
     {
       operationId: 'first-check-in-001',
       venueId: 'venue-1',
       durationMinutes: 60,
       audienceMode: 'all_friends',
-    },
-    db
+    }
   );
+  const replacementEligibilitySessionId = await makeEligible('alice', 'venue-2');
   const replacementInput = {
     operationId: 'replace-check-in-001',
+    eligibilitySessionId: replacementEligibilitySessionId,
     venueId: 'venue-2',
     durationMinutes: 30,
     audienceMode: 'selected_friends',
@@ -265,23 +321,21 @@ test('replacing a check-in revokes removed viewers before returning success', as
 test('blocking revokes friendship and both activity directions', async () => {
   await makeFriends('alice', 'bob');
   await claimSocialHandle('alice', 'alice_1', db);
-  await createCheckIn(
+  await createEligibleCheckIn(
     'alice',
     {
       venueId: 'venue-1',
       durationMinutes: 30,
       audienceMode: 'all_friends',
-    },
-    db
+    }
   );
-  await createCheckIn(
+  await createEligibleCheckIn(
     'bob',
     {
       venueId: 'venue-1',
       durationMinutes: 30,
       audienceMode: 'all_friends',
-    },
-    db
+    }
   );
   await blockUser('bob', 'alice', db);
   assert.equal((await db.doc('users/bob/friendActivity/alice').get()).exists, false);
@@ -294,14 +348,13 @@ test('blocking revokes friendship and both activity directions', async () => {
 
 test('expired check-in cleanup removes canonical and viewer documents', async () => {
   await makeFriends('alice', 'bob');
-  await createCheckIn(
+  await createEligibleCheckIn(
     'alice',
     {
       venueId: 'venue-1',
       durationMinutes: 30,
       audienceMode: 'all_friends',
-    },
-    db
+    }
   );
   await db.doc('activeCheckIns/alice').update({ expiresAt: Timestamp.fromMillis(1) });
   const result = await cleanupExpiredCheckIns(Timestamp.now(), db);
@@ -311,15 +364,14 @@ test('expired check-in cleanup removes canonical and viewer documents', async ()
 
 test('scheduled cleanup removes expired rate-limit and idempotency records', async () => {
   await enforceSocialRateLimit('alice', 'search', 5, 60_000, db);
-  await createCheckIn(
+  await createEligibleCheckIn(
     'alice',
     {
       operationId: 'cleanup-check-in-001',
       venueId: 'venue-1',
       durationMinutes: 30,
       audienceMode: 'all_friends',
-    },
-    db
+    }
   );
   const operation = await db.collection('socialOperations').limit(1).get();
   assert.equal(operation.size, 1);
@@ -336,14 +388,13 @@ test('account social cleanup removes relationships and visibility without deleti
   await claimSocialHandle('alice', 'alice_1', db);
   await blockUser('charlie', 'alice', db);
   await enforceSocialRateLimit('alice', 'search', 5, 60_000, db);
-  await createCheckIn(
+  await createEligibleCheckIn(
     'bob',
     {
       venueId: 'venue-1',
       durationMinutes: 30,
       audienceMode: 'all_friends',
-    },
-    db
+    }
   );
   const result = await deleteSocialAccountData('alice', db);
   assert.equal(result.relationshipsDeleted, 1);
