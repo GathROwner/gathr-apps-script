@@ -104,6 +104,20 @@ test('custom address is absent from canonical event metadata and unauthorized pr
   assert.equal((await db.doc(`users/charlie/friendEventLocations/${event.eventId}`).get()).exists, false);
 });
 
+test('a host with no friends retains a private zero-guest event projection', async () => {
+  const event = await createFriendEvent('dana', customInput({
+    visibility: 'all_friends',
+    selectedUids: undefined,
+  }), db);
+  const hostProjection = (await db.doc(`users/dana/friendEvents/${event.eventId}`).get()).data();
+  assert.equal(hostProjection?.viewerRole, 'host');
+  assert.equal(hostProjection?.viewerCount, 0);
+  assert.deepEqual(hostProjection?.guests, []);
+  assert.equal((await db.doc(`users/dana/friendEventLocations/${event.eventId}`).get()).exists, true);
+  assert.equal((await db.doc(`users/alice/friendEvents/${event.eventId}`).get()).exists, false);
+  assert.equal((await db.doc(`users/bob/friendEvents/${event.eventId}`).get()).exists, false);
+});
+
 test('delayed address remains absent until the reveal job writes authorized projections', async () => {
   const revealAtMs = Date.now() + 60 * 60_000;
   const event = await createFriendEvent('alice', customInput({
