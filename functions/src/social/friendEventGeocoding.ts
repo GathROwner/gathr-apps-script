@@ -27,7 +27,9 @@ export async function resolveFriendEventAddress(
   const location = record(input.location);
   if (!location || location.type !== 'custom_address') return input;
 
-  if (!accessToken) {
+  const normalizedAccessToken = accessToken.trim();
+
+  if (!normalizedAccessToken) {
     if (options.allowTrustedCoordinates === true) return input;
     throw new SocialDomainError(
       'failed-precondition',
@@ -47,7 +49,7 @@ export async function resolveFriendEventAddress(
   // still accepted as free-form query text, while these supported result types
   // cover exact homes, streets, cities, and localities.
   url.searchParams.set('types', 'address,street,place,locality');
-  url.searchParams.set('access_token', accessToken);
+  url.searchParams.set('access_token', normalizedAccessToken);
 
   let response: Response;
   try {

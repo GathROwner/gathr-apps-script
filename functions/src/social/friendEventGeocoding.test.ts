@@ -33,6 +33,19 @@ test('server geocoding replaces client preview coordinates without changing the 
   assert.doesNotMatch(requestedTypes || '', /poi/);
 });
 
+test('server geocoding trims secret transport whitespace before calling Mapbox', async () => {
+  let requestedUrl = '';
+  await resolveFriendEventAddress(customInput, '  test-token\r\n', {
+    fetchImpl: async (input) => {
+      requestedUrl = String(input);
+      return new Response(JSON.stringify({
+        features: [{ geometry: { coordinates: [-63.126, 46.234] } }],
+      }), { status: 200 });
+    },
+  });
+  assert.equal(new URL(requestedUrl).searchParams.get('access_token'), 'test-token');
+});
+
 test('production custom addresses fail closed without a server geocoding token', async () => {
   await assert.rejects(
     () => resolveFriendEventAddress(customInput, ''),
