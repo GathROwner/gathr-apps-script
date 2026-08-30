@@ -28,7 +28,10 @@ import {
   respondToFriendEvent,
   updateFriendEvent,
 } from './friendEvents.js';
-import { resolveFriendEventAddress } from './friendEventGeocoding.js';
+import {
+  resolveFriendEventAddress,
+  suggestFriendEventAddresses,
+} from './friendEventGeocoding.js';
 import { SOCIAL_REGION, SocialDomainError } from './validation.js';
 
 const options = {
@@ -202,6 +205,15 @@ export const geocodeFriendEventAddressCallable = onCall(friendEventOptions, asyn
     );
     const location = asData(resolved.location);
     return { latitude: location.latitude, longitude: location.longitude };
+  });
+});
+
+export const suggestFriendEventAddressesCallable = onCall(friendEventOptions, async (request) => {
+  const uid = requireUid(request.auth);
+  const data = asData(request.data);
+  return run(async () => {
+    await enforceSocialRateLimit(uid, 'friend_event_address_suggest', 180, 60 * 60_000);
+    return suggestFriendEventAddresses(data, friendEventGeocodingToken.value());
   });
 });
 

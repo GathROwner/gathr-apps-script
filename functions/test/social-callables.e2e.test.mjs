@@ -78,11 +78,21 @@ test('deployed callable surface enforces Auth and completes the friend/check-in 
   const unauthenticated = await call('searchUserByHandleCallable', { handle: 'bob_friend' });
   assert.equal(unauthenticated.response.ok, false);
   assert.equal(unauthenticated.json.error.status, 'UNAUTHENTICATED');
+  const unauthenticatedSuggestion = await call(
+    'suggestFriendEventAddressesCallable',
+    { query: '9 Dale Drive' }
+  );
+  assert.equal(unauthenticatedSuggestion.response.ok, false);
+  assert.equal(unauthenticatedSuggestion.json.error.status, 'UNAUTHENTICATED');
 
   const [aliceToken, bobToken] = await Promise.all([
     signIn('alice@gathr.local', 'GathrTest!2026'),
     signIn('bob@gathr.local', 'GathrTest!2026'),
   ]);
+  assert.deepEqual(
+    resultOf(await call('suggestFriendEventAddressesCallable', { query: '9' }, aliceToken)),
+    { suggestions: [] }
+  );
   assert.equal((await call('claimSocialHandleCallable', { handle: 'alice_friend' }, aliceToken)).response.ok, true);
   assert.equal((await call('claimSocialHandleCallable', { handle: 'bob_friend' }, bobToken)).response.ok, true);
 
