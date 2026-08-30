@@ -30,6 +30,10 @@ import {
   assertCompletedCheckInEligibility,
   checkInEligibilitySessionId,
 } from './checkInEligibility.js';
+import {
+  cleanupFriendEventsForAccount,
+  revokeFriendEventAccessBetween,
+} from './friendEvents.js';
 
 const COLLECTIONS = {
   ACTIVE_CHECK_INS: 'activeCheckIns',
@@ -46,6 +50,8 @@ const USER_SUBCOLLECTIONS = {
   BLOCKS: 'blocks',
   FRIENDS: 'friends',
   FRIEND_ACTIVITY: 'friendActivity',
+  FRIEND_EVENTS: 'friendEvents',
+  FRIEND_EVENT_LOCATIONS: 'friendEventLocations',
   FRIEND_REQUESTS: 'friendRequests',
 } as const;
 
@@ -471,6 +477,7 @@ export async function removeFriend(
     revokeViewerFromCheckIn(transaction, actorCheckIn, otherUid);
     revokeViewerFromCheckIn(transaction, otherCheckIn, actorUid);
   });
+  await revokeFriendEventAccessBetween(actorUid, otherUid, db);
   return { removed: true, otherUid };
 }
 
@@ -512,6 +519,7 @@ export async function blockUser(
     revokeViewerFromCheckIn(transaction, actorCheckIn, blockedUid);
     revokeViewerFromCheckIn(transaction, blockedCheckIn, actorUid);
   });
+  await revokeFriendEventAccessBetween(actorUid, blockedUid, db);
   return { blocked: true, blockedUid };
 }
 
@@ -558,7 +566,11 @@ export async function createCheckIn(
   const audience = parseAudience(input.audienceMode, input.selectedUids);
   const message = normalizeCheckInMessage(input.message);
   const operationId = validateSocialOperationId(input.operationId ?? randomUUID());
-  const eligibilitySessionId = validateSocialOperationId(input.eligibilitySessionId);
+  const eligibilitySessionId = input.eligibilitySessionId === undefined
+    || input.eligibilitySessionId === null
+    || input.eligibilitySessionId === ''
+    ? ''
+    : validateSocialOperationId(input.eligibilitySessionId);
   const inputHash = createHash('sha256').update(JSON.stringify({
     venueId,
     durationMinutes,
@@ -574,9 +586,11 @@ export async function createCheckIn(
   const venueRef = db.collection(COLLECTIONS.VENUES).doc(venueId);
   const checkInRef = activeCheckInRef(db, ownerUid);
   const operationRef = socialOperationRef(db, ownerUid, operationId);
-  const eligibilityRef = db.collection('checkInEligibilitySessions').doc(
-    checkInEligibilitySessionId(ownerUid, eligibilitySessionId)
-  );
+  const eligibilityRef = eligibilitySessionId
+    ? db.collection('checkInEligibilitySessions').doc(
+      checkInEligibilitySessionId(ownerUid, eligibilitySessionId)
+    )
+    : null;
   const createdAt = Timestamp.now();
   const expiresAt = Timestamp.fromMillis(
     createdAt.toMillis() + durationMinutes * 60_000
@@ -589,7 +603,7 @@ export async function createCheckIn(
       venueRef,
       checkInRef,
       operationRef,
-      eligibilityRef
+      ...(eligibilityRef ? [eligibilityRef] : [])
     );
     const previousOperation = baseSnapshots[3].data() || {};
     if (baseSnapshots[3].exists) {
@@ -607,8 +621,6 @@ export async function createCheckIn(
     }
     const ownerData = assertExisting(baseSnapshots[0], 'Your user profile');
     const venueData = assertExisting(baseSnapshots[1], 'Venue');
-    const eligibilityData = assertExisting(baseSnapshots[4], 'Check-in eligibility');
-    assertCompletedCheckInEligibility(eligibilityData, ownerUid, venueId, createdAt);
     if (venueData.socialVenueMirrorSource === 'gathr-event-api') {
       const mirrorExpiresAt = venueData.socialVenueMirrorExpiresAt;
       if (!(mirrorExpiresAt instanceof Timestamp) || mirrorExpiresAt.toMillis() <= createdAt.toMillis()) {
@@ -619,6 +631,16 @@ export async function createCheckIn(
       }
     }
     const previousCheckIn = baseSnapshots[2].data() || {};
+    const needsEligibility = !baseSnapshots[2].exists || previousCheckIn.venueId !== venueId;
+    if (needsEligibility) {
+      if (!eligibilityRef || !baseSnapshots[4]?.exists) {
+        throw new SocialDomainError(
+          'failed-precondition',
+          'Remain near this venue until check-in becomes available.'
+        );
+      }
+      assertCompletedCheckInEligibility(baseSnapshots[4].data() || {}, ownerUid, venueId, createdAt);
+    }
     const relationshipSnapshots = relRefs.length
       ? await transaction.getAll(...relRefs)
       : [];
@@ -676,10 +698,12 @@ export async function createCheckIn(
       revision,
     };
     transaction.set(checkInRef, checkIn);
-    transaction.update(eligibilityRef, {
-      consumedAt: createdAt,
-      consumedCheckInRevision: revision,
-    });
+    if (needsEligibility && eligibilityRef) {
+      transaction.update(eligibilityRef, {
+        consumedAt: createdAt,
+        consumedCheckInRevision: revision,
+      });
+    }
     for (const viewerUid of viewerUids) {
       transaction.set(activityRef(db, viewerUid, ownerUid), {
         ownerUid,
@@ -821,8 +845,11 @@ export async function deleteSocialAccountData(
   projectionsDeleted: number;
   incomingBlocksDeleted: number;
   handleReleased: boolean;
+  hostedEventsDeleted: number;
+  eventMembershipsRevoked: number;
 }> {
   const uid = validateUid(uidValue);
+  const friendEventCleanup = await cleanupFriendEventsForAccount(uid, db);
   await checkOut(uid, db);
   const [
     relationshipsSnapshot,
@@ -903,6 +930,8 @@ export async function deleteSocialAccountData(
     projectionsDeleted,
     incomingBlocksDeleted: incomingBlocksSnapshot.size,
     handleReleased,
+    hostedEventsDeleted: friendEventCleanup.hostedEventsDeleted,
+    eventMembershipsRevoked: friendEventCleanup.membershipsRevoked,
   };
 }
 

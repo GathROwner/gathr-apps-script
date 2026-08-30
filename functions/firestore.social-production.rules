@@ -71,6 +71,16 @@ service cloud.firestore {
         allow write: if false;
       }
 
+      match /friendEvents/{eventId} {
+        allow read: if isAuthenticated() && isAccessingOwnData(userId);
+        allow write: if false;
+      }
+
+      match /friendEventLocations/{eventId} {
+        allow read: if isAuthenticated() && isAccessingOwnData(userId);
+        allow write: if false;
+      }
+
       match /blocks/{blockedUid} {
         allow read: if isAuthenticated() && isAccessingOwnData(userId);
         allow write: if false;
@@ -114,6 +124,26 @@ service cloud.firestore {
     match /activeCheckIns/{ownerUid} {
       allow read: if isAuthenticated() && isAccessingOwnData(ownerUid);
       allow write: if false;
+    }
+
+    match /checkInEligibilitySessions/{sessionId} {
+      allow read, write: if false;
+    }
+
+    match /friendEvents/{eventId} {
+      allow read, write: if false;
+    }
+
+    match /friendEventPrivateLocations/{eventId} {
+      allow read, write: if false;
+    }
+
+    match /friendEventInvitations/{invitationId} {
+      allow read, write: if false;
+    }
+
+    match /friendEventResponses/{responseId} {
+      allow read, write: if false;
     }
 
     match /socialRateLimits/{rateLimitId} {

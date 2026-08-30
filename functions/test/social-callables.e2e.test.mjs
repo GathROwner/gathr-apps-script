@@ -4,6 +4,7 @@ import test, { after, before } from 'node:test';
 import { deleteApp, getApps, initializeApp } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
+import { Timestamp } from 'firebase-admin/firestore';
 import { cleanupSocialDataOnAuthDelete } from '../lib/social/accountCleanup.js';
 
 const projectId = 'demo-gathr-social';
@@ -64,7 +65,11 @@ before(async () => {
     await auth.createUser({ ...user, password: 'GathrTest!2026' });
     await db.doc(`users/${user.uid}`).set({ displayName: user.displayName, photoURL: '' });
   }
-  await db.doc('venues/venue-1').set({ pagename: 'Callable Test Venue' });
+  await db.doc('venues/venue-1').set({
+    pagename: 'Callable Test Venue',
+    latitude: 46.2382,
+    longitude: -63.1311,
+  });
 });
 
 after(async () => deleteApp(app));
@@ -96,11 +101,28 @@ test('deployed callable surface enforces Auth and completes the friend/check-in 
 
   const checkInRequest = {
     operationId: 'callable-check-in-001',
+    eligibilitySessionId: 'callable-dwell-001',
     venueId: 'venue-1',
     durationMinutes: 30,
     audienceMode: 'all_friends',
     message: 'Callable test',
   };
+  const firstDwellSample = await call('recordCheckInEligibilitySampleCallable', {
+    sessionId: 'callable-dwell-001',
+    venueId: 'venue-1',
+    latitude: 46.2382,
+    longitude: -63.1311,
+    accuracyMeters: 8,
+    speedMetersPerSecond: 0,
+  }, bobToken);
+  assert.equal(resultOf(firstDwellSample).eligible, false);
+  await db.doc('checkInEligibilitySessions/bob_callable-dwell-001').update({
+    eligible: true,
+    qualifyingMs: 90_000,
+    completedAt: Timestamp.now(),
+    completedExpiresAt: Timestamp.fromMillis(Date.now() + 5 * 60_000),
+    expiresAt: Timestamp.fromMillis(Date.now() + 5 * 60_000),
+  });
   const checkedIn = await call('createCheckInCallable', checkInRequest, bobToken);
   assert.equal(resultOf(checkedIn).viewerCount, 1);
   const retried = await call('createCheckInCallable', checkInRequest, bobToken);
@@ -109,6 +131,40 @@ test('deployed callable surface enforces Auth and completes the friend/check-in 
 
   await call('checkOutCallable', {}, bobToken);
   assert.equal((await db.doc('users/alice/friendActivity/bob').get()).exists, false);
+
+  const startAtMs = Date.now() + 24 * 60 * 60_000;
+  const created = await call('createFriendEventCallable', {
+    operationId: 'callable-friend-event-001',
+    title: 'Callable private party',
+    description: 'A private callable lifecycle test.',
+    category: 'Gatherings & Parties',
+    startAtMs,
+    endAtMs: startAtMs + 2 * 60 * 60_000,
+    visibility: 'selected_friends',
+    selectedUids: ['bob'],
+    guestInviteMode: 'host_only',
+    guestListVisible: false,
+    location: {
+      type: 'custom_address',
+      address: '12 Example Lane, Charlottetown, PE',
+      placeName: 'Private home',
+      latitude: 46.2382,
+      longitude: -63.1311,
+    },
+  }, aliceToken);
+  const eventId = resultOf(created).eventId;
+  assert.ok(eventId);
+  assert.equal((await db.doc(`users/bob/friendEventLocations/${eventId}`).get()).data()?.address, '12 Example Lane, Charlottetown, PE');
+  assert.equal(resultOf(await call('respondToFriendEventCallable', { eventId, response: 'maybe' }, bobToken)).response, 'maybe');
+  const canceled = await call('cancelFriendEventCallable', {
+    eventId,
+    reason: 'Callable cancellation test',
+  }, aliceToken);
+  assert.equal(resultOf(canceled).status, 'canceled');
+  assert.equal((await db.doc(`users/bob/friendEventLocations/${eventId}`).get()).exists, false);
+  assert.equal((await db.doc(`users/bob/friendEvents/${eventId}`).get()).data()?.cancellationReason, 'Callable cancellation test');
+  assert.equal((await call('deleteFriendEventCallable', { eventId }, aliceToken)).response.ok, true);
+  assert.equal((await db.doc(`friendEvents/${eventId}`).get()).exists, false);
 });
 
 test('Auth deletion fallback removes an orphaned social profile and handle', async () => {

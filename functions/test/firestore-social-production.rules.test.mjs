@@ -44,6 +44,13 @@ beforeEach(async () => {
       setDoc(doc(db, 'venues/venue-1/events/event-1'), { title: 'Event One' }),
       setDoc(doc(db, 'crowdsourced_shared_event_candidates/private-1'), { userId: 'alice' }),
       setDoc(doc(db, 'users/alice/crowdContributionDays/2026-08-29'), { count: 1 }),
+      setDoc(doc(db, 'users/alice/friendEvents/private-event'), { viewerUid: 'alice' }),
+      setDoc(doc(db, 'users/alice/friendEventLocations/private-event'), { address: '12 Private Lane' }),
+      setDoc(doc(db, 'friendEvents/private-event'), { hostUid: 'alice' }),
+      setDoc(doc(db, 'friendEventPrivateLocations/private-event'), { address: '12 Private Lane' }),
+      setDoc(doc(db, 'friendEventInvitations/private-event_bob'), { hostUid: 'alice' }),
+      setDoc(doc(db, 'friendEventResponses/private-event_bob'), { hostUid: 'alice' }),
+      setDoc(doc(db, 'checkInEligibilitySessions/alice_session'), { uid: 'alice' }),
     ]);
   });
 });
@@ -91,4 +98,21 @@ test('preserves private crowdsourcing state and the default deny', async () => {
   await assertFails(getDoc(doc(aliceDb, 'crowdsourced_shared_event_candidates/private-1')));
   await assertFails(getDoc(doc(aliceDb, 'users/alice/crowdContributionDays/2026-08-29')));
   await assertFails(getDoc(doc(aliceDb, 'unknown_collection/private-1')));
+});
+
+test('allows only the owning viewer to read event projections and denies canonical private state', async () => {
+  const aliceDb = environment.authenticatedContext('alice').firestore();
+  const bobDb = environment.authenticatedContext('bob').firestore();
+
+  await assertSucceeds(getDoc(doc(aliceDb, 'users/alice/friendEvents/private-event')));
+  await assertSucceeds(getDoc(doc(aliceDb, 'users/alice/friendEventLocations/private-event')));
+  await assertFails(getDoc(doc(bobDb, 'users/alice/friendEvents/private-event')));
+  await assertFails(getDoc(doc(bobDb, 'users/alice/friendEventLocations/private-event')));
+  await assertFails(getDocs(collectionGroup(aliceDb, 'friendEvents')));
+  await assertFails(getDocs(collectionGroup(aliceDb, 'friendEventLocations')));
+  await assertFails(getDoc(doc(aliceDb, 'friendEvents/private-event')));
+  await assertFails(getDoc(doc(aliceDb, 'friendEventPrivateLocations/private-event')));
+  await assertFails(getDoc(doc(aliceDb, 'friendEventInvitations/private-event_bob')));
+  await assertFails(getDoc(doc(aliceDb, 'friendEventResponses/private-event_bob')));
+  await assertFails(getDoc(doc(aliceDb, 'checkInEligibilitySessions/alice_session')));
 });

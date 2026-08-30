@@ -36,7 +36,8 @@ export type SocialErrorCode =
   | 'invalid-argument'
   | 'not-found'
   | 'permission-denied'
-  | 'resource-exhausted';
+  | 'resource-exhausted'
+  | 'unavailable';
 
 export class SocialDomainError extends Error {
   constructor(

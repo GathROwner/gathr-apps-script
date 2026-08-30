@@ -1,6 +1,44 @@
 {
   "indexes": [
     {
+      "collectionGroup": "friendEventPrivateLocations",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "revealPending",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "revealAt",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "__name__",
+          "order": "ASCENDING"
+        }
+      ],
+      "density": "SPARSE_ALL"
+    },
+    {
+      "collectionGroup": "friendEvents",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "endAt",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "__name__",
+          "order": "ASCENDING"
+        }
+      ],
+      "density": "SPARSE_ALL"
+    },
+    {
       "collectionGroup": "pageSubmissions",
       "queryScope": "COLLECTION",
       "fields": [

@@ -1,5 +1,6 @@
 import { HttpsError, onCall } from 'firebase-functions/v2/https';
 import { logger } from 'firebase-functions';
+import { defineSecret } from 'firebase-functions/params';
 
 import {
   acceptFriendRequest,
@@ -18,12 +19,35 @@ import {
   unblockUser,
 } from './socialService.js';
 import { recordCheckInEligibilitySample } from './checkInEligibility.js';
+import {
+  cancelFriendEvent,
+  createFriendEvent,
+  deleteFriendEvent,
+  inviteToFriendEvent,
+  removeFromFriendEvent,
+  respondToFriendEvent,
+  updateFriendEvent,
+} from './friendEvents.js';
+import { resolveFriendEventAddress } from './friendEventGeocoding.js';
 import { SOCIAL_REGION, SocialDomainError } from './validation.js';
 
 const options = {
   region: SOCIAL_REGION,
   timeoutSeconds: 30,
   memory: '256MiB' as const,
+};
+
+// Keep the deployment switch explicit: App Check enforcement must be enabled
+// only after the matching iOS App Attest / Android Play Integrity client build
+// is installed. Production Release 2 preflight requires this value to be true.
+const releaseTwoOptions = {
+  ...options,
+  enforceAppCheck: process.env.SOCIAL_RELEASE_TWO_ENFORCE_APP_CHECK === 'true',
+};
+const friendEventGeocodingToken = defineSecret('FRIEND_EVENT_GEOCODING_TOKEN');
+const friendEventOptions = {
+  ...releaseTwoOptions,
+  secrets: [friendEventGeocodingToken],
 };
 
 function requireUid(auth: { uid: string } | undefined): string {
@@ -136,7 +160,7 @@ export const createCheckInCallable = onCall(options, async (request) => {
   });
 });
 
-export const recordCheckInEligibilitySampleCallable = onCall(options, async (request) => {
+export const recordCheckInEligibilitySampleCallable = onCall(releaseTwoOptions, async (request) => {
   const uid = requireUid(request.auth);
   const data = asData(request.data);
   return run(async () => {
@@ -150,6 +174,84 @@ export const recordCheckInEligibilitySampleCallable = onCall(options, async (req
       speedMetersPerSecond: data.speedMetersPerSecond,
     });
   });
+});
+
+export const createFriendEventCallable = onCall(friendEventOptions, async (request) => {
+  const uid = requireUid(request.auth);
+  const data = asData(request.data);
+  return run(async () => {
+    await enforceSocialRateLimit(uid, 'create_friend_event', 20, 24 * 60 * 60_000);
+    const resolved = await resolveFriendEventAddress(
+      data,
+      friendEventGeocodingToken.value(),
+      { allowTrustedCoordinates: process.env.FUNCTIONS_EMULATOR === 'true' }
+    );
+    return createFriendEvent(uid, resolved as unknown as Parameters<typeof createFriendEvent>[1]);
+  });
+});
+
+export const geocodeFriendEventAddressCallable = onCall(friendEventOptions, async (request) => {
+  const uid = requireUid(request.auth);
+  const data = asData(request.data);
+  return run(async () => {
+    await enforceSocialRateLimit(uid, 'friend_event_geocode', 30, 60 * 60_000);
+    const resolved = await resolveFriendEventAddress(
+      { location: { type: 'custom_address', address: data.address } },
+      friendEventGeocodingToken.value()
+    );
+    const location = asData(resolved.location);
+    return { latitude: location.latitude, longitude: location.longitude };
+  });
+});
+
+export const updateFriendEventCallable = onCall(friendEventOptions, async (request) => {
+  const uid = requireUid(request.auth);
+  const data = asData(request.data);
+  return run(async () => {
+    const resolved = await resolveFriendEventAddress(
+      data,
+      friendEventGeocodingToken.value(),
+      { allowTrustedCoordinates: process.env.FUNCTIONS_EMULATOR === 'true' }
+    );
+    return updateFriendEvent(
+      uid,
+      resolved.eventId,
+      resolved as unknown as Parameters<typeof updateFriendEvent>[2]
+    );
+  });
+});
+
+export const inviteToFriendEventCallable = onCall(releaseTwoOptions, async (request) => {
+  const uid = requireUid(request.auth);
+  const data = asData(request.data);
+  return run(async () => {
+    await enforceSocialRateLimit(uid, 'friend_event_invite', 60, 60 * 60_000);
+    return inviteToFriendEvent(uid, data.eventId, data.targetUid);
+  });
+});
+
+export const respondToFriendEventCallable = onCall(releaseTwoOptions, async (request) => {
+  const uid = requireUid(request.auth);
+  const data = asData(request.data);
+  return run(() => respondToFriendEvent(uid, data.eventId, data.response));
+});
+
+export const removeFromFriendEventCallable = onCall(releaseTwoOptions, async (request) => {
+  const uid = requireUid(request.auth);
+  const data = asData(request.data);
+  return run(() => removeFromFriendEvent(uid, data.eventId, data.memberUid));
+});
+
+export const cancelFriendEventCallable = onCall(releaseTwoOptions, async (request) => {
+  const uid = requireUid(request.auth);
+  const data = asData(request.data);
+  return run(() => cancelFriendEvent(uid, data.eventId, undefined, undefined, data.reason));
+});
+
+export const deleteFriendEventCallable = onCall(releaseTwoOptions, async (request) => {
+  const uid = requireUid(request.auth);
+  const data = asData(request.data);
+  return run(() => deleteFriendEvent(uid, data.eventId));
 });
 
 export const checkOutCallable = onCall(options, async (request) => {

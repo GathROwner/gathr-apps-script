@@ -225,6 +225,111 @@ test('dwell eligibility rejects movement and completes only after stationary qua
   assert.equal(Object.hasOwn(stored || {}, 'longitude'), false);
 });
 
+test('short walk-bys, poor accuracy, outside resets, and expired sessions never unlock check-in', async () => {
+  const start = Date.now();
+  const sessionId = 'walk-by-session-001';
+  for (const elapsed of [0, 20_000, 40_000]) {
+    const result = await recordCheckInEligibilitySample('alice', {
+      sessionId,
+      venueId: 'venue-1',
+      latitude: 46.2382,
+      longitude: -63.1311,
+      accuracyMeters: 10,
+      speedMetersPerSecond: 1.2,
+    }, db, Timestamp.fromMillis(start + elapsed));
+    assert.equal(result.eligible, false);
+  }
+  const poorAccuracy = await recordCheckInEligibilitySample('alice', {
+    sessionId,
+    venueId: 'venue-1',
+    latitude: 46.2382,
+    longitude: -63.1311,
+    accuracyMeters: 100,
+    speedMetersPerSecond: 0,
+  }, db, Timestamp.fromMillis(start + 50_000));
+  assert.equal(poorAccuracy.reason, 'low_accuracy');
+  await recordCheckInEligibilitySample('alice', {
+    sessionId,
+    venueId: 'venue-1',
+    latitude: 46.25,
+    longitude: -63.15,
+    accuracyMeters: 10,
+    speedMetersPerSecond: 0,
+  }, db, Timestamp.fromMillis(start + 60_000));
+  const reset = await recordCheckInEligibilitySample('alice', {
+    sessionId,
+    venueId: 'venue-1',
+    latitude: 46.25,
+    longitude: -63.15,
+    accuracyMeters: 10,
+    speedMetersPerSecond: 0,
+  }, db, Timestamp.fromMillis(start + 91_000));
+  assert.equal(reset.qualifyingMs, 0);
+
+  await db.doc(`checkInEligibilitySessions/alice_${sessionId}`).update({
+    eligible: true,
+    qualifyingMs: CHECK_IN_DWELL_TARGET_MS,
+    completedExpiresAt: Timestamp.fromMillis(start + 100_000),
+    expiresAt: Timestamp.fromMillis(start + 100_000),
+  });
+  const expired = await recordCheckInEligibilitySample('alice', {
+    sessionId,
+    venueId: 'venue-1',
+    latitude: 46.2382,
+    longitude: -63.1311,
+    accuracyMeters: 10,
+    speedMetersPerSecond: 0,
+  }, db, Timestamp.fromMillis(start + 100_001));
+  assert.equal(expired.eligible, false);
+  assert.equal(expired.qualifyingMs, 0);
+});
+
+test('brief indoor GPS jitter pauses dwell without erasing legitimate progress', async () => {
+  const start = Date.now();
+  const sessionId = 'jitter-session-001';
+  for (const [elapsed, latitude] of [
+    [0, 46.2382],
+    [20_000, 46.2382],
+    [30_000, 46.25],
+    [40_000, 46.2382],
+    [60_000, 46.2382],
+    [80_000, 46.2382],
+    [100_000, 46.2382],
+    [120_000, 46.2382],
+  ]) {
+    await recordCheckInEligibilitySample('alice', {
+      sessionId,
+      venueId: 'venue-1',
+      latitude,
+      longitude: latitude === 46.2382 ? -63.1311 : -63.15,
+      accuracyMeters: 12,
+      speedMetersPerSecond: 0,
+    }, db, Timestamp.fromMillis(start + elapsed));
+  }
+  const stored = (await db.doc(`checkInEligibilitySessions/alice_${sessionId}`).get()).data();
+  assert.equal(stored?.eligible, true);
+  assert.equal(stored?.qualifyingMs, CHECK_IN_DWELL_TARGET_MS);
+});
+
+test('a consumed dwell session cannot be replayed after checkout', async () => {
+  const eligibilitySessionId = await makeEligible('alice', 'venue-1');
+  await createCheckIn('alice', {
+    operationId: 'consumed-dwell-first',
+    eligibilitySessionId,
+    venueId: 'venue-1',
+    durationMinutes: 30,
+    audienceMode: 'all_friends',
+  }, db);
+  await checkOut('alice', db);
+  await assert.rejects(() => createCheckIn('alice', {
+    operationId: 'consumed-dwell-replay',
+    eligibilitySessionId,
+    venueId: 'venue-1',
+    durationMinutes: 30,
+    audienceMode: 'all_friends',
+  }, db), (error) => error?.code === 'failed-precondition');
+});
+
 test('all-friends check-in fans out and checkout revokes every viewer', async () => {
   await Promise.all([makeFriends('alice', 'bob'), makeFriends('alice', 'charlie')]);
   const checkIn = await createEligibleCheckIn(

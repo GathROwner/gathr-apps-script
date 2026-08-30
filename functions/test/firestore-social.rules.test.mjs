@@ -42,6 +42,14 @@ beforeEach(async () => {
         ownerUid: 'bob',
         venueId: 'venue-1',
       }),
+      setDoc(doc(db, 'users/alice/friendEvents/event-1'), {
+        eventId: 'event-1',
+        viewerUid: 'alice',
+      }),
+      setDoc(doc(db, 'users/alice/friendEventLocations/event-1'), {
+        eventId: 'event-1',
+        address: '12 Private Lane',
+      }),
       setDoc(doc(db, 'users/alice/blocks/bad-user'), {
         ownerUid: 'alice',
         blockedUid: 'bad-user',
@@ -50,6 +58,11 @@ beforeEach(async () => {
         ownerUid: 'alice',
         venueId: 'venue-1',
       }),
+      setDoc(doc(db, 'checkInEligibilitySessions/alice_session'), { uid: 'alice' }),
+      setDoc(doc(db, 'friendEvents/event-1'), { hostUid: 'alice' }),
+      setDoc(doc(db, 'friendEventPrivateLocations/event-1'), { hostUid: 'alice' }),
+      setDoc(doc(db, 'friendEventInvitations/event-1_bob'), { hostUid: 'alice' }),
+      setDoc(doc(db, 'friendEventResponses/event-1_bob'), { hostUid: 'alice' }),
       setDoc(doc(db, 'socialHandles/alice_handle'), { uid: 'alice' }),
       setDoc(doc(db, 'socialRelationships/pair'), {
         members: ['alice', 'bob'],
@@ -73,6 +86,8 @@ test('a user can read their own profile and social projections', async () => {
   await assertSucceeds(getDoc(doc(db, 'users/alice/friends/bob')));
   await assertSucceeds(getDoc(doc(db, 'users/alice/friendRequests/bob')));
   await assertSucceeds(getDoc(doc(db, 'users/alice/friendActivity/bob')));
+  await assertSucceeds(getDoc(doc(db, 'users/alice/friendEvents/event-1')));
+  await assertSucceeds(getDoc(doc(db, 'users/alice/friendEventLocations/event-1')));
   await assertSucceeds(getDoc(doc(db, 'users/alice/blocks/bad-user')));
   await assertSucceeds(getDoc(doc(db, 'activeCheckIns/alice')));
 });
@@ -82,6 +97,8 @@ test('another authenticated user cannot read viewer-specific social data or a ra
   await assertFails(getDoc(doc(db, 'users/alice/friends/bob')));
   await assertFails(getDoc(doc(db, 'users/alice/friendRequests/bob')));
   await assertFails(getDoc(doc(db, 'users/alice/friendActivity/bob')));
+  await assertFails(getDoc(doc(db, 'users/alice/friendEvents/event-1')));
+  await assertFails(getDoc(doc(db, 'users/alice/friendEventLocations/event-1')));
   await assertFails(getDoc(doc(db, 'users/alice/blocks/bad-user')));
   await assertFails(getDoc(doc(db, 'activeCheckIns/alice')));
 });
@@ -93,6 +110,11 @@ test('clients cannot read canonical social indexes or relationships', async () =
   await assertFails(getDoc(doc(db, 'socialRateLimits/alice_search')));
   await assertFails(getDoc(doc(db, 'socialOperations/retry-token')));
   await assertFails(getDoc(doc(db, 'userReports/report-1')));
+  await assertFails(getDoc(doc(db, 'checkInEligibilitySessions/alice_session')));
+  await assertFails(getDoc(doc(db, 'friendEvents/event-1')));
+  await assertFails(getDoc(doc(db, 'friendEventPrivateLocations/event-1')));
+  await assertFails(getDoc(doc(db, 'friendEventInvitations/event-1_bob')));
+  await assertFails(getDoc(doc(db, 'friendEventResponses/event-1_bob')));
 });
 
 test('collection-group queries cannot leak social projections across users', async () => {
@@ -100,6 +122,8 @@ test('collection-group queries cannot leak social projections across users', asy
   await assertFails(getDocs(collectionGroup(db, 'friends')));
   await assertFails(getDocs(collectionGroup(db, 'friendRequests')));
   await assertFails(getDocs(collectionGroup(db, 'friendActivity')));
+  await assertFails(getDocs(collectionGroup(db, 'friendEvents')));
+  await assertFails(getDocs(collectionGroup(db, 'friendEventLocations')));
   await assertFails(getDocs(collectionGroup(db, 'blocks')));
 });
 
@@ -108,10 +132,14 @@ test('clients cannot write server-controlled social documents', async () => {
   await assertFails(setDoc(doc(db, 'users/alice/friends/charlie'), { uid: 'charlie' }));
   await assertFails(setDoc(doc(db, 'users/alice/friendRequests/charlie'), { uid: 'charlie' }));
   await assertFails(setDoc(doc(db, 'users/alice/friendActivity/charlie'), { uid: 'charlie' }));
+  await assertFails(setDoc(doc(db, 'users/alice/friendEvents/forged'), { eventId: 'forged' }));
+  await assertFails(setDoc(doc(db, 'users/alice/friendEventLocations/forged'), { address: 'leak' }));
   await assertFails(setDoc(doc(db, 'users/alice/blocks/charlie'), { blockedUid: 'charlie' }));
   await assertFails(setDoc(doc(db, 'activeCheckIns/alice'), { ownerUid: 'alice' }));
   await assertFails(setDoc(doc(db, 'socialRelationships/forged'), { members: ['alice', 'bob'] }));
   await assertFails(setDoc(doc(db, 'socialOperations/forged'), { uid: 'alice' }));
+  await assertFails(setDoc(doc(db, 'friendEvents/forged'), { hostUid: 'alice' }));
+  await assertFails(setDoc(doc(db, 'friendEventPrivateLocations/forged'), { address: 'leak' }));
 });
 
 test('profile updates cannot forge or change server-controlled handle fields', async () => {

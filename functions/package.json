@@ -13,7 +13,7 @@
     "test:compiled": "npm run build && node --test lib/**/*.test.js",
     "test:social": "npm run build && node --test lib/social/*.test.js",
     "test:rules": "firebase emulators:exec --project demo-gathr-social --only firestore \"node --test test/firestore-social.rules.test.mjs\"",
-    "test:social-integration": "npm run build && firebase emulators:exec --project demo-gathr-social --only firestore \"node --test test/social-service.integration.test.mjs\"",
+    "test:social-integration": "npm run build && firebase emulators:exec --project demo-gathr-social --only firestore \"node --test --test-concurrency=1 test/social-service.integration.test.mjs test/friend-events.integration.test.mjs\"",
     "test:social-callables": "npm run build && node scripts/prepare-social-staging-deploy.mjs && cross-env FUNCTIONS_DISCOVERY_TIMEOUT=60 firebase --config firebase.social-production.json emulators:exec --project demo-gathr-social --only \"auth,firestore,functions\" \"node --test test/social-callables.e2e.test.mjs\"",
     "test:social-staging": "node scripts/test-social-staging.e2e.mjs",
     "staging:seed-social-venues": "node scripts/seed-social-staging-venues.mjs",
