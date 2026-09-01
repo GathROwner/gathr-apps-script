@@ -321,6 +321,42 @@ test('different dated cities override a misleading multi-location model claim', 
   assert.equal(result.kind, 'separate_occurrences');
 });
 
+test('an unsupported model separate-occurrences claim does not hide a named venue listing', () => {
+  const result = classifySpatialEvent({
+    name: 'Neil E Dee at The Guild',
+    description: 'An evening performance in Charlottetown.',
+    location: 'The Guild',
+    modelSpatialEvidence: { kind: 'separate_occurrences' },
+  });
+
+  assert.equal(result.kind, 'single_location');
+  assert.equal(result.representation, 'venue');
+});
+
+test('an unsupported model multi-location claim does not hide a room inside its host', () => {
+  const result = classifySpatialEvent({
+    name: 'Andrew Hall Room 142 Snack Break',
+    location: 'UPEI',
+    description: 'Juice boxes and snacks in Andrew Hall Room 142.',
+    modelSpatialEvidence: { kind: 'multi_location' },
+  });
+
+  assert.equal(result.kind, 'single_location');
+  assert.equal(result.representation, 'venue');
+});
+
+test('a model route claim still requires route evidence rather than a route-like word', () => {
+  const result = classifySpatialEvent({
+    name: 'Kobbler Jay live at the bookstore',
+    location: 'The Bookmark',
+    description: 'A live performance on Saturday.',
+    modelSpatialEvidence: { kind: 'route' },
+  });
+
+  assert.equal(result.kind, 'single_location');
+  assert.equal(result.representation, 'venue');
+});
+
 test('numbered schedule items and times do not become locations', () => {
   const result = classifySpatialEvent({
     name: 'Busker Festival Saturday schedule',

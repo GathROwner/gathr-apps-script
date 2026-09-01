@@ -113,3 +113,18 @@ test('dated city tour is held for splitting instead of one multi-location public
   assert.equal(details?.spatialEvidence?.kind, 'separate_occurrences');
   assert.ok(details?.autoPublishReviewReasons.includes('split_location_occurrences_before_publication'));
 });
+
+test('a false separate-occurrences model label on a normal venue listing stays out of the area queue', () => {
+  const details = resolvePostDerivedCityLevelEventLocation({
+    item: {
+      name: 'Neil E Dee at The Guild',
+      venue: 'The Guild',
+      description: 'An evening performance in Charlottetown.',
+      spatial: { kind: 'separate_occurrences' },
+    } as ParserProcessedEvent,
+    row: row({ text: 'Neil E Dee plays The Guild this Saturday.' }),
+    establishment: 'The Guild',
+  });
+
+  assert.equal(details, null);
+});

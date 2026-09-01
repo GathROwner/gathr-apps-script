@@ -442,18 +442,33 @@ export function classifySpatialEvent(
       !ADDRESS_SIGNAL_PATTERN.test(entry.label)
     );
 
+  // Stage 3 is useful evidence, not an authority to turn ordinary listings
+  // into area events. In particular, a flattened venue calendar has often
+  // been labelled "separate_occurrences" despite containing neither two dated
+  // place lines nor a real multi-site structure. Require source-visible
+  // structure before honouring a non-venue model classification.
+  const hasExplicitMultiplePlaces = locations.length >= 2 &&
+    !allLocationsAreRooms &&
+    !locationsLookLikeHostSublocations;
+  const modelRouteIsSupported = normalizedModelKind === 'route' &&
+    ((routeEvent && routeStructure) || hasRouteRoles || confirmedStreets.length > 0);
+  const modelMultiLocationIsSupported = normalizedModelKind === 'multi_location' &&
+    (multiCue || hasExplicitMultiplePlaces || modelLocations.length >= 2);
+  const modelSeparateOccurrencesIsSupported =
+    normalizedModelKind === 'separate_occurrences' && separateOccurrences;
+
   let kind: SpatialEventKind = 'unknown';
-  if (separateOccurrences || normalizedModelKind === 'separate_occurrences') {
+  if (separateOccurrences || modelSeparateOccurrencesIsSupported) {
     kind = 'separate_occurrences';
-  } else if (online && !physical && normalizedModelKind !== 'route' && normalizedModelKind !== 'multi_location') {
+  } else if (online && !physical && !modelRouteIsSupported && !modelMultiLocationIsSupported) {
     kind = 'online';
   } else if (
-    (normalizedModelKind === 'route' || (routeEvent && (routeStructure || hasRouteRoles))) &&
+    (modelRouteIsSupported || (routeEvent && (routeStructure || hasRouteRoles))) &&
     !nonEventTrafficNotice
   ) {
     kind = 'route';
   } else if (
-    (normalizedModelKind === 'multi_location' || multiCue || locations.length >= 2) &&
+    (modelMultiLocationIsSupported || multiCue || hasExplicitMultiplePlaces) &&
     !allLocationsAreRooms &&
     !locationsLookLikeHostSublocations
   ) {
