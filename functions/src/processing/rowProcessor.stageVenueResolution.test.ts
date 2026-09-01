@@ -79,6 +79,25 @@ const cornwallOntarioLibraryVenue: VenueData = {
   province: 'ON',
 };
 
+test('an exact parsed street address resolves a known venue before a broad city label', async () => {
+  const resolved = await resolveVenueForFullParserEventWithMatcherForRegression({
+    item: {
+      name: 'Restorative Reset',
+      venue: 'Summerside, PEI',
+      address: '265 B Heather Moyse Drive, Summerside, PE',
+    } as ParserProcessedEvent,
+    row: { uniqueId: 'address-regression', text: '', mediaUrls: [], pageName: 'Yoga PEI', userName: 'Yoga PEI', timestamp: '2026-09-01T00:00:00.000Z' } as RawRowData,
+    rowVenue: null,
+    establishment: 'Yoga PEI',
+    rowIndex: 1,
+    matcher: async () => ({ isMatch: false, matchType: 'none', similarity: 0 }),
+    addressMatcher: async (address) => address.includes('Heather Moyse')
+      ? { isMatch: true, matchType: 'exact', similarity: 0.99, matchedVenue: foundersVenue }
+      : { isMatch: false, matchType: 'none', similarity: 0 },
+  });
+  assert.equal(resolved?.id, foundersVenue.id);
+});
+
 const foundersRow = {
   uniqueId: '1621154443353403',
   text: "This Week: July 6 - July 12. Sounds of the Waterfront at Founders' Hall Stage and Peake's Quay Stage.",

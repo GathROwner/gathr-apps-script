@@ -4034,7 +4034,25 @@ async function resolveVenueForFullParserEvent(
     rowIndex,
     matcher: async (candidate, facebookUrl, context) =>
       firestoreService.findMatchingVenue(candidate, facebookUrl, context),
+    addressMatcher: async (address) => firestoreService.findVenueByAddress(address),
   });
+}
+
+function looksLikeSpecificStreetAddress(value: unknown): boolean {
+  const text = String(value || '').trim();
+  return /\b\d{1,6}\s*[A-Za-z]?\s+[^,]{2,80}\b(?:street|st\.?|road|rd\.?|avenue|ave\.?|drive|dr\.?|lane|ln\.?|boulevard|blvd\.?|way)\b/i.test(text);
+}
+
+function fullParserAddressCandidates(item: ParserProcessedEvent, row: RawRowData): string[] {
+  const itemAny = item as unknown as Record<string, unknown>;
+  const rowAny = row as unknown as Record<string, unknown>;
+  return Array.from(new Set([
+    itemAny.address,
+    itemAny.streetAddress,
+    row.address,
+    rowAny.streetAddress,
+    row.facebookEventLocationName,
+  ].map((value) => String(value || '').trim()).filter(looksLikeSpecificStreetAddress)));
 }
 
 export async function resolveVenueForFullParserEventWithMatcherForRegression(params: {
@@ -4044,8 +4062,9 @@ export async function resolveVenueForFullParserEventWithMatcherForRegression(par
   establishment: string;
   rowIndex: number;
   matcher: FullParserVenueMatcher;
+  addressMatcher?: (address: string) => Promise<MatchInfo>;
 }): Promise<VenueData | null> {
-  const { item, rowVenue, row, establishment, rowIndex, matcher } = params;
+  const { item, rowVenue, row, establishment, rowIndex, matcher, addressMatcher } = params;
   // Get the event's own establishment/venue names
   const itemEstablishment = String(item.establishment || '').trim();
   const itemVenue = String(item.venue || '').trim();
@@ -4094,6 +4113,25 @@ export async function resolveVenueForFullParserEventWithMatcherForRegression(par
         resolvedVenueName: knownOverrideMatch.name,
       });
       return knownOverrideMatch;
+    }
+  }
+
+  // A structured address is stronger location evidence than an organizer or
+  // city label. Use it only to resolve an already-known venue, and never let it
+  // bypass a real route or multi-site classification.
+  if (!postDerivedCityLevelLocation?.spatialEvidence && addressMatcher) {
+    for (const address of fullParserAddressCandidates(item, row)) {
+      const addressMatch = await addressMatcher(address);
+      if (addressMatch.isMatch && addressMatch.matchedVenue) {
+        logger.info('Resolved full-parser event through exact address identity', {
+          rowIndex,
+          itemName: item.name || '',
+          address,
+          resolvedVenueId: addressMatch.matchedVenue.id,
+          resolvedVenueName: addressMatch.matchedVenue.name,
+        });
+        return addressMatch.matchedVenue;
+      }
     }
   }
 

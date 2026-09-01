@@ -364,6 +364,9 @@ export interface CityLevelEventReviewRecord {
   id?: string;
   status: 'needs_review' | 'approved' | 'rejected' | 'published' | 'ignored';
   uniqueId?: string;
+  /** Every source that contributed to this review; the first remains in legacy fields. */
+  sourceUniqueIds?: string[];
+  sourceUrls?: string[];
   fileId?: string;
   fileName?: string;
   rowIndex?: number;

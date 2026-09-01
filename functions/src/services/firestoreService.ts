@@ -790,6 +790,28 @@ function compactRecord<T extends Record<string, unknown>>(value: T): T {
 }
 
 function buildCityLevelEventReviewDocId(input: QueueCityLevelEventReviewInput): string {
+  // A review represents an occurrence, not a scrape row. Independent source
+  // pages commonly announce the same performer, time and physical stop. Keep
+  // those sources as samples on one review rather than creating parallel holds.
+  // Do not use this key when the minimum occurrence facts are absent: a source
+  // identity is safer than accidentally merging two vague city-wide listings.
+  const spatialStop = input.spatialEvidence?.locations?.length === 1
+    ? input.spatialEvidence.locations[0]?.label
+    : '';
+  const occurrenceFingerprint = [
+    input.eventName,
+    input.eventDate,
+    input.eventTime,
+    spatialStop || input.observedLocationName || input.locationLabel,
+    input.locationScope,
+  ]
+    .map((value) => normalizeVenueName(String(value || '')))
+    .filter(Boolean)
+    .join('|');
+  if (occurrenceFingerprint.split('|').length >= 4) {
+    return `cityevt_${createHash('sha1').update(`occurrence|${occurrenceFingerprint}`).digest('hex').slice(0, 24)}`;
+  }
+
   const fingerprint = [
     input.uniqueId,
     input.facebookUrl,
@@ -806,6 +828,13 @@ function buildCityLevelEventReviewDocId(input: QueueCityLevelEventReviewInput): 
     input.locationLabel,
   ].join('|');
   return `cityevt_${createHash('sha1').update(stableKey).digest('hex').slice(0, 24)}`;
+}
+
+// Exported solely for deterministic regression coverage; callers must queue
+// through queueCityLevelEventReview so samples and stale-state behavior remain
+// transactional.
+export function buildCityLevelEventReviewDocIdForRegression(input: QueueCityLevelEventReviewInput): string {
+  return buildCityLevelEventReviewDocId(input);
 }
 
 function buildCityLevelEventReviewSample(
@@ -1461,6 +1490,11 @@ export async function queueCityLevelEventReview(
     : undefined;
   let created = false;
   let shouldRefreshPublishedEvent = false;
+  const incomingSourceUniqueId = String(input.uniqueId || '').trim();
+  const incomingSourceUrls = dedupeUrls([
+    String(input.facebookUrl || '').trim(),
+    String(input.topLevelUrl || '').trim(),
+  ]);
 
   await db.runTransaction(async (tx) => {
     const snapshot = await tx.get(docRef);
@@ -1470,7 +1504,9 @@ export async function queueCityLevelEventReview(
       created = true;
       const payload: CityLevelEventReviewRecord = {
         status: 'needs_review',
-        uniqueId: String(input.uniqueId || '').trim() || undefined,
+        uniqueId: incomingSourceUniqueId || undefined,
+        sourceUniqueIds: incomingSourceUniqueId ? [incomingSourceUniqueId] : undefined,
+        sourceUrls: incomingSourceUrls.length > 0 ? incomingSourceUrls : undefined,
         fileId: String(input.fileId || '').trim() || undefined,
         fileName: String(input.fileName || '').trim() || undefined,
         rowIndex: Number.isFinite(Number(input.rowIndex)) ? Number(input.rowIndex) : undefined,
@@ -1536,6 +1572,17 @@ export async function queueCityLevelEventReview(
       ...tokenizeMediaUrls(existing.externalLinks),
       ...externalLinks,
     ]);
+    const mergedSourceUniqueIds = Array.from(new Set([
+      ...(Array.isArray(existing.sourceUniqueIds) ? existing.sourceUniqueIds : []),
+      String(existing.uniqueId || '').trim(),
+      incomingSourceUniqueId,
+    ].map((value) => String(value || '').trim()).filter(Boolean)));
+    const mergedSourceUrls = dedupeUrls([
+      ...(Array.isArray(existing.sourceUrls) ? existing.sourceUrls : []),
+      String(existing.facebookUrl || '').trim(),
+      String(existing.topLevelUrl || '').trim(),
+      ...incomingSourceUrls,
+    ]);
     const shouldRefreshTiming = shouldRefreshCityLevelReviewTiming(existing, input);
     const nextEndDate = shouldRefreshTiming
       ? asOptionalTrimmedString(input.endDate) || asOptionalTrimmedString(existing.endDate)
@@ -1549,6 +1596,8 @@ export async function queueCityLevelEventReview(
       compactRecord({
         status: nextStatus,
         uniqueId: String(existing.uniqueId || input.uniqueId || '').trim() || undefined,
+        sourceUniqueIds: mergedSourceUniqueIds.length > 0 ? mergedSourceUniqueIds : undefined,
+        sourceUrls: mergedSourceUrls.length > 0 ? mergedSourceUrls : undefined,
         fileId: String(existing.fileId || input.fileId || '').trim() || undefined,
         fileName: String(existing.fileName || input.fileName || '').trim() || undefined,
         rowIndex: existing.rowIndex ?? (Number.isFinite(Number(input.rowIndex)) ? Number(input.rowIndex) : undefined),
