@@ -131,19 +131,29 @@ function stripLocationPrefix(value: string): string {
   ).replace(/[.!?]+$/g, '').trim();
 }
 
+// Some structured Facebook payloads expose their end timestamp as a generic
+// "start"/"location" value. A timestamp is useful event metadata, never a
+// second map location.
+function isTemporalMetadata(value: string): boolean {
+  const text = cleanText(value, 180);
+  return /^20\d{2}-\d{2}-\d{2}(?:[T\s]\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:?\d{2})?)?$/i.test(text) ||
+    /^\d{1,2}:\d{2}(?:\s*(?:am|pm))?$/i.test(text);
+}
+
 function splitExplicitList(value: string): string[] {
   const normalized = String(value || '')
     .replace(/\s+(?:and|then)\s+/gi, ' | ')
     .replace(/\s*(?:→|->|>|;|\|)\s*/g, ' | ');
 
-  const commaParts = normalized.includes('|')
-    ? normalized.split('|')
-    : normalized.split(/\s*,\s*/);
+  // Commas are overwhelmingly address punctuation ("145 Richmond Street,
+  // Charlottetown, PE"), not evidence of multiple venues. Require an explicit
+  // list separator for multi-site evidence.
+  const commaParts = normalized.includes('|') ? normalized.split('|') : [normalized];
 
   return uniqueStrings(
     commaParts
       .map((part) => stripLocationPrefix(part))
-      .filter((part) => part.length >= 3)
+      .filter((part) => part.length >= 3 && !isTemporalMetadata(part))
   );
 }
 
@@ -166,7 +176,7 @@ function locationFromModel(value: unknown): SpatialLocationEvidence | null {
     : null;
   if (!record) return null;
   const label = cleanText(record.label || record.name || record.location, 180);
-  if (!label) return null;
+  if (!label || isTemporalMetadata(label)) return null;
   const rawRole = normalizeKey(record.role);
   const role: SpatialLocationRole =
     rawRole === 'start' || rawRole === 'finish' || rawRole === 'stop'
@@ -226,7 +236,7 @@ function extractPrefixedLocations(text: string): SpatialLocationEvidence[] {
       const label = stripLocationPrefix(single[3].split(
         /\b(?:(?:confirmed|possible|approximate|estimated|official)\s+)?(?:weather\s+)?(?:start(?:ing)?|finish(?:ing)?|locations?|venues?|sites?|stops?|checkpoints?|turnaround|route|course|street\s+sequence|streets?)\s*(?:\([^)]{1,80}\))?\s*[:\-–—]\s*/i
       )[0]);
-      if (label) {
+      if (label && !isTemporalMetadata(label)) {
         locations.push({
           label,
           role: inferRole(single[2]),
@@ -292,7 +302,7 @@ function extractInlineLabeledLocations(text: string): SpatialLocationEvidence[] 
     const isList = /^(?:locations?|venues?|sites?|stops?|checkpoints?)$/i.test(rawType);
     const labels = isList ? splitExplicitList(section) : [stripLocationPrefix(section)];
     for (const label of labels) {
-      if (!label) continue;
+      if (!label || isTemporalMetadata(label)) continue;
       locations.push({
         label,
         role: inferRole(rawType),
@@ -370,6 +380,16 @@ function looksLikeSeparateLocationOccurrences(text: string): boolean {
   return datedLocationLines.length >= 2;
 }
 
+function extractDatedCityLocations(text: string): SpatialLocationEvidence[] {
+  const lines = String(text || '').split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+  const cities = ['Charlottetown', 'Summerside', 'Montague', 'Cornwall', 'Stratford', 'Georgetown', 'Souris', 'Kensington'];
+  return lines.flatMap((line) => {
+    if (!DATE_TOKEN_PATTERN.test(line)) return [];
+    const city = cities.find((candidate) => new RegExp(`\\b${candidate}\\b`, 'i').test(line));
+    return city ? [{ label: city, role: 'location' as const, certainty: 'confirmed' as const, sourceText: cleanText(line, 300) }] : [];
+  });
+}
+
 function chooseConfidence(params: {
   kind: SpatialEventKind;
   modelKind: SpatialEventKind | null;
@@ -410,6 +430,7 @@ export function classifySpatialEvent(
     ...extractPrefixedLocations(corpus),
     ...extractInlineLabeledLocations(corpus),
     ...extractInlineRoleLocations(location),
+    ...extractDatedCityLocations(corpus),
   ];
   const locations = dedupeLocations([...modelLocations, ...textLocations]);
   const confirmedStreets = uniqueStrings([
@@ -423,7 +444,10 @@ export function classifySpatialEvent(
   const trafficNoticeHeadline = /\b(traffic|road|street)\s+(?:notice|advisory|closure|impact)\b/i.test(name);
   const nonEventTrafficNotice = trafficNotice && (trafficNoticeHeadline || !EVENT_OCCURRENCE_PATTERN.test(name));
   const multiCue = MULTI_LOCATION_PATTERN.test(corpus);
-  const separateOccurrences = looksLikeSeparateLocationOccurrences(corpus);
+  // A schedule with many dates at one named venue is normal calendar data,
+  // not an area event. Only retain separate-occurrence routing when there are
+  // at least two distinct extracted places to split.
+  const separateOccurrences = looksLikeSeparateLocationOccurrences(corpus) && locations.length >= 2;
   const online = ONLINE_PATTERN.test(corpus);
   const physical = PHYSICAL_LOCATION_PATTERN.test(corpus) || locations.length > 0;
   const hasRouteRoles = locations.some((entry) => entry.role === 'start') &&

@@ -366,3 +366,30 @@ test('numbered schedule items and times do not become locations', () => {
   assert.equal(result.kind, 'single_location');
   assert.equal(result.locations.length, 0);
 });
+
+test('a structured timestamp beside one street address remains one venue', () => {
+  const result = classifySpatialEvent({
+    name: 'Restorative Reset',
+    location: '265 B Heather Moyse Drive, Summerside, PE',
+    modelSpatialEvidence: {
+      kind: 'multi_location',
+      locations: [
+        { label: '265 B Heather Moyse Drive, Summerside, PE', role: 'location' },
+        { label: '2026-09-06T21:30:00.000Z', role: 'start' },
+      ],
+    },
+  });
+  assert.equal(result.kind, 'single_location');
+  assert.equal(result.representation, 'venue');
+  assert.equal(result.locations.length, 1);
+});
+
+test('a repeated one-location schedule does not become separate occurrences', () => {
+  const result = classifySpatialEvent({
+    name: 'Library programme',
+    location: 'Montague Rotary Library',
+    combinedText: 'September 2 - Montague Rotary Library\nSeptember 9 - Montague Rotary Library',
+  });
+  assert.equal(result.kind, 'single_location');
+  assert.equal(result.representation, 'venue');
+});
