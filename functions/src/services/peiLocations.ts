@@ -22,12 +22,21 @@ export interface PeiPlaceCentroid {
   /** City the place belongs to (for areas inside a city). */
   city?: string;
   province: 'PEI';
-  scope: 'city' | 'area';
+  scope: 'city' | 'area' | 'province';
   latitude: number;
   longitude: number;
 }
 
 const PEI_PLACE_CENTROIDS: Record<string, PeiPlaceCentroid> = {
+  // Reference anchor only. Province-scope events deliberately use mapMode
+  // 'none' so this coordinate never claims to be their physical venue.
+  pei: {
+    label: 'Across Prince Edward Island',
+    province: 'PEI',
+    scope: 'province',
+    latitude: 46.5107,
+    longitude: -63.4168,
+  },
   charlottetown: {
     // Matches placesService DEFAULT_LOCATION (Charlottetown anchor).
     label: 'Charlottetown, PEI',
@@ -182,7 +191,7 @@ function stripProvinceSuffix(normalized: string): string {
  * "Downtown Charlottetown" is not broadened to the Charlottetown city marker.
  */
 export function resolvePeiCentroid(details: {
-  locationScope?: 'city' | 'area' | null;
+  locationScope?: 'city' | 'area' | 'province' | null;
   locationCity?: string | null;
   locationLabel?: string | null;
 }): PeiPlaceCentroid | null {
@@ -192,6 +201,7 @@ export function resolvePeiCentroid(details: {
   for (const candidate of candidates) {
     const normalized = stripProvinceSuffix(normalizePeiPlaceName(candidate));
     if (!normalized) continue;
+    if (normalized === 'pei' && details.locationScope !== 'province') continue;
     const match = PEI_PLACE_CENTROIDS[normalized];
     if (match) return match;
   }

@@ -147,7 +147,7 @@ export interface EventData {
   id?: string;
   uniqueId: string;
   establishment: string;
-  locationScope?: 'venue' | 'city' | 'area' | 'route' | 'unknown';
+  locationScope?: 'venue' | 'city' | 'area' | 'province' | 'route' | 'unknown';
   locationLabel?: string;
   locationCity?: string;
   locationProvince?: string;
@@ -378,7 +378,7 @@ export interface CityLevelEventReviewRecord {
   autoPublishFieldSources?: CityLevelAutoPublishFieldSources;
   autoPublishReviewReasons?: string[];
   spatialEvidence?: SpatialEventClassification;
-  locationScope: 'city' | 'area' | 'route';
+  locationScope: 'city' | 'area' | 'province' | 'route';
   locationLabel: string;
   locationCity?: string;
   locationProvince?: string;
@@ -443,7 +443,7 @@ export interface FinalizeCityLevelEventReviewInput {
     locationLabel?: string;
     locationCity?: string;
     locationProvince?: string;
-    locationScope?: 'city' | 'area';
+    locationScope?: 'city' | 'area' | 'province';
     locationPrecision?: 'city_centroid' | 'approximate' | 'none';
     imageUrl?: string;
     mediaUrls?: string[];

@@ -1701,19 +1701,20 @@ function requireCityLevelEventField(value: unknown, fieldName: string): string {
   return normalized;
 }
 
-function normalizePublishedCityLevelScope(value: unknown): 'city' | 'area' {
-  return String(value || '').trim() === 'area' ? 'area' : 'city';
+function normalizePublishedCityLevelScope(value: unknown): 'city' | 'area' | 'province' {
+  const scope = String(value || '').trim();
+  return scope === 'province' || scope === 'area' ? scope : 'city';
 }
 
 function normalizePublishedCityLevelPrecision(
   value: unknown,
-  scope: 'city' | 'area'
+  scope: 'city' | 'area' | 'province'
 ): 'city_centroid' | 'approximate' | 'none' {
   const normalized = String(value || '').trim();
   if (normalized === 'none' || normalized === 'approximate' || normalized === 'city_centroid') {
     return normalized;
   }
-  return scope === 'city' ? 'city_centroid' : 'approximate';
+  return scope === 'city' ? 'city_centroid' : scope === 'province' ? 'none' : 'approximate';
 }
 
 function normalizePublishedCityLevelEventType(value: unknown): string {
@@ -1934,7 +1935,9 @@ function buildPublishedCityLevelEventData(
     locationProvince: asOptionalTrimmedString(manual.locationProvince || record.locationProvince),
     locationPrecision,
     locationReviewStatus: 'approved',
-    mapMode: locationPrecision === 'none' ? 'none' : 'area',
+    // Province scope uses a geographic reference anchor for discovery only;
+    // it must never render as a claimed physical location marker.
+    mapMode: locationScope === 'province' || locationPrecision === 'none' ? 'none' : 'area',
     address: locationLabel,
     facebookUrl: asOptionalTrimmedString(record.facebookUrl),
     cleanedFacebookUrl: asOptionalTrimmedString(record.facebookUrl),
@@ -2330,6 +2333,9 @@ function evaluateCityLevelAutoPublishEligibility(
 
   if (record.locationScope === 'route') {
     reasons.push('route_candidate_requires_geometry_review');
+  }
+  if (record.locationScope === 'province') {
+    reasons.push('province_scope_requires_manual_review');
   }
   if (
     record.spatialEvidence &&

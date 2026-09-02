@@ -305,6 +305,19 @@ test('province-only PEI city-level candidate stays in review', () => {
   assert.ok(result.reasons.includes('unsupported_city_or_area'));
 });
 
+test('province scope requires manual reviewer approval even when it has a PEI reference anchor', () => {
+  const result = evaluateWithAutoPublishEnabled(autoPublishReadyRecord({
+    locationScope: 'province' as any,
+    locationLabel: 'Across Prince Edward Island',
+    locationProvince: 'PEI',
+    locationPrecision: 'none',
+  }));
+  // Automatic ingestion remains intentionally conservative; this coverage
+  // scope is for explicit reviewer approval, not province-only auto-publish.
+  assert.equal(result.eligible, false);
+  assert.ok(result.reasons.includes('province_scope_requires_manual_review'));
+});
+
 test('loose text or parser-fallback city candidate stays in review', () => {
   const result = evaluateWithAutoPublishEnabled(baseRecord({
     autoPublishSource: 'parser_fallback',
