@@ -257,6 +257,76 @@ test('does not let a newer one-off calendar item repaint an older recurring keep
   assert.equal(preview.updates.totalOccurrences, undefined);
 });
 
+test('does not let a dated Salty Saturdays poster repaint a stale recurring keeper', () => {
+  const mayImage = 'https://storage.googleapis.com/gathr-uploaded-images/events/salty-may.webp';
+  const julyImage = 'https://storage.googleapis.com/gathr-uploaded-images/events/salty-july.webp';
+  const venue: VenueData = {
+    id: 'slug_saltandsolpei',
+    name: 'Salt & Sol Restaurant and Lounge',
+    normalizedName: 'salt sol restaurant and lounge',
+    address: '2 Pownal Street 2nd Floor',
+    latitude: 46.232,
+    longitude: -63.125,
+  };
+  const preview = previewDuplicateMerge({
+    venue,
+    existingEvent: buildEvent({
+      uniqueId: '1796647248391130_1',
+      establishment: venue.name,
+      venueId: venue.id,
+      eventType: 'live_music',
+      eventName: 'Salty Saturdays: MÖJO',
+      name: 'Salty Saturdays: MÖJO',
+      description: 'Salty Saturday nights are back!! @mojo.mojo.mo.jo kicking off our summer this Saturday at 10pm. Rain or shine!',
+      category: 'Live Music',
+      isEvent: 'Yes',
+      isFoodSpecial: 'No',
+      startDate: '2026-05-16',
+      endDate: '2026-05-17',
+      startTime: '22:00',
+      endTime: '02:00',
+      isRecurring: 'Yes',
+      recurringPattern: 'weekly_saturday',
+      sourceTimestamp: new Date('2026-05-15T20:00:00.000Z'),
+      mediaUrls: [mayImage],
+      image: mayImage,
+      imageUrl: mayImage,
+      relevantImageUrl: mayImage,
+    }),
+    incomingEvent: buildEvent({
+      uniqueId: '1843494740373047_abbe51656d78c73b',
+      establishment: venue.name,
+      venueId: venue.id,
+      eventType: 'live_music',
+      eventName: 'Salty Saturdays (ft. DJ Dekz & Jeremie)',
+      name: 'Salty Saturdays (ft. DJ Dekz & Jeremie)',
+      description: 'Saturday: Salty Saturdays ft Sundrift Festival with DJ Dekz and Jeremie',
+      category: 'Live Music',
+      isEvent: 'Yes',
+      isFoodSpecial: 'No',
+      startDate: '2026-07-04',
+      endDate: '2026-07-05',
+      startTime: '22:00',
+      endTime: '02:00',
+      isRecurring: 'No',
+      recurringPattern: 'none',
+      sourceTimestamp: new Date('2026-07-03T20:00:00.000Z'),
+      mediaUrls: [julyImage],
+      image: julyImage,
+      imageUrl: julyImage,
+      relevantImageUrl: julyImage,
+      sharedPostThumbnail: julyImage,
+    }),
+  });
+
+  assert.equal(preview.updates.sourceTimestamp, undefined);
+  assert.equal(preview.updates.mediaUrls, undefined);
+  assert.equal(preview.updates.image, undefined);
+  assert.equal(preview.updates.imageUrl, undefined);
+  assert.equal(preview.updates.relevantImageUrl, undefined);
+  assert.equal(preview.updates.sharedPostThumbnail, undefined);
+});
+
 test('still promotes image fields for a legitimate newer finite family shape', () => {
   const oldImage = 'https://storage.googleapis.com/gathr-uploaded-images/events/two-can-dine-march.webp';
   const newImage = 'https://storage.googleapis.com/gathr-uploaded-images/events/two-can-dine-april.webp';

@@ -2744,7 +2744,11 @@ function removeDurationOnlyEachCue(text: string): string {
 }
 
 function hasStrongRecurringCueForSingleDateDemotion(text: string): boolean {
-  return hasStrongRecurringCue(removeDurationOnlyEachCue(text));
+  const normalized = removeDurationOnlyEachCue(text)
+    .replace(/\bevery\s+corner\b/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  return hasStrongRecurringCue(normalized);
 }
 
 function hasSingleDayMultiSessionOneOffCue(
@@ -3543,7 +3547,7 @@ function isSpecificLineupActRow(
   return tokens.length <= 4 && /[A-Za-z]/.test(rawName) && /\d/.test(rawName);
 }
 
-function shouldForceScheduleHeaderCustomRecurrenceOneOff(
+function shouldForceWeakCustomRecurrenceOneOff(
   event: Pick<FormattedEvent, 'category' | 'name' | 'startDate' | 'endDate' | 'startTime' | 'endTime'>,
   sourceText: string,
   recurringPattern: RecurringPattern,
@@ -3565,10 +3569,46 @@ function shouldForceScheduleHeaderCustomRecurrenceOneOff(
     0;
   if (recurringDayCount < 2) return false;
   if (!isSingleOccurrenceDateWindow(event)) return false;
-  if (!hasScheduleHeaderContext(sourceText)) return false;
   if (hasStrongCustomRecurrenceCue(sourceText)) return false;
 
-  return isSpecificPerformerScheduleRow(event);
+  if (!hasSeriesOrProgramCue(sourceText)) return true;
+
+  return hasScheduleHeaderContext(sourceText) && isSpecificPerformerScheduleRow(event);
+}
+
+function shouldForceScheduleRowWeeklyOneOff(
+  event: Pick<FormattedEvent, 'startDate' | 'endDate' | 'startTime' | 'endTime'>,
+  originalItem: ExtractedItem | undefined,
+  sourceText: string,
+  recurringPattern: RecurringPattern,
+  recurrenceUntilDate: string | undefined,
+  totalOccurrences: number | undefined,
+  customRecurringConfiguration?: {
+    recurringDaysOfWeek?: RecurringWeekday[];
+    recurringWeekdaySequence?: RecurringWeekday[];
+    recurringWeekInterval?: number;
+  }
+): boolean {
+  if (
+    recurringPattern === 'none' ||
+    recurringPattern === 'daily' ||
+    recurringPattern === 'weekly_custom' ||
+    customRecurringConfiguration ||
+    recurrenceUntilDate ||
+    totalOccurrences !== undefined
+  ) {
+    return false;
+  }
+
+  if (!isSingleOccurrenceDateWindow(event)) return false;
+  if (hasStrongRecurringCueForSingleDateDemotion(sourceText)) return false;
+
+  const sourceType = String(
+    (originalItem as unknown as Record<string, unknown> | undefined)?._sourceType || ''
+  )
+    .trim()
+    .toLowerCase();
+  return sourceType === 'schedule' || sourceType === 'calendar';
 }
 
 function hasEveryNightThisWeekLineupCue(text: string): boolean {
@@ -4139,16 +4179,16 @@ function normalizeRecurringForFormattedEvent(
     recurringPattern = 'none';
   }
 
-  let forcedScheduleHeaderCustomOneOff = false;
+  let forcedWeakCustomOneOff = false;
   if (
-    shouldForceScheduleHeaderCustomRecurrenceOneOff(
+    shouldForceWeakCustomRecurrenceOneOff(
       event,
       sourceText,
       recurringPattern,
       customRecurringConfiguration
     )
   ) {
-    logger.debug(`Forced schedule-header custom recurrence to one-off for "${event.name}"`, {
+    logger.debug(`Forced weak custom recurrence to one-off for "${event.name}"`, {
       recurringPatternFrom: recurringPattern,
       recurringDaysOfWeek: customRecurringConfiguration?.recurringDaysOfWeek || [],
       startDate: event.startDate,
@@ -4156,7 +4196,7 @@ function normalizeRecurringForFormattedEvent(
     });
     recurringPattern = 'none';
     customRecurringConfiguration = undefined;
-    forcedScheduleHeaderCustomOneOff = true;
+    forcedWeakCustomOneOff = true;
   }
 
   let totalOccurrences =
@@ -4183,6 +4223,33 @@ function normalizeRecurringForFormattedEvent(
 
   let forcedFiniteRunOneOff = false;
   let explicitDateAlignmentDemotedToOneOff = false;
+
+  if (
+    shouldForceScheduleRowWeeklyOneOff(
+      event,
+      originalItem,
+      sourceText,
+      recurringPattern,
+      recurrenceUntilDate,
+      totalOccurrences,
+      customRecurringConfiguration
+    )
+  ) {
+    logger.debug(`Forced finite schedule row to one-off for "${event.name}"`, {
+      recurringPatternFrom: recurringPattern,
+      startDate: event.startDate,
+      sourceType: String(
+        (originalItem as unknown as Record<string, unknown> | undefined)?._sourceType || ''
+      ),
+      sourceText: sourceText.slice(0, 220),
+    });
+    recurringPattern = 'none';
+    customRecurringConfiguration = undefined;
+    totalOccurrences = undefined;
+    recurrenceUntilDate = undefined;
+    forcedFiniteRunOneOff = true;
+  }
+
   const explicitOccurrenceAlignment = alignFiniteExplicitOccurrenceDates(
     event,
     sourceText,
@@ -4456,7 +4523,7 @@ function normalizeRecurringForFormattedEvent(
     recurrenceUntilDate = undefined;
     isRecurring = false;
   }
-  if (forcedScheduleHeaderCustomOneOff) {
+  if (forcedWeakCustomOneOff) {
     recurringPattern = 'none';
     totalOccurrences = undefined;
     recurrenceUntilDate = undefined;

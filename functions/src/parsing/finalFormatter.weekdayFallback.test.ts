@@ -600,6 +600,102 @@ test('true multi-day live music series containers can still stay recurring', () 
   assert.deepEqual(normalized.recurringDaysOfWeek, ['friday', 'saturday']);
 });
 
+test('a weak Friday-and-Saturday Live DJ extraction cannot become an open-ended custom recurrence', () => {
+  const normalized = applyRecurrenceNormalizationForRegression(
+    buildEvent({
+      category: 'Live Music',
+      name: 'Live DJ',
+      description: 'Pasties Party! Fri and Sat with DJ MCODE 2000! LIVE DJ @ 10PM',
+      establishment: 'Be You',
+      venue: 'Be You',
+      startDate: '2026-08-10',
+      endDate: '2026-08-11',
+      startTime: '22:00',
+      endTime: '01:00',
+      isRecurring: 'Yes',
+      recurringPattern: 'weekly_custom',
+      recurringDaysOfWeek: ['friday', 'saturday'],
+    }),
+    buildOriginalItem({
+      name: 'Live DJ',
+      description: 'Pasties Party! Fri and Sat with DJ MCODE 2000! LIVE DJ @ 10PM',
+      date: '2026-08-10',
+      startTime: '22:00',
+      endTime: '01:00',
+      recurringPattern: 'weekly_custom',
+      recurringDaysOfWeek: ['friday', 'saturday'],
+    })
+  );
+
+  assert.equal(normalized.isRecurring, false);
+  assert.equal(normalized.recurringPattern, 'none');
+  assert.equal(normalized.recurringDaysOfWeek, undefined);
+  assert.equal(normalized.recurrenceUntilDate, undefined);
+});
+
+test('an explicit every-Friday-and-Saturday Live DJ series remains recurring', () => {
+  const normalized = applyRecurrenceNormalizationForRegression(
+    buildEvent({
+      category: 'Live Music',
+      name: 'Live DJ',
+      description: 'Live DJ every Friday and Saturday at 10PM.',
+      startDate: '2026-08-14',
+      endDate: '2026-08-15',
+      startTime: '22:00',
+      endTime: '01:00',
+      isRecurring: 'Yes',
+      recurringPattern: 'weekly_custom',
+      recurringDaysOfWeek: ['friday', 'saturday'],
+    }),
+    buildOriginalItem({
+      name: 'Live DJ',
+      description: 'Live DJ every Friday and Saturday at 10PM.',
+      date: '2026-08-14',
+      startTime: '22:00',
+      endTime: '01:00',
+      recurringPattern: 'weekly_custom',
+      recurringDaysOfWeek: ['friday', 'saturday'],
+    })
+  );
+
+  assert.equal(normalized.isRecurring, true);
+  assert.equal(normalized.recurringPattern, 'weekly_custom');
+  assert.deepEqual(normalized.recurringDaysOfWeek, ['friday', 'saturday']);
+});
+
+test('a single dated schedule row cannot become an open-ended weekly event', () => {
+  const description =
+    'Throughout Victoria Park Woods. Discover art around every corner. Dance and music woven into the woods, glowing sculptures, immersive installations by the water, playground and beyond.';
+  const normalized = applyRecurrenceNormalizationForRegression(
+    buildEvent({
+      category: 'Live Music',
+      name: 'Art Installations',
+      description,
+      establishment: 'Victoria Park',
+      venue: 'Victoria Park',
+      startDate: '2026-08-29',
+      endDate: '2026-08-29',
+      startTime: '16:00',
+      endTime: '23:00',
+      isRecurring: 'Yes',
+      recurringPattern: 'weekly_saturday',
+    }),
+    buildOriginalItem({
+      name: 'Art Installations',
+      description,
+      date: '2026-08-29',
+      startTime: '16:00',
+      endTime: '23:00',
+      recurringPattern: 'weekly_saturday',
+      _sourceType: 'schedule',
+    })
+  );
+
+  assert.equal(normalized.isRecurring, false);
+  assert.equal(normalized.recurringPattern, 'none');
+  assert.equal(normalized.recurrenceUntilDate, undefined);
+});
+
 test('an explicit every-Tuesday source corrects a bad daily model result and anchor date', () => {
   const normalized = applyRecurrenceNormalizationForRegression(
     buildEvent({

@@ -287,10 +287,11 @@ function hasStrongRecurringTextSignal(event: EventData): boolean {
   if (!text) return false;
 
   if (/\b(weekly|recurring|ongoing|every|each|most)\b/i.test(text)) return true;
-  if (/\b(mondays|tuesdays|wednesdays|thursdays|fridays|saturdays|sundays)\b/i.test(text)) {
-    return true;
-  }
-  return /\b(monday|tuesday|wednesday|thursday|friday|saturday|sunday)s?\s+(at|from|between|starting|starts|after|until|through|thru|to|\d{1,2}(?::\d{2})?\s*(am|pm)?|\d{1,2}\s*[-\u2013\u2014])/i.test(text);
+  const standingScheduleText = text.replace(
+    /\b(?:this|coming|next)\s+(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday)s?\b/gi,
+    ' '
+  );
+  return /\b(monday|tuesday|wednesday|thursday|friday|saturday|sunday)s?\s+(at|from|between|starting|starts|after|until|through|thru|to|\d{1,2}(?::\d{2})?\s*(am|pm)?|\d{1,2}\s*[-\u2013\u2014])/i.test(standingScheduleText);
 }
 
 function hasStrongRecurringFamilySignal(event: EventData): boolean {

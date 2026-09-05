@@ -263,6 +263,48 @@ test('still matches a cross-post recurring family when the text gives recurring 
   assert.equal(pickRecurringFamilyFallbackMatch(incoming, [olderKeeper])?.id, 'farmers_market_keeper');
 });
 
+test('does not fold a dated Salty Saturdays lineup into a stale recurring keeper', () => {
+  const incoming = buildEvent({
+    uniqueId: '1843494740373047_abbe51656d78c73b',
+    venueId: 'slug_saltandsolpei',
+    establishment: 'Salt & Sol Restaurant and Lounge',
+    eventType: 'live_music',
+    eventName: 'Salty Saturdays (ft. DJ Dekz & Jeremie)',
+    name: 'Salty Saturdays (ft. DJ Dekz & Jeremie)',
+    description: 'Saturday: Salty Saturdays ft Sundrift Festival with DJ Dekz and Jeremie',
+    startDate: '2026-07-04',
+    endDate: '2026-07-05',
+    startTime: '22:00',
+    endTime: '02:00',
+    isEvent: 'Yes',
+    isFoodSpecial: 'No',
+    isRecurring: 'No',
+    recurringPattern: 'none',
+  });
+
+  const staleKeeper = buildEvent({
+    id: 'hk56ENbgJxXh4wbxjyGT',
+    uniqueId: '1796647248391130_1',
+    venueId: 'slug_saltandsolpei',
+    establishment: 'Salt & Sol Restaurant and Lounge',
+    eventType: 'live_music',
+    eventName: 'Salty Saturdays: MÖJO',
+    name: 'Salty Saturdays: MÖJO',
+    description: 'Salty Saturday nights are back!! @mojo.mojo.mo.jo kicking off our summer this Saturday at 10pm. Rain or shine!',
+    startDate: '2026-05-16',
+    endDate: '2026-05-17',
+    startTime: '22:00',
+    endTime: '02:00',
+    isEvent: 'Yes',
+    isFoodSpecial: 'No',
+    isRecurring: 'Yes',
+    recurringPattern: 'weekly_saturday',
+  });
+
+  assert.equal(isRecurringFamilyFallbackCompatible(incoming, staleKeeper), false);
+  assert.equal(pickRecurringFamilyFallbackMatch(incoming, [staleKeeper]), undefined);
+});
+
 test('allows a dated schedule item to refresh a durable recurring series keeper', () => {
   const incoming = buildEvent({
     uniqueId: 'new_farmers_market_weekly_flyer',

@@ -71,32 +71,39 @@ test('public verified source routes to a public candidate while retaining user s
 });
 
 test('public shared route preserves stops and stays eligible for the spatial review queue', async () => {
-  const parsed = await parseSharedEventPayload({
-    sourceUrl: 'https://example.com/events/parade',
-    title: 'Harbour Parade',
-    description: 'Start: Victoria Park\nRoute: Brighton Road -> Queen Street\nFinish: Confederation Centre',
-    startDate: '2026-09-01',
-    startTime: '10:00',
-    locationName: 'Charlottetown, PEI',
-  }, {
-    sourceVisibility: 'public_verified',
-    visibilityEvidence: {
-      method: 'public_url_probe',
-      checkedAt: '2026-08-23T12:00:00.000Z',
-      reason: 'Public source verified.',
+  const originalNow = Settings.now;
+  Settings.now = () => new Date('2026-08-23T12:00:00.000Z').getTime();
+
+  try {
+    const parsed = await parseSharedEventPayload({
+      sourceUrl: 'https://example.com/events/parade',
       title: 'Harbour Parade',
       description: 'Start: Victoria Park\nRoute: Brighton Road -> Queen Street\nFinish: Confederation Centre',
       startDate: '2026-09-01',
       startTime: '10:00',
       locationName: 'Charlottetown, PEI',
-    },
-  });
+    }, {
+      sourceVisibility: 'public_verified',
+      visibilityEvidence: {
+        method: 'public_url_probe',
+        checkedAt: '2026-08-23T12:00:00.000Z',
+        reason: 'Public source verified.',
+        title: 'Harbour Parade',
+        description: 'Start: Victoria Park\nRoute: Brighton Road -> Queen Street\nFinish: Confederation Centre',
+        startDate: '2026-09-01',
+        startTime: '10:00',
+        locationName: 'Charlottetown, PEI',
+      },
+    });
 
-  assert.equal(parsed.spatialEvidence?.kind, 'route');
-  assert.equal(parsed.spatialEvidence?.routeEvidenceLevel, 'official_full_route');
-  assert.ok(parsed.reviewReasons.includes('route_candidate_requires_geometry_review'));
-  assert.equal(parsed.needsUserReview, false);
-  assert.equal(parsed.routing, 'public_candidate');
+    assert.equal(parsed.spatialEvidence?.kind, 'route');
+    assert.equal(parsed.spatialEvidence?.routeEvidenceLevel, 'official_full_route');
+    assert.ok(parsed.reviewReasons.includes('route_candidate_requires_geometry_review'));
+    assert.equal(parsed.needsUserReview, false);
+    assert.equal(parsed.routing, 'public_candidate');
+  } finally {
+    Settings.now = originalNow;
+  }
 });
 
 test('private share text cannot add route facts to a verified public candidate', async () => {
