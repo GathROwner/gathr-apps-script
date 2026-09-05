@@ -30,6 +30,7 @@ import {
   resolveStageModel,
 } from './runtimeConfig.js';
 import { logger } from '../utils/logger.js';
+import { isFacilityClosureOnlyListing } from './facilityActivityPolicy.js';
 
 // Initialize OpenAI client lazily
 let openaiClient: OpenAI | null = null;
@@ -408,7 +409,8 @@ Never return arrays of values for an item; each must be a JSON object.`;
       workshopGroundedEvents,
       combinedText
     );
-    const discreteEvents = filterOperationalHoursOnlyEvents(sourceGroundedEvents);
+    const facilityActivityFilteredEvents = filterFacilityClosureOnlyEvents(sourceGroundedEvents);
+    const discreteEvents = filterOperationalHoursOnlyEvents(facilityActivityFilteredEvents);
     const retailFilteredEvents = filterRetailMerchandisePromotions(discreteEvents);
     const advisoryFilteredEvents = filterTrafficAdvisoryLogisticsEvents(retailFilteredEvents, combinedText);
     const cruiseFilteredEvents = filterCruiseShipLogisticsEvents(advisoryFilteredEvents, combinedText);
@@ -2225,7 +2227,6 @@ function isOperationalHoursOnlyTitle(value: unknown): boolean {
     /\b(?:business|store|summer|winter|festival)\s+hours\b/.test(normalized) ||
     /\b(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday|mon|tue|wed|thu|fri|sat|sun)\s+hours\b/.test(normalized) ||
     /\bstudio\s+open(?:\s+(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday|weekday|weekend))?\b/.test(normalized) ||
-    /\ball\s+pools\s+open\b/.test(normalized) ||
     /^casino\s+gaming$/.test(normalized) ||
     /^poker\s+(?:and\s+)?roulette\s+tables$/.test(normalized)
   );
@@ -2240,7 +2241,7 @@ function hasOperationalHoursCue(value: unknown): boolean {
     /\bopen\s+hours\b/.test(normalized) ||
     /\b(?:hours|open)\s*(?:are|:|-)?\s*\d{1,2}(?::\d{2})?\s*(?:am|pm)?\s*(?:to|until|-)\s*\d{1,2}/.test(normalized) ||
     /\bopen\b.{0,60}\b\d{1,2}(?::\d{2})?(?:\s*(?:am|pm))?(?:\s+(?:to|until)\s+|\s*-\s*|\s+)\d{1,2}/.test(normalized) ||
-    /\b(?:casino\s+gaming|poker\s+(?:and\s+)?roulette\s+tables|all\s+pools\s+open)\b/.test(normalized)
+    /\b(?:casino\s+gaming|poker\s+(?:and\s+)?roulette\s+tables)\b/.test(normalized)
   );
 }
 
@@ -2270,6 +2271,29 @@ export function filterOperationalHoursOnlyEvents(
     }
 
     logger.debug(`Dropped operating-hours-only listing "${event.name}"`, {
+      startDate: event.startDate,
+      startTime: event.startTime,
+      venue: event.venue || event.establishment,
+    });
+    return false;
+  });
+}
+
+export function filterFacilityClosureOnlyEvents(
+  events: FormattedEvent[]
+): FormattedEvent[] {
+  return events.filter((event) => {
+    if (
+      !isFacilityClosureOnlyListing({
+        name: event.name,
+        description: event.description,
+        category: event.category,
+      })
+    ) {
+      return true;
+    }
+
+    logger.debug(`Dropped facility-closure-only listing "${event.name}"`, {
       startDate: event.startDate,
       startTime: event.startTime,
       venue: event.venue || event.establishment,

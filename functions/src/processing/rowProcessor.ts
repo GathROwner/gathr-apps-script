@@ -103,6 +103,22 @@ function normalizeDateOnlyCandidate(value: unknown): string {
   return Number.isNaN(parsed.getTime()) ? '' : parsed.toISOString().slice(0, 10);
 }
 
+export function resolveTrustedFullParserStartDate(params: {
+  itemStartDate?: unknown;
+  rowUtcStartDate?: unknown;
+}): string {
+  const itemStartDate = String(params.itemStartDate || '').trim();
+  const itemDateIsMissingSentinel = /^(?:unknown|none|null|n\/?a)$/i.test(itemStartDate);
+  const parsedItemStartDate = itemStartDate && !itemDateIsMissingSentinel
+    ? formatDate(itemStartDate)
+    : '';
+  if (parsedItemStartDate) return parsedItemStartDate;
+
+  const rowUtcStartDate = String(params.rowUtcStartDate || '').trim();
+  if (!rowUtcStartDate) return '';
+  return utcToLocal(rowUtcStartDate).date || '';
+}
+
 function meaningfulSelectionTokens(value: string): string[] {
   const stopWords = new Set([
     'the',
@@ -4339,6 +4355,21 @@ async function processFullParserEvent(
   duplicateEventId?: string;
   event?: EventData;
 }> {
+  const trustedStartDate = resolveTrustedFullParserStartDate({
+    itemStartDate: item.startDate,
+    rowUtcStartDate: row.utcStartDate,
+  });
+  if (!trustedStartDate) {
+    logger.info('Skipping full-parser event without a trusted start date', {
+      rowIndex,
+      itemName: String(item.name || '').trim(),
+      itemStartDate: String(item.startDate || '').trim(),
+      rowUtcStartDate: String(row.utcStartDate || '').trim(),
+      sourceUniqueId: String(row.uniqueId || '').trim(),
+    });
+    return { created: false, updated: false, isDuplicate: false };
+  }
+
   const venue = await resolveVenueForFullParserEvent(
     item,
     rowVenue,
@@ -4451,8 +4482,7 @@ async function processFullParserEvent(
     return { created: false, updated: false, isDuplicate: false };
   }
 
-  const startDateRaw = String(item.startDate || '').trim();
-  const startDate = startDateRaw ? formatDate(startDateRaw) : '';
+  const startDate = trustedStartDate;
   const rawEndDateValue = item.endDate;
   let endDate = String(item.endDate || '').trim();
   endDate = endDate ? formatDate(endDate) : '';

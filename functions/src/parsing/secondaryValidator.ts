@@ -23,6 +23,7 @@ import {
   resolveStageModel,
 } from './runtimeConfig.js';
 import { logger } from '../utils/logger.js';
+import { isFacilityClosureOnlyListing } from './facilityActivityPolicy.js';
 
 // Initialize OpenAI client lazily
 let openaiClient: OpenAI | null = null;
@@ -198,8 +199,12 @@ function isOperatingHoursOnlyItem(item: ExtractedItem | undefined): boolean {
 
   const normalized = text.toLowerCase();
 
+  if (isFacilityClosureOnlyListing({ name, description, category })) {
+    return true;
+  }
+
   if (
-    /\b(happy\s*hour|specials?|deals?|discount|sale|bogo|free\s+with|live\s+music|trivia|karaoke|open\s*mic|concert|comedy|class|workshop|program|drop[-\s]?in|swim|pool|public\s+skate|movie|screening|show|party|festival|fundraiser|open\s+house)\b/i.test(
+    /\b(happy\s*hour|specials?|deals?|discount|sale|bogo|free\s+with|live\s+music|trivia|karaoke|open\s*mic|concert|comedy|class|workshop|program|drop[-\s]?in|swim|pools?|public\s+skate|ice\s+time|skating|movie|screening|show|party|festival|fundraiser|open\s+house)\b/i.test(
       text
     )
   ) {

@@ -1,7 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { filterOperationalHoursOnlyEvents } from './finalFormatter.js';
+import {
+  filterFacilityClosureOnlyEvents,
+  filterOperationalHoursOnlyEvents,
+} from './finalFormatter.js';
 import { FormattedEvent } from './types.js';
 
 function event(name: string, description: string): FormattedEvent {
@@ -53,4 +56,38 @@ test('keeps a discrete public event even when its venue is open daily', () => {
   );
 
   assert.deepEqual(filterOperationalHoursOnlyEvents([tournament]), [tournament]);
+});
+
+test('keeps public swim and bookable ice availability', () => {
+  const publicSwim = event('Public Swim', 'Public swim Sunday from 1pm to 3pm.');
+  const poolsOpen = event('All Pools Open', 'All pools open Sunday from 1pm to 4pm.');
+  const availableIce = event(
+    'Available Ice Time',
+    'Available ice time from 8:45pm to 10:45pm. Call the rink to book.'
+  );
+  availableIce.category = 'Sports';
+
+  assert.deepEqual(
+    filterFacilityClosureOnlyEvents(
+      filterOperationalHoursOnlyEvents([publicSwim, poolsOpen, availableIce])
+    ),
+    [publicSwim, poolsOpen, availableIce]
+  );
+});
+
+test('drops pool and ice closure notices', () => {
+  const poolClosure = event(
+    'Public Swim Cancelled',
+    'The pool is closed Saturday for maintenance.'
+  );
+  const iceClosure = event(
+    'Ice Time Unavailable',
+    'The rink is closed September 8.'
+  );
+  iceClosure.category = 'Sports';
+
+  assert.deepEqual(
+    filterFacilityClosureOnlyEvents([poolClosure, iceClosure]),
+    []
+  );
 });

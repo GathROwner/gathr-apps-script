@@ -265,6 +265,7 @@ Purpose: capture parser, ingestion, and cleanup weaknesses found during Firestor
 - Evidence: the June 12 scheduled-cleanup review found Bell Aliant Centre lane-swim, pool-open, pool-closed, and Aqua Arthritis schedule blocks, plus an Inn at Bay Fortune room-availability listing.
 - Impact: routine facility schedules and inventory availability can appear as app events until cleanup removes each generated one-off.
 - Follow-up: suppress pool/facility open/closed schedule blocks, lane-swim availability blocks, and hotel room availability unless the post describes a specific public event or registration program.
+- Policy correction (2026-09-05): public/lane/family swim schedules and bookable ice availability are valid things to do and should remain. Only pool/rink/ice closure or unavailable notices are suppressed. Hotel inventory remains a separate question.
 
 ### Out-of-market venue docs may still receive event children
 

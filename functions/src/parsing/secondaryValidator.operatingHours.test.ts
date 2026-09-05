@@ -83,6 +83,51 @@ test('keeps pool and swim activities that include public session times', () => {
   );
 });
 
+test('keeps available ice time as a bookable sporting activity', () => {
+  assert.equal(
+    isOperatingHoursOnlyItemForRegression(
+      item({
+        name: 'Available Ice Time',
+        description: 'Available ice time from 8:45 PM to 10:45 PM. Call the rink to book.',
+        category: 'Sports',
+      })
+    ),
+    false
+  );
+  assert.equal(
+    isOperatingHoursOnlyItemForRegression(
+      item({
+        name: 'All Pools Open',
+        description: 'All pools open Sunday from 1:00 PM to 4:00 PM.',
+        category: 'Family Friendly',
+      })
+    ),
+    false
+  );
+});
+
+test('rejects pool and ice closure notices while preserving activity availability', () => {
+  assert.equal(
+    isOperatingHoursOnlyItemForRegression(
+      item({
+        name: 'Public Swim Cancelled',
+        description: 'The pool is closed Saturday for maintenance.',
+      })
+    ),
+    true
+  );
+  assert.equal(
+    isOperatingHoursOnlyItemForRegression(
+      item({
+        name: 'Ice Time Unavailable',
+        description: 'The rink is closed September 8.',
+        category: 'Sports',
+      })
+    ),
+    true
+  );
+});
+
 test('keeps season opening announcements that merely mention hours', () => {
   assert.equal(
     isOperatingHoursOnlyItemForRegression(

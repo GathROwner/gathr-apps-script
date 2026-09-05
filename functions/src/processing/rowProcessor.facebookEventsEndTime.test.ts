@@ -149,6 +149,37 @@ test('uses the Highland Storm venue address when a Holmans source-page address l
   assert.equal(result, '619 Water Street East, Summerside, PE C1N 4H8, Canada');
 });
 
+test('uses canonical venue addresses for legacy Downtown Charlottetown roundup cases', () => {
+  const cases = [
+    {
+      itemVenueName: 'Olde Dublin Pub',
+      resolvedVenueId: 'fb_100063673418060',
+      venueAddress: '131 Sydney St, Charlottetown, PE C1A 1G5, Canada',
+    },
+    {
+      itemVenueName: 'The Gahan House',
+      resolvedVenueId: 'slug_thegahanhouse',
+      venueAddress: '126 Sydney St, Charlottetown, PE C1A 1G5, Canada',
+    },
+  ];
+
+  for (const fixture of cases) {
+    const result = resolveEventAddressForVenue({
+      itemAddress: '1 Weymouth Street, Charlottetown, PE, Canada, C1A7M8',
+      rowAddress: '',
+      sourceVenueAddress: '1 Weymouth Street, Charlottetown, PE C1A 7M8, Canada',
+      sourceVenueId: 'slug_downtowncharlottetowninc',
+      resolvedVenueId: fixture.resolvedVenueId,
+      venueAddress: fixture.venueAddress,
+      rowEstablishment: 'Downtown Charlottetown Inc.',
+      canonicalVenueName: fixture.itemVenueName,
+      itemVenueName: fixture.itemVenueName,
+    });
+
+    assert.equal(result, fixture.venueAddress);
+  }
+});
+
 test('uses target venue coordinates whenever its address replaces source-page metadata', () => {
   const result = resolveEventCoordinatesForVenue({
     usesVenueAddress: true,
