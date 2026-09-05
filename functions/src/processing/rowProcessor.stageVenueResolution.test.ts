@@ -53,6 +53,20 @@ const charlottetownEventGroundsVenue: VenueData = {
   address: '360 Grafton St, Charlottetown, PE, Canada',
 };
 
+const confederationCentreVenue: VenueData = {
+  id: 'slug_confedcentre',
+  name: 'Confederation Centre of the Arts',
+  normalizedName: 'confederation centre of the arts',
+  address: '145 Richmond St, Charlottetown, PE C1A 1J1, Canada',
+};
+
+const sobeyFamilyTheatreVenue: VenueData = {
+  id: 'slug_sobeyfamilytheatre',
+  name: 'Sobey Family Theatre',
+  normalizedName: 'sobey family theatre',
+  address: '130 Queen St, Charlottetown, PE C1A 4B3, Canada',
+};
+
 const peiLibrarySystemVenue: VenueData = {
   id: 'slug_peilibrary',
   name: 'PEI Public Library Service des bibliothèques publiques ÎPÉ',
@@ -96,6 +110,38 @@ test('an exact parsed street address resolves a known venue before a broad city 
       : { isMatch: false, matchType: 'none', similarity: 0 },
   });
   assert.equal(resolved?.id, foundersVenue.id);
+});
+
+test('an explicit Sobey Family Theatre detail overrides the Confederation Centre source page', async () => {
+  const candidates: string[] = [];
+  const resolved = await resolveVenueForFullParserEventWithMatcherForRegression({
+    item: {
+      name: 'Anne of Green Gables–The Musical™ (Closing Performance)',
+      establishment: 'Confederation Centre of the Arts',
+      venue: 'Sobey Family Theatre',
+      additionalLocation: 'Sobey Family Theatre',
+    } as ParserProcessedEvent,
+    row: {
+      uniqueId: 'anne-closing-performance',
+      text: 'Saturday, September 5 at 7:30 p.m. Closing performance.',
+      mediaUrls: [],
+      pageName: 'Confederation Centre of the Arts',
+      userName: 'Confederation Centre of the Arts',
+      timestamp: '2026-09-05T12:00:00.000Z',
+    } as RawRowData,
+    rowVenue: confederationCentreVenue,
+    establishment: 'Confederation Centre of the Arts',
+    rowIndex: 1,
+    matcher: async (candidate) => {
+      candidates.push(candidate);
+      return normalizeVenueName(candidate) === normalizeVenueName(sobeyFamilyTheatreVenue.name)
+        ? { isMatch: true, matchType: 'exact', similarity: 1, matchedVenue: sobeyFamilyTheatreVenue }
+        : { isMatch: false, matchType: 'none', similarity: 0 };
+    },
+  });
+
+  assert.equal(resolved?.id, sobeyFamilyTheatreVenue.id);
+  assert.equal(candidates[0], 'Sobey Family Theatre');
 });
 
 const foundersRow = {

@@ -27,6 +27,7 @@ type VenueWebsiteEnrichmentSummary = {
   updatedFields: {
     dates: number;
     times: number;
+    venues: number;
     descriptions: number;
     links: number;
     images: number;
@@ -37,6 +38,7 @@ type VenueWebsiteEnrichmentSummary = {
 type WebsiteCandidate = {
   title: string;
   description?: string;
+  venue?: string;
   date?: string;
   dateRangeStart?: string;
   dateRangeEnd?: string;
@@ -139,6 +141,7 @@ export async function enrichEventsFromVenueWebsite(
     updatedFields: {
       dates: 0,
       times: 0,
+      venues: 0,
       descriptions: 0,
       links: 0,
       images: 0,
@@ -530,6 +533,16 @@ async function discoverDetailPageCandidates(
     if (!listingHtml) continue;
     summary.listingPagesFetched += 1;
 
+    if (isLikelyEventDetailUrl(listingPage)) {
+      const directCandidate = parseDetailPageCandidate(listingPage, listingHtml, yearHint);
+      if (directCandidate) {
+        detailCandidates.set(
+          `${directCandidate.sourceUrl}|${directCandidate.title}|${directCandidate.date || directCandidate.dateRangeStart || ''}`,
+          directCandidate
+        );
+      }
+    }
+
     const detailUrls = discoverDetailPages(listingPage, listingHtml, relevanceTokens).slice(
       0,
       Math.max(1, cfg.maxDetailPages)
@@ -627,8 +640,16 @@ function parseDetailPageCandidate(
         .replace(/<\/?[^>]+>/g, ' ')
     )
   );
-  const dateInfo = extractDateInfoFromText(text, yearHint);
-  const timeInfo = extractTimeInfoFromText(text);
+  const labeledDate = extractLabeledSection(text, /date\s*\(s\)|\bdates?\b/i);
+  const dateInfo = labeledDate.found
+    ? extractDateInfoFromText(labeledDate.value, yearHint)
+    : extractDateInfoFromText(text, yearHint);
+  const labeledTime = extractLabeledSection(text, /time\s*\(s\)|\btimes?\b/i);
+  const timeInfo = labeledTime.found
+    ? extractTimeInfoFromText(labeledTime.value)
+    : extractTimeInfoFromText(text);
+  const labeledVenue = extractLabeledSection(text, /\b(?:venue|location)\b/i);
+  const venue = labeledVenue.found ? cleanVenueLabel(labeledVenue.value) : '';
 
   if (!title && !dateInfo.date && !dateInfo.dateRangeStart) {
     return null;
@@ -637,6 +658,7 @@ function parseDetailPageCandidate(
   return {
     title: title || cleanSlugTitle(detailUrl),
     description,
+    venue,
     date: dateInfo.date,
     dateRangeStart: dateInfo.dateRangeStart,
     dateRangeEnd: dateInfo.dateRangeEnd,
@@ -646,6 +668,39 @@ function parseDetailPageCandidate(
     sourceUrl: detailUrl,
     source: 'detail_page',
   };
+}
+
+function isLikelyEventDetailUrl(url: string): boolean {
+  const path = safePathname(url);
+  if (!path || !EVENT_PATH_PATTERN.test(path)) return false;
+  return path.split('/').filter(Boolean).length >= 2;
+}
+
+function extractLabeledSection(
+  text: string,
+  labelPattern: RegExp
+): { found: boolean; value: string } {
+  const source = String(text || '');
+  const flags = labelPattern.flags.includes('i') ? 'i' : '';
+  const matcher = new RegExp(labelPattern.source, flags);
+  const match = matcher.exec(source);
+  if (!match || match.index === undefined) return { found: false, value: '' };
+
+  const tail = source.slice(match.index + match[0].length, match.index + match[0].length + 300);
+  const nextLabel = tail.search(
+    /\b(?:date\s*\(s\)|dates?|time\s*\(s\)|times?|venue|location|buy\s+tickets?|running\s+time|audience\s+advisory|share|credits?)\b/i
+  );
+  return {
+    found: true,
+    value: cleanText(nextLabel >= 0 ? tail.slice(0, nextLabel) : tail),
+  };
+}
+
+function cleanVenueLabel(value: string): string {
+  return cleanText(value)
+    .replace(/^(?:at|@)\s+/i, '')
+    .replace(/\s+(?:buy\s+tickets?|tickets?)\b.*$/i, '')
+    .trim();
 }
 
 function extractDateInfoFromText(
@@ -772,6 +827,11 @@ function applyWebsiteCandidates(
         evidence: `venue_website:${bestCandidate.sourceUrl}`,
       };
       summary.updatedFields.times += 1;
+      changed = true;
+    }
+    if (!hasUsableFieldValue(updated.venue) && hasUsableFieldValue(bestCandidate.venue)) {
+      updated.venue = bestCandidate.venue;
+      summary.updatedFields.venues += 1;
       changed = true;
     }
     if (!hasUsableFieldValue(updated.endTime) && hasUsableFieldValue(bestCandidate.endTime)) {

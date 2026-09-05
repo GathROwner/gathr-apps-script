@@ -93,3 +93,25 @@ test('does not merge records whose one shared word is not a contained event core
     false
   );
 });
+
+test('matches Anne closing-performance title variants at the same venue and curtain time', () => {
+  const base = occurrence('Anne of Green Gables–The Musical™ (Closing Performance)', {
+    establishment: 'Sobey Family Theatre',
+    additionalLocation: 'Sobey Family Theatre',
+    startDate: '2026-09-05',
+    startTime: '19:30',
+  });
+
+  assert.equal(
+    isHighConfidenceSameOccurrenceDuplicate(
+      base,
+      occurrence('Anne of Green Gables - The Musical ™️', {
+        establishment: 'Sobey Family Theatre',
+        additionalLocation: 'Sobey Family Theatre',
+        startDate: '2026-09-05',
+        startTime: '19:30',
+      })
+    ),
+    true
+  );
+});

@@ -196,3 +196,57 @@ test('Tivoli-style website follow-up attempts the venue site but fails closed wh
     restoreFetch();
   }
 });
+
+test('event detail labels outrank unrelated site hours and recover the explicit subvenue', async () => {
+  const detailUrl =
+    'https://confederationcentre.com/event/anne-of-green-gables-the-musical-2026/';
+  const restoreFetch = installFetchMap({
+    [detailUrl]: htmlResponse(`
+      <html>
+        <head>
+          <meta property="og:title" content="Anne of Green Gables–The Musical™">
+        </head>
+        <body>
+          <header>Box office hours: Monday–Saturday 8:00am–6:00pm</header>
+          <h1>Anne of Green Gables–The Musical™</h1>
+          <h4>Date(s)</h4><div>Sep 2, 2026 - Sep 5, 2026</div>
+          <h4>Time(s)</h4><div>7:30pm</div>
+          <h4>Venue</h4><div>Sobey Family Theatre</div>
+          <a href="/tickets/anne">Buy Tickets</a>
+        </body>
+      </html>
+    `),
+  });
+
+  try {
+    const result = await enrichEventsFromVenueWebsite(
+      [
+        buildEventItem({
+          name: 'Anne of Green Gables–The Musical™',
+          date: '2026-09-05',
+          startTime: '',
+          venue: '',
+        }),
+      ],
+      `Closing Saturday. Details and tickets: ${detailUrl}`,
+      '',
+      '2026-09-04T17:00:23.000Z',
+      {
+        name: 'Confederation Centre of the Arts',
+        website: 'https://confederationcentre.com/',
+      },
+      DEFAULT_PARSING_CONFIG
+    );
+
+    assert.equal(result.summary.appliedCount, 1);
+    assert.equal(result.summary.updatedFields.times, 1);
+    assert.equal(result.summary.updatedFields.venues, 1);
+    assert.equal(result.items[0].startTime, '19:30');
+    assert.equal(result.items[0].endTime, '');
+    assert.equal(result.items[0].venue, 'Sobey Family Theatre');
+    assert.equal((result.items[0] as any).ticketLink, detailUrl);
+    assert.match(String(result.items[0].timeFlags?.start?.evidence || ''), /venue_website:/i);
+  } finally {
+    restoreFetch();
+  }
+});

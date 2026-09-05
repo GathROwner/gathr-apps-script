@@ -2763,6 +2763,10 @@ function removeDurationOnlyEachCue(text: string): string {
       /\beach\s+(?:concert|show|performance|set|event|screening|presentation|reading|service)\s+(?:is|will\s+be|lasts?|runs?|takes)\s+(?:about|approximately|approx\.?|around|roughly)?\s*\d+(?:\.\d+)?\s*(?:minutes?|mins?|hours?|hrs?)\b/g,
       ' '
     )
+    .replace(
+      /\beach\s+(?:teams?|team['’]?s|players?|participants?|attendees?|guests?|customers?|children|adults?|people|persons?)\b/g,
+      ' '
+    )
     .replace(/\s+/g, ' ')
     .trim();
 }
@@ -2814,7 +2818,7 @@ function hasConcreteDateReference(text: string): boolean {
 function hasOneOffEventCue(text: string): boolean {
   const normalized = String(text || '').toLowerCase();
   if (!normalized) return false;
-  return /\b(tonight|tomorrow|this\s+(monday|tuesday|wednesday|thursday|friday|saturday|sunday)|this\s+coming\s+(monday|tuesday|wednesday|thursday|friday|saturday|sunday)|coming\s+(monday|tuesday|wednesday|thursday|friday|saturday|sunday)|one night only|doors open|tickets on sale)\b/.test(
+  return /\b(tonight|tomorrow|this\s+(?:[a-z'-]+\s+){0,2}(monday|tuesday|wednesday|thursday|friday|saturday|sunday)|coming\s+(monday|tuesday|wednesday|thursday|friday|saturday|sunday)|one night only|doors open|tickets on sale)\b/.test(
     normalized
   );
 }
@@ -3353,16 +3357,25 @@ function shouldForceExplicitDatedWeeklyOneOff(
     return false;
   }
 
-  if (hasRecurringCueSignal || recurrenceUntilDate || totalOccurrences !== undefined) {
+  const hasDefinitiveRecurringCue = hasStrongRecurringCueForSingleDateDemotion(sourceText);
+  const hasOneOffCue = hasOneOffEventCue(sourceText);
+  if (
+    hasDefinitiveRecurringCue ||
+    (hasRecurringCueSignal && !hasOneOffCue) ||
+    recurrenceUntilDate ||
+    totalOccurrences !== undefined
+  ) {
     return false;
   }
 
-  const hasOneOffCue = hasOneOffEventCue(sourceText);
   if (hasSeriesCue && !hasOneOffCue) {
     return false;
   }
 
-  if (!hasConcreteDateReference(sourceText) || explicitOccurrenceDates.length > 1) {
+  if (
+    (!hasConcreteDateReference(sourceText) && !hasOneOffCue) ||
+    explicitOccurrenceDates.length > 1
+  ) {
     return false;
   }
 

@@ -696,6 +696,39 @@ test('a single dated schedule row cannot become an open-ended weekly event', () 
   assert.equal(normalized.recurrenceUntilDate, undefined);
 });
 
+test('a dated FIFA match post cannot promote a one-off match into an endless Saturday series', () => {
+  const description =
+    'BRONZE MEDAL - France vs England on this fine Saturday evening! This game will show each team’s strengths and weaknesses, with only one team walking away with a medal.';
+  const normalized = applyRecurrenceNormalizationForRegression(
+    buildEvent({
+      category: 'Sports',
+      name: 'FIFA World Cup Matchday: France vs England (Bronze Medal Match)',
+      description,
+      establishment: 'Founders’ Food Hall and Market',
+      venue: 'Founders’ Food Hall and Market',
+      startDate: '2026-07-18',
+      endDate: '2026-07-18',
+      startTime: '18:00',
+      endTime: '23:00',
+      isRecurring: 'Yes',
+      recurringPattern: 'weekly_saturday',
+    }),
+    buildOriginalItem({
+      name: 'FIFA World Cup Matchday: France vs England (Bronze Medal Match)',
+      description,
+      date: '2026-07-18',
+      startTime: '18:00',
+      endTime: '23:00',
+      recurringPattern: 'weekly_saturday',
+      _sourceType: 'event',
+    })
+  );
+
+  assert.equal(normalized.isRecurring, false);
+  assert.equal(normalized.recurringPattern, 'none');
+  assert.equal(normalized.recurrenceUntilDate, undefined);
+});
+
 test('an explicit every-Tuesday source corrects a bad daily model result and anchor date', () => {
   const normalized = applyRecurrenceNormalizationForRegression(
     buildEvent({
