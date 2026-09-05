@@ -27,6 +27,7 @@ import {
   GptUsageRecord,
   ParseSkipReason,
   ParseStageArtifactsSnapshot,
+  ExtractedItem as ParserExtractedItem,
 } from '../parsing/types.js';
 import { parsePostData, prepareManagedDisplayImageUrls } from '../parsing/postParser.js';
 import * as gptService from '../services/gptService.js';
@@ -57,6 +58,7 @@ import {
   classifySpatialEvent,
   SpatialEventClassification,
 } from '../parsing/spatialEventClassifier.js';
+import { isOperatingHoursOnlyItemForRegression } from '../parsing/secondaryValidator.js';
 
 /**
  * Result of processing a single row
@@ -2022,6 +2024,23 @@ function rowEstablishmentLooksLikePostDerivedCityLevelSource(
   return Boolean(details);
 }
 
+export function shouldRejectStructuredFacebookOperatingHoursForRegression(params: {
+  title: string;
+  description: string;
+  category: ParserProcessedEvent['category'];
+  startTime: string;
+  endTime: string;
+}): boolean {
+  return isOperatingHoursOnlyItemForRegression({
+    name: params.title,
+    description: params.description,
+    category: params.category,
+    startTime: params.startTime,
+    endTime: params.endTime,
+    _sourceType: 'facebook_events_scraper_structured_row',
+  } as unknown as ParserExtractedItem);
+}
+
 async function buildStructuredFacebookEventScraperEvents(
   row: RawRowData,
   establishment: string,
@@ -2046,6 +2065,26 @@ async function buildStructuredFacebookEventScraperEvents(
   const localDateTime = utcToLocal(utcStartDate);
   if (!localDateTime.date) {
     return null;
+  }
+
+  const cleanDescription = String(row.facebookEventDescription || row.text || title).trim();
+  const endResolution = resolveFacebookEventEndDateTime(row, localDateTime);
+  if (
+    shouldRejectStructuredFacebookOperatingHoursForRegression({
+      title,
+      description: cleanDescription,
+      category: inferFacebookEventCategory(row),
+      startTime: localDateTime.time,
+      endTime: endResolution?.endTime || '',
+    })
+  ) {
+    logger.info('Rejected structured Facebook Events operating-hours listing', {
+      uniqueId: row.uniqueId,
+      title,
+      startTime: localDateTime.time,
+      endTime: endResolution?.endTime || '',
+    });
+    return [];
   }
 
   const matchedVenueName = getVenueDisplayNameForProcessing(matchedVenue);
@@ -2093,10 +2132,10 @@ async function buildStructuredFacebookEventScraperEvents(
     reusableManagedMediaUrls.length > 0
       ? options.managedMediaSourceReason || 'reused_existing_structured_facebook_event_media'
       : 'facebook_events_scraper_media_upload';
-  const ticketLink = extractFacebookEventTextValue(row.text, 'Ticket link');
+  const ticketLink =
+    row.actionLinks?.find((link) => link.role === 'ticket_purchase')?.url ||
+    extractFacebookEventTextValue(row.text, 'Ticket link');
   const ticketSummary = extractFacebookEventTextValue(row.text, 'Tickets');
-  const cleanDescription = String(row.facebookEventDescription || row.text || title).trim();
-  const endResolution = resolveFacebookEventEndDateTime(row, localDateTime);
   const recurrenceResolution = resolveFacebookEventRecurrence(row, localDateTime);
 
   const event: ParserProcessedEvent = {
@@ -2113,9 +2152,10 @@ async function buildStructuredFacebookEventScraperEvents(
     endDate: endResolution?.endDate || localDateTime.date,
     startTime: localDateTime.time,
     endTime: endResolution?.endTime || '',
-    ticketPrice: ticketSummary,
+    ticketPrice: ticketLink ? ticketSummary : '',
     ticketLink,
-    ticketsBuyUrl: ticketLink || row.ticketsBuyUrl,
+    ticketsBuyUrl: ticketLink || undefined,
+    actionLinks: row.actionLinks,
     relevantImageIndex: primaryImageUrl ? 0 : -1,
     venue: venueName || establishment,
     additionalLocation: '',
@@ -2392,6 +2432,7 @@ async function queueCityLevelFacebookEventForReview(params: {
   comments?: number;
   topReactionsCount?: number;
   ticketsBuyUrl?: string;
+  actionLinks?: EventData['actionLinks'];
   externalLinks?: string[];
   sourceContentSignature?: string;
 }): Promise<void> {
@@ -2425,6 +2466,7 @@ async function queueCityLevelFacebookEventForReview(params: {
       comments: params.comments,
       topReactionsCount: params.topReactionsCount,
       ticketsBuyUrl: params.ticketsBuyUrl,
+      actionLinks: params.actionLinks,
       externalLinks: params.externalLinks,
       locationLabel: location.locationLabel,
       locationCity: location.locationCity,
@@ -2548,6 +2590,7 @@ async function queuePostDerivedCityLevelEventForReview(params: {
   imageUrl?: string;
   mediaUrls?: string[];
   ticketsBuyUrl?: string;
+  actionLinks?: EventData['actionLinks'];
   externalLinks?: string[];
 }): Promise<void> {
   const state = params.batchManager.getState();
@@ -2589,6 +2632,7 @@ async function queuePostDerivedCityLevelEventForReview(params: {
       imageUrl: params.imageUrl,
       mediaUrls: params.mediaUrls,
       ticketsBuyUrl: params.ticketsBuyUrl,
+      actionLinks: params.actionLinks,
       externalLinks: params.externalLinks,
       locationLabel: params.location.locationLabel,
       locationCity: params.location.locationCity,
@@ -3048,6 +3092,7 @@ export async function processRow(
           usersInterested: row.usersInterested || '',
           facebookUsersResponded: row.facebookUsersResponded || '',
           ticketsBuyUrl: row.ticketsBuyUrl || '',
+          actionLinks: row.actionLinks,
           likes: row.likes,
           shares: row.shares,
           comments: row.comments,
@@ -4329,6 +4374,7 @@ async function processFullParserEvent(
         comments: item.comments ?? row.comments,
         topReactionsCount: item.topReactionsCount ?? row.topReactionsCount,
         ticketsBuyUrl: item.ticketsBuyUrl || row.ticketsBuyUrl,
+        actionLinks: item.actionLinks || row.actionLinks,
         externalLinks: row.externalLinks,
         sourceContentSignature: buildFacebookEventSourceContentSignature(row),
       });
@@ -4364,6 +4410,7 @@ async function processFullParserEvent(
         imageUrl: String(item.image || item.relevantImageUrl || '').trim() || undefined,
         mediaUrls: Array.isArray(item.mediaUrls) ? item.mediaUrls : row.mediaUrls,
         ticketsBuyUrl: item.ticketsBuyUrl || row.ticketsBuyUrl,
+        actionLinks: item.actionLinks || row.actionLinks,
         externalLinks: row.externalLinks,
       });
       logger.debug('Skipping unknown-venue queue for post-derived city/area event location', {
@@ -4585,6 +4632,7 @@ async function processFullParserEvent(
     ticketPrice: String(item.ticketPrice || '').trim() || undefined,
     ticketLink: String(item.ticketLink || '').trim() || undefined,
     ticketsBuyUrl: String(item.ticketsBuyUrl || row.ticketsBuyUrl || '').trim() || undefined,
+    actionLinks: item.actionLinks || row.actionLinks,
     externalLinks: row.externalLinks,
     isRecurring: item.isRecurring,
     recurringPattern: item.recurringPattern || undefined,
@@ -4812,6 +4860,7 @@ async function processExtractedItem(
     comments: item.comments ?? row.comments,
     topReactionsCount: item.topReactionsCount ?? row.topReactionsCount,
     ticketsBuyUrl: row.ticketsBuyUrl,
+    actionLinks: row.actionLinks,
     externalLinks: row.externalLinks,
     venueId: venue.id,
     category: (normalizedLegacyCategory || legacyItem.category) as EventData['category'],
@@ -5368,6 +5417,7 @@ function buildDuplicateEventUpdates(
     'ageRestriction',
     'ticketLink',
     'ticketsBuyUrl',
+    'actionLinks',
     'ticketProvider',
     'organizedBy',
     'utcStartDate',
@@ -7935,6 +7985,7 @@ export function summarizeFullParserEvents(
     recurrenceUntilDate: event.recurrenceUntilDate || '',
     ticketLink: event.ticketLink || '',
     ticketsBuyUrl: event.ticketsBuyUrl || '',
+    actionLinks: Array.isArray(event.actionLinks) ? event.actionLinks : [],
     image: event.image || '',
     relevantImageUrl: event.relevantImageUrl || '',
     sharedPostThumbnail: event.sharedPostThumbnail || '',

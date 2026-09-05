@@ -13,6 +13,7 @@ import {
   RawRowData,
 } from '../types/index.js';
 import { logger } from '../utils/logger.js';
+import { classifyStructuredFacebookActionLink } from '../parsing/structuredActionLinkClassifier.js';
 import {
   fetchApifyDatasetItemsById,
   getApifyDatasetFallbackLimit,
@@ -891,10 +892,28 @@ function joinNonEmpty(parts: unknown[], separator = ' '): string {
     .trim();
 }
 
+function getFacebookEventTicketSummary(row: unknown[], headerMap: HeaderIndexMap): string {
+  return joinNonEmpty([
+    getFirstNonEmptyColumnValue(row, headerMap, ['ticketsInfo/title']),
+    getFirstNonEmptyColumnValue(row, headerMap, ['ticketsInfo/price']),
+    getFirstNonEmptyColumnValue(row, headerMap, ['ticketsInfo/subtitle']),
+    getFirstNonEmptyColumnValue(row, headerMap, ['ticketsInfo/ticketProvider']),
+  ], ' | ');
+}
+
+function getFacebookEventActionLink(row: unknown[], headerMap: HeaderIndexMap) {
+  const candidateUrl = getFirstNonEmptyColumnValue(row, headerMap, ['ticketsInfo/buyUrl']);
+  return classifyStructuredFacebookActionLink(
+    candidateUrl,
+    getFacebookEventTicketSummary(row, headerMap)
+  );
+}
+
 function buildFacebookEventText(
   row: unknown[],
   headerMap: HeaderIndexMap,
-  description: string
+  description: string,
+  actionLink = getFacebookEventActionLink(row, headerMap)
 ): string {
   const lines: string[] = [];
   const addLine = (label: string, value: unknown) => {
@@ -918,14 +937,13 @@ function buildFacebookEventText(
   );
   addLine('Organizer', getFirstNonEmptyColumnValue(row, headerMap, ['organizators/0/name', 'organizedBy']));
 
-  const ticketSummary = joinNonEmpty([
-    getFirstNonEmptyColumnValue(row, headerMap, ['ticketsInfo/title']),
-    getFirstNonEmptyColumnValue(row, headerMap, ['ticketsInfo/price']),
-    getFirstNonEmptyColumnValue(row, headerMap, ['ticketsInfo/subtitle']),
-    getFirstNonEmptyColumnValue(row, headerMap, ['ticketsInfo/ticketProvider']),
-  ], ' | ');
+  const ticketSummary = getFacebookEventTicketSummary(row, headerMap);
   addLine('Tickets', ticketSummary);
-  addLine('Ticket link', getFirstNonEmptyColumnValue(row, headerMap, ['ticketsInfo/buyUrl']));
+  if (actionLink?.role === 'ticket_purchase') {
+    addLine('Ticket link', actionLink.url);
+  } else if (actionLink?.url) {
+    addLine('Event info link', actionLink.url);
+  }
 
   const responseSummary = joinNonEmpty([
     getFirstNonEmptyColumnValue(row, headerMap, ['usersGoing']) ? `${getFirstNonEmptyColumnValue(row, headerMap, ['usersGoing'])} going` : '',
@@ -960,8 +978,9 @@ function extractRowData(
   const description = String(
     getFirstNonEmptyColumnValue(row, headerMap, ['Text', 'text', 'description']) || ''
   );
+  const actionLink = isFacebookEvent ? getFacebookEventActionLink(row, headerMap) : undefined;
   const text = isFacebookEvent
-    ? buildFacebookEventText(row, headerMap, description)
+    ? buildFacebookEventText(row, headerMap, description, actionLink)
     : description;
   const sharedPostTextMatch = getFirstNonEmptyColumnValueWithHeader(
     row,
@@ -975,7 +994,7 @@ function extractRowData(
   const mediaUrls = collectMediaUrls(row, headerMap);
   const ocrText = isFacebookEvent ? '' : collectOcrText(row, headerMap);
   const externalLinks = isFacebookEvent ? collectExternalLinks(row, headerMap) : [];
-  const ticketsBuyUrl = String(getFirstNonEmptyColumnValue(row, headerMap, ['ticketsInfo/buyUrl']) || '').trim();
+  const ticketsBuyUrl = actionLink?.role === 'ticket_purchase' ? actionLink.url : '';
 
   // Skip rows that are entirely empty
   const hasAnyValue = row.some(value => {
@@ -1178,6 +1197,7 @@ function extractRowData(
     facebookEventDescription: isFacebookEvent ? description.trim() || undefined : undefined,
     externalLinks,
     ticketsBuyUrl: ticketsBuyUrl || undefined,
+    actionLinks: actionLink ? [actionLink] : undefined,
     usersResponded,
     usersGoing,
     usersInterested,

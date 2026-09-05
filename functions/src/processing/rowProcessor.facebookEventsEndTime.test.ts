@@ -11,6 +11,7 @@ import {
   resolveFacebookEventRecurrence,
   resolveFullParserEventImageUrls,
   resolvePostDerivedCityLevelEventLocation,
+  shouldRejectStructuredFacebookOperatingHoursForRegression,
 } from './rowProcessor.js';
 import { EventData, RawRowData, VenueData } from '../types/index.js';
 import { FAMILY_FRIENDLY_SCORING_VERSION } from '../utils/familyFriendlyScoring.js';
@@ -77,6 +78,20 @@ test('resolves a Facebook Events explicit multi-day range from the structured Wh
   assert.equal(result?.source, 'dateTimeSentence');
   assert.equal(result?.endDate, '2026-05-23');
   assert.equal(result?.endTime, '20:00');
+});
+
+test('rejects the Confederation Court Mall Saturday-hours structured event', () => {
+  assert.equal(
+    shouldRejectStructuredFacebookOperatingHoursForRegression({
+      title: 'Confederation Court Mall Saturday Hours',
+      description:
+        'Mall open hours stated as part of a weekend reminder about free downtown parking on weekends.',
+      category: 'Gatherings & Parties',
+      startTime: '09:00',
+      endTime: '18:00',
+    }),
+    true
+  );
 });
 
 test('uses the resolved venue address when an event-specific venue differs from the source row page', () => {

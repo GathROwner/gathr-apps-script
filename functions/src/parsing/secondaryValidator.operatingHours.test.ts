@@ -41,6 +41,21 @@ test('rejects store hours split into weekday schedule rows', () => {
   );
 });
 
+test('rejects venue-prefixed weekday hours when the time exists only in structured fields', () => {
+  assert.equal(
+    isOperatingHoursOnlyItemForRegression(
+      item({
+        name: 'Confederation Court Mall Saturday Hours',
+        description:
+          'Mall open hours stated as part of a weekend reminder about free downtown parking on weekends.',
+        startTime: '09:00',
+        endTime: '18:00',
+      })
+    ),
+    true
+  );
+});
+
 test('keeps actual happy hour specials even when they include a weekday range', () => {
   assert.equal(
     isOperatingHoursOnlyItemForRegression(

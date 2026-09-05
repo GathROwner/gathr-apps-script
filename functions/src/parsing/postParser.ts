@@ -3460,6 +3460,9 @@ function addMetadata(
     event.usersResponded = data.usersResponded || event.usersResponded || '';
     event.utcStartDate = data.utcStartDate || event.utcStartDate || '';
     event.ticketsBuyUrl = data.ticketsBuyUrl || event.ticketsBuyUrl || '';
+    event.actionLinks = Array.isArray(data.actionLinks)
+      ? data.actionLinks.map((entry) => ({ ...entry }))
+      : event.actionLinks;
 
     // Bridge Stage 5 "ticketLink" → ticketsBuyUrl if not provided upstream
     if (

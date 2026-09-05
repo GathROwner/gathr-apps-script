@@ -4,6 +4,7 @@
  */
 
 import type { ModelSpatialEvidence, SpatialEventClassification } from './spatialEventClassifier.js';
+import type { EventActionLink } from '../types/index.js';
 
 // ===================
 // Venue/Hours Types (also in main types, duplicated here for module independence)
@@ -463,6 +464,7 @@ export interface FormattedEvent extends RecurrenceScheduleFields {
   _categoryHintOriginal?: string;
   _categorySource?: CategoryNormalizationSource;
   _categoryNormalizationReason?: string;
+  actionLinks?: EventActionLink[];
 }
 
 export interface FormattingDecision {
@@ -578,6 +580,7 @@ export interface ProcessedEvent extends TimeResolvedEvent {
   facebookUsersResponded?: string;
   utcStartDate?: string;
   ticketsBuyUrl?: string;
+  actionLinks?: EventActionLink[];
   ticketProvider?: string;
   likes?: number;
   shares?: number;
@@ -619,6 +622,7 @@ export interface ExtractedDataInput {
   usersInterested?: string;
   facebookUsersResponded?: string;
   ticketsBuyUrl?: string;
+  actionLinks?: EventActionLink[];
   ticketProvider?: string;
   likes?: number;
   shares?: number;

@@ -167,6 +167,7 @@ const EVENT_UPDATE_AUDIT_BASE_FIELDS = [
   'facebookUrl',
   'cleanedFacebookUrl',
   'ticketsBuyUrl',
+  'actionLinks',
   'ticketLink',
   'ticketPrice',
   'price',
@@ -872,6 +873,7 @@ function buildCityLevelEventReviewSample(
     comments: input.comments,
     topReactionsCount: input.topReactionsCount,
     ticketsBuyUrl: asOptionalTrimmedString(input.ticketsBuyUrl),
+    actionLinks: input.actionLinks,
     externalLinks: externalLinks.length > 0 ? externalLinks : undefined,
     spatialEvidence: input.spatialEvidence,
     createdAt: new Date(),
@@ -1543,6 +1545,7 @@ export async function queueCityLevelEventReview(
         comments: input.comments,
         topReactionsCount: input.topReactionsCount,
         ticketsBuyUrl: asOptionalTrimmedString(input.ticketsBuyUrl),
+        actionLinks: input.actionLinks,
         externalLinks: externalLinks.length > 0 ? externalLinks : undefined,
         organizerName: String(input.organizerName || '').trim() || undefined,
         facebookUrl: String(input.facebookUrl || '').trim() || undefined,
@@ -1645,6 +1648,10 @@ export async function queueCityLevelEventReview(
         comments: input.comments ?? existing.comments,
         topReactionsCount: input.topReactionsCount ?? existing.topReactionsCount,
         ticketsBuyUrl: asOptionalTrimmedString(input.ticketsBuyUrl) || asOptionalTrimmedString(existing.ticketsBuyUrl),
+        actionLinks:
+          Array.isArray(input.actionLinks) && input.actionLinks.length > 0
+            ? input.actionLinks
+            : existing.actionLinks,
         externalLinks: mergedExternalLinks.length > 0 ? mergedExternalLinks : undefined,
         organizerName: String(existing.organizerName || input.organizerName || '').trim() || undefined,
         facebookUrl: String(existing.facebookUrl || input.facebookUrl || '').trim() || undefined,
@@ -1951,6 +1958,10 @@ function buildPublishedCityLevelEventData(
     comments: record.comments,
     topReactionsCount: record.topReactionsCount,
     ticketsBuyUrl: asOptionalTrimmedString(manual.ticketsBuyUrl || record.ticketsBuyUrl),
+    actionLinks:
+      Array.isArray(manual.actionLinks) && manual.actionLinks.length > 0
+        ? manual.actionLinks
+        : record.actionLinks,
     externalLinks: externalLinks.length > 0 ? externalLinks : undefined,
     source: 'city_level_event_review',
     createdAt: admin.firestore.FieldValue.serverTimestamp(),
@@ -5584,6 +5595,7 @@ function buildRowUpdateAuditSnapshot(row?: RawRowData): Record<string, unknown> 
     facebookEventLocationIsCityLevel: row.facebookEventLocationIsCityLevel,
     facebookEventOrganizerName: row.facebookEventOrganizerName,
     ticketsBuyUrl: row.ticketsBuyUrl,
+    actionLinks: sanitizeAuditValue(row.actionLinks),
     externalLinks: sanitizeAuditValue(row.externalLinks),
     mediaUrls: sanitizeAuditValue(mediaUrls),
     mediaUrlCount: mediaUrls.length || undefined,

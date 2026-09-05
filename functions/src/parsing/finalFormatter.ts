@@ -2223,6 +2223,7 @@ function isOperationalHoursOnlyTitle(value: unknown): boolean {
     /\bopen\s+(?:every\s+day|daily)\b/.test(normalized) ||
     /\bregular\s+(?:farm\s+)?hours\b/.test(normalized) ||
     /\b(?:business|store|summer|winter|festival)\s+hours\b/.test(normalized) ||
+    /\b(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday|mon|tue|wed|thu|fri|sat|sun)\s+hours\b/.test(normalized) ||
     /\bstudio\s+open(?:\s+(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday|weekday|weekend))?\b/.test(normalized) ||
     /\ball\s+pools\s+open\b/.test(normalized) ||
     /^casino\s+gaming$/.test(normalized) ||
@@ -2236,6 +2237,7 @@ function hasOperationalHoursCue(value: unknown): boolean {
   return (
     /\bopen\s+(?:every\s+day|daily)\b/.test(normalized) ||
     /\bregular\s+(?:farm\s+)?hours\b/.test(normalized) ||
+    /\bopen\s+hours\b/.test(normalized) ||
     /\b(?:hours|open)\s*(?:are|:|-)?\s*\d{1,2}(?::\d{2})?\s*(?:am|pm)?\s*(?:to|until|-)\s*\d{1,2}/.test(normalized) ||
     /\bopen\b.{0,60}\b\d{1,2}(?::\d{2})?(?:\s*(?:am|pm))?(?:\s+(?:to|until)\s+|\s*-\s*|\s+)\d{1,2}/.test(normalized) ||
     /\b(?:casino\s+gaming|poker\s+(?:and\s+)?roulette\s+tables|all\s+pools\s+open)\b/.test(normalized)
@@ -2252,7 +2254,11 @@ export function filterOperationalHoursOnlyEvents(
       event.name,
       event.description,
     ].join(' '));
-    if (!isOperationalHoursOnlyTitle(event.name) || !hasOperationalHoursCue(eventText)) {
+    const hasStructuredHours = Boolean(event.startTime && event.endTime);
+    if (
+      !isOperationalHoursOnlyTitle(event.name) ||
+      (!hasOperationalHoursCue(eventText) && !hasStructuredHours)
+    ) {
       return true;
     }
     const normalizedTitle = normalizeWorkshopSupportText(String(event.name || ''));

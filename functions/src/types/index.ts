@@ -143,6 +143,24 @@ export interface EventImageProvenance {
   setAt?: unknown;
 }
 
+export type EventActionLinkRole =
+  | 'ticket_purchase'
+  | 'registration'
+  | 'event_info'
+  | 'schedule'
+  | 'livestream'
+  | 'wagering'
+  | 'unknown';
+
+export interface EventActionLink {
+  url: string;
+  role: EventActionLinkRole;
+  label: string;
+  confidence?: number;
+  source?: string;
+  evidence?: string;
+}
+
 export interface EventData {
   id?: string;
   uniqueId: string;
@@ -208,6 +226,7 @@ export interface EventData {
   organizedBy?: string;
   utcStartDate?: string;
   ticketsBuyUrl?: string;
+  actionLinks?: EventActionLink[];
   ticketProvider?: string;
   externalLinks?: string[];
   timeResolution?: unknown;
@@ -275,6 +294,7 @@ export interface RawRowData {
   facebookEventDescription?: string;
   externalLinks?: string[];
   ticketsBuyUrl?: string;
+  actionLinks?: EventActionLink[];
   usersResponded?: string;
   usersGoing?: string;
   usersInterested?: string;
@@ -311,6 +331,7 @@ export interface QueueCityLevelEventReviewInput {
   comments?: number;
   topReactionsCount?: number;
   ticketsBuyUrl?: string;
+  actionLinks?: EventActionLink[];
   externalLinks?: string[];
   locationLabel: string;
   observedLocationName?: string;
@@ -355,6 +376,7 @@ export interface CityLevelEventReviewSample {
   comments?: number;
   topReactionsCount?: number;
   ticketsBuyUrl?: string;
+  actionLinks?: EventActionLink[];
   externalLinks?: string[];
   spatialEvidence?: SpatialEventClassification;
   createdAt?: Date;
@@ -403,6 +425,7 @@ export interface CityLevelEventReviewRecord {
   comments?: number;
   topReactionsCount?: number;
   ticketsBuyUrl?: string;
+  actionLinks?: EventActionLink[];
   externalLinks?: string[];
   organizerName?: string;
   facebookUrl?: string;
@@ -452,6 +475,7 @@ export interface FinalizeCityLevelEventReviewInput {
     usersInterested?: string;
     facebookUsersResponded?: string;
     ticketsBuyUrl?: string;
+    actionLinks?: EventActionLink[];
     externalLinks?: string[];
   };
   notes?: string;

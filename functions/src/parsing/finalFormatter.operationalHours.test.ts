@@ -37,6 +37,10 @@ test('drops operating-hours-only records from the event output', () => {
       'Robert McMillan Pottery Gallery & Studio Open (Friday)',
       'Come walk our studio floors. Open 10-5pm Wed-Sun.'
     ),
+    event(
+      'Confederation Court Mall Saturday Hours',
+      'Mall open hours stated as part of a weekend reminder about free downtown parking on weekends.'
+    ),
   ];
 
   assert.deepEqual(filterOperationalHoursOnlyEvents(records), []);

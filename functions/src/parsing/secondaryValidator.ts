@@ -216,11 +216,15 @@ function isOperatingHoursOnlyItem(item: ExtractedItem | undefined): boolean {
     ) ||
     /\bhours\s*\((?:monday|tuesday|wednesday|thursday|friday|saturday|sunday|mon|tue|wed|thu|fri|sat|sun)/i.test(
       name
+    ) ||
+    /\b(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday|mon|tue|wed|thu|fri|sat|sun)\s+hours\b/i.test(
+      name
     );
   const hoursBody =
     /\b(?:updated\s+)?(?:operating|business|regular|restaurant|store|shop|kitchen|bar|lounge|weekend|holiday|summer|winter)\s+hours\b/i.test(
       text
     ) ||
+    /\bopen\s+hours\b/i.test(text) ||
     /\b(?:open|closed)\s+(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday|mon|tue|wed|thu|fri|sat|sun)\b/i.test(
       normalized
     );
@@ -232,8 +236,10 @@ function isOperatingHoursOnlyItem(item: ExtractedItem | undefined): boolean {
     /\b\d{1,2}(?::\d{2})?\s*(?:a\.?m\.?|p\.?m\.?)?\s*(?:-|–|—|to|until|til|till)\s*\d{1,2}(?::\d{2})?\s*(?:a\.?m\.?|p\.?m\.?)\b/i.test(
       text
     );
+  const structuredTimeRange =
+    hasNonEmptyValue((item as any).startTime) && hasNonEmptyValue((item as any).endTime);
 
-  return Boolean((hoursTitle || hoursBody) && weekdaySchedule && timeRange);
+  return Boolean((hoursTitle || hoursBody) && weekdaySchedule && (timeRange || structuredTimeRange));
 }
 
 export function isOperatingHoursOnlyItemForRegression(item: ExtractedItem | undefined): boolean {
