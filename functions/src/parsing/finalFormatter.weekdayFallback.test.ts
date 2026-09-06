@@ -662,3 +662,184 @@ test('a singular weekday listing cannot remain an open-ended daily recurrence', 
   assert.equal(normalized.recurringPattern, 'none');
   assert.equal(normalized.recurrenceUntilDate, undefined);
 });
+
+test('select-dates season copy cannot become a fabricated daily recurrence', () => {
+  const normalized = applyRecurrenceNormalizationForRegression(
+    buildEvent({
+      category: 'Cinema',
+      name: 'Come From Away (musical) — Select Dates',
+      description:
+        'Musical: "Come From Away". Show dates: June 30, 2026 until Sept 26, 2026. Select dates at Sobey Family Theatre.',
+      establishment: 'Sobey Family Theatre',
+      venue: 'Sobey Family Theatre',
+      startDate: '2026-06-30',
+      endDate: '2026-06-30',
+      startTime: '10:00',
+      endTime: '17:00',
+      isRecurring: 'Yes',
+      recurringPattern: 'daily',
+      recurrenceUntilDate: '2026-09-26',
+    }),
+    buildOriginalItem({
+      name: 'Come From Away (musical) — Select Dates',
+      description:
+        'Musical: "Come From Away". Show dates: June 30, 2026 until Sept 26, 2026. Select dates at Sobey Family Theatre.',
+      date: '2026-06-30',
+      startTime: '10:00',
+      endTime: '17:00',
+      recurringPattern: 'daily',
+      _sourceType: 'calendar',
+    })
+  );
+
+  assert.equal(normalized.isRecurring, false);
+  assert.equal(normalized.recurringPattern, 'none');
+  assert.equal(normalized.startDate, '2026-06-30');
+  assert.equal(normalized.endDate, '2026-06-30');
+  assert.equal(normalized.totalOccurrences, undefined);
+  assert.equal(normalized.recurrenceUntilDate, undefined);
+});
+
+test('select-dates promotional range cannot remain one continuously active event', () => {
+  const normalized = applyRecurrenceNormalizationForRegression(
+    buildEvent({
+      category: 'Cinema',
+      name: 'Come From Away (Charlottetown Festival)',
+      description:
+        'Coming this summer to The Charlottetown Festival. June 30 - September 26 (select dates).',
+      establishment: 'Confederation Centre of the Arts',
+      venue: 'Confederation Centre of the Arts',
+      startDate: '2026-06-30',
+      endDate: '2026-09-26',
+      startTime: '08:00',
+      endTime: '17:00',
+      isRecurring: 'No',
+      recurringPattern: 'none',
+    }),
+    buildOriginalItem({
+      name: 'Come From Away (Charlottetown Festival)',
+      description:
+        'Coming this summer to The Charlottetown Festival. June 30 - September 26 (select dates).',
+      date: '2026-06-30',
+      startTime: '08:00',
+      endTime: '17:00',
+      recurringPattern: 'none',
+      _sourceType: 'calendar',
+    })
+  );
+
+  assert.equal(normalized.isRecurring, false);
+  assert.equal(normalized.recurringPattern, 'none');
+  assert.equal(normalized.startDate, '2026-06-30');
+  assert.equal(normalized.endDate, '2026-06-30');
+});
+
+test('select-dates copy with an explicit weekly cadence remains recurring', () => {
+  const normalized = applyRecurrenceNormalizationForRegression(
+    buildEvent({
+      category: 'Cinema',
+      name: 'Thursday Theatre Series — Select Dates',
+      description: 'Performances every Thursday on select dates through September 24.',
+      startDate: '2026-09-03',
+      endDate: '2026-09-03',
+      startTime: '19:30',
+      endTime: '21:10',
+      isRecurring: 'Yes',
+      recurringPattern: 'weekly_thursday',
+      recurrenceUntilDate: '2026-09-24',
+    }),
+    buildOriginalItem({
+      name: 'Thursday Theatre Series — Select Dates',
+      description: 'Performances every Thursday on select dates through September 24.',
+      date: '2026-09-03',
+      startTime: '19:30',
+      endTime: '21:10',
+      recurringPattern: 'weekly_thursday',
+    })
+  );
+
+  assert.equal(normalized.isRecurring, true);
+  assert.equal(normalized.recurringPattern, 'weekly_thursday');
+  assert.equal(normalized.recurrenceUntilDate, '2026-09-24');
+});
+
+test('an exact select-dates list may retain only the recurrence it proves', () => {
+  const normalized = applyRecurrenceNormalizationForRegression(
+    buildEvent({
+      category: 'Cinema',
+      name: 'Thursday Theatre — Select Dates',
+      description: 'Select dates shown: September 3 & 10.',
+      startDate: '2026-09-03',
+      endDate: '2026-09-03',
+      startTime: '19:30',
+      endTime: '21:10',
+      isRecurring: 'Yes',
+      recurringPattern: 'weekly_thursday',
+    }),
+    buildOriginalItem({
+      name: 'Thursday Theatre — Select Dates',
+      description: 'Select dates shown: September 3 & 10.',
+      date: '2026-09-03',
+      startTime: '19:30',
+      endTime: '21:10',
+      recurringPattern: 'weekly_thursday',
+    })
+  );
+
+  assert.equal(normalized.isRecurring, true);
+  assert.equal(normalized.recurringPattern, 'weekly_thursday');
+  assert.equal(normalized.startDate, '2026-09-03');
+  assert.equal(normalized.recurrenceUntilDate, '2026-09-10');
+  assert.equal(normalized.totalOccurrences, 2);
+});
+
+test('an irregular same-weekday select-dates list cannot become daily', () => {
+  const normalized = applyRecurrenceNormalizationForRegression(
+    buildEvent({
+      category: 'Cinema',
+      name: 'Limited Theatre — Select Dates',
+      description: 'Select dates shown: September 3 & 17.',
+      startDate: '2026-09-03',
+      endDate: '2026-09-03',
+      startTime: '19:30',
+      endTime: '21:10',
+      isRecurring: 'Yes',
+      recurringPattern: 'daily',
+      recurrenceUntilDate: '2026-09-17',
+    }),
+    buildOriginalItem({
+      name: 'Limited Theatre — Select Dates',
+      description: 'Select dates shown: September 3 & 17.',
+      date: '2026-09-03',
+      startTime: '19:30',
+      endTime: '21:10',
+      recurringPattern: 'daily',
+    })
+  );
+
+  assert.equal(normalized.isRecurring, false);
+  assert.equal(normalized.recurringPattern, 'none');
+  assert.equal(normalized.startDate, '2026-09-03');
+  assert.equal(normalized.endDate, '2026-09-03');
+  assert.equal(normalized.recurrenceUntilDate, undefined);
+});
+
+test('ordinary continuous multi-day events are not collapsed by the select-dates guard', () => {
+  const normalized = applyRecurrenceNormalizationForRegression(
+    buildEvent({
+      category: 'Gatherings & Parties',
+      name: 'Three-Day Arts Festival',
+      description: 'One continuous festival running September 4 through September 6.',
+      startDate: '2026-09-04',
+      endDate: '2026-09-06',
+      startTime: '10:00',
+      endTime: '17:00',
+      isRecurring: 'No',
+      recurringPattern: 'none',
+    })
+  );
+
+  assert.equal(normalized.isRecurring, false);
+  assert.equal(normalized.startDate, '2026-09-04');
+  assert.equal(normalized.endDate, '2026-09-06');
+});

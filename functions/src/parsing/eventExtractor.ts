@@ -1588,6 +1588,41 @@ function splitFiniteMultiWeekdaySeriesItems(items: ExtractedItem[]): ExtractedIt
       continue;
     }
 
+    const hasSelectDatesCue = /\bselect(?:ed)?\s+dates?\b/i.test(sourceText);
+    const hasDateRangeConnector =
+      /\b(?:from|until|through|thru|till)\b/i.test(sourceText) ||
+      /\b(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\s+\d{1,2}(?:st|nd|rd|th)?\s*[-–—]\s*(?:(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\s+)?\d{1,2}/i.test(
+        sourceText
+      );
+
+    if (hasSelectDatesCue && hasDateRangeConnector) {
+      // Range endpoints define the season boundary, not two guaranteed shows.
+      // Final formatting will require a real cadence before recurrence survives.
+      expanded.push(item);
+      continue;
+    }
+
+    if (hasSelectDatesCue) {
+      // Exact select-date lists are safest as dated one-offs. This supports
+      // irregular gaps that the recurrence model cannot represent without
+      // inventing intervening performances.
+      for (const occurrenceDate of occurrenceDates) {
+        expanded.push({
+          ...(item as any),
+          date: occurrenceDate,
+          recurringPattern: 'none',
+          isRecurring: false,
+          totalOccurrences: undefined,
+          recurrenceUntilDate: undefined,
+          extractionReason: [
+            String((item as any).extractionReason || '').trim(),
+            `explicit_select_date:${occurrenceDate}`,
+          ].filter(Boolean).join(' | '),
+        } as ExtractedItem);
+      }
+      continue;
+    }
+
     const groups = new Map<RecurringPattern, string[]>();
     for (const occurrenceDate of occurrenceDates) {
       const pattern = splitRecurringPatternForDate(occurrenceDate);
@@ -1614,6 +1649,12 @@ function splitFiniteMultiWeekdaySeriesItems(items: ExtractedItem[]): ExtractedIt
   }
 
   return expanded;
+}
+
+export function splitFiniteDateSeriesItemsForRegression(
+  items: ExtractedItem[]
+): ExtractedItem[] {
+  return splitFiniteMultiWeekdaySeriesItems(items.map((item) => ({ ...(item as any) })));
 }
 
 function extractUmbrellaThemeCandidateLines(combinedText: string): string[] {

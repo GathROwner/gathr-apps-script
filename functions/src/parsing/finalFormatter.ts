@@ -409,7 +409,8 @@ Never return arrays of values for an item; each must be a JSON object.`;
       combinedText
     );
     const discreteEvents = filterOperationalHoursOnlyEvents(sourceGroundedEvents);
-    const retailFilteredEvents = filterRetailMerchandisePromotions(discreteEvents);
+    const occurrenceGroundedEvents = filterUnsupportedProductionSeasonPromotions(discreteEvents);
+    const retailFilteredEvents = filterRetailMerchandisePromotions(occurrenceGroundedEvents);
     const advisoryFilteredEvents = filterTrafficAdvisoryLogisticsEvents(retailFilteredEvents, combinedText);
     const cruiseFilteredEvents = filterCruiseShipLogisticsEvents(advisoryFilteredEvents, combinedText);
     const promotedFiniteWeeklyEvents = promoteFiniteWeeklyOneOffSequences(cruiseFilteredEvents);
@@ -2272,6 +2273,74 @@ export function filterOperationalHoursOnlyEvents(
   });
 }
 
+function hasSpecificPerformanceOccurrenceCue(value: unknown): boolean {
+  const text = normalizeCruiseLogisticsText(value);
+  if (!text) return false;
+
+  return (
+    /\b(?:final|closing|last)\s+(?:show|performance)\b/.test(text) ||
+    /\b(?:show|performance)\s+(?:is\s+)?(?:today|tonight)\b/.test(text) ||
+    /\b(?:today|tonight)\s+(?:at\s+)?\d{1,2}(?::\d{2})?\s*(?:am|pm)\b/.test(text) ||
+    /\b(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b.{0,32}\b(?:at\s+)?\d{1,2}(?::\d{2})?\s*(?:am|pm)\b/.test(text) ||
+    /\b(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\s+\d{1,2}(?:st|nd|rd|th)?\b.{0,32}\b(?:at\s+)?\d{1,2}(?::\d{2})?\s*(?:am|pm)\b/.test(text)
+  );
+}
+
+function isUnsupportedProductionSeasonPromotion(event: FormattedEvent): boolean {
+  if (!isRecurringFlagEnabled(event.isEvent)) return false;
+
+  const text = normalizeCruiseLogisticsText([
+    event.name,
+    event.description,
+  ].join(' '));
+  if (!text) return false;
+
+  const hasSelectDateSeasonBoundary =
+    /\bselect(?:ed)?\s+dates?\b/.test(text) &&
+    (
+      /\b(?:from|until|through|thru|till)\b/.test(text) ||
+      /\b(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\s+\d{1,2}(?:st|nd|rd|th)?\s*-\s*(?:(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\s+)?\d{1,2}/.test(text) ||
+      /\b(?:closing\s+date|final\s+day\s+listed)\b/.test(text)
+    );
+
+  if (hasSelectDateSeasonBoundary) {
+    return !hasSpecificPerformanceOccurrenceCue(text);
+  }
+
+  const hasScheduledProductionCue =
+    /\b(musical|theatre|theater|stage|production|show|performance)\b/.test(text);
+  if (!hasScheduledProductionCue) return false;
+
+  const hasRunHorizonOnly =
+    /\b(?:on\s+stage|playing|showing|running|this\s+summer)\b/.test(text) &&
+    /\b(?:until|through|thru|till)\s+(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\s+\d{1,2}/.test(text);
+
+  if (!hasRunHorizonOnly) return false;
+  if (hasSpecificPerformanceOccurrenceCue(text)) return false;
+
+  // A production's season boundary establishes availability, not an actual
+  // performance on every day or on the closing date. Without one supported
+  // occurrence, there is no publishable event card.
+  return true;
+}
+
+export function filterUnsupportedProductionSeasonPromotions(
+  events: FormattedEvent[]
+): FormattedEvent[] {
+  return events.filter((event) => {
+    const shouldDrop = isUnsupportedProductionSeasonPromotion(event);
+    if (shouldDrop) {
+      logger.debug(`Dropped production season promotion without an occurrence "${event.name}"`, {
+        startDate: event.startDate,
+        endDate: event.endDate,
+        startTime: event.startTime,
+        venue: event.venue || event.establishment,
+      });
+    }
+    return !shouldDrop;
+  });
+}
+
 export function filterRetailMerchandisePromotions(
   events: FormattedEvent[]
 ): FormattedEvent[] {
@@ -2798,6 +2867,32 @@ function hasSeriesOrProgramCue(text: string): boolean {
     /\b(?:summer|day|kids?|children|youth|teen|art|dance|theatre|sports?|hockey|soccer|march break|pd day)\s+camp\b/.test(normalized) ||
     /\bcamp\s+(?:for|runs?|weeks?|registration|ages?|campers?|kids?|children|youth|teens?)\b/.test(normalized)
   );
+}
+
+function hasSelectDatesCue(text: string): boolean {
+  return /\bselect(?:ed)?\s+dates?\b/i.test(String(text || ''));
+}
+
+function shouldDemoteAmbiguousSelectDatesSchedule(
+  sourceText: string,
+  hasExactOccurrenceAlignment: boolean,
+  customRecurringConfiguration?:
+    | {
+        recurringDaysOfWeek?: RecurringWeekday[];
+        recurringWeekdaySequence?: RecurringWeekday[];
+        recurringWeekInterval?: number;
+      }
+    | undefined
+): boolean {
+  if (!hasSelectDatesCue(sourceText)) return false;
+  if (hasExactOccurrenceAlignment) return false;
+  if (customRecurringConfiguration) return false;
+
+  // A season boundary says when a production is available, not which days it
+  // performs. Only an explicit cadence can safely materialize occurrences.
+  if (detectRecurringPatternFromText(sourceText) !== 'none') return false;
+
+  return true;
 }
 
 function hasHolidayWeekendOneOffCue(text: string): boolean {
@@ -4177,12 +4272,36 @@ function normalizeRecurringForFormattedEvent(
 
   let forcedFiniteRunOneOff = false;
   let explicitDateAlignmentDemotedToOneOff = false;
-  const explicitOccurrenceAlignment = alignFiniteExplicitOccurrenceDates(
+  let explicitOccurrenceAlignment = alignFiniteExplicitOccurrenceDates(
     event,
     sourceText,
     recurringPattern,
     customRecurringConfiguration
   );
+  if (
+    shouldDemoteAmbiguousSelectDatesSchedule(
+      sourceText,
+      Boolean(explicitOccurrenceAlignment),
+      customRecurringConfiguration
+    )
+  ) {
+    logger.debug(`Demoted select-dates range without occurrence evidence for "${event.name}"`, {
+      recurringPatternFrom: recurringPattern,
+      startDate: event.startDate,
+      endDateFrom: event.endDate,
+      recurrenceUntilDate,
+      sourceText: sourceText.slice(0, 220),
+    });
+    recurringPattern = 'none';
+    customRecurringConfiguration = undefined;
+    totalOccurrences = undefined;
+    recurrenceUntilDate = undefined;
+    event.endDate =
+      resolveOccurrenceLocalEndDate(event.startDate, event.startTime, event.endTime) ||
+      event.startDate;
+    forcedFiniteRunOneOff = true;
+    explicitOccurrenceAlignment = undefined;
+  }
   if (explicitOccurrenceAlignment) {
     event.startDate = explicitOccurrenceAlignment.startDate;
     event.endDate = explicitOccurrenceAlignment.endDate;
