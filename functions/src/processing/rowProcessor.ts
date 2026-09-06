@@ -59,6 +59,7 @@ import {
   SpatialEventClassification,
 } from '../parsing/spatialEventClassifier.js';
 import { isOperatingHoursOnlyItemForRegression } from '../parsing/secondaryValidator.js';
+import { buildEventTimingContract } from '../timing/eventTimingContract.js';
 
 /**
  * Result of processing a single row
@@ -4694,6 +4695,8 @@ async function processFullParserEvent(
     ticketProvider: String(item.ticketProvider || '').trim() || undefined,
   } as EventData & { _sourceType?: string };
 
+  eventData.timing = buildEventTimingContract(eventData);
+
   enforceCategoryTypeConsistency(eventData);
   Object.assign(eventData, scoreFamilyFriendly({
     ...eventData,
@@ -4913,7 +4916,11 @@ async function processExtractedItem(
     ),
     totalOccurrences: recurrenceLifecycle.totalOccurrences,
     recurrenceUntilDate: recurrenceLifecycle.recurrenceUntilDate,
+    timeResolution: legacyItem.timeResolution,
+    timeFlags: legacyItem.timeFlags,
   };
+
+  eventData.timing = buildEventTimingContract(eventData);
 
   enforceCategoryTypeConsistency(eventData);
   Object.assign(eventData, scoreFamilyFriendly({
@@ -5699,6 +5706,21 @@ function buildDuplicateEventUpdates(
     timeImproved = true;
   }
 
+  const endProvenanceImproved =
+    getEndTimeInferenceRank(incoming) > getEndTimeInferenceRank(existing) &&
+    Boolean(asTrimmedString(incoming.endTime)) &&
+    toComparableTime(asTrimmedString(existing.endTime)) ===
+      toComparableTime(asTrimmedString(incoming.endTime));
+  const startProvenanceImproved =
+    getTimeFlagSource(incoming.timeFlags, 'start') === 'explicit' &&
+    getTimeFlagSource(existing.timeFlags, 'start') !== 'explicit' &&
+    Boolean(asTrimmedString(incoming.startTime)) &&
+    toComparableTime(asTrimmedString(existing.startTime)) ===
+      toComparableTime(asTrimmedString(incoming.startTime));
+  if (endProvenanceImproved || startProvenanceImproved) {
+    timeImproved = true;
+  }
+
   if (timeImproved) {
     if (incoming.timeResolution != null) {
       setField('timeResolution', incoming.timeResolution);
@@ -5871,6 +5893,10 @@ function buildDuplicateEventUpdates(
   setField('familyFriendlyLevel', familyFriendlyScore.familyFriendlyLevel);
   setField('familyFriendlyReasons', familyFriendlyScore.familyFriendlyReasons);
   setField('familyFriendlyScoringVersion', familyFriendlyScore.familyFriendlyScoringVersion);
+
+  if (timeImproved || !existing.timing) {
+    setField('timing', buildEventTimingContract({ ...existing, ...updates }));
+  }
 
   return {
     updates,
@@ -7625,13 +7651,18 @@ function isExplicitIncomingTime(event: EventData, side: 'start' | 'end'): boolea
 
 function getEndTimeInferenceRank(event: EventData): number {
   const source = getTimeFlagSource(event.timeFlags, 'end');
-  if (source === 'explicit') return 4;
+  if (source === 'explicit' || event.timing?.schedule.end.status === 'observed') return 5;
 
   const resolution = asRecord(event.timeResolution);
   const endFromHours = String(resolution?.endFromHours || '').trim().toLowerCase();
-  if (endFromHours === 'duration_default') return 3;
-  if (endFromHours === 'category_default') return 2;
-  if (endFromHours === 'to_close') return 1;
+  if (endFromHours === 'to_close' || event.timing?.schedule.end.status === 'until_close') return 4;
+  if (event.timing?.estimate?.confidence === 'high') return 3;
+  if (event.timing?.estimate?.confidence === 'medium') return 2;
+  if (
+    event.timing?.estimate?.confidence === 'low' ||
+    endFromHours === 'duration_default' ||
+    endFromHours === 'category_default'
+  ) return 1;
   return 0;
 }
 
@@ -8023,6 +8054,7 @@ export function summarizeFullParserEvents(
     imageProvenance: event.imageProvenance || null,
     timeResolution: event.timeResolution || null,
     timeFlags: event.timeFlags || null,
+    timing: (event as unknown as EventData).timing || null,
     _sourceType: (event as unknown as Record<string, unknown>)._sourceType || null,
     description: String(event.description || '').slice(0, 240),
   }));

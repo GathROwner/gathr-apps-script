@@ -161,6 +161,64 @@ export interface EventActionLink {
   evidence?: string;
 }
 
+export interface EventTimingContract {
+  version: 2;
+  timeZone: string;
+  scheduleKind:
+    | 'timed_session'
+    | 'availability_window'
+    | 'all_day'
+    | 'multi_day'
+    | 'until_close'
+    | 'unknown';
+  schedule: {
+    start: {
+      at?: string | null;
+      localDate?: string | null;
+      localTime?: string | null;
+      timeZone?: string | null;
+      status: 'observed' | 'semantic' | 'until_close' | 'all_day' | 'unknown';
+      sourceType?: string | null;
+      evidence?: string | null;
+      sourceUrl?: string | null;
+      observedAt?: string | null;
+      sourceRevision?: string | null;
+    };
+    end: {
+      at?: string | null;
+      localDate?: string | null;
+      localTime?: string | null;
+      timeZone?: string | null;
+      status: 'observed' | 'semantic' | 'until_close' | 'all_day' | 'unknown';
+      sourceType?: string | null;
+      evidence?: string | null;
+      sourceUrl?: string | null;
+      observedAt?: string | null;
+      sourceRevision?: string | null;
+    };
+  };
+  estimate?: {
+    endAt?: string | null;
+    displayEndAt?: string | null;
+    discoveryCutoffAt?: string | null;
+    displayEndDate?: string | null;
+    displayEndTime?: string | null;
+    discoveryCutoffDate?: string | null;
+    discoveryCutoffTime?: string | null;
+    method?: string | null;
+    confidence: 'high' | 'medium' | 'low' | 'unknown';
+    sampleSize?: number | null;
+    medianDurationMinutes?: number | null;
+    upperDurationMinutes?: number | null;
+    estimateVersion?: string | null;
+    evidenceRefs?: string[];
+    computedAt?: string | null;
+    invalidatedAt?: string | null;
+    invalidationReason?: string | null;
+  } | null;
+  policyVersion?: string | null;
+}
+
 export interface EventData {
   id?: string;
   uniqueId: string;
@@ -231,6 +289,7 @@ export interface EventData {
   externalLinks?: string[];
   timeResolution?: unknown;
   timeFlags?: unknown;
+  timing?: EventTimingContract | null;
   sourceTimestamp?: Date;
   sourceContentSignature?: string;
   lastSeenAt?: Date;
