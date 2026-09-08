@@ -4116,9 +4116,64 @@ export async function resolveVenueForFullParserEventWithMatcherForRegression(par
     }
   }
 
+  // Explicit item-level venue evidence belongs to the individual event. Try
+  // it before inherited row/page addresses so a schedule item is not pulled
+  // back to the source Page venue by otherwise-valid address metadata.
+  // Route and multi-site classifications keep their existing review path.
+  const itemHasDifferentVenue = itemSpecificVenueCandidates.length > 0;
+  let itemSpecificVenueUnmatched = false;
+  if (!postDerivedCityLevelLocation && itemHasDifferentVenue) {
+    const itemVenueMatch = await findFirstFullParserVenueMatch({
+      candidates: itemSpecificVenueCandidates,
+      matcher,
+      rowIndex,
+      reason: 'event_has_different_venue',
+      context: venueMatchContext,
+    });
+    if (itemVenueMatch) {
+      logger.debug('Resolved event to different venue than row', {
+        rowIndex,
+        rowEstablishment: establishment,
+        eventEstablishment: itemEstablishment || itemVenue,
+        resolvedVenueId: itemVenueMatch.id,
+        resolvedVenueName: itemVenueMatch.name,
+      });
+      return itemVenueMatch;
+    }
+
+    itemSpecificVenueUnmatched = true;
+    logger.debug('No venue match for event with different establishment', {
+      rowIndex,
+      rowEstablishment: establishment,
+      eventEstablishment: itemEstablishment,
+      eventVenue: itemVenue,
+    });
+  }
+
+  if (!postDerivedCityLevelLocation && additionalLocationVenueCandidates.length > 0) {
+    const additionalLocationMatch = await findFirstFullParserVenueMatch({
+      candidates: additionalLocationVenueCandidates,
+      matcher,
+      rowIndex,
+      reason: 'event_has_different_additional_location',
+      context: venueMatchContext,
+    });
+    if (additionalLocationMatch) {
+      logger.debug('Resolved event to additionalLocation venue different than row', {
+        rowIndex,
+        rowEstablishment: establishment,
+        additionalLocation: itemAdditionalLocation,
+        resolvedVenueId: additionalLocationMatch.id,
+        resolvedVenueName: additionalLocationMatch.name,
+      });
+      return additionalLocationMatch;
+    }
+  }
+
   // A structured address is stronger location evidence than an organizer or
-  // city label. Use it only to resolve an already-known venue, and never let it
-  // bypass a real route or multi-site classification.
+  // city label, but weaker than a confidently matched venue named on the
+  // individual item. Use it only to resolve an already-known venue, and never
+  // let it bypass a real route or multi-site classification.
   if (!postDerivedCityLevelLocation?.spatialEvidence && addressMatcher) {
     for (const address of fullParserAddressCandidates(item, row)) {
       const addressMatch = await addressMatcher(address);
@@ -4180,57 +4235,11 @@ export async function resolveVenueForFullParserEventWithMatcherForRegression(par
     return null;
   }
 
-  // Check if the event specifies a different venue than the row-level establishment
-  const itemHasDifferentVenue = itemSpecificVenueCandidates.length > 0;
-
-  // If event has a different venue, try to match it first before falling back to rowVenue
-  if (itemHasDifferentVenue) {
-    const itemVenueMatch = await findFirstFullParserVenueMatch({
-      candidates: itemSpecificVenueCandidates,
-      matcher,
-      rowIndex,
-      reason: 'event_has_different_venue',
-      context: venueMatchContext,
-    });
-    if (itemVenueMatch) {
-      logger.debug('Resolved event to different venue than row', {
-        rowIndex,
-        rowEstablishment: establishment,
-        eventEstablishment: itemEstablishment || itemVenue,
-        resolvedVenueId: itemVenueMatch.id,
-        resolvedVenueName: itemVenueMatch.name,
-      });
-      return itemVenueMatch;
-    }
-
-    // If no match found for the event's specific venue, log and skip (don't fall back to rowVenue)
-    logger.debug('No venue match for event with different establishment', {
-      rowIndex,
-      rowEstablishment: establishment,
-      eventEstablishment: itemEstablishment,
-      eventVenue: itemVenue,
-    });
+  // Preserve the existing safety rule: an unresolved explicit alternate venue
+  // must not silently fall back to the row venue. Exact-address resolution has
+  // already had its chance above.
+  if (itemSpecificVenueUnmatched) {
     return null;
-  }
-
-  if (additionalLocationVenueCandidates.length > 0) {
-    const additionalLocationMatch = await findFirstFullParserVenueMatch({
-      candidates: additionalLocationVenueCandidates,
-      matcher,
-      rowIndex,
-      reason: 'event_has_different_additional_location',
-      context: venueMatchContext,
-    });
-    if (additionalLocationMatch) {
-      logger.debug('Resolved event to additionalLocation venue different than row', {
-        rowIndex,
-        rowEstablishment: establishment,
-        additionalLocation: itemAdditionalLocation,
-        resolvedVenueId: additionalLocationMatch.id,
-        resolvedVenueName: additionalLocationMatch.name,
-      });
-      return additionalLocationMatch;
-    }
   }
 
   if (cityLevelFacebookEventLocation) {

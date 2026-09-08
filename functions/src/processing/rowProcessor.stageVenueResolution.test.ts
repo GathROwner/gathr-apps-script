@@ -79,6 +79,96 @@ const cornwallOntarioLibraryVenue: VenueData = {
   province: 'ON',
 };
 
+const portCharlottetownVenue: VenueData = {
+  id: 'slug_downtowncharlottetowninc',
+  name: 'Port Charlottetown',
+  normalizedName: 'port charlottetown',
+  address: '1 Weymouth St, Charlottetown, PE C1A 8W1',
+};
+
+const buenosIslandStudioVenue: VenueData = {
+  id: '0F6W6IBgJqlKQ8AmaTGC',
+  name: 'Buenos Island Studio',
+  normalizedName: 'buenos island studio',
+  address: 'Charlottetown, PE',
+};
+
+// These are the venue-resolution fields from parse snapshot
+// 1-a9VEyfhjX1K4PlLQ9VheZtpDHy1I0Px_263_1788874739941. Required RawRowData
+// fields that the resolver does not read are deliberately neutral test values.
+const downtownScheduleSnapshotRow = {
+  uniqueId: 'venue-resolution-regression-only',
+  text: '',
+  mediaUrls: [],
+  address: '1 Weymouth St, Charlottetown, PE C1A 8W1',
+  pageName: 'Downtown Charlottetown Inc.',
+  userName: 'Downtown Charlottetown Inc.',
+  timestamp: '1970-01-01T00:00:00.000Z',
+  sourceScraperType: 'posts',
+} as RawRowData;
+
+test('Beginner Lindy Hop snapshot item venue outranks inherited Port address', async () => {
+  let addressMatchCalls = 0;
+  const resolved = await resolveVenueForFullParserEventWithMatcherForRegression({
+    item: {
+      name: 'Beginner Lindy Hop 1',
+      establishment: 'Side Door Studio',
+      additionalLocation: 'Side Door Studio',
+    } as ParserProcessedEvent,
+    row: downtownScheduleSnapshotRow,
+    rowVenue: portCharlottetownVenue,
+    establishment: 'Downtown Charlottetown Inc.',
+    rowIndex: 263,
+    matcher: async (candidate) =>
+      normalizeVenueName(candidate) === 'side door studio'
+        ? {
+            isMatch: true,
+            matchType: 'exact',
+            similarity: 1,
+            matchedVenue: buenosIslandStudioVenue,
+          }
+        : { isMatch: false, matchType: 'none', similarity: 0 },
+    addressMatcher: async () => {
+      addressMatchCalls += 1;
+      return {
+        isMatch: true,
+        matchType: 'exact',
+        similarity: 1,
+        matchedVenue: portCharlottetownVenue,
+      };
+    },
+  });
+
+  assert.equal(resolved?.id, buenosIslandStudioVenue.id);
+  assert.equal(addressMatchCalls, 0);
+});
+
+test('inherited exact address remains a fallback when a schedule item has no explicit venue', async () => {
+  const observedAddresses: string[] = [];
+  const resolved = await resolveVenueForFullParserEventWithMatcherForRegression({
+    item: { name: 'Schedule item without a venue' } as ParserProcessedEvent,
+    row: downtownScheduleSnapshotRow,
+    rowVenue: portCharlottetownVenue,
+    establishment: 'Downtown Charlottetown Inc.',
+    rowIndex: 263,
+    matcher: async () => ({ isMatch: false, matchType: 'none', similarity: 0 }),
+    addressMatcher: async (address) => {
+      observedAddresses.push(address);
+      return address === downtownScheduleSnapshotRow.address
+        ? {
+            isMatch: true,
+            matchType: 'exact',
+            similarity: 1,
+            matchedVenue: portCharlottetownVenue,
+          }
+        : { isMatch: false, matchType: 'none', similarity: 0 };
+    },
+  });
+
+  assert.equal(resolved?.id, portCharlottetownVenue.id);
+  assert.deepEqual(observedAddresses, [downtownScheduleSnapshotRow.address]);
+});
+
 test('an exact parsed street address resolves a known venue before a broad city label', async () => {
   const resolved = await resolveVenueForFullParserEventWithMatcherForRegression({
     item: {
