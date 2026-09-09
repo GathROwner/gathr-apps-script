@@ -78,6 +78,12 @@ async function main() {
     fetchPublicEvents(),
   ]);
   const venues = new Map(venueSnapshot.docs.map((doc) => [doc.id, { id: doc.id, ...doc.data() }]));
+  const publicEventCountsByVenueId = new Map();
+  for (const event of publicFeed.events) {
+    const venueId = String(event.venueId || '').trim();
+    if (!venueId) continue;
+    publicEventCountsByVenueId.set(venueId, (publicEventCountsByVenueId.get(venueId) || 0) + 1);
+  }
 
   const topNestedMismatches = [];
   const outsideAllowedRegion = [];
@@ -106,6 +112,7 @@ async function main() {
         name: venue.name || '',
         address: venue.address || '',
         coordinates,
+        publicEventCount: publicEventCountsByVenueId.get(venue.id) || 0,
       });
     }
 
@@ -128,6 +135,7 @@ async function main() {
           name: venue.name || '',
           address: venue.address || '',
           coordinates: coordinatesFromLocationRecord(venue),
+          publicEventCount: publicEventCountsByVenueId.get(venue.id) || 0,
         })),
       });
     }
@@ -156,10 +164,17 @@ async function main() {
   }
 
   const publicEventParentMismatches = [];
+  const publicEventsOutsideAllowedRegion = [];
   for (const event of publicFeed.events) {
     const venue = venues.get(String(event.venueId || ''));
-    if (!venue) continue;
     const eventCoordinates = coordinatesFromLocationRecord(event);
+    if (eventCoordinates && checkEventCoordinatesAgainstAllowedRegions(eventCoordinates).decision === 'reject') {
+      publicEventsOutsideAllowedRegion.push({
+        ...publicEventSummary(event),
+        eventCoordinates,
+      });
+    }
+    if (!venue) continue;
     const venueCoordinates = coordinatesFromLocationRecord(venue);
     if (!eventCoordinates || !venueCoordinates) continue;
     if (!addressesLikelyEquivalent(event.address, venue.address)) continue;
@@ -185,12 +200,18 @@ async function main() {
       topNestedMismatches: topNestedMismatches.length,
       outsideAllowedRegion: outsideAllowedRegion.length,
       duplicatePlaceIdsAcrossAddresses: duplicatePlaceIdsAcrossAddresses.length,
+      publicVenuesOutsideAllowedRegion: outsideAllowedRegion.filter((venue) => venue.publicEventCount > 0).length,
+      publicEventsOutsideAllowedRegion: publicEventsOutsideAllowedRegion.length,
+      duplicatePlaceIdGroupsWithPublicEvents: duplicatePlaceIdsAcrossAddresses.filter((group) =>
+        group.venues.some((venue) => venue.publicEventCount > 0)
+      ).length,
       storedEventParentMismatches: storedEventParentMismatches.length,
       publicEventParentMismatches: publicEventParentMismatches.length,
     },
     findings: {
       topNestedMismatches,
       outsideAllowedRegion,
+      publicEventsOutsideAllowedRegion,
       duplicatePlaceIdsAcrossAddresses,
       storedEventParentMismatches,
       publicEventParentMismatches,

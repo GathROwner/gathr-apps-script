@@ -4177,6 +4177,7 @@ async function finalizeCreateNew(
   let googleBusinessStatus = String(suggestionNoteMeta.businessStatus || relatedSuggestionMeta.businessStatus || '').trim() || undefined;
   let googleRating = suggestionNoteMeta.rating ?? relatedSuggestionMeta.rating;
   let googleUserRatingsTotal = suggestionNoteMeta.userRatingsTotal ?? relatedSuggestionMeta.userRatingsTotal;
+  let googleLocationCandidateAddress: string | undefined;
   let operatingHours: ReturnType<typeof placesService.convertToOperatingHours> = null;
 
   if (googlePlaceId) {
@@ -4184,6 +4185,7 @@ async function finalizeCreateNew(
       const livePlaceDetails = await placesService.getPlaceDetails(googlePlaceId);
       if (livePlaceDetails) {
         const liveFormattedAddress = String(livePlaceDetails.formattedAddress || '').trim();
+        googleLocationCandidateAddress = liveFormattedAddress || undefined;
         if (!manualAddress && liveFormattedAddress) {
           address = liveFormattedAddress;
           addressSource = 'google_places';
@@ -4282,32 +4284,35 @@ async function finalizeCreateNew(
     ...getVenueAliasCandidates(String(record.establishment || '')),
   ].filter(Boolean);
 
-  const venueId = await firestoreService.upsertVenue({
-    name: venueName,
-    pagename: venueName,
-    facebookUrl,
-    pageurl: facebookUrl,
-    address,
-    rawAddress: address,
-    addressSource,
-    city,
-    province,
-    postalCode,
-    website,
-    phone,
-    email,
-    category,
-    latitude,
-    longitude,
-    googlePlaceId,
-    googlePlaceTypes: googlePlaceTypes.length ? googlePlaceTypes : undefined,
-    googleBusinessStatus,
-    googleRating,
-    googleUserRatingsTotal,
-    operatingHours: operatingHours || undefined,
-    aliases: Array.from(new Set(aliasNames)),
-    aliasesNormalized: Array.from(new Set(aliasNames.map((v) => normalizeVenueName(v)).filter(Boolean))),
-  } as any);
+  const venueId = await firestoreService.upsertVenue(
+    {
+      name: venueName,
+      pagename: venueName,
+      facebookUrl,
+      pageurl: facebookUrl,
+      address,
+      rawAddress: address,
+      addressSource,
+      city,
+      province,
+      postalCode,
+      website,
+      phone,
+      email,
+      category,
+      latitude,
+      longitude,
+      googlePlaceId,
+      googlePlaceTypes: googlePlaceTypes.length ? googlePlaceTypes : undefined,
+      googleBusinessStatus,
+      googleRating,
+      googleUserRatingsTotal,
+      operatingHours: operatingHours || undefined,
+      aliases: Array.from(new Set(aliasNames)),
+      aliasesNormalized: Array.from(new Set(aliasNames.map((v) => normalizeVenueName(v)).filter(Boolean))),
+    } as any,
+    { locationCandidateAddress: googleLocationCandidateAddress }
+  );
 
   // Ensure aliases are merged even if the upsert updated an existing doc by id in the future.
   await firestoreService.addVenueAliases(venueId, aliasNames);
@@ -4318,7 +4323,7 @@ async function finalizeCreateNew(
       operatingHours,
       googlePlaceId,
       latitude !== undefined && longitude !== undefined ? { latitude, longitude } : undefined,
-      address
+      googleLocationCandidateAddress || address
     );
   }
 

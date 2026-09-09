@@ -61,6 +61,21 @@ test('rejects a Places result whose address conflicts with the canonical venue',
   assert.ok(result.reasons.includes('coordinate_move_requires_manual_review'));
 });
 
+test('rejects a new Library venue when its Google identity resolves to PEI Preserve Company', () => {
+  const result = assessVenueLocationCandidate({
+    expectedAddress: 'Dominion Building, 97 Queen St, Charlottetown, PE C1A 4A9',
+    candidateAddress: '2841 New Glasgow Rd, New Glasgow, PE C0A 1N0, Canada',
+    candidate: {
+      latitude: 46.4091112,
+      longitude: -63.3481532,
+      googlePlaceId: 'ChIJVWSVqHK6X0sR1lrS8Xbhp4c',
+    },
+  });
+
+  assert.equal(result.decision, 'reject');
+  assert.deepEqual(result.reasons, ['candidate_address_conflicts_with_canonical_address']);
+});
+
 test('accepts a small same-address coordinate refinement', () => {
   const result = assessVenueLocationCandidate({
     existing: { address: '46 Kensington Road, Charlottetown, PE C1A 5H7, Canada', latitude: 46.2458204, longitude: -63.1171685, googlePlaceId: 'eastlink' },

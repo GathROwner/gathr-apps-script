@@ -3537,7 +3537,10 @@ export async function findMatchingVenue(
 /**
  * Create or update a venue
  */
-export async function upsertVenue(venue: Partial<VenueData>): Promise<string> {
+export async function upsertVenue(
+  venue: Partial<VenueData>,
+  options?: { locationCandidateAddress?: string }
+): Promise<string> {
   let venueForWrite: Partial<VenueData> = { ...venue };
   let existingVenue: Record<string, unknown> | undefined;
   if (venue.id) {
@@ -3602,7 +3605,7 @@ export async function upsertVenue(venue: Partial<VenueData>): Promise<string> {
     existing: existingVenue,
     expectedAddress: String(venueForWrite.address || existingVenue?.address || '').trim(),
     candidate: venue as unknown as Record<string, unknown>,
-    candidateAddress: incomingRawAddress,
+    candidateAddress: String(options?.locationCandidateAddress || incomingRawAddress).trim(),
   });
   if (locationAssessment.decision === 'reject') {
     logger.warn('Rejected incoherent venue location update', {
@@ -3611,7 +3614,7 @@ export async function upsertVenue(venue: Partial<VenueData>): Promise<string> {
       reasons: locationAssessment.reasons,
       moveDistanceMeters: locationAssessment.moveDistanceMeters,
       existingAddress: existingVenue?.address,
-      candidateAddress: incomingRawAddress,
+      candidateAddress: String(options?.locationCandidateAddress || incomingRawAddress).trim(),
       existingCoordinates: locationAssessment.existingCoordinates,
       candidateCoordinates: locationAssessment.candidateCoordinates,
       existingGooglePlaceId: existingVenue?.googlePlaceId || existingVenue?.placeId,
