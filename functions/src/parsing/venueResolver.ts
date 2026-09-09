@@ -285,7 +285,13 @@ async function getVenueOperatingHours(
         const detailsCoords = details?.location
           ? { latitude: details.location.lat, longitude: details.location.lng }
           : undefined;
-        await updateVenueOperatingHours(firestoreVenue.id, refreshed, existingPlaceId, detailsCoords);
+        await updateVenueOperatingHours(
+          firestoreVenue.id,
+          refreshed,
+          existingPlaceId,
+          detailsCoords,
+          details?.formattedAddress
+        );
         logger.debug(`Refreshed operating hours via Google Places details for "${venueName}"`);
         return refreshed;
       }
@@ -302,7 +308,8 @@ async function getVenueOperatingHours(
           firestoreVenue.id,
           operatingHours,
           placeResult?.placeId || undefined,
-          placeCoords
+          placeCoords,
+          placeResult?.formattedAddress
         );
       }
       logger.debug(`Found operating hours via Google Places for "${venueName}"`);

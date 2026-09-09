@@ -4313,7 +4313,13 @@ async function finalizeCreateNew(
   await firestoreService.addVenueAliases(venueId, aliasNames);
 
   if (operatingHours) {
-    await firestoreService.updateVenueOperatingHours(venueId, operatingHours, googlePlaceId);
+    await firestoreService.updateVenueOperatingHours(
+      venueId,
+      operatingHours,
+      googlePlaceId,
+      latitude !== undefined && longitude !== undefined ? { latitude, longitude } : undefined,
+      address
+    );
   }
 
   const cfg = getResolverConfig();

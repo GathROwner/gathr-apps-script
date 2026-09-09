@@ -77,6 +77,13 @@ import {
   normalizeCanadianAddress,
 } from '../utils/addressNormalization.js';
 import { withFamilyFriendlyScore } from '../utils/familyFriendlyScoring.js';
+import {
+  assessVenueLocationCandidate,
+  coordinatesFromLocationRecord,
+  locationAddress,
+  resolveVenueScopedEventLocation,
+  synchronizedCoordinateFields,
+} from './locationCoherence.js';
 
 // Initialize Firebase Admin if not already initialized
 if (!admin.apps.length) {
@@ -3532,6 +3539,13 @@ export async function findMatchingVenue(
  */
 export async function upsertVenue(venue: Partial<VenueData>): Promise<string> {
   let venueForWrite: Partial<VenueData> = { ...venue };
+  let existingVenue: Record<string, unknown> | undefined;
+  if (venue.id) {
+    const existingSnapshot = await db.collection(COLLECTIONS.VENUES).doc(venue.id).get();
+    if (existingSnapshot.exists) {
+      existingVenue = existingSnapshot.data() || {};
+    }
+  }
   const incomingRawAddress = String(venue.rawAddress || venue.address || '').trim();
   if (incomingRawAddress) {
     const incomingSource = inferAddressSource(venue as Record<string, unknown>);
@@ -3546,45 +3560,70 @@ export async function upsertVenue(venue: Partial<VenueData>): Promise<string> {
       addressUpdatedAt: admin.firestore.FieldValue.serverTimestamp(),
     };
 
-    if (venue.id) {
-      const existingSnapshot = await db.collection(COLLECTIONS.VENUES).doc(venue.id).get();
-      if (existingSnapshot.exists) {
-        const existing = existingSnapshot.data() || {};
-        const preferred = choosePreferredAddress(
-          {
-            address: existing.address,
-            source: inferAddressSource(existing),
-            googlePlaceId: existing.googlePlaceId || existing.placeId,
-          },
-          {
-            address: incomingRawAddress,
-            source: incomingSource,
-            googlePlaceId: venue.googlePlaceId,
-          }
-        );
-
-        if (preferred.selected === 'existing') {
-          venueForWrite = {
-            ...venueForWrite,
-            address: preferred.address,
-            rawAddress: String(existing.rawAddress || existing.address || preferred.address).trim(),
-            normalizedAddress: preferred.address,
-            addressSource: preferred.source,
-            addressNormalizationIssues: Array.isArray(existing.addressNormalizationIssues)
-              ? existing.addressNormalizationIssues
-              : preferred.normalization.issues,
-            addressUpdatedAt: existing.addressUpdatedAt,
-          };
-          logger.info('Preserved higher-confidence canonical venue address', {
-            venueId: venue.id,
-            existingAddress: existing.address,
-            existingAddressSource: preferred.source,
-            rejectedIncomingAddress: incomingRawAddress,
-            rejectedIncomingAddressSource: incomingSource,
-          });
+    if (existingVenue) {
+      const existing = existingVenue;
+      const preferred = choosePreferredAddress(
+        {
+          address: existing.address,
+          source: inferAddressSource(existing),
+          googlePlaceId: existing.googlePlaceId || existing.placeId,
+        },
+        {
+          address: incomingRawAddress,
+          source: incomingSource,
+          googlePlaceId: venue.googlePlaceId,
         }
+      );
+
+      if (preferred.selected === 'existing') {
+        venueForWrite = {
+          ...venueForWrite,
+          address: preferred.address,
+          rawAddress: String(existing.rawAddress || existing.address || preferred.address).trim(),
+          normalizedAddress: preferred.address,
+          addressSource: preferred.source,
+          addressNormalizationIssues: Array.isArray(existing.addressNormalizationIssues)
+            ? existing.addressNormalizationIssues
+            : preferred.normalization.issues,
+          addressUpdatedAt: existing.addressUpdatedAt,
+        };
+        logger.info('Preserved higher-confidence canonical venue address', {
+          venueId: venue.id,
+          existingAddress: existing.address,
+          existingAddressSource: preferred.source,
+          rejectedIncomingAddress: incomingRawAddress,
+          rejectedIncomingAddressSource: incomingSource,
+        });
       }
     }
+  }
+
+  const locationAssessment = assessVenueLocationCandidate({
+    existing: existingVenue,
+    expectedAddress: String(venueForWrite.address || existingVenue?.address || '').trim(),
+    candidate: venue as unknown as Record<string, unknown>,
+    candidateAddress: incomingRawAddress,
+  });
+  if (locationAssessment.decision === 'reject') {
+    logger.warn('Rejected incoherent venue location update', {
+      venueId: venue.id,
+      venueName: venue.name,
+      reasons: locationAssessment.reasons,
+      moveDistanceMeters: locationAssessment.moveDistanceMeters,
+      existingAddress: existingVenue?.address,
+      candidateAddress: incomingRawAddress,
+      existingCoordinates: locationAssessment.existingCoordinates,
+      candidateCoordinates: locationAssessment.candidateCoordinates,
+      existingGooglePlaceId: existingVenue?.googlePlaceId || existingVenue?.placeId,
+      candidateGooglePlaceId: venue.googlePlaceId,
+    });
+    throw new Error(`Venue location update requires manual review: ${locationAssessment.reasons.join(', ')}`);
+  }
+  if (locationAssessment.candidateCoordinates) {
+    venueForWrite = {
+      ...venueForWrite,
+      ...synchronizedCoordinateFields(locationAssessment.candidateCoordinates),
+    } as Partial<VenueData>;
   }
 
   const normalizedName = normalizeVenueName(venueForWrite.name || '');
@@ -3616,9 +3655,43 @@ export async function updateVenueOperatingHours(
   venueId: string,
   operatingHours: OperatingHours,
   googlePlaceId?: string,
-  coordinates?: { latitude: number; longitude: number }
+  coordinates?: { latitude: number; longitude: number },
+  candidateAddress?: string
 ): Promise<void> {
   if (!venueId) return;
+
+  const venueRef = db.collection(COLLECTIONS.VENUES).doc(venueId);
+  const venueSnapshot = await venueRef.get();
+  if (!venueSnapshot.exists) {
+    throw new Error(`Cannot update operating hours for missing venue: ${venueId}`);
+  }
+  const existingVenue = venueSnapshot.data() || {};
+  const locationAssessment = assessVenueLocationCandidate({
+    existing: existingVenue,
+    expectedAddress: existingVenue.address,
+    candidate: {
+      address: candidateAddress,
+      latitude: coordinates?.latitude,
+      longitude: coordinates?.longitude,
+      googlePlaceId,
+    },
+    candidateAddress,
+  });
+  if (locationAssessment.decision === 'reject') {
+    logger.warn('Rejected incoherent Google Places operating-hours update', {
+      venueId,
+      venueName: existingVenue.name,
+      reasons: locationAssessment.reasons,
+      moveDistanceMeters: locationAssessment.moveDistanceMeters,
+      existingAddress: existingVenue.address,
+      candidateAddress,
+      existingCoordinates: locationAssessment.existingCoordinates,
+      candidateCoordinates: locationAssessment.candidateCoordinates,
+      existingGooglePlaceId: existingVenue.googlePlaceId || existingVenue.placeId,
+      candidateGooglePlaceId: googlePlaceId,
+    });
+    throw new Error(`Operating-hours location requires manual review: ${locationAssessment.reasons.join(', ')}`);
+  }
 
   const update: Record<string, unknown> = {
     operatingHours,
@@ -3630,19 +3703,11 @@ export async function updateVenueOperatingHours(
     update.googlePlaceId = googlePlaceId;
   }
 
-  if (
-    coordinates &&
-    Number.isFinite(Number(coordinates.latitude)) &&
-    Number.isFinite(Number(coordinates.longitude))
-  ) {
-    const latitude = Number(coordinates.latitude);
-    const longitude = Number(coordinates.longitude);
-    update.latitude = latitude;
-    update.longitude = longitude;
-    update.coordinates = { latitude, longitude };
+  if (locationAssessment.candidateCoordinates) {
+    Object.assign(update, synchronizedCoordinateFields(locationAssessment.candidateCoordinates));
   }
 
-  await db.collection(COLLECTIONS.VENUES).doc(venueId).set(update, { merge: true });
+  await venueRef.set(update, { merge: true });
 }
 
 /**
@@ -5341,6 +5406,72 @@ function isReusableSharedEventResult(event: PrivateSharedEventRecord): boolean {
   return hasDate || hasPlace || hasMedia || hasDescription;
 }
 
+async function withCanonicalVenueLocationForEventWrite<T extends Partial<EventData>>(
+  venueId: string,
+  event: T,
+  existingEvent?: Partial<EventData>
+): Promise<T> {
+  const venueSnapshot = await db.collection(COLLECTIONS.VENUES).doc(venueId).get();
+  if (!venueSnapshot.exists) {
+    throw new Error(`Cannot write event for missing venue: ${venueId}`);
+  }
+
+  const venue = venueSnapshot.data() || {};
+  const effectiveEvent = {
+    ...(existingEvent || {}),
+    ...event,
+    address: event.address ?? existingEvent?.address,
+    rawAddress: event.rawAddress ?? (event.address !== undefined ? event.address : existingEvent?.rawAddress),
+    normalizedAddress: event.normalizedAddress ?? (
+      event.address !== undefined || event.rawAddress !== undefined
+        ? undefined
+        : existingEvent?.normalizedAddress
+    ),
+    latitude: event.latitude ?? existingEvent?.latitude,
+    longitude: event.longitude ?? existingEvent?.longitude,
+  };
+  const resolution = resolveVenueScopedEventLocation({
+    event: effectiveEvent as unknown as Record<string, unknown>,
+    venue,
+  });
+
+  if (resolution.decision === 'reject') {
+    logger.warn('Rejected incoherent venue-scoped event location', {
+      venueId,
+      eventId: existingEvent?.id,
+      eventName: event.eventName || event.name || existingEvent?.eventName || existingEvent?.name,
+      reasons: resolution.reasons,
+      eventAddress: locationAddress(effectiveEvent as unknown as Record<string, unknown>),
+      eventCoordinates: coordinatesFromLocationRecord(effectiveEvent as unknown as Record<string, unknown>),
+      venueAddress: locationAddress(venue),
+      venueCoordinates: coordinatesFromLocationRecord(venue),
+    });
+    throw new Error(`Event location requires manual review: ${resolution.reasons.join(', ')}`);
+  }
+
+  if (resolution.source !== 'venue' || !resolution.coordinates) {
+    return event;
+  }
+
+  if (resolution.reasons.length > 0) {
+    logger.warn('Replaced event coordinates with canonical venue coordinates', {
+      venueId,
+      eventId: existingEvent?.id,
+      eventName: event.eventName || event.name || existingEvent?.eventName || existingEvent?.name,
+      eventAddress: locationAddress(effectiveEvent as unknown as Record<string, unknown>),
+      venueAddress: locationAddress(venue),
+      previousCoordinates: coordinatesFromLocationRecord(effectiveEvent as unknown as Record<string, unknown>),
+      canonicalCoordinates: resolution.coordinates,
+    });
+  }
+
+  return {
+    ...event,
+    latitude: resolution.coordinates.latitude,
+    longitude: resolution.coordinates.longitude,
+  };
+}
+
 /**
  * Create a new event
  */
@@ -5348,7 +5479,8 @@ export async function createEvent(
   venueId: string,
   event: Omit<EventData, 'id' | 'createdAt' | 'venueId'>
 ): Promise<string> {
-  const normalizedEvent = withNormalizedEventAddressForWrite(withFamilyFriendlyScore({ ...event }));
+  const locationAlignedEvent = await withCanonicalVenueLocationForEventWrite(venueId, { ...event });
+  const normalizedEvent = withNormalizedEventAddressForWrite(withFamilyFriendlyScore(locationAlignedEvent));
   const sanitizedEvent = await sanitizeEventManagedImageReferencesForWrite(normalizedEvent, {
     operation: 'createEvent',
     venueId,
@@ -5405,7 +5537,21 @@ export async function updateEvent(
   eventId: string,
   updates: Partial<EventData>
 ): Promise<void> {
-  const normalizedUpdates = withNormalizedEventAddressForWrite({ ...updates });
+  const eventRef = db
+    .collection(COLLECTIONS.VENUES)
+    .doc(venueId)
+    .collection(COLLECTIONS.EVENTS)
+    .doc(eventId);
+  const existingEventSnapshot = await eventRef.get();
+  const existingEvent = existingEventSnapshot.exists
+    ? ({ id: existingEventSnapshot.id, ...(existingEventSnapshot.data() || {}) } as Partial<EventData>)
+    : undefined;
+  const locationAlignedUpdates = await withCanonicalVenueLocationForEventWrite(
+    venueId,
+    { ...updates },
+    existingEvent
+  );
+  const normalizedUpdates = withNormalizedEventAddressForWrite(locationAlignedUpdates);
   const sanitizedUpdates = await sanitizeEventManagedImageReferencesForWrite(normalizedUpdates, {
     operation: 'updateEvent',
     venueId,
@@ -5425,12 +5571,7 @@ export async function updateEvent(
     updatedBy: 'firestore_update',
   }));
 
-  await db
-    .collection(COLLECTIONS.VENUES)
-    .doc(venueId)
-    .collection(COLLECTIONS.EVENTS)
-    .doc(eventId)
-    .update(data);
+  await eventRef.update(data);
 
   logger.debug('Updated event', { venueId, eventId });
 }
