@@ -30,6 +30,7 @@ import {
   assertCompletedCheckInEligibility,
   checkInEligibilitySessionId,
 } from './checkInEligibility.js';
+import { validateExternalCheckInPlaceCandidate } from './nearbyCheckInPlaces.js';
 import {
   cleanupFriendEventsForAccount,
   revokeFriendEventAccessBetween,
@@ -65,7 +66,8 @@ export interface SafeProfile {
 export interface CheckInInput {
   operationId?: unknown;
   eligibilitySessionId?: unknown;
-  venueId: unknown;
+  venueId?: unknown;
+  placeCandidateId?: unknown;
   durationMinutes: unknown;
   audienceMode: unknown;
   selectedUids?: unknown;
@@ -561,7 +563,17 @@ export async function createCheckIn(
   db = firestore()
 ): Promise<DocumentData> {
   const ownerUid = validateUid(ownerUidValue, 'ownerUid');
-  const venueId = validateVenueId(input.venueId);
+  const hasVenueId = input.venueId !== undefined && input.venueId !== null && input.venueId !== '';
+  const hasPlaceCandidateId = input.placeCandidateId !== undefined
+    && input.placeCandidateId !== null
+    && input.placeCandidateId !== '';
+  if (hasVenueId === hasPlaceCandidateId) {
+    throw new SocialDomainError('invalid-argument', 'Choose one check-in place.');
+  }
+  const venueId = hasVenueId ? validateVenueId(input.venueId) : '';
+  const placeCandidateId = hasPlaceCandidateId
+    ? validateSocialOperationId(input.placeCandidateId)
+    : '';
   const durationMinutes = parseCheckInDuration(input.durationMinutes);
   const audience = parseAudience(input.audienceMode, input.selectedUids);
   const message = normalizeCheckInMessage(input.message);
@@ -572,7 +584,8 @@ export async function createCheckIn(
     ? ''
     : validateSocialOperationId(input.eligibilitySessionId);
   const inputHash = createHash('sha256').update(JSON.stringify({
-    venueId,
+    venueId: venueId || null,
+    placeCandidateId: placeCandidateId || null,
     durationMinutes,
     audience,
     message,
@@ -583,7 +596,9 @@ export async function createCheckIn(
   const ownerBlockRefs = candidates.map((uid) => blockRef(db, ownerUid, uid));
   const viewerBlockRefs = candidates.map((uid) => blockRef(db, uid, ownerUid));
   const ownerProfileRef = userRef(db, ownerUid);
-  const venueRef = db.collection(COLLECTIONS.VENUES).doc(venueId);
+  const locationRef = venueId
+    ? db.collection(COLLECTIONS.VENUES).doc(venueId)
+    : db.collection('checkInPlaceCandidates').doc(placeCandidateId);
   const checkInRef = activeCheckInRef(db, ownerUid);
   const operationRef = socialOperationRef(db, ownerUid, operationId);
   const eligibilityRef = eligibilitySessionId
@@ -600,7 +615,7 @@ export async function createCheckIn(
   return db.runTransaction(async (transaction) => {
     const baseSnapshots = await transaction.getAll(
       ownerProfileRef,
-      venueRef,
+      locationRef,
       checkInRef,
       operationRef,
       ...(eligibilityRef ? [eligibilityRef] : [])
@@ -610,18 +625,38 @@ export async function createCheckIn(
       if (
         previousOperation.action !== 'create_check_in'
         || previousOperation.inputHash !== inputHash
-        || !previousOperation.result
       ) {
         throw new SocialDomainError(
           'failed-precondition',
           'This social operation ID was already used for another request.'
         );
       }
-      return previousOperation.result as DocumentData;
+      if (previousOperation.result) return previousOperation.result as DocumentData;
+      const activeRetry = baseSnapshots[2].data() || {};
+      const activeRetryExpiresAt = activeRetry.expiresAt;
+      if (
+        previousOperation.resultRevision
+        && previousOperation.resultRevision === activeRetry.revision
+        && activeRetryExpiresAt instanceof Timestamp
+        && activeRetryExpiresAt.toMillis() > createdAt.toMillis()
+      ) return activeRetry;
+      throw new SocialDomainError(
+        'failed-precondition',
+        'This check-in request has expired. Refresh nearby places and try again.'
+      );
     }
     const ownerData = assertExisting(baseSnapshots[0], 'Your user profile');
-    const venueData = assertExisting(baseSnapshots[1], 'Venue');
-    if (venueData.socialVenueMirrorSource === 'gathr-event-api') {
+    const venueData = venueId ? assertExisting(baseSnapshots[1], 'Venue') : {};
+    const externalPlace = placeCandidateId
+      ? validateExternalCheckInPlaceCandidate(
+        baseSnapshots[1].data() || {},
+        ownerUid,
+        placeCandidateId,
+        createdAt
+      )
+      : null;
+    const venueLocationKey = externalPlace?.locationKey || `venue:${venueId}`;
+    if (venueId && venueData.socialVenueMirrorSource === 'gathr-event-api') {
       const mirrorExpiresAt = venueData.socialVenueMirrorExpiresAt;
       if (!(mirrorExpiresAt instanceof Timestamp) || mirrorExpiresAt.toMillis() <= createdAt.toMillis()) {
         throw new SocialDomainError(
@@ -631,7 +666,9 @@ export async function createCheckIn(
       }
     }
     const previousCheckIn = baseSnapshots[2].data() || {};
-    const needsEligibility = !baseSnapshots[2].exists || previousCheckIn.venueId !== venueId;
+    const previousLocationKey = text(previousCheckIn.venueLocationKey, 100)
+      || (previousCheckIn.venueId ? `venue:${previousCheckIn.venueId}` : '');
+    const needsEligibility = !baseSnapshots[2].exists || previousLocationKey !== venueLocationKey;
     if (needsEligibility) {
       if (!eligibilityRef || !baseSnapshots[4]?.exists) {
         throw new SocialDomainError(
@@ -639,7 +676,11 @@ export async function createCheckIn(
           'Remain near this venue until check-in becomes available.'
         );
       }
-      assertCompletedCheckInEligibility(baseSnapshots[4].data() || {}, ownerUid, venueId, createdAt);
+      assertCompletedCheckInEligibility(baseSnapshots[4].data() || {}, ownerUid, {
+        ...(venueId ? { venueId } : {}),
+        ...(placeCandidateId ? { placeCandidateId } : {}),
+        locationKey: venueLocationKey,
+      }, createdAt);
     }
     const relationshipSnapshots = relRefs.length
       ? await transaction.getAll(...relRefs)
@@ -669,11 +710,11 @@ export async function createCheckIn(
     }
 
     const ownerProfile = safeProfile(ownerUid, ownerData);
-    const venueName =
-      text(venueData.pagename, 120) ||
-      text(venueData.title, 120) ||
-      text(venueData.name, 120) ||
-      'GathR venue';
+    const venueName = externalPlace?.name
+      || text(venueData.pagename, 120)
+      || text(venueData.title, 120)
+      || text(venueData.name, 120)
+      || 'GathR venue';
     const previousViewerUids = Array.isArray(previousCheckIn.viewerUids)
       ? previousCheckIn.viewerUids.map((uid: unknown) => validateUid(uid, 'viewerUid'))
       : [];
@@ -684,9 +725,16 @@ export async function createCheckIn(
 
     const checkIn = {
       ownerUid,
-      venueId,
-      venueLocationKey: `venue:${venueId}`,
+      ...(venueId ? { venueId } : {}),
+      locationType: externalPlace ? 'external_place' : 'gathr_venue',
+      venueLocationKey,
       venueNameSnapshot: venueName,
+      ...(externalPlace ? {
+        placeAddress: externalPlace.address,
+        placeCategory: externalPlace.category,
+        latitude: externalPlace.latitude,
+        longitude: externalPlace.longitude,
+      } : {}),
       audienceMode: audience.mode,
       selectedUids: audience.mode === 'selected_friends' ? audience.selectedUids : [],
       viewerUids,
@@ -704,15 +752,28 @@ export async function createCheckIn(
         consumedCheckInRevision: revision,
       });
     }
+    if (externalPlace) {
+      transaction.update(locationRef, {
+        consumedAt: createdAt,
+        consumedCheckInRevision: revision,
+      });
+    }
     for (const viewerUid of viewerUids) {
       transaction.set(activityRef(db, viewerUid, ownerUid), {
         ownerUid,
         displayName: ownerProfile.displayName,
         photoURL: ownerProfile.photoURL,
         socialHandle: ownerProfile.socialHandle,
-        venueId,
-        venueLocationKey: `venue:${venueId}`,
+        ...(venueId ? { venueId } : {}),
+        locationType: externalPlace ? 'external_place' : 'gathr_venue',
+        venueLocationKey,
         venueName,
+        ...(externalPlace ? {
+          placeAddress: externalPlace.address,
+          placeCategory: externalPlace.category,
+          latitude: externalPlace.latitude,
+          longitude: externalPlace.longitude,
+        } : {}),
         message,
         createdAt,
         expiresAt,
@@ -723,9 +784,11 @@ export async function createCheckIn(
       uid: ownerUid,
       action: 'create_check_in',
       inputHash,
-      result: checkIn,
+      ...(externalPlace ? { resultRevision: revision } : { result: checkIn }),
       createdAt,
-      expiresAt: Timestamp.fromMillis(createdAt.toMillis() + 24 * 60 * 60_000),
+      expiresAt: externalPlace
+        ? Timestamp.fromMillis(expiresAt.toMillis() + 5 * 60_000)
+        : Timestamp.fromMillis(createdAt.toMillis() + 24 * 60 * 60_000),
     });
     return checkIn;
   });
@@ -858,6 +921,8 @@ export async function deleteSocialAccountData(
     rateLimitsSnapshot,
     ownedHandlesSnapshot,
     operationsSnapshot,
+    eligibilitySessionsSnapshot,
+    placeCandidatesSnapshot,
   ] = await Promise.all([
     db.collection(COLLECTIONS.RELATIONSHIPS).where('members', 'array-contains', uid).get(),
     db.collection(COLLECTIONS.ACTIVE_CHECK_INS).where('viewerUids', 'array-contains', uid).get(),
@@ -865,6 +930,8 @@ export async function deleteSocialAccountData(
     db.collection(COLLECTIONS.RATE_LIMITS).where('uid', '==', uid).get(),
     db.collection(COLLECTIONS.HANDLES).where('uid', '==', uid).get(),
     db.collection(COLLECTIONS.OPERATIONS).where('uid', '==', uid).get(),
+    db.collection('checkInEligibilitySessions').where('uid', '==', uid).get(),
+    db.collection('checkInPlaceCandidates').where('uid', '==', uid).get(),
   ]);
   for (const relationshipSnapshot of relationshipsSnapshot.docs) {
     const data = relationshipSnapshot.data();
@@ -915,6 +982,15 @@ export async function deleteSocialAccountData(
       batch.delete(document.ref);
     }
     await batch.commit();
+  }
+  for (const snapshot of [eligibilitySessionsSnapshot, placeCandidatesSnapshot]) {
+    for (let index = 0; index < snapshot.docs.length; index += 400) {
+      const batch = db.batch();
+      for (const document of snapshot.docs.slice(index, index + 400)) {
+        batch.delete(document.ref);
+      }
+      await batch.commit();
+    }
   }
   let handleReleased = ownedHandlesSnapshot.size > 0;
   for (let index = 0; index < ownedHandlesSnapshot.docs.length; index += 400) {

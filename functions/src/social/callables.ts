@@ -33,6 +33,7 @@ import {
   resolveFriendEventAddress,
   suggestFriendEventLocations,
 } from './friendEventGeocoding.js';
+import { discoverNearbyCheckInPlaces } from './nearbyCheckInPlaces.js';
 import { SOCIAL_REGION, SocialDomainError } from './validation.js';
 
 const options = {
@@ -156,6 +157,7 @@ export const createCheckInCallable = onCall(options, async (request) => {
       operationId: data.operationId,
       eligibilitySessionId: data.eligibilitySessionId,
       venueId: data.venueId,
+      placeCandidateId: data.placeCandidateId,
       durationMinutes: data.durationMinutes,
       audienceMode: data.audienceMode,
       selectedUids: data.selectedUids,
@@ -172,12 +174,27 @@ export const recordCheckInEligibilitySampleCallable = onCall(releaseTwoOptions, 
     return recordCheckInEligibilitySample(uid, {
       sessionId: data.sessionId,
       venueId: data.venueId,
+      placeCandidateId: data.placeCandidateId,
       candidateVenueIds: data.candidateVenueIds,
       latitude: data.latitude,
       longitude: data.longitude,
       accuracyMeters: data.accuracyMeters,
       speedMetersPerSecond: data.speedMetersPerSecond,
     });
+  });
+});
+
+export const discoverNearbyCheckInPlacesCallable = onCall(friendEventOptions, async (request) => {
+  const uid = requireUid(request.auth);
+  const data = asData(request.data);
+  return run(async () => {
+    await enforceSocialRateLimit(uid, 'nearby_check_in_places', 60, 60 * 60_000);
+    return discoverNearbyCheckInPlaces(uid, {
+      latitude: data.latitude,
+      longitude: data.longitude,
+      accuracyMeters: data.accuracyMeters,
+      capturedAtMs: data.capturedAtMs,
+    }, friendEventGeocodingToken.value());
   });
 });
 

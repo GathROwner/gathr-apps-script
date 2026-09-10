@@ -28,6 +28,10 @@ import {
   CHECK_IN_DWELL_TARGET_MS,
   recordCheckInEligibilitySample,
 } from '../lib/social/checkInEligibility.js';
+import {
+  cleanupExpiredCheckInPlaceCandidates,
+  discoverNearbyCheckInPlaces,
+} from '../lib/social/nearbyCheckInPlaces.js';
 
 const projectId = 'demo-gathr-social';
 let app;
@@ -79,6 +83,43 @@ async function makeEligible(uid, venueId) {
 async function createEligibleCheckIn(uid, input) {
   const eligibilitySessionId = await makeEligible(uid, input.venueId);
   return createCheckIn(uid, { ...input, eligibilitySessionId }, db);
+}
+
+async function seedExternalCandidate(uid, candidateId, expiresAt = Date.now() + 15 * 60_000) {
+  const locationKey = 'external:0123456789abcdef0123456789abcdef';
+  await db.doc(`checkInPlaceCandidates/${candidateId}`).set({
+    uid,
+    candidateId,
+    source: 'mapbox_search_box',
+    place: {
+      type: 'external_place',
+      locationKey,
+      name: 'The Oak Downtown',
+      address: '172 Great George St, Charlottetown, PE, Canada',
+      category: 'Pub',
+      latitude: 46.2382,
+      longitude: -63.1311,
+    },
+    createdAt: Timestamp.now(),
+    expiresAt: Timestamp.fromMillis(expiresAt),
+  });
+  return locationKey;
+}
+
+async function makeExternalEligible(uid, candidateId) {
+  const sessionId = `external-${++eligibilitySequence}`;
+  const locationKey = await seedExternalCandidate(uid, candidateId);
+  await db.doc(`checkInEligibilitySessions/${uid}_${sessionId}`).set({
+    uid,
+    sessionId,
+    placeCandidateId: candidateId,
+    locationKey,
+    eligible: true,
+    qualifyingMs: CHECK_IN_DWELL_TARGET_MS,
+    completedExpiresAt: Timestamp.fromMillis(Date.now() + 5 * 60_000),
+    expiresAt: Timestamp.fromMillis(Date.now() + 5 * 60_000),
+  });
+  return sessionId;
 }
 
 before(async () => {
@@ -263,6 +304,129 @@ test('one dwell session exposes only server-validated overlapping venue choices'
     audienceMode: 'all_friends',
   }, db);
   assert.equal(checkIn.venueId, 'venue-neighbor');
+});
+
+test('nearby discovery prioritizes canonical venues and issues opaque external candidates', async () => {
+  const result = await discoverNearbyCheckInPlaces('alice', {
+    latitude: 46.2382,
+    longitude: -63.1311,
+    accuracyMeters: 8,
+    capturedAtMs: Date.now(),
+  }, 'test-token', {
+    db,
+    fetchImpl: async () => new Response(JSON.stringify({
+      features: [
+        {
+          geometry: { coordinates: [-63.13108, 46.23818] },
+          properties: {
+            mapbox_id: 'poi.the-oak',
+            feature_type: 'poi',
+            name: 'The Oak Downtown',
+            full_address: '172 Great George St, Charlottetown, PE, Canada',
+            poi_category: ['pub'],
+          },
+        },
+        {
+          geometry: { coordinates: [-63.13108, 46.23818] },
+          properties: {
+            mapbox_id: 'address.home',
+            feature_type: 'address',
+            name: '172 Great George St',
+            full_address: '172 Great George St, Charlottetown, PE, Canada',
+          },
+        },
+      ],
+    }), { status: 200 }),
+  });
+  assert.equal(result.candidates[0]?.type, 'gathr_venue');
+  const external = result.candidates.find((candidate) => candidate.type === 'external_place');
+  assert.ok(external);
+  assert.doesNotMatch(external.id, /mapbox|the-oak/i);
+  assert.equal(external.name, 'The Oak Downtown');
+  const stored = await db.doc(`checkInPlaceCandidates/${external.id}`).get();
+  assert.equal(stored.data()?.uid, 'alice');
+  assert.equal(Object.hasOwn(stored.data() || {}, 'latitude'), false);
+});
+
+test('external place dwell is user-bound, server-timed, and rejects stale or forged candidates', async () => {
+  const candidateId = 'external-candidate-001';
+  await seedExternalCandidate('alice', candidateId);
+  const start = Date.now();
+  let result;
+  for (let elapsed = 0; elapsed <= 100_000; elapsed += 20_000) {
+    result = await recordCheckInEligibilitySample('alice', {
+      sessionId: 'external-dwell-001',
+      placeCandidateId: candidateId,
+      latitude: 46.2382,
+      longitude: -63.1311,
+      accuracyMeters: 8,
+      speedMetersPerSecond: 0,
+    }, db, Timestamp.fromMillis(start + elapsed));
+  }
+  assert.equal(result?.eligible, true);
+  assert.equal(result?.placeCandidateId, candidateId);
+  assert.match(result?.locationKey || '', /^external:/);
+  const storedSession = (await db.doc('checkInEligibilitySessions/alice_external-dwell-001').get()).data();
+  assert.equal(Object.hasOwn(storedSession || {}, 'latitude'), false);
+  assert.equal(Object.hasOwn(storedSession || {}, 'longitude'), false);
+
+  await assert.rejects(() => recordCheckInEligibilitySample('bob', {
+    sessionId: 'external-forged-001',
+    placeCandidateId: candidateId,
+    latitude: 46.2382,
+    longitude: -63.1311,
+    accuracyMeters: 8,
+  }, db), (error) => error?.code === 'failed-precondition');
+
+  await seedExternalCandidate('alice', 'external-stale-001', Date.now() - 1);
+  await assert.rejects(() => recordCheckInEligibilitySample('alice', {
+    sessionId: 'external-stale-session',
+    placeCandidateId: 'external-stale-001',
+    latitude: 46.2382,
+    longitude: -63.1311,
+    accuracyMeters: 8,
+  }, db), (error) => error?.code === 'failed-precondition');
+});
+
+test('external check-in uses the existing consent projection and retry contract', async () => {
+  await Promise.all([makeFriends('alice', 'bob'), makeFriends('alice', 'charlie')]);
+  const candidateId = 'external-checkin-001';
+  const eligibilitySessionId = await makeExternalEligible('alice', candidateId);
+  const input = {
+    operationId: 'external-operation-001',
+    eligibilitySessionId,
+    placeCandidateId: candidateId,
+    durationMinutes: 30,
+    audienceMode: 'selected_friends',
+    selectedUids: ['bob'],
+    message: 'At the bar',
+  };
+  const created = await createCheckIn('alice', input, db);
+  const retried = await createCheckIn('alice', input, db);
+  assert.equal(created.locationType, 'external_place');
+  assert.equal(created.venueId, undefined);
+  assert.equal(created.venueNameSnapshot, 'The Oak Downtown');
+  assert.equal(retried.revision, created.revision);
+  const bobProjection = (await db.doc('users/bob/friendActivity/alice').get()).data();
+  assert.equal(bobProjection?.venueName, 'The Oak Downtown');
+  assert.equal(bobProjection?.latitude, 46.2382);
+  assert.equal(bobProjection?.longitude, -63.1311);
+  assert.equal(bobProjection?.placeCategory, 'Pub');
+  assert.equal((await db.doc('users/charlie/friendActivity/alice').get()).exists, false);
+  assert.equal(Object.hasOwn(bobProjection || {}, 'mapboxId'), false);
+  const operation = await db.collection('socialOperations').limit(1).get();
+  assert.equal(operation.docs[0]?.data().result, undefined);
+  assert.equal(operation.docs[0]?.data().resultRevision, created.revision);
+
+  await blockUser('bob', 'alice', db);
+  assert.equal((await db.doc('users/bob/friendActivity/alice').get()).exists, false);
+  assert.deepEqual((await db.doc('activeCheckIns/alice').get()).data()?.viewerUids, []);
+});
+
+test('expired external candidates are removed by cleanup', async () => {
+  await seedExternalCandidate('alice', 'external-expired-001', 1);
+  assert.deepEqual(await cleanupExpiredCheckInPlaceCandidates(Timestamp.now(), db), { cleaned: 1 });
+  assert.equal((await db.doc('checkInPlaceCandidates/external-expired-001').get()).exists, false);
 });
 
 test('short walk-bys, poor accuracy, outside resets, and expired sessions never unlock check-in', async () => {

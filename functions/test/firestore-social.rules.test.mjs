@@ -59,6 +59,7 @@ beforeEach(async () => {
         venueId: 'venue-1',
       }),
       setDoc(doc(db, 'checkInEligibilitySessions/alice_session'), { uid: 'alice' }),
+      setDoc(doc(db, 'checkInPlaceCandidates/candidate-1'), { uid: 'alice' }),
       setDoc(doc(db, 'friendEvents/event-1'), { hostUid: 'alice' }),
       setDoc(doc(db, 'friendEventPrivateLocations/event-1'), { hostUid: 'alice' }),
       setDoc(doc(db, 'friendEventInvitations/event-1_bob'), { hostUid: 'alice' }),
@@ -111,6 +112,7 @@ test('clients cannot read canonical social indexes or relationships', async () =
   await assertFails(getDoc(doc(db, 'socialOperations/retry-token')));
   await assertFails(getDoc(doc(db, 'userReports/report-1')));
   await assertFails(getDoc(doc(db, 'checkInEligibilitySessions/alice_session')));
+  await assertFails(getDoc(doc(db, 'checkInPlaceCandidates/candidate-1')));
   await assertFails(getDoc(doc(db, 'friendEvents/event-1')));
   await assertFails(getDoc(doc(db, 'friendEventPrivateLocations/event-1')));
   await assertFails(getDoc(doc(db, 'friendEventInvitations/event-1_bob')));
@@ -136,6 +138,7 @@ test('clients cannot write server-controlled social documents', async () => {
   await assertFails(setDoc(doc(db, 'users/alice/friendEventLocations/forged'), { address: 'leak' }));
   await assertFails(setDoc(doc(db, 'users/alice/blocks/charlie'), { blockedUid: 'charlie' }));
   await assertFails(setDoc(doc(db, 'activeCheckIns/alice'), { ownerUid: 'alice' }));
+  await assertFails(setDoc(doc(db, 'checkInPlaceCandidates/candidate-2'), { uid: 'alice' }));
   await assertFails(setDoc(doc(db, 'socialRelationships/forged'), { members: ['alice', 'bob'] }));
   await assertFails(setDoc(doc(db, 'socialOperations/forged'), { uid: 'alice' }));
   await assertFails(setDoc(doc(db, 'friendEvents/forged'), { hostUid: 'alice' }));

@@ -11,6 +11,7 @@ import {
   validateUid,
   validateVenueId,
 } from './validation.js';
+import { validateExternalCheckInPlaceCandidate } from './nearbyCheckInPlaces.js';
 
 export const CHECK_IN_DWELL_TARGET_MS = 90_000;
 export const CHECK_IN_BASE_RADIUS_METRES = 50;
@@ -23,7 +24,8 @@ export const CHECK_IN_SESSION_TTL_MS = 10 * 60_000;
 
 export interface CheckInEligibilitySampleInput {
   sessionId: unknown;
-  venueId: unknown;
+  venueId?: unknown;
+  placeCandidateId?: unknown;
   candidateVenueIds?: unknown;
   latitude: unknown;
   longitude: unknown;
@@ -33,7 +35,9 @@ export interface CheckInEligibilitySampleInput {
 
 export interface CheckInEligibilityResult {
   sessionId: string;
-  venueId: string;
+  venueId?: string;
+  placeCandidateId?: string;
+  locationKey: string;
   eligibleVenueIds: string[];
   eligible: boolean;
   qualifyingMs: number;
@@ -127,8 +131,20 @@ export async function recordCheckInEligibilitySample(
 ): Promise<CheckInEligibilityResult> {
   const uid = validateUid(uidValue, 'uid');
   const sessionId = validateSocialOperationId(input.sessionId);
-  const venueId = validateVenueId(input.venueId);
-  const candidateVenueIds = parseCandidateVenueIds(input.candidateVenueIds, venueId);
+  const hasVenueId = input.venueId !== undefined && input.venueId !== null && input.venueId !== '';
+  const hasPlaceCandidateId = input.placeCandidateId !== undefined
+    && input.placeCandidateId !== null
+    && input.placeCandidateId !== '';
+  if (hasVenueId === hasPlaceCandidateId) {
+    throw new SocialDomainError('invalid-argument', 'Choose one check-in place.');
+  }
+  const venueId = hasVenueId ? validateVenueId(input.venueId) : '';
+  const placeCandidateId = hasPlaceCandidateId
+    ? validateSocialOperationId(input.placeCandidateId)
+    : '';
+  const candidateVenueIds = venueId
+    ? parseCandidateVenueIds(input.candidateVenueIds, venueId)
+    : [];
   const sampleLatitude = parseLatitude(input.latitude);
   const sampleLongitude = parseLongitude(input.longitude);
   const sampleAccuracy = finiteNumber(input.accuracyMeters, 'accuracyMeters');
@@ -143,21 +159,38 @@ export async function recordCheckInEligibilitySample(
   const venueRefs = candidateVenueIds.map((candidateVenueId) =>
     db.collection('venues').doc(candidateVenueId)
   );
+  const placeCandidateRef = placeCandidateId
+    ? db.collection('checkInPlaceCandidates').doc(placeCandidateId)
+    : null;
   const sessionRef = db
     .collection('checkInEligibilitySessions')
     .doc(checkInEligibilitySessionId(uid, sessionId));
 
   return db.runTransaction(async (transaction) => {
-    const snapshots = await transaction.getAll(...venueRefs, sessionRef);
+    const snapshots = await transaction.getAll(
+      ...venueRefs,
+      ...(placeCandidateRef ? [placeCandidateRef] : []),
+      sessionRef
+    );
     const venueSnapshots = snapshots.slice(0, venueRefs.length);
     const venueSnapshot = venueSnapshots[0];
+    const placeCandidateSnapshot = placeCandidateRef ? snapshots[venueRefs.length] : null;
     const sessionSnapshot = snapshots[snapshots.length - 1];
-    if (!venueSnapshot.exists) {
+    if (venueId && !venueSnapshot?.exists) {
       throw new SocialDomainError('not-found', 'This venue is not currently available for check-in.');
     }
-    const venue = venueSnapshot.data() || {};
-    const venueLatitude = parseLatitude(venue.latitude);
-    const venueLongitude = parseLongitude(venue.longitude);
+    const venue = venueSnapshot?.data() || {};
+    const externalPlace = placeCandidateId
+      ? validateExternalCheckInPlaceCandidate(
+        placeCandidateSnapshot?.data() || {},
+        uid,
+        placeCandidateId,
+        now
+      )
+      : null;
+    const targetLatitude = externalPlace?.latitude ?? parseLatitude(venue.latitude);
+    const targetLongitude = externalPlace?.longitude ?? parseLongitude(venue.longitude);
+    const locationKey = externalPlace?.locationKey || `venue:${venueId}`;
     const candidateDistances = venueSnapshots.map((snapshot, index) => {
       if (!snapshot.exists) return null;
       const candidate = snapshot.data() || {};
@@ -175,7 +208,10 @@ export async function recordCheckInEligibilitySample(
     if (sessionSnapshot.exists && previous.uid !== uid) {
       throw new SocialDomainError('permission-denied', 'This check-in session is unavailable.');
     }
-    if (sessionSnapshot.exists && previous.venueId !== venueId) {
+    const previousLocationKey = typeof previous.locationKey === 'string'
+      ? previous.locationKey
+      : previous.venueId ? `venue:${previous.venueId}` : '';
+    if (sessionSnapshot.exists && previousLocationKey !== locationKey) {
       throw new SocialDomainError('failed-precondition', 'Start a new check-in session for this venue.');
     }
     if (previous.consumedAt) {
@@ -193,10 +229,12 @@ export async function recordCheckInEligibilitySample(
     ) {
       return {
         sessionId,
-        venueId,
+        ...(venueId ? { venueId } : {}),
+        ...(placeCandidateId ? { placeCandidateId } : {}),
+        locationKey,
         eligibleVenueIds: Array.isArray(previous.eligibleVenueIds)
           ? previous.eligibleVenueIds.map((candidate: unknown) => validateVenueId(candidate))
-          : [venueId],
+          : venueId ? [venueId] : [],
         eligible: true,
         qualifyingMs: CHECK_IN_DWELL_TARGET_MS,
         requiredMs: CHECK_IN_DWELL_TARGET_MS,
@@ -210,8 +248,8 @@ export async function recordCheckInEligibilitySample(
     const distance = distanceMetres(
       sampleLatitude,
       sampleLongitude,
-      venueLatitude,
-      venueLongitude
+      targetLatitude,
+      targetLongitude
     );
     const accurate = sampleAccuracy <= CHECK_IN_MAX_ACCURACY_METRES;
     const stationaryEnough = sampleSpeed <= CHECK_IN_MAX_SPEED_METRES_PER_SECOND;
@@ -265,7 +303,9 @@ export async function recordCheckInEligibilitySample(
     transaction.set(sessionRef, {
       uid,
       sessionId,
-      venueId,
+      ...(venueId ? { venueId } : {}),
+      ...(placeCandidateId ? { placeCandidateId } : {}),
+      locationKey,
       eligibleVenueIds: eligible ? eligibleVenueIds : [],
       eligible,
       qualifyingMs: Math.min(qualifyingMs, CHECK_IN_DWELL_TARGET_MS),
@@ -282,7 +322,9 @@ export async function recordCheckInEligibilitySample(
 
     return {
       sessionId,
-      venueId,
+      ...(venueId ? { venueId } : {}),
+      ...(placeCandidateId ? { placeCandidateId } : {}),
+      locationKey,
       eligibleVenueIds: eligible ? eligibleVenueIds : [],
       eligible,
       qualifyingMs: Math.min(qualifyingMs, CHECK_IN_DWELL_TARGET_MS),
@@ -315,15 +357,27 @@ export async function cleanupExpiredCheckInEligibilitySessions(
 export function assertCompletedCheckInEligibility(
   session: DocumentData,
   uid: string,
-  venueId: string,
+  target: { venueId?: string; placeCandidateId?: string; locationKey: string },
   now: Timestamp
 ): void {
   const completedExpiresAt = session.completedExpiresAt;
   if (
     session.uid !== uid
     || !(
-      session.venueId === venueId
-      || (Array.isArray(session.eligibleVenueIds) && session.eligibleVenueIds.includes(venueId))
+      session.locationKey === target.locationKey
+      || (
+        target.venueId
+        && session.venueId === target.venueId
+      )
+      || (
+        target.venueId
+        && Array.isArray(session.eligibleVenueIds)
+        && session.eligibleVenueIds.includes(target.venueId)
+      )
+      || (
+        target.placeCandidateId
+        && session.placeCandidateId === target.placeCandidateId
+      )
     )
     || session.eligible !== true
     || !(completedExpiresAt instanceof Timestamp)

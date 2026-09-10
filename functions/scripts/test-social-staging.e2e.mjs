@@ -267,6 +267,55 @@ try {
   await call(alice, 'checkOutCallable');
   assert.equal(await getDocument(bob, `users/${bob.uid}/friendActivity/${alice.uid}`), null);
 
+  const nearby = await call(alice, 'discoverNearbyCheckInPlacesCallable', {
+    latitude: 46.2382,
+    longitude: -63.1311,
+    accuracyMeters: 8,
+    capturedAtMs: Date.now(),
+  });
+  const externalPlace = nearby.candidates.find((candidate) => candidate.type === 'external_place');
+  assert.ok(externalPlace, 'Expected at least one public external POI near the staging coordinate.');
+  assert.ok(externalPlace.id);
+  assert.equal(externalPlace.venueId, undefined);
+  const externalDwellSessionId = `live-${runId}-external-dwell`;
+  const firstExternalSample = await call(alice, 'recordCheckInEligibilitySampleCallable', {
+    sessionId: externalDwellSessionId,
+    placeCandidateId: externalPlace.id,
+    latitude: externalPlace.latitude,
+    longitude: externalPlace.longitude,
+    accuracyMeters: 8,
+    speedMetersPerSecond: 0,
+  });
+  assert.equal(firstExternalSample.eligible, false);
+  const externalCompletedAt = Date.now();
+  await writeAdminFields(`checkInEligibilitySessions/${alice.uid}_${externalDwellSessionId}`, {
+    eligible: booleanValue(true),
+    qualifyingMs: integerValue(90_000),
+    completedAt: timestampValue(externalCompletedAt),
+    completedExpiresAt: timestampValue(externalCompletedAt + 5 * 60_000),
+    expiresAt: timestampValue(externalCompletedAt + 5 * 60_000),
+  });
+  const externalCheckInRequest = {
+    operationId: `live-${runId}-external`,
+    eligibilitySessionId: externalDwellSessionId,
+    placeCandidateId: externalPlace.id,
+    durationMinutes: 30,
+    audienceMode: 'selected_friends',
+    selectedUids: [bob.uid],
+    message: 'External place staging smoke test',
+  };
+  const externalCheckIn = await call(alice, 'createCheckInCallable', externalCheckInRequest);
+  const retriedExternalCheckIn = await call(alice, 'createCheckInCallable', externalCheckInRequest);
+  assert.equal(externalCheckIn.locationType, 'external_place');
+  assert.equal(retriedExternalCheckIn.revision, externalCheckIn.revision);
+  const externalActivity = await getDocument(bob, `users/${bob.uid}/friendActivity/${alice.uid}`);
+  assert.equal(field(externalActivity, 'locationType'), 'external_place');
+  assert.equal(field(externalActivity, 'venueName'), externalPlace.name);
+  assert.equal(Number.isFinite(Number(field(externalActivity, 'latitude'))), true);
+  assert.equal(Number.isFinite(Number(field(externalActivity, 'longitude'))), true);
+  await call(alice, 'checkOutCallable');
+  assert.equal(await getDocument(bob, `users/${bob.uid}/friendActivity/${alice.uid}`), null);
+
   const privateAddress = '1 Queen Street, Charlottetown, PE C1A 4A2';
   const geocoded = await call(alice, 'geocodeFriendEventAddressCallable', {
     address: privateAddress,
@@ -351,12 +400,13 @@ try {
 
   console.log(JSON.stringify({
     projectId,
-    callableCountExercised: 22,
+    callableCountExercised: 26,
     profileSyncVerified: true,
     authDeleteCleanupVerified: true,
     blockDisplaySnapshotVerified: true,
     checkInVisibilityVerified: true,
     contextualEligibilityVerified: true,
+    externalPlaceCheckInVerified: true,
     delayedPrivateAddressVerified: true,
     guestInviteAndRsvpVerified: true,
     eventCancellationAndDeletionVerified: true,
