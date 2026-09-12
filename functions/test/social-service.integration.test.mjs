@@ -506,7 +506,7 @@ test('Here can qualify with moderate accuracy while Place requires stronger fixe
   assert.equal(result?.expiresAtMs, start + 90_000 + 20_000);
 });
 
-test('unknown speed needs repeated stable fixes and a long capture gap resets credit', async () => {
+test('unknown speed needs repeated stable fixes and a matching return fix resumes interrupted credit', async () => {
   const sessionId = 'readiness-unknown-speed-001';
   const start = Date.now();
   const first = await recordCheckInReadinessSample('alice', {
@@ -544,8 +544,43 @@ test('unknown speed needs repeated stable fixes and a long capture gap resets cr
     speedMetersPerSecond: null,
     capturedAtMs: start + 40_001,
   }, db, Timestamp.fromMillis(start + 40_001));
-  assert.equal(longGap.hereQualifyingMs, 0);
-  assert.equal(longGap.placeQualifyingMs, 0);
+  assert.equal(longGap.hereQualifyingMs, CHECK_IN_HERE_TARGET_MS);
+  assert.equal(longGap.placeQualifyingMs, 40_001);
+});
+
+test('an interruption older than the resume window resets readiness', async () => {
+  const sessionId = 'readiness-expired-resume-001';
+  const start = Date.now();
+  await recordCheckInReadinessSample('alice', {
+    protocolVersion: 1, reset: false, sessionId, sequence: 0,
+    latitude: 46.2382, longitude: -63.1311, accuracyMeters: 8,
+    speedMetersPerSecond: 0, capturedAtMs: start,
+  }, db, Timestamp.fromMillis(start));
+  const result = await recordCheckInReadinessSample('alice', {
+    protocolVersion: 1, reset: false, sessionId, sequence: 1,
+    latitude: 46.2382, longitude: -63.1311, accuracyMeters: 8,
+    speedMetersPerSecond: 0, capturedAtMs: start + 300_001,
+  }, db, Timestamp.fromMillis(start + 300_001));
+  assert.equal(result.hereQualifyingMs, 0);
+  assert.equal(result.placeQualifyingMs, 0);
+});
+
+test('a displaced return fix cannot claim interrupted readiness time', async () => {
+  const sessionId = 'readiness-displaced-resume-001';
+  const start = Date.now();
+  await recordCheckInReadinessSample('alice', {
+    protocolVersion: 1, reset: false, sessionId, sequence: 0,
+    latitude: 46.2382, longitude: -63.1311, accuracyMeters: 8,
+    speedMetersPerSecond: 0, capturedAtMs: start,
+  }, db, Timestamp.fromMillis(start));
+  const result = await recordCheckInReadinessSample('alice', {
+    protocolVersion: 1, reset: false, sessionId, sequence: 1,
+    latitude: 46.2392, longitude: -63.1311, accuracyMeters: 8,
+    speedMetersPerSecond: 0, capturedAtMs: start + 90_000,
+  }, db, Timestamp.fromMillis(start + 90_000));
+  assert.equal(result.reason, 'outside');
+  assert.equal(result.hereQualifyingMs, 0);
+  assert.equal(result.placeQualifyingMs, 0);
 });
 
 test('driving suppression follows the owner and cannot be bypassed with a new session', async () => {

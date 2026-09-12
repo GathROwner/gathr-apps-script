@@ -27,6 +27,7 @@ export const CHECK_IN_PLACE_MAX_ACCURACY_METRES = 25;
 export const CHECK_IN_STATIONARY_RADIUS_METRES = 20;
 export const CHECK_IN_OUTSIDE_RESET_MS = 30_000;
 export const CHECK_IN_SAMPLE_MAX_GAP_MS = 20_000;
+export const CHECK_IN_RESUME_MAX_GAP_MS = 5 * 60_000;
 export const CHECK_IN_SAMPLE_MAX_AGE_MS = 60_000;
 export const CHECK_IN_SAMPLE_MAX_FUTURE_MS = 10_000;
 export const CHECK_IN_COMPLETION_TTL_MS = 5 * 60_000;
@@ -364,6 +365,10 @@ export async function recordCheckInReadinessSample(
     const previousAccuracy = continuing && !resetRequested
       ? Number(previous.lastAccuracyMeters)
       : Number.NaN;
+    const previouslyInterrupted = continuing && !resetRequested
+      && timestampMillis(previous.interruptedSinceAt) !== null;
+    const recoveringFromDriving = previouslyInterrupted
+      && timestampMillis(previous.drivingSuppressedUntilAt) !== null;
     let drivingSuppressedUntilMs = ownerExpired
       ? null
       : timestampMillis(owner.drivingSuppressedUntilAt);
@@ -407,10 +412,22 @@ export async function recordCheckInReadinessSample(
         ? sample.capturedAtMs - lastCapturedAtMs
         : 0;
       const serverGapMs = lastSeenMs === null ? 0 : nowMs - lastSeenMs;
-      const validGap = captureGapMs > 0
+      const shortGap = captureGapMs > 0
         && captureGapMs <= CHECK_IN_SAMPLE_MAX_GAP_MS
         && serverGapMs >= 0
         && serverGapMs <= CHECK_IN_SAMPLE_MAX_GAP_MS;
+      // Foreground collection can be suspended by a screenshot or app switch.
+      // A longer interval counts only when a fresh return fix is still stationary
+      // and inside the original anchor; `reason === qualifying` proves both here.
+      const resumeGap = captureGapMs > 0
+        && captureGapMs <= CHECK_IN_RESUME_MAX_GAP_MS
+        && serverGapMs >= 0
+        && serverGapMs <= CHECK_IN_RESUME_MAX_GAP_MS
+        && (captureGapMs > CHECK_IN_SAMPLE_MAX_GAP_MS
+          || serverGapMs > CHECK_IN_SAMPLE_MAX_GAP_MS);
+      // The first good fix after driving establishes a new baseline;
+      // it cannot retroactively credit the interrupted interval.
+      const validGap = !recoveringFromDriving && (shortGap || resumeGap);
       if (!validGap && lastSeenMs !== null) {
         hereQualifyingMs = 0;
         placeQualifyingMs = 0;
