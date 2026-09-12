@@ -106,7 +106,7 @@ npm run deploy:social-staging
 For a narrow rollout, retain both explicit arguments and add the exact function filter, for example:
 
 ```powershell
-firebase deploy --project gathr-social-staging --config firebase.staging.json --only "functions:recordCheckInReadinessSampleCallable,functions:bindCheckInReadinessCallable,functions:createCheckInCallable"
+firebase deploy --project gathr-social-staging --config firebase.staging.json --only "functions:gathr-social-staging:recordCheckInReadinessSampleCallable,functions:gathr-social-staging:bindCheckInReadinessCallable,functions:gathr-social-staging:createCheckInCallable"
 ```
 
 Do not infer the Firebase project from the codebase label, and do not use the unqualified `npm run deploy` command for this Preview service.
