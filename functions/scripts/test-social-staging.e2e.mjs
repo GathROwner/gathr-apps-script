@@ -316,7 +316,7 @@ try {
   await call(alice, 'checkOutCallable');
   assert.equal(await getDocument(bob, `users/${bob.uid}/friendActivity/${alice.uid}`), null);
 
-  const privateAddress = '1 Queen Street, Charlottetown, PE C1A 4A2';
+  const privateAddress = '156 Great George Street, Charlottetown, PE C1A 1N9';
   const startAtMs = Date.now() + 24 * 60 * 60_000;
   const baseEventInput = {
     title: 'Staging backyard movie night',
@@ -331,7 +331,7 @@ try {
     location: {
       type: 'custom_address',
       address: privateAddress,
-      placeName: 'Staging private home',
+      placeName: 'Staging private venue',
       revealAtMs: startAtMs,
     },
   };
@@ -365,7 +365,7 @@ try {
     bob,
     `users/${bob.uid}/friendEventLocations/${eventId}`
   );
-  assert.equal(field(bobLocationAfterReveal, 'address'), privateAddress);
+  assert.match(field(bobLocationAfterReveal, 'address'), /156, Great George Street/);
 
   await call(alice, 'cancelFriendEventCallable', {
     eventId,

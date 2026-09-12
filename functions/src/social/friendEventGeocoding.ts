@@ -285,19 +285,25 @@ export async function resolveFriendEventAddress(
     lon?: unknown;
     name?: unknown;
     display_name?: unknown;
+    address?: unknown;
   }>;
   const match = body[0];
   const longitude = Number(match?.lon);
   const latitude = Number(match?.lat);
   const resolvedAddress = addressText(match?.display_name);
   const resolvedName = featureText(match?.name);
+  const requestedHouseNumber = address.match(/^\s*(\d+[a-z-]?)/i)?.[1]
+    ?.toLocaleLowerCase().replace(/[^a-z0-9]/g, '') || '';
+  const returnedHouseNumber = featureText(record(match?.address)?.house_number)
+    .toLocaleLowerCase().replace(/[^a-z0-9]/g, '');
   const resolvedPlaceName = resolvedName && !/^\d+[a-z-]?$/i.test(resolvedName)
     ? resolvedName
     : '';
   if (
     !Number.isFinite(latitude) || latitude < -90 || latitude > 90 ||
     !Number.isFinite(longitude) || longitude < -180 || longitude > 180 ||
-    resolvedAddress.length < 5
+    resolvedAddress.length < 5 ||
+    (requestedHouseNumber && requestedHouseNumber !== returnedHouseNumber)
   ) {
     throw new SocialDomainError(
       'invalid-argument',

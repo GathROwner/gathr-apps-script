@@ -34,6 +34,7 @@ test('server geocoding replaces every temporary preview field with storable OSM 
         lon: '-63.126',
         name: 'OpenStreetMap place name',
         display_name: '123 Water Street, Charlottetown, Prince Edward Island, Canada',
+        address: { house_number: '123' },
       }]), { status: 200 });
     },
   });
@@ -62,6 +63,7 @@ test('server geocoding identifies GathR and requests JSON from Nominatim', async
         lat: '46.234',
         lon: '-63.126',
         display_name: '123 Water Street, Charlottetown, Prince Edward Island, Canada',
+        address: { house_number: '123' },
       }]), { status: 200 });
     },
   });
@@ -73,6 +75,20 @@ test('custom addresses fail closed when Nominatim returns no match', async () =>
   await assert.rejects(
     () => resolveFriendEventAddress(customInput, {
       fetchImpl: async () => new Response(JSON.stringify([]), { status: 200 }),
+    }),
+    /could not be located/
+  );
+});
+
+test('custom civic addresses reject a street-centre result without the requested house number', async () => {
+  await assert.rejects(
+    () => resolveFriendEventAddress(customInput, {
+      fetchImpl: async () => new Response(JSON.stringify([{
+        lat: '46.234',
+        lon: '-63.126',
+        display_name: 'Water Street, Charlottetown, Prince Edward Island, Canada',
+        address: { road: 'Water Street' },
+      }]), { status: 200 }),
     }),
     /could not be located/
   );
