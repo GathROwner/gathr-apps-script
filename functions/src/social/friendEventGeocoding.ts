@@ -245,13 +245,7 @@ export async function resolveFriendEventAddress(
   if (!location || location.type !== 'custom_address') return input;
 
   const address = addressText(location.address);
-  const previewPlaceName = featureText(location.placeName);
-  const query = [previewPlaceName, address]
-    .filter(Boolean)
-    .filter((value, index, values) => values.indexOf(value) === index)
-    .join(', ')
-    .slice(0, 300);
-  if (query.length < 5) {
+  if (address.length < 5) {
     throw new SocialDomainError('invalid-argument', 'Enter a complete event address.');
   }
 
@@ -259,7 +253,7 @@ export async function resolveFriendEventAddress(
     process.env.NOMINATIM_API_ENDPOINT || 'https://nominatim.openstreetmap.org/search'
   );
   url.searchParams.set('format', 'jsonv2');
-  url.searchParams.set('q', query);
+  url.searchParams.set('q', address);
   url.searchParams.set('limit', '1');
   url.searchParams.set('countrycodes', 'ca');
   url.searchParams.set('addressdetails', '1');

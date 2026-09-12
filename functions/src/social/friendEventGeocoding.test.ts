@@ -45,10 +45,7 @@ test('server geocoding replaces every temporary preview field with storable OSM 
   const requested = new URL(requestedUrl);
   assert.equal(requested.hostname, 'nominatim.openstreetmap.org');
   assert.equal(requested.pathname, '/search');
-  assert.equal(
-    requested.searchParams.get('q'),
-    'Temporary preview name, Temporary preview address, Charlottetown PE'
-  );
+  assert.equal(requested.searchParams.get('q'), 'Temporary preview address, Charlottetown PE');
   assert.equal(requested.searchParams.get('countrycodes'), 'ca');
   assert.equal(requested.searchParams.get('addressdetails'), '1');
   assert.equal(requested.searchParams.has('permanent'), false);
