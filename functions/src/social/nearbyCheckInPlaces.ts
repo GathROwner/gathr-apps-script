@@ -275,28 +275,38 @@ export async function discoverNearbyCheckInPlaces(
     + `nwr(around:${CHECK_IN_PLACE_DISCOVERY_RADIUS_METRES},${latitude},${longitude})["name"]["tourism"];`
     + `nwr(around:${CHECK_IN_PLACE_DISCOVERY_RADIUS_METRES},${latitude},${longitude})["name"]["leisure"];`
     + `);out center tags;`;
-  const endpoint = options.overpassEndpoint
-    || process.env.OVERPASS_API_ENDPOINT
-    || 'https://overpass-api.de/api/interpreter';
-  let response: Response;
-  try {
-    response = await (options.fetchImpl || fetch)(endpoint, {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
-        'User-Agent': 'GathRPreview/1.1 (support@gathr.app)',
-      },
-      body: new URLSearchParams({ data: overpassQuery }),
-      signal: AbortSignal.timeout(8_000),
-    });
-  } catch {
+  const configuredEndpoint = options.overpassEndpoint || process.env.OVERPASS_API_ENDPOINT;
+  const endpoints = configuredEndpoint
+    ? [configuredEndpoint]
+    : [
+      'https://overpass-api.de/api/interpreter',
+      'https://overpass.kumi.systems/api/interpreter',
+    ];
+  let payload: unknown;
+  for (const endpoint of endpoints) {
+    try {
+      const response = await (options.fetchImpl || fetch)(endpoint, {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+          'User-Agent': 'GathRPreview/1.1 (support@gathr.app)',
+        },
+        body: new URLSearchParams({ data: overpassQuery }),
+        signal: AbortSignal.timeout(10_000),
+      });
+      if (!response.ok) continue;
+      payload = await response.json();
+      break;
+    } catch {
+      // Public Preview providers have no SLA. Try the next configured endpoint
+      // without logging coordinates or other user location data.
+    }
+  }
+  if (payload === undefined) {
     throw new SocialDomainError('unavailable', 'Nearby places could not be loaded right now.');
   }
-  if (!response.ok) {
-    throw new SocialDomainError('unavailable', 'Nearby places could not be loaded right now.');
-  }
-  const external = parsePublicNearbyPlaces(await response.json(), { latitude, longitude })
+  const external = parsePublicNearbyPlaces(payload, { latitude, longitude })
     .filter((candidate) => !externalMatchesCanonical(candidate, canonical));
   const selectedCanonical = canonical.slice(0, MAX_RETURNED_CANDIDATES);
   const slots = MAX_RETURNED_CANDIDATES - selectedCanonical.length;
