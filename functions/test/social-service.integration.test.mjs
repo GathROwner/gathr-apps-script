@@ -307,7 +307,13 @@ test('one dwell session exposes only server-validated overlapping venue choices'
   assert.equal(checkIn.venueId, 'venue-neighbor');
 });
 
-test('nearby discovery prioritizes canonical venues and issues opaque external candidates', async () => {
+test('nearby discovery keeps unknown places selectable when canonical venues fill the list', async () => {
+  const denseVenueIds = ['dense-1', 'dense-2', 'dense-3', 'dense-4'];
+  await Promise.all(denseVenueIds.map((id, index) => db.doc(`venues/${id}`).set({
+    pagename: `Dense Venue ${index + 1}`,
+    latitude: 46.2382 + (index + 1) * 0.00001,
+    longitude: -63.1311,
+  })));
   const result = await discoverNearbyCheckInPlaces('alice', {
     latitude: 46.2382,
     longitude: -63.1311,
@@ -329,7 +335,7 @@ test('nearby discovery prioritizes canonical venues and issues opaque external c
       ],
     }), { status: 200 }),
   });
-  assert.equal(result.candidates[0]?.type, 'gathr_venue');
+  assert.equal(result.candidates.length, 5);
   const external = result.candidates.find((candidate) => candidate.type === 'external_place');
   assert.ok(external);
   assert.doesNotMatch(external.id, /openstreetmap|the-oak/i);
@@ -337,6 +343,7 @@ test('nearby discovery prioritizes canonical venues and issues opaque external c
   const stored = await db.doc(`checkInPlaceCandidates/${external.id}`).get();
   assert.equal(stored.data()?.uid, 'alice');
   assert.equal(Object.hasOwn(stored.data() || {}, 'latitude'), false);
+  await Promise.all(denseVenueIds.map((id) => db.doc(`venues/${id}`).delete()));
 });
 
 test('external place dwell is user-bound, server-timed, and rejects stale or forged candidates', async () => {

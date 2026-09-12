@@ -16,6 +16,7 @@ export const CHECK_IN_PLACE_DISCOVERY_RADIUS_METRES = 175;
 export const CHECK_IN_PLACE_MAX_ACCURACY_METRES = 100;
 export const CHECK_IN_PLACE_LOCATION_MAX_AGE_MS = 60_000;
 const MAX_RETURNED_CANDIDATES = 5;
+const MAX_RESERVED_EXTERNAL_CANDIDATES = 2;
 const MAX_CANONICAL_VENUES_SCANNED = 500;
 
 export interface ExternalCheckInPlaceSnapshot {
@@ -50,6 +51,20 @@ interface NearbyPlaceInput {
   longitude?: unknown;
   accuracyMeters?: unknown;
   capturedAtMs?: unknown;
+}
+
+export function selectNearbyPlaceCandidateSlots<TCanonical, TExternal>(
+  canonical: TCanonical[],
+  external: TExternal[],
+  maximum = MAX_RETURNED_CANDIDATES
+): { canonical: TCanonical[]; external: TExternal[] } {
+  const reservedExternalCount = Math.min(external.length, MAX_RESERVED_EXTERNAL_CANDIDATES, maximum);
+  const selectedCanonical = canonical.slice(0, maximum - reservedExternalCount);
+  const remainingSlots = maximum - selectedCanonical.length;
+  return {
+    canonical: selectedCanonical,
+    external: external.slice(0, remainingSlots),
+  };
 }
 
 function record(value: unknown): Record<string, unknown> {
@@ -308,9 +323,11 @@ export async function discoverNearbyCheckInPlaces(
   }
   const external = parsePublicNearbyPlaces(payload, { latitude, longitude })
     .filter((candidate) => !externalMatchesCanonical(candidate, canonical));
-  const selectedCanonical = canonical.slice(0, MAX_RETURNED_CANDIDATES);
-  const slots = MAX_RETURNED_CANDIDATES - selectedCanonical.length;
-  const selectedExternal = external.slice(0, slots);
+  // A dense downtown can easily fill all five slots with existing GathR venues.
+  // Keep room for nearby public places so an unknown venue is actually selectable.
+  const selected = selectNearbyPlaceCandidateSlots(canonical, external);
+  const selectedCanonical = selected.canonical;
+  const selectedExternal = selected.external;
   const batch = db.batch();
   const externalCandidates = selectedExternal.map((candidate) => {
     const candidateId = randomUUID();
@@ -343,7 +360,10 @@ export async function discoverNearbyCheckInPlaces(
     } satisfies NearbyCheckInPlaceCandidate;
   });
   if (selectedExternal.length > 0) await batch.commit();
-  return { candidates: [...selectedCanonical, ...externalCandidates], expiresAt };
+  const candidates = [...selectedCanonical, ...externalCandidates]
+    .sort((left, right) => left.distanceMetres - right.distanceMetres
+      || (left.type === 'gathr_venue' ? -1 : 1));
+  return { candidates, expiresAt };
 }
 
 export function validateExternalCheckInPlaceCandidate(

@@ -1,7 +1,10 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { parsePublicNearbyPlaces } from './nearbyCheckInPlaces.js';
+import {
+  parsePublicNearbyPlaces,
+  selectNearbyPlaceCandidateSlots,
+} from './nearbyCheckInPlaces.js';
 
 const origin = { latitude: 46.2382, longitude: -63.1311 };
 
@@ -57,4 +60,13 @@ test('nearby parsing rejects address-only and residence-like results', () => {
     ],
   }, origin);
   assert.deepEqual(result, []);
+});
+
+test('nearby selection reserves room for unknown public places in dense venue areas', () => {
+  const canonical = ['known-1', 'known-2', 'known-3', 'known-4', 'known-5', 'known-6'];
+  const external = ['unknown-1', 'unknown-2', 'unknown-3'];
+  const selected = selectNearbyPlaceCandidateSlots(canonical, external);
+
+  assert.deepEqual(selected.canonical, ['known-1', 'known-2', 'known-3']);
+  assert.deepEqual(selected.external, ['unknown-1', 'unknown-2']);
 });
