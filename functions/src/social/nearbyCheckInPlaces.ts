@@ -29,9 +29,20 @@ export interface ExternalCheckInPlaceSnapshot {
   longitude: number;
 }
 
+export interface PrivateCheckInPlaceSnapshot {
+  type: 'private_place';
+  locationKey: string;
+  name: string;
+  category: 'Private location';
+  latitude: number;
+  longitude: number;
+}
+
+export type CheckInPlaceSnapshot = ExternalCheckInPlaceSnapshot | PrivateCheckInPlaceSnapshot;
+
 export interface NearbyCheckInPlaceCandidate {
   id: string;
-  type: 'gathr_venue' | 'external_place';
+  type: 'gathr_venue' | 'external_place' | 'private_place';
   venueId?: string;
   name: string;
   address: string;
@@ -51,6 +62,55 @@ interface NearbyPlaceInput {
   longitude?: unknown;
   accuracyMeters?: unknown;
   capturedAtMs?: unknown;
+}
+
+interface PrivatePlaceInput extends NearbyPlaceInput {
+  label?: unknown;
+}
+
+const PRIVATE_PLACE_PRESET_LABELS = new Set([
+  'Home',
+  "Friend's place",
+  'Private gathering',
+  'Private place',
+]);
+
+function parsePrivatePlaceLabel(value: unknown): string {
+  const label = cleanText(value, 40) || 'Private place';
+  if (PRIVATE_PLACE_PRESET_LABELS.has(label)) return label;
+  const looksLikeAddress = /\b[A-Z]\d[A-Z][ -]?\d[A-Z]\d\b/i.test(label)
+    || /\b\d{1,6}\s+[\p{L}.'-]+(?:\s+[\p{L}.'-]+){0,4}\s+(?:street|st|road|rd|avenue|ave|drive|dr|lane|ln|court|ct|boulevard|blvd|highway|hwy)\b/iu.test(label);
+  if (looksLikeAddress) {
+    throw new SocialDomainError(
+      'invalid-argument',
+      'Use a private-place label, not a street address.'
+    );
+  }
+  if (label.length < 2) {
+    throw new SocialDomainError('invalid-argument', 'Private-place label is too short.');
+  }
+  return label;
+}
+
+function parseFreshNearbyLocation(
+  input: NearbyPlaceInput,
+  now: Timestamp
+): { latitude: number; longitude: number; accuracyMeters: number } {
+  const latitude = finiteCoordinate(input.latitude, -90, 90, 'latitude');
+  const longitude = finiteCoordinate(input.longitude, -180, 180, 'longitude');
+  const accuracyMeters = finiteCoordinate(input.accuracyMeters, 0, 10_000, 'accuracyMeters');
+  if (accuracyMeters > CHECK_IN_PLACE_MAX_ACCURACY_METRES) {
+    throw new SocialDomainError('failed-precondition', 'A more accurate location is needed nearby.');
+  }
+  const capturedAtMs = Number(input.capturedAtMs);
+  if (
+    !Number.isFinite(capturedAtMs)
+    || capturedAtMs < now.toMillis() - CHECK_IN_PLACE_LOCATION_MAX_AGE_MS
+    || capturedAtMs > now.toMillis() + 10_000
+  ) {
+    throw new SocialDomainError('failed-precondition', 'Refresh your location and try again.');
+  }
+  return { latitude, longitude, accuracyMeters };
 }
 
 export function selectNearbyPlaceCandidateSlots<TCanonical, TExternal>(
@@ -266,22 +326,9 @@ export async function discoverNearbyCheckInPlaces(
   } = {}
 ): Promise<{ candidates: NearbyCheckInPlaceCandidate[]; expiresAt: Timestamp }> {
   const uid = validateUid(uidValue, 'uid');
-  const latitude = finiteCoordinate(input.latitude, -90, 90, 'latitude');
-  const longitude = finiteCoordinate(input.longitude, -180, 180, 'longitude');
-  const accuracyMeters = finiteCoordinate(input.accuracyMeters, 0, 10_000, 'accuracyMeters');
-  if (accuracyMeters > CHECK_IN_PLACE_MAX_ACCURACY_METRES) {
-    throw new SocialDomainError('failed-precondition', 'A more accurate location is needed nearby.');
-  }
   const db = options.db || getFirestore();
   const now = options.now || Timestamp.now();
-  const capturedAtMs = Number(input.capturedAtMs);
-  if (
-    !Number.isFinite(capturedAtMs)
-    || capturedAtMs < now.toMillis() - CHECK_IN_PLACE_LOCATION_MAX_AGE_MS
-    || capturedAtMs > now.toMillis() + 10_000
-  ) {
-    throw new SocialDomainError('failed-precondition', 'Refresh your location to find nearby places.');
-  }
+  const { latitude, longitude, accuracyMeters } = parseFreshNearbyLocation(input, now);
   const expiresAt = Timestamp.fromMillis(now.toMillis() + CHECK_IN_PLACE_CANDIDATE_TTL_MS);
   const canonical = await nearbyCanonicalVenues(db, latitude, longitude, accuracyMeters, now);
   const overpassQuery = `[out:json][timeout:8];(`
@@ -366,6 +413,52 @@ export async function discoverNearbyCheckInPlaces(
   return { candidates, expiresAt };
 }
 
+export async function createPrivateCheckInPlaceCandidate(
+  uidValue: unknown,
+  input: PrivatePlaceInput,
+  options: { db?: Firestore; now?: Timestamp } = {}
+): Promise<{
+  candidate: NearbyCheckInPlaceCandidate & { type: 'private_place' };
+  expiresAt: Timestamp;
+}> {
+  const uid = validateUid(uidValue, 'uid');
+  const db = options.db || getFirestore();
+  const now = options.now || Timestamp.now();
+  const { latitude, longitude } = parseFreshNearbyLocation(input, now);
+  const name = parsePrivatePlaceLabel(input.label);
+  const candidateId = randomUUID();
+  const locationKey = `private:${createHash('sha256').update(candidateId).digest('hex').slice(0, 32)}`;
+  const expiresAt = Timestamp.fromMillis(now.toMillis() + CHECK_IN_PLACE_CANDIDATE_TTL_MS);
+  await db.collection('checkInPlaceCandidates').doc(candidateId).set({
+    uid,
+    candidateId,
+    source: 'user_private_place',
+    place: {
+      type: 'private_place',
+      locationKey,
+      name,
+      category: 'Private location',
+      latitude,
+      longitude,
+    },
+    createdAt: now,
+    expiresAt,
+  });
+  return {
+    candidate: {
+      id: candidateId,
+      type: 'private_place',
+      name,
+      address: '',
+      category: 'Private location',
+      latitude,
+      longitude,
+      distanceMetres: 0,
+    },
+    expiresAt,
+  };
+}
+
 export function validateExternalCheckInPlaceCandidate(
   candidate: DocumentData,
   uid: string,
@@ -395,6 +488,65 @@ export function validateExternalCheckInPlaceCandidate(
     throw new SocialDomainError('failed-precondition', 'Refresh nearby places and select this place again.');
   }
   return { type: 'external_place', locationKey, name, address, category, latitude, longitude };
+}
+
+export function validateCheckInPlaceCandidate(
+  candidate: DocumentData,
+  uid: string,
+  candidateId: string,
+  now: Timestamp
+): CheckInPlaceSnapshot {
+  const expiry = candidate.expiresAt;
+  const place = record(candidate.place);
+  if (
+    candidate.uid !== uid
+    || candidate.candidateId !== candidateId
+    || !(expiry instanceof Timestamp)
+    || expiry.toMillis() <= now.toMillis()
+    || candidate.consumedAt
+  ) {
+    throw new SocialDomainError('failed-precondition', 'Refresh this check-in place and try again.');
+  }
+  if (candidate.source === 'openstreetmap_overpass') {
+    return validateExternalCheckInPlaceCandidate(candidate, uid, candidateId, now);
+  }
+  if (candidate.source !== 'user_private_place' || place.type !== 'private_place') {
+    throw new SocialDomainError('failed-precondition', 'Refresh this check-in place and try again.');
+  }
+  const name = parsePrivatePlaceLabel(place.name);
+  const locationKey = cleanText(place.locationKey, 80);
+  const latitude = finiteCoordinate(place.latitude, -90, 90, 'candidate latitude');
+  const longitude = finiteCoordinate(place.longitude, -180, 180, 'candidate longitude');
+  if (!/^private:[a-f0-9]{32}$/.test(locationKey)) {
+    throw new SocialDomainError('failed-precondition', 'Refresh this check-in place and try again.');
+  }
+  return {
+    type: 'private_place',
+    locationKey,
+    name,
+    category: 'Private location',
+    latitude,
+    longitude,
+  };
+}
+
+export function approximatePrivateLocation(
+  latitudeValue: unknown,
+  longitudeValue: unknown,
+  cellSizeMetres = 750
+): { latitude: number; longitude: number } {
+  const latitude = finiteCoordinate(latitudeValue, -90, 90, 'latitude');
+  const longitude = finiteCoordinate(longitudeValue, -180, 180, 'longitude');
+  const boundedCellSize = Math.max(500, Math.min(1_500, cellSizeMetres));
+  const latitudeStep = boundedCellSize / 111_320;
+  const longitudeStep = boundedCellSize
+    / (111_320 * Math.max(0.2, Math.cos(latitude * Math.PI / 180)));
+  const snappedLatitude = (Math.floor(latitude / latitudeStep) + 0.5) * latitudeStep;
+  const snappedLongitude = (Math.floor(longitude / longitudeStep) + 0.5) * longitudeStep;
+  return {
+    latitude: Number(snappedLatitude.toFixed(6)),
+    longitude: Number(snappedLongitude.toFixed(6)),
+  };
 }
 
 export async function cleanupExpiredCheckInPlaceCandidates(

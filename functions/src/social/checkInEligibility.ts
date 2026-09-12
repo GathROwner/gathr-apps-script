@@ -11,7 +11,7 @@ import {
   validateUid,
   validateVenueId,
 } from './validation.js';
-import { validateExternalCheckInPlaceCandidate } from './nearbyCheckInPlaces.js';
+import { validateCheckInPlaceCandidate } from './nearbyCheckInPlaces.js';
 
 export const CHECK_IN_DWELL_TARGET_MS = 90_000;
 export const CHECK_IN_BASE_RADIUS_METRES = 50;
@@ -180,17 +180,17 @@ export async function recordCheckInEligibilitySample(
       throw new SocialDomainError('not-found', 'This venue is not currently available for check-in.');
     }
     const venue = venueSnapshot?.data() || {};
-    const externalPlace = placeCandidateId
-      ? validateExternalCheckInPlaceCandidate(
+    const candidatePlace = placeCandidateId
+      ? validateCheckInPlaceCandidate(
         placeCandidateSnapshot?.data() || {},
         uid,
         placeCandidateId,
         now
       )
       : null;
-    const targetLatitude = externalPlace?.latitude ?? parseLatitude(venue.latitude);
-    const targetLongitude = externalPlace?.longitude ?? parseLongitude(venue.longitude);
-    const locationKey = externalPlace?.locationKey || `venue:${venueId}`;
+    const targetLatitude = candidatePlace?.latitude ?? parseLatitude(venue.latitude);
+    const targetLongitude = candidatePlace?.longitude ?? parseLongitude(venue.longitude);
+    const locationKey = candidatePlace?.locationKey || `venue:${venueId}`;
     const candidateDistances = venueSnapshots.map((snapshot, index) => {
       if (!snapshot.exists) return null;
       const candidate = snapshot.data() || {};

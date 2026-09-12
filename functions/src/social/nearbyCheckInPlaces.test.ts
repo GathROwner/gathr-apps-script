@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import {
+  approximatePrivateLocation,
   parsePublicNearbyPlaces,
   selectNearbyPlaceCandidateSlots,
 } from './nearbyCheckInPlaces.js';
@@ -69,4 +70,15 @@ test('nearby selection reserves room for unknown public places in dense venue ar
 
   assert.deepEqual(selected.canonical, ['known-1', 'known-2', 'known-3']);
   assert.deepEqual(selected.external, ['unknown-1', 'unknown-2']);
+});
+
+test('private locations are projected to a neighbourhood-sized server grid', () => {
+  const exact = { latitude: 46.25391, longitude: -63.13988 };
+  const projected = approximatePrivateLocation(exact.latitude, exact.longitude);
+  const repeated = approximatePrivateLocation(exact.latitude, exact.longitude);
+
+  assert.deepEqual(projected, repeated);
+  assert.notDeepEqual(projected, exact);
+  assert.ok(Math.abs(projected.latitude - exact.latitude) < 0.01);
+  assert.ok(Math.abs(projected.longitude - exact.longitude) < 0.015);
 });

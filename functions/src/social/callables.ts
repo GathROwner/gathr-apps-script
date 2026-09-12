@@ -33,7 +33,10 @@ import {
   resolveFriendEventAddress,
   suggestFriendEventLocations,
 } from './friendEventGeocoding.js';
-import { discoverNearbyCheckInPlaces } from './nearbyCheckInPlaces.js';
+import {
+  createPrivateCheckInPlaceCandidate,
+  discoverNearbyCheckInPlaces,
+} from './nearbyCheckInPlaces.js';
 import { SOCIAL_REGION, SocialDomainError } from './validation.js';
 
 const options = {
@@ -161,6 +164,7 @@ export const createCheckInCallable = onCall(options, async (request) => {
       durationMinutes: data.durationMinutes,
       audienceMode: data.audienceMode,
       selectedUids: data.selectedUids,
+      shareExactLocation: data.shareExactLocation,
       message: data.message,
     });
   });
@@ -190,6 +194,21 @@ export const discoverNearbyCheckInPlacesCallable = onCall(releaseTwoOptions, asy
   return run(async () => {
     await enforceSocialRateLimit(uid, 'nearby_check_in_places', 20, 24 * 60 * 60_000);
     return discoverNearbyCheckInPlaces(uid, {
+      latitude: data.latitude,
+      longitude: data.longitude,
+      accuracyMeters: data.accuracyMeters,
+      capturedAtMs: data.capturedAtMs,
+    });
+  });
+});
+
+export const createPrivateCheckInPlaceCandidateCallable = onCall(releaseTwoOptions, async (request) => {
+  const uid = requireUid(request.auth);
+  const data = asData(request.data);
+  return run(async () => {
+    await enforceSocialRateLimit(uid, 'private_check_in_place', 20, 24 * 60 * 60_000);
+    return createPrivateCheckInPlaceCandidate(uid, {
+      label: data.label,
       latitude: data.latitude,
       longitude: data.longitude,
       accuracyMeters: data.accuracyMeters,

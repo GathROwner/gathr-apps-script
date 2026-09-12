@@ -316,6 +316,52 @@ try {
   await call(alice, 'checkOutCallable');
   assert.equal(await getDocument(bob, `users/${bob.uid}/friendActivity/${alice.uid}`), null);
 
+  const privateCandidateResult = await call(alice, 'createPrivateCheckInPlaceCandidateCallable', {
+    label: 'Home',
+    latitude: 46.25391,
+    longitude: -63.13988,
+    accuracyMeters: 8,
+    capturedAtMs: Date.now(),
+  });
+  const privateCandidate = privateCandidateResult.candidate;
+  assert.equal(privateCandidate.type, 'private_place');
+  assert.equal(privateCandidate.address, '');
+  const privateDwellSessionId = `live-${runId}-private-dwell`;
+  await call(alice, 'recordCheckInEligibilitySampleCallable', {
+    sessionId: privateDwellSessionId,
+    placeCandidateId: privateCandidate.id,
+    latitude: privateCandidate.latitude,
+    longitude: privateCandidate.longitude,
+    accuracyMeters: 8,
+    speedMetersPerSecond: 0,
+  });
+  const privateCompletedAt = Date.now();
+  await writeAdminFields(`checkInEligibilitySessions/${alice.uid}_${privateDwellSessionId}`, {
+    eligible: booleanValue(true),
+    qualifyingMs: integerValue(90_000),
+    completedAt: timestampValue(privateCompletedAt),
+    completedExpiresAt: timestampValue(privateCompletedAt + 5 * 60_000),
+    expiresAt: timestampValue(privateCompletedAt + 5 * 60_000),
+  });
+  const privateCheckIn = await call(alice, 'createCheckInCallable', {
+    operationId: `live-${runId}-private`,
+    eligibilitySessionId: privateDwellSessionId,
+    placeCandidateId: privateCandidate.id,
+    durationMinutes: 30,
+    audienceMode: 'all_friends',
+    shareExactLocation: false,
+    message: 'Private place staging smoke test',
+  });
+  assert.equal(privateCheckIn.locationType, 'private_place');
+  const privateActivity = await getDocument(bob, `users/${bob.uid}/friendActivity/${alice.uid}`);
+  assert.equal(field(privateActivity, 'locationType'), 'private_place');
+  assert.equal(field(privateActivity, 'locationPrecision'), 'approximate');
+  assert.notEqual(Number(field(privateActivity, 'latitude')), privateCandidate.latitude);
+  assert.notEqual(Number(field(privateActivity, 'longitude')), privateCandidate.longitude);
+  assert.equal(field(privateActivity, 'placeAddress'), undefined);
+  await call(alice, 'checkOutCallable');
+  assert.equal(await getDocument(bob, `users/${bob.uid}/friendActivity/${alice.uid}`), null);
+
   const privateAddress = '156 Great George Street, Charlottetown, PE C1A 1N9';
   const startAtMs = Date.now() + 24 * 60 * 60_000;
   const baseEventInput = {

@@ -30,6 +30,7 @@ import {
 } from '../lib/social/checkInEligibility.js';
 import {
   cleanupExpiredCheckInPlaceCandidates,
+  createPrivateCheckInPlaceCandidate,
   discoverNearbyCheckInPlaces,
 } from '../lib/social/nearbyCheckInPlaces.js';
 
@@ -121,6 +122,33 @@ async function makeExternalEligible(uid, candidateId) {
     expiresAt: Timestamp.fromMillis(Date.now() + 5 * 60_000),
   });
   return sessionId;
+}
+
+async function makePrivateEligible(uid, label = 'Home') {
+  const now = Timestamp.now();
+  const created = await createPrivateCheckInPlaceCandidate(uid, {
+    label,
+    latitude: 46.25391,
+    longitude: -63.13988,
+    accuracyMeters: 8,
+    capturedAtMs: now.toMillis(),
+  }, { db, now });
+  const candidateId = created.candidate.id;
+  const sessionId = `private-${++eligibilitySequence}`;
+  await db.doc(`checkInEligibilitySessions/${uid}_${sessionId}`).set({
+    uid,
+    sessionId,
+    placeCandidateId: candidateId,
+    locationKey: `private:${'0'.repeat(32)}`,
+    eligible: true,
+    qualifyingMs: CHECK_IN_DWELL_TARGET_MS,
+    completedExpiresAt: Timestamp.fromMillis(Date.now() + 5 * 60_000),
+    expiresAt: Timestamp.fromMillis(Date.now() + 5 * 60_000),
+  });
+  const candidate = (await db.doc(`checkInPlaceCandidates/${candidateId}`).get()).data();
+  const locationKey = candidate?.place?.locationKey;
+  await db.doc(`checkInEligibilitySessions/${uid}_${sessionId}`).update({ locationKey });
+  return { candidateId, sessionId, locationKey };
 }
 
 before(async () => {
@@ -419,6 +447,61 @@ test('external check-in uses the existing consent projection and retry contract'
   await blockUser('bob', 'alice', db);
   assert.equal((await db.doc('users/bob/friendActivity/alice').get()).exists, false);
   assert.deepEqual((await db.doc('activeCheckIns/alice').get()).data()?.viewerUids, []);
+});
+
+test('private check-in projects only a coarse point to all friends', async () => {
+  await Promise.all([makeFriends('alice', 'bob'), makeFriends('alice', 'charlie')]);
+  const { candidateId, sessionId } = await makePrivateEligible('alice', 'Home');
+  const created = await createCheckIn('alice', {
+    operationId: 'private-approximate-operation-001',
+    eligibilitySessionId: sessionId,
+    placeCandidateId: candidateId,
+    durationMinutes: 30,
+    audienceMode: 'all_friends',
+    shareExactLocation: false,
+  }, db);
+
+  assert.equal(created.locationType, 'private_place');
+  assert.equal(created.venueNameSnapshot, 'Home');
+  assert.equal(created.locationPrecision, 'exact');
+  assert.equal(Object.hasOwn(created, 'placeAddress'), false);
+  for (const viewerUid of ['bob', 'charlie']) {
+    const projection = (await db.doc(`users/${viewerUid}/friendActivity/alice`).get()).data();
+    assert.equal(projection?.locationType, 'private_place');
+    assert.equal(projection?.locationPrecision, 'approximate');
+    assert.notEqual(projection?.latitude, created.latitude);
+    assert.notEqual(projection?.longitude, created.longitude);
+    assert.equal(Object.hasOwn(projection || {}, 'placeAddress'), false);
+  }
+});
+
+test('private exact pin requires and reaches only explicitly selected friends', async () => {
+  await Promise.all([makeFriends('alice', 'bob'), makeFriends('alice', 'charlie')]);
+  const first = await makePrivateEligible('alice', 'Private gathering');
+  await assert.rejects(() => createCheckIn('alice', {
+    operationId: 'private-invalid-exact-operation-001',
+    eligibilitySessionId: first.sessionId,
+    placeCandidateId: first.candidateId,
+    durationMinutes: 30,
+    audienceMode: 'all_friends',
+    shareExactLocation: true,
+  }, db), (error) => error?.code === 'invalid-argument');
+
+  const second = await makePrivateEligible('alice', "Friend's place");
+  const created = await createCheckIn('alice', {
+    operationId: 'private-selected-exact-operation-001',
+    eligibilitySessionId: second.sessionId,
+    placeCandidateId: second.candidateId,
+    durationMinutes: 30,
+    audienceMode: 'selected_friends',
+    selectedUids: ['bob'],
+    shareExactLocation: true,
+  }, db);
+  const bobProjection = (await db.doc('users/bob/friendActivity/alice').get()).data();
+  assert.equal(bobProjection?.locationPrecision, 'exact');
+  assert.equal(bobProjection?.latitude, created.latitude);
+  assert.equal(bobProjection?.longitude, created.longitude);
+  assert.equal((await db.doc('users/charlie/friendActivity/alice').get()).exists, false);
 });
 
 test('expired external candidates are removed by cleanup', async () => {

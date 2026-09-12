@@ -30,7 +30,10 @@ import {
   assertCompletedCheckInEligibility,
   checkInEligibilitySessionId,
 } from './checkInEligibility.js';
-import { validateExternalCheckInPlaceCandidate } from './nearbyCheckInPlaces.js';
+import {
+  approximatePrivateLocation,
+  validateCheckInPlaceCandidate,
+} from './nearbyCheckInPlaces.js';
 import {
   cleanupFriendEventsForAccount,
   revokeFriendEventAccessBetween,
@@ -71,6 +74,7 @@ export interface CheckInInput {
   durationMinutes: unknown;
   audienceMode: unknown;
   selectedUids?: unknown;
+  shareExactLocation?: unknown;
   message?: unknown;
 }
 
@@ -576,6 +580,16 @@ export async function createCheckIn(
     : '';
   const durationMinutes = parseCheckInDuration(input.durationMinutes);
   const audience = parseAudience(input.audienceMode, input.selectedUids);
+  const shareExactLocation = input.shareExactLocation === true;
+  if (input.shareExactLocation !== undefined && typeof input.shareExactLocation !== 'boolean') {
+    throw new SocialDomainError('invalid-argument', 'Exact-location choice is invalid.');
+  }
+  if (shareExactLocation && audience.mode !== 'selected_friends') {
+    throw new SocialDomainError(
+      'invalid-argument',
+      'Exact location can only be shared with friends you explicitly choose.'
+    );
+  }
   const message = normalizeCheckInMessage(input.message);
   const operationId = validateSocialOperationId(input.operationId ?? randomUUID());
   const eligibilitySessionId = input.eligibilitySessionId === undefined
@@ -588,6 +602,7 @@ export async function createCheckIn(
     placeCandidateId: placeCandidateId || null,
     durationMinutes,
     audience,
+    shareExactLocation,
     message,
     eligibilitySessionId,
   })).digest('hex');
@@ -647,15 +662,21 @@ export async function createCheckIn(
     }
     const ownerData = assertExisting(baseSnapshots[0], 'Your user profile');
     const venueData = venueId ? assertExisting(baseSnapshots[1], 'Venue') : {};
-    const externalPlace = placeCandidateId
-      ? validateExternalCheckInPlaceCandidate(
+    const candidatePlace = placeCandidateId
+      ? validateCheckInPlaceCandidate(
         baseSnapshots[1].data() || {},
         ownerUid,
         placeCandidateId,
         createdAt
       )
       : null;
-    const venueLocationKey = externalPlace?.locationKey || `venue:${venueId}`;
+    if (shareExactLocation && candidatePlace?.type !== 'private_place') {
+      throw new SocialDomainError(
+        'invalid-argument',
+        'Exact-location sharing is only available for a private place.'
+      );
+    }
+    const venueLocationKey = candidatePlace?.locationKey || `venue:${venueId}`;
     if (venueId && venueData.socialVenueMirrorSource === 'gathr-event-api') {
       const mirrorExpiresAt = venueData.socialVenueMirrorExpiresAt;
       if (!(mirrorExpiresAt instanceof Timestamp) || mirrorExpiresAt.toMillis() <= createdAt.toMillis()) {
@@ -710,7 +731,7 @@ export async function createCheckIn(
     }
 
     const ownerProfile = safeProfile(ownerUid, ownerData);
-    const venueName = externalPlace?.name
+    const venueName = candidatePlace?.name
       || text(venueData.pagename, 120)
       || text(venueData.title, 120)
       || text(venueData.name, 120)
@@ -723,20 +744,24 @@ export async function createCheckIn(
       transaction.delete(activityRef(db, previousViewerUid, ownerUid));
     }
 
+    const privatePlace = candidatePlace?.type === 'private_place' ? candidatePlace : null;
+    const externalPlace = candidatePlace?.type === 'external_place' ? candidatePlace : null;
     const checkIn = {
       ownerUid,
       ...(venueId ? { venueId } : {}),
-      locationType: externalPlace ? 'external_place' : 'gathr_venue',
+      locationType: candidatePlace?.type || 'gathr_venue',
       venueLocationKey,
       venueNameSnapshot: venueName,
-      ...(externalPlace ? {
-        placeAddress: externalPlace.address,
-        placeCategory: externalPlace.category,
-        latitude: externalPlace.latitude,
-        longitude: externalPlace.longitude,
+      ...(candidatePlace ? {
+        ...(externalPlace ? { placeAddress: externalPlace.address } : {}),
+        placeCategory: candidatePlace.category,
+        latitude: candidatePlace.latitude,
+        longitude: candidatePlace.longitude,
+        locationPrecision: 'exact',
       } : {}),
       audienceMode: audience.mode,
       selectedUids: audience.mode === 'selected_friends' ? audience.selectedUids : [],
+      shareExactLocation: Boolean(privatePlace && shareExactLocation),
       viewerUids,
       viewerCount: viewerUids.length,
       message,
@@ -752,20 +777,24 @@ export async function createCheckIn(
         consumedCheckInRevision: revision,
       });
     }
-    if (externalPlace) {
+    if (candidatePlace) {
       transaction.update(locationRef, {
         consumedAt: createdAt,
         consumedCheckInRevision: revision,
       });
     }
+    const approximatePrivate = privatePlace
+      ? approximatePrivateLocation(privatePlace.latitude, privatePlace.longitude)
+      : null;
     for (const viewerUid of viewerUids) {
+      const receivesExactPrivateLocation = Boolean(privatePlace && shareExactLocation);
       transaction.set(activityRef(db, viewerUid, ownerUid), {
         ownerUid,
         displayName: ownerProfile.displayName,
         photoURL: ownerProfile.photoURL,
         socialHandle: ownerProfile.socialHandle,
         ...(venueId ? { venueId } : {}),
-        locationType: externalPlace ? 'external_place' : 'gathr_venue',
+        locationType: candidatePlace?.type || 'gathr_venue',
         venueLocationKey,
         venueName,
         ...(externalPlace ? {
@@ -773,6 +802,16 @@ export async function createCheckIn(
           placeCategory: externalPlace.category,
           latitude: externalPlace.latitude,
           longitude: externalPlace.longitude,
+          locationPrecision: 'exact',
+        } : privatePlace && approximatePrivate ? {
+          placeCategory: privatePlace.category,
+          latitude: receivesExactPrivateLocation
+            ? privatePlace.latitude
+            : approximatePrivate.latitude,
+          longitude: receivesExactPrivateLocation
+            ? privatePlace.longitude
+            : approximatePrivate.longitude,
+          locationPrecision: receivesExactPrivateLocation ? 'exact' : 'approximate',
         } : {}),
         message,
         createdAt,
@@ -784,9 +823,9 @@ export async function createCheckIn(
       uid: ownerUid,
       action: 'create_check_in',
       inputHash,
-      ...(externalPlace ? { resultRevision: revision } : { result: checkIn }),
+      ...(candidatePlace ? { resultRevision: revision } : { result: checkIn }),
       createdAt,
-      expiresAt: externalPlace
+      expiresAt: candidatePlace
         ? Timestamp.fromMillis(expiresAt.toMillis() + 5 * 60_000)
         : Timestamp.fromMillis(createdAt.toMillis() + 24 * 60 * 60_000),
     });
