@@ -90,7 +90,8 @@ async function seedExternalCandidate(uid, candidateId, expiresAt = Date.now() + 
   await db.doc(`checkInPlaceCandidates/${candidateId}`).set({
     uid,
     candidateId,
-    source: 'mapbox_search_box',
+    source: 'openstreetmap_overpass',
+    osmElementKeyHash: '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef',
     place: {
       type: 'external_place',
       locationKey,
@@ -312,36 +313,26 @@ test('nearby discovery prioritizes canonical venues and issues opaque external c
     longitude: -63.1311,
     accuracyMeters: 8,
     capturedAtMs: Date.now(),
-  }, 'test-token', {
+  }, {
     db,
     fetchImpl: async () => new Response(JSON.stringify({
-      features: [
+      elements: [
         {
-          geometry: { coordinates: [-63.13108, 46.23818] },
-          properties: {
-            mapbox_id: 'poi.the-oak',
-            feature_type: 'poi',
-            name: 'The Oak Downtown',
-            full_address: '172 Great George St, Charlottetown, PE, Canada',
-            poi_category: ['pub'],
+          type: 'node', id: 6595141644, lat: 46.23818, lon: -63.13108,
+          tags: {
+            name: 'The Oak Downtown', amenity: 'pub',
+            'addr:housenumber': '156', 'addr:street': 'Great George Street',
+            'addr:city': 'Charlottetown',
           },
         },
-        {
-          geometry: { coordinates: [-63.13108, 46.23818] },
-          properties: {
-            mapbox_id: 'address.home',
-            feature_type: 'address',
-            name: '172 Great George St',
-            full_address: '172 Great George St, Charlottetown, PE, Canada',
-          },
-        },
+        { type: 'node', id: 2, lat: 46.23818, lon: -63.13108, tags: { name: 'Address only' } },
       ],
     }), { status: 200 }),
   });
   assert.equal(result.candidates[0]?.type, 'gathr_venue');
   const external = result.candidates.find((candidate) => candidate.type === 'external_place');
   assert.ok(external);
-  assert.doesNotMatch(external.id, /mapbox|the-oak/i);
+  assert.doesNotMatch(external.id, /openstreetmap|the-oak/i);
   assert.equal(external.name, 'The Oak Downtown');
   const stored = await db.doc(`checkInPlaceCandidates/${external.id}`).get();
   assert.equal(stored.data()?.uid, 'alice');
@@ -413,7 +404,7 @@ test('external check-in uses the existing consent projection and retry contract'
   assert.equal(bobProjection?.longitude, -63.1311);
   assert.equal(bobProjection?.placeCategory, 'Pub');
   assert.equal((await db.doc('users/charlie/friendActivity/alice').get()).exists, false);
-  assert.equal(Object.hasOwn(bobProjection || {}, 'mapboxId'), false);
+  assert.equal(Object.hasOwn(bobProjection || {}, 'osmElementKey'), false);
   const operation = await db.collection('socialOperations').limit(1).get();
   assert.equal(operation.docs[0]?.data().result, undefined);
   assert.equal(operation.docs[0]?.data().resultRevision, created.revision);

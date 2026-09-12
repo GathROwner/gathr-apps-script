@@ -184,42 +184,37 @@ export const recordCheckInEligibilitySampleCallable = onCall(releaseTwoOptions, 
   });
 });
 
-export const discoverNearbyCheckInPlacesCallable = onCall(friendEventOptions, async (request) => {
+export const discoverNearbyCheckInPlacesCallable = onCall(releaseTwoOptions, async (request) => {
   const uid = requireUid(request.auth);
   const data = asData(request.data);
   return run(async () => {
-    await enforceSocialRateLimit(uid, 'nearby_check_in_places', 60, 60 * 60_000);
+    await enforceSocialRateLimit(uid, 'nearby_check_in_places', 20, 24 * 60 * 60_000);
     return discoverNearbyCheckInPlaces(uid, {
       latitude: data.latitude,
       longitude: data.longitude,
       accuracyMeters: data.accuracyMeters,
       capturedAtMs: data.capturedAtMs,
-    }, friendEventGeocodingToken.value());
+    });
   });
 });
 
-export const createFriendEventCallable = onCall(friendEventOptions, async (request) => {
+export const createFriendEventCallable = onCall(releaseTwoOptions, async (request) => {
   const uid = requireUid(request.auth);
   const data = asData(request.data);
   return run(async () => {
     await enforceSocialRateLimit(uid, 'create_friend_event', 20, 24 * 60 * 60_000);
-    const resolved = await resolveFriendEventAddress(
-      data,
-      friendEventGeocodingToken.value(),
-      { allowTrustedCoordinates: process.env.FUNCTIONS_EMULATOR === 'true' }
-    );
+    const resolved = await resolveFriendEventAddress(data);
     return createFriendEvent(uid, resolved as unknown as Parameters<typeof createFriendEvent>[1]);
   });
 });
 
-export const geocodeFriendEventAddressCallable = onCall(friendEventOptions, async (request) => {
+export const geocodeFriendEventAddressCallable = onCall(releaseTwoOptions, async (request) => {
   const uid = requireUid(request.auth);
   const data = asData(request.data);
   return run(async () => {
     await enforceSocialRateLimit(uid, 'friend_event_geocode', 30, 60 * 60_000);
     const resolved = await resolveFriendEventAddress(
-      { location: { type: 'custom_address', address: data.address } },
-      friendEventGeocodingToken.value()
+      { location: { type: 'custom_address', address: data.address } }
     );
     const location = asData(resolved.location);
     return { latitude: location.latitude, longitude: location.longitude };
@@ -244,15 +239,11 @@ export const retrieveFriendEventLocationSuggestionCallable = onCall(friendEventO
   });
 });
 
-export const updateFriendEventCallable = onCall(friendEventOptions, async (request) => {
+export const updateFriendEventCallable = onCall(releaseTwoOptions, async (request) => {
   const uid = requireUid(request.auth);
   const data = asData(request.data);
   return run(async () => {
-    const resolved = await resolveFriendEventAddress(
-      data,
-      friendEventGeocodingToken.value(),
-      { allowTrustedCoordinates: process.env.FUNCTIONS_EMULATOR === 'true' }
-    );
+    const resolved = await resolveFriendEventAddress(data);
     return updateFriendEvent(
       uid,
       resolved.eventId,

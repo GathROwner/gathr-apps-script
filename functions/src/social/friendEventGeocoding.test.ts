@@ -17,50 +17,73 @@ const customInput = {
   },
 };
 
-test('server geocoding replaces client preview coordinates without changing the private address', async () => {
+test('server geocoding replaces every temporary preview field with storable OSM values', async () => {
   let requestedUrl = '';
-  const resolved = await resolveFriendEventAddress(customInput, 'test-token', {
+  const resolved = await resolveFriendEventAddress({
+    ...customInput,
+    location: {
+      ...customInput.location,
+      placeName: 'Temporary preview name',
+      address: 'Temporary preview address, Charlottetown PE',
+    },
+  }, {
     fetchImpl: async (input) => {
       requestedUrl = String(input);
-      return new Response(JSON.stringify({
-        features: [{ geometry: { coordinates: [-63.126, 46.234] } }],
-      }), { status: 200 });
+      return new Response(JSON.stringify([{
+        lat: '46.234',
+        lon: '-63.126',
+        name: 'OpenStreetMap place name',
+        display_name: '123 Water Street, Charlottetown, Prince Edward Island, Canada',
+      }]), { status: 200 });
     },
   });
   const location = resolved.location as Record<string, unknown>;
-  assert.equal(location.address, '123 Water Street, Charlottetown PE');
+  assert.equal(location.placeName, 'OpenStreetMap place name');
+  assert.equal(location.address, '123 Water Street, Charlottetown, Prince Edward Island, Canada');
   assert.equal(location.latitude, 46.234);
   assert.equal(location.longitude, -63.126);
-  assert.match(requestedUrl, /api\.mapbox\.com\/search\/geocode\/v6\/forward/);
-  assert.equal(new URL(requestedUrl).searchParams.get('permanent'), 'true');
-  const requestedTypes = new URL(requestedUrl).searchParams.get('types');
-  assert.equal(requestedTypes, 'address,street,place,locality');
-  assert.doesNotMatch(requestedTypes || '', /poi/);
+  const requested = new URL(requestedUrl);
+  assert.equal(requested.hostname, 'nominatim.openstreetmap.org');
+  assert.equal(requested.pathname, '/search');
+  assert.equal(
+    requested.searchParams.get('q'),
+    'Temporary preview name, Temporary preview address, Charlottetown PE'
+  );
+  assert.equal(requested.searchParams.get('countrycodes'), 'ca');
+  assert.equal(requested.searchParams.get('addressdetails'), '1');
+  assert.equal(requested.searchParams.has('permanent'), false);
 });
 
-test('server geocoding trims secret transport whitespace before calling Mapbox', async () => {
+test('server geocoding identifies GathR and requests JSON from Nominatim', async () => {
   let requestedUrl = '';
-  await resolveFriendEventAddress(customInput, '  test-token\r\n', {
-    fetchImpl: async (input) => {
+  let requestedHeaders: unknown;
+  await resolveFriendEventAddress(customInput, {
+    fetchImpl: async (input, init) => {
       requestedUrl = String(input);
-      return new Response(JSON.stringify({
-        features: [{ geometry: { coordinates: [-63.126, 46.234] } }],
-      }), { status: 200 });
+      requestedHeaders = init?.headers;
+      return new Response(JSON.stringify([{
+        lat: '46.234',
+        lon: '-63.126',
+        display_name: '123 Water Street, Charlottetown, Prince Edward Island, Canada',
+      }]), { status: 200 });
     },
   });
-  assert.equal(new URL(requestedUrl).searchParams.get('access_token'), 'test-token');
+  assert.equal(new URL(requestedUrl).searchParams.get('format'), 'jsonv2');
+  assert.match(JSON.stringify(requestedHeaders), /GathRPreview/);
 });
 
-test('production custom addresses fail closed without a server geocoding token', async () => {
+test('custom addresses fail closed when Nominatim returns no match', async () => {
   await assert.rejects(
-    () => resolveFriendEventAddress(customInput, ''),
-    /verification is temporarily unavailable/
+    () => resolveFriendEventAddress(customInput, {
+      fetchImpl: async () => new Response(JSON.stringify([]), { status: 200 }),
+    }),
+    /could not be located/
   );
 });
 
 test('non-address locations never call the geocoder', async () => {
   const input = { location: { type: 'online', onlineUrl: 'https://example.com' } };
-  const result = await resolveFriendEventAddress(input, 'test-token', {
+  const result = await resolveFriendEventAddress(input, {
     fetchImpl: async () => { throw new Error('should not run'); },
   });
   assert.equal(result, input);

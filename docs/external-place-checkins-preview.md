@@ -5,7 +5,7 @@ This experiment lets an authenticated Preview user explicitly check in at a near
 ## Trust and privacy contract
 
 - `discoverNearbyCheckInPlacesCallable` accepts the current foreground latitude, longitude, and accuracy. It returns at most five nearby choices, with recognized GathR venues first.
-- Mapbox Search Box results are filtered to `poi` features. Address-only results, raw pins, and residence-like categories are rejected.
+- OpenStreetMap results are restricted to named public amenities, shops, tourism locations, and leisure venues. Address-only results, raw pins, and residence-like categories are rejected. The public-service endpoints are server-configurable so Preview can be moved off them without a mobile update.
 - External results are stored only as opaque, user-bound `checkInPlaceCandidates` records with a 15-minute expiry. The app never submits a trusted name, address, or coordinate.
 - Selecting a result does not check the user in. `recordCheckInEligibilitySampleCallable` still requires the existing 90-second stationary dwell with the existing accuracy, speed, distance, reset, and expiry limits.
 - `createCheckInCallable` remains the explicit consent action. It preserves audience, duration, optional message, blocking, idempotency, and expiry behavior.
@@ -50,4 +50,4 @@ Canonical venue requests continue to use `venueId` and are backward-compatible. 
 
 ## Release boundary
 
-This feature is staging/Preview-only. Do not deploy it to Production until GathR has a Mapbox agreement that permits the required active-check-in/projection storage, or uses a POI provider and contract that permits it. Search Box response data must not become a permanent GathR venue or event catalogue.
+This feature is staging/Preview-only. It uses the public Overpass API only for explicit, low-volume user requests, with cached opaque candidates and OpenStreetMap attribution. Do not deploy it to Production until GathR uses a hosted or paid OpenStreetMap-compatible provider with an appropriate service level and capacity agreement.

@@ -41,7 +41,7 @@ export interface NearbyCheckInPlaceCandidate {
 }
 
 interface ParsedExternalPlace extends ExternalCheckInPlaceSnapshot {
-  mapboxId: string;
+  osmElementKey: string;
   distanceMetres: number;
 }
 
@@ -96,13 +96,23 @@ function normalizedMatchText(value: string): string {
     .toLocaleLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
 }
 
-function firstCategory(properties: Record<string, unknown>): string {
-  const categoryValues = [
-    ...(Array.isArray(properties.poi_category) ? properties.poi_category : []),
-    properties.category,
-    properties.maki,
-  ];
-  return cleanText(categoryValues.find((value) => cleanText(value)), 80) || 'Place';
+function firstCategory(tags: Record<string, unknown>): string {
+  return cleanText(
+    tags.amenity || tags.shop || tags.tourism || tags.leisure || tags.office || tags.craft,
+    80
+  ).replace(/_/g, ' ') || 'Place';
+}
+
+function osmAddress(tags: Record<string, unknown>): string {
+  const streetAddress = [cleanText(tags['addr:housenumber'], 30), cleanText(tags['addr:street'], 120)]
+    .filter(Boolean)
+    .join(' ');
+  return [
+    streetAddress,
+    cleanText(tags['addr:city'], 100),
+    cleanText(tags['addr:province'], 100) || cleanText(tags['addr:state'], 100),
+    cleanText(tags['addr:postcode'], 30),
+  ].filter(Boolean).join(', ');
 }
 
 const DISALLOWED_PUBLIC_PLACE_TERMS = [
@@ -120,44 +130,49 @@ export function parsePublicNearbyPlaces(
   payload: unknown,
   origin: { latitude: number; longitude: number }
 ): ParsedExternalPlace[] {
-  const features = Array.isArray(record(payload).features)
-    ? record(payload).features as unknown[]
+  const elements = Array.isArray(record(payload).elements)
+    ? record(payload).elements as unknown[]
     : [];
   const seen = new Set<string>();
   const parsed: ParsedExternalPlace[] = [];
-  for (const rawFeature of features) {
-    const feature = record(rawFeature);
-    const properties = record(feature.properties);
-    const geometry = record(feature.geometry);
-    const coordinates = Array.isArray(geometry.coordinates) ? geometry.coordinates : [];
-    const featureType = cleanText(properties.feature_type || feature.type, 40).toLocaleLowerCase();
-    if (featureType !== 'poi') continue;
-    const mapboxId = cleanText(properties.mapbox_id || feature.id, 500);
-    const name = cleanText(properties.name_preferred || properties.name, 120);
-    const address = cleanText(properties.full_address, 300)
-      || [cleanText(properties.address, 160), cleanText(properties.place_formatted, 200)]
-        .filter(Boolean).join(', ');
-    const category = firstCategory(properties);
-    const latitude = Number(coordinates[1]);
-    const longitude = Number(coordinates[0]);
+  for (const rawElement of elements) {
+    const element = record(rawElement);
+    const tags = record(element.tags);
+    const center = record(element.center);
+    const elementType = cleanText(element.type, 20).toLocaleLowerCase();
+    const elementId = cleanText(
+      typeof element.id === 'number' ? String(element.id) : element.id,
+      60
+    );
+    if (!['node', 'way', 'relation'].includes(elementType)) continue;
+    const name = cleanText(tags.name, 120);
+    const address = osmAddress(tags);
+    const hasPublicPlaceTag = Boolean(cleanText(
+      tags.amenity || tags.shop || tags.tourism || tags.leisure || tags.office || tags.craft,
+      80
+    ));
+    const category = firstCategory(tags);
+    const latitude = Number(element.lat ?? center.lat);
+    const longitude = Number(element.lon ?? center.lon);
     if (
-      !mapboxId || !name || !address
+      !elementId || !name || !hasPublicPlaceTag
       || !Number.isFinite(latitude) || latitude < -90 || latitude > 90
       || !Number.isFinite(longitude) || longitude < -180 || longitude > 180
     ) continue;
-    const publicDescriptor = normalizedMatchText(`${category} ${properties.poi_category_ids || ''}`);
+    const publicDescriptor = normalizedMatchText(category);
     if (DISALLOWED_PUBLIC_PLACE_TERMS.some((term) => publicDescriptor.includes(term))) continue;
     const distance = distanceMetres(origin.latitude, origin.longitude, latitude, longitude);
     if (distance > CHECK_IN_PLACE_DISCOVERY_RADIUS_METRES) continue;
-    const dedupeKey = `${normalizedMatchText(name)}|${normalizedMatchText(address)}`;
+    const dedupeKey = `${normalizedMatchText(name)}|${normalizedMatchText(address) || elementType + elementId}`;
     if (seen.has(dedupeKey)) continue;
     seen.add(dedupeKey);
+    const osmElementKey = `${elementType}:${elementId}`;
     parsed.push({
       type: 'external_place',
-      mapboxId,
-      locationKey: `external:${createHash('sha256').update(mapboxId).digest('hex').slice(0, 32)}`,
+      osmElementKey,
+      locationKey: `external:${createHash('sha256').update(osmElementKey).digest('hex').slice(0, 32)}`,
       name,
-      address,
+      address: address || 'Address not listed',
       category,
       latitude,
       longitude,
@@ -228,11 +243,11 @@ function externalMatchesCanonical(
 export async function discoverNearbyCheckInPlaces(
   uidValue: unknown,
   input: NearbyPlaceInput,
-  accessToken: string,
   options: {
     db?: Firestore;
     fetchImpl?: FetchLike;
     now?: Timestamp;
+    overpassEndpoint?: string;
   } = {}
 ): Promise<{ candidates: NearbyCheckInPlaceCandidate[]; expiresAt: Timestamp }> {
   const uid = validateUid(uidValue, 'uid');
@@ -241,10 +256,6 @@ export async function discoverNearbyCheckInPlaces(
   const accuracyMeters = finiteCoordinate(input.accuracyMeters, 0, 10_000, 'accuracyMeters');
   if (accuracyMeters > CHECK_IN_PLACE_MAX_ACCURACY_METRES) {
     throw new SocialDomainError('failed-precondition', 'A more accurate location is needed nearby.');
-  }
-  const token = accessToken.trim();
-  if (!token) {
-    throw new SocialDomainError('failed-precondition', 'Nearby places are temporarily unavailable.');
   }
   const db = options.db || getFirestore();
   const now = options.now || Timestamp.now();
@@ -258,16 +269,25 @@ export async function discoverNearbyCheckInPlaces(
   }
   const expiresAt = Timestamp.fromMillis(now.toMillis() + CHECK_IN_PLACE_CANDIDATE_TTL_MS);
   const canonical = await nearbyCanonicalVenues(db, latitude, longitude, accuracyMeters, now);
-  const url = new URL('https://api.mapbox.com/search/searchbox/v1/reverse');
-  url.searchParams.set('longitude', String(longitude));
-  url.searchParams.set('latitude', String(latitude));
-  url.searchParams.set('types', 'poi');
-  url.searchParams.set('limit', '10');
-  url.searchParams.set('access_token', token);
+  const overpassQuery = `[out:json][timeout:8];(`
+    + `nwr(around:${CHECK_IN_PLACE_DISCOVERY_RADIUS_METRES},${latitude},${longitude})["name"]["amenity"];`
+    + `nwr(around:${CHECK_IN_PLACE_DISCOVERY_RADIUS_METRES},${latitude},${longitude})["name"]["shop"];`
+    + `nwr(around:${CHECK_IN_PLACE_DISCOVERY_RADIUS_METRES},${latitude},${longitude})["name"]["tourism"];`
+    + `nwr(around:${CHECK_IN_PLACE_DISCOVERY_RADIUS_METRES},${latitude},${longitude})["name"]["leisure"];`
+    + `);out center tags;`;
+  const endpoint = options.overpassEndpoint
+    || process.env.OVERPASS_API_ENDPOINT
+    || 'https://overpass-api.de/api/interpreter';
   let response: Response;
   try {
-    response = await (options.fetchImpl || fetch)(url, {
-      headers: { Accept: 'application/json' },
+    response = await (options.fetchImpl || fetch)(endpoint, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+        'User-Agent': 'GathRPreview/1.1 (support@gathr.app)',
+      },
+      body: new URLSearchParams({ data: overpassQuery }),
       signal: AbortSignal.timeout(8_000),
     });
   } catch {
@@ -287,8 +307,8 @@ export async function discoverNearbyCheckInPlaces(
     batch.set(db.collection('checkInPlaceCandidates').doc(candidateId), {
       uid,
       candidateId,
-      source: 'mapbox_search_box',
-      mapboxIdHash: createHash('sha256').update(candidate.mapboxId).digest('hex'),
+      source: 'openstreetmap_overpass',
+      osmElementKeyHash: createHash('sha256').update(candidate.osmElementKey).digest('hex'),
       place: {
         type: candidate.type,
         locationKey: candidate.locationKey,
@@ -327,7 +347,7 @@ export function validateExternalCheckInPlaceCandidate(
   if (
     candidate.uid !== uid
     || candidate.candidateId !== candidateId
-    || candidate.source !== 'mapbox_search_box'
+    || candidate.source !== 'openstreetmap_overpass'
     || !(expiry instanceof Timestamp)
     || expiry.toMillis() <= now.toMillis()
     || candidate.consumedAt

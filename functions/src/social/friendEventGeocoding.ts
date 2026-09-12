@@ -161,7 +161,7 @@ export async function suggestFriendEventLocations(
 /**
  * Complete a Search Box session after the user deliberately selects a result.
  * These coordinates are only a client preview; create/update replaces them via
- * the permanent server geocode before anything is stored.
+ * an independently licensed server geocode before anything is stored.
  */
 export async function retrieveFriendEventLocationSuggestion(
   input: Record<string, unknown>,
@@ -239,44 +239,38 @@ export async function retrieveFriendEventLocationSuggestion(
  */
 export async function resolveFriendEventAddress(
   input: Record<string, unknown>,
-  accessToken: string,
-  options: { fetchImpl?: FetchLike; allowTrustedCoordinates?: boolean } = {}
+  options: { fetchImpl?: FetchLike } = {}
 ): Promise<Record<string, unknown>> {
   const location = record(input.location);
   if (!location || location.type !== 'custom_address') return input;
 
-  const normalizedAccessToken = accessToken.trim();
-
-  if (!normalizedAccessToken) {
-    if (options.allowTrustedCoordinates === true) return input;
-    throw new SocialDomainError(
-      'failed-precondition',
-      'Private address verification is temporarily unavailable.'
-    );
-  }
-
   const address = addressText(location.address);
-  if (address.length < 5) {
+  const previewPlaceName = featureText(location.placeName);
+  const query = [previewPlaceName, address]
+    .filter(Boolean)
+    .filter((value, index, values) => values.indexOf(value) === index)
+    .join(', ')
+    .slice(0, 300);
+  if (query.length < 5) {
     throw new SocialDomainError('invalid-argument', 'Enter a complete event address.');
   }
 
-  const url = new URL('https://api.mapbox.com/search/geocode/v6/forward');
-  url.searchParams.set('q', address);
+  const url = new URL(
+    process.env.NOMINATIM_API_ENDPOINT || 'https://nominatim.openstreetmap.org/search'
+  );
+  url.searchParams.set('format', 'jsonv2');
+  url.searchParams.set('q', query);
   url.searchParams.set('limit', '1');
-  // Final custom-event coordinates are stored in the private canonical
-  // location record. Autocomplete remains temporary, but this final lookup
-  // must use Mapbox's permanent geocoding mode.
-  url.searchParams.set('permanent', 'true');
-  // Mapbox Geocoding v6 rejects the legacy `poi` type. Event place names are
-  // still accepted as free-form query text, while these supported result types
-  // cover exact homes, streets, cities, and localities.
-  url.searchParams.set('types', 'address,street,place,locality');
-  url.searchParams.set('access_token', normalizedAccessToken);
+  url.searchParams.set('countrycodes', 'ca');
+  url.searchParams.set('addressdetails', '1');
 
   let response: Response;
   try {
     response = await (options.fetchImpl || fetch)(url, {
-      headers: { Accept: 'application/json' },
+      headers: {
+        Accept: 'application/json',
+        'User-Agent': 'GathRPreview/1.1 (support@gathr.app)',
+      },
       signal: AbortSignal.timeout(8_000),
     });
   } catch {
@@ -292,13 +286,24 @@ export async function resolveFriendEventAddress(
     );
   }
 
-  const body = await response.json() as { features?: Array<{ geometry?: { coordinates?: unknown[] } }> };
-  const coordinates = body.features?.[0]?.geometry?.coordinates;
-  const longitude = Number(coordinates?.[0]);
-  const latitude = Number(coordinates?.[1]);
+  const body = await response.json() as Array<{
+    lat?: unknown;
+    lon?: unknown;
+    name?: unknown;
+    display_name?: unknown;
+  }>;
+  const match = body[0];
+  const longitude = Number(match?.lon);
+  const latitude = Number(match?.lat);
+  const resolvedAddress = addressText(match?.display_name);
+  const resolvedName = featureText(match?.name);
+  const resolvedPlaceName = resolvedName && !/^\d+[a-z-]?$/i.test(resolvedName)
+    ? resolvedName
+    : '';
   if (
     !Number.isFinite(latitude) || latitude < -90 || latitude > 90 ||
-    !Number.isFinite(longitude) || longitude < -180 || longitude > 180
+    !Number.isFinite(longitude) || longitude < -180 || longitude > 180 ||
+    resolvedAddress.length < 5
   ) {
     throw new SocialDomainError(
       'invalid-argument',
@@ -310,7 +315,10 @@ export async function resolveFriendEventAddress(
     ...input,
     location: {
       ...location,
-      address,
+      // Search Box fields supplied by the app are preview-only. Only the
+      // independently resolved OpenStreetMap values cross the storage boundary.
+      address: resolvedAddress,
+      placeName: resolvedPlaceName,
       latitude,
       longitude,
     },

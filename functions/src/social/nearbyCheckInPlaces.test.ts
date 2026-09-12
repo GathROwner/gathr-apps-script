@@ -7,14 +7,17 @@ const origin = { latitude: 46.2382, longitude: -63.1311 };
 
 function poi(overrides: Record<string, unknown> = {}) {
   return {
-    type: 'Feature',
-    geometry: { coordinates: [-63.131, 46.23825] },
-    properties: {
-      mapbox_id: 'poi.the-oak',
-      feature_type: 'poi',
+    type: 'node',
+    id: 6595141644,
+    lat: 46.23825,
+    lon: -63.131,
+    tags: {
       name: 'The Oak Downtown',
-      full_address: '172 Great George St, Charlottetown, PE, Canada',
-      poi_category: ['pub', 'restaurant'],
+      amenity: 'pub',
+      'addr:housenumber': '156',
+      'addr:street': 'Great George Street',
+      'addr:city': 'Charlottetown',
+      'addr:province': 'Prince Edward Island',
       ...overrides,
     },
   };
@@ -22,32 +25,35 @@ function poi(overrides: Record<string, unknown> = {}) {
 
 test('nearby parsing keeps only deduplicated public POIs within range', () => {
   const result = parsePublicNearbyPlaces({
-    features: [
+    elements: [
       poi(),
-      poi({ mapbox_id: 'poi.duplicate' }),
-      poi({ mapbox_id: 'address.1', feature_type: 'address', name: '172 Great George St' }),
-      poi({ mapbox_id: 'poi.home', name: 'Private Home', poi_category: ['residential'] }),
+      { ...poi(), id: 6595141645 },
+      { type: 'node', id: 9, lat: 46.23825, lon: -63.131, tags: { name: '156 Great George St' } },
+      poi({ name: 'Private Home', amenity: 'residential' }),
       {
-        ...poi({ mapbox_id: 'poi.far', name: 'Far Cafe' }),
-        geometry: { coordinates: [-63.15, 46.25] },
+        ...poi({ name: 'Far Cafe' }),
+        id: 123,
+        lat: 46.25,
+        lon: -63.15,
       },
-      poi({ mapbox_id: '', name: 'Missing id' }),
+      { ...poi({ name: 'Missing id' }), id: '' },
     ],
   }, origin);
 
   assert.equal(result.length, 1);
   assert.equal(result[0]?.name, 'The Oak Downtown');
   assert.equal(result[0]?.category, 'pub');
+  assert.equal(result[0]?.address, '156 Great George Street, Charlottetown, Prince Edward Island');
   assert.match(result[0]?.locationKey || '', /^external:[a-f0-9]{32}$/);
   assert.ok((result[0]?.distanceMetres || 1_000) < 20);
 });
 
 test('nearby parsing rejects address-only and residence-like results', () => {
   const result = parsePublicNearbyPlaces({
-    features: [
-      poi({ feature_type: 'address', mapbox_id: 'address.2' }),
-      poi({ mapbox_id: 'poi.apartment', poi_category: ['apartment'] }),
-      poi({ mapbox_id: 'poi.house', poi_category: ['house'] }),
+    elements: [
+      { type: 'node', id: 2, lat: 46.23825, lon: -63.131, tags: { name: 'Address only' } },
+      { ...poi({ amenity: 'apartment' }), id: 3 },
+      { ...poi({ amenity: 'house' }), id: 4 },
     ],
   }, origin);
   assert.deepEqual(result, []);

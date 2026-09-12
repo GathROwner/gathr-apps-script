@@ -317,12 +317,6 @@ try {
   assert.equal(await getDocument(bob, `users/${bob.uid}/friendActivity/${alice.uid}`), null);
 
   const privateAddress = '1 Queen Street, Charlottetown, PE C1A 4A2';
-  const geocoded = await call(alice, 'geocodeFriendEventAddressCallable', {
-    address: privateAddress,
-  });
-  assert.equal(Number.isFinite(Number(geocoded.latitude)), true);
-  assert.equal(Number.isFinite(Number(geocoded.longitude)), true);
-
   const startAtMs = Date.now() + 24 * 60 * 60_000;
   const baseEventInput = {
     title: 'Staging backyard movie night',
