@@ -117,28 +117,50 @@ test('deployed callable surface enforces Auth and completes the friend/check-in 
 
   const checkInRequest = {
     operationId: 'callable-check-in-001',
-    eligibilitySessionId: 'callable-dwell-001',
+    eligibilitySessionId: 'callable-readiness-001',
     venueId: 'venue-1',
     durationMinutes: 30,
     audienceMode: 'all_friends',
     message: 'Callable test',
   };
-  const firstDwellSample = await call('recordCheckInEligibilitySampleCallable', {
-    sessionId: 'callable-dwell-001',
+  const capturedAtMs = Date.now();
+  const firstReadinessSample = await call('recordCheckInReadinessSampleCallable', {
+    protocolVersion: 1,
+    reset: false,
+    sessionId: 'callable-readiness-001',
+    sequence: 0,
+    latitude: 46.2382,
+    longitude: -63.1311,
+    accuracyMeters: 8,
+    speedMetersPerSecond: 0,
+    capturedAtMs,
+  }, bobToken);
+  assert.equal(resultOf(firstReadinessSample).protocolVersion, 1);
+  assert.equal(resultOf(firstReadinessSample).hereQualifyingMs, 0);
+  assert.equal(typeof resultOf(firstReadinessSample).expiresAtMs, 'number');
+  await db.doc('checkInEligibilitySessions/bob_callable-readiness-001').update({
+    qualifyingMs: 90_000,
+    hereQualifyingMs: 30_000,
+    placeQualifyingMs: 90_000,
+    hereReady: true,
+    placeReady: true,
+    lastSeenAt: Timestamp.now(),
+    lastCapturedAtMs: Date.now(),
+  });
+  const boundReadiness = await call('bindCheckInReadinessCallable', {
+    protocolVersion: 1,
+    readinessSessionId: 'callable-readiness-001',
+    operationId: 'callable-bind-readiness-001',
     venueId: 'venue-1',
     latitude: 46.2382,
     longitude: -63.1311,
     accuracyMeters: 8,
     speedMetersPerSecond: 0,
+    capturedAtMs: Date.now(),
   }, bobToken);
-  assert.equal(resultOf(firstDwellSample).eligible, false);
-  await db.doc('checkInEligibilitySessions/bob_callable-dwell-001').update({
-    eligible: true,
-    qualifyingMs: 90_000,
-    completedAt: Timestamp.now(),
-    completedExpiresAt: Timestamp.fromMillis(Date.now() + 5 * 60_000),
-    expiresAt: Timestamp.fromMillis(Date.now() + 5 * 60_000),
-  });
+  assert.equal(resultOf(boundReadiness).eligibilitySessionId, 'callable-readiness-001');
+  assert.equal(resultOf(boundReadiness).locationType, 'gathr_venue');
+  assert.equal(typeof resultOf(boundReadiness).expiresAtMs, 'number');
   const checkedIn = await call('createCheckInCallable', checkInRequest, bobToken);
   assert.equal(resultOf(checkedIn).viewerCount, 1);
   const retried = await call('createCheckInCallable', checkInRequest, bobToken);
@@ -160,17 +182,13 @@ test('deployed callable surface enforces Auth and completes the friend/check-in 
     selectedUids: ['bob'],
     guestInviteMode: 'host_only',
     guestListVisible: false,
-    location: {
-      type: 'custom_address',
-      address: '12 Example Lane, Charlottetown, PE',
-      placeName: 'Private home',
-      latitude: 46.2382,
-      longitude: -63.1311,
-    },
+    // Keep the callable smoke test self-contained; custom-address geocoding is
+    // covered separately and needs an external service secret.
+    location: { type: 'recognized_venue', venueId: 'venue-1' },
   }, aliceToken);
   const eventId = resultOf(created).eventId;
   assert.ok(eventId);
-  assert.equal((await db.doc(`users/bob/friendEventLocations/${eventId}`).get()).data()?.address, '12 Example Lane, Charlottetown, PE');
+  assert.equal((await db.doc(`users/bob/friendEvents/${eventId}`).get()).data()?.venueId, 'venue-1');
   assert.equal(resultOf(await call('respondToFriendEventCallable', { eventId, response: 'maybe' }, bobToken)).response, 'maybe');
   const canceled = await call('cancelFriendEventCallable', {
     eventId,

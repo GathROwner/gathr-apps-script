@@ -701,6 +701,8 @@ export async function createCheckIn(
         ...(venueId ? { venueId } : {}),
         ...(placeCandidateId ? { placeCandidateId } : {}),
         locationKey: venueLocationKey,
+        locationType: candidatePlace?.type || 'gathr_venue',
+        shareExactLocation,
       }, createdAt);
     }
     const relationshipSnapshots = relRefs.length

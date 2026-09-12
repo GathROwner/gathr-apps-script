@@ -26,7 +26,11 @@ import {
 } from '../lib/social/socialService.js';
 import {
   CHECK_IN_DWELL_TARGET_MS,
+  CHECK_IN_HERE_TARGET_MS,
+  CHECK_IN_PLACE_TARGET_MS,
+  bindCheckInReadiness,
   recordCheckInEligibilitySample,
+  recordCheckInReadinessSample,
 } from '../lib/social/checkInEligibility.js';
 import {
   cleanupExpiredCheckInPlaceCandidates,
@@ -294,6 +298,295 @@ test('dwell eligibility rejects movement and completes only after stationary qua
   assert.equal(stored?.qualifyingMs, CHECK_IN_DWELL_TARGET_MS);
   assert.equal(Object.hasOwn(stored || {}, 'latitude'), false);
   assert.equal(Object.hasOwn(stored || {}, 'longitude'), false);
+});
+
+test('target-free readiness exposes distinct Here and Place thresholds before binding once', async () => {
+  const sessionId = 'readiness-public-001';
+  const start = Date.now();
+  let sequence = 0;
+  let result;
+  for (const elapsed of [0, 10_000, 30_000]) {
+    result = await recordCheckInReadinessSample('alice', {
+      protocolVersion: 1,
+      reset: false,
+      sessionId,
+      sequence: sequence++,
+      latitude: 46.2382,
+      longitude: -63.1311,
+      accuracyMeters: 8,
+      speedMetersPerSecond: 0,
+      capturedAtMs: start + elapsed,
+    }, db, Timestamp.fromMillis(start + elapsed));
+  }
+  assert.equal(result?.hereReady, true);
+  assert.equal(result?.placeReady, false);
+  assert.equal(result?.hereQualifyingMs, CHECK_IN_HERE_TARGET_MS);
+  assert.equal(result?.placeQualifyingMs, CHECK_IN_HERE_TARGET_MS);
+
+  await assert.rejects(() => bindCheckInReadiness('alice', {
+    protocolVersion: 1,
+    readinessSessionId: sessionId,
+    operationId: 'bind-public-too-soon-001',
+    venueId: 'venue-1',
+    latitude: 46.2382,
+    longitude: -63.1311,
+    accuracyMeters: 8,
+    speedMetersPerSecond: 0,
+    capturedAtMs: start + 30_000,
+  }, db, Timestamp.fromMillis(start + 30_000)), (error) => error?.code === 'failed-precondition');
+
+  for (const elapsed of [50_000, 70_000, 90_000]) {
+    result = await recordCheckInReadinessSample('alice', {
+      protocolVersion: 1,
+      reset: false,
+      sessionId,
+      sequence: sequence++,
+      latitude: 46.2382,
+      longitude: -63.1311,
+      accuracyMeters: 8,
+      speedMetersPerSecond: 0,
+      capturedAtMs: start + elapsed,
+    }, db, Timestamp.fromMillis(start + elapsed));
+  }
+  assert.equal(result?.placeReady, true);
+  assert.equal(result?.placeQualifyingMs, CHECK_IN_PLACE_TARGET_MS);
+  const bound = await bindCheckInReadiness('alice', {
+    protocolVersion: 1,
+    readinessSessionId: sessionId,
+    operationId: 'bind-public-ready-001',
+    venueId: 'venue-1',
+    latitude: 46.2382,
+    longitude: -63.1311,
+    accuracyMeters: 8,
+    speedMetersPerSecond: 0,
+    capturedAtMs: start + 90_000,
+  }, db, Timestamp.fromMillis(start + 90_000));
+  assert.equal(bound.eligibilitySessionId, sessionId);
+  assert.equal(bound.locationType, 'gathr_venue');
+  assert.equal(bound.exactPrivateAllowed, false);
+  const retry = await bindCheckInReadiness('alice', {
+    protocolVersion: 1,
+    readinessSessionId: sessionId,
+    operationId: 'bind-public-ready-001',
+    venueId: 'venue-1',
+    latitude: 46.2382,
+    longitude: -63.1311,
+    accuracyMeters: 8,
+    speedMetersPerSecond: 0,
+    capturedAtMs: start + 90_000,
+  }, db, Timestamp.fromMillis(start + 90_001));
+  assert.equal(retry.eligibilitySessionId, sessionId);
+  await assert.rejects(() => bindCheckInReadiness('alice', {
+    protocolVersion: 1,
+    readinessSessionId: sessionId,
+    operationId: 'bind-swapped-place-001',
+    venueId: 'venue-neighbor',
+    latitude: 46.2382,
+    longitude: -63.1311,
+    accuracyMeters: 8,
+    speedMetersPerSecond: 0,
+    capturedAtMs: start + 90_001,
+  }, db, Timestamp.fromMillis(start + 90_001)), (error) => error?.code === 'failed-precondition');
+});
+
+test('Here readiness permits only approximate private sharing until Place is ready', async () => {
+  await makeFriends('alice', 'bob');
+  const sessionId = 'readiness-private-001';
+  const start = Date.now();
+  let sequence = 0;
+  for (const elapsed of [0, 10_000, 30_000]) {
+    await recordCheckInReadinessSample('alice', {
+      protocolVersion: 1,
+      reset: false,
+      sessionId,
+      sequence: sequence++,
+      latitude: 46.25391,
+      longitude: -63.13988,
+      accuracyMeters: 8,
+      speedMetersPerSecond: 0,
+      capturedAtMs: start + elapsed,
+    }, db, Timestamp.fromMillis(start + elapsed));
+  }
+  const privateCandidate = await createPrivateCheckInPlaceCandidate('alice', {
+    label: 'Home',
+    latitude: 46.25391,
+    longitude: -63.13988,
+    accuracyMeters: 8,
+    capturedAtMs: start + 30_000,
+  }, { db, now: Timestamp.fromMillis(start + 30_000) });
+  const bound = await bindCheckInReadiness('alice', {
+    protocolVersion: 1,
+    readinessSessionId: sessionId,
+    operationId: 'bind-private-here-001',
+    placeCandidateId: privateCandidate.candidate.id,
+    latitude: 46.25391,
+    longitude: -63.13988,
+    accuracyMeters: 8,
+    speedMetersPerSecond: 0,
+    capturedAtMs: start + 30_000,
+  }, db, Timestamp.fromMillis(start + 30_000));
+  assert.equal(bound.locationType, 'private_place');
+  assert.equal(bound.exactPrivateAllowed, false);
+
+  await assert.rejects(() => createCheckIn('alice', {
+    operationId: 'private-here-exact-denied-001',
+    eligibilitySessionId: sessionId,
+    placeCandidateId: privateCandidate.candidate.id,
+    durationMinutes: 30,
+    audienceMode: 'selected_friends',
+    selectedUids: ['bob'],
+    shareExactLocation: true,
+  }, db), (error) => error?.code === 'failed-precondition');
+
+  const created = await createCheckIn('alice', {
+    operationId: 'private-here-approximate-001',
+    eligibilitySessionId: sessionId,
+    placeCandidateId: privateCandidate.candidate.id,
+    durationMinutes: 30,
+    audienceMode: 'all_friends',
+    shareExactLocation: false,
+  }, db);
+  const projection = (await db.doc('users/bob/friendActivity/alice').get()).data();
+  assert.equal(created.locationType, 'private_place');
+  assert.equal(projection?.locationPrecision, 'approximate');
+  assert.notEqual(projection?.latitude, created.latitude);
+  assert.equal(Object.hasOwn(projection || {}, 'placeAddress'), false);
+});
+
+test('driving resets readiness and suppresses stoplight qualification during cooldown', async () => {
+  const sessionId = 'readiness-driving-001';
+  const start = Date.now();
+  const sample = (sequence, elapsed, speedMetersPerSecond) => recordCheckInReadinessSample('alice', {
+    protocolVersion: 1,
+    reset: false,
+    sessionId,
+    sequence,
+    latitude: 46.2382,
+    longitude: -63.1311,
+    accuracyMeters: 8,
+    speedMetersPerSecond,
+    capturedAtMs: start + elapsed,
+  }, db, Timestamp.fromMillis(start + elapsed));
+
+  await sample(0, 0, 0);
+  await sample(1, 20_000, 0);
+  const driving = await sample(2, 30_000, 8);
+  assert.equal(driving.reason, 'driving');
+  assert.equal(driving.placeQualifyingMs, 0);
+  const stoppedAtLight = await sample(3, 50_000, 0);
+  assert.equal(stoppedAtLight.reason, 'driving');
+  assert.equal(stoppedAtLight.hereReady, false);
+  const cooldownEnded = await sample(4, 61_000, 0);
+  assert.equal(cooldownEnded.placeQualifyingMs, 0);
+  assert.equal(cooldownEnded.hereReady, false);
+});
+
+test('Here can qualify with moderate accuracy while Place requires stronger fixes', async () => {
+  const sessionId = 'readiness-accuracy-001';
+  const start = Date.now();
+  let result;
+  let sequence = 0;
+  for (const elapsed of [0, 10_000, 30_000, 50_000, 70_000, 90_000]) {
+    result = await recordCheckInReadinessSample('alice', {
+      protocolVersion: 1,
+      reset: false,
+      sessionId,
+      sequence: sequence++,
+      latitude: 46.2382,
+      longitude: -63.1311,
+      accuracyMeters: 40,
+      speedMetersPerSecond: 0,
+      capturedAtMs: start + elapsed,
+    }, db, Timestamp.fromMillis(start + elapsed));
+  }
+  assert.equal(result?.hereReady, true);
+  assert.equal(result?.hereQualifyingMs, CHECK_IN_HERE_TARGET_MS);
+  assert.equal(result?.placeReady, false);
+  assert.equal(result?.placeQualifyingMs, 0);
+  assert.equal(result?.expiresAtMs, start + 90_000 + 20_000);
+});
+
+test('unknown speed needs repeated stable fixes and a long capture gap resets credit', async () => {
+  const sessionId = 'readiness-unknown-speed-001';
+  const start = Date.now();
+  const first = await recordCheckInReadinessSample('alice', {
+    protocolVersion: 1,
+    reset: false,
+    sessionId,
+    sequence: 0,
+    latitude: 46.2382,
+    longitude: -63.1311,
+    accuracyMeters: 8,
+    speedMetersPerSecond: null,
+    capturedAtMs: start,
+  }, db, Timestamp.fromMillis(start));
+  assert.equal(first.hereQualifyingMs, 0);
+  const stable = await recordCheckInReadinessSample('alice', {
+    protocolVersion: 1,
+    reset: false,
+    sessionId,
+    sequence: 1,
+    latitude: 46.2382,
+    longitude: -63.1311,
+    accuracyMeters: 8,
+    speedMetersPerSecond: null,
+    capturedAtMs: start + 10_000,
+  }, db, Timestamp.fromMillis(start + 10_000));
+  assert.equal(stable.hereQualifyingMs, 10_000);
+  const longGap = await recordCheckInReadinessSample('alice', {
+    protocolVersion: 1,
+    reset: false,
+    sessionId,
+    sequence: 2,
+    latitude: 46.2382,
+    longitude: -63.1311,
+    accuracyMeters: 8,
+    speedMetersPerSecond: null,
+    capturedAtMs: start + 40_001,
+  }, db, Timestamp.fromMillis(start + 40_001));
+  assert.equal(longGap.hereQualifyingMs, 0);
+  assert.equal(longGap.placeQualifyingMs, 0);
+});
+
+test('driving suppression follows the owner and cannot be bypassed with a new session', async () => {
+  const start = Date.now();
+  const firstSession = 'readiness-owner-driving-001';
+  await recordCheckInReadinessSample('alice', {
+    protocolVersion: 1,
+    reset: false,
+    sessionId: firstSession,
+    sequence: 0,
+    latitude: 46.2382,
+    longitude: -63.1311,
+    accuracyMeters: 8,
+    speedMetersPerSecond: 8,
+    capturedAtMs: start,
+  }, db, Timestamp.fromMillis(start));
+  const secondSession = 'readiness-owner-driving-002';
+  const stopped = await recordCheckInReadinessSample('alice', {
+    protocolVersion: 1,
+    reset: false,
+    sessionId: secondSession,
+    sequence: 0,
+    latitude: 46.2382,
+    longitude: -63.1311,
+    accuracyMeters: 8,
+    speedMetersPerSecond: 0,
+    capturedAtMs: start + 20_000,
+  }, db, Timestamp.fromMillis(start + 20_000));
+  assert.equal(stopped.reason, 'driving');
+  assert.equal(stopped.hereQualifyingMs, 0);
+  await assert.rejects(() => bindCheckInReadiness('alice', {
+    protocolVersion: 1,
+    readinessSessionId: firstSession,
+    operationId: 'bind-superseded-driving-001',
+    venueId: 'venue-1',
+    latitude: 46.2382,
+    longitude: -63.1311,
+    accuracyMeters: 8,
+    speedMetersPerSecond: 0,
+    capturedAtMs: start + 20_000,
+  }, db, Timestamp.fromMillis(start + 20_000)), (error) => error?.code === 'failed-precondition');
 });
 
 test('one dwell session exposes only server-validated overlapping venue choices', async () => {

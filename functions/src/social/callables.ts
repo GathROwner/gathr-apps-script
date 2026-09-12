@@ -18,7 +18,11 @@ import {
   sendFriendRequest,
   unblockUser,
 } from './socialService.js';
-import { recordCheckInEligibilitySample } from './checkInEligibility.js';
+import {
+  bindCheckInReadiness,
+  recordCheckInEligibilitySample,
+  recordCheckInReadinessSample,
+} from './checkInEligibility.js';
 import {
   cancelFriendEvent,
   createFriendEvent,
@@ -184,6 +188,45 @@ export const recordCheckInEligibilitySampleCallable = onCall(releaseTwoOptions, 
       longitude: data.longitude,
       accuracyMeters: data.accuracyMeters,
       speedMetersPerSecond: data.speedMetersPerSecond,
+    });
+  });
+});
+
+export const recordCheckInReadinessSampleCallable = onCall(releaseTwoOptions, async (request) => {
+  const uid = requireUid(request.auth);
+  const data = asData(request.data);
+  return run(async () => {
+    await enforceSocialRateLimit(uid, 'check_in_readiness', 360, 60 * 60_000);
+    return recordCheckInReadinessSample(uid, {
+      protocolVersion: data.protocolVersion,
+      reset: data.reset,
+      sessionId: data.sessionId,
+      sequence: data.sequence,
+      latitude: data.latitude,
+      longitude: data.longitude,
+      accuracyMeters: data.accuracyMeters,
+      speedMetersPerSecond: data.speedMetersPerSecond,
+      capturedAtMs: data.capturedAtMs,
+    });
+  });
+});
+
+export const bindCheckInReadinessCallable = onCall(releaseTwoOptions, async (request) => {
+  const uid = requireUid(request.auth);
+  const data = asData(request.data);
+  return run(async () => {
+    await enforceSocialRateLimit(uid, 'bind_check_in_readiness', 30, 60 * 60_000);
+    return bindCheckInReadiness(uid, {
+      protocolVersion: data.protocolVersion,
+      readinessSessionId: data.readinessSessionId,
+      operationId: data.operationId,
+      venueId: data.venueId,
+      placeCandidateId: data.placeCandidateId,
+      latitude: data.latitude,
+      longitude: data.longitude,
+      accuracyMeters: data.accuracyMeters,
+      speedMetersPerSecond: data.speedMetersPerSecond,
+      capturedAtMs: data.capturedAtMs,
     });
   });
 });
