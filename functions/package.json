@@ -10,6 +10,7 @@
     "shell": "npm run build && firebase functions:shell",
     "start": "npm run shell",
     "deploy": "firebase deploy --only functions",
+    "deploy:social-staging": "firebase deploy --project gathr-social-staging --config firebase.staging.json --only functions",
     "test:compiled": "npm run build && node --test lib/**/*.test.js",
     "test:social": "npm run build && node --test lib/social/*.test.js",
     "test:rules": "firebase emulators:exec --project demo-gathr-social --only firestore \"node --test test/firestore-social.rules.test.mjs\"",

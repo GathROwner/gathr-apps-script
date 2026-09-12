@@ -1,6 +1,7 @@
 {
   "projects": {
     "default": "gathr-migrated",
+    "social-staging": "gathr-social-staging",
     "production": "gathr-m1"
   }
 }
