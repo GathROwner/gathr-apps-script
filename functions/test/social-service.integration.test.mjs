@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import test, { after, before, beforeEach } from 'node:test';
 
 import { deleteApp, initializeApp } from 'firebase-admin/app';
@@ -1133,4 +1134,63 @@ test('orphan cleanup can release a handle after the main profile is already gone
   const result = await deleteSocialAccountData('alice', db);
   assert.equal(result.handleReleased, true);
   assert.equal((await db.doc('socialHandles/alice_orphan').get()).exists, false);
+});
+
+
+test('event grounds discovery binds inside the footprint and refuses a distant retry without consuming readiness', async () => {
+  const fixture = JSON.parse(readFileSync(new URL('./fixtures/charlottetown-event-grounds.json', import.meta.url), 'utf8'));
+  const start = Date.now();
+  const position = { latitude: 46.24105, longitude: -63.1158, accuracyMeters: 5, speedMetersPerSecond: 0 };
+  const sessionId = 'grounds-readiness-001';
+  for (let sequence = 0; sequence <= 9; sequence++) {
+    await recordCheckInReadinessSample('alice', { protocolVersion: 1, reset: false, sessionId,
+      sequence, ...position, capturedAtMs: start + sequence * 10000 }, db, Timestamp.fromMillis(start + sequence * 10000));
+  }
+  const now = Timestamp.fromMillis(start + 90000);
+  const discovery = await discoverNearbyCheckInPlaces('alice', { ...position, capturedAtMs: now.toMillis() }, {
+    db, now, fetchImpl: async (_url, options) => {
+      assert.match(decodeURIComponent(options.body.toString()), /out.center.geom/);
+      return new Response(JSON.stringify(fixture), { status: 200 });
+    },
+  });
+  const place = discovery.candidates.find(p => p.name === 'Charlottetown Event Grounds');
+  assert.ok(place);
+  assert.equal(place.distanceMetres, 0);
+  assert.equal(Object.hasOwn(place, 'checkInBoundary'), false);
+  const stored = (await db.doc('checkInPlaceCandidates/' + place.id).get()).data();
+  assert.equal(stored.checkInBoundary.length, 21);
+  const bind = { protocolVersion: 1, readinessSessionId: sessionId, operationId: 'grounds-bind-001',
+    placeCandidateId: place.id, ...position, capturedAtMs: now.toMillis() };
+  await assert.rejects(() => bindCheckInReadiness('alice', { ...bind, latitude: 46.243 }, db, now),
+    error => error.code === 'failed-precondition' && /position changed/.test(error.message));
+  assert.equal((await db.doc('checkInEligibilitySessions/alice_' + sessionId).get()).data().boundAt, undefined);
+  const grant = await bindCheckInReadiness('alice', bind, db, now);
+  assert.equal(grant.locationType, 'external_place');
+  assert.equal(grant.placeCandidateId, place.id);
+  // Same location in the legacy protocol also qualifies against the area.
+  let legacy;
+  for (const elapsed of [0, 20000, 40000, 60000, 80000, 100000]) {
+    legacy = await recordCheckInEligibilitySample('alice', { sessionId: 'grounds-legacy-001',
+      placeCandidateId: place.id, ...position }, db, Timestamp.fromMillis(start + elapsed));
+  }
+  assert.equal(legacy.eligible, true);
+  assert.equal(legacy.distanceMetres, 0);
+});
+
+test('a point-only place outside 50m plus GPS uncertainty is neither offered nor bindable', async () => {
+  const start = Date.now();
+  const position = { latitude: 46.2382, longitude: -63.1311, accuracyMeters: 5, speedMetersPerSecond: 0 };
+  await db.doc('venues/outside-point').set({ pagename: 'Outside point', latitude: 46.23883, longitude: -63.1311 });
+  const discovery = await discoverNearbyCheckInPlaces('alice', { ...position, capturedAtMs: start }, {
+    db, now: Timestamp.fromMillis(start), fetchImpl: async () => new Response(JSON.stringify({ elements: [] })),
+  });
+  assert.equal(discovery.candidates.some(p => p.venueId === 'outside-point'), false);
+  for (let sequence = 0; sequence <= 9; sequence++) {
+    await recordCheckInReadinessSample('alice', { protocolVersion: 1, reset: false,
+      sessionId: 'outside-readiness-001', sequence, ...position, capturedAtMs: start + sequence * 10000 }, db, Timestamp.fromMillis(start + sequence * 10000));
+  }
+  await assert.rejects(() => bindCheckInReadiness('alice', { protocolVersion: 1,
+    readinessSessionId: 'outside-readiness-001', operationId: 'outside-bind-001', venueId: 'outside-point',
+    ...position, capturedAtMs: start + 90000 }, db, Timestamp.fromMillis(start + 90000)),
+    error => error.code === 'failed-precondition' && /outside this place/.test(error.message));
 });

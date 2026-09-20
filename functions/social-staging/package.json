@@ -4,7 +4,7 @@
   "description": "Isolated Firebase deployment source for GathR social preview functions",
   "main": "index.js",
   "scripts": {
-    "prepare-deploy": "npm --prefix .. run build && node ../scripts/prepare-social-staging-deploy.mjs"
+    "prepare-deploy": "npm --prefix .. run build:social && node ../scripts/prepare-social-staging-deploy.mjs"
   },
   "engines": {
     "node": "22"

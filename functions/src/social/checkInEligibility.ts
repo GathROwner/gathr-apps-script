@@ -12,11 +12,12 @@ import {
   validateVenueId,
 } from './validation.js';
 import { validateCheckInPlaceCandidate } from './nearbyCheckInPlaces.js';
+import { CHECK_IN_BASE_RADIUS_METRES, checkInPlaceDistance, parseCheckInBoundary } from './checkInPlaceGeometry.js';
+export { CHECK_IN_BASE_RADIUS_METRES } from './checkInPlaceGeometry.js';
 
 export const CHECK_IN_DWELL_TARGET_MS = 90_000;
 export const CHECK_IN_HERE_TARGET_MS = 30_000;
 export const CHECK_IN_PLACE_TARGET_MS = 90_000;
-export const CHECK_IN_BASE_RADIUS_METRES = 50;
 export const CHECK_IN_MAX_ACCURACY_METRES = 75;
 export const CHECK_IN_MAX_SPEED_METRES_PER_SECOND = 10 / 3.6;
 export const CHECK_IN_STATIONARY_MAX_SPEED_METRES_PER_SECOND = 1.1;
@@ -627,24 +628,22 @@ export async function bindCheckInReadiness(
       : sample.speedMetersPerSecond <= CHECK_IN_STATIONARY_MAX_SPEED_METRES_PER_SECOND;
     const notDriving = sample.speedMetersPerSecond === null
       || sample.speedMetersPerSecond < CHECK_IN_DRIVING_SPEED_METRES_PER_SECOND;
-    const anchorDistance = distanceMetres(
-      parseLatitude(session.anchorLatitude),
-      parseLongitude(session.anchorLongitude),
-      targetLatitude,
-      targetLongitude
-    );
-    const sampleDistance = distanceMetres(
-      sample.latitude,
-      sample.longitude,
-      targetLatitude,
-      targetLongitude
-    );
+    const boundary = locationType === 'external_place'
+      ? parseCheckInBoundary(venue.checkInBoundary) : undefined;
+    const pin = { latitude: targetLatitude, longitude: targetLongitude };
+    const anchorDistance = checkInPlaceDistance({ latitude: parseLatitude(session.anchorLatitude),
+      longitude: parseLongitude(session.anchorLongitude) }, pin, boundary);
+    const sampleDistance = checkInPlaceDistance(sample, pin, boundary);
     const allowedDistance = CHECK_IN_BASE_RADIUS_METRES
       + Math.max(sample.accuracyMeters, Number(session.lastAccuracyMeters) || 0);
-    if (!accurate || !stationary || !notDriving
-      || evidenceDistance > CHECK_IN_STATIONARY_RADIUS_METRES
-      || anchorDistance > allowedDistance || sampleDistance > allowedDistance) {
-      throw new SocialDomainError('failed-precondition', 'Your location no longer matches this check-in place.');
+    if (!accurate) {
+      throw new SocialDomainError('failed-precondition', 'Your GPS accuracy changed. Wait for a clearer location, then try this place again.');
+    }
+    if (!stationary || !notDriving || evidenceDistance > CHECK_IN_STATIONARY_RADIUS_METRES) {
+      throw new SocialDomainError('failed-precondition', 'Your position changed. Return to the map and let the location rings settle.');
+    }
+    if (anchorDistance > allowedDistance || sampleDistance > allowedDistance) {
+      throw new SocialDomainError('failed-precondition', 'You are outside this place’s check-in area. Move closer, then refresh nearby places.');
     }
     const completedExpiresAt = Timestamp.fromMillis(nowMs + CHECK_IN_COMPLETION_TTL_MS);
     const exactPrivateAllowed = privatePlace
@@ -803,12 +802,10 @@ export async function recordCheckInEligibilitySample(
       };
     }
 
-    const distance = distanceMetres(
-      sampleLatitude,
-      sampleLongitude,
-      targetLatitude,
-      targetLongitude
-    );
+    const boundary = candidatePlace?.type === 'external_place'
+      ? parseCheckInBoundary(placeCandidateSnapshot?.data()?.checkInBoundary) : undefined;
+    const distance = checkInPlaceDistance({ latitude: sampleLatitude, longitude: sampleLongitude },
+      { latitude: targetLatitude, longitude: targetLongitude }, boundary);
     const accurate = sampleAccuracy <= CHECK_IN_MAX_ACCURACY_METRES;
     const stationaryEnough = sampleSpeed <= CHECK_IN_MAX_SPEED_METRES_PER_SECOND;
     const inside = accurate && distance <= CHECK_IN_BASE_RADIUS_METRES + sampleAccuracy;

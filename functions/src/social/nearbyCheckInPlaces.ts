@@ -8,6 +8,7 @@ import {
 } from 'firebase-admin/firestore';
 
 import { SocialDomainError, validateUid } from './validation.js';
+import { checkInPlaceDistance, parseCheckInBoundary, publicCheckInRadius, type BoundaryPoint } from './checkInPlaceGeometry.js';
 
 type FetchLike = (input: string | URL | Request, init?: RequestInit) => Promise<Response>;
 
@@ -53,6 +54,7 @@ export interface NearbyCheckInPlaceCandidate {
 }
 
 interface ParsedExternalPlace extends ExternalCheckInPlaceSnapshot {
+  checkInBoundary?: BoundaryPoint[];
   osmElementKey: string;
   distanceMetres: number;
 }
@@ -203,7 +205,7 @@ const DISALLOWED_PUBLIC_PLACE_TERMS = [
 
 export function parsePublicNearbyPlaces(
   payload: unknown,
-  origin: { latitude: number; longitude: number }
+  origin: { latitude: number; longitude: number; accuracyMeters?: number }
 ): ParsedExternalPlace[] {
   const elements = Array.isArray(record(payload).elements)
     ? record(payload).elements as unknown[]
@@ -236,8 +238,10 @@ export function parsePublicNearbyPlaces(
     ) continue;
     const publicDescriptor = normalizedMatchText(category);
     if (DISALLOWED_PUBLIC_PLACE_TERMS.some((term) => publicDescriptor.includes(term))) continue;
-    const distance = distanceMetres(origin.latitude, origin.longitude, latitude, longitude);
-    if (distance > CHECK_IN_PLACE_DISCOVERY_RADIUS_METRES) continue;
+    const checkInBoundary = elementType === 'way' && tags.area !== 'no'
+      ? parseCheckInBoundary(element.geometry) : undefined;
+    const distance = checkInPlaceDistance(origin, { latitude, longitude }, checkInBoundary);
+    if (distance > publicCheckInRadius(origin.accuracyMeters || 0)) continue;
     const dedupeKey = `${normalizedMatchText(name)}|${normalizedMatchText(address) || elementType + elementId}`;
     if (seen.has(dedupeKey)) continue;
     seen.add(dedupeKey);
@@ -245,6 +249,7 @@ export function parsePublicNearbyPlaces(
     parsed.push({
       type: 'external_place',
       osmElementKey,
+      ...(checkInBoundary ? { checkInBoundary } : {}),
       locationKey: `external:${createHash('sha256').update(osmElementKey).digest('hex').slice(0, 32)}`,
       name,
       address: address || 'Address not listed',
@@ -282,7 +287,7 @@ async function nearbyCanonicalVenues(
       || !Number.isFinite(venueLongitude) || venueLongitude < -180 || venueLongitude > 180
     ) continue;
     const distance = distanceMetres(latitude, longitude, venueLatitude, venueLongitude);
-    if (distance > CHECK_IN_PLACE_DISCOVERY_RADIUS_METRES + accuracyMeters) continue;
+    if (distance > publicCheckInRadius(accuracyMeters)) continue;
     candidates.push({
       id: `venue:${document.id}`,
       type: 'gathr_venue',
@@ -336,7 +341,7 @@ export async function discoverNearbyCheckInPlaces(
     + `nwr(around:${CHECK_IN_PLACE_DISCOVERY_RADIUS_METRES},${latitude},${longitude})["name"]["shop"];`
     + `nwr(around:${CHECK_IN_PLACE_DISCOVERY_RADIUS_METRES},${latitude},${longitude})["name"]["tourism"];`
     + `nwr(around:${CHECK_IN_PLACE_DISCOVERY_RADIUS_METRES},${latitude},${longitude})["name"]["leisure"];`
-    + `);out center tags;`;
+    + `);out center geom;`;
   const configuredEndpoint = options.overpassEndpoint || process.env.OVERPASS_API_ENDPOINT;
   const endpoints = configuredEndpoint
     ? [configuredEndpoint]
@@ -368,7 +373,7 @@ export async function discoverNearbyCheckInPlaces(
   if (payload === undefined) {
     throw new SocialDomainError('unavailable', 'Nearby places could not be loaded right now.');
   }
-  const external = parsePublicNearbyPlaces(payload, { latitude, longitude })
+  const external = parsePublicNearbyPlaces(payload, { latitude, longitude, accuracyMeters })
     .filter((candidate) => !externalMatchesCanonical(candidate, canonical));
   // A dense downtown can easily fill all five slots with existing GathR venues.
   // Keep room for nearby public places so an unknown venue is actually selectable.
@@ -382,6 +387,7 @@ export async function discoverNearbyCheckInPlaces(
       uid,
       candidateId,
       source: 'openstreetmap_overpass',
+      ...(candidate.checkInBoundary ? { checkInBoundary: candidate.checkInBoundary } : {}),
       osmElementKeyHash: createHash('sha256').update(candidate.osmElementKey).digest('hex'),
       place: {
         type: candidate.type,
