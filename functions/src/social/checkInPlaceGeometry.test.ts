@@ -57,3 +57,18 @@ test('open ways, area=no and incomplete relations cannot expand point eligibilit
     assert.deepEqual(parsePublicNearbyPlaces({ elements: [element] }, inside), []);
   }
 });
+
+
+test('full geometry output without a separate centre remains selectable', () => {
+  const latitudes = grounds.geometry.map((p: { lat: number }) => p.lat);
+  const longitudes = grounds.geometry.map((p: { lon: number }) => p.lon);
+  const bounds = { minlat: Math.min(...latitudes), maxlat: Math.max(...latitudes),
+    minlon: Math.min(...longitudes), maxlon: Math.max(...longitudes) };
+  for (const element of [{ ...grounds, center: undefined, bounds }, { ...grounds, center: undefined }]) {
+    const places = parsePublicNearbyPlaces({ elements: [element] }, inside);
+    assert.equal(places.length, 1);
+    assert.equal(places[0].distanceMetres, 0);
+    assert.equal(places[0].latitude, pin.latitude);
+    assert.equal(places[0].longitude, pin.longitude);
+  }
+});

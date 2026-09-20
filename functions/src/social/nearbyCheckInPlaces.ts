@@ -229,8 +229,19 @@ export function parsePublicNearbyPlaces(
       80
     ));
     const category = firstCategory(tags);
-    const latitude = Number(element.lat ?? center.lat);
-    const longitude = Number(element.lon ?? center.lon);
+    const checkInBoundary = elementType === 'way' && tags.area !== 'no'
+      ? parseCheckInBoundary(element.geometry) : undefined;
+    // Overpass geom output may supply bounds instead of center. Use bounds only
+    // for the display pin; eligibility still uses the complete closed footprint.
+    const bounds = record(element.bounds);
+    const boundaryLatitudes = checkInBoundary?.map(point => point.lat) || [];
+    const boundaryLongitudes = checkInBoundary?.map(point => point.lon) || [];
+    const minLat = Number(bounds.minlat ?? (checkInBoundary ? Math.min(...boundaryLatitudes) : NaN));
+    const maxLat = Number(bounds.maxlat ?? (checkInBoundary ? Math.max(...boundaryLatitudes) : NaN));
+    const minLon = Number(bounds.minlon ?? (checkInBoundary ? Math.min(...boundaryLongitudes) : NaN));
+    const maxLon = Number(bounds.maxlon ?? (checkInBoundary ? Math.max(...boundaryLongitudes) : NaN));
+    const latitude = Number(element.lat ?? center.lat ?? (minLat + maxLat) / 2);
+    const longitude = Number(element.lon ?? center.lon ?? (minLon + maxLon) / 2);
     if (
       !elementId || !name || !hasPublicPlaceTag
       || !Number.isFinite(latitude) || latitude < -90 || latitude > 90
@@ -238,8 +249,6 @@ export function parsePublicNearbyPlaces(
     ) continue;
     const publicDescriptor = normalizedMatchText(category);
     if (DISALLOWED_PUBLIC_PLACE_TERMS.some((term) => publicDescriptor.includes(term))) continue;
-    const checkInBoundary = elementType === 'way' && tags.area !== 'no'
-      ? parseCheckInBoundary(element.geometry) : undefined;
     const distance = checkInPlaceDistance(origin, { latitude, longitude }, checkInBoundary);
     if (distance > publicCheckInRadius(origin.accuracyMeters || 0)) continue;
     const dedupeKey = `${normalizedMatchText(name)}|${normalizedMatchText(address) || elementType + elementId}`;
