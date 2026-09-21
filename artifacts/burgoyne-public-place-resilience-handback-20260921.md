@@ -33,18 +33,16 @@ The existing `functions/src/social/checkInPlaceGeometry.test.ts` remains the Eve
 3. A successful empty provider payload returns `complete` and no candidates.
 4. A normal successful provider payload returns `complete` and a server-owned external candidate.
 
-## Validation limitation
+## Validation
 
-`npm.cmd run build:social` could not run in this task's restricted Windows sandbox: Node failed resolving the existing shared dependency junction with `EPERM: lstat C:\\Users\\craig`. Per coordinator instruction, the escalated retry was cancelled rather than requesting approval. `git diff --check` passed. The source/test changes were statically inspected, but compile/lint/test execution must be rerun from the authorized backend environment before release or deploy.
+The delegated task sandbox could not access the existing shared dependency directory, so the originating coordinator created a local worktree junction to the already-installed backend dependencies and independently reran the required validation from the authorized environment:
 
-Recommended commands from that environment:
+- `npm.cmd run build:social` — passed.
+- `node --test lib/social/nearbyCheckInPlaces.test.js lib/social/checkInPlaceGeometry.test.js` — 14/14 tests passed.
+- `npm.cmd run lint:social` — passed with no errors.
+- `git diff --check` — passed.
 
-```powershell
-cd functions
-npm.cmd run build:social
-node --test lib/social/nearbyCheckInPlaces.test.js lib/social/checkInPlaceGeometry.test.js
-npm.cmd run lint:social
-```
+No dependencies were installed or changed, and the local `node_modules` junction is ignored by Git.
 
 ## Current OSM/tag and distance findings
 
