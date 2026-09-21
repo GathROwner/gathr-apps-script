@@ -76,7 +76,7 @@ function asData(value: unknown): Record<string, unknown> {
 function rethrowSafe(error: unknown): never {
   if (error instanceof HttpsError) throw error;
   if (error instanceof SocialDomainError) {
-    throw new HttpsError(error.code, error.message);
+    throw new HttpsError(error.code, error.message, error.details);
   }
   logger.error('Unhandled social callable error', {
     error_type: error instanceof Error ? error.name : 'unknown',

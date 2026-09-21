@@ -42,7 +42,8 @@ export type SocialErrorCode =
 export class SocialDomainError extends Error {
   constructor(
     readonly code: SocialErrorCode,
-    message: string
+    message: string,
+    readonly details?: Record<string, unknown>
   ) {
     super(message);
     this.name = 'SocialDomainError';

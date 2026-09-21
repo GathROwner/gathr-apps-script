@@ -1,8 +1,11 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import { Timestamp } from 'firebase-admin/firestore';
 
 import {
   approximatePrivateLocation,
+  discoverNearbyCheckInPlaces,
+  NEARBY_EXTERNAL_LOOKUP_UNAVAILABLE_CONDITION,
   parsePublicNearbyPlaces,
   selectNearbyPlaceCandidateSlots,
 } from './nearbyCheckInPlaces.js';
@@ -26,6 +29,34 @@ function poi(overrides: Record<string, unknown> = {}) {
     },
   };
 }
+
+function fakeDiscoveryDb(venues: Array<{ id: string; data: Record<string, unknown> }> = []) {
+  const venueDocs = venues.map((venue) => ({ id: venue.id, data: () => venue.data }));
+  return {
+    collection(name: string) {
+      if (name === 'venues') {
+        return {
+          limit: () => ({ get: async () => ({ docs: venueDocs }) }),
+        };
+      }
+      if (name === 'checkInPlaceCandidates') {
+        return { doc: (id: string) => ({ id }) };
+      }
+      throw new Error(`Unexpected collection: ${name}`);
+    },
+    batch() {
+      return { set: () => undefined, commit: async () => undefined };
+    },
+  };
+}
+
+const discoveryNow = Timestamp.fromMillis(1_700_000_000_000);
+const discoveryInput = {
+  latitude: origin.latitude,
+  longitude: origin.longitude,
+  accuracyMeters: 5,
+  capturedAtMs: discoveryNow.toMillis(),
+};
 
 test('nearby parsing keeps only deduplicated public POIs within range', () => {
   const result = parsePublicNearbyPlaces({
@@ -70,6 +101,59 @@ test('nearby selection reserves room for unknown public places in dense venue ar
 
   assert.deepEqual(selected.canonical, ['known-1', 'known-2', 'known-3']);
   assert.deepEqual(selected.external, ['unknown-1', 'unknown-2']);
+});
+
+test('nearby discovery returns canonical venues when every external provider is unavailable', async () => {
+  const result = await discoverNearbyCheckInPlaces('alice', discoveryInput, {
+    db: fakeDiscoveryDb([{ id: 'known-venue', data: {
+      pagename: 'Known GathR venue', latitude: origin.latitude, longitude: origin.longitude,
+    } }]) as never,
+    now: discoveryNow,
+    fetchImpl: async () => { throw new Error('provider unavailable'); },
+  });
+
+  assert.equal(result.externalLookupStatus, 'partial_unavailable');
+  assert.deepEqual(result.candidates.map((candidate) => candidate.venueId), ['known-venue']);
+});
+
+test('nearby discovery reports a typed retryable condition when no canonical venue survives provider failure', async () => {
+  await assert.rejects(
+    () => discoverNearbyCheckInPlaces('alice', discoveryInput, {
+      db: fakeDiscoveryDb() as never,
+      now: discoveryNow,
+      fetchImpl: async () => { throw new Error('provider unavailable'); },
+    }),
+    (error: unknown) => {
+      const domainError = error as { code?: string; details?: { condition?: string; retryable?: boolean } };
+      return domainError.code === 'unavailable'
+        && domainError.details?.condition === NEARBY_EXTERNAL_LOOKUP_UNAVAILABLE_CONDITION
+        && domainError.details?.retryable === true;
+    }
+  );
+});
+
+test('nearby discovery labels a successful empty external search as complete', async () => {
+  const result = await discoverNearbyCheckInPlaces('alice', discoveryInput, {
+    db: fakeDiscoveryDb() as never,
+    now: discoveryNow,
+    fetchImpl: async () => new Response(JSON.stringify({ elements: [] }), { status: 200 }),
+  });
+
+  assert.equal(result.externalLookupStatus, 'complete');
+  assert.deepEqual(result.candidates, []);
+});
+
+test('nearby discovery labels a successful external search as complete and keeps its candidate', async () => {
+  const result = await discoverNearbyCheckInPlaces('alice', discoveryInput, {
+    db: fakeDiscoveryDb() as never,
+    now: discoveryNow,
+    fetchImpl: async () => new Response(JSON.stringify({ elements: [poi()] }), { status: 200 }),
+  });
+
+  assert.equal(result.externalLookupStatus, 'complete');
+  assert.equal(result.candidates.length, 1);
+  assert.equal(result.candidates[0]?.name, 'The Oak Downtown');
+  assert.equal(result.candidates[0]?.type, 'external_place');
 });
 
 test('private locations are projected to a neighbourhood-sized server grid', () => {

@@ -53,6 +53,19 @@ export interface NearbyCheckInPlaceCandidate {
   distanceMetres: number;
 }
 
+// This describes only whether the additive external search completed. It does
+// not disclose provider names, request data, or a user's location.
+export type NearbyExternalLookupStatus = 'complete' | 'partial_unavailable';
+
+export interface NearbyCheckInPlacesResult {
+  candidates: NearbyCheckInPlaceCandidate[];
+  expiresAt: Timestamp;
+  externalLookupStatus: NearbyExternalLookupStatus;
+}
+
+export const NEARBY_EXTERNAL_LOOKUP_UNAVAILABLE_CONDITION =
+  'nearby_public_places_external_lookup_unavailable';
+
 interface ParsedExternalPlace extends ExternalCheckInPlaceSnapshot {
   checkInBoundary?: BoundaryPoint[];
   osmElementKey: string;
@@ -338,7 +351,7 @@ export async function discoverNearbyCheckInPlaces(
     now?: Timestamp;
     overpassEndpoint?: string;
   } = {}
-): Promise<{ candidates: NearbyCheckInPlaceCandidate[]; expiresAt: Timestamp }> {
+): Promise<NearbyCheckInPlacesResult> {
   const uid = validateUid(uidValue, 'uid');
   const db = options.db || getFirestore();
   const now = options.now || Timestamp.now();
@@ -380,7 +393,24 @@ export async function discoverNearbyCheckInPlaces(
     }
   }
   if (payload === undefined) {
-    throw new SocialDomainError('unavailable', 'Nearby places could not be loaded right now.');
+    // Canonical GathR venues do not depend on Overpass. Keep them usable while
+    // making the incomplete external search explicit to the client.
+    const selectedCanonical = selectNearbyPlaceCandidateSlots(canonical, []).canonical;
+    if (selectedCanonical.length > 0) {
+      return {
+        candidates: selectedCanonical,
+        expiresAt,
+        externalLookupStatus: 'partial_unavailable',
+      };
+    }
+    throw new SocialDomainError(
+      'unavailable',
+      'Nearby public-place search is temporarily unavailable. Try again.',
+      {
+        condition: NEARBY_EXTERNAL_LOOKUP_UNAVAILABLE_CONDITION,
+        retryable: true,
+      }
+    );
   }
   const external = parsePublicNearbyPlaces(payload, { latitude, longitude, accuracyMeters })
     .filter((candidate) => !externalMatchesCanonical(candidate, canonical));
@@ -425,7 +455,7 @@ export async function discoverNearbyCheckInPlaces(
   const candidates = [...selectedCanonical, ...externalCandidates]
     .sort((left, right) => left.distanceMetres - right.distanceMetres
       || (left.type === 'gathr_venue' ? -1 : 1));
-  return { candidates, expiresAt };
+  return { candidates, expiresAt, externalLookupStatus: 'complete' };
 }
 
 export async function createPrivateCheckInPlaceCandidate(
