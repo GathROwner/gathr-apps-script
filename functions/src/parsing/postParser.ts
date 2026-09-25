@@ -1976,8 +1976,111 @@ function countDateImageMatches(eventText: string, imageText: string): number {
   return count;
 }
 
+type ImageMatchEvent = Pick<TimeResolvedEvent, 'name' | 'description' | 'category'> &
+  Partial<Pick<TimeResolvedEvent, 'startDate' | 'startTime' | 'endTime'>>;
+
+const IMAGE_MATCH_MONTHS = [
+  { name: 'january', aliases: ['jan'] },
+  { name: 'february', aliases: ['feb'] },
+  { name: 'march', aliases: ['mar'] },
+  { name: 'april', aliases: ['apr'] },
+  { name: 'may', aliases: [] },
+  { name: 'june', aliases: ['jun'] },
+  { name: 'july', aliases: ['jul'] },
+  { name: 'august', aliases: ['aug'] },
+  { name: 'september', aliases: ['sep', 'sept'] },
+  { name: 'october', aliases: ['oct'] },
+  { name: 'november', aliases: ['nov'] },
+  { name: 'december', aliases: ['dec'] },
+] as const;
+
+const IMAGE_MATCH_WEEKDAYS = [
+  { name: 'sunday', alias: 'sun' },
+  { name: 'monday', alias: 'mon' },
+  { name: 'tuesday', alias: 'tue' },
+  { name: 'wednesday', alias: 'wed' },
+  { name: 'thursday', alias: 'thu' },
+  { name: 'friday', alias: 'fri' },
+  { name: 'saturday', alias: 'sat' },
+] as const;
+
+function normalizeTemporalImageText(value: string): string {
+  return normalizeComparableName(value)
+    .replace(/\b([ap])\s+m\b/g, '$1m')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function buildEventDateImagePhrases(startDate: string | undefined): string[] {
+  const match = String(startDate || '').trim().match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!match) return [];
+
+  const year = Number(match[1]);
+  const monthNumber = Number(match[2]);
+  const day = Number(match[3]);
+  if (
+    !Number.isInteger(year) ||
+    !Number.isInteger(monthNumber) ||
+    !Number.isInteger(day) ||
+    monthNumber < 1 ||
+    monthNumber > 12 ||
+    day < 1 ||
+    day > 31
+  ) {
+    return [];
+  }
+
+  const date = new Date(Date.UTC(year, monthNumber - 1, day));
+  if (
+    date.getUTCFullYear() !== year ||
+    date.getUTCMonth() !== monthNumber - 1 ||
+    date.getUTCDate() !== day
+  ) {
+    return [];
+  }
+
+  const month = IMAGE_MATCH_MONTHS[monthNumber - 1];
+  const weekday = IMAGE_MATCH_WEEKDAYS[date.getUTCDay()];
+  const monthTokens = [month.name, ...month.aliases];
+  const phrases = new Set<string>([
+    `${year} ${String(monthNumber).padStart(2, '0')} ${String(day).padStart(2, '0')}`,
+    `${weekday.name} ${day}`,
+    `${weekday.alias} ${day}`,
+  ]);
+
+  for (const token of monthTokens) {
+    phrases.add(`${token} ${day}`);
+    phrases.add(`${day} ${token}`);
+  }
+
+  return Array.from(phrases);
+}
+
+function buildEventTimeImagePhrases(time: string | undefined): string[] {
+  const match = String(time || '').trim().match(/^([01]?\d|2[0-3]):([0-5]\d)$/);
+  if (!match) return [];
+
+  const hour24 = Number(match[1]);
+  const minutes = match[2];
+  const hour12 = hour24 % 12 || 12;
+  const meridiem = hour24 >= 12 ? 'pm' : 'am';
+  const phrases = new Set<string>([`${hour24} ${minutes}`]);
+
+  if (minutes === '00') {
+    phrases.add(`${hour12} ${meridiem}`);
+  } else {
+    phrases.add(`${hour12} ${minutes} ${meridiem}`);
+  }
+
+  return Array.from(phrases);
+}
+
+function countPhraseMatches(phrases: string[], imageText: string): number {
+  return phrases.reduce((count, phrase) => count + (imageText.includes(phrase) ? 1 : 0), 0);
+}
+
 function scoreDisplayImageAnalysisMatch(
-  event: Pick<TimeResolvedEvent, 'name' | 'description' | 'category'>,
+  event: ImageMatchEvent,
   image: { imageIndex?: number; description?: string; relevanceToPost?: string },
   displayMediaUrls: string[]
 ): { score: number; url: string; index: number; strongEvidence: boolean } | null {
@@ -1992,7 +2095,10 @@ function scoreDisplayImageAnalysisMatch(
   const titleText = normalizeComparableName(event?.name || '');
   const detailText = normalizeComparableName(`${event?.description || ''} ${event?.category || ''}`);
   const eventText = normalizeComparableName(`${titleText} ${detailText}`);
-  const imageText = normalizeComparableName(`${image?.description || ''} ${image?.relevanceToPost || ''}`);
+  const descriptionText = normalizeTemporalImageText(image?.description || '');
+  const imageText = normalizeTemporalImageText(
+    `${image?.description || ''} ${image?.relevanceToPost || ''}`
+  );
   if (!eventText || !imageText) return null;
 
   const titleTokens = tokenizeStrongTitleImageMatchText(titleText);
@@ -2001,8 +2107,20 @@ function scoreDisplayImageAnalysisMatch(
   );
 
   const titleMatches = countTokenMatches(titleTokens, imageText);
+  const descriptionTitleMatches = countTokenMatches(titleTokens, descriptionText);
   const detailMatches = countTokenMatches(detailTokens, imageText);
   const dateMatches = countDateImageMatches(eventText, imageText);
+  const exactDateMatches = countPhraseMatches(
+    buildEventDateImagePhrases(event.startDate),
+    descriptionText
+  );
+  const exactTimeMatches = countPhraseMatches(
+    [
+      ...buildEventTimeImagePhrases(event.startTime),
+      ...buildEventTimeImagePhrases(event.endTime),
+    ],
+    descriptionText
+  );
 
   let cueScore = 0;
   if (eventText.includes('wellness') && imageText.includes('wellness')) cueScore += 6;
@@ -2016,17 +2134,24 @@ function scoreDisplayImageAnalysisMatch(
     cueScore += 5;
   }
 
-  const score = titleMatches * 3 + Math.min(detailMatches, 3) + dateMatches * 2 + cueScore;
+  const score =
+    titleMatches * 3 +
+    Math.min(detailMatches, 3) +
+    dateMatches * 2 +
+    exactDateMatches * 5 +
+    exactTimeMatches * 3 +
+    cueScore;
   const strongEvidence =
     cueScore >= 6 ||
     titleMatches >= 2 ||
-    (titleMatches >= 1 && dateMatches >= 1);
+    (titleMatches >= 1 && dateMatches >= 1) ||
+    (descriptionTitleMatches >= 1 && (exactDateMatches >= 1 || exactTimeMatches >= 1));
 
   return { score, url, index: imageIndex, strongEvidence };
 }
 
 function findBestDisplayImageAnalysisMatch(
-  event: Pick<TimeResolvedEvent, 'name' | 'description' | 'category'>,
+  event: ImageMatchEvent,
   imageAnalysis: Array<{ imageIndex?: number; description?: string; relevanceToPost?: string }>,
   displayMediaUrls: string[]
 ): { score: number; url: string; index: number; strongEvidence: boolean } | null {
@@ -2045,7 +2170,7 @@ function findBestDisplayImageAnalysisMatch(
 }
 
 export function selectDisplayImageFromAnalysis(
-  event: Pick<TimeResolvedEvent, 'name' | 'description' | 'category'>,
+  event: ImageMatchEvent,
   imageAnalysis: Array<{ imageIndex?: number; description?: string; relevanceToPost?: string }>,
   displayMediaUrls: string[]
 ): string {

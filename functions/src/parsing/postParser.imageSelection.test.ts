@@ -90,6 +90,128 @@ test('overrides default first-image index when analysis strongly matches another
   assert.equal(resolved.reason, 'image_analysis_match_over_default_first_image_index');
 });
 
+test('uses exact event date and time to select the matching UPEISU schedule page', () => {
+  const displayMediaUrls = [
+    'https://storage.googleapis.com/gathr-uploaded-images/postimages/1788531518053-xdlvzy.webp',
+    'https://storage.googleapis.com/gathr-uploaded-images/postimages/1788531518529-8zugmt.webp',
+    'https://storage.googleapis.com/gathr-uploaded-images/postimages/1788531518937-j4cy9f.webp',
+  ];
+  const imageAnalysis = [
+    {
+      imageIndex: 0,
+      description:
+        'September 2026 events from Sat 5 through Tue 15, including Toga Night, Disney Trivia, and Leader In The Making.',
+      relevanceToPost: 'First page of the full UPEISU calendar, which also promotes a pool party later in September.',
+    },
+    {
+      imageIndex: 1,
+      description:
+        'September events continued from Tue 15 through Wed 23, including Music Bingo and Karaoke Night.',
+      relevanceToPost: 'Second page of the UPEISU September calendar.',
+    },
+    {
+      imageIndex: 2,
+      description:
+        'September events continued. Fri 25 Pool Party from 8:30 PM to 10 PM in the Bell Aliant Centre.',
+      relevanceToPost: 'Third page of the UPEISU September calendar.',
+    },
+  ];
+
+  const resolved = resolveRelevantImageUrlForEvent(
+    {
+      name: 'Pool Party',
+      description: 'Pool party.',
+      category: 'Gatherings & Parties',
+      startDate: '2026-09-25',
+      startTime: '20:30',
+      endTime: '22:00',
+      relevantImageIndex: 0,
+    } as any,
+    [],
+    displayMediaUrls,
+    imageAnalysis
+  );
+
+  assert.equal(resolved.url, displayMediaUrls[2]);
+  assert.equal(resolved.reason, 'image_analysis_match_over_default_first_image_index');
+});
+
+test('keeps the first UPEISU schedule page when its date, time, and title match', () => {
+  const displayMediaUrls = [
+    'https://storage.googleapis.com/gathr-uploaded-images/postimages/page-1.webp',
+    'https://storage.googleapis.com/gathr-uploaded-images/postimages/page-2.webp',
+    'https://storage.googleapis.com/gathr-uploaded-images/postimages/page-3.webp',
+  ];
+  const resolved = resolveRelevantImageUrlForEvent(
+    {
+      name: 'Disney Trivia',
+      description: 'Disney trivia night.',
+      category: 'Trivia Night',
+      startDate: '2026-09-09',
+      startTime: '19:00',
+      endTime: '21:00',
+      relevantImageIndex: 0,
+    } as any,
+    [],
+    displayMediaUrls,
+    [
+      {
+        imageIndex: 0,
+        description: 'Wed 9 Disney Trivia from 7 PM to 9 PM in the Fox and Crow.',
+        relevanceToPost: 'First page of the September calendar.',
+      },
+      {
+        imageIndex: 1,
+        description: 'September events continued from Tue 15 through Wed 23.',
+        relevanceToPost: 'Second calendar page with other trivia events.',
+      },
+      {
+        imageIndex: 2,
+        description: 'September events continued from Wed 23 through Mon 28.',
+        relevanceToPost: 'Third calendar page.',
+      },
+    ]
+  );
+
+  assert.equal(resolved.url, displayMediaUrls[0]);
+  assert.equal(resolved.reason, 'model_selected_original_image_index');
+});
+
+test('does not override the first image for an alternate page that only shares the date', () => {
+  const displayMediaUrls = [
+    'https://storage.googleapis.com/gathr-uploaded-images/postimages/pool-poster.webp',
+    'https://storage.googleapis.com/gathr-uploaded-images/postimages/unrelated-september-25.webp',
+  ];
+  const resolved = resolveRelevantImageUrlForEvent(
+    {
+      name: 'Pool Party',
+      description: 'Pool party.',
+      category: 'Gatherings & Parties',
+      startDate: '2026-09-25',
+      startTime: '20:30',
+      endTime: '22:00',
+      relevantImageIndex: 0,
+    } as any,
+    [],
+    displayMediaUrls,
+    [
+      {
+        imageIndex: 0,
+        description: 'Pool Party poster with swimmers at the Bell Aliant Centre.',
+        relevanceToPost: 'Specific event poster.',
+      },
+      {
+        imageIndex: 1,
+        description: 'Fri 25 textbook sale from 8:30 AM to 10 AM.',
+        relevanceToPost: 'A different event on the same date.',
+      },
+    ]
+  );
+
+  assert.equal(resolved.url, displayMediaUrls[0]);
+  assert.equal(resolved.reason, 'model_selected_original_image_index');
+});
+
 test('keeps selected first image when alternate image only matches broad family or park terms', () => {
   const displayMediaUrls = [
     'https://storage.googleapis.com/gathr-uploaded-images/postimages/pei-nerf-wars.webp',

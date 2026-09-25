@@ -173,7 +173,9 @@ INVALID CONTENT:
 âœ— "Visit us" without events/specials
 
 ANALYSIS REQUIREMENTS:
-1. First, analyze any images present and describe what you see
+1. First, analyze every image present and return exactly one imageAnalysis entry per attached image, using its 0-based attachment order.
+   - Each description must cover ONLY text and visuals visible in that specific image. Do not summarize or copy details from the other images into it.
+   - For calendars and schedule pages, transcribe the exact visible event names, dates/day numbers, times, and venues into that image's description.
 2. Then analyze the text content
 3. Determine if valid content exists
 4. Provide clear reasoning for your decision
