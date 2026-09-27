@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
+import { applyRecurrenceNormalizationForRegression } from '../parsing/finalFormatter.js';
+import { ExtractedItem, FormattedEvent } from '../parsing/types.js';
 import { previewDuplicateMerge } from './rowProcessor.js';
 import { EventData, VenueData } from '../types/index.js';
 
@@ -449,5 +451,91 @@ test('promotes an incoming same-source recurring parent over a one-off occurrenc
   assert.equal(preview.updates.endDate, '2026-08-13');
   assert.equal(preview.updates.recurringPattern, 'weekly_thursday');
   assert.equal(preview.updates.totalOccurrences, 3);
+  assert.equal(preview.updates.isRecurring, true);
+});
+
+test('dated weekly wording survives formatting and promotes the matching one-off occurrence', () => {
+  const venue: VenueData = {
+    id: 'slug_kinkorapubliclibrary',
+    name: 'Kinkora Public Library',
+    normalizedName: 'kinkora public library',
+    address: '45 Anderson Road',
+    latitude: 46.327,
+    longitude: -63.603,
+  };
+  const description =
+    'Our weekly summer reading club meets again this Thursday, August 13 at 5pm.';
+  const formattedIncoming = applyRecurrenceNormalizationForRegression(
+    {
+      isEvent: 'Yes',
+      isFoodSpecial: 'No',
+      category: 'Family Friendly',
+      name: 'TD Summer Reading Club Activities',
+      description,
+      establishment: 'Kinkora Public Library',
+      address: '45 Anderson Road',
+      startDate: '2026-08-13',
+      endDate: '2026-08-13',
+      startTime: '17:00',
+      endTime: '19:00',
+      ticketPrice: '',
+      ticketLink: '',
+      relevantImageIndex: 0,
+      venue: 'Kinkora Public Library',
+      additionalLocation: '',
+      isRecurring: 'Yes',
+      recurringPattern: 'weekly_thursday',
+    } as FormattedEvent,
+    {
+      name: 'TD Summer Reading Club Activities',
+      description,
+      date: '2026-08-13',
+      startTime: '17:00',
+      endTime: '19:00',
+      venue: 'Kinkora Public Library',
+      recurringPattern: 'weekly_thursday',
+    } as ExtractedItem
+  );
+
+  assert.equal(formattedIncoming.isRecurring, true);
+  assert.equal(formattedIncoming.recurringPattern, 'weekly_thursday');
+
+  const preview = previewDuplicateMerge({
+    venue,
+    existingEvent: buildEvent({
+      uniqueId: '1365076749141329_8',
+      establishment: 'Kinkora Public Library',
+      venueId: venue.id,
+      eventType: 'community',
+      eventName: 'TD Summer Reading Club Activities',
+      name: 'TD Summer Reading Club Activities',
+      description: 'Join us for reading club activities.',
+      category: 'Family Friendly',
+      isEvent: 'Yes',
+      isFoodSpecial: 'No',
+      startDate: '2026-08-13',
+      endDate: '2026-08-13',
+      startTime: '17:00',
+      endTime: '19:00',
+      isRecurring: 'No',
+      recurringPattern: 'none',
+      sourceTimestamp: new Date('2026-07-28T12:00:00.000Z'),
+      timeResolution: undefined,
+      timeFlags: undefined,
+    }),
+    incomingEvent: buildEvent({
+      ...formattedIncoming,
+      uniqueId: '1365076749141329_7',
+      venueId: venue.id,
+      eventType: 'community',
+      eventName: 'TD Summer Reading Club Activities',
+      sourceTimestamp: new Date('2026-07-28T12:00:00.000Z'),
+      timeResolution: undefined,
+      timeFlags: undefined,
+    }),
+  });
+
+  assert.equal(preview.updates.startDate, undefined);
+  assert.equal(preview.updates.recurringPattern, 'weekly_thursday');
   assert.equal(preview.updates.isRecurring, true);
 });

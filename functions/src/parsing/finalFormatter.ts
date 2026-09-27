@@ -2779,6 +2779,44 @@ function hasCadenceCompatibleRecurringCue(
   ].some((pattern) => pattern.test(normalized));
 }
 
+function hasDatedWeeklyFrequencyCue(
+  text: string,
+  recurringPattern: RecurringPattern,
+  startDate: string | undefined
+): boolean {
+  const normalized = normalizeWeekdayExtractionText(text);
+  if (
+    !normalized ||
+    !recurringPattern.startsWith('weekly_') ||
+    recurringPattern === 'weekly_custom' ||
+    !/\bweekly\b/.test(normalized) ||
+    !hasConcreteDateReference(normalized)
+  ) {
+    return false;
+  }
+
+  if (
+    /\b(monthly|every\s+month|each\s+month|annual|annually|yearly|every\s+year|each\s+year|biweekly|fortnightly|every\s+other\s+week|one[\s-](?:off|time)|one\s+night\s+only|this\s+week\s+only|special\s+edition)\b/.test(
+      normalized
+    )
+  ) {
+    return false;
+  }
+
+  const withoutNonEventWeeklyPhrases = normalized.replace(
+    /\bweekly\s+(?:newsletter|email|roundup|bulletin|menu|hours|schedule|calendar|updates?|post|promotion|advertisement|ad)\b/g,
+    ' '
+  );
+  if (!/\bweekly\b/.test(withoutNonEventWeeklyPhrases)) {
+    return false;
+  }
+
+  const normalizedStartDate = String(startDate || '').trim();
+  return Boolean(
+    normalizedStartDate && patternFromIsoDate(normalizedStartDate) === recurringPattern
+  );
+}
+
 function hasSingleDayMultiSessionOneOffCue(
   event: Pick<FormattedEvent, 'startDate' | 'endDate'>,
   sourceText: string
@@ -3359,6 +3397,7 @@ function shouldForceExplicitDatedWeeklyOneOff(
 
   if (
     hasCadenceCompatibleRecurringCue(sourceText, recurringPattern) ||
+    hasDatedWeeklyFrequencyCue(sourceText, recurringPattern, event.startDate) ||
     recurrenceUntilDate ||
     totalOccurrences !== undefined
   ) {
@@ -3421,7 +3460,10 @@ function shouldForceSingleExplicitDateOneOff(
     return false;
   }
 
-  if (hasCadenceCompatibleRecurringCue(normalizedSource, recurringPattern)) {
+  if (
+    hasCadenceCompatibleRecurringCue(normalizedSource, recurringPattern) ||
+    hasDatedWeeklyFrequencyCue(normalizedSource, recurringPattern, event.startDate)
+  ) {
     return false;
   }
 
