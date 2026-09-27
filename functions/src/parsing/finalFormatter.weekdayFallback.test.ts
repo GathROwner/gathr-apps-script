@@ -198,6 +198,99 @@ test('explicit one-off dates are not kept as simple weekly recurring events', ()
   }
 });
 
+test('event-level every wording does not validate an incompatible weekly cadence', () => {
+  const description =
+    'This SATURDAY - we’ve got an absolute masterclass w/ Nick Burden from Ottawa, Robbie Vino from Halifax and David Haddad from Moncton! Come for a laugh, support your local comedy scene, and hear me pull back the curtains of some of my less endearing moments through the last 30 years. Did I mention I do new material every show? Poster text: "THE COMEDY CAVE" / "SATURDAY AUGUST 15" / "DOORS OPEN: 7PM" / "SHOW: 8PM-10PM" / "189 KENT STREET CHARLOTTETOWN"';
+
+  const normalized = applyRecurrenceNormalizationForRegression(
+    buildEvent({
+      category: 'Comedy',
+      name: 'The Comedy Cave (Comedy Show)',
+      description,
+      establishment: 'The Factory Downtown',
+      venue: 'The Factory Downtown',
+      startDate: '2026-08-15',
+      endDate: '2026-08-15',
+      startTime: '20:00',
+      endTime: '22:00',
+      isRecurring: 'Yes',
+      recurringPattern: 'weekly_saturday',
+    }),
+    buildOriginalItem({
+      name: 'The Comedy Cave (Comedy Show)',
+      description,
+      date: '2026-08-15',
+      startTime: '20:00',
+      endTime: '22:00',
+      venue: 'The Factory Downtown',
+      recurringPattern: 'weekly_saturday',
+    })
+  );
+
+  assert.equal(normalized.isRecurring, false);
+  assert.equal(normalized.recurringPattern, 'none');
+});
+
+test('monthly wording does not validate a weekly cadence without an every-weekday cue', () => {
+  const description =
+    'Our monthly comedy showcase returns this Saturday, August 15 at 8pm. New performers appear every show.';
+
+  const normalized = applyRecurrenceNormalizationForRegression(
+    buildEvent({
+      category: 'Comedy',
+      name: 'Monthly Comedy Showcase',
+      description,
+      startDate: '2026-08-15',
+      endDate: '2026-08-15',
+      startTime: '20:00',
+      endTime: '22:00',
+      isRecurring: 'Yes',
+      recurringPattern: 'weekly_saturday',
+    }),
+    buildOriginalItem({
+      name: 'Monthly Comedy Showcase',
+      description,
+      date: '2026-08-15',
+      startTime: '20:00',
+      endTime: '22:00',
+      recurringPattern: 'weekly_saturday',
+    })
+  );
+
+  assert.equal(normalized.isRecurring, false);
+  assert.equal(normalized.recurringPattern, 'none');
+});
+
+test('an explicit every-Saturday cue still protects a real weekly recurrence', () => {
+  const description =
+    'The Comedy Cave runs every Saturday at 8pm, starting Saturday, August 15.';
+
+  const normalized = applyRecurrenceNormalizationForRegression(
+    buildEvent({
+      category: 'Comedy',
+      name: 'The Comedy Cave',
+      description,
+      startDate: '2026-08-15',
+      endDate: '2026-08-15',
+      startTime: '20:00',
+      endTime: '22:00',
+      isRecurring: 'Yes',
+      recurringPattern: 'weekly_saturday',
+    }),
+    buildOriginalItem({
+      name: 'The Comedy Cave',
+      description,
+      date: '2026-08-15',
+      startTime: '20:00',
+      endTime: '22:00',
+      recurringPattern: 'weekly_saturday',
+    })
+  );
+
+  assert.equal(normalized.isRecurring, true);
+  assert.equal(normalized.recurringPattern, 'weekly_saturday');
+});
+
 test('single-date concerts with duration-only each wording are not kept as weekly recurring', () => {
   const examples = [
     {

@@ -307,6 +307,80 @@ test('still promotes image fields for a legitimate newer finite family shape', (
   assert.equal(preview.updates.imageProvenance?.primaryUrl, newImage);
 });
 
+test('same-occurrence refresh can improve media without creating a weekly family', () => {
+  const oldImage =
+    'https://storage.googleapis.com/gathr-uploaded-images/postimages/comedy-cave-july.webp';
+  const newImage =
+    'https://storage.googleapis.com/gathr-uploaded-images/postimages/comedy-cave-august.webp';
+  const venue: VenueData = {
+    id: 'V7zQ5unfTY1GtNKUvR7c',
+    name: 'The Factory Downtown',
+    normalizedName: 'the factory downtown',
+    address: '189 Kent Street',
+    latitude: 46.236,
+    longitude: -63.128,
+  };
+
+  const preview = previewDuplicateMerge({
+    venue,
+    existingEvent: buildEvent({
+      uniqueId: '1772514857574758_5d110d048656f7f8',
+      establishment: 'The Factory Downtown',
+      venueId: venue.id,
+      eventType: 'event',
+      eventName: 'The Comedy Cave: Jalen + Friends (Stand-up Comedy Showcase)',
+      name: 'The Comedy Cave: Jalen + Friends (Stand-up Comedy Showcase)',
+      description: 'One unforgettable night of stand-up comedy.',
+      category: 'Comedy',
+      isEvent: 'Yes',
+      isFoodSpecial: 'No',
+      startDate: '2026-08-15',
+      endDate: '2026-08-15',
+      startTime: '20:00',
+      endTime: '22:00',
+      isRecurring: 'No',
+      recurringPattern: 'none',
+      sourceTimestamp: new Date('2026-07-27T19:48:53.000Z'),
+      mediaUrls: [oldImage],
+      image: oldImage,
+      imageUrl: oldImage,
+      relevantImageUrl: oldImage,
+    }),
+    incomingEvent: buildEvent({
+      uniqueId: '1789273352565575_8157646ba085fc2f',
+      establishment: 'The Factory Downtown',
+      venueId: venue.id,
+      eventType: 'event',
+      eventName: 'The Comedy Cave (Comedy Show)',
+      name: 'The Comedy Cave (Comedy Show)',
+      description:
+        'This SATURDAY, August 15 at 8pm. New material every show.',
+      category: 'Comedy',
+      isEvent: 'Yes',
+      isFoodSpecial: 'No',
+      startDate: '2026-08-15',
+      endDate: '2026-08-15',
+      startTime: '20:00',
+      endTime: '22:00',
+      isRecurring: 'No',
+      recurringPattern: 'none',
+      sourceTimestamp: new Date('2026-08-13T23:07:15.000Z'),
+      mediaUrls: [newImage],
+      image: newImage,
+      imageUrl: newImage,
+      relevantImageUrl: newImage,
+    }),
+  });
+
+  assert.notEqual(preview.updates.isRecurring, true);
+  assert.notEqual(preview.updates.recurringPattern, 'weekly_saturday');
+  assert.equal(preview.updates.recurrenceUntilDate, undefined);
+  assert.equal(preview.updates.totalOccurrences, undefined);
+  assert.equal(preview.updates.image, newImage);
+  assert.equal(preview.updates.imageUrl, newImage);
+  assert.equal(preview.updates.relevantImageUrl, newImage);
+});
+
 test('promotes an incoming same-source recurring parent over a one-off occurrence child', () => {
   const venue: VenueData = {
     id: 'slug_kinkorapubliclibrary',

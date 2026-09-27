@@ -2742,26 +2742,41 @@ function hasRecurringCue(text: string): boolean {
   );
 }
 
-function hasStrongRecurringCue(text: string): boolean {
+function hasCadenceCompatibleRecurringCue(
+  text: string,
+  recurringPattern: RecurringPattern
+): boolean {
   const normalized = normalizeWeekdayExtractionText(text);
   if (!normalized) return false;
-  return /\b(every|each|weekly|daily|biweekly|every other|recurring|repeats?|weekdays|monthly)\b/.test(
-    normalized
-  );
-}
 
-function removeDurationOnlyEachCue(text: string): string {
-  return normalizeWeekdayExtractionText(text)
-    .replace(
-      /\beach\s+(?:concert|show|performance|set|event|screening|presentation|reading|service)\s+(?:is|will\s+be|lasts?|runs?|takes)\s+(?:about|approximately|approx\.?|around|roughly)?\s*\d+(?:\.\d+)?\s*(?:minutes?|mins?|hours?|hrs?)\b/g,
-      ' '
-    )
-    .replace(/\s+/g, ' ')
-    .trim();
-}
+  if (recurringPattern === 'daily') {
+    return /\b(daily|every\s+(?:single\s+)?day|each\s+day|seven\s+days\s+a\s+week|7\s+days\s+a\s+week)\b/.test(
+      normalized
+    );
+  }
 
-function hasStrongRecurringCueForSingleDateDemotion(text: string): boolean {
-  return hasStrongRecurringCue(removeDurationOnlyEachCue(text));
+  const weekday = normalizeRecurringWeekdayToken(recurringPattern.replace('weekly_', ''));
+  if (!weekday || recurringPattern === 'weekly_custom') return false;
+
+  const weekdayAliases: Record<RecurringWeekday, string> = {
+    sunday: 'sunday|sun',
+    monday: 'monday|mon',
+    tuesday: 'tuesday|tue|tues',
+    wednesday: 'wednesday|wed',
+    thursday: 'thursday|thu|thur|thurs',
+    friday: 'friday|fri',
+    saturday: 'saturday|sat',
+  };
+  const weekdayToken = `(?:${weekdayAliases[weekday]})`;
+
+  return [
+    new RegExp(`\\b(?:every|each)\\s+(?:single\\s+)?${weekdayToken}s?\\b`),
+    new RegExp(`\\b${weekdayToken}s\\b`),
+    new RegExp(`\\bweekly(?:\\s+on)?\\s+${weekdayToken}s?\\b`),
+    new RegExp(`\\b${weekdayToken}s?\\s+(?:weekly|every\\s+week)\\b`),
+    new RegExp(`\\bevery\\s+week\\s+(?:on\\s+)?${weekdayToken}\\b`),
+    new RegExp(`\\b(?:recurs?|repeats?)\\s+(?:on\\s+)?${weekdayToken}s?\\b`),
+  ].some((pattern) => pattern.test(normalized));
 }
 
 function hasSingleDayMultiSessionOneOffCue(
@@ -3321,7 +3336,7 @@ function shouldForceExplicitDatedWeeklyOneOff(
   sourceText: string,
   recurringPattern: RecurringPattern,
   explicitOccurrenceDates: string[],
-  hasRecurringCueSignal: boolean,
+  _hasRecurringCueSignal: boolean,
   hasSeriesCue: boolean,
   recurrenceUntilDate: string | undefined,
   totalOccurrences: number | undefined,
@@ -3342,7 +3357,11 @@ function shouldForceExplicitDatedWeeklyOneOff(
     return false;
   }
 
-  if (hasRecurringCueSignal || recurrenceUntilDate || totalOccurrences !== undefined) {
+  if (
+    hasCadenceCompatibleRecurringCue(sourceText, recurringPattern) ||
+    recurrenceUntilDate ||
+    totalOccurrences !== undefined
+  ) {
     return false;
   }
 
@@ -3402,7 +3421,7 @@ function shouldForceSingleExplicitDateOneOff(
     return false;
   }
 
-  if (hasStrongRecurringCueForSingleDateDemotion(normalizedSource)) {
+  if (hasCadenceCompatibleRecurringCue(normalizedSource, recurringPattern)) {
     return false;
   }
 
