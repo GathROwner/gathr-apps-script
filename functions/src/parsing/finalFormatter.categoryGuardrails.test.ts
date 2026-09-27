@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 
 import {
   applyCategoryCorrectionsForRegression,
+  filterCommercialPromotionEvents,
   filterRetailMerchandisePromotions,
 } from './finalFormatter.js';
 import { CalendarItem, FormattedEvent } from './types.js';
@@ -189,4 +190,18 @@ test('keeps a real market event that happens to sell merchandise', () => {
   });
 
   assert.deepEqual(filterRetailMerchandisePromotions([market]), [market]);
+});
+
+test('drops warranty, retail-discount, and online administrative promotions but keeps a grand opening', () => {
+  const records = [
+    formatted({ name: 'Limited-Time Free Extended Warranty', description: 'Shop now for a free extended warranty.' }),
+    formatted({ name: 'Bone & Biscuit Discount', description: 'Save on pet food and treats this week.' }),
+    formatted({ name: 'UPEISU renewal deadline', description: 'Renew your membership online through the student union portal.' }),
+    formatted({ name: 'Kent Street Butcher Grand Opening BBQ', description: 'Food trucks and live music at our grand opening.' }),
+  ];
+
+  assert.deepEqual(
+    filterCommercialPromotionEvents(records).map((event) => event.name),
+    ['Kent Street Butcher Grand Opening BBQ']
+  );
 });

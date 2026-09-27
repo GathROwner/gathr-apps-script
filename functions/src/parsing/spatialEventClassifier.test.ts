@@ -121,7 +121,8 @@ test('same physical location repeated by alias collapses to one point', () => {
   });
 
   assert.equal(result.locations.length, 1);
-  assert.ok(result.reviewReasons.includes('multi_location_names_not_fully_extracted'));
+  assert.equal(result.kind, 'single_location');
+  assert.equal(result.representation, 'venue');
 });
 
 test('separate dated city occurrences must not become one multi-location event', () => {
@@ -392,4 +393,35 @@ test('a repeated one-location schedule does not become separate occurrences', ()
   });
   assert.equal(result.kind, 'single_location');
   assert.equal(result.representation, 'venue');
+});
+
+test('a venue plus its municipality is one location, even when the model claims separate occurrences', () => {
+  const result = classifySpatialEvent({
+    name: 'In Spite of Ourselves: An Evening of John Prine',
+    location: 'Kings Playhouse',
+    combinedText: 'Kings Playhouse\nGeorgetown, PE\nOctober 4 2026 at 7:30 PM',
+    modelSpatialEvidence: {
+      kind: 'separate_occurrences',
+      locations: ['Kings Playhouse', 'Georgetown, PE', 'Georgetown'],
+    },
+  });
+
+  assert.equal(result.kind, 'single_location');
+  assert.equal(result.representation, 'venue');
+});
+
+test('a venue name repeated with its street address is one physical location', () => {
+  const result = classifySpatialEvent({
+    name: 'Community Supper',
+    location: 'Park Royal United Church',
+    combinedText: 'Locations: Park Royal United Church; Park Royal United Church, 11 Christie Drive',
+    modelSpatialEvidence: {
+      kind: 'multi_location',
+      locations: ['Park Royal United Church', 'Park Royal United Church (11 Christie Drive)'],
+    },
+  });
+
+  assert.equal(result.kind, 'single_location');
+  assert.equal(result.representation, 'venue');
+  assert.equal(result.locations.length, 1);
 });

@@ -194,15 +194,28 @@ function locationFromModel(value: unknown): SpatialLocationEvidence | null {
   };
 }
 
+function canonicalPhysicalLocationKey(value: string): string {
+  const cleaned = cleanText(value, 300)
+    // A repeated host name is frequently followed by its street address in a
+    // second extractor output. The address adds provenance, not another site.
+    .replace(/\s*\(\s*\d{1,6}\s+[^)]*\)\s*$/i, '')
+    .replace(/\s*[,\-–—]\s*\d{1,6}\s+.*$/i, '')
+    .trim();
+  return normalizeKey(cleaned);
+}
+
 function dedupeLocations(values: SpatialLocationEvidence[]): SpatialLocationEvidence[] {
   const result: SpatialLocationEvidence[] = [];
   const byKey = new Map<string, number>();
   for (const value of values) {
-    const key = normalizeKey(value.address || value.label);
-    if (!key) continue;
-    const existingIndex = byKey.get(key);
+    const keys = Array.from(new Set([
+      canonicalPhysicalLocationKey(value.label),
+      normalizeKey(value.address || ''),
+    ].filter(Boolean)));
+    if (!keys.length) continue;
+    const existingIndex = keys.map((key) => byKey.get(key)).find((index) => index !== undefined);
     if (existingIndex === undefined) {
-      byKey.set(key, result.length);
+      for (const key of keys) byKey.set(key, result.length);
       result.push(value);
       continue;
     }
@@ -217,6 +230,7 @@ function dedupeLocations(values: SpatialLocationEvidence[]): SpatialLocationEvid
           : 'possible',
       sourceText: existing.sourceText || value.sourceText,
     };
+    for (const key of keys) byKey.set(key, existingIndex);
   }
   return result;
 }
@@ -390,6 +404,20 @@ function extractDatedCityLocations(text: string): SpatialLocationEvidence[] {
   });
 }
 
+// A municipality in an address or a poster footer is geographic context, not
+// a second event site.  Keeping it in `locations` is useful provenance, but
+// it must not make "Kings Playhouse, Georgetown" look like two locations.
+// Intentionally narrow: labels with streets, venues, or two place names (for
+// example "St. Roch, Tignish") remain physical-location evidence.
+function isPlainMunicipalityContext(value: string): boolean {
+  const key = normalizeKey(value);
+  return /^(?:charlottetown|summerside|montague|cornwall|stratford|georgetown|souris|kensington)(?: pe| pei| prince edward island)?$/.test(key);
+}
+
+function structuralLocations(values: SpatialLocationEvidence[]): SpatialLocationEvidence[] {
+  return values.filter((entry) => !isPlainMunicipalityContext(entry.label));
+}
+
 function chooseConfidence(params: {
   kind: SpatialEventKind;
   modelKind: SpatialEventKind | null;
@@ -447,7 +475,12 @@ export function classifySpatialEvent(
   // A schedule with many dates at one named venue is normal calendar data,
   // not an area event. Only retain separate-occurrence routing when there are
   // at least two distinct extracted places to split.
-  const separateOccurrences = looksLikeSeparateLocationOccurrences(corpus) && locations.length >= 2;
+  // A repeated city footer beside one venue is not a city tour.  Require two
+  // distinct dated municipalities before holding an event for occurrence
+  // splitting.  That preserves actual Charlottetown/Montague/Summerside tours
+  // while allowing a normal "venue + city" event through venue resolution.
+  const datedCities = dedupeLocations(extractDatedCityLocations(corpus));
+  const separateOccurrences = looksLikeSeparateLocationOccurrences(corpus) && datedCities.length >= 2;
   const online = ONLINE_PATTERN.test(corpus);
   const physical = PHYSICAL_LOCATION_PATTERN.test(corpus) || locations.length > 0;
   const hasRouteRoles = locations.some((entry) => entry.role === 'start') &&
@@ -471,13 +504,14 @@ export function classifySpatialEvent(
   // been labelled "separate_occurrences" despite containing neither two dated
   // place lines nor a real multi-site structure. Require source-visible
   // structure before honouring a non-venue model classification.
-  const hasExplicitMultiplePlaces = locations.length >= 2 &&
+  const physicalLocations = structuralLocations(locations);
+  const hasExplicitMultiplePlaces = physicalLocations.length >= 2 &&
     !allLocationsAreRooms &&
     !locationsLookLikeHostSublocations;
   const modelRouteIsSupported = normalizedModelKind === 'route' &&
     ((routeEvent && routeStructure) || hasRouteRoles || confirmedStreets.length > 0);
   const modelMultiLocationIsSupported = normalizedModelKind === 'multi_location' &&
-    (multiCue || hasExplicitMultiplePlaces || modelLocations.length >= 2);
+    (multiCue || hasExplicitMultiplePlaces || structuralLocations(dedupeLocations(modelLocations)).length >= 2);
   const modelSeparateOccurrencesIsSupported =
     normalizedModelKind === 'separate_occurrences' && separateOccurrences;
 

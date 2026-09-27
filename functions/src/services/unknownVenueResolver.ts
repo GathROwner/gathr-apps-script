@@ -947,7 +947,10 @@ function getMeaningfulVenueTokens(value: string): string[] {
   return Array.from(new Set(
     normalized
       .split(/\s+/)
-      .map((token) => token.trim())
+      // Canadian venue names often use "centre" while a poster uses the US
+      // spelling "center". This is an identity-equivalent spelling, not a
+      // second location.
+      .map((token) => token.trim() === 'center' ? 'centre' : token.trim())
       .filter((token) => token.length >= 3)
       .filter((token) => !VENUE_TOKEN_STOPWORDS.has(token))
   ));
@@ -972,12 +975,10 @@ export function sourcePageIdentitySupportsExistingVenueSuggestion(
 
   const candidateTokens = new Set(getMeaningfulVenueTokens(candidateName));
   const sharedTokens = unknownTokens.filter((token) => candidateTokens.has(token));
-  if (sharedTokens.length >= 2) return true;
-
-  // A source-page slug is already a strong identity signal. Allow one distinctive
-  // shared token so "Havenwood Studio Theatre" can suggest "Havenwood Dance Studio"
-  // while generic source pages such as "Downtown Charlottetown" still fail.
-  return sharedTokens.some((token) => token.length >= 8);
+  // A publisher page can be an adjacent resort, promoter, or organizer. One
+  // distinctive shared word (for example "Brudenell") is not enough to turn
+  // that page identity into a physical-location match.
+  return sharedTokens.length >= 2;
 }
 
 function candidateExtendsUnknownNameByTokens(
@@ -1387,7 +1388,7 @@ async function linkSuggestionToExistingVenueByFacebookUrl(
 
   const venueAny = existingVenue as unknown as Record<string, unknown>;
   const existingVenueName = getVenueDisplayName(venueAny) || existingVenue.name || '';
-  if (shouldSkipFacebookUrlLinkDueToNameConflict(suggestion, existingVenueName, params)) {
+  if (shouldSkipExistingVenueLinkDueToNameConflict(suggestion, existingVenueName, params)) {
     logger.info('Skipped unknown-venue Facebook URL link due to candidate/existing name conflict', {
       docId: params.docId,
       unknownVenueName: params.unknownVenueName,
@@ -1429,7 +1430,7 @@ async function linkSuggestionToExistingVenueByFacebookUrl(
   return linkedSuggestion;
 }
 
-function shouldSkipFacebookUrlLinkDueToNameConflict(
+export function shouldSkipExistingVenueLinkDueToNameConflict(
   suggestion: UnrecognizedVenueSuggestedMatch,
   existingVenueName: string,
   params: {
@@ -1475,18 +1476,42 @@ async function linkSuggestionToExistingVenueByPlaceId(
   if (!existingVenue) return suggestion;
 
   const venueAny = existingVenue as unknown as Record<string, unknown>;
+  const existingVenueName = getVenueDisplayName(venueAny) || existingVenue.name || '';
+  // A bad historical Place ID must not convert a clearly named candidate into
+  // a different venue. Keep the Places candidate for review instead.
+  if (shouldSkipExistingVenueLinkDueToNameConflict(suggestion, existingVenueName, params)) {
+    logger.warn('Skipped unknown-venue Place ID link due to candidate/existing name conflict', {
+      docId: params.docId,
+      unknownVenueName: params.unknownVenueName,
+      source: params.source,
+      candidateVenueName: suggestion.venueName,
+      existingVenueId: existingVenue.id,
+      existingVenueName,
+      placeId: normalizedPlaceId,
+    });
+    return {
+      ...suggestion,
+      note: mergeSuggestionNotes(suggestion.note, [
+        ['placeIdLinkSkipped', 'candidate_existing_name_conflict'],
+        ['existingVenueId', existingVenue.id],
+        ['existingVenueName', existingVenueName],
+        ['placeId', normalizedPlaceId],
+        ['source', params.source],
+      ]) || suggestion.note,
+    };
+  }
   const linkedSuggestion: UnrecognizedVenueSuggestedMatch = {
     ...suggestion,
     confidence: Math.max(0.98, Number(suggestion.confidence || 0)),
     venueId: existingVenue.id,
-    venueName: getVenueDisplayName(venueAny) || existingVenue.name || suggestion.venueName,
+    venueName: existingVenueName || suggestion.venueName,
     address: getVenueAddress(venueAny) || suggestion.address,
     facebookUrl: getVenueFacebookUrl(venueAny) || suggestion.facebookUrl,
     note: buildSuggestionNote([
       ['linkedBy', 'placeId'],
       ['placeId', normalizedPlaceId],
       ['existingVenueId', existingVenue.id],
-      ['existingVenueName', getVenueDisplayName(venueAny) || existingVenue.name || ''],
+      ['existingVenueName', existingVenueName],
     ]) || suggestion.note,
   };
 

@@ -410,7 +410,8 @@ Never return arrays of values for an item; each must be a JSON object.`;
     );
     const discreteEvents = filterOperationalHoursOnlyEvents(sourceGroundedEvents);
     const retailFilteredEvents = filterRetailMerchandisePromotions(discreteEvents);
-    const advisoryFilteredEvents = filterTrafficAdvisoryLogisticsEvents(retailFilteredEvents, combinedText);
+    const commercialFilteredEvents = filterCommercialPromotionEvents(retailFilteredEvents);
+    const advisoryFilteredEvents = filterTrafficAdvisoryLogisticsEvents(commercialFilteredEvents, combinedText);
     const cruiseFilteredEvents = filterCruiseShipLogisticsEvents(advisoryFilteredEvents, combinedText);
     const promotedFiniteWeeklyEvents = promoteFiniteWeeklyOneOffSequences(cruiseFilteredEvents);
     const collapsedProcessedEvents = collapseRecurringSeriesEvents(promotedFiniteWeeklyEvents);
@@ -2290,6 +2291,28 @@ export function filterRetailMerchandisePromotions(
     }
 
     logger.debug(`Dropped retail merchandise promotion "${event.name}"`, {
+      category: event.category,
+      venue: event.venue || event.establishment,
+    });
+    return false;
+  });
+}
+
+export function filterCommercialPromotionEvents(
+  events: FormattedEvent[]
+): FormattedEvent[] {
+  return events.filter((event) => {
+    const text = normalizeCruiseLogisticsText([event.name, event.description].join(' '));
+    if (hasPublicEventCue(text)) return true;
+
+    const warrantyPromotion = /\b(?:limited[-\s]?time\s+)?(?:free\s+)?(?:extended\s+)?warranty\b/.test(text);
+    const retailDiscount = /\b(?:save|sale|discount|coupon|clearance|shop\s+now|while\s+supplies\s+last)\b/.test(text) &&
+      /\b(?:products?|retail|store|warranty|accessories|apparel|merchandise|pet\s+food|treats?)\b/.test(text);
+    const onlineAdministrativeDeadline = /\b(?:apply|application|renew|renewal|membership|deadline|due\s+date)\b/.test(text) &&
+      /\b(?:online|portal|form|student\s+union|account)\b/.test(text);
+    if (!warrantyPromotion && !retailDiscount && !onlineAdministrativeDeadline) return true;
+
+    logger.debug(`Dropped commercial promotion "${event.name}"`, {
       category: event.category,
       venue: event.venue || event.establishment,
     });

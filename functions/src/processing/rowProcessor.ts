@@ -2662,6 +2662,18 @@ async function queueUnknownVenueForReview(params: {
 }): Promise<void> {
   const venueName = String(params.venueName || '').trim();
   if (!venueName) return;
+  if (isClearlyNonEventPromotion({
+    name: params.eventName,
+    description: params.description,
+    sourceText: [params.row.sharedPostText, params.row.text].filter(Boolean).join('\n'),
+  })) {
+    logger.debug('Skipping unknown-venue queue for clear non-event promotion', {
+      rowIndex: params.rowIndex,
+      venueName,
+      eventName: params.eventName || '',
+    });
+    return;
+  }
 
   try {
     const state = params.batchManager.getState();
@@ -4038,6 +4050,36 @@ async function resolveVenueForFullParserEvent(
   });
 }
 
+/**
+ * This guard is intentionally narrower than generic event classification.
+ * It only prevents a review email when the source is clearly a commercial or
+ * administrative promotion and has no public-event signal. Ambiguous posts
+ * continue to the normal parser and review paths.
+ */
+export function isClearlyNonEventPromotion(params: {
+  name?: unknown;
+  description?: unknown;
+  sourceText?: unknown;
+}): boolean {
+  const text = [params.name, params.description, params.sourceText]
+    .map((value) => String(value || '').toLowerCase())
+    .join(' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (!text) return false;
+
+  const publicEventCue = /\b(grand\s+opening|open\s+house|concert|live\s+music|festival|market|vendors?|fundraiser|workshop|class|show|performance|trivia|karaoke|comedy|movie|screening|tickets?|register|registration|race|parade|run|walk|food\s+trucks?)\b/i.test(text);
+  if (publicEventCue) return false;
+
+  const warrantyPromotion = /\b(?:limited[-\s]?time\s+)?(?:free\s+)?(?:extended\s+)?warranty\b/i.test(text);
+  const retailPromotion = /\b(?:save|sale|discount|%\s*off|coupon|clearance|shop\s+now|while\s+supplies\s+last)\b/i.test(text) &&
+    /\b(?:product|products|retail|store|warranty|accessories|apparel|merchandise|pet\s+food|treats?)\b/i.test(text);
+  const onlineAdministrativeDeadline = /\b(?:apply|application|renew|renewal|membership|deadline|due\s+date)\b/i.test(text) &&
+    /\b(?:online|portal|form|student\s+union|account)\b/i.test(text);
+
+  return warrantyPromotion || retailPromotion || onlineAdministrativeDeadline;
+}
+
 function looksLikeSpecificStreetAddress(value: unknown): boolean {
   const text = String(value || '').trim();
   return /\b\d{1,6}\s*[A-Za-z]?\s+[^,]{2,80}\b(?:street|st\.?|road|rd\.?|avenue|ave\.?|drive|dr\.?|lane|ln\.?|boulevard|blvd\.?|way)\b/i.test(text);
@@ -4049,6 +4091,9 @@ function fullParserAddressCandidates(item: ParserProcessedEvent, row: RawRowData
   return Array.from(new Set([
     itemAny.address,
     itemAny.streetAddress,
+    itemAny.location,
+    item.additionalLocation,
+    item.venue,
     row.address,
     rowAny.streetAddress,
     row.facebookEventLocationName,

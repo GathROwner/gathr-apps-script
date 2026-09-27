@@ -4,6 +4,7 @@ import test from 'node:test';
 import { UnrecognizedVenueRecord, UnrecognizedVenueSampleEvent } from '../types/index.js';
 import {
   extractReplayTargetsFromSamples,
+  shouldSkipExistingVenueLinkDueToNameConflict,
   sourcePageIdentitySupportsExistingVenueSuggestion,
 } from './unknownVenueResolver.js';
 
@@ -141,18 +142,50 @@ test('unknown venue finalizer does not replay synthetic shared-event samples as 
   assert.deepEqual(selection.targets, []);
 });
 
-test('source page identity suggestion guard allows distinctive shared venue tokens', () => {
+test('source page identity suggestion guard needs two venue-identity tokens', () => {
   assert.equal(
-    sourcePageIdentitySupportsExistingVenueSuggestion(
-      'Havenwood Studio Theatre',
-      'Havenwood Dance Studio'
-    ),
+    sourcePageIdentitySupportsExistingVenueSuggestion('Havenwood Studio Theatre', 'Havenwood Dance Studio'),
     true
   );
   assert.equal(
     sourcePageIdentitySupportsExistingVenueSuggestion(
       "Peake's Quay",
       "Peake's Quay Restaurant & Bar"
+    ),
+    true
+  );
+});
+
+test('source page identity does not turn a shared geographic word into a physical location match', () => {
+  assert.equal(
+    sourcePageIdentitySupportsExistingVenueSuggestion('Brudenell Provincial Park', 'Rodd Brudenell River Resort'),
+    false
+  );
+});
+
+test('source page identity treats Canadian and US centre spelling as the same token', () => {
+  assert.equal(
+    sourcePageIdentitySupportsExistingVenueSuggestion(
+      'Charlottetown Library Learning Center',
+      'Charlottetown Library Learning Centre'
+    ),
+    true
+  );
+});
+
+test('source page identity treats simple venue word-order changes as the same identity', () => {
+  assert.equal(
+    sourcePageIdentitySupportsExistingVenueSuggestion('Charlottetown Indigo', 'Indigo Charlottetown'),
+    true
+  );
+});
+
+test('an existing Place ID link is rejected when it conflicts with the named candidate', () => {
+  assert.equal(
+    shouldSkipExistingVenueLinkDueToNameConflict(
+      { venueName: 'Charlottetown Library Learning Center', confidence: 0.98, matchType: 'places' },
+      "Peake's Quay",
+      { unknownVenueName: 'Charlottetown Library Learning Center', source: 'places' }
     ),
     true
   );
