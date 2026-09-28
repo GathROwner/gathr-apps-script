@@ -8643,7 +8643,7 @@ async function uploadImageBuffer(
 ): Promise<string | null> {
   try {
     const form = new FormData();
-    const blob = new Blob([buffer], { type: contentType || 'image/jpeg' });
+    const blob = new Blob([new Uint8Array(buffer)], { type: contentType || 'image/jpeg' });
     const fileName = `backfill-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`;
 
     form.append('folder', folder);

@@ -6763,9 +6763,9 @@ function countDuplicateMergeWeeklyOccurrencesThrough(
   for (let dayOffset = 0; dayOffset <= diffDays; dayOffset += 1) {
     const current = new Date(start);
     current.setUTCDate(start.getUTCDate() + dayOffset);
-    const weekday = VALID_RECURRING_WEEKDAYS_ARRAY[current.getUTCDay()] || '';
+    const weekday = VALID_RECURRING_WEEKDAYS_ARRAY[current.getUTCDay()];
     const weekOffset = Math.floor(dayOffset / 7);
-    if (weekdays.has(weekday) && weekOffset % weekInterval === 0) {
+    if (weekday && weekdays.has(weekday) && weekOffset % weekInterval === 0) {
       count += 1;
     }
   }
