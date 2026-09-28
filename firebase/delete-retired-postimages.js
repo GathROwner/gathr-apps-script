@@ -1,5 +1,5 @@
 /*
- * Deletes only the objects in a completed audit-retired-postimages manifest.
+ * Deletes only the objects in a completed managed-image audit manifest.
  * Default mode performs a storage preflight. --apply requires every object to
  * still exist and writes a metadata backup before deleting and re-verifying.
  *
@@ -21,14 +21,16 @@ const reportIndex = process.argv.indexOf('--report');
 const reportPath = reportIndex >= 0 ? process.argv[reportIndex + 1] : '';
 if (!reportPath) throw new Error('--report <audit-report.json> is required');
 
-function objectLocation(url) {
+function objectLocation(url, expectedPrefix) {
   const parsed = new URL(url);
   if (parsed.hostname !== 'storage.googleapis.com') throw new Error(`Unexpected storage URL: ${url}`);
   const [bucket, ...objectParts] = parsed.pathname.split('/').filter(Boolean);
-  if (bucket !== 'gathr-uploaded-images' || !objectParts.join('/').startsWith('postimages/')) {
+  const objectName = objectParts.join('/');
+  if (!['postimages/', 'profilepictures/'].includes(expectedPrefix)) throw new Error(`Unexpected audit prefix: ${expectedPrefix}`);
+  if (bucket !== 'gathr-uploaded-images' || !objectName.startsWith(expectedPrefix)) {
     throw new Error(`Unexpected deletion target: ${url}`);
   }
-  return { url, bucket, objectName: objectParts.join('/') };
+  return { url, bucket, objectName };
 }
 
 function timestampedPath(suffix) {
@@ -40,7 +42,8 @@ async function main() {
   if (report.mode !== 'read-only' || !Array.isArray(report.entries) || !Array.isArray(report.deletionManifest)) {
     throw new Error('Audit report shape is invalid');
   }
-  const manifest = [...new Set(report.deletionManifest)].map(objectLocation);
+  const expectedPrefix = report.objectPrefix || 'postimages/';
+  const manifest = [...new Set(report.deletionManifest)].map((url) => objectLocation(url, expectedPrefix));
   if (manifest.length === 0) throw new Error('Audit report contains no deletion targets');
   const invalid = report.entries.filter((entry) => report.deletionManifest.includes(entry.url) && (
     entry.status !== 'deletable' || entry.activeReferences.length || entry.provenanceReferences.length
