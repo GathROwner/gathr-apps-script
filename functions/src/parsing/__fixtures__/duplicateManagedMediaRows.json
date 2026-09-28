@@ -1,0 +1,31 @@
+{
+  "capturedAt": "2026-09-28T02:00:00.000Z",
+  "purpose": "Regression fixtures for same-post reprocessing that formerly appended a fresh managed object to existing event media.",
+  "rows": [
+    {
+      "name": "Yoga reprocessed single-image Facebook post",
+      "sourceSnapshotIds": [
+        "19EgbAD5H1F5RH2oQGzqHvZm4ooIGHoUA_245_1789138332135",
+        "1AKC_33446w6OaJM_pOU-lqdlBGMF77V3_341_1789224124010"
+      ],
+      "sourceAuditId": "g1ZyYn8XPnzyO6zQvCr1",
+      "sourcePostId": "1710446091090849",
+      "eventPath": "venues/TpTHxHfn9wopdRr70KeS/events/XO7repKckrks88iYCh3d",
+      "sourceMediaIdentity": "/v/t51.82787-15/803151690_18367504114241828_5924740386700066344_n.webp",
+      "existingManagedMedia": ["1789138280355-8ddij2.webp"],
+      "incomingManagedMedia": ["1789224082401-wae9qm.webp"],
+      "expectedMergedMedia": ["1789224082401-wae9qm.webp"]
+    },
+    {
+      "name": "Babas calendar reprocessed single-image Facebook post",
+      "sourceSnapshotId": "1ijGpoW5jTaJkQjq6FVcaijLuw8nojzZm_146_1787752959099",
+      "sourceAuditId": "i74baP52GrUdDEVNNZK1",
+      "sourcePostId": "1516546983846167",
+      "eventPath": "venues/fb_100057766283684/events/QE6w7hI2A5AT2Yyo3fLh",
+      "sourceMediaIdentity": "/v/t51.82787-15/784507281_18623019127001496_1086447659843876380_n.jpg",
+      "existingManagedMedia": ["1787750033117-4vk80z.webp"],
+      "incomingManagedMedia": ["1787752596535-72tfbr.webp"],
+      "expectedMergedMedia": ["1787752596535-72tfbr.webp"]
+    }
+  ]
+}
