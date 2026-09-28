@@ -7743,6 +7743,16 @@ function mergeUniqueUrls(existingUrls?: string[], incomingUrls?: string[]): stri
 
 function mergeDuplicateMediaUrls(existing: EventData, incoming: EventData): string[] {
   const incomingUrls = normalizeUrlList(incoming.mediaUrls);
+
+  // Reprocessing one Facebook post may upload a new managed object for the
+  // same bytes. The incoming row is its current complete media set, so do not
+  // append its old managed URLs forever. Posts with different source IDs still
+  // merge their media, which preserves a flyer plus a separately-posted
+  // schedule when both genuinely contribute to the same event.
+  if (hasSameSourceUniqueId(existing, incoming) && incomingUrls.length > 0) {
+    return incomingUrls;
+  }
+
   if (isStructuredFacebookEventSource(incoming)) {
     const incomingManagedUrls = incomingUrls.filter((url) => isStorageManagedUrl(url));
     if (incomingManagedUrls.length > 0) {
@@ -7751,6 +7761,12 @@ function mergeDuplicateMediaUrls(existing: EventData, incoming: EventData): stri
   }
 
   return mergeUniqueUrls(existing.mediaUrls, incoming.mediaUrls);
+}
+
+function hasSameSourceUniqueId(existing: EventData, incoming: EventData): boolean {
+  const existingUniqueId = asTrimmedString(existing.uniqueId);
+  const incomingUniqueId = asTrimmedString(incoming.uniqueId);
+  return Boolean(existingUniqueId && incomingUniqueId && existingUniqueId === incomingUniqueId);
 }
 
 function shouldAlignStructuredFacebookEventManagedImage(

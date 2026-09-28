@@ -3677,7 +3677,9 @@ export async function prepareManagedDisplayImageUrls(
   let uploadedCount = 0;
   let failedCount = 0;
 
-  for (const raw of urls) {
+  const sourceUrls = selectDistinctDisplaySourceImageUrls(urls);
+
+  for (const raw of sourceUrls) {
     if (uploaded.length >= MAX_OCR_OUTPUT_IMAGES_DEFAULT) break;
     const sourceUrl = String(raw || '').trim();
     if (!sourceUrl) continue;
@@ -3713,12 +3715,67 @@ export async function prepareManagedDisplayImageUrls(
   logger.info('Display image upload summary', {
     postId: context.postId || '',
     inputCount: urls.length,
+    sourceDeduplicatedCount: sourceUrls.length,
     attemptedCount,
     uploadedCount,
     failedCount,
   });
 
   return uploaded;
+}
+
+/**
+ * Facebook commonly exposes the same attachment at several dimensions. They
+ * have the same CDN object path and only differ in resize query parameters.
+ * Uploading each variant produces distinct managed URLs and consequently a
+ * misleading gallery. Keep the largest advertised variant for a shared
+ * Facebook CDN object path. Other hosts retain their full URL because a query
+ * string can be meaningful media identity there.
+ */
+export function selectDistinctDisplaySourceImageUrls(urls: string[]): string[] {
+  const selected: Array<{ url: string; identity: string; pixelArea: number }> = [];
+  const indexByIdentity = new Map<string, number>();
+
+  for (const raw of urls) {
+    const url = String(raw || '').trim();
+    if (!url) continue;
+
+    const identity = getFacebookDisplayImageIdentity(url) || url;
+    const pixelArea = getAdvertisedImagePixelArea(url);
+    const existingIndex = indexByIdentity.get(identity);
+    if (existingIndex === undefined) {
+      indexByIdentity.set(identity, selected.length);
+      selected.push({ url, identity, pixelArea });
+      continue;
+    }
+
+    // A tie retains source order. This is important when the post deliberately
+    // contains multiple pages that happen to use the same dimensions.
+    if (pixelArea > selected[existingIndex].pixelArea) {
+      selected[existingIndex] = { url, identity, pixelArea };
+    }
+  }
+
+  return selected.map((candidate) => candidate.url);
+}
+
+function getFacebookDisplayImageIdentity(rawUrl: string): string | undefined {
+  try {
+    const parsed = new URL(rawUrl);
+    const host = parsed.hostname.toLowerCase();
+    if (!host.endsWith('fbcdn.net')) return undefined;
+    // Facebook can serve a single attachment through different regional CDN
+    // hosts, while its attachment path remains stable.
+    return parsed.pathname;
+  } catch {
+    return undefined;
+  }
+}
+
+function getAdvertisedImagePixelArea(rawUrl: string): number {
+  const match = rawUrl.match(/(?:^|[_?&])(?:p|s)(\d{2,5})x(\d{2,5})(?:[_&]|$)/i);
+  if (!match) return 0;
+  return Number(match[1]) * Number(match[2]);
 }
 
 async function prepareManagedProfileIconUrl(
