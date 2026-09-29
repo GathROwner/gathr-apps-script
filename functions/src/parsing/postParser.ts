@@ -42,7 +42,7 @@ import { enrichEventsFromVenueWebsite } from './websiteDetailEnricher.js';
 import { performSecondaryValidation } from './secondaryValidator.js';
 import { performFinalFormatting } from './finalFormatter.js';
 import { resolveTimesWithOperatingHours } from './venueResolver.js';
-import { parseBooleanEnv, parseNumberEnv } from './runtimeConfig.js';
+import { parseBooleanEnv, parseNumberEnv, resolveStageModel } from './runtimeConfig.js';
 import { logger } from '../utils/logger.js';
 
 const CATEGORY_END_DEFAULTS: Record<string, string> = {
@@ -1243,8 +1243,34 @@ export async function parsePostData(
       ocrMode: stage2Routing.ocrMode,
     });
 
+    const stage3ModelRouting = resolveStage3ModelRouting(
+      resolvedContentType,
+      classification,
+      stage2Routing,
+      cfg,
+      modelRouter
+    );
+    const selectedStage3Model = resolveStageModel(
+      stage3ModelRouting.appliedModel,
+      'STAGE3_MODEL_OVERRIDE'
+    );
+    const lunaFullImageRequested =
+      selectedStage3Model === 'gpt-6-luna' &&
+      parseBooleanEnv('STAGE3_LUNA_FULL_IMAGE', false);
     let stage37TicketUrl = '';
     let extractionImageUrls = ocrImageUrls;
+    let lunaFullImageReady = false;
+    if (lunaFullImageRequested && allImageUrls.length > 0) {
+      const fullImageUrls = await prepareFullImageDataUrls(allImageUrls, { postId });
+      lunaFullImageReady = fullImageUrls.length === allImageUrls.length;
+      if (lunaFullImageReady) extractionImageUrls = fullImageUrls;
+      logger.info('Luna full-image Stage 3 decision', {
+        postId,
+        sourceCount: allImageUrls.length,
+        preparedCount: fullImageUrls.length,
+        enabled: lunaFullImageReady,
+      });
+    }
     const cleanupImageUrls = new Set<string>(ocrImageUrls);
     const displayImageUploadStart = Date.now();
     const displayImageUrls = await prepareManagedDisplayImageUrls(sourcePostMediaUrls, {
@@ -1267,9 +1293,9 @@ export async function parsePostData(
       resolvedContentType === 'SCHEDULE';
     const hasComplexitySignals = stage2Routing.signals.hasComplexitySignals;
     const recommendsTilingCount = stage2Routing.signals.recommendsTilingCount;
-    const shouldUseCalendarTiles = stage2Routing.enabled
+    const shouldUseCalendarTiles = !lunaFullImageReady && (stage2Routing.enabled
       ? resolvedContentType === 'CALENDAR' && stage2Routing.shouldUseCalendarTiles
-      : stage2Routing.legacyShouldUseCalendarTiles;
+      : stage2Routing.legacyShouldUseCalendarTiles);
 
     if (isCalendarOrSchedule) {
       if (shouldUseCalendarTiles) {
@@ -1316,27 +1342,23 @@ export async function parsePostData(
           enabled: false,
           baseCount: ocrImageUrls.length,
           tiledCount: 0,
-          ocrMode: stage2Routing.ocrMode,
+          fullImageCount: lunaFullImageReady ? extractionImageUrls.length : 0,
+          ocrMode: lunaFullImageReady ? 'full_image' : stage2Routing.ocrMode,
           routingEnabled: stage2Routing.enabled,
           routingReason: stage2Routing.routingReason,
           tilingSignals: {
             hasComplexitySignals,
             recommendsTilingCount,
           },
-          reason: stage2Routing.enabled
+          reason: lunaFullImageReady
+            ? 'Luna full-image strategy selected'
+            : stage2Routing.enabled
             ? 'Stage 2 score routing selected basic OCR mode'
             : 'Stage 1 image complexity does not recommend tiling',
         });
       }
     }
 
-    const stage3ModelRouting = resolveStage3ModelRouting(
-      resolvedContentType,
-      classification,
-      stage2Routing,
-      cfg,
-      modelRouter
-    );
     if (modelRouter.shadowEnabled || stage3ModelRouting.routeEnabled) {
       logger.info('Stage 3 model routing decision', {
         contentType: stage3ModelRouting.contentType,
@@ -3605,6 +3627,31 @@ function addMetadata(
   event.topReactionsCount = data.topReactionsCount;
 
   return event;
+}
+
+async function prepareFullImageDataUrls(
+  urls: string[],
+  context: { postId?: string }
+): Promise<string[]> {
+  const images: string[] = [];
+  for (const url of urls) {
+    let download;
+    try {
+      download = await downloadImageBufferWithRetry(url, context);
+    } catch (error) {
+      logger.warn('Luna full-image source download failed; using existing image path', {
+        postId: context.postId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+      return [];
+    }
+    const contentType = String(download?.contentType || '').split(';')[0].toLowerCase();
+    if (!download || !['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(contentType)) {
+      return [];
+    }
+    images.push(`data:${contentType};base64,${download.buffer.toString('base64')}`);
+  }
+  return images;
 }
 
 async function prepareOcrImageUrls(

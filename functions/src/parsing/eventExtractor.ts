@@ -3776,7 +3776,11 @@ export function shouldPreferAnchoredScheduleTextParserForRegression(
 }
 
 function createOcrDebugPrompt(imageUrls: string[]): string {
-  const list = imageUrls.map((url, idx) => `${idx + 1}. ${url}`).join('\n');
+  // Full source images may arrive as data URLs. Never place their base64 bytes
+  // in the text prompt or ask the model to echo them in its JSON response.
+  const list = imageUrls
+    .map((url, idx) => `${idx + 1}. ${url.startsWith('data:') ? `[attached image ${idx + 1}]` : url}`)
+    .join('\n');
   return `You are an OCR engine. Extract all visible text from each image.
 Do not infer or paraphrase. Preserve line breaks.
 
@@ -3786,7 +3790,7 @@ ${list}
 Return ONLY valid JSON in this exact shape:
 {
   "images": [
-    { "index": 1, "url": "<url>", "text": "<all text from image>" }
+    { "index": 1, "url": "<image reference from IMAGE URLS>", "text": "<all text from image>" }
   ],
   "notes": ""
 }
@@ -4187,9 +4191,12 @@ async function callGPT(
 ): Promise<string> {
   const client = getOpenAIClient();
   const model = resolveStageModel(config.gptModelReasoning, usageMeta.modelEnvVar);
-  const imageDetail = resolveImageDetail(usageMeta.imageDetailEnvVar, 'high');
+  const imageDetail = model === 'gpt-6-luna'
+    ? resolveImageDetail(usageMeta.imageDetailEnvVar, 'high', true)
+    : resolveImageDetail(usageMeta.imageDetailEnvVar, 'high');
 
-  const isGpt5Model = (value: string): boolean => value.startsWith('gpt-5');
+  const usesResponsesApi = (value: string): boolean =>
+    value.startsWith('gpt-5') || value === 'gpt-6-luna';
   const maxOutputTokens = 32000;
   const MIN_OUTPUT_TOKENS = 512;
 
@@ -4311,6 +4318,7 @@ async function callGPT(
       model,
       input: [{ role: 'user', content }],
       max_output_tokens: outputTokens,
+      ...(model === 'gpt-6-luna' ? { reasoning: { effort: 'none' } } : {}),
     });
     const durationMs = Date.now() - callStart;
 
@@ -4360,7 +4368,7 @@ async function callGPT(
   };
 
   const runOnce = async (urls: string[], outputTokens: number): Promise<string> => {
-    if (isGpt5Model(model)) {
+    if (usesResponsesApi(model)) {
       return runResponses(urls, outputTokens);
     }
     return runChat(urls, outputTokens);

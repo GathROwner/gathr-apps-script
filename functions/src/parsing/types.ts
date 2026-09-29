@@ -75,6 +75,7 @@ export interface GptUsageRecord {
   outputTokens?: number;
   totalTokens?: number;
   cachedInputTokens?: number;
+  cacheWriteInputTokens?: number;
 }
 
 export interface ParseStageArtifactsSnapshot {
