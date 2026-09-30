@@ -61,6 +61,9 @@ console.log(JSON.stringify({
   eventCount: events.length,
   stages: usage.map(({ stage, model, inputTokens, outputTokens }) => ({ stage, model, inputTokens, outputTokens })),
   skips: skips.map(({ stage, reason }) => ({ stage, reason })),
-  events: events.map(({ name, startDate, startTime, recurringPattern, venue, relevantImageIndex }) =>
-    ({ name, startDate, startTime, recurringPattern, venue, relevantImageIndex })),
+  events: events.map(({ name, startDate, startTime, endTime, isRecurring, recurringPattern,
+    venue, relevantImageIndex, relevantImageUrl, image }) =>
+    ({ name, startDate, startTime, endTime, isRecurring, recurringPattern,
+      venue, relevantImageIndex, hasRelevantImageUrl: Boolean(relevantImageUrl),
+      hasDisplayImage: Boolean(image) })),
 }, null, 2));

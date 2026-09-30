@@ -7,6 +7,7 @@ import {
   findMissingExpectedCalendarNames,
   findMissingExpectedCalendarSlotsInFinalEvents,
   applyReviewedCalendarRoomAliases,
+  processEvents,
   resolveRelevantImageUrlForEvent,
   selectUnusedManagedImageUrls,
   selectDisplayImageFromAnalysis,
@@ -97,6 +98,26 @@ test('an unmapped band cannot become an event image', () => {
   );
   assert.equal(selected.url, '');
   assert.equal(selected.reason, 'unmapped_analysis_frame');
+});
+
+test('caption-only listing keeps post media as context without claiming an image match', () => {
+  const image = 'https://storage.googleapis.com/gathr-uploaded-images/postimages/seawalk.webp';
+  const listing = { name: 'BYOC (Bring Your Own Craft) nights', relevantImageIndex: -1 } as any;
+  const selected = resolveRelevantImageUrlForEvent(
+    listing, ['analysis-frame'], [image], [{ imageIndex: 0, description: 'Seawalk workshops' }]
+  );
+  assert.deepEqual(selected, { url: '', reason: 'caption_only_event_no_image_match' });
+
+  const [processed] = processEvents(
+    [listing], 'Seawalk Studio', '', '', ['analysis-frame'], [image], [],
+    { id: '1715992940535525' } as any
+  );
+  assert.equal(processed.image, image);
+  assert.equal(processed.relevantImageUrl, image);
+  assert.deepEqual(processed.mediaUrls, [image]);
+  assert.equal(processed.imageProvenance?.primarySource, 'post_media');
+  assert.equal(processed.imageProvenance?.isFallback, true);
+  assert.equal(processed.imageProvenance?.selectionReason, 'caption_only_post_media_context');
 });
 
 test('cleanup retains every source gallery image while discarding temporary bands', () => {

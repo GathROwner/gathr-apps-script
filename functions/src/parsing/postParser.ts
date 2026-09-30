@@ -42,6 +42,7 @@ import { enrichEventsFromCalendarLinks } from './calendarLinkEnricher.js';
 import { enrichEventsFromVenueWebsite } from './websiteDetailEnricher.js';
 import { performSecondaryValidation } from './secondaryValidator.js';
 import { performFinalFormatting } from './finalFormatter.js';
+import { reconcileCaptionOnlyWeeklyEvents } from './captionOnlyWeekly.js';
 import { resolveTimesWithOperatingHours } from './venueResolver.js';
 import { shouldHoldUndatedStandingSchedule, isSelectedLunaCanaryPost,
   canRetryLunaCanaryWithLegacy, canaryGeneratedCleanupUrls } from './lunaSafetyGate.js';
@@ -2105,9 +2106,32 @@ async function parsePostDataCore(
       cfg,
       input.combinedText
     );
-    const formattedEvents = bandRules.length > 0 && formattedEventsRaw
+    let formattedEvents = bandRules.length > 0 && formattedEventsRaw
       ? applyReviewedCalendarRoomAliases(formattedEventsRaw, bandRules)
       : formattedEventsRaw;
+    if (lunaCanarySelected && resolvedContentType === 'CALENDAR' && formattedEvents) {
+      const captionWeekly = reconcileCaptionOnlyWeeklyEvents({
+        combinedText: input.combinedText,
+        postedAt: timestamp,
+        timezone: cfg.timezone,
+        events: formattedEvents,
+      });
+      if (captionWeekly.issues.length > 0) {
+        logger.warn('Luna caption-only weekly source check failed', {
+          postId,
+          issues: captionWeekly.issues,
+        });
+        return retryCanaryWithLegacy('caption_only_weekly_source_mismatch',
+          captionWeekly.issues.join(','));
+      }
+      formattedEvents = captionWeekly.events;
+      if (captionWeekly.promotedCount > 0) {
+        logger.info('Luna caption-only weekly source check passed', {
+          postId,
+          promotedCount: captionWeekly.promotedCount,
+        });
+      }
+    }
     logTiming('stage5_format', stage5Start, {
       postId,
       formattedCount: formattedEvents?.length || 0,
@@ -2754,6 +2778,9 @@ export function resolveRelevantImageUrlForEvent(
   analysisFrames?: AnalysisImageFrame[]
 ): { url: string; reason: string } {
   const rawIndex = Number(event.relevantImageIndex);
+  if (rawIndex === -1) {
+    return { url: '', reason: 'caption_only_event_no_image_match' };
+  }
   const hasValidIndex = Number.isInteger(rawIndex) && rawIndex >= 0;
   const fromDisplay =
     analysisFrames
@@ -3869,7 +3896,7 @@ function addMinutesToHHMM(hhmm: string, deltaMinutes: number): string {
 /**
  * Process formatted events with metadata
  */
-function processEvents(
+export function processEvents(
   parsedData: TimeResolvedEvent[],
   userName: string,
   facebookUrl: string,
@@ -3912,6 +3939,7 @@ function processEvents(
         ticketImageOverride && String(event.ticketLink || '').trim()
       );
       const imageOverride = canUseTicketImageOverride ? ticketImageOverride : heroImageOverride;
+      const isCaptionOnly = Number(event.relevantImageIndex) === -1;
       const primaryMediaUrl = displayMediaUrls[0] || mapOcrImageUrlToManaged(analysisMediaUrls[0] || '');
       let primaryImageSource = mediaProvenanceSource;
       let primaryImageReason = mediaProvenanceReason;
@@ -3958,10 +3986,10 @@ function processEvents(
         if (!resolvedRelevantImage.url) {
           primaryImageSource = processedEvent.image ? mediaProvenanceSource : 'no_image';
           primaryImageReason = processedEvent.image
-            ? mediaProvenanceReason
+            ? isCaptionOnly ? 'caption_only_post_media_context' : mediaProvenanceReason
             : 'no_usable_event_image_provided';
         }
-        primaryIsFallback = mediaProvenanceSource !== 'post_media';
+        primaryIsFallback = mediaProvenanceSource !== 'post_media' || isCaptionOnly;
       }
       processedEvent.mediaUrls = normalizedDisplayMediaUrls;
       if (!processedEvent.image && normalizedDisplayMediaUrls.length > 0) {

@@ -3648,6 +3648,9 @@ SOURCE-COPY CHECK FOR DENSE POSTERS:
 - Keep text from adjacent posters outside the calendar boundary out of this calendar's items.
 - A time printed below a food or drink deal belongs to that deal. Do not assign it to a performance in the same cell unless the source also attaches that time to the performance.
 ` : '';
+  const captionListingRule = literalSourceNames
+    ? `- Include a separately advertised caption event with an explicit date, or an explicit every/weekly weekday and time, even when absent from every image. Keep it separate from pictured entries and merge any duplicate listing. For a weekly weekday with no first date, use the first matching weekday on or after the posted date as the initial date. Do not invent a final date or multiple occurrences. Mark an image-absent caption item with relevantImageIndex -1.\n`
+    : '- Do NOT infer items from the caption if they do not appear in the image; only use caption to disambiguate dates when the grid shows day-of-week only.\n';
   return `Extract ALL events and specials from this CALENDAR content, ensure you process all attached images.
 
 CONTENT:
@@ -3672,7 +3675,7 @@ ${literalNameRules}
 - A line break inside a calendar cell is layout, not proof that a new act begins. Join consecutive lines into one performer name when the earlier line has no separating punctuation. Split a lineup only where the flyer prints a separator such as a comma, ampersand, plus sign, or distinct billing marker. Preserve the resulting names exactly; do not insert separators that are not printed.
 - Include the date (or day-of-week if that's all that's shown), start_time and end_time when present, and the stage/venue exactly as shown in the grid.
 - For lineup grids, set type="event" (do NOT use "special" unless there is an explicit price/discount).
-- Do NOT infer items from the caption if they do not appear in the image; only use caption to disambiguate dates when the grid shows day-of-week only.
+${captionListingRule}
 - If performer names in the image are unreadable, return no items and note "image_unreadable" in notes rather than guessing.
 ${festivalGroupingRules}
 
@@ -3686,7 +3689,7 @@ For each item found, extract:
 - price: if no specific price mentioned, use empty string
 - description: Any additional details
 - extractionReason: Why this was identified as a calendar item
-- relevantImageIndex: 0-based index of the provided image that visibly contains this exact calendar item, date, or time. The first attached image is 0, the second is 1, etc. If no attached image clearly matches this item, use 0.
+- relevantImageIndex: 0-based index of the provided image that visibly contains this exact calendar item, date, or time. The first attached image is 0, the second is 1, etc. For the separately advertised caption-only item, use -1 rather than claiming a flyer depicts it.
 - spatial: Preserve explicit structure as { kind, locations, confirmedStreets, ordered, evidenceNotes }. Use kind "multi_location" only for one occurrence happening at multiple physical places; use "route" for an ordered movement path; use "separate_occurrences" when different dates are tied to different places. Never guess coordinates, streets, or order. Rooms/stages inside one host venue remain one location.
 
 Pay special attention to:
