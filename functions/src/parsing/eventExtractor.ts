@@ -4420,7 +4420,7 @@ async function callGPT(
   };
 
   const runOnce = async (urls: string[], outputTokens: number): Promise<string> => {
-    if (isGpt5Model(model)) {
+    if (usesResponsesApi(model)) {
       return runResponses(urls, outputTokens);
     }
     return runChat(urls, outputTokens);
