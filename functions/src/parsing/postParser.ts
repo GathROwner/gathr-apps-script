@@ -1751,13 +1751,6 @@ async function parsePostDataCore(
       }
     }
 
-    const stage3ModelRouting = resolveStage3ModelRouting(
-      resolvedContentType,
-      classification,
-      stage2Routing,
-      cfg,
-      modelRouter
-    );
     if (modelRouter.shadowEnabled || stage3ModelRouting.routeEnabled) {
       logger.info('Stage 3 model routing decision', {
         contentType: stage3ModelRouting.contentType,
