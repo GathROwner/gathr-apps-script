@@ -68,6 +68,22 @@ function buildRawRow(text: string): RawRowData {
   };
 }
 
+test('duplicate merge replaces managed media from a reprocessed copy of the same post', () => {
+  const venue = buildVenue();
+  const existing = buildEvent({
+    mediaUrls: ['https://storage.googleapis.com/gathr-uploaded-images/postimages/old-upload.webp'],
+  });
+  const incoming = buildEvent({
+    mediaUrls: ['https://storage.googleapis.com/gathr-uploaded-images/postimages/current-upload.webp'],
+  });
+
+  const result = previewDuplicateMerge({ existingEvent: existing, incomingEvent: incoming, venue });
+
+  assert.deepEqual(result.updates.mediaUrls, [
+    'https://storage.googleapis.com/gathr-uploaded-images/postimages/current-upload.webp',
+  ]);
+});
+
 test('resolves a Facebook Events explicit multi-day range from the structured When text', () => {
   const result = resolveFacebookEventEndDateTime(
     buildRawRow('When: May 22 at 12:00\u202fPM \u2013 May 23 at 8:00\u202fPM ADT\nDuration: 2 days'),

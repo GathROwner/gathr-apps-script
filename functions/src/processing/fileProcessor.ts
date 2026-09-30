@@ -82,6 +82,7 @@ export async function processDatasetFile(
           existingStandardEventsUpdated: 0,
           newFoodSpecialsCreated: 0,
           existingFoodSpecialsUpdated: 0,
+          parseSnapshotWrites: 0,
         },
       };
     }
@@ -262,6 +263,7 @@ async function processSelectedRows(
         existingStandardEventsUpdated: 0,
         newFoodSpecialsCreated: 0,
         existingFoodSpecialsUpdated: 0,
+        parseSnapshotWrites: 0,
       },
       nextBatchScheduled: false,
     };

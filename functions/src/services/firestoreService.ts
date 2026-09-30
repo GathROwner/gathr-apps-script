@@ -146,6 +146,7 @@ const COLLECTIONS = {
   SHARED_EVENT_INGESTS: 'sharedEventIngests',
   PUBLIC_SHARED_EVENT_CANDIDATES: 'public_shared_event_candidates',
   SHARED_EVENT_SCRAPE_ENRICHMENTS: 'shared_event_scrape_enrichments',
+  RUNTIME_METADATA: 'runtime_metadata',
 } as const;
 
 const MAX_SNAPSHOT_TEXT_LENGTH = 20000;
@@ -7259,6 +7260,37 @@ export async function deleteExpiredEvents(
 /**
  * Create or update batch processing state
  */
+/**
+ * Records that public event data changed in a parser batch. Clients poll this
+ * one small document before deciding whether to download the full event feed.
+ * It deliberately advances only after persisted parser changes, not for rows
+ * that were skipped, invalid, or detected as duplicates.
+ */
+export async function publishEventFeedChange(input: {
+  fileId: string;
+  runId?: string;
+  batchNumber: number;
+  created: number;
+  updated: number;
+}): Promise<void> {
+  const created = Math.max(0, Number(input.created) || 0);
+  const updated = Math.max(0, Number(input.updated) || 0);
+  const changedEvents = created + updated;
+  if (changedEvents === 0) return;
+
+  await db.collection(COLLECTIONS.RUNTIME_METADATA).doc('event_feed').set({
+    version: admin.firestore.FieldValue.increment(1),
+    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    source: 'parser',
+    lastFileId: input.fileId,
+    lastRunId: input.runId || null,
+    lastBatchNumber: input.batchNumber,
+    lastChangedEvents: changedEvents,
+    lastCreatedEvents: created,
+    lastUpdatedEvents: updated,
+  }, { merge: true });
+}
+
 export async function saveBatchState(state: BatchState): Promise<string> {
   const docId = `${state.fileId}_${state.batchNumber}`;
 
@@ -8643,7 +8675,7 @@ async function uploadImageBuffer(
 ): Promise<string | null> {
   try {
     const form = new FormData();
-    const blob = new Blob([buffer], { type: contentType || 'image/jpeg' });
+    const blob = new Blob([new Uint8Array(buffer)], { type: contentType || 'image/jpeg' });
     const fileName = `backfill-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`;
 
     form.append('folder', folder);

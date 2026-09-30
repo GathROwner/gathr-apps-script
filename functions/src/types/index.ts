@@ -65,6 +65,8 @@ export interface ProcessingStats {
   existingStandardEventsUpdated: number;
   newFoodSpecialsCreated: number;
   existingFoodSpecialsUpdated: number;
+  /** Number of per-row parser snapshots successfully persisted in this run. */
+  parseSnapshotWrites: number;
   unknownVenueCount?: number;
 }
 

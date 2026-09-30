@@ -42,7 +42,7 @@ import { enrichEventsFromVenueWebsite } from './websiteDetailEnricher.js';
 import { performSecondaryValidation } from './secondaryValidator.js';
 import { performFinalFormatting } from './finalFormatter.js';
 import { resolveTimesWithOperatingHours } from './venueResolver.js';
-import { parseBooleanEnv, parseNumberEnv, resolveStageModel } from './runtimeConfig.js';
+import { parseBooleanEnv, parseNumberEnv } from './runtimeConfig.js';
 import { logger } from '../utils/logger.js';
 
 const CATEGORY_END_DEFAULTS: Record<string, string> = {
@@ -1243,34 +1243,8 @@ export async function parsePostData(
       ocrMode: stage2Routing.ocrMode,
     });
 
-    const stage3ModelRouting = resolveStage3ModelRouting(
-      resolvedContentType,
-      classification,
-      stage2Routing,
-      cfg,
-      modelRouter
-    );
-    const selectedStage3Model = resolveStageModel(
-      stage3ModelRouting.appliedModel,
-      'STAGE3_MODEL_OVERRIDE'
-    );
-    const lunaFullImageRequested =
-      selectedStage3Model === 'gpt-6-luna' &&
-      parseBooleanEnv('STAGE3_LUNA_FULL_IMAGE', false);
     let stage37TicketUrl = '';
     let extractionImageUrls = ocrImageUrls;
-    let lunaFullImageReady = false;
-    if (lunaFullImageRequested && allImageUrls.length > 0) {
-      const fullImageUrls = await prepareFullImageDataUrls(allImageUrls, { postId });
-      lunaFullImageReady = fullImageUrls.length === allImageUrls.length;
-      if (lunaFullImageReady) extractionImageUrls = fullImageUrls;
-      logger.info('Luna full-image Stage 3 decision', {
-        postId,
-        sourceCount: allImageUrls.length,
-        preparedCount: fullImageUrls.length,
-        enabled: lunaFullImageReady,
-      });
-    }
     const cleanupImageUrls = new Set<string>(ocrImageUrls);
     const displayImageUploadStart = Date.now();
     const displayImageUrls = await prepareManagedDisplayImageUrls(sourcePostMediaUrls, {
@@ -1293,9 +1267,9 @@ export async function parsePostData(
       resolvedContentType === 'SCHEDULE';
     const hasComplexitySignals = stage2Routing.signals.hasComplexitySignals;
     const recommendsTilingCount = stage2Routing.signals.recommendsTilingCount;
-    const shouldUseCalendarTiles = !lunaFullImageReady && (stage2Routing.enabled
+    const shouldUseCalendarTiles = stage2Routing.enabled
       ? resolvedContentType === 'CALENDAR' && stage2Routing.shouldUseCalendarTiles
-      : stage2Routing.legacyShouldUseCalendarTiles);
+      : stage2Routing.legacyShouldUseCalendarTiles;
 
     if (isCalendarOrSchedule) {
       if (shouldUseCalendarTiles) {
@@ -1342,23 +1316,27 @@ export async function parsePostData(
           enabled: false,
           baseCount: ocrImageUrls.length,
           tiledCount: 0,
-          fullImageCount: lunaFullImageReady ? extractionImageUrls.length : 0,
-          ocrMode: lunaFullImageReady ? 'full_image' : stage2Routing.ocrMode,
+          ocrMode: stage2Routing.ocrMode,
           routingEnabled: stage2Routing.enabled,
           routingReason: stage2Routing.routingReason,
           tilingSignals: {
             hasComplexitySignals,
             recommendsTilingCount,
           },
-          reason: lunaFullImageReady
-            ? 'Luna full-image strategy selected'
-            : stage2Routing.enabled
+          reason: stage2Routing.enabled
             ? 'Stage 2 score routing selected basic OCR mode'
             : 'Stage 1 image complexity does not recommend tiling',
         });
       }
     }
 
+    const stage3ModelRouting = resolveStage3ModelRouting(
+      resolvedContentType,
+      classification,
+      stage2Routing,
+      cfg,
+      modelRouter
+    );
     if (modelRouter.shadowEnabled || stage3ModelRouting.routeEnabled) {
       logger.info('Stage 3 model routing decision', {
         contentType: stage3ModelRouting.contentType,
@@ -3629,31 +3607,6 @@ function addMetadata(
   return event;
 }
 
-async function prepareFullImageDataUrls(
-  urls: string[],
-  context: { postId?: string }
-): Promise<string[]> {
-  const images: string[] = [];
-  for (const url of urls) {
-    let download;
-    try {
-      download = await downloadImageBufferWithRetry(url, context);
-    } catch (error) {
-      logger.warn('Luna full-image source download failed; using existing image path', {
-        postId: context.postId,
-        error: error instanceof Error ? error.message : String(error),
-      });
-      return [];
-    }
-    const contentType = String(download?.contentType || '').split(';')[0].toLowerCase();
-    if (!download || !['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(contentType)) {
-      return [];
-    }
-    images.push(`data:${contentType};base64,${download.buffer.toString('base64')}`);
-  }
-  return images;
-}
-
 async function prepareOcrImageUrls(
   urls: string[],
   context: { postId?: string; userName?: string; pageName?: string; combinedText?: string },
@@ -3724,7 +3677,9 @@ export async function prepareManagedDisplayImageUrls(
   let uploadedCount = 0;
   let failedCount = 0;
 
-  for (const raw of urls) {
+  const sourceUrls = selectDistinctDisplaySourceImageUrls(urls);
+
+  for (const raw of sourceUrls) {
     if (uploaded.length >= MAX_OCR_OUTPUT_IMAGES_DEFAULT) break;
     const sourceUrl = String(raw || '').trim();
     if (!sourceUrl) continue;
@@ -3760,12 +3715,67 @@ export async function prepareManagedDisplayImageUrls(
   logger.info('Display image upload summary', {
     postId: context.postId || '',
     inputCount: urls.length,
+    sourceDeduplicatedCount: sourceUrls.length,
     attemptedCount,
     uploadedCount,
     failedCount,
   });
 
   return uploaded;
+}
+
+/**
+ * Facebook commonly exposes the same attachment at several dimensions. They
+ * have the same CDN object path and only differ in resize query parameters.
+ * Uploading each variant produces distinct managed URLs and consequently a
+ * misleading gallery. Keep the largest advertised variant for a shared
+ * Facebook CDN object path. Other hosts retain their full URL because a query
+ * string can be meaningful media identity there.
+ */
+export function selectDistinctDisplaySourceImageUrls(urls: string[]): string[] {
+  const selected: Array<{ url: string; identity: string; pixelArea: number }> = [];
+  const indexByIdentity = new Map<string, number>();
+
+  for (const raw of urls) {
+    const url = String(raw || '').trim();
+    if (!url) continue;
+
+    const identity = getFacebookDisplayImageIdentity(url) || url;
+    const pixelArea = getAdvertisedImagePixelArea(url);
+    const existingIndex = indexByIdentity.get(identity);
+    if (existingIndex === undefined) {
+      indexByIdentity.set(identity, selected.length);
+      selected.push({ url, identity, pixelArea });
+      continue;
+    }
+
+    // A tie retains source order. This is important when the post deliberately
+    // contains multiple pages that happen to use the same dimensions.
+    if (pixelArea > selected[existingIndex].pixelArea) {
+      selected[existingIndex] = { url, identity, pixelArea };
+    }
+  }
+
+  return selected.map((candidate) => candidate.url);
+}
+
+function getFacebookDisplayImageIdentity(rawUrl: string): string | undefined {
+  try {
+    const parsed = new URL(rawUrl);
+    const host = parsed.hostname.toLowerCase();
+    if (!host.endsWith('fbcdn.net')) return undefined;
+    // Facebook can serve a single attachment through different regional CDN
+    // hosts, while its attachment path remains stable.
+    return parsed.pathname;
+  } catch {
+    return undefined;
+  }
+}
+
+function getAdvertisedImagePixelArea(rawUrl: string): number {
+  const match = rawUrl.match(/(?:^|[_?&])(?:p|s)(\d{2,5})x(\d{2,5})(?:[_&]|$)/i);
+  if (!match) return 0;
+  return Number(match[1]) * Number(match[2]);
 }
 
 async function prepareManagedProfileIconUrl(

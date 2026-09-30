@@ -3188,6 +3188,7 @@ export async function processRow(
             ],
             error: result.error,
           });
+          batchManager.incrementParseSnapshotWrites();
         }
         return result;
       }
@@ -3321,6 +3322,7 @@ export async function processRow(
             },
           ],
         });
+        batchManager.incrementParseSnapshotWrites();
       }
 
       return result;
@@ -3364,6 +3366,7 @@ export async function processRow(
           stages: snapshotStages,
           error: parseResult.error || 'Parse failed',
         });
+        batchManager.incrementParseSnapshotWrites();
       }
       return result;
     }
@@ -3396,6 +3399,7 @@ export async function processRow(
           stages: snapshotStages,
           error: parseResult.error || 'No events extracted',
         });
+        batchManager.incrementParseSnapshotWrites();
       }
       return result;
     }
@@ -3587,6 +3591,7 @@ export async function processRow(
         },
         stages: snapshotStages,
       });
+      batchManager.incrementParseSnapshotWrites();
     }
 
     return result;
@@ -3616,6 +3621,7 @@ export async function processRow(
         stages: [],
         error: result.error,
       });
+      batchManager.incrementParseSnapshotWrites();
     }
     return result;
   }
@@ -6763,9 +6769,9 @@ function countDuplicateMergeWeeklyOccurrencesThrough(
   for (let dayOffset = 0; dayOffset <= diffDays; dayOffset += 1) {
     const current = new Date(start);
     current.setUTCDate(start.getUTCDate() + dayOffset);
-    const weekday = VALID_RECURRING_WEEKDAYS_ARRAY[current.getUTCDay()] || '';
+    const weekday = VALID_RECURRING_WEEKDAYS_ARRAY[current.getUTCDay()];
     const weekOffset = Math.floor(dayOffset / 7);
-    if (weekdays.has(weekday) && weekOffset % weekInterval === 0) {
+    if (weekday && weekdays.has(weekday) && weekOffset % weekInterval === 0) {
       count += 1;
     }
   }
@@ -7743,6 +7749,16 @@ function mergeUniqueUrls(existingUrls?: string[], incomingUrls?: string[]): stri
 
 function mergeDuplicateMediaUrls(existing: EventData, incoming: EventData): string[] {
   const incomingUrls = normalizeUrlList(incoming.mediaUrls);
+
+  // Reprocessing one Facebook post may upload a new managed object for the
+  // same bytes. The incoming row is its current complete media set, so do not
+  // append its old managed URLs forever. Posts with different source IDs still
+  // merge their media, which preserves a flyer plus a separately-posted
+  // schedule when both genuinely contribute to the same event.
+  if (hasSameSourceUniqueId(existing, incoming) && incomingUrls.length > 0) {
+    return incomingUrls;
+  }
+
   if (isStructuredFacebookEventSource(incoming)) {
     const incomingManagedUrls = incomingUrls.filter((url) => isStorageManagedUrl(url));
     if (incomingManagedUrls.length > 0) {
@@ -7751,6 +7767,12 @@ function mergeDuplicateMediaUrls(existing: EventData, incoming: EventData): stri
   }
 
   return mergeUniqueUrls(existing.mediaUrls, incoming.mediaUrls);
+}
+
+function hasSameSourceUniqueId(existing: EventData, incoming: EventData): boolean {
+  const existingUniqueId = asTrimmedString(existing.uniqueId);
+  const incomingUniqueId = asTrimmedString(incoming.uniqueId);
+  return Boolean(existingUniqueId && incomingUniqueId && existingUniqueId === incomingUniqueId);
 }
 
 function shouldAlignStructuredFacebookEventManagedImage(

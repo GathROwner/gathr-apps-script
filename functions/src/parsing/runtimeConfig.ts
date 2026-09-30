@@ -1,9 +1,7 @@
 import { GptUsageRecord, ParsingConfig } from './types.js';
 import { logger } from '../utils/logger.js';
 
-export type ImageDetailLevel = 'low' | 'high' | 'original' | 'auto';
-
-type LegacyImageDetailLevel = Exclude<ImageDetailLevel, 'original'>;
+export type ImageDetailLevel = 'low' | 'high' | 'auto';
 
 export function resolveStageModel(defaultModel: string, envVarName: string): string {
   const override = String(process.env[envVarName] || '').trim();
@@ -12,21 +10,10 @@ export function resolveStageModel(defaultModel: string, envVarName: string): str
 
 export function resolveImageDetail(
   envVarName: string,
-  fallback?: LegacyImageDetailLevel
-): LegacyImageDetailLevel;
-export function resolveImageDetail(
-  envVarName: string,
-  fallback: ImageDetailLevel,
-  allowOriginal: true
-): ImageDetailLevel;
-export function resolveImageDetail(
-  envVarName: string,
-  fallback: ImageDetailLevel = 'high',
-  allowOriginal = false
+  fallback: ImageDetailLevel = 'high'
 ): ImageDetailLevel {
   const raw = String(process.env[envVarName] || '').trim().toLowerCase();
-  if (raw === 'low' || raw === 'high' || raw === 'auto' ||
-      (allowOriginal && raw === 'original')) {
+  if (raw === 'low' || raw === 'high' || raw === 'auto') {
     return raw;
   }
   return fallback;
@@ -50,7 +37,6 @@ export function extractTokenUsage(usage: any): {
   outputTokens: number;
   totalTokens: number;
   cachedInputTokens: number;
-  cacheWriteInputTokens: number;
 } {
   const inputTokens = Number(
     usage?.input_tokens ??
@@ -71,16 +57,12 @@ export function extractTokenUsage(usage: any): {
     usage?.prompt_tokens_details?.cached_tokens ??
     0
   ) || 0;
-  const cacheWriteInputTokens = Number(
-    usage?.input_tokens_details?.cache_write_tokens ?? 0
-  ) || 0;
 
   return {
     inputTokens,
     outputTokens,
     totalTokens,
     cachedInputTokens,
-    cacheWriteInputTokens,
   };
 }
 

@@ -231,6 +231,11 @@ class Logger {
     errors: number;
     newEvents: number;
     updatedEvents: number;
+    parseSnapshotWrites?: number;
+    newStandardEvents?: number;
+    updatedStandardEvents?: number;
+    newFoodSpecials?: number;
+    updatedFoodSpecials?: number;
     durationMs: number;
   }): void {
     this.info('Processing summary', {

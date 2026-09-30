@@ -30,6 +30,7 @@ export function initializeStats(): ProcessingStats {
     existingStandardEventsUpdated: 0,
     newFoodSpecialsCreated: 0,
     existingFoodSpecialsUpdated: 0,
+    parseSnapshotWrites: 0,
     unknownVenueCount: 0,
   };
 }
@@ -195,6 +196,15 @@ export class BatchManager {
   }
 
   /**
+   * Record a successfully persisted per-row parse snapshot. This is an exact
+   * parser-side write count, not a Cloud Billing total (which also includes
+   * reads, indexes, and writes performed by other services).
+   */
+  incrementParseSnapshotWrites(count: number = 1): void {
+    this.state.stats.parseSnapshotWrites += count;
+  }
+
+  /**
    * Increment new standard events counter
    */
   incrementNewStandardEvents(count: number = 1): void {
@@ -293,12 +303,51 @@ export class BatchManager {
   }
 
   /**
+   * Advance the lightweight public-feed marker once for this execution when
+   * rows actually created or updated events. A marker write is much smaller
+   * than making every active device download the full feed on its next poll.
+   */
+  private async publishEventFeedChangeIfNeeded(): Promise<void> {
+    if (this.config.dryRun) return;
+
+    const created = Math.max(
+      this.state.stats.newEventsCreated,
+      this.state.stats.newStandardEventsCreated + this.state.stats.newFoodSpecialsCreated
+    );
+    const updated = Math.max(
+      this.state.stats.existingEventsUpdated,
+      this.state.stats.existingStandardEventsUpdated + this.state.stats.existingFoodSpecialsUpdated
+    );
+
+    if (created + updated === 0) return;
+
+    try {
+      await firestoreService.publishEventFeedChange({
+        fileId: this.state.fileId,
+        runId: this.state.runId,
+        batchNumber: this.state.batchNumber,
+        created,
+        updated,
+      });
+    } catch (error) {
+      // The parser's durable event writes are already complete. Keep a
+      // temporary feed-marker failure observable without failing the batch.
+      logger.warn('Unable to publish public event feed change marker', {
+        fileId: this.state.fileId,
+        batchNumber: this.state.batchNumber,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
+  /**
    * Mark processing as paused
    */
   async pause(): Promise<void> {
     this.state.status = 'paused';
     await this.saveCheckpoint();
     await this.saveBatchState();
+    await this.publishEventFeedChangeIfNeeded();
 
     logger.info('Processing paused', {
       fileId: this.state.fileId,
@@ -322,6 +371,7 @@ export class BatchManager {
       this.state.fileName,
       this.state.stats
     );
+    await this.publishEventFeedChangeIfNeeded();
 
     logger.logSummary({
       totalRows: this.state.totalRows,
@@ -331,6 +381,11 @@ export class BatchManager {
       errors: this.state.stats.errorCount,
       newEvents: this.state.stats.newEventsCreated,
       updatedEvents: this.state.stats.existingEventsUpdated,
+      parseSnapshotWrites: this.state.stats.parseSnapshotWrites,
+      newStandardEvents: this.state.stats.newStandardEventsCreated,
+      updatedStandardEvents: this.state.stats.existingStandardEventsUpdated,
+      newFoodSpecials: this.state.stats.newFoodSpecialsCreated,
+      updatedFoodSpecials: this.state.stats.existingFoodSpecialsUpdated,
       durationMs: this.getElapsedTime(),
     });
   }
