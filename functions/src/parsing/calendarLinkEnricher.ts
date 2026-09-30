@@ -94,11 +94,45 @@ export async function enrichEventsFromCalendarLinks(
   summary.candidateUrl = candidateUrls[0];
 
   const mergedScrapedItems: ExtractedItem[] = [];
+  let usedVeeziCalendar = false;
   for (const url of candidateUrls.slice(0, MAX_CANDIDATE_URLS)) {
     summary.attemptedUrls += 1;
 
     const pageHtml = await fetchHtml(url, cfg.timeoutMs, cfg.maxHtmlBytes);
     if (!pageHtml) continue;
+
+    // Some cinema calendars render showtimes directly in month cells rather
+    // than exposing the Drupal day feed handled below. Follow only months
+    // anchored by the post caption or extracted flyer dates.
+    if (/class=["'][^"']*veezi-date\b/i.test(pageHtml) &&
+        /class=["'][^"']*veezi-film\b/i.test(pageHtml)) {
+      const months = collectVeeziMonths(inputItems, combinedText, timestamp, config.timezone);
+      const websiteItems: ExtractedItem[] = [];
+      for (const month of months) {
+        const monthUrl = new URL(url);
+        monthUrl.searchParams.set('month', month);
+        const monthHtml = await fetchHtml(monthUrl.toString(), cfg.timeoutMs, cfg.maxHtmlBytes);
+        summary.attemptedDates += 1;
+        if (!monthHtml) continue;
+        summary.fetchedFeeds += 1;
+        websiteItems.push(...parseVeeziMonthItems(monthHtml, month, monthUrl.toString(), userName));
+      }
+      const advertisedDates = new Set(inputItems.map((item) => String(item.date || '').trim())
+        .filter((date) => /^20\d{2}-\d{2}-\d{2}$/.test(date)));
+      const postScopedItems = advertisedDates.size > 0
+        ? websiteItems.filter((item) => advertisedDates.has(String(item.date || '')))
+        : websiteItems;
+      if (postScopedItems.length > 0) {
+        mergedScrapedItems.push(...dedupeParsedItems(postScopedItems));
+        summary.usedUrl = url;
+        summary.windowMode = 'month';
+        summary.windowReason = 'post_anchored_veezi_months';
+        summary.windowStart = `${months[0]}-01`;
+        summary.windowEnd = `${months[months.length - 1]}-31`;
+        usedVeeziCalendar = true;
+        break;
+      }
+    }
 
     const dateWindow = resolveDateWindow({
       timestamp,
@@ -149,12 +183,81 @@ export async function enrichEventsFromCalendarLinks(
   summary.detailImagesApplied = detailImageStats.applied;
 
   summary.extractedCount = mergedScrapedItems.length;
-  const deduped = mergeWithoutDuplicates(inputItems, mergedScrapedItems);
+  const authoritativeMonths = new Set(mergedScrapedItems.map((item) =>
+    String(item.date || '').slice(0, 7)
+  ));
+  const baseItems = usedVeeziCalendar
+    // A complete linked month calendar is the source of screening times and
+    // titles. Poster-derived entries in those months can have invented times
+    // and ranges, so retaining them creates duplicate or wrong showtimes.
+    ? inputItems.filter((item) =>
+        !authoritativeMonths.has(String(item.date || '').slice(0, 7)))
+    : inputItems;
+  const deduped = mergeWithoutDuplicates(baseItems, mergedScrapedItems);
   summary.mergedCount = deduped.length - inputItems.length;
   summary.reason = summary.mergedCount > 0 ? 'merged_calendar_feed_items' : 'calendar_feed_duplicates';
 
   logger.info('Stage 3.8 summary', summary);
   return { items: deduped, summary };
+}
+
+function collectVeeziMonths(
+  items: ExtractedItem[], combinedText: string, timestamp: string, timezone: string
+): string[] {
+  const months = new Set<string>();
+  for (const item of items) {
+    const date = String(item.date || '');
+    if (/^20\d{2}-\d{2}-\d{2}$/.test(date)) months.add(date.slice(0, 7));
+  }
+  const posted = DateTime.fromISO(timestamp, { zone: timezone || 'America/Halifax' });
+  if (posted.isValid) {
+    for (const { token, month } of MONTH_NAMES) {
+      if (new RegExp(`\\b${token}\\b`, 'i').test(combinedText)) {
+        const year = month < posted.month - 6 ? posted.year + 1 : posted.year;
+        months.add(`${year}-${String(month).padStart(2, '0')}`);
+      }
+    }
+  }
+  return Array.from(months).sort().slice(0, 3);
+}
+
+export function parseVeeziMonthItems(
+  html: string, month: string, pageUrl: string, userName: string
+): ExtractedItem[] {
+  if (!/^20\d{2}-\d{2}$/.test(month)) return [];
+  const monthNumber = Number(month.slice(5));
+  const dates = Array.from(String(html || '').matchAll(
+    /<div\b[^>]*class=["'][^"']*veezi-date\b[^"']*["'][^>]*>\s*([A-Za-z]{3})\s+(\d{1,2})\s*<\/div>/gi
+  ));
+  const items: ExtractedItem[] = [];
+  for (let index = 0; index < dates.length; index++) {
+    const dateMatch = dates[index];
+    const printedMonth = MONTH_NAMES.find((entry) =>
+      entry.token.startsWith(String(dateMatch[1] || '').toLowerCase()))?.month;
+    if (printedMonth !== monthNumber) continue;
+    const day = Number(dateMatch[2]);
+    const date = DateTime.fromISO(`${month}-${String(day).padStart(2, '0')}`);
+    if (!date.isValid || date.month !== monthNumber) continue;
+    const segment = html.slice(dateMatch.index + dateMatch[0].length,
+      index + 1 < dates.length ? dates[index + 1].index : html.length);
+    const showtimes = segment.matchAll(
+      /<div\b[^>]*class=["'][^"']*veezi-time\b[^"']*["'][^>]*>([\s\S]*?)<\/div>\s*<div\b[^>]*class=["'][^"']*veezi-film\b[^"']*["'][^>]*>\s*<a\b[^>]*href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi
+    );
+    for (const showtime of showtimes) {
+      const startTime = parse12hTime(cleanText(showtime[1]));
+      const name = cleanText(showtime[3]);
+      if (!startTime || !name) continue;
+      const detailUrl = resolveRelativeUrl(decodeHtml(showtime[2]), pageUrl);
+      items.push({
+        name, date: date.toFormat('yyyy-MM-dd'), startTime, endTime: '',
+        venue: userName, price: '', description: '', recurringPattern: 'none',
+        extractionReason: `Linked cinema calendar showtime: ${pageUrl}`,
+        _sourceType: 'event',
+        ...(detailUrl ? { ticketLink: detailUrl } : {}),
+      } as ExtractedItem);
+    }
+  }
+  return dedupeParsedItems(items);
 }
 
 function resolveCalendarConfig(config: ParsingConfig) {

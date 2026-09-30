@@ -2,10 +2,146 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import {
+  AnalysisImageFrame,
+  findMissingExpectedCalendarSlots,
+  findMissingExpectedCalendarNames,
+  findMissingExpectedCalendarSlotsInFinalEvents,
+  applyReviewedCalendarRoomAliases,
   resolveRelevantImageUrlForEvent,
+  selectUnusedManagedImageUrls,
   selectDisplayImageFromAnalysis,
   selectDisplayImageFromCarouselOrder,
 } from './postParser.js';
+
+test('source-reviewed names reject small model spelling and word omissions', () => {
+  const expected = [
+    { date: '2026-06-05', name: 'Masters of Reality' },
+    { date: '2026-06-27', name: 'Laura & Don' },
+  ];
+  const bad = [
+    { date: '2026-06-05', name: 'Masters Reality', description: '' },
+    { date: '2026-06-27', name: 'Laura Goon', description: '' },
+  ] as any;
+  assert.deepEqual(findMissingExpectedCalendarNames(bad, expected), [
+    '2026-06-05:Masters of Reality', '2026-06-27:Laura & Don',
+  ]);
+  assert.deepEqual(findMissingExpectedCalendarNames([
+    { date: '2026-06-05', name: 'Masters of Reality', description: '' },
+    { date: '2026-06-27', name: 'Concert', description: 'Laura & Don perform' },
+  ] as any, expected), ['2026-06-27:Laura & Don']);
+  assert.deepEqual(findMissingExpectedCalendarNames([
+    { date: '2026-06-27', name: 'Concert', description: 'Laura & Don perform' },
+  ] as any, [{ date: '2026-06-27', name: 'Laura & Don', allowDescription: true }]), []);
+  assert.deepEqual(findMissingExpectedCalendarNames([
+    { date: '2026-02-12', name: 'Early Trivia', description: 'w/ Darcy' },
+  ] as any, [{ date: '2026-02-12', name: 'Early Trivia with Darcy', allowDescription: true }]), []);
+  assert.deepEqual(findMissingExpectedCalendarNames([
+    { date: '2026-09-05', name: 'Music Bingo with Darcy', description: '' },
+  ] as any, [{ date: '2026-09-05', name: 'Music Bingo! with Darcy' }]), []);
+});
+
+test('source-reviewed room aliases retain the host and room separately', () => {
+  const rules = [{ hostVenue: 'The Factory Downtown', roomAliases: ['Comedy Cave'] }] as any;
+  const items = [
+    { establishment: 'Comedy Cave', venue: 'Comedy Cave', additionalLocation: '' },
+    { establishment: 'The Comedy Cave', venue: 'The Comedy Cave', additionalLocation: 'The Comedy Cave' },
+    { establishment: 'Other Venue', venue: '', additionalLocation: '' },
+  ];
+  assert.deepEqual(applyReviewedCalendarRoomAliases(items, rules), [
+    { establishment: 'The Factory Downtown', venue: '', additionalLocation: 'Comedy Cave' },
+    { establishment: 'The Factory Downtown', venue: '', additionalLocation: 'The Comedy Cave' },
+    items[2],
+  ]);
+});
+
+test('four calendar bands resolve to their original carousel image, not the band number', () => {
+  const cover = 'https://storage.googleapis.com/gathr-uploaded-images/postimages/cover.webp';
+  const calendar = 'https://storage.googleapis.com/gathr-uploaded-images/postimages/calendar.webp';
+  const market = 'https://storage.googleapis.com/gathr-uploaded-images/postimages/market.webp';
+  const frameUrls = ['cover-frame', 'calendar-band-1', 'calendar-band-2',
+    'calendar-band-3', 'calendar-band-4', 'market-frame'];
+  const frames: AnalysisImageFrame[] = frameUrls.map((imageUrl, index) => ({
+    imageUrl,
+    sourceUrl: index === 0 ? 'cover-source' : index === 5 ? 'market-source' : 'calendar-source',
+    sourceGalleryIndex: index === 0 ? 0 : index === 5 ? 2 : 1,
+    displayUrl: index === 0 ? cover : index === 5 ? market : calendar,
+    kind: index > 0 && index < 5 ? 'calendar_band' : 'whole',
+  }));
+  for (const bandIndex of [1, 2, 3, 4]) {
+    const resolved = resolveRelevantImageUrlForEvent(
+      { relevantImageIndex: bandIndex } as any,
+      frameUrls,
+      [cover, calendar, market],
+      [],
+      frames
+    );
+    assert.equal(resolved.url, calendar);
+    assert.equal(resolved.reason, 'model_selected_analysis_frame_source');
+  }
+  assert.equal(resolveRelevantImageUrlForEvent(
+    { relevantImageIndex: 5 } as any, frameUrls, [cover, calendar, market], [], frames
+  ).url, market);
+});
+
+test('an unmapped band cannot become an event image', () => {
+  const frames: AnalysisImageFrame[] = [{
+    imageUrl: 'calendar-band-1', sourceUrl: 'calendar-source', sourceGalleryIndex: 1,
+    displayUrl: '', kind: 'calendar_band',
+  }];
+  const selected = resolveRelevantImageUrlForEvent(
+    { relevantImageIndex: 0 } as any,
+    ['calendar-band-1'],
+    ['https://storage.googleapis.com/gathr-uploaded-images/postimages/cover.webp'],
+    [],
+    frames
+  );
+  assert.equal(selected.url, '');
+  assert.equal(selected.reason, 'unmapped_analysis_frame');
+});
+
+test('cleanup retains every source gallery image while discarding temporary bands', () => {
+  const base = 'https://storage.googleapis.com/gathr-uploaded-images/postimages/';
+  const sources = Array.from({ length: 5 }, (_, index) => `${base}source-${index}.webp`);
+  const bands = Array.from({ length: 4 }, (_, index) => `${base}band-${index}.webp`);
+  const deleted = selectUnusedManagedImageUrls(
+    [...sources, `${base}ocr-base.webp`, ...bands],
+    [{ image: sources[0], relevantImageUrl: sources[4], mediaUrls: sources } as any]
+  );
+  assert.deepEqual(deleted, [`${base}ocr-base.webp`, ...bands]);
+  assert.deepEqual(selectUnusedManagedImageUrls(
+    [...sources, `${base}ocr-base.webp`, ...bands], []
+  ), [...sources, `${base}ocr-base.webp`, ...bands]);
+});
+
+test('calendar band gate finds missing dated slots, including simultaneous listings', () => {
+  const actual = [
+    { date: '2026-07-02', startTime: '6:00 PM' },
+    { date: '2026-07-02', startTime: '18:00' },
+    { date: '2026-07-03', startTime: '10:00 PM' },
+  ] as any;
+  assert.deepEqual(findMissingExpectedCalendarSlots(actual, [
+    '2026-07-02@18:00', '2026-07-02@18:00', '2026-07-03@22:00',
+  ]), []);
+  assert.deepEqual(findMissingExpectedCalendarSlots(actual, [
+    '2026-07-02@18:00', '2026-07-02@18:00', '2026-07-03@22:00',
+    '2026-07-04@18:00',
+  ]), ['2026-07-04@18:00']);
+});
+
+test('final calendar gate expands bounded weekly series before checking source slots', () => {
+  const events = [{
+    name: 'Carter MacLellan', startDate: '2026-07-01', startTime: '18:00',
+    isRecurring: true, recurringPattern: 'weekly_wednesday',
+    totalOccurrences: 5, recurrenceUntilDate: '2026-07-29',
+  }] as any;
+  const slots = ['2026-07-01@18:00', '2026-07-08@18:00', '2026-07-15@18:00',
+    '2026-07-22@18:00', '2026-07-29@18:00'];
+  assert.deepEqual(findMissingExpectedCalendarSlotsInFinalEvents(events, slots), []);
+  assert.deepEqual(findMissingExpectedCalendarSlotsInFinalEvents(events.slice(0, 0), slots), slots);
+  assert.deepEqual(findMissingExpectedCalendarSlotsInFinalEvents(
+    [{ ...events[0], totalOccurrences: 4 }], slots
+  ), ['2026-07-29@18:00']);
+});
 
 test('selects event-specific display image from image analysis descriptions', () => {
   const selected = selectDisplayImageFromAnalysis(

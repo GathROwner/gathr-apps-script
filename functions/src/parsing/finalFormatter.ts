@@ -376,6 +376,10 @@ Never return arrays of values for an item; each must be a JSON object.`;
         categoryNormalizationStats
       );
 
+      // A scheduled community meal is an activity, not a restaurant deal.
+      // Preserve its printed start while leaving an unprinted end for Stage 5.5.
+      event = normalizeCommunityMealEvent(event, originalItem);
+
       // Validate and correct isEvent/isFoodSpecial based on category
       event = validateEventTypeFlags(event);
 
@@ -384,6 +388,20 @@ Never return arrays of values for an item; each must be a JSON object.`;
         event = normalizeRecurringForFormattedEvent(event, originalItem);
       } else {
         event = applyLegacyRecurringNormalization(event);
+      }
+
+      // A dated calendar cell describes one occurrence. The model can infer an
+      // open-ended recurrence from repeated cells and invent a duration; let
+      // promoteFiniteWeeklyOneOffSequences derive a finite series from the
+      // explicit cells after all rows have been formatted instead.
+      if (
+        originalItem?._sourceType === 'calendar' &&
+        Boolean(parseIsoDate(String(originalItem.date || '').trim()))
+      ) {
+        event.isRecurring = 'No';
+        event.recurringPattern = 'none';
+        event.totalOccurrences = undefined;
+        event.recurrenceUntilDate = undefined;
       }
 
       event = rehydrateFormattedEventMetadata(event, originalItem);
@@ -1189,6 +1207,7 @@ function detectExplicitFoodSpecialCategory(
   event: FormattedEvent,
   originalItem?: ExtractedItem
 ): Category | null {
+  if (isOrganizedCommunityMeal(event)) return null;
   const text = `${event.name || ''} ${event.description || ''} ${String((originalItem as any)?.extractionReason || '')}`
     .toLowerCase()
     .trim();
@@ -2040,6 +2059,39 @@ function validateEventTypeFlags(event: FormattedEvent): FormattedEvent {
     }
   }
 
+  return event;
+}
+
+function isOrganizedCommunityMeal(event: FormattedEvent): boolean {
+  const name = String(event.name || '').toLowerCase();
+  const description = String(event.description || '').toLowerCase();
+  const communityMeal =
+    /\b(?:seniors?|community|family)\b.*\b(?:lunch|dinner|breakfast)\b|\b(?:lunch|dinner|breakfast)\b.*\b(?:seniors?|community|family)\b/.test(name);
+  const organizedActivity = /\b(?:meet|learn|programs?|registration|register|sponsored|festival|fundraiser)\b/.test(description);
+  const pricedOffer = /\$\s*\d|\b(?:discount|half[- ]price|special|deal|offer|sale)\b/.test(`${name} ${description}`);
+  return communityMeal && organizedActivity && !pricedOffer;
+}
+
+export function normalizeCommunityMealEvent(
+  event: FormattedEvent,
+  originalItem?: ExtractedItem
+): FormattedEvent {
+  if (!isOrganizedCommunityMeal(event)) return event;
+
+  event.category = 'Gatherings & Parties';
+  event.isEvent = 'Yes';
+  event.isFoodSpecial = 'No';
+  event._categorySource = 'keyword_inference';
+  event._categoryNormalizationReason = 'scheduled community meal with program details, not a priced food offer';
+  const explicitEnd = originalItem?.timeFlags?.end?.source === 'explicit' ||
+    event.timeFlags?.end?.source === 'explicit' ||
+    Boolean(String(originalItem?.endTime || '').trim());
+  if (!explicitEnd) {
+    event.endTime = '';
+    if (event.timeFlags?.end) {
+      event.timeFlags.end = { source: 'none', toClose: false, evidence: '' };
+    }
+  }
   return event;
 }
 
@@ -5634,7 +5686,7 @@ async function callGPTWithSchema(
   const client = getOpenAIClient();
   const explicitModelOverride = String(config.stage5ModelOverride || '').trim();
   const model = explicitModelOverride || resolveStageModel(config.gptModelFast, 'STAGE5_MODEL_OVERRIDE');
-  const isGpt5Model = (value: string): boolean => value.startsWith('gpt-5');
+  const usesResponses = (value: string): boolean => /^gpt-(?:5|6)(?:\.|-)/.test(value);
   const rawStage5ResponsesMaxTokens = Number.parseInt(
     String(process.env.STAGE5_RESPONSES_MAX_OUTPUT_TOKENS || '32000'),
     10
@@ -5717,7 +5769,7 @@ async function callGPTWithSchema(
   }));
 
   try {
-    if (isGpt5Model(model)) {
+    if (usesResponses(model)) {
       const schemaHint = JSON.stringify(schema[0]?.parameters || {}, null, 2);
       const promptWithSchema = `${prompt}\n\nReturn ONLY valid JSON that matches this schema:\n${schemaHint}`;
       const callStart = Date.now();

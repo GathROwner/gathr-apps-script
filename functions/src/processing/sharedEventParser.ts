@@ -1,6 +1,7 @@
 import { createHash } from 'crypto';
 import { DateTime } from 'luxon';
 import { extractContentByType } from '../parsing/eventExtractor.js';
+import { cleanupLunaCalendarFullImages, prepareLunaCalendarFullImages } from '../parsing/postParser.js';
 import type { ExtractedItem } from '../parsing/types.js';
 import {
   ParsedSharedEvent,
@@ -151,9 +152,12 @@ function normalizeMediaUrls(value: unknown): string[] {
   const urls: string[] = [];
 
   for (const entry of value) {
-    const raw = cleanString(entry, 2000);
+    const dryRunImage = process.env.PARSER_DRY_RUN_LOCAL_IMAGES === 'true' &&
+      typeof entry === 'string' && entry.length <= 12 * 1024 * 1024 &&
+      /^data:image\/(?:jpeg|png|webp|gif);base64,/i.test(entry);
+    const raw = dryRunImage ? entry : cleanString(entry, 2000);
     if (!raw || seen.has(raw)) continue;
-    if (!/^https?:\/\//i.test(raw) && !/^file:\/\//i.test(raw)) continue;
+    if (!dryRunImage && !/^https?:\/\//i.test(raw) && !/^file:\/\//i.test(raw)) continue;
     seen.add(raw);
     urls.push(raw);
     if (urls.length >= MAX_MEDIA_URLS) break;
@@ -1758,7 +1762,10 @@ function buildExtractedParsedEventsFromCalendarItems(
     .filter((event): event is ParsedSharedEvent => Boolean(event));
 }
 
-async function buildExtractedParsedEventsFromCalendarImage(primary: ParsedSharedEvent): Promise<ParsedSharedEvent[]> {
+async function buildExtractedParsedEventsFromCalendarImage(
+  primary: ParsedSharedEvent,
+  options: { lunaHighPilot?: boolean } = {}
+): Promise<ParsedSharedEvent[]> {
   if (!shouldAttemptCalendarImageExtraction(primary)) return [];
 
   try {
@@ -1771,14 +1778,35 @@ async function buildExtractedParsedEventsFromCalendarImage(primary: ParsedShared
     const timestamp = primary.visibilityEvidence.sourcePublishedAt ||
       DateTime.now().setZone(primary.timezone).toISO() ||
       new Date().toISOString();
-    const calendarImageUrls = primary.mediaUrls.slice(0, MAX_CALENDAR_IMAGE_EXTRACTION_URLS);
-    const items = await extractContentByType(
+    const calendarImageUrls = primary.mediaUrls.slice(0,
+      options.lunaHighPilot ? MAX_MEDIA_URLS : MAX_CALENDAR_IMAGE_EXTRACTION_URLS);
+    const prepared = options.lunaHighPilot
+      ? await prepareLunaCalendarFullImages(calendarImageUrls, {
+          userName: primary.locationName || primary.title || 'Facebook share',
+          combinedText,
+        })
+      : null;
+    if (options.lunaHighPilot && !prepared) {
+      logger.warn('Shared calendar Luna pilot retrying existing extraction: complete preprocessing unavailable', {
+        sourcePlatform: primary.sourcePlatform, imageCount: calendarImageUrls.length,
+      });
+    }
+    let items: ExtractedItem[];
+    try {
+      items = await extractContentByType(
       'CALENDAR',
       combinedText,
-      calendarImageUrls,
+      prepared?.imageUrls || calendarImageUrls,
       primary.locationName || primary.title || 'Facebook share',
       timestamp,
       {
+        ...(options.lunaHighPilot && prepared ? {
+          gptModelReasoning: 'gpt-6-luna',
+          stage3ModelOverride: 'gpt-6-luna',
+          stage3ReasoningEffort: 'high' as const,
+          stage3ImageDetail: 'original' as const,
+          lunaCalendarLiteralSourcePrompt: true,
+        } : {}),
         gptUsageHandler: async (usage) => {
           logger.info('Shared event calendar image GPT usage', {
             tag: 'shared_event_calendar_image',
@@ -1791,6 +1819,26 @@ async function buildExtractedParsedEventsFromCalendarImage(primary: ParsedShared
         },
       }
     );
+      if (options.lunaHighPilot && prepared && items.length === 0) {
+        logger.warn('Shared calendar Luna pilot retrying existing extraction: no items', {
+          sourcePlatform: primary.sourcePlatform, imageCount: calendarImageUrls.length,
+        });
+        items = await extractContentByType('CALENDAR', combinedText, calendarImageUrls,
+          primary.locationName || primary.title || 'Facebook share', timestamp, {});
+      }
+    } catch (error) {
+      if (!options.lunaHighPilot || !prepared) throw error;
+      logger.warn('Shared calendar Luna pilot retrying existing extraction after error', {
+        sourcePlatform: primary.sourcePlatform,
+        error: error instanceof Error ? error.message : String(error),
+      });
+      items = await extractContentByType('CALENDAR', combinedText, calendarImageUrls,
+        primary.locationName || primary.title || 'Facebook share', timestamp, {});
+    } finally {
+      if (prepared?.uploadedUrls.length) {
+        await cleanupLunaCalendarFullImages(prepared.uploadedUrls);
+      }
+    }
 
     logger.info('Shared event calendar image extraction complete', {
       tag: 'shared_event_calendar_image',
@@ -2095,10 +2143,12 @@ export async function parseSharedEventPayloads(
   visibility?: {
     sourceVisibility: SharedEventSourceVisibility;
     visibilityEvidence: SharedEventVisibilityEvidence;
-  }
+  },
+  options: { lunaHighCalendarPilot?: boolean } = {}
 ): Promise<ParsedSharedEvent[]> {
   const primary = await parseSharedEventPayload(payload, visibility);
-  const calendarImageEvents = await buildExtractedParsedEventsFromCalendarImage(primary);
+  const calendarImageEvents = await buildExtractedParsedEventsFromCalendarImage(primary,
+    { lunaHighPilot: options.lunaHighCalendarPilot });
   const textEvents = buildExtractedParsedEventsFromShareText(primary);
   const extractedEvents = mergeExtractedParsedEvents(calendarImageEvents, textEvents);
   const parsedEvents = extractedEvents.length > 0 ? extractedEvents : [primary];

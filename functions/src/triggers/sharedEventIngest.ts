@@ -11,6 +11,8 @@ import {
   verifySharedEventSourceVisibility,
 } from '../processing/sharedEventParser.js';
 import { parseSharedEventImageUpload } from '../processing/sharedEventImageUpload.js';
+import { isSelectedLunaCanaryPost } from '../parsing/lunaSafetyGate.js';
+import { parseBooleanEnv } from '../parsing/runtimeConfig.js';
 import { ApifyAdHocWebhook, startActorRunNoWait } from '../services/apifyService.js';
 import * as firestoreService from '../services/firestoreService.js';
 import { ParsedSharedEvent, SharedEventSubmitPayload } from '../types/sharedEvent.js';
@@ -722,6 +724,12 @@ async function processSharedEventPayloadToFirestore(params: {
   const parsedEvents = await parseSharedEventPayloads(params.payload, {
     sourceVisibility: visibility.visibility,
     visibilityEvidence: visibility.evidence,
+  }, {
+    lunaHighCalendarPilot: isSelectedLunaCanaryPost(
+      params.ownerUid,
+      parseBooleanEnv('LUNA_SHARED_CALENDAR_CANARY_ENABLED', false),
+      String(process.env.LUNA_SHARED_CALENDAR_OWNER_UIDS || '')
+    ),
   });
   const parsedEvent = parsedEvents[0];
   const normalizedSourceUrl = visibility.evidence.finalUrl

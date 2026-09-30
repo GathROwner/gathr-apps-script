@@ -609,9 +609,9 @@ async function callGPTWithSchema(
   config: ParsingConfig
 ): Promise<ValidationResult> {
   const client = getOpenAIClient();
-  const model = resolveStageModel(config.gptModelFast, 'STAGE1_MODEL_OVERRIDE');
+  const model = config.stage1ModelOverride || resolveStageModel(config.gptModelFast, 'STAGE1_MODEL_OVERRIDE');
   const imageDetail = resolveImageDetail('STAGE1_IMAGE_DETAIL', 'high');
-  const isGpt5Model = (value: string): boolean => value.startsWith('gpt-5');
+  const usesResponses = (value: string): boolean => /^gpt-(?:5|6)(?:\.|-)/.test(value);
 
   const extractResponsesText = (response: any): string => {
     if (!response) return '';
@@ -651,7 +651,7 @@ async function callGPTWithSchema(
   }));
 
   const runOnce = async (urls: string[]): Promise<ValidationResult> => {
-    if (isGpt5Model(model)) {
+    if (usesResponses(model)) {
       const schemaHint = JSON.stringify(schema[0]?.parameters || {}, null, 2);
       const promptWithSchema = `${prompt}\n\nReturn ONLY valid JSON that matches this schema:\n${schemaHint}`;
       const content = [
@@ -672,7 +672,8 @@ async function callGPTWithSchema(
       const response = await client.responses.create({
         model,
         input: [{ role: 'user', content }],
-        max_output_tokens: 2000,
+        max_output_tokens: model.startsWith('gpt-6') ? 6000 : 2000,
+        ...(model.startsWith('gpt-6') ? { reasoning: { effort: 'none' as any } } : {}),
       });
       const durationMs = Date.now() - callStart;
       logger.info('Timing', {

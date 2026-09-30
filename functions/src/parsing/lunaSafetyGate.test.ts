@@ -1,0 +1,70 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { shouldHoldUndatedStandingSchedule, isSelectedLunaCanaryPost,
+  canRetryLunaCanaryWithLegacy, canaryGeneratedCleanupUrls } from './lunaSafetyGate.js';
+import { normalizeCommunityMealEvent } from './finalFormatter.js';
+import type { ExtractedItem, FormattedEvent } from './types.js';
+
+test('holds an undated standing weekday board but preserves dated and this-week schedules', () => {
+  assert.equal(shouldHoldUndatedStandingSchedule(
+    'The Factory week at a glance: standing weekly schedule. Tue to Sat.'), true);
+  assert.equal(shouldHoldUndatedStandingSchedule(
+    'Week at a glance for this week: Tue to Sat.'), false);
+  assert.equal(shouldHoldUndatedStandingSchedule(
+    'Weekly lineup September 29 through October 3.'), false);
+  assert.equal(shouldHoldUndatedStandingSchedule(
+    'Sounds of the Waterfront July 6-12 at two stages.'), false);
+});
+
+test('Luna canary matches only an enabled, exact post ID in a bounded list', () => {
+  assert.equal(isSelectedLunaCanaryPost('post-1', true, 'post-1,post-2'), true);
+  assert.equal(isSelectedLunaCanaryPost('post-3', true, 'post-1,post-2'), false);
+  assert.equal(isSelectedLunaCanaryPost('post-1', false, 'post-1'), false);
+  assert.equal(isSelectedLunaCanaryPost('post-1', true, '*'), false);
+  assert.equal(isSelectedLunaCanaryPost('post-1', true, Array(9).fill('post-1').join(',')), false);
+});
+
+test('legacy retry keeps the complete source gallery and tiles the intended image', () => {
+  assert.equal(canRetryLunaCanaryWithLegacy(1, [0]), true);
+  assert.equal(canRetryLunaCanaryWithLegacy(4, [0]), true);
+  assert.equal(canRetryLunaCanaryWithLegacy(4, []), true);
+  assert.equal(canRetryLunaCanaryWithLegacy(4, [1]), false);
+  assert.equal(canRetryLunaCanaryWithLegacy(4, [0, 1]), false);
+  assert.equal(canRetryLunaCanaryWithLegacy(5, []), false);
+  assert.equal(canRetryLunaCanaryWithLegacy(0, []), false);
+  assert.equal(canRetryLunaCanaryWithLegacy(1, null), false);
+});
+
+test('canary cleanup excludes managed source gallery and profile images', () => {
+  const source = 'https://storage.googleapis.com/gathr-uploaded-images/postimages/source.jpg';
+  const profile = 'https://storage.googleapis.com/gathr-uploaded-images/profilepictures/profile.jpg';
+  const analysis = 'https://storage.googleapis.com/gathr-uploaded-images/postimages/ocr-base.webp';
+  assert.deepEqual(canaryGeneratedCleanupUrls([source, analysis, profile], [source, profile]),
+    [analysis]);
+});
+
+test('scheduled community lunch remains an event and gets no invented end', () => {
+  const source = { endTime: '', timeFlags: { end: { source: 'none' } } } as ExtractedItem;
+  const event = {
+    name: 'Senior’s Lunch',
+    description: 'Meet other seniors and learn about Town programs. Sponsored by Mary’s Cornwall Bakery.',
+    category: 'Food Special', isEvent: 'No', isFoodSpecial: 'Yes',
+    startTime: '11:30', endTime: '21:00',
+  } as FormattedEvent;
+  const normalized = normalizeCommunityMealEvent(event, source);
+  assert.equal(normalized.category, 'Gatherings & Parties');
+  assert.equal(normalized.isEvent, 'Yes');
+  assert.equal(normalized.isFoodSpecial, 'No');
+  assert.equal(normalized.endTime, '');
+});
+
+test('priced lunch deal and printed end time are preserved', () => {
+  const deal = { name: 'Senior Lunch Special', description: 'Half-price lunch for seniors.',
+    category: 'Food Special', endTime: '20:00' } as FormattedEvent;
+  assert.equal(normalizeCommunityMealEvent(deal).category, 'Food Special');
+  assert.equal(normalizeCommunityMealEvent(deal).endTime, '20:00');
+  const gathering = { name: 'Community Dinner', description: 'Meet neighbours and register for programs.',
+    category: 'Food Special', endTime: '20:00' } as FormattedEvent;
+  const source = { endTime: '20:00', timeFlags: { end: { source: 'explicit' } } } as ExtractedItem;
+  assert.equal(normalizeCommunityMealEvent(gathering, source).endTime, '20:00');
+});

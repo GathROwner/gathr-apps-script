@@ -430,8 +430,14 @@ export async function performSecondaryValidation(
   try {
     const response = await callGPT(prompt, cfg);
     const validationResult = parseSecondaryValidationResponse(response);
-    if (validationResult._parseError) {
-      logger.warn('Stage 4: Falling back to raw data due to parse error');
+    const responseCountMismatch = !validationResult._parseError &&
+      validationResult.validatedItems.length !== originalStage3Count;
+    if (validationResult._parseError || responseCountMismatch) {
+      logger.warn('Stage 4: Falling back to raw data due to invalid validation response', {
+        parseError: Boolean(validationResult._parseError),
+        expectedCount: originalStage3Count,
+        returnedCount: validationResult.validatedItems.length,
+      });
       const fallbackItems = rawData.map(item => ({ ...item }));
       let fallbackNormalizationCount = 0;
       fallbackItems.forEach(item => {
@@ -454,6 +460,8 @@ export async function performSecondaryValidation(
       (deterministicFallback.kept as any)._happyHourNoPriceOverrideCount = 0;
       (deterministicFallback.kept as any)._operatingHoursOnlyRejectCount =
         deterministicFallback.rejectedCount;
+      (deterministicFallback.kept as any)._validationFallbackReason =
+        responseCountMismatch ? 'response_count_mismatch' : 'parse_error';
       return deterministicFallback.kept;
     }
 
@@ -695,7 +703,12 @@ Calendar events (_sourceType="calendar") only need these fields to be valid:
 - name (required)
 - date (required)
 - startTime (required)
-- venue (required)
+
+The venue field is optional when the calendar belongs to the posting venue/page.
+An empty venue means the event takes place at that posting venue. If spatial
+metadata or the description identifies the posting venue, do not reject the
+item solely because venue is empty. Do not infer a different venue from the
+posting page when the item explicitly names another location.
 
 EXCEPTION FOR CALENDAR-FORMATTED SPECIALS:
 - If a _sourceType="calendar" item is clearly a day-specific food/drink/points deal
@@ -707,16 +720,18 @@ These fields are OPTIONAL and should NOT cause rejection if missing:
 - endTime (optional - many events don't list end times)
 - price (optional - free events won't have pricing)
 - description (optional - brief listings often omit descriptions)
+- venue (optional when the posting venue is the location)
 
 DO NOT reject calendar events just because endTime, price, or description are empty/missing.
 
 DUPLICATE DETECTION RULES:
-- Same venue + SAME time = likely duplicate (reject one)
+- Same event name + SAME date + SAME time + same venue = likely duplicate (reject one)
+- The same show on DIFFERENT dates is multiple valid performances. KEEP every explicitly printed date, even when the name, venue, and clock time are identical.
 - Same venue + DIFFERENT times = separate events (keep both)
 - Multiple sessions/workshops at same venue are common and valid
 - Multiple movie showings at same cinema are normal
-- Don't reject events just because they're at the same location
-- Only reject TRUE duplicates where the name, venue, AND time are identical
+- Don't reject events just because they're at the same location or recur on another date
+- Only reject TRUE duplicates where the name, date, venue, AND time are identical
 
 SPECIAL VALIDATION FOR MIXED CONTENT:
 When _sourceType indicates the item came from a specific extractor:
@@ -1047,7 +1062,7 @@ async function callGPT(prompt: string, config: ParsingConfig): Promise<string> {
   const client = getOpenAIClient();
   const explicitModelOverride = String(config.stage4ModelOverride || '').trim();
   const model = explicitModelOverride || resolveStageModel(config.gptModelFast, 'STAGE4_MODEL_OVERRIDE');
-  const isGpt5Model = (value: string): boolean => value.startsWith('gpt-5');
+  const usesResponses = (value: string): boolean => /^gpt-(?:5|6)(?:\.|-)/.test(value);
   const rawStage4ResponsesMaxTokens = Number.parseInt(
     String(process.env.STAGE4_RESPONSES_MAX_OUTPUT_TOKENS || '32000'),
     10
@@ -1084,7 +1099,7 @@ async function callGPT(prompt: string, config: ParsingConfig): Promise<string> {
   };
 
   try {
-    if (isGpt5Model(model)) {
+    if (usesResponses(model)) {
       const callStart = Date.now();
       const response = await client.responses.create({
         model,

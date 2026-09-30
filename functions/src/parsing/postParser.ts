@@ -16,6 +16,7 @@
  */
 
 import { DateTime } from 'luxon';
+import { AsyncLocalStorage } from 'async_hooks';
 import { execFile } from 'child_process';
 import { promisify } from 'util';
 import {
@@ -42,7 +43,9 @@ import { enrichEventsFromVenueWebsite } from './websiteDetailEnricher.js';
 import { performSecondaryValidation } from './secondaryValidator.js';
 import { performFinalFormatting } from './finalFormatter.js';
 import { resolveTimesWithOperatingHours } from './venueResolver.js';
-import { parseBooleanEnv, parseNumberEnv } from './runtimeConfig.js';
+import { shouldHoldUndatedStandingSchedule, isSelectedLunaCanaryPost,
+  canRetryLunaCanaryWithLegacy, canaryGeneratedCleanupUrls } from './lunaSafetyGate.js';
+import { parseBooleanEnv, parseNumberEnv, resolveStageModel } from './runtimeConfig.js';
 import { logger } from '../utils/logger.js';
 
 const CATEGORY_END_DEFAULTS: Record<string, string> = {
@@ -80,9 +83,11 @@ const CLOSING_HINT_PATTERN =
   /\bopen\s*(?:['’]?\s*til|till|until)\s*(\d{1,2}(?::\d{2})?)\s*\.?\s*(a\.?\s*m\.?|p\.?\s*m\.?)\b/gi;
 
 const MAX_OCR_IMAGES = 4;
+const MAX_SOURCE_GALLERY_IMAGES = 16;
 const MAX_OCR_OUTPUT_IMAGES_DEFAULT = 16;
 const MAX_OCR_OUTPUT_IMAGES_CALENDAR = 50;
 const OCR_TILE_MODE_CALENDAR = 'calendar';
+const OCR_TILE_MODE_CALENDAR_BANDS = 'calendar-bands-v1';
 const OCR_IMAGE_UPLOAD_FOLDER = 'postimages';
 const PROFILE_IMAGE_UPLOAD_FOLDER = 'profilepictures';
 const OCR_IMAGE_UPLOAD_MAX_BYTES = 8 * 1024 * 1024;
@@ -92,9 +97,197 @@ const OCR_IMAGE_UPLOAD_RETRIES = 2;
 const CURL_DOWNLOAD_MAX_BUFFER_BYTES = OCR_IMAGE_UPLOAD_MAX_BYTES + 512 * 1024;
 const execFileAsync = promisify(execFile);
 
-const ocrTileBaseMap = new Map<string, string>();
-const ocrUploadedSourceMap = new Map<string, string>();
-const sourceManagedImageMap = new Map<string, string>();
+interface ParseImageMaps {
+  ocrTileBaseMap: Map<string, string>;
+  ocrUploadedSourceMap: Map<string, string>;
+  sourceManagedImageMap: Map<string, string>;
+}
+
+export interface AnalysisImageFrame {
+  imageUrl: string;
+  sourceUrl: string;
+  sourceGalleryIndex: number;
+  displayUrl: string;
+  kind: 'whole' | 'calendar_band';
+  region?: { left: number; top: number; width: number; height: number };
+}
+
+interface CalendarBandCrop {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+}
+interface CalendarBandRule {
+  sourceIndex: number;
+  crop: CalendarBandCrop;
+  cuts: [number, number, number];
+  expectedSlots: string[];
+  expectedNames?: Array<{ date: string; name: string; requireFinal?: boolean; allowDescription?: boolean }>;
+  hostVenue?: string;
+  roomAliases?: string[];
+}
+interface OcrUploadOptions {
+  tileMode?: string;
+  ocr?: boolean;
+  folder?: string;
+  bandCrop?: CalendarBandCrop;
+  bandCuts?: [number, number, number];
+  onPayload?: (payload: any) => void;
+}
+
+function calendarBandRulesForPost(postId: string): CalendarBandRule[] | null {
+  if (!postId || !parseBooleanEnv('LUNA_FOUR_BANDS_ENABLED', false)) return [];
+  try {
+    const allRules = JSON.parse(String(process.env.LUNA_FOUR_BAND_RULES_JSON || '{}'));
+    const rules = allRules && typeof allRules === 'object' ? allRules[postId] : null;
+    if (rules === undefined || rules === null) return [];
+    if (!Array.isArray(rules) || rules.length < 1 || rules.length > 4) return null;
+    const valid = rules.every((rule: any) => {
+      if (!Number.isInteger(rule?.sourceIndex) || rule.sourceIndex < 0 || rule.sourceIndex >= MAX_SOURCE_GALLERY_IMAGES) {
+        return false;
+      }
+      if (!rule.crop || !Array.isArray(rule.cuts) || rule.cuts.length !== 3 ||
+          !rule.cuts.every((cut: unknown) => Number.isInteger(cut))) return false;
+      if (!Array.isArray(rule.expectedSlots) || rule.expectedSlots.length < 4 ||
+          rule.expectedSlots.length > 100 ||
+          !rule.expectedSlots.every((slot: unknown) =>
+            typeof slot === 'string' && /^\d{4}-\d{2}-\d{2}@\d{2}:\d{2}$/.test(slot))) return false;
+      if (rule.expectedNames !== undefined &&
+          (!Array.isArray(rule.expectedNames) || rule.expectedNames.length > 100 ||
+            !rule.expectedNames.every((entry: any) =>
+              /^\d{4}-\d{2}-\d{2}$/.test(String(entry?.date || '')) &&
+              typeof entry?.name === 'string' && entry.name.trim().length >= 3 &&
+              entry.name.length <= 120 &&
+              (entry.requireFinal === undefined || typeof entry.requireFinal === 'boolean') &&
+              (entry.allowDescription === undefined || typeof entry.allowDescription === 'boolean')))) return false;
+      if (rule.hostVenue !== undefined &&
+          (typeof rule.hostVenue !== 'string' || rule.hostVenue.trim().length < 3 ||
+            rule.hostVenue.length > 120)) return false;
+      if (rule.roomAliases !== undefined &&
+          (!rule.hostVenue || !Array.isArray(rule.roomAliases) ||
+            rule.roomAliases.length > 10 || !rule.roomAliases.every((room: unknown) =>
+              typeof room === 'string' && room.trim().length >= 3 && room.length <= 120))) return false;
+      return ['left', 'top', 'width', 'height'].every(key =>
+        Number.isInteger(rule.crop[key]) && rule.crop[key] >= 0
+      ) && rule.crop.width >= 600 && rule.crop.height >= 800 &&
+        rule.cuts[0] < rule.cuts[1] && rule.cuts[1] < rule.cuts[2] &&
+        rule.cuts[0] > rule.crop.top &&
+        rule.cuts[2] < rule.crop.top + rule.crop.height;
+    });
+    return valid ? rules : null;
+  } catch {
+    return null;
+  }
+}
+
+function calendarNameKey(value: unknown): string {
+  return String(value || '').normalize('NFKC').toLocaleLowerCase('en-CA')
+    .replace(/\bw\s*\//g, 'with')
+    .replace(/[!.,:;?"“”'’]/g, '')
+    .replace(/\s+/g, ' ').trim();
+}
+
+export function findMissingExpectedCalendarNames(
+  items: ExtractedItem[], expected: Array<{ date: string; name: string; allowDescription?: boolean }>
+): string[] {
+  return expected.filter(entry => !items.some(item =>
+    String(item.date || '') === entry.date &&
+    calendarNameKey(entry.allowDescription
+      ? `${item.name || ''} ${item.description || ''}` : item.name)
+      .includes(calendarNameKey(entry.name))
+  )).map(entry => `${entry.date}:${entry.name}`);
+}
+
+export function findMissingExpectedCalendarNamesInFinalEvents(
+  events: ProcessedEvent[], expected: Array<{ date: string; name: string; allowDescription?: boolean }>
+): string[] {
+  return expected.filter(entry => !events.some(event =>
+    calendarNameKey(entry.allowDescription
+      ? `${event.name || ''} ${event.description || ''}` : event.name)
+      .includes(calendarNameKey(entry.name))
+  )).map(entry => `${entry.date}:${entry.name}`);
+}
+
+export function applyReviewedCalendarRoomAliases<T extends { establishment: string; venue: string; additionalLocation: string }>(
+  items: T[], rules: CalendarBandRule[]
+): T[] {
+  const roomKey = (value: unknown) => calendarNameKey(value).replace(/^the\s+/, '');
+  const aliases = new Map<string, { host: string; room: string }>();
+  for (const rule of rules) {
+    if (!rule.hostVenue) continue;
+    for (const room of rule.roomAliases || []) {
+      aliases.set(roomKey(room), { host: rule.hostVenue, room });
+    }
+  }
+  return items.map(item => {
+    const match = aliases.get(roomKey(item.establishment));
+    if (!match) return item;
+    return { ...item, establishment: match.host,
+      additionalLocation: item.additionalLocation || match.room,
+      venue: roomKey(item.venue) === roomKey(match.room) ? '' : item.venue };
+  });
+}
+
+export function findMissingExpectedCalendarSlots(
+  items: ExtractedItem[],
+  expectedSlots: string[]
+): string[] {
+  const actual = new Map<string, number>();
+  for (const item of items) {
+    const date = String((item as any).date || '').trim();
+    const time = normalizeTimeHHMM((item as any).startTime);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !time) continue;
+    const key = `${date}@${time}`;
+    actual.set(key, (actual.get(key) || 0) + 1);
+  }
+  const missing: string[] = [];
+  for (const slot of expectedSlots) {
+    const count = actual.get(slot) || 0;
+    if (count > 0) actual.set(slot, count - 1);
+    else missing.push(slot);
+  }
+  return missing;
+}
+export function findMissingExpectedCalendarSlotsInFinalEvents(
+  events: ProcessedEvent[],
+  expectedSlots: string[]
+): string[] {
+  const occurrences: ExtractedItem[] = [];
+  for (const event of events) {
+    const startDate = String(event.startDate || '').trim();
+    const startTime = String(event.startTime || '').trim();
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(startDate) || !startTime) continue;
+    const recurring = event.isRecurring === true || event.isRecurring === 'Yes';
+    const pattern = String(event.recurringPattern || 'none');
+    const count = recurring ? Number(event.totalOccurrences) : 1;
+    const stepDays = pattern === 'daily' ? 1 : /^weekly_(monday|tuesday|wednesday|thursday|friday|saturday|sunday)$/.test(pattern)
+      ? 7 : 0;
+    if (recurring && (!stepDays || !Number.isInteger(count) || count < 1 || count > 100)) continue;
+    const date = new Date(`${startDate}T12:00:00.000Z`);
+    if (Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== startDate) continue;
+    for (let index = 0; index < count; index++) {
+      const occurrence = new Date(date);
+      occurrence.setUTCDate(occurrence.getUTCDate() + index * stepDays);
+      const occurrenceDate = occurrence.toISOString().slice(0, 10);
+      if (event.recurrenceUntilDate && occurrenceDate > String(event.recurrenceUntilDate)) break;
+      occurrences.push({ date: occurrenceDate, startTime } as ExtractedItem);
+    }
+  }
+  return findMissingExpectedCalendarSlots(occurrences, expectedSlots);
+}
+function newParseImageMaps(): ParseImageMaps {
+  return {
+    ocrTileBaseMap: new Map(),
+    ocrUploadedSourceMap: new Map(),
+    sourceManagedImageMap: new Map(),
+  };
+}
+const parseImageMapStore = new AsyncLocalStorage<ParseImageMaps>();
+const standaloneImageMaps = newParseImageMaps();
+function currentImageMaps(): ParseImageMaps {
+  return parseImageMapStore.getStore() || standaloneImageMaps;
+}
 
 function logTiming(
   step: string,
@@ -736,6 +929,17 @@ export async function replayPostDataFromArtifacts(
   artifacts: Stage45ReplayArtifacts,
   config: Partial<ParsingConfig> = {}
 ): Promise<ProcessedEvent[]> {
+  return parseImageMapStore.run(newParseImageMaps(), () =>
+    replayPostDataFromArtifactsCore(input, establishmentMap, artifacts, config)
+  );
+}
+
+async function replayPostDataFromArtifactsCore(
+  input: ParsePostInput,
+  establishmentMap: EstablishmentMap,
+  artifacts: Stage45ReplayArtifacts,
+  config: Partial<ParsingConfig>
+): Promise<ProcessedEvent[]> {
   const cfg = { ...DEFAULT_PARSING_CONFIG, ...config };
   const reportSkipReason = async (skipReason: ParseSkipReason): Promise<void> => {
     if (typeof cfg.skipReasonHandler !== 'function') return;
@@ -772,9 +976,6 @@ export async function replayPostDataFromArtifacts(
   } = input;
   const postId = extractedData?.id || extractedData?.postId || '';
   const parseStart = Date.now();
-  ocrTileBaseMap.clear();
-  ocrUploadedSourceMap.clear();
-  sourceManagedImageMap.clear();
 
   logger.info('replayPostDataFromArtifacts: Starting Stage 4+ replay', {
     userName,
@@ -786,7 +987,7 @@ export async function replayPostDataFromArtifacts(
 
   const establishmentInfo = establishmentMap[facebookUrl] || {};
   let partialAddress = establishmentInfo.address || '';
-  const sourcePostMediaUrls = normalizeImageUrls(mediaUrls || [], MAX_OCR_IMAGES);
+  const sourcePostMediaUrls = normalizeImageUrls(mediaUrls || [], MAX_SOURCE_GALLERY_IMAGES);
   const imageSources = [
     ...sourcePostMediaUrls,
     ...(sharedPostThumbnails || []),
@@ -1008,8 +1209,17 @@ export async function parsePostData(
   establishmentMap: EstablishmentMap = {},
   config: Partial<ParsingConfig> = {}
 ): Promise<ProcessedEvent[]> {
+  return parseImageMapStore.run(newParseImageMaps(), () =>
+    parsePostDataCore(input, establishmentMap, config)
+  );
+}
+
+async function parsePostDataCore(
+  input: ParsePostInput,
+  establishmentMap: EstablishmentMap,
+  config: Partial<ParsingConfig>
+): Promise<ProcessedEvent[]> {
   const cfg = { ...DEFAULT_PARSING_CONFIG, ...config };
-  const modelRouter = resolveModelRouterConfig(cfg);
   const reportSkipReason = async (skipReason: ParseSkipReason): Promise<void> => {
     if (typeof cfg.skipReasonHandler !== 'function') return;
     try {
@@ -1036,11 +1246,92 @@ export async function parsePostData(
   } = input;
 
   const postId = extractedData?.id || extractedData?.postId || '';
+  const lunaCanarySelected = !cfg.lunaCanaryBypass && isSelectedLunaCanaryPost(
+    postId,
+    parseBooleanEnv('LUNA_CANARY_ENABLED', false),
+    String(process.env.LUNA_CANARY_POST_IDS || '')
+  );
+  const intendedBandRules = lunaCanarySelected ? calendarBandRulesForPost(postId) : [];
+  const cleanupImageUrls = new Set<string>();
+  const originalMediaUrls = [
+    ...(mediaUrls || []), ...(sharedPostThumbnails || []), profilePicUrl || '',
+  ];
+  const cleanupCanaryGeneratedImages = async (events: ProcessedEvent[]): Promise<void> => {
+    await cleanupUnusedOcrImages(
+      canaryGeneratedCleanupUrls(Array.from(cleanupImageUrls), originalMediaUrls), events
+    );
+  };
+  if (lunaCanarySelected && (mediaUrls || []).length > MAX_SOURCE_GALLERY_IMAGES) {
+    await reportSkipReason({
+      stage: 'precheck',
+      reason: 'Luna canary requires source review',
+      detail: `source_gallery_exceeds_limit: sourceImages=${mediaUrls.length}, limit=${MAX_SOURCE_GALLERY_IMAGES}`,
+    });
+    return [];
+  }
+  if (lunaCanarySelected) {
+    cfg.gptModelFast = 'gpt-6-luna';
+    cfg.gptModelReasoning = 'gpt-6-luna';
+    cfg.stage1ModelOverride = 'gpt-6-luna';
+    cfg.stage2ModelOverride = 'gpt-6-luna';
+    cfg.stage3ModelOverride = 'gpt-6-luna';
+    const canaryStage3Effort = String(
+      process.env.LUNA_CANARY_STAGE3_REASONING_EFFORT || 'high'
+    ).trim().toLowerCase();
+    if (canaryStage3Effort !== 'high' && canaryStage3Effort !== 'xhigh') {
+      throw new Error(`Unsupported LUNA_CANARY_STAGE3_REASONING_EFFORT: ${canaryStage3Effort}`);
+    }
+    cfg.stage3ReasoningEffort = canaryStage3Effort;
+    cfg.stage3ImageDetail = 'original';
+    cfg.lunaCalendarLiteralSourcePrompt = true;
+    cfg.stage4ModelOverride = 'gpt-6-luna';
+    cfg.stage5ModelOverride = 'gpt-6-luna';
+    logger.info('Exact-post Luna canary selected', { postId });
+  }
+  const holdCalendarBandCanary = async (reason: string, detail = ''): Promise<ProcessedEvent[]> => {
+    logger.warn('Exact-post calendar band canary held for review', { postId, reason, detail });
+    const stage: ParseSkipReason['stage'] = reason.includes('stage1') ? 'stage1'
+      : reason.includes('stage2') || reason.includes('content_type') ? 'stage2'
+      : reason.includes('stage4') ? 'stage4'
+      : reason.includes('stage5') || reason.includes('final_') ? 'stage5'
+      : reason.includes('pipeline_') ? 'pipeline' : 'stage3';
+    await reportSkipReason({
+      stage,
+      reason: 'Luna canary requires source review',
+      detail: `${reason}${detail ? `: ${detail}` : ''}`,
+    });
+    await cleanupCanaryGeneratedImages([]);
+    return [];
+  };
+  const retryCanaryWithLegacy = async (reason: string, detail = ''): Promise<ProcessedEvent[]> => {
+    // The existing route analyzes at most four sources and tiles only the first.
+    // Hold a larger gallery or a calendar in another carousel position for review.
+    if (!canRetryLunaCanaryWithLegacy(
+      normalizeImageUrls(mediaUrls || [], MAX_SOURCE_GALLERY_IMAGES).length,
+      intendedBandRules?.map(rule => rule.sourceIndex) ?? null
+    )) {
+      return holdCalendarBandCanary(reason, detail);
+    }
+    logger.warn('Exact-post Luna canary retrying with the existing parser route', {
+      postId,
+      reason,
+      detail,
+    });
+    await cleanupCanaryGeneratedImages([]);
+    cleanupImageUrls.clear();
+    const legacyEvents = await parsePostData(input, establishmentMap,
+      { ...config, lunaCanaryBypass: true });
+    return legacyEvents.length > 0 ? legacyEvents
+      : holdCalendarBandCanary('legacy_retry_no_items', reason);
+  };
+  const modelRouter = resolveModelRouterConfig(cfg);
+  if (lunaCanarySelected) {
+    modelRouter.enabled = false;
+    modelRouter.shadowEnabled = false;
+  }
   const parseStart = Date.now();
-  // Keep mappings isolated to the current row parse.
-  ocrTileBaseMap.clear();
-  ocrUploadedSourceMap.clear();
-  sourceManagedImageMap.clear();
+  // The AsyncLocalStorage context keeps image mappings isolated across
+  // concurrently parsed rows and exact-post fallback retries.
 
   logger.info('parsePostData: Starting 5-stage parsing system', {
     userName,
@@ -1054,17 +1345,23 @@ export async function parsePostData(
   let partialAddress = establishmentInfo.address || '';
   const category = establishmentInfo.category || '';
 
-  // Prepare image data (include shared thumbnails for OCR where available)
-  const sourcePostMediaUrls = normalizeImageUrls(mediaUrls || [], MAX_OCR_IMAGES);
+  // Keep the legacy display-gallery limit unchanged outside the Luna pilot.
+  // The exact-post Luna pilot inspects every retained source image at all
+  // stages, so a flyer in gallery position five cannot be rejected at Stage 1.
+  // Unselected posts keep the legacy four-image analysis budget.
+  const galleryLimit = lunaCanarySelected || parseBooleanEnv('STAGE3_LUNA_FULL_IMAGE', false)
+    ? MAX_SOURCE_GALLERY_IMAGES : MAX_OCR_IMAGES;
+  const sourcePostMediaUrls = normalizeImageUrls(mediaUrls || [], galleryLimit);
   const imageSources = [
     ...sourcePostMediaUrls,
     ...(sharedPostThumbnails || []),
   ];
-  const allImageUrls = normalizeImageUrls(imageSources, MAX_OCR_IMAGES);
+  const analysisImageLimit = lunaCanarySelected ? MAX_SOURCE_GALLERY_IMAGES : MAX_OCR_IMAGES;
+  const allImageUrls = normalizeImageUrls(imageSources, analysisImageLimit);
   logger.debug('Total unique images to process', {
     total: imageSources.length,
     usable: allImageUrls.length,
-    cappedAt: MAX_OCR_IMAGES,
+    cappedAt: analysisImageLimit,
   });
   const ocrPrepStart = Date.now();
   const ocrImageUrls = await prepareOcrImageUrls(allImageUrls, {
@@ -1075,6 +1372,7 @@ export async function parsePostData(
   }, {
     calendarTiles: false,
   });
+  for (const url of ocrImageUrls) cleanupImageUrls.add(url);
   logTiming('ocr_upload', ocrPrepStart, {
     postId,
     inputCount: allImageUrls.length,
@@ -1097,6 +1395,10 @@ export async function parsePostData(
     cfg.ocrDebugHandler(ocrDebugSnapshot);
   }
   const extractionText = appendOcrText(combinedText, ocrDebugSnapshot?.ocrText);
+  if (lunaCanarySelected && (allImageUrls.length === 0 ||
+      ocrImageUrls.length !== allImageUrls.length)) {
+    return retryCanaryWithLegacy('preprocessed_image_missing');
+  }
 
   // Early exit for empty content
   if (ocrImageUrls.length === 0 && !combinedText.trim()) {
@@ -1141,6 +1443,7 @@ export async function parsePostData(
     logTiming('stage1_validate', stage1Start, { postId });
 
     if (!validation.hasValidContent || validation.validationDecision === 'VALIDATION_FAILED') {
+      if (lunaCanarySelected) return retryCanaryWithLegacy('stage1_validation_failed');
       logger.info(`Content validation failed: ${validation.reason}`);
       await reportSkipReason({
         stage: 'stage1',
@@ -1182,6 +1485,7 @@ export async function parsePostData(
     logTiming('stage2_classify', stage2Start, { postId });
 
     if (!classification || classification.confidence < cfg.confidenceThreshold) {
+      if (lunaCanarySelected) return retryCanaryWithLegacy('stage2_classification_failed');
       logger.info(`Classification confidence too low: ${classification?.confidence || 0}`);
       await reportSkipReason({
         stage: 'stage2',
@@ -1197,6 +1501,11 @@ export async function parsePostData(
     const resolvedContentType = stage2Routing.shouldUseRoutedContentType
       ? stage2Routing.routedContentType
       : classification.contentType;
+    if (intendedBandRules === null ||
+        (intendedBandRules.length > 0 && resolvedContentType !== 'CALENDAR')) {
+      return retryCanaryWithLegacy('calendar_band_content_type_mismatch',
+        `classified=${resolvedContentType}`);
+    }
 
     if (stage2Routing.shadowEnabled) {
       logger.info('Stage 2 score routing shadow', {
@@ -1243,9 +1552,69 @@ export async function parsePostData(
       ocrMode: stage2Routing.ocrMode,
     });
 
+    const stage3ModelRouting = resolveStage3ModelRouting(
+      resolvedContentType,
+      classification,
+      stage2Routing,
+      cfg,
+      modelRouter
+    );
+    const selectedStage3Model = cfg.stage3ModelOverride || resolveStageModel(
+      stage3ModelRouting.appliedModel,
+      'STAGE3_MODEL_OVERRIDE'
+    );
+    const lunaFullImageRequested =
+      selectedStage3Model === 'gpt-6-luna' &&
+      (lunaCanarySelected || parseBooleanEnv('STAGE3_LUNA_FULL_IMAGE', false));
+    const stage3SourceUrls = normalizeImageUrls(imageSources, MAX_SOURCE_GALLERY_IMAGES);
+    const additionalOcrImageUrls: string[] = [];
+    let lunaFrameSourceUrls: string[] = [];
+    let lunaFrameKinds: Array<'whole' | 'calendar_band'> = [];
+    let lunaFrameRegions: Array<AnalysisImageFrame['region']> = [];
     let stage37TicketUrl = '';
     let extractionImageUrls = ocrImageUrls;
-    const cleanupImageUrls = new Set<string>(ocrImageUrls);
+    let lunaFullImageReady = false;
+    if (lunaCanarySelected && process.env.PARSER_DRY_RUN_LOCAL_IMAGES === 'true' &&
+        stage3SourceUrls.length > 0 && stage3SourceUrls.every((url) => /^data:image\//i.test(url)) &&
+        ocrImageUrls.length === allImageUrls.length) {
+      extractionImageUrls = stage3SourceUrls;
+      lunaFrameSourceUrls = [...stage3SourceUrls];
+      lunaFrameKinds = stage3SourceUrls.map(() => 'whole');
+      lunaFrameRegions = stage3SourceUrls.map(() => undefined);
+      lunaFullImageReady = true;
+    }
+    // The OCR upload produces the high-contrast base image without tiles.
+    // Send that preprocessed image to Luna; downloading the original source
+    // here would silently bypass the readability step used by the trial.
+    if (lunaFullImageRequested && !lunaFullImageReady && process.env.IMAGE_UPLOAD_URL &&
+        ocrImageUrls.length > 0 && ocrImageUrls.length === allImageUrls.length) {
+      const extraSources = stage3SourceUrls.slice(allImageUrls.length);
+      const extraOcr = extraSources.length > 0
+        ? await prepareOcrImageUrls(extraSources, { postId, userName, pageName, combinedText })
+        : [];
+      additionalOcrImageUrls.push(...extraOcr);
+      const stage3OcrUrls = [...ocrImageUrls, ...extraOcr];
+      if (stage3OcrUrls.length === stage3SourceUrls.length) {
+        const fullImageUrls = await prepareFullImageDataUrls(stage3OcrUrls, { postId });
+        lunaFullImageReady = fullImageUrls.length === stage3SourceUrls.length;
+        if (lunaFullImageReady) {
+          extractionImageUrls = fullImageUrls;
+          lunaFrameSourceUrls = [...stage3SourceUrls];
+          lunaFrameKinds = stage3SourceUrls.map(() => 'whole');
+          lunaFrameRegions = stage3SourceUrls.map(() => undefined);
+        }
+      }
+      logger.info('Luna full-image Stage 3 decision', {
+        postId,
+        sourceCount: stage3SourceUrls.length,
+        preparedCount: lunaFullImageReady ? extractionImageUrls.length : stage3OcrUrls.length,
+        enabled: lunaFullImageReady,
+      });
+    }
+    if (lunaCanarySelected && !lunaFullImageReady) {
+      return retryCanaryWithLegacy('full_preprocessed_image_unavailable');
+    }
+    for (const url of additionalOcrImageUrls) cleanupImageUrls.add(url);
     const displayImageUploadStart = Date.now();
     const displayImageUrls = await prepareManagedDisplayImageUrls(sourcePostMediaUrls, {
       postId: extractedData?.id || extractedData?.postId || '',
@@ -1255,9 +1624,16 @@ export async function parsePostData(
     }
     logTiming('display_image_upload', displayImageUploadStart, {
       postId,
-      inputCount: allImageUrls.length,
+      inputCount: sourcePostMediaUrls.length,
       outputCount: displayImageUrls.length,
     });
+    const requireManagedGallery = Boolean(process.env.IMAGE_UPLOAD_URL) &&
+      process.env.PARSER_DRY_RUN_LOCAL_IMAGES !== 'true';
+    if (lunaCanarySelected && requireManagedGallery && sourcePostMediaUrls.some(url =>
+      !currentImageMaps().sourceManagedImageMap.get(url)
+    )) {
+      return retryCanaryWithLegacy('gallery_display_image_missing');
+    }
     const managedProfilePicUrl = await prepareManagedProfileIconUrl(profilePicUrl || '', {
       postId: extractedData?.id || extractedData?.postId || '',
     });
@@ -1265,6 +1641,51 @@ export async function parsePostData(
     const isCalendarOrSchedule =
       resolvedContentType === 'CALENDAR' ||
       resolvedContentType === 'SCHEDULE';
+    const bandRules = lunaCanarySelected && lunaFullImageReady &&
+      resolvedContentType === 'CALENDAR' ? intendedBandRules : [];
+    if (bandRules === null) return holdCalendarBandCanary('invalid_calendar_band_rule');
+    if (bandRules.length > 0) {
+      const seenSourceIndexes = new Set<number>();
+      for (const rule of bandRules) {
+        const sourceUrl = sourcePostMediaUrls[rule.sourceIndex];
+        const frameIndex = lunaFrameSourceUrls.indexOf(sourceUrl);
+        if (!sourceUrl || frameIndex < 0 || seenSourceIndexes.has(rule.sourceIndex)) {
+          return retryCanaryWithLegacy('calendar_band_source_missing_or_duplicate');
+        }
+        seenSourceIndexes.add(rule.sourceIndex);
+        const bandResult = await prepareCalendarBandFrames(sourceUrl, rule.crop, rule.cuts, { postId });
+        if (!bandResult) return retryCanaryWithLegacy('calendar_band_preparation_failed');
+        for (const url of bandResult.uploadedUrls) cleanupImageUrls.add(url);
+        extractionImageUrls.splice(frameIndex, 1, ...bandResult.imageUrls);
+        lunaFrameSourceUrls.splice(frameIndex, 1, ...bandResult.imageUrls.map(() => sourceUrl));
+        lunaFrameKinds.splice(frameIndex, 1, ...bandResult.imageUrls.map(() => 'calendar_band' as const));
+        lunaFrameRegions.splice(frameIndex, 1, ...bandResult.regions);
+      }
+      logger.info('Exact-post Luna calendar bands selected', {
+        postId,
+        sourceIndexes: bandRules.map(rule => rule.sourceIndex),
+        frameCount: extractionImageUrls.length,
+      });
+    }
+    const lunaAnalysisFrames: AnalysisImageFrame[] | undefined = lunaFullImageReady
+      ? extractionImageUrls.map((imageUrl, index) => {
+          const sourceUrl = lunaFrameSourceUrls[index] || '';
+          return {
+            imageUrl,
+            sourceUrl,
+            sourceGalleryIndex: sourcePostMediaUrls.indexOf(sourceUrl),
+            displayUrl: currentImageMaps().sourceManagedImageMap.get(sourceUrl) || '',
+            kind: lunaFrameKinds[index] || 'whole',
+            region: lunaFrameRegions[index],
+          };
+        })
+      : undefined;
+    if (lunaCanarySelected && (!lunaAnalysisFrames ||
+        lunaAnalysisFrames.length !== extractionImageUrls.length ||
+        lunaAnalysisFrames.some(frame => !frame.sourceUrl ||
+          (requireManagedGallery && frame.sourceGalleryIndex >= 0 && !isManagedImageUrl(frame.displayUrl))))) {
+      return retryCanaryWithLegacy('analysis_frame_source_mapping_missing');
+    }
     const hasComplexitySignals = stage2Routing.signals.hasComplexitySignals;
     const recommendsTilingCount = stage2Routing.signals.recommendsTilingCount;
     const shouldUseCalendarTiles = stage2Routing.enabled
@@ -1362,18 +1783,20 @@ export async function parsePostData(
       attempt: 'primary' | 'fallback'
     ): Promise<{ items: ExtractedItem[]; ticketUrl: string }> => {
       const stage3Cfg =
-        stage3Model === cfg.gptModelReasoning
-          ? cfg
-          : ({ ...cfg, gptModelReasoning: stage3Model } as ParsingConfig);
+        ({ ...cfg, gptModelReasoning: stage3Model,
+          stage3ModelOverride: stage3Model } as ParsingConfig);
 
       logger.info('=== STAGE 3: CONTENT EXTRACTION ===', {
         stage3Model,
         attempt,
       });
       const stage3Start = Date.now();
+      const stage3ExtractionText = bandRules.length > 0
+        ? `${extractionText}\n\nIMAGE FRAME LAYOUT FOR THIS POST: The first frame(s) may be other carousel images. Four consecutive, overlapping frames show one dense calendar from top to bottom. Inspect every calendar frame, including the final frame and its last week. Use each frame's printed date and time; merge overlap duplicates. The relevantImageIndex is the index of the frame containing the printed item, not its source gallery index. Copy performer names exactly as printed; do not infer a name from a photo or nearby entry.`
+        : extractionText;
       let stage3Items = await extractContentByType(
         resolvedContentType,
-        extractionText,
+        stage3ExtractionText,
         extractionImageUrls,
         userName,
         timestamp,
@@ -1476,7 +1899,7 @@ export async function parsePostData(
 
     let fallbackAttempted = false;
     let rawExtractedData: ExtractedItem[] = [];
-    let stage3Result = await runStage3Pipeline(stage3ModelRouting.appliedModel, 'primary');
+    let stage3Result = await runStage3Pipeline(selectedStage3Model, 'primary');
     rawExtractedData = stage3Result.items;
     stage37TicketUrl = stage3Result.ticketUrl || stage37TicketUrl;
 
@@ -1493,12 +1916,50 @@ export async function parsePostData(
     }
 
     if (!rawExtractedData || rawExtractedData.length === 0) {
+      if (lunaCanarySelected) return retryCanaryWithLegacy('stage3_no_items');
       logger.info('No content extracted');
       await reportSkipReason({
         stage: 'stage3',
         reason: 'Due to no extractable content in Stage 3',
       });
       return [];
+    }
+
+    if (bandRules.length > 0) {
+      const expectedSlots = bandRules.flatMap(rule => rule.expectedSlots);
+      const missingSlots = findMissingExpectedCalendarSlots(rawExtractedData, expectedSlots);
+      if (missingSlots.length > 0) {
+        logger.warn('Calendar band canary missed source-reviewed slots', {
+          postId,
+          expectedCount: expectedSlots.length,
+          extractedCount: rawExtractedData.length,
+          missingSlots,
+        });
+        await emitStageArtifacts(cfg, {
+          source: 'live',
+          contentType: resolvedContentType,
+          imageFrameManifest: lunaAnalysisFrames?.map((frame, frameIndex) => ({
+            frameIndex,
+            sourceGalleryIndex: frame.sourceGalleryIndex,
+            kind: frame.kind,
+            ...(frame.region ? { region: frame.region } : {}),
+          })),
+          stage3Items: deepCloneJson(rawExtractedData),
+          stage37TicketUrl: stage37TicketUrl || undefined,
+        });
+        return retryCanaryWithLegacy('calendar_band_missing_expected_slots',
+          missingSlots.join(','));
+      }
+      const missingNames = findMissingExpectedCalendarNames(
+        rawExtractedData, bandRules.flatMap(rule => rule.expectedNames || [])
+      );
+      if (missingNames.length > 0) {
+        await emitStageArtifacts(cfg, {
+          source: 'live', contentType: resolvedContentType,
+          stage3Items: deepCloneJson(rawExtractedData),
+        });
+        return retryCanaryWithLegacy('calendar_band_source_name_mismatch', missingNames.join(','));
+      }
     }
 
     logger.info(`Extracted ${rawExtractedData.length} raw items`);
@@ -1534,9 +1995,28 @@ export async function parsePostData(
     await emitStageArtifacts(cfg, {
       source: 'live',
       contentType: resolvedContentType,
+      imageFrameManifest: lunaAnalysisFrames?.map((frame, frameIndex) => ({
+        frameIndex,
+        sourceGalleryIndex: frame.sourceGalleryIndex,
+        kind: frame.kind,
+        ...(frame.region ? { region: frame.region } : {}),
+      })),
       stage3Items: deepCloneJson(rawExtractedData),
       stage37TicketUrl: stage37TicketUrl || undefined,
     });
+
+    if (lunaFullImageRequested && shouldHoldUndatedStandingSchedule(extractionText)) {
+      logger.warn('Luna standing weekly board held: no source-supported date anchor', {
+        postId,
+        contentType: resolvedContentType,
+        extractedCount: rawExtractedData.length,
+      });
+      await reportSkipReason({
+        stage: 'stage3',
+        reason: 'Undated standing weekly schedule requires a bounded date or explicit recurrence review',
+      });
+      return [];
+    }
 
     // ========================================
     // STAGE 4: Secondary Validation
@@ -1589,6 +2069,7 @@ export async function parsePostData(
     }
 
     if (!validatedData || validatedData.length === 0) {
+      if (lunaCanarySelected) return retryCanaryWithLegacy('stage4_no_items');
       logger.info('No items passed secondary validation');
       await reportSkipReason({
         stage: 'stage4',
@@ -1623,7 +2104,7 @@ export async function parsePostData(
     // ========================================
     logger.info('=== STAGE 5: FINAL FORMATTING ===');
     const stage5Start = Date.now();
-    const formattedEvents = await performFinalFormatting(
+    const formattedEventsRaw = await performFinalFormatting(
       validatedData,
       userName,
       partialAddress,
@@ -1631,12 +2112,16 @@ export async function parsePostData(
       cfg,
       input.combinedText
     );
+    const formattedEvents = bandRules.length > 0 && formattedEventsRaw
+      ? applyReviewedCalendarRoomAliases(formattedEventsRaw, bandRules)
+      : formattedEventsRaw;
     logTiming('stage5_format', stage5Start, {
       postId,
       formattedCount: formattedEvents?.length || 0,
     });
 
     if (!formattedEvents || formattedEvents.length === 0) {
+      if (lunaCanarySelected) return retryCanaryWithLegacy('stage5_no_items');
       logger.info('No events formatted successfully');
       await reportSkipReason({
         stage: 'stage5',
@@ -1746,10 +2231,30 @@ export async function parsePostData(
       },
       heroImageOverrides,
       managedTicketImageHints,
-      validation.imageAnalysis || []
+      validation.imageAnalysis || [],
+      lunaAnalysisFrames
     );
 
-    await cleanupUnusedOcrImages(Array.from(cleanupImageUrls), processedEvents);
+    if (bandRules.length > 0) {
+      const missingFinalSlots = findMissingExpectedCalendarSlotsInFinalEvents(
+        processedEvents, bandRules.flatMap(rule => rule.expectedSlots)
+      );
+      if (missingFinalSlots.length > 0) {
+        return retryCanaryWithLegacy('calendar_band_final_missing_expected_slots',
+          missingFinalSlots.join(','));
+      }
+      const missingFinalNames = findMissingExpectedCalendarNamesInFinalEvents(
+        processedEvents, bandRules.flatMap(rule =>
+          (rule.expectedNames || []).filter(entry => entry.requireFinal))
+      );
+      if (missingFinalNames.length > 0) {
+        return retryCanaryWithLegacy('calendar_band_final_source_name_mismatch',
+          missingFinalNames.join(','));
+      }
+    }
+
+    if (lunaCanarySelected) await cleanupCanaryGeneratedImages(processedEvents);
+    else await cleanupUnusedOcrImages(Array.from(cleanupImageUrls), processedEvents);
 
     logger.info(`parsePostData: Completed. Final events: ${processedEvents.length}`);
     logTiming('parse_total', parseStart, {
@@ -1759,6 +2264,7 @@ export async function parsePostData(
     return processedEvents;
   } catch (error) {
     logger.error('parsePostData: Error in parsing system', error);
+    if (lunaCanarySelected) return retryCanaryWithLegacy('pipeline_exception');
     await reportSkipReason({
       stage: 'pipeline',
       reason: 'Due to parsing pipeline error',
@@ -2251,12 +2757,18 @@ export function resolveRelevantImageUrlForEvent(
   event: TimeResolvedEvent,
   analysisMediaUrls: string[],
   displayMediaUrls: string[],
-  imageAnalysis: Array<{ imageIndex?: number; description?: string; relevanceToPost?: string }>
+  imageAnalysis: Array<{ imageIndex?: number; description?: string; relevanceToPost?: string }>,
+  analysisFrames?: AnalysisImageFrame[]
 ): { url: string; reason: string } {
   const rawIndex = Number(event.relevantImageIndex);
   const hasValidIndex = Number.isInteger(rawIndex) && rawIndex >= 0;
   const fromDisplay =
-    hasValidIndex && rawIndex < displayMediaUrls.length
+    analysisFrames
+      ? hasValidIndex && rawIndex < analysisFrames.length &&
+        analysisFrames[rawIndex].imageUrl === analysisMediaUrls[rawIndex]
+        ? String(analysisFrames[rawIndex].displayUrl || '').trim()
+        : ''
+      : hasValidIndex && rawIndex < displayMediaUrls.length
       ? String(displayMediaUrls[rawIndex] || '').trim()
       : '';
   const bestImageAnalysis = findBestDisplayImageAnalysisMatch(event, imageAnalysis, displayMediaUrls);
@@ -2282,6 +2794,16 @@ export function resolveRelevantImageUrlForEvent(
     !firstImageHasComparableEvidence
   ) {
     return { url: fromImageAnalysis, reason: 'image_analysis_match_over_default_first_image_index' };
+  }
+
+  if (analysisFrames) {
+    if (fromDisplay && isManagedImageUrl(fromDisplay)) {
+      return { url: fromDisplay, reason: 'model_selected_analysis_frame_source' };
+    }
+    if (fromImageAnalysis && isManagedImageUrl(fromImageAnalysis)) {
+      return { url: fromImageAnalysis, reason: 'image_analysis_match_for_unmapped_analysis_frame' };
+    }
+    return { url: '', reason: 'unmapped_analysis_frame' };
   }
 
   const hasDegenerateImageAnalysis = !hasUsefulPerImageAnalysis(imageAnalysis, displayMediaUrls);
@@ -2419,10 +2941,12 @@ export function applySpecialTimeFallbacks(
 ): TimeResolvedEvent[] {
   // Extract posted time
   let postedHHMM = '';
+  let postedDate = '';
   try {
     const dt = DateTime.fromISO(timestamp, { zone: timezone });
     if (dt.isValid) {
       postedHHMM = dt.toFormat('HH:mm');
+      postedDate = dt.toFormat('yyyy-MM-dd');
     }
   } catch {
     // Ignore parse errors
@@ -2463,9 +2987,12 @@ export function applySpecialTimeFallbacks(
         (isSpecial || (isEventLikely && hasTodayCue)) &&
         !hasStartClock &&
         !hasExplicitStart &&
-        postedHHMM
+        postedHHMM &&
+        ev.startDate === postedDate
       ) {
         ev.startTime = postedHHMM;
+        ev.timeResolution = ev.timeResolution || { hoursUsed: false };
+        ev.timeResolution.startFromPostTime = true;
 
         // Update timeFlags
         ev.timeFlags = ev.timeFlags || { start: { source: 'none', evidence: '' }, end: { toClose: false, evidence: '' } };
@@ -2690,7 +3217,10 @@ export function enforceDateTimeCompleteness(
     );
     const isSemanticStart = ev.timeFlags?.start?.source === 'semantic';
 
-    if (!ev.startTime && postedHHMM && (isSpecial || hasTodayCue || isSemanticStart)) {
+    // A post-time fallback is only defensible for a same-day offer. Reusing the
+    // publication time on a later calendar date invents an event start time.
+    if (!ev.startTime && postedHHMM && ev.startDate === postedDate &&
+        (isSpecial || hasTodayCue || isSemanticStart)) {
       ev.startTime = postedHHMM;
       ev.timeFlags = ev.timeFlags || {
         start: { source: 'none', evidence: '' },
@@ -3357,7 +3887,8 @@ function processEvents(
   extractedData?: ParsePostInput['extractedData'],
   heroImageOverrides: string[] = [],
   ticketImageOverrides: string[] = [],
-  imageAnalysis: Array<{ imageIndex?: number; description?: string; relevanceToPost?: string }> = []
+  imageAnalysis: Array<{ imageIndex?: number; description?: string; relevanceToPost?: string }> = [],
+  analysisFrames?: AnalysisImageFrame[]
 ): ProcessedEvent[] {
   logger.debug(`Processing ${parsedData.length} events`);
 
@@ -3418,7 +3949,8 @@ function processEvents(
           event,
           analysisMediaUrls,
           displayMediaUrls,
-          imageAnalysis
+          imageAnalysis,
+          analysisFrames
         );
         if (resolvedRelevantImage.url) {
           processedEvent.relevantImageUrl = resolvedRelevantImage.url;
@@ -3607,6 +4139,120 @@ function addMetadata(
   return event;
 }
 
+export async function prepareCalendarBandFrames(
+  sourceUrl: string,
+  crop: CalendarBandCrop,
+  cuts: [number, number, number],
+  context: { postId?: string }
+): Promise<{
+  imageUrls: string[];
+  uploadedUrls: string[];
+  regions: Array<NonNullable<AnalysisImageFrame['region']>>;
+} | null> {
+  const uploadUrl = process.env.IMAGE_UPLOAD_URL;
+  if (!uploadUrl) return null;
+  let payload: any = null;
+  const uploadedUrls = await uploadImageForOcr(sourceUrl, uploadUrl, context, {
+    tileMode: OCR_TILE_MODE_CALENDAR_BANDS,
+    bandCrop: crop,
+    bandCuts: cuts,
+    onPayload: response => { payload = response; },
+  });
+  if (!uploadedUrls) return null;
+  const manifest = payload?.bandManifest;
+  const regions = Array.isArray(manifest?.regions) ? manifest.regions : [];
+  const valid = manifest?.version === OCR_TILE_MODE_CALENDAR_BANDS &&
+    manifest?.eligible === true && regions.length === 4 &&
+    String(manifest.baseImageUrl || '') === uploadedUrls[0] &&
+    regions.every((region: any, index: number) =>
+      Number.isInteger(region?.left) && Number.isInteger(region?.top) &&
+      Number.isInteger(region?.width) && Number.isInteger(region?.height) &&
+      region.width > 0 && region.height > 0 &&
+      region.index === index &&
+      String(region.imageUrl || '') === uploadedUrls[index + 1]
+    );
+  if (!valid) {
+    await cleanupUnusedOcrImages(uploadedUrls, []);
+    logger.warn('Calendar band upload returned an unusable manifest', {
+      postId: context.postId || '',
+      reason: manifest?.reason || 'missing_or_invalid_manifest',
+    });
+    return null;
+  }
+  registerSourceMapping(sourceUrl, uploadedUrls);
+  registerTileMapping(uploadedUrls);
+  const bandUrls = uploadedUrls.slice(1);
+  const imageUrls = await prepareFullImageDataUrls(bandUrls, context);
+  if (imageUrls.length !== 4) {
+    await cleanupUnusedOcrImages(uploadedUrls, []);
+    return null;
+  }
+  return {
+    imageUrls,
+    uploadedUrls,
+    regions: regions.map((region: any) => ({
+      left: region.left,
+      top: region.top,
+      width: region.width,
+      height: region.height,
+    })),
+  };
+}
+
+async function prepareFullImageDataUrls(
+  urls: string[],
+  context: { postId?: string }
+): Promise<string[]> {
+  const images: string[] = [];
+  for (const url of urls) {
+    let download;
+    try {
+      download = await downloadImageBufferWithRetry(url, context);
+    } catch (error) {
+      logger.warn('Luna full-image source download failed; using existing image path', {
+        postId: context.postId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+      return [];
+    }
+
+    const contentType = String(download?.contentType || '').split(';')[0].toLowerCase();
+    if (!download || !['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(contentType)) {
+      return [];
+    }
+    images.push(`data:${contentType};base64,${download.buffer.toString('base64')}`);
+  }
+  return images;
+}
+
+/** Reuse the scheduled post's OCR base and full-resolution model input for a share pilot. */
+export async function prepareLunaCalendarFullImages(
+  sourceUrls: string[],
+  context: { postId?: string; userName?: string; pageName?: string; combinedText?: string }
+): Promise<{ imageUrls: string[]; uploadedUrls: string[] } | null> {
+  if (sourceUrls.length === 0 || sourceUrls.length > MAX_SOURCE_GALLERY_IMAGES) return null;
+  if (process.env.PARSER_DRY_RUN_LOCAL_IMAGES === 'true' &&
+      sourceUrls.every(url => /^data:image\//i.test(url))) {
+    return { imageUrls: [...sourceUrls], uploadedUrls: [] };
+  }
+  if (!process.env.IMAGE_UPLOAD_URL) return null;
+  const uploadedUrls = await prepareOcrImageUrls(sourceUrls, context, { calendarTiles: false });
+  if (uploadedUrls.length !== sourceUrls.length) {
+    await cleanupUnusedOcrImages(uploadedUrls, []);
+    return null;
+  }
+  const imageUrls = await prepareFullImageDataUrls(uploadedUrls, context);
+  if (imageUrls.length !== sourceUrls.length) {
+    await cleanupUnusedOcrImages(uploadedUrls, []);
+    return null;
+  }
+  return { imageUrls, uploadedUrls: canaryGeneratedCleanupUrls(uploadedUrls, sourceUrls) };
+}
+
+export async function cleanupLunaCalendarFullImages(uploadedUrls: string[]): Promise<void> {
+  await cleanupUnusedOcrImages(uploadedUrls, []);
+}
+
 async function prepareOcrImageUrls(
   urls: string[],
   context: { postId?: string; userName?: string; pageName?: string; combinedText?: string },
@@ -3691,7 +4337,7 @@ export async function prepareManagedDisplayImageUrls(
       continue;
     }
 
-    const cached = sourceManagedImageMap.get(sourceUrl);
+    const cached = currentImageMaps().sourceManagedImageMap.get(sourceUrl);
     if (cached) {
       uploaded.push(cached);
       continue;
@@ -3786,7 +4432,7 @@ async function prepareManagedProfileIconUrl(
   if (!sourceUrl) return '';
   if (isManagedImageUrl(sourceUrl)) return sourceUrl;
 
-  const cached = sourceManagedImageMap.get(sourceUrl);
+  const cached = currentImageMaps().sourceManagedImageMap.get(sourceUrl);
   if (cached && isManagedImageUrl(cached)) return cached;
 
   const uploadUrl = process.env.IMAGE_UPLOAD_URL;
@@ -3818,7 +4464,7 @@ async function uploadImageForOcr(
   imageUrl: string,
   uploadUrl: string,
   context: { postId?: string },
-  options?: { tileMode?: string; ocr?: boolean; folder?: string }
+  options?: OcrUploadOptions
 ): Promise<string[] | null> {
   const download = await downloadImageBufferWithRetry(imageUrl, context);
   if (!download) return null;
@@ -4067,7 +4713,7 @@ async function uploadImageBufferWithRetry(
   contentType: string,
   uploadUrl: string,
   context: { postId?: string },
-  options?: { tileMode?: string; ocr?: boolean; folder?: string }
+  options?: OcrUploadOptions
 ): Promise<string[] | null> {
   for (let attempt = 1; attempt <= OCR_IMAGE_UPLOAD_RETRIES; attempt++) {
     const result = await uploadImageBuffer(
@@ -4089,7 +4735,7 @@ async function uploadImageBuffer(
   uploadUrl: string,
   context: { postId?: string },
   attempt: number,
-  options?: { tileMode?: string; ocr?: boolean; folder?: string }
+  options?: OcrUploadOptions
 ): Promise<string[] | null> {
   try {
     const form = new FormData();
@@ -4103,6 +4749,12 @@ async function uploadImageBuffer(
     form.append('ocr', ocrEnabled ? 'true' : 'false');
     if (ocrEnabled && options?.tileMode) {
       form.append('tile', options.tileMode);
+    }
+    if (ocrEnabled && options?.bandCrop) {
+      form.append('bandCrop', JSON.stringify(options.bandCrop));
+    }
+    if (ocrEnabled && options?.bandCuts) {
+      form.append('bandCuts', JSON.stringify(options.bandCuts));
     }
 
     const response = await fetchWithTimeout(
@@ -4131,6 +4783,8 @@ async function uploadImageBuffer(
       return null;
     }
 
+    options?.onPayload?.(payload);
+
     return uploadedUrls;
   } catch (error) {
     logger.warn('OCR image upload error', {
@@ -4151,6 +4805,26 @@ async function cleanupUnusedOcrImages(
   const deleteUrl = getImageDeleteUrl();
   if (!deleteUrl) return;
 
+  const deletions = selectUnusedManagedImageUrls(ocrImageUrls, processedEvents);
+  if (deletions.length === 0) return;
+
+  let deleted = 0;
+  for (const url of deletions) {
+    const success = await deleteImageWithRetry(url, deleteUrl);
+    if (success) deleted++;
+  }
+
+  logger.info('OCR image cleanup summary', {
+    total: ocrImageUrls.length,
+    deleted,
+    skipped: deletions.length - deleted,
+  });
+}
+
+export function selectUnusedManagedImageUrls(
+  uploadedUrls: string[],
+  processedEvents: ProcessedEvent[]
+): string[] {
   const keep = new Set<string>();
   for (const event of processedEvents || []) {
     if ((event as any).icon) keep.add((event as any).icon);
@@ -4164,21 +4838,9 @@ async function cleanupUnusedOcrImages(
     }
   }
 
-  const deletions = ocrImageUrls.filter(url => url && !keep.has(url) && isManagedImageUrl(url));
-  if (deletions.length === 0) return;
-
-  let deleted = 0;
-  for (const url of deletions) {
-    const success = await deleteImageWithRetry(url, deleteUrl);
-    if (success) deleted++;
-  }
-
-  logger.info('OCR image cleanup summary', {
-    total: ocrImageUrls.length,
-    kept: keep.size,
-    deleted,
-    skipped: deletions.length - deleted,
-  });
+  return [...new Set(uploadedUrls.filter(url =>
+    Boolean(url) && !keep.has(url) && isManagedImageUrl(url)
+  ))];
 }
 
 async function deleteImageWithRetry(imageUrl: string, deleteUrl: string): Promise<boolean> {
@@ -4319,8 +4981,10 @@ function normalizeImageUrls(urls: string[], maxCount: number): string[] {
   for (const raw of urls || []) {
     const trimmed = String(raw || '').trim();
     if (!trimmed) continue;
-    if (!/^https?:\/\//i.test(trimmed)) continue;
-    if (!looksLikeImageUrl(trimmed)) continue;
+    const localTrialImage = process.env.PARSER_DRY_RUN_LOCAL_IMAGES === 'true' &&
+      /^data:image\/(?:jpeg|png|webp|gif);base64,/i.test(trimmed);
+    if (!localTrialImage && !/^https?:\/\//i.test(trimmed)) continue;
+    if (!localTrialImage && !looksLikeImageUrl(trimmed)) continue;
     unique.add(trimmed);
     if (unique.size >= maxCount) break;
   }
@@ -4364,7 +5028,7 @@ function registerTileMapping(urls: string[]): void {
   if (!urls || urls.length < 2) return;
   const baseUrl = urls[0];
   for (const tileUrl of urls.slice(1)) {
-    if (tileUrl) ocrTileBaseMap.set(tileUrl, baseUrl);
+    if (tileUrl) currentImageMaps().ocrTileBaseMap.set(tileUrl, baseUrl);
   }
 }
 
@@ -4374,7 +5038,7 @@ function registerSourceMapping(sourceUrl: string, uploadedUrls: string[]): void 
   for (const uploadedUrl of uploadedUrls) {
     const managedUrl = String(uploadedUrl || '').trim();
     if (!managedUrl) continue;
-    ocrUploadedSourceMap.set(managedUrl, source);
+    currentImageMaps().ocrUploadedSourceMap.set(managedUrl, source);
   }
 }
 
@@ -4382,12 +5046,12 @@ function registerDisplayMapping(sourceUrl: string, managedUrl: string): void {
   const source = String(sourceUrl || '').trim();
   const managed = String(managedUrl || '').trim();
   if (!source || !managed || !isManagedImageUrl(managed)) return;
-  sourceManagedImageMap.set(source, managed);
+  currentImageMaps().sourceManagedImageMap.set(source, managed);
 }
 
 function mapOcrImageUrlToBase(url: string): string {
   if (!url) return url;
-  return ocrTileBaseMap.get(url) || url;
+  return currentImageMaps().ocrTileBaseMap.get(url) || url;
 }
 
 function mapOcrImageUrlToManaged(url: string): string {
@@ -4396,27 +5060,29 @@ function mapOcrImageUrlToManaged(url: string): string {
 
   // Already managed: prefer mapped display image when this is an OCR upload.
   if (isManagedImageUrl(input)) {
-    const sourceFromManaged = ocrUploadedSourceMap.get(input);
+    const sourceFromManaged = currentImageMaps().ocrUploadedSourceMap.get(input);
     if (sourceFromManaged) {
-      const mapped = sourceManagedImageMap.get(sourceFromManaged);
+      const mapped = currentImageMaps().sourceManagedImageMap.get(sourceFromManaged);
       if (mapped && isManagedImageUrl(mapped)) return mapped;
     }
-    return input;
+    // An uploaded OCR crop is not safe as an event image if its source display
+    // upload failed. Only unrelated managed URLs (e.g. ticket art) pass through.
+    return currentImageMaps().ocrTileBaseMap.has(input) || sourceFromManaged ? '' : input;
   }
 
   // Source URL directly from extraction.
-  const mappedDirect = sourceManagedImageMap.get(input);
+  const mappedDirect = currentImageMaps().sourceManagedImageMap.get(input);
   if (mappedDirect && isManagedImageUrl(mappedDirect)) return mappedDirect;
 
   // OCR uploaded URL -> source URL -> managed display URL.
-  const sourceUrl = ocrUploadedSourceMap.get(input);
+  const sourceUrl = currentImageMaps().ocrUploadedSourceMap.get(input);
   if (sourceUrl) {
-    const mappedFromSource = sourceManagedImageMap.get(sourceUrl);
+    const mappedFromSource = currentImageMaps().sourceManagedImageMap.get(sourceUrl);
     if (mappedFromSource && isManagedImageUrl(mappedFromSource)) return mappedFromSource;
   }
 
   // OCR tile URL -> base OCR URL -> source URL -> managed display URL.
-  const baseUrl = ocrTileBaseMap.get(input);
+  const baseUrl = currentImageMaps().ocrTileBaseMap.get(input);
   if (baseUrl && baseUrl !== input) {
     const mappedFromBase = mapOcrImageUrlToManaged(baseUrl);
     if (mappedFromBase) return mappedFromBase;
@@ -4453,7 +5119,7 @@ async function buildOcrDebugSnapshot(
   combinedText: string,
   config: ParsingConfig
 ): Promise<OcrDebugSnapshot> {
-  const tileUrls = (uploadedUrls || []).filter(url => ocrTileBaseMap.has(url));
+  const tileUrls = (uploadedUrls || []).filter(url => currentImageMaps().ocrTileBaseMap.has(url));
   const tileBaseMap: Record<string, string> = {};
   for (const tileUrl of tileUrls) {
     const base = mapOcrImageUrlToBase(tileUrl);

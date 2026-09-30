@@ -80,6 +80,12 @@ export interface GptUsageRecord {
 export interface ParseStageArtifactsSnapshot {
   source: 'live' | 'replay';
   contentType?: ContentType;
+  imageFrameManifest?: Array<{
+    frameIndex: number;
+    sourceGalleryIndex: number;
+    kind: 'whole' | 'calendar_band';
+    region?: { left: number; top: number; width: number; height: number };
+  }>;
   stage3Items?: ExtractedItem[];
   stage4Items?: ExtractedItem[];
   stage37TicketUrl?: string;
@@ -130,8 +136,15 @@ export interface ParsingConfig {
   gptUsageHandler?: (usage: GptUsageRecord) => void | Promise<void>;
   stageArtifactsHandler?: (snapshot: ParseStageArtifactsSnapshot) => void | Promise<void>;
   replayArtifacts?: Stage45ReplayArtifacts;
+  stage1ModelOverride?: string;
+  stage2ModelOverride?: string;
+  stage3ModelOverride?: string;
+  stage3ReasoningEffort?: 'none' | 'low' | 'medium' | 'high' | 'xhigh' | 'max';
+  stage3ImageDetail?: 'low' | 'high' | 'original' | 'auto';
+  lunaCalendarLiteralSourcePrompt?: boolean;
   stage4ModelOverride?: string;
   stage5ModelOverride?: string;
+  lunaCanaryBypass?: boolean;
 }
 
 export const DEFAULT_PARSING_CONFIG: ParsingConfig = {
@@ -491,7 +504,7 @@ export interface TimeResolution {
   endFromHours?: 'to_close' | 'category_default' | 'duration_default';
   startFromFacebookEvent?: boolean;
   endFromFacebookEvent?: 'dateTimeSentence' | 'duration';
-  reason?: 'no_place_match' | 'no_hours' | 'no_date';
+  reason?: 'no_place_match' | 'no_hours' | 'no_date' | 'calendar_time_not_advertised';
 }
 
 export interface TimeResolvedEvent extends FormattedEvent {

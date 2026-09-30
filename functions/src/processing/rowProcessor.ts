@@ -860,8 +860,13 @@ function normalizedVenueNamesForResolution(params: {
   canonicalVenueName?: unknown;
   venueAliases?: unknown;
 }): Set<string> {
+  const canonicalName = String(params.canonicalVenueName || '').trim();
+  const canonicalBaseName = canonicalName.includes('|')
+    ? canonicalName.split('|')[0].trim()
+    : '';
   return new Set([
-    normalizeVenueName(String(params.canonicalVenueName || '').trim()),
+    normalizeVenueName(canonicalName),
+    canonicalBaseName ? normalizeVenueName(canonicalBaseName) : '',
     ...(Array.isArray(params.venueAliases)
       ? params.venueAliases.map((value) => normalizeVenueName(String(value || '').trim()))
       : []),
@@ -2218,10 +2223,14 @@ function mergeStageArtifactsSnapshot(
   const stage4Items = Array.isArray(incoming.stage4Items)
     ? deepCloneJson(incoming.stage4Items)
     : base?.stage4Items;
+  const imageFrameManifest = Array.isArray(incoming.imageFrameManifest)
+    ? deepCloneJson(incoming.imageFrameManifest)
+    : base?.imageFrameManifest;
 
   return {
     source,
     contentType,
+    imageFrameManifest,
     stage3Items,
     stage4Items,
     stage37TicketUrl,
@@ -2244,6 +2253,7 @@ function sanitizeStageArtifactsSnapshot(
   return {
     source: snapshot.source,
     contentType: snapshot.contentType,
+    imageFrameManifest: snapshot.imageFrameManifest?.slice(0, 64),
     stage37TicketUrl: snapshot.stage37TicketUrl,
     stage3Items: truncateItems(snapshot.stage3Items) as ParseStageArtifactsSnapshot['stage3Items'],
     stage4Items: truncateItems(snapshot.stage4Items) as ParseStageArtifactsSnapshot['stage4Items'],
@@ -3142,7 +3152,7 @@ export async function processRow(
         result.error = skipDetail ? `${skipReason}: ${skipDetail}` : skipReason;
         batchManager.markRowSkipped(rowIndex, skipReason);
 
-        if (enableSnapshots) {
+        if (enableSnapshots || parserSkipReason?.reason === 'Luna canary requires source review') {
           const state = batchManager.getState();
           const persistedStageArtifacts = enableStageArtifacts
             ? sanitizeStageArtifactsSnapshot(stageArtifactsSnapshot)
@@ -4292,7 +4302,8 @@ async function processFullParserEvent(
   itemIndex: number,
   rowVenue: VenueData | null,
   establishment: string,
-  batchManager: BatchManager
+  batchManager: BatchManager,
+  previewOnly = false
 ): Promise<{
   created: boolean;
   updated: boolean;
@@ -4309,6 +4320,9 @@ async function processFullParserEvent(
   );
 
   if (!venue) {
+    if (previewOnly) {
+      throw new Error(`No venue resolved for dry write preview: ${String(item.name || '')}`);
+    }
     if (isCityLevelFacebookEventLocation(row)) {
       await queueCityLevelFacebookEventForReview({
         row,
@@ -4628,6 +4642,12 @@ async function processFullParserEvent(
     contextText: buildFamilyFriendlyScoringContext(row),
   }));
 
+  // Construct the real event payload, then stop before profile-image promotion,
+  // duplicate checks, and all Firestore writes during a local preview.
+  if (previewOnly) {
+    return { created: false, updated: false, isDuplicate: false, event: eventData };
+  }
+
   const canonicalIcon = await resolveCanonicalVenueIcon({
     venue,
     row,
@@ -4712,6 +4732,22 @@ async function processFullParserEvent(
   eventData.id = eventId;
 
   return { created: true, updated: false, isDuplicate: false, event: eventData };
+}
+
+export async function previewFullParserEventWritePayload(
+  item: ParserProcessedEvent,
+  row: RawRowData,
+  rowIndex: number,
+  itemIndex: number,
+  rowVenue: VenueData,
+  establishment: string
+): Promise<EventData> {
+  const result = await processFullParserEvent(
+    item, row, rowIndex, itemIndex, rowVenue, establishment,
+    {} as BatchManager, true
+  );
+  if (!result.event) throw new Error('Dry write preview produced no event payload');
+  return result.event;
 }
 
 /**

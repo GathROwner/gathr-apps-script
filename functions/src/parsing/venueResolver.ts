@@ -103,6 +103,7 @@ export async function resolveTimesWithOperatingHours(
 
   // Get posted time for fallback
   const postedHHMM = extractPostedTime(timestamp);
+  const postedDate = DateTime.fromISO(timestamp, { zone: cfg.timezone }).toFormat('yyyy-MM-dd');
 
   for (const event of formattedEvents) {
     try {
@@ -111,6 +112,7 @@ export async function resolveTimesWithOperatingHours(
         userName,
         partialAddress,
         postedHHMM,
+        postedDate,
         cfg,
         operatingHoursMemo
       );
@@ -135,6 +137,7 @@ async function resolveEventTimes(
   userName: string,
   partialAddress: string,
   postedHHMM: string,
+  postedDate: string,
   config: ParsingConfig,
   operatingHoursMemo: Map<string, Promise<OperatingHours | null>>
 ): Promise<TimeResolvedEvent> {
@@ -156,7 +159,19 @@ async function resolveEventTimes(
   // Check if we have a date to work with
   if (!event.startDate || event.startDate.trim() === '') {
     resolved.timeResolution.reason = 'no_date';
-    return applyFallbackTimes(resolved, event, postedHHMM);
+    return applyFallbackTimes(resolved, event, postedHHMM, postedDate);
+  }
+
+  // A future dated calendar cell with no printed time cannot gain a start
+  // from the venue's opening hours. That would turn an untimed offer into a
+  // timed event even if a cached venue-hours record happens to exist.
+  if (
+    needsStartTime &&
+    event._sourceType === 'calendar' &&
+    event.startDate !== postedDate
+  ) {
+    resolved.timeResolution.reason = 'calendar_time_not_advertised';
+    return resolved;
   }
 
   // Try to get venue operating hours
@@ -168,7 +183,7 @@ async function resolveEventTimes(
 
   if (!operatingHours) {
     resolved.timeResolution.reason = 'no_place_match';
-    return applyFallbackTimes(resolved, event, postedHHMM);
+    return applyFallbackTimes(resolved, event, postedHHMM, postedDate);
   }
 
   // Get the day of week for the event
@@ -181,7 +196,7 @@ async function resolveEventTimes(
 
   if (!dayHours || dayHours.closed) {
     resolved.timeResolution.reason = 'no_hours';
-    return applyFallbackTimes(resolved, event, postedHHMM);
+    return applyFallbackTimes(resolved, event, postedHHMM, postedDate);
   }
 
   // Mark that we used operating hours
@@ -285,7 +300,9 @@ async function getVenueOperatingHours(
         const detailsCoords = details?.location
           ? { latitude: details.location.lat, longitude: details.location.lng }
           : undefined;
-        await updateVenueOperatingHours(firestoreVenue.id, refreshed, existingPlaceId, detailsCoords);
+        if (process.env.PARSER_DRY_RUN_LOCAL_IMAGES !== 'true') {
+          await updateVenueOperatingHours(firestoreVenue.id, refreshed, existingPlaceId, detailsCoords);
+        }
         logger.debug(`Refreshed operating hours via Google Places details for "${venueName}"`);
         return refreshed;
       }
@@ -298,12 +315,14 @@ async function getVenueOperatingHours(
         const placeCoords = placeResult?.location
           ? { latitude: placeResult.location.lat, longitude: placeResult.location.lng }
           : undefined;
-        await updateVenueOperatingHours(
-          firestoreVenue.id,
-          operatingHours,
-          placeResult?.placeId || undefined,
-          placeCoords
-        );
+        if (process.env.PARSER_DRY_RUN_LOCAL_IMAGES !== 'true') {
+          await updateVenueOperatingHours(
+            firestoreVenue.id,
+            operatingHours,
+            placeResult?.placeId || undefined,
+            placeCoords
+          );
+        }
       }
       logger.debug(`Found operating hours via Google Places for "${venueName}"`);
       return operatingHours;
@@ -319,10 +338,11 @@ async function getVenueOperatingHours(
 /**
  * Apply fallback times when venue hours are unavailable
  */
-function applyFallbackTimes(
+export function applyFallbackTimes(
   resolved: TimeResolvedEvent,
   event: FormattedEvent,
-  postedHHMM: string
+  postedHHMM: string,
+  postedDate: string
 ): TimeResolvedEvent {
   const isSpecial =
     event.isFoodSpecial === 'Yes' ||
@@ -345,7 +365,8 @@ function applyFallbackTimes(
     (isSpecial || (isEventLikely && hasTodayCue)) &&
     !hasStartClock &&
     !hasExplicitStart &&
-    postedHHMM
+    postedHHMM &&
+    event.startDate === postedDate
   ) {
     resolved.startTime = postedHHMM;
 

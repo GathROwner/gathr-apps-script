@@ -133,6 +133,19 @@ test('uses the resolved venue address when the item names a known venue alias bu
   assert.equal(result, '2 Pownal Street 2nd Floor, Charlottetown, PE, Canada, Prince Edward Island');
 });
 
+test('uses the stored Baba venue address when the parser misreads its number and omits the city suffix', () => {
+  const result = resolveEventAddressForVenue({
+    itemAddress: '131 Great George St, Charlottetown, PE',
+    rowAddress: '181 Great George St, Charlottetown, PE C1A 4L1, Canada',
+    venueAddress: '181 Great George St, Charlottetown, PE C1A 4L1, Canada',
+    rowEstablishment: "Baba's Lounge",
+    canonicalVenueName: "Baba's Lounge | Charlottetown PE",
+    itemVenueName: "Baba's Lounge",
+  });
+
+  assert.equal(result, '181 Great George St, Charlottetown, PE C1A 4L1, Canada');
+});
+
 test('uses the Highland Storm venue address when a Holmans source-page address leaks into the parsed item', () => {
   const result = resolveEventAddressForVenue({
     itemAddress: '286 Fitzroy Street, Summerside, PE C1N 1J2, Canada',

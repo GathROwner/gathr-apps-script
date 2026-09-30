@@ -2,10 +2,12 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import {
+  applySpecialTimeFallbacks,
   enforceDateTimeCompleteness,
   extractExplicitTimeRangeForRegression,
 } from './postParser.js';
 import { TimeResolvedEvent } from './types.js';
+import { applyFallbackTimes, resolveTimesWithOperatingHours } from './venueResolver.js';
 
 function buildEvent(overrides: Partial<TimeResolvedEvent> = {}): TimeResolvedEvent {
   return {
@@ -34,6 +36,64 @@ function buildEvent(overrides: Partial<TimeResolvedEvent> = {}): TimeResolvedEve
     ...overrides,
   };
 }
+
+test('untimed future calendar offer does not inherit its post time', () => {
+  const offer = buildEvent({
+    isEvent: 'No',
+    isFoodSpecial: 'Yes',
+    category: 'Food Special',
+    name: '$6 pints with appetizer',
+    startDate: '2026-09-08',
+    endDate: '2026-09-08',
+    startTime: '',
+    endTime: '',
+    timeResolution: { hoursUsed: false },
+  });
+
+  const future = enforceDateTimeCompleteness(
+    applySpecialTimeFallbacks([offer], '2026-08-25T19:01:04.000Z', 'America/Halifax'),
+    '2026-08-25T19:01:04.000Z', 'America/Halifax'
+  );
+  assert.equal(future.length, 0);
+
+  const sameDay = enforceDateTimeCompleteness(
+    applySpecialTimeFallbacks(
+      [{ ...offer, startDate: '2026-08-25', endDate: '2026-08-25' }],
+      '2026-08-25T19:01:04.000Z', 'America/Halifax'
+    ),
+    '2026-08-25T19:01:04.000Z', 'America/Halifax'
+  );
+  assert.equal(sameDay.length, 1);
+  assert.equal(sameDay[0].startTime, '16:01');
+  assert.equal(sameDay[0].timeResolution?.startFromPostTime, true);
+});
+
+test('venue-hours fallback cannot date a future calendar offer from its post time', () => {
+  const offer = buildEvent({
+    isEvent: 'No', isFoodSpecial: 'Yes', category: 'Happy Hour',
+    startDate: '2026-09-08', endDate: '2026-09-08',
+    startTime: '', endTime: '', timeResolution: { hoursUsed: false },
+  });
+  const future = applyFallbackTimes({ ...offer }, offer, '16:01', '2026-08-25');
+  assert.equal(future.startTime, '');
+  const sameDay = { ...offer, startDate: '2026-08-25', endDate: '2026-08-25' };
+  const resolved = applyFallbackTimes({ ...sameDay }, sameDay, '16:01', '2026-08-25');
+  assert.equal(resolved.startTime, '16:01');
+  assert.equal(resolved.timeResolution?.startFromPostTime, true);
+});
+
+test('future untimed calendar offer does not inherit venue opening hours', async () => {
+  const offer = buildEvent({
+    isEvent: 'No', isFoodSpecial: 'Yes', category: 'Happy Hour',
+    startDate: '2026-09-08', endDate: '2026-09-08',
+    startTime: '', endTime: '', _sourceType: 'calendar',
+  });
+  const resolved = await resolveTimesWithOperatingHours(
+    [offer], "Baba's Lounge", '', '2026-08-25T19:01:04.000Z'
+  );
+  assert.equal(resolved[0].startTime, '');
+  assert.equal(resolved[0].timeResolution?.reason, 'calendar_time_not_advertised');
+});
 
 test('grouped workshop rows can override category-default close times using the next start time', () => {
   const resolved = enforceDateTimeCompleteness(

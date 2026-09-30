@@ -827,7 +827,17 @@ async function extractCalendarContent(
 ): Promise<CalendarItem[]> {
   logger.debug('Extracting calendar content', { imageCount: imageUrls.length });
 
-  const prompt = createCalendarExtractionPrompt(combinedText, userName, timestamp);
+  const model = config.stage3ModelOverride || resolveStageModel(config.gptModelReasoning, 'STAGE3_MODEL_OVERRIDE');
+  const lunaHighGrouping = model === 'gpt-6-luna' &&
+    ['high', 'xhigh'].includes(
+      String(config.stage3ReasoningEffort ||
+        process.env.STAGE3_COMPARISON_REASONING_EFFORT || 'none').trim().toLowerCase()
+    );
+  const literalSourceNames = model === 'gpt-6-luna' &&
+    (config.lunaCalendarLiteralSourcePrompt === true ||
+      parseBooleanEnv('LUNA_CALENDAR_LITERAL_SOURCE_PROMPT', false));
+  const prompt = createCalendarExtractionPrompt(combinedText, userName, timestamp,
+    lunaHighGrouping, model === 'gpt-6-luna', literalSourceNames);
 
   const response = await callGPT(prompt, imageUrls, config);
   let items: CalendarItem[] = [];
@@ -3431,6 +3441,8 @@ function createEventExtractionPrompt(
   return `Extract ONLY EVENTS (entertainment/activities) from this content. IGNORE all food/drink specials.
 
 - When a single session or workshop block lists multiple explicit dates/times (e.g., "Session 1: Jan 14 & 28, 6-8 pm"), emit a separate event object for each listed date/time pair instead of collapsing them into one. Only treat it as a recurring event if the language explicitly says "every" or "weekly" with a weekday.
+- For a named festival with shared admission, location, and hours, create one parent festival event per advertised day. Put its vendors, activities, and on-site stage timetable in that day's description. Do not turn each vendor, attraction, or stage act into a separate feed event unless it has a separate admission or clearly independent venue/event listing.
+- For a concert lineup in one time slot, create one event for the whole lineup and preserve every printed act in the name or description. Split only when the source gives distinct start times or independently advertised sessions.
 
 CONTENT:
 - Posted by: ${userName}
@@ -3506,6 +3518,7 @@ SERIES SPLITTING RULE:
 - If one post lists multiple named themed/program blocks under an umbrella heading, output one item per named block instead of one generic umbrella item.
 - If a named block has explicit Friday dates and explicit Saturday dates, output separate Friday and Saturday items for that named block.
 - Do not collapse multiple named sub-series into the umbrella title.
+- Exception: a festival's vendors, attractions, and on-site stage timetable belong to its parent festival event when they share its admission, location, and hours.
 
 VENUE EXTRACTION:
 - Look for hints that the event is at a different venue ("at [Location]")
@@ -3612,8 +3625,29 @@ Return pure JSON with specials and extraction reasoning.`;
 function createCalendarExtractionPrompt(
   combinedText: string,
   userName: string,
-  timestamp: string
+  timestamp: string,
+  groupFestivalDetails = false,
+  clarifyMeridiem = false,
+  literalSourceNames = false
 ): string {
+  const meridiemRule = clarifyMeridiem
+    ? '- A time lacking AM/PM is not automatically morning. Resolve the meridiem only when surrounding show context strongly supports it (for example, paired early and late evening performances); state that evidence in extractionReason. Otherwise keep the time ambiguous and say so. Never silently default to AM.\n'
+    : '';
+  const festivalGroupingRules = groupFestivalDetails ? `
+IMPORTANT (Festival flyers with one parent event):
+- If a festival lists food stalls, vendors, booths, rides, or attractions under its shared day/hours, create the festival item for each stated date and put those offerings in the matching festival description. Do not turn each offering into an event or copy the festival hours onto it.
+- Preserve day-specific exceptions (such as a Saturday-only vendor) only in that matching day's festival description. Never copy a Sunday-only offering into Saturday's item or a Saturday-only offering into Sunday's item.
+- Put named performances in an on-site stage schedule into that day's parent festival description, including their printed times. Create a separate feed event only if the source advertises independent admission or a distinct venue outside the parent festival.
+- Preserve printed performer names exactly. Do not replace a performer with a generic music theme.
+- An office closure, holiday observance, election date, or nominations notice is not an event unless the flyer explicitly advertises a public gathering or session for it.
+` : '';
+  const literalNameRules = literalSourceNames ? `
+SOURCE-COPY CHECK FOR DENSE POSTERS:
+- For each dated cell, copy the complete printed event and performer names into name, including connecting words, initials, numbers, ampersands, and unusual spellings. Do not autocorrect to a familiar band, shorten a name because the rest is in description, or invent words hidden by glare.
+- Read the matching image region again before returning each name. If letters remain unclear, say exactly which part is uncertain in extractionReason; do not silently substitute a likely name.
+- Keep text from adjacent posters outside the calendar boundary out of this calendar's items.
+- A time printed below a food or drink deal belongs to that deal. Do not assign it to a performance in the same cell unless the source also attaches that time to the performance.
+` : '';
   return `Extract ALL events and specials from this CALENDAR content, ensure you process all attached images.
 
 CONTENT:
@@ -3632,11 +3666,15 @@ IMPORTANT (Calendar grids with lineups):
 - Some entries may be faint or colored (e.g., purple/pink). Read colored text carefully.
 - Do NOT collapse repeated items into weekly recurrences. If the same class appears on multiple dates, output one item per date.
 - If a cell lists multiple sessions (e.g., "5pm & 6:30pm"), output separate items for each time.
-- Create ONE item per performance in the grid. Set name to the performer/act, not the series title.
+${meridiemRule}
+${literalNameRules}
+- Create one item per independently advertised event or time slot in the grid. When several acts share one cell and start time, they are one lineup event; preserve all act names in the name or description. Distinct sessions with different printed start times remain separate.
+- A line break inside a calendar cell is layout, not proof that a new act begins. Join consecutive lines into one performer name when the earlier line has no separating punctuation. Split a lineup only where the flyer prints a separator such as a comma, ampersand, plus sign, or distinct billing marker. Preserve the resulting names exactly; do not insert separators that are not printed.
 - Include the date (or day-of-week if that's all that's shown), start_time and end_time when present, and the stage/venue exactly as shown in the grid.
 - For lineup grids, set type="event" (do NOT use "special" unless there is an explicit price/discount).
 - Do NOT infer items from the caption if they do not appear in the image; only use caption to disambiguate dates when the grid shows day-of-week only.
 - If performer names in the image are unreadable, return no items and note "image_unreadable" in notes rather than guessing.
+${festivalGroupingRules}
 
 For each item found, extract:
 - name: Event/special name
@@ -3689,6 +3727,16 @@ CONTENT:
 
 This appears to be a schedule/lineup with multiple performances.
 Extract EVERY performance/event listed.
+
+FESTIVAL PARENT RULE:
+- When the schedule is printed inside one named festival with shared admission, location, and hours, create one festival event for each festival date. Put that day's stage timetable, vendors, and activities in its description. Do not publish each stage act, vendor, or attraction as a separate event unless it has independent admission or a separate venue outside the festival.
+- A photo of an activity is evidence about the parent festival, not a new event by itself.
+- A named concert series across two separately named public venues is not one shared-location festival event. When each performer has its own printed start time and a venue or stage column, extract one item per performer. Keep the performer name as the event name and its own stage/venue label; never combine the two venue columns into one venue or collapse four performances into one daily series item.
+
+DATE ANCHORING:
+- When the image says "this week" and gives weekdays without numeric dates, anchor those weekdays to the calendar week containing the post's local date in America/Halifax. Do not label them indefinite weekly recurrences.
+- If neither an explicit date nor a clear relative week anchor is present, leave date empty rather than assigning the post date to every item.
+- A tournament with meal and music under one advertised Saturday block is one event unless the source gives separate independent start times or admission.
 
 For each item found, extract:
 - name: Performer/event name
@@ -4186,10 +4234,21 @@ async function callGPT(
   }
 ): Promise<string> {
   const client = getOpenAIClient();
-  const model = resolveStageModel(config.gptModelReasoning, usageMeta.modelEnvVar);
-  const imageDetail = resolveImageDetail(usageMeta.imageDetailEnvVar, 'high');
+  const model = config.stage3ModelOverride || resolveStageModel(config.gptModelReasoning, usageMeta.modelEnvVar);
+  const isGpt6TrialModel = model === 'gpt-6-luna' || model === 'gpt-6-sol';
+  const imageDetail = config.stage3ImageDetail || (isGpt6TrialModel
+    ? resolveImageDetail(usageMeta.imageDetailEnvVar, 'high', true)
+    : resolveImageDetail(usageMeta.imageDetailEnvVar, 'high'));
+  const comparisonEffort = String(
+    config.stage3ReasoningEffort || process.env.STAGE3_COMPARISON_REASONING_EFFORT ||
+    (model === 'gpt-6-luna' ? 'none' : 'medium')
+  ).trim().toLowerCase();
+  if (isGpt6TrialModel && !['none', 'low', 'medium', 'high', 'xhigh', 'max'].includes(comparisonEffort)) {
+    throw new Error(`Unsupported STAGE3_COMPARISON_REASONING_EFFORT: ${comparisonEffort}`);
+  }
 
-  const isGpt5Model = (value: string): boolean => value.startsWith('gpt-5');
+  const usesResponsesApi = (value: string): boolean =>
+    value.startsWith('gpt-5') || value === 'gpt-6-luna' || value === 'gpt-6-sol';
   const maxOutputTokens = 32000;
   const MIN_OUTPUT_TOKENS = 512;
 
@@ -4311,6 +4370,7 @@ async function callGPT(
       model,
       input: [{ role: 'user', content }],
       max_output_tokens: outputTokens,
+      ...(isGpt6TrialModel ? { reasoning: { effort: comparisonEffort as 'none' | 'low' | 'medium' | 'high' | 'xhigh' | 'max' } } : {}),
     });
     const durationMs = Date.now() - callStart;
 
