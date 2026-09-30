@@ -3894,22 +3894,43 @@ async function findFirstFullParserVenueMatch(params: {
   for (const candidate of params.candidates) {
     const itemMatchStart = Date.now();
     const itemMatch = await params.matcher(candidate, undefined, params.context);
+    const accepted = Boolean(itemMatch.isMatch && itemMatch.matchedVenue &&
+      fuzzyLocationSuffixMatchHasVenueIdentity(candidate, itemMatch));
     logTiming('venue_match_item', itemMatchStart, {
       rowIndex: params.rowIndex,
       candidateVenue: candidate,
       hasFacebookUrl: false,
-      matched: itemMatch.isMatch,
+      matched: accepted,
+      providerMatched: itemMatch.isMatch,
+      matchType: itemMatch.matchType,
       parserMode: 'full5stage',
       reason: params.reason,
       regionHint: params.context?.regionHint || '',
       cityHint: params.context?.cityHint || '',
     });
-    if (itemMatch.isMatch && itemMatch.matchedVenue) {
+    if (accepted && itemMatch.matchedVenue) {
       return itemMatch.matchedVenue;
     }
   }
 
   return null;
+}
+
+function fuzzyLocationSuffixMatchHasVenueIdentity(candidate: string, match: MatchInfo): boolean {
+  if (match.matchType !== 'fuzzy' || !candidate.includes(',') || !match.matchedVenue) return true;
+  const venuePart = normalizeVenueName(candidate.split(',')[0] || '');
+  const genericWords = new Set([
+    'the', 'and', 'studio', 'hall', 'club', 'centre', 'center', 'restaurant',
+    'cafe', 'coffee', 'bar', 'theatre', 'theater', 'market', 'stage', 'arena',
+    'park', 'community', 'events', 'event',
+  ]);
+  const identityWords = venuePart.split(/\s+/).filter(word =>
+    word.length >= 4 && !genericWords.has(word));
+  if (identityWords.length === 0) return false;
+  return Array.from(normalizedVenueNamesForVenue(match.matchedVenue)).some(name => {
+    const nameWords = new Set(name.split(/\s+/));
+    return identityWords.some(word => nameWords.has(word));
+  });
 }
 
 function normalizeKnownVenueOverrideLocation(value: unknown): string {

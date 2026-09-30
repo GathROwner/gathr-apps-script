@@ -79,6 +79,43 @@ const cornwallOntarioLibraryVenue: VenueData = {
   province: 'ON',
 };
 
+test('a city suffix cannot fuzzy-match a different venue in that city', async () => {
+  const row = {
+    uniqueId: 'seawalk-caption-pilot', text: 'Fall Workshops', mediaUrls: [],
+    pageName: 'Central Coastal Drive PEI', userName: 'Central Coastal Drive PEI',
+    timestamp: '2026-09-29T19:22:31.000Z',
+  } as RawRowData;
+  const item = {
+    name: 'Painted Pumpkins', establishment: 'Seawalk Studio, North Rustico',
+    venue: 'Seawalk Studio, North Rustico',
+  } as ParserProcessedEvent;
+  const lionsClub = {
+    id: 'north-rustico-lions-club', name: 'North Rustico Lions Club',
+    normalizedName: 'north rustico lions club',
+    aliases: ['North Rustico Lions Club'],
+  } as VenueData;
+  const matcher = async (candidate: string): Promise<MatchInfo> =>
+    candidate === 'Seawalk Studio, North Rustico'
+      ? { isMatch: true, matchType: 'fuzzy', similarity: 0.894, matchedVenue: lionsClub }
+      : { isMatch: false, matchType: 'none', similarity: 0 };
+  const resolved = await resolveVenueForFullParserEventWithMatcherForRegression({
+    item, row, rowVenue: null, establishment: row.userName, rowIndex: 149, matcher,
+  });
+  assert.equal(resolved, null);
+
+  const seawalk = { id: 'seawalk-studio', name: 'Seawalk Studio',
+    normalizedName: 'seawalk studio', aliases: [] } as VenueData;
+  const resolvedAfterVenueExists = await resolveVenueForFullParserEventWithMatcherForRegression({
+    item, row, rowVenue: null, establishment: row.userName, rowIndex: 149,
+    matcher: async (candidate) => candidate === 'Seawalk Studio, North Rustico'
+      ? { isMatch: true, matchType: 'fuzzy', similarity: 0.9, matchedVenue: lionsClub }
+      : candidate === 'Seawalk Studio'
+        ? { isMatch: true, matchType: 'exact', similarity: 1, matchedVenue: seawalk }
+        : { isMatch: false, matchType: 'none', similarity: 0 },
+  });
+  assert.equal(resolvedAfterVenueExists?.id, seawalk.id);
+});
+
 test('an exact parsed street address resolves a known venue before a broad city label', async () => {
   const resolved = await resolveVenueForFullParserEventWithMatcherForRegression({
     item: {
