@@ -28,6 +28,7 @@ If a pilot causes trouble, remove its exact ID from `LUNA_CANARY_POST_IDS` or se
 
 ## Open gates
 
-- No current post has been source-validated for the exact-ID live pilot. An October lineup snapshot appeared to have media metadata but its prior parse reported no usable image; do not select it without recovering and inspecting that image.
+- An October lineup snapshot appeared to have media metadata but its prior parse reported no usable image; do not select it without recovering and inspecting that image.
+- A source-verified Seawalk Studio post was subsequently identified, but the Luna full-route dry run omitted its fifth, caption-only recurring event while the saved GPT-5.2 result retained it. Keep post `1715992940535525` out of the allowlist pending the correction in `luna-seawalk-pilot-gate-2026-09-30.md`.
 - The current private-share parser contains extra classification and photo-safety logic compared with the first trial branch. After prompt hardening, two identical Luna high dry runs on the February Factory poster produced 49 and 48 dated private entries. The second combined two separate February 7 listings and misread a February 21 DJ. Luna xhigh on the earlier prompt cost more without restoring four missing Friday late-night entries. Keep `LUNA_SHARED_CALENDAR_CANARY_ENABLED` off until this path passes source-grounded repeatability checks. See `luna-share-live-baseline-gate-2026-09-30.md` in the share release checkout for all six scored runs.
 - The four-band backend helper passed its three focused tests but remains undeployed. Reviewed crop coordinates and an authenticated Cloud Run deploy are still required before any four-band live pilot.
