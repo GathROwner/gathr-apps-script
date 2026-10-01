@@ -526,7 +526,7 @@ async function discoverDetailPageCandidates(
   // well as links discovered from a venue listing page.
   if (safePathname(pageUrl).split('/').filter(Boolean).length >= 2) {
     const directCandidate = parseDetailPageCandidate(pageUrl, pageHtml, yearHint);
-    if (directCandidate) {
+    if (directCandidate?.namedMealSeatings?.length === 2) {
       detailCandidates.set(`${directCandidate.sourceUrl}|${directCandidate.title}|${directCandidate.date || directCandidate.dateRangeStart || ''}`, directCandidate);
     }
   }

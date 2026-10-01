@@ -205,6 +205,24 @@ test('explicit lunch and dinner seatings split one website-backed gallery event 
   }
 });
 
+test('ordinary direct detail pages do not enter the special two-seating path', async () => {
+  const url = 'https://example.org/events/ordinary-show';
+  const restoreFetch = installFetchMap({
+    [url]: htmlResponse('<html><body><h1>Ordinary Show</h1><p>October 2 at 7:00 p.m.</p></body></html>'),
+  });
+  try {
+    const result = await enrichEventsFromVenueWebsite(
+      [buildEventItem({ name: 'Ordinary Show', date: '2026-10-02', startTime: '' })],
+      `Details: ${url}`, '', '2026-10-01T12:00:00.000Z',
+      undefined, DEFAULT_PARSING_CONFIG
+    );
+    assert.equal(result.items.length, 1);
+    assert.equal(result.summary.appliedCount, 0);
+  } finally {
+    restoreFetch();
+  }
+});
+
 test('Tivoli-style website follow-up attempts the venue site but fails closed when no showtimes exist on detail pages', async () => {
   const restoreFetch = installFetchMap({
     'https://tivolicinema.com/': htmlResponse(
