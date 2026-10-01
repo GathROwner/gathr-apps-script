@@ -43,6 +43,7 @@ import { enrichEventsFromVenueWebsite } from './websiteDetailEnricher.js';
 import { performSecondaryValidation } from './secondaryValidator.js';
 import { performFinalFormatting } from './finalFormatter.js';
 import { reconcileCaptionOnlyWeeklyEvents } from './captionOnlyWeekly.js';
+import { reconcileRaceSchedule } from './raceScheduleReconciler.js';
 import { resolveTimesWithOperatingHours } from './venueResolver.js';
 import { shouldHoldUndatedStandingSchedule, shouldRetrySeasonalLeagueWithLegacy,
   isSelectedLunaCanaryPost,
@@ -2291,21 +2292,34 @@ async function parsePostDataCore(
       validation.imageAnalysis || [],
       lunaAnalysisFrames
     );
+    const raceReconciliation = lunaCanarySelected
+      ? reconcileRaceSchedule(processedEvents, input.combinedText)
+      : { events: processedEvents, applied: false, foldedCount: 0,
+          correctedStart: false, restoredRegistrationUrl: false };
+    if (raceReconciliation.applied) {
+      logger.info('Luna race schedule source reconciliation', {
+        postId,
+        foldedCount: raceReconciliation.foldedCount,
+        correctedStart: raceReconciliation.correctedStart,
+        restoredRegistrationUrl: raceReconciliation.restoredRegistrationUrl,
+      });
+    }
+    const reconciledEvents = raceReconciliation.events;
 
-    if (lunaCanarySelected && hasMalformedLunaEventTitle(processedEvents)) {
+    if (lunaCanarySelected && hasMalformedLunaEventTitle(reconciledEvents)) {
       return retryCanaryWithLegacy('malformed_final_event_title');
     }
 
     if (bandRules.length > 0) {
       const missingFinalSlots = findMissingExpectedCalendarSlotsInFinalEvents(
-        processedEvents, bandRules.flatMap(rule => rule.expectedSlots)
+        reconciledEvents, bandRules.flatMap(rule => rule.expectedSlots)
       );
       if (missingFinalSlots.length > 0) {
         return retryCanaryWithLegacy('calendar_band_final_missing_expected_slots',
           missingFinalSlots.join(','));
       }
       const missingFinalNames = findMissingExpectedCalendarNamesInFinalEvents(
-        processedEvents, bandRules.flatMap(rule =>
+        reconciledEvents, bandRules.flatMap(rule =>
           (rule.expectedNames || []).filter(entry => entry.requireFinal))
       );
       if (missingFinalNames.length > 0) {
@@ -2314,15 +2328,15 @@ async function parsePostDataCore(
       }
     }
 
-    if (lunaCanarySelected) await cleanupCanaryGeneratedImages(processedEvents);
-    else await cleanupUnusedOcrImages(Array.from(cleanupImageUrls), processedEvents);
+    if (lunaCanarySelected) await cleanupCanaryGeneratedImages(reconciledEvents);
+    else await cleanupUnusedOcrImages(Array.from(cleanupImageUrls), reconciledEvents);
 
-    logger.info(`parsePostData: Completed. Final events: ${processedEvents.length}`);
+    logger.info(`parsePostData: Completed. Final events: ${reconciledEvents.length}`);
     logTiming('parse_total', parseStart, {
       postId,
-      finalCount: processedEvents.length,
+      finalCount: reconciledEvents.length,
     });
-    return processedEvents;
+    return reconciledEvents;
   } catch (error) {
     logger.error('parsePostData: Error in parsing system', error);
     if (lunaCanarySelected) return retryCanaryWithLegacy('pipeline_exception');
