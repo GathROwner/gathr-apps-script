@@ -3831,18 +3831,21 @@ export function shouldPreferAnchoredScheduleTextParserForRegression(
   return shouldPreferAnchoredScheduleTextParser(combinedText, scheduleItems);
 }
 
-function createOcrDebugPrompt(imageUrls: string[]): string {
-  const list = imageUrls.map((url, idx) => `${idx + 1}. ${url}`).join('\n');
-  return `You are an OCR engine. Extract all visible text from each image.
+export function createOcrDebugPrompt(imageUrls: string[]): string {
+  // Images are attached as image parts by callGPT. OCR preprocessing can
+  // produce data URLs; listing them in text bills the entire base64 payload
+  // as prompt tokens without adding any visual information.
+  const list = imageUrls.map((_, idx) => `${idx + 1}. Attached image ${idx + 1}`).join('\n');
+  return `You are an OCR engine. Extract all visible text from each attached image.
 Do not infer or paraphrase. Preserve line breaks.
 
-IMAGE URLS:
+IMAGES IN ATTACHMENT ORDER:
 ${list}
 
 Return ONLY valid JSON in this exact shape:
 {
   "images": [
-    { "index": 1, "url": "<url>", "text": "<all text from image>" }
+    { "index": 1, "text": "<all text from image>" }
   ],
   "notes": ""
 }
