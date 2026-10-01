@@ -1,0 +1,13 @@
+{
+  "frozenAtUtc": "2026-10-01T23:12:00Z",
+  "purpose": "Current selected-row Luna high regression cohort; source expectations recorded before these replays",
+  "dryRunOnly": true,
+  "cases": [
+    {"key":"hunters","fileId":"1um-iVMpR_c0xhUimqoOqEMx3tXY0l2Qj","row":318,"postId":"1551142473699637","source":"four-day poster","expectedCount":5,"critical":"Five distinct printed date/start slots; managed poster retained","legacyCostUsd":0.03795,"baseline":"docs/luna-diverse-selected-row-canaries-2026-10-01.md"},
+    {"key":"downtown","fileId":"1um-iVMpR_c0xhUimqoOqEMx3tXY0l2Qj","row":30,"postId":"1550728650428000","source":"long caption","expectedCount":28,"critical":"All 28 printed date/start/title slots; source 2 a.m. typo must not be silently fixed","legacyCostUsd":0.01537,"baseline":"docs/luna-diverse-selected-row-canaries-2026-10-01.md"},
+    {"key":"clamdiggers","fileId":"1um-iVMpR_c0xhUimqoOqEMx3tXY0l2Qj","row":94,"postId":"1941319207262021","source":"five-image gallery and linked page","expectedCount":2,"critical":"Separate 12:00–14:00 lunch and 18:00–21:00 dinner; full managed gallery and ticket URL","legacyCostUsd":0.08408,"baseline":"docs/luna-diverse-selected-row-canaries-2026-10-01.md"},
+    {"key":"pints","fileId":"1YVXjUfU15dcdBwtuIR7PyJktBfR-gjGD","row":273,"postId":"122142962361157304","source":"three-image festival gallery","expectedCount":2,"critical":"Onsite festival plus separate offsite 12:00–17:00 vendors market; proper source image","legacyCostUsd":0.06910,"baseline":"docs/luna-rollout-gate-2026-10-01.md"},
+    {"key":"cornfest","fileId":"1yjqqEOctulJcObGboRVelF0ySiiMaEXj","row":0,"postId":"1547968420692186","source":"dense four-image gallery","expectedCount":15,"critical":"All 15 timed slots including Sunday HACHE, corn shucking, and BBQ; 9/6 source-image mapping","legacyCostUsd":0.09910,"baseline":"docs/luna-cornfest-production-canary-2026-10-01.md"},
+    {"key":"fox_trot","fileId":"1Dqh5RrrFEs2Q5bWMNLbRmQ8ogHEyCa27","row":37,"postId":"1506961248120710","source":"race caption with two gallery logos","expectedCount":2,"critical":"October 16 pickup 11:00–18:00 and October 17 race 11:00 at Victoria Park; registration URL and both images","legacyCostUsd":0.03427,"baseline":"artifacts/luna-fox-trot-2026-10-01/ground-truth.md"}
+  ]
+}

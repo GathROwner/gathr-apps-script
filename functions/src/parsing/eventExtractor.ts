@@ -968,8 +968,10 @@ export async function auditCalendarInventory(
   const timedPrimaryCount = items.filter(item =>
     /^\d{4}-\d{2}-\d{2}$/.test(item.date) &&
     Boolean(normalizeCalendarInventoryTime(item.startTime))).length;
-  if (!audit?.enabled || !Number.isFinite(audit.estimatedItemCount) ||
-      audit.estimatedItemCount - timedPrimaryCount < 2) return [];
+  // Stage 2 counts can underestimate a dense poster (Cornfest: 13 estimated,
+  // 12 extracted, 15 printed). Read the bounded dense frames regardless of
+  // that estimate; reconciliation still guards any proposed additions.
+  if (!audit?.enabled || !Number.isFinite(audit.estimatedItemCount)) return [];
   const maxFrames = Math.min(Math.max(Math.trunc(audit.maxFrames ?? 2), 1), 2);
   const frameIndices = [...new Set(audit.denseFrameIndices)]
     .filter(index => Number.isInteger(index) && index >= 0 &&
