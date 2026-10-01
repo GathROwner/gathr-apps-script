@@ -9,6 +9,12 @@
 
 ## Parser release evidence
 
+### October 1 source-time and linked-calendar hardening
+
+Commit `05e3590` was built and passed all 170 `functions/lib/parsing/*.test.js` tests. The two-image Cornwall weekly flyer completed two local managed-backend dry runs with nine correct source-flyer occurrences, nine valid payload previews, and stable 4/5 gallery image mapping. The `luna-rollout-gate-2026-10-01.md` note records the unequal legacy website-expansion comparison and remaining quality gates. No Firestore events were written by these dry runs.
+
+Before deployment, all 308 `processing_locks` were inspected; none was active (four old failed locks were non-active). The exact three-function Firebase dry run passed. The narrow real deployment then updated only `processDataset`, `processDatasetResume`, and `processDatasetSelectedRows` in `gathr-migrated` / `gathr-functions`. Latest ready revisions are `processdataset-00427-loj`, `processdatasetresume-00391-zot`, and `processdatasetselectedrows-00274-xiy`. Service environment name checks found `LUNA_CANARY_ENABLED`, `LUNA_CANARY_POST_IDS`, and `LUNA_FOUR_BANDS_ENABLED` absent from all three. Thus the scheduled parser remains on legacy. The immediate pre-deployment revisions were `processdataset-00426-lug`, `processdatasetresume-00390-rap`, and `processdatasetselectedrows-00273-tow`; source rollback remains commit `1437b32`. The Firebase CLI again warned that the package version of `firebase-functions` is outdated.
+
 - The pre-release parser source from the active Function source generation was downloaded and committed as `1437b32` before cherry-picking the tested Luna change. The live source differed from the earlier trial branch, so this merge preserved the deployed baseline.
 - The first merge commit was `0720438`, followed by Stage 3 duplicate-declaration repair `d4a8460` and a runtime Responses-routing repair `bc25deb`. The last repair replaced a stale `isGpt5Model` reference with `usesResponsesApi`; both the selected Luna route and unselected legacy route then completed a local five-stage dry smoke test with one event each.
 - `npm run build` and 35 focused parser tests passed. The final narrow Firebase dry run passed, then the three-function deployment completed. The Firebase CLI warned that the repository's `firebase-functions` package is outdated.

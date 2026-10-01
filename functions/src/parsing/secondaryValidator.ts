@@ -433,7 +433,8 @@ export async function performSecondaryValidation(
   rawData: ExtractedItem[],
   userName: string,
   timestamp: string,
-  config: Partial<ParsingConfig> = {}
+  config: Partial<ParsingConfig> = {},
+  skipLunaChunking = false
 ): Promise<ExtractedItem[]> {
   const cfg = { ...DEFAULT_PARSING_CONFIG, ...config };
 
@@ -444,6 +445,40 @@ export async function performSecondaryValidation(
     itemCount: originalStage3Count,
     userName,
   });
+
+  if (!skipLunaChunking && cfg.lunaCalendarLiteralSourcePrompt && rawData.length > 15) {
+    const chunks = partitionLunaValidationItems(rawData);
+    const kept: ExtractedItem[] = [];
+    const aggregate = {
+      _calendarDealAllDayNormalizationCount: 0,
+      _calendarDealAllDayOverrideCount: 0,
+      _happyHourNoPriceOverrideCount: 0,
+      _operatingHoursOnlyRejectCount: 0,
+    };
+    const fallbackReasons: string[] = [];
+    for (const [index, chunk] of chunks.entries()) {
+      const result = await performSecondaryValidation(chunk, userName, timestamp, config, true);
+      for (const item of result) {
+        item._pipelineTotalStage3 = originalStage3Count;
+        kept.push(item);
+      }
+      for (const key of Object.keys(aggregate)) {
+        aggregate[key] += Number((result as any)[key] || 0);
+      }
+      if ((result as any)._validationFallbackReason) {
+        fallbackReasons.push(`chunk_${index + 1}:${(result as any)._validationFallbackReason}`);
+      }
+    }
+    Object.assign(kept, aggregate);
+    if (fallbackReasons.length) (kept as any)._validationFallbackReason = fallbackReasons.join(',');
+    logger.info('Stage 4 Luna chunked validation summary', {
+      inputCount: rawData.length,
+      chunkCount: chunks.length,
+      keptCount: kept.length,
+      fallbackReasons,
+    });
+    return kept;
+  }
 
   const currentYear = new Date().getFullYear();
   const prompt = createValidationPrompt(rawData, userName, timestamp, currentYear);
@@ -657,6 +692,14 @@ export async function performSecondaryValidation(
     );
     return deterministicFallback.kept;
   }
+}
+
+export function partitionLunaValidationItems(items: ExtractedItem[]): ExtractedItem[][] {
+  const chunks: ExtractedItem[][] = [];
+  for (let start = 0; start < items.length; start += 15) {
+    chunks.push(items.slice(start, start + 15));
+  }
+  return chunks;
 }
 
 /**
@@ -961,7 +1004,30 @@ function normalizeJsonText(text: string): string {
 }
 
 function stripJsonComments(text: string): string {
-  return text.replace(/\/\/.*$/gm, '').replace(/\/\*[\s\S]*?\*\//g, '');
+  let result = '';
+  let inString = false;
+  for (let index = 0; index < text.length; index++) {
+    const char = text[index];
+    const next = text[index + 1];
+    if (char === '"' && !isQuoteEscaped(text, index)) inString = !inString;
+    if (!inString && char === '/' && next === '/') {
+      while (index < text.length && text[index] !== '\n') index++;
+      if (index < text.length) result += '\n';
+      continue;
+    }
+    if (!inString && char === '/' && next === '*') {
+      index += 2;
+      while (index < text.length && !(text[index] === '*' && text[index + 1] === '/')) index++;
+      index++;
+      continue;
+    }
+    result += char;
+  }
+  return result;
+}
+
+export function normalizeStage4JsonForRegression(text: string): string {
+  return normalizeJsonText(text);
 }
 
 /**
