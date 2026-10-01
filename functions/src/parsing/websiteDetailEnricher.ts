@@ -45,6 +45,7 @@ type WebsiteCandidate = {
   imageUrl?: string;
   sourceUrl: string;
   source: 'detail_page' | 'locarius_api';
+  namedMealSeatings?: Array<{ label: string; startTime: string; endTime: string }>;
 };
 
 const DEFAULT_TIMEOUT_MS = 12000;
@@ -210,7 +211,7 @@ export async function enrichEventsFromVenueWebsite(
       continue;
     }
 
-    const applied = applyWebsiteCandidates(inputItems, discoveredCandidates, summary);
+    const applied = applyWebsiteCandidates(inputItems, discoveredCandidates, summary, combinedText);
     if (applied.summary.appliedCount > 0) {
       return {
         items: applied.items,
@@ -521,6 +522,14 @@ async function discoverDetailPageCandidates(
   ]).slice(0, Math.max(1, cfg.maxListingPages));
 
   const detailCandidates = new Map<string, WebsiteCandidate>();
+  // A post may link straight to the event detail page. Inspect that page as
+  // well as links discovered from a venue listing page.
+  if (safePathname(pageUrl).split('/').filter(Boolean).length >= 2) {
+    const directCandidate = parseDetailPageCandidate(pageUrl, pageHtml, yearHint);
+    if (directCandidate) {
+      detailCandidates.set(`${directCandidate.sourceUrl}|${directCandidate.title}|${directCandidate.date || directCandidate.dateRangeStart || ''}`, directCandidate);
+    }
+  }
   for (const listingPage of listingPages) {
     summary.listingPagesAttempted += 1;
     const listingHtml =
@@ -645,7 +654,25 @@ function parseDetailPageCandidate(
     imageUrl,
     sourceUrl: detailUrl,
     source: 'detail_page',
+    namedMealSeatings: parseNamedMealSeatings(text),
   };
+}
+
+function parseNamedMealSeatings(text: string): Array<{ label: string; startTime: string; endTime: string }> {
+  // A page that explicitly sells lunch and dinner as separate experiences is
+  // not one continuous event. Keep this narrow; ordinary multi-act programs
+  // must not be split just because they print several time ranges.
+  if (!/two distinct culinary and cultural experiences/i.test(text)) return [];
+  const matches = Array.from(text.matchAll(
+    /\b(Garden Lunch Experience|Evening Dinner Experience)\s*\(\s*(\d{1,2}(?::\d{2})?\s*[ap]\.?m\.?)\s*[–—-]\s*(?:approx(?:imately)?\.?\s*)?(\d{1,2}(?::\d{2})?\s*[ap]\.?m\.?)\s*\)/gi
+  ));
+  const seatings = matches.map(match => ({
+    label: match[1],
+    startTime: parse12hTime(match[2]),
+    endTime: parse12hTime(match[3]),
+  })).filter(item => item.startTime && item.endTime);
+  const labels = new Set(seatings.map(item => item.label.toLowerCase()));
+  return seatings.length === 2 && labels.size === 2 ? seatings : [];
 }
 
 function extractDateInfoFromText(
@@ -741,7 +768,8 @@ function parse12hTime(raw: string): string {
 function applyWebsiteCandidates(
   items: ExtractedItem[],
   candidates: WebsiteCandidate[],
-  summary: VenueWebsiteEnrichmentSummary
+  summary: VenueWebsiteEnrichmentSummary,
+  combinedText: string
 ): { items: ExtractedItem[]; summary: VenueWebsiteEnrichmentSummary } {
   const nextItems = items.map((item) => {
     if (!shouldAttemptForItem(item)) return item;
@@ -803,6 +831,34 @@ function applyWebsiteCandidates(
     return item;
   });
 
+  if (nextItems.length === 1 && /\bboth\b[^.\n]{0,120}\blunch\b[^.\n]{0,100}\bdinner\b[^.\n]{0,100}\bseatings\b/i.test(combinedText)) {
+    const original = items[0];
+    const candidate = findBestCandidateForItem(original, candidates);
+    const seatings = candidate?.namedMealSeatings || [];
+    const initialStart = String(original.startTime || '').trim();
+    const linkedPage = String(candidate?.sourceUrl || '').replace(/\/$/, '');
+    const samePrintedDate = !candidate?.date || !original.date || candidate.date === original.date;
+    if (seatings.length === 2 && linkedPage && combinedText.includes(linkedPage) && samePrintedDate &&
+        (!hasUsableFieldValue(initialStart) || initialStart === seatings[0].startTime)) {
+      const base = nextItems[0];
+      const splitItems = seatings.map(seating => ({
+        ...base,
+        name: `${String(base.name || candidate?.title || '').replace(/\s+Live Performances$/i, '').trim()}: ${seating.label}`,
+        startTime: seating.startTime,
+        endTime: seating.endTime,
+        timeFlags: {
+          ...base.timeFlags,
+          start: { source: 'explicit', evidence: `venue_website:${candidate?.sourceUrl} ${seating.label}` },
+          end: { source: 'explicit', toClose: false, evidence: `venue_website:${candidate?.sourceUrl} ${seating.label}` },
+        },
+        extractionReason: `${String(base.extractionReason || '').trim()} | two named website seatings`,
+      })) as ExtractedItem[];
+      summary.appliedCount = 2;
+      summary.updatedFields.times = 2;
+      summary.reason = 'split_explicit_website_meal_seatings';
+      return { items: splitItems, summary };
+    }
+  }
   return { items: nextItems, summary };
 }
 

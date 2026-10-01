@@ -151,6 +151,60 @@ test('Trailside-style website follow-up recovers explicit start times from locar
   }
 });
 
+test('explicit lunch and dinner seatings split one website-backed gallery event while preserving source media', async () => {
+  const detailUrl = 'https://fallflavours.ca/signature-event/taste-of-georgetown-2/';
+  const restoreFetch = installFetchMap({
+    'https://fallflavours.ca/': htmlResponse(
+      `<html><body><a href="${detailUrl}">Taste of Georgetown</a></body></html>`
+    ),
+    [detailUrl]: htmlResponse(
+      '<html><head><meta property="og:title" content="Taste of Georgetown"></head><body>' +
+      '<h1>Taste of Georgetown</h1><p>Friday, October 2. Two distinct culinary and cultural experiences.</p>' +
+      '<p>Garden Lunch Experience (12:00 p.m. – approx. 2:00 p.m.)</p>' +
+      '<p>Evening Dinner Experience (6:00 p.m. – approx. 9:00 p.m.)</p></body></html>'
+    ),
+    'https://fallflavours.ca/signature-event/taste-of-georgetown-2': htmlResponse(
+      '<html><head><meta property="og:title" content="Taste of Georgetown"></head><body>' +
+      '<h1>Taste of Georgetown</h1><p>Friday, October 2. Two distinct culinary and cultural experiences.</p>' +
+      '<p>Garden Lunch Experience (12:00 p.m. – approx. 2:00 p.m.)</p>' +
+      '<p>Evening Dinner Experience (6:00 p.m. – approx. 9:00 p.m.)</p></body></html>'
+    ),
+  });
+
+  try {
+    const sourceItem = buildEventItem({
+      name: 'Taste of Georgetown Live Performances',
+      date: '2026-10-02',
+      startTime: '',
+      _sourceImageIndex: 2,
+    } as any);
+    const caption = `At both the lunch and the dinner seatings of Taste of Georgetown on October 2,` +
+      ` enjoy performances. Tickets on our website: ${detailUrl}`;
+    const result = await enrichEventsFromVenueWebsite(
+      [sourceItem], caption, '', '2026-10-01T12:00:00.000Z',
+      { name: 'Kings Playhouse', website: 'https://fallflavours.ca/' }, DEFAULT_PARSING_CONFIG
+    );
+    assert.equal(result.summary.reason, 'split_explicit_website_meal_seatings');
+    assert.deepEqual(result.items.map(item => [item.startTime, item.endTime]),
+      [['12:00', '14:00'], ['18:00', '21:00']]);
+    assert.deepEqual(result.items.map(item => (item as any)._sourceImageIndex), [2, 2]);
+    assert.equal(result.items.every(item => item.timeFlags?.end?.source === 'explicit'), true);
+    assert.deepEqual(result.items.map(item => item.name), [
+      'Taste of Georgetown: Garden Lunch Experience',
+      'Taste of Georgetown: Evening Dinner Experience',
+    ]);
+
+    const lunchOnly = await enrichEventsFromVenueWebsite(
+      [sourceItem], `Join us for lunch. Tickets available at ${detailUrl}`, '',
+      '2026-10-01T12:00:00.000Z',
+      { name: 'Kings Playhouse', website: 'https://fallflavours.ca/' }, DEFAULT_PARSING_CONFIG
+    );
+    assert.equal(lunchOnly.items.length, 1);
+  } finally {
+    restoreFetch();
+  }
+});
+
 test('Tivoli-style website follow-up attempts the venue site but fails closed when no showtimes exist on detail pages', async () => {
   const restoreFetch = installFetchMap({
     'https://tivolicinema.com/': htmlResponse(
