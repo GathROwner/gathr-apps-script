@@ -269,6 +269,8 @@ function hasDealBenefitSignal(text: string): boolean {
 function isLikelyCalendarDealCardSpecial(item: ExtractedItem | undefined): boolean {
   if (!item) return false;
   if (String((item as any)._sourceType || '').toLowerCase() !== 'calendar') return false;
+  // A printed start time identifies a timed listing, even when admission is free.
+  if (hasNonEmptyValue((item as any).startTime)) return false;
 
   const date = String((item as any).date || '').trim();
   if (!date || /^unknown$/i.test(date)) return false;
@@ -287,6 +289,12 @@ function isLikelyCalendarDealCardSpecial(item: ExtractedItem | undefined): boole
     combined
   );
   return !hasEventSignal;
+}
+
+export function isLikelyCalendarDealCardSpecialForRegression(
+  item: ExtractedItem | undefined
+): boolean {
+  return isLikelyCalendarDealCardSpecial(item);
 }
 
 function normalizeCalendarDealCardAsAllDaySpecial(

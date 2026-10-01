@@ -3680,6 +3680,7 @@ function createCalendarExtractionPrompt(
     : '';
   const festivalGroupingRules = groupFestivalDetails ? `
 IMPORTANT (Festival flyers with one parent event):
+- First check whether the source actually advertises one shared event at one venue with shared admission and hours. A town-wide festival schedule with separate venues, registrations, or independently timed activities is a collection of events; extract those activities separately. Do not hide one of those activities only in a festival-parent description.
 - If a festival lists food stalls, vendors, booths, rides, or attractions under its shared day/hours, create the festival item for each stated date and put those offerings in the matching festival description. Do not turn each offering into an event or copy the festival hours onto it.
 - Preserve day-specific exceptions (such as a Saturday-only vendor) only in that matching day's festival description. Never copy a Sunday-only offering into Saturday's item or a Saturday-only offering into Sunday's item.
 - Put named performances in an on-site stage schedule into that day's parent festival description, including their printed times. Create a separate feed event only if the source advertises independent admission or a distinct venue outside the parent festival.
@@ -3710,6 +3711,7 @@ This appears to be a calendar with multiple dates and activities.
 Extract EVERY event/special listed for EVERY date shown.
 
 IMPORTANT (Calendar grids with lineups):
+${clarifyMeridiem ? '- Before assigning a listing to a date, inspect whether the printed date label is above, below, or beside that listing in this image. Follow the visible cell boundaries and repeat that check for each row; do not assume the date label always precedes its listings. A cell can contain multiple separately timed listings.\n' : ''}
 - Images may include day-cell crops from the SAME calendar. Treat all images as parts of one calendar.
 - Some images may repeat or overlap; de-duplicate items and merge details across images.
 - You are given 1+ images; use the images as the PRIMARY source. Read (OCR) the text in the image(s).

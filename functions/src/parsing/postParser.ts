@@ -1796,7 +1796,7 @@ async function parsePostDataCore(
       });
       const stage3Start = Date.now();
       const stage3ExtractionText = bandRules.length > 0
-        ? `${extractionText}\n\nIMAGE FRAME LAYOUT FOR THIS POST: The first frame(s) may be other carousel images. Four consecutive, overlapping frames show one dense calendar from top to bottom. Inspect every calendar frame, including the final frame and its last week. Use each frame's printed date and time; merge overlap duplicates. The relevantImageIndex is the index of the frame containing the printed item, not its source gallery index. Copy performer names exactly as printed; do not infer a name from a photo or nearby entry.`
+        ? `${extractionText}\n\nIMAGE FRAME LAYOUT FOR THIS POST: The first frame(s) may be other carousel images. Four consecutive, overlapping frames show one dense calendar from top to bottom. Inspect every calendar frame, including the final frame and its last week. Determine whether each frame places date labels above, below, or beside their listings; assign every listing to its visible cell before extracting it, and do not skip a cell with multiple separately timed listings. Use each frame's printed date and time; merge overlap duplicates. The relevantImageIndex is the index of the frame containing the printed item, not its source gallery index. Copy performer names exactly as printed; do not infer a name from a photo or nearby entry.`
         : extractionText;
       let stage3Items = await extractContentByType(
         resolvedContentType,
