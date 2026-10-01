@@ -44,7 +44,8 @@ import { performSecondaryValidation } from './secondaryValidator.js';
 import { performFinalFormatting } from './finalFormatter.js';
 import { reconcileCaptionOnlyWeeklyEvents } from './captionOnlyWeekly.js';
 import { resolveTimesWithOperatingHours } from './venueResolver.js';
-import { shouldHoldUndatedStandingSchedule, isSelectedLunaCanaryPost,
+import { shouldHoldUndatedStandingSchedule, shouldRetrySeasonalLeagueWithLegacy,
+  isSelectedLunaCanaryPost,
   canRetryLunaCanaryWithLegacy, canaryGeneratedCleanupUrls,
   hasMalformedLunaEventTitle } from './lunaSafetyGate.js';
 import { parseBooleanEnv, parseNumberEnv, resolveStageModel } from './runtimeConfig.js';
@@ -1326,6 +1327,9 @@ async function parsePostDataCore(
     return legacyEvents.length > 0 ? legacyEvents
       : holdCalendarBandCanary('legacy_retry_no_items', reason);
   };
+  if (lunaCanarySelected && shouldRetrySeasonalLeagueWithLegacy(combinedText)) {
+    return retryCanaryWithLegacy('seasonal_league_recurrence_unreviewed');
+  }
   const modelRouter = resolveModelRouterConfig(cfg);
   if (lunaCanarySelected) {
     modelRouter.enabled = false;

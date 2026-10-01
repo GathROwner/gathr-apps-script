@@ -81,6 +81,8 @@ export async function enrichEventsFromCalendarLinks(
 
   const inputItems = Array.isArray(items) ? items : [];
   const cfg = resolveCalendarConfig(config);
+  const sourceAnchoredFlyer = Boolean(config.lunaCalendarLiteralSourcePrompt &&
+    inputItems.filter(item => /^20\d{2}-\d{2}-\d{2}$/.test(String(item.date || ''))).length >= 2);
   if (!cfg.enabled) {
     summary.reason = 'disabled';
     return { items: inputItems, summary };
@@ -148,7 +150,8 @@ export async function enrichEventsFromCalendarLinks(
       summary.windowEnd = dateWindow.end;
       summary.windowReason = dateWindow.reason;
     }
-    const feedUrls = collectFeedUrls(url, pageHtml, dateWindow);
+    const feedUrls = collectFeedUrls(url, pageHtml, dateWindow,
+      config.lunaCalendarLiteralSourcePrompt ? inputItems : [], sourceAnchoredFlyer);
     summary.attemptedDates += feedUrls.length;
     if (feedUrls.length === 0) continue;
 
@@ -163,8 +166,12 @@ export async function enrichEventsFromCalendarLinks(
       if (parsed.length > 0) scrapedForUrl.push(...parsed);
     }
 
-    if (scrapedForUrl.length > 0) {
-      mergedScrapedItems.push(...scrapedForUrl);
+    const scopedItems = sourceAnchoredFlyer
+      ? dedupeParsedItems(scrapedForUrl.filter(websiteItem => inputItems.some(flyerItem =>
+          isMatchingWebsiteItemForFlyer(flyerItem, websiteItem))))
+      : scrapedForUrl;
+    if (scopedItems.length > 0) {
+      mergedScrapedItems.push(...scopedItems);
       summary.usedUrl = url;
       // Use first successful calendar URL to keep Stage 3.8 bounded.
       break;
@@ -176,13 +183,22 @@ export async function enrichEventsFromCalendarLinks(
     return { items: inputItems, summary };
   }
 
-  const detailImageStats = await enrichDetailImagesForCalendarItems(mergedScrapedItems, cfg);
-  summary.detailPagesAttempted = detailImageStats.attempted;
-  summary.detailPagesFetched = detailImageStats.fetched;
-  summary.detailImagesExtracted = detailImageStats.extracted;
-  summary.detailImagesApplied = detailImageStats.applied;
+  if (!sourceAnchoredFlyer || usedVeeziCalendar) {
+    const detailImageStats = await enrichDetailImagesForCalendarItems(mergedScrapedItems, cfg);
+    summary.detailPagesAttempted = detailImageStats.attempted;
+    summary.detailPagesFetched = detailImageStats.fetched;
+    summary.detailImagesExtracted = detailImageStats.extracted;
+    summary.detailImagesApplied = detailImageStats.applied;
+  }
 
   summary.extractedCount = mergedScrapedItems.length;
+  if (sourceAnchoredFlyer && !usedVeeziCalendar) {
+    const corroboratedItems = inputItems.map(item => mergeWebsiteDetailsIntoFlyer(item, mergedScrapedItems));
+    summary.reason = 'corroborated_post_flyer_items';
+    summary.mergedCount = 0;
+    logger.info('Stage 3.8 summary', summary);
+    return { items: corroboratedItems, summary };
+  }
   const authoritativeMonths = new Set(mergedScrapedItems.map((item) =>
     String(item.date || '').slice(0, 7)
   ));
@@ -251,6 +267,7 @@ export function parseVeeziMonthItems(
       items.push({
         name, date: date.toFormat('yyyy-MM-dd'), startTime, endTime: '',
         venue: userName, price: '', description: '', recurringPattern: 'none',
+        relevantImageIndex: -1,
         extractionReason: `Linked cinema calendar showtime: ${pageUrl}`,
         _sourceType: 'event',
         ...(detailUrl ? { ticketLink: detailUrl } : {}),
@@ -546,15 +563,20 @@ function buildDateList(start: DateTime, end: DateTime, cap: number): string[] {
 function collectFeedUrls(
   pageUrl: string,
   html: string,
-  window: { start: string; end: string; dates: string[] }
+  window: { start: string; end: string; dates: string[] },
+  flyerItems: ExtractedItem[] = [],
+  sourceAnchored = false
 ): string[] {
   const set = new Set<string>();
+  const flyerDates = new Set(flyerItems.map(item => String(item.date || '').trim())
+    .filter(date => /^20\d{2}-\d{2}-\d{2}$/.test(date)).slice(0, 10));
   const add = (raw: string) => {
     const resolved = resolveRelativeUrl(raw, pageUrl);
     if (!resolved) return;
     const date = extractCurrentDate(resolved);
     if (!date) return;
-    if (date < window.start || date > window.end) return;
+    if (sourceAnchored ? !flyerDates.has(date)
+      : (date < window.start || date > window.end) && !flyerDates.has(date)) return;
     set.add(resolved);
   };
 
@@ -567,13 +589,21 @@ function collectFeedUrls(
 
   const drupalFeedPath = extractDrupalFeedPath(html);
   if (drupalFeedPath) {
-    for (const date of window.dates) {
+    for (const date of sourceAnchored ? flyerDates : new Set([...window.dates, ...flyerDates])) {
       const synthesized = buildFeedUrl(pageUrl, drupalFeedPath, date);
       if (synthesized) set.add(synthesized);
     }
   }
 
   return Array.from(set);
+}
+
+export function collectFeedUrlsForRegression(
+  pageUrl: string, html: string,
+  window: { start: string; end: string; dates: string[] },
+  flyerItems: ExtractedItem[], sourceAnchored = false
+): string[] {
+  return collectFeedUrls(pageUrl, html, window, flyerItems, sourceAnchored);
 }
 
 function extractDrupalFeedPath(html: string): string {
@@ -670,6 +700,7 @@ function parseDrupalFeedItems(
       venue: branch || userName || '',
       price: '',
       recurringPattern: 'none',
+      relevantImageIndex: -1,
       extractionReason: `Stage 3.8 linked calendar feed (${new URL(sourceUrl).hostname})`,
       _sourceType: 'event',
     };
@@ -679,6 +710,15 @@ function parseDrupalFeedItems(
   }
 
   return dedupeParsedItems(items);
+}
+
+export function parseDrupalFeedItemsForRegression(
+  html: string,
+  currentDate: string,
+  sourceUrl: string,
+  userName: string
+): ExtractedItem[] {
+  return parseDrupalFeedItems(html, currentDate, sourceUrl, userName);
 }
 
 function parseTimeRange(raw: string): { startTime: string; endTime: string } {
@@ -933,17 +973,121 @@ function hasValue(value: unknown): boolean {
 }
 
 function mergeWithoutDuplicates(base: ExtractedItem[], additions: ExtractedItem[]): ExtractedItem[] {
-  const out = [...base];
+  const out = base.map(item => corroborateAmbiguousFlyerTime(item, additions));
   const seen = new Set<string>();
-  for (const item of base) seen.add(itemKey(item));
+  for (const item of out) seen.add(itemKey(item));
 
   for (const item of additions) {
     const key = itemKey(item);
     if (!key || seen.has(key)) continue;
     seen.add(key);
-    out.push(item);
+    const matchingFlyerIndex = findMatchingFlyerImageIndex(out, item);
+    out.push(matchingFlyerIndex === null ? item : {
+      ...item,
+      relevantImageIndex: matchingFlyerIndex,
+    } as ExtractedItem);
   }
   return out;
+}
+
+function isMatchingWebsiteItemForFlyer(
+  flyerItem: ExtractedItem, websiteItem: ExtractedItem
+): boolean {
+  return String(flyerItem.date || '') === String(websiteItem.date || '') &&
+    calendarTitleSimilarity(String(flyerItem.name || ''), String(websiteItem.name || '')) >= 0.75;
+}
+
+function mergeWebsiteDetailsIntoFlyer(
+  flyerItem: ExtractedItem, websiteItems: ExtractedItem[]
+): ExtractedItem {
+  const matches = websiteItems.filter(item => isMatchingWebsiteItemForFlyer(flyerItem, item));
+  const corroborated = corroborateAmbiguousFlyerTime(flyerItem, matches);
+  if (matches.length !== 1) return corroborated;
+  const website = matches[0] as any;
+  const next = { ...corroborated } as any;
+  if (!String(next.startTime || '').trim()) next.startTime = website.startTime || '';
+  if (!String(next.endTime || '').trim()) next.endTime = website.endTime || '';
+  if (!String(next.description || '').trim()) next.description = website.description || '';
+  if (!String(next.ticketLink || '').trim()) next.ticketLink = website.ticketLink || '';
+  return next as ExtractedItem;
+}
+
+export function mergeWebsiteDetailsIntoFlyerForRegression(
+  flyerItems: ExtractedItem[], websiteItems: ExtractedItem[]
+): ExtractedItem[] {
+  return flyerItems.map(item => mergeWebsiteDetailsIntoFlyer(item, websiteItems));
+}
+
+function corroborateAmbiguousFlyerTime(
+  flyerItem: ExtractedItem, websiteItems: ExtractedItem[]
+): ExtractedItem {
+  const printedTime = String(flyerItem.startTime || '');
+  const evidence = `${printedTime} ${String((flyerItem as any).extractionReason || '')}`;
+  if (!/meridiem\s+unspecified|AM\s*\/\s*PM\s+unspecified|does\s+not\s+specify\s+AM\s+or\s+PM/i.test(evidence)) {
+    return flyerItem;
+  }
+  const matches = websiteItems.filter(websiteItem =>
+    String(websiteItem.date || '') === String(flyerItem.date || '') &&
+    /^\d{1,2}:\d{2}$/.test(String(websiteItem.startTime || '')) &&
+    calendarTitleSimilarity(String(flyerItem.name || ''), String(websiteItem.name || '')) >= 0.85
+  );
+  if (matches.length !== 1) return flyerItem;
+  return {
+    ...flyerItem,
+    startTime: matches[0].startTime,
+    endTime: flyerItem.endTime || matches[0].endTime,
+    extractionReason: `${String((flyerItem as any).extractionReason || '')} Time corroborated by linked calendar feed.`,
+  } as ExtractedItem;
+}
+
+function calendarTitleSimilarity(left: string, right: string): number {
+  const leftName = normalizeName(left);
+  const rightName = normalizeName(right);
+  if (!leftName || !rightName) return 0;
+  if (leftName === rightName) return 1;
+  if (Math.min(leftName.length, rightName.length) >= 12 &&
+      (leftName.includes(rightName) || rightName.includes(leftName))) return 0.9;
+  const leftTokens = new Set(leftName.split(' ').filter(Boolean));
+  const rightTokens = new Set(rightName.split(' ').filter(Boolean));
+  const shared = [...leftTokens].filter(token => rightTokens.has(token)).length;
+  return shared / Math.max(leftTokens.size, rightTokens.size);
+}
+
+function findMatchingFlyerImageIndex(base: ExtractedItem[], websiteItem: ExtractedItem): number | null {
+  const websiteName = normalizeName(String(websiteItem.name || ''));
+  const websiteDate = String(websiteItem.date || '').trim();
+  const websiteTime = normalizeComparableTime(String(websiteItem.startTime || ''));
+  if (!websiteDate || !websiteTime || websiteName.split(' ').length < 3) return null;
+
+  const matches = base.flatMap(item => {
+    const imageIndex = (item as any).relevantImageIndex;
+    if (!Number.isInteger(imageIndex) || imageIndex < 0 ||
+        String(item.date || '').trim() !== websiteDate ||
+        normalizeComparableTime(String(item.startTime || '')) !== websiteTime) return [];
+    const overlap = calendarTitleSimilarity(String(item.name || ''), websiteName);
+    return overlap >= 0.75 ? [{ imageIndex, overlap }] : [];
+  }).sort((a, b) => b.overlap - a.overlap);
+
+  return matches.length === 1 ||
+    (matches.length > 1 && matches[0].overlap - matches[1].overlap >= 0.15)
+    ? matches[0].imageIndex : null;
+}
+
+function normalizeComparableTime(raw: string): string {
+  const value = String(raw || '').trim();
+  const clock24 = value.match(/^(\d{1,2}):(\d{2})$/);
+  if (clock24) return `${String(Number(clock24[1])).padStart(2, '0')}:${clock24[2]}`;
+  const clock12 = value.match(/(\d{1,2})(?::(\d{2}))?\s*([ap])\.?m\.?/i);
+  if (!clock12) return '';
+  let hour = Number(clock12[1]) % 12;
+  if (clock12[3].toLowerCase() === 'p') hour += 12;
+  return `${String(hour).padStart(2, '0')}:${clock12[2] || '00'}`;
+}
+
+export function mergeCalendarFeedItemsForRegression(
+  flyerItems: ExtractedItem[], websiteItems: ExtractedItem[]
+): ExtractedItem[] {
+  return mergeWithoutDuplicates(flyerItems, websiteItems);
 }
 
 function dedupeParsedItems(items: ExtractedItem[]): ExtractedItem[] {

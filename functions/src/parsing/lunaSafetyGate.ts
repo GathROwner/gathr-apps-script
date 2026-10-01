@@ -37,6 +37,15 @@ export function canaryGeneratedCleanupUrls(candidates: string[], originals: stri
   return candidates.filter(url => Boolean(url) && !input.has(url));
 }
 
+/** Season-long weekday league boards need a reviewed recurrence window before Luna writes them. */
+export function shouldRetrySeasonalLeagueWithLegacy(sourceText: string): boolean {
+  const text = String(sourceText || '');
+  return /\bregular\s+season\b/i.test(text) &&
+    /\b(?:begins?|starts?)\b.{0,60}\bweek\s+of\b/i.test(text) &&
+    /\b(?:league|curling)\b/i.test(text) &&
+    /\bschedule\s+(?:is\s+)?below\b/i.test(text);
+}
+
 /** A prose paragraph in a title is a malformed extraction, not a publishable event name. */
 export function hasMalformedLunaEventTitle(
   events: Array<{ name?: string; eventName?: string }>

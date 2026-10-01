@@ -359,6 +359,14 @@ export function preserveValidatedItemSourceType(
     (nextItem as any)._sourceType = originalSourceType as ExtractedItem['_sourceType'];
   }
 
+  // The image-aware extraction stage selected the source frame. Validation
+  // may correct event facts, but it has no reason to reassign image provenance.
+  const originalImageIndex = (originalItem as any)?.relevantImageIndex;
+  if (typeof originalImageIndex === 'number' &&
+      Number.isInteger(originalImageIndex) && originalImageIndex >= -1) {
+    (nextItem as any).relevantImageIndex = originalImageIndex;
+  }
+
   if (
     !hasMeaningfulTimeFlags((nextItem as any)?.timeFlags) &&
     hasMeaningfulTimeFlags((originalItem as any)?.timeFlags)
@@ -367,6 +375,19 @@ export function preserveValidatedItemSourceType(
   }
 
   return nextItem;
+}
+
+export function hasMissingValidatedSourceIdentity(
+  rawData: ExtractedItem[], validatedItems: ValidatedItem[]
+): boolean {
+  return validatedItems.some((entry, index) => {
+    const original = rawData[index];
+    if (!original) return false;
+    return Boolean(
+      (String(original.name || '').trim() && !String(entry?.item?.name || '').trim()) ||
+      (String(original.date || '').trim() && !String(entry?.item?.date || '').trim())
+    );
+  });
 }
 
 function cloneTimeFlags(value: unknown): TimeFlags | undefined {
@@ -432,11 +453,15 @@ export async function performSecondaryValidation(
     const validationResult = parseSecondaryValidationResponse(response);
     const responseCountMismatch = !validationResult._parseError &&
       validationResult.validatedItems.length !== originalStage3Count;
-    if (validationResult._parseError || responseCountMismatch) {
+    const responseIdentityCorrupted = !validationResult._parseError &&
+      !responseCountMismatch &&
+      hasMissingValidatedSourceIdentity(rawData, validationResult.validatedItems);
+    if (validationResult._parseError || responseCountMismatch || responseIdentityCorrupted) {
       logger.warn('Stage 4: Falling back to raw data due to invalid validation response', {
         parseError: Boolean(validationResult._parseError),
         expectedCount: originalStage3Count,
         returnedCount: validationResult.validatedItems.length,
+        responseIdentityCorrupted,
       });
       const fallbackItems = rawData.map(item => ({ ...item }));
       let fallbackNormalizationCount = 0;
@@ -461,7 +486,8 @@ export async function performSecondaryValidation(
       (deterministicFallback.kept as any)._operatingHoursOnlyRejectCount =
         deterministicFallback.rejectedCount;
       (deterministicFallback.kept as any)._validationFallbackReason =
-        responseCountMismatch ? 'response_count_mismatch' : 'parse_error';
+        responseCountMismatch ? 'response_count_mismatch'
+          : responseIdentityCorrupted ? 'response_source_identity_corrupted' : 'parse_error';
       return deterministicFallback.kept;
     }
 

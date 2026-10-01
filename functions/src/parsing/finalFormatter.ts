@@ -338,7 +338,16 @@ Never return arrays of values for an item; each must be a JSON object.`;
     const categoryNormalizationStats = createCategoryNormalizationStats();
 
     // Process each formatted event
-    const processedEvents = validFormattedEvents.map(({ event: alignedEvent, originalItem }) => {
+    const sourceReadyFormattedEvents = validFormattedEvents.filter(({ originalItem }) => {
+      if (!hasUnresolvedEarlyMeridiem(originalItem)) return true;
+      logger.warn('Holding calendar event with unresolved AM/PM in printed time', {
+        name: originalItem.name,
+        date: originalItem.date,
+        printedTime: originalItem.startTime,
+      });
+      return false;
+    });
+    const processedEvents = sourceReadyFormattedEvents.map(({ event: alignedEvent, originalItem }) => {
       let event = { ...alignedEvent } as FormattedEvent & { sourceItemIndex?: number };
       delete event.sourceItemIndex;
 
@@ -1103,6 +1112,16 @@ export function rehydrateFormattedEventMetadata(
   const nextEvent = { ...event } as FormattedEvent;
   let changed = false;
 
+  if (!String(nextEvent.startTime || '').trim()) {
+    const sourceStartTime = normalizeUnambiguousSourceStartTime(
+      String(originalItem?.startTime || '')
+    );
+    if (sourceStartTime) {
+      nextEvent.startTime = sourceStartTime;
+      changed = true;
+    }
+  }
+
   const existingSourceType = String((event as Record<string, unknown>)._sourceType || '').trim();
   const originalSourceType = String((originalItem as Record<string, unknown> | undefined)?._sourceType || '').trim();
   if (!existingSourceType && originalSourceType) {
@@ -1115,7 +1134,7 @@ export function rehydrateFormattedEventMetadata(
   if (
     typeof originalRelevantImageIndex === 'number' &&
     Number.isInteger(originalRelevantImageIndex) &&
-    originalRelevantImageIndex >= 0 &&
+    originalRelevantImageIndex >= -1 &&
     nextEvent.relevantImageIndex !== originalRelevantImageIndex
   ) {
     nextEvent.relevantImageIndex = originalRelevantImageIndex;
@@ -1792,6 +1811,38 @@ function isGeneralFestivalParent(event: Pick<FormattedEvent, 'name' | 'descripti
   return /\b(?:fest|festival|fair)\b/i.test(event.name || '') &&
     !/\b(?:music|concert|jazz|blues|rock|folk|comedy|improv)\b/i.test(event.name || '') &&
     /\b(?:vendors?|activities|attractions|crafts)\b/i.test(event.description || '');
+}
+
+export function normalizeUnambiguousSourceStartTime(raw: string): string {
+  const value = String(raw || '').trim();
+  const clock24 = value.match(/^(\d{1,2}):(\d{2})$/);
+  if (clock24 && Number(clock24[1]) < 24 && Number(clock24[2]) < 60) {
+    return `${String(Number(clock24[1])).padStart(2, '0')}:${clock24[2]}`;
+  }
+  const clock12 = value.match(/^(\d{1,2})(?::(\d{2}))?\s*([ap])\.?m\.?$/i);
+  if (clock12 && Number(clock12[1]) >= 1 && Number(clock12[1]) <= 12 &&
+      Number(clock12[2] || '0') < 60) {
+    let hour = Number(clock12[1]) % 12;
+    if (clock12[3].toLowerCase() === 'p') hour += 12;
+    return `${String(hour).padStart(2, '0')}:${clock12[2] || '00'}`;
+  }
+  const french24 = value.match(/^(\d{1,2})\s*h\s*(\d{2})$/i);
+  if (french24 && Number(french24[1]) >= 9 && Number(french24[1]) < 24 &&
+      Number(french24[2]) < 60) {
+    return `${String(Number(french24[1])).padStart(2, '0')}:${french24[2]}`;
+  }
+  return '';
+}
+
+export function hasUnresolvedEarlyMeridiem(item?: ExtractedItem): boolean {
+  if (!item) return false;
+  const printedTime = String(item.startTime || '').trim();
+  const evidence = `${printedTime} ${String((item as any).extractionReason || '')}`;
+  if (!/meridiem\s+unspecified|AM\s*\/\s*PM\s+unspecified|does\s+not\s+specify\s+AM\s+or\s+PM/i.test(evidence)) {
+    return false;
+  }
+  const hour = printedTime.match(/^([1-8])(?:\s*h\s*\d{2}|:\d{2})/i);
+  return Boolean(hour);
 }
 
 export function applyFestivalParentCategoryForRegression(event: FormattedEvent): FormattedEvent {

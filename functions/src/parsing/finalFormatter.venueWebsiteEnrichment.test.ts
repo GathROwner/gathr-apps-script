@@ -3,10 +3,40 @@ import assert from 'node:assert/strict';
 
 import {
   applyExplicitDateRangeCorrections,
+  hasUnresolvedEarlyMeridiem,
+  normalizeUnambiguousSourceStartTime,
   repairGenericTitleFragmentVenue,
   rehydrateFormattedEventMetadata,
 } from './finalFormatter.js';
 import { ExtractedItem, TimeResolvedEvent } from './types.js';
+
+test('holds a printed 7 h 00 without AM/PM while retaining a corroborated time', () => {
+  assert.equal(hasUnresolvedEarlyMeridiem({
+    name: 'Cercle de conversation en français',
+    startTime: '7:00 (AM/PM unspecified)',
+  } as ExtractedItem), true);
+  assert.equal(hasUnresolvedEarlyMeridiem({
+    name: 'Cercle de conversation en français',
+    startTime: '19:00',
+  } as ExtractedItem), false);
+  assert.equal(hasUnresolvedEarlyMeridiem({
+    name: 'L’heure des tout-petits',
+    startTime: '10 h 30 (AM/PM unspecified)',
+  } as ExtractedItem), false);
+});
+
+test('restores only unambiguous printed start times when formatting omits them', () => {
+  assert.equal(normalizeUnambiguousSourceStartTime('1:30 P.M.'), '13:30');
+  assert.equal(normalizeUnambiguousSourceStartTime('4:00 P.M.'), '16:00');
+  assert.equal(normalizeUnambiguousSourceStartTime('10 h 30'), '10:30');
+  assert.equal(normalizeUnambiguousSourceStartTime('19:00'), '19:00');
+  assert.equal(normalizeUnambiguousSourceStartTime('7:00 (meridiem unspecified)'), '');
+  const restored = rehydrateFormattedEventMetadata(
+    buildFormattedEvent({ startTime: '' }) as any,
+    { name: 'Community Puzzle', startTime: '1:30 P.M.' } as ExtractedItem
+  );
+  assert.equal(restored.startTime, '13:30');
+});
 
 function buildFormattedEvent(
   overrides: Partial<TimeResolvedEvent> = {}
@@ -115,6 +145,14 @@ test('formatted metadata rehydration preserves image-aware relevant image index'
   );
 
   assert.equal(rehydrated.relevantImageIndex, 1);
+});
+
+test('formatted metadata rehydration keeps linked-calendar entries off unrelated post images', () => {
+  const rehydrated = rehydrateFormattedEventMetadata(
+    buildFormattedEvent({ relevantImageIndex: 0 }),
+    buildOriginalItem({ relevantImageIndex: -1 })
+  );
+  assert.equal(rehydrated.relevantImageIndex, -1);
 });
 
 test('generic title-fragment venue does not override the row venue', () => {

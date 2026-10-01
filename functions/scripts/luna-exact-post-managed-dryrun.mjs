@@ -18,7 +18,11 @@ if (!localBackend) {
 }
 if (localBackend && !localStorageKeyPath) throw new Error('Local backend mode requires a storage key path');
 const backendDeleteUrl = localBackend ? '' : backendUploadUrl.replace(/\/upload-image\/?$/, '/delete-image');
-const imageBytes = await fs.readFile(sourceImagePath);
+const sourceImagePaths = sourceImagePath.split(';').map(path => path.trim()).filter(Boolean);
+const sourceImageBytes = await Promise.all(sourceImagePaths.map(path => fs.readFile(path)));
+if (localBackend && sourceImageBytes.length !== 1) {
+  throw new Error('Local backend mode currently supports one source image');
+}
 let localBucket = null;
 let localUrls = null;
 if (localBackend) {
@@ -27,7 +31,7 @@ if (localBackend) {
   const { Storage } = requireBackend('@google-cloud/storage');
   const storage = new Storage({ projectId: 'fb-post-processor', keyFilename: localStorageKeyPath });
   localBucket = storage.bucket('gathr-uploaded-images');
-  const base = sharp(imageBytes, { failOn: 'none' }).rotate();
+  const base = sharp(sourceImageBytes[0], { failOn: 'none' }).rotate();
   const metadata = await base.metadata();
   let ocr = base.clone();
   const minSide = Math.min(metadata.width, metadata.height);
@@ -60,18 +64,20 @@ const snapshot = await firestore.collection('parse_snapshots').doc(snapshotId).g
 if (!snapshot.exists) throw new Error(`Snapshot ${snapshotId} not found`);
 const source = snapshot.data();
 const postId = String(source.uniqueId || '');
-if (!postId || (source.rowMeta?.mediaUrls || []).length !== 1) {
-  throw new Error('Exact-post dry run requires a post ID and one source image');
+if (!postId || (source.rowMeta?.mediaUrls || []).length !== sourceImageBytes.length) {
+  throw new Error('Exact-post dry run requires a post ID and one saved image per source gallery item');
 }
 
 const uploaded = new Set();
 const backendCalls = [];
+let savedOcrImageCount = 0;
 let localOrigin = '';
 const server = http.createServer(async (request, response) => {
   try {
-    if (request.method === 'GET' && request.url === '/source.jpg') {
+    const sourceMatch = /^\/source-(\d+)\.jpg$/.exec(request.url || '');
+    if (request.method === 'GET' && sourceMatch && sourceImageBytes[Number(sourceMatch[1])]) {
       response.writeHead(200, { 'content-type': 'image/jpeg' });
-      response.end(imageBytes);
+      response.end(sourceImageBytes[Number(sourceMatch[1])]);
       return;
     }
     if (request.method !== 'POST' || !['/upload-image', '/delete-image'].includes(request.url)) {
@@ -112,11 +118,17 @@ const server = http.createServer(async (request, response) => {
     try { parsed = JSON.parse(body); } catch { /* status is still reported */ }
     if (isUpload && result.ok) {
       for (const url of parsed.imageUrls || [parsed.imageUrl]) if (url) uploaded.add(String(url));
-      if (kind === 'ocr' && parsed.imageUrl) {
-        const prepared = await fetch(parsed.imageUrl);
-        if (prepared.ok) {
-          await fs.writeFile(reportPath.replace(/\.json$/, '-preprocessed.webp'),
-            Buffer.from(await prepared.arrayBuffer()));
+      if (kind === 'ocr') {
+        const preparedUrls = parsed.imageUrls || [parsed.imageUrl];
+        for (let index = 0; index < preparedUrls.length; index++) {
+          if (!preparedUrls[index]) continue;
+          const prepared = await fetch(preparedUrls[index]);
+          if (prepared.ok) {
+            const suffix = sourceImageBytes.length === 1 ? '-preprocessed.webp'
+              : `-preprocessed-${savedOcrImageCount++}.webp`;
+            await fs.writeFile(reportPath.replace(/\.json$/, suffix),
+              Buffer.from(await prepared.arrayBuffer()));
+          }
         }
       }
     }
@@ -147,10 +159,10 @@ process.env.PARSER_DRY_RUN_LOCAL_IMAGES = 'false';
 const usage = [];
 const skips = [];
 const report = { snapshotId, postId, backendCalls, events: [], payloads: [], skips, usage,
-  rowVenue: null, cleanup: [] };
+  rowVenue: null, stages: {}, cleanup: [] };
 try {
   const establishment = String(source.rowMeta?.userName || source.establishment || '');
-  const sourceUrl = `${localOrigin}/source.jpg`;
+  const sourceUrls = sourceImageBytes.map((_, index) => `${localOrigin}/source-${index}.jpg`);
   const row = {
     ...source.rowMeta,
     uniqueId: postId,
@@ -159,19 +171,27 @@ try {
     text: String(source.rowMeta?.text || source.inputText || '').split(/\bOCR TEXT\s*:/i)[0],
     timestamp: String(source.rowMeta?.timestamp || ''),
     facebookUrl: String(source.facebookUrl || source.rowMeta?.facebookUrl || ''),
-    mediaUrls: [sourceUrl],
+    mediaUrls: sourceUrls,
     sourceScraperType: String(source.rowMeta?.sourceScraperType || 'posts'),
   };
   const rowMatch = await findMatchingVenue(establishment, row.facebookUrl || undefined);
   const rowVenue = rowMatch.isMatch ? rowMatch.matchedVenue : null;
   report.rowVenue = rowVenue ? { id: rowVenue.id, name: rowVenue.name } : null;
+  const parsingConfig = process.env.LUNA_DRYRUN_DISABLE_CALENDAR_LINKS === 'true'
+    ? { calendarLinkEnrichment: { enabled: false } } : {};
   const events = await parsePostData({
     combinedText: source.inputText,
-    mediaUrls: [sourceUrl], sharedPostThumbnails: [],
+    mediaUrls: sourceUrls, sharedPostThumbnails: [],
     userName: establishment, pageName: row.pageName,
     timestamp: row.timestamp, facebookUrl: row.facebookUrl,
     profilePicUrl: '', extractedData: { id: postId, postId },
   }, {}, {
+    ...parsingConfig,
+    stageArtifactsHandler: snapshot => {
+      if (snapshot.imageFrameManifest) report.stages.imageFrameManifest = snapshot.imageFrameManifest;
+      if (snapshot.stage3Items) report.stages.stage3Items = snapshot.stage3Items;
+      if (snapshot.stage4Items) report.stages.stage4Items = snapshot.stage4Items;
+    },
     gptUsageHandler: item => usage.push({ stage: item.stage, model: item.model,
       inputTokens: item.inputTokens, outputTokens: item.outputTokens }),
     skipReasonHandler: item => skips.push({ stage: item.stage, reason: item.reason }),

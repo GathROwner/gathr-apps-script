@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { shouldHoldUndatedStandingSchedule, isSelectedLunaCanaryPost,
+import { shouldHoldUndatedStandingSchedule, shouldRetrySeasonalLeagueWithLegacy,
+  isSelectedLunaCanaryPost,
   canRetryLunaCanaryWithLegacy, canaryGeneratedCleanupUrls,
   hasMalformedLunaEventTitle } from './lunaSafetyGate.js';
 import { normalizeCommunityMealEvent } from './finalFormatter.js';
@@ -42,6 +43,15 @@ test('canary cleanup excludes managed source gallery and profile images', () => 
   const analysis = 'https://storage.googleapis.com/gathr-uploaded-images/postimages/ocr-base.webp';
   assert.deepEqual(canaryGeneratedCleanupUrls([source, analysis, profile], [source, profile]),
     [analysis]);
+});
+
+test('seasonal league timetable uses the reviewed legacy route until recurrence is defined', () => {
+  assert.equal(shouldRetrySeasonalLeagueWithLegacy(
+    'The Regular Season will officially begin the week of November 2, 2026. The schedule is below. New this year is a daytime regular league on Wednesdays.'), true);
+  assert.equal(shouldRetrySeasonalLeagueWithLegacy(
+    'The festival begins November 2. See the stage schedule below.'), false);
+  assert.equal(shouldRetrySeasonalLeagueWithLegacy(
+    'The curling league meets November 2 for a one-day tournament.'), false);
 });
 
 test('Luna prose title falls back while genuine multi-part performance names remain usable', () => {
