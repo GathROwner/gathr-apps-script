@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { reconcileCalendarInventory } from './calendarInventoryReconciliation.js';
+import { buildGuardedCalendarInventoryAdditions,
+  reconcileCalendarInventory } from './calendarInventoryReconciliation.js';
 import type { CalendarItem } from './types.js';
 
 const item = (name: string, date: string, startTime: string): CalendarItem => ({
@@ -54,4 +55,42 @@ test('invalid date and image provenance do not become additions', () => {
   ]);
   assert.equal(result.additions.length, 0);
   assert.deepEqual(result.conflicts.map(entry => entry.reason), ['invalid_fields', 'invalid_fields']);
+});
+
+test('fully matched Cornfest inventory converts two source-backed omissions without inferred end time', () => {
+  const primary = [item("SAM'S FAMILY FUN DAY", '2026-09-27', '1:00pm')];
+  const result = reconcileCalendarInventory(primary, [
+    { ...listing("SAM'S FAMILY FUN DAY", '2026-09-27', '1:00pm'),
+      excerpt: 'Children can enjoy exciting inflatables' },
+    { ...listing('ENTERTAINMENT', '2026-09-27', '2:00pm'),
+      endTime: '4:00pm', performers: ['HACHE'],
+      excerpt: 'you will be entertained by HACHE.' },
+    { ...listing('CORNBOIL & COMMUNITY BBQ', '2026-09-27', '2:00pm'),
+      excerpt: 'fresh hot corn on the cob and hot dogs' },
+  ]);
+  const decision = buildGuardedCalendarInventoryAdditions(primary, result, 0);
+  assert.equal(decision.eligible, true);
+  assert.deepEqual(decision.items.map(value => value.name),
+    ['ENTERTAINMENT — HACHE', 'CORNBOIL & COMMUNITY BBQ']);
+  assert.deepEqual(decision.items.map(value => value.relevantImageIndex), [2, 2]);
+  assert.equal(decision.items[1].endTime, undefined);
+  assert.equal(primary.length, 1);
+});
+
+test('a name dispute or incomplete primary coverage blocks all additions', () => {
+  const primary = [item('Fretz and Keys', '2026-07-08', '5pm')];
+  const inventory = [
+    { ...listing('Frites and Keys', '2026-07-08', '5pm', 0),
+      excerpt: 'Frites and Keys will play music tonight' },
+    { ...listing('Extra show', '2026-07-09', '6pm', 0),
+      excerpt: 'Extra show at the same venue tonight' },
+  ];
+  const disputed = buildGuardedCalendarInventoryAdditions(primary,
+    reconcileCalendarInventory(primary, inventory), 0);
+  assert.equal(disputed.reason, 'disputed_reading');
+  assert.deepEqual(disputed.items, []);
+  const incomplete = buildGuardedCalendarInventoryAdditions(primary,
+    reconcileCalendarInventory(primary, [inventory[1]]), 0);
+  assert.equal(incomplete.reason, 'incomplete_primary_coverage');
+  assert.deepEqual(incomplete.items, []);
 });

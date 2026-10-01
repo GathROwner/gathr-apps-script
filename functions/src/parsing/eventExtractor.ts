@@ -31,7 +31,8 @@ import {
 } from './runtimeConfig.js';
 import { logger } from '../utils/logger.js';
 import { findCalendarOcrNameDisputes } from './calendarNameDisputes.js';
-import { normalizeCalendarInventoryTime, reconcileCalendarInventory,
+import { buildGuardedCalendarInventoryAdditions, normalizeCalendarInventoryTime,
+  reconcileCalendarInventory,
   type CalendarInventoryListing } from './calendarInventoryReconciliation.js';
 
 // Initialize OpenAI client lazily
@@ -910,7 +911,8 @@ async function extractCalendarContent(
 
   if (modernCalendarPilot && model === 'gpt-6-luna' &&
       config.calendarInventoryAudit?.enabled && imageUrls.length > 0) {
-    await auditCalendarInventory(items, imageUrls, config);
+    const additions = await auditCalendarInventory(items, imageUrls, config);
+    if (additions.length > 0) items = [...items, ...additions];
   }
 
   if (modernCalendarPilot && items.length >= 20 && imageUrls.length > 0 &&
@@ -958,16 +960,16 @@ async function extractCalendarContent(
   return items;
 }
 
-/** A diagnostic second read. It cannot add or rewrite an extracted item. */
+/** A bounded second read. Its optional guarded additions still pass Stage 4/5. */
 export async function auditCalendarInventory(
   items: CalendarItem[], imageUrls: string[], config: ParsingConfig
-): Promise<void> {
+): Promise<CalendarItem[]> {
   const audit = config.calendarInventoryAudit;
   const timedPrimaryCount = items.filter(item =>
     /^\d{4}-\d{2}-\d{2}$/.test(item.date) &&
     Boolean(normalizeCalendarInventoryTime(item.startTime))).length;
   if (!audit?.enabled || !Number.isFinite(audit.estimatedItemCount) ||
-      audit.estimatedItemCount - timedPrimaryCount < 2) return;
+      audit.estimatedItemCount - timedPrimaryCount < 2) return [];
   const maxFrames = Math.min(Math.max(Math.trunc(audit.maxFrames ?? 2), 1), 2);
   const frameIndices = [...new Set(audit.denseFrameIndices)]
     .filter(index => Number.isInteger(index) && index >= 0 &&
@@ -975,12 +977,12 @@ export async function auditCalendarInventory(
       Number.isInteger(audit.frameSourceGalleryIndices[index]) &&
       audit.frameSourceGalleryIndices[index] >= 0)
     .slice(0, maxFrames);
-  if (frameIndices.length === 0) return;
+  if (frameIndices.length === 0) return [];
 
   const monthPattern = '(January|February|March|April|May|June|July|August|September|October|November|December)';
   const knownDates = [...new Set(items.map(item => item.date))]
     .filter(value => /^\d{4}-\d{2}-\d{2}$/.test(value));
-  if (knownDates.length === 0) return;
+  if (knownDates.length === 0) return [];
   const resolveHeading = (heading: string): string | null => {
     const explicit = String(heading).match(/\b(20\d{2})-(\d{2})-(\d{2})\b/);
     if (explicit) return explicit[0];
@@ -1046,11 +1048,18 @@ export async function auditCalendarInventory(
     }
   }
   const reconciliation = reconcileCalendarInventory(items, listings);
-  logger.info('Calendar inventory audit; Stage 3 items preserved', {
+  const additionDecision = buildGuardedCalendarInventoryAdditions(
+    items, reconciliation, unresolvedListings.length);
+  const appliedAdditions = audit.applyAdditions === true &&
+    readFrameIndices.length === frameIndices.length && additionDecision.eligible
+    ? additionDecision.items : [];
+  logger.info('Calendar inventory audit result', {
     estimatedItemCount: audit.estimatedItemCount, primaryItemCount: items.length,
     timedPrimaryCount,
     readFrameIndices, inventoryCount: listings.length,
     additions: reconciliation.additions.length,
+    additionDecision: additionDecision.reason,
+    appliedAdditionCount: appliedAdditions.length,
     conflicts: reconciliation.conflicts.length,
     unresolved: unresolvedListings.length,
   });
@@ -1059,14 +1068,16 @@ export async function auditCalendarInventory(
       await audit.handler({
         estimatedItemCount: audit.estimatedItemCount, primaryItemCount: items.length,
         readFrameIndices, rawListingCount: listings.length + unresolvedListings.length,
-        unresolvedListings, reconciliation, listings,
+        unresolvedListings, reconciliation, listings, additionDecision,
+        appliedAdditionCount: appliedAdditions.length,
       });
     } catch (error) {
-      logger.warn('Calendar inventory audit handler failed; Stage 3 items preserved', {
+      logger.warn('Calendar inventory audit handler failed; candidate decision preserved', {
         error: error instanceof Error ? error.message : String(error),
       });
     }
   }
+  return appliedAdditions;
 }
 
 /**

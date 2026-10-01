@@ -4,7 +4,8 @@
  */
 
 import type { ModelSpatialEvidence, SpatialEventClassification } from './spatialEventClassifier.js';
-import type { CalendarInventoryListing, CalendarInventoryReconciliation } from './calendarInventoryReconciliation.js';
+import type { CalendarInventoryAdditionDecision, CalendarInventoryListing,
+  CalendarInventoryReconciliation } from './calendarInventoryReconciliation.js';
 
 // ===================
 // Venue/Hours Types (also in main types, duplicated here for module independence)
@@ -111,6 +112,8 @@ export interface CalendarInventoryAuditSnapshot {
   unresolvedListings: Array<{ frameIndex: number; title: string; dateHeading: string; reason: string }>;
   reconciliation: CalendarInventoryReconciliation;
   listings: CalendarInventoryListing[];
+  additionDecision: CalendarInventoryAdditionDecision;
+  appliedAdditionCount: number;
 }
 
 export interface ParsingConfig {
@@ -164,13 +167,15 @@ export interface ParsingConfig {
     differingModelWord: string;
     differingOcrWord: string;
   }>) => void | Promise<void>;
-  /** Off by default. A bounded second read reports omissions without modifying Stage 3 items. */
+  /** Off by default. A bounded second read can report or explicitly pilot guarded additions. */
   calendarInventoryAudit?: {
     enabled: boolean;
     estimatedItemCount: number;
     frameSourceGalleryIndices: number[];
     denseFrameIndices: number[];
     maxFrames?: number;
+    /** Explicit pilot gate; false by default. Candidates still pass normal Stage 4/5. */
+    applyAdditions?: boolean;
     handler?: (snapshot: CalendarInventoryAuditSnapshot) => void | Promise<void>;
   };
   stage4ModelOverride?: string;
