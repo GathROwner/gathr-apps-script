@@ -36,3 +36,13 @@ export function canaryGeneratedCleanupUrls(candidates: string[], originals: stri
   const input = new Set(originals.filter(Boolean));
   return candidates.filter(url => Boolean(url) && !input.has(url));
 }
+
+/** A prose paragraph in a title is a malformed extraction, not a publishable event name. */
+export function hasMalformedLunaEventTitle(
+  events: Array<{ name?: string; eventName?: string }>
+): boolean {
+  return events.some(event => {
+    const title = String(event.eventName || event.name || '').trim();
+    return title.length > 140 && title.split(/\s+/).length > 20;
+  });
+}

@@ -221,3 +221,42 @@ test('does not collapse same-source age-group sibling events', () => {
   );
   assert.equal(shouldSkipSiblingUniqueIdDuplicateCheck(incoming, youngerSibling), true);
 });
+
+test('keeps a same-post gallery talk separate from an exhibition opening at a different time', () => {
+  const opening = buildEvent({
+    uniqueId: '1713005494164338_18811d195622afe4',
+    eventName: 'SOFT INTERNET THEORY — Exhibition Opening',
+    name: 'SOFT INTERNET THEORY — Exhibition Opening',
+    startDate: '2026-10-03',
+    startTime: '19:00',
+  });
+  const talk = buildEvent({
+    uniqueId: '1713005494164338_b081946e4a9087fe',
+    eventName: 'SOFT INTERNET THEORY Talk and Tour',
+    name: 'SOFT INTERNET THEORY Talk and Tour',
+    startDate: '2026-10-03',
+    startTime: '18:00',
+  });
+
+  assert.equal(isDuplicateEntry(talk, opening, { requireEstablishmentMatch: false }), true);
+  assert.equal(shouldSkipSiblingUniqueIdDuplicateCheck(talk, opening), true);
+});
+
+test('still deduplicates a same-post event whose time was corrected', () => {
+  const opening = buildEvent({
+    uniqueId: '1713005494164338_18811d195622afe4',
+    eventName: 'SOFT INTERNET THEORY — Exhibition Opening',
+    name: 'SOFT INTERNET THEORY — Exhibition Opening',
+    startDate: '2026-10-03',
+    startTime: '19:00',
+  });
+  const correctedOpening = buildEvent({
+    uniqueId: '1713005494164338_b8079fb6a7686270',
+    eventName: 'SOFT INTERNET THEORY Exhibition Opening',
+    name: 'SOFT INTERNET THEORY Exhibition Opening',
+    startDate: '2026-10-03',
+    startTime: '18:00',
+  });
+
+  assert.equal(shouldSkipSiblingUniqueIdDuplicateCheck(correctedOpening, opening), false);
+});

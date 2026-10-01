@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { shouldHoldUndatedStandingSchedule, isSelectedLunaCanaryPost,
-  canRetryLunaCanaryWithLegacy, canaryGeneratedCleanupUrls } from './lunaSafetyGate.js';
+  canRetryLunaCanaryWithLegacy, canaryGeneratedCleanupUrls,
+  hasMalformedLunaEventTitle } from './lunaSafetyGate.js';
 import { normalizeCommunityMealEvent } from './finalFormatter.js';
 import type { ExtractedItem, FormattedEvent } from './types.js';
 
@@ -41,6 +42,15 @@ test('canary cleanup excludes managed source gallery and profile images', () => 
   const analysis = 'https://storage.googleapis.com/gathr-uploaded-images/postimages/ocr-base.webp';
   assert.deepEqual(canaryGeneratedCleanupUrls([source, analysis, profile], [source, profile]),
     [analysis]);
+});
+
+test('Luna prose title falls back while genuine multi-part performance names remain usable', () => {
+  assert.equal(hasMalformedLunaEventTitle([{ name:
+    'October 17th 1- and October 25th 3- with a BBQ. You will have a chance to register in person, sign up for leagues, meet board members, pick up some pro shop items, and check out the club!' }]), true);
+  assert.equal(hasMalformedLunaEventTitle([{ name:
+    'Celtic Christmas at Red Shores (Live Entertainment with The Ross Family)' }]), false);
+  assert.equal(hasMalformedLunaEventTitle([{ name:
+    'SOFT INTERNET THEORY Exhibition Opening' }]), false);
 });
 
 test('scheduled community lunch remains an event and gets no invented end', () => {

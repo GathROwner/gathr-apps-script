@@ -15,3 +15,9 @@ The Montague replay exposed a code defect in the canary route: `lunaFullImageRea
 Evidence files are under `C:\Users\craig\.codex\worktrees\luna-pilot-release\pilot-source\`: `gallery-managed-dryrun.json` and `.log`, `founders-managed-dryrun.json` and `.log`, `montague-managed-dryrun.json` and `.log`, `montague-full-image-dryrun.json` and `.log`, plus their saved source images and preprocessed WebP files. Temporary managed upload objects were cleaned up. The gallery replay's model usage and image tracing were observed locally, not billed-cost or live-write evidence.
 
 Next gate: independently verify how a selected-row dry run behaves in the deployed Function, then inspect the gallery opening's existing document and dedupe keys against the two proposed payloads. Only after that should a single exact post be enabled for a production dry canary; no live write is justified from these local results alone.
+
+## Follow-up on October 1 UTC
+
+The deployed selected-row route completed a production dry run for the gallery post: two extracted items, managed image provenance, six Luna calls, and no event write. The existing deduper incorrectly matched both proposed items to the opening. A local fix for hashed same-source sibling IDs now matches only the opening; the talk remains distinct in a read-only Firestore check. The fix is built and focused tests pass, but it has not yet been deployed or exercised through a live selected-row write.
+
+Montague's next local run varied: it extracted two sign-up days and 21 weekly league slots with concise titles, so a malformed-title guard alone would not block it. Several recurrence flags and inferred end times require source-grounded review. Keep Montague off the live allowlist.

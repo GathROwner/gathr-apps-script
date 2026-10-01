@@ -3840,8 +3840,23 @@ function extractUniqueIdRoot(value: unknown): string {
   const separatorIndex = normalized.lastIndexOf('_');
   if (separatorIndex <= 0) return normalized;
   const suffix = normalized.slice(separatorIndex + 1);
-  if (!/^\d+$/.test(suffix)) return normalized;
+  if (!/^\d+$/.test(suffix) && !/^[a-f0-9]{16}$/i.test(suffix)) return normalized;
   return normalized.slice(0, separatorIndex);
+}
+
+function titlesDescribeDistinctSamePostItems(incoming: EventData, existing: EventData): boolean {
+  const tokens = (event: EventData): Set<string> => new Set(
+    String(event.eventName || event.name || '')
+      .toLowerCase()
+      .match(/[a-z0-9]+/g)
+      ?.filter(token => token.length > 2 && !['and', 'the', 'with', 'for'].includes(token)) || []
+  );
+  const incomingTokens = tokens(incoming);
+  const existingTokens = tokens(existing);
+  if (incomingTokens.size < 2 || existingTokens.size < 2) return false;
+  const common = [...incomingTokens].filter(token => existingTokens.has(token)).length;
+  const union = new Set([...incomingTokens, ...existingTokens]).size;
+  return union > 0 && common / union < 0.6;
 }
 
 export function shouldSkipSiblingUniqueIdDuplicateCheck(
@@ -3865,6 +3880,7 @@ export function shouldSkipSiblingUniqueIdDuplicateCheck(
   const incomingStartTime = String(incoming.startTime || '').trim();
   const existingStartTime = String(existing.startTime || '').trim();
   if (incomingStartTime && existingStartTime && incomingStartTime !== existingStartTime) {
+    if (titlesDescribeDistinctSamePostItems(incoming, existing)) return true;
     if (isDuplicateEntry(incoming, existing, { requireEstablishmentMatch: false })) {
       return false;
     }

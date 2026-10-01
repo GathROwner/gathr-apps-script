@@ -45,7 +45,8 @@ import { performFinalFormatting } from './finalFormatter.js';
 import { reconcileCaptionOnlyWeeklyEvents } from './captionOnlyWeekly.js';
 import { resolveTimesWithOperatingHours } from './venueResolver.js';
 import { shouldHoldUndatedStandingSchedule, isSelectedLunaCanaryPost,
-  canRetryLunaCanaryWithLegacy, canaryGeneratedCleanupUrls } from './lunaSafetyGate.js';
+  canRetryLunaCanaryWithLegacy, canaryGeneratedCleanupUrls,
+  hasMalformedLunaEventTitle } from './lunaSafetyGate.js';
 import { parseBooleanEnv, parseNumberEnv, resolveStageModel } from './runtimeConfig.js';
 import { logger } from '../utils/logger.js';
 
@@ -2256,6 +2257,10 @@ async function parsePostDataCore(
       validation.imageAnalysis || [],
       lunaAnalysisFrames
     );
+
+    if (lunaCanarySelected && hasMalformedLunaEventTitle(processedEvents)) {
+      return retryCanaryWithLegacy('malformed_final_event_title');
+    }
 
     if (bandRules.length > 0) {
       const missingFinalSlots = findMissingExpectedCalendarSlotsInFinalEvents(
