@@ -39,6 +39,16 @@ test('a second reading cannot overwrite a different spelling at an already occup
   assert.equal(result.conflicts[0]?.reason, 'same_slot_different_title');
 });
 
+test('possessive apostrophe variation is the same title when date and time agree', () => {
+  const result = reconcileCalendarInventory(
+    [item("1ST SENIOR'S RECREATIONAL PICKLEBALL TOURNAMENT", '2026-09-25', '10:00')],
+    [listing('1ST SENIORS RECREATIONAL PICKLEBALL TOURNAMENT',
+      '2026-09-25', '10:00AM')]
+  );
+  assert.equal(result.matched.length, 1);
+  assert.equal(result.conflicts.length, 0);
+});
+
 test('a differently titled duplicate market promotion is held instead of added', () => {
   const result = reconcileCalendarInventory(
     [item('COMMUNITY FARMERS MARKET / YARD SALE', '2026-09-26', '08:30')],

@@ -1061,6 +1061,15 @@ export async function auditCalendarInventory(
     additionDecision: additionDecision.reason,
     appliedAdditionCount: appliedAdditions.length,
     conflicts: reconciliation.conflicts.length,
+    conflictDetails: reconciliation.conflicts.slice(0, 5).map(({ listing, reason }) => ({
+      reason, date: listing.date, startTime: listing.startTime,
+      inventoryTitle: listing.title,
+      primaryTitlesAtSlot: items.filter(item =>
+        item.date === listing.date &&
+        normalizeCalendarInventoryTime(item.startTime) ===
+          normalizeCalendarInventoryTime(listing.startTime)
+      ).map(item => item.name),
+    })),
     unresolved: unresolvedListings.length,
   });
   if (audit.handler) {

@@ -34,6 +34,7 @@ export interface CalendarInventoryAdditionDecision {
 export function normalizeCalendarInventoryTitle(value: string): string {
   return String(value || '').normalize('NFKD').toLowerCase()
     .replace(/[‘’`´]/g, "'")
+    .replace(/'/g, '')
     .replace(/[^a-z0-9]+/g, ' ')
     .trim().replace(/\s+/g, ' ');
 }
