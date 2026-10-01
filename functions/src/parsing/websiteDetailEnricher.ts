@@ -843,7 +843,7 @@ function applyWebsiteCandidates(
       const base = nextItems[0];
       const splitItems = seatings.map(seating => ({
         ...base,
-        name: `${String(base.name || candidate?.title || '').replace(/\s+Live Performances$/i, '').trim()}: ${seating.label}`,
+        name: `${String(base.name || candidate?.title || '').trim().replace(/\s+Live Performances$/i, '').replace(/[\s:–—-]+$/g, '')}: ${seating.label}`,
         startTime: seating.startTime,
         endTime: seating.endTime,
         timeFlags: {

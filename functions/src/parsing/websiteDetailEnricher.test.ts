@@ -194,6 +194,16 @@ test('explicit lunch and dinner seatings split one website-backed gallery event 
       'Taste of Georgetown: Evening Dinner Experience',
     ]);
 
+    const colonTitle = await enrichEventsFromVenueWebsite(
+      [{ ...sourceItem, name: 'Taste of Georgetown:' }], caption, '',
+      '2026-10-01T12:00:00.000Z',
+      { name: 'Kings Playhouse', website: 'https://fallflavours.ca/' }, DEFAULT_PARSING_CONFIG
+    );
+    assert.deepEqual(colonTitle.items.map(item => item.name), [
+      'Taste of Georgetown: Garden Lunch Experience',
+      'Taste of Georgetown: Evening Dinner Experience',
+    ]);
+
     const lunchOnly = await enrichEventsFromVenueWebsite(
       [sourceItem], `Join us for lunch. Tickets available at ${detailUrl}`, '',
       '2026-10-01T12:00:00.000Z',
