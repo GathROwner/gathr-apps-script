@@ -3735,6 +3735,7 @@ Extract EVERY performance/event listed.
 
 FESTIVAL PARENT RULE:
 - When the schedule is printed inside one named festival with shared admission, location, and hours, create one festival event for each festival date. Put that day's stage timetable, vendors, and activities in its description. Do not publish each stage act, vendor, or attraction as a separate event unless it has independent admission or a separate venue outside the festival.
+- Before returning, scan the schedule's activity listings for any named public activity at a venue outside the festival host. Such an activity needs its own event with its own printed time, even when grouped under the festival's "Things to Do" heading. A vendor business name or a room/stage within the host is not a different venue.
 - If the festival's last on-site performance has a printed end time and no later festival hours are printed, use that last performance end as the parent festival end. Do not replace it with a generic two-hour duration.
 - A photo of an activity is evidence about the parent festival, not a new event by itself.
 - A named concert series across two separately named public venues is not one shared-location festival event. When each performer has its own printed start time and a venue or stage column, extract one item per performer. Keep the performer name as the event name and its own stage/venue label; never combine the two venue columns into one venue or collapse four performances into one daily series item.

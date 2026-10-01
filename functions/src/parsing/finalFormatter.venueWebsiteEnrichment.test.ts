@@ -38,6 +38,21 @@ test('restores only unambiguous printed start times when formatting omits them',
   assert.equal(restored.startTime, '13:30');
 });
 
+test('restores a printed same-day end when Stage 5 collapses it to the start', () => {
+  const source = {
+    name: 'Stratford Fall Fest', startTime: '13:00', endTime: '17:00',
+    timeFlags: { end: { source: 'explicit', toClose: false, evidence: '1pm-5pm' } },
+  } as ExtractedItem;
+  const collapsed = buildFormattedEvent({ startTime: '13:00', endTime: '13:00' });
+  assert.equal(rehydrateFormattedEventMetadata(collapsed as any, source).endTime, '17:00');
+  assert.equal(rehydrateFormattedEventMetadata(
+    buildFormattedEvent({ startTime: '13:00', endTime: '16:00' }) as any, source
+  ).endTime, '16:00');
+  assert.equal(rehydrateFormattedEventMetadata(
+    collapsed as any, { ...source, timeFlags: undefined } as ExtractedItem
+  ).endTime, '13:00');
+});
+
 function buildFormattedEvent(
   overrides: Partial<TimeResolvedEvent> = {}
 ): TimeResolvedEvent {

@@ -1122,6 +1122,18 @@ export function rehydrateFormattedEventMetadata(
     }
   }
 
+  const sourceStartTime = normalizeUnambiguousSourceStartTime(String(originalItem?.startTime || ''));
+  const sourceEndTime = normalizeUnambiguousSourceStartTime(String(originalItem?.endTime || ''));
+  if (
+    originalItem?.timeFlags?.end?.source === 'explicit' &&
+    sourceStartTime && sourceEndTime && sourceEndTime > sourceStartTime &&
+    String(nextEvent.startTime || '').trim() === sourceStartTime &&
+    String(nextEvent.endTime || '').trim() === sourceStartTime
+  ) {
+    nextEvent.endTime = sourceEndTime;
+    changed = true;
+  }
+
   const existingSourceType = String((event as Record<string, unknown>)._sourceType || '').trim();
   const originalSourceType = String((originalItem as Record<string, unknown> | undefined)?._sourceType || '').trim();
   if (!existingSourceType && originalSourceType) {
