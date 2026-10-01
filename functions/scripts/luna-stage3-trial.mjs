@@ -11,8 +11,8 @@ if (!snapshotId || !serviceAccountPath || !reportPath || !process.env.OPENAI_API
   throw new Error('Pass snapshot ID, service-account path, report path, and OPENAI_API_KEY');
 }
 const model = process.env.STAGE3_MODEL_OVERRIDE;
-if (!['gpt-6-luna', 'gpt-6-sol'].includes(model)) {
-  throw new Error('STAGE3_MODEL_OVERRIDE must be gpt-6-luna or gpt-6-sol for this isolated trial');
+if (!['gpt-6-luna', 'gpt-6-sol', 'gpt-6.1-sol'].includes(model)) {
+  throw new Error('STAGE3_MODEL_OVERRIDE must be gpt-6-luna, gpt-6-sol, or gpt-6.1-sol for this isolated trial');
 }
 if (process.env.STAGE3_IMAGE_DETAIL !== 'original') {
   throw new Error('STAGE3_IMAGE_DETAIL must be original for this full-image trial');
@@ -82,7 +82,9 @@ const items = await extractContentByType(
 );
 const rates = model === 'gpt-6-luna'
   ? { input: 0.10, cached: 0.01, write: 0.125, output: 0.50 }
-  : { input: 2.00, cached: 0.20, write: 2.50, output: 10.00 };
+  : model === 'gpt-6.1-sol'
+    ? { input: 2.00, cached: 0.10, write: 2.50, output: 10.00 }
+    : { input: 2.00, cached: 0.20, write: 2.50, output: 10.00 };
 const costUsd = usage.reduce((sum, record) => {
   const input = record.inputTokens || 0;
   const cached = record.cachedInputTokens || 0;

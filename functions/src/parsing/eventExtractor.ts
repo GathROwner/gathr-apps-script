@@ -828,16 +828,17 @@ async function extractCalendarContent(
   logger.debug('Extracting calendar content', { imageCount: imageUrls.length });
 
   const model = config.stage3ModelOverride || resolveStageModel(config.gptModelReasoning, 'STAGE3_MODEL_OVERRIDE');
-  const lunaHighGrouping = model === 'gpt-6-luna' &&
-    ['high', 'xhigh'].includes(
+  const modernCalendarPilot = model === 'gpt-6-luna' || model === 'gpt-6.1-sol';
+  const lunaHighGrouping = modernCalendarPilot &&
+    ['high', 'xhigh', 'max'].includes(
       String(config.stage3ReasoningEffort ||
         process.env.STAGE3_COMPARISON_REASONING_EFFORT || 'none').trim().toLowerCase()
     );
-  const literalSourceNames = model === 'gpt-6-luna' &&
+  const literalSourceNames = modernCalendarPilot &&
     (config.lunaCalendarLiteralSourcePrompt === true ||
       parseBooleanEnv('LUNA_CALENDAR_LITERAL_SOURCE_PROMPT', false));
   const prompt = createCalendarExtractionPrompt(combinedText, userName, timestamp,
-    lunaHighGrouping, model === 'gpt-6-luna', literalSourceNames);
+    lunaHighGrouping, modernCalendarPilot, literalSourceNames);
 
   const response = await callGPT(prompt, imageUrls, config);
   let items: CalendarItem[] = [];
@@ -4246,7 +4247,7 @@ async function callGPT(
 ): Promise<string> {
   const client = getOpenAIClient();
   const model = config.stage3ModelOverride || resolveStageModel(config.gptModelReasoning, usageMeta.modelEnvVar);
-  const isGpt6TrialModel = model === 'gpt-6-luna' || model === 'gpt-6-sol';
+  const isGpt6TrialModel = model === 'gpt-6-luna' || model === 'gpt-6-sol' || model === 'gpt-6.1-sol';
   const imageDetail = config.stage3ImageDetail || (isGpt6TrialModel
     ? resolveImageDetail(usageMeta.imageDetailEnvVar, 'high', true)
     : resolveImageDetail(usageMeta.imageDetailEnvVar, 'high'));
@@ -4259,7 +4260,7 @@ async function callGPT(
   }
 
   const usesResponsesApi = (value: string): boolean =>
-    value.startsWith('gpt-5') || value === 'gpt-6-luna' || value === 'gpt-6-sol';
+    value.startsWith('gpt-5') || value === 'gpt-6-luna' || value === 'gpt-6-sol' || value === 'gpt-6.1-sol';
   const maxOutputTokens = 32000;
   const MIN_OUTPUT_TOKENS = 512;
 

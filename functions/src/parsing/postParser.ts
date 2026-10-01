@@ -1281,7 +1281,7 @@ async function parsePostDataCore(
     const canaryStage3Effort = String(
       process.env.LUNA_CANARY_STAGE3_REASONING_EFFORT || 'high'
     ).trim().toLowerCase();
-    if (canaryStage3Effort !== 'high' && canaryStage3Effort !== 'xhigh') {
+    if (!['high', 'xhigh', 'max'].includes(canaryStage3Effort)) {
       throw new Error(`Unsupported LUNA_CANARY_STAGE3_REASONING_EFFORT: ${canaryStage3Effort}`);
     }
     cfg.stage3ReasoningEffort = canaryStage3Effort;
