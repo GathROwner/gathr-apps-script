@@ -64,8 +64,18 @@ export function reconcileRaceSchedule(
   const title = rawTitle.toLowerCase().replace(/\b\w/g, letter => letter.toUpperCase())
     .replace(/\bBy\b/g, 'by');
   const parent: ProcessedEvent = { ...parentSource, name: title, startTime: explicitStart };
-  if (scheduleText && !/ages\s*10\s*[–-]\s*12/i.test(String(parent.description || ''))) {
-    parent.description = [String(parent.description || '').trim(), 'Race-day schedule:', scheduleText]
+  const description = String(parent.description || '').trim();
+  const detailKinds = [
+    /on-site registration/i,
+    /warm[ -]?up/i,
+    /first heat/i,
+    /ages\s*6\s*[–-]\s*9/i,
+    /ages\s*10\s*[–-]\s*12/i,
+  ];
+  const missingDetails = scheduleText.split(/\r?\n/).map(line => line.trim())
+    .filter(line => detailKinds.some(kind => kind.test(line) && !kind.test(description)));
+  if (missingDetails.length > 0) {
+    parent.description = [description, `Additional race-day details: ${missingDetails.join('; ')}`]
       .filter(Boolean).join('\n\n');
   }
   if (registrationUrl) {

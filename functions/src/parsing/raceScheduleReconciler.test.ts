@@ -51,6 +51,7 @@ test('keeps Friday pickup, folds Saturday logistics, and restores race source de
   assert.equal(result.events[1].startTime, '11:00');
   assert.equal(result.events[1].timeFlags?.end?.source, 'semantic');
   assert.match(result.events[1].description, /Kids Ages 10–12/);
+  assert.match(result.events[1].description, /On-Site Registration/);
   assert.match(result.events[1].ticketsBuyUrl || '', /raceroster\.com/);
   assert.equal(result.events[1].imageProvenance?.media?.length, 2);
 });
