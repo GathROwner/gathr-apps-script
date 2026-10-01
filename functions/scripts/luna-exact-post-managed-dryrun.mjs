@@ -196,10 +196,14 @@ try {
       inputTokens: item.inputTokens, outputTokens: item.outputTokens }),
     skipReasonHandler: item => skips.push({ stage: item.stage, reason: item.reason }),
   });
-  report.events = events.map(({ name, description, category, startDate, startTime, endTime, recurringPattern,
-    relevantImageIndex, image, relevantImageUrl, mediaUrls, imageProvenance, venue }) => ({
-    name, description, category, startDate, startTime, endTime, recurringPattern, relevantImageIndex,
-    image, relevantImageUrl, mediaUrls, imageProvenance, venue,
+  report.events = events.map(({ name, description, category, startDate, endDate,
+    startTime, endTime, isRecurring, recurringPattern, totalOccurrences, recurrenceUntilDate,
+    ticketLink, ticketsBuyUrl, relevantImageIndex, image, relevantImageUrl,
+    mediaUrls, imageProvenance, venue }) => ({
+    name, description, category, startDate, endDate, startTime, endTime,
+    isRecurring, recurringPattern, totalOccurrences, recurrenceUntilDate,
+    ticketLink, ticketsBuyUrl, relevantImageIndex, image, relevantImageUrl,
+    mediaUrls, imageProvenance, venue,
   }));
   for (let index = 0; index < events.length; index++) {
     try {
@@ -208,8 +212,11 @@ try {
       report.payloads.push({ name: events[index].name, description: payload.description,
         category: payload.category, venueId: payload.venueId,
         establishment: payload.establishment, startDate: payload.startDate,
-        startTime: payload.startTime, endTime: payload.endTime,
+        startTime: payload.startTime, endDate: payload.endDate, endTime: payload.endTime,
         recurringPattern: payload.recurringPattern, isRecurring: payload.isRecurring,
+        totalOccurrences: payload.totalOccurrences,
+        recurrenceUntilDate: payload.recurrenceUntilDate,
+        ticketLink: payload.ticketLink, ticketsBuyUrl: payload.ticketsBuyUrl,
         image: payload.image, relevantImageUrl: payload.relevantImageUrl,
         mediaUrls: payload.mediaUrls, imageProvenance: payload.imageProvenance,
         uniqueId: payload.uniqueId });
