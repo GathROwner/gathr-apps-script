@@ -1800,6 +1800,8 @@ async function parsePostDataCore(
           .map(image => image.imageIndex));
         stage3Cfg.calendarInventoryAudit = {
           ...cfg.calendarInventoryAudit,
+          applyAdditions: lunaCanarySelected &&
+            cfg.calendarInventoryAudit.applyAdditions === true,
           estimatedItemCount: classification.estimatedItemCount,
           frameSourceGalleryIndices: lunaAnalysisFrames.map(frame => frame.sourceGalleryIndex),
           denseFrameIndices: lunaAnalysisFrames.flatMap((frame, index) =>
