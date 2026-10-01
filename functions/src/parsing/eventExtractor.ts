@@ -1058,6 +1058,10 @@ export async function auditCalendarInventory(
     timedPrimaryCount,
     readFrameIndices, inventoryCount: listings.length,
     additions: reconciliation.additions.length,
+    additionDetails: reconciliation.additions.slice(0, 3).map(listing => ({
+      date: listing.date, startTime: listing.startTime, title: listing.title,
+      sourceGalleryIndex: listing.sourceGalleryIndex,
+    })),
     additionDecision: additionDecision.reason,
     appliedAdditionCount: appliedAdditions.length,
     conflicts: reconciliation.conflicts.length,

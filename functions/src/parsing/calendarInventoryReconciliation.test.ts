@@ -49,6 +49,17 @@ test('possessive apostrophe variation is the same title when date and time agree
   assert.equal(result.conflicts.length, 0);
 });
 
+test('printed tournament title matches named morning and afternoon sessions by slot', () => {
+  const name = '3RD ANNUAL LUCK OF THE DRAW ADULT PICKLEBALL TOURNAMENT';
+  const date = '2026-09-26';
+  const result = reconcileCalendarInventory([
+    item(`${name} — Recreational Tournament`, date, '10:00'),
+    item(`${name} — Competitive Tournament`, date, '13:00'),
+  ], [listing(name, date, '10:00am'), listing(name, date, '1:00pm')]);
+  assert.equal(result.matched.length, 2);
+  assert.equal(result.conflicts.length, 0);
+});
+
 test('a differently titled duplicate market promotion is held instead of added', () => {
   const result = reconcileCalendarInventory(
     [item('COMMUNITY FARMERS MARKET / YARD SALE', '2026-09-26', '08:30')],

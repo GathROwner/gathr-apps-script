@@ -48,6 +48,15 @@ export function normalizeCalendarInventoryTime(value: string): string | null {
   return `${String(hour).padStart(2, '0')}:${match[2] || '00'}`;
 }
 
+function sameListingTitle(primaryName: string, inventoryTitle: string): boolean {
+  const primary = normalizeCalendarInventoryTitle(primaryName);
+  const inventory = normalizeCalendarInventoryTitle(inventoryTitle);
+  if (primary === inventory) return true;
+  if (!primary.startsWith(`${inventory} `)) return false;
+  const suffix = primary.slice(inventory.length).trim();
+  return suffix === 'recreational tournament' || suffix === 'competitive tournament';
+}
+
 function validDate(value: string): boolean {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
   const date = new Date(`${value}T12:00:00Z`);
@@ -96,7 +105,7 @@ export function reconcileCalendarInventory(
     seenInventory.set(identity, listing.sourceGalleryIndex);
 
     const sameSlot = primarySlots.get(slot) || [];
-    if (sameSlot.some(item => normalizeCalendarInventoryTitle(item.name) === title)) {
+    if (sameSlot.some(item => sameListingTitle(item.name, listing.title))) {
       matched.push(listing);
     } else if (sameSlot.length > 0) {
       conflicts.push({ listing, reason: 'same_slot_different_title' });
