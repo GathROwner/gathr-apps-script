@@ -142,6 +142,17 @@ export interface ParsingConfig {
   stage3ReasoningEffort?: 'none' | 'low' | 'medium' | 'high' | 'xhigh' | 'max';
   stage3ImageDetail?: 'low' | 'high' | 'original' | 'auto';
   lunaCalendarLiteralSourcePrompt?: boolean;
+  /** Opt-in Luna calendar transcription comparison; records disputes without changing extracted items. */
+  calendarNameAdjudicationDiagnostics?: boolean;
+  calendarNameDisputeHandler?: (disputes: Array<{
+    itemIndex: number;
+    date: string;
+    sourceImageIndex: number;
+    modelName: string;
+    ocrCandidate: string;
+    differingModelWord: string;
+    differingOcrWord: string;
+  }>) => void | Promise<void>;
   stage4ModelOverride?: string;
   stage5ModelOverride?: string;
   lunaCanaryBypass?: boolean;

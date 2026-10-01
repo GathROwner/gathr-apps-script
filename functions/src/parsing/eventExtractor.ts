@@ -30,6 +30,7 @@ import {
   resolveStageModel,
 } from './runtimeConfig.js';
 import { logger } from '../utils/logger.js';
+import { findCalendarOcrNameDisputes } from './calendarNameDisputes.js';
 
 // Initialize OpenAI client lazily
 let openaiClient: OpenAI | null = null;
@@ -903,6 +904,48 @@ async function extractCalendarContent(
       config
     );
     items = supplemented;
+  }
+
+  if (modernCalendarPilot && items.length >= 20 && imageUrls.length > 0 &&
+      config.calendarNameAdjudicationDiagnostics === true) {
+    const allDisputes = [];
+    for (let imageIndex = 0; imageIndex < Math.min(imageUrls.length, 4); imageIndex++) {
+      const frameItems = items.filter(item => item.relevantImageIndex === imageIndex);
+      if (frameItems.length < 5) continue;
+      const transcriptionPrompt = `Literal transcription task. Read ONLY the attached calendar image. For each printed date cell, put its day number alone on one line, followed by every printed line of event text and time. Preserve names letter for letter, including accents. Do not infer dates, events, or identities. Do not summarize, classify, group, or explain.`;
+      let reading: string;
+      try {
+        reading = await callGPT(transcriptionPrompt, [imageUrls[imageIndex]], {
+          ...config,
+          stage3ModelOverride: 'gpt-6-luna',
+          stage3ReasoningEffort: 'high',
+          stage3ImageDetail: 'original',
+        });
+      } catch (error) {
+        logger.warn('Luna calendar transcription diagnostic failed', {
+          imageIndex,
+          error: error instanceof Error ? error.message : String(error),
+        });
+        continue;
+      }
+      const disputes = findCalendarOcrNameDisputes(frameItems, reading);
+      for (const dispute of disputes) {
+        allDisputes.push({
+          ...dispute,
+          itemIndex: items.indexOf(frameItems[dispute.itemIndex]),
+          sourceImageIndex: imageIndex,
+        });
+      }
+    }
+    if (allDisputes.length > 0) {
+      logger.warn('Luna calendar name readings disagree; base extraction preserved', {
+        disputeCount: allDisputes.length,
+        disputes: allDisputes,
+      });
+    }
+    if (config.calendarNameDisputeHandler) {
+      await config.calendarNameDisputeHandler(allDisputes);
+    }
   }
 
   return items;
@@ -3653,6 +3696,9 @@ SOURCE-COPY CHECK FOR DENSE POSTERS:
   const captionListingRule = literalSourceNames
     ? `- Include a separately advertised caption event with an explicit date, or an explicit every/weekly weekday and time, even when absent from every image. Keep it separate from pictured entries and merge any duplicate listing. For a weekly weekday with no first date, use the first matching weekday on or after the posted date as the initial date. Do not invent a final date or multiple occurrences. Mark an image-absent caption item with relevantImageIndex -1.\n`
     : '- Do NOT infer items from the caption if they do not appear in the image; only use caption to disambiguate dates when the grid shows day-of-week only.\n';
+  const ocrEvidenceRule = clarifyMeridiem
+    ? '- If the Text block includes OCR text from the images, use it as a fallible aid to enumerate date cells. The attached image is the source of truth for exact names, dates, and times. OCR can misread one letter; when OCR and the visible text disagree, copy the visible characters rather than silently replacing a correct visual reading. If the characters remain unreadable, say so in extractionReason instead of guessing.'
+    : '- If the Text block includes OCR text from the images, treat it as authoritative and use it to enumerate every date cell.';
   return `Extract ALL events and specials from this CALENDAR content, ensure you process all attached images.
 
 CONTENT:
@@ -3667,7 +3713,7 @@ IMPORTANT (Calendar grids with lineups):
 - Images may include day-cell crops from the SAME calendar. Treat all images as parts of one calendar.
 - Some images may repeat or overlap; de-duplicate items and merge details across images.
 - You are given 1+ images; use the images as the PRIMARY source. Read (OCR) the text in the image(s).
-- If the Text block includes OCR text from the images, treat it as authoritative and use it to enumerate every date cell.
+${ocrEvidenceRule}
 - Some entries may be faint or colored (e.g., purple/pink). Read colored text carefully.
 - Do NOT collapse repeated items into weekly recurrences. If the same class appears on multiple dates, output one item per date.
 - If a cell lists multiple sessions (e.g., "5pm & 6:30pm"), output separate items for each time.

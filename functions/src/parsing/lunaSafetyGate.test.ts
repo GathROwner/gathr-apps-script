@@ -52,6 +52,8 @@ test('seasonal league timetable uses the reviewed legacy route until recurrence 
     'The festival begins November 2. See the stage schedule below.'), false);
   assert.equal(shouldRetrySeasonalLeagueWithLegacy(
     'The curling league meets November 2 for a one-day tournament.'), false);
+  assert.equal(shouldRetrySeasonalLeagueWithLegacy(
+    'The Regular Season will officially begin the week of November 2, 2026. The schedule is below. New daytime regular league. Learn to Curl starts November 12 for 6 weeks.'), true);
 });
 
 test('Luna prose title falls back while genuine multi-part performance names remain usable', () => {

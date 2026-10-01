@@ -159,7 +159,7 @@ process.env.PARSER_DRY_RUN_LOCAL_IMAGES = 'false';
 const usage = [];
 const skips = [];
 const report = { snapshotId, postId, backendCalls, events: [], payloads: [], skips, usage,
-  rowVenue: null, stages: {}, cleanup: [] };
+  rowVenue: null, stages: {}, adjudicationDisputes: [], cleanup: [] };
 try {
   const establishment = String(source.rowMeta?.userName || source.establishment || '');
   const sourceUrls = sourceImageBytes.map((_, index) => `${localOrigin}/source-${index}.jpg`);
@@ -187,6 +187,8 @@ try {
     profilePicUrl: '', extractedData: { id: postId, postId },
   }, {}, {
     ...parsingConfig,
+    calendarNameAdjudicationDiagnostics: process.env.LUNA_DRYRUN_NAME_ADJUDICATION === 'true',
+    calendarNameDisputeHandler: disputes => { report.adjudicationDisputes = disputes; },
     stageArtifactsHandler: snapshot => {
       if (snapshot.imageFrameManifest) report.stages.imageFrameManifest = snapshot.imageFrameManifest;
       if (snapshot.stage3Items) report.stages.stage3Items = snapshot.stage3Items;
