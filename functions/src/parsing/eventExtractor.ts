@@ -3788,6 +3788,7 @@ CRITICAL JSON FORMATTING REQUIREMENTS:
       "price": "string",
       "description": "string",
       "extractionReason": "string",
+      "relevantImageIndex": 0,
       "timeFlags": {
         "start": { "source": "explicit" | "implied" | "semantic" | "none", "evidence": "string" },
         "end": { "source": "explicit" | "implied" | "semantic" | "none", "toClose": boolean, "evidence": "string" }

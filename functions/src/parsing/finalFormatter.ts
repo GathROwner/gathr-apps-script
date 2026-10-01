@@ -375,6 +375,7 @@ Never return arrays of values for an item; each must be a JSON object.`;
         originalItem,
         categoryNormalizationStats
       );
+      if (isGeneralFestivalParent(event)) event.category = 'Gatherings & Parties';
 
       // A scheduled community meal is an activity, not a restaurant deal.
       // Preserve its printed start while leaving an unprinted end for Stage 5.5.
@@ -1787,6 +1788,18 @@ function applyFinalCategoryNormalizationGuardrail(
 /**
  * Apply category corrections based on content analysis
  */
+function isGeneralFestivalParent(event: Pick<FormattedEvent, 'name' | 'description'>): boolean {
+  return /\b(?:fest|festival|fair)\b/i.test(event.name || '') &&
+    !/\b(?:music|concert|jazz|blues|rock|folk|comedy|improv)\b/i.test(event.name || '') &&
+    /\b(?:vendors?|activities|attractions|crafts)\b/i.test(event.description || '');
+}
+
+export function applyFestivalParentCategoryForRegression(event: FormattedEvent): FormattedEvent {
+  return isGeneralFestivalParent(event)
+    ? { ...event, category: 'Gatherings & Parties' }
+    : { ...event };
+}
+
 function applyCategoryCorrections(
   event: FormattedEvent,
   originalItem: ExtractedItem | undefined
@@ -1832,6 +1845,12 @@ function applyCategoryCorrections(
   event = applyCinemaVenueHardening(event, originalItem);
 
   const textToCheck = `${event.name || ''} ${event.description || ''} ${'extractionReason' in (originalItem || {}) ? (originalItem as any).extractionReason || '' : ''}`.toLowerCase();
+
+  // A shared-admission festival is the event; its stage acts and vendors are
+  // details. Do not classify the parent from one act or a vendor's name.
+  if (isGeneralFestivalParent(event)) {
+    event.category = 'Gatherings & Parties';
+  }
 
   const hasTriviaCue =
     /\b(trivia|triva)\b/.test(textToCheck) ||
@@ -1879,29 +1898,7 @@ function applyCategoryCorrections(
     const isArtParty = artPartyExclusions.some((indicator) => textToCheck.includes(indicator));
 
     if (!isArtParty) {
-      const comedyIndicators = [
-        'comedy',
-        'comedian',
-        'comic',
-        'stand-up',
-        'standup',
-        'improv',
-        'comedy award',
-        'just for laughs',
-        'the debaters',
-        'last comic standing',
-        'yuk yuk',
-        'yukyuk',
-        'comedy club',
-        'comedy night',
-        'laugh factory',
-        'funny',
-        'jokes',
-        'hilarious',
-      ];
-      const hasComedyIndicator = comedyIndicators.some((indicator) =>
-        textToCheck.includes(indicator)
-      );
+      const hasComedyIndicator = /\b(?:comedy|comedian|comic|stand[ -]?up|improv|just for laughs|the debaters|last comic standing|yuk ?yuk|laugh factory|funny|jokes|hilarious)\b/i.test(textToCheck);
 
       if (hasComedyIndicator) {
         logger.debug(`Category correction: "${event.name}" → Comedy`);
@@ -4006,8 +4003,12 @@ function normalizeRecurringForFormattedEvent(
     .join(' ');
   const isForcedHolidayWeekendOneOff = /\bmixed_holiday_weekend_split:/i.test(extractionReasonText);
 
-  if (isForcedHolidayWeekendOneOff) {
-    logger.debug(`Forced holiday/weekend split item to one-off for "${event.name}"`, {
+  const isDatedFestivalParent = /^\d{4}-\d{2}-\d{2}$/.test(String(event.startDate || '')) &&
+    /\b(?:fest|festival|fair)\b/i.test(String(event.name || '')) &&
+    !/\b(?:weekly|recurring|every\s+(?:week(?:end)?|day|month|monday|tuesday|wednesday|thursday|friday|saturday|sunday)|each\s+(?:week(?:end)?|month))\b/i.test(sourceText);
+
+  if (isForcedHolidayWeekendOneOff || isDatedFestivalParent) {
+    logger.debug(`Forced explicitly dated festival or holiday item to one-off for "${event.name}"`, {
       extractionReason: extractionReasonText,
       startDate: event.startDate,
       endDate: event.endDate,

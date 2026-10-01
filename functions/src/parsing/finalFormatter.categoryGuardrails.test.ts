@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 
 import {
   applyCategoryCorrectionsForRegression,
+  applyFestivalParentCategoryForRegression,
+  applyRecurrenceNormalizationForRegression,
   filterRetailMerchandisePromotions,
 } from './finalFormatter.js';
 import { CalendarItem, FormattedEvent } from './types.js';
@@ -56,6 +58,60 @@ test('Beer Garden venue wording does not turn a named performer into a food spec
     assert.equal(result.isEvent, 'Yes');
     assert.equal(result.isFoodSpecial, 'No');
   }
+});
+
+test('festival with an Improvement Group vendor remains a dated gathering', () => {
+  const description = 'Fall Fest with stage performances, artisans and vendors including Stratford Area Watershed Improvement Group.';
+  const event = formatted({
+    category: 'Live Music',
+    name: 'Town of Stratford Fall Fest',
+    description,
+    startDate: '2026-09-26',
+    endDate: '2026-09-26',
+    recurringPattern: 'weekly_saturday',
+    isRecurring: 'Yes',
+  });
+  const source = extracted({
+    name: event.name,
+    description,
+    date: '2026-09-26',
+  });
+  const categoryCorrected = applyCategoryCorrectionsForRegression(event, source);
+  const recurrenceCorrected = applyRecurrenceNormalizationForRegression(categoryCorrected, source);
+  assert.equal(categoryCorrected.category, 'Gatherings & Parties');
+  assert.equal(applyFestivalParentCategoryForRegression(formatted({
+    name: event.name, description, category: 'Live Music',
+  })).category, 'Gatherings & Parties');
+  assert.equal(recurrenceCorrected.recurringPattern, 'none');
+  assert.equal(recurrenceCorrected.isRecurring, false);
+});
+
+test('an actual improv performance remains Comedy', () => {
+  const result = applyCategoryCorrectionsForRegression(
+    formatted({ name: 'Improv at the Beer Garden', description: 'Live improv comedy show.' }),
+    extracted({ name: 'Improv at the Beer Garden', description: 'Live improv comedy show.' })
+  );
+  assert.equal(result.category, 'Comedy');
+});
+
+test('an Improvement Group mention does not turn live music into Comedy', () => {
+  const result = applyCategoryCorrectionsForRegression(
+    formatted({ description: 'Live band fundraiser for the Watershed Improvement Group.' }),
+    extracted({ description: 'Live band fundraiser for the Watershed Improvement Group.' })
+  );
+  assert.equal(result.category, 'Live Music');
+});
+
+test('a festival explicitly advertised every Saturday stays recurring', () => {
+  const description = 'Fall Fest every Saturday with vendors and activities.';
+  const result = applyRecurrenceNormalizationForRegression(
+    formatted({
+      name: 'Fall Fest', description, startDate: '2026-09-26', endDate: '2026-09-26',
+      recurringPattern: 'weekly_saturday', isRecurring: 'Yes',
+    }),
+    extracted({ name: 'Fall Fest', description, date: '2026-09-26' })
+  );
+  assert.equal(result.recurringPattern, 'weekly_saturday');
 });
 
 test('an actual beer special is still categorized as a food or drink special', () => {
