@@ -240,6 +240,20 @@ export function isOperatingHoursOnlyItemForRegression(item: ExtractedItem | unde
   return isOperatingHoursOnlyItem(item);
 }
 
+/** A source-copied schedule line cannot be discarded just because its clock time looks odd. */
+export function shouldKeepExplicitScheduleTime(item: ExtractedItem | undefined, reason: string): boolean {
+  if (!item || item.extractionReason !== 'schedule_text_fallback' ||
+      isOperatingHoursOnlyItem(item)) return false;
+  const flags = item.timeFlags;
+  if (flags?.start?.source !== 'explicit' || !String(flags.start.evidence || '').trim() ||
+      !String(item.name || '').trim() ||
+      !/^\d{4}-\d{2}-\d{2}$/.test(String(item.date || '')) ||
+      !/^\d{1,2}:\d{2}$/.test(String(item.startTime || ''))) return false;
+  const explanation = String(reason || '').toLowerCase();
+  return /\b(?:implausible|unlikely|unrealistic|typo|misprint|suspicious)\b/.test(explanation) &&
+    /\b(?:time|hour|clock|start|am|pm)\b/.test(explanation);
+}
+
 function applyDeterministicStage4Rejects(
   items: ExtractedItem[],
   reasonPrefix: string
@@ -616,6 +630,13 @@ export async function performSecondaryValidation(
           calendarDealAllDayOverrideCount++;
         }
 
+        if (decision === 'REJECTED' && shouldKeepExplicitScheduleTime(item, reason)) {
+          logger.info(`Stage 4 preserved explicitly printed schedule time for "${item.name}"`, {
+            date: item.date, startTime: item.startTime,
+          });
+          decision = 'KEPT';
+        }
+
         if (decision === 'KEPT' && normalizeCalendarDealCardAsAllDaySpecial(item, userName)) {
           calendarDealAllDayNormalizationCount++;
         }
@@ -800,6 +821,9 @@ These fields are OPTIONAL and should NOT cause rejection if missing:
 - venue (optional when the posting venue is the location)
 
 DO NOT reject calendar events just because endTime, price, or description are empty/missing.
+When a schedule line supplies a date, named activity, and explicit clock time, do not
+reject it merely because that printed time seems implausible or mistyped. Copy the
+printed time unchanged; do not silently correct it. Other validation rules still apply.
 
 DUPLICATE DETECTION RULES:
 - Same event name + SAME date + SAME time + same venue = likely duplicate (reject one)
