@@ -28,6 +28,7 @@ const events = await parsePostData({
   calendarInventoryAudit: {
     enabled: true, estimatedItemCount: 0,
     frameSourceGalleryIndices: [], denseFrameIndices: [], maxFrames: 2,
+    applyAdditions: process.env.LUNA_DRY_RUN_APPLY_INVENTORY === 'true',
     handler: snapshot => audits.push(snapshot),
   },
   stageArtifactsHandler: snapshot => artifacts.push(snapshot),
@@ -49,14 +50,17 @@ const report = {
     imageProvenance }) => ({ name, startDate, startTime, endTime,
     relevantImageIndex, imageProvenance })),
 };
+const runLabel = String(process.env.LUNA_DRY_RUN_LABEL || 'full-pipeline')
+  .replace(/[^a-zA-Z0-9_-]/g, '');
 const outputPath = path.join(root,
-  'artifacts/cornfest-google-chat-2026-10-01/cornfest-inventory-audit-full-pipeline.json');
+  `artifacts/cornfest-google-chat-2026-10-01/cornfest-inventory-audit-${runLabel}.json`);
 await fs.writeFile(outputPath, JSON.stringify(report, null, 2));
 console.log(JSON.stringify({ outputPath, stage3Count: report.stage3Count,
   stage4Count: report.stage4Count, finalCount: report.finalCount,
   audits: audits.map(audit => ({ estimated: audit.estimatedItemCount,
     primary: audit.primaryItemCount, frames: audit.readFrameIndices,
     additions: audit.reconciliation.additions.map(item => item.title),
+    applied: audit.appliedAdditionCount,
     conflicts: audit.reconciliation.conflicts.map(item => item.listing.title),
     unresolved: audit.unresolvedListings.length })),
   usage: report.usage, skips: skips.map(item => item.reason) }));
