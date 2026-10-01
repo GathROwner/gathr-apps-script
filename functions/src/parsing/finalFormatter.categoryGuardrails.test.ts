@@ -60,6 +60,60 @@ test('Beer Garden venue wording does not turn a named performer into a food spec
   }
 });
 
+test('a pizza sponsor does not turn a kids race into a food special', () => {
+  const result = applyCategoryCorrectionsForRegression(
+    formatted({
+      name: 'Kids Fox Trot Presented by Boston Pizza',
+      description: 'A race for kids at Victoria Park. Admission tickets are $10.',
+      category: 'Food Special',
+      venue: 'Victoria Park',
+    }),
+    extracted({
+      name: 'Kids Fox Trot Presented by Boston Pizza',
+      description: 'A scheduled children’s race and warm-up. Admission tickets are $10.',
+      venue: 'Victoria Park',
+    })
+  );
+  assert.equal(result.category, 'Sports');
+  assert.equal(result.isEvent, 'Yes');
+  assert.equal(result.isFoodSpecial, 'No');
+});
+
+test('a lunchtime live performer at a food hall remains an event', () => {
+  const result = applyCategoryCorrectionsForRegression(
+    formatted({
+      name: 'Lunch Sounds Better Live with Carter Maclellan',
+      description: 'Live performance at noon.', category: 'Food Special',
+      venue: 'Founders Food Hall and Market',
+    }),
+    extracted({
+      name: 'Lunch Sounds Better Live with Carter Maclellan',
+      description: 'Live performance at noon.',
+      venue: 'Founders Food Hall and Market',
+    })
+  );
+  assert.equal(result.category, 'Live Music');
+  assert.equal(result.isEvent, 'Yes');
+  assert.equal(result.isFoodSpecial, 'No');
+});
+
+test('a vendors market inside a festival schedule is a gathering', () => {
+  const result = applyCategoryCorrectionsForRegression(
+    formatted({
+      name: 'Afternoon Vendors Market',
+      category: 'Live Music',
+      description: 'Part of the Bay Boogie Festival at St Peters Circle Club.',
+      venue: 'St Peters Circle Club',
+    }),
+    extracted({
+      name: 'Afternoon Vendors Market',
+      description: 'Vendors market from noon to 5 PM.',
+      venue: 'St Peters Circle Club',
+    })
+  );
+  assert.equal(result.category, 'Gatherings & Parties');
+});
+
 test('festival with an Improvement Group vendor remains a dated gathering', () => {
   const description = 'Fall Fest with stage performances, artisans and vendors including Stratford Area Watershed Improvement Group.';
   const event = formatted({

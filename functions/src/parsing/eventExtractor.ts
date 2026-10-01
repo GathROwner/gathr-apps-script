@@ -3443,6 +3443,7 @@ function createEventExtractionPrompt(
 - When a single session or workshop block lists multiple explicit dates/times (e.g., "Session 1: Jan 14 & 28, 6-8 pm"), emit a separate event object for each listed date/time pair instead of collapsing them into one. Only treat it as a recurring event if the language explicitly says "every" or "weekly" with a weekday.
 - For a named festival with shared admission, location, and hours, create one parent festival event per advertised day. Put its vendors, activities, and on-site stage timetable in that day's description. Do not turn each vendor, attraction, or stage act into a separate feed event unless it has a separate admission or clearly independent venue/event listing.
 - For a concert lineup in one time slot, create one event for the whole lineup and preserve every printed act in the name or description. Split only when the source gives distinct start times or independently advertised sessions.
+- If attendee-facing registration or kit pickup has its own explicit hours on a different date or at a different venue from the main event, extract that session separately. Keep same-day warm-ups and heats within a single race in the main event description unless separately advertised.
 
 CONTENT:
 - Posted by: ${userName}
@@ -3674,6 +3675,7 @@ ${literalNameRules}
 - Create one item per independently advertised event or time slot in the grid. When several acts share one cell and start time, they are one lineup event; preserve all act names in the name or description. Distinct sessions with different printed start times remain separate.
 - A line break inside a calendar cell is layout, not proof that a new act begins. Join consecutive lines into one performer name when the earlier line has no separating punctuation. Split a lineup only where the flyer prints a separator such as a comma, ampersand, plus sign, or distinct billing marker. Preserve the resulting names exactly; do not insert separators that are not printed.
 - Include the date (or day-of-week if that's all that's shown), start_time and end_time when present, and the stage/venue exactly as shown in the grid.
+- Distinguish registration or doors opening from the advertised start of the main program. When the caption explicitly gives the main event's start and the flyer prints an earlier registration time, use the caption's event start and keep registration in the description. If the sources genuinely disagree about the main start, state the conflict in extractionReason instead of silently substituting registration.
 - For lineup grids, set type="event" (do NOT use "special" unless there is an explicit price/discount).
 ${captionListingRule}
 - If performer names in the image are unreadable, return no items and note "image_unreadable" in notes rather than guessing.
@@ -3733,6 +3735,7 @@ Extract EVERY performance/event listed.
 
 FESTIVAL PARENT RULE:
 - When the schedule is printed inside one named festival with shared admission, location, and hours, create one festival event for each festival date. Put that day's stage timetable, vendors, and activities in its description. Do not publish each stage act, vendor, or attraction as a separate event unless it has independent admission or a separate venue outside the festival.
+- If the festival's last on-site performance has a printed end time and no later festival hours are printed, use that last performance end as the parent festival end. Do not replace it with a generic two-hour duration.
 - A photo of an activity is evidence about the parent festival, not a new event by itself.
 - A named concert series across two separately named public venues is not one shared-location festival event. When each performer has its own printed start time and a venue or stage column, extract one item per performer. Keep the performer name as the event name and its own stage/venue label; never combine the two venue columns into one venue or collapse four performances into one daily series item.
 

@@ -3053,8 +3053,14 @@ export function enforceDateTimeCompleteness(
   const posted = DateTime.fromISO(timestamp, { zone: timezone });
   const postedDate = posted.isValid ? posted.toFormat('yyyy-MM-dd') : '';
   const postedHHMM = posted.isValid ? posted.toFormat('HH:mm') : '';
-  const sharedCombinedTextRange =
-    events.length === 1 ? extractExplicitTimeRangeFromEvidence(combinedText, '') : null;
+  // A single extracted event may still come from a post with several dated
+  // sessions. In that case a range from another day cannot supply its end.
+  const printedDates = new Set(
+    [...combinedText.matchAll(/\b(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:tember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\s+\d{1,2}(?:st|nd|rd|th)?\b|\b\d{4}-\d{2}-\d{2}\b/gi)]
+      .map(match => match[0].toLowerCase().replace(/(?:st|nd|rd|th)\b/g, ''))
+  );
+  const sharedCombinedTextRange = events.length === 1 && printedDates.size <= 1
+    ? extractExplicitTimeRangeFromEvidence(combinedText, '') : null;
   const siblingEndTimeHints = buildSiblingEndTimeHints(events);
   const denseScheduleBatchUsesDurationDefault = shouldUseBatchDurationDefault(events);
 
@@ -3604,6 +3610,13 @@ function shouldPreferDurationDefaultForMissingEnd(
 
   const sourceType = String((event as any)?._sourceType || '').trim().toLowerCase();
   if (sourceType === 'schedule' || sourceType === 'calendar') {
+    return true;
+  }
+
+  if (
+    String(event.category || '').trim() === 'Sports' &&
+    /\b(race|marathon|triathlon|trot|relay|running|run)\b/i.test(String(event.name || ''))
+  ) {
     return true;
   }
 

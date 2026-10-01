@@ -68,6 +68,21 @@ test('untimed future calendar offer does not inherit its post time', () => {
   assert.equal(sameDay[0].timeResolution?.startFromPostTime, true);
 });
 
+test('a race does not inherit the previous day kit-pickup end time', () => {
+  const [race] = enforceDateTimeCompleteness(
+    [buildEvent({
+      category: 'Sports', name: 'Kids Fox Trot',
+      startDate: '2026-10-17', endDate: '2026-10-17',
+      startTime: '11:00', endTime: '21:00',
+      timeResolution: { hoursUsed: false, endFromHours: 'category_default' },
+    })],
+    '2026-09-29T16:00:00.000Z', 'America/Halifax',
+    'Friday, October 16th: 11:00 AM - 6:00 PM race kit pick-up. Saturday, October 17th: 11:00 AM Kids Fox Trot.'
+  );
+  assert.equal(race.endTime, '13:00');
+  assert.equal(race.timeResolution?.endFromHours, 'duration_default');
+});
+
 test('venue-hours fallback cannot date a future calendar offer from its post time', () => {
   const offer = buildEvent({
     isEvent: 'No', isFoodSpecial: 'Yes', category: 'Happy Hour',

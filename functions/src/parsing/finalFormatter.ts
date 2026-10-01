@@ -1233,6 +1233,13 @@ function detectExplicitFoodSpecialCategory(
     .trim();
   if (!text) return null;
 
+  // A restaurant can sponsor a sporting event without advertising a meal.
+  // Its name alone must not convert the race into a food special.
+  const sportingEvent = /\b(race|marathon|triathlon|trot|relay|running|run)\b/.test(text);
+  const explicitFoodOffer = /\b(food|drink)\s+special\b|\b(happy\s*hour|wing\s*night|two\s+can\s+dine)\b|\b(half[- ]priced?|prix fixe)\b|\b(?:pizza|burger|taco|wings?)\s*(?:for|only)?\s*\$\s*\d+|\$\s*\d+\s*(?:pizza|burger|taco|wings?)\b/.test(text);
+  const livePerformance = /\b(live|concert|music|band|performance|performer|singer|dj)\b/.test(text);
+  if ((sportingEvent || livePerformance) && !explicitFoodOffer) return null;
+
   if (/\bhappy\s*hour\b/.test(text)) return 'Happy Hour';
   if (/\bwing\s*night\b/.test(text)) return 'Wing Night';
 
@@ -1722,6 +1729,11 @@ function applyFinalCategoryNormalizationGuardrail(
     return event;
   };
 
+  if (/\b(?:vendors?|farmers?|craft)\s+market\b/i.test(String(event.name || ''))) {
+    stats.keywordInference += 1;
+    return setCategory('Gatherings & Parties', 'keyword_inference', 'market title');
+  }
+
   const isStrongUpgradeOverWeakFinal = (candidate: Category | null): boolean =>
     Boolean(
       candidate &&
@@ -1856,6 +1868,9 @@ function applyCategoryCorrections(
   originalItem: ExtractedItem | undefined
 ): FormattedEvent {
   const rawCategory = String(event.category || '').trim();
+  if (/\b(?:vendors?|farmers?|craft)\s+market\b/i.test(String(event.name || ''))) {
+    event.category = 'Gatherings & Parties';
+  }
   const normalizedAlias = CATEGORY_ALIAS_MAP[rawCategory.toLowerCase()];
   if (normalizedAlias && rawCategory !== normalizedAlias) {
     logger.debug(`Category alias normalization: "${event.name}" -> ${normalizedAlias}`, {
@@ -1866,6 +1881,19 @@ function applyCategoryCorrections(
   }
 
   const forcedFoodCategory = detectExplicitFoodSpecialCategory(event, originalItem);
+  if (
+    !forcedFoodCategory &&
+    event.category === 'Food Special' &&
+    /\b(race|marathon|triathlon|trot|relay|running|run)\b/i.test(`${event.name || ''} ${event.description || ''}`)
+  ) {
+    event.category = 'Sports';
+  } else if (
+    !forcedFoodCategory &&
+    event.category === 'Food Special' &&
+    /\b(live|concert|music|band|performance|performer|singer|dj)\b/i.test(`${event.name || ''} ${event.description || ''}`)
+  ) {
+    event.category = 'Live Music';
+  }
   if (forcedFoodCategory && event.category !== forcedFoodCategory) {
     logger.debug(`Category safeguard: "${event.name}" → ${forcedFoodCategory}`);
     event.category = forcedFoodCategory;
