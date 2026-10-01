@@ -1289,6 +1289,14 @@ async function parsePostDataCore(
     cfg.lunaCalendarLiteralSourcePrompt = true;
     cfg.stage4ModelOverride = 'gpt-6-luna';
     cfg.stage5ModelOverride = 'gpt-6-luna';
+    if (parseBooleanEnv('LUNA_CALENDAR_INVENTORY_AUDIT', false)) {
+      cfg.calendarInventoryAudit = {
+        enabled: true, estimatedItemCount: 0,
+        frameSourceGalleryIndices: [], denseFrameIndices: [], maxFrames: 2,
+        applyAdditions: parseBooleanEnv('LUNA_CALENDAR_INVENTORY_APPLY', false),
+        handler: cfg.calendarInventoryAudit?.handler,
+      };
+    }
     logger.info('Exact-post Luna canary selected', { postId });
   }
   const holdCalendarBandCanary = async (reason: string, detail = ''): Promise<ProcessedEvent[]> => {
