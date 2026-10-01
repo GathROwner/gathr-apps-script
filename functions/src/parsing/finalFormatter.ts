@@ -1112,6 +1112,47 @@ export function rehydrateFormattedEventMetadata(
   const nextEvent = { ...event } as FormattedEvent;
   let changed = false;
 
+  // A calendar/schedule cell with its own printed month/day and clock time is
+  // one dated slot. Stage 5 can mistake another weekday in the caption (such
+  // as a registration deadline) for recurrence and move every slot onto that
+  // weekday. Keep the validated source date/time and let the later finite
+  // sequence pass combine only genuinely consecutive weekly slots.
+  const sourceType = String((originalItem as Record<string, unknown> | undefined)?._sourceType || '');
+  const sourceDate = String(originalItem?.date || '').trim();
+  const sourceStartEvidence = String(originalItem?.timeFlags?.start?.evidence || '');
+  const sourcePattern = String(originalItem?.recurringPattern || 'none').trim().toLowerCase();
+  const hasPrintedMonthDay = /\b(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\s+\d{1,2}\b|\b\d{1,2}\s+(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\b|\b20\d{2}-\d{2}-\d{2}\b/i.test(sourceStartEvidence);
+  const isPrintedOneOffSlot =
+    (sourceType === 'calendar' || sourceType === 'schedule') &&
+    Boolean(parseIsoDate(sourceDate)) &&
+    sourcePattern === 'none' &&
+    originalItem?.timeFlags?.start?.source === 'explicit' &&
+    hasPrintedMonthDay &&
+    !/\b(?:every|weekly|each\s+(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday))\b/i.test(
+      `${originalItem?.name || ''} ${originalItem?.description || ''} ${sourceStartEvidence}`
+    );
+  if (isPrintedOneOffSlot) {
+    const sourceTime = normalizeUnambiguousSourceStartTime(String(originalItem?.startTime || ''));
+    const formattedAsSingleDay = nextEvent.startDate === nextEvent.endDate;
+    if (nextEvent.startDate !== sourceDate) {
+      nextEvent.startDate = sourceDate;
+      if (formattedAsSingleDay) nextEvent.endDate = sourceDate;
+      changed = true;
+    }
+    if (sourceTime && nextEvent.startTime !== sourceTime) {
+      nextEvent.startTime = sourceTime;
+      changed = true;
+    }
+    if (nextEvent.isRecurring !== 'No' || nextEvent.recurringPattern !== 'none' ||
+        nextEvent.totalOccurrences || nextEvent.recurrenceUntilDate) {
+      nextEvent.isRecurring = 'No';
+      nextEvent.recurringPattern = 'none';
+      nextEvent.totalOccurrences = undefined;
+      nextEvent.recurrenceUntilDate = undefined;
+      changed = true;
+    }
+  }
+
   if (!String(nextEvent.startTime || '').trim()) {
     const sourceStartTime = normalizeUnambiguousSourceStartTime(
       String(originalItem?.startTime || '')
