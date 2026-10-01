@@ -1,0 +1,17 @@
+# First exact-post Luna canary candidate — 2026-09-30
+
+An exact-post candidate does **not** have to be new to GathR. The selected-row route accepts `sourceUniqueIds` even when its dataset is already in `processed_datasets`; ordinary whole-dataset processing skips an already processed file. A previously seen post is useful for source and 5.2 comparison, but a live selected-row replay can update or create events and needs a separate dedupe review. All replays below used the local managed-endpoint runner, with no Firestore event writes or duplicate checks. `LUNA_CANARY_ENABLED` remains off in production.
+
+## Candidate comparison
+
+| Post | Saved 5.2 result | Managed Luna high result | Decision |
+| --- | --- | --- | --- |
+| Confederation Centre Art Gallery, `1713005494164338`, snapshot `1Dqh5RrrFEs2Q5bWMNLbRmQ8ogHEyCa27_99_1790773018651` | Two October 3 items: talk/tour 18:00, opening 19:00 | Two Luna items, same starts and verified `slug_ccoagallery` venue; two managed image and dry-write payload previews, no legacy retry | Best controlled dry canary candidate. End times are inferred because the caption gives none. The existing October 3 gallery query found only the opening, with a different generated unique ID; audit dedupe before a live write. |
+| Founders’ Food Hall, `1706332971502216` | Friday and Sunday patio listings; Saturday missing | Luna's validator rejected the patio as an amenity, then the route retried legacy and again returned Friday and Sunday. The real image endpoint worked. | Exclude: this would test fallback, not successful Luna extraction. The source says Friday **and Saturday** 16:00–19:00, Sunday 12:00–17:00. |
+| Montague Curling Club, `1729380189192723` | Two membership sign-up days: October 17 13:00–15:00 and October 25 15:00–17:00 | Before the routing fix, Stage 3 received 43 legacy OCR tiles and the parser emitted 23 schedule items. After the fix, Stage 3 received one preprocessed full image and zero tiles, but returned two malformed long names and a false venue; both dry-write previews stopped. | Exclude from live canary; keep as a regression case for separating caption sign-up days from the image's 2026/27 league schedule. |
+
+The Montague replay exposed a code defect in the canary route: `lunaFullImageReady` prepared a one-frame source manifest, then the legacy calendar branch replaced `extractionImageUrls` with tiles. The local correction skips that branch when full-image or reviewed-band frames are already ready. The subsequent managed replay logged `preparedCount: 1`, `tiledCount: 0`, and Stage 3 `imageCount: 1`. TypeScript build passed. This correction is local only; the deployed parser Functions are still at `bc25deb`.
+
+Evidence files are under `C:\Users\craig\.codex\worktrees\luna-pilot-release\pilot-source\`: `gallery-managed-dryrun.json` and `.log`, `founders-managed-dryrun.json` and `.log`, `montague-managed-dryrun.json` and `.log`, `montague-full-image-dryrun.json` and `.log`, plus their saved source images and preprocessed WebP files. Temporary managed upload objects were cleaned up. The gallery replay's model usage and image tracing were observed locally, not billed-cost or live-write evidence.
+
+Next gate: independently verify how a selected-row dry run behaves in the deployed Function, then inspect the gallery opening's existing document and dedupe keys against the two proposed payloads. Only after that should a single exact post be enabled for a production dry canary; no live write is justified from these local results alone.

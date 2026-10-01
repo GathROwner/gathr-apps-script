@@ -1689,9 +1689,12 @@ async function parsePostDataCore(
     }
     const hasComplexitySignals = stage2Routing.signals.hasComplexitySignals;
     const recommendsTilingCount = stage2Routing.signals.recommendsTilingCount;
-    const shouldUseCalendarTiles = stage2Routing.enabled
+    // The Luna route already has a preprocessed whole-image (or reviewed band)
+    // frame manifest. Replacing those frames with legacy OCR tiles loses the
+    // source mapping and recreates the expensive tile path for schedules.
+    const shouldUseCalendarTiles = !lunaFullImageReady && (stage2Routing.enabled
       ? resolvedContentType === 'CALENDAR' && stage2Routing.shouldUseCalendarTiles
-      : stage2Routing.legacyShouldUseCalendarTiles;
+      : stage2Routing.legacyShouldUseCalendarTiles);
 
     if (isCalendarOrSchedule) {
       if (shouldUseCalendarTiles) {
@@ -1745,9 +1748,11 @@ async function parsePostDataCore(
             hasComplexitySignals,
             recommendsTilingCount,
           },
-          reason: stage2Routing.enabled
-            ? 'Stage 2 score routing selected basic OCR mode'
-            : 'Stage 1 image complexity does not recommend tiling',
+          reason: lunaFullImageReady
+            ? 'Luna preprocessed full-image frames already prepared'
+            : stage2Routing.enabled
+              ? 'Stage 2 score routing selected basic OCR mode'
+              : 'Stage 1 image complexity does not recommend tiling',
         });
       }
     }
