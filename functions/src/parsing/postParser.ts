@@ -1789,6 +1789,26 @@ async function parsePostDataCore(
       const stage3Cfg =
         ({ ...cfg, gptModelReasoning: stage3Model,
           stage3ModelOverride: stage3Model } as ParsingConfig);
+      if (stage3Model === 'gpt-6-luna' && lunaFullImageReady &&
+          bandRules.length === 0 && resolvedContentType === 'CALENDAR' &&
+          cfg.calendarInventoryAudit?.enabled && lunaAnalysisFrames) {
+        const denseSourceIndexes = new Set((validation.imageAnalysis || [])
+          .filter(image => !image.imageComplexity?.isPromotionalPhoto &&
+            Number(image.imageComplexity?.textDensityScore || 0) >= 0.65 &&
+            (image.imageComplexity?.hasDenseText ||
+              image.imageComplexity?.recommendsTiling))
+          .map(image => image.imageIndex));
+        stage3Cfg.calendarInventoryAudit = {
+          ...cfg.calendarInventoryAudit,
+          estimatedItemCount: classification.estimatedItemCount,
+          frameSourceGalleryIndices: lunaAnalysisFrames.map(frame => frame.sourceGalleryIndex),
+          denseFrameIndices: lunaAnalysisFrames.flatMap((frame, index) =>
+            frame.kind === 'whole' && denseSourceIndexes.has(frame.sourceGalleryIndex)
+              ? [index] : []),
+        };
+      } else {
+        stage3Cfg.calendarInventoryAudit = undefined;
+      }
 
       logger.info('=== STAGE 3: CONTENT EXTRACTION ===', {
         stage3Model,

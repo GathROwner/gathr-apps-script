@@ -31,6 +31,8 @@ import {
 } from './runtimeConfig.js';
 import { logger } from '../utils/logger.js';
 import { findCalendarOcrNameDisputes } from './calendarNameDisputes.js';
+import { normalizeCalendarInventoryTime, reconcileCalendarInventory,
+  type CalendarInventoryListing } from './calendarInventoryReconciliation.js';
 
 // Initialize OpenAI client lazily
 let openaiClient: OpenAI | null = null;
@@ -906,6 +908,11 @@ async function extractCalendarContent(
     items = supplemented;
   }
 
+  if (modernCalendarPilot && model === 'gpt-6-luna' &&
+      config.calendarInventoryAudit?.enabled && imageUrls.length > 0) {
+    await auditCalendarInventory(items, imageUrls, config);
+  }
+
   if (modernCalendarPilot && items.length >= 20 && imageUrls.length > 0 &&
       config.calendarNameAdjudicationDiagnostics === true) {
     const allDisputes = [];
@@ -949,6 +956,117 @@ async function extractCalendarContent(
   }
 
   return items;
+}
+
+/** A diagnostic second read. It cannot add or rewrite an extracted item. */
+export async function auditCalendarInventory(
+  items: CalendarItem[], imageUrls: string[], config: ParsingConfig
+): Promise<void> {
+  const audit = config.calendarInventoryAudit;
+  const timedPrimaryCount = items.filter(item =>
+    /^\d{4}-\d{2}-\d{2}$/.test(item.date) &&
+    Boolean(normalizeCalendarInventoryTime(item.startTime))).length;
+  if (!audit?.enabled || !Number.isFinite(audit.estimatedItemCount) ||
+      audit.estimatedItemCount - timedPrimaryCount < 2) return;
+  const maxFrames = Math.min(Math.max(Math.trunc(audit.maxFrames ?? 2), 1), 2);
+  const frameIndices = [...new Set(audit.denseFrameIndices)]
+    .filter(index => Number.isInteger(index) && index >= 0 &&
+      index < imageUrls.length &&
+      Number.isInteger(audit.frameSourceGalleryIndices[index]) &&
+      audit.frameSourceGalleryIndices[index] >= 0)
+    .slice(0, maxFrames);
+  if (frameIndices.length === 0) return;
+
+  const monthPattern = '(January|February|March|April|May|June|July|August|September|October|November|December)';
+  const knownDates = [...new Set(items.map(item => item.date))]
+    .filter(value => /^\d{4}-\d{2}-\d{2}$/.test(value));
+  if (knownDates.length === 0) return;
+  const resolveHeading = (heading: string): string | null => {
+    const explicit = String(heading).match(/\b(20\d{2})-(\d{2})-(\d{2})\b/);
+    if (explicit) return explicit[0];
+    const match = String(heading).match(new RegExp(`\\b${monthPattern}\\s+(\\d{1,2})(?:st|nd|rd|th)?\\b`, 'i'));
+    if (!match) return null;
+    const month = DateTime.fromFormat(match[1], 'MMMM', { locale: 'en' }).month;
+    const day = Number(match[2]);
+    if (!month || day < 1 || day > 31) return null;
+    const years = [...new Set(knownDates.filter(date =>
+      Number(date.slice(5, 7)) === month && Number(date.slice(8, 10)) === day
+    ).map(date => Number(date.slice(0, 4))))];
+    if (years.length !== 1) return null;
+    const resolved = DateTime.utc(years[0], month, day);
+    return resolved.isValid ? resolved.toISODate() : null;
+  };
+
+  const listings: CalendarInventoryListing[] = [];
+  const unresolvedListings: Array<{ frameIndex: number; title: string;
+    dateHeading: string; reason: string }> = [];
+  const readFrameIndices: number[] = [];
+  const prompt = 'Inspect this ONE image from an event post. Inventory every independently advertised dated activity or performance visible in its main schedule, whether shown as a bullet, calendar cell, or stage column. Include every printed date heading and stage name needed to identify a listing. Make separate records for separately timed sessions in one cell. For each listing return the exact printed title, printed start and end time if any, named performers, stage or venue if printed, and one short verbatim excerpt from the same listing. Ignore sponsor ads and decorations. Do not infer an unprinted date, time, performer, or venue. Return only JSON with an events array; each event has date_heading, title, start_time, end_time, performers, venue, excerpt. Preserve the printed date heading verbatim.';
+  for (const frameIndex of frameIndices) {
+    try {
+      const reading = await callGPT(prompt, [imageUrls[frameIndex]], {
+        ...config, stage3ModelOverride: 'gpt-6-luna',
+        stage3ReasoningEffort: 'high', stage3ImageDetail: 'original',
+      }, {
+        stage: 'stage3', component: 'calendarInventoryAudit',
+        modelEnvVar: 'STAGE3_MODEL_OVERRIDE', imageDetailEnvVar: 'STAGE3_IMAGE_DETAIL',
+        maxOutputTokens: 8000, allowTextRetry: false,
+      });
+      const parsed = parseJSONResponse(reading);
+      if (!Array.isArray(parsed?.events)) {
+        throw new Error('Calendar inventory response omitted events array');
+      }
+      const events = parsed.events;
+      readFrameIndices.push(frameIndex);
+      for (const raw of events) {
+        if (!raw || typeof raw !== 'object') continue;
+        const event = raw as Record<string, unknown>;
+        const title = String(event.title || '').trim();
+        const dateHeading = String(event.date_heading || event.date || '').trim();
+        const date = resolveHeading(dateHeading);
+        if (!date) {
+          unresolvedListings.push({ frameIndex, title, dateHeading,
+            reason: 'date_not_anchored_in_primary_items' });
+          continue;
+        }
+        listings.push({
+          date, title, startTime: String(event.start_time || '').trim(),
+          endTime: event.end_time ? String(event.end_time) : null,
+          venue: event.venue ? String(event.venue) : null,
+          performers: Array.isArray(event.performers)
+            ? event.performers.filter((value): value is string => typeof value === 'string') : [],
+          excerpt: String(event.excerpt || ''), frameIndex,
+          sourceGalleryIndex: audit.frameSourceGalleryIndices[frameIndex],
+        });
+      }
+    } catch (error) {
+      logger.warn('Calendar inventory audit read failed', {
+        frameIndex, error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+  const reconciliation = reconcileCalendarInventory(items, listings);
+  logger.info('Calendar inventory audit; Stage 3 items preserved', {
+    estimatedItemCount: audit.estimatedItemCount, primaryItemCount: items.length,
+    timedPrimaryCount,
+    readFrameIndices, inventoryCount: listings.length,
+    additions: reconciliation.additions.length,
+    conflicts: reconciliation.conflicts.length,
+    unresolved: unresolvedListings.length,
+  });
+  if (audit.handler) {
+    try {
+      await audit.handler({
+        estimatedItemCount: audit.estimatedItemCount, primaryItemCount: items.length,
+        readFrameIndices, rawListingCount: listings.length + unresolvedListings.length,
+        unresolvedListings, reconciliation, listings,
+      });
+    } catch (error) {
+      logger.warn('Calendar inventory audit handler failed; Stage 3 items preserved', {
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
 }
 
 /**
@@ -4286,6 +4404,8 @@ async function callGPT(
     component: string;
     modelEnvVar: string;
     imageDetailEnvVar: string;
+    maxOutputTokens?: number;
+    allowTextRetry?: boolean;
   } = {
     stage: 'stage3',
     component: 'eventExtractor',
@@ -4309,7 +4429,7 @@ async function callGPT(
 
   const usesResponsesApi = (value: string): boolean =>
     value.startsWith('gpt-5') || value === 'gpt-6-luna' || value === 'gpt-6-sol' || value === 'gpt-6.1-sol';
-  const maxOutputTokens = 32000;
+  const maxOutputTokens = usageMeta.maxOutputTokens ?? 32000;
   const MIN_OUTPUT_TOKENS = 512;
 
   const parseModelMaxTokensFromError = (error: unknown): number | null => {
@@ -4509,7 +4629,7 @@ async function callGPT(
   try {
     return await runWithAdaptiveTokens(imageUrls);
   } catch (error) {
-    if (imageUrls && imageUrls.length > 0) {
+    if (usageMeta.allowTextRetry !== false && imageUrls && imageUrls.length > 0) {
       logger.warn('GPT call failed with images; retrying without images', {
         error: error instanceof Error ? error.message : String(error),
       });

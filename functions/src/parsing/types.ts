@@ -4,6 +4,7 @@
  */
 
 import type { ModelSpatialEvidence, SpatialEventClassification } from './spatialEventClassifier.js';
+import type { CalendarInventoryListing, CalendarInventoryReconciliation } from './calendarInventoryReconciliation.js';
 
 // ===================
 // Venue/Hours Types (also in main types, duplicated here for module independence)
@@ -102,6 +103,16 @@ export interface Stage45ReplayArtifacts {
 // Configuration
 // ===================
 
+export interface CalendarInventoryAuditSnapshot {
+  estimatedItemCount: number;
+  primaryItemCount: number;
+  readFrameIndices: number[];
+  rawListingCount: number;
+  unresolvedListings: Array<{ frameIndex: number; title: string; dateHeading: string; reason: string }>;
+  reconciliation: CalendarInventoryReconciliation;
+  listings: CalendarInventoryListing[];
+}
+
 export interface ParsingConfig {
   batchSize: number;
   maxRetries: number;
@@ -153,6 +164,15 @@ export interface ParsingConfig {
     differingModelWord: string;
     differingOcrWord: string;
   }>) => void | Promise<void>;
+  /** Off by default. A bounded second read reports omissions without modifying Stage 3 items. */
+  calendarInventoryAudit?: {
+    enabled: boolean;
+    estimatedItemCount: number;
+    frameSourceGalleryIndices: number[];
+    denseFrameIndices: number[];
+    maxFrames?: number;
+    handler?: (snapshot: CalendarInventoryAuditSnapshot) => void | Promise<void>;
+  };
   stage4ModelOverride?: string;
   stage5ModelOverride?: string;
   lunaCanaryBypass?: boolean;

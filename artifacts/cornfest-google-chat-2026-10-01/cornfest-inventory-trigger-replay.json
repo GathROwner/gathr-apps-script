@@ -1,0 +1,388 @@
+{
+  "noFirestoreWrites": true,
+  "imagePaths": [
+    "C:/Users/craig/.codex/worktrees/luna-parser-cost-trial/gathr-apps-script/artifacts/cornfest-attachment-trial/photo-1-cloudrun-base.webp",
+    "C:/Users/craig/.codex/worktrees/luna-parser-cost-trial/gathr-apps-script/artifacts/cornfest-attachment-trial/photo-2-cloudrun-base.webp",
+    "C:/Users/craig/.codex/worktrees/luna-parser-cost-trial/gathr-apps-script/artifacts/cornfest-attachment-trial/photo-3-cloudrun-base.webp",
+    "C:\\Users\\craig\\.codex\\worktrees\\luna-pilot-release\\gathr-apps-script\\artifacts\\cornfest-google-chat-2026-10-01\\production-gallery-slide-4.webp"
+  ],
+  "primaryCountBefore": 13,
+  "primaryCountAfter": 13,
+  "snapshot": {
+    "estimatedItemCount": 15,
+    "primaryItemCount": 13,
+    "readFrameIndices": [
+      1,
+      2
+    ],
+    "rawListingCount": 15,
+    "unresolvedListings": [],
+    "reconciliation": {
+      "matched": [
+        {
+          "date": "2026-09-24",
+          "title": "SENIOR'S LUNCH",
+          "startTime": "11:30am",
+          "endTime": null,
+          "venue": "Cornwall Civic Centre",
+          "performers": [],
+          "excerpt": "hot lunch of corn chowder and homemade biscuits.",
+          "frameIndex": 1,
+          "sourceGalleryIndex": 1
+        },
+        {
+          "date": "2026-09-25",
+          "title": "CORNHOLE TOURNAMENT",
+          "startTime": "10:00AM",
+          "endTime": null,
+          "venue": "Cornwall Civic Centre",
+          "performers": [],
+          "excerpt": "Test your skills and join the fun at our Cornfest Tournament!",
+          "frameIndex": 1,
+          "sourceGalleryIndex": 1
+        },
+        {
+          "date": "2026-09-25",
+          "title": "1ST SENIORS RECREATIONAL PICKLEBALL TOURNAMENT",
+          "startTime": "10:00AM",
+          "endTime": null,
+          "venue": "APM CENTRE",
+          "performers": [],
+          "excerpt": "Designed for recreational players 50+",
+          "frameIndex": 1,
+          "sourceGalleryIndex": 1
+        },
+        {
+          "date": "2026-09-25",
+          "title": "DESSERT BINGO",
+          "startTime": "1:00PM",
+          "endTime": null,
+          "venue": "Cornwall Civic Centre",
+          "performers": [],
+          "excerpt": "the prizes for this event are some delicious treats from Mary’s Bakery.",
+          "frameIndex": 1,
+          "sourceGalleryIndex": 1
+        },
+        {
+          "date": "2026-09-25",
+          "title": "ADULT TRIVIA",
+          "startTime": "7:30pm",
+          "endTime": null,
+          "venue": "Sam’s Family Restaurant",
+          "performers": [
+            "Greg Lucas"
+          ],
+          "excerpt": "Join us for a great evening with our host Greg Lucas",
+          "frameIndex": 1,
+          "sourceGalleryIndex": 1
+        },
+        {
+          "date": "2026-09-26",
+          "title": "COMMUNITY FARMERS MARKET / YARD SALE",
+          "startTime": "8:30 am",
+          "endTime": "11:30am",
+          "venue": "Your Home/Terry Fox Sports Complex",
+          "performers": [],
+          "excerpt": "You can register your address with us or book a table at the Civic Centre, and we will advertise for you!",
+          "frameIndex": 1,
+          "sourceGalleryIndex": 1
+        },
+        {
+          "date": "2026-09-26",
+          "title": "YOU’VE BEEN CORN – VICTED COMMUNITY JAIL IS COMING TO CORNFEST",
+          "startTime": "9:00am",
+          "endTime": "11:00am",
+          "venue": "Good’s Independent Grocer",
+          "performers": [],
+          "excerpt": "“arrested and hauled off to our community jail!”",
+          "frameIndex": 1,
+          "sourceGalleryIndex": 1
+        },
+        {
+          "date": "2026-09-26",
+          "title": "3rd ANNUAL LUCK OF THE DRAW ADULT PICKLEBALL TOURNAMENT",
+          "startTime": "10:00am",
+          "endTime": "12:00pm",
+          "venue": "Terry Fox Sports Complex",
+          "performers": [],
+          "excerpt": "Recreational Tournament 10:00am – 12:00pm",
+          "frameIndex": 1,
+          "sourceGalleryIndex": 1
+        },
+        {
+          "date": "2026-09-26",
+          "title": "3rd ANNUAL LUCK OF THE DRAW ADULT PICKLEBALL TOURNAMENT",
+          "startTime": "1:00pm",
+          "endTime": "3:00pm",
+          "venue": "Terry Fox Sports Complex",
+          "performers": [],
+          "excerpt": "Competitive Tournament: 1:00pm – 3:00pm",
+          "frameIndex": 1,
+          "sourceGalleryIndex": 1
+        },
+        {
+          "date": "2026-09-26",
+          "title": "CHOCOLATE BAR BINGO",
+          "startTime": "12:30pm",
+          "endTime": null,
+          "venue": "Civic Centre (inside)",
+          "performers": [],
+          "excerpt": "This is a new unique way to play your favorite B-I-N-G-O!",
+          "frameIndex": 2,
+          "sourceGalleryIndex": 2
+        },
+        {
+          "date": "2026-09-26",
+          "title": "CLYDE RIVER GOLF COURSE AMAZING RACE CHALLENGE",
+          "startTime": "2:00pm",
+          "endTime": null,
+          "venue": "Cornwall Civic Centre",
+          "performers": [],
+          "excerpt": "This is our 3rd Amazing Race",
+          "frameIndex": 2,
+          "sourceGalleryIndex": 2
+        },
+        {
+          "date": "2026-09-27",
+          "title": "SAM’S FAMILY FUN DAY",
+          "startTime": "1:00pm",
+          "endTime": "4:00pm",
+          "venue": "Cornwall Town Hall",
+          "performers": [
+            "Top Hat"
+          ],
+          "excerpt": "Children can enjoy exciting inflatables, amazing balloon twisting by Top Hat",
+          "frameIndex": 2,
+          "sourceGalleryIndex": 2
+        },
+        {
+          "date": "2026-09-27",
+          "title": "CORN SHUCKING COMPETITION",
+          "startTime": "1:30pm",
+          "endTime": null,
+          "venue": null,
+          "performers": [],
+          "excerpt": "This year we are also offering youth and adult competitions!",
+          "frameIndex": 2,
+          "sourceGalleryIndex": 2
+        }
+      ],
+      "additions": [
+        {
+          "date": "2026-09-27",
+          "title": "ENTERTAINMENT",
+          "startTime": "2:00pm",
+          "endTime": "4:00pm",
+          "venue": null,
+          "performers": [
+            "HACHE"
+          ],
+          "excerpt": "you will be entertained by HACHE.",
+          "frameIndex": 2,
+          "sourceGalleryIndex": 2
+        },
+        {
+          "date": "2026-09-27",
+          "title": "CORNBOIL & COMMUNITY BBQ",
+          "startTime": "2:00pm",
+          "endTime": null,
+          "venue": null,
+          "performers": [],
+          "excerpt": "Don’t forget to drop by for fresh hot corn on the cob",
+          "frameIndex": 2,
+          "sourceGalleryIndex": 2
+        }
+      ],
+      "conflicts": []
+    },
+    "listings": [
+      {
+        "date": "2026-09-24",
+        "title": "SENIOR'S LUNCH",
+        "startTime": "11:30am",
+        "endTime": null,
+        "venue": "Cornwall Civic Centre",
+        "performers": [],
+        "excerpt": "hot lunch of corn chowder and homemade biscuits.",
+        "frameIndex": 1,
+        "sourceGalleryIndex": 1
+      },
+      {
+        "date": "2026-09-25",
+        "title": "CORNHOLE TOURNAMENT",
+        "startTime": "10:00AM",
+        "endTime": null,
+        "venue": "Cornwall Civic Centre",
+        "performers": [],
+        "excerpt": "Test your skills and join the fun at our Cornfest Tournament!",
+        "frameIndex": 1,
+        "sourceGalleryIndex": 1
+      },
+      {
+        "date": "2026-09-25",
+        "title": "1ST SENIORS RECREATIONAL PICKLEBALL TOURNAMENT",
+        "startTime": "10:00AM",
+        "endTime": null,
+        "venue": "APM CENTRE",
+        "performers": [],
+        "excerpt": "Designed for recreational players 50+",
+        "frameIndex": 1,
+        "sourceGalleryIndex": 1
+      },
+      {
+        "date": "2026-09-25",
+        "title": "DESSERT BINGO",
+        "startTime": "1:00PM",
+        "endTime": null,
+        "venue": "Cornwall Civic Centre",
+        "performers": [],
+        "excerpt": "the prizes for this event are some delicious treats from Mary’s Bakery.",
+        "frameIndex": 1,
+        "sourceGalleryIndex": 1
+      },
+      {
+        "date": "2026-09-25",
+        "title": "ADULT TRIVIA",
+        "startTime": "7:30pm",
+        "endTime": null,
+        "venue": "Sam’s Family Restaurant",
+        "performers": [
+          "Greg Lucas"
+        ],
+        "excerpt": "Join us for a great evening with our host Greg Lucas",
+        "frameIndex": 1,
+        "sourceGalleryIndex": 1
+      },
+      {
+        "date": "2026-09-26",
+        "title": "COMMUNITY FARMERS MARKET / YARD SALE",
+        "startTime": "8:30 am",
+        "endTime": "11:30am",
+        "venue": "Your Home/Terry Fox Sports Complex",
+        "performers": [],
+        "excerpt": "You can register your address with us or book a table at the Civic Centre, and we will advertise for you!",
+        "frameIndex": 1,
+        "sourceGalleryIndex": 1
+      },
+      {
+        "date": "2026-09-26",
+        "title": "YOU’VE BEEN CORN – VICTED COMMUNITY JAIL IS COMING TO CORNFEST",
+        "startTime": "9:00am",
+        "endTime": "11:00am",
+        "venue": "Good’s Independent Grocer",
+        "performers": [],
+        "excerpt": "“arrested and hauled off to our community jail!”",
+        "frameIndex": 1,
+        "sourceGalleryIndex": 1
+      },
+      {
+        "date": "2026-09-26",
+        "title": "3rd ANNUAL LUCK OF THE DRAW ADULT PICKLEBALL TOURNAMENT",
+        "startTime": "10:00am",
+        "endTime": "12:00pm",
+        "venue": "Terry Fox Sports Complex",
+        "performers": [],
+        "excerpt": "Recreational Tournament 10:00am – 12:00pm",
+        "frameIndex": 1,
+        "sourceGalleryIndex": 1
+      },
+      {
+        "date": "2026-09-26",
+        "title": "3rd ANNUAL LUCK OF THE DRAW ADULT PICKLEBALL TOURNAMENT",
+        "startTime": "1:00pm",
+        "endTime": "3:00pm",
+        "venue": "Terry Fox Sports Complex",
+        "performers": [],
+        "excerpt": "Competitive Tournament: 1:00pm – 3:00pm",
+        "frameIndex": 1,
+        "sourceGalleryIndex": 1
+      },
+      {
+        "date": "2026-09-26",
+        "title": "CHOCOLATE BAR BINGO",
+        "startTime": "12:30pm",
+        "endTime": null,
+        "venue": "Civic Centre (inside)",
+        "performers": [],
+        "excerpt": "This is a new unique way to play your favorite B-I-N-G-O!",
+        "frameIndex": 2,
+        "sourceGalleryIndex": 2
+      },
+      {
+        "date": "2026-09-26",
+        "title": "CLYDE RIVER GOLF COURSE AMAZING RACE CHALLENGE",
+        "startTime": "2:00pm",
+        "endTime": null,
+        "venue": "Cornwall Civic Centre",
+        "performers": [],
+        "excerpt": "This is our 3rd Amazing Race",
+        "frameIndex": 2,
+        "sourceGalleryIndex": 2
+      },
+      {
+        "date": "2026-09-27",
+        "title": "SAM’S FAMILY FUN DAY",
+        "startTime": "1:00pm",
+        "endTime": "4:00pm",
+        "venue": "Cornwall Town Hall",
+        "performers": [
+          "Top Hat"
+        ],
+        "excerpt": "Children can enjoy exciting inflatables, amazing balloon twisting by Top Hat",
+        "frameIndex": 2,
+        "sourceGalleryIndex": 2
+      },
+      {
+        "date": "2026-09-27",
+        "title": "CORN SHUCKING COMPETITION",
+        "startTime": "1:30pm",
+        "endTime": null,
+        "venue": null,
+        "performers": [],
+        "excerpt": "This year we are also offering youth and adult competitions!",
+        "frameIndex": 2,
+        "sourceGalleryIndex": 2
+      },
+      {
+        "date": "2026-09-27",
+        "title": "ENTERTAINMENT",
+        "startTime": "2:00pm",
+        "endTime": "4:00pm",
+        "venue": null,
+        "performers": [
+          "HACHE"
+        ],
+        "excerpt": "you will be entertained by HACHE.",
+        "frameIndex": 2,
+        "sourceGalleryIndex": 2
+      },
+      {
+        "date": "2026-09-27",
+        "title": "CORNBOIL & COMMUNITY BBQ",
+        "startTime": "2:00pm",
+        "endTime": null,
+        "venue": null,
+        "performers": [],
+        "excerpt": "Don’t forget to drop by for fresh hot corn on the cob",
+        "frameIndex": 2,
+        "sourceGalleryIndex": 2
+      }
+    ]
+  },
+  "usage": [
+    {
+      "model": "gpt-6-luna",
+      "component": "calendarInventoryAudit",
+      "inputTokens": 5682,
+      "outputTokens": 3213,
+      "cachedInputTokens": 0
+    },
+    {
+      "model": "gpt-6-luna",
+      "component": "calendarInventoryAudit",
+      "inputTokens": 5682,
+      "outputTokens": 1681,
+      "cachedInputTokens": 0
+    }
+  ]
+}

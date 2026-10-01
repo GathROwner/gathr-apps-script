@@ -1,0 +1,397 @@
+{
+  "postId": "dry-cornfest-inventory-audit",
+  "imagePaths": [
+    "C:/Users/craig/.codex/worktrees/luna-parser-cost-trial/gathr-apps-script/artifacts/cornfest-attachment-trial/photo-1-cloudrun-base.webp",
+    "C:/Users/craig/.codex/worktrees/luna-parser-cost-trial/gathr-apps-script/artifacts/cornfest-attachment-trial/photo-2-cloudrun-base.webp",
+    "C:/Users/craig/.codex/worktrees/luna-parser-cost-trial/gathr-apps-script/artifacts/cornfest-attachment-trial/photo-3-cloudrun-base.webp",
+    "C:\\Users\\craig\\.codex\\worktrees\\luna-pilot-release\\gathr-apps-script\\artifacts\\cornfest-google-chat-2026-10-01\\production-gallery-slide-4.webp"
+  ],
+  "noFirestoreWrites": true,
+  "stage3Count": 16,
+  "stage4Count": 15,
+  "finalCount": 15,
+  "manifest": [
+    {
+      "frameIndex": 0,
+      "sourceGalleryIndex": 0,
+      "kind": "whole"
+    },
+    {
+      "frameIndex": 1,
+      "sourceGalleryIndex": 1,
+      "kind": "whole"
+    },
+    {
+      "frameIndex": 2,
+      "sourceGalleryIndex": 2,
+      "kind": "whole"
+    },
+    {
+      "frameIndex": 3,
+      "sourceGalleryIndex": 3,
+      "kind": "whole"
+    }
+  ],
+  "audit": [],
+  "skips": [],
+  "usage": [
+    {
+      "stage": "stage1",
+      "model": "gpt-6-luna",
+      "component": "contentValidator",
+      "inputTokens": 10283,
+      "outputTokens": 1208,
+      "cachedInputTokens": 0
+    },
+    {
+      "stage": "stage2",
+      "model": "gpt-6-luna",
+      "component": "contentClassifier",
+      "inputTokens": 9634,
+      "outputTokens": 159,
+      "cachedInputTokens": 0
+    },
+    {
+      "stage": "stage3",
+      "model": "gpt-6-luna",
+      "component": "eventExtractor",
+      "inputTokens": 18611,
+      "outputTokens": 8671,
+      "cachedInputTokens": 0
+    },
+    {
+      "stage": "stage4",
+      "model": "gpt-6-luna",
+      "component": "secondaryValidator",
+      "inputTokens": 5392,
+      "outputTokens": 4498,
+      "cachedInputTokens": 0
+    },
+    {
+      "stage": "stage4",
+      "model": "gpt-6-luna",
+      "component": "secondaryValidator",
+      "inputTokens": 1974,
+      "outputTokens": 378,
+      "cachedInputTokens": 0
+    },
+    {
+      "stage": "stage5",
+      "model": "gpt-6-luna",
+      "component": "finalFormatter",
+      "inputTokens": 6283,
+      "outputTokens": 5605,
+      "cachedInputTokens": 0
+    }
+  ],
+  "stage3Items": [
+    {
+      "name": "Cornwall Cornfest",
+      "date": "2026-09-24",
+      "startTime": "",
+      "relevantImageIndex": 1
+    },
+    {
+      "name": "SENIOR’S LUNCH",
+      "date": "2026-09-24",
+      "startTime": "11:30 AM",
+      "relevantImageIndex": 1
+    },
+    {
+      "name": "CORNHOLE TOURNAMENT",
+      "date": "2026-09-25",
+      "startTime": "10:00 AM",
+      "relevantImageIndex": 1
+    },
+    {
+      "name": "1ST SENIORS RECREATIONAL PICKLEBALL TOURNAMENT",
+      "date": "2026-09-25",
+      "startTime": "10:00 AM",
+      "relevantImageIndex": 1
+    },
+    {
+      "name": "DESSERT BINGO",
+      "date": "2026-09-25",
+      "startTime": "1:00 PM",
+      "relevantImageIndex": 1
+    },
+    {
+      "name": "ADULT TRIVIA",
+      "date": "2026-09-25",
+      "startTime": "7:30 PM",
+      "relevantImageIndex": 1
+    },
+    {
+      "name": "COMMUNITY FARMERS MARKET / YARD SALE",
+      "date": "2026-09-26",
+      "startTime": "8:30 AM",
+      "relevantImageIndex": 1
+    },
+    {
+      "name": "YOU’VE BEEN CORN – VICTED COMMUNITY JAIL IS COMING TO CORNFEST",
+      "date": "2026-09-26",
+      "startTime": "9:00 AM",
+      "relevantImageIndex": 1
+    },
+    {
+      "name": "3RD ANNUAL LUCK OF THE DRAW ADULT PICKLEBALL TOURNAMENT — Recreational Tournament",
+      "date": "2026-09-26",
+      "startTime": "10:00 AM",
+      "relevantImageIndex": 1
+    },
+    {
+      "name": "3RD ANNUAL LUCK OF THE DRAW ADULT PICKLEBALL TOURNAMENT — Competitive Tournament",
+      "date": "2026-09-26",
+      "startTime": "1:00 PM",
+      "relevantImageIndex": 1
+    },
+    {
+      "name": "CHOCOLATE BAR BINGO",
+      "date": "2026-09-26",
+      "startTime": "12:30 PM",
+      "relevantImageIndex": 2
+    },
+    {
+      "name": "CLYDE RIVER GOLF COURSE AMAZING RACE CHALLENGE",
+      "date": "2026-09-26",
+      "startTime": "2:00 PM",
+      "relevantImageIndex": 2
+    },
+    {
+      "name": "SAM’S FAMILY FUN DAY",
+      "date": "2026-09-27",
+      "startTime": "1:00 PM",
+      "relevantImageIndex": 2
+    },
+    {
+      "name": "CORN SHUCKING COMPETITION",
+      "date": "2026-09-27",
+      "startTime": "1:30 PM",
+      "relevantImageIndex": 2
+    },
+    {
+      "name": "ENTERTAINMENT — HACHE",
+      "date": "2026-09-27",
+      "startTime": "2:00 PM",
+      "relevantImageIndex": 2
+    },
+    {
+      "name": "CORNBOIL & COMMUNITY BBQ",
+      "date": "2026-09-27",
+      "startTime": "2:00 PM",
+      "relevantImageIndex": 2
+    }
+  ],
+  "events": [
+    {
+      "name": "SENIOR’S LUNCH",
+      "startDate": "2026-09-24",
+      "startTime": "11:30",
+      "endTime": "13:30",
+      "relevantImageIndex": 1,
+      "imageProvenance": {
+        "version": 1,
+        "primarySource": "no_image",
+        "isFallback": false,
+        "selectionReason": "no_usable_event_image_provided",
+        "updatedBy": "parser"
+      }
+    },
+    {
+      "name": "CORNHOLE TOURNAMENT",
+      "startDate": "2026-09-25",
+      "startTime": "10:00",
+      "endTime": "12:00",
+      "relevantImageIndex": 1,
+      "imageProvenance": {
+        "version": 1,
+        "primarySource": "no_image",
+        "isFallback": false,
+        "selectionReason": "no_usable_event_image_provided",
+        "updatedBy": "parser"
+      }
+    },
+    {
+      "name": "1ST SENIORS RECREATIONAL PICKLEBALL TOURNAMENT",
+      "startDate": "2026-09-25",
+      "startTime": "10:00",
+      "endTime": "12:00",
+      "relevantImageIndex": 1,
+      "imageProvenance": {
+        "version": 1,
+        "primarySource": "no_image",
+        "isFallback": false,
+        "selectionReason": "no_usable_event_image_provided",
+        "updatedBy": "parser"
+      }
+    },
+    {
+      "name": "DESSERT BINGO",
+      "startDate": "2026-09-25",
+      "startTime": "13:00",
+      "endTime": "21:00",
+      "relevantImageIndex": 1,
+      "imageProvenance": {
+        "version": 1,
+        "primarySource": "no_image",
+        "isFallback": false,
+        "selectionReason": "no_usable_event_image_provided",
+        "updatedBy": "parser"
+      }
+    },
+    {
+      "name": "ADULT TRIVIA",
+      "startDate": "2026-09-25",
+      "startTime": "19:30",
+      "endTime": "21:30",
+      "relevantImageIndex": 1,
+      "imageProvenance": {
+        "version": 1,
+        "primarySource": "no_image",
+        "isFallback": false,
+        "selectionReason": "no_usable_event_image_provided",
+        "updatedBy": "parser"
+      }
+    },
+    {
+      "name": "COMMUNITY FARMERS MARKET / YARD SALE",
+      "startDate": "2026-09-26",
+      "startTime": "08:30",
+      "endTime": "11:30",
+      "relevantImageIndex": 1,
+      "imageProvenance": {
+        "version": 1,
+        "primarySource": "no_image",
+        "isFallback": false,
+        "selectionReason": "no_usable_event_image_provided",
+        "updatedBy": "parser"
+      }
+    },
+    {
+      "name": "YOU’VE BEEN CORN – VICTED COMMUNITY JAIL IS COMING TO CORNFEST",
+      "startDate": "2026-09-26",
+      "startTime": "09:00",
+      "endTime": "11:00",
+      "relevantImageIndex": 1,
+      "imageProvenance": {
+        "version": 1,
+        "primarySource": "no_image",
+        "isFallback": false,
+        "selectionReason": "no_usable_event_image_provided",
+        "updatedBy": "parser"
+      }
+    },
+    {
+      "name": "3RD ANNUAL LUCK OF THE DRAW ADULT PICKLEBALL TOURNAMENT — Recreational Tournament",
+      "startDate": "2026-09-26",
+      "startTime": "10:00",
+      "endTime": "12:00",
+      "relevantImageIndex": 1,
+      "imageProvenance": {
+        "version": 1,
+        "primarySource": "no_image",
+        "isFallback": false,
+        "selectionReason": "no_usable_event_image_provided",
+        "updatedBy": "parser"
+      }
+    },
+    {
+      "name": "3RD ANNUAL LUCK OF THE DRAW ADULT PICKLEBALL TOURNAMENT — Competitive Tournament",
+      "startDate": "2026-09-26",
+      "startTime": "13:00",
+      "endTime": "15:00",
+      "relevantImageIndex": 1,
+      "imageProvenance": {
+        "version": 1,
+        "primarySource": "no_image",
+        "isFallback": false,
+        "selectionReason": "no_usable_event_image_provided",
+        "updatedBy": "parser"
+      }
+    },
+    {
+      "name": "CHOCOLATE BAR BINGO",
+      "startDate": "2026-09-26",
+      "startTime": "12:30",
+      "endTime": "14:30",
+      "relevantImageIndex": 2,
+      "imageProvenance": {
+        "version": 1,
+        "primarySource": "no_image",
+        "isFallback": false,
+        "selectionReason": "no_usable_event_image_provided",
+        "updatedBy": "parser"
+      }
+    },
+    {
+      "name": "CLYDE RIVER GOLF COURSE AMAZING RACE CHALLENGE",
+      "startDate": "2026-09-26",
+      "startTime": "14:00",
+      "endTime": "16:00",
+      "relevantImageIndex": 2,
+      "imageProvenance": {
+        "version": 1,
+        "primarySource": "no_image",
+        "isFallback": false,
+        "selectionReason": "no_usable_event_image_provided",
+        "updatedBy": "parser"
+      }
+    },
+    {
+      "name": "SAM’S FAMILY FUN DAY",
+      "startDate": "2026-09-27",
+      "startTime": "13:00",
+      "endTime": "16:00",
+      "relevantImageIndex": 2,
+      "imageProvenance": {
+        "version": 1,
+        "primarySource": "no_image",
+        "isFallback": false,
+        "selectionReason": "no_usable_event_image_provided",
+        "updatedBy": "parser"
+      }
+    },
+    {
+      "name": "CORN SHUCKING COMPETITION",
+      "startDate": "2026-09-27",
+      "startTime": "13:30",
+      "endTime": "15:30",
+      "relevantImageIndex": 2,
+      "imageProvenance": {
+        "version": 1,
+        "primarySource": "no_image",
+        "isFallback": false,
+        "selectionReason": "no_usable_event_image_provided",
+        "updatedBy": "parser"
+      }
+    },
+    {
+      "name": "ENTERTAINMENT — HACHE",
+      "startDate": "2026-09-27",
+      "startTime": "14:00",
+      "endTime": "16:00",
+      "relevantImageIndex": 2,
+      "imageProvenance": {
+        "version": 1,
+        "primarySource": "no_image",
+        "isFallback": false,
+        "selectionReason": "no_usable_event_image_provided",
+        "updatedBy": "parser"
+      }
+    },
+    {
+      "name": "CORNBOIL & COMMUNITY BBQ",
+      "startDate": "2026-09-27",
+      "startTime": "14:00",
+      "endTime": "16:00",
+      "relevantImageIndex": 2,
+      "imageProvenance": {
+        "version": 1,
+        "primarySource": "no_image",
+        "isFallback": false,
+        "selectionReason": "no_usable_event_image_provided",
+        "updatedBy": "parser"
+      }
+    }
+  ]
+}
