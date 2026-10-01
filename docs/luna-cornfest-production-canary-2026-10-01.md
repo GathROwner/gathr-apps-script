@@ -17,3 +17,11 @@ All 13 final records point to managed post media, not the profile icon. The firs
 ## Decision
 
 The exact-post canary failed the reviewed 15-slot coverage criterion. Broad Luna activation remains off. A bounded second-look method should target missed source-supported listings and be tested against gallery provenance, duplicate handling, and cost before another switch decision. The four original screenshots and a source-specific question for external review are in `artifacts/cornfest-google-chat-2026-10-01/`.
+
+## Focused second-read experiment
+
+Two independent Luna high Responses calls read the same Cloud Run-preprocessed third gallery image, without any parser or Firestore write. The first asked for every bullet under the final Sunday heading and returned all four listings with printed times, including the two missed by production Stage 3. The second used a generic instruction to preserve named performers and a source excerpt; it again returned all four, with `HACHE` explicitly attached to the 2:00–4:00 pm entertainment listing. The second call also retained the printed 2:00 pm BBQ start and left its unprinted end null. These direct transcription calls did not exercise automatic triggering, event normalization, deduplication, or image provenance mapping.
+
+The first direct call used 5,616 input tokens (5,613 cache-write) and 412 output tokens. The second used 5,615 input tokens (5,612 cache-write) and 1,153 output tokens. At the official current Luna standard rates of $0.10/M input, $0.125/M cache writes, and $0.50/M output, estimated model charges are approximately $0.00091 and $0.00128, respectively; infrastructure and tax are excluded. Reports are `artifacts/cornfest-google-chat-2026-10-01/sunday-focused-read.json` and `sunday-focused-full-text-read.json`.
+
+The external suggestion to crop the bottom 40% of the screenshot is invalid for this example: the source is 588×1280, so that crop begins around y=768, below the Sunday bullet text around y=450–695. Its proposed 24-versus-10 OCR line mismatch was not measured, and event counts cannot be inferred from visual line counts alone. A same-image second read with explicit bullet inventory is the tested useful ingredient; a general trigger and guarded merge still need design and cross-calendar evaluation.
