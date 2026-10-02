@@ -111,6 +111,52 @@ test('an approximate linked-page end stays unspecified instead of becoming a cat
   assert.equal(event.timeResolution?.endFromHours, undefined);
 });
 
+test('Stage 5.5 skips venue and category end guesses for approximate linked-page ends', async () => {
+  const marked = buildEvent({
+    category: 'Live Music',
+    name: 'Taste of Georgetown: Evening Dinner Experience',
+    startDate: '2026-10-02',
+    endDate: '2026-10-02',
+    startTime: '18:00',
+    endTime: '',
+    timeFlags: {
+      start: { source: 'explicit', evidence: 'venue_website: named seating' },
+      end: {
+        source: 'none',
+        toClose: false,
+        evidence: 'venue_website: named seating approximate end omitted',
+      },
+    },
+    timeResolution: { hoursUsed: false },
+  });
+  const [resolved] = await resolveTimesWithOperatingHours(
+    [marked], 'Kings Playhouse', '', '2026-10-01T12:00:00.000Z'
+  );
+  assert.equal(resolved.endTime, '');
+  assert.equal(resolved.timeResolution?.hoursUsed, false);
+  assert.equal(resolved.timeResolution?.endFromHours, undefined);
+
+  const markedFallback = applyFallbackTimes({ ...marked }, marked, '', '');
+  assert.equal(markedFallback.endTime, '');
+  assert.equal(markedFallback.timeResolution?.endFromHours, undefined);
+
+  const ordinary = buildEvent({
+    category: 'Live Music',
+    startDate: '2026-10-02',
+    endDate: '2026-10-02',
+    description: 'Evening live music at the venue.',
+    startTime: '18:00',
+    endTime: '',
+    timeFlags: {
+      start: { source: 'explicit', evidence: '6:00 PM' },
+      end: { source: 'none', toClose: false, evidence: '' },
+    },
+  });
+  const ordinaryFallback = applyFallbackTimes({ ...ordinary }, ordinary, '', '');
+  assert.equal(ordinaryFallback.endTime, '01:00');
+  assert.equal(ordinaryFallback.timeResolution?.endFromHours, 'category_default');
+});
+
 test('venue-hours fallback cannot date a future calendar offer from its post time', () => {
   const offer = buildEvent({
     isEvent: 'No', isFoodSpecial: 'Yes', category: 'Happy Hour',

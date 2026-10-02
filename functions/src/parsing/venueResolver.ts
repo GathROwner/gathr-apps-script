@@ -148,8 +148,9 @@ async function resolveEventTimes(
 
   // Check if we need to resolve times
   const needsStartTime = !event.startTime || event.startTime.trim() === '';
-  const needsEndTime = !event.endTime || event.endTime.trim() === '';
-  const toClose = event.timeFlags?.end?.toClose === true;
+  const approximateLinkedPageEnd = hasApproximateLinkedPageEnd(event);
+  const needsEndTime = (!event.endTime || event.endTime.trim() === '') && !approximateLinkedPageEnd;
+  const toClose = event.timeFlags?.end?.toClose === true && !approximateLinkedPageEnd;
 
   if (!needsStartTime && !needsEndTime && !toClose) {
     // Nothing to resolve
@@ -386,7 +387,7 @@ export function applyFallbackTimes(
 
   // Apply category default for end time if missing and toClose was set
   const hasEndClock = resolved.endTime && resolved.endTime.trim() !== '';
-  if (!hasEndClock) {
+  if (!hasEndClock && !hasApproximateLinkedPageEnd(event)) {
     resolved.timeResolution = resolved.timeResolution || { hoursUsed: false };
 
     if (event.timeFlags?.end?.toClose) {
@@ -414,6 +415,10 @@ export function applyFallbackTimes(
   }
 
   return resolved;
+}
+
+function hasApproximateLinkedPageEnd(event: Pick<FormattedEvent, 'timeFlags'>): boolean {
+  return /\bapproximate end omitted\b/i.test(String(event.timeFlags?.end?.evidence || ''));
 }
 
 /**
