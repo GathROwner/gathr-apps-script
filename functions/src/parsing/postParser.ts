@@ -1290,11 +1290,13 @@ async function parsePostDataCore(
     cfg.lunaCalendarLiteralSourcePrompt = true;
     cfg.stage4ModelOverride = 'gpt-6-luna';
     cfg.stage5ModelOverride = 'gpt-6-luna';
-    if (parseBooleanEnv('LUNA_CALENDAR_INVENTORY_AUDIT', false)) {
+    // Exact-post Luna pilots default to the guarded second read for dense
+    // calendars. An explicit false remains available as a rollback switch.
+    if (parseBooleanEnv('LUNA_CALENDAR_INVENTORY_AUDIT', true)) {
       cfg.calendarInventoryAudit = {
         enabled: true, estimatedItemCount: 0,
         frameSourceGalleryIndices: [], denseFrameIndices: [], maxFrames: 2,
-        applyAdditions: parseBooleanEnv('LUNA_CALENDAR_INVENTORY_APPLY', false),
+        applyAdditions: parseBooleanEnv('LUNA_CALENDAR_INVENTORY_APPLY', true),
         handler: cfg.calendarInventoryAudit?.handler,
       };
     }
@@ -1412,7 +1414,8 @@ async function parsePostDataCore(
   const extractionText = appendOcrText(combinedText, ocrDebugSnapshot?.ocrText);
   if (lunaCanarySelected && (allImageUrls.length === 0 ||
       ocrImageUrls.length !== allImageUrls.length)) {
-    return retryCanaryWithLegacy('preprocessed_image_missing');
+    return holdCalendarBandCanary('preprocessed_image_missing',
+      `sourceImages=${allImageUrls.length}, preprocessed=${ocrImageUrls.length}`);
   }
 
   // Early exit for empty content
@@ -1627,7 +1630,7 @@ async function parsePostDataCore(
       });
     }
     if (lunaCanarySelected && !lunaFullImageReady) {
-      return retryCanaryWithLegacy('full_preprocessed_image_unavailable');
+      return holdCalendarBandCanary('full_preprocessed_image_unavailable');
     }
     for (const url of additionalOcrImageUrls) cleanupImageUrls.add(url);
     const displayImageUploadStart = Date.now();
@@ -1647,7 +1650,7 @@ async function parsePostDataCore(
     if (lunaCanarySelected && requireManagedGallery && sourcePostMediaUrls.some(url =>
       !currentImageMaps().sourceManagedImageMap.get(url)
     )) {
-      return retryCanaryWithLegacy('gallery_display_image_missing');
+      return holdCalendarBandCanary('gallery_display_image_missing');
     }
     const managedProfilePicUrl = await prepareManagedProfileIconUrl(profilePicUrl || '', {
       postId: extractedData?.id || extractedData?.postId || '',
