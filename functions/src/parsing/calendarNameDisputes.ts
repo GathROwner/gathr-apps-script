@@ -93,3 +93,104 @@ export function findCalendarOcrNameDisputes(
   }
   return disputes;
 }
+
+/** A diagnostic from OCR word positions. It never rewrites a model title. */
+export interface SpatialOcrWord {
+  text: string;
+  vertices: { x: number; y: number }[];
+  confidence: number | null;
+}
+
+export interface SpatialOcrParagraph {
+  words: SpatialOcrWord[];
+}
+
+export interface SpatialCalendarFrame {
+  frameIndex: number;
+  sourceGalleryIndex: number;
+  region: { left: number; top: number; width: number; height: number };
+}
+
+export interface SpatialNameDispute {
+  kind: 'name_disagreement';
+  itemIndex: number;
+  date: string;
+  sourceGalleryIndex: number;
+  frameIndex: number;
+  modelWord: string;
+  ocrWord: string;
+  sharedAnchors: string[];
+  ocrVertices: SpatialOcrWord['vertices'];
+  ocrConfidence: number | null;
+}
+
+function editDistance(a: string, b: string): number {
+  const previous = Array.from({ length: b.length + 1 }, (_, i) => i);
+  for (let i = 1; i <= a.length; i++) {
+    const current = [i];
+    for (let j = 1; j <= b.length; j++) {
+      current[j] = Math.min(current[j - 1] + 1, previous[j] + 1,
+        previous[j - 1] + Number(a[i - 1] !== b[j - 1]));
+    }
+    previous.splice(0, previous.length, ...current);
+  }
+  return previous[b.length];
+}
+
+function insideRegion(word: SpatialOcrWord, region: SpatialCalendarFrame['region']): boolean {
+  if (word.vertices.length < 3 || !word.vertices.every(point =>
+    Number.isFinite(point.x) && Number.isFinite(point.y))) return false;
+  const centerX = word.vertices.reduce((sum, point) => sum + point.x, 0) / word.vertices.length;
+  const centerY = word.vertices.reduce((sum, point) => sum + point.y, 0) / word.vertices.length;
+  return centerX >= region.left && centerX <= region.left + region.width &&
+    centerY >= region.top && centerY <= region.top + region.height;
+}
+
+/**
+ * Compare a model title with OCR text from the same original image and frame.
+ * Two other shared name words are required, so an isolated fuzzy word never
+ * creates a confirmed dispute. The result is review evidence, not a correction
+ * or a statement that other titles are complete.
+ */
+export function findSpatialCalendarNameDisputes(
+  items: DatedNameItem[],
+  frames: SpatialCalendarFrame[],
+  paragraphsBySource: Map<number, SpatialOcrParagraph[]>
+): SpatialNameDispute[] {
+  const disputes: SpatialNameDispute[] = [];
+  const seen = new Set<string>();
+  for (let itemIndex = 0; itemIndex < items.length; itemIndex++) {
+    const item = items[itemIndex];
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(item.date)) continue;
+    const frame = frames.find(value => value.frameIndex === item.relevantImageIndex);
+    if (!frame || frame.sourceGalleryIndex < 0) continue;
+    const modelWords = words(item.name).map(value => ({ raw: value, normalized: comparable(value) }));
+    if (modelWords.length < 3) continue;
+    for (const paragraph of paragraphsBySource.get(frame.sourceGalleryIndex) || []) {
+      const local = paragraph.words.filter(word => insideRegion(word, frame.region));
+      if (local.length < 3) continue;
+      const ocrWords = local.map(value => ({ ...value, normalized: comparable(value.text) }));
+      const sharedAnchors = [...new Set(ocrWords.map(value => value.normalized)
+        .filter(value => value.length >= 3 && modelWords.some(model => model.normalized === value)))];
+      if (sharedAnchors.length < 2) continue;
+      for (const ocr of ocrWords) {
+        if (ocr.normalized.length < 5 || modelWords.some(model => model.normalized === ocr.normalized)) continue;
+        const candidates = modelWords.filter(model => model.normalized.length >= 5 &&
+          model.normalized.slice(0, 3) === ocr.normalized.slice(0, 3) &&
+          editDistance(model.normalized, ocr.normalized) <= 4 &&
+          editDistance(model.normalized, ocr.normalized) / Math.max(model.normalized.length,
+            ocr.normalized.length) <= 0.35);
+        if (candidates.length !== 1) continue;
+        const model = candidates[0];
+        const key = `${itemIndex}|${frame.sourceGalleryIndex}|${model.normalized}|${ocr.normalized}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        disputes.push({ kind: 'name_disagreement', itemIndex, date: item.date,
+          sourceGalleryIndex: frame.sourceGalleryIndex, frameIndex: frame.frameIndex,
+          modelWord: model.raw, ocrWord: ocr.text, sharedAnchors,
+          ocrVertices: ocr.vertices, ocrConfidence: ocr.confidence });
+      }
+    }
+  }
+  return disputes;
+}

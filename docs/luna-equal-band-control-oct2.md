@@ -4,7 +4,8 @@
 The image-upload endpoint and managed URL were mocked. There were no real
 uploads, Firestore writes, deployments, or production flag changes. Every
 band came from the saved 2880×3840 Cloud Run-style color WebP; the full image
-was cut at y=960, 1920, and 2880 with 280 pixels of overlap. No hand-placed
+was cut at y=960, 1920, and 2880 with 280 pixels added on each side of an
+interior cut (560 pixels shared by adjacent bands). No hand-placed
 row boundaries or source-name hints were supplied. Four existing non-target
 source-slot sentinels remained because the exact-post canary protocol requires
 them; this was not a completely unguided production route.
@@ -22,6 +23,8 @@ observe raw behavior; a production exact-post guard with the reviewed
 `HeartFakers` spelling would now hold this canary for review.
 
 The February full pipeline took about 4.8 minutes and May about 5.5 minutes.
+An earlier repeat with manually placed bands also recovered February 3, so
+this run does not isolate the equal-height geometry from model variation.
 The generic crop is promising for coverage, but two trials do not justify
 automatic routing of all dense flyers. The February final also shortened the
 printed music-bingo name to `Music Bingo 28`, which needs source review. The
@@ -31,4 +34,6 @@ uncertain-year images or galleries with the calendar on a later slide.
 Raw outputs: `artifacts/luna-six-calendars-2026-10-02/photo-06/luna-high-reviewed-equal-bands-r2.json`
 and `artifacts/luna-six-calendars-2026-10-02/photo-04/luna-high-reviewed-equal-bands-r1.json`.
 The dry-run harness supports `HELDOUT_AUTO_BANDS=true` and
-`HELDOUT_PREVIEW_ONLY=true` for crop inspection before paid calls.
+`HELDOUT_PREVIEW_ONLY=true` for crop inspection before paid calls. Subsequent
+runs use immutable labels, label-specific band image paths, and source/band
+SHA-256 hashes so new comparisons do not overwrite old visual evidence.

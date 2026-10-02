@@ -1,12 +1,14 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import http from 'node:http';
+import crypto from 'node:crypto';
 import { createRequire } from 'node:module';
 import { parsePostData } from '../lib/parsing/postParser.js';
 
 const id = process.argv[2];
 const label = process.argv[3] || 'r1';
 if (!['photo-01', 'photo-02', 'photo-03', 'photo-04', 'photo-05', 'photo-06'].includes(id) ||
+    !/^[a-z0-9][a-z0-9-]{0,63}$/.test(label) ||
     (!process.env.OPENAI_API_KEY && process.env.HELDOUT_PREVIEW_ONLY !== 'true') ||
     process.env.IMAGE_UPLOAD_URL || process.env.IMAGE_DELETE_URL) {
   throw new Error('Guarded local dry run: reviewed photo with verified year, existing key, no upload/delete endpoints');
@@ -16,6 +18,15 @@ const fixtureRoot = 'C:/Users/craig/.codex/worktrees/luna-parser-cost-trial/gath
 const dir = path.join(fixtureRoot, 'eval', id);
 const outputDir = path.join(root, 'artifacts/luna-six-calendars-2026-10-02', id);
 await fs.mkdir(outputDir, { recursive: true });
+const outputPath = path.join(outputDir, `luna-high-reviewed-${label}.json`);
+if (await fs.stat(outputPath).then(() => true, () => false)) {
+  throw new Error(`Run label already exists; choose a new label: ${outputPath}`);
+}
+const bandOutputDir = path.join(outputDir, label);
+if (await fs.stat(bandOutputDir).then(() => true, () => false)) {
+  throw new Error(`Run label has image evidence already; choose a new label: ${bandOutputDir}`);
+}
+await fs.mkdir(bandOutputDir, { recursive: true });
 const sharp = createRequire('C:/Users/craig/Dev/gathr-apps-script/gathr-backend/package.json')('sharp');
 const cases = {
   'photo-01': { venue: 'The Factory Downtown', month: 'September', timestamp: '2026-09-01T12:00:00.000Z',
@@ -83,6 +94,7 @@ if (automaticEqualBands) {
 const base = await fs.readFile(path.join(dir, 'cloudrun-calendar-base.webp'));
 const color = await fs.readFile(path.join(dir, 'cloudrun-calendar-color.webp'));
 const original = await fs.readFile(path.join(fixtureRoot, `${id}.jpg`));
+const sha256 = buffer => crypto.createHash('sha256').update(buffer).digest('hex');
 const image = buffer => `data:image/webp;base64,${buffer.toString('base64')}`;
 const baseUrl = image(base);
 const originalUrl = `data:image/jpeg;base64,${original.toString('base64')}`;
@@ -97,7 +109,7 @@ const regions = [0, 1, 2, 3].map(index => {
 const bands = await Promise.all(regions.map(async region => {
   const { left, top, width, height } = region;
   const result = await sharp(color).extract({ left, top, width, height }).webp({ quality: 90 }).toBuffer();
-  await fs.writeFile(path.join(outputDir, `reviewed-band-${region.index + 1}.webp`), result);
+  await fs.writeFile(path.join(bandOutputDir, `reviewed-band-${region.index + 1}.webp`), result);
   return result;
 }));
 const bandUrls = bands.map(image);
@@ -170,12 +182,13 @@ const output = { id, label, method: automaticEqualBands
   yearUnresolved: Boolean(item.yearUnresolved),
   diagnosticNameGuardBypass,
   sourceImage: `${id}.jpg`, sourceUrl: originalUrl.slice(0, 30) + '[omitted]', crop: item.crop, cuts: item.cuts,
+  imageHashes: { originalSha256: sha256(original), colorSha256: sha256(color),
+    bandSha256: bands.map(sha256) },
   regions, expectedSlots: item.expectedSlots, ocrUploads, displayUploads, bandUploads,
   latencyMs: Date.now() - started, usage, skips, error,
   frameManifest: artifacts.find(value => value.imageFrameManifest)?.imageFrameManifest || [],
   stage3Items: artifacts.find(value => value.stage3Items)?.stage3Items || [], events };
 if (JSON.stringify(output.events).includes('data:image/')) throw new Error('Analysis image leaked into final event');
-const outputPath = path.join(outputDir, `luna-high-reviewed-${label}.json`);
 await fs.writeFile(outputPath, JSON.stringify(output, null, 2));
 console.log(JSON.stringify({ outputPath, stage3Count: output.stage3Items.length,
   finalCount: events.length, skips, error, usage, latencyMs: output.latencyMs }));
