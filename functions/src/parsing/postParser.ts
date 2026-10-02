@@ -3361,10 +3361,12 @@ export function enforceDateTimeCompleteness(
     }
 
     // If end time is missing but we have start time, infer a deterministic end time.
-    if (!ev.endTime && ev.startTime) {
+    if (!ev.endTime && ev.startTime && !hasApproximateLinkedPageEnd(ev)) {
       const inferred = inferEndTimeFromStart(ev.startTime, String(ev.category || ''), ev);
       ev.endTime = inferred.endTime;
       ev.timeResolution.endFromHours = inferred.source;
+    } else if (!ev.endTime && hasApproximateLinkedPageEnd(ev)) {
+      delete ev.timeResolution.endFromHours;
     }
 
     const siblingEndHint = siblingEndTimeHints.get(index);
@@ -3442,7 +3444,7 @@ export function enforceDateTimeCompleteness(
       !ev.startDate ? 'startDate' : '',
       !ev.startTime ? 'startTime' : '',
       !ev.endDate ? 'endDate' : '',
-      !ev.endTime ? 'endTime' : '',
+      !ev.endTime && !hasApproximateLinkedPageEnd(ev) ? 'endTime' : '',
     ].filter(Boolean);
 
     if (missingFields.length > 0) {
@@ -5306,6 +5308,10 @@ function hasExplicitMidnight(event: TimeResolvedEvent, which: 'start' | 'end'): 
     /\b12(?::00)?\s*a\.?m\.?\b/i.test(haystack) ||
     /\ball[\s-]?day\b|\bopen\s*to\s*close\b/i.test(haystack)
   );
+}
+
+function hasApproximateLinkedPageEnd(event: Pick<TimeResolvedEvent, 'timeFlags'>): boolean {
+  return /\bapproximate end omitted\b/i.test(String(event.timeFlags?.end?.evidence || ''));
 }
 
 // Re-export types and config for convenience

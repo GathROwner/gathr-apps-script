@@ -45,7 +45,7 @@ type WebsiteCandidate = {
   imageUrl?: string;
   sourceUrl: string;
   source: 'detail_page' | 'locarius_api';
-  namedMealSeatings?: Array<{ label: string; startTime: string; endTime: string }>;
+  namedSeatings?: Array<{ label: string; startTime: string; endTime: string }>;
 };
 
 const DEFAULT_TIMEOUT_MS = 12000;
@@ -156,7 +156,8 @@ export async function enrichEventsFromVenueWebsite(
   const texts = [combinedText, ocrText || ''].filter(Boolean);
   const websiteCuePresent = texts.some((text) => WEBSITE_CUE_PATTERN.test(String(text || '')));
   const candidateItems = inputItems.filter((item) => shouldAttemptForItem(item));
-  if (candidateItems.length === 0) {
+  const hasRepeatedSameDayStartTimes = findRepeatedSameDayStartTimeGroups(inputItems).length > 0;
+  if (candidateItems.length === 0 && !hasRepeatedSameDayStartTimes) {
     summary.reason = 'no_missing_event_time_candidates';
     return { items: inputItems, summary };
   }
@@ -526,7 +527,7 @@ async function discoverDetailPageCandidates(
   // well as links discovered from a venue listing page.
   if (safePathname(pageUrl).split('/').filter(Boolean).length >= 2) {
     const directCandidate = parseDetailPageCandidate(pageUrl, pageHtml, yearHint);
-    if (directCandidate?.namedMealSeatings?.length === 2) {
+    if ((directCandidate?.namedSeatings?.length || 0) >= 2) {
       detailCandidates.set(`${directCandidate.sourceUrl}|${directCandidate.title}|${directCandidate.date || directCandidate.dateRangeStart || ''}`, directCandidate);
     }
   }
@@ -637,7 +638,12 @@ function parseDetailPageCandidate(
     )
   );
   const dateInfo = extractDateInfoFromText(text, yearHint);
-  const timeInfo = extractTimeInfoFromText(text);
+  const namedSeatings = dateInfo.date && !dateInfo.dateRangeStart
+    ? parseNamedSeatings(html)
+    : [];
+  // A page with separately named same-day sessions has no safe page-wide
+  // start time. Keep those times attached to their labels for reconciliation.
+  const timeInfo = namedSeatings.length >= 2 ? {} : extractTimeInfoFromText(text);
 
   if (!title && !dateInfo.date && !dateInfo.dateRangeStart) {
     return null;
@@ -654,25 +660,45 @@ function parseDetailPageCandidate(
     imageUrl,
     sourceUrl: detailUrl,
     source: 'detail_page',
-    namedMealSeatings: parseNamedMealSeatings(text),
+    namedSeatings,
   };
 }
 
-function parseNamedMealSeatings(text: string): Array<{ label: string; startTime: string; endTime: string }> {
-  // A page that explicitly sells lunch and dinner as separate experiences is
-  // not one continuous event. Keep this narrow; ordinary multi-act programs
-  // must not be split just because they print several time ranges.
-  if (!/two distinct culinary and cultural experiences/i.test(text)) return [];
-  const matches = Array.from(text.matchAll(
-    /\b(Garden Lunch Experience|Evening Dinner Experience)\s*\(\s*(\d{1,2}(?::\d{2})?\s*[ap]\.?m\.?)\s*[–—-]\s*(?:approx(?:imately)?\.?\s*)?(\d{1,2}(?::\d{2})?\s*[ap]\.?m\.?)\s*\)/gi
-  ));
-  const seatings = matches.map(match => ({
-    label: match[1],
-    startTime: parse12hTime(match[2]),
-    endTime: parse12hTime(match[3]),
-  })).filter(item => item.startTime && item.endTime);
-  const labels = new Set(seatings.map(item => item.label.toLowerCase()));
-  return seatings.length === 2 && labels.size === 2 ? seatings : [];
+function parseNamedSeatings(html: string): Array<{ label: string; startTime: string; endTime: string }> {
+  const blocks = Array.from(String(html || '').matchAll(
+    /<(h[1-6]|p|li|strong|b|em|dt|summary)\b[^>]*>([\s\S]*?)<\/\1>/gi
+  )).map(match => cleanText(match[2] || '')).filter(Boolean);
+  const time = String.raw`\d{1,2}(?::\d{2})?\s*(?:a\.?m\.?|p\.?m\.?)`;
+  const rangePattern = new RegExp(
+    `([^.!?()]{2,120}?)\\s*\\(\\s*(${time})\\s*(?:-|–|—|to)\\s*` +
+      `(?:(approx(?:imately)?\\.?|about|around)\\s*)?(${time})\\s*\\)`,
+    'gi'
+  );
+  const seatings: Array<{ label: string; startTime: string; endTime: string }> = [];
+  const seen = new Set<string>();
+
+  for (const block of blocks) {
+    for (const match of block.matchAll(rangePattern)) {
+      const label = String(match[1] || '').trim().replace(/^[\s:|–—-]+|[\s:|–—-]+$/g, '');
+      const startTime = parse12hTime(match[2]);
+      const approximateEnd = Boolean(match[3]);
+      const endTime = approximateEnd ? '' : parse12hTime(match[4]);
+      if (!label || !startTime || (!approximateEnd && !endTime)) continue;
+      const key = `${label.toLowerCase()}|${startTime}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      seatings.push({ label, startTime, endTime });
+    }
+  }
+
+  if (seatings.length < 2 || seatings.length > 12) return [];
+  const labels = new Set(seatings.map(item => normalizeNamedLabel(item.label)));
+  const starts = new Set(seatings.map(item => item.startTime));
+  return labels.size === seatings.length && starts.size === seatings.length ? seatings : [];
+}
+
+function normalizeNamedLabel(value: string): string {
+  return String(value || '').toLowerCase().replace(/[^a-z0-9\s]+/g, ' ').replace(/\s+/g, ' ').trim();
 }
 
 function extractDateInfoFromText(
@@ -771,6 +797,9 @@ function applyWebsiteCandidates(
   summary: VenueWebsiteEnrichmentSummary,
   combinedText: string
 ): { items: ExtractedItem[]; summary: VenueWebsiteEnrichmentSummary } {
+  const reconciledItems = reconcileRepeatedSameDaySeatingTimes(items, candidates, summary);
+  if (reconciledItems) return { items: reconciledItems, summary };
+
   const nextItems = items.map((item) => {
     if (!shouldAttemptForItem(item)) return item;
 
@@ -831,35 +860,186 @@ function applyWebsiteCandidates(
     return item;
   });
 
-  if (nextItems.length === 1 && /\bboth\b[^.\n]{0,120}\blunch\b[^.\n]{0,100}\bdinner\b[^.\n]{0,100}\bseatings\b/i.test(combinedText)) {
+  if (nextItems.length === 1 && hasExplicitMultipleSeatingCue(combinedText)) {
     const original = items[0];
     const candidate = findBestCandidateForItem(original, candidates);
-    const seatings = candidate?.namedMealSeatings || [];
+    const seatings = candidate?.namedSeatings || [];
     const initialStart = String(original.startTime || '').trim();
     const linkedPage = String(candidate?.sourceUrl || '').replace(/\/$/, '');
     const samePrintedDate = !candidate?.date || !original.date || candidate.date === original.date;
-    if (seatings.length === 2 && linkedPage && combinedText.includes(linkedPage) && samePrintedDate &&
-        (!hasUsableFieldValue(initialStart) || initialStart === seatings[0].startTime)) {
+    if (seatings.length >= 2 && linkedPage && combinedText.includes(linkedPage) && samePrintedDate &&
+        (!hasUsableFieldValue(initialStart) || seatings.some(seating => seating.startTime === initialStart))) {
       const base = nextItems[0];
       const splitItems = seatings.map(seating => ({
         ...base,
         name: `${String(base.name || candidate?.title || '').trim().replace(/\s+Live Performances$/i, '').replace(/[\s:–—-]+$/g, '')}: ${seating.label}`,
         startTime: seating.startTime,
-        endTime: seating.endTime,
+        endTime: seating.endTime || '',
         timeFlags: {
           ...base.timeFlags,
           start: { source: 'explicit', evidence: `venue_website:${candidate?.sourceUrl} ${seating.label}` },
-          end: { source: 'explicit', toClose: false, evidence: `venue_website:${candidate?.sourceUrl} ${seating.label}` },
+          end: seating.endTime
+            ? { source: 'explicit', toClose: false, evidence: `venue_website:${candidate?.sourceUrl} ${seating.label}` }
+            : { source: 'none', toClose: false, evidence: `venue_website:${candidate?.sourceUrl} approximate end omitted` },
         },
-        extractionReason: `${String(base.extractionReason || '').trim()} | two named website seatings`,
+        extractionReason: `${String(base.extractionReason || '').trim()} | named linked-page seatings`,
       })) as ExtractedItem[];
-      summary.appliedCount = 2;
-      summary.updatedFields.times = 2;
-      summary.reason = 'split_explicit_website_meal_seatings';
+      summary.appliedCount = splitItems.length;
+      summary.updatedFields.times = splitItems.length;
+      summary.reason = 'split_explicit_named_website_seatings';
       return { items: splitItems, summary };
     }
   }
   return { items: nextItems, summary };
+}
+
+function hasExplicitMultipleSeatingCue(text: string): boolean {
+  const cue = String(text || '');
+  const countCue = /\b(?:both|two|2|three|3|multiple|several|separate|distinct)\b/i;
+  const seatingCue = /\b(?:seatings?|sessions?|experiences?)\b/i;
+  return (countCue.test(cue) && seatingCue.test(cue));
+}
+
+function reconcileRepeatedSameDaySeatingTimes(
+  items: ExtractedItem[],
+  candidates: WebsiteCandidate[],
+  summary: VenueWebsiteEnrichmentSummary
+): ExtractedItem[] | null {
+  for (const group of findRepeatedSameDayStartTimeGroups(items)) {
+    for (const candidate of candidates) {
+      const seatings = candidate.namedSeatings || [];
+      if (!candidate.date || candidate.date !== group.date ||
+          candidate.dateRangeStart || candidate.dateRangeEnd || seatings.length !== group.indices.length) {
+        continue;
+      }
+
+      const assignment = mapItemsToNamedSeatings(
+        group.indices.map(index => items[index]), seatings, candidate.title || ''
+      );
+      if (!assignment) continue;
+
+      let changedCount = 0;
+      const nextItems = items.slice();
+      for (let offset = 0; offset < group.indices.length; offset++) {
+        const itemIndex = group.indices[offset];
+        const item = items[itemIndex];
+        const seating = assignment[offset];
+        const currentStart = normalizeWebsiteTime(String(item.startTime || ''));
+        const currentEnd = String(item.endTime || '').trim();
+        let reconciledEnd = currentEnd;
+        const existingFlags = item.timeFlags || {
+          start: { source: 'none' as const, evidence: '' },
+          end: { toClose: false, evidence: '' },
+        };
+        let endFlags = existingFlags.end || { toClose: false, evidence: '' };
+        if (seating.endTime && !hasUsableFieldValue(currentEnd)) {
+          reconciledEnd = seating.endTime;
+          endFlags = {
+            source: 'explicit',
+            toClose: false,
+            evidence: `venue_website:${candidate.sourceUrl} ${seating.label}`,
+          };
+        } else if (!seating.endTime && existingFlags.end?.source !== 'explicit') {
+          reconciledEnd = '';
+          endFlags = {
+            source: 'none',
+            toClose: false,
+            evidence: `venue_website:${candidate.sourceUrl} ${seating.label} approximate end omitted`,
+          };
+        }
+        if (currentStart !== seating.startTime || currentEnd !== reconciledEnd) changedCount += 1;
+        nextItems[itemIndex] = {
+          ...item,
+          startTime: seating.startTime,
+          endTime: reconciledEnd,
+          timeFlags: {
+            ...existingFlags,
+            start: {
+              source: 'explicit',
+              evidence: `venue_website:${candidate.sourceUrl} ${seating.label}`,
+            },
+            end: endFlags,
+          },
+          extractionReason: `${String(item.extractionReason || '').trim()} | start time reconciled with named linked-page seating`,
+        } as ExtractedItem;
+      }
+
+      if (changedCount === 0) continue;
+      summary.appliedCount += group.indices.length;
+      summary.updatedFields.times += changedCount;
+      summary.reason = 'reconciled_named_website_seating_times';
+      return nextItems;
+    }
+  }
+  return null;
+}
+
+function findRepeatedSameDayStartTimeGroups(items: ExtractedItem[]): Array<{ date: string; indices: number[] }> {
+  const groups = new Map<string, { date: string; indices: number[] }>();
+  (items || []).forEach((item, index) => {
+    if (!isEventishItem(item)) return;
+    const date = String(item.date || '').trim();
+    const startTime = normalizeWebsiteTime(String(item.startTime || ''));
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !startTime) return;
+    const key = `${date}|${startTime}`;
+    const group = groups.get(key) || { date, indices: [] };
+    group.indices.push(index);
+    groups.set(key, group);
+  });
+  return Array.from(groups.values()).filter(group => group.indices.length >= 2);
+}
+
+function mapItemsToNamedSeatings(
+  items: ExtractedItem[],
+  seatings: Array<{ label: string; startTime: string; endTime: string }>,
+  candidateTitle: string
+): Array<{ label: string; startTime: string; endTime: string }> | null {
+  const genericLabelWords = new Set([
+    'a', 'an', 'and', 'at', 'event', 'events', 'experience', 'experiences',
+    'for', 'of', 'session', 'sessions', 'seating', 'seatings', 'the', 'with',
+  ]);
+  const labelTokenSets = seatings.map(seating => new Set(
+    tokenize(seating.label).filter(token => token.length >= 3 && !genericLabelWords.has(token))
+  ));
+  const uniqueLabelTokens = labelTokenSets.map((tokens, index) => new Set(
+    Array.from(tokens).filter(token => labelTokenSets.every((other, otherIndex) =>
+      otherIndex === index || !other.has(token)
+    ))
+  ));
+  if (uniqueLabelTokens.some(tokens => tokens.size === 0)) return null;
+
+  const titleTokens = tokenize(candidateTitle).filter(token => token.length >= 3 && !TOKEN_STOP_WORDS.has(token));
+  const requiredTitleOverlap = titleTokens.length > 0 ? Math.min(2, titleTokens.length) : 0;
+  const assigned = new Set<number>();
+  const result: Array<{ label: string; startTime: string; endTime: string }> = [];
+
+  for (const item of items) {
+    const itemTokens = new Set(tokenize(String(item.name || '')));
+    if (requiredTitleOverlap > 0 && scoreTokenOverlap(titleTokens, Array.from(itemTokens)) < requiredTitleOverlap) {
+      return null;
+    }
+    const matches = uniqueLabelTokens.flatMap((tokens, index) =>
+      Array.from(tokens).some(token => itemTokens.has(token)) ? [index] : []
+    );
+    if (matches.length !== 1 || assigned.has(matches[0])) return null;
+    assigned.add(matches[0]);
+    result.push(seatings[matches[0]]);
+  }
+
+  return assigned.size === seatings.length ? result : null;
+}
+
+function normalizeWebsiteTime(raw: string): string {
+  const value = String(raw || '').trim();
+  const clock24 = value.match(/^(\d{1,2}):(\d{2})$/);
+  if (clock24 && Number(clock24[1]) < 24 && Number(clock24[2]) < 60) {
+    return `${String(Number(clock24[1])).padStart(2, '0')}:${clock24[2]}`;
+  }
+  const clock12 = value.match(/^(\d{1,2})(?::(\d{2}))?\s*([ap])\.?m\.?$/i);
+  if (!clock12) return '';
+  let hour = Number(clock12[1]) % 12;
+  if (clock12[3].toLowerCase() === 'p') hour += 12;
+  return `${String(hour).padStart(2, '0')}:${clock12[2] || '00'}`;
 }
 
 function findBestCandidateForItem(

@@ -83,6 +83,34 @@ test('a race does not inherit the previous day kit-pickup end time', () => {
   assert.equal(race.timeResolution?.endFromHours, 'duration_default');
 });
 
+test('an approximate linked-page end stays unspecified instead of becoming a category default', () => {
+  const [event] = enforceDateTimeCompleteness(
+    [buildEvent({
+      category: 'Live Music',
+      name: 'Taste of Georgetown: Evening Dinner Experience',
+      startDate: '2026-10-02',
+      endDate: '2026-10-02',
+      startTime: '18:00',
+      endTime: '',
+      timeFlags: {
+        start: { source: 'explicit', evidence: 'venue_website: official named seating' },
+        end: {
+          source: 'none',
+          toClose: false,
+          evidence: 'venue_website: official named seating approximate end omitted',
+        },
+      },
+    })],
+    '2026-10-01T12:00:00.000Z', 'America/Halifax'
+  );
+
+  assert.equal(event.name, 'Taste of Georgetown: Evening Dinner Experience');
+  assert.equal(event.startTime, '18:00');
+  assert.equal(event.endDate, '2026-10-02');
+  assert.equal(event.endTime, '');
+  assert.equal(event.timeResolution?.endFromHours, undefined);
+});
+
 test('venue-hours fallback cannot date a future calendar offer from its post time', () => {
   const offer = buildEvent({
     isEvent: 'No', isFoodSpecial: 'Yes', category: 'Happy Hour',

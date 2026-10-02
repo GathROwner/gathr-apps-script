@@ -175,7 +175,7 @@ test('Trailside-style website follow-up recovers explicit start times from locar
   }
 });
 
-test('explicit lunch and dinner seatings split one website-backed gallery event while preserving source media', async () => {
+test('explicit named seatings split one website-backed gallery event without exactizing approximate ends', async () => {
   const detailUrl = 'https://fallflavours.ca/signature-event/taste-of-georgetown-2/';
   const restoreFetch = installFetchMap({
     'https://fallflavours.ca/': htmlResponse(
@@ -208,11 +208,11 @@ test('explicit lunch and dinner seatings split one website-backed gallery event 
       [sourceItem], caption, '', '2026-10-01T12:00:00.000Z',
       { name: 'Kings Playhouse', website: 'https://fallflavours.ca/' }, DEFAULT_PARSING_CONFIG
     );
-    assert.equal(result.summary.reason, 'split_explicit_website_meal_seatings');
+    assert.equal(result.summary.reason, 'split_explicit_named_website_seatings');
     assert.deepEqual(result.items.map(item => [item.startTime, item.endTime]),
-      [['12:00', '14:00'], ['18:00', '21:00']]);
+      [['12:00', ''], ['18:00', '']]);
     assert.deepEqual(result.items.map(item => (item as any)._sourceImageIndex), [2, 2]);
-    assert.equal(result.items.every(item => item.timeFlags?.end?.source === 'explicit'), true);
+    assert.equal(result.items.every(item => item.timeFlags?.end?.source !== 'explicit'), true);
     assert.deepEqual(result.items.map(item => item.name), [
       'Taste of Georgetown: Garden Lunch Experience',
       'Taste of Georgetown: Evening Dinner Experience',
@@ -234,6 +234,89 @@ test('explicit lunch and dinner seatings split one website-backed gallery event 
       { name: 'Kings Playhouse', website: 'https://fallflavours.ca/' }, DEFAULT_PARSING_CONFIG
     );
     assert.equal(lunchOnly.items.length, 1);
+  } finally {
+    restoreFetch();
+  }
+});
+
+test('repeated same-day starts reconcile to uniquely named linked-page seatings and preserve unrelated events', async () => {
+  const detailUrl = 'https://harbourtable.example/events/october-table';
+  const restoreFetch = installFetchMap({
+    [detailUrl]: htmlResponse(
+      '<html><head><meta property="og:title" content="Harbour Table"></head><body>' +
+      '<h1>Harbour Table</h1><p>October 2, 2026.</p>' +
+      '<h2>Garden Gathering (11:30 a.m. – 1:00 p.m.)</h2>' +
+      '<h2>Twilight Supper (6:15 p.m. – approx. 8:30 p.m.)</h2></body></html>'
+    ),
+  });
+
+  try {
+    const garden = buildEventItem({
+      name: 'Harbour Table: Garden Gathering',
+      date: '2026-10-02',
+      startTime: '11:30',
+      endTime: '',
+    });
+    const twilight = buildEventItem({
+      name: 'Harbour Table: Twilight Supper',
+      date: '2026-10-02',
+      startTime: '11:30',
+      endTime: '01:00',
+    });
+    const unrelated = buildEventItem({
+      name: 'Harbour Theatre: Late Show',
+      date: '2026-10-02',
+      startTime: '19:30',
+      endTime: '21:00',
+    });
+    const caption = `Tickets and details: ${detailUrl}`;
+    const result = await enrichEventsFromVenueWebsite(
+      [garden, twilight, unrelated], caption, '', '2026-10-01T12:00:00.000Z',
+      undefined, DEFAULT_PARSING_CONFIG
+    );
+
+    assert.equal(result.summary.reason, 'reconciled_named_website_seating_times');
+    assert.deepEqual(result.items.map(item => [item.name, item.startTime, item.endTime]), [
+      ['Harbour Table: Garden Gathering', '11:30', '13:00'],
+      ['Harbour Table: Twilight Supper', '18:15', ''],
+      ['Harbour Theatre: Late Show', '19:30', '21:00'],
+    ]);
+    assert.equal(result.items[0].timeFlags?.end?.source, 'explicit');
+    assert.equal(result.items[1].timeFlags?.start?.evidence.includes('Twilight Supper'), true);
+    assert.equal(result.items[1].timeFlags?.end?.source, 'none');
+    assert.equal(result.items[1].timeFlags?.end?.evidence.includes('approximate end omitted'), true);
+    assert.equal(result.items.length, 3);
+  } finally {
+    restoreFetch();
+  }
+});
+
+test('same-day time collisions stay unchanged when linked seating names do not identify extracted items', async () => {
+  const detailUrl = 'https://harbourtable.example/events/october-table';
+  const restoreFetch = installFetchMap({
+    [detailUrl]: htmlResponse(
+      '<html><head><meta property="og:title" content="Harbour Table"></head><body>' +
+      '<h1>Harbour Table</h1><p>October 2, 2026.</p>' +
+      '<h2>Garden Gathering (11:30 a.m. – approx. 1:00 p.m.)</h2>' +
+      '<h2>Twilight Supper (6:15 p.m. – approx. 8:30 p.m.)</h2></body></html>'
+    ),
+  });
+
+  try {
+    const items = [
+      buildEventItem({ name: 'Harbour Table', date: '2026-10-02', startTime: '11:30' }),
+      buildEventItem({ name: 'Harbour Table', date: '2026-10-02', startTime: '11:30' }),
+    ];
+    const result = await enrichEventsFromVenueWebsite(
+      items, `Details: ${detailUrl}`, '', '2026-10-01T12:00:00.000Z',
+      undefined, DEFAULT_PARSING_CONFIG
+    );
+
+    assert.deepEqual(result.items.map(item => [item.name, item.startTime]), [
+      ['Harbour Table', '11:30'],
+      ['Harbour Table', '11:30'],
+    ]);
+    assert.equal(result.summary.updatedFields.times, 0);
   } finally {
     restoreFetch();
   }
