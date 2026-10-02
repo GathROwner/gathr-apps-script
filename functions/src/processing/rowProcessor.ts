@@ -7855,7 +7855,13 @@ function mergeDuplicateMediaUrls(existing: EventData, incoming: EventData): stri
 function hasSameSourceUniqueId(existing: EventData, incoming: EventData): boolean {
   const existingUniqueId = asTrimmedString(existing.uniqueId);
   const incomingUniqueId = asTrimmedString(incoming.uniqueId);
-  return Boolean(existingUniqueId && incomingUniqueId && existingUniqueId === incomingUniqueId);
+  if (!existingUniqueId || !incomingUniqueId) return false;
+  if (existingUniqueId === incomingUniqueId) return true;
+  // Expanded event IDs include a content hash. A corrected title can change
+  // that hash even though both records came from the same Facebook post.
+  const existingPost = /^(\d{10,})_[0-9a-f]{8,}$/i.exec(existingUniqueId);
+  const incomingPost = /^(\d{10,})_[0-9a-f]{8,}$/i.exec(incomingUniqueId);
+  return Boolean(existingPost && incomingPost && existingPost[1] === incomingPost[1]);
 }
 
 function shouldAlignStructuredFacebookEventManagedImage(
@@ -7922,9 +7928,7 @@ function shouldPromoteCanonicalImageFromNewerDuplicate(
 
   if (hasNewerSourceTimestamp) return true;
 
-  const existingUniqueId = asTrimmedString(existing.uniqueId || existing.id);
-  const incomingUniqueId = asTrimmedString(incoming.uniqueId || incoming.id);
-  if (!existingUniqueId || !incomingUniqueId || existingUniqueId !== incomingUniqueId) {
+  if (!hasSameSourceUniqueId(existing, incoming)) {
     return false;
   }
 

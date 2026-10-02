@@ -1,0 +1,227 @@
+{
+  "snapshotId": "1OmFzDG0kWiY-k8C-8G6-oGlTBxE3B0cq_209_1790960626927",
+  "gallery": [
+    "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+    "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+    "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp"
+  ],
+  "entries": [
+    {
+      "name": "Coffee & Consent",
+      "path": "venues/slug_upeisu/events/P0tSDGFBmFp9o2x2Xuvt",
+      "uniqueId": "1739771728156396_811847070ef3a80f",
+      "updateTime": {
+        "seconds": 1790960610,
+        "nanoseconds": 77188000
+      },
+      "changedFields": [
+        "mediaUrls",
+        "relevantImageUrl",
+        "image",
+        "imageUrl",
+        "imageProvenance"
+      ],
+      "updates": {
+        "mediaUrls": [
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp"
+        ],
+        "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+        "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+        "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+        "imageProvenance": {
+          "version": 1,
+          "primarySource": "post_media",
+          "primaryField": "relevantImageUrl",
+          "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+          "isFallback": false,
+          "sourceFields": [
+            "relevantImageUrl",
+            "mediaUrls",
+            "icon"
+          ],
+          "media": [
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+              "source": "post_media",
+              "field": "relevantImageUrl",
+              "isPrimary": true,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": true,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1788272615042-2sifmb.webp",
+              "source": "profile_image",
+              "field": "icon",
+              "isPrimary": false,
+              "isFallback": false
+            }
+          ],
+          "selectionReason": "model_selected_analysis_frame_source; duplicate_merge_image_update",
+          "updatedBy": "duplicate_merge"
+        }
+      }
+    },
+    {
+      "name": "Sexy Sexual Health Trivia",
+      "path": "venues/fb_100052099464909/events/ELp2wyMTX7TmCEMKlp2E",
+      "uniqueId": "1739771728156396_4d8265bb209dc30d",
+      "updateTime": {
+        "seconds": 1790960614,
+        "nanoseconds": 543719000
+      },
+      "changedFields": [
+        "mediaUrls",
+        "relevantImageUrl",
+        "image",
+        "imageUrl",
+        "imageProvenance"
+      ],
+      "updates": {
+        "mediaUrls": [
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp"
+        ],
+        "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+        "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+        "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+        "imageProvenance": {
+          "version": 1,
+          "primarySource": "post_media",
+          "primaryField": "relevantImageUrl",
+          "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+          "isFallback": false,
+          "sourceFields": [
+            "relevantImageUrl",
+            "mediaUrls",
+            "icon"
+          ],
+          "media": [
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+              "source": "post_media",
+              "field": "relevantImageUrl",
+              "isPrimary": true,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": true,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1773753075007-l233hs.webp",
+              "source": "profile_image",
+              "field": "icon",
+              "isPrimary": false,
+              "isFallback": false
+            }
+          ],
+          "selectionReason": "model_selected_analysis_frame_source; duplicate_merge_image_update",
+          "updatedBy": "duplicate_merge"
+        }
+      }
+    },
+    {
+      "name": "Go- Experience The Pride",
+      "path": "venues/slug_upeiturffield/events/Li0eZIKcYCrqHWUqQlSO",
+      "uniqueId": "1739771728156396_3ae68f15da36802f",
+      "updateTime": {
+        "seconds": 1790960613,
+        "nanoseconds": 336656000
+      },
+      "changedFields": [
+        "mediaUrls",
+        "imageProvenance"
+      ],
+      "updates": {
+        "mediaUrls": [
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp"
+        ],
+        "imageProvenance": {
+          "version": 1,
+          "primarySource": "post_media",
+          "primaryField": "relevantImageUrl",
+          "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+          "isFallback": false,
+          "sourceFields": [
+            "relevantImageUrl",
+            "mediaUrls"
+          ],
+          "media": [
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+              "source": "post_media",
+              "field": "relevantImageUrl",
+              "isPrimary": true,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": true,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": false
+            }
+          ],
+          "selectionReason": "model_selected_analysis_frame_source; duplicate_merge_image_update",
+          "updatedBy": "duplicate_merge"
+        }
+      }
+    }
+  ]
+}

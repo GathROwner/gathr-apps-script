@@ -66,7 +66,8 @@ export function isOnlineAdministrativeMilestone(event: {
 }): boolean {
   const name = String(event.name || '').trim();
   const detail = `${event.description || ''} ${event.spatial?.evidenceNotes || ''}`;
-  const administrativeAction = /\b(?:voting|registration|applications?|nominations?)\s+(?:opens?|closes?|starts?|ends?|deadline)\b/i.test(name);
+  const administrativeAction = /\b(?:voting|registration|applications?|nominations?)\s+(?:opens?|closes?|starts?|ends?|deadline)\b/i.test(name) ||
+    /\belections?\b/i.test(name);
   const isPhysicalPlace = (place: unknown): boolean => {
     const label = String(place || '').trim();
     return Boolean(label) &&

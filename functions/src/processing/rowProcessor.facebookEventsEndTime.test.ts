@@ -84,6 +84,41 @@ test('duplicate merge replaces managed media from a reprocessed copy of the same
   ]);
 });
 
+test('same-post expanded IDs replace duplicate gallery copies and align the selected hero', () => {
+  const oldGallery = ['old-0', 'old-1', 'old-2'].map(name =>
+    `https://storage.googleapis.com/gathr-uploaded-images/postimages/${name}.webp`);
+  const newGallery = ['new-0', 'new-1', 'new-2'].map(name =>
+    `https://storage.googleapis.com/gathr-uploaded-images/postimages/${name}.webp`);
+  const existing = buildEvent({
+    uniqueId: '1739771728156396_636371d8b7e35e63',
+    image: oldGallery[0], imageUrl: oldGallery[0], relevantImageUrl: oldGallery[0],
+    mediaUrls: oldGallery,
+  });
+  const incoming = buildEvent({
+    uniqueId: '1739771728156396_668f146924408911',
+    image: newGallery[0], imageUrl: newGallery[0], relevantImageUrl: newGallery[1],
+    mediaUrls: newGallery,
+    imageProvenance: {
+      version: 1, primarySource: 'post_media', primaryField: 'relevantImageUrl',
+      primaryUrl: newGallery[1], isFallback: false,
+      selectionReason: 'model_selected_analysis_frame_source', updatedBy: 'parser',
+    },
+  });
+  const result = previewDuplicateMerge({ existingEvent: existing, incomingEvent: incoming, venue: buildVenue() });
+  assert.deepEqual(result.updates.mediaUrls, newGallery);
+  assert.equal(result.updates.image, newGallery[0]);
+  assert.equal(result.updates.relevantImageUrl, newGallery[1]);
+  assert.deepEqual([...new Set(result.updates.imageProvenance?.media?.filter(media => media.source === 'post_media')
+    .map(media => media.url))].sort(), [...newGallery].sort());
+
+  const otherPost = previewDuplicateMerge({
+    existingEvent: existing,
+    incomingEvent: { ...incoming, uniqueId: '1739771728156397_668f146924408911' },
+    venue: buildVenue(),
+  });
+  assert.deepEqual(otherPost.updates.mediaUrls, [...oldGallery, ...newGallery]);
+});
+
 test('resolves a Facebook Events explicit multi-day range from the structured When text', () => {
   const result = resolveFacebookEventEndDateTime(
     buildRawRow('When: May 22 at 12:00\u202fPM \u2013 May 23 at 8:00\u202fPM ADT\nDuration: 2 days'),

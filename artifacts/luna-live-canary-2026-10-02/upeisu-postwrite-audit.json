@@ -1,0 +1,3078 @@
+{
+  "createdAt": "2026-10-02T17:08:08.274Z",
+  "runId": "97ed195c-49f8-4d34-8d31-32226be1ecd1",
+  "backupSha256": "efdd221e85222572d6c635ce33eeac6c8a85176f63429d7615a5b3ee2649bc88",
+  "beforeCount": 19,
+  "afterCount": 24,
+  "changed": [
+    {
+      "path": "venues/slug_upeisu/events/P0tSDGFBmFp9o2x2Xuvt",
+      "updateTime": {
+        "__type": "Timestamp",
+        "seconds": 1790960610,
+        "nanoseconds": 77188000
+      },
+      "data": {
+        "uniqueId": "1739771728156396_811847070ef3a80f",
+        "establishment": "UPEISU | Charlottetown PE",
+        "locationScope": "venue",
+        "locationLabel": "UPEISU | Charlottetown PE",
+        "locationPrecision": "exact",
+        "locationReviewStatus": "not_needed",
+        "additionalLocation": "W.A. Murphy Student Centre Hallway",
+        "eventType": "gatherings_parties",
+        "eventName": "Coffee & Consent (with SVPRO)",
+        "description": "Coffee & Consent from 11:30 AM to 1:00 PM in the W.A Murphy Student Centre Hallway with SVPRO.",
+        "startDate": "2026-10-02",
+        "endDate": "2026-10-02",
+        "startTime": "11:30",
+        "endTime": "13:00",
+        "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790950427256-368f1u.webp",
+        "facebookUrl": "https://www.facebook.com/UPEISU/",
+        "sourceTimestamp": {
+          "__type": "Timestamp",
+          "seconds": 1790899011,
+          "nanoseconds": 0
+        },
+        "likes": 1,
+        "shares": 0,
+        "topReactionsCount": 1,
+        "venueId": "slug_upeisu",
+        "category": "Gatherings & Parties",
+        "isEvent": "Yes",
+        "isFoodSpecial": "No",
+        "name": "Coffee & Consent (with SVPRO)",
+        "address": "550 University Ave, Charlottetown, PE C1A 4P3, Canada",
+        "rawAddress": "550 University Ave, Charlottetown, PE C1A 4P3, Canada",
+        "normalizedAddress": "550 University Ave, Charlottetown, PE C1A 4P3, Canada",
+        "addressSource": "google_places",
+        "addressNormalizationIssues": [],
+        "externalLinks": [],
+        "isRecurring": "No",
+        "recurringPattern": "none",
+        "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1788272615042-2sifmb.webp",
+        "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790950427256-368f1u.webp",
+        "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790950427256-368f1u.webp",
+        "cleanedFacebookUrl": "https://www.facebook.com/UPEISU/",
+        "latitude": 46.2570778,
+        "longitude": -63.1406754,
+        "timeResolution": {
+          "hoursUsed": false
+        },
+        "timeFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "from 11:30 AM"
+          },
+          "end": {
+            "source": "explicit",
+            "toClose": false,
+            "evidence": "to 1:00 PM"
+          }
+        },
+        "_sourceType": "event",
+        "familyFriendlyScore": 15,
+        "familyFriendlyLevel": "unlikely",
+        "familyFriendlyReasons": [
+          "insufficient_family_evidence"
+        ],
+        "familyFriendlyScoringVersion": "family-friendly-v4",
+        "addressUpdatedAt": {
+          "__type": "Timestamp",
+          "seconds": 1790950666,
+          "nanoseconds": 433000000
+        },
+        "createdAt": {
+          "__type": "Timestamp",
+          "seconds": 1790950666,
+          "nanoseconds": 433000000
+        },
+        "lastSeenAt": {
+          "__type": "Timestamp",
+          "seconds": 1790960610,
+          "nanoseconds": 62000000
+        },
+        "imageProvenance": {
+          "version": 1,
+          "primarySource": "post_media",
+          "primaryField": "mediaUrls",
+          "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790950427256-368f1u.webp",
+          "isFallback": false,
+          "sourceFields": [
+            "mediaUrls"
+          ],
+          "media": [
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790950427256-368f1u.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": true,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790950427664-7dis8q.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790950428033-7tzrm4.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": true
+            }
+          ],
+          "selectionReason": "model_selected_analysis_frame_source; duplicate_merge_image_update",
+          "updatedBy": "duplicate_merge",
+          "setAt": {
+            "__type": "Timestamp",
+            "seconds": 1790960610,
+            "nanoseconds": 62000000
+          }
+        },
+        "mediaUrls": [
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790950427256-368f1u.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790950427664-7dis8q.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790950428033-7tzrm4.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp"
+        ],
+        "updatedAt": {
+          "__type": "Timestamp",
+          "seconds": 1790960610,
+          "nanoseconds": 62000000
+        }
+      },
+      "changedFields": [
+        "mediaUrls",
+        "lastSeenAt",
+        "imageProvenance",
+        "updatedAt"
+      ]
+    },
+    {
+      "path": "venues/slug_upeisu/events/Z3VfHNIVvKwdUHNzo1VX",
+      "updateTime": {
+        "__type": "Timestamp",
+        "seconds": 1790960622,
+        "nanoseconds": 358534000
+      },
+      "data": {
+        "uniqueId": "1739771728156396_3a12ca3b29a6dfcb",
+        "establishment": "UPEISU | Charlottetown PE",
+        "locationScope": "venue",
+        "locationLabel": "UPEISU | Charlottetown PE",
+        "locationPrecision": "exact",
+        "locationReviewStatus": "not_needed",
+        "additionalLocation": "W.A. Murphy Student Centre Hallway",
+        "eventType": "sports",
+        "eventName": "Connect the Pride: Pre-game social",
+        "description": "Connect the Pride: Pre-game social from 6 PM to 7 PM in the W.A. Murphy Student Centre Hallway.",
+        "startDate": "2026-10-23",
+        "endDate": "2026-10-23",
+        "startTime": "18:00",
+        "endTime": "19:00",
+        "facebookUrl": "https://www.facebook.com/UPEISU/",
+        "sourceTimestamp": {
+          "__type": "Timestamp",
+          "seconds": 1790899011,
+          "nanoseconds": 0
+        },
+        "likes": 1,
+        "shares": 0,
+        "topReactionsCount": 1,
+        "venueId": "slug_upeisu",
+        "category": "Sports",
+        "isEvent": "Yes",
+        "isFoodSpecial": "No",
+        "name": "Connect the Pride: Pre-game social",
+        "address": "550 University Ave, Charlottetown, PE C1A 4P3, Canada",
+        "rawAddress": "550 University Ave, Charlottetown, PE C1A 4P3, Canada",
+        "normalizedAddress": "550 University Ave, Charlottetown, PE C1A 4P3, Canada",
+        "addressSource": "google_places",
+        "addressNormalizationIssues": [],
+        "externalLinks": [],
+        "isRecurring": "No",
+        "recurringPattern": "none",
+        "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1788272615042-2sifmb.webp",
+        "cleanedFacebookUrl": "https://www.facebook.com/UPEISU/",
+        "latitude": 46.2570778,
+        "longitude": -63.1406754,
+        "timeResolution": {
+          "hoursUsed": false
+        },
+        "timeFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "from 6 PM"
+          },
+          "end": {
+            "source": "explicit",
+            "toClose": false,
+            "evidence": "to 7 PM"
+          }
+        },
+        "_sourceType": "event",
+        "familyFriendlyScore": 15,
+        "familyFriendlyLevel": "unlikely",
+        "familyFriendlyReasons": [
+          "insufficient_family_evidence"
+        ],
+        "familyFriendlyScoringVersion": "family-friendly-v4",
+        "addressUpdatedAt": {
+          "__type": "Timestamp",
+          "seconds": 1790950673,
+          "nanoseconds": 516000000
+        },
+        "createdAt": {
+          "__type": "Timestamp",
+          "seconds": 1790950673,
+          "nanoseconds": 516000000
+        },
+        "lastSeenAt": {
+          "__type": "Timestamp",
+          "seconds": 1790960622,
+          "nanoseconds": 349000000
+        },
+        "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+        "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+        "imageProvenance": {
+          "version": 1,
+          "primarySource": "post_media",
+          "primaryField": "relevantImageUrl",
+          "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+          "isFallback": false,
+          "sourceFields": [
+            "relevantImageUrl",
+            "image",
+            "imageUrl",
+            "mediaUrls"
+          ],
+          "media": [
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+              "source": "post_media",
+              "field": "relevantImageUrl",
+              "isPrimary": true,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+              "source": "post_media",
+              "field": "image",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+              "source": "post_media",
+              "field": "imageUrl",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": true
+            }
+          ],
+          "selectionReason": "model_selected_analysis_frame_source; duplicate_merge_image_update",
+          "updatedBy": "duplicate_merge",
+          "setAt": {
+            "__type": "Timestamp",
+            "seconds": 1790960622,
+            "nanoseconds": 349000000
+          }
+        },
+        "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+        "mediaUrls": [
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp"
+        ],
+        "updatedAt": {
+          "__type": "Timestamp",
+          "seconds": 1790960622,
+          "nanoseconds": 349000000
+        }
+      },
+      "changedFields": [
+        "imageUrl",
+        "mediaUrls",
+        "image",
+        "relevantImageUrl",
+        "lastSeenAt",
+        "imageProvenance",
+        "updatedAt"
+      ]
+    },
+    {
+      "path": "venues/slug_upeisu/events/wJy8NuSRlBAUN2I52BSr",
+      "updateTime": {
+        "__type": "Timestamp",
+        "seconds": 1790960623,
+        "nanoseconds": 57989000
+      },
+      "data": {
+        "uniqueId": "1739771728156396_58aca0a4646bde4c",
+        "establishment": "UPEISU | Charlottetown PE",
+        "locationScope": "venue",
+        "locationLabel": "UPEISU | Charlottetown PE",
+        "locationPrecision": "exact",
+        "locationReviewStatus": "not_needed",
+        "additionalLocation": "W.A. Murphy Student Centre Hallway",
+        "eventType": "sports",
+        "eventName": "Cheer- Rally the Pride: Pre-Game Social",
+        "description": "Cheer- Rally the Pride: Pre-Game Social from 5 PM to 7 PM in the W.A. Murphy Student Centre Hallway.",
+        "startDate": "2026-10-24",
+        "endDate": "2026-10-24",
+        "startTime": "17:00",
+        "endTime": "19:00",
+        "facebookUrl": "https://www.facebook.com/UPEISU/",
+        "sourceTimestamp": {
+          "__type": "Timestamp",
+          "seconds": 1790899011,
+          "nanoseconds": 0
+        },
+        "likes": 1,
+        "shares": 0,
+        "topReactionsCount": 1,
+        "venueId": "slug_upeisu",
+        "category": "Sports",
+        "isEvent": "Yes",
+        "isFoodSpecial": "No",
+        "name": "Cheer- Rally the Pride: Pre-Game Social",
+        "address": "550 University Ave, Charlottetown, PE C1A 4P3, Canada",
+        "rawAddress": "550 University Ave, Charlottetown, PE C1A 4P3, Canada",
+        "normalizedAddress": "550 University Ave, Charlottetown, PE C1A 4P3, Canada",
+        "addressSource": "google_places",
+        "addressNormalizationIssues": [],
+        "externalLinks": [],
+        "isRecurring": "No",
+        "recurringPattern": "none",
+        "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1788272615042-2sifmb.webp",
+        "cleanedFacebookUrl": "https://www.facebook.com/UPEISU/",
+        "latitude": 46.2570778,
+        "longitude": -63.1406754,
+        "timeResolution": {
+          "hoursUsed": false
+        },
+        "timeFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "from 5 PM"
+          },
+          "end": {
+            "source": "explicit",
+            "toClose": false,
+            "evidence": "to 7 PM"
+          }
+        },
+        "_sourceType": "event",
+        "familyFriendlyScore": 15,
+        "familyFriendlyLevel": "unlikely",
+        "familyFriendlyReasons": [
+          "insufficient_family_evidence"
+        ],
+        "familyFriendlyScoringVersion": "family-friendly-v4",
+        "addressUpdatedAt": {
+          "__type": "Timestamp",
+          "seconds": 1790950674,
+          "nanoseconds": 52000000
+        },
+        "createdAt": {
+          "__type": "Timestamp",
+          "seconds": 1790950674,
+          "nanoseconds": 52000000
+        },
+        "lastSeenAt": {
+          "__type": "Timestamp",
+          "seconds": 1790960623,
+          "nanoseconds": 45000000
+        },
+        "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+        "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+        "imageProvenance": {
+          "version": 1,
+          "primarySource": "post_media",
+          "primaryField": "relevantImageUrl",
+          "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+          "isFallback": false,
+          "sourceFields": [
+            "relevantImageUrl",
+            "image",
+            "imageUrl",
+            "mediaUrls"
+          ],
+          "media": [
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+              "source": "post_media",
+              "field": "relevantImageUrl",
+              "isPrimary": true,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+              "source": "post_media",
+              "field": "image",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+              "source": "post_media",
+              "field": "imageUrl",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": true
+            }
+          ],
+          "selectionReason": "model_selected_analysis_frame_source; duplicate_merge_image_update",
+          "updatedBy": "duplicate_merge",
+          "setAt": {
+            "__type": "Timestamp",
+            "seconds": 1790960623,
+            "nanoseconds": 45000000
+          }
+        },
+        "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+        "mediaUrls": [
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp"
+        ],
+        "updatedAt": {
+          "__type": "Timestamp",
+          "seconds": 1790960623,
+          "nanoseconds": 45000000
+        }
+      },
+      "changedFields": [
+        "imageUrl",
+        "mediaUrls",
+        "image",
+        "relevantImageUrl",
+        "lastSeenAt",
+        "imageProvenance",
+        "updatedAt"
+      ]
+    },
+    {
+      "path": "venues/slug_upeisu/events/LEeIVlDt8mLNIGpphSLw",
+      "updateTime": {
+        "__type": "Timestamp",
+        "seconds": 1790960626,
+        "nanoseconds": 321604000
+      },
+      "data": {
+        "uniqueId": "1739771728156396_636371d8b7e35e63",
+        "establishment": "UPEISU | Charlottetown PE",
+        "locationScope": "venue",
+        "locationLabel": "UPEISU | Charlottetown PE",
+        "locationPrecision": "exact",
+        "locationReviewStatus": "not_needed",
+        "additionalLocation": "W.A. Murphy Student Centre Hallway",
+        "eventType": "gatherings_parties",
+        "eventName": "Celebrate the Pride",
+        "description": "Celebrate the Pride from 5 PM to 6 PM in the W.A. Murphy Student Centre Hallway.",
+        "startDate": "2026-10-30",
+        "endDate": "2026-10-30",
+        "startTime": "17:00",
+        "endTime": "18:00",
+        "facebookUrl": "https://www.facebook.com/UPEISU/",
+        "sourceTimestamp": {
+          "__type": "Timestamp",
+          "seconds": 1790899011,
+          "nanoseconds": 0
+        },
+        "likes": 1,
+        "shares": 0,
+        "topReactionsCount": 1,
+        "venueId": "slug_upeisu",
+        "category": "Gatherings & Parties",
+        "isEvent": "Yes",
+        "isFoodSpecial": "No",
+        "name": "Celebrate the Pride",
+        "address": "550 University Ave, Charlottetown, PE C1A 4P3, Canada",
+        "rawAddress": "550 University Ave, Charlottetown, PE C1A 4P3, Canada",
+        "normalizedAddress": "550 University Ave, Charlottetown, PE C1A 4P3, Canada",
+        "addressSource": "google_places",
+        "addressNormalizationIssues": [],
+        "externalLinks": [],
+        "isRecurring": "No",
+        "recurringPattern": "none",
+        "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1788272615042-2sifmb.webp",
+        "cleanedFacebookUrl": "https://www.facebook.com/UPEISU/",
+        "latitude": 46.2570778,
+        "longitude": -63.1406754,
+        "timeResolution": {
+          "hoursUsed": false
+        },
+        "timeFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "from 5 PM"
+          },
+          "end": {
+            "source": "explicit",
+            "toClose": false,
+            "evidence": "to 6 PM"
+          }
+        },
+        "_sourceType": "event",
+        "familyFriendlyScore": 15,
+        "familyFriendlyLevel": "unlikely",
+        "familyFriendlyReasons": [
+          "insufficient_family_evidence"
+        ],
+        "familyFriendlyScoringVersion": "family-friendly-v4",
+        "addressUpdatedAt": {
+          "__type": "Timestamp",
+          "seconds": 1790950676,
+          "nanoseconds": 791000000
+        },
+        "createdAt": {
+          "__type": "Timestamp",
+          "seconds": 1790950676,
+          "nanoseconds": 791000000
+        },
+        "lastSeenAt": {
+          "__type": "Timestamp",
+          "seconds": 1790960626,
+          "nanoseconds": 311000000
+        },
+        "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp",
+        "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp",
+        "imageProvenance": {
+          "version": 1,
+          "primarySource": "post_media",
+          "primaryField": "relevantImageUrl",
+          "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp",
+          "isFallback": false,
+          "sourceFields": [
+            "relevantImageUrl",
+            "image",
+            "imageUrl",
+            "mediaUrls"
+          ],
+          "media": [
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp",
+              "source": "post_media",
+              "field": "relevantImageUrl",
+              "isPrimary": true,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp",
+              "source": "post_media",
+              "field": "image",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp",
+              "source": "post_media",
+              "field": "imageUrl",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": true
+            }
+          ],
+          "selectionReason": "model_selected_analysis_frame_source; duplicate_merge_image_update",
+          "updatedBy": "duplicate_merge",
+          "setAt": {
+            "__type": "Timestamp",
+            "seconds": 1790960626,
+            "nanoseconds": 311000000
+          }
+        },
+        "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp",
+        "mediaUrls": [
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp"
+        ],
+        "updatedAt": {
+          "__type": "Timestamp",
+          "seconds": 1790960626,
+          "nanoseconds": 311000000
+        }
+      },
+      "changedFields": [
+        "imageUrl",
+        "mediaUrls",
+        "image",
+        "relevantImageUrl",
+        "lastSeenAt",
+        "imageProvenance",
+        "updatedAt"
+      ]
+    },
+    {
+      "path": "venues/fb_100052099464909/events/idb0opCMHl9FHeSQP19i",
+      "updateTime": {
+        "__type": "Timestamp",
+        "seconds": 1790960611,
+        "nanoseconds": 668610000
+      },
+      "data": {
+        "uniqueId": "1739771728156396_b638eca7a3080943",
+        "establishment": "The Fox & Crow | Charlottetown PE",
+        "locationScope": "venue",
+        "locationLabel": "The Fox & Crow | Charlottetown PE",
+        "locationPrecision": "exact",
+        "locationReviewStatus": "not_needed",
+        "eventType": "live_music",
+        "eventName": "19+ Silent Disco",
+        "description": "19+ Silent Disco from 10 PM to 1 AM at The Fox & Crow.",
+        "startDate": "2026-10-02",
+        "endDate": "2026-10-03",
+        "startTime": "22:00",
+        "endTime": "01:00",
+        "facebookUrl": "https://www.facebook.com/UPEISU/",
+        "sourceTimestamp": {
+          "__type": "Timestamp",
+          "seconds": 1790899011,
+          "nanoseconds": 0
+        },
+        "likes": 1,
+        "shares": 0,
+        "topReactionsCount": 1,
+        "venueId": "fb_100052099464909",
+        "category": "Live Music",
+        "isEvent": "Yes",
+        "isFoodSpecial": "No",
+        "name": "19+ Silent Disco",
+        "address": "550 University Avenue W.A. Murphy Student Center, Charlottetown, PE, Canada",
+        "rawAddress": "550 University Avenue W.A. Murphy Student Center, Charlottetown, PE, Canada",
+        "normalizedAddress": "550 University Avenue W.A. Murphy Student Center, Charlottetown, PE, Canada",
+        "addressSource": "google_places",
+        "addressNormalizationIssues": [],
+        "externalLinks": [],
+        "isRecurring": "No",
+        "recurringPattern": "none",
+        "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1773753075007-l233hs.webp",
+        "cleanedFacebookUrl": "https://www.facebook.com/UPEISU/",
+        "latitude": 46.2578518,
+        "longitude": -63.1406696,
+        "timeResolution": {
+          "hoursUsed": false
+        },
+        "timeFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "from 10 PM"
+          },
+          "end": {
+            "source": "explicit",
+            "toClose": false,
+            "evidence": "to 1 AM"
+          }
+        },
+        "_sourceType": "event",
+        "familyFriendlyScore": 0,
+        "familyFriendlyLevel": "unlikely",
+        "familyFriendlyReasons": [
+          "very_late_start",
+          "insufficient_family_evidence"
+        ],
+        "familyFriendlyScoringVersion": "family-friendly-v4",
+        "addressUpdatedAt": {
+          "__type": "Timestamp",
+          "seconds": 1790950667,
+          "nanoseconds": 333000000
+        },
+        "createdAt": {
+          "__type": "Timestamp",
+          "seconds": 1790950667,
+          "nanoseconds": 333000000
+        },
+        "lastSeenAt": {
+          "__type": "Timestamp",
+          "seconds": 1790960611,
+          "nanoseconds": 658000000
+        },
+        "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+        "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+        "imageProvenance": {
+          "version": 1,
+          "primarySource": "post_media",
+          "primaryField": "relevantImageUrl",
+          "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+          "isFallback": false,
+          "sourceFields": [
+            "relevantImageUrl",
+            "image",
+            "imageUrl",
+            "mediaUrls"
+          ],
+          "media": [
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+              "source": "post_media",
+              "field": "relevantImageUrl",
+              "isPrimary": true,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+              "source": "post_media",
+              "field": "image",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+              "source": "post_media",
+              "field": "imageUrl",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": true
+            }
+          ],
+          "selectionReason": "model_selected_analysis_frame_source; duplicate_merge_image_update",
+          "updatedBy": "duplicate_merge",
+          "setAt": {
+            "__type": "Timestamp",
+            "seconds": 1790960611,
+            "nanoseconds": 658000000
+          }
+        },
+        "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+        "mediaUrls": [
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp"
+        ],
+        "updatedAt": {
+          "__type": "Timestamp",
+          "seconds": 1790960611,
+          "nanoseconds": 658000000
+        }
+      },
+      "changedFields": [
+        "imageUrl",
+        "mediaUrls",
+        "image",
+        "relevantImageUrl",
+        "lastSeenAt",
+        "imageProvenance",
+        "updatedAt"
+      ]
+    },
+    {
+      "path": "venues/fb_100052099464909/events/ELp2wyMTX7TmCEMKlp2E",
+      "updateTime": {
+        "__type": "Timestamp",
+        "seconds": 1790960614,
+        "nanoseconds": 543719000
+      },
+      "data": {
+        "uniqueId": "1739771728156396_4d8265bb209dc30d",
+        "establishment": "The Fox & Crow | Charlottetown PE",
+        "locationScope": "venue",
+        "locationLabel": "The Fox & Crow | Charlottetown PE",
+        "locationPrecision": "exact",
+        "locationReviewStatus": "not_needed",
+        "eventType": "trivia_night",
+        "eventName": "Sexy Sexual Health Trivia (with SVPRO)",
+        "description": "Sexy Sexual Health Trivia from 7 PM to 9 PM at The Fox & Crow with SVPRO.",
+        "startDate": "2026-10-06",
+        "endDate": "2026-10-06",
+        "startTime": "19:00",
+        "endTime": "21:00",
+        "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790950428033-7tzrm4.webp",
+        "facebookUrl": "https://www.facebook.com/UPEISU/",
+        "sourceTimestamp": {
+          "__type": "Timestamp",
+          "seconds": 1790899011,
+          "nanoseconds": 0
+        },
+        "likes": 1,
+        "shares": 0,
+        "topReactionsCount": 1,
+        "venueId": "fb_100052099464909",
+        "category": "Trivia Night",
+        "isEvent": "Yes",
+        "isFoodSpecial": "No",
+        "name": "Sexy Sexual Health Trivia (with SVPRO)",
+        "address": "550 University Avenue W.A. Murphy Student Center, Charlottetown, PE, Canada",
+        "rawAddress": "550 University Avenue W.A. Murphy Student Center, Charlottetown, PE, Canada",
+        "normalizedAddress": "550 University Avenue W.A. Murphy Student Center, Charlottetown, PE, Canada",
+        "addressSource": "google_places",
+        "addressNormalizationIssues": [],
+        "externalLinks": [],
+        "isRecurring": "No",
+        "recurringPattern": "none",
+        "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1773753075007-l233hs.webp",
+        "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790950428033-7tzrm4.webp",
+        "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790950428033-7tzrm4.webp",
+        "cleanedFacebookUrl": "https://www.facebook.com/UPEISU/",
+        "latitude": 46.2578518,
+        "longitude": -63.1406696,
+        "timeResolution": {
+          "hoursUsed": false
+        },
+        "timeFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "from 7 PM"
+          },
+          "end": {
+            "source": "explicit",
+            "toClose": false,
+            "evidence": "to 9 PM"
+          }
+        },
+        "_sourceType": "event",
+        "familyFriendlyScore": 15,
+        "familyFriendlyLevel": "unlikely",
+        "familyFriendlyReasons": [
+          "insufficient_family_evidence"
+        ],
+        "familyFriendlyScoringVersion": "family-friendly-v4",
+        "addressUpdatedAt": {
+          "__type": "Timestamp",
+          "seconds": 1790950669,
+          "nanoseconds": 20000000
+        },
+        "createdAt": {
+          "__type": "Timestamp",
+          "seconds": 1790950669,
+          "nanoseconds": 20000000
+        },
+        "lastSeenAt": {
+          "__type": "Timestamp",
+          "seconds": 1790960614,
+          "nanoseconds": 531000000
+        },
+        "imageProvenance": {
+          "version": 1,
+          "primarySource": "post_media",
+          "primaryField": "mediaUrls",
+          "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790950428033-7tzrm4.webp",
+          "isFallback": false,
+          "sourceFields": [
+            "mediaUrls"
+          ],
+          "media": [
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790950428033-7tzrm4.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": true,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790950427256-368f1u.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790950427664-7dis8q.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": true
+            }
+          ],
+          "selectionReason": "model_selected_analysis_frame_source; duplicate_merge_image_update",
+          "updatedBy": "duplicate_merge",
+          "setAt": {
+            "__type": "Timestamp",
+            "seconds": 1790960614,
+            "nanoseconds": 531000000
+          }
+        },
+        "mediaUrls": [
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790950427256-368f1u.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790950427664-7dis8q.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790950428033-7tzrm4.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp"
+        ],
+        "updatedAt": {
+          "__type": "Timestamp",
+          "seconds": 1790960614,
+          "nanoseconds": 531000000
+        }
+      },
+      "changedFields": [
+        "mediaUrls",
+        "lastSeenAt",
+        "imageProvenance",
+        "updatedAt"
+      ]
+    },
+    {
+      "path": "venues/fb_100052099464909/events/AEGb9B6WbrfuIKJR6c0f",
+      "updateTime": {
+        "__type": "Timestamp",
+        "seconds": 1790960615,
+        "nanoseconds": 429614000
+      },
+      "data": {
+        "uniqueId": "1739771728156396_1707d10c8d0f7593",
+        "establishment": "The Fox & Crow | Charlottetown PE",
+        "locationScope": "venue",
+        "locationLabel": "The Fox & Crow | Charlottetown PE",
+        "locationPrecision": "exact",
+        "locationReviewStatus": "not_needed",
+        "eventType": "workshops_classes",
+        "eventName": "Financial Literacy Workshop (with Evans Webbo)",
+        "description": "Financial Literacy Workshop with Evans Webbo from 10 AM to 11 AM in The Fox & Crow.",
+        "startDate": "2026-10-07",
+        "endDate": "2026-10-07",
+        "startTime": "10:00",
+        "endTime": "11:00",
+        "facebookUrl": "https://www.facebook.com/UPEISU/",
+        "sourceTimestamp": {
+          "__type": "Timestamp",
+          "seconds": 1790899011,
+          "nanoseconds": 0
+        },
+        "likes": 1,
+        "shares": 0,
+        "topReactionsCount": 1,
+        "venueId": "fb_100052099464909",
+        "category": "Workshops & Classes",
+        "isEvent": "Yes",
+        "isFoodSpecial": "No",
+        "name": "Financial Literacy Workshop (with Evans Webbo)",
+        "address": "550 University Avenue W.A. Murphy Student Center, Charlottetown, PE, Canada",
+        "rawAddress": "550 University Avenue W.A. Murphy Student Center, Charlottetown, PE, Canada",
+        "normalizedAddress": "550 University Avenue W.A. Murphy Student Center, Charlottetown, PE, Canada",
+        "addressSource": "google_places",
+        "addressNormalizationIssues": [],
+        "externalLinks": [],
+        "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1773753075007-l233hs.webp",
+        "cleanedFacebookUrl": "https://www.facebook.com/UPEISU/",
+        "latitude": 46.2578518,
+        "longitude": -63.1406696,
+        "timeResolution": {
+          "hoursUsed": false
+        },
+        "timeFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "from 10 AM"
+          },
+          "end": {
+            "source": "explicit",
+            "toClose": false,
+            "evidence": "to 11 AM"
+          }
+        },
+        "_sourceType": "event",
+        "familyFriendlyScore": 15,
+        "familyFriendlyLevel": "unlikely",
+        "familyFriendlyReasons": [
+          "insufficient_family_evidence"
+        ],
+        "familyFriendlyScoringVersion": "family-friendly-v4",
+        "addressUpdatedAt": {
+          "__type": "Timestamp",
+          "seconds": 1790950669,
+          "nanoseconds": 729000000
+        },
+        "createdAt": {
+          "__type": "Timestamp",
+          "seconds": 1790950669,
+          "nanoseconds": 729000000
+        },
+        "totalOccurrences": 0,
+        "lastSeenAt": {
+          "__type": "Timestamp",
+          "seconds": 1790960615,
+          "nanoseconds": 417000000
+        },
+        "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+        "recurringPattern": "none",
+        "recurrenceUntilDate": "",
+        "recurringDaysOfWeek": [],
+        "isRecurring": false,
+        "recurringWeekdaySequence": [],
+        "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+        "imageProvenance": {
+          "version": 1,
+          "primarySource": "post_media",
+          "primaryField": "relevantImageUrl",
+          "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+          "isFallback": false,
+          "sourceFields": [
+            "relevantImageUrl",
+            "image",
+            "imageUrl",
+            "mediaUrls"
+          ],
+          "media": [
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+              "source": "post_media",
+              "field": "relevantImageUrl",
+              "isPrimary": true,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+              "source": "post_media",
+              "field": "image",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+              "source": "post_media",
+              "field": "imageUrl",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": true
+            }
+          ],
+          "selectionReason": "model_selected_analysis_frame_source; duplicate_merge_image_update",
+          "updatedBy": "duplicate_merge",
+          "setAt": {
+            "__type": "Timestamp",
+            "seconds": 1790960615,
+            "nanoseconds": 417000000
+          }
+        },
+        "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+        "mediaUrls": [
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp"
+        ],
+        "recurringWeekInterval": 1,
+        "updatedAt": {
+          "__type": "Timestamp",
+          "seconds": 1790960615,
+          "nanoseconds": 417000000
+        }
+      },
+      "changedFields": [
+        "imageUrl",
+        "mediaUrls",
+        "isRecurring",
+        "recurringPattern",
+        "image",
+        "relevantImageUrl",
+        "lastSeenAt",
+        "imageProvenance",
+        "updatedAt",
+        "totalOccurrences",
+        "recurrenceUntilDate",
+        "recurringDaysOfWeek",
+        "recurringWeekdaySequence",
+        "recurringWeekInterval"
+      ]
+    },
+    {
+      "path": "venues/fb_100052099464909/events/MtRlsOY7bz9kGILoPOMg",
+      "updateTime": {
+        "__type": "Timestamp",
+        "seconds": 1790960616,
+        "nanoseconds": 335150000
+      },
+      "data": {
+        "uniqueId": "1739771728156396_754d0f8dee7bc8ae",
+        "establishment": "The Fox & Crow | Charlottetown PE",
+        "locationScope": "venue",
+        "locationLabel": "The Fox & Crow | Charlottetown PE",
+        "locationPrecision": "exact",
+        "locationReviewStatus": "not_needed",
+        "eventType": "trivia_night",
+        "eventName": "Pop Culture Trivia",
+        "description": "Pop Culture Trivia from 7 PM to 9 PM at The Fox & Crow.",
+        "startDate": "2026-10-07",
+        "endDate": "2026-10-07",
+        "startTime": "19:00",
+        "endTime": "21:00",
+        "facebookUrl": "https://www.facebook.com/UPEISU/",
+        "sourceTimestamp": {
+          "__type": "Timestamp",
+          "seconds": 1790899011,
+          "nanoseconds": 0
+        },
+        "likes": 1,
+        "shares": 0,
+        "topReactionsCount": 1,
+        "venueId": "fb_100052099464909",
+        "category": "Trivia Night",
+        "isEvent": "Yes",
+        "isFoodSpecial": "No",
+        "name": "Pop Culture Trivia",
+        "address": "550 University Avenue W.A. Murphy Student Center, Charlottetown, PE, Canada",
+        "rawAddress": "550 University Avenue W.A. Murphy Student Center, Charlottetown, PE, Canada",
+        "normalizedAddress": "550 University Avenue W.A. Murphy Student Center, Charlottetown, PE, Canada",
+        "addressSource": "google_places",
+        "addressNormalizationIssues": [],
+        "externalLinks": [],
+        "isRecurring": "No",
+        "recurringPattern": "none",
+        "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1773753075007-l233hs.webp",
+        "cleanedFacebookUrl": "https://www.facebook.com/UPEISU/",
+        "latitude": 46.2578518,
+        "longitude": -63.1406696,
+        "timeResolution": {
+          "hoursUsed": false
+        },
+        "timeFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "from 7 PM"
+          },
+          "end": {
+            "source": "explicit",
+            "toClose": false,
+            "evidence": "to 9 PM"
+          }
+        },
+        "_sourceType": "event",
+        "familyFriendlyScore": 15,
+        "familyFriendlyLevel": "unlikely",
+        "familyFriendlyReasons": [
+          "insufficient_family_evidence"
+        ],
+        "familyFriendlyScoringVersion": "family-friendly-v4",
+        "addressUpdatedAt": {
+          "__type": "Timestamp",
+          "seconds": 1790950670,
+          "nanoseconds": 609000000
+        },
+        "createdAt": {
+          "__type": "Timestamp",
+          "seconds": 1790950670,
+          "nanoseconds": 609000000
+        },
+        "lastSeenAt": {
+          "__type": "Timestamp",
+          "seconds": 1790960616,
+          "nanoseconds": 325000000
+        },
+        "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+        "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+        "imageProvenance": {
+          "version": 1,
+          "primarySource": "post_media",
+          "primaryField": "relevantImageUrl",
+          "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+          "isFallback": false,
+          "sourceFields": [
+            "relevantImageUrl",
+            "image",
+            "imageUrl",
+            "mediaUrls"
+          ],
+          "media": [
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+              "source": "post_media",
+              "field": "relevantImageUrl",
+              "isPrimary": true,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+              "source": "post_media",
+              "field": "image",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+              "source": "post_media",
+              "field": "imageUrl",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": true
+            }
+          ],
+          "selectionReason": "model_selected_analysis_frame_source; duplicate_merge_image_update",
+          "updatedBy": "duplicate_merge",
+          "setAt": {
+            "__type": "Timestamp",
+            "seconds": 1790960616,
+            "nanoseconds": 325000000
+          }
+        },
+        "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+        "mediaUrls": [
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp"
+        ],
+        "updatedAt": {
+          "__type": "Timestamp",
+          "seconds": 1790960616,
+          "nanoseconds": 325000000
+        }
+      },
+      "changedFields": [
+        "imageUrl",
+        "mediaUrls",
+        "image",
+        "relevantImageUrl",
+        "lastSeenAt",
+        "imageProvenance",
+        "updatedAt"
+      ]
+    },
+    {
+      "path": "venues/fb_100052099464909/events/UrZwKCmcaAl3bcSyAjBy",
+      "updateTime": {
+        "__type": "Timestamp",
+        "seconds": 1790960620,
+        "nanoseconds": 917921000
+      },
+      "data": {
+        "uniqueId": "1739771728156396_bc4e8a1448528ddd",
+        "establishment": "The Fox & Crow | Charlottetown PE",
+        "locationScope": "venue",
+        "locationLabel": "The Fox & Crow | Charlottetown PE",
+        "locationPrecision": "exact",
+        "locationReviewStatus": "not_needed",
+        "eventType": "trivia_night",
+        "eventName": "Name That Tune Trivia",
+        "description": "Name That Tune Trivia from 7 PM to 9 PM at The Fox & Crow.",
+        "startDate": "2026-10-21",
+        "endDate": "2026-10-21",
+        "startTime": "19:00",
+        "endTime": "21:00",
+        "facebookUrl": "https://www.facebook.com/UPEISU/",
+        "sourceTimestamp": {
+          "__type": "Timestamp",
+          "seconds": 1790899011,
+          "nanoseconds": 0
+        },
+        "likes": 1,
+        "shares": 0,
+        "topReactionsCount": 1,
+        "venueId": "fb_100052099464909",
+        "category": "Trivia Night",
+        "isEvent": "Yes",
+        "isFoodSpecial": "No",
+        "name": "Name That Tune Trivia",
+        "address": "550 University Avenue W.A. Murphy Student Center, Charlottetown, PE, Canada",
+        "rawAddress": "550 University Avenue W.A. Murphy Student Center, Charlottetown, PE, Canada",
+        "normalizedAddress": "550 University Avenue W.A. Murphy Student Center, Charlottetown, PE, Canada",
+        "addressSource": "google_places",
+        "addressNormalizationIssues": [],
+        "externalLinks": [],
+        "isRecurring": "No",
+        "recurringPattern": "none",
+        "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1773753075007-l233hs.webp",
+        "cleanedFacebookUrl": "https://www.facebook.com/UPEISU/",
+        "latitude": 46.2578518,
+        "longitude": -63.1406696,
+        "timeResolution": {
+          "hoursUsed": false
+        },
+        "timeFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "from 7 PM"
+          },
+          "end": {
+            "source": "explicit",
+            "toClose": false,
+            "evidence": "to 9 PM"
+          }
+        },
+        "_sourceType": "event",
+        "familyFriendlyScore": 15,
+        "familyFriendlyLevel": "unlikely",
+        "familyFriendlyReasons": [
+          "insufficient_family_evidence"
+        ],
+        "familyFriendlyScoringVersion": "family-friendly-v4",
+        "addressUpdatedAt": {
+          "__type": "Timestamp",
+          "seconds": 1790950672,
+          "nanoseconds": 152000000
+        },
+        "createdAt": {
+          "__type": "Timestamp",
+          "seconds": 1790950672,
+          "nanoseconds": 152000000
+        },
+        "lastSeenAt": {
+          "__type": "Timestamp",
+          "seconds": 1790960620,
+          "nanoseconds": 907000000
+        },
+        "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+        "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+        "imageProvenance": {
+          "version": 1,
+          "primarySource": "post_media",
+          "primaryField": "relevantImageUrl",
+          "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+          "isFallback": false,
+          "sourceFields": [
+            "relevantImageUrl",
+            "image",
+            "imageUrl",
+            "mediaUrls"
+          ],
+          "media": [
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+              "source": "post_media",
+              "field": "relevantImageUrl",
+              "isPrimary": true,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+              "source": "post_media",
+              "field": "image",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+              "source": "post_media",
+              "field": "imageUrl",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": true
+            }
+          ],
+          "selectionReason": "model_selected_analysis_frame_source; duplicate_merge_image_update",
+          "updatedBy": "duplicate_merge",
+          "setAt": {
+            "__type": "Timestamp",
+            "seconds": 1790960620,
+            "nanoseconds": 907000000
+          }
+        },
+        "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+        "mediaUrls": [
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp"
+        ],
+        "updatedAt": {
+          "__type": "Timestamp",
+          "seconds": 1790960620,
+          "nanoseconds": 907000000
+        }
+      },
+      "changedFields": [
+        "imageUrl",
+        "mediaUrls",
+        "image",
+        "relevantImageUrl",
+        "lastSeenAt",
+        "imageProvenance",
+        "updatedAt"
+      ]
+    },
+    {
+      "path": "venues/fb_100052099464909/events/bC3knwy44wxnRKHY6E51",
+      "updateTime": {
+        "__type": "Timestamp",
+        "seconds": 1790960621,
+        "nanoseconds": 763092000
+      },
+      "data": {
+        "uniqueId": "1739771728156396_86c50211ec66d9fc",
+        "establishment": "The Fox & Crow | Charlottetown PE",
+        "locationScope": "venue",
+        "locationLabel": "The Fox & Crow | Charlottetown PE",
+        "locationPrecision": "exact",
+        "locationReviewStatus": "not_needed",
+        "eventType": "gatherings_parties",
+        "eventName": "Murder Mystery",
+        "description": "Murder Mystery from 7 PM to 9 PM at The Fox & Crow.",
+        "startDate": "2026-10-22",
+        "endDate": "2026-10-22",
+        "startTime": "19:00",
+        "endTime": "21:00",
+        "facebookUrl": "https://www.facebook.com/UPEISU/",
+        "sourceTimestamp": {
+          "__type": "Timestamp",
+          "seconds": 1790899011,
+          "nanoseconds": 0
+        },
+        "likes": 1,
+        "shares": 0,
+        "topReactionsCount": 1,
+        "venueId": "fb_100052099464909",
+        "category": "Gatherings & Parties",
+        "isEvent": "Yes",
+        "isFoodSpecial": "No",
+        "name": "Murder Mystery",
+        "address": "550 University Avenue W.A. Murphy Student Center, Charlottetown, PE, Canada",
+        "rawAddress": "550 University Avenue W.A. Murphy Student Center, Charlottetown, PE, Canada",
+        "normalizedAddress": "550 University Avenue W.A. Murphy Student Center, Charlottetown, PE, Canada",
+        "addressSource": "google_places",
+        "addressNormalizationIssues": [],
+        "externalLinks": [],
+        "isRecurring": "No",
+        "recurringPattern": "none",
+        "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1773753075007-l233hs.webp",
+        "cleanedFacebookUrl": "https://www.facebook.com/UPEISU/",
+        "latitude": 46.2578518,
+        "longitude": -63.1406696,
+        "timeResolution": {
+          "hoursUsed": false
+        },
+        "timeFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "from 7 PM"
+          },
+          "end": {
+            "source": "explicit",
+            "toClose": false,
+            "evidence": "to 9 PM"
+          }
+        },
+        "_sourceType": "event",
+        "familyFriendlyScore": 15,
+        "familyFriendlyLevel": "unlikely",
+        "familyFriendlyReasons": [
+          "insufficient_family_evidence"
+        ],
+        "familyFriendlyScoringVersion": "family-friendly-v4",
+        "addressUpdatedAt": {
+          "__type": "Timestamp",
+          "seconds": 1790950672,
+          "nanoseconds": 904000000
+        },
+        "createdAt": {
+          "__type": "Timestamp",
+          "seconds": 1790950672,
+          "nanoseconds": 904000000
+        },
+        "lastSeenAt": {
+          "__type": "Timestamp",
+          "seconds": 1790960621,
+          "nanoseconds": 752000000
+        },
+        "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+        "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+        "imageProvenance": {
+          "version": 1,
+          "primarySource": "post_media",
+          "primaryField": "relevantImageUrl",
+          "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+          "isFallback": false,
+          "sourceFields": [
+            "relevantImageUrl",
+            "image",
+            "imageUrl",
+            "mediaUrls"
+          ],
+          "media": [
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+              "source": "post_media",
+              "field": "relevantImageUrl",
+              "isPrimary": true,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+              "source": "post_media",
+              "field": "image",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+              "source": "post_media",
+              "field": "imageUrl",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": true
+            }
+          ],
+          "selectionReason": "model_selected_analysis_frame_source; duplicate_merge_image_update",
+          "updatedBy": "duplicate_merge",
+          "setAt": {
+            "__type": "Timestamp",
+            "seconds": 1790960621,
+            "nanoseconds": 752000000
+          }
+        },
+        "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+        "mediaUrls": [
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp"
+        ],
+        "updatedAt": {
+          "__type": "Timestamp",
+          "seconds": 1790960621,
+          "nanoseconds": 752000000
+        }
+      },
+      "changedFields": [
+        "imageUrl",
+        "mediaUrls",
+        "image",
+        "relevantImageUrl",
+        "lastSeenAt",
+        "imageProvenance",
+        "updatedAt"
+      ]
+    },
+    {
+      "path": "venues/fb_100052099464909/events/dLfF0SgzJMLX6DaCLOtJ",
+      "updateTime": {
+        "__type": "Timestamp",
+        "seconds": 1790960623,
+        "nanoseconds": 982329000
+      },
+      "data": {
+        "uniqueId": "1739771728156396_4a3aa725b8e2aebf",
+        "establishment": "The Fox & Crow | Charlottetown PE",
+        "locationScope": "venue",
+        "locationLabel": "The Fox & Crow | Charlottetown PE",
+        "locationPrecision": "exact",
+        "locationReviewStatus": "not_needed",
+        "eventType": "live_music",
+        "eventName": "Music Bingo",
+        "description": "Music Bingo from 7 PM to 9 PM at The Fox & Crow.",
+        "startDate": "2026-10-27",
+        "endDate": "2026-10-27",
+        "startTime": "19:00",
+        "endTime": "21:00",
+        "facebookUrl": "https://www.facebook.com/UPEISU/",
+        "sourceTimestamp": {
+          "__type": "Timestamp",
+          "seconds": 1790899011,
+          "nanoseconds": 0
+        },
+        "likes": 1,
+        "shares": 0,
+        "topReactionsCount": 1,
+        "venueId": "fb_100052099464909",
+        "category": "Live Music",
+        "isEvent": "Yes",
+        "isFoodSpecial": "No",
+        "name": "Music Bingo",
+        "address": "550 University Avenue W.A. Murphy Student Center, Charlottetown, PE, Canada",
+        "rawAddress": "550 University Avenue W.A. Murphy Student Center, Charlottetown, PE, Canada",
+        "normalizedAddress": "550 University Avenue W.A. Murphy Student Center, Charlottetown, PE, Canada",
+        "addressSource": "google_places",
+        "addressNormalizationIssues": [],
+        "externalLinks": [],
+        "isRecurring": "No",
+        "recurringPattern": "none",
+        "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1773753075007-l233hs.webp",
+        "cleanedFacebookUrl": "https://www.facebook.com/UPEISU/",
+        "latitude": 46.2578518,
+        "longitude": -63.1406696,
+        "timeResolution": {
+          "hoursUsed": false
+        },
+        "timeFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "from 7 PM"
+          },
+          "end": {
+            "source": "explicit",
+            "toClose": false,
+            "evidence": "to 9 PM"
+          }
+        },
+        "_sourceType": "event",
+        "familyFriendlyScore": 15,
+        "familyFriendlyLevel": "unlikely",
+        "familyFriendlyReasons": [
+          "insufficient_family_evidence"
+        ],
+        "familyFriendlyScoringVersion": "family-friendly-v4",
+        "addressUpdatedAt": {
+          "__type": "Timestamp",
+          "seconds": 1790950674,
+          "nanoseconds": 760000000
+        },
+        "createdAt": {
+          "__type": "Timestamp",
+          "seconds": 1790950674,
+          "nanoseconds": 760000000
+        },
+        "lastSeenAt": {
+          "__type": "Timestamp",
+          "seconds": 1790960623,
+          "nanoseconds": 971000000
+        },
+        "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+        "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+        "imageProvenance": {
+          "version": 1,
+          "primarySource": "post_media",
+          "primaryField": "relevantImageUrl",
+          "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+          "isFallback": false,
+          "sourceFields": [
+            "relevantImageUrl",
+            "image",
+            "imageUrl",
+            "mediaUrls"
+          ],
+          "media": [
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+              "source": "post_media",
+              "field": "relevantImageUrl",
+              "isPrimary": true,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+              "source": "post_media",
+              "field": "image",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+              "source": "post_media",
+              "field": "imageUrl",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": true
+            }
+          ],
+          "selectionReason": "model_selected_analysis_frame_source; duplicate_merge_image_update",
+          "updatedBy": "duplicate_merge",
+          "setAt": {
+            "__type": "Timestamp",
+            "seconds": 1790960623,
+            "nanoseconds": 971000000
+          }
+        },
+        "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+        "mediaUrls": [
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp"
+        ],
+        "updatedAt": {
+          "__type": "Timestamp",
+          "seconds": 1790960623,
+          "nanoseconds": 971000000
+        }
+      },
+      "changedFields": [
+        "imageUrl",
+        "mediaUrls",
+        "image",
+        "relevantImageUrl",
+        "lastSeenAt",
+        "imageProvenance",
+        "updatedAt"
+      ]
+    },
+    {
+      "path": "venues/fb_100052099464909/events/vGmG6jkM6SYV3WuOsAPZ",
+      "updateTime": {
+        "__type": "Timestamp",
+        "seconds": 1790960624,
+        "nanoseconds": 837434000
+      },
+      "data": {
+        "uniqueId": "1739771728156396_a59af3e491fd08c6",
+        "establishment": "The Fox & Crow | Charlottetown PE",
+        "locationScope": "venue",
+        "locationLabel": "The Fox & Crow | Charlottetown PE",
+        "locationPrecision": "exact",
+        "locationReviewStatus": "not_needed",
+        "eventType": "trivia_night",
+        "eventName": "Halloween Trivia",
+        "description": "Halloween Trivia from 7 PM to 9 PM at The Fox & Crow.",
+        "startDate": "2026-10-28",
+        "endDate": "2026-10-28",
+        "startTime": "19:00",
+        "endTime": "21:00",
+        "facebookUrl": "https://www.facebook.com/UPEISU/",
+        "sourceTimestamp": {
+          "__type": "Timestamp",
+          "seconds": 1790899011,
+          "nanoseconds": 0
+        },
+        "likes": 1,
+        "shares": 0,
+        "topReactionsCount": 1,
+        "venueId": "fb_100052099464909",
+        "category": "Trivia Night",
+        "isEvent": "Yes",
+        "isFoodSpecial": "No",
+        "name": "Halloween Trivia",
+        "address": "550 University Avenue W.A. Murphy Student Center, Charlottetown, PE, Canada",
+        "rawAddress": "550 University Avenue W.A. Murphy Student Center, Charlottetown, PE, Canada",
+        "normalizedAddress": "550 University Avenue W.A. Murphy Student Center, Charlottetown, PE, Canada",
+        "addressSource": "google_places",
+        "addressNormalizationIssues": [],
+        "externalLinks": [],
+        "isRecurring": "No",
+        "recurringPattern": "none",
+        "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1773753075007-l233hs.webp",
+        "cleanedFacebookUrl": "https://www.facebook.com/UPEISU/",
+        "latitude": 46.2578518,
+        "longitude": -63.1406696,
+        "timeResolution": {
+          "hoursUsed": false
+        },
+        "timeFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "from 7 PM"
+          },
+          "end": {
+            "source": "explicit",
+            "toClose": false,
+            "evidence": "to 9 PM"
+          }
+        },
+        "_sourceType": "event",
+        "familyFriendlyScore": 15,
+        "familyFriendlyLevel": "unlikely",
+        "familyFriendlyReasons": [
+          "insufficient_family_evidence"
+        ],
+        "familyFriendlyScoringVersion": "family-friendly-v4",
+        "addressUpdatedAt": {
+          "__type": "Timestamp",
+          "seconds": 1790950675,
+          "nanoseconds": 498000000
+        },
+        "createdAt": {
+          "__type": "Timestamp",
+          "seconds": 1790950675,
+          "nanoseconds": 498000000
+        },
+        "lastSeenAt": {
+          "__type": "Timestamp",
+          "seconds": 1790960624,
+          "nanoseconds": 827000000
+        },
+        "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp",
+        "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp",
+        "imageProvenance": {
+          "version": 1,
+          "primarySource": "post_media",
+          "primaryField": "relevantImageUrl",
+          "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp",
+          "isFallback": false,
+          "sourceFields": [
+            "relevantImageUrl",
+            "image",
+            "imageUrl",
+            "mediaUrls"
+          ],
+          "media": [
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp",
+              "source": "post_media",
+              "field": "relevantImageUrl",
+              "isPrimary": true,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp",
+              "source": "post_media",
+              "field": "image",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp",
+              "source": "post_media",
+              "field": "imageUrl",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": true
+            }
+          ],
+          "selectionReason": "model_selected_analysis_frame_source; duplicate_merge_image_update",
+          "updatedBy": "duplicate_merge",
+          "setAt": {
+            "__type": "Timestamp",
+            "seconds": 1790960624,
+            "nanoseconds": 827000000
+          }
+        },
+        "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp",
+        "mediaUrls": [
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp"
+        ],
+        "updatedAt": {
+          "__type": "Timestamp",
+          "seconds": 1790960624,
+          "nanoseconds": 827000000
+        }
+      },
+      "changedFields": [
+        "imageUrl",
+        "mediaUrls",
+        "image",
+        "relevantImageUrl",
+        "lastSeenAt",
+        "imageProvenance",
+        "updatedAt"
+      ]
+    },
+    {
+      "path": "venues/slug_upeiturffield/events/Li0eZIKcYCrqHWUqQlSO",
+      "updateTime": {
+        "__type": "Timestamp",
+        "seconds": 1790960613,
+        "nanoseconds": 336656000
+      },
+      "data": {
+        "uniqueId": "1739771728156396_3ae68f15da36802f",
+        "establishment": "UPEI Turf Field",
+        "locationScope": "venue",
+        "locationLabel": "UPEI Turf Field",
+        "locationPrecision": "exact",
+        "locationReviewStatus": "not_needed",
+        "additionalLocation": "UPEI Turf",
+        "eventType": "gatherings_parties",
+        "eventName": "Go- Experience The Pride",
+        "description": "Go- Experience The Pride, starting at 1:30 PM at The UPEI Turf.",
+        "startDate": "2026-10-03",
+        "endDate": "2026-10-03",
+        "startTime": "13:30",
+        "facebookUrl": "https://www.facebook.com/UPEISU/",
+        "sourceTimestamp": {
+          "__type": "Timestamp",
+          "seconds": 1790899011,
+          "nanoseconds": 0
+        },
+        "likes": 1,
+        "shares": 0,
+        "topReactionsCount": 1,
+        "venueId": "slug_upeiturffield",
+        "category": "Gatherings & Parties",
+        "isEvent": "Yes",
+        "isFoodSpecial": "No",
+        "name": "Go- Experience The Pride",
+        "address": "550 University Ave, Charlottetown, PE C1A 0G7, Canada",
+        "rawAddress": "550 University Ave, Charlottetown, PE C1A 0G7, Canada",
+        "normalizedAddress": "550 University Ave, Charlottetown, PE C1A 0G7, Canada",
+        "addressSource": "venue",
+        "addressNormalizationIssues": [],
+        "externalLinks": [],
+        "isRecurring": "No",
+        "recurringPattern": "none",
+        "cleanedFacebookUrl": "https://www.facebook.com/UPEISU/",
+        "latitude": 46.2609591,
+        "longitude": -63.14033680000001,
+        "timeFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "starting at 1:30 PM"
+          },
+          "end": {
+            "source": "none",
+            "toClose": false,
+            "evidence": "No end time shown"
+          }
+        },
+        "_sourceType": "event",
+        "familyFriendlyScore": 15,
+        "familyFriendlyLevel": "unlikely",
+        "familyFriendlyReasons": [
+          "insufficient_family_evidence"
+        ],
+        "familyFriendlyScoringVersion": "family-friendly-v4",
+        "addressUpdatedAt": {
+          "__type": "Timestamp",
+          "seconds": 1790950668,
+          "nanoseconds": 236000000
+        },
+        "createdAt": {
+          "__type": "Timestamp",
+          "seconds": 1790950668,
+          "nanoseconds": 236000000
+        },
+        "lastSeenAt": {
+          "__type": "Timestamp",
+          "seconds": 1790960613,
+          "nanoseconds": 326000000
+        },
+        "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+        "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+        "imageProvenance": {
+          "version": 1,
+          "primarySource": "post_media",
+          "primaryField": "relevantImageUrl",
+          "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+          "isFallback": false,
+          "sourceFields": [
+            "relevantImageUrl",
+            "image",
+            "imageUrl",
+            "mediaUrls"
+          ],
+          "media": [
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+              "source": "post_media",
+              "field": "relevantImageUrl",
+              "isPrimary": true,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+              "source": "post_media",
+              "field": "image",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+              "source": "post_media",
+              "field": "imageUrl",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790950427256-368f1u.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790950427664-7dis8q.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790950428033-7tzrm4.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": true
+            }
+          ],
+          "selectionReason": "model_selected_analysis_frame_source; duplicate_merge_image_update",
+          "updatedBy": "duplicate_merge",
+          "setAt": {
+            "__type": "Timestamp",
+            "seconds": 1790960613,
+            "nanoseconds": 326000000
+          }
+        },
+        "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+        "timeResolution": {
+          "hoursUsed": false,
+          "reason": "no_place_match",
+          "endFromHours": "duration_default"
+        },
+        "endTime": "15:30",
+        "mediaUrls": [
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790950427256-368f1u.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790950427664-7dis8q.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790950428033-7tzrm4.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp"
+        ],
+        "updatedAt": {
+          "__type": "Timestamp",
+          "seconds": 1790960613,
+          "nanoseconds": 326000000
+        }
+      },
+      "changedFields": [
+        "endTime",
+        "imageUrl",
+        "mediaUrls",
+        "image",
+        "relevantImageUrl",
+        "timeResolution",
+        "lastSeenAt",
+        "imageProvenance",
+        "updatedAt"
+      ]
+    }
+  ],
+  "created": [
+    {
+      "path": "venues/slug_upeisu/events/rbgauwg4O0pSpq9MFooN",
+      "updateTime": {
+        "__type": "Timestamp",
+        "seconds": 1790960625,
+        "nanoseconds": 768493000
+      },
+      "data": {
+        "uniqueId": "1739771728156396_1cbc74f59f8f42bb",
+        "establishment": "UPEISU | Charlottetown PE",
+        "locationScope": "venue",
+        "locationLabel": "UPEISU | Charlottetown PE",
+        "locationPrecision": "exact",
+        "locationReviewStatus": "not_needed",
+        "additionalLocation": "Day Lounge",
+        "eventType": "workshops_classes",
+        "eventName": "Create: Build The Pride",
+        "startDate": "2026-10-29",
+        "endDate": "2026-10-29",
+        "startTime": "18:00",
+        "endTime": "21:00",
+        "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp",
+        "mediaUrls": [
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp"
+        ],
+        "facebookUrl": "https://www.facebook.com/UPEISU/",
+        "sourceTimestamp": {
+          "__type": "Timestamp",
+          "seconds": 1790899011,
+          "nanoseconds": 0
+        },
+        "likes": 1,
+        "shares": 0,
+        "topReactionsCount": 1,
+        "venueId": "slug_upeisu",
+        "category": "Workshops & Classes",
+        "isEvent": "Yes",
+        "isFoodSpecial": "No",
+        "name": "Create: Build The Pride",
+        "address": "550 University Ave, Charlottetown, PE C1A 4P3, Canada",
+        "rawAddress": "550 University Ave, Charlottetown, PE C1A 4P3, Canada",
+        "normalizedAddress": "550 University Ave, Charlottetown, PE C1A 4P3, Canada",
+        "addressSource": "google_places",
+        "addressNormalizationIssues": [],
+        "externalLinks": [],
+        "isRecurring": "No",
+        "recurringPattern": "none",
+        "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1788272615042-2sifmb.webp",
+        "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp",
+        "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp",
+        "cleanedFacebookUrl": "https://www.facebook.com/UPEISU/",
+        "latitude": 46.2570778,
+        "longitude": -63.1406754,
+        "timeResolution": {
+          "hoursUsed": false
+        },
+        "_sourceType": "calendar",
+        "familyFriendlyScore": 15,
+        "familyFriendlyLevel": "unlikely",
+        "familyFriendlyReasons": [
+          "insufficient_family_evidence"
+        ],
+        "familyFriendlyScoringVersion": "family-friendly-v4",
+        "addressUpdatedAt": {
+          "__type": "Timestamp",
+          "seconds": 1790960625,
+          "nanoseconds": 756000000
+        },
+        "lastSeenAt": {
+          "__type": "Timestamp",
+          "seconds": 1790960625,
+          "nanoseconds": 756000000
+        },
+        "createdAt": {
+          "__type": "Timestamp",
+          "seconds": 1790960625,
+          "nanoseconds": 756000000
+        },
+        "imageProvenance": {
+          "version": 1,
+          "primarySource": "post_media",
+          "primaryField": "relevantImageUrl",
+          "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp",
+          "isFallback": false,
+          "sourceFields": [
+            "relevantImageUrl",
+            "image",
+            "imageUrl",
+            "icon",
+            "mediaUrls"
+          ],
+          "media": [
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp",
+              "source": "post_media",
+              "field": "relevantImageUrl",
+              "isPrimary": true,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp",
+              "source": "post_media",
+              "field": "image",
+              "isPrimary": false,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp",
+              "source": "post_media",
+              "field": "imageUrl",
+              "isPrimary": false,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1788272615042-2sifmb.webp",
+              "source": "profile_image",
+              "field": "icon",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": false
+            }
+          ],
+          "selectionReason": "model_selected_analysis_frame_source",
+          "updatedBy": "parser",
+          "setAt": {
+            "__type": "Timestamp",
+            "seconds": 1790960625,
+            "nanoseconds": 756000000
+          }
+        },
+        "updatedAt": {
+          "__type": "Timestamp",
+          "seconds": 1790960625,
+          "nanoseconds": 756000000
+        }
+      }
+    },
+    {
+      "path": "venues/slug_upeisu/events/hTpDFtrQNMwxVKpB3xij",
+      "updateTime": {
+        "__type": "Timestamp",
+        "seconds": 1790960626,
+        "nanoseconds": 913663000
+      },
+      "data": {
+        "uniqueId": "1739771728156396_d743061682e4734b",
+        "establishment": "UPEISU | Charlottetown PE",
+        "locationScope": "venue",
+        "locationLabel": "UPEISU | Charlottetown PE",
+        "locationPrecision": "exact",
+        "locationReviewStatus": "not_needed",
+        "additionalLocation": "W.A Murphy Student Centre",
+        "eventType": "gatherings_parties",
+        "eventName": "Halloween Pub",
+        "description": "$10 CASH entry fee. The printed end time of 2 AM is overnight, on November 1.",
+        "startDate": "2026-10-30",
+        "endDate": "2026-10-31",
+        "startTime": "22:00",
+        "endTime": "02:00",
+        "price": "$10 CASH",
+        "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp",
+        "mediaUrls": [
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp"
+        ],
+        "facebookUrl": "https://www.facebook.com/UPEISU/",
+        "sourceTimestamp": {
+          "__type": "Timestamp",
+          "seconds": 1790899011,
+          "nanoseconds": 0
+        },
+        "likes": 1,
+        "shares": 0,
+        "topReactionsCount": 1,
+        "venueId": "slug_upeisu",
+        "category": "Gatherings & Parties",
+        "isEvent": "Yes",
+        "isFoodSpecial": "No",
+        "name": "Halloween Pub",
+        "address": "550 University Ave, Charlottetown, PE C1A 4P3, Canada",
+        "rawAddress": "550 University Ave, Charlottetown, PE C1A 4P3, Canada",
+        "normalizedAddress": "550 University Ave, Charlottetown, PE C1A 4P3, Canada",
+        "addressSource": "google_places",
+        "addressNormalizationIssues": [],
+        "ticketPrice": "$10 CASH",
+        "externalLinks": [],
+        "isRecurring": "No",
+        "recurringPattern": "none",
+        "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1788272615042-2sifmb.webp",
+        "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp",
+        "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp",
+        "cleanedFacebookUrl": "https://www.facebook.com/UPEISU/",
+        "latitude": 46.2570778,
+        "longitude": -63.1406754,
+        "timeResolution": {
+          "hoursUsed": false
+        },
+        "_sourceType": "calendar",
+        "familyFriendlyScore": 0,
+        "familyFriendlyLevel": "unlikely",
+        "familyFriendlyReasons": [
+          "very_late_start",
+          "insufficient_family_evidence"
+        ],
+        "familyFriendlyScoringVersion": "family-friendly-v4",
+        "addressUpdatedAt": {
+          "__type": "Timestamp",
+          "seconds": 1790960626,
+          "nanoseconds": 899000000
+        },
+        "lastSeenAt": {
+          "__type": "Timestamp",
+          "seconds": 1790960626,
+          "nanoseconds": 899000000
+        },
+        "createdAt": {
+          "__type": "Timestamp",
+          "seconds": 1790960626,
+          "nanoseconds": 899000000
+        },
+        "imageProvenance": {
+          "version": 1,
+          "primarySource": "post_media",
+          "primaryField": "relevantImageUrl",
+          "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp",
+          "isFallback": false,
+          "sourceFields": [
+            "relevantImageUrl",
+            "image",
+            "imageUrl",
+            "icon",
+            "mediaUrls"
+          ],
+          "media": [
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp",
+              "source": "post_media",
+              "field": "relevantImageUrl",
+              "isPrimary": true,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp",
+              "source": "post_media",
+              "field": "image",
+              "isPrimary": false,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp",
+              "source": "post_media",
+              "field": "imageUrl",
+              "isPrimary": false,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1788272615042-2sifmb.webp",
+              "source": "profile_image",
+              "field": "icon",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": false
+            }
+          ],
+          "selectionReason": "model_selected_analysis_frame_source",
+          "updatedBy": "parser",
+          "setAt": {
+            "__type": "Timestamp",
+            "seconds": 1790960626,
+            "nanoseconds": 899000000
+          }
+        },
+        "updatedAt": {
+          "__type": "Timestamp",
+          "seconds": 1790960626,
+          "nanoseconds": 899000000
+        }
+      }
+    },
+    {
+      "path": "venues/fb_100052099464909/events/QheFpoLBijf6Kd3QVEAk",
+      "updateTime": {
+        "__type": "Timestamp",
+        "seconds": 1790960617,
+        "nanoseconds": 444708000
+      },
+      "data": {
+        "uniqueId": "1739771728156396_2207573e9f24ec0d",
+        "establishment": "The Fox & Crow | Charlottetown PE",
+        "locationScope": "venue",
+        "locationLabel": "The Fox & Crow | Charlottetown PE",
+        "locationPrecision": "exact",
+        "locationReviewStatus": "not_needed",
+        "eventType": "gatherings_parties",
+        "eventName": "Share the Pride: Panther Friendsgiving",
+        "description": "Sign-up required.",
+        "startDate": "2026-10-09",
+        "endDate": "2026-10-09",
+        "startTime": "16:30",
+        "endTime": "18:30",
+        "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+        "mediaUrls": [
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp"
+        ],
+        "facebookUrl": "https://www.facebook.com/UPEISU/",
+        "sourceTimestamp": {
+          "__type": "Timestamp",
+          "seconds": 1790899011,
+          "nanoseconds": 0
+        },
+        "likes": 1,
+        "shares": 0,
+        "topReactionsCount": 1,
+        "venueId": "fb_100052099464909",
+        "category": "Gatherings & Parties",
+        "isEvent": "Yes",
+        "isFoodSpecial": "No",
+        "name": "Share the Pride: Panther Friendsgiving",
+        "address": "550 University Avenue W.A. Murphy Student Center, Charlottetown, PE, Canada",
+        "rawAddress": "550 University Avenue W.A. Murphy Student Center, Charlottetown, PE, Canada",
+        "normalizedAddress": "550 University Avenue W.A. Murphy Student Center, Charlottetown, PE, Canada",
+        "addressSource": "google_places",
+        "addressNormalizationIssues": [],
+        "externalLinks": [],
+        "isRecurring": "No",
+        "recurringPattern": "none",
+        "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1773753075007-l233hs.webp",
+        "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+        "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+        "cleanedFacebookUrl": "https://www.facebook.com/UPEISU/",
+        "latitude": 46.2578518,
+        "longitude": -63.1406696,
+        "timeResolution": {
+          "hoursUsed": false
+        },
+        "_sourceType": "calendar",
+        "familyFriendlyScore": 15,
+        "familyFriendlyLevel": "unlikely",
+        "familyFriendlyReasons": [
+          "insufficient_family_evidence"
+        ],
+        "familyFriendlyScoringVersion": "family-friendly-v4",
+        "addressUpdatedAt": {
+          "__type": "Timestamp",
+          "seconds": 1790960617,
+          "nanoseconds": 432000000
+        },
+        "lastSeenAt": {
+          "__type": "Timestamp",
+          "seconds": 1790960617,
+          "nanoseconds": 432000000
+        },
+        "createdAt": {
+          "__type": "Timestamp",
+          "seconds": 1790960617,
+          "nanoseconds": 432000000
+        },
+        "imageProvenance": {
+          "version": 1,
+          "primarySource": "post_media",
+          "primaryField": "relevantImageUrl",
+          "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+          "isFallback": false,
+          "sourceFields": [
+            "relevantImageUrl",
+            "image",
+            "imageUrl",
+            "icon",
+            "mediaUrls"
+          ],
+          "media": [
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+              "source": "post_media",
+              "field": "relevantImageUrl",
+              "isPrimary": true,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+              "source": "post_media",
+              "field": "image",
+              "isPrimary": false,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+              "source": "post_media",
+              "field": "imageUrl",
+              "isPrimary": false,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1773753075007-l233hs.webp",
+              "source": "profile_image",
+              "field": "icon",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": false
+            }
+          ],
+          "selectionReason": "model_selected_analysis_frame_source",
+          "updatedBy": "parser",
+          "setAt": {
+            "__type": "Timestamp",
+            "seconds": 1790960617,
+            "nanoseconds": 432000000
+          }
+        },
+        "updatedAt": {
+          "__type": "Timestamp",
+          "seconds": 1790960617,
+          "nanoseconds": 432000000
+        }
+      }
+    },
+    {
+      "path": "venues/fb_100052099464909/events/bpxQx1l9r9g8agcTBjvb",
+      "updateTime": {
+        "__type": "Timestamp",
+        "seconds": 1790960618,
+        "nanoseconds": 261004000
+      },
+      "data": {
+        "uniqueId": "1739771728156396_420b8fdae9e5f50d",
+        "establishment": "The Fox & Crow | Charlottetown PE",
+        "locationScope": "venue",
+        "locationLabel": "The Fox & Crow | Charlottetown PE",
+        "locationPrecision": "exact",
+        "locationReviewStatus": "not_needed",
+        "eventType": "live_music",
+        "eventName": "Monster High Drag Show",
+        "description": "Present your student ID for free entry.",
+        "startDate": "2026-10-10",
+        "endDate": "2026-10-10",
+        "startTime": "21:00",
+        "endTime": "23:00",
+        "price": "Free entry with student ID",
+        "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+        "mediaUrls": [
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp"
+        ],
+        "facebookUrl": "https://www.facebook.com/UPEISU/",
+        "sourceTimestamp": {
+          "__type": "Timestamp",
+          "seconds": 1790899011,
+          "nanoseconds": 0
+        },
+        "likes": 1,
+        "shares": 0,
+        "topReactionsCount": 1,
+        "venueId": "fb_100052099464909",
+        "category": "Live Music",
+        "isEvent": "Yes",
+        "isFoodSpecial": "No",
+        "name": "Monster High Drag Show",
+        "address": "550 University Avenue W.A. Murphy Student Center, Charlottetown, PE, Canada",
+        "rawAddress": "550 University Avenue W.A. Murphy Student Center, Charlottetown, PE, Canada",
+        "normalizedAddress": "550 University Avenue W.A. Murphy Student Center, Charlottetown, PE, Canada",
+        "addressSource": "google_places",
+        "addressNormalizationIssues": [],
+        "ticketPrice": "Free entry with student ID",
+        "externalLinks": [],
+        "isRecurring": "No",
+        "recurringPattern": "none",
+        "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1773753075007-l233hs.webp",
+        "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+        "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+        "cleanedFacebookUrl": "https://www.facebook.com/UPEISU/",
+        "latitude": 46.2578518,
+        "longitude": -63.1406696,
+        "timeResolution": {
+          "hoursUsed": false,
+          "reason": "no_hours",
+          "endFromHours": "duration_default"
+        },
+        "_sourceType": "calendar",
+        "familyFriendlyScore": 0,
+        "familyFriendlyLevel": "unlikely",
+        "familyFriendlyReasons": [
+          "late_start",
+          "insufficient_family_evidence"
+        ],
+        "familyFriendlyScoringVersion": "family-friendly-v4",
+        "addressUpdatedAt": {
+          "__type": "Timestamp",
+          "seconds": 1790960618,
+          "nanoseconds": 248000000
+        },
+        "lastSeenAt": {
+          "__type": "Timestamp",
+          "seconds": 1790960618,
+          "nanoseconds": 248000000
+        },
+        "createdAt": {
+          "__type": "Timestamp",
+          "seconds": 1790960618,
+          "nanoseconds": 248000000
+        },
+        "imageProvenance": {
+          "version": 1,
+          "primarySource": "post_media",
+          "primaryField": "relevantImageUrl",
+          "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+          "isFallback": false,
+          "sourceFields": [
+            "relevantImageUrl",
+            "image",
+            "imageUrl",
+            "icon",
+            "mediaUrls"
+          ],
+          "media": [
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+              "source": "post_media",
+              "field": "relevantImageUrl",
+              "isPrimary": true,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+              "source": "post_media",
+              "field": "image",
+              "isPrimary": false,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+              "source": "post_media",
+              "field": "imageUrl",
+              "isPrimary": false,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1773753075007-l233hs.webp",
+              "source": "profile_image",
+              "field": "icon",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": false
+            }
+          ],
+          "selectionReason": "model_selected_analysis_frame_source",
+          "updatedBy": "parser",
+          "setAt": {
+            "__type": "Timestamp",
+            "seconds": 1790960618,
+            "nanoseconds": 248000000
+          }
+        },
+        "updatedAt": {
+          "__type": "Timestamp",
+          "seconds": 1790960618,
+          "nanoseconds": 248000000
+        }
+      }
+    },
+    {
+      "path": "venues/fb_100052099464909/events/J6dKfINcR8jN49Xa8gBP",
+      "updateTime": {
+        "__type": "Timestamp",
+        "seconds": 1790960620,
+        "nanoseconds": 66896000
+      },
+      "data": {
+        "uniqueId": "1739771728156396_0695515581a15861",
+        "establishment": "The Fox & Crow | Charlottetown PE",
+        "locationScope": "venue",
+        "locationLabel": "The Fox & Crow | Charlottetown PE",
+        "locationPrecision": "exact",
+        "locationReviewStatus": "not_needed",
+        "eventType": "gatherings_parties",
+        "eventName": "Mix & Mingle with Mayoral Candidates",
+        "description": "One free drink ticket per student.",
+        "startDate": "2026-10-19",
+        "endDate": "2026-10-19",
+        "startTime": "19:00",
+        "endTime": "21:00",
+        "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+        "mediaUrls": [
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp"
+        ],
+        "facebookUrl": "https://www.facebook.com/UPEISU/",
+        "sourceTimestamp": {
+          "__type": "Timestamp",
+          "seconds": 1790899011,
+          "nanoseconds": 0
+        },
+        "likes": 1,
+        "shares": 0,
+        "topReactionsCount": 1,
+        "venueId": "fb_100052099464909",
+        "category": "Gatherings & Parties",
+        "isEvent": "Yes",
+        "isFoodSpecial": "No",
+        "name": "Mix & Mingle with Mayoral Candidates",
+        "address": "550 University Avenue W.A. Murphy Student Center, Charlottetown, PE, Canada",
+        "rawAddress": "550 University Avenue W.A. Murphy Student Center, Charlottetown, PE, Canada",
+        "normalizedAddress": "550 University Avenue W.A. Murphy Student Center, Charlottetown, PE, Canada",
+        "addressSource": "google_places",
+        "addressNormalizationIssues": [],
+        "externalLinks": [],
+        "isRecurring": "No",
+        "recurringPattern": "none",
+        "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1773753075007-l233hs.webp",
+        "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+        "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+        "cleanedFacebookUrl": "https://www.facebook.com/UPEISU/",
+        "latitude": 46.2578518,
+        "longitude": -63.1406696,
+        "timeResolution": {
+          "hoursUsed": false
+        },
+        "_sourceType": "calendar",
+        "familyFriendlyScore": 15,
+        "familyFriendlyLevel": "unlikely",
+        "familyFriendlyReasons": [
+          "insufficient_family_evidence"
+        ],
+        "familyFriendlyScoringVersion": "family-friendly-v4",
+        "addressUpdatedAt": {
+          "__type": "Timestamp",
+          "seconds": 1790960620,
+          "nanoseconds": 51000000
+        },
+        "lastSeenAt": {
+          "__type": "Timestamp",
+          "seconds": 1790960620,
+          "nanoseconds": 51000000
+        },
+        "createdAt": {
+          "__type": "Timestamp",
+          "seconds": 1790960620,
+          "nanoseconds": 51000000
+        },
+        "imageProvenance": {
+          "version": 1,
+          "primarySource": "post_media",
+          "primaryField": "relevantImageUrl",
+          "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+          "isFallback": false,
+          "sourceFields": [
+            "relevantImageUrl",
+            "image",
+            "imageUrl",
+            "icon",
+            "mediaUrls"
+          ],
+          "media": [
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+              "source": "post_media",
+              "field": "relevantImageUrl",
+              "isPrimary": true,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+              "source": "post_media",
+              "field": "image",
+              "isPrimary": false,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+              "source": "post_media",
+              "field": "imageUrl",
+              "isPrimary": false,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1773753075007-l233hs.webp",
+              "source": "profile_image",
+              "field": "icon",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472358-nhm2l9.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960472849-n898de.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790960473255-58pl2o.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": false
+            }
+          ],
+          "selectionReason": "model_selected_analysis_frame_source",
+          "updatedBy": "parser",
+          "setAt": {
+            "__type": "Timestamp",
+            "seconds": 1790960620,
+            "nanoseconds": 51000000
+          }
+        },
+        "updatedAt": {
+          "__type": "Timestamp",
+          "seconds": 1790960620,
+          "nanoseconds": 51000000
+        }
+      }
+    }
+  ],
+  "missing": []
+}
