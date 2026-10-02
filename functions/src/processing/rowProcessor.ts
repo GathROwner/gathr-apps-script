@@ -3809,6 +3809,10 @@ function expandStageVenueCandidate(value: unknown): string[] {
   const raw = String(value || '').trim();
   if (!raw) return [];
 
+  // A flyer often uses a grammatical article that the venue record omits.
+  // Always try the printed name first so a real venue beginning with "The" wins.
+  const withoutLeadingThe = raw.replace(/^the\s+/i, '').trim();
+
   const strippedStage = raw
     .replace(/\s*[-–—:]?\s*(?:main\s+)?(?:stage|courtyard|patio|room|auditorium|theatre|theater)\s*$/i, '')
     .trim();
@@ -3816,7 +3820,7 @@ function expandStageVenueCandidate(value: unknown): string[] {
     ? raw.split(',')[0]?.trim()
     : '';
 
-  return uniqueVenueCandidates([raw, strippedStage, venueNameBeforeCity]);
+  return uniqueVenueCandidates([raw, withoutLeadingThe, strippedStage, venueNameBeforeCity]);
 }
 
 function candidateLooksLikeRowScopedSubLocation(

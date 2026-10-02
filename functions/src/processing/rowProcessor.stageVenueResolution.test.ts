@@ -79,6 +79,34 @@ const cornwallOntarioLibraryVenue: VenueData = {
   province: 'ON',
 };
 
+test('a printed leading article can fall back to a known venue without overriding an exact match', async () => {
+  const row = { uniqueId: 'upeisu-gallery', text: '', mediaUrls: [],
+    pageName: 'UPEISU', userName: 'UPEISU', timestamp: '2026-10-01T23:56:51Z' } as RawRowData;
+  const turf = { id: 'slug_upeiturffield', name: 'UPEI Turf Field',
+    normalizedName: 'upei turf field' } as VenueData;
+  const exactThe = { id: 'different-venue', name: 'The UPEI Turf',
+    normalizedName: 'the upei turf' } as VenueData;
+  const item = { name: 'Go- Experience The Pride', establishment: 'The UPEI Turf' } as ParserProcessedEvent;
+  const tried: string[] = [];
+  const resolve = (includeExact: boolean) => resolveVenueForFullParserEventWithMatcherForRegression({
+    item, row, rowVenue: { id: 'slug_upeisu', name: 'UPEISU' } as VenueData,
+    establishment: row.userName, rowIndex: 209,
+    matcher: async candidate => {
+      tried.push(candidate);
+      if (includeExact && candidate === 'The UPEI Turf')
+        return { isMatch: true, matchType: 'exact', similarity: 1, matchedVenue: exactThe };
+      if (candidate === 'UPEI Turf')
+        return { isMatch: true, matchType: 'fuzzy', similarity: 0.9, matchedVenue: turf };
+      return { isMatch: false, matchType: 'none', similarity: 0 };
+    },
+  });
+  assert.equal((await resolve(false))?.id, turf.id);
+  assert.deepEqual(tried.slice(0, 2), ['The UPEI Turf', 'UPEI Turf']);
+  tried.length = 0;
+  assert.equal((await resolve(true))?.id, exactThe.id);
+  assert.deepEqual(tried, ['The UPEI Turf']);
+});
+
 test('a city suffix cannot fuzzy-match a different venue in that city', async () => {
   const row = {
     uniqueId: 'seawalk-caption-pilot', text: 'Fall Workshops', mediaUrls: [],
