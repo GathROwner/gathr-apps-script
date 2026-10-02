@@ -86,6 +86,34 @@ test('updates stale end time when explicit schedule evidence uses a bare range l
   assert.ok(preview.changedFields.includes('endTime'));
 });
 
+test('repairs both class times from printed range after a Group 1 label', () => {
+  const existingEvent = buildEvent({
+    eventName: 'Creative Art Club (Group 1)',
+    name: 'Creative Art Club (Group 1)',
+    startTime: '01:00',
+    endTime: '12:30',
+    timeFlags: {
+      start: { source: 'explicit', evidence: 'Group 1 - 12:30pm-1:45pm' },
+      end: { source: 'explicit', toClose: false, evidence: 'Group 1 - 12:30pm-1:45pm' },
+    },
+  });
+  const incomingEvent = buildEvent({
+    eventName: 'Creative Art Club - Time Slot 1',
+    name: 'Creative Art Club - Time Slot 1',
+    startTime: '12:30',
+    endTime: '13:45',
+    timeFlags: {
+      start: { source: 'explicit', evidence: '12:30 – 1:45pm' },
+      end: { source: 'explicit', toClose: false, evidence: '12:30 – 1:45pm' },
+    },
+  });
+
+  const preview = previewDuplicateMerge({ existingEvent, incomingEvent, venue: buildVenue() });
+  assert.equal(preview.updates.startTime, '12:30');
+  assert.equal(preview.updates.endTime, '13:45');
+  assert.equal(preview.timeImproved, true);
+});
+
 test('uses a single explicit range in the existing description when the keeper lacks usable timeFlags', () => {
   const venue = buildVenue();
   const existingEvent = buildEvent({

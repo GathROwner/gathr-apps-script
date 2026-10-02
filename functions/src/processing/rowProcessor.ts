@@ -7296,7 +7296,10 @@ function extractComparableTimesFromEvidence(
   evidence: string,
   context?: { expectedStart?: string; expectedEnd?: string }
 ): string[] {
-  const normalized = evidence.trim().toLowerCase().replace(/[–—]/g, '-').replace(/\./g, '');
+  const normalized = evidence.trim().toLowerCase().replace(/[–—]/g, '-').replace(/\./g, '')
+    // A label such as "Group 1 - 12:30pm" identifies a session; its ordinal is
+    // not the first clock time in the following printed range.
+    .replace(/\b(?:group|time\s*slot|slot|session)\s*#?\s*[1-9]\s*[-:]\s*(?=\d{1,2}(?::\d{2})?\s*(?:am|pm)?\b)/g, '');
   if (!normalized) return [];
 
   const rangeWithTrailingMeridiem = normalized.match(

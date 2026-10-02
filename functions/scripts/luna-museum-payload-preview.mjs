@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import admin from 'firebase-admin';
 import { checkDuplicate, findMatchingVenue } from '../lib/services/firestoreService.js';
-import { previewFullParserEventWritePayload } from '../lib/processing/rowProcessor.js';
+import { previewDuplicateMerge, previewFullParserEventWritePayload } from '../lib/processing/rowProcessor.js';
 
 const root = path.resolve(import.meta.dirname, '../..');
 const dir = path.join(root, 'artifacts/luna-live-canary-2026-10-02');
@@ -40,6 +40,13 @@ for (let index = 0; index < events.length; index++) {
   try {
     const payload = await previewFullParserEventWritePayload(event, row, 144, index, rowVenue, establishment);
     const duplicate = await checkDuplicate(payload, payload.venueId, []);
+    const targetVenue = duplicate.existingEvent
+      ? await db.collection('venues').doc(payload.venueId).get()
+      : null;
+    const merge = duplicate.existingEvent && targetVenue?.exists
+      ? previewDuplicateMerge({ existingEvent: duplicate.existingEvent,
+        incomingEvent: payload, venue: targetVenue.data() })
+      : null;
     payloads.push({ name: event.name, date: payload.startDate, time: payload.startTime,
       endTime: payload.endTime, uniqueId: payload.uniqueId, venueId: payload.venueId,
       recurringPattern: payload.recurringPattern || '', totalOccurrences: payload.totalOccurrences || null,
@@ -48,7 +55,16 @@ for (let index = 0; index < events.length; index++) {
       gallery: payload.imageProvenance?.media?.filter(x => x.source === 'post_media').map(x => x.url) || [],
       duplicate: { isDuplicate: duplicate.isDuplicate, eventId: duplicate.existingEvent?.id || '',
         existingName: duplicate.existingEvent?.name || '',
-        existingUniqueId: duplicate.existingEvent?.uniqueId || '' }, error: '' });
+        existingUniqueId: duplicate.existingEvent?.uniqueId || '' },
+      proposedMerge: merge ? { changedFields: merge.changedFields,
+        startTime: merge.updates.startTime || '', endTime: merge.updates.endTime || '' } : null,
+      timeEvidence: {
+        incomingFlags: payload.timeFlags || null,
+        incomingResolution: payload.timeResolution || null,
+        existingFlags: duplicate.existingEvent?.timeFlags || null,
+        existingResolution: duplicate.existingEvent?.timeResolution || null,
+      },
+      error: '' });
   } catch (cause) {
     payloads.push({ name: event.name, error: cause instanceof Error ? cause.message : String(cause) });
   }
