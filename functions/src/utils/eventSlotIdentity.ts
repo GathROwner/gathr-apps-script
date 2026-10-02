@@ -1,6 +1,9 @@
 type SlotEvent = {
   eventName?: string;
   name?: string;
+  startTime?: string;
+  endTime?: string;
+  timeFlags?: unknown;
 };
 
 function title(event: SlotEvent): string {
@@ -33,12 +36,82 @@ function distinctiveTitleTokens(event: SlotEvent): Set<string> {
   ));
 }
 
-/** Use an explicit Group/Slot number only when the surrounding event title also agrees. */
-export function hasMatchingExplicitSlotIdentity(left: SlotEvent, right: SlotEvent): boolean {
-  const leftSlot = explicitSlotOrdinal(left);
-  if (leftSlot === null || leftSlot !== explicitSlotOrdinal(right)) return false;
+function hasSharedTitleCore(left: SlotEvent, right: SlotEvent): boolean {
   const leftTokens = distinctiveTitleTokens(left);
   const rightTokens = distinctiveTitleTokens(right);
   const shared = [...leftTokens].filter(token => rightTokens.has(token)).length;
   return shared >= 3 && shared / Math.min(leftTokens.size, rightTokens.size) >= 0.6;
+}
+
+/** Use an explicit Group/Slot number only when the surrounding event title also agrees. */
+export function hasMatchingExplicitSlotIdentity(left: SlotEvent, right: SlotEvent): boolean {
+  const leftSlot = explicitSlotOrdinal(left);
+  return leftSlot !== null && leftSlot === explicitSlotOrdinal(right) &&
+    hasSharedTitleCore(left, right);
+}
+
+function timeFlag(event: SlotEvent, side: 'start' | 'end'): { source: string; evidence: string } {
+  const value = (event.timeFlags as Record<string, unknown> | undefined)?.[side] as
+    Record<string, unknown> | undefined;
+  return { source: String(value?.source || '').toLowerCase(), evidence: String(value?.evidence || '') };
+}
+
+function clock(token: string, meridiem: string): string {
+  const match = token.match(/^(\d{1,2}):(\d{2})$/);
+  if (!match) return '';
+  let hour = Number(match[1]);
+  const minute = Number(match[2]);
+  if (hour > (meridiem ? 12 : 23) || minute > 59) return '';
+  if (meridiem === 'pm' && hour < 12) hour += 12;
+  if (meridiem === 'am' && hour === 12) hour = 0;
+  return `${String(hour).padStart(2, '0')}:${match[2]}`;
+}
+
+function printedLabeledSlotRange(event: SlotEvent): [string, string] | null {
+  if (explicitSlotOrdinal(event) === null) return null;
+  const start = timeFlag(event, 'start');
+  const end = timeFlag(event, 'end');
+  if (start.source !== 'explicit' || end.source !== 'explicit') return null;
+  const evidence = (start.evidence || end.evidence).replace(/[–—]/g, '-').toLowerCase();
+  const match = evidence.match(/\b(\d{1,2}:\d{2})\s*(am|pm)?\s*(?:-|to)\s*(\d{1,2}:\d{2})\s*(am|pm)?\b/);
+  if (!match) return null;
+  const startTime = clock(match[1], match[2] || match[4] || '');
+  const endTime = clock(match[3], match[4] || match[2] || '');
+  if (!startTime || !endTime) return null;
+  const [startHour, startMinute] = startTime.split(':').map(Number);
+  const [endHour, endMinute] = endTime.split(':').map(Number);
+  const duration = endHour * 60 + endMinute - startHour * 60 - startMinute;
+  return duration > 0 && duration <= 8 * 60 ? [startTime, endTime] : null;
+}
+
+function incomingClockSupported(event: SlotEvent, side: 'start' | 'end'): boolean {
+  const flag = timeFlag(event, side);
+  const value = String(side === 'start' ? event.startTime || '' : event.endTime || '');
+  if (flag.source !== 'explicit' || !/^\d{1,2}:\d{2}$/.test(value)) return false;
+  const token = flag.evidence.toLowerCase().match(/\b(\d{1,2}:\d{2})\s*(am|pm)?\b/);
+  if (!token) return false;
+  const sourceTime = clock(token[1], token[2] || '');
+  if (!sourceTime) return false;
+  if (token[2]) return sourceTime === clock(value, '');
+  const [sourceHour, sourceMinute] = sourceTime.split(':').map(Number);
+  const [valueHour, valueMinute] = value.split(':').map(Number);
+  return sourceMinute === valueMinute && sourceHour % 12 === valueHour % 12;
+}
+
+function labeledSlotEvidenceComparison(incoming: SlotEvent, existing: SlotEvent): boolean | null {
+  if (explicitSlotOrdinal(incoming) !== null || !hasSharedTitleCore(incoming, existing)) return null;
+  const printed = printedLabeledSlotRange(existing);
+  if (!printed || !incomingClockSupported(incoming, 'start') ||
+      !incomingClockSupported(incoming, 'end')) return null;
+  return printed[0] === clock(String(incoming.startTime || ''), '') &&
+    printed[1] === clock(String(incoming.endTime || ''), '');
+}
+
+/** Match generic new titles to a labeled older session only with corroborating printed clocks. */
+export function hasMatchingLabeledSlotTimeEvidence(incoming: SlotEvent, existing: SlotEvent): boolean {
+  return labeledSlotEvidenceComparison(incoming, existing) === true;
+}
+
+export function hasConflictingLabeledSlotTimeEvidence(incoming: SlotEvent, existing: SlotEvent): boolean {
+  return labeledSlotEvidenceComparison(incoming, existing) === false;
 }

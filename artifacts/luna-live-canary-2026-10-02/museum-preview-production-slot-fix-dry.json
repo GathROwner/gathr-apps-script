@@ -1,0 +1,144 @@
+{
+  "snapshotId": "1OmFzDG0kWiY-k8C-8G6-oGlTBxE3B0cq_144_1790967755871",
+  "postId": "1615048507081168",
+  "rowVenue": "slug_eptek.centre",
+  "payloads": [
+    {
+      "name": "Let's Get Creative Kid's Art Club – Fall Session",
+      "date": "2026-10-18",
+      "time": "12:30",
+      "endTime": "13:45",
+      "uniqueId": "1615048507081168_26619b4b9a9ed115",
+      "venueId": "slug_eptek.centre",
+      "recurringPattern": "weekly_sunday",
+      "totalOccurrences": 8,
+      "recurrenceUntilDate": "2026-12-06",
+      "category": "Workshops & Classes",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790967721586-9c4hk7.webp",
+      "gallery": [
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790967721586-9c4hk7.webp",
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790967721586-9c4hk7.webp",
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790967721879-gdv0ea.webp",
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790967722073-8qokzk.webp",
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790967722286-2qt7ay.webp"
+      ],
+      "duplicate": {
+        "isDuplicate": true,
+        "eventId": "nOz8TgJISaSmdkMUVNzY",
+        "existingName": "Let's Get Creative Art Club @ Eptek – Fall 2026 (Group 2)",
+        "existingUniqueId": "1586777749908244_2d1cd3440099a40b"
+      },
+      "proposedMerge": {
+        "changedFields": [
+          "familyFriendlyScore",
+          "familyFriendlyReasons"
+        ],
+        "startTime": "",
+        "endTime": ""
+      },
+      "timeEvidence": {
+        "incomingFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "12:30"
+          },
+          "end": {
+            "source": "explicit",
+            "toClose": false,
+            "evidence": "1:45"
+          }
+        },
+        "incomingResolution": {
+          "hoursUsed": false
+        },
+        "existingFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "Group 2 - 2:15pm-3:30pm"
+          },
+          "end": {
+            "source": "explicit",
+            "toClose": false,
+            "evidence": "Group 2 - 2:15pm-3:30pm"
+          }
+        },
+        "existingResolution": {
+          "hoursUsed": false
+        }
+      },
+      "error": ""
+    },
+    {
+      "name": "Let's Get Creative Kid's Art Club – Fall Session",
+      "date": "2026-10-18",
+      "time": "14:15",
+      "endTime": "15:30",
+      "uniqueId": "1615048507081168_4c65c3bbb4e13ab4",
+      "venueId": "slug_eptek.centre",
+      "recurringPattern": "weekly_sunday",
+      "totalOccurrences": 8,
+      "recurrenceUntilDate": "2026-12-06",
+      "category": "Workshops & Classes",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790967721586-9c4hk7.webp",
+      "gallery": [
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790967721586-9c4hk7.webp",
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790967721586-9c4hk7.webp",
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790967721879-gdv0ea.webp",
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790967722073-8qokzk.webp",
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790967722286-2qt7ay.webp"
+      ],
+      "duplicate": {
+        "isDuplicate": true,
+        "eventId": "nOz8TgJISaSmdkMUVNzY",
+        "existingName": "Let's Get Creative Art Club @ Eptek – Fall 2026 (Group 2)",
+        "existingUniqueId": "1586777749908244_2d1cd3440099a40b"
+      },
+      "proposedMerge": {
+        "changedFields": [
+          "startTime",
+          "endTime",
+          "timeFlags",
+          "relevantImageUrl",
+          "image",
+          "imageUrl",
+          "imageProvenance",
+          "familyFriendlyScore",
+          "familyFriendlyReasons"
+        ],
+        "startTime": "14:15",
+        "endTime": "15:30"
+      },
+      "timeEvidence": {
+        "incomingFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "2:15"
+          },
+          "end": {
+            "source": "explicit",
+            "toClose": false,
+            "evidence": "3:30"
+          }
+        },
+        "incomingResolution": {
+          "hoursUsed": false
+        },
+        "existingFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "Group 2 - 2:15pm-3:30pm"
+          },
+          "end": {
+            "source": "explicit",
+            "toClose": false,
+            "evidence": "Group 2 - 2:15pm-3:30pm"
+          }
+        },
+        "existingResolution": {
+          "hoursUsed": false
+        }
+      },
+      "error": ""
+    }
+  ]
+}

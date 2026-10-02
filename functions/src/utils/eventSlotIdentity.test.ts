@@ -3,7 +3,9 @@ import { test } from 'node:test';
 import {
   explicitSlotOrdinal,
   hasConflictingExplicitSlotOrdinals,
+  hasConflictingLabeledSlotTimeEvidence,
   hasMatchingExplicitSlotIdentity,
+  hasMatchingLabeledSlotTimeEvidence,
 } from './eventSlotIdentity.js';
 import { isDuplicateEntry } from './similarity.js';
 
@@ -47,4 +49,46 @@ test('a bare matching group number cannot merge unrelated events', () => {
   );
   assert.equal(explicitSlotOrdinal({ name: 'Time Slot 12:30–1:45pm' }), null);
   assert.equal(explicitSlotOrdinal({ name: 'Friday dinner at 6 PM' }), null);
+});
+
+test('generic class titles match the older group whose printed clock range agrees', () => {
+  const incoming = {
+    ...classEvent("Let's Get Creative Kid's Art Club – Fall Session", '12:30', '13:45'),
+    timeFlags: {
+      start: { source: 'explicit', evidence: '12:30' },
+      end: { source: 'explicit', evidence: '1:45' },
+    },
+  };
+  const oldGroup1 = {
+    ...classEvent("Let's Get Creative Art Club @ Eptek – Fall 2026 (Group 1)", '01:00', '12:30'),
+    timeFlags: {
+      start: { source: 'explicit', evidence: 'Group 1 - 12:30pm-1:45pm' },
+      end: { source: 'explicit', evidence: 'Group 1 - 12:30pm-1:45pm' },
+    },
+  };
+  const oldGroup2 = {
+    ...classEvent("Let's Get Creative Art Club @ Eptek – Fall 2026 (Group 2)", '14:00', '14:15'),
+    timeFlags: {
+      start: { source: 'explicit', evidence: 'Group 2 - 2:15pm-3:30pm' },
+      end: { source: 'explicit', evidence: 'Group 2 - 2:15pm-3:30pm' },
+    },
+  };
+
+  assert.equal(hasMatchingLabeledSlotTimeEvidence(incoming, oldGroup1), true);
+  assert.equal(hasMatchingLabeledSlotTimeEvidence(incoming, oldGroup2), false);
+  assert.equal(hasConflictingLabeledSlotTimeEvidence(incoming, oldGroup2), true);
+  assert.equal(isDuplicateEntry(incoming, oldGroup2, { requireEstablishmentMatch: false }), false);
+});
+
+test('a guessed clock without explicit source evidence cannot override a labeled group', () => {
+  const incoming = classEvent('Creative Art Club', '12:30', '13:45');
+  const existing = {
+    ...classEvent('Creative Art Club (Group 1)', '01:00', '12:30'),
+    timeFlags: {
+      start: { source: 'explicit', evidence: 'Group 1 - 12:30pm-1:45pm' },
+      end: { source: 'explicit', evidence: 'Group 1 - 12:30pm-1:45pm' },
+    },
+  };
+  assert.equal(hasMatchingLabeledSlotTimeEvidence(incoming, existing), false);
+  assert.equal(hasConflictingLabeledSlotTimeEvidence(incoming, existing), false);
 });

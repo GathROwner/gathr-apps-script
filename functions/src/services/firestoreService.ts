@@ -80,7 +80,9 @@ import {
 import { withFamilyFriendlyScore } from '../utils/familyFriendlyScoring.js';
 import {
   hasConflictingExplicitSlotOrdinals,
+  hasConflictingLabeledSlotTimeEvidence,
   hasMatchingExplicitSlotIdentity,
+  hasMatchingLabeledSlotTimeEvidence,
 } from '../utils/eventSlotIdentity.js';
 
 // Initialize Firebase Admin if not already initialized
@@ -4098,7 +4100,8 @@ export async function checkDuplicate(
   const matchingCurrentRunSlot = currentRunEntries.find((existing) =>
     String(existing.venueId || '').trim() === String(venueId || '').trim() &&
     existing.startDate === event.startDate &&
-    hasMatchingExplicitSlotIdentity(event, existing)
+    (hasMatchingExplicitSlotIdentity(event, existing) ||
+      hasMatchingLabeledSlotTimeEvidence(event, existing))
   );
   if (matchingCurrentRunSlot) {
     return { isDuplicate: true, existingEvent: matchingCurrentRunSlot };
@@ -4106,6 +4109,7 @@ export async function checkDuplicate(
   for (const existing of currentRunEntries) {
     const sameVenue = String(existing.venueId || '').trim() === String(venueId || '').trim();
     if (hasConflictingExplicitSlotOrdinals(event, existing)) continue;
+    if (hasConflictingLabeledSlotTimeEvidence(event, existing)) continue;
     if (sameVenue && shouldSkipSiblingUniqueIdDuplicateCheck(event, existing)) {
       continue;
     }
@@ -4144,7 +4148,8 @@ export async function checkDuplicate(
 
   const matchingStoredSlot = existingEvents.find((existing) =>
     existing.startDate === event.startDate &&
-    hasMatchingExplicitSlotIdentity(event, existing)
+    (hasMatchingExplicitSlotIdentity(event, existing) ||
+      hasMatchingLabeledSlotTimeEvidence(event, existing))
   );
   if (matchingStoredSlot) {
     return { isDuplicate: true, existingEvent: matchingStoredSlot };
@@ -4152,6 +4157,7 @@ export async function checkDuplicate(
 
   for (const existing of existingEvents) {
     if (hasConflictingExplicitSlotOrdinals(event, existing)) continue;
+    if (hasConflictingLabeledSlotTimeEvidence(event, existing)) continue;
     if (shouldSkipSiblingUniqueIdDuplicateCheck(event, existing)) {
       continue;
     }
