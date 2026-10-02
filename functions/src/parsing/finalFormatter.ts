@@ -1122,12 +1122,16 @@ export function rehydrateFormattedEventMetadata(
   const sourceStartEvidence = String(originalItem?.timeFlags?.start?.evidence || '');
   const sourcePattern = String(originalItem?.recurringPattern || 'none').trim().toLowerCase();
   const hasPrintedMonthDay = /\b(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\s+\d{1,2}\b|\b\d{1,2}\s+(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\b|\b20\d{2}-\d{2}-\d{2}\b/i.test(sourceStartEvidence);
+  const sourceWeekday = String((originalItem as Record<string, unknown> | undefined)?.day || '').trim().toLowerCase();
+  const dateWeekday = parseIsoDate(sourceDate)?.getUTCDay();
+  const hasMatchingSourceWeekday = dateWeekday !== undefined &&
+    ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'][dateWeekday] === sourceWeekday;
   const isPrintedOneOffSlot =
     (sourceType === 'calendar' || sourceType === 'schedule') &&
     Boolean(parseIsoDate(sourceDate)) &&
     sourcePattern === 'none' &&
     originalItem?.timeFlags?.start?.source === 'explicit' &&
-    hasPrintedMonthDay &&
+    (hasPrintedMonthDay || hasMatchingSourceWeekday) &&
     !/\b(?:every|weekly|each\s+(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday))\b/i.test(
       `${originalItem?.name || ''} ${originalItem?.description || ''} ${sourceStartEvidence}`
     );

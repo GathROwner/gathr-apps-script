@@ -1,0 +1,80 @@
+{
+  "snapshotId": "1OmFzDG0kWiY-k8C-8G6-oGlTBxE3B0cq_187_1790949401366",
+  "rowVenue": {
+    "id": "slug_centralcoastalpei",
+    "name": "Central Coastal Drive PEI | Cavendish PE"
+  },
+  "payloads": [
+    {
+      "name": "Sharing the Field (Festival – Sunday main festival)",
+      "error": "No venue resolved for dry write preview: Sharing the Field (Festival – Sunday main festival)"
+    },
+    {
+      "name": "Sunday Performer Lineup: Nico Romero Dada",
+      "date": "2026-10-04",
+      "time": "14:00",
+      "venueId": "slug_centralcoastalpei",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790949225751-jqsv8p.webp",
+      "recurringPattern": "none",
+      "error": ""
+    },
+    {
+      "name": "Sunday Performer Lineup: Filipino Dance Masters",
+      "date": "2026-10-04",
+      "time": "15:15",
+      "venueId": "slug_centralcoastalpei",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790949225751-jqsv8p.webp",
+      "recurringPattern": "none",
+      "error": ""
+    },
+    {
+      "name": "Sunday Performer Lineup: Wolf Castle",
+      "date": "2026-10-04",
+      "time": "16:00",
+      "venueId": "slug_centralcoastalpei",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790949225751-jqsv8p.webp",
+      "recurringPattern": "none",
+      "error": ""
+    },
+    {
+      "name": "Sunday Performer Lineup: Sweet Gale",
+      "date": "2026-10-04",
+      "time": "16:40",
+      "venueId": "slug_centralcoastalpei",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790949225751-jqsv8p.webp",
+      "recurringPattern": "none",
+      "error": ""
+    },
+    {
+      "name": "Sunday Performer Lineup: Fiver",
+      "date": "2026-10-04",
+      "time": "17:25",
+      "venueId": "slug_centralcoastalpei",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790949225751-jqsv8p.webp",
+      "recurringPattern": "none",
+      "error": ""
+    },
+    {
+      "name": "Friday Performance: Ocean Kin",
+      "date": "2026-10-02",
+      "time": "20:00",
+      "venueId": "slug_theguildpei",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790949225991-wnu7zp.webp",
+      "recurringPattern": "none",
+      "error": ""
+    },
+    {
+      "name": "Saturday Performance: Ocean Kin",
+      "date": "2026-10-03",
+      "time": "20:00",
+      "venueId": "slug_theguildpei",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790949225991-wnu7zp.webp",
+      "recurringPattern": "weekly_saturday",
+      "error": ""
+    },
+    {
+      "name": "Saturday Performance: A Gorgon's Tale (by North Barn Theatre)",
+      "error": "No venue resolved for dry write preview: Saturday Performance: A Gorgon's Tale (by North Barn Theatre)"
+    }
+  ]
+}

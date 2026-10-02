@@ -872,7 +872,14 @@ function findBestCandidateForItem(
   let bestScore = 0;
 
   for (const candidate of candidates) {
+    // A multi-day page often contains the first performance's clock time.
+    // That time cannot be assigned to each day of the surrounding festival.
+    if (itemDate && candidate.dateRangeStart && candidate.dateRangeEnd &&
+        candidate.dateRangeStart !== candidate.dateRangeEnd && !candidate.date) {
+      continue;
+    }
     let score = 0;
+    const titleOverlap = scoreTokenOverlap(itemTokens, tokenize(candidate.title || ''));
     if (itemDate && candidate.date && itemDate === candidate.date) {
       score += 6;
     } else if (
@@ -882,11 +889,14 @@ function findBestCandidateForItem(
       itemDate >= candidate.dateRangeStart &&
       itemDate <= candidate.dateRangeEnd
     ) {
+      // A date-range page can describe several different performances. Its
+      // first clock time must not become the time of every untimed parent day.
+      if (titleOverlap === 0) continue;
       score += 4;
     }
 
     if (candidate.startTime) score += 1;
-    score += scoreTokenOverlap(itemTokens, tokenize(candidate.title || ''));
+    score += titleOverlap;
 
     if (score > bestScore) {
       best = candidate;

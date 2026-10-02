@@ -59,3 +59,35 @@ test('explicit weekly schedule remains recurring', () => {
   assert.equal(restored.isRecurring, 'Yes');
   assert.equal(restored.recurringPattern, 'weekly_wednesday');
 });
+
+test('dated gallery performance keeps its source date when clock evidence omits month and day', () => {
+  const source = {
+    name: 'A Gorgon’s Tale',
+    description: 'Performance at River Clyde Pageant Site.',
+    date: '2026-10-03',
+    day: 'Saturday',
+    startTime: '16:00',
+    endTime: '17:00',
+    recurringPattern: 'none',
+    _sourceType: 'schedule',
+    timeFlags: {
+      start: { source: 'explicit', evidence: '4:00-5:00pm' },
+      end: { source: 'explicit', toClose: false, evidence: '4:00-5:00pm' },
+    },
+  } as unknown as ExtractedItem;
+  const model = {
+    name: source.name,
+    startDate: '2026-10-04',
+    endDate: '2026-10-04',
+    startTime: '16:00',
+    endTime: '17:00',
+    isRecurring: 'Yes',
+    recurringPattern: 'weekly_sunday',
+  } as FormattedEvent;
+
+  const restored = rehydrateFormattedEventMetadata(model, source);
+  assert.equal(restored.startDate, '2026-10-03');
+  assert.equal(restored.endDate, '2026-10-03');
+  assert.equal(restored.recurringPattern, 'none');
+  assert.equal(restored.isRecurring, 'No');
+});

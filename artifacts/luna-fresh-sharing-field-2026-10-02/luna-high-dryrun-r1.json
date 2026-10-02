@@ -1,0 +1,735 @@
+{
+  "snapshotId": "1OmFzDG0kWiY-k8C-8G6-oGlTBxE3B0cq_187_1790949401366",
+  "postId": "1718102183657934",
+  "sourceImageCount": 5,
+  "ocrUploads": 5,
+  "displayUploads": 5,
+  "method": "exact saved caption and ordered original gallery, local Cloud Run Sharp transform and upload mock, Firestore read only",
+  "usage": [
+    {
+      "stage": "stage1",
+      "component": "contentValidator",
+      "endpoint": "responses",
+      "model": "gpt-6-luna",
+      "imageCount": 5,
+      "durationMs": 10830,
+      "inputTokens": 16000,
+      "outputTokens": 1226,
+      "totalTokens": 17226,
+      "cachedInputTokens": 0
+    },
+    {
+      "stage": "stage2",
+      "component": "contentClassifier",
+      "endpoint": "responses",
+      "model": "gpt-6-luna",
+      "imageCount": 5,
+      "durationMs": 5923,
+      "inputTokens": 15351,
+      "outputTokens": 197,
+      "totalTokens": 15548,
+      "cachedInputTokens": 0
+    },
+    {
+      "stage": "stage3",
+      "component": "eventExtractor",
+      "endpoint": "responses",
+      "model": "gpt-6-luna",
+      "imageCount": 5,
+      "durationMs": 41021,
+      "inputTokens": 20305,
+      "outputTokens": 4659,
+      "totalTokens": 24964,
+      "cachedInputTokens": 0
+    },
+    {
+      "stage": "stage4",
+      "component": "secondaryValidator",
+      "endpoint": "responses",
+      "model": "gpt-6-luna",
+      "durationMs": 22938,
+      "inputTokens": 3485,
+      "outputTokens": 2711,
+      "totalTokens": 6196,
+      "cachedInputTokens": 0
+    },
+    {
+      "stage": "stage5",
+      "component": "finalFormatter",
+      "endpoint": "responses",
+      "model": "gpt-6-luna",
+      "durationMs": 13958,
+      "inputTokens": 3629,
+      "outputTokens": 1635,
+      "totalTokens": 5264,
+      "cachedInputTokens": 0
+    }
+  ],
+  "skips": [],
+  "error": "",
+  "frameManifest": [
+    {
+      "frameIndex": 0,
+      "sourceGalleryIndex": 0,
+      "kind": "whole"
+    },
+    {
+      "frameIndex": 1,
+      "sourceGalleryIndex": 1,
+      "kind": "whole"
+    },
+    {
+      "frameIndex": 2,
+      "sourceGalleryIndex": 2,
+      "kind": "whole"
+    },
+    {
+      "frameIndex": 3,
+      "sourceGalleryIndex": 3,
+      "kind": "whole"
+    },
+    {
+      "frameIndex": 4,
+      "sourceGalleryIndex": 4,
+      "kind": "whole"
+    }
+  ],
+  "stage3Items": [
+    {
+      "name": "Sharing the Field",
+      "day": "Friday",
+      "date": "2026-10-02",
+      "startTime": "20:00",
+      "endTime": "",
+      "venue": "New Glasgow, PEI",
+      "price": "",
+      "description": "First day of the Oct 2–4 festival weekend. The separately listed Ocean Kin performance is at The Guild at 8:00 PM.",
+      "extractionReason": "The poster identifies Sharing the Field as a multi-day festival running Oct 2–4; the festival parent is represented once for this date. The Guild performance is listed separately because it has a venue outside the festival host.",
+      "relevantImageIndex": 0,
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "8:00 PM"
+        },
+        "end": {
+          "source": "none",
+          "toClose": false,
+          "evidence": ""
+        }
+      },
+      "type": "event",
+      "_sourceType": "schedule",
+      "_pipelineIndex": 1,
+      "_pipelineTotalStage3": 6
+    },
+    {
+      "name": "Ocean Kin",
+      "day": "Friday",
+      "date": "2026-10-02",
+      "startTime": "20:00",
+      "endTime": "",
+      "venue": "The Guild",
+      "price": "",
+      "description": "Performance listed as part of the Sharing the Field weekend; the schedule also lists it on Saturday, Oct 3.",
+      "extractionReason": "The schedule gives Ocean Kin a specific start time and names The Guild, a venue outside the festival host, so it is extracted as a separate event.",
+      "relevantImageIndex": 2,
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "8:00pm"
+        },
+        "end": {
+          "source": "none",
+          "toClose": false,
+          "evidence": ""
+        }
+      },
+      "type": "event",
+      "_sourceType": "schedule",
+      "_pipelineIndex": 2,
+      "_pipelineTotalStage3": 6
+    },
+    {
+      "name": "Sharing the Field",
+      "day": "Saturday",
+      "date": "2026-10-03",
+      "startTime": "16:00",
+      "endTime": "17:00",
+      "venue": "New Glasgow, PEI",
+      "price": "",
+      "description": "Second day of the Oct 2–4 festival weekend. Separately listed performances are Ocean Kin at The Guild at 8:00 PM and A Gorgon’s Tale by North Barn Theatre at River Clyde Pageant Site from 4:00–5:00 PM.",
+      "extractionReason": "The poster identifies Sharing the Field as a multi-day festival running Oct 2–4; the festival parent is represented once for this date. The performances at separately named venues are also extracted as individual events.",
+      "relevantImageIndex": 0,
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "4:00–5:00 PM"
+        },
+        "end": {
+          "source": "explicit",
+          "toClose": false,
+          "evidence": "4:00–5:00 PM"
+        }
+      },
+      "type": "event",
+      "_sourceType": "schedule",
+      "_pipelineIndex": 3,
+      "_pipelineTotalStage3": 6
+    },
+    {
+      "name": "A Gorgon’s Tale by North Barn Theatre",
+      "day": "Saturday",
+      "date": "2026-10-03",
+      "startTime": "16:00",
+      "endTime": "17:00",
+      "venue": "River Clyde Pageant Site",
+      "price": "",
+      "description": "Performance listed as part of the Sharing the Field weekend.",
+      "extractionReason": "The schedule gives this performance its own time range and names River Clyde Pageant Site, a venue outside the Sunday festival host.",
+      "relevantImageIndex": 2,
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "4:00-5:00pm"
+        },
+        "end": {
+          "source": "explicit",
+          "toClose": false,
+          "evidence": "4:00-5:00pm"
+        }
+      },
+      "type": "event",
+      "_sourceType": "schedule",
+      "_pipelineIndex": 4,
+      "_pipelineTotalStage3": 6
+    },
+    {
+      "name": "Ocean Kin",
+      "day": "Saturday",
+      "date": "2026-10-03",
+      "startTime": "20:00",
+      "endTime": "",
+      "venue": "The Guild",
+      "price": "",
+      "description": "Performance listed as part of the Sharing the Field weekend; the schedule also lists it on Friday, Oct 2.",
+      "extractionReason": "The schedule gives Ocean Kin a specific start time and names The Guild, a venue outside the festival host, so it is extracted as a separate event.",
+      "relevantImageIndex": 2,
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "8:00pm"
+        },
+        "end": {
+          "source": "none",
+          "toClose": false,
+          "evidence": ""
+        }
+      },
+      "type": "event",
+      "_sourceType": "schedule",
+      "_pipelineIndex": 5,
+      "_pipelineTotalStage3": 6
+    },
+    {
+      "name": "Sharing the Field",
+      "day": "Sunday",
+      "date": "2026-10-04",
+      "startTime": "14:00",
+      "endTime": "18:00",
+      "venue": "The Mill Restaurant",
+      "price": "",
+      "description": "Main festival, 2:00–6:00 PM. Sunday performer timetable: 2:00–3:00 Nico Romero Dada; 3:15–4:00 Filipino Dance Masters; 4:00–4:35 Wolf Castle; 4:40–5:20 Sweet Gale; 5:25–6:00 Fiver. Sunday vendors and activities include Hot Pepper Challenge with the Burly Farmer, Natural Weaving with Rilla Marshall, Kids Craft Table with Becca the Witch, Stiltwalking with Laura Astwood, Fish Smoking with Chad Poirier, Bouquet Bar with Mossbank Flower Farm, Evelyn Bradley: Contemporary Food Practices of the African and Black Diaspora on PEI, and a by-donation farm stand. The post says most Sunday activities are free and a free shuttle is available from Montague, Stratford, and Charlottetown.",
+      "extractionReason": "The post gives the Sunday festival’s date, host venue, and hours. Under the festival parent rule, Sunday’s performers, vendors, and activities are included in the parent event description rather than extracted as separate on-site events.",
+      "relevantImageIndex": 1,
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "from 2–6 PM"
+        },
+        "end": {
+          "source": "explicit",
+          "toClose": false,
+          "evidence": "from 2–6 PM"
+        }
+      },
+      "type": "event",
+      "_sourceType": "schedule",
+      "_pipelineIndex": 6,
+      "_pipelineTotalStage3": 6
+    }
+  ],
+  "events": [
+    {
+      "isEvent": "Yes",
+      "isFoodSpecial": "No",
+      "category": "Live Music",
+      "name": "Ocean Kin",
+      "description": "Performance listed as part of the Sharing the Field weekend; the schedule also lists it on Saturday, Oct 3.",
+      "establishment": "The Guild",
+      "address": "",
+      "startDate": "2026-10-03",
+      "endDate": "2026-10-03",
+      "startTime": "20:00",
+      "endTime": "22:00",
+      "ticketPrice": "",
+      "ticketLink": "",
+      "relevantImageIndex": 2,
+      "venue": "The Guild",
+      "additionalLocation": "The Guild",
+      "isRecurring": "Yes",
+      "recurringPattern": "weekly_saturday",
+      "_categoryOriginal": "Live Music",
+      "_categoryHintOriginal": "",
+      "_categorySource": "model_final",
+      "_categoryNormalizationReason": "kept allowed model category \"Live Music\"",
+      "_sourceType": "schedule",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "8:00pm"
+        },
+        "end": {
+          "source": "none",
+          "toClose": false,
+          "evidence": ""
+        }
+      },
+      "timeResolution": {
+        "hoursUsed": false,
+        "reason": "no_place_match",
+        "endFromHours": "duration_default"
+      },
+      "icon": "",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-sharing-field-0.webp",
+      "cleanedFacebookUrl": "https://www.facebook.com/CentralCoastalPEI",
+      "sharedPostThumbnail": "",
+      "id": "1718102183657934",
+      "latitude": "",
+      "longitude": "",
+      "city": "",
+      "streetAddress": "",
+      "organizedBy": "",
+      "usersResponded": "",
+      "utcStartDate": "",
+      "ticketsBuyUrl": "",
+      "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-sharing-field-2.webp",
+      "mediaUrls": [
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-sharing-field-0.webp",
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-sharing-field-1.webp",
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-sharing-field-2.webp",
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-sharing-field-3.webp",
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-sharing-field-4.webp"
+      ],
+      "imageProvenance": {
+        "version": 1,
+        "primarySource": "post_media",
+        "primaryField": "relevantImageUrl",
+        "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-sharing-field-2.webp",
+        "isFallback": false,
+        "sourceFields": [
+          "relevantImageUrl",
+          "mediaUrls"
+        ],
+        "media": [
+          {
+            "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-sharing-field-2.webp",
+            "source": "post_media",
+            "field": "relevantImageUrl",
+            "isPrimary": true,
+            "isFallback": false
+          },
+          {
+            "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-sharing-field-0.webp",
+            "source": "post_media",
+            "field": "mediaUrls",
+            "isPrimary": false,
+            "isFallback": false
+          },
+          {
+            "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-sharing-field-1.webp",
+            "source": "post_media",
+            "field": "mediaUrls",
+            "isPrimary": false,
+            "isFallback": false
+          },
+          {
+            "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-sharing-field-2.webp",
+            "source": "post_media",
+            "field": "mediaUrls",
+            "isPrimary": true,
+            "isFallback": false
+          },
+          {
+            "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-sharing-field-3.webp",
+            "source": "post_media",
+            "field": "mediaUrls",
+            "isPrimary": false,
+            "isFallback": false
+          },
+          {
+            "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-sharing-field-4.webp",
+            "source": "post_media",
+            "field": "mediaUrls",
+            "isPrimary": false,
+            "isFallback": false
+          }
+        ],
+        "selectionReason": "model_selected_analysis_frame_source",
+        "updatedBy": "parser"
+      }
+    },
+    {
+      "isEvent": "Yes",
+      "isFoodSpecial": "No",
+      "category": "Live Music",
+      "name": "A Gorgon’s Tale by North Barn Theatre",
+      "description": "Performance listed as part of the Sharing the Field weekend.",
+      "establishment": "River Clyde Pageant Site",
+      "address": "",
+      "startDate": "2026-10-04",
+      "endDate": "2026-10-04",
+      "startTime": "16:00",
+      "endTime": "17:00",
+      "ticketPrice": "",
+      "ticketLink": "",
+      "relevantImageIndex": 2,
+      "venue": "River Clyde Pageant Site",
+      "additionalLocation": "River Clyde Pageant Site",
+      "isRecurring": "Yes",
+      "recurringPattern": "weekly_sunday",
+      "_categoryOriginal": "Live Music",
+      "_categoryHintOriginal": "",
+      "_categorySource": "model_final",
+      "_categoryNormalizationReason": "kept allowed model category \"Live Music\"",
+      "_sourceType": "schedule",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "4:00-5:00pm"
+        },
+        "end": {
+          "source": "explicit",
+          "toClose": false,
+          "evidence": "4:00-5:00pm"
+        }
+      },
+      "timeResolution": {
+        "hoursUsed": false
+      },
+      "icon": "",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-sharing-field-0.webp",
+      "cleanedFacebookUrl": "https://www.facebook.com/CentralCoastalPEI",
+      "sharedPostThumbnail": "",
+      "id": "1718102183657934",
+      "latitude": "",
+      "longitude": "",
+      "city": "",
+      "streetAddress": "",
+      "organizedBy": "",
+      "usersResponded": "",
+      "utcStartDate": "",
+      "ticketsBuyUrl": "",
+      "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-sharing-field-2.webp",
+      "mediaUrls": [
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-sharing-field-0.webp",
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-sharing-field-1.webp",
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-sharing-field-2.webp",
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-sharing-field-3.webp",
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-sharing-field-4.webp"
+      ],
+      "imageProvenance": {
+        "version": 1,
+        "primarySource": "post_media",
+        "primaryField": "relevantImageUrl",
+        "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-sharing-field-2.webp",
+        "isFallback": false,
+        "sourceFields": [
+          "relevantImageUrl",
+          "mediaUrls"
+        ],
+        "media": [
+          {
+            "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-sharing-field-2.webp",
+            "source": "post_media",
+            "field": "relevantImageUrl",
+            "isPrimary": true,
+            "isFallback": false
+          },
+          {
+            "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-sharing-field-0.webp",
+            "source": "post_media",
+            "field": "mediaUrls",
+            "isPrimary": false,
+            "isFallback": false
+          },
+          {
+            "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-sharing-field-1.webp",
+            "source": "post_media",
+            "field": "mediaUrls",
+            "isPrimary": false,
+            "isFallback": false
+          },
+          {
+            "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-sharing-field-2.webp",
+            "source": "post_media",
+            "field": "mediaUrls",
+            "isPrimary": true,
+            "isFallback": false
+          },
+          {
+            "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-sharing-field-3.webp",
+            "source": "post_media",
+            "field": "mediaUrls",
+            "isPrimary": false,
+            "isFallback": false
+          },
+          {
+            "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-sharing-field-4.webp",
+            "source": "post_media",
+            "field": "mediaUrls",
+            "isPrimary": false,
+            "isFallback": false
+          }
+        ],
+        "selectionReason": "model_selected_analysis_frame_source",
+        "updatedBy": "parser"
+      }
+    },
+    {
+      "isEvent": "Yes",
+      "isFoodSpecial": "No",
+      "category": "Live Music",
+      "name": "Ocean Kin",
+      "description": "Performance listed as part of the Sharing the Field weekend; the schedule also lists it on Friday, Oct 2.",
+      "establishment": "The Guild",
+      "address": "",
+      "startDate": "2026-10-09",
+      "endDate": "2026-10-09",
+      "startTime": "20:00",
+      "endTime": "22:00",
+      "ticketPrice": "",
+      "ticketLink": "",
+      "relevantImageIndex": 2,
+      "venue": "The Guild",
+      "additionalLocation": "The Guild",
+      "isRecurring": "Yes",
+      "recurringPattern": "weekly_friday",
+      "_categoryOriginal": "Live Music",
+      "_categoryHintOriginal": "",
+      "_categorySource": "model_final",
+      "_categoryNormalizationReason": "kept allowed model category \"Live Music\"",
+      "_sourceType": "schedule",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "8:00pm"
+        },
+        "end": {
+          "source": "none",
+          "toClose": false,
+          "evidence": ""
+        }
+      },
+      "timeResolution": {
+        "hoursUsed": false,
+        "reason": "no_place_match",
+        "endFromHours": "duration_default"
+      },
+      "icon": "",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-sharing-field-0.webp",
+      "cleanedFacebookUrl": "https://www.facebook.com/CentralCoastalPEI",
+      "sharedPostThumbnail": "",
+      "id": "1718102183657934",
+      "latitude": "",
+      "longitude": "",
+      "city": "",
+      "streetAddress": "",
+      "organizedBy": "",
+      "usersResponded": "",
+      "utcStartDate": "",
+      "ticketsBuyUrl": "",
+      "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-sharing-field-2.webp",
+      "mediaUrls": [
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-sharing-field-0.webp",
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-sharing-field-1.webp",
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-sharing-field-2.webp",
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-sharing-field-3.webp",
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-sharing-field-4.webp"
+      ],
+      "imageProvenance": {
+        "version": 1,
+        "primarySource": "post_media",
+        "primaryField": "relevantImageUrl",
+        "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-sharing-field-2.webp",
+        "isFallback": false,
+        "sourceFields": [
+          "relevantImageUrl",
+          "mediaUrls"
+        ],
+        "media": [
+          {
+            "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-sharing-field-2.webp",
+            "source": "post_media",
+            "field": "relevantImageUrl",
+            "isPrimary": true,
+            "isFallback": false
+          },
+          {
+            "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-sharing-field-0.webp",
+            "source": "post_media",
+            "field": "mediaUrls",
+            "isPrimary": false,
+            "isFallback": false
+          },
+          {
+            "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-sharing-field-1.webp",
+            "source": "post_media",
+            "field": "mediaUrls",
+            "isPrimary": false,
+            "isFallback": false
+          },
+          {
+            "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-sharing-field-2.webp",
+            "source": "post_media",
+            "field": "mediaUrls",
+            "isPrimary": true,
+            "isFallback": false
+          },
+          {
+            "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-sharing-field-3.webp",
+            "source": "post_media",
+            "field": "mediaUrls",
+            "isPrimary": false,
+            "isFallback": false
+          },
+          {
+            "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-sharing-field-4.webp",
+            "source": "post_media",
+            "field": "mediaUrls",
+            "isPrimary": false,
+            "isFallback": false
+          }
+        ],
+        "selectionReason": "model_selected_analysis_frame_source",
+        "updatedBy": "parser"
+      }
+    },
+    {
+      "isEvent": "Yes",
+      "isFoodSpecial": "No",
+      "category": "Live Music",
+      "name": "Sharing the Field",
+      "description": "Main festival, 2:00–6:00 PM. Sunday performer timetable: 2:00–3:00 Nico Romero Dada; 3:15–4:00 Filipino Dance Masters; 4:00–4:35 Wolf Castle; 4:40–5:20 Sweet Gale; 5:25–6:00 Fiver. Sunday vendors and activities include Hot Pepper Challenge with the Burly Farmer, Natural Weaving with Rilla Marshall, Kids Craft Table with Becca the Witch, Stiltwalking with Laura Astwood, Fish Smoking with Chad Poirier, Bouquet Bar with Mossbank Flower Farm, Evelyn Bradley: Contemporary Food Practices of the African and Black Diaspora on PEI, and a by-donation farm stand. The post says most Sunday activities are free and a free shuttle is available from Montague, Stratford, and Charlottetown.",
+      "establishment": "The Mill Restaurant",
+      "address": "",
+      "startDate": "2026-10-04",
+      "endDate": "2026-10-04",
+      "startTime": "14:00",
+      "endTime": "18:00",
+      "ticketPrice": "",
+      "ticketLink": "",
+      "relevantImageIndex": 1,
+      "venue": "The Mill Restaurant",
+      "additionalLocation": "The Mill Restaurant",
+      "isRecurring": "No",
+      "recurringPattern": "none",
+      "_categoryOriginal": "Live Music",
+      "_categoryHintOriginal": "",
+      "_categorySource": "model_final",
+      "_categoryNormalizationReason": "kept allowed model category \"Live Music\"",
+      "_sourceType": "schedule",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "from 2–6 PM"
+        },
+        "end": {
+          "source": "explicit",
+          "toClose": false,
+          "evidence": "from 2–6 PM"
+        }
+      },
+      "timeResolution": {
+        "hoursUsed": false
+      },
+      "icon": "",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-sharing-field-0.webp",
+      "cleanedFacebookUrl": "https://www.facebook.com/CentralCoastalPEI",
+      "sharedPostThumbnail": "",
+      "id": "1718102183657934",
+      "latitude": "",
+      "longitude": "",
+      "city": "",
+      "streetAddress": "",
+      "organizedBy": "",
+      "usersResponded": "",
+      "utcStartDate": "",
+      "ticketsBuyUrl": "",
+      "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-sharing-field-1.webp",
+      "mediaUrls": [
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-sharing-field-0.webp",
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-sharing-field-1.webp",
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-sharing-field-2.webp",
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-sharing-field-3.webp",
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-sharing-field-4.webp"
+      ],
+      "imageProvenance": {
+        "version": 1,
+        "primarySource": "post_media",
+        "primaryField": "relevantImageUrl",
+        "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-sharing-field-1.webp",
+        "isFallback": false,
+        "sourceFields": [
+          "relevantImageUrl",
+          "mediaUrls"
+        ],
+        "media": [
+          {
+            "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-sharing-field-1.webp",
+            "source": "post_media",
+            "field": "relevantImageUrl",
+            "isPrimary": true,
+            "isFallback": false
+          },
+          {
+            "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-sharing-field-0.webp",
+            "source": "post_media",
+            "field": "mediaUrls",
+            "isPrimary": false,
+            "isFallback": false
+          },
+          {
+            "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-sharing-field-1.webp",
+            "source": "post_media",
+            "field": "mediaUrls",
+            "isPrimary": true,
+            "isFallback": false
+          },
+          {
+            "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-sharing-field-2.webp",
+            "source": "post_media",
+            "field": "mediaUrls",
+            "isPrimary": false,
+            "isFallback": false
+          },
+          {
+            "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-sharing-field-3.webp",
+            "source": "post_media",
+            "field": "mediaUrls",
+            "isPrimary": false,
+            "isFallback": false
+          },
+          {
+            "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-sharing-field-4.webp",
+            "source": "post_media",
+            "field": "mediaUrls",
+            "isPrimary": false,
+            "isFallback": false
+          }
+        ],
+        "selectionReason": "model_selected_analysis_frame_source",
+        "updatedBy": "parser"
+      }
+    }
+  ]
+}

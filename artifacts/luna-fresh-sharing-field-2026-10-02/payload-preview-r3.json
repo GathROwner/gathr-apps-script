@@ -1,0 +1,35 @@
+{
+  "snapshotId": "1OmFzDG0kWiY-k8C-8G6-oGlTBxE3B0cq_187_1790949401366",
+  "rowVenue": {
+    "id": "slug_centralcoastalpei",
+    "name": "Central Coastal Drive PEI | Cavendish PE"
+  },
+  "payloads": [
+    {
+      "name": "Sharing the Field",
+      "error": "No venue resolved for dry write preview: Sharing the Field"
+    },
+    {
+      "name": "Ocean Kin",
+      "date": "2026-10-02",
+      "time": "20:00",
+      "venueId": "slug_theguildpei",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-sharing-field-2.webp",
+      "recurringPattern": "none",
+      "error": ""
+    },
+    {
+      "name": "Ocean Kin",
+      "date": "2026-10-03",
+      "time": "20:00",
+      "venueId": "slug_theguildpei",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-sharing-field-2.webp",
+      "recurringPattern": "none",
+      "error": ""
+    },
+    {
+      "name": "A Gorgon’s Tale",
+      "error": "No venue resolved for dry write preview: A Gorgon’s Tale"
+    }
+  ]
+}

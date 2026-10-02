@@ -58,6 +58,30 @@ function jsonResponse(value: unknown): Response {
   });
 }
 
+test('a festival date-range page does not lend a child performance time to untimed parent days', async () => {
+  const listing = 'https://riverclydearts.com/field';
+  const detail = 'https://riverclydearts.com/field/tale';
+  const restoreFetch = installFetchMap({
+    [listing]: htmlResponse(`<html><body><a href="${detail}">Sharing the Field details</a></body></html>`),
+    [detail]: htmlResponse('<html><head><meta property="og:title" content="Sharing the Field"></head><body><h1>Sharing the Field</h1><p>October 2 to October 4, 2026. A Gorgon’s Tale is Saturday, October 3, 4:00pm–5:00pm.</p></body></html>'),
+  });
+
+  try {
+    const input = buildEventItem({ name: 'Sharing the Field', date: '2026-10-02',
+      startTime: '', _sourceType: 'schedule' });
+    const result = await enrichEventsFromVenueWebsite(
+      [input], `See more info at ${listing}`, '', '2026-10-01T15:00:00Z',
+      { name: 'River Clyde Arts', website: listing } as EstablishmentInfo,
+      DEFAULT_PARSING_CONFIG
+    );
+    assert.ok(result.summary.candidateItemsFound > 0);
+    assert.equal(result.items[0].startTime, '');
+    assert.equal(result.summary.appliedCount, 0);
+  } finally {
+    restoreFetch();
+  }
+});
+
 test('Trailside-style website follow-up recovers explicit start times from locarius-backed site data', async () => {
   const restoreFetch = installFetchMap({
     'https://trailside.ca/': htmlResponse(
