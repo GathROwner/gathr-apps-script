@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { buildGuardedCalendarInventoryAdditions,
+import { buildGuardedCalendarInventoryAdditions, hasCompleteCalendarInventoryReads,
+  isCalendarInventoryEventObject,
   reconcileCalendarInventory } from './calendarInventoryReconciliation.js';
 import type { CalendarItem } from './types.js';
 
@@ -76,6 +77,53 @@ test('invalid date and image provenance do not become additions', () => {
   ]);
   assert.equal(result.additions.length, 0);
   assert.deepEqual(result.conflicts.map(entry => entry.reason), ['invalid_fields', 'invalid_fields']);
+});
+
+test('a source listing with no printed start time stays visible but cannot be added', () => {
+  const source = { ...listing('The HeartFakers', '2026-05-30', ''),
+    excerpt: 'The HeartFakers (Tom Petty Tribute)' };
+  const result = reconcileCalendarInventory([], [source]);
+  assert.equal(result.conflicts[0]?.reason, 'source_start_time_unprinted');
+  assert.deepEqual(result.additions, []);
+  assert.equal(result.conflicts[0]?.listing.excerpt, source.excerpt);
+  const decision = buildGuardedCalendarInventoryAdditions([], result, 0);
+  assert.equal(decision.reason, 'disputed_reading');
+});
+
+test('a nonempty malformed source time is distinct from an unprinted time', () => {
+  const result = reconcileCalendarInventory([], [
+    listing('Shawn Hogan', '2026-06-05', '6:45'),
+    listing('Open Mic', '2026-06-08', ''),
+  ]);
+  assert.deepEqual(result.conflicts.map(entry => entry.reason),
+    ['invalid_fields', 'source_start_time_unprinted']);
+});
+
+test('one empty or malformed inventory frame blocks additions from a different frame', () => {
+  const requested = [0, 1];
+  for (const status of ['empty_inventory', 'invalid_schema',
+    'incomplete_response', 'request_error']) {
+    assert.equal(hasCompleteCalendarInventoryReads(requested, [
+      { frameIndex: 0, status: 'completed' }, { frameIndex: 1, status },
+    ]), false, status);
+  }
+  assert.equal(hasCompleteCalendarInventoryReads(requested, [
+    { frameIndex: 0, status: 'completed' },
+  ]), false);
+  assert.equal(hasCompleteCalendarInventoryReads(requested, [
+    { frameIndex: 0, status: 'completed' },
+    { frameIndex: 1, status: 'completed' },
+  ]), true);
+});
+
+test('malformed inventory array members cannot be counted as valid listings', () => {
+  for (const value of [null, [], {}, { title: '' }, { title: 17 },
+    { title: false }, { title: {} }, { title: ['Wing Night'] },
+    { title: 'Wing Night', excerpt: {} },
+    { title: 'Wing Night', performers: [17] }]) {
+    assert.equal(isCalendarInventoryEventObject(value), false);
+  }
+  assert.equal(isCalendarInventoryEventObject({ title: 'Wing Night', start_time: '' }), true);
 });
 
 test('fully matched Cornfest inventory converts two source-backed omissions without inferred end time', () => {

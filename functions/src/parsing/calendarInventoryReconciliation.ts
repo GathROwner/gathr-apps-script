@@ -15,7 +15,8 @@ export interface CalendarInventoryListing {
 
 export interface CalendarInventoryConflict {
   listing: CalendarInventoryListing;
-  reason: 'same_slot_different_title' | 'duplicate_across_images' | 'invalid_fields';
+  reason: 'same_slot_different_title' | 'duplicate_across_images' |
+    'source_start_time_unprinted' | 'invalid_fields';
 }
 
 export interface CalendarInventoryReconciliation {
@@ -29,6 +30,34 @@ export interface CalendarInventoryAdditionDecision {
   reason: 'eligible' | 'incomplete_primary_coverage' | 'disputed_reading' |
     'unresolved_date' | 'candidate_count_out_of_bounds' | 'weak_source_evidence';
   items: CalendarItem[];
+}
+
+/** Every requested frame must return a nonempty, structurally valid inventory. */
+export function hasCompleteCalendarInventoryReads(
+  requestedFrameIndices: readonly number[],
+  outcomes: readonly { frameIndex: number; status: string }[]
+): boolean {
+  if (requestedFrameIndices.length === 0 ||
+      outcomes.length !== requestedFrameIndices.length) return false;
+  return requestedFrameIndices.every(frameIndex =>
+    outcomes.filter(outcome => outcome.frameIndex === frameIndex &&
+      outcome.status === 'completed').length === 1);
+}
+
+/** A malformed member cannot silently disappear from an otherwise complete read. */
+export function isCalendarInventoryEventObject(
+  value: unknown
+): value is Record<string, unknown> & { title: string } {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+  const event = value as Record<string, unknown>;
+  if (typeof event.title !== 'string' || !event.title.trim()) return false;
+  for (const key of ['date_heading', 'date', 'start_time', 'end_time',
+    'venue', 'excerpt']) {
+    if (event[key] != null && typeof event[key] !== 'string') return false;
+  }
+  return event.performers == null ||
+    (Array.isArray(event.performers) &&
+      event.performers.every(performer => typeof performer === 'string'));
 }
 
 export function normalizeCalendarInventoryTitle(value: string): string {
@@ -87,9 +116,17 @@ export function reconcileCalendarInventory(
   for (const listing of inventory) {
     const time = normalizeCalendarInventoryTime(listing.startTime);
     const title = normalizeCalendarInventoryTitle(listing.title);
-    if (!validDate(listing.date) || !time || !title ||
+    if (!validDate(listing.date) || !title ||
         !Number.isInteger(listing.frameIndex) || listing.frameIndex < 0 ||
         !Number.isInteger(listing.sourceGalleryIndex) || listing.sourceGalleryIndex < 0) {
+      conflicts.push({ listing, reason: 'invalid_fields' });
+      continue;
+    }
+    if (!String(listing.startTime || '').trim()) {
+      conflicts.push({ listing, reason: 'source_start_time_unprinted' });
+      continue;
+    }
+    if (!time) {
       conflicts.push({ listing, reason: 'invalid_fields' });
       continue;
     }

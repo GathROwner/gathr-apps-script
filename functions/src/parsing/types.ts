@@ -108,8 +108,25 @@ export interface CalendarInventoryAuditSnapshot {
   estimatedItemCount: number;
   primaryItemCount: number;
   readFrameIndices: number[];
+  frameReadOutcomes: Array<{ frameIndex: number;
+    status: 'completed' | 'empty_inventory' | 'empty_response' |
+      'invalid_schema' | 'incomplete_response' | 'request_error';
+    detail?: string }>;
+  malformedListings: Array<{ frameIndex: number; sourceGalleryIndex: number;
+    entryIndex: number; reason: string }>;
   rawListingCount: number;
-  unresolvedListings: Array<{ frameIndex: number; title: string; dateHeading: string; reason: string }>;
+  unresolvedListings: Array<{
+    frameIndex: number;
+    sourceGalleryIndex: number;
+    title: string;
+    dateHeading: string;
+    startTime: string;
+    endTime: string | null;
+    venue: string | null;
+    performers: string[];
+    excerpt: string;
+    reason: string;
+  }>;
   reconciliation: CalendarInventoryReconciliation;
   listings: CalendarInventoryListing[];
   additionDecision: CalendarInventoryAdditionDecision;

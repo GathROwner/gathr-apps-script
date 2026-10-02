@@ -20,6 +20,7 @@ import {
   RecurringPattern,
   TimeFlags,
   ParsingConfig,
+  CalendarInventoryAuditSnapshot,
   DEFAULT_PARSING_CONFIG,
 } from './types.js';
 import {
@@ -31,7 +32,9 @@ import {
 } from './runtimeConfig.js';
 import { logger } from '../utils/logger.js';
 import { findCalendarOcrNameDisputes } from './calendarNameDisputes.js';
-import { buildGuardedCalendarInventoryAdditions, normalizeCalendarInventoryTime,
+import { buildGuardedCalendarInventoryAdditions, hasCompleteCalendarInventoryReads,
+  isCalendarInventoryEventObject,
+  normalizeCalendarInventoryTime,
   reconcileCalendarInventory,
   type CalendarInventoryListing } from './calendarInventoryReconciliation.js';
 
@@ -1002,9 +1005,11 @@ export async function auditCalendarInventory(
   };
 
   const listings: CalendarInventoryListing[] = [];
-  const unresolvedListings: Array<{ frameIndex: number; title: string;
-    dateHeading: string; reason: string }> = [];
+  const unresolvedListings: CalendarInventoryAuditSnapshot['unresolvedListings'] = [];
   const readFrameIndices: number[] = [];
+  const frameReadOutcomes: CalendarInventoryAuditSnapshot['frameReadOutcomes'] = [];
+  const malformedListings: CalendarInventoryAuditSnapshot['malformedListings'] = [];
+  let rawListingCount = 0;
   const prompt = 'Inspect this ONE image from an event post. Inventory every independently advertised dated activity or performance visible in its main schedule, whether shown as a bullet, calendar cell, or stage column. Include every printed date heading and stage name needed to identify a listing. Make separate records for separately timed sessions in one cell. For each listing return the exact printed title, printed start and end time if any, named performers, stage or venue if printed, and one short verbatim excerpt from the same listing. Ignore sponsor ads and decorations. Do not infer an unprinted date, time, performer, or venue. Return only JSON with an events array; each event has date_heading, title, start_time, end_time, performers, venue, excerpt. Preserve the printed date heading verbatim.';
   for (const frameIndex of frameIndices) {
     try {
@@ -1014,38 +1019,70 @@ export async function auditCalendarInventory(
       }, {
         stage: 'stage3', component: 'calendarInventoryAudit',
         modelEnvVar: 'STAGE3_MODEL_OVERRIDE', imageDetailEnvVar: 'STAGE3_IMAGE_DETAIL',
-        maxOutputTokens: 8000, allowTextRetry: false,
+        maxOutputTokens: 8000, allowTextRetry: false, requireCompleteResponse: true,
       });
+      if (!reading.trim()) throw new Error('Calendar inventory response was empty');
       const parsed = parseJSONResponse(reading);
       if (!Array.isArray(parsed?.events)) {
         throw new Error('Calendar inventory response omitted events array');
       }
       const events = parsed.events;
-      readFrameIndices.push(frameIndex);
-      for (const raw of events) {
-        if (!raw || typeof raw !== 'object') continue;
+      rawListingCount += events.length;
+      let malformedInFrame = 0;
+      for (const [entryIndex, raw] of events.entries()) {
+        if (!isCalendarInventoryEventObject(raw)) {
+          malformedInFrame++;
+          malformedListings.push({ frameIndex,
+            sourceGalleryIndex: audit.frameSourceGalleryIndices[frameIndex],
+            entryIndex, reason: 'missing_event_object_or_title' });
+          continue;
+        }
         const event = raw as Record<string, unknown>;
         const title = String(event.title || '').trim();
         const dateHeading = String(event.date_heading || event.date || '').trim();
         const date = resolveHeading(dateHeading);
-        if (!date) {
-          unresolvedListings.push({ frameIndex, title, dateHeading,
-            reason: 'date_not_anchored_in_primary_items' });
-          continue;
-        }
-        listings.push({
-          date, title, startTime: String(event.start_time || '').trim(),
+        const rawListing = {
+          frameIndex,
+          sourceGalleryIndex: audit.frameSourceGalleryIndices[frameIndex],
+          title,
+          dateHeading,
+          startTime: String(event.start_time || '').trim(),
           endTime: event.end_time ? String(event.end_time) : null,
           venue: event.venue ? String(event.venue) : null,
           performers: Array.isArray(event.performers)
             ? event.performers.filter((value): value is string => typeof value === 'string') : [],
-          excerpt: String(event.excerpt || ''), frameIndex,
-          sourceGalleryIndex: audit.frameSourceGalleryIndices[frameIndex],
+          excerpt: String(event.excerpt || ''),
+        };
+        if (!date) {
+          unresolvedListings.push({ ...rawListing,
+            reason: 'date_not_anchored_in_primary_items' });
+          continue;
+        }
+        listings.push({
+          date, title, startTime: rawListing.startTime,
+          endTime: rawListing.endTime, venue: rawListing.venue,
+          performers: rawListing.performers, excerpt: rawListing.excerpt,
+          frameIndex, sourceGalleryIndex: rawListing.sourceGalleryIndex,
         });
       }
+      if (malformedInFrame > 0) {
+        frameReadOutcomes.push({ frameIndex, status: 'invalid_schema',
+          detail: `${malformedInFrame} malformed event entries` });
+      } else if (events.length === 0) {
+        frameReadOutcomes.push({ frameIndex, status: 'empty_inventory' });
+      } else {
+        frameReadOutcomes.push({ frameIndex, status: 'completed' });
+        readFrameIndices.push(frameIndex);
+      }
     } catch (error) {
+      const detail = error instanceof Error ? error.message : String(error);
+      const status = detail.startsWith('Incomplete calendar inventory response:')
+        ? 'incomplete_response' : detail.includes('response was empty')
+          ? 'empty_response' : detail.includes('omitted events array')
+          ? 'invalid_schema' : 'request_error';
+      frameReadOutcomes.push({ frameIndex, status, detail });
       logger.warn('Calendar inventory audit read failed', {
-        frameIndex, error: error instanceof Error ? error.message : String(error),
+        frameIndex, error: detail,
       });
     }
   }
@@ -1053,12 +1090,14 @@ export async function auditCalendarInventory(
   const additionDecision = buildGuardedCalendarInventoryAdditions(
     items, reconciliation, unresolvedListings.length);
   const appliedAdditions = audit.applyAdditions === true &&
-    readFrameIndices.length === frameIndices.length && additionDecision.eligible
+    hasCompleteCalendarInventoryReads(frameIndices, frameReadOutcomes) &&
+    additionDecision.eligible
     ? additionDecision.items : [];
   logger.info('Calendar inventory audit result', {
     estimatedItemCount: audit.estimatedItemCount, primaryItemCount: items.length,
     timedPrimaryCount,
-    readFrameIndices, inventoryCount: listings.length,
+    readFrameIndices, frameReadOutcomes, malformedListings,
+    inventoryCount: listings.length,
     additions: reconciliation.additions.length,
     additionDetails: reconciliation.additions.slice(0, 3).map(listing => ({
       date: listing.date, startTime: listing.startTime, title: listing.title,
@@ -1082,7 +1121,8 @@ export async function auditCalendarInventory(
     try {
       await audit.handler({
         estimatedItemCount: audit.estimatedItemCount, primaryItemCount: items.length,
-        readFrameIndices, rawListingCount: listings.length + unresolvedListings.length,
+        readFrameIndices, frameReadOutcomes, malformedListings,
+        rawListingCount,
         unresolvedListings, reconciliation, listings, additionDecision,
         appliedAdditionCount: appliedAdditions.length,
       });
@@ -4432,6 +4472,7 @@ async function callGPT(
     imageDetailEnvVar: string;
     maxOutputTokens?: number;
     allowTextRetry?: boolean;
+    requireCompleteResponse?: boolean;
   } = {
     stage: 'stage3',
     component: 'eventExtractor',
@@ -4601,6 +4642,8 @@ async function callGPT(
     });
 
     const messageContent = extractResponsesText(response);
+    const responseStatus = response.status;
+    const incompleteReason = response.incomplete_details?.reason;
     const stopReason = response.stop_reason;
     logger.info('GPT extraction response received (responses)', {
       model,
@@ -4610,11 +4653,16 @@ async function callGPT(
       totalTokens: usage.totalTokens,
       cachedInputTokens: usage.cachedInputTokens,
       stopReason,
+      responseStatus,
+      incompleteReason,
       responsePreview: messageContent?.slice(0, 500),
       responseTail: messageContent?.slice(-200),
       responseLength: messageContent?.length,
     });
 
+    if (usageMeta.requireCompleteResponse && responseStatus !== 'completed') {
+      throw new Error(`Incomplete calendar inventory response: ${responseStatus || 'unknown'} (${incompleteReason || stopReason || 'unknown reason'})`);
+    }
     if (stopReason === 'max_output_tokens') {
       logger.warn('GPT response truncated due to max_output_tokens limit', {
         model,

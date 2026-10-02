@@ -1997,6 +1997,17 @@ async function parsePostDataCore(
     if (bandRules.length > 0) {
       const expectedSlots = bandRules.flatMap(rule => rule.expectedSlots);
       const missingSlots = findMissingExpectedCalendarSlots(rawExtractedData, expectedSlots);
+      const missingNames = findMissingExpectedCalendarNames(
+        rawExtractedData, bandRules.flatMap(rule => rule.expectedNames || [])
+      );
+      if (missingNames.length > 0) {
+        await emitStageArtifacts(cfg, {
+          source: 'live', contentType: resolvedContentType,
+          stage3Items: deepCloneJson(rawExtractedData),
+        });
+        return holdCalendarBandCanary('calendar_band_source_name_mismatch',
+          missingNames.join(','));
+      }
       if (missingSlots.length > 0) {
         logger.warn('Calendar band canary missed source-reviewed slots', {
           postId,
@@ -2018,16 +2029,6 @@ async function parsePostDataCore(
         });
         return retryCanaryWithLegacy('calendar_band_missing_expected_slots',
           missingSlots.join(','));
-      }
-      const missingNames = findMissingExpectedCalendarNames(
-        rawExtractedData, bandRules.flatMap(rule => rule.expectedNames || [])
-      );
-      if (missingNames.length > 0) {
-        await emitStageArtifacts(cfg, {
-          source: 'live', contentType: resolvedContentType,
-          stage3Items: deepCloneJson(rawExtractedData),
-        });
-        return retryCanaryWithLegacy('calendar_band_source_name_mismatch', missingNames.join(','));
       }
     }
 
@@ -2348,17 +2349,17 @@ async function parsePostDataCore(
       const missingFinalSlots = findMissingExpectedCalendarSlotsInFinalEvents(
         reconciledEvents, bandRules.flatMap(rule => rule.expectedSlots)
       );
-      if (missingFinalSlots.length > 0) {
-        return retryCanaryWithLegacy('calendar_band_final_missing_expected_slots',
-          missingFinalSlots.join(','));
-      }
       const missingFinalNames = findMissingExpectedCalendarNamesInFinalEvents(
         reconciledEvents, bandRules.flatMap(rule =>
           (rule.expectedNames || []).filter(entry => entry.requireFinal))
       );
       if (missingFinalNames.length > 0) {
-        return retryCanaryWithLegacy('calendar_band_final_source_name_mismatch',
+        return holdCalendarBandCanary('calendar_band_final_source_name_mismatch',
           missingFinalNames.join(','));
+      }
+      if (missingFinalSlots.length > 0) {
+        return retryCanaryWithLegacy('calendar_band_final_missing_expected_slots',
+          missingFinalSlots.join(','));
       }
     }
 
