@@ -75,6 +75,11 @@ test('online election milestones without a gathering place are held, but public 
     spatial: { kind: 'online', locations: ['myupei.ca'], evidenceNotes: 'No physical venue is listed.' },
   }), true);
   assert.equal(isOnlineAdministrativeMilestone({
+    name: 'UPEISU Elections: Voting Starts', description: 'Voting starts via myupei.ca.',
+    venue: 'myupei.ca', additionalLocation: 'myupei.ca',
+    spatial: { kind: 'single_location', locations: ['myupei.ca'], evidenceNotes: 'The online voting site is printed.' },
+  }), true);
+  assert.equal(isOnlineAdministrativeMilestone({
     name: 'UPEISU Elections: Voting Ends', description: 'Results announced on social media.',
     spatial: { locations: [], evidenceNotes: 'No physical venue is shown.' },
   }), true);

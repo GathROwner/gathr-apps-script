@@ -67,11 +67,16 @@ export function isOnlineAdministrativeMilestone(event: {
   const name = String(event.name || '').trim();
   const detail = `${event.description || ''} ${event.spatial?.evidenceNotes || ''}`;
   const administrativeAction = /\b(?:voting|registration|applications?|nominations?)\s+(?:opens?|closes?|starts?|ends?|deadline)\b/i.test(name);
+  const isPhysicalPlace = (place: unknown): boolean => {
+    const label = String(place || '').trim();
+    return Boolean(label) &&
+      !/^(?:https?:\/\/)?[\w.-]+\.[a-z]{2,}(?:\/|$)/i.test(label) &&
+      !/^(?:online|virtual|website|social media|our social media)$/i.test(label);
+  };
   const spatialPlaces = event.spatial?.kind === 'online' ? [] :
-    (event.spatial?.locations || []).filter(place =>
-      !/^(?:https?:\/\/)?[\w.-]+\.[a-z]{2,}(?:\/|$)/i.test(String(place || '').trim()));
-  const physicalPlace = Boolean(String(event.venue || '').trim() ||
-    String(event.additionalLocation || '').trim() || spatialPlaces.length);
+    (event.spatial?.locations || []).filter(isPhysicalPlace);
+  const physicalPlace = isPhysicalPlace(event.venue) ||
+    isPhysicalPlace(event.additionalLocation) || spatialPlaces.length > 0;
   const remoteEvidence = /\b(?:online|virtual|website|social media|via\s+\S+\.\w{2,})\b/i.test(detail);
   return administrativeAction && !physicalPlace && remoteEvidence;
 }
