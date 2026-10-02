@@ -78,6 +78,10 @@ import {
   normalizeCanadianAddress,
 } from '../utils/addressNormalization.js';
 import { withFamilyFriendlyScore } from '../utils/familyFriendlyScoring.js';
+import {
+  hasConflictingExplicitSlotOrdinals,
+  hasMatchingExplicitSlotIdentity,
+} from '../utils/eventSlotIdentity.js';
 
 // Initialize Firebase Admin if not already initialized
 if (!admin.apps.length) {
@@ -4091,8 +4095,17 @@ export async function checkDuplicate(
   }
 
   // Check against current run entries first
+  const matchingCurrentRunSlot = currentRunEntries.find((existing) =>
+    String(existing.venueId || '').trim() === String(venueId || '').trim() &&
+    existing.startDate === event.startDate &&
+    hasMatchingExplicitSlotIdentity(event, existing)
+  );
+  if (matchingCurrentRunSlot) {
+    return { isDuplicate: true, existingEvent: matchingCurrentRunSlot };
+  }
   for (const existing of currentRunEntries) {
     const sameVenue = String(existing.venueId || '').trim() === String(venueId || '').trim();
+    if (hasConflictingExplicitSlotOrdinals(event, existing)) continue;
     if (sameVenue && shouldSkipSiblingUniqueIdDuplicateCheck(event, existing)) {
       continue;
     }
@@ -4129,7 +4142,16 @@ export async function checkDuplicate(
     endDate: event.startDate,
   });
 
+  const matchingStoredSlot = existingEvents.find((existing) =>
+    existing.startDate === event.startDate &&
+    hasMatchingExplicitSlotIdentity(event, existing)
+  );
+  if (matchingStoredSlot) {
+    return { isDuplicate: true, existingEvent: matchingStoredSlot };
+  }
+
   for (const existing of existingEvents) {
+    if (hasConflictingExplicitSlotOrdinals(event, existing)) continue;
     if (shouldSkipSiblingUniqueIdDuplicateCheck(event, existing)) {
       continue;
     }

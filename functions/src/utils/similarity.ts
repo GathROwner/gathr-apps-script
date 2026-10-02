@@ -3,6 +3,8 @@
  * Ported from utilities.js and migration/venue-matcher.js
  */
 
+import { hasConflictingExplicitSlotOrdinals } from './eventSlotIdentity.js';
+
 /**
  * Calculate Levenshtein distance between two strings
  * Uses dynamic programming approach
@@ -551,6 +553,7 @@ export function isHighConfidenceSameOccurrenceDuplicate(
     name?: string;
   }
 ): boolean {
+  if (hasConflictingExplicitSlotOrdinals(newData, existingData)) return false;
   if (newData.startDate !== existingData.startDate) return false;
   if (!newData.startTime || !existingData.startTime) return false;
   if (calculateTimeDifferenceHours(newData.startTime, existingData.startTime) !== 0) {
@@ -607,6 +610,7 @@ export function isDuplicateEntry(
     establishmentSimilarityThreshold?: number;
   }
 ): boolean {
+  if (hasConflictingExplicitSlotOrdinals(newData, existingData)) return false;
   const {
     similarityThreshold = 0.7,
     timeToleranceHours = 3,
