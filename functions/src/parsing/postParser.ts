@@ -48,7 +48,7 @@ import { resolveTimesWithOperatingHours } from './venueResolver.js';
 import { shouldHoldUndatedStandingSchedule, shouldRetrySeasonalLeagueWithLegacy,
   isSelectedLunaCanaryPost,
   canRetryLunaCanaryWithLegacy, canaryGeneratedCleanupUrls,
-  hasMalformedLunaEventTitle } from './lunaSafetyGate.js';
+  hasMalformedLunaEventTitle, isOnlineAdministrativeMilestone } from './lunaSafetyGate.js';
 import { parseBooleanEnv, parseNumberEnv, resolveStageModel } from './runtimeConfig.js';
 import { logger } from '../utils/logger.js';
 import { findRecoverableManagedSourceGallery } from '../services/firestoreService.js';
@@ -2339,7 +2339,15 @@ async function parsePostDataCore(
         restoredRegistrationUrl: raceReconciliation.restoredRegistrationUrl,
       });
     }
-    const reconciledEvents = raceReconciliation.events;
+    const reconciledEvents = lunaCanarySelected
+      ? raceReconciliation.events.filter(event => !isOnlineAdministrativeMilestone(event))
+      : raceReconciliation.events;
+    if (lunaCanarySelected && reconciledEvents.length !== raceReconciliation.events.length) {
+      logger.info('Luna online administrative milestones held', {
+        postId,
+        heldCount: raceReconciliation.events.length - reconciledEvents.length,
+      });
+    }
 
     if (lunaCanarySelected && hasMalformedLunaEventTitle(reconciledEvents)) {
       return retryCanaryWithLegacy('malformed_final_event_title');

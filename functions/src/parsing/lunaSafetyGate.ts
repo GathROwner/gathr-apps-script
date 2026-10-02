@@ -55,3 +55,23 @@ export function hasMalformedLunaEventTitle(
     return title.length > 140 && title.split(/\s+/).length > 20;
   });
 }
+
+/** Keep online administrative deadlines out of the event feed when no gathering place is printed. */
+export function isOnlineAdministrativeMilestone(event: {
+  name?: string;
+  description?: string;
+  venue?: string;
+  additionalLocation?: string;
+  spatial?: { kind?: string; locations?: unknown[]; evidenceNotes?: string };
+}): boolean {
+  const name = String(event.name || '').trim();
+  const detail = `${event.description || ''} ${event.spatial?.evidenceNotes || ''}`;
+  const administrativeAction = /\b(?:voting|registration|applications?|nominations?)\s+(?:opens?|closes?|starts?|ends?|deadline)\b/i.test(name);
+  const spatialPlaces = event.spatial?.kind === 'online' ? [] :
+    (event.spatial?.locations || []).filter(place =>
+      !/^(?:https?:\/\/)?[\w.-]+\.[a-z]{2,}(?:\/|$)/i.test(String(place || '').trim()));
+  const physicalPlace = Boolean(String(event.venue || '').trim() ||
+    String(event.additionalLocation || '').trim() || spatialPlaces.length);
+  const remoteEvidence = /\b(?:online|virtual|website|social media|via\s+\S+\.\w{2,})\b/i.test(detail);
+  return administrativeAction && !physicalPlace && remoteEvidence;
+}

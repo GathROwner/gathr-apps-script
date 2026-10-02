@@ -1,0 +1,179 @@
+{
+  "snapshotId": "1OmFzDG0kWiY-k8C-8G6-oGlTBxE3B0cq_209_1790950676816",
+  "rowVenue": {
+    "id": "slug_upeisu",
+    "name": "UPEISU | Charlottetown PE"
+  },
+  "payloads": [
+    {
+      "name": "Coffee & Consent",
+      "date": "2026-10-02",
+      "time": "11:30",
+      "venueId": "slug_upeisu",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-upeisu-0.webp",
+      "recurringPattern": "none",
+      "error": ""
+    },
+    {
+      "name": "19+ Silent Disco",
+      "date": "2026-10-02",
+      "time": "22:00",
+      "venueId": "fb_100052099464909",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-upeisu-0.webp",
+      "recurringPattern": "none",
+      "error": ""
+    },
+    {
+      "name": "Go- Experience The Pride",
+      "error": "No venue resolved for dry write preview: Go- Experience The Pride"
+    },
+    {
+      "name": "Sexy Sexual Health Trivia",
+      "date": "2026-10-06",
+      "time": "19:00",
+      "venueId": "fb_100052099464909",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-upeisu-0.webp",
+      "recurringPattern": "none",
+      "error": ""
+    },
+    {
+      "name": "Financial Literacy Workshop",
+      "date": "2026-10-07",
+      "time": "10:00",
+      "venueId": "fb_100052099464909",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-upeisu-0.webp",
+      "recurringPattern": "none",
+      "error": ""
+    },
+    {
+      "name": "Pop Culture Trivia",
+      "date": "2026-10-07",
+      "time": "19:00",
+      "venueId": "fb_100052099464909",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-upeisu-0.webp",
+      "recurringPattern": "none",
+      "error": ""
+    },
+    {
+      "name": "Share the Pride: Panther Friendsgiving",
+      "date": "2026-10-09",
+      "time": "16:30",
+      "venueId": "fb_100052099464909",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-upeisu-0.webp",
+      "recurringPattern": "none",
+      "error": ""
+    },
+    {
+      "name": "Monster High Drag Show",
+      "date": "2026-10-10",
+      "time": "21:00",
+      "venueId": "fb_100052099464909",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-upeisu-0.webp",
+      "recurringPattern": "none",
+      "error": ""
+    },
+    {
+      "name": "UPEISU Elections: Voting Starts",
+      "date": "2026-10-13",
+      "time": "08:00",
+      "venueId": "slug_upeisu",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-upeisu-1.webp",
+      "recurringPattern": "none",
+      "error": ""
+    },
+    {
+      "name": "UPEISU Elections: Voting Ends",
+      "date": "2026-10-14",
+      "time": "21:00",
+      "venueId": "slug_upeisu",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-upeisu-1.webp",
+      "recurringPattern": "none",
+      "error": ""
+    },
+    {
+      "name": "Mix & Mingle with Mayoral Candidates",
+      "date": "2026-10-19",
+      "time": "19:00",
+      "venueId": "fb_100052099464909",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-upeisu-1.webp",
+      "recurringPattern": "none",
+      "error": ""
+    },
+    {
+      "name": "Name That Tune Trivia",
+      "date": "2026-10-21",
+      "time": "19:00",
+      "venueId": "fb_100052099464909",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-upeisu-1.webp",
+      "recurringPattern": "none",
+      "error": ""
+    },
+    {
+      "name": "Murder Mystery",
+      "date": "2026-10-22",
+      "time": "19:00",
+      "venueId": "fb_100052099464909",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-upeisu-1.webp",
+      "recurringPattern": "none",
+      "error": ""
+    },
+    {
+      "name": "Connect the Pride: Pre-game social",
+      "date": "2026-10-23",
+      "time": "18:00",
+      "venueId": "slug_upeisu",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-upeisu-1.webp",
+      "recurringPattern": "none",
+      "error": ""
+    },
+    {
+      "name": "Cheer- Rally the Pride: Pre-Game Social",
+      "date": "2026-10-24",
+      "time": "17:00",
+      "venueId": "slug_upeisu",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-upeisu-1.webp",
+      "recurringPattern": "none",
+      "error": ""
+    },
+    {
+      "name": "Music Bingo",
+      "date": "2026-10-27",
+      "time": "19:00",
+      "venueId": "fb_100052099464909",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-upeisu-1.webp",
+      "recurringPattern": "none",
+      "error": ""
+    },
+    {
+      "name": "Halloween Trivia",
+      "date": "2026-10-28",
+      "time": "19:00",
+      "venueId": "fb_100052099464909",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-upeisu-2.webp",
+      "recurringPattern": "none",
+      "error": ""
+    },
+    {
+      "name": "Create: Build The Pride",
+      "error": "No venue resolved for dry write preview: Create: Build The Pride"
+    },
+    {
+      "name": "Celebrate the Pride",
+      "date": "2026-10-30",
+      "time": "17:00",
+      "venueId": "slug_upeisu",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-upeisu-2.webp",
+      "recurringPattern": "none",
+      "error": ""
+    },
+    {
+      "name": "Halloween Pub",
+      "date": "2026-10-30",
+      "time": "22:00",
+      "venueId": "slug_upeisu",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/dry-upeisu-2.webp",
+      "recurringPattern": "none",
+      "error": ""
+    }
+  ]
+}

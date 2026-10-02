@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { shouldHoldUndatedStandingSchedule, shouldRetrySeasonalLeagueWithLegacy,
   isSelectedLunaCanaryPost,
   canRetryLunaCanaryWithLegacy, canaryGeneratedCleanupUrls,
-  hasMalformedLunaEventTitle } from './lunaSafetyGate.js';
+  hasMalformedLunaEventTitle, isOnlineAdministrativeMilestone } from './lunaSafetyGate.js';
 import { normalizeCommunityMealEvent } from './finalFormatter.js';
 import type { ExtractedItem, FormattedEvent } from './types.js';
 
@@ -63,6 +63,32 @@ test('Luna prose title falls back while genuine multi-part performance names rem
     'Celtic Christmas at Red Shores (Live Entertainment with The Ross Family)' }]), false);
   assert.equal(hasMalformedLunaEventTitle([{ name:
     'SOFT INTERNET THEORY Exhibition Opening' }]), false);
+});
+
+test('online election milestones without a gathering place are held, but public events survive', () => {
+  assert.equal(isOnlineAdministrativeMilestone({
+    name: 'UPEISU Elections: Voting Starts', description: 'Voting starts via myupei.ca.',
+    spatial: { locations: [], evidenceNotes: 'No physical venue is shown.' },
+  }), true);
+  assert.equal(isOnlineAdministrativeMilestone({
+    name: 'UPEISU Elections: Voting Starts', description: 'Voting starts via myupei.ca.',
+    spatial: { kind: 'online', locations: ['myupei.ca'], evidenceNotes: 'No physical venue is listed.' },
+  }), true);
+  assert.equal(isOnlineAdministrativeMilestone({
+    name: 'UPEISU Elections: Voting Ends', description: 'Results announced on social media.',
+    spatial: { locations: [], evidenceNotes: 'No physical venue is shown.' },
+  }), true);
+  assert.equal(isOnlineAdministrativeMilestone({
+    name: 'Election Night Watch Party', description: 'Watch results together at 8 PM.',
+    venue: 'The Fox & Crow',
+  }), false);
+  assert.equal(isOnlineAdministrativeMilestone({
+    name: 'Voter Registration Workshop', description: 'Join online via Zoom at 7 PM.',
+  }), false);
+  assert.equal(isOnlineAdministrativeMilestone({
+    name: 'Registration Opens', description: 'At the student centre from 6 PM.',
+    additionalLocation: 'Student Centre',
+  }), false);
 });
 
 test('scheduled community lunch remains an event and gets no invented end', () => {
