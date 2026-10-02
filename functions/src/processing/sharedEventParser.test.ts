@@ -10,8 +10,32 @@ import {
   parseSharedEventPayload,
   parseSharedEventPayloads,
   selectParsedEventsForSubmissionForRegression,
+  shouldAttemptCalendarImageExtraction,
   verifySharedEventSourceVisibility,
 } from './sharedEventParser.js';
+
+test('Luna opt-in checks a captioned calendar share without changing ordinary share gating', async () => {
+  const primary = await parseSharedEventPayload({
+    title: 'Bay Boogie schedule',
+    description: 'October 3 at Pints East. See the calendar of events in the images.',
+    mediaUrls: ['https://example.com/bay-boogie-calendar.webp'],
+    sourcePlatform: 'unknown',
+  }, {
+    sourceVisibility: 'user_private',
+    visibilityEvidence: {
+      method: 'share_payload_hint', checkedAt: '2026-10-01T12:00:00.000Z',
+      reason: 'Private photo share.',
+    },
+  });
+
+  assert.ok(primary.startDate);
+  assert.ok(primary.locationName);
+  assert.equal(shouldAttemptCalendarImageExtraction(primary), false);
+  assert.equal(shouldAttemptCalendarImageExtraction(primary, { lunaHighPilot: true }), true);
+  assert.equal(shouldAttemptCalendarImageExtraction({
+    ...primary, title: 'Bay Boogie', description: 'Pints East on Saturday.',
+  }, { lunaHighPilot: true }), false);
+});
 
 test('private visibility hints keep shared Facebook events user-private', async () => {
   const visibility = await verifySharedEventSourceVisibility({

@@ -1620,7 +1620,10 @@ function buildExtractedParsedEventsFromShareText(primary: ParsedSharedEvent): Pa
   });
 }
 
-function shouldAttemptCalendarImageExtraction(primary: ParsedSharedEvent): boolean {
+export function shouldAttemptCalendarImageExtraction(
+  primary: ParsedSharedEvent,
+  options: { lunaHighPilot?: boolean } = {}
+): boolean {
   if (primary.mediaUrls.length === 0) return false;
   if (String(process.env.ENABLE_SHARED_EVENT_IMAGE_CALENDAR_EXTRACTION || 'true').toLowerCase() === 'false') {
     return false;
@@ -1640,7 +1643,8 @@ function shouldAttemptCalendarImageExtraction(primary: ParsedSharedEvent): boole
     /\b(calendar|schedule|line[-\s]?up|coming up|this week|this month|next month)\b/i.test(text) ||
     /\b(?:jan|feb|mar|apr|may|jun|june|jul|july|aug|sep|sept|oct|nov|dec)[a-z]*\s*!{0,2}\b/i.test(text);
 
-  if (hasStructuredEvent && !(isFacebookPost && hasCalendarCue)) return false;
+  if (hasStructuredEvent && !(isFacebookPost && hasCalendarCue) &&
+      !(options.lunaHighPilot && hasCalendarCue)) return false;
 
   return primary.reviewReasons.includes('missing_start_date') ||
     hasCalendarCue;
@@ -1766,7 +1770,7 @@ async function buildExtractedParsedEventsFromCalendarImage(
   primary: ParsedSharedEvent,
   options: { lunaHighPilot?: boolean } = {}
 ): Promise<ParsedSharedEvent[]> {
-  if (!shouldAttemptCalendarImageExtraction(primary)) return [];
+  if (!shouldAttemptCalendarImageExtraction(primary, options)) return [];
 
   try {
     const combinedText = [

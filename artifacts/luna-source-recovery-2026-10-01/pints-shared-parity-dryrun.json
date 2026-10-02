@@ -2,8 +2,8 @@
   "sourceImageCount": 3,
   "uploads": 3,
   "deletes": 0,
-  "eventCount": 2,
-  "privateCount": 2,
+  "eventCount": 11,
+  "privateCount": 11,
   "events": [
     {
       "date": "2026-10-03",
@@ -17,8 +17,89 @@
     {
       "date": "2026-10-03",
       "time": "12:00",
-      "title": "Afternoon Vendors Market @ St Peters Circle Club",
+      "title": "Bay Boogie Festival doors open",
+      "venue": "Pints East",
+      "routing": "private_only",
+      "needsUserReview": false,
+      "sourceImageCount": 3
+    },
+    {
+      "date": "2026-10-03",
+      "time": "13:00",
+      "title": "Tango Demonstration by Argentine Tango PEI",
+      "venue": "Pints East",
+      "routing": "private_only",
+      "needsUserReview": false,
+      "sourceImageCount": 3
+    },
+    {
+      "date": "2026-10-03",
+      "time": "14:00",
+      "title": "MACSTEWART performance",
+      "venue": "Pints East",
+      "routing": "private_only",
+      "needsUserReview": false,
+      "sourceImageCount": 3
+    },
+    {
+      "date": "2026-10-03",
+      "time": "16:00",
+      "title": "Line Dancing Demonstration with Norma Weir",
+      "venue": "Pints East",
+      "routing": "private_only",
+      "needsUserReview": false,
+      "sourceImageCount": 3
+    },
+    {
+      "date": "2026-10-03",
+      "time": "17:00",
+      "title": "Killin' Time performance",
+      "venue": "Pints East",
+      "routing": "private_only",
+      "needsUserReview": false,
+      "sourceImageCount": 3
+    },
+    {
+      "date": "2026-10-03",
+      "time": "19:30",
+      "title": "Kindle performance",
+      "venue": "Pints East",
+      "routing": "private_only",
+      "needsUserReview": false,
+      "sourceImageCount": 3
+    },
+    {
+      "date": "2026-10-03",
+      "time": "12:00",
+      "title": "Afternoon Vendors Market",
       "venue": "St Peters Circle Club",
+      "routing": "private_only",
+      "needsUserReview": false,
+      "sourceImageCount": 3
+    },
+    {
+      "date": "2026-10-03",
+      "time": "12:00",
+      "title": "Julio's Oyster Bar",
+      "venue": "Pints East",
+      "routing": "private_only",
+      "needsUserReview": false,
+      "sourceImageCount": 3
+    },
+    {
+      "date": "2026-10-03",
+      "time": "12:00",
+      "title": "Petting Zoo with Elemental Acres",
+      "venue": "Pints East",
+      "routing": "private_only",
+      "needsUserReview": false,
+      "sourceImageCount": 3
+    },
+    {
+      "date": "2026-10-03",
+      "time": "12:00",
+      "title": "Grampy's Barrel Train Rides",
+      "venue": "Pints East",
       "routing": "private_only",
       "needsUserReview": false,
       "sourceImageCount": 3

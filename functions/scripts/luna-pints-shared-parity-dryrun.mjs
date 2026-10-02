@@ -66,8 +66,8 @@ const previousNow = Settings.now;
 Settings.now = () => new Date('2026-10-01T12:00:00.000Z').getTime();
 try {
   const events = await parseSharedEventPayloads({
-    title: 'Bay Boogie gallery',
-    description: 'See the schedule and vendor list in these images.',
+    title: 'Pints East Bay Boogie festival schedule',
+    description: 'One week away from our Bay Boogie festival at Pints East on October 3, 2026. See the schedule and vendor list in these images.',
     mediaUrls: source.map((_, index) => `${origin}/source-${index}.webp`),
     sourcePlatform: 'unknown',
     visibilityHint: 'private',
