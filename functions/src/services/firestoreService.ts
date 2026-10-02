@@ -42,6 +42,7 @@ import {
   normalizeUrl,
 } from '../utils/similarity.js';
 import { getVenueAliasCandidates } from './venueAliases.js';
+import { selectRecoverableManagedGallery } from './managedSourceGallery.js';
 import { pickCompatibleExactUniqueIdMatch } from './exactUniqueIdCompatibility.js';
 import {
   isCityLevelAutoPublishEnabled,
@@ -7664,6 +7665,30 @@ export async function getParseSnapshotById(
     id: doc.id,
     createdAt,
   };
+}
+
+/** Reuse the saved, ordered post gallery only for an exact source-image match. */
+export async function findRecoverableManagedSourceGallery(
+  postId: string,
+  sourceUrls: string[]
+): Promise<{ urls: string[]; snapshotId: string } | null> {
+  if (!postId || sourceUrls.length < 1 || sourceUrls.length > 16) return null;
+  const matches = await db.collection(COLLECTIONS.PARSE_SNAPSHOTS)
+    .where('uniqueId', '==', postId)
+    .limit(100)
+    .get();
+  return selectRecoverableManagedGallery(matches.docs.map(doc => {
+    const data = doc.data();
+    const createdAt = data.createdAt;
+    return {
+      id: doc.id,
+      createdAtMs: createdAt instanceof admin.firestore.Timestamp
+        ? createdAt.toMillis() : 0,
+      uniqueId: data.uniqueId,
+      rowMeta: data.rowMeta,
+      stages: data.stages,
+    };
+  }), postId, sourceUrls);
 }
 
 /**

@@ -51,6 +51,7 @@ import { shouldHoldUndatedStandingSchedule, shouldRetrySeasonalLeagueWithLegacy,
   hasMalformedLunaEventTitle } from './lunaSafetyGate.js';
 import { parseBooleanEnv, parseNumberEnv, resolveStageModel } from './runtimeConfig.js';
 import { logger } from '../utils/logger.js';
+import { findRecoverableManagedSourceGallery } from '../services/firestoreService.js';
 
 const CATEGORY_END_DEFAULTS: Record<string, string> = {
   'Happy Hour': '19:00',
@@ -1368,20 +1369,20 @@ async function parsePostDataCore(
   // Unselected posts keep the legacy four-image analysis budget.
   const galleryLimit = lunaCanarySelected || parseBooleanEnv('STAGE3_LUNA_FULL_IMAGE', false)
     ? MAX_SOURCE_GALLERY_IMAGES : MAX_OCR_IMAGES;
-  const sourcePostMediaUrls = normalizeImageUrls(mediaUrls || [], galleryLimit);
+  let sourcePostMediaUrls = normalizeImageUrls(mediaUrls || [], galleryLimit);
   const imageSources = [
     ...sourcePostMediaUrls,
     ...(sharedPostThumbnails || []),
   ];
   const analysisImageLimit = lunaCanarySelected ? MAX_SOURCE_GALLERY_IMAGES : MAX_OCR_IMAGES;
-  const allImageUrls = normalizeImageUrls(imageSources, analysisImageLimit);
+  let allImageUrls = normalizeImageUrls(imageSources, analysisImageLimit);
   logger.debug('Total unique images to process', {
     total: imageSources.length,
     usable: allImageUrls.length,
     cappedAt: analysisImageLimit,
   });
   const ocrPrepStart = Date.now();
-  const ocrImageUrls = await prepareOcrImageUrls(allImageUrls, {
+  let ocrImageUrls = await prepareOcrImageUrls(allImageUrls, {
     postId: extractedData?.id || extractedData?.postId || '',
     userName,
     pageName,
@@ -1389,6 +1390,36 @@ async function parsePostDataCore(
   }, {
     calendarTiles: false,
   });
+  if (lunaCanarySelected && sourcePostMediaUrls.length === allImageUrls.length &&
+      ocrImageUrls.length !== allImageUrls.length) {
+    try {
+      const recovered = await findRecoverableManagedSourceGallery(postId, sourcePostMediaUrls);
+      if (recovered) {
+        const recoveredOcrUrls = await prepareOcrImageUrls(recovered.urls, {
+          postId, userName, pageName, combinedText,
+        }, { calendarTiles: false });
+        if (recoveredOcrUrls.length === recovered.urls.length) {
+          await cleanupUnusedOcrImages(ocrImageUrls, []);
+          sourcePostMediaUrls = recovered.urls;
+          allImageUrls = recovered.urls;
+          ocrImageUrls = recoveredOcrUrls;
+          logger.info('Exact-post Luna gallery recovered from saved source snapshot', {
+            postId, snapshotId: recovered.snapshotId, imageCount: recovered.urls.length,
+          });
+        } else {
+          await cleanupUnusedOcrImages(recoveredOcrUrls, []);
+          logger.warn('Exact-post Luna saved gallery could not be preprocessed', {
+            postId, snapshotId: recovered.snapshotId,
+            sourceImages: recovered.urls.length, preprocessed: recoveredOcrUrls.length,
+          });
+        }
+      }
+    } catch (error) {
+      logger.warn('Exact-post Luna saved gallery recovery failed', {
+        postId, error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
   for (const url of ocrImageUrls) cleanupImageUrls.add(url);
   logTiming('ocr_upload', ocrPrepStart, {
     postId,

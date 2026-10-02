@@ -1,0 +1,27 @@
+{
+  "sourceImageCount": 3,
+  "uploads": 3,
+  "deletes": 0,
+  "eventCount": 2,
+  "privateCount": 2,
+  "events": [
+    {
+      "date": "2026-10-03",
+      "time": "12:00",
+      "title": "Bay Boogie Festival",
+      "venue": "Pints East",
+      "routing": "private_only",
+      "needsUserReview": false,
+      "sourceImageCount": 3
+    },
+    {
+      "date": "2026-10-03",
+      "time": "12:00",
+      "title": "Afternoon Vendors Market @ St Peters Circle Club",
+      "venue": "St Peters Circle Club",
+      "routing": "private_only",
+      "needsUserReview": false,
+      "sourceImageCount": 3
+    }
+  ]
+}
