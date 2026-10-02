@@ -1,0 +1,65 @@
+{
+  "checkedAt": "2026-10-02T18:19:57.855Z",
+  "backupPath": "C:\\Users\\craig\\.codex\\worktrees\\luna-pilot-release\\gathr-apps-script\\artifacts\\luna-live-canary-2026-10-02\\library-market-prewrite-backup.json",
+  "latestSnapshotId": "1OmFzDG0kWiY-k8C-8G6-oGlTBxE3B0cq_164_1790965169451",
+  "snapshotEventCount": 1,
+  "snapshotEvents": [
+    {
+      "name": "Late Night Market",
+      "date": "2026-10-03",
+      "startTime": "17:00",
+      "endTime": "22:00",
+      "category": "Food Special"
+    }
+  ],
+  "changes": [
+    {
+      "path": "venues/slug_charlottetownlibrarylearningcentre/events/c4ENYKLh26FgN5cyF9SC",
+      "changedKeys": [
+        "imageUrl",
+        "mediaUrls",
+        "image",
+        "relevantImageUrl",
+        "lastSeenAt",
+        "imageProvenance",
+        "updatedAt"
+      ],
+      "before": {
+        "name": "Late Night Market (Library After Hours)",
+        "startDate": "2026-10-03",
+        "startTime": "17:00",
+        "endTime": "22:00",
+        "category": "Food Special",
+        "mediaCount": 3,
+        "hero": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790948569313-z5ts4u.webp"
+      },
+      "after": {
+        "name": "Late Night Market (Library After Hours)",
+        "startDate": "2026-10-03",
+        "startTime": "17:00",
+        "endTime": "22:00",
+        "category": "Food Special",
+        "mediaCount": 3,
+        "hero": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790965148527-oqwk9y.webp"
+      }
+    }
+  ],
+  "newDocs": [],
+  "target": {
+    "path": "venues/slug_charlottetownlibrarylearningcentre/events/c4ENYKLh26FgN5cyF9SC",
+    "uniqueId": "1422273086755028_80a864a594a26190",
+    "name": "Late Night Market (Library After Hours)",
+    "startDate": "2026-10-03",
+    "startTime": "17:00",
+    "endTime": "22:00",
+    "category": "Food Special",
+    "gallery": [
+      "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790965148527-oqwk9y.webp",
+      "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790965148941-cuq224.webp",
+      "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790965149185-aq5dl8.webp"
+    ],
+    "hero": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790965148527-oqwk9y.webp",
+    "heroInGallery": true,
+    "provenanceSource": "post_media"
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "snapshotId": "1OmFzDG0kWiY-k8C-8G6-oGlTBxE3B0cq_144_1790964332414",
+  "postId": "1615048507081168",
+  "rowVenue": "slug_eptek.centre",
+  "payloads": [
+    {
+      "name": "Let's Get Creative Kid's Art Club (Fall session) - Time Slot 1",
+      "date": "2026-10-18",
+      "time": "12:30",
+      "endTime": "13:45",
+      "uniqueId": "1615048507081168_083808ec0e886459",
+      "venueId": "slug_eptek.centre",
+      "recurringPattern": "weekly_sunday",
+      "totalOccurrences": 8,
+      "recurrenceUntilDate": "2026-12-06",
+      "category": "Workshops & Classes",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790964278818-zvd2mr.webp",
+      "gallery": [
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790964278818-zvd2mr.webp",
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790964278818-zvd2mr.webp",
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790964279229-4bhria.webp",
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790964279459-h73i9v.webp",
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790964279696-k2odjg.webp"
+      ],
+      "duplicate": {
+        "isDuplicate": true,
+        "eventId": "nOz8TgJISaSmdkMUVNzY",
+        "existingName": "Let's Get Creative Art Club @ Eptek – Fall 2026 (Group 2)",
+        "existingUniqueId": "1586777749908244_2d1cd3440099a40b"
+      },
+      "error": ""
+    },
+    {
+      "name": "Let's Get Creative Kid's Art Club (Fall session) - Time Slot 2",
+      "date": "2026-10-18",
+      "time": "14:15",
+      "endTime": "15:30",
+      "uniqueId": "1615048507081168_49038489b1fe3a12",
+      "venueId": "slug_eptek.centre",
+      "recurringPattern": "weekly_sunday",
+      "totalOccurrences": 8,
+      "recurrenceUntilDate": "2026-12-06",
+      "category": "Workshops & Classes",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790964278818-zvd2mr.webp",
+      "gallery": [
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790964278818-zvd2mr.webp",
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790964278818-zvd2mr.webp",
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790964279229-4bhria.webp",
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790964279459-h73i9v.webp",
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790964279696-k2odjg.webp"
+      ],
+      "duplicate": {
+        "isDuplicate": true,
+        "eventId": "nOz8TgJISaSmdkMUVNzY",
+        "existingName": "Let's Get Creative Art Club @ Eptek – Fall 2026 (Group 2)",
+        "existingUniqueId": "1586777749908244_2d1cd3440099a40b"
+      },
+      "error": ""
+    }
+  ]
+}

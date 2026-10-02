@@ -1,0 +1,678 @@
+{
+  "purpose": "Prewrite exact venue/date backup for Library Market Luna selected-row live pilot",
+  "createdAt": "2026-10-02T18:17:55.121Z",
+  "fileId": "1OmFzDG0kWiY-k8C-8G6-oGlTBxE3B0cq",
+  "postId": "1422273086755028",
+  "sourceSnapshotId": "1OmFzDG0kWiY-k8C-8G6-oGlTBxE3B0cq_164_1790948611398",
+  "lockStatus": "completed",
+  "docs": [
+    {
+      "path": "venues/slug_charlottetownlibrarylearningcentre",
+      "updateTime": {
+        "__type": "Timestamp",
+        "seconds": 1790169134,
+        "nanoseconds": 284564000
+      },
+      "data": {
+        "sourceSheet": "Contact Info",
+        "facebookUrl": "https://www.facebook.com/cllcroomrentals",
+        "pagenameSlug": "charlottetownlibrarylearningcentre",
+        "address": "Dominion Building, 97 Queen St, Charlottetown, PE C1A 4A9",
+        "pagenameNormalized": "charlottetown library learning centre",
+        "instagramUrl": "https://www.instagram.com/charlottetownlibrarylearning/",
+        "pagenameSearchTokens": [
+          "charlottetown",
+          "library",
+          "learning",
+          "centre"
+        ],
+        "pageurl": "https://www.facebook.com/cllcroomrentals",
+        "pagename": "Charlottetown Library Learning Centre",
+        "createdAt": {
+          "__type": "Timestamp",
+          "seconds": 1769989997,
+          "nanoseconds": 546000000
+        },
+        "importedAt": {
+          "__type": "Timestamp",
+          "seconds": 1769989997,
+          "nanoseconds": 546000000
+        },
+        "facebookAliasUrls": [],
+        "title": "Charlottetown Library Learning Centre",
+        "venueSplitMeta": {
+          "splitFromVenueId": "slug_peilibrary",
+          "splitAt": "2026-02-21T00:48:10.998Z",
+          "reason": "separate_charlottetown_library_from_peilibrary"
+        },
+        "name": "Charlottetown Library Learning Centre",
+        "normalizedName": "charlottetown library learning centre",
+        "province": "PE",
+        "city": "Charlottetown",
+        "postalCode": "C1A 4A9",
+        "profileImage": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1774103098355-rkkck0.webp",
+        "profileImageSourceSignature": "scontent-lga3-3.xx.fbcdn.net/v/t39.30808-1/300185403_104125239086786_1602531837408524759_n.png",
+        "googlePlaceId": "ChIJkekco-FSXksRVgftLb_nfCs",
+        "latitude": 46.2332239,
+        "locationIntegrityUpdatedAt": {
+          "__type": "Timestamp",
+          "seconds": 1788920510,
+          "nanoseconds": 330000000
+        },
+        "aliases": [
+          "Charlottetown Library Learning Centre - Children’s Program Room",
+          "Charlottetown Library Learning Centre - Auditorium",
+          "Charlottetown Library",
+          "Charlottetown Library Learning Center"
+        ],
+        "aliasesNormalized": [
+          "charlottetown library learning centre childrens program room",
+          "charlottetown library learning centre auditorium",
+          "charlottetown library",
+          "charlottetown library learning center"
+        ],
+        "operatingHoursUpdatedAt": {
+          "__type": "Timestamp",
+          "seconds": 1790169134,
+          "nanoseconds": 266000000
+        },
+        "operatingHours": {
+          "sunday": {
+            "close": "17:00",
+            "open": "12:30"
+          },
+          "saturday": {
+            "close": "17:00",
+            "open": "09:30"
+          },
+          "tuesday": {
+            "close": "20:30",
+            "open": "09:30"
+          },
+          "friday": {
+            "close": "17:00",
+            "open": "09:30"
+          },
+          "thursday": {
+            "close": "20:30",
+            "open": "09:30"
+          },
+          "wednesday": {
+            "close": "20:30",
+            "open": "09:30"
+          },
+          "monday": {
+            "close": "20:30",
+            "open": "09:30"
+          }
+        },
+        "coordinates": {
+          "latitude": 46.2332239,
+          "longitude": -63.12699549999999
+        },
+        "longitude": -63.12699549999999,
+        "updatedAt": {
+          "__type": "Timestamp",
+          "seconds": 1790169134,
+          "nanoseconds": 266000000
+        }
+      }
+    },
+    {
+      "path": "venues/slug_charlottetownlibrarylearningcentre/events/NI05F5tmGgLDVINN2nmg",
+      "updateTime": {
+        "__type": "Timestamp",
+        "seconds": 1790945928,
+        "nanoseconds": 101844000
+      },
+      "data": {
+        "uniqueId": "1361147709534233_c9a7bf65ed1b875e",
+        "establishment": "Charlottetown Library Learning Centre",
+        "locationScope": "venue",
+        "locationLabel": "Charlottetown Library Learning Centre",
+        "locationPrecision": "exact",
+        "locationReviewStatus": "not_needed",
+        "eventType": "live_music",
+        "eventName": "ENCHANTED: A Book Lovers Ball (City of Starlight)",
+        "startDate": "2026-10-03",
+        "endDate": "2026-10-03",
+        "startTime": "19:30",
+        "endTime": "23:30",
+        "facebookUrl": "https://www.facebook.com/PEILibrary",
+        "likes": 9,
+        "topReactionsCount": 2,
+        "venueId": "slug_charlottetownlibrarylearningcentre",
+        "category": "Live Music",
+        "isEvent": "Yes",
+        "isFoodSpecial": "No",
+        "name": "ENCHANTED: A Book Lovers Ball (City of Starlight)",
+        "address": "Dominion Building, 97 Queen St, Charlottetown, PE C1A 4A9",
+        "isRecurring": "No",
+        "recurringPattern": "none",
+        "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1774103098355-rkkck0.webp",
+        "cleanedFacebookUrl": "https://www.facebook.com/PEILibrary",
+        "timeResolution": {
+          "hoursUsed": false
+        },
+        "timeFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "7:30 PM – 11:30 PM"
+          },
+          "end": {
+            "source": "explicit",
+            "toClose": false,
+            "evidence": "7:30 PM – 11:30 PM"
+          }
+        },
+        "_sourceType": "event",
+        "createdAt": {
+          "__type": "Timestamp",
+          "seconds": 1784900253,
+          "nanoseconds": 370000000
+        },
+        "ticketPrice": "$5",
+        "price": "$5",
+        "familyFriendlyLevel": "unlikely",
+        "familyFriendlyScore": 15,
+        "familyFriendlyScoringVersion": "family-friendly-v4",
+        "familyFriendlyReasons": [
+          "insufficient_family_evidence"
+        ],
+        "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1787562290689-149gh2.webp",
+        "sourceContentSignature": "9d0465844d2262f0b20d431cf41de200cef3f2f0f85e548acdfb565a1de75ec0",
+        "addressNormalizationIssues": [],
+        "sourceTimestamp": {
+          "__type": "Timestamp",
+          "seconds": 1791066600,
+          "nanoseconds": 0
+        },
+        "usersInterested": "292",
+        "description": "ENCHANTED: A Book Lovers Ball returns October 3rd with this year's theme: City of Starlight! ️✨\n\nWhat’s waiting for you:\n Live DJ & dancing\n Cash bar \n Free photo booth to capture your royal look\n️ Fantasy vendor market featuring local creators\n An exhilarating after-hours library experience\n\n⏰ NEW THIS YEAR: Extended hours to dance the night away!\n\n When: Saturday, October 3rd, 2026 | 7:30 PM – 11:30 PM\n Where: Charlottetown Library Learning Centre (100 - 97 Queen Street)\n️ Details: 19+ event (IDs checked at the door). \n\nAll proceeds directly support the Charlottetown Library Learning Centre Foundation. Come for the magic, stay for the night of your dreams! ✨\n\nPURCHASE TICKETS HERE: https://cllcfoundation.ca/bookball/",
+        "usersResponded": "29",
+        "addressUpdatedAt": {
+          "__type": "Timestamp",
+          "seconds": 1787562291,
+          "nanoseconds": 45000000
+        },
+        "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1787562290689-149gh2.webp",
+        "addressSource": "venue",
+        "rawAddress": "Dominion Building, 97 Queen St, Charlottetown, PE C1A 4A9",
+        "utcStartDate": "2026-10-03T22:30:00.000Z",
+        "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1787562290689-149gh2.webp",
+        "normalizedAddress": "Dominion Building, 97 Queen St, Charlottetown, PE C1A 4A9",
+        "usersGoing": "29",
+        "externalLinks": [
+          "https://cllcfoundation.ca/bookball/"
+        ],
+        "facebookUsersResponded": "321",
+        "metadata": {
+          "latitude": 46.2332239,
+          "longitude": -63.1269955
+        },
+        "latitude": 46.2332239,
+        "locationIntegrityUpdatedAt": {
+          "__type": "Timestamp",
+          "seconds": 1788920510,
+          "nanoseconds": 330000000
+        },
+        "longitude": -63.1269955,
+        "shares": 2,
+        "additionalLocation": "Charlottetown Learning Library",
+        "lastSeenAt": {
+          "__type": "Timestamp",
+          "seconds": 1790945928,
+          "nanoseconds": 91000000
+        },
+        "imageProvenance": {
+          "version": 1,
+          "primarySource": "post_media",
+          "primaryField": "mediaUrls",
+          "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1787562290689-149gh2.webp",
+          "isFallback": false,
+          "sourceFields": [
+            "mediaUrls"
+          ],
+          "media": [
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1787562290689-149gh2.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": true,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790945200751-cvxuiu.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790945717920-r3jeb2.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": true
+            }
+          ],
+          "selectionReason": "model_selected_original_image_index; duplicate_merge_image_update",
+          "updatedBy": "duplicate_merge",
+          "setAt": {
+            "__type": "Timestamp",
+            "seconds": 1790945928,
+            "nanoseconds": 91000000
+          }
+        },
+        "mediaUrls": [
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1787562290689-149gh2.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790945200751-cvxuiu.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790945717920-r3jeb2.webp"
+        ],
+        "updatedAt": {
+          "__type": "Timestamp",
+          "seconds": 1790945928,
+          "nanoseconds": 91000000
+        }
+      }
+    },
+    {
+      "path": "venues/slug_charlottetownlibrarylearningcentre/events/c4ENYKLh26FgN5cyF9SC",
+      "updateTime": {
+        "__type": "Timestamp",
+        "seconds": 1790948611,
+        "nanoseconds": 386221000
+      },
+      "data": {
+        "uniqueId": "1422273086755028_80a864a594a26190",
+        "establishment": "Charlottetown Library Learning Centre",
+        "locationScope": "venue",
+        "locationLabel": "Charlottetown Library Learning Centre",
+        "locationPrecision": "exact",
+        "locationReviewStatus": "not_needed",
+        "eventType": "food_special",
+        "eventName": "Late Night Market (Library After Hours)",
+        "description": "Experience the library after hours as it transforms into a vibrant marketplace with local vendors throughout the library's main space (books, art, treats, handmade goods). $5 at the door; kids under 12 free. 50/50 tickets available.",
+        "startDate": "2026-10-03",
+        "endDate": "2026-10-03",
+        "startTime": "17:00",
+        "endTime": "22:00",
+        "price": "$5 at the door (kids under 12 free)",
+        "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790948569313-z5ts4u.webp",
+        "mediaUrls": [
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790948569313-z5ts4u.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790948569672-2lp6q9.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790948569905-xlrkr5.webp"
+        ],
+        "facebookUrl": "https://www.facebook.com/PEILibrary",
+        "sourceTimestamp": {
+          "__type": "Timestamp",
+          "seconds": 1790895603,
+          "nanoseconds": 0
+        },
+        "likes": 13,
+        "shares": 4,
+        "topReactionsCount": 2,
+        "venueId": "slug_charlottetownlibrarylearningcentre",
+        "category": "Food Special",
+        "isEvent": "No",
+        "isFoodSpecial": "Yes",
+        "name": "Late Night Market (Library After Hours)",
+        "address": "Dominion Building, 97 Queen St, Charlottetown, PE C1A 4A9",
+        "rawAddress": "Dominion Building, 97 Queen St, Charlottetown, PE C1A 4A9",
+        "normalizedAddress": "Dominion Building, 97 Queen St, Charlottetown, PE C1A 4A9",
+        "addressSource": "venue",
+        "addressNormalizationIssues": [],
+        "ticketPrice": "$5 at the door (kids under 12 free)",
+        "externalLinks": [],
+        "isRecurring": "No",
+        "recurringPattern": "none",
+        "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1774103098355-rkkck0.webp",
+        "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790948569313-z5ts4u.webp",
+        "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790948569313-z5ts4u.webp",
+        "cleanedFacebookUrl": "https://www.facebook.com/PEILibrary",
+        "latitude": 46.2332239,
+        "longitude": -63.12699549999999,
+        "timeResolution": {
+          "hoursUsed": false
+        },
+        "timeFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "When: Saturday, October 3rd, 2026 | 5:00 PM – 10:00 PM"
+          },
+          "end": {
+            "source": "explicit",
+            "toClose": false,
+            "evidence": "When: Saturday, October 3rd, 2026 | 5:00 PM – 10:00 PM"
+          }
+        },
+        "_sourceType": "event",
+        "familyFriendlyScore": 15,
+        "familyFriendlyLevel": "unlikely",
+        "familyFriendlyReasons": [
+          "insufficient_family_evidence"
+        ],
+        "familyFriendlyScoringVersion": "family-friendly-v4",
+        "addressUpdatedAt": {
+          "__type": "Timestamp",
+          "seconds": 1790948611,
+          "nanoseconds": 367000000
+        },
+        "lastSeenAt": {
+          "__type": "Timestamp",
+          "seconds": 1790948611,
+          "nanoseconds": 367000000
+        },
+        "createdAt": {
+          "__type": "Timestamp",
+          "seconds": 1790948611,
+          "nanoseconds": 367000000
+        },
+        "imageProvenance": {
+          "version": 1,
+          "primarySource": "post_media",
+          "primaryField": "relevantImageUrl",
+          "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790948569313-z5ts4u.webp",
+          "isFallback": false,
+          "sourceFields": [
+            "relevantImageUrl",
+            "image",
+            "imageUrl",
+            "icon",
+            "mediaUrls"
+          ],
+          "media": [
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790948569313-z5ts4u.webp",
+              "source": "post_media",
+              "field": "relevantImageUrl",
+              "isPrimary": true,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790948569313-z5ts4u.webp",
+              "source": "post_media",
+              "field": "image",
+              "isPrimary": false,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790948569313-z5ts4u.webp",
+              "source": "post_media",
+              "field": "imageUrl",
+              "isPrimary": false,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1774103098355-rkkck0.webp",
+              "source": "profile_image",
+              "field": "icon",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790948569313-z5ts4u.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790948569672-2lp6q9.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790948569905-xlrkr5.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": false
+            }
+          ],
+          "selectionReason": "model_selected_original_image_index",
+          "updatedBy": "parser",
+          "setAt": {
+            "__type": "Timestamp",
+            "seconds": 1790948611,
+            "nanoseconds": 367000000
+          }
+        },
+        "updatedAt": {
+          "__type": "Timestamp",
+          "seconds": 1790948611,
+          "nanoseconds": 367000000
+        }
+      }
+    },
+    {
+      "path": "venues/slug_charlottetownlibrarylearningcentre/events/qW9FUgW70abfUH3G2Sek",
+      "updateTime": {
+        "__type": "Timestamp",
+        "seconds": 1788920510,
+        "nanoseconds": 361728000
+      },
+      "data": {
+        "uniqueId": "1085151360985766_3bea9c5e18fbbd7f",
+        "establishment": "Charlottetown Library Learning Centre",
+        "locationScope": "venue",
+        "locationLabel": "Charlottetown Library Learning Centre",
+        "locationPrecision": "exact",
+        "locationReviewStatus": "not_needed",
+        "eventType": "gatherings_parties",
+        "eventName": "Late Night Artisan Market (open to public)",
+        "description": "Late Night Artisan Market open to public from 5PM - 10PM.",
+        "startDate": "2026-10-03",
+        "endDate": "2026-10-03",
+        "startTime": "17:00",
+        "endTime": "22:00",
+        "price": "$5",
+        "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1785250379854-34p7at.webp",
+        "mediaUrls": [
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1785250379854-34p7at.webp"
+        ],
+        "facebookUrl": "https://www.facebook.com/cllcroomrentals",
+        "sourceTimestamp": {
+          "__type": "Timestamp",
+          "seconds": 1785174405,
+          "nanoseconds": 0
+        },
+        "likes": 1,
+        "shares": 0,
+        "topReactionsCount": 1,
+        "venueId": "slug_charlottetownlibrarylearningcentre",
+        "category": "Gatherings & Parties",
+        "isEvent": "Yes",
+        "isFoodSpecial": "No",
+        "name": "Late Night Artisan Market (open to public)",
+        "address": "Dominion Building, 97 Queen St, Charlottetown, PE C1A 4A9",
+        "ticketPrice": "$5",
+        "externalLinks": [],
+        "isRecurring": "No",
+        "recurringPattern": "none",
+        "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1774103098355-rkkck0.webp",
+        "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1785250379854-34p7at.webp",
+        "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1785250379854-34p7at.webp",
+        "cleanedFacebookUrl": "https://www.facebook.com/cllcroomrentals",
+        "timeResolution": {
+          "hoursUsed": false
+        },
+        "timeFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "OPEN TO PUBLIC FROM 5PM - 10PM"
+          },
+          "end": {
+            "source": "explicit",
+            "toClose": false,
+            "evidence": "OPEN TO PUBLIC FROM 5PM - 10PM"
+          }
+        },
+        "_sourceType": "event",
+        "lastSeenAt": {
+          "__type": "Timestamp",
+          "seconds": 1785250494,
+          "nanoseconds": 910000000
+        },
+        "createdAt": {
+          "__type": "Timestamp",
+          "seconds": 1785250494,
+          "nanoseconds": 910000000
+        },
+        "imageProvenance": {
+          "version": 1,
+          "primarySource": "post_media",
+          "primaryField": "relevantImageUrl",
+          "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1785250379854-34p7at.webp",
+          "isFallback": false,
+          "sourceFields": [
+            "relevantImageUrl",
+            "image",
+            "imageUrl",
+            "icon",
+            "mediaUrls"
+          ],
+          "media": [
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1785250379854-34p7at.webp",
+              "source": "post_media",
+              "field": "relevantImageUrl",
+              "isPrimary": true,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1785250379854-34p7at.webp",
+              "source": "post_media",
+              "field": "image",
+              "isPrimary": false,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1785250379854-34p7at.webp",
+              "source": "post_media",
+              "field": "imageUrl",
+              "isPrimary": false,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1774103098355-rkkck0.webp",
+              "source": "profile_image",
+              "field": "icon",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1785250379854-34p7at.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": false
+            }
+          ],
+          "selectionReason": "model_selected_original_image_index",
+          "updatedBy": "parser",
+          "setAt": {
+            "__type": "Timestamp",
+            "seconds": 1785250494,
+            "nanoseconds": 910000000
+          }
+        },
+        "familyFriendlyLevel": "unlikely",
+        "familyFriendlyScore": 15,
+        "familyFriendlyScoringVersion": "family-friendly-v4",
+        "familyFriendlyReasons": [
+          "insufficient_family_evidence"
+        ],
+        "metadata": {
+          "latitude": 46.2332239,
+          "longitude": -63.1269955
+        },
+        "latitude": 46.2332239,
+        "locationIntegrityUpdatedAt": {
+          "__type": "Timestamp",
+          "seconds": 1788920510,
+          "nanoseconds": 330000000
+        },
+        "longitude": -63.1269955,
+        "updatedAt": {
+          "__type": "Timestamp",
+          "seconds": 1788920510,
+          "nanoseconds": 330000000
+        }
+      }
+    },
+    {
+      "path": "venues/slug_peilibrary",
+      "updateTime": {
+        "__type": "Timestamp",
+        "seconds": 1790256963,
+        "nanoseconds": 451686000
+      },
+      "data": {
+        "sourceSheet": "Contact Info",
+        "pagenameSlug": "peilibrary",
+        "createdAt": {
+          "__type": "Timestamp",
+          "seconds": 1769989997,
+          "nanoseconds": 546000000
+        },
+        "importedAt": {
+          "__type": "Timestamp",
+          "seconds": 1769989997,
+          "nanoseconds": 546000000
+        },
+        "facebookAliasUrls": [],
+        "facebookUrl": "https://www.facebook.com/PEILibrary/",
+        "pagenameNormalized": "pei public library service des bibliotheques publiques ipe",
+        "venueSplitMeta": {
+          "reason": "separate_charlottetown_library_from_peilibrary",
+          "splitToVenueId": "slug_charlottetownlibrarylearningcentre",
+          "splitAt": "2026-02-21T00:48:10.999Z"
+        },
+        "pagenameSearchTokens": [
+          "pei",
+          "public",
+          "library",
+          "service",
+          "bibliotheques",
+          "publiques",
+          "ipe"
+        ],
+        "pageurl": "https://www.facebook.com/PEILibrary/",
+        "title": "PEI Public Library Service des bibliothèques publiques ÎPÉ",
+        "pagename": "PEI Public Library Service des bibliothèques publiques ÎPÉ",
+        "latitude": 46.41977,
+        "coordinates": {
+          "latitude": 46.41977,
+          "longitude": -62.70682
+        },
+        "longitude": -62.70682,
+        "name": "PEI Public Library Service des bibliothèques publiques ÎPÉ",
+        "normalizedName": "pei public library service des biblioth ques publiques p",
+        "profileImage": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1773235688192-zvbh8r.webp",
+        "addressUpdatedAt": {
+          "__type": "Timestamp",
+          "seconds": 1786099929,
+          "nanoseconds": 33000000
+        },
+        "addressSource": "contact_info",
+        "rawAddress": "89 Red Head Road, Morell, PE, Canada, Prince Edward Island",
+        "address": "89 Red Head Road, Morell, PE, Canada",
+        "addressNormalizationIssues": [
+          "duplicate_province_alias",
+          "country_before_province"
+        ],
+        "normalizedAddress": "89 Red Head Road, Morell, PE, Canada",
+        "profileImageSourceSignature": "scontent-bos5-1.xx.fbcdn.net/v/t39.30808-1/450457792_807212744927735_1250708984159399024_n.jpg",
+        "updatedAt": {
+          "__type": "Timestamp",
+          "seconds": 1790256963,
+          "nanoseconds": 436000000
+        }
+      }
+    }
+  ]
+}
