@@ -109,6 +109,7 @@ const report = { generatedAtUtc: new Date().toISOString(), fileId: manifest.file
   apiCostAssumption: 'standard rates; every input token priced uncached; output tokens include reasoning; no Google/Cloud cost',
   representative: summarize(rows.filter(row => row.cohort === 'representative')),
   stress: summarize(rows.filter(row => row.cohort === 'stress')),
+  additional: summarize(rows.filter(row => row.cohort === 'additional')),
   rows };
 await fs.writeFile(path.join(dir, 'score.json'), JSON.stringify(report, null, 2));
 const header = 'rowIndex,cohort,comparable,unavailable,fallback,legacyCount,lunaCount,exactCount,slotOnlyCount,missedCount,extraCount,inputTokens,outputTokens,apiCostUpperUsd,error';
@@ -117,4 +118,6 @@ await fs.writeFile(path.join(dir, 'score.csv'), [header, ...rows.map(row => [row
   row.cohort, row.comparable, row.unavailable, row.fallback, row.legacyCount, row.lunaCount,
   row.exactCount, row.slotOnlyCount, row.missedCount, row.extraCount, row.tokens.input,
   row.tokens.output, row.apiCostUpperUsd.toFixed(6), row.error.slice(0, 200)].map(csv).join(','))].join('\n'));
-console.log(JSON.stringify({ representative: report.representative, stress: report.stress }));
+console.log(JSON.stringify(rows.some(row => row.cohort === 'additional')
+  ? { additional: report.additional }
+  : { representative: report.representative, stress: report.stress }));

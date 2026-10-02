@@ -1318,7 +1318,13 @@ async function parsePostDataCore(
     await cleanupCanaryGeneratedImages([]);
     return [];
   };
+  const lunaLegacyFallbackEnabled = parseBooleanEnv(
+    'LUNA_CANARY_LEGACY_FALLBACK_ENABLED', true
+  );
   const retryCanaryWithLegacy = async (reason: string, detail = ''): Promise<ProcessedEvent[]> => {
+    if (!lunaLegacyFallbackEnabled) {
+      return holdCalendarBandCanary(reason, detail);
+    }
     // The existing route analyzes at most four sources and tiles only the first.
     // Hold a larger gallery or a calendar in another carousel position for review.
     if (!canRetryLunaCanaryWithLegacy(
@@ -1339,7 +1345,8 @@ async function parsePostDataCore(
     return legacyEvents.length > 0 ? legacyEvents
       : holdCalendarBandCanary('legacy_retry_no_items', reason);
   };
-  if (lunaCanarySelected && shouldRetrySeasonalLeagueWithLegacy(combinedText)) {
+  if (lunaCanarySelected && lunaLegacyFallbackEnabled &&
+      shouldRetrySeasonalLeagueWithLegacy(combinedText)) {
     return retryCanaryWithLegacy('seasonal_league_recurrence_unreviewed');
   }
   const modelRouter = resolveModelRouterConfig(cfg);

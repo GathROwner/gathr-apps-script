@@ -44,14 +44,28 @@ const stress = [...candidates].sort((a, b) => b.legacyEvents.length - a.legacyEv
 const stressRows = new Set(stress.map(item => item.rowIndex));
 const rank = item => createHash('sha256').update(`oct2-luna-cohort:${item.postId}`)
   .digest('hex');
-const representative = candidates.filter(item => !stressRows.has(item.rowIndex))
-  .sort((a, b) => rank(a).localeCompare(rank(b))).slice(0, 40);
-const selected = [...representative.map(item => ({ ...item, cohort: 'representative' })),
-  ...stress.map(item => ({ ...item, cohort: 'stress' }))];
+const ranked = candidates.filter(item => !stressRows.has(item.rowIndex))
+  .sort((a, b) => rank(a).localeCompare(rank(b)));
+const additional = process.env.LUNA_COHORT_RUN_LABEL === 'additional';
+const representative = ranked.slice(additional ? 40 : 0, additional ? 80 : 40);
+const selected = additional
+  ? representative.map(item => ({ ...item, cohort: 'additional' }))
+  : [...representative.map(item => ({ ...item, cohort: 'representative' })),
+    ...stress.map(item => ({ ...item, cohort: 'stress' }))];
+if (additional) {
+  if (selected.length !== 40) throw new Error(`Expected 40 additional rows, got ${selected.length}`);
+  const first = JSON.parse(await fs.readFile(path.join(root,
+    'artifacts/luna-oct2-cohort/corrected/manifest.json'), 'utf8'));
+  const firstRows = new Set(first.rows.map(item => item.rowIndex));
+  const overlap = selected.filter(item => firstRows.has(item.rowIndex));
+  if (overlap.length) throw new Error(`Additional cohort overlaps first cohort: ${overlap.map(x => x.rowIndex)}`);
+}
 await fs.writeFile(path.join(outputDir, 'manifest.json'), JSON.stringify({
   fileId, completionUtc: new Date(completion).toISOString(),
   originalRows: latestByRow.size, eligibleRows: candidates.length,
-  selection: '40 SHA256-ranked eligible rows outside the eight highest legacy-output rows; eight stress rows',
+  selection: additional
+    ? 'next 40 SHA256-ranked eligible rows after the first 40, excluding the same eight highest legacy-output rows'
+    : '40 SHA256-ranked eligible rows outside the eight highest legacy-output rows; eight stress rows',
   rows: selected.map(item => ({ snapshotId: item.doc.id, rowIndex: item.rowIndex,
     postId: item.postId, cohort: item.cohort, imageCount: item.imageCount,
     legacyEventCount: item.legacyEvents.length })),
@@ -62,6 +76,9 @@ const count = Number(process.argv[3] || selected.length);
 if (!Number.isInteger(start) || start < 0 || !Number.isInteger(count) || count < 1 ||
     start + count > selected.length) throw new Error('Pass a valid start and count');
 process.env.LUNA_CANARY_ENABLED = 'true';
+if (additional || process.env.LUNA_COHORT_DISABLE_LEGACY_FALLBACK === 'true') {
+  process.env.LUNA_CANARY_LEGACY_FALLBACK_ENABLED = 'false';
+}
 // This flag also suppresses the parser's venue-hours Firestore cache writes.
 // Source HTTP URLs and the mocked upload endpoint still exercise the normal
 // preprocessed full-image path because the URLs are not data:image URLs.
@@ -163,7 +180,7 @@ async function run(item) {
   let error = '';
   try {
     events = await parsePostData({
-      combinedText: snapshot.inputText,
+      combinedText: snapshot.inputText || '',
       mediaUrls: originals.map((_, index) => `${origin}/source-${index}.jpg`),
       sharedPostThumbnails: [],
       userName: snapshot.rowMeta.userName || snapshot.establishment || '',

@@ -1,0 +1,329 @@
+{
+  "fileId": "1OmFzDG0kWiY-k8C-8G6-oGlTBxE3B0cq",
+  "completionUtc": "2026-10-02T15:20:38.000Z",
+  "originalRows": 175,
+  "eligibleRows": 152,
+  "selection": "next 40 SHA256-ranked eligible rows after the first 40, excluding the same eight highest legacy-output rows",
+  "rows": [
+    {
+      "snapshotId": "1OmFzDG0kWiY-k8C-8G6-oGlTBxE3B0cq_131_1790948038218",
+      "rowIndex": 131,
+      "postId": "1748834513631028",
+      "cohort": "additional",
+      "imageCount": 1,
+      "legacyEventCount": 0
+    },
+    {
+      "snapshotId": "1OmFzDG0kWiY-k8C-8G6-oGlTBxE3B0cq_120_1790947805025",
+      "rowIndex": 120,
+      "postId": "1599803172159047",
+      "cohort": "additional",
+      "imageCount": 3,
+      "legacyEventCount": 0
+    },
+    {
+      "snapshotId": "1OmFzDG0kWiY-k8C-8G6-oGlTBxE3B0cq_160_1790948493490",
+      "rowIndex": 160,
+      "postId": "1695515925907716",
+      "cohort": "additional",
+      "imageCount": 1,
+      "legacyEventCount": 2
+    },
+    {
+      "snapshotId": "1OmFzDG0kWiY-k8C-8G6-oGlTBxE3B0cq_245_1790951083747",
+      "rowIndex": 245,
+      "postId": "1374324548017842",
+      "cohort": "additional",
+      "imageCount": 1,
+      "legacyEventCount": 0
+    },
+    {
+      "snapshotId": "1OmFzDG0kWiY-k8C-8G6-oGlTBxE3B0cq_129_1790947934608",
+      "rowIndex": 129,
+      "postId": "1749430986904714",
+      "cohort": "additional",
+      "imageCount": 1,
+      "legacyEventCount": 1
+    },
+    {
+      "snapshotId": "1OmFzDG0kWiY-k8C-8G6-oGlTBxE3B0cq_273_1790951914386",
+      "rowIndex": 273,
+      "postId": "1682531690552002",
+      "cohort": "additional",
+      "imageCount": 3,
+      "legacyEventCount": 1
+    },
+    {
+      "snapshotId": "1OmFzDG0kWiY-k8C-8G6-oGlTBxE3B0cq_218_1790950788193",
+      "rowIndex": 218,
+      "postId": "1139642629048627",
+      "cohort": "additional",
+      "imageCount": 3,
+      "legacyEventCount": 0
+    },
+    {
+      "snapshotId": "1OmFzDG0kWiY-k8C-8G6-oGlTBxE3B0cq_176_1790948786674",
+      "rowIndex": 176,
+      "postId": "1718464436951186",
+      "cohort": "additional",
+      "imageCount": 1,
+      "legacyEventCount": 1
+    },
+    {
+      "snapshotId": "1OmFzDG0kWiY-k8C-8G6-oGlTBxE3B0cq_99_1790947456772",
+      "rowIndex": 99,
+      "postId": "1712676870867105",
+      "cohort": "additional",
+      "imageCount": 1,
+      "legacyEventCount": 0
+    },
+    {
+      "snapshotId": "1OmFzDG0kWiY-k8C-8G6-oGlTBxE3B0cq_356_1790954321059",
+      "rowIndex": 356,
+      "postId": "1527771136045451",
+      "cohort": "additional",
+      "imageCount": 3,
+      "legacyEventCount": 0
+    },
+    {
+      "snapshotId": "1OmFzDG0kWiY-k8C-8G6-oGlTBxE3B0cq_157_1790948419441",
+      "rowIndex": 157,
+      "postId": "1693073192822195",
+      "cohort": "additional",
+      "imageCount": 1,
+      "legacyEventCount": 1
+    },
+    {
+      "snapshotId": "1OmFzDG0kWiY-k8C-8G6-oGlTBxE3B0cq_84_1790946749139",
+      "rowIndex": 84,
+      "postId": "1798196158610587",
+      "cohort": "additional",
+      "imageCount": 1,
+      "legacyEventCount": 0
+    },
+    {
+      "snapshotId": "1OmFzDG0kWiY-k8C-8G6-oGlTBxE3B0cq_258_1790951249134",
+      "rowIndex": 258,
+      "postId": "1916294306491238",
+      "cohort": "additional",
+      "imageCount": 1,
+      "legacyEventCount": 0
+    },
+    {
+      "snapshotId": "1OmFzDG0kWiY-k8C-8G6-oGlTBxE3B0cq_241_1790951060120",
+      "rowIndex": 241,
+      "postId": "1720024430130405",
+      "cohort": "additional",
+      "imageCount": 1,
+      "legacyEventCount": 0
+    },
+    {
+      "snapshotId": "1OmFzDG0kWiY-k8C-8G6-oGlTBxE3B0cq_112_1790947618738",
+      "rowIndex": 112,
+      "postId": "1596143542170959",
+      "cohort": "additional",
+      "imageCount": 1,
+      "legacyEventCount": 0
+    },
+    {
+      "snapshotId": "1OmFzDG0kWiY-k8C-8G6-oGlTBxE3B0cq_298_1790952368400",
+      "rowIndex": 298,
+      "postId": "1622516405908762",
+      "cohort": "additional",
+      "imageCount": 3,
+      "legacyEventCount": 1
+    },
+    {
+      "snapshotId": "1OmFzDG0kWiY-k8C-8G6-oGlTBxE3B0cq_359_1790954397471",
+      "rowIndex": 359,
+      "postId": "1104714968975120",
+      "cohort": "additional",
+      "imageCount": 1,
+      "legacyEventCount": 0
+    },
+    {
+      "snapshotId": "1OmFzDG0kWiY-k8C-8G6-oGlTBxE3B0cq_325_1790953224279",
+      "rowIndex": 325,
+      "postId": "122148165849035455",
+      "cohort": "additional",
+      "imageCount": 1,
+      "legacyEventCount": 3
+    },
+    {
+      "snapshotId": "1OmFzDG0kWiY-k8C-8G6-oGlTBxE3B0cq_23_1790945672908",
+      "rowIndex": 23,
+      "postId": "1547177637450491",
+      "cohort": "additional",
+      "imageCount": 1,
+      "legacyEventCount": 0
+    },
+    {
+      "snapshotId": "1OmFzDG0kWiY-k8C-8G6-oGlTBxE3B0cq_271_1790951823278",
+      "rowIndex": 271,
+      "postId": "1499823918849645",
+      "cohort": "additional",
+      "imageCount": 3,
+      "legacyEventCount": 1
+    },
+    {
+      "snapshotId": "1OmFzDG0kWiY-k8C-8G6-oGlTBxE3B0cq_139_1790948062730",
+      "rowIndex": 139,
+      "postId": "1757184866410008",
+      "cohort": "additional",
+      "imageCount": 1,
+      "legacyEventCount": 0
+    },
+    {
+      "snapshotId": "1OmFzDG0kWiY-k8C-8G6-oGlTBxE3B0cq_272_1790951858217",
+      "rowIndex": 272,
+      "postId": "1499715032193867",
+      "cohort": "additional",
+      "imageCount": 1,
+      "legacyEventCount": 0
+    },
+    {
+      "snapshotId": "1OmFzDG0kWiY-k8C-8G6-oGlTBxE3B0cq_185_1790949629326",
+      "rowIndex": 185,
+      "postId": "1719030666898419",
+      "cohort": "additional",
+      "imageCount": 1,
+      "legacyEventCount": 1
+    },
+    {
+      "snapshotId": "1OmFzDG0kWiY-k8C-8G6-oGlTBxE3B0cq_47_1790946356463",
+      "rowIndex": 47,
+      "postId": "2199279354313490",
+      "cohort": "additional",
+      "imageCount": 1,
+      "legacyEventCount": 0
+    },
+    {
+      "snapshotId": "1OmFzDG0kWiY-k8C-8G6-oGlTBxE3B0cq_290_1790952218885",
+      "rowIndex": 290,
+      "postId": "1678226043897410",
+      "cohort": "additional",
+      "imageCount": 2,
+      "legacyEventCount": 1
+    },
+    {
+      "snapshotId": "1OmFzDG0kWiY-k8C-8G6-oGlTBxE3B0cq_311_1790952776264",
+      "rowIndex": 311,
+      "postId": "1506353274846026",
+      "cohort": "additional",
+      "imageCount": 1,
+      "legacyEventCount": 0
+    },
+    {
+      "snapshotId": "1OmFzDG0kWiY-k8C-8G6-oGlTBxE3B0cq_161_1790948533929",
+      "rowIndex": 161,
+      "postId": "1695422285917080",
+      "cohort": "additional",
+      "imageCount": 1,
+      "legacyEventCount": 0
+    },
+    {
+      "snapshotId": "1OmFzDG0kWiY-k8C-8G6-oGlTBxE3B0cq_274_1790951973418",
+      "rowIndex": 274,
+      "postId": "1682499087221929",
+      "cohort": "additional",
+      "imageCount": 1,
+      "legacyEventCount": 3
+    },
+    {
+      "snapshotId": "1OmFzDG0kWiY-k8C-8G6-oGlTBxE3B0cq_351_1790954253015",
+      "rowIndex": 351,
+      "postId": "122143529637157304",
+      "cohort": "additional",
+      "imageCount": 2,
+      "legacyEventCount": 0
+    },
+    {
+      "snapshotId": "1OmFzDG0kWiY-k8C-8G6-oGlTBxE3B0cq_192_1790950019727",
+      "rowIndex": 192,
+      "postId": "1718696973598258",
+      "cohort": "additional",
+      "imageCount": 1,
+      "legacyEventCount": 0
+    },
+    {
+      "snapshotId": "1OmFzDG0kWiY-k8C-8G6-oGlTBxE3B0cq_343_1790953830661",
+      "rowIndex": 343,
+      "postId": "1560078552811897",
+      "cohort": "additional",
+      "imageCount": 1,
+      "legacyEventCount": 0
+    },
+    {
+      "snapshotId": "1OmFzDG0kWiY-k8C-8G6-oGlTBxE3B0cq_215_1790950771389",
+      "rowIndex": 215,
+      "postId": "1060204563439477",
+      "cohort": "additional",
+      "imageCount": 1,
+      "legacyEventCount": 0
+    },
+    {
+      "snapshotId": "1OmFzDG0kWiY-k8C-8G6-oGlTBxE3B0cq_295_1790952275877",
+      "rowIndex": 295,
+      "postId": "1917491605878917",
+      "cohort": "additional",
+      "imageCount": 3,
+      "legacyEventCount": 0
+    },
+    {
+      "snapshotId": "1OmFzDG0kWiY-k8C-8G6-oGlTBxE3B0cq_35_1790945979279",
+      "rowIndex": 35,
+      "postId": "1550805643753634",
+      "cohort": "additional",
+      "imageCount": 1,
+      "legacyEventCount": 1
+    },
+    {
+      "snapshotId": "1OmFzDG0kWiY-k8C-8G6-oGlTBxE3B0cq_144_1790948212452",
+      "rowIndex": 144,
+      "postId": "1615048507081168",
+      "cohort": "additional",
+      "imageCount": 4,
+      "legacyEventCount": 2
+    },
+    {
+      "snapshotId": "1OmFzDG0kWiY-k8C-8G6-oGlTBxE3B0cq_297_1790952292713",
+      "rowIndex": 297,
+      "postId": "1622899699203766",
+      "cohort": "additional",
+      "imageCount": 3,
+      "legacyEventCount": 0
+    },
+    {
+      "snapshotId": "1OmFzDG0kWiY-k8C-8G6-oGlTBxE3B0cq_191_1790950012774",
+      "rowIndex": 191,
+      "postId": "1719910060143616",
+      "cohort": "additional",
+      "imageCount": 1,
+      "legacyEventCount": 0
+    },
+    {
+      "snapshotId": "1OmFzDG0kWiY-k8C-8G6-oGlTBxE3B0cq_360_1790954404954",
+      "rowIndex": 360,
+      "postId": "1104513318995285",
+      "cohort": "additional",
+      "imageCount": 1,
+      "legacyEventCount": 0
+    },
+    {
+      "snapshotId": "1OmFzDG0kWiY-k8C-8G6-oGlTBxE3B0cq_175_1790948729011",
+      "rowIndex": 175,
+      "postId": "2004555080809039",
+      "cohort": "additional",
+      "imageCount": 1,
+      "legacyEventCount": 1
+    },
+    {
+      "snapshotId": "1OmFzDG0kWiY-k8C-8G6-oGlTBxE3B0cq_324_1790953131067",
+      "rowIndex": 324,
+      "postId": "122148175857035455",
+      "cohort": "additional",
+      "imageCount": 3,
+      "legacyEventCount": 0
+    }
+  ]
+}

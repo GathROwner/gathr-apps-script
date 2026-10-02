@@ -1,5 +1,7 @@
 # October 2 large-parse Luna cohort comparison
 
+> Follow-up: this first comparison used a guarded route with older-model retries. The [Luna-only audit](luna-oct2-extended-comparison.md) adds 40 distinct posts and reruns the fallback posts without retry. Its release assessment supersedes the guarded-only decision below.
+
 ## Scope and method
 
 The completed October 2 dataset `1OmFzDG0kWiY-k8C-8G6-oGlTBxE3B0cq` had 384 source rows and 175 original parse snapshots. Of those snapshots, 152 had one to four source images. This evaluation selected 40 of those rows by a fixed SHA-256 rank, excluding the eight rows with the most saved output, then added those eight dense rows. The 48 selected rows represent 31.6% of the eligible image rows. This is a broad sample, not a claim of statistical representativeness across all post types.
