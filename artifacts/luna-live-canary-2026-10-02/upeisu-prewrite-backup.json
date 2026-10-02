@@ -2610,5 +2610,737 @@
         }
       }
     }
+  ],
+  "venueDocs": [
+    {
+      "path": "venues/slug_upeisu",
+      "updateTime": {
+        "__type": "Timestamp",
+        "seconds": 1790950666,
+        "nanoseconds": 276789000
+      },
+      "data": {
+        "sourceSheet": "Contact Info",
+        "hoursSource": "Google Places",
+        "pagenameSlug": "upeisu",
+        "facebookUrl": "https://www.facebook.com/UPEISU/",
+        "operatingHoursJson": "{\"utc_offset_minutes\":0,\"week\":[{\"weekday\":\"Monday\",\"is24h\":false,\"segments\":[]},{\"weekday\":\"Tuesday\",\"is24h\":false,\"segments\":[]},{\"weekday\":\"Wednesday\",\"is24h\":false,\"segments\":[]},{\"weekday\":\"Thursday\",\"is24h\":false,\"segments\":[{\"open\":\"19:00\",\"close\":\"22:30\",\"overnight\":false}]},{\"weekday\":\"Friday\",\"is24h\":false,\"segments\":[]},{\"weekday\":\"Saturday\",\"is24h\":false,\"segments\":[{\"open\":\"19:00\",\"close\":\"22:30\",\"overnight\":false}]},{\"weekday\":\"Sunday\",\"is24h\":false,\"segments\":[]}]}",
+        "operatingHoursParsed": {
+          "week": [
+            {
+              "weekday": "Monday",
+              "is24h": false,
+              "segments": []
+            },
+            {
+              "weekday": "Tuesday",
+              "is24h": false,
+              "segments": []
+            },
+            {
+              "weekday": "Wednesday",
+              "is24h": false,
+              "segments": []
+            },
+            {
+              "weekday": "Thursday",
+              "is24h": false,
+              "segments": [
+                {
+                  "open": "19:00",
+                  "close": "22:30",
+                  "overnight": false
+                }
+              ]
+            },
+            {
+              "weekday": "Friday",
+              "is24h": false,
+              "segments": []
+            },
+            {
+              "weekday": "Saturday",
+              "is24h": false,
+              "segments": [
+                {
+                  "open": "19:00",
+                  "close": "22:30",
+                  "overnight": false
+                }
+              ]
+            },
+            {
+              "weekday": "Sunday",
+              "is24h": false,
+              "segments": []
+            }
+          ],
+          "utc_offset_minutes": 0
+        },
+        "pageurl": "https://www.facebook.com/UPEISU/",
+        "category1": "Education",
+        "title": "UPEISU | Charlottetown PE",
+        "pagenameNormalized": "upeisu charlottetown pe",
+        "instagramUrl": "https://www.instagram.com/upeisu/",
+        "pagenameSearchTokens": [
+          "upeisu",
+          "charlottetown",
+          "pe"
+        ],
+        "categories": [
+          "Education"
+        ],
+        "email": "reception@upeisu.ca",
+        "pagename": "UPEISU | Charlottetown PE",
+        "createdAt": {
+          "__type": "Timestamp",
+          "seconds": 1769989997,
+          "nanoseconds": 546000000
+        },
+        "importedAt": {
+          "__type": "Timestamp",
+          "seconds": 1769989997,
+          "nanoseconds": 546000000
+        },
+        "name": "UPEISU | Charlottetown PE",
+        "normalizedName": "upeisu charlottetown pe",
+        "province": "PE",
+        "postalCode": "C1A 4P3",
+        "profileImage": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1788272615042-2sifmb.webp",
+        "aliases": [
+          "W.A. Murphy Student Centre Hallway (concourse)",
+          "McMillan Hall, W.A. Murphy Student Centre",
+          "Concourse of the W.A Murphy Student Centre",
+          "Concourse of the W.A. Murphy Student Centre",
+          "Concourse of W.A Murphy Student Centre",
+          "W.A. Murphy Student Centre Concourse",
+          "W.A Murphy Student Centre Concourse",
+          "Day Lounge, W.A. Murphy Student Centre",
+          "UPEISU Office, second floor of the W.A. Murphy Student Centre (across from Tim Hortons)",
+          "UPEISU Office",
+          "Panther Pantry at UPEISU Office",
+          "UPEISU Panther Pantry",
+          "McMillan Hall"
+        ],
+        "aliasesNormalized": [
+          "w a murphy student centre hallway concourse",
+          "mcmillan hall w a murphy student centre",
+          "concourse of the w a murphy student centre",
+          "concourse of w a murphy student centre",
+          "w a murphy student centre concourse",
+          "day lounge w a murphy student centre",
+          "upeisu office second floor of the w a murphy student centre across from tim hortons",
+          "upeisu office",
+          "panther pantry at upeisu office",
+          "upeisu panther pantry",
+          "mcmillan hall"
+        ],
+        "website": "http://www.upeisu.ca/",
+        "address": "550 University Ave, Charlottetown, PE C1A 4P3, Canada",
+        "updatedBy": "codex-approved-upeisu-place-metadata-repair-2026-09-30",
+        "addressNormalizationIssues": [],
+        "googlePlaceId": "ChIJDXPmPrVSXksRIzGbGL01ySw",
+        "googleRating": 4.4,
+        "city": "Charlottetown",
+        "latitude": 46.2570778,
+        "placeId": "ChIJDXPmPrVSXksRIzGbGL01ySw",
+        "coordinates": {
+          "latitude": 46.2570778,
+          "longitude": -63.1406754
+        },
+        "googlePlaceTypes": [
+          "educational_institution",
+          "point_of_interest",
+          "establishment"
+        ],
+        "googleUserRatingsTotal": 8,
+        "placeDetailsParsed": {
+          "formatted_address": "5 Church Ave, Souris, PE C0A 2B0, Canada",
+          "current_opening_hours": {
+            "open_now": false,
+            "periods": [
+              {
+                "close": {
+                  "date": "2025-09-25",
+                  "day": 4,
+                  "time": "2230"
+                },
+                "open": {
+                  "date": "2025-09-25",
+                  "day": 4,
+                  "time": "1900"
+                }
+              },
+              {
+                "close": {
+                  "date": "2025-09-20",
+                  "day": 6,
+                  "time": "2230"
+                },
+                "open": {
+                  "date": "2025-09-20",
+                  "day": 6,
+                  "time": "1900"
+                }
+              }
+            ],
+            "weekday_text": [
+              "Monday: Closed",
+              "Tuesday: Closed",
+              "Wednesday: Closed",
+              "Thursday: 7:00 – 10:30 PM",
+              "Friday: Closed",
+              "Saturday: 7:00 – 10:30 PM",
+              "Sunday: Closed"
+            ]
+          },
+          "user_ratings_total": 11,
+          "business_status": "OPERATIONAL",
+          "opening_hours": {
+            "open_now": false,
+            "periods": [
+              {
+                "close": {
+                  "day": 4,
+                  "time": "2230"
+                },
+                "open": {
+                  "day": 4,
+                  "time": "1900"
+                }
+              },
+              {
+                "close": {
+                  "day": 6,
+                  "time": "2230"
+                },
+                "open": {
+                  "day": 6,
+                  "time": "1900"
+                }
+              }
+            ],
+            "weekday_text": [
+              "Monday: Closed",
+              "Tuesday: Closed",
+              "Wednesday: Closed",
+              "Thursday: 7:00 – 10:30 PM",
+              "Friday: Closed",
+              "Saturday: 7:00 – 10:30 PM",
+              "Sunday: Closed"
+            ]
+          },
+          "international_phone_number": "+1 902-687-3376",
+          "place_id": "ChIJTzJAtHMRXksRjx4sKJ0EyN8",
+          "url": "https://maps.google.com/?cid=16125143538830417551",
+          "formattedPhoneNumber": "(902) 566-0534",
+          "types": [
+            "educational_institution",
+            "point_of_interest",
+            "establishment"
+          ],
+          "website": "http://www.upeisu.ca/",
+          "formattedAddress": "550 University Ave, Charlottetown, PE C1A 4P3, Canada",
+          "name": "W.A. Murphy Student Centre",
+          "placeId": "ChIJDXPmPrVSXksRIzGbGL01ySw",
+          "rating": 4.4,
+          "userRatingsTotal": 8,
+          "businessStatus": "OPERATIONAL",
+          "location": {
+            "lng": -63.1406754,
+            "lat": 46.2570778
+          },
+          "openingHours": {
+            "periods": [
+              {
+                "open": {
+                  "day": 1,
+                  "time": "09:00"
+                },
+                "close": {
+                  "day": 1,
+                  "time": "16:00"
+                }
+              },
+              {
+                "open": {
+                  "day": 2,
+                  "time": "09:00"
+                },
+                "close": {
+                  "day": 2,
+                  "time": "16:00"
+                }
+              },
+              {
+                "open": {
+                  "day": 3,
+                  "time": "09:00"
+                },
+                "close": {
+                  "day": 3,
+                  "time": "16:00"
+                }
+              },
+              {
+                "open": {
+                  "day": 4,
+                  "time": "09:00"
+                },
+                "close": {
+                  "day": 4,
+                  "time": "16:00"
+                }
+              },
+              {
+                "open": {
+                  "day": 5,
+                  "time": "09:00"
+                },
+                "close": {
+                  "day": 5,
+                  "time": "16:00"
+                }
+              }
+            ],
+            "weekdayText": [
+              "Monday: 9:00 AM - 4:00 PM",
+              "Tuesday: 9:00 AM - 4:00 PM",
+              "Wednesday: 9:00 AM - 4:00 PM",
+              "Thursday: 9:00 AM - 4:00 PM",
+              "Friday: 9:00 AM - 4:00 PM",
+              "Saturday: Closed",
+              "Sunday: Closed"
+            ]
+          }
+        },
+        "placeDetailsJson": "{\"placeId\":\"ChIJDXPmPrVSXksRIzGbGL01ySw\",\"name\":\"W.A. Murphy Student Centre\",\"formattedAddress\":\"550 University Ave, Charlottetown, PE C1A 4P3, Canada\",\"formattedPhoneNumber\":\"(902) 566-0534\",\"website\":\"http://www.upeisu.ca/\",\"location\":{\"lat\":46.2570778,\"lng\":-63.1406754},\"types\":[\"educational_institution\",\"point_of_interest\",\"establishment\"],\"businessStatus\":\"OPERATIONAL\",\"openingHours\":{\"weekdayText\":[\"Monday: 9:00 AM - 4:00 PM\",\"Tuesday: 9:00 AM - 4:00 PM\",\"Wednesday: 9:00 AM - 4:00 PM\",\"Thursday: 9:00 AM - 4:00 PM\",\"Friday: 9:00 AM - 4:00 PM\",\"Saturday: Closed\",\"Sunday: Closed\"],\"periods\":[{\"open\":{\"day\":1,\"time\":\"09:00\"},\"close\":{\"day\":1,\"time\":\"16:00\"}},{\"open\":{\"day\":2,\"time\":\"09:00\"},\"close\":{\"day\":2,\"time\":\"16:00\"}},{\"open\":{\"day\":3,\"time\":\"09:00\"},\"close\":{\"day\":3,\"time\":\"16:00\"}},{\"open\":{\"day\":4,\"time\":\"09:00\"},\"close\":{\"day\":4,\"time\":\"16:00\"}},{\"open\":{\"day\":5,\"time\":\"09:00\"},\"close\":{\"day\":5,\"time\":\"16:00\"}}]},\"rating\":4.4,\"userRatingsTotal\":8}",
+        "addressUpdatedAt": {
+          "__type": "Timestamp",
+          "seconds": 1790783847,
+          "nanoseconds": 802000000
+        },
+        "addressSource": "google_places",
+        "rawAddress": "550 University Ave, Charlottetown, PE C1A 4P3, Canada",
+        "operatingHoursUpdatedAt": {
+          "__type": "Timestamp",
+          "seconds": 1790783847,
+          "nanoseconds": 802000000
+        },
+        "phone": "(902) 566-0534",
+        "operatingHours": {
+          "sunday": {
+            "closed": true,
+            "close": "",
+            "open": ""
+          },
+          "saturday": {
+            "closed": true,
+            "close": "",
+            "open": ""
+          },
+          "tuesday": {
+            "close": "16:00",
+            "open": "09:00"
+          },
+          "friday": {
+            "close": "16:00",
+            "open": "09:00"
+          },
+          "thursday": {
+            "close": "16:00",
+            "open": "09:00"
+          },
+          "wednesday": {
+            "close": "16:00",
+            "open": "09:00"
+          },
+          "monday": {
+            "close": "16:00",
+            "open": "09:00"
+          }
+        },
+        "normalizedAddress": "550 University Ave, Charlottetown, PE C1A 4P3, Canada",
+        "googleBusinessStatus": "OPERATIONAL",
+        "longitude": -63.1406754,
+        "profileImageSourceSignature": "scontent-mia5-2.xx.fbcdn.net/v/t39.30808-1/790626356_1707243881409181_1761851537950546165_n.jpg",
+        "updatedAt": {
+          "__type": "Timestamp",
+          "seconds": 1790950666,
+          "nanoseconds": 261000000
+        }
+      }
+    },
+    {
+      "path": "venues/fb_100052099464909",
+      "updateTime": {
+        "__type": "Timestamp",
+        "seconds": 1789821802,
+        "nanoseconds": 874739000
+      },
+      "data": {
+        "sourceSheet": "Contact Info",
+        "isBusinessPageActive": false,
+        "adStatus": "This Page is not currently running ads.",
+        "placeId": "ChIJRVF_cUpTXksRKbGmKBWIt00",
+        "title": "The Fox & Crow | Charlottetown PE",
+        "operatingHoursJson": "{\"utc_offset_minutes\":0,\"week\":[{\"weekday\":\"Monday\",\"is24h\":false,\"segments\":[{\"open\":\"08:00\",\"close\":\"19:00\",\"overnight\":false}]},{\"weekday\":\"Tuesday\",\"is24h\":false,\"segments\":[{\"open\":\"08:00\",\"close\":\"19:00\",\"overnight\":false}]},{\"weekday\":\"Wednesday\",\"is24h\":false,\"segments\":[{\"open\":\"08:00\",\"close\":\"21:00\",\"overnight\":false}]},{\"weekday\":\"Thursday\",\"is24h\":false,\"segments\":[{\"open\":\"08:00\",\"close\":\"19:00\",\"overnight\":false}]},{\"weekday\":\"Friday\",\"is24h\":false,\"segments\":[{\"open\":\"08:00\",\"close\":\"19:00\",\"overnight\":false}]},{\"weekday\":\"Saturday\",\"is24h\":false,\"segments\":[]},{\"weekday\":\"Sunday\",\"is24h\":false,\"segments\":[]}]}",
+        "categories": [
+          "Page",
+          "Pub"
+        ],
+        "email": "thefoxandcrow@upeisu.ca",
+        "likes": 1369,
+        "pagename": "The Fox & Crow | Charlottetown PE",
+        "website": "upeisu.ca",
+        "hoursSource": "Google Places",
+        "category0": "Page",
+        "ratingOverall": 3.9,
+        "category1": "Pub",
+        "facebookId": "100052099464909",
+        "services": [
+          "Dine-in",
+          "In-store pickup"
+        ],
+        "creationDate": "September 4, 2018",
+        "pageId": "100052099464909",
+        "ratingCount": 32,
+        "placeDetailsParsed": {
+          "formatted_address": "550 University Ave, Charlottetown, PE C1A 4P3, Canada",
+          "types": [
+            "establishment",
+            "food",
+            "point_of_interest",
+            "restaurant"
+          ],
+          "website": "https://facebook.com/264691060838233/",
+          "current_opening_hours": {
+            "open_now": true,
+            "periods": [
+              {
+                "close": {
+                  "date": "2025-09-29",
+                  "day": 1,
+                  "time": "1900"
+                },
+                "open": {
+                  "date": "2025-09-29",
+                  "day": 1,
+                  "time": "0800"
+                }
+              },
+              {
+                "close": {
+                  "date": "2025-09-23",
+                  "day": 2,
+                  "time": "1900"
+                },
+                "open": {
+                  "date": "2025-09-23",
+                  "day": 2,
+                  "time": "0800"
+                }
+              },
+              {
+                "close": {
+                  "date": "2025-09-24",
+                  "day": 3,
+                  "time": "2100"
+                },
+                "open": {
+                  "date": "2025-09-24",
+                  "day": 3,
+                  "time": "0800"
+                }
+              },
+              {
+                "close": {
+                  "date": "2025-09-25",
+                  "day": 4,
+                  "time": "1900"
+                },
+                "open": {
+                  "date": "2025-09-25",
+                  "day": 4,
+                  "time": "0800"
+                }
+              },
+              {
+                "close": {
+                  "date": "2025-09-26",
+                  "day": 5,
+                  "time": "1900"
+                },
+                "open": {
+                  "date": "2025-09-26",
+                  "day": 5,
+                  "time": "0800"
+                }
+              }
+            ],
+            "weekday_text": [
+              "Monday: 8:00 AM – 7:00 PM",
+              "Tuesday: 8:00 AM – 7:00 PM",
+              "Wednesday: 8:00 AM – 9:00 PM",
+              "Thursday: 8:00 AM – 7:00 PM",
+              "Friday: 8:00 AM – 7:00 PM",
+              "Saturday: Closed",
+              "Sunday: Closed"
+            ]
+          },
+          "user_ratings_total": 8,
+          "business_status": "OPERATIONAL",
+          "name": "The Fox & Crow",
+          "rating": 4.6,
+          "opening_hours": {
+            "open_now": true,
+            "periods": [
+              {
+                "close": {
+                  "day": 1,
+                  "time": "1900"
+                },
+                "open": {
+                  "day": 1,
+                  "time": "0800"
+                }
+              },
+              {
+                "close": {
+                  "day": 2,
+                  "time": "1900"
+                },
+                "open": {
+                  "day": 2,
+                  "time": "0800"
+                }
+              },
+              {
+                "close": {
+                  "day": 3,
+                  "time": "2100"
+                },
+                "open": {
+                  "day": 3,
+                  "time": "0800"
+                }
+              },
+              {
+                "close": {
+                  "day": 4,
+                  "time": "1900"
+                },
+                "open": {
+                  "day": 4,
+                  "time": "0800"
+                }
+              },
+              {
+                "close": {
+                  "day": 5,
+                  "time": "1900"
+                },
+                "open": {
+                  "day": 5,
+                  "time": "0800"
+                }
+              }
+            ],
+            "weekday_text": [
+              "Monday: 8:00 AM – 7:00 PM",
+              "Tuesday: 8:00 AM – 7:00 PM",
+              "Wednesday: 8:00 AM – 9:00 PM",
+              "Thursday: 8:00 AM – 7:00 PM",
+              "Friday: 8:00 AM – 7:00 PM",
+              "Saturday: Closed",
+              "Sunday: Closed"
+            ]
+          },
+          "place_id": "ChIJRVF_cUpTXksRKbGmKBWIt00",
+          "url": "https://maps.google.com/?cid=5600094286116204841"
+        },
+        "placeDetailsJson": "{\"business_status\":\"OPERATIONAL\",\"current_opening_hours\":{\"open_now\":true,\"periods\":[{\"close\":{\"date\":\"2025-09-29\",\"day\":1,\"time\":\"1900\"},\"open\":{\"date\":\"2025-09-29\",\"day\":1,\"time\":\"0800\"}},{\"close\":{\"date\":\"2025-09-23\",\"day\":2,\"time\":\"1900\"},\"open\":{\"date\":\"2025-09-23\",\"day\":2,\"time\":\"0800\"}},{\"close\":{\"date\":\"2025-09-24\",\"day\":3,\"time\":\"2100\"},\"open\":{\"date\":\"2025-09-24\",\"day\":3,\"time\":\"0800\"}},{\"close\":{\"date\":\"2025-09-25\",\"day\":4,\"time\":\"1900\"},\"open\":{\"date\":\"2025-09-25\",\"day\":4,\"time\":\"0800\"}},{\"close\":{\"date\":\"2025-09-26\",\"day\":5,\"time\":\"1900\"},\"open\":{\"date\":\"2025-09-26\",\"day\":5,\"time\":\"0800\"}}],\"weekday_text\":[\"Monday: 8:00 AM – 7:00 PM\",\"Tuesday: 8:00 AM – 7:00 PM\",\"Wednesday: 8:00 AM – 9:00 PM\",\"Thursday: 8:00 AM – 7:00 PM\",\"Friday: 8:00 AM – 7:00 PM\",\"Saturday: Closed\",\"Sunday: Closed\"]},\"formatted_address\":\"550 University Ave, Charlottetown, PE C1A 4P3, Canada\",\"name\":\"The Fox & Crow\",\"opening_hours\":{\"open_now\":true,\"periods\":[{\"close\":{\"day\":1,\"time\":\"1900\"},\"open\":{\"day\":1,\"time\":\"0800\"}},{\"close\":{\"day\":2,\"time\":\"1900\"},\"open\":{\"day\":2,\"time\":\"0800\"}},{\"close\":{\"day\":3,\"time\":\"2100\"},\"open\":{\"day\":3,\"time\":\"0800\"}},{\"close\":{\"day\":4,\"time\":\"1900\"},\"open\":{\"day\":4,\"time\":\"0800\"}},{\"close\":{\"day\":5,\"time\":\"1900\"},\"open\":{\"day\":5,\"time\":\"0800\"}}],\"weekday_text\":[\"Monday: 8:00 AM – 7:00 PM\",\"Tuesday: 8:00 AM – 7:00 PM\",\"Wednesday: 8:00 AM – 9:00 PM\",\"Thursday: 8:00 AM – 7:00 PM\",\"Friday: 8:00 AM – 7:00 PM\",\"Saturday: Closed\",\"Sunday: Closed\"]},\"place_id\":\"ChIJRVF_cUpTXksRKbGmKBWIt00\",\"rating\":4.6,\"types\":[\"establishment\",\"food\",\"point_of_interest\",\"restaurant\"],\"url\":\"https://maps.google.com/?cid=5600094286116204841\",\"user_ratings_total\":8,\"website\":\"https://facebook.com/264691060838233/\"}",
+        "followers": 1458,
+        "operatingHoursParsed": {
+          "week": [
+            {
+              "weekday": "Monday",
+              "is24h": false,
+              "segments": [
+                {
+                  "open": "08:00",
+                  "close": "19:00",
+                  "overnight": false
+                }
+              ]
+            },
+            {
+              "weekday": "Tuesday",
+              "is24h": false,
+              "segments": [
+                {
+                  "open": "08:00",
+                  "close": "19:00",
+                  "overnight": false
+                }
+              ]
+            },
+            {
+              "weekday": "Wednesday",
+              "is24h": false,
+              "segments": [
+                {
+                  "open": "08:00",
+                  "close": "21:00",
+                  "overnight": false
+                }
+              ]
+            },
+            {
+              "weekday": "Thursday",
+              "is24h": false,
+              "segments": [
+                {
+                  "open": "08:00",
+                  "close": "19:00",
+                  "overnight": false
+                }
+              ]
+            },
+            {
+              "weekday": "Friday",
+              "is24h": false,
+              "segments": [
+                {
+                  "open": "08:00",
+                  "close": "19:00",
+                  "overnight": false
+                }
+              ]
+            },
+            {
+              "weekday": "Saturday",
+              "is24h": false,
+              "segments": []
+            },
+            {
+              "weekday": "Sunday",
+              "is24h": false,
+              "segments": []
+            }
+          ],
+          "utc_offset_minutes": 0
+        },
+        "hoursFetchedAt": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1758634407382.webp",
+        "pagenameNormalized": "the fox crow charlottetown pe",
+        "phone": "+1 902-566-0366",
+        "info1": "18 talking about this",
+        "info0": "The Fox & Crow, Charlottetown, Prince Edward Island. 1,369 likes",
+        "instagramUrl": "https://www.instagram.com/usuthefoxandcrow/",
+        "pagenameSearchTokens": [
+          "the",
+          "fox",
+          "crow",
+          "charlottetown",
+          "pe"
+        ],
+        "info2": "205 were here. Your campus pub and cafe\nOwned by you -...",
+        "pageAdLibraryId": "264691060838233",
+        "latitude": 46.2578518,
+        "longitude": -63.1406696,
+        "facebookUrl": "https://www.facebook.com/UPEISUTheFoxandCrow/",
+        "pagenameSlug": "upeisuthefoxandcrow",
+        "pageurl": "https://www.facebook.com/UPEISUTheFoxandCrow/",
+        "createdAt": {
+          "__type": "Timestamp",
+          "seconds": 1769989997,
+          "nanoseconds": 546000000
+        },
+        "importedAt": {
+          "__type": "Timestamp",
+          "seconds": 1769989997,
+          "nanoseconds": 546000000
+        },
+        "coordinates": {
+          "latitude": 46.2578518,
+          "longitude": -63.1406696
+        },
+        "name": "The Fox & Crow | Charlottetown PE",
+        "normalizedName": "the fox crow charlottetown pe",
+        "profileImage": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1773753075007-l233hs.webp",
+        "addressUpdatedAt": {
+          "__type": "Timestamp",
+          "seconds": 1786099929,
+          "nanoseconds": 33000000
+        },
+        "addressSource": "google_places",
+        "rawAddress": "550 University Avenue W.A. Murphy Student Center , Charlottetown, PE, Canada, Prince Edward Island",
+        "address": "550 University Avenue W.A. Murphy Student Center, Charlottetown, PE, Canada",
+        "addressNormalizationIssues": [
+          "duplicate_province_alias",
+          "country_before_province"
+        ],
+        "normalizedAddress": "550 University Avenue W.A. Murphy Student Center, Charlottetown, PE, Canada",
+        "profileImageSourceSignature": "scontent-ord5-2.xx.fbcdn.net/v/t39.30808-1/291839269_528030632276914_3982106645075641995_n.jpg",
+        "updatedAt": {
+          "__type": "Timestamp",
+          "seconds": 1789821802,
+          "nanoseconds": 861000000
+        }
+      }
+    },
+    {
+      "path": "venues/slug_upeiturffield",
+      "updateTime": {
+        "__type": "Timestamp",
+        "seconds": 1782380861,
+        "nanoseconds": 364219000
+      },
+      "data": {
+        "name": "UPEI Turf Field",
+        "pagename": "UPEI Turf Field",
+        "title": "UPEI Turf Field",
+        "normalizedName": "upei turf field",
+        "pagenameNormalized": "upei turf field",
+        "address": "550 University Ave, Charlottetown, PE C1A 0G7, Canada",
+        "city": "Charlottetown",
+        "province": "PE",
+        "aliases": [
+          "UPEI Turf Field"
+        ],
+        "aliasesNormalized": [
+          "upei turf field"
+        ],
+        "category": "stadium",
+        "latitude": 46.2609591,
+        "longitude": -63.14033680000001,
+        "coordinates": {
+          "__type": "GeoPoint",
+          "latitude": 46.2609591,
+          "longitude": -63.14033680000001
+        },
+        "googlePlaceTypes": [
+          "stadium",
+          "event_venue",
+          "sports_complex",
+          "sports_activity_location",
+          "point_of_interest",
+          "establishment"
+        ],
+        "googleBusinessStatus": "OPERATIONAL",
+        "source": "unknown_venue_manual_review",
+        "createdBy": "codex-approved-daily-unknown-venue-plan-2026-06-25",
+        "createdAt": {
+          "__type": "Timestamp",
+          "seconds": 1782380857,
+          "nanoseconds": 118000000
+        },
+        "updatedAt": {
+          "__type": "Timestamp",
+          "seconds": 1782380857,
+          "nanoseconds": 118000000
+        }
+      }
+    }
   ]
 }
