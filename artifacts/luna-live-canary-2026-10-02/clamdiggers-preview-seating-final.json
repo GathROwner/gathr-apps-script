@@ -1,0 +1,45 @@
+{
+  "snapshotId": "1um-iVMpR_c0xhUimqoOqEMx3tXY0l2Qj_94_1790971315612",
+  "postId": "1941319207262021",
+  "rowVenue": "fb_100041518821722",
+  "payloads": [
+    {
+      "name": "Taste of Georgetown: Garden Lunch Experience",
+      "date": "2026-10-02",
+      "time": "12:00",
+      "endDate": "2026-10-02",
+      "uniqueId": "1941319207262021_4df2e164a7076976",
+      "venueId": "GHVmi7KY2DhZIQQbVc0p",
+      "category": "Gatherings & Parties",
+      "ticketLink": "https://fallflavours.ca/signature-event/taste-of-georgetown-2",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790971314869-p6xxmp.webp",
+      "mediaCount": 0,
+      "duplicate": {
+        "isDuplicate": true,
+        "eventId": "cDfflnOoVbcq4Qr3mlNa",
+        "existingName": "Taste of Georgetown (Lunch seating)",
+        "existingUniqueId": "1697946452333552_427c3487ba27f7a7"
+      },
+      "error": ""
+    },
+    {
+      "name": "Taste of Georgetown: Evening Dinner Experience",
+      "date": "2026-10-02",
+      "time": "18:00",
+      "endDate": "2026-10-02",
+      "uniqueId": "1941319207262021_fc6193e9f02f06ab",
+      "venueId": "GHVmi7KY2DhZIQQbVc0p",
+      "category": "Gatherings & Parties",
+      "ticketLink": "https://fallflavours.ca/signature-event/taste-of-georgetown-2",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790971314869-p6xxmp.webp",
+      "mediaCount": 0,
+      "duplicate": {
+        "isDuplicate": true,
+        "eventId": "oGCP0YsfkwGOpBlxM1AB",
+        "existingName": "Taste of Georgetown (Dinner seating)",
+        "existingUniqueId": "1697946452333552_d136a8f244c64f8b"
+      },
+      "error": ""
+    }
+  ]
+}
