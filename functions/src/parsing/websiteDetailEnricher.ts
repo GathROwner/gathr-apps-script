@@ -797,9 +797,6 @@ function applyWebsiteCandidates(
   summary: VenueWebsiteEnrichmentSummary,
   combinedText: string
 ): { items: ExtractedItem[]; summary: VenueWebsiteEnrichmentSummary } {
-  const reconciledItems = reconcileRepeatedSameDaySeatingTimes(items, candidates, summary);
-  if (reconciledItems) return { items: reconciledItems, summary };
-
   const nextItems = items.map((item) => {
     if (!shouldAttemptForItem(item)) return item;
 
@@ -860,6 +857,9 @@ function applyWebsiteCandidates(
     return item;
   });
 
+  const reconciledItems = reconcileSameDayNamedSeatingTimes(nextItems, candidates, summary, items);
+  if (reconciledItems) return { items: reconciledItems, summary };
+
   if (nextItems.length === 1 && hasExplicitMultipleSeatingCue(combinedText)) {
     const original = items[0];
     const candidate = findBestCandidateForItem(original, candidates);
@@ -900,12 +900,17 @@ function hasExplicitMultipleSeatingCue(text: string): boolean {
   return (countCue.test(cue) && seatingCue.test(cue));
 }
 
-function reconcileRepeatedSameDaySeatingTimes(
+function reconcileSameDayNamedSeatingTimes(
   items: ExtractedItem[],
   candidates: WebsiteCandidate[],
-  summary: VenueWebsiteEnrichmentSummary
+  summary: VenueWebsiteEnrichmentSummary,
+  originalItems: ExtractedItem[]
 ): ExtractedItem[] | null {
-  for (const group of findRepeatedSameDayStartTimeGroups(items)) {
+  const groups = [
+    ...findRepeatedSameDayStartTimeGroups(items),
+    ...findMissingSameDayStartTimeGroups(items),
+  ];
+  for (const group of groups) {
     for (const candidate of candidates) {
       const seatings = candidate.namedSeatings || [];
       if (!candidate.date || candidate.date !== group.date ||
@@ -965,7 +970,7 @@ function reconcileRepeatedSameDaySeatingTimes(
       }
 
       if (changedCount === 0) continue;
-      summary.appliedCount += group.indices.length;
+      summary.appliedCount += group.indices.filter(index => items[index] === originalItems[index]).length;
       summary.updatedFields.times += changedCount;
       summary.reason = 'reconciled_named_website_seating_times';
       return nextItems;
@@ -985,6 +990,19 @@ function findRepeatedSameDayStartTimeGroups(items: ExtractedItem[]): Array<{ dat
     const group = groups.get(key) || { date, indices: [] };
     group.indices.push(index);
     groups.set(key, group);
+  });
+  return Array.from(groups.values()).filter(group => group.indices.length >= 2);
+}
+
+function findMissingSameDayStartTimeGroups(items: ExtractedItem[]): Array<{ date: string; indices: number[] }> {
+  const groups = new Map<string, { date: string; indices: number[] }>();
+  (items || []).forEach((item, index) => {
+    if (!isEventishItem(item)) return;
+    const date = String(item.date || '').trim();
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || normalizeWebsiteTime(String(item.startTime || ''))) return;
+    const group = groups.get(date) || { date, indices: [] };
+    group.indices.push(index);
+    groups.set(date, group);
   });
   return Array.from(groups.values()).filter(group => group.indices.length >= 2);
 }

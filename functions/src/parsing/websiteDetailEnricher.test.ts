@@ -291,6 +291,72 @@ test('repeated same-day starts reconcile to uniquely named linked-page seatings 
   }
 });
 
+test('unknown extracted seating times resolve from their uniquely named linked-page sessions', async () => {
+  const detailUrl = 'https://fallflavours.ca/signature-event/taste-of-georgetown-2';
+  const restoreFetch = installFetchMap({
+    [detailUrl]: htmlResponse(
+      '<html><head><meta property="og:title" content="Taste of Georgetown"></head><body>' +
+      '<h1>Taste of Georgetown</h1><p>Friday, October 2, 2026. Two distinct culinary experiences.</p>' +
+      '<p><strong><em>Garden Lunch Experience (12:00 p.m. – approx. 2:00 p.m.)</em></strong></p>' +
+      '<p><em><strong>Evening Dinner Experience (6:00 p.m. – approx. 9:00 p.m.)</strong></em></p>' +
+      '</body></html>'
+    ),
+  });
+
+  try {
+    const items = [
+      buildEventItem({
+        name: 'Taste of Georgetown ? Lunch Seating',
+        date: '2026-10-02',
+        startTime: 'unknown',
+        endTime: '',
+      }),
+      buildEventItem({
+        name: 'Taste of Georgetown ? Dinner Seating',
+        date: '2026-10-02',
+        startTime: 'unknown',
+        endTime: '',
+      }),
+    ];
+    const result = await enrichEventsFromVenueWebsite(
+      items, `Tickets and details: ${detailUrl}`, '', '2026-10-01T12:00:00.000Z',
+      undefined, DEFAULT_PARSING_CONFIG
+    );
+
+    assert.equal(result.summary.reason, 'reconciled_named_website_seating_times');
+    assert.equal(result.summary.appliedCount, 2);
+    assert.deepEqual(result.items.map(item => [item.name, item.date, item.startTime, item.endTime]), [
+      ['Taste of Georgetown ? Lunch Seating', '2026-10-02', '12:00', ''],
+      ['Taste of Georgetown ? Dinner Seating', '2026-10-02', '18:00', ''],
+    ]);
+    assert.equal(result.items.every(item => (item as any).ticketLink === detailUrl), true);
+    assert.equal(result.items[1].timeFlags?.start?.evidence.includes('Evening Dinner Experience'), true);
+    assert.equal(result.items[1].timeFlags?.end?.evidence.includes('approximate end omitted'), true);
+  } finally {
+    restoreFetch();
+  }
+});
+
+test('distinct populated starts are not overwritten by linked seating times', async () => {
+  const detailUrl = 'https://fallflavours.ca/signature-event/taste-of-georgetown-2';
+  const restoreFetch = installFetchMap({});
+  try {
+    const items = [
+      buildEventItem({ name: 'Taste of Georgetown: Garden Lunch Experience', date: '2026-10-02', startTime: '12:00' }),
+      buildEventItem({ name: 'Taste of Georgetown: Evening Dinner Experience', date: '2026-10-02', startTime: '18:00' }),
+    ];
+    const result = await enrichEventsFromVenueWebsite(
+      items, `Details: ${detailUrl}`, '', '2026-10-01T12:00:00.000Z',
+      undefined, DEFAULT_PARSING_CONFIG
+    );
+
+    assert.deepEqual(result.items.map(item => item.startTime), ['12:00', '18:00']);
+    assert.equal(result.summary.reason, 'no_missing_event_time_candidates');
+  } finally {
+    restoreFetch();
+  }
+});
+
 test('same-day time collisions stay unchanged when linked seating names do not identify extracted items', async () => {
   const detailUrl = 'https://harbourtable.example/events/october-table';
   const restoreFetch = installFetchMap({
