@@ -1,0 +1,125 @@
+{
+  "checkedAt": "2026-10-02T20:33:36.347Z",
+  "fileId": "1OmFzDG0kWiY-k8C-8G6-oGlTBxE3B0cq",
+  "runId": "dafe6a0f-1c99-4d73-8521-7cf8d3e4ee53",
+  "lockStatus": "completed",
+  "sameDaySiblingIds": [
+    "3DO8t0Eyl1TB8scIBfEx",
+    "nOz8TgJISaSmdkMUVNzY"
+  ],
+  "docs": [
+    {
+      "path": "venues/slug_eptek.centre",
+      "changedFields": [],
+      "before": {
+        "name": "Eptek Art & Culture Centre | Summerside PE",
+        "mediaCount": 0
+      },
+      "after": {
+        "name": "Eptek Art & Culture Centre | Summerside PE",
+        "mediaCount": 0,
+        "distinctMediaCount": 0,
+        "retainedOldMedia": true,
+        "addedMediaCount": 0,
+        "addedMediaManaged": true,
+        "heroFromAddedMedia": false,
+        "heroInGallery": false
+      },
+      "updateTime": "2026-10-02T13:36:51.715Z"
+    },
+    {
+      "path": "venues/slug_eptek.centre/events/3DO8t0Eyl1TB8scIBfEx",
+      "changedFields": [
+        "additionalLocation",
+        "description",
+        "endTime",
+        "familyFriendlyReasons",
+        "familyFriendlyScore",
+        "icon",
+        "image",
+        "imageProvenance",
+        "imageUrl",
+        "lastSeenAt",
+        "mediaUrls",
+        "price",
+        "relevantImageUrl",
+        "shares",
+        "sourceTimestamp",
+        "startTime",
+        "ticketPrice",
+        "timeFlags",
+        "updatedAt"
+      ],
+      "before": {
+        "name": "Let's Get Creative Art Club @ Eptek – Fall 2026 (Group 1)",
+        "startDate": "2026-10-18",
+        "startTime": "01:00",
+        "endTime": "12:30",
+        "recurrence": "weekly_sunday",
+        "occurrences": 8,
+        "mediaCount": 1
+      },
+      "after": {
+        "name": "Let's Get Creative Art Club @ Eptek – Fall 2026 (Group 1)",
+        "startDate": "2026-10-18",
+        "startTime": "12:30",
+        "endTime": "13:45",
+        "recurrence": "weekly_sunday",
+        "occurrences": 8,
+        "mediaCount": 5,
+        "distinctMediaCount": 5,
+        "retainedOldMedia": true,
+        "addedMediaCount": 4,
+        "addedMediaManaged": true,
+        "heroFromAddedMedia": true,
+        "heroInGallery": true
+      },
+      "updateTime": "2026-10-02T20:30:35.392Z"
+    },
+    {
+      "path": "venues/slug_eptek.centre/events/nOz8TgJISaSmdkMUVNzY",
+      "changedFields": [
+        "endTime",
+        "familyFriendlyReasons",
+        "familyFriendlyScore",
+        "image",
+        "imageProvenance",
+        "imageUrl",
+        "lastSeenAt",
+        "mediaUrls",
+        "price",
+        "relevantImageUrl",
+        "startTime",
+        "ticketPrice",
+        "timeFlags",
+        "updatedAt"
+      ],
+      "before": {
+        "name": "Let's Get Creative Art Club @ Eptek – Fall 2026 (Group 2)",
+        "startDate": "2026-10-18",
+        "startTime": "14:00",
+        "endTime": "14:15",
+        "recurrence": "weekly_sunday",
+        "occurrences": 8,
+        "mediaCount": 5
+      },
+      "after": {
+        "name": "Let's Get Creative Art Club @ Eptek – Fall 2026 (Group 2)",
+        "startDate": "2026-10-18",
+        "startTime": "14:15",
+        "endTime": "15:30",
+        "recurrence": "weekly_sunday",
+        "occurrences": 8,
+        "mediaCount": 9,
+        "distinctMediaCount": 9,
+        "retainedOldMedia": true,
+        "addedMediaCount": 4,
+        "addedMediaManaged": true,
+        "heroFromAddedMedia": true,
+        "heroInGallery": true
+      },
+      "updateTime": "2026-10-02T20:30:36.004Z"
+    }
+  ],
+  "errors": []
+}
