@@ -1,0 +1,279 @@
+{
+  "snapshotId": "1OmFzDG0kWiY-k8C-8G6-oGlTBxE3B0cq_209_1790959040953",
+  "rowVenue": {
+    "id": "slug_upeisu",
+    "name": "UPEISU | Charlottetown PE"
+  },
+  "payloads": [
+    {
+      "name": "Coffee & Consent",
+      "uniqueId": "1739771728156396_668f146924408911",
+      "date": "2026-10-02",
+      "time": "11:30",
+      "venueId": "slug_upeisu",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790958877838-828sga.webp",
+      "recurringPattern": "none",
+      "duplicate": {
+        "isDuplicate": true,
+        "eventId": "P0tSDGFBmFp9o2x2Xuvt",
+        "existingName": "Coffee & Consent (with SVPRO)"
+      },
+      "error": ""
+    },
+    {
+      "name": "19+ Silent Disco",
+      "uniqueId": "1739771728156396_b638eca7a3080943",
+      "date": "2026-10-02",
+      "time": "22:00",
+      "venueId": "fb_100052099464909",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790958877838-828sga.webp",
+      "recurringPattern": "none",
+      "duplicate": {
+        "isDuplicate": true,
+        "eventId": "idb0opCMHl9FHeSQP19i",
+        "existingName": "19+ Silent Disco"
+      },
+      "error": ""
+    },
+    {
+      "name": "Go- Experience The Pride",
+      "uniqueId": "1739771728156396_68812b54103e76c0",
+      "date": "2026-10-03",
+      "time": "13:30",
+      "venueId": "slug_upeiturffield",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790958877838-828sga.webp",
+      "recurringPattern": "none",
+      "duplicate": {
+        "isDuplicate": true,
+        "eventId": "Li0eZIKcYCrqHWUqQlSO",
+        "existingName": "Go- Experience The Pride"
+      },
+      "error": ""
+    },
+    {
+      "name": "Sexy Sexual Health Trivia",
+      "uniqueId": "1739771728156396_b1c3c77d2c6a5062",
+      "date": "2026-10-06",
+      "time": "19:00",
+      "venueId": "fb_100052099464909",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790958877838-828sga.webp",
+      "recurringPattern": "none",
+      "duplicate": {
+        "isDuplicate": true,
+        "eventId": "ELp2wyMTX7TmCEMKlp2E",
+        "existingName": "Sexy Sexual Health Trivia (with SVPRO)"
+      },
+      "error": ""
+    },
+    {
+      "name": "Financial Literacy Workshop with Evans Webbo",
+      "uniqueId": "1739771728156396_1707d10c8d0f7593",
+      "date": "2026-10-07",
+      "time": "10:00",
+      "venueId": "fb_100052099464909",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790958877838-828sga.webp",
+      "recurringPattern": "none",
+      "duplicate": {
+        "isDuplicate": true,
+        "eventId": "AEGb9B6WbrfuIKJR6c0f",
+        "existingName": "Financial Literacy Workshop (with Evans Webbo)"
+      },
+      "error": ""
+    },
+    {
+      "name": "Pop Culture Trivia",
+      "uniqueId": "1739771728156396_754d0f8dee7bc8ae",
+      "date": "2026-10-07",
+      "time": "19:00",
+      "venueId": "fb_100052099464909",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790958877838-828sga.webp",
+      "recurringPattern": "none",
+      "duplicate": {
+        "isDuplicate": true,
+        "eventId": "MtRlsOY7bz9kGILoPOMg",
+        "existingName": "Pop Culture Trivia"
+      },
+      "error": ""
+    },
+    {
+      "name": "Share the Pride: Panther Friendsgiving",
+      "uniqueId": "1739771728156396_2207573e9f24ec0d",
+      "date": "2026-10-09",
+      "time": "16:30",
+      "venueId": "fb_100052099464909",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790958877838-828sga.webp",
+      "recurringPattern": "none",
+      "duplicate": {
+        "isDuplicate": false,
+        "eventId": "",
+        "existingName": ""
+      },
+      "error": ""
+    },
+    {
+      "name": "Monster High Drag Show",
+      "uniqueId": "1739771728156396_420b8fdae9e5f50d",
+      "date": "2026-10-10",
+      "time": "21:00",
+      "venueId": "fb_100052099464909",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790958877838-828sga.webp",
+      "recurringPattern": "none",
+      "duplicate": {
+        "isDuplicate": false,
+        "eventId": "",
+        "existingName": ""
+      },
+      "error": ""
+    },
+    {
+      "name": "Mix & Mingle with Mayoral Candidates",
+      "uniqueId": "1739771728156396_0695515581a15861",
+      "date": "2026-10-19",
+      "time": "19:00",
+      "venueId": "fb_100052099464909",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790958878277-oeo9to.webp",
+      "recurringPattern": "none",
+      "duplicate": {
+        "isDuplicate": false,
+        "eventId": "",
+        "existingName": ""
+      },
+      "error": ""
+    },
+    {
+      "name": "Name That Tune Trivia",
+      "uniqueId": "1739771728156396_bc4e8a1448528ddd",
+      "date": "2026-10-21",
+      "time": "19:00",
+      "venueId": "fb_100052099464909",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790958878277-oeo9to.webp",
+      "recurringPattern": "none",
+      "duplicate": {
+        "isDuplicate": true,
+        "eventId": "UrZwKCmcaAl3bcSyAjBy",
+        "existingName": "Name That Tune Trivia"
+      },
+      "error": ""
+    },
+    {
+      "name": "Murder Mystery",
+      "uniqueId": "1739771728156396_86c50211ec66d9fc",
+      "date": "2026-10-22",
+      "time": "19:00",
+      "venueId": "fb_100052099464909",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790958878277-oeo9to.webp",
+      "recurringPattern": "none",
+      "duplicate": {
+        "isDuplicate": true,
+        "eventId": "bC3knwy44wxnRKHY6E51",
+        "existingName": "Murder Mystery"
+      },
+      "error": ""
+    },
+    {
+      "name": "Connect the Pride: Pre-game social",
+      "uniqueId": "1739771728156396_3a12ca3b29a6dfcb",
+      "date": "2026-10-23",
+      "time": "18:00",
+      "venueId": "slug_upeisu",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790958878277-oeo9to.webp",
+      "recurringPattern": "none",
+      "duplicate": {
+        "isDuplicate": true,
+        "eventId": "Z3VfHNIVvKwdUHNzo1VX",
+        "existingName": "Connect the Pride: Pre-game social"
+      },
+      "error": ""
+    },
+    {
+      "name": "Cheer- Rally the Pride: Pre-Game Social",
+      "uniqueId": "1739771728156396_58aca0a4646bde4c",
+      "date": "2026-10-24",
+      "time": "17:00",
+      "venueId": "slug_upeisu",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790958878277-oeo9to.webp",
+      "recurringPattern": "none",
+      "duplicate": {
+        "isDuplicate": true,
+        "eventId": "wJy8NuSRlBAUN2I52BSr",
+        "existingName": "Cheer- Rally the Pride: Pre-Game Social"
+      },
+      "error": ""
+    },
+    {
+      "name": "Music Bingo",
+      "uniqueId": "1739771728156396_4a3aa725b8e2aebf",
+      "date": "2026-10-27",
+      "time": "19:00",
+      "venueId": "fb_100052099464909",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790958878277-oeo9to.webp",
+      "recurringPattern": "none",
+      "duplicate": {
+        "isDuplicate": true,
+        "eventId": "dLfF0SgzJMLX6DaCLOtJ",
+        "existingName": "Music Bingo"
+      },
+      "error": ""
+    },
+    {
+      "name": "Halloween Trivia",
+      "uniqueId": "1739771728156396_a59af3e491fd08c6",
+      "date": "2026-10-28",
+      "time": "19:00",
+      "venueId": "fb_100052099464909",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790958878690-8a7e14.webp",
+      "recurringPattern": "none",
+      "duplicate": {
+        "isDuplicate": true,
+        "eventId": "vGmG6jkM6SYV3WuOsAPZ",
+        "existingName": "Halloween Trivia"
+      },
+      "error": ""
+    },
+    {
+      "name": "Create: Build The Pride",
+      "uniqueId": "1739771728156396_1cbc74f59f8f42bb",
+      "date": "2026-10-29",
+      "time": "18:00",
+      "venueId": "slug_upeisu",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790958878690-8a7e14.webp",
+      "recurringPattern": "none",
+      "duplicate": {
+        "isDuplicate": false,
+        "eventId": "",
+        "existingName": ""
+      },
+      "error": ""
+    },
+    {
+      "name": "Celebrate the Pride",
+      "uniqueId": "1739771728156396_636371d8b7e35e63",
+      "date": "2026-10-30",
+      "time": "17:00",
+      "venueId": "slug_upeisu",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790958878690-8a7e14.webp",
+      "recurringPattern": "none",
+      "duplicate": {
+        "isDuplicate": true,
+        "eventId": "LEeIVlDt8mLNIGpphSLw",
+        "existingName": "Celebrate the Pride"
+      },
+      "error": ""
+    },
+    {
+      "name": "Halloween Pub",
+      "uniqueId": "1739771728156396_d743061682e4734b",
+      "date": "2026-10-30",
+      "time": "22:00",
+      "venueId": "slug_upeisu",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790958878690-8a7e14.webp",
+      "recurringPattern": "none",
+      "duplicate": {
+        "isDuplicate": false,
+        "eventId": "",
+        "existingName": ""
+      },
+      "error": ""
+    }
+  ]
+}

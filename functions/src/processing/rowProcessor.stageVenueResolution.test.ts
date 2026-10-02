@@ -107,6 +107,23 @@ test('a printed leading article can fall back to a known venue without overridin
   assert.deepEqual(tried, ['The UPEI Turf']);
 });
 
+test('a room-only location uses a source venue only when its stored alias names that room', async () => {
+  const row = { uniqueId: 'upeisu-room-gallery', text: '', mediaUrls: [],
+    pageName: 'UPEISU', userName: 'UPEISU', timestamp: '2026-10-01T23:56:51Z' } as RawRowData;
+  const rowVenue = { id: 'slug_upeisu', name: 'UPEISU',
+    normalizedName: 'upeisu', aliases: ['Day Lounge, W.A. Murphy Student Centre'] } as VenueData;
+  const noMatch = async (): Promise<MatchInfo> =>
+    ({ isMatch: false, matchType: 'none', similarity: 0 });
+  const resolve = (location: string, venue: VenueData) =>
+    resolveVenueForFullParserEventWithMatcherForRegression({
+      item: { name: 'Create: Build The Pride', establishment: location } as ParserProcessedEvent,
+      row, rowVenue: venue, establishment: row.userName, rowIndex: 209, matcher: noMatch,
+    });
+  assert.equal((await resolve('Day Lounge', rowVenue))?.id, rowVenue.id);
+  assert.equal(await resolve('Day Lounge', { ...rowVenue, aliases: ['Another Room, W.A. Murphy Student Centre'] }), null);
+  assert.equal(await resolve('The Fox & Crow', rowVenue), null);
+});
+
 test('a city suffix cannot fuzzy-match a different venue in that city', async () => {
   const row = {
     uniqueId: 'seawalk-caption-pilot', text: 'Fall Workshops', mediaUrls: [],

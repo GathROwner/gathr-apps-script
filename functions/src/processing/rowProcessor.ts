@@ -4244,6 +4244,28 @@ export async function resolveVenueForFullParserEventWithMatcherForRegression(par
       return itemVenueMatch;
     }
 
+    // A source venue may explicitly identify a room as part of its own site,
+    // while the flyer prints only the room name. Accept that short label only
+    // when it is the complete first component of a stored alias.
+    if (rowVenue) {
+      const printedLocations = [itemEstablishment, itemVenue]
+        .map(value => normalizeVenueName(value || ''))
+        .filter(value => value.length >= 8 && value.split(/\s+/).length >= 2);
+      const hasExplicitRoomAlias = (rowVenue.aliases || []).some(alias => {
+        const [room, ...venueContext] = String(alias || '').split(',');
+        return venueContext.length > 0 &&
+          printedLocations.includes(normalizeVenueName(room || ''));
+      });
+      if (hasExplicitRoomAlias) {
+        logger.info('Resolved printed room through source venue alias', {
+          rowIndex,
+          itemName: item.name || '',
+          resolvedVenueId: rowVenue.id,
+        });
+        return rowVenue;
+      }
+    }
+
     // If no match found for the event's specific venue, log and skip (don't fall back to rowVenue)
     logger.debug('No venue match for event with different establishment', {
       rowIndex,
