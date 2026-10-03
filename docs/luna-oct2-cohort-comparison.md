@@ -1,6 +1,10 @@
 # October 2 large-parse Luna cohort comparison
 
-> Follow-up: this first comparison used a guarded route with older-model retries. The [Luna-only audit](luna-oct2-extended-comparison.md) adds 40 distinct posts and reruns the fallback posts without retry. Its release assessment supersedes the guarded-only decision below.
+> Scope correction (October 2): this first comparison used a guarded route
+> that changed every model stage to Luna on selected posts, with older-model
+> retries on holds. The [all-Luna audit](luna-oct2-extended-comparison.md)
+> removed those retries, but also changed every stage. Neither run measured
+> the intended Stage 3-only replacement of GPT-5.2.
 
 ## Scope and method
 

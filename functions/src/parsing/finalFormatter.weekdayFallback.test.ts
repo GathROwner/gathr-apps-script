@@ -64,6 +64,35 @@ test('single-weekday row-scoped recurrence fallback still works when the row onl
   assert.equal(normalized.recurringPattern, 'weekly_tuesday');
 });
 
+test('a year after a date does not turn a weekly October class into a one-off', () => {
+  for (const [name, date, pattern, weekday] of [
+    ['Contemporary Dance', '2026-10-07', 'weekly_wednesday', 'Wednesdays'],
+    ['Beginner Belly Dance', '2026-10-02', 'weekly_friday', 'Fridays'],
+  ] as const) {
+    const source = `${name}: ${weekday}. One of four drop-in classes available through October. Pass valid October-November 6, 2026.`;
+    const normalized = applyRecurrenceNormalizationForRegression(
+      buildEvent({
+        category: 'Workshops & Classes',
+        name,
+        description: source,
+        startDate: date,
+        endDate: date,
+        isRecurring: 'Yes',
+        recurringPattern: pattern,
+      }),
+      buildOriginalItem({
+        name,
+        description: source,
+        date,
+        recurringPattern: pattern,
+      })
+    );
+    assert.equal(normalized.recurringPattern, pattern, name);
+    assert.equal(normalized.isRecurring, true, name);
+    assert.equal(normalized.recurrenceUntilDate, '2026-10-31', name);
+  }
+});
+
 test('mixed weekly board text does not let a Wednesday cue overwrite a Friday item', () => {
   const normalized = applyRecurrenceNormalizationForRegression(
     buildEvent({

@@ -1,5 +1,11 @@
 # October 2 Luna-only parser audit
 
+> Scope correction (October 2): this run changed **all five model stages** to
+> Luna. It measured an all-Luna pipeline, not the intended drop-in replacement
+> of GPT-5.2 at Stage 3 while keeping GPT-5 mini and nano. Its quality and
+> cost totals must not be presented as the Stage 3 substitution result. The
+> separately recorded Stage 3-only rerun supersedes this release assessment.
+
 ## What was tested
 
 The completed October 2 large parse is dataset `1OmFzDG0kWiY-k8C-8G6-oGlTBxE3B0cq` (384 source rows, 175 saved parse snapshots). Of those, 152 snapshots had source images. The first comparison selected 40 by fixed SHA-256 ranking plus eight high-output rows. One of the 48 source galleries was unavailable. Its guarded route used an older-model retry on 27 of the 47 accessible posts, so that first comparison cannot measure Luna alone.

@@ -4,6 +4,7 @@ import path from 'node:path';
 const dir = path.resolve(import.meta.dirname, '../../artifacts/luna-oct2-cohort',
   process.env.LUNA_COHORT_RUN_LABEL || '');
 const manifest = JSON.parse(await fs.readFile(path.join(dir, 'manifest.json'), 'utf8'));
+const stage3SwapOnly = process.env.LUNA_COHORT_STAGE3_ONLY === 'true';
 // Standard API list prices per million tokens, October 2, 2026. All input is
 // priced as uncached, so this is an upper estimate; it excludes other vendors.
 const rates = { 'gpt-6-luna': [0.10, 0.50], 'gpt-5.2': [1.75, 14.00],
@@ -46,7 +47,12 @@ for (const item of manifest.rows) {
   let result;
   try { result = JSON.parse(await fs.readFile(file, 'utf8')); } catch { continue; }
   const models = [...new Set((result.usage || []).map(call => call.model))];
-  const fallback = models.some(model => model !== 'gpt-6-luna');
+  const expectedStageModels = { stage1: 'gpt-5-mini', stage2: 'gpt-5-mini',
+    stage3: 'gpt-6-luna', ocr_debug: 'gpt-6-luna',
+    stage4: 'gpt-5-nano', stage5: 'gpt-5-nano' };
+  const fallback = stage3SwapOnly
+    ? (result.usage || []).some(call => expectedStageModels[call.stage] !== call.model)
+    : models.some(model => model !== 'gpt-6-luna');
   // A mocked upload count can increase when website or legacy retry images are
   // prepared. It is a harness warning, not evidence that the Luna output failed.
   const substantiveError = result.error && !result.unavailable &&
@@ -104,6 +110,9 @@ function summarize(items) {
     allAttemptedApiCostUpperUsd: items.reduce((n, row) => n + row.apiCostUpperUsd, 0) };
 }
 const report = { generatedAtUtc: new Date().toISOString(), fileId: manifest.fileId,
+  modelScope: stage3SwapOnly
+    ? 'only production Stage 3 gpt-5.2 swapped to gpt-6-luna high; Stage 1/2 mini and Stage 4/5 nano unchanged; recursive legacy fallback disabled'
+    : 'all modeled parser stages use gpt-6-luna',
   method: 'same date/start and title word-overlap comparison; counts require source review, not automatic quality conclusions',
   pricingSource: 'https://developers.openai.com/api/docs/models/',
   apiCostAssumption: 'standard rates; every input token priced uncached; output tokens include reasoning; no Google/Cloud cost',

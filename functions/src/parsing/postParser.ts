@@ -1256,6 +1256,8 @@ async function parsePostDataCore(
     parseBooleanEnv('LUNA_CANARY_ENABLED', false),
     String(process.env.LUNA_CANARY_POST_IDS || '')
   );
+  const lunaStage3Only = lunaCanarySelected &&
+    parseBooleanEnv('LUNA_CANARY_STAGE3_ONLY', true);
   const intendedBandRules = lunaCanarySelected ? calendarBandRulesForPost(postId) : [];
   const cleanupImageUrls = new Set<string>();
   const originalMediaUrls = [
@@ -1275,10 +1277,16 @@ async function parsePostDataCore(
     return [];
   }
   if (lunaCanarySelected) {
-    cfg.gptModelFast = 'gpt-6-luna';
+    // Preserve the deployed mini/nano stages in a Stage 3 substitution trial.
+    if (!lunaStage3Only) {
+      cfg.gptModelFast = 'gpt-6-luna';
+      cfg.stage1ModelOverride = 'gpt-6-luna';
+      cfg.stage2ModelOverride = 'gpt-6-luna';
+      cfg.stage4ModelOverride = 'gpt-6-luna';
+      cfg.stage5ModelOverride = 'gpt-6-luna';
+    }
+    // OCR debug formerly inherited the GPT-5.2 reasoning model.
     cfg.gptModelReasoning = 'gpt-6-luna';
-    cfg.stage1ModelOverride = 'gpt-6-luna';
-    cfg.stage2ModelOverride = 'gpt-6-luna';
     cfg.stage3ModelOverride = 'gpt-6-luna';
     const canaryStage3Effort = String(
       process.env.LUNA_CANARY_STAGE3_REASONING_EFFORT || 'high'
@@ -1289,8 +1297,6 @@ async function parsePostDataCore(
     cfg.stage3ReasoningEffort = canaryStage3Effort;
     cfg.stage3ImageDetail = 'original';
     cfg.lunaCalendarLiteralSourcePrompt = true;
-    cfg.stage4ModelOverride = 'gpt-6-luna';
-    cfg.stage5ModelOverride = 'gpt-6-luna';
     // Exact-post Luna pilots default to the guarded second read for dense
     // calendars. An explicit false remains available as a rollback switch.
     if (parseBooleanEnv('LUNA_CALENDAR_INVENTORY_AUDIT', true)) {

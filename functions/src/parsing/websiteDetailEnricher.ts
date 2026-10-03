@@ -46,6 +46,9 @@ type WebsiteCandidate = {
   sourceUrl: string;
   source: 'detail_page' | 'locarius_api';
   namedSeatings?: Array<{ label: string; startTime: string; endTime: string }>;
+  // Only populated when a detail page prints both its individual dates and a
+  // clock range labelled with the same series title.
+  namedSeriesDates?: string[];
 };
 
 const DEFAULT_TIMEOUT_MS = 12000;
@@ -527,7 +530,8 @@ async function discoverDetailPageCandidates(
   // well as links discovered from a venue listing page.
   if (safePathname(pageUrl).split('/').filter(Boolean).length >= 2) {
     const directCandidate = parseDetailPageCandidate(pageUrl, pageHtml, yearHint);
-    if ((directCandidate?.namedSeatings?.length || 0) >= 2) {
+    if ((directCandidate?.namedSeatings?.length || 0) >= 2 ||
+        (directCandidate?.namedSeriesDates?.length || 0) >= 2) {
       detailCandidates.set(`${directCandidate.sourceUrl}|${directCandidate.title}|${directCandidate.date || directCandidate.dateRangeStart || ''}`, directCandidate);
     }
   }
@@ -644,6 +648,7 @@ function parseDetailPageCandidate(
   // A page with separately named same-day sessions has no safe page-wide
   // start time. Keep those times attached to their labels for reconciliation.
   const timeInfo = namedSeatings.length >= 2 ? {} : extractTimeInfoFromText(text);
+  const namedSeries = extractNamedSeriesSchedule(html, title, yearHint);
 
   if (!title && !dateInfo.date && !dateInfo.dateRangeStart) {
     return null;
@@ -655,13 +660,55 @@ function parseDetailPageCandidate(
     date: dateInfo.date,
     dateRangeStart: dateInfo.dateRangeStart,
     dateRangeEnd: dateInfo.dateRangeEnd,
-    startTime: timeInfo.startTime,
-    endTime: timeInfo.endTime,
+    startTime: namedSeries ? namedSeries.startTime : timeInfo.startTime,
+    endTime: namedSeries ? namedSeries.endTime : timeInfo.endTime,
     imageUrl,
     sourceUrl: detailUrl,
     source: 'detail_page',
     namedSeatings,
+    namedSeriesDates: namedSeries?.dates,
   };
+}
+
+function extractNamedSeriesSchedule(
+  html: string, title: string, yearHint: number
+): { dates: string[]; startTime: string; endTime: string } | null {
+  const titleTokens = tokenizeSeriesTitle(title);
+  if (titleTokens.length < 3) return null;
+  const blocks = Array.from(String(html || '').matchAll(/<(?:p|li)\b[^>]*>([\s\S]*?)<\/(?:p|li)>/gi))
+    .map(match => cleanText(decodeHtml(match[1] || ''))).filter(Boolean);
+  const monthListPattern = /\b(january|february|march|april|may|june|july|august|september|october|november|december)\s+(\d{1,2}(?:\s*,\s*\d{1,2})+)/gi;
+  let dates: string[] = [];
+  for (const block of blocks) {
+    const groups = Array.from(block.matchAll(monthListPattern));
+    if (!groups.length || !groups.some(group => group[2].includes(','))) continue;
+    const candidateDates = groups.flatMap(group => group[2].split(',')
+      .map(day => buildDateString(group[1], day.trim(), undefined, yearHint))).filter(Boolean);
+    if (candidateDates.length >= 2 && candidateDates.length <= 40) {
+      dates = dedupeStrings(candidateDates);
+      break;
+    }
+  }
+  if (dates.length < 2) return null;
+
+  // Match a time only when its own printed line labels the same series. A
+  // check-in, breakfast, or another performance on this page is not evidence.
+  const labelledRange = /\b(\d{1,2}(?::\d{2})?)\s*(?:-|–|—|to)\s*(\d{1,2}(?::\d{2})?)\s*(a\.?m\.?|p\.?m\.?)\s*\|\s*(.{3,100})/i;
+  for (const block of blocks) {
+    const match = block.match(labelledRange);
+    if (!match) continue;
+    const labelTokens = tokenizeSeriesTitle(match[4]);
+    if (!titleTokens.every(token => labelTokens.includes(token))) continue;
+    const period = match[3];
+    const startTime = parse12hTime(`${match[1]} ${period}`);
+    const endTime = parse12hTime(`${match[2]} ${period}`);
+    if (startTime && endTime && startTime < endTime) return { dates, startTime, endTime };
+  }
+  return null;
+}
+
+function tokenizeSeriesTitle(value: string): string[] {
+  return tokenize(String(value || '').replace(/[’']/g, '').split(/\s+[–—-]\s+/)[0]);
 }
 
 function parseNamedSeatings(html: string): Array<{ label: string; startTime: string; endTime: string }> {
@@ -1073,13 +1120,23 @@ function findBestCandidateForItem(
     // A multi-day page often contains the first performance's clock time.
     // That time cannot be assigned to each day of the surrounding festival.
     if (itemDate && candidate.dateRangeStart && candidate.dateRangeEnd &&
-        candidate.dateRangeStart !== candidate.dateRangeEnd && !candidate.date) {
+        candidate.dateRangeStart !== candidate.dateRangeEnd && !candidate.date &&
+        !candidate.namedSeriesDates?.length) {
       continue;
+    }
+    if (candidate.namedSeriesDates?.length) {
+      const seriesItemTokens = tokenizeSeriesTitle(item.name || '');
+      const seriesTitleTokens = tokenizeSeriesTitle(candidate.title || '');
+      if (!itemDate || !candidate.namedSeriesDates.includes(itemDate) ||
+          seriesItemTokens.length < 3 ||
+          !seriesItemTokens.every(token => seriesTitleTokens.includes(token))) continue;
     }
     let score = 0;
     const titleOverlap = scoreTokenOverlap(itemTokens, tokenize(candidate.title || ''));
     if (itemDate && candidate.date && itemDate === candidate.date) {
       score += 6;
+    } else if (itemDate && candidate.namedSeriesDates?.includes(itemDate)) {
+      score += 8;
     } else if (
       itemDate &&
       candidate.dateRangeStart &&
@@ -1245,6 +1302,10 @@ function extractFirst(text: string, regex: RegExp): string {
 
 function decodeHtml(value: string): string {
   return String(value || '')
+    .replace(/&#(\d+);|&#x([0-9a-f]+);/gi, (_match, decimal, hex) => {
+      const codepoint = Number.parseInt(decimal || hex, decimal ? 10 : 16);
+      return codepoint > 0 && codepoint <= 0x10ffff ? String.fromCodePoint(codepoint) : '';
+    })
     .replace(/&amp;/g, '&')
     .replace(/&quot;/g, '"')
     .replace(/&#39;/g, "'")

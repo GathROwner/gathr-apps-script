@@ -82,6 +82,38 @@ test('a festival date-range page does not lend a child performance time to untim
   }
 });
 
+test('a named dining series lends only its own published evening time to individually listed dates', async () => {
+  const detail = 'https://innatbayfortune.example/special-events/chefs-harvest/';
+  const restoreFetch = installFetchMap({
+    [detail]: htmlResponse(`<html><body>
+      <h1>Chefs&#8217; Harvest Dining Series</h1>
+      <p>October 15, 16, 17 | October 22, 23, 24 | November 5, 6, 7</p>
+      <p>October 15–17 | Forager menu</p>
+      <li>3:00 PM | Check In</li>
+      <li>5:00–9:30 PM | Chefs’ Harvest Dining Series Experience the full evening</li>
+      <li>9:30–10:30 PM | Fire Bar</li>
+    </body></html>`),
+  });
+  try {
+    const items = [
+      buildEventItem({ name: 'Chef’s Harvest Dining Series', date: '2026-10-15', startTime: 'unknown' }),
+      buildEventItem({ name: 'Chef’s Harvest Dining Series', date: '2026-10-24', startTime: 'unknown' }),
+      buildEventItem({ name: 'Chef’s Harvest Dining Series', date: '2026-11-07', startTime: 'unknown' }),
+      buildEventItem({ name: 'Chef’s Harvest Dining Series', date: '2026-10-18', startTime: 'unknown' }),
+      buildEventItem({ name: 'Different dinner', date: '2026-10-15', startTime: 'unknown' }),
+    ];
+    const result = await enrichEventsFromVenueWebsite(
+      items, `Details at ${detail}`, '', '2026-10-02T15:00:00Z',
+      { name: 'The Inn', website: detail } as EstablishmentInfo, DEFAULT_PARSING_CONFIG
+    );
+    assert.deepEqual(result.items.map(item => item.startTime),
+      ['17:00', '17:00', '17:00', 'unknown', 'unknown']);
+    assert.equal(result.summary.appliedCount, 3);
+  } finally {
+    restoreFetch();
+  }
+});
+
 test('Trailside-style website follow-up recovers explicit start times from locarius-backed site data', async () => {
   const restoreFetch = installFetchMap({
     'https://trailside.ca/': htmlResponse(

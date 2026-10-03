@@ -3162,7 +3162,10 @@ function consumeMonthDayList(text: string, startIndex: number): { days: number[]
       continue;
     }
 
-    const dayMatch = rest.match(/^(\d{1,2})(?:st|nd|rd|th)?/i);
+    // A four-digit year after a date (for example, "November 6, 2026") is
+    // context for the date, not two more days in an occurrence list.
+    if (/^\d{4}\b/.test(rest)) break;
+    const dayMatch = rest.match(/^(\d{1,2})(?!\d)(?:st|nd|rd|th)?\b/i);
     if (dayMatch) {
       const day = Number(dayMatch[1]);
       if (!Number.isFinite(day) || day <= 0 || day > 31) break;
@@ -3568,6 +3571,16 @@ function shouldForceSingleExplicitDateOneOff(
     return false;
   }
 
+  // A class offered on plural weekdays through a stated period remains a
+  // series even when the only numeric date describes pass validity.
+  if (
+    hasSeriesOrProgramCue(normalizedSource) &&
+    /\b(mondays|tuesdays|wednesdays|thursdays|fridays|saturdays|sundays)\b/.test(normalizedSource) &&
+    /\b(through|until)\s+(?:the\s+end\s+of\s+)?(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\b/.test(normalizedSource)
+  ) {
+    return false;
+  }
+
   const startDate = String(event.startDate || '').trim();
   const endDate = String(event.endDate || '').trim() || startDate;
   if (!startDate) return false;
@@ -3868,6 +3881,19 @@ function extractRecurrenceUntilDateFromText(
       detectStandaloneWeeklyPattern(normalized) !== 'none')
   ) {
     return explicitRange.endDate;
+  }
+
+  const classMonthLimit = normalized.match(
+    /\b(?:classes|sessions|programs?|courses?|workshops?)\b[^.!?]{0,80}?\b(?:until|through|thru|till)\s+(?:the\s+end\s+of\s+)?(jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)(?:\s+(20\d{2}))?\b/i
+  );
+  if (classMonthLimit) {
+    const month = MONTH_TOKEN_TO_NUMBER[normalizeMonthToken(classMonthLimit[1])];
+    if (month) {
+      let year = classMonthLimit[2] ? Number(classMonthLimit[2]) : fallbackYear;
+      if (!classMonthLimit[2] && start && month < start.getUTCMonth() + 1) year += 1;
+      const lastDay = new Date(Date.UTC(year, month, 0)).getUTCDate();
+      return toIsoDateFromParts(year, month, lastDay) || undefined;
+    }
   }
 
   const untilPatterns = [

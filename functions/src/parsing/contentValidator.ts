@@ -650,7 +650,9 @@ async function callGPTWithSchema(
     },
   }));
 
-  const runOnce = async (urls: string[]): Promise<ValidationResult> => {
+  class TruncatedValidationJsonError extends Error {}
+
+  const runOnce = async (urls: string[], outputTokenLimit?: number): Promise<ValidationResult> => {
     if (usesResponses(model)) {
       const schemaHint = JSON.stringify(schema[0]?.parameters || {}, null, 2);
       const promptWithSchema = `${prompt}\n\nReturn ONLY valid JSON that matches this schema:\n${schemaHint}`;
@@ -669,10 +671,11 @@ async function callGPTWithSchema(
       }
 
       const callStart = Date.now();
+      const maxOutputTokens = outputTokenLimit ?? (model.startsWith('gpt-6') ? 6000 : 2000);
       const response = await client.responses.create({
         model,
         input: [{ role: 'user', content }],
-        max_output_tokens: model.startsWith('gpt-6') ? 6000 : 2000,
+        max_output_tokens: maxOutputTokens,
         ...(model.startsWith('gpt-6') ? { reasoning: { effort: 'none' as any } } : {}),
       });
       const durationMs = Date.now() - callStart;
@@ -701,7 +704,17 @@ async function callGPTWithSchema(
         tokens: usage.totalTokens,
       });
 
-      return parseJsonResponse(messageContent || '');
+      try {
+        return parseJsonResponse(messageContent || '');
+      } catch (error) {
+        if (urls.length > 0 &&
+          (response.status === 'incomplete' || usage.outputTokens >= maxOutputTokens)) {
+          throw new TruncatedValidationJsonError(
+            `Image validation JSON reached the ${maxOutputTokens}-token response limit`
+          );
+        }
+        throw error;
+      }
     }
 
     const content: OpenAI.Chat.Completions.ChatCompletionContentPart[] = [
@@ -779,6 +792,18 @@ async function callGPTWithSchema(
     return await runOnce(imageUrls);
   } catch (error) {
     if (imageUrls && imageUrls.length > 0) {
+      if (error instanceof TruncatedValidationJsonError) {
+        logger.warn('Image validation JSON was truncated; retrying with images and a larger output cap', {
+          error: error.message,
+        });
+        try {
+          return await runOnce(imageUrls, 4000);
+        } catch (retryError) {
+          logger.warn('Expanded image validation retry failed', {
+            error: retryError instanceof Error ? retryError.message : String(retryError),
+          });
+        }
+      }
       logger.warn('GPT call failed with images; retrying without images', {
         error: error instanceof Error ? error.message : String(error),
       });

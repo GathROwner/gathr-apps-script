@@ -3671,6 +3671,7 @@ function createEventExtractionPrompt(
 - When a single session or workshop block lists multiple explicit dates/times (e.g., "Session 1: Jan 14 & 28, 6-8 pm"), emit a separate event object for each listed date/time pair instead of collapsing them into one. Only treat it as a recurring event if the language explicitly says "every" or "weekly" with a weekday.
 - For a named festival with shared admission, location, and hours, create one parent festival event per advertised day. Put its vendors, activities, and on-site stage timetable in that day's description. Do not turn each vendor, attraction, or stage act into a separate feed event unless it has a separate admission or clearly independent venue/event listing.
 - For a concert lineup in one time slot, create one event for the whole lineup and preserve every printed act in the name or description. Split only when the source gives distinct start times or independently advertised sessions.
+- A named dining or activity series sold as one reservation is one attendee-facing event per advertised date. Keep its workshop, reception, courses, and other untimed components in the series description. Do not split those components into separate events unless the source advertises a separate booking or distinct start time for each.
 - If attendee-facing registration or kit pickup has its own explicit hours on a different date or at a different venue from the main event, extract that session separately. Keep same-day warm-ups and heats within a single race in the main event description unless separately advertised.
 
 CONTENT:
@@ -3961,6 +3962,7 @@ function createScheduleExtractionPrompt(
 CONTENT:
 - Posted by: ${userName}
 - Posted at: ${timestamp}
+- Posted local date (America/Halifax): ${DateTime.fromISO(timestamp, { zone: 'America/Halifax' }).toISODate()}
 - Text: "${combinedText}"
 
 This appears to be a schedule/lineup with multiple performances.
@@ -3975,13 +3977,15 @@ FESTIVAL PARENT RULE:
 
 DATE ANCHORING:
 - When the image says "this week" and gives weekdays without numeric dates, anchor those weekdays to the calendar week containing the post's local date in America/Halifax. Do not label them indefinite weekly recurrences.
-- If neither an explicit date nor a clear relative week anchor is present, leave date empty rather than assigning the post date to every item.
+- When named classes are explicitly offered weekly within a printed month or bounded season (for example, "through October" and "Mondays @ 6pm"), set each timed class's date to its first matching weekday on or after the posted date within that printed period, and set its weekly weekday recurrence. A pass expiration is not proof that every class continues through the full pass validity period. Omit an untimed class whose start time is only "morning".
+- If neither an explicit date nor a clear relative week or named-month schedule anchor is present, leave date empty rather than assigning the post date to every item.
 - A tournament with meal and music under one advertised Saturday block is one event unless the source gives separate independent start times or admission.
 
 For each item found, extract:
 - name: Performer/event name
 - day: Day of week if shown
 - date: Date if available (YYYY-MM-DD)
+- recurringPattern: "weekly_monday" through "weekly_sunday" for an explicitly repeating named weekday class; otherwise "none"
 - startTime: Performance start time
 - endTime: Performance end time ONLY when the same schedule line shows an explicit range (otherwise use "")
 - venue: Venue name if different from ${userName} (look for location names, venue names, "at [location]")
@@ -4019,6 +4023,7 @@ CRITICAL JSON FORMATTING REQUIREMENTS:
       "name": "string",
       "day": "string",
       "date": "YYYY-MM-DD",
+      "recurringPattern": "none or weekly_weekday",
       "startTime": "HH:mm or \"\"",
       "endTime": "HH:mm or \"\"",
       "venue": "string",

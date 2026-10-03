@@ -46,7 +46,8 @@ const rank = item => createHash('sha256').update(`oct2-luna-cohort:${item.postId
   .digest('hex');
 const ranked = candidates.filter(item => !stressRows.has(item.rowIndex))
   .sort((a, b) => rank(a).localeCompare(rank(b)));
-const additional = process.env.LUNA_COHORT_RUN_LABEL === 'additional';
+const additional = process.env.LUNA_COHORT_SELECTION === 'additional' ||
+  process.env.LUNA_COHORT_RUN_LABEL === 'additional';
 const representative = ranked.slice(additional ? 40 : 0, additional ? 80 : 40);
 const selected = additional
   ? representative.map(item => ({ ...item, cohort: 'additional' }))
@@ -76,6 +77,9 @@ const count = Number(process.argv[3] || selected.length);
 if (!Number.isInteger(start) || start < 0 || !Number.isInteger(count) || count < 1 ||
     start + count > selected.length) throw new Error('Pass a valid start and count');
 process.env.LUNA_CANARY_ENABLED = 'true';
+if (process.env.LUNA_COHORT_STAGE3_ONLY === 'true') {
+  process.env.LUNA_CANARY_STAGE3_ONLY = 'true';
+}
 if (additional || process.env.LUNA_COHORT_DISABLE_LEGACY_FALLBACK === 'true') {
   process.env.LUNA_CANARY_LEGACY_FALLBACK_ENABLED = 'false';
 }
@@ -120,6 +124,7 @@ async function preprocess(bytes) {
 const concise = event => ({ name: event.name, startDate: event.startDate,
   startTime: event.startTime, endDate: event.endDate, endTime: event.endTime,
   recurringPattern: event.recurringPattern, totalOccurrences: event.totalOccurrences,
+  recurrenceUntilDate: event.recurrenceUntilDate, isRecurring: event.isRecurring,
   venue: event.venue, relevantImageIndex: event.relevantImageIndex,
   hasImage: Boolean(event.image), hasRelevantImageUrl: Boolean(event.relevantImageUrl) });
 
@@ -176,6 +181,7 @@ async function run(item) {
   process.env.LUNA_CANARY_POST_IDS = item.postId;
   const usage = [];
   const skips = [];
+  const stages = [];
   let events = [];
   let error = '';
   try {
@@ -193,6 +199,8 @@ async function run(item) {
         inputTokens: value.inputTokens, outputTokens: value.outputTokens }),
       skipReasonHandler: value => skips.push({ stage: value.stage, reason: value.reason,
         detail: value.detail }),
+      ...(process.env.LUNA_COHORT_CAPTURE_STAGES === 'true'
+        ? { stageArtifactsHandler: value => stages.push(value) } : {}),
     });
   } catch (cause) { error = String(cause?.stack || cause); }
   finally {
@@ -206,7 +214,8 @@ async function run(item) {
   return { snapshotId: item.doc.id, rowIndex: row, postId: item.postId, cohort: item.cohort,
     imageCount: originals.length, ocrUploads, displayUploads,
     method: `original saved caption and ordered gallery (${imageSource}); local Cloud Run Sharp transform; mocked uploads; no event writes`,
-    legacyEvents: item.legacyEvents.map(concise), lunaEvents: events.map(concise), usage, skips, error };
+    legacyEvents: item.legacyEvents.map(concise), lunaEvents: events.map(concise), usage, skips, error,
+    ...(stages.length > 0 ? { stages } : {}) };
 }
 
 for (let index = start; index < start + count; index++) {
