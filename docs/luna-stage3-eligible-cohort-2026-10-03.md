@@ -26,3 +26,10 @@ The new regular full-dataset route allocates the 17% canary **after Stage 2 has 
 Deploy only `processDataset`, `processDatasetResume`, and `processDatasetSelectedRows` after the narrow Firebase dry run. Preserve the prior serving revisions `processdataset-00438-jon`, `processdatasetresume-00402-cop`, and `processdatasetselectedrows-00394-sah` for immediate traffic rollback. For a safe operational stop, set `LUNA_CANARY_ENABLED=false` on all three services; this sends Stage 3 through the existing GPT-5.2 route while retaining the code. Any deployment during an active full parse must be deferred.
 
 The next newly completed regular full dataset is required to measure actual eligible and selected counts, Luna calls, holds, writes, provenance, and cost. Do not treat local dry runs as production evidence.
+
+## Deployment readback
+
+- Committed as `b7b95ac`. The narrow Firebase dry run and deploy both succeeded for `gathr-functions:processDataset`, `processDatasetResume`, and `processDatasetSelectedRows` in `gathr-migrated`. Firebase warned that `firebase-functions` is outdated; it did not block the deploy.
+- A second read-only lock check at 2026-10-03T21:04:19Z found no active or processing parse before deployment.
+- Cloud Run readback shows `processdataset-00439-yiz`, `processdatasetresume-00403-req`, and `processdatasetselectedrows-00395-maz` ready at 100% traffic. Each retained `LUNA_CANARY_ENABLED=true`, Stage 3 only, high effort, 17%, excluded post `1551794836988048`, and no legacy fallback.
+- The next-full-run audit heartbeat was updated to measure the eligible and selected counts and reconcile selected posts with actual Luna calls. Full-gallery promotion beyond four images remains a specific live audit check; the local exact-post routing test used a one-image post.
