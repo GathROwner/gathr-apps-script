@@ -1,3 +1,5 @@
+import { createHash } from 'crypto';
+
 /** A standing weekday board must not be anchored to the post's arbitrary week. */
 export function shouldHoldUndatedStandingSchedule(sourceText: string): boolean {
   const text = String(sourceText || '');
@@ -18,6 +20,22 @@ export function isSelectedLunaCanaryPost(
   const ids = String(allowedIds || '').split(',').map(id=>id.trim()).filter(Boolean);
   if (ids.length===0 || ids.length>8 || ids.some(id=>id==='*')) return false;
   return ids.includes(postId);
+}
+
+/** Stable, bounded sampling for a future dataset whose post IDs are not known yet. */
+export function isSampledLunaCanaryPost(
+  postId: string,
+  enabled: boolean,
+  percentValue: string,
+  excludedIds = ''
+): boolean {
+  if (!enabled || !postId) return false;
+  const percent = Number(percentValue);
+  if (!Number.isFinite(percent) || percent <= 0 || percent > 20) return false;
+  const excluded = excludedIds.split(',').map(id => id.trim()).filter(Boolean);
+  if (excluded.includes(postId)) return false;
+  const bucket = createHash('sha256').update(postId).digest().readUInt32BE(0) / 0x100000000;
+  return bucket < percent / 100;
 }
 
 /** Legacy tiles only the first of at most four analyzed source images. */

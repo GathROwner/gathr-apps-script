@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { shouldHoldUndatedStandingSchedule, shouldRetrySeasonalLeagueWithLegacy,
-  isSelectedLunaCanaryPost,
+  isSelectedLunaCanaryPost, isSampledLunaCanaryPost,
   canRetryLunaCanaryWithLegacy, canaryGeneratedCleanupUrls,
   hasMalformedLunaEventTitle, isOnlineAdministrativeMilestone } from './lunaSafetyGate.js';
 import { normalizeCommunityMealEvent } from './finalFormatter.js';
@@ -43,6 +43,17 @@ test('canary cleanup excludes managed source gallery and profile images', () => 
   const analysis = 'https://storage.googleapis.com/gathr-uploaded-images/postimages/ocr-base.webp';
   assert.deepEqual(canaryGeneratedCleanupUrls([source, analysis, profile], [source, profile]),
     [analysis]);
+});
+
+test('Luna sample is stable, bounded, and can exclude a reviewed post', () => {
+  const ids = Array.from({ length: 200 }, (_, i) => `post-${i}`);
+  const selected = ids.filter(id => isSampledLunaCanaryPost(id, true, '15'));
+  assert.ok(selected.length >= 15 && selected.length <= 45);
+  assert.deepEqual(selected, ids.filter(id => isSampledLunaCanaryPost(id, true, '15')));
+  assert.equal(isSampledLunaCanaryPost(selected[0], true, '15', selected[0]), false);
+  assert.equal(isSampledLunaCanaryPost(selected[0], false, '15'), false);
+  assert.equal(isSampledLunaCanaryPost(selected[0], true, '21'), false);
+  assert.equal(isSampledLunaCanaryPost(selected[0], true, '*'), false);
 });
 
 test('seasonal league timetable uses the reviewed legacy route until recurrence is defined', () => {

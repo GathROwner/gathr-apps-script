@@ -46,7 +46,7 @@ import { reconcileCaptionOnlyWeeklyEvents } from './captionOnlyWeekly.js';
 import { reconcileRaceSchedule } from './raceScheduleReconciler.js';
 import { resolveTimesWithOperatingHours } from './venueResolver.js';
 import { shouldHoldUndatedStandingSchedule, shouldRetrySeasonalLeagueWithLegacy,
-  isSelectedLunaCanaryPost,
+  isSelectedLunaCanaryPost, isSampledLunaCanaryPost,
   canRetryLunaCanaryWithLegacy, canaryGeneratedCleanupUrls,
   hasMalformedLunaEventTitle, isOnlineAdministrativeMilestone } from './lunaSafetyGate.js';
 import { parseBooleanEnv, parseNumberEnv, resolveStageModel } from './runtimeConfig.js';
@@ -1251,10 +1251,15 @@ async function parsePostDataCore(
   } = input;
 
   const postId = extractedData?.id || extractedData?.postId || '';
-  const lunaCanarySelected = !cfg.lunaCanaryBypass && isSelectedLunaCanaryPost(
-    postId,
-    parseBooleanEnv('LUNA_CANARY_ENABLED', false),
-    String(process.env.LUNA_CANARY_POST_IDS || '')
+  const lunaCanaryEnabled = parseBooleanEnv('LUNA_CANARY_ENABLED', false);
+  const lunaCanarySelected = !cfg.lunaCanaryBypass && (
+    isSelectedLunaCanaryPost(
+      postId, lunaCanaryEnabled, String(process.env.LUNA_CANARY_POST_IDS || '')
+    ) || isSampledLunaCanaryPost(
+      postId, lunaCanaryEnabled,
+      String(process.env.LUNA_CANARY_SAMPLE_PERCENT || ''),
+      String(process.env.LUNA_CANARY_EXCLUDED_POST_IDS || '')
+    )
   );
   const lunaStage3Only = lunaCanarySelected &&
     parseBooleanEnv('LUNA_CANARY_STAGE3_ONLY', true);
