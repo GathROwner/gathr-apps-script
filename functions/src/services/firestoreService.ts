@@ -3851,6 +3851,36 @@ function extractUniqueIdRoot(value: unknown): string {
   return normalized.slice(0, separatorIndex);
 }
 
+/** Keep a later broad program extraction from duplicating separately timed sessions
+ * already saved from the same source post. This does not merge into a child event. */
+export function hasExistingSameSourceSessionsCoveredByProgram(
+  incoming: EventData,
+  existingEvents: EventData[]
+): boolean {
+  const root = extractUniqueIdRoot(incoming.uniqueId);
+  const titleAndDescription = `${incoming.eventName || incoming.name || ''} ${incoming.description || ''}`;
+  if (!root || !/\bsessions?\b/i.test(titleAndDescription) ||
+      !/^\d{4}-\d{2}-\d{2}$/.test(String(incoming.startDate || '')) ||
+      incoming.startDate !== incoming.endDate ||
+      !/^\d{2}:\d{2}$/.test(String(incoming.startTime || '')) ||
+      !/^\d{2}:\d{2}$/.test(String(incoming.endTime || '')) ||
+      String(incoming.startTime) >= String(incoming.endTime)) {
+    return false;
+  }
+
+  const covered = existingEvents.filter((existing) =>
+    existing.uniqueId !== incoming.uniqueId &&
+    extractUniqueIdRoot(existing.uniqueId) === root &&
+    existing.startDate === incoming.startDate &&
+    /^session\s*\d+\s*:/i.test(String(existing.eventName || existing.name || '')) &&
+    /^\d{2}:\d{2}$/.test(String(existing.startTime || '')) &&
+    /^\d{2}:\d{2}$/.test(String(existing.endTime || '')) &&
+    String(existing.startTime) >= String(incoming.startTime) &&
+    String(existing.endTime) <= String(incoming.endTime)
+  );
+  return new Set(covered.map((event) => event.startTime)).size >= 2;
+}
+
 function titlesDescribeDistinctSamePostItems(incoming: EventData, existing: EventData): boolean {
   const tokens = (event: EventData): Set<string> => new Set(
     String(event.eventName || event.name || '')
@@ -4145,6 +4175,16 @@ export async function checkDuplicate(
     startDate: event.startDate,
     endDate: event.startDate,
   });
+
+  if (hasExistingSameSourceSessionsCoveredByProgram(event, existingEvents)) {
+    logger.info('Same-source program already represented by timed sessions; skipping umbrella create', {
+      venueId,
+      incomingUniqueId: event.uniqueId,
+      incomingTitle: event.eventName || event.name,
+      date: event.startDate,
+    });
+    return { isDuplicate: true };
+  }
 
   const matchingStoredSlot = existingEvents.find((existing) =>
     existing.startDate === event.startDate &&

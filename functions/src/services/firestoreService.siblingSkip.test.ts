@@ -3,9 +3,43 @@ import assert from 'node:assert/strict';
 import { EventData } from '../types/index.js';
 import { pickCompatibleExactUniqueIdMatch } from './exactUniqueIdCompatibility.js';
 import {
+  hasExistingSameSourceSessionsCoveredByProgram,
   pickUnrecognizedVenueDocIdForSource,
   shouldSkipSiblingUniqueIdDuplicateCheck,
 } from './firestoreService.js';
+
+test('same-source timed sessions block a later umbrella program without replacing a child', () => {
+  const root = '1401951132140319';
+  const program = buildEvent({
+    uniqueId: `${root}_67f000c83eb9152e`,
+    eventName: 'Criminal Law Half-Day PD Event',
+    description: 'Sessions: body worn cameras; DUI; deportation.',
+    startDate: '2026-10-20', endDate: '2026-10-20',
+    startTime: '08:30', endTime: '12:30',
+  });
+  const session1 = buildEvent({
+    uniqueId: `${root}_2533dd31b83ba332`,
+    eventName: 'Session 1: Body worn cameras',
+    startDate: '2026-10-20', endDate: '2026-10-20',
+    startTime: '09:00', endTime: '10:00',
+  });
+  const session2 = buildEvent({
+    uniqueId: `${root}_619f694e72d7a37b`,
+    eventName: 'Session 2: I have a DUI',
+    startDate: '2026-10-20', endDate: '2026-10-20',
+    startTime: '10:15', endTime: '11:15',
+  });
+  assert.equal(hasExistingSameSourceSessionsCoveredByProgram(program, [session1, session2]), true);
+  assert.equal(hasExistingSameSourceSessionsCoveredByProgram(program, [session1]), false);
+  assert.equal(hasExistingSameSourceSessionsCoveredByProgram(program,
+    [session1, { ...session2, uniqueId: 'other_post_619f694e72d7a37b' }]), false);
+  assert.equal(hasExistingSameSourceSessionsCoveredByProgram(program,
+    [session1, { ...session2, startDate: '2026-10-21' }]), false);
+  assert.equal(hasExistingSameSourceSessionsCoveredByProgram(program,
+    [session1, { ...session2, startTime: '13:15', endTime: '14:15' }]), false);
+  assert.equal(hasExistingSameSourceSessionsCoveredByProgram(
+    { ...program, description: '', eventName: 'Independent workshop' }, [session1, session2]), false);
+});
 import { isDuplicateEntry } from '../utils/similarity.js';
 
 function buildEvent(overrides: Partial<EventData>): EventData {
