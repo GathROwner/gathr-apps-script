@@ -200,6 +200,8 @@ export interface ParsingConfig {
   /** Format large Luna canary inventories in bounded nano batches. */
   stage5BatchSize?: number;
   lunaCanaryBypass?: boolean;
+  /** Used only by regular full-dataset runs after Stage 2 has passed. */
+  lunaStage3EligibleSelector?: (postId: string, percent: number) => boolean;
 }
 
 export const DEFAULT_PARSING_CONFIG: ParsingConfig = {

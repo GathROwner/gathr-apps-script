@@ -1253,18 +1253,21 @@ async function parsePostDataCore(
 
   const postId = extractedData?.id || extractedData?.postId || '';
   const lunaCanaryEnabled = parseBooleanEnv('LUNA_CANARY_ENABLED', false);
-  const lunaCanarySelected = !cfg.lunaCanaryBypass && (
+  const lunaEligibleQuotaMode = lunaCanaryEnabled && !cfg.lunaCanaryBypass &&
+    parseBooleanEnv('LUNA_CANARY_STAGE3_ONLY', true) &&
+    typeof cfg.lunaStage3EligibleSelector === 'function';
+  let lunaCanarySelected = !cfg.lunaCanaryBypass && (
     isSelectedLunaCanaryPost(
       postId, lunaCanaryEnabled, String(process.env.LUNA_CANARY_POST_IDS || '')
-    ) || isSampledLunaCanaryPost(
+    ) || (!lunaEligibleQuotaMode && isSampledLunaCanaryPost(
       postId, lunaCanaryEnabled,
       String(process.env.LUNA_CANARY_SAMPLE_PERCENT || ''),
       String(process.env.LUNA_CANARY_EXCLUDED_POST_IDS || '')
-    )
+    ))
   );
-  const lunaStage3Only = lunaCanarySelected &&
+  let lunaStage3Only = lunaCanarySelected &&
     parseBooleanEnv('LUNA_CANARY_STAGE3_ONLY', true);
-  const intendedBandRules = lunaCanarySelected ? calendarBandRulesForPost(postId) : [];
+  let intendedBandRules = lunaCanarySelected ? calendarBandRulesForPost(postId) : [];
   const cleanupImageUrls = new Set<string>();
   const originalMediaUrls = [
     ...(mediaUrls || []), ...(sharedPostThumbnails || []), profilePicUrl || '',
@@ -1282,7 +1285,9 @@ async function parsePostDataCore(
     });
     return [];
   }
-  if (lunaCanarySelected) {
+  const configureLunaCanary = (): void => {
+    lunaStage3Only = parseBooleanEnv('LUNA_CANARY_STAGE3_ONLY', true);
+    intendedBandRules = calendarBandRulesForPost(postId);
     // Preserve the deployed mini/nano stages in a Stage 3 substitution trial.
     if (!lunaStage3Only) {
       cfg.gptModelFast = 'gpt-6-luna';
@@ -1315,7 +1320,8 @@ async function parsePostDataCore(
       };
     }
     logger.info('Exact-post Luna canary selected', { postId });
-  }
+  };
+  if (lunaCanarySelected) configureLunaCanary();
   const holdCalendarBandCanary = async (reason: string, detail = ''): Promise<ProcessedEvent[]> => {
     logger.warn('Exact-post calendar band canary held for review', { postId, reason, detail });
     const stage: ParseSkipReason['stage'] = reason.includes('stage1') ? 'stage1'
@@ -1390,7 +1396,7 @@ async function parsePostDataCore(
   const galleryLimit = lunaCanarySelected || parseBooleanEnv('STAGE3_LUNA_FULL_IMAGE', false)
     ? MAX_SOURCE_GALLERY_IMAGES : MAX_OCR_IMAGES;
   let sourcePostMediaUrls = normalizeImageUrls(mediaUrls || [], galleryLimit);
-  const imageSources = [
+  let imageSources = [
     ...sourcePostMediaUrls,
     ...(sharedPostThumbnails || []),
   ];
@@ -1447,7 +1453,7 @@ async function parsePostDataCore(
     outputCount: ocrImageUrls.length,
   });
   let ocrDebugSnapshot: OcrDebugSnapshot | undefined;
-  if (typeof cfg.ocrDebugHandler === 'function') {
+  if (!lunaEligibleQuotaMode && typeof cfg.ocrDebugHandler === 'function') {
     const ocrDebugStart = Date.now();
     ocrDebugSnapshot = await buildOcrDebugSnapshot(
       allImageUrls,
@@ -1462,7 +1468,7 @@ async function parsePostDataCore(
     });
     cfg.ocrDebugHandler(ocrDebugSnapshot);
   }
-  const extractionText = appendOcrText(combinedText, ocrDebugSnapshot?.ocrText);
+  let extractionText = appendOcrText(combinedText, ocrDebugSnapshot?.ocrText);
   if (lunaCanarySelected && (allImageUrls.length === 0 ||
       ocrImageUrls.length !== allImageUrls.length)) {
     return holdCalendarBandCanary('preprocessed_image_missing',
@@ -1502,7 +1508,7 @@ async function parsePostDataCore(
       stage1AppliedModel === cfg.gptModelFast
         ? cfg
         : ({ ...cfg, gptModelFast: stage1AppliedModel } as ParsingConfig);
-    const validation = await validateContent(
+    let validation = await validateContent(
       combinedText,
       ocrImageUrls,
       userName,
@@ -1544,7 +1550,7 @@ async function parsePostDataCore(
       stage2AppliedModel === cfg.gptModelFast
         ? cfg
         : ({ ...cfg, gptModelFast: stage2AppliedModel } as ParsingConfig);
-    const classification = await classifyContent(
+    let classification = await classifyContent(
       combinedText,
       ocrImageUrls,
       userName,
@@ -1564,6 +1570,110 @@ async function parsePostDataCore(
           : 'classification missing',
       });
       return [];
+    }
+
+    if (lunaEligibleQuotaMode) {
+      const percent = Number(process.env.LUNA_CANARY_SAMPLE_PERCENT || '');
+      if (!Number.isFinite(percent) || percent <= 0 || percent > 20) {
+        throw new Error(`Unsupported LUNA_CANARY_SAMPLE_PERCENT: ${percent}`);
+      }
+      const excludedIds = String(process.env.LUNA_CANARY_EXCLUDED_POST_IDS || '')
+        .split(',').map(id => id.trim()).filter(Boolean);
+      // Count only posts with a usable image gallery. The Luna full-image route
+      // would hold a text-only or unprepared gallery before its Stage 3 call.
+      const stage3ImageReady = postId && !excludedIds.includes(postId) &&
+        (mediaUrls || []).length <= MAX_SOURCE_GALLERY_IMAGES &&
+        allImageUrls.length > 0 && ocrImageUrls.length === allImageUrls.length;
+      const quotaSelected = stage3ImageReady
+        ? cfg.lunaStage3EligibleSelector!(postId, percent) : false;
+      if (quotaSelected && !lunaCanarySelected) {
+        lunaCanarySelected = true;
+        configureLunaCanary();
+        modelRouter.enabled = false;
+        modelRouter.shadowEnabled = false;
+
+        // Stages 1-2 retain the existing mini image budget. Once the post is
+        // allocated, restore its ordered full gallery for Luna Stage 3.
+        const fullSourcePostMediaUrls = normalizeImageUrls(mediaUrls || [], MAX_SOURCE_GALLERY_IMAGES);
+        const fullImageSources = [
+          ...fullSourcePostMediaUrls,
+          ...(sharedPostThumbnails || []),
+        ];
+        const fullAllImageUrls = normalizeImageUrls(fullImageSources, MAX_SOURCE_GALLERY_IMAGES);
+        const extraSources = fullAllImageUrls.slice(allImageUrls.length);
+        const extraOcrUrls = extraSources.length > 0
+          ? await prepareOcrImageUrls(extraSources, {
+            postId, userName, pageName, combinedText,
+          }, { calendarTiles: false }) : [];
+        for (const url of extraOcrUrls) cleanupImageUrls.add(url);
+        sourcePostMediaUrls = fullSourcePostMediaUrls;
+        imageSources = fullImageSources;
+        allImageUrls = fullAllImageUrls;
+        ocrImageUrls = [...ocrImageUrls, ...extraOcrUrls];
+
+        if (sourcePostMediaUrls.length === allImageUrls.length &&
+            ocrImageUrls.length !== allImageUrls.length) {
+          const recovered = await findRecoverableManagedSourceGallery(postId, sourcePostMediaUrls);
+          if (recovered) {
+            const recoveredOcrUrls = await prepareOcrImageUrls(recovered.urls, {
+              postId, userName, pageName, combinedText,
+            }, { calendarTiles: false });
+            if (recoveredOcrUrls.length === recovered.urls.length) {
+              await cleanupUnusedOcrImages(ocrImageUrls, []);
+              sourcePostMediaUrls = recovered.urls;
+              imageSources = [...recovered.urls];
+              allImageUrls = recovered.urls;
+              ocrImageUrls = recoveredOcrUrls;
+              for (const url of recoveredOcrUrls) cleanupImageUrls.add(url);
+              logger.info('Eligible-cohort Luna gallery recovered from saved source snapshot', {
+                postId, snapshotId: recovered.snapshotId, imageCount: recovered.urls.length,
+              });
+            } else {
+              await cleanupUnusedOcrImages(recoveredOcrUrls, []);
+            }
+          }
+        }
+        if (allImageUrls.length === 0 || ocrImageUrls.length !== allImageUrls.length) {
+          return holdCalendarBandCanary('preprocessed_image_missing',
+            `sourceImages=${allImageUrls.length}, preprocessed=${ocrImageUrls.length}`);
+        }
+        if (extraSources.length > 0) {
+          // A promoted carousel may put its schedule beyond the mini route's
+          // four-image budget. Refresh its mini decisions with the full gallery
+          // before Luna interprets the complete source order.
+          const fullValidation = await validateContent(
+            combinedText, ocrImageUrls, userName, timestamp, stage1Config
+          );
+          if (fullValidation.hasValidContent &&
+              fullValidation.validationDecision !== 'VALIDATION_FAILED') {
+            validation = fullValidation;
+          }
+          const fullClassification = await classifyContent(
+            combinedText, ocrImageUrls, userName, extractedData, stage2Config
+          );
+          if (fullClassification &&
+              fullClassification.confidence >= cfg.confidenceThreshold) {
+            classification = fullClassification;
+          }
+          logger.info('Eligible-cohort Luna full-gallery mini refresh', {
+            postId, imageCount: allImageUrls.length,
+            classification: classification.contentType,
+            confidence: classification.confidence,
+          });
+        }
+      }
+      if (typeof cfg.ocrDebugHandler === 'function') {
+        const ocrDebugStart = Date.now();
+        ocrDebugSnapshot = await buildOcrDebugSnapshot(
+          allImageUrls, ocrImageUrls, combinedText, cfg
+        );
+        logTiming('ocr_debug', ocrDebugStart, {
+          postId, hasOcrText: Boolean(ocrDebugSnapshot?.ocrText),
+          error: ocrDebugSnapshot?.error || '',
+        });
+        cfg.ocrDebugHandler(ocrDebugSnapshot);
+        extractionText = appendOcrText(combinedText, ocrDebugSnapshot?.ocrText);
+      }
     }
 
     const stage2Routing = resolveStage2ScoreRouting(combinedText, classification, validation);

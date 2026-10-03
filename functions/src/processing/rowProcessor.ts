@@ -3090,6 +3090,10 @@ export async function processRow(
           gptUsageRecords.push(usage);
         },
       };
+      if (config?.lunaStage3EligibleQuota) {
+        parserConfig.lunaStage3EligibleSelector = (postId, percent) =>
+          batchManager.selectEligibleLunaStage3Post(postId, percent);
+      }
       if (enableStageArtifacts) {
         parserConfig.stageArtifactsHandler = (snapshot: ParseStageArtifactsSnapshot) => {
           stageArtifactsSnapshot = mergeStageArtifactsSnapshot(stageArtifactsSnapshot, snapshot);

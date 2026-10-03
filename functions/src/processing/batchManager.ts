@@ -13,6 +13,7 @@ import {
 } from '../types/index.js';
 import * as firestoreService from '../services/firestoreService.js';
 import { logger } from '../utils/logger.js';
+import { isLunaStage3QuotaOrdinal } from '../parsing/lunaSafetyGate.js';
 
 /**
  * Initialize processing stats
@@ -32,6 +33,8 @@ export function initializeStats(): ProcessingStats {
     existingFoodSpecialsUpdated: 0,
     parseSnapshotWrites: 0,
     unknownVenueCount: 0,
+    lunaStage3EligibleCount: 0,
+    lunaStage3SelectedCount: 0,
   };
 }
 
@@ -104,6 +107,23 @@ export class BatchManager {
    */
   addCurrentRunEntry(entry: EventData): void {
     this.currentRunEntries.push(entry);
+  }
+
+  /** Called once, only after a regular full-dataset post passes Stage 2. */
+  selectEligibleLunaStage3Post(postId: string, percent: number): boolean {
+    const eligible = Number(this.state.stats.lunaStage3EligibleCount || 0) + 1;
+    const selected = isLunaStage3QuotaOrdinal(eligible, percent, this.state.fileId);
+    this.state.stats.lunaStage3EligibleCount = eligible;
+    if (selected) {
+      this.state.stats.lunaStage3SelectedCount =
+        Number(this.state.stats.lunaStage3SelectedCount || 0) + 1;
+    }
+    logger.info('Luna Stage 3 eligible-cohort allocation', {
+      fileId: this.state.fileId, postId, eligibleOrdinal: eligible,
+      selected, selectedCount: this.state.stats.lunaStage3SelectedCount || 0,
+      percent,
+    });
+    return selected;
   }
 
   /**

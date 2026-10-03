@@ -190,7 +190,10 @@ async function processRows(
     // Process the row
     const shouldParseInDryRun = config.dryRun && config.parserMode === 'full5stage';
     if (!config.dryRun || shouldParseInDryRun) {
-      await processRow(row, i, batchManager, config);
+      await processRow(row, i, batchManager, {
+        ...config,
+        lunaStage3EligibleQuota: true,
+      });
     } else {
       // Dry run - just log what would happen
       logger.debug('Dry run: would process row', { rowIndex: i });

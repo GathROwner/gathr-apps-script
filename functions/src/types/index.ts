@@ -21,6 +21,8 @@ export interface ProcessingConfig {
   parserMode: 'legacy' | 'full5stage';
   dryRun: boolean;
   verboseLogging: boolean;
+  /** Regular full-dataset runs allocate Luna after Stage 2, across checkpoints. */
+  lunaStage3EligibleQuota?: boolean;
 }
 
 export const DEFAULT_CONFIG: ProcessingConfig = {
@@ -68,6 +70,10 @@ export interface ProcessingStats {
   /** Number of per-row parser snapshots successfully persisted in this run. */
   parseSnapshotWrites: number;
   unknownVenueCount?: number;
+  /** Posts that passed Stage 2 and entered the Stage 3 canary allocation. */
+  lunaStage3EligibleCount?: number;
+  /** Posts allocated to Luna within that eligible cohort. */
+  lunaStage3SelectedCount?: number;
 }
 
 export interface CheckpointData {

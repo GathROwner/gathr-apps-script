@@ -148,7 +148,10 @@ localOrigin = `http://127.0.0.1:${server.address().port}`;
 process.env.IMAGE_UPLOAD_URL = `${localOrigin}/upload-image`;
 process.env.IMAGE_DELETE_URL = `${localOrigin}/delete-image`;
 process.env.LUNA_CANARY_ENABLED = 'true';
-process.env.LUNA_CANARY_POST_IDS = postId;
+const eligibleQuotaTrial = ['true', 'false'].includes(process.env.LUNA_DRYRUN_ELIGIBLE_QUOTA);
+const testLateEligibleSelection = process.env.LUNA_DRYRUN_ELIGIBLE_QUOTA === 'true';
+process.env.LUNA_CANARY_POST_IDS = eligibleQuotaTrial ? '' : postId;
+if (eligibleQuotaTrial) process.env.LUNA_CANARY_SAMPLE_PERCENT = '17';
 process.env.STAGE1_MODEL_OVERRIDE = 'gpt-5-mini';
 process.env.STAGE2_MODEL_OVERRIDE = 'gpt-5-mini';
 process.env.STAGE3_MODEL_OVERRIDE = 'gpt-5.2';
@@ -187,6 +190,9 @@ try {
     profilePicUrl: '', extractedData: { id: postId, postId },
   }, {}, {
     ...parsingConfig,
+    ...(eligibleQuotaTrial
+      ? { lunaStage3EligibleSelector: () => testLateEligibleSelection }
+      : {}),
     calendarNameAdjudicationDiagnostics: process.env.LUNA_DRYRUN_NAME_ADJUDICATION === 'true',
     calendarNameDisputeHandler: disputes => { report.adjudicationDisputes = disputes; },
     stageArtifactsHandler: snapshot => {

@@ -38,6 +38,25 @@ export function isSampledLunaCanaryPost(
   return bucket < percent / 100;
 }
 
+/** Online quota with a stable, run-seeded pick inside each 5-6 post window.
+ * This avoids tying every selection to the same position in a source-ordered file. */
+export function isLunaStage3QuotaOrdinal(
+  eligibleOrdinal: number,
+  percent: number,
+  runSeed = ''
+): boolean {
+  if (!Number.isInteger(eligibleOrdinal) || eligibleOrdinal < 1 ||
+      !Number.isFinite(percent) || percent <= 0 || percent > 20) return false;
+  const windowIndex = Math.floor((eligibleOrdinal - 1) * percent / 100);
+  const first = Math.ceil(windowIndex * 100 / percent) + 1;
+  const last = Math.ceil((windowIndex + 1) * 100 / percent);
+  const windowSize = last - first + 1;
+  const offset = createHash('sha256')
+    .update(`${runSeed}:${windowIndex}`)
+    .digest().readUInt32BE(0) % windowSize;
+  return eligibleOrdinal === first + offset;
+}
+
 /** Legacy tiles only the first of at most four analyzed source images. */
 export function canRetryLunaCanaryWithLegacy(
   sourceImageCount: number,
