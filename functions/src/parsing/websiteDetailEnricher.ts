@@ -44,7 +44,7 @@ type WebsiteCandidate = {
   endTime?: string;
   imageUrl?: string;
   sourceUrl: string;
-  source: 'detail_page' | 'locarius_api';
+  source: 'detail_page' | 'locarius_api' | 'article_paragraph';
   namedSeatings?: Array<{ label: string; startTime: string; endTime: string }>;
   // Only populated when a detail page prints both its individual dates and a
   // clock range labelled with the same series title.
@@ -204,18 +204,22 @@ export async function enrichEventsFromVenueWebsite(
       relevanceTokens,
       yearHint,
       cfg,
-      summary
+      summary,
+      config.lunaCalendarLiteralSourcePrompt === true
     );
     if (detailCandidates.length > 0) {
       discoveredCandidates.push(...detailCandidates);
     }
 
     summary.candidateItemsFound += discoveredCandidates.length;
-    if (discoveredCandidates.length === 0) {
+    const articleAlignedItems = config.lunaCalendarLiteralSourcePrompt === true
+      ? reconcileRepeatedWeekdaySessions(inputItems, pageHtml, candidateUrl, summary)
+      : inputItems;
+    if (discoveredCandidates.length === 0 && summary.appliedCount === 0) {
       continue;
     }
 
-    const applied = applyWebsiteCandidates(inputItems, discoveredCandidates, summary, combinedText);
+    const applied = applyWebsiteCandidates(articleAlignedItems, discoveredCandidates, summary, combinedText);
     if (applied.summary.appliedCount > 0) {
       return {
         items: applied.items,
@@ -518,7 +522,8 @@ async function discoverDetailPageCandidates(
     maxListingPages: number;
     maxDetailPages: number;
   },
-  summary: VenueWebsiteEnrichmentSummary
+  summary: VenueWebsiteEnrichmentSummary,
+  allowArticleParagraphs = false
 ): Promise<WebsiteCandidate[]> {
   const listingPages = dedupeStrings([
     pageUrl,
@@ -526,6 +531,13 @@ async function discoverDetailPageCandidates(
   ]).slice(0, Math.max(1, cfg.maxListingPages));
 
   const detailCandidates = new Map<string, WebsiteCandidate>();
+  // A linked news post can contain several unrelated activities. Keep the
+  // date and clock attached to their own paragraph instead of treating its
+  // first time as the time of the whole page.
+  for (const candidate of allowArticleParagraphs
+    ? extractDatedParagraphCandidates(pageUrl, pageHtml, yearHint) : []) {
+    detailCandidates.set(`${candidate.sourceUrl}|${candidate.title}|${candidate.date}`, candidate);
+  }
   // A post may link straight to the event detail page. Inspect that page as
   // well as links discovered from a venue listing page.
   if (safePathname(pageUrl).split('/').filter(Boolean).length >= 2) {
@@ -561,6 +573,84 @@ async function discoverDetailPageCandidates(
   }
 
   return Array.from(detailCandidates.values());
+}
+
+function reconcileRepeatedWeekdaySessions(
+  items: ExtractedItem[], html: string, sourceUrl: string,
+  summary: VenueWebsiteEnrichmentSummary
+): ExtractedItem[] {
+  const groups = new Map<string, number[]>();
+  items.forEach((item, index) => {
+    const date = String(item.date || '');
+    const name = String(item.name || '').trim().toLowerCase();
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || name.length < 4) return;
+    const key = `${date}|${name}`;
+    groups.set(key, [...(groups.get(key) || []), index]);
+  });
+  const paragraphs = Array.from(String(html || '').matchAll(/<p\b[^>]*>([\s\S]*?)<\/p>/gi))
+    .slice(0, 100).map(match => cleanText(decodeHtml(match[1] || '')));
+  const next = items.slice();
+  for (const [key, indices] of groups) {
+    if (indices.length !== 2 || indices.every(index => hasUsableFieldValue(items[index].startTime))) continue;
+    const [date, name] = key.split('|');
+    const weekday = DateTime.fromISO(date, { zone: 'America/Halifax' }).weekdayLong?.toLowerCase();
+    if (!weekday) continue;
+    const matches = paragraphs.filter(block =>
+      new RegExp(`\\b${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i').test(block) &&
+      new RegExp(`\\b${weekday}s?\\b`, 'i').test(block)
+    ).map(block => ({ block, times: Array.from(block.matchAll(
+      /\b\d{1,2}(?::\d{2})?\s*(?:a\.?m\.?|p\.?m\.?)(?=\W|$)/gi
+    )).map(match => parse12hTime(match[0])).filter(Boolean) }))
+      .filter(candidate => candidate.times.length === 2);
+    if (matches.length !== 1) continue;
+    const times = matches[0].times;
+    if (indices.some((index, offset) => hasUsableFieldValue(items[index].startTime) &&
+        normalizeWebsiteTime(String(items[index].startTime)) !== times[offset])) continue;
+    indices.forEach((index, offset) => {
+      if (hasUsableFieldValue(items[index].startTime)) return;
+      const item = { ...items[index] };
+      item.startTime = times[offset];
+      item.timeFlags = item.timeFlags || {
+        start: { source: 'none', evidence: '' }, end: { toClose: false, evidence: '' },
+      };
+      item.timeFlags.start = { source: 'explicit',
+        evidence: `venue_website:${sourceUrl} ${matches[0].block}` };
+      next[index] = item;
+      summary.appliedCount += 1;
+      summary.updatedFields.times += 1;
+      summary.reason = 'merged_linked_weekday_session_times';
+    });
+  }
+  return next;
+}
+
+function extractDatedParagraphCandidates(
+  pageUrl: string,
+  html: string,
+  yearHint: number
+): WebsiteCandidate[] {
+  const blocks = Array.from(String(html || '').matchAll(/<p\b[^>]*>([\s\S]*?)<\/p>/gi))
+    .slice(0, 100)
+    .map(match => cleanText(decodeHtml(match[1] || '')))
+    .filter(block => block.length >= 12 && block.length <= 650);
+  return blocks.flatMap(block => {
+    let { date } = extractDateInfoFromText(block, yearHint);
+    if (!date) {
+      const abbreviatedDate = block.match(
+        /\b(jan|feb|mar|apr|jun|jul|aug|sep|sept|oct|nov|dec)\.?\s+(\d{1,2})(?:st|nd|rd|th)?\b/i
+      );
+      if (abbreviatedDate) {
+        const month = DateTime.fromFormat(abbreviatedDate[1].slice(0, 3), 'LLL', { locale: 'en' }).month;
+        const parsed = DateTime.fromObject({ year: yearHint, month, day: Number(abbreviatedDate[2]) },
+          { zone: 'America/Halifax' });
+        if (parsed.isValid) date = parsed.toFormat('yyyy-MM-dd');
+      }
+    }
+    const { startTime, endTime } = extractTimeInfoFromText(block);
+    if (!date || !startTime) return [];
+    return [{ title: block, description: block, date, startTime, endTime,
+      sourceUrl: pageUrl, source: 'article_paragraph' as const }];
+  });
 }
 
 function discoverListingPages(pageUrl: string, pageHtml: string, relevanceTokens: string[]): string[] {
@@ -872,6 +962,14 @@ function applyWebsiteCandidates(
         source: 'explicit',
         evidence: `venue_website:${bestCandidate.sourceUrl}`,
       };
+      if (bestCandidate.source === 'article_paragraph' &&
+          !hasUsableFieldValue(bestCandidate.endTime) &&
+          !hasUsableFieldValue(updated.endTime)) {
+        updated.timeFlags.end = {
+          source: 'none', toClose: false,
+          evidence: `venue_website:${bestCandidate.sourceUrl} approximate end omitted`,
+        };
+      }
       summary.updatedFields.times += 1;
       changed = true;
     }
@@ -1133,6 +1231,9 @@ function findBestCandidateForItem(
     }
     let score = 0;
     const titleOverlap = scoreTokenOverlap(itemTokens, tokenize(candidate.title || ''));
+    if (candidate.source === 'article_paragraph' &&
+        (!itemDate || candidate.date !== itemDate ||
+          titleOverlap < Math.min(2, itemTokens.length))) continue;
     if (itemDate && candidate.date && itemDate === candidate.date) {
       score += 6;
     } else if (itemDate && candidate.namedSeriesDates?.includes(itemDate)) {

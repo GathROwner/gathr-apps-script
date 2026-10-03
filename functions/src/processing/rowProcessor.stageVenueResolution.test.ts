@@ -180,6 +180,28 @@ test('an exact parsed street address resolves a known venue before a broad city 
   assert.equal(resolved?.id, foundersVenue.id);
 });
 
+test('an organizer street address cannot override a different printed event venue', async () => {
+  const organizer = { id: 'slug_cbapeibranch', name: 'Canadian Bar Association - PEI Branch',
+    normalizedName: 'canadian bar association pei branch',
+    address: '119 Kent St #300, Charlottetown, PE' } as VenueData;
+  const row = { uniqueId: 'cba-cle', text: 'At The Delta Prince Edward', mediaUrls: [],
+    pageName: organizer.name, userName: organizer.name,
+    address: organizer.address, timestamp: '2026-10-02T12:00:00.000Z' } as RawRowData;
+  const triedAddresses: string[] = [];
+  const resolved = await resolveVenueForFullParserEventWithMatcherForRegression({
+    item: { name: 'Session 3', establishment: 'The Delta Prince Edward',
+      venue: 'The Delta Prince Edward' } as ParserProcessedEvent,
+    row, rowVenue: organizer, establishment: organizer.name, rowIndex: 166,
+    matcher: async () => ({ isMatch: false, matchType: 'none', similarity: 0 }),
+    addressMatcher: async address => {
+      triedAddresses.push(address);
+      return { isMatch: true, matchType: 'exact', similarity: 1, matchedVenue: organizer };
+    },
+  });
+  assert.equal(resolved, null);
+  assert.deepEqual(triedAddresses, []);
+});
+
 const foundersRow = {
   uniqueId: '1621154443353403',
   text: "This Week: July 6 - July 12. Sounds of the Waterfront at Founders' Hall Stage and Peake's Quay Stage.",

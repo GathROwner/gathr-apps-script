@@ -31,6 +31,7 @@ import {
 } from './runtimeConfig.js';
 import { logger } from '../utils/logger.js';
 import { levenshteinDistance } from '../utils/similarity.js';
+import { DateTime } from 'luxon';
 
 // Initialize OpenAI client lazily
 let openaiClient: OpenAI | null = null;
@@ -458,6 +459,12 @@ Never return arrays of values for an item; each must be a JSON object.`;
       }
 
       event = rehydrateFormattedEventMetadata(event, originalItem);
+
+      // Run after recurrence normalization so pickup weekdays cannot turn a
+      // finite ordering window into an open weekly series.
+      if (cfg.lunaCalendarLiteralSourcePrompt === true) {
+        event = reconcilePreorderOfferWindow(event, originalItem, timestamp, cfg.timezone);
+      }
 
       // Ensure isRecurring is properly set in canonical output format.
       const processedEvent: FormattedEvent = {
@@ -5639,6 +5646,53 @@ function computeEndDateForWeekdayRange(startDate: string, endWeekday: number): s
   return toIsoDateUtc(end);
 }
 
+function reconcilePreorderOfferWindow(
+  event: FormattedEvent,
+  originalItem: ExtractedItem | undefined,
+  timestamp: string,
+  timezone: string
+): FormattedEvent {
+  if (!FOOD_CATEGORIES.includes(event.category) &&
+      (originalItem as any)?._sourceType !== 'special') return event;
+  const source = String((originalItem as any)?.description || '');
+  if (!/\bpre-?orders?\b/i.test(source) || !/\bpick-?up\b/i.test(source)) return event;
+  const deadline = source.match(
+    /\bpre-?orders?\b[\s\S]{0,180}?\b(?:until|through|by)\s+(?:(?:mon|tues?|wednes|thurs?|fri|satur|sun)day,?\s+)?(jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\.?\s+(\d{1,2})(?:st|nd|rd|th)?(?:,?\s+(20\d{2}))?\s*(?:(?:at|@)\s*)?(\d{1,2})(?::(\d{2}))?\s*(a\.?m\.?|p\.?m\.?)(?=\W|$)/i
+  );
+  if (!deadline) return event;
+  const posted = DateTime.fromISO(timestamp, { zone: 'utc' }).setZone(timezone || 'America/Halifax');
+  if (!posted.isValid) return event;
+  const month = DateTime.fromFormat(deadline[1].slice(0, 3), 'LLL', { locale: 'en' }).month;
+  const day = Number(deadline[2]);
+  const year = Number(deadline[3] || posted.year);
+  const date = DateTime.fromObject({ year, month, day }, { zone: timezone || 'America/Halifax' });
+  if (!date.isValid || date < posted.startOf('day')) return event;
+  let hour = Number(deadline[4]);
+  const minute = Number(deadline[5] || 0);
+  if (!Number.isInteger(hour) || hour < 1 || hour > 12 || minute > 59) return event;
+  if (/^p/i.test(deadline[6]) && hour !== 12) hour += 12;
+  if (/^a/i.test(deadline[6]) && hour === 12) hour = 0;
+  event.startDate = posted.toFormat('yyyy-MM-dd');
+  event.startTime = posted.toFormat('HH:mm');
+  event.endDate = date.toFormat('yyyy-MM-dd');
+  event.endTime = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+  event.isRecurring = 'No';
+  event.isEvent = 'No';
+  event.category = 'Food Special';
+  event.recurringPattern = 'none';
+  event.totalOccurrences = 1;
+  event.recurrenceUntilDate = '';
+  event.timeFlags = {
+    start: { source: 'semantic', evidence: `post timestamp ${timestamp}` },
+    end: { source: 'explicit', toClose: false, evidence: deadline[0] },
+  };
+  logger.info('Reconciled pre-order offer to ordering window', {
+    name: event.name, startDate: event.startDate, endDate: event.endDate,
+    endTime: event.endTime,
+  });
+  return event;
+}
+
 function applyWeekdayRangeCorrections(
   event: FormattedEvent,
   originalItem?: ExtractedItem
@@ -5654,6 +5708,7 @@ function applyWeekdayRangeCorrections(
     .filter(Boolean)
     .join(' ');
   const normalizedText = normalizeWeekdayExtractionText(text);
+  if (/\bpre-?orders?\b/i.test(text) && /\bpick-?up\b/i.test(text)) return event;
 
   const supplementalRangeMatch =
     normalizedText.match(

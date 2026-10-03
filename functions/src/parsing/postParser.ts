@@ -1151,7 +1151,8 @@ async function replayPostDataFromArtifactsCore(
     normalizedEvents,
     timestamp,
     cfg.timezone,
-    combinedText
+    combinedText,
+    cfg.lunaCalendarLiteralSourcePrompt === true
   );
   logTiming('stage5_6_datetime_replay', stage56Start, {
     postId,
@@ -2288,7 +2289,8 @@ async function parsePostDataCore(
       normalizedEvents,
       timestamp,
       cfg.timezone,
-      input.combinedText
+      input.combinedText,
+      cfg.lunaCalendarLiteralSourcePrompt === true
     );
     logTiming('stage5_6_datetime', stage56Start, {
       postId,
@@ -3154,7 +3156,8 @@ export function enforceDateTimeCompleteness(
   events: TimeResolvedEvent[],
   timestamp: string,
   timezone: string,
-  combinedText = ''
+  combinedText = '',
+  reconcileHalfDaySessions = false
 ): TimeResolvedEvent[] {
   const posted = DateTime.fromISO(timestamp, { zone: timezone });
   const postedDate = posted.isValid ? posted.toFormat('yyyy-MM-dd') : '';
@@ -3249,6 +3252,12 @@ export function enforceDateTimeCompleteness(
         });
       }
     }
+
+    // A session cannot begin at 11:30 p.m. inside an explicitly advertised
+    // 8:30 a.m.–12:30 p.m. half-day program. Source captions occasionally
+    // print the wrong meridiem on one session while the program window and
+    // neighbouring sessions establish the same-day interpretation.
+    if (reconcileHalfDaySessions) reconcileHalfDaySessionMeridiem(ev, combinedText);
 
     const combinedTextRange =
       !explicitEvidenceRange && sharedCombinedTextRange ? sharedCombinedTextRange : null;
@@ -3493,6 +3502,37 @@ export function enforceDateTimeCompleteness(
   });
 
   return kept;
+}
+
+function reconcileHalfDaySessionMeridiem(ev: TimeResolvedEvent, sourceText: string): void {
+  if (!/^session\s*\d+\b/i.test(String(ev.name || '').trim()) ||
+      !/\bhalf[-\s]?day\b/i.test(sourceText)) return;
+  const window = sourceText.match(
+    /\bTime\s*:\s*(\d{1,2}(?::\d{2})?\s*[ap]\.?m\.?)\s*[–—-]\s*(\d{1,2}(?::\d{2})?\s*[ap]\.?m\.?)/i
+  );
+  if (!window) return;
+  const windowStart = normalizeTimeHHMM(window[1].replace(/\.$/, ''));
+  const windowEnd = normalizeTimeHHMM(window[2].replace(/\.$/, ''));
+  const start = normalizeTimeHHMM(ev.startTime);
+  const end = normalizeTimeHHMM(ev.endTime);
+  if (!windowStart || !windowEnd || !start || !end ||
+      windowStart >= windowEnd || start < windowEnd || end > windowEnd) return;
+  const startHour = Number(start.slice(0, 2));
+  if (startHour < 12) return;
+  const correctedStart = `${String(startHour - 12).padStart(2, '0')}${start.slice(2)}`;
+  if (correctedStart < windowStart || correctedStart >= end ||
+      (Number(end.slice(0, 2)) * 60 + Number(end.slice(3))) -
+        (Number(correctedStart.slice(0, 2)) * 60 + Number(correctedStart.slice(3))) > 180) return;
+  ev.startTime = correctedStart;
+  ev.endDate = ev.startDate;
+  ev.timeFlags = ev.timeFlags || {
+    start: { source: 'none', evidence: '' },
+    end: { source: 'none', toClose: false, evidence: '' },
+  };
+  ev.timeFlags.start = {
+    source: 'semantic',
+    evidence: `session meridiem reconciled with printed half-day window ${window[0]}`,
+  };
 }
 
 function buildSiblingEndTimeHints(
@@ -3748,7 +3788,7 @@ function applyOvernightEndDate(event: TimeResolvedEvent, timezone: string): void
   const endMinutes = hhmmToMinutes(endHHMM);
   if (startMinutes === null || endMinutes === null) return;
 
-  if (endMinutes < startMinutes) {
+  if (endMinutes < startMinutes && endDate === startDate) {
     const startDt = DateTime.fromFormat(startDate, 'yyyy-MM-dd', { zone: timezone });
     if (!startDt.isValid) return;
     event.endDate = startDt.plus({ days: 1 }).toFormat('yyyy-MM-dd');

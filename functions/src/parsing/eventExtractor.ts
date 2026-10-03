@@ -212,7 +212,8 @@ async function extractEvents(
     timestamp,
     tz,
     postedLocalPretty,
-    postedLocalDate
+    postedLocalDate,
+    config.lunaCalendarLiteralSourcePrompt === true
   );
 
   const response = await callGPT(prompt, imageUrls, config);
@@ -292,7 +293,10 @@ async function extractFoodSpecials(
   const postedDt = DateTime.fromISO(timestamp, { zone: tz });
   const postedLocalDate = postedDt.toFormat('yyyy-MM-dd');
 
-  const prompt = createFoodSpecialExtractionPrompt(combinedText, userName, timestamp, tz);
+  const prompt = createFoodSpecialExtractionPrompt(
+    combinedText, userName, timestamp, tz,
+    config.lunaCalendarLiteralSourcePrompt === true
+  );
 
   const response = await callGPT(prompt, imageUrls, config);
 
@@ -3664,8 +3668,12 @@ function createEventExtractionPrompt(
   timestamp: string,
   tz: string,
   postedLocalPretty: string,
-  postedLocalDate: string
+  postedLocalDate: string,
+  literalSourceNames = false
 ): string {
+  const nameRule = literalSourceNames
+    ? '- Copy every printed performer or event name letter for letter from the matching image. A caption that gives only a first name does not justify shortening or guessing the surname. Check unusual surnames again before returning the JSON. If a letter remains unclear, state that uncertainty in extractionReason.\n'
+    : '';
   return `Extract ONLY EVENTS (entertainment/activities) from this content. IGNORE all food/drink specials.
 
 - When a single session or workshop block lists multiple explicit dates/times (e.g., "Session 1: Jan 14 & 28, 6-8 pm"), emit a separate event object for each listed date/time pair instead of collapsing them into one. Only treat it as a recurring event if the language explicitly says "every" or "weekly" with a weekday.
@@ -3721,6 +3729,7 @@ IGNORE COMPLETELY:
 
 For each EVENT found, extract:
 - name: Event name
+${nameRule}
 - description: Full details - IMPORTANT: If the original text has a weekday prefix (e.g., "Friday-", "Thursday-", "Saturday-"), you MUST preserve it at the start of the description field for date validation.
 - date: Specific date (YYYY-MM-DD) - NEVER use "recurring" here. For recurring events, use the first occurrence date or posted date.
 - startTime: Start time.
@@ -3774,7 +3783,8 @@ function createFoodSpecialExtractionPrompt(
   combinedText: string,
   userName: string,
   timestamp: string,
-  tz: string
+  tz: string,
+  clarifyPreorderWindow = false
 ): string {
   return `Your job is to Extract ALL FOOD/DRINK SPECIALS that have cost savings from this content. IGNORE all events/entertainment.
 
@@ -3804,6 +3814,11 @@ TIME & EVIDENCE RULES (FOR SPECIALS — SAME AS EVENTS):
 ✓ Any cost savings on food/drinks
 
 CRITICAL: Extract ALL food/drink specials even if they say "Everyday", "Daily", or appear at the end of the post text.
+${clarifyPreorderWindow ? `
+PRE-ORDER WINDOW:
+- When the savings require ordering before a stated deadline, the special is available during the ordering window. Use the posted local date as its first date when the post says orders are open now; use the stated order deadline as its end date and time. Put later pickup dates only in the description.
+- Do not turn pickup dates into recurrence or use them as the start of a "Pre-Order" listing. If the order deadline has a stated time, copy that exact time as the special's end-time evidence.
+` : ''}
 
 IGNORE COMPLETELY:
 ✗ Live music, trivia, entertainment

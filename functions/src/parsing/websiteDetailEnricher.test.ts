@@ -82,6 +82,35 @@ test('a festival date-range page does not lend a child performance time to untim
   }
 });
 
+test('Luna matches a linked article paragraph to its dated rally and two weekday class times', async () => {
+  const article = 'https://miltonvalepark.com/october-1-2026/luna-regression';
+  const restoreFetch = installFetchMap({
+    [article]: htmlResponse(`<html><body>
+      <h1>October community update</h1>
+      <p>Saturday, Oct. 3 at 10:30 a.m. – Car Rally – Teams explore Miltonvale Park.</p>
+      <p>TUESDAYS – Square Dancing at 2 p.m. No classes on Oct. 6.</p>
+      <p>NEW TIMES! Milton Hall- TUESDAYS – YOGA with Leone 8:30 a.m. – Mat Yoga and 10 a.m. -Chair Yoga.</p>
+    </body></html>`),
+  });
+  const items = [
+    buildEventItem({ name: 'Car Rally', date: '2026-10-03', startTime: 'unknown' }),
+    buildEventItem({ name: 'Yoga', date: '2026-10-06', startTime: 'unknown' }),
+    buildEventItem({ name: 'Yoga', date: '2026-10-06', startTime: 'unknown' }),
+  ];
+  try {
+    const result = await enrichEventsFromVenueWebsite(
+      items, `More info at ${article}`, '', '2026-10-02T17:00:31Z',
+      { name: 'Milton Community Hall', website: article } as EstablishmentInfo,
+      { ...DEFAULT_PARSING_CONFIG, lunaCalendarLiteralSourcePrompt: true }
+    );
+    assert.deepEqual(result.items.map(item => item.startTime), ['10:30', '08:30', '10:00']);
+    assert.match(String(result.items[0].timeFlags?.end?.evidence), /approximate end omitted/);
+    assert.equal(result.summary.appliedCount, 3);
+  } finally {
+    restoreFetch();
+  }
+});
+
 test('a named dining series lends only its own published evening time to individually listed dates', async () => {
   const detail = 'https://innatbayfortune.example/special-events/chefs-harvest/';
   const restoreFetch = installFetchMap({

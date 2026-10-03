@@ -37,6 +37,28 @@ function buildEvent(overrides: Partial<TimeResolvedEvent> = {}): TimeResolvedEve
   };
 }
 
+test('Luna reconciles a half-day session meridiem only inside its printed program window', () => {
+  const source = 'Criminal Law Half-Day CLE. Time: 8:30am–12:30pm. Session 3: 11:30pm – 12:30pm.';
+  const item = buildEvent({
+    name: 'Session 3: Deportation', startDate: '2026-10-20', endDate: '2026-10-21',
+    startTime: '23:30', endTime: '12:30',
+    timeFlags: {
+      start: { source: 'explicit', evidence: 'Session 3: 11:30pm – 12:30pm' },
+      end: { source: 'explicit', toClose: false, evidence: 'Session 3: 11:30pm – 12:30pm' },
+    },
+  });
+  const [corrected] = enforceDateTimeCompleteness(
+    [item], '2026-10-02T12:00:00.000Z', 'America/Halifax', source, true
+  );
+  assert.equal(corrected.startTime, '11:30');
+  assert.equal(corrected.endDate, '2026-10-20');
+
+  const [legacy] = enforceDateTimeCompleteness(
+    [item], '2026-10-02T12:00:00.000Z', 'America/Halifax', source
+  );
+  assert.notEqual(legacy.startTime, '11:30');
+});
+
 test('untimed future calendar offer does not inherit its post time', () => {
   const offer = buildEvent({
     isEvent: 'No',

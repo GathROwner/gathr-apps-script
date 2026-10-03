@@ -4084,15 +4084,17 @@ function looksLikeSpecificStreetAddress(value: unknown): boolean {
   return /\b\d{1,6}\s*[A-Za-z]?\s+[^,]{2,80}\b(?:street|st\.?|road|rd\.?|avenue|ave\.?|drive|dr\.?|lane|ln\.?|boulevard|blvd\.?|way)\b/i.test(text);
 }
 
-function fullParserAddressCandidates(item: ParserProcessedEvent, row: RawRowData): string[] {
+function fullParserAddressCandidates(
+  item: ParserProcessedEvent,
+  row: RawRowData,
+  includeRowAddress = true
+): string[] {
   const itemAny = item as unknown as Record<string, unknown>;
   const rowAny = row as unknown as Record<string, unknown>;
   return Array.from(new Set([
     itemAny.address,
     itemAny.streetAddress,
-    row.address,
-    rowAny.streetAddress,
-    row.facebookEventLocationName,
+    ...(includeRowAddress ? [row.address, rowAny.streetAddress, row.facebookEventLocationName] : []),
   ].map((value) => String(value || '').trim()).filter(looksLikeSpecificStreetAddress)));
 }
 
@@ -4161,7 +4163,12 @@ export async function resolveVenueForFullParserEventWithMatcherForRegression(par
   // city label. Use it only to resolve an already-known venue, and never let it
   // bypass a real route or multi-site classification.
   if (!postDerivedCityLevelLocation?.spatialEvidence && addressMatcher) {
-    for (const address of fullParserAddressCandidates(item, row)) {
+    // The post author's address describes the organizer, not an event that
+    // explicitly names another venue. Only the item's own address may resolve
+    // that event before its printed venue name is checked below.
+    const hasDifferentPrintedVenue =
+      itemSpecificVenueCandidates.length > 0 || additionalLocationVenueCandidates.length > 0;
+    for (const address of fullParserAddressCandidates(item, row, !hasDifferentPrintedVenue)) {
       const addressMatch = await addressMatcher(address);
       if (addressMatch.isMatch && addressMatch.matchedVenue) {
         logger.info('Resolved full-parser event through exact address identity', {
