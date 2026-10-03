@@ -1302,6 +1302,7 @@ async function parsePostDataCore(
     cfg.stage3ReasoningEffort = canaryStage3Effort;
     cfg.stage3ImageDetail = 'original';
     cfg.lunaCalendarLiteralSourcePrompt = true;
+    if (lunaStage3Only) cfg.stage5BatchSize = 9;
     // Exact-post Luna pilots default to the guarded second read for dense
     // calendars. An explicit false remains available as a rollback switch.
     if (parseBooleanEnv('LUNA_CALENDAR_INVENTORY_AUDIT', true)) {

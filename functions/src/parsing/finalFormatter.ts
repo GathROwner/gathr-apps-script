@@ -30,6 +30,7 @@ import {
   resolveStageModel,
 } from './runtimeConfig.js';
 import { logger } from '../utils/logger.js';
+import { levenshteinDistance } from '../utils/similarity.js';
 
 // Initialize OpenAI client lazily
 let openaiClient: OpenAI | null = null;
@@ -282,11 +283,44 @@ Return exactly ${expectedCount} objects in formattedEvents (one-to-one with the 
 Copy each input sourceItemIndex to the matching formatted event. Do not drop, merge, or reorder items.
 Never return arrays of values for an item; each must be a JSON object.`;
 
-  const prompt = batchHeader + '\n\n' + createFormattingPrompt(validatedData, userName, partialAddress, timestamp);
   const schema = createFormattingSchema();
 
   try {
-    let response = await callGPTWithSchema(prompt, 'formatEvents', schema, cfg);
+    const canaryBatchSize = Number(cfg.stage5BatchSize || 0);
+    let response: FormattingResult;
+    if (canaryBatchSize >= 2 && canaryBatchSize <= 12 && expectedCount > canaryBatchSize) {
+      const formattedEvents: FormattedEvent[] = [];
+      for (let offset = 0; offset < expectedCount; offset += canaryBatchSize) {
+        const items = validatedData.slice(offset, offset + canaryBatchSize);
+        logger.info('Stage 5 canary formatting batch', {
+          offset, batchCount: items.length, totalCount: expectedCount,
+        });
+        const chunkHeader = `BATCH COUNT ENFORCEMENT: You are formatting exactly ${items.length} validated items.\n` +
+          `Return exactly ${items.length} objects in formattedEvents (one-to-one with the input order).\n` +
+          'Copy each input sourceItemIndex to the matching formatted event. Do not drop, merge, or reorder items.\n' +
+          'Never return arrays of values for an item; each must be a JSON object.';
+        const chunkPrompt = chunkHeader + '\n\n' +
+          createFormattingPrompt(items, userName, partialAddress, timestamp);
+        const chunkResponse = normalizeFormattingResponse(
+          await callGPTWithSchema(chunkPrompt, 'formatEvents', schema, cfg), items, items.length
+        );
+        if (chunkResponse.formattedEvents.length !== items.length) {
+          logger.warn('Stage 5 canary batch count mismatch', {
+            offset, expected: items.length, actual: chunkResponse.formattedEvents.length,
+          });
+          return [];
+        }
+        const aligned = alignFormattedEventsToValidatedData(chunkResponse.formattedEvents, items);
+        formattedEvents.push(...aligned.map((entry, index) => ({
+          ...entry.event, sourceItemIndex: offset + index,
+        })));
+      }
+      response = { formattedEvents, formattingDecisions: [] };
+    } else {
+      const prompt = batchHeader + '\n\n' +
+        createFormattingPrompt(validatedData, userName, partialAddress, timestamp);
+      response = await callGPTWithSchema(prompt, 'formatEvents', schema, cfg);
+    }
 
     // Validate and normalize response
     response = normalizeFormattingResponse(response, validatedData, expectedCount);
@@ -300,6 +334,15 @@ Never return arrays of values for an item; each must be a JSON object.`;
       response.formattedEvents,
       validatedData
     );
+    if (canaryBatchSize >= 2) {
+      const identityIssues = getStage5SourceIdentityIssues(alignedFormattedEvents);
+      if (identityIssues.length > 0) {
+        logger.warn('Stage 5 canary source identity mismatch', {
+          count: identityIssues.length, examples: identityIssues.slice(0, 5),
+        });
+        return [];
+      }
+    }
 
     // Filter out malformed entries without losing their source-row association.
     const validFormattedEvents: Array<{
@@ -1880,6 +1923,33 @@ function isGeneralFestivalParent(event: Pick<FormattedEvent, 'name' | 'descripti
   return /\b(?:fest|festival|fair)\b/i.test(event.name || '') &&
     !/\b(?:music|concert|jazz|blues|rock|folk|comedy|improv)\b/i.test(event.name || '') &&
     /\b(?:vendors?|activities|attractions|crafts)\b/i.test(event.description || '');
+}
+
+export function getStage5SourceIdentityIssues(
+  aligned: Array<{ event: FormattedEvent; originalItem: ExtractedItem; inputIndex: number }>
+): Array<{ index: number; field: string; source: string; formatted: string }> {
+  const issues: Array<{ index: number; field: string; source: string; formatted: string }> = [];
+  for (const { event, originalItem, inputIndex } of aligned) {
+    if (!['calendar', 'schedule'].includes(String(originalItem._sourceType || ''))) continue;
+    const sourceName = normalizeAlignmentText(originalItem.name);
+    const formattedName = normalizeAlignmentText(event.name);
+    const minorNameVariation = sourceName.length >= 6 && formattedName.length >= 6 &&
+      levenshteinDistance(sourceName, formattedName) <= 2;
+    if (sourceName && sourceName !== formattedName && !minorNameVariation) {
+      issues.push({ index: inputIndex, field: 'name', source: originalItem.name, formatted: event.name });
+    }
+    const sourceDate = String(originalItem.date || '').trim();
+    const formattedDate = String(event.startDate || '').trim();
+    if (/^\d{4}-\d{2}-\d{2}$/.test(sourceDate) && sourceDate !== formattedDate) {
+      issues.push({ index: inputIndex, field: 'date', source: sourceDate, formatted: formattedDate });
+    }
+    const sourceTime = normalizeUnambiguousSourceStartTime(String(originalItem.startTime || ''));
+    const formattedTime = normalizeUnambiguousSourceStartTime(String(event.startTime || ''));
+    if (sourceTime && sourceTime !== formattedTime) {
+      issues.push({ index: inputIndex, field: 'startTime', source: sourceTime, formatted: formattedTime });
+    }
+  }
+  return issues;
 }
 
 export function normalizeUnambiguousSourceStartTime(raw: string): string {

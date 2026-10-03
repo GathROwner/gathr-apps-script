@@ -197,6 +197,8 @@ export interface ParsingConfig {
   };
   stage4ModelOverride?: string;
   stage5ModelOverride?: string;
+  /** Format large Luna canary inventories in bounded nano batches. */
+  stage5BatchSize?: number;
   lunaCanaryBypass?: boolean;
 }
 

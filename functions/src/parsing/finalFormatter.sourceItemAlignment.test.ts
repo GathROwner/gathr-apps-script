@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { alignFormattedEventsToValidatedDataForRegression } from './finalFormatter.js';
+import { alignFormattedEventsToValidatedDataForRegression,
+  getStage5SourceIdentityIssues } from './finalFormatter.js';
 import { ExtractedItem, FormattedEvent } from './types.js';
 
 function input(name: string, venue: string, startTime: string): ExtractedItem {
@@ -104,4 +105,34 @@ test('duplicate sourceItemIndex cannot repaint a different source row', () => {
   assert.equal(aligned[0].event.venue, "Hunter's Ale House");
   assert.equal(aligned[1].event.name, 'Follow the Rainbow');
   assert.equal(aligned[1].event.venue, 'Kent Street');
+});
+
+test('dense calendar guard detects a count-preserving shift and repeated later entries', () => {
+  const inputs = [
+    { ...input('Dan Paynter', 'Founders Food Hall', '5:00 pm'), _sourceType: 'calendar' },
+    { ...input('Marvin Birt', 'Founders Food Hall', '6:00 pm'), _sourceType: 'calendar' },
+    { ...input('Ghost Tour', 'Founders Food Hall', '6:30 pm'), _sourceType: 'calendar' },
+  ] as ExtractedItem[];
+  const shifted = [
+    output('Dan Paynter', 'Founders Food Hall', '17:00', 0),
+    output('Ghost Tour', 'Founders Food Hall', '18:30', 1),
+    output('Ghost Tour', 'Founders Food Hall', '18:30', 2),
+  ];
+  const aligned = alignFormattedEventsToValidatedDataForRegression(shifted, inputs);
+  const issues = getStage5SourceIdentityIssues(aligned);
+  assert.ok(issues.some(issue => issue.index === 1 && issue.field === 'name'));
+  assert.ok(issues.some(issue => issue.index === 1 && issue.field === 'startTime'));
+  assert.deepEqual(getStage5SourceIdentityIssues(
+    alignFormattedEventsToValidatedDataForRegression([
+      output('Dan Paynter', 'Founders Food Hall', '17:00', 0),
+      output('Marvin Birt', 'Founders Food Hall', '18:00', 1),
+      output('Ghost Tour', 'Founders Food Hall', '18:30', 2),
+    ], inputs)
+  ), []);
+  const spellingVariation = [{
+    originalItem: { ...inputs[0], name: 'Siobhan White' },
+    event: { ...output('Slobhan White', 'Founders Food Hall', '17:00', 0) },
+    inputIndex: 0,
+  }];
+  assert.deepEqual(getStage5SourceIdentityIssues(spellingVariation), []);
 });
