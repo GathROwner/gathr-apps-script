@@ -31,7 +31,7 @@ export function isSampledLunaCanaryPost(
 ): boolean {
   if (!enabled || !postId) return false;
   const percent = Number(percentValue);
-  if (!Number.isFinite(percent) || percent <= 0 || percent > 20) return false;
+  if (!Number.isFinite(percent) || percent <= 0 || percent > 50) return false;
   const excluded = excludedIds.split(',').map(id => id.trim()).filter(Boolean);
   if (excluded.includes(postId)) return false;
   const bucket = createHash('sha256').update(postId).digest().readUInt32BE(0) / 0x100000000;
@@ -46,7 +46,7 @@ export function isLunaStage3QuotaOrdinal(
   runSeed = ''
 ): boolean {
   if (!Number.isInteger(eligibleOrdinal) || eligibleOrdinal < 1 ||
-      !Number.isFinite(percent) || percent <= 0 || percent > 20) return false;
+      !Number.isFinite(percent) || percent <= 0 || percent > 50) return false;
   const windowIndex = Math.floor((eligibleOrdinal - 1) * percent / 100);
   const first = Math.ceil(windowIndex * 100 / percent) + 1;
   const last = Math.ceil((windowIndex + 1) * 100 / percent);

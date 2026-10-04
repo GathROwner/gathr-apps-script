@@ -1574,7 +1574,7 @@ async function parsePostDataCore(
 
     if (lunaEligibleQuotaMode) {
       const percent = Number(process.env.LUNA_CANARY_SAMPLE_PERCENT || '');
-      if (!Number.isFinite(percent) || percent <= 0 || percent > 20) {
+      if (!Number.isFinite(percent) || percent <= 0 || percent > 50) {
         throw new Error(`Unsupported LUNA_CANARY_SAMPLE_PERCENT: ${percent}`);
       }
       const excludedIds = String(process.env.LUNA_CANARY_EXCLUDED_POST_IDS || '')
@@ -4664,6 +4664,15 @@ export async function prepareManagedDisplayImageUrls(
     }
   }
 
+  // Deduplicated Facebook resize URLs are still present in the source gallery.
+  // Give each variant the representative's managed URL so provenance checks
+  // distinguish a missing upload from a duplicate URL for the same attachment.
+  for (const [sourceUrl, managedUrl] of resolveFacebookDisplayImageAliases(
+    urls, sourceUrls, currentImageMaps().sourceManagedImageMap
+  )) {
+    registerDisplayMapping(sourceUrl, managedUrl);
+  }
+
   logger.info('Display image upload summary', {
     postId: context.postId || '',
     inputCount: urls.length,
@@ -4711,7 +4720,7 @@ export function selectDistinctDisplaySourceImageUrls(urls: string[]): string[] {
   return selected.map((candidate) => candidate.url);
 }
 
-function getFacebookDisplayImageIdentity(rawUrl: string): string | undefined {
+export function getFacebookDisplayImageIdentity(rawUrl: string): string | undefined {
   try {
     const parsed = new URL(rawUrl);
     const host = parsed.hostname.toLowerCase();
@@ -4724,8 +4733,29 @@ function getFacebookDisplayImageIdentity(rawUrl: string): string | undefined {
   }
 }
 
+export function resolveFacebookDisplayImageAliases(
+  originalUrls: string[],
+  selectedUrls: string[],
+  sourceManagedImageMap: ReadonlyMap<string, string>
+): Map<string, string> {
+  const managedByIdentity = new Map<string, string>();
+  for (const sourceUrl of selectedUrls) {
+    const identity = getFacebookDisplayImageIdentity(sourceUrl);
+    const managedUrl = sourceManagedImageMap.get(sourceUrl);
+    if (identity && managedUrl) managedByIdentity.set(identity, managedUrl);
+  }
+  const aliases = new Map<string, string>();
+  for (const raw of originalUrls) {
+    const sourceUrl = String(raw || '').trim();
+    const identity = getFacebookDisplayImageIdentity(sourceUrl);
+    const managedUrl = identity && managedByIdentity.get(identity);
+    if (managedUrl) aliases.set(sourceUrl, managedUrl);
+  }
+  return aliases;
+}
+
 function getAdvertisedImagePixelArea(rawUrl: string): number {
-  const match = rawUrl.match(/(?:^|[_?&])(?:p|s)(\d{2,5})x(\d{2,5})(?:[_&]|$)/i);
+  const match = rawUrl.match(/(?:^|[_?&=])(?:p|s)(\d{2,5})x(\d{2,5})(?:[_&]|$)/i);
   if (!match) return 0;
   return Number(match[1]) * Number(match[2]);
 }
