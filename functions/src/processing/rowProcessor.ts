@@ -3092,7 +3092,8 @@ export async function processRow(
       };
       if (config?.lunaStage3EligibleQuota) {
         parserConfig.lunaStage3EligibleSelector = (postId, percent) =>
-          batchManager.selectEligibleLunaStage3Post(postId, percent);
+          batchManager.selectEligibleLunaStage3Post(
+            postId || row.uniqueId || `row:${rowIndex}`, percent);
       }
       if (enableStageArtifacts) {
         parserConfig.stageArtifactsHandler = (snapshot: ParseStageArtifactsSnapshot) => {

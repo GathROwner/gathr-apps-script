@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {
   buildResumeTaskCheckpoint,
   matchesResumeTaskCheckpoint,
+  classifyResumeTaskClaim,
 } from './resumeTaskGuard.js';
 
 test('buildResumeTaskCheckpoint returns row and batch identity', () => {
@@ -10,6 +11,18 @@ test('buildResumeTaskCheckpoint returns row and batch identity', () => {
     buildResumeTaskCheckpoint({ rowIndex: 120, batchNumber: 4 }),
     { rowIndex: 120, batchNumber: 4 }
   );
+});
+
+test('resume claim permits a timed-out task to continue from newer row progress', () => {
+  const expected = { rowIndex: 119, batchNumber: 1 };
+  const current = { rowIndex: 147, batchNumber: 1 };
+  assert.equal(classifyResumeTaskClaim(expected, current, 'running', 600000), 'claim');
+  assert.equal(classifyResumeTaskClaim(expected, current, 'running', 300000), 'busy');
+  assert.equal(classifyResumeTaskClaim(expected, current, 'paused', 600000), 'stale');
+  assert.equal(classifyResumeTaskClaim(expected, expected, 'paused', 0), 'claim');
+  assert.equal(classifyResumeTaskClaim(expected, current, 'completed', 600000), 'stale');
+  assert.equal(classifyResumeTaskClaim({ rowIndex: 149, batchNumber: 1 }, current,
+    'running', 600000), 'stale');
 });
 
 test('matchesResumeTaskCheckpoint accepts the exact same checkpoint identity', () => {

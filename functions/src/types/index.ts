@@ -89,6 +89,8 @@ export interface CheckpointData {
 export interface ProcessingLock {
   fileId: string;
   runId: string;
+  /** Changes for every resume worker so an older worker cannot save progress. */
+  workerId?: string;
   status: 'running' | 'paused' | 'completed' | 'failed';
   startedAt: Date;
   lastHeartbeat: Date;

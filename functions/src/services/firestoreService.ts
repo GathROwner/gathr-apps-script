@@ -33,6 +33,7 @@ import {
   UnrecognizedVenueStatus,
 } from '../types/index.js';
 import { logger } from '../utils/logger.js';
+import { classifyResumeTaskClaim, ResumeTaskCheckpoint } from '../processing/resumeTaskGuard.js';
 import {
   normalizeVenueName,
   extractFacebookSlug,
@@ -7475,6 +7476,7 @@ export async function acquireProcessingLock(
         {
           fileId,
           runId,
+          workerId: existing.runId === runId ? (existing.workerId || runId) : runId,
           status: 'running',
           startedAt,
           lastHeartbeat: new Date(now),
@@ -7496,6 +7498,7 @@ export async function acquireProcessingLock(
     const lock: ProcessingLock = {
       fileId,
       runId: requestedRunId,
+      workerId: requestedRunId,
       status: 'running',
       startedAt: new Date(now),
       lastHeartbeat: new Date(now),
@@ -7521,6 +7524,7 @@ export async function refreshProcessingLock(
     ttlMs?: number;
     status?: ProcessingLock['status'];
     source?: string;
+    workerId?: string;
   }
 ): Promise<{
   refreshed: boolean;
@@ -7554,6 +7558,10 @@ export async function refreshProcessingLock(
       };
     }
 
+    if (options?.workerId && existing.workerId !== options.workerId) {
+      return { refreshed: false, reason: 'worker_id_mismatch', lock: existing };
+    }
+
     const expiresAtMs = parseTimestampMillis(existing.expiresAt);
     const isExpired = expiresAtMs === null || expiresAtMs <= now;
     const status = options?.status ?? existing.status;
@@ -7576,11 +7584,54 @@ export async function refreshProcessingLock(
   });
 }
 
+/** Atomically claim a queued resume. A fresh running lease cannot be claimed
+ * twice, while a task that timed out can continue from its newer checkpoint. */
+export async function claimProcessingResume(
+  fileId: string,
+  runId: string,
+  expectedCheckpoint?: ResumeTaskCheckpoint
+): Promise<{ claimed: boolean; reason: 'claimed' | 'busy' | 'stale';
+  checkpoint?: ResumeTaskCheckpoint; workerId?: string }> {
+  const now = Date.now();
+  const lockRef = db.collection(COLLECTIONS.PROCESSING_LOCKS).doc(fileId);
+  const checkpointRef = db.collection(COLLECTIONS.CHECKPOINTS).doc(fileId);
+  return db.runTransaction(async (tx) => {
+    const [lockDoc, checkpointDoc] = await Promise.all([
+      tx.get(lockRef), tx.get(checkpointRef),
+    ]);
+    if (!lockDoc.exists || !checkpointDoc.exists) {
+      return { claimed: false, reason: 'stale' as const };
+    }
+    const lock = lockDoc.data() as ProcessingLock;
+    const checkpoint = checkpointDoc.data() as CheckpointData;
+    if (lock.runId !== runId || (checkpoint.runId && checkpoint.runId !== runId)) {
+      return { claimed: false, reason: 'stale' as const };
+    }
+    const current = { rowIndex: checkpoint.rowIndex, batchNumber: checkpoint.batchNumber };
+    const heartbeatMs = parseTimestampMillis(lock.lastHeartbeat);
+    const verdict = classifyResumeTaskClaim(expectedCheckpoint, current, lock.status,
+      heartbeatMs === null ? Number.POSITIVE_INFINITY : Math.max(0, now - heartbeatMs));
+    if (verdict !== 'claim') {
+      return { claimed: false, reason: verdict, checkpoint: current };
+    }
+    const workerId = randomUUID();
+    tx.set(lockRef, {
+      status: 'running',
+      workerId,
+      lastHeartbeat: new Date(now),
+      expiresAt: new Date(now + getProcessingLockTtlMs()),
+      source: 'processDatasetResume',
+    }, { merge: true });
+    return { claimed: true, reason: 'claimed' as const, checkpoint: current, workerId };
+  });
+}
+
 export async function releaseProcessingLock(
   fileId: string,
   runId: string,
   status: ProcessingLock['status'],
-  source?: string
+  source?: string,
+  workerId?: string
 ): Promise<boolean> {
   const now = Date.now();
   const lockRef = db.collection(COLLECTIONS.PROCESSING_LOCKS).doc(fileId);
@@ -7592,7 +7643,7 @@ export async function releaseProcessingLock(
     }
 
     const existing = doc.data() as ProcessingLock;
-    if (existing.runId !== runId) {
+    if (existing.runId !== runId || (workerId && existing.workerId !== workerId)) {
       return false;
     }
 
@@ -7618,12 +7669,33 @@ export async function releaseProcessingLock(
 /**
  * Save processing checkpoint
  */
-export async function saveCheckpoint(checkpoint: CheckpointData): Promise<void> {
+export async function saveCheckpoint(
+  checkpoint: CheckpointData,
+  workerId?: string
+): Promise<void> {
   const docId = checkpoint.fileId;
-
-  await db.collection(COLLECTIONS.CHECKPOINTS).doc(docId).set({
-    ...checkpoint,
-    timestamp: admin.firestore.FieldValue.serverTimestamp(),
+  const checkpointRef = db.collection(COLLECTIONS.CHECKPOINTS).doc(docId);
+  const lockRef = db.collection(COLLECTIONS.PROCESSING_LOCKS).doc(docId);
+  await db.runTransaction(async (tx) => {
+    const [currentDoc, lockDoc] = await Promise.all([
+      tx.get(checkpointRef), workerId ? tx.get(lockRef) : Promise.resolve(null),
+    ]);
+    if (workerId) {
+      const lock = lockDoc?.data() as ProcessingLock | undefined;
+      if (!lock || lock.runId !== checkpoint.runId || lock.workerId !== workerId ||
+          lock.status !== 'running') {
+        throw new Error('resume_worker_fenced');
+      }
+    }
+    const current = currentDoc.data() as CheckpointData | undefined;
+    if (current && current.runId === checkpoint.runId &&
+        current.rowIndex > checkpoint.rowIndex) {
+      throw new Error('resume_worker_fenced');
+    }
+    tx.set(checkpointRef, {
+      ...checkpoint,
+      timestamp: admin.firestore.FieldValue.serverTimestamp(),
+    });
   });
 
   logger.logCheckpoint({
@@ -7645,8 +7717,26 @@ export async function getCheckpoint(fileId: string): Promise<CheckpointData | nu
 /**
  * Delete checkpoint after processing completes
  */
-export async function deleteCheckpoint(fileId: string): Promise<void> {
-  await db.collection(COLLECTIONS.CHECKPOINTS).doc(fileId).delete();
+export async function deleteCheckpoint(
+  fileId: string,
+  runId?: string,
+  workerId?: string
+): Promise<void> {
+  const checkpointRef = db.collection(COLLECTIONS.CHECKPOINTS).doc(fileId);
+  if (!workerId) {
+    await checkpointRef.delete();
+    return;
+  }
+  const lockRef = db.collection(COLLECTIONS.PROCESSING_LOCKS).doc(fileId);
+  await db.runTransaction(async (tx) => {
+    const lockDoc = await tx.get(lockRef);
+    const lock = lockDoc.data() as ProcessingLock | undefined;
+    if (!lock || lock.runId !== runId || lock.workerId !== workerId ||
+        lock.status !== 'running') {
+      throw new Error('resume_worker_fenced');
+    }
+    tx.delete(checkpointRef);
+  });
 }
 
 // ===================

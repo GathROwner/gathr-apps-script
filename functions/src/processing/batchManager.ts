@@ -13,7 +13,7 @@ import {
 } from '../types/index.js';
 import * as firestoreService from '../services/firestoreService.js';
 import { logger } from '../utils/logger.js';
-import { isLunaStage3QuotaOrdinal } from '../parsing/lunaSafetyGate.js';
+import { isSampledEligibleLunaStage3Post } from '../parsing/lunaSafetyGate.js';
 
 /**
  * Initialize processing stats
@@ -70,15 +70,18 @@ export class BatchManager {
   private config: ProcessingConfig;
   private state: BatchState;
   private startTime: number;
+  private workerId?: string;
   private currentRunEntries: EventData[] = [];
 
   constructor(
     state: BatchState,
-    config?: Partial<ProcessingConfig>
+    config?: Partial<ProcessingConfig>,
+    workerId?: string
   ) {
     this.config = { ...DEFAULT_CONFIG, ...config };
     this.state = state;
     this.startTime = Date.now();
+    this.workerId = workerId;
   }
 
   /**
@@ -112,7 +115,7 @@ export class BatchManager {
   /** Called once, only after a regular full-dataset post passes Stage 2. */
   selectEligibleLunaStage3Post(postId: string, percent: number): boolean {
     const eligible = Number(this.state.stats.lunaStage3EligibleCount || 0) + 1;
-    const selected = isLunaStage3QuotaOrdinal(eligible, percent, this.state.fileId);
+    const selected = isSampledEligibleLunaStage3Post(this.state.fileId, postId, percent);
     this.state.stats.lunaStage3EligibleCount = eligible;
     if (selected) {
       this.state.stats.lunaStage3SelectedCount =
@@ -312,7 +315,7 @@ export class BatchManager {
       timestamp: new Date(),
     };
 
-    await firestoreService.saveCheckpoint(checkpoint);
+    await firestoreService.saveCheckpoint(checkpoint, this.workerId);
   }
 
   /**
@@ -382,7 +385,6 @@ export class BatchManager {
    */
   async complete(): Promise<void> {
     this.state.status = 'completed';
-    await firestoreService.deleteCheckpoint(this.state.fileId);
     await this.saveBatchState();
 
     // Mark dataset as processed
@@ -391,6 +393,8 @@ export class BatchManager {
       this.state.fileName,
       this.state.stats
     );
+    await firestoreService.deleteCheckpoint(this.state.fileId, this.state.runId,
+      this.workerId);
     await this.publishEventFeedChangeIfNeeded();
 
     logger.logSummary({
@@ -463,7 +467,8 @@ export async function loadOrCreateBatchManager(
   totalRows: number,
   resumeFromCheckpoint: boolean = true,
   config?: Partial<ProcessingConfig>,
-  runId?: string
+  runId?: string,
+  workerId?: string
 ): Promise<BatchManager> {
   if (resumeFromCheckpoint) {
     // Try to load existing checkpoint
@@ -481,13 +486,13 @@ export async function loadOrCreateBatchManager(
         fileName,
         totalRows,
         checkpoint.batchNumber,
-        checkpoint.runId || runId
+        runId || checkpoint.runId
       );
       state.currentRowIndex = checkpoint.rowIndex;
       state.processedRows = checkpoint.rowIndex;
       state.stats = checkpoint.stats;
 
-      const manager = new BatchManager(state, config);
+      const manager = new BatchManager(state, config, workerId);
 
       // Restore current run entries
       for (const entry of checkpoint.currentRunEntries) {
@@ -500,7 +505,7 @@ export async function loadOrCreateBatchManager(
 
   // Create new batch manager
   const state = createBatchState(fileId, fileName, totalRows, 1, runId);
-  return new BatchManager(state, config);
+  return new BatchManager(state, config, workerId);
 }
 
 /**

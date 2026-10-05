@@ -1,39 +1,29 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { BatchManager, createBatchState } from './batchManager.js';
+import { isSampledEligibleLunaStage3Post } from '../parsing/lunaSafetyGate.js';
 
-test('Luna eligible quota continues from checkpoint stats across batch resumes', () => {
+test('eligible Stage 3 routing stays with the source post after a replay', () => {
   const first = new BatchManager(createBatchState('dataset-a', 'dataset', 200));
-  const firstSelected = Array.from({ length: 50 }, (_, index) =>
-    first.selectEligibleLunaStage3Post(`post-${index}`, 17)
-  ).filter(Boolean).length;
-  const checkpointStats = first.getStats();
-  assert.equal(checkpointStats.lunaStage3EligibleCount, 50);
-  assert.equal(checkpointStats.lunaStage3SelectedCount, firstSelected);
+  const original = first.selectEligibleLunaStage3Post('post-121', 50);
 
+  // A retry may reach the post at a different eligible ordinal because the
+  // previous invocation timed out and Stage 2 can make different decisions.
   const resumedState = createBatchState('dataset-a', 'dataset', 200, 2);
-  resumedState.stats = checkpointStats;
+  resumedState.stats.lunaStage3EligibleCount = 43;
   const resumed = new BatchManager(resumedState);
-  const nextSelected = Array.from({ length: 40 }, (_, index) =>
-    resumed.selectEligibleLunaStage3Post(`post-${index + 50}`, 17)
-  ).filter(Boolean).length;
-  assert.equal(resumed.getStats().lunaStage3EligibleCount, 90);
-  const totalSelected = Number(resumed.getStats().lunaStage3SelectedCount || 0);
-  assert.ok(totalSelected >= 15 && totalSelected <= 16);
-  assert.equal(firstSelected + nextSelected, totalSelected);
+  assert.equal(resumed.selectEligibleLunaStage3Post('post-121', 50), original);
+  assert.equal(resumed.getStats().lunaStage3EligibleCount, 44);
 });
 
-test('50 percent Luna quota remains balanced across a checkpoint resume', () => {
-  const first = new BatchManager(createBatchState('dataset-half', 'dataset', 100));
-  for (let index = 0; index < 50; index++) {
-    first.selectEligibleLunaStage3Post(`post-${index}`, 50);
+test('eligible sampling stays bounded at the configured rate', () => {
+  for (const percent of [17, 50]) {
+    const selected = Array.from({ length: 1000 }, (_, index) =>
+      isSampledEligibleLunaStage3Post(`dataset-${percent}`, `post-${index}`, percent)
+    ).filter(Boolean).length;
+    assert.ok(selected > 1000 * (percent / 100 - 0.05));
+    assert.ok(selected < 1000 * (percent / 100 + 0.05));
   }
-  const resumedState = createBatchState('dataset-half', 'dataset', 100, 2);
-  resumedState.stats = first.getStats();
-  const resumed = new BatchManager(resumedState);
-  for (let index = 50; index < 100; index++) {
-    resumed.selectEligibleLunaStage3Post(`post-${index}`, 50);
-  }
-  assert.equal(resumed.getStats().lunaStage3EligibleCount, 100);
-  assert.equal(resumed.getStats().lunaStage3SelectedCount, 50);
+  assert.equal(isSampledEligibleLunaStage3Post('dataset', 'post', 51), false);
+  assert.equal(isSampledEligibleLunaStage3Post('dataset', '', 50), false);
 });

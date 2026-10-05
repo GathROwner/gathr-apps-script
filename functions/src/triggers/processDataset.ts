@@ -18,7 +18,6 @@ import { logger } from '../utils/logger.js';
 import * as firestoreService from '../services/firestoreService.js';
 import {
   buildResumeTaskCheckpoint,
-  matchesResumeTaskCheckpoint,
   ResumeTaskCheckpoint,
 } from '../processing/resumeTaskGuard.js';
 
@@ -143,6 +142,7 @@ export const processDataset = onRequest(
         rowIndexes,
         mediaOverrideUrl: mediaOverrideUrl || undefined,
         runId: activeRunId,
+        workerId: activeRunId,
       });
 
       // If processing was paused, schedule the next batch
@@ -244,10 +244,37 @@ export const processDatasetStatus = onRequest(
  * Task Queue: Resume processing for a paused file
  * This is called automatically when a batch completes and more work remains
  */
+function startResumeLockHeartbeat(
+  fileId: string,
+  runId: string,
+  workerId: string
+): () => Promise<void> {
+  let inFlight: Promise<void> | undefined;
+  const timer = setInterval(() => {
+    if (inFlight) return;
+    inFlight = firestoreService.refreshProcessingLock(fileId, runId, {
+      status: 'running', source: 'processDatasetResume', workerId,
+    }).then((result) => {
+      if (!result.refreshed) {
+        logger.warn('Resume heartbeat lost worker ownership', { fileId, reason: result.reason });
+      }
+    }).catch((error) => {
+      logger.warn('Resume heartbeat failed', {
+        fileId, error: error instanceof Error ? error.message : String(error),
+      });
+    }).finally(() => { inFlight = undefined; });
+  }, 30000);
+  timer.unref();
+  return async () => {
+    clearInterval(timer);
+    await inFlight;
+  };
+}
+
 export const processDatasetResume = onTaskDispatched(
   {
     retryConfig: {
-      maxAttempts: 3,
+      maxAttempts: 6,
       minBackoffSeconds: 60,
     },
     rateLimits: {
@@ -280,6 +307,8 @@ export const processDatasetResume = onTaskDispatched(
 
     logger.setContext({ functionName: 'processDatasetResume', fileId, runId });
     logger.info('Resuming processing from task queue');
+    let stopHeartbeat: (() => Promise<void>) | undefined;
+    let claimedWorkerId: string | undefined;
 
     try {
       if (!runId) {
@@ -287,56 +316,54 @@ export const processDatasetResume = onTaskDispatched(
         return;
       }
 
-      if (expectedCheckpoint) {
-        const currentCheckpoint = await firestoreService.getCheckpoint(fileId);
-        if (!matchesResumeTaskCheckpoint(expectedCheckpoint, currentCheckpoint)) {
-          logger.info('Resume skipped by stale checkpoint guard', {
-            expectedCheckpoint,
-            currentCheckpoint: currentCheckpoint
-              ? buildResumeTaskCheckpoint(currentCheckpoint)
-              : null,
-          });
-          return;
-        }
+      const claim = await firestoreService.claimProcessingResume(fileId, runId,
+        expectedCheckpoint);
+      if (!claim.claimed && claim.reason === 'busy') {
+        // Cloud Tasks retries after the active worker has finished or timed out.
+        throw new Error('resume_claim_busy');
       }
-
-      const lock = await firestoreService.refreshProcessingLock(fileId, runId, {
-        status: 'running',
-        source: 'processDatasetResume',
-      });
-
-      if (!lock.refreshed) {
-        logger.warn('Resume skipped by lock guard', {
-          reason: lock.reason,
-          lockRunId: lock.lock?.runId,
-          lockStatus: lock.lock?.status,
+      if (!claim.claimed) {
+        logger.info('Resume skipped by stale checkpoint or lock guard', {
+          reason: claim.reason, expectedCheckpoint,
+          currentCheckpoint: claim.checkpoint || null,
         });
         return;
       }
+      if (!claim.workerId) throw new Error('resume_claim_missing_worker_id');
+      const workerId = claim.workerId;
+      claimedWorkerId = workerId;
+      stopHeartbeat = startResumeLockHeartbeat(fileId, runId, workerId);
 
       const { resumeProcessing } = await loadFileProcessor();
       const result = await resumeProcessing(fileId, {
         dryRun,
         runId,
+        workerId,
         config: buildParserConfig(parserMode, {
           maxExecutionMs: resumeMaxExecutionMs,
         }),
       });
+      await stopHeartbeat();
+      stopHeartbeat = undefined;
 
       // If still more work, schedule next batch
       if (result.nextBatchScheduled) {
-        await firestoreService.refreshProcessingLock(fileId, runId, {
+        const paused = await firestoreService.refreshProcessingLock(fileId, runId, {
           status: 'paused',
           source: 'processDatasetResume',
+          workerId,
         });
+        if (!paused.refreshed) throw new Error('resume_worker_fenced');
         await scheduleNextBatch(fileId, fileName, runId, { dryRun, parserMode });
       } else {
-        await firestoreService.releaseProcessingLock(
+        const released = await firestoreService.releaseProcessingLock(
           fileId,
           runId,
           result.success ? 'completed' : 'failed',
-          'processDatasetResume'
+          'processDatasetResume',
+          workerId
         );
+        if (!released) throw new Error('resume_worker_fenced');
 
         if (result.success) {
           const stats = result.stats;
@@ -364,11 +391,20 @@ export const processDatasetResume = onTaskDispatched(
 
       logger.info('Resume processing complete', { result });
     } catch (error) {
+      if (error instanceof Error && error.message === 'resume_claim_busy') {
+        logger.info('Resume worker still active; Cloud Tasks will retry');
+        throw error;
+      }
+      if (error instanceof Error && error.message === 'resume_worker_fenced') {
+        logger.warn('Older resume worker fenced; keeping newer worker state');
+        return;
+      }
       logger.error('Resume processing failed', error);
       if (runId) {
         await firestoreService.refreshProcessingLock(fileId, runId, {
           status: 'running',
           source: 'processDatasetResume',
+          workerId: claimedWorkerId,
         });
         await firestoreService.markSharedEventPublicProcessingFailedForFile({
           fileId,
@@ -379,6 +415,7 @@ export const processDatasetResume = onTaskDispatched(
       }
       throw error; // Re-throw to trigger retry
     } finally {
+      await stopHeartbeat?.();
       logger.clearContext('functionName', 'fileId', 'runId');
     }
   }

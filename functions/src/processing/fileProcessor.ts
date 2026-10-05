@@ -34,6 +34,7 @@ export async function processDatasetFile(
     sourceUniqueIds?: string[];
     mediaOverrideUrl?: string;
     runId?: string;
+    workerId?: string;
   }
 ): Promise<ProcessDatasetResponse> {
   const config: ProcessingConfig = {
@@ -112,7 +113,8 @@ export async function processDatasetFile(
       rows.length,
       options?.resumeFromCheckpoint ?? true,
       config,
-      options?.runId
+      options?.runId,
+      options?.workerId
     );
 
     // Start processing
@@ -123,6 +125,9 @@ export async function processDatasetFile(
 
     return result;
   } catch (error) {
+    if (error instanceof Error && error.message === 'resume_worker_fenced') {
+      throw error;
+    }
     logger.error('File processing failed', error);
     return {
       success: false,
@@ -184,6 +189,7 @@ async function processRows(
     const validation = validateRowData(row);
     if (!validation.isValid) {
       batchManager.markRowInvalid(i, validation.errors.join(', '));
+      await batchManager.saveCheckpoint();
       continue;
     }
 
@@ -199,6 +205,10 @@ async function processRows(
       logger.debug('Dry run: would process row', { rowIndex: i });
       batchManager.markRowProcessed(i);
     }
+
+    // A Cloud Task may time out before the batch pauses. Persist the next row
+    // after each completed row so a retry cannot replay the entire batch.
+    await batchManager.saveCheckpoint();
 
     validRowsInBatch++;
 
@@ -409,6 +419,7 @@ export async function resumeProcessing(
     dryRun?: boolean;
     config?: Partial<ProcessingConfig>;
     runId?: string;
+    workerId?: string;
   }
 ): Promise<ProcessDatasetResponse> {
   logger.info('Resuming processing', { fileId });
@@ -418,6 +429,7 @@ export async function resumeProcessing(
     dryRun: options?.dryRun ?? false,
     config: options?.config,
     runId: options?.runId,
+    workerId: options?.workerId,
   });
 }
 

@@ -38,6 +38,21 @@ export function isSampledLunaCanaryPost(
   return bucket < percent / 100;
 }
 
+/** Select only eligible Stage 3 posts, using identity that survives a checkpoint replay. */
+export function isSampledEligibleLunaStage3Post(
+  fileId: string,
+  postId: string,
+  percent: number
+): boolean {
+  if (!fileId || !postId || !Number.isFinite(percent) || percent <= 0 || percent > 50) {
+    return false;
+  }
+  const bucket = createHash('sha256')
+    .update(`${fileId}\0${postId}`)
+    .digest().readUInt32BE(0) / 0x100000000;
+  return bucket < percent / 100;
+}
+
 /** Online quota with a stable, run-seeded pick inside each 5-6 post window.
  * This avoids tying every selection to the same position in a source-ordered file. */
 export function isLunaStage3QuotaOrdinal(

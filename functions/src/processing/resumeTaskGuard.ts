@@ -28,3 +28,24 @@ export function matchesResumeTaskCheckpoint(
     expected.batchNumber === checkpoint.batchNumber
   );
 }
+
+/** A timed-out 540-second resume may leave a newer per-row checkpoint behind.
+ * Only a stale running lease may recover it; a paused task must match exactly. */
+export function classifyResumeTaskClaim(
+  expected: ResumeTaskCheckpoint | undefined,
+  checkpoint: ResumeTaskCheckpoint | undefined,
+  lockStatus: 'running' | 'paused' | 'completed' | 'failed',
+  heartbeatAgeMs: number,
+  staleAfterMs = 570000
+): 'claim' | 'busy' | 'stale' {
+  if (!checkpoint || lockStatus === 'completed' || lockStatus === 'failed') return 'stale';
+  if (lockStatus === 'paused') {
+    return !expected || matchesResumeTaskCheckpoint(expected, checkpoint)
+      ? 'claim' : 'stale';
+  }
+  if (heartbeatAgeMs < staleAfterMs) return 'busy';
+  return !expected ||
+    (expected.batchNumber === checkpoint.batchNumber &&
+      expected.rowIndex <= checkpoint.rowIndex)
+    ? 'claim' : 'stale';
+}
