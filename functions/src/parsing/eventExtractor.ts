@@ -3711,12 +3711,13 @@ DATE RESOLUTION RULES (MANDATORY — EXACT ALGORITHM):
 TIME ASSOCIATION RULES (MANDATORY — PER-DAY REGION):
 - Use ONLY times that are visibly present in the post TEXT or IMAGE. Do not infer or estimate.
 - **Per-day rule:** Assign the start time that appears in the SAME tile/line/region as that weekday's act. **Do NOT** copy a time from another day's region.
-- If the poster includes a single GLOBAL time **and** none of the per-day regions show a different time, you may apply the global time to all acts. **If ANY per-day region shows its own time (e.g., "From 9 pm"), that per-day time MUST override the global time for that day.**
+- A poster may stack two or more date headings above ONE shared performer/title and ONE shared performance-time line. That shared line belongs to each listed date when no date has its own different time. Emit one event per date and copy the exact shared time evidence to each. This is a shared event block, not a time borrowed from Friday for Tuesday.
+- If the poster includes a single GLOBAL event time **and** none of the per-day regions show a different time, apply that global time to each event it visibly covers. **If ANY per-day region shows its own time (e.g., "From 9 pm"), that per-day time MUST override the global time for that day.** Do not use generic venue opening hours as an event time.
 - Normalize colloquial phrases: "From 9 pm", "Starting at 9pm" → startTime "21:00".
 - Never output "22:00" unless you actually read a "10 pm/10:00 PM/22:00" token in the SAME region for that day.
 - Accepted formats include: "9pm", "9 pm", "9 p.m.", "9PM", "9:00 PM", or phrases like "From 9 pm". Normalize to 24h "HH:mm" in ${tz} (e.g., "From 9 pm" → "21:00").
 - Evidence requirement: set timeFlags.start.source="explicit" and timeFlags.start.evidence to the exact substring you read.
-- **If your evidence does not contain a time token from the SAME region, set startTime="unknown" and timeFlags.start.source="none". Do not guess or copy a global time in this case.**
+- **If your evidence does not contain a time token from the same date region or a clearly shared event block covering that date, set startTime="unknown" and timeFlags.start.source="none".** Never copy a time from a different date's private tile.
 - Never fabricate an end time. If none is visible, set endTime="unknown" and timeFlags.end.toClose=false.
 
 EXTRACT ONLY:
