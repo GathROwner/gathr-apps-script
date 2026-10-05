@@ -169,3 +169,34 @@ test('does not return a missing incoming icon when the venue has no profile imag
     assert.deepEqual(updates, []);
   });
 });
+
+test('rechecks a managed image after the probe cache expires', async () => {
+  const imageUrl = 'https://storage.googleapis.com/gathr-uploaded-images/profilepictures/cache-expiry-test.webp';
+  const originalNow = Date.now;
+  let nowMs = 1_000_000;
+  Date.now = () => nowMs;
+  try {
+    await withImageMocks(new Map([[imageUrl, { status: 200, contentType: 'image/webp' }]]),
+      async (calls) => {
+        const resolved = await resolveCanonicalVenueIconForRegression({
+          venue: buildVenue(''), row: buildRow(imageUrl), incomingIcon: imageUrl,
+          rowIndex: 0, parserMode: 'full5stage',
+        });
+        assert.equal(resolved, imageUrl);
+        assert.deepEqual(calls, [imageUrl]);
+      });
+
+    nowMs += 6 * 60 * 1000;
+    await withImageMocks(new Map([[imageUrl, { status: 404 }]]), async (calls, updates) => {
+      const resolved = await resolveCanonicalVenueIconForRegression({
+        venue: buildVenue(''), row: buildRow(imageUrl), incomingIcon: imageUrl,
+        rowIndex: 0, parserMode: 'full5stage',
+      });
+      assert.equal(resolved, undefined);
+      assert.deepEqual(calls, [imageUrl]);
+      assert.deepEqual(updates, []);
+    });
+  } finally {
+    Date.now = originalNow;
+  }
+});

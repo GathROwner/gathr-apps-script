@@ -5061,12 +5061,13 @@ interface DuplicateEventAuditContext {
   batchManager: BatchManager;
 }
 const PROFILE_IMAGE_COMPARE_TIMEOUT_MS = 10_000;
+const PROFILE_IMAGE_PROBE_CACHE_MS = 5 * 60 * 1000;
 type ManagedImageProbeResult =
   | { status: 'available'; contentHash: string }
   | { status: 'missing'; httpStatus: 404 }
   | { status: 'unknown'; httpStatus?: number };
 
-const managedImageProbeCache = new Map<string, ManagedImageProbeResult>();
+const managedImageProbeCache = new Map<string, { result: ManagedImageProbeResult; checkedAt: number }>();
 
 function selectParserProfilePicUrl(row: RawRowData, venue: VenueData | null): string {
   const rowProfile = asTrimmedString(row.profilePicUrl);
@@ -5274,7 +5275,10 @@ async function getManagedImageProbe(url: string): Promise<ManagedImageProbeResul
   if (!normalizedUrl || !isManagedBucketImageUrl(normalizedUrl)) return { status: 'unknown' };
 
   const cached = managedImageProbeCache.get(normalizedUrl);
-  if (cached) return cached;
+  if (cached && Date.now() - cached.checkedAt < PROFILE_IMAGE_PROBE_CACHE_MS) {
+    return cached.result;
+  }
+  if (cached) managedImageProbeCache.delete(normalizedUrl);
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), PROFILE_IMAGE_COMPARE_TIMEOUT_MS);
@@ -5286,7 +5290,7 @@ async function getManagedImageProbe(url: string): Promise<ManagedImageProbeResul
     });
     if (response.status === 404) {
       const missing: ManagedImageProbeResult = { status: 'missing', httpStatus: 404 };
-      managedImageProbeCache.set(normalizedUrl, missing);
+      managedImageProbeCache.set(normalizedUrl, { result: missing, checkedAt: Date.now() });
       return missing;
     }
 
@@ -5307,7 +5311,7 @@ async function getManagedImageProbe(url: string): Promise<ManagedImageProbeResul
 
     const hash = createHash('sha1').update(buffer).digest('hex');
     const available: ManagedImageProbeResult = { status: 'available', contentHash: hash };
-    managedImageProbeCache.set(normalizedUrl, available);
+    managedImageProbeCache.set(normalizedUrl, { result: available, checkedAt: Date.now() });
     return available;
   } catch {
     return { status: 'unknown' };
