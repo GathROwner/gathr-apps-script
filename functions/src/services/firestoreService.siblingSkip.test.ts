@@ -4,9 +4,46 @@ import { EventData } from '../types/index.js';
 import { pickCompatibleExactUniqueIdMatch } from './exactUniqueIdCompatibility.js';
 import {
   hasExistingSameSourceSessionsCoveredByProgram,
+  isGenericRingetteSlotCoveredByDetailedSchedule,
   pickUnrecognizedVenueDocIdForSource,
   shouldSkipSiblingUniqueIdDuplicateCheck,
 } from './firestoreService.js';
+
+test('suppresses only an exact generic ringette slot covered by the same venue page detailed schedule', () => {
+  const generic: EventData = {
+    uniqueId: '1662948381959213_2e6912334ff2d1ee',
+    venueId: 'slug_easternkingssportsplex',
+    establishment: 'Eastern Kings Sportsplex',
+    cleanedFacebookUrl: 'https://www.facebook.com/EasternKingsSportsplex/',
+    eventName: 'RINGETTE', name: 'RINGETTE', description: 'Friday rink schedule',
+    startDate: '2026-10-09', endDate: '2026-10-09',
+    startTime: '16:20', endTime: '17:20',
+  } as EventData;
+  const detailed: EventData = {
+    ...generic,
+    uniqueId: '1662950478625670_48ee16fdd17eec60',
+    eventName: 'Souris Savers Ringette — U12',
+    name: 'Souris Savers Ringette — U12',
+    description: 'Ringette ice schedule session for U12.',
+  };
+  assert.equal(isGenericRingetteSlotCoveredByDetailedSchedule(generic, detailed), true);
+  assert.equal(isGenericRingetteSlotCoveredByDetailedSchedule(detailed, generic), false);
+  assert.equal(isGenericRingetteSlotCoveredByDetailedSchedule(generic, {
+    ...detailed, startTime: '18:40', endTime: '19:40', name: 'Souris Savers Ringette — U14',
+  }), false);
+  assert.equal(isGenericRingetteSlotCoveredByDetailedSchedule(generic, {
+    ...detailed, cleanedFacebookUrl: 'https://www.facebook.com/OtherRink',
+  }), false);
+  assert.equal(isGenericRingetteSlotCoveredByDetailedSchedule(generic, {
+    ...detailed, subVenue: 'second rink',
+  }), false);
+  assert.equal(isGenericRingetteSlotCoveredByDetailedSchedule({
+    ...generic, subVenue: 'rink A',
+  }, { ...detailed, subVenue: 'rink B' }), false);
+  assert.equal(isGenericRingetteSlotCoveredByDetailedSchedule(generic, {
+    ...detailed, name: 'Souris Savers Hockey — U12', eventName: 'Souris Savers Hockey — U12',
+  }), false);
+});
 
 test('same-source timed sessions block a later umbrella program without replacing a child', () => {
   const root = '1401951132140319';

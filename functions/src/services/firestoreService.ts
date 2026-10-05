@@ -3918,6 +3918,39 @@ function hasSeparateSameDayTimeWindows(incoming: EventData, existing: EventData)
   return incomingEnd <= existingStart || existingEnd <= incomingStart;
 }
 
+/** A broad rink calendar label must not recreate a slot already described by
+ * the venue's more specific team schedule. Keep the specific source untouched:
+ * merging these two posts would replace its image or source identity. */
+export function isGenericRingetteSlotCoveredByDetailedSchedule(
+  incoming: EventData,
+  existing: EventData
+): boolean {
+  if (String(incoming.eventName || incoming.name || '').trim().toLowerCase() !== 'ringette') {
+    return false;
+  }
+  const detailedTitle = String(existing.eventName || existing.name || '').trim();
+  if (!/\bringette\b/i.test(detailedTitle) || !/\bU\d{1,2}\b/i.test(detailedTitle)) {
+    return false;
+  }
+  const incomingRoot = extractUniqueIdRoot(String(incoming.uniqueId || ''));
+  const existingRoot = extractUniqueIdRoot(String(existing.uniqueId || ''));
+  if (!incomingRoot || !existingRoot || incomingRoot === existingRoot) return false;
+  if (!incoming.venueId || incoming.venueId !== existing.venueId) return false;
+  const sourcePage = (event: EventData): string =>
+    String(event.cleanedFacebookUrl || event.facebookUrl || '').trim().toLowerCase().replace(/\/+$/, '');
+  if (!sourcePage(incoming) || sourcePage(incoming) !== sourcePage(existing)) return false;
+  if (String(incoming.additionalLocation || '') !== String(existing.additionalLocation || '')) return false;
+  if (String(incoming.subVenue || '') !== String(existing.subVenue || '')) return false;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(String(incoming.startDate || '')) ||
+      incoming.startDate !== existing.startDate ||
+      incoming.endDate !== existing.endDate ||
+      !/^\d{2}:\d{2}$/.test(String(incoming.startTime || '')) ||
+      incoming.startTime !== existing.startTime ||
+      !/^\d{2}:\d{2}$/.test(String(incoming.endTime || '')) ||
+      incoming.endTime !== existing.endTime) return false;
+  return true;
+}
+
 export function shouldSkipSiblingUniqueIdDuplicateCheck(
   incoming: EventData,
   existing: EventData
@@ -4151,6 +4184,14 @@ export async function checkDuplicate(
     }
   }
 
+  // A detailed schedule already covers this exact generic slot. Do not merge
+  // the generic post into it: source and image provenance belong to the keeper.
+  if (currentRunEntries.some((existing) =>
+    isGenericRingetteSlotCoveredByDetailedSchedule(event, existing)
+  )) {
+    return { isDuplicate: true };
+  }
+
   // Check against current run entries first
   const matchingCurrentRunSlot = currentRunEntries.find((existing) =>
     String(existing.venueId || '').trim() === String(venueId || '').trim() &&
@@ -4200,6 +4241,12 @@ export async function checkDuplicate(
     startDate: event.startDate,
     endDate: event.startDate,
   });
+
+  if (existingEvents.some((existing) =>
+    isGenericRingetteSlotCoveredByDetailedSchedule(event, existing)
+  )) {
+    return { isDuplicate: true };
+  }
 
   if (hasExistingSameSourceSessionsCoveredByProgram(event, existingEvents)) {
     logger.info('Same-source program already represented by timed sessions; skipping umbrella create', {
