@@ -2763,11 +2763,14 @@ export async function processRow(
       return result;
     }
 
-    if (row.sourceScraperType === 'events') {
-      const coordinateCheck = checkEventCoordinatesAgainstAllowedRegions({
+    const facebookEventCoordinateCheck = row.sourceScraperType === 'events'
+      ? checkEventCoordinatesAgainstAllowedRegions({
         latitude: row.facebookEventLocationLatitude,
         longitude: row.facebookEventLocationLongitude,
-      });
+      })
+      : null;
+    if (facebookEventCoordinateCheck) {
+      const coordinateCheck = facebookEventCoordinateCheck;
       if (coordinateCheck.unknownRegionCodes.length > 0) {
         logger.warn('Ignoring unknown configured event ingest regions', {
           rowIndex,
@@ -2867,6 +2870,30 @@ export async function processRow(
     }
 
     const venue = venueMatch.isMatch ? venueMatch.matchedVenue! : null;
+    // Structured Facebook Events are checked from their event coordinates
+    // above. Ordinary page posts can still resolve to an out-of-region venue;
+    // stop them before gallery upload, model calls, or event writes.
+    if (venue && facebookEventCoordinateCheck?.decision !== 'allow') {
+      const venueCoordinateCheck = checkEventCoordinatesAgainstAllowedRegions({
+        latitude: venue.latitude,
+        longitude: venue.longitude,
+      });
+      if (venueCoordinateCheck.decision === 'reject') {
+        const reason = 'matched_venue_coordinates_outside_allowed_regions';
+        logger.warn('Rejecting source row matched to venue outside configured ingest regions', {
+          rowIndex,
+          uniqueId: row.uniqueId,
+          venueId: venue.id,
+          latitude: venueCoordinateCheck.latitude,
+          longitude: venueCoordinateCheck.longitude,
+          allowedRegionCodes: venueCoordinateCheck.allowedRegionCodes,
+        });
+        result.isInvalid = true;
+        result.error = reason;
+        batchManager.markRowInvalid(rowIndex, reason);
+        return result;
+      }
+    }
     const matchedVenueId = venue?.id;
     let facebookEventSourceContentSignature: string | undefined;
     let reusableFacebookEventMediaUrls: string[] = [];

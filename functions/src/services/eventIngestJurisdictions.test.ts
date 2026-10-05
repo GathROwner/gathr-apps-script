@@ -26,6 +26,15 @@ test('rejects unmistakably off-region Facebook Event coordinates', () => {
   assert.deepEqual(result.allowedRegionCodes, ['PEI']);
 });
 
+test('rejects the matched Ontario Cornwall Public Library venue coordinates', () => {
+  const result = checkEventCoordinatesAgainstAllowedRegions({
+    latitude: 45.0191421,
+    longitude: -74.7272033,
+  }, 'PEI');
+  assert.equal(result.decision, 'reject');
+  assert.deepEqual(result.allowedRegionCodes, ['PEI']);
+});
+
 test('leaves rows without complete coordinates to existing review safeguards', () => {
   const result = checkEventCoordinatesAgainstAllowedRegions({
     latitude: 46.2382,
