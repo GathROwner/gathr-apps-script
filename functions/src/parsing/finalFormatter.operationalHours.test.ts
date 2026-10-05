@@ -29,7 +29,6 @@ function event(name: string, description: string): FormattedEvent {
 
 test('drops operating-hours-only records from the event output', () => {
   const records = [
-    event('Splash Pad Open Daily (weather permitting)', 'Open daily from 10am to 8pm.'),
     event('Regular Farm Hours (Hands-on Experiences)', 'Regular farm hours are 10am to 6pm.'),
     event('Casino Gaming', 'Casino gaming is open daily from 12pm to 2am.'),
     event('Open daily 12-6 (closed Wednesdays)', 'Open daily 12pm to 6pm.'),
@@ -40,6 +39,21 @@ test('drops operating-hours-only records from the event output', () => {
   ];
 
   assert.deepEqual(filterOperationalHoursOnlyEvents(records), []);
+});
+
+test('keeps dated public pool access windows while still filtering ordinary venue hours', () => {
+  const morning = { ...event('All pools open', 'All pools open.'),
+    startDate: '2026-10-05', endDate: '2026-10-05', startTime: '09:30', endTime: '11:30' };
+  const afternoon = { ...event('All pools open', 'All pools open.'),
+    startDate: '2026-10-05', endDate: '2026-10-05', startTime: '12:30', endTime: '16:00' };
+  const splashPad = event('Splash Pad Open Daily (weather permitting)', 'Open daily from 10am to 8pm.');
+  const incomplete = { ...morning, startTime: '' };
+  const ordinaryHours = event('Regular Farm Hours', 'Regular farm hours are 10am to 6pm.');
+
+  assert.deepEqual(
+    filterOperationalHoursOnlyEvents([morning, afternoon, splashPad, incomplete, ordinaryHours]),
+    [morning, afternoon, splashPad]
+  );
 });
 
 test('keeps a discrete public event even when its venue is open daily', () => {

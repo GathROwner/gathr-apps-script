@@ -2557,11 +2557,20 @@ function hasOperationalHoursCue(value: unknown): boolean {
   );
 }
 
+function isScheduledPublicPoolAccess(event: FormattedEvent): boolean {
+  const title = normalizeWorkshopSupportText(String(event.name || ''));
+  if (!/\b(?:all\s+pools\s+open|splash\s+pad\s+open)\b/.test(title)) return false;
+  return /^\d{4}-\d{2}-\d{2}$/.test(String(event.startDate || '')) &&
+    /^\d{1,2}:\d{2}$/.test(String(event.startTime || '')) &&
+    /^\d{1,2}:\d{2}$/.test(String(event.endTime || ''));
+}
+
 export function filterOperationalHoursOnlyEvents(
   events: FormattedEvent[]
 ): FormattedEvent[] {
   return events.filter((event) => {
     if (!isRecurringFlagEnabled(event.isEvent)) return true;
+    if (isScheduledPublicPoolAccess(event)) return true;
 
     const eventText = normalizeCruiseLogisticsText([
       event.name,
