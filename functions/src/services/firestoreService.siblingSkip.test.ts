@@ -294,3 +294,59 @@ test('still deduplicates a same-post event whose time was corrected', () => {
 
   assert.equal(shouldSkipSiblingUniqueIdDuplicateCheck(correctedOpening, opening), false);
 });
+
+test('preserves separate same-post pool and ringette slots within the fuzzy time tolerance', () => {
+  const cases = [
+    {
+      root: '1523167083164543', firstTitle: 'Lane swim', secondTitle: 'Lane swim',
+      firstDate: '2026-10-05', firstStart: '12:00', firstEnd: '13:00',
+      secondStart: '13:00', secondEnd: '16:00',
+    },
+    {
+      root: '1523167083164543', firstTitle: 'Leisure pool open', secondTitle: 'Leisure pool open',
+      firstDate: '2026-10-05', firstStart: '17:30', firstEnd: '19:00',
+      secondStart: '20:00', secondEnd: '21:00',
+    },
+    {
+      root: '1662950478625670', firstTitle: 'Souris Savers Ringette — U12',
+      secondTitle: 'Souris Savers Ringette — U14',
+      firstDate: '2026-10-09', firstStart: '16:20', firstEnd: '17:20',
+      secondStart: '18:40', secondEnd: '19:40',
+    },
+    {
+      root: '1662950478625670', firstTitle: 'Souris Savers Ringette — U10',
+      secondTitle: 'Souris Savers Ringette — U12',
+      firstDate: '2026-10-10', firstStart: '13:40', firstEnd: '14:40',
+      secondStart: '14:50', secondEnd: '15:50',
+    },
+  ];
+
+  for (const item of cases) {
+    const first = buildEvent({
+      uniqueId: `${item.root}_1`, eventName: item.firstTitle, name: item.firstTitle,
+      startDate: item.firstDate, endDate: item.firstDate,
+      startTime: item.firstStart, endTime: item.firstEnd,
+    });
+    const second = buildEvent({
+      uniqueId: `${item.root}_2`, eventName: item.secondTitle, name: item.secondTitle,
+      startDate: item.firstDate, endDate: item.firstDate,
+      startTime: item.secondStart, endTime: item.secondEnd,
+    });
+    assert.equal(shouldSkipSiblingUniqueIdDuplicateCheck(second, first), true,
+      `${item.firstTitle} ${item.firstStart} -> ${item.secondTitle} ${item.secondStart}`);
+  }
+});
+
+test('keeps overlapping corrected same-post times eligible for deduplication', () => {
+  const existing = buildEvent({
+    uniqueId: 'same_post_1', eventName: 'Exhibition Opening', name: 'Exhibition Opening',
+    startDate: '2026-10-05', endDate: '2026-10-05',
+    startTime: '18:00', endTime: '20:00',
+  });
+  const corrected = buildEvent({
+    uniqueId: 'same_post_2', eventName: 'Exhibition Opening', name: 'Exhibition Opening',
+    startDate: '2026-10-05', endDate: '2026-10-05',
+    startTime: '19:00', endTime: '21:00',
+  });
+  assert.equal(shouldSkipSiblingUniqueIdDuplicateCheck(corrected, existing), false);
+});

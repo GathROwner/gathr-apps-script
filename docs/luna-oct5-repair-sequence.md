@@ -32,9 +32,13 @@ RCMP row 11: the captured Facebook resize variants show the October 25 Torch Run
 
 Next trace extraction misses for Bell Aliant Centre and Stanley Bridge. Reproduce each using original caption and ordered gallery, then make a scoped parser or validation fix and repeat dry runs.
 
-## 4. Write and dedup losses — pending
+## 4. Write and dedup losses — four slots repaired in code; production writes pending
 
-Trace why Bell Aliant Centre saved nine of eleven payloads and Eastern Kings Sportsplex saved eight of ten. Check source identity and time-slot reconciliation before changing dedup. Preserve the corrected rink records and Side Door Tango occurrences.
+Cloud Run row-result logs prove Bell Aliant Centre row 187 extracted 11 payloads, created nine records, and classified two as duplicates of the earlier 12:00–13:00 lane swim and 17:30–19:00 leisure swim. The missing 13:00–16:00 lane swim and 20:00–21:00 leisure swim were separate, nonoverlapping sessions in the caption. Eastern Kings Sportsplex row 228 extracted 10, created eight, and classified the Friday October 9 18:40 U14 and Saturday October 10 14:50 U12 sessions as duplicates of earlier same-source U12/U10 sessions. The row logs identify the exact keeper IDs; Firestore confirmed all four lost slots were absent and the keeper times matched. This is a write/dedup defect after successful extraction.
+
+The same-source sibling guard now preserves two events with distinct unique IDs from one source post when their complete, same-day time windows do not overlap, even if their similar titles and start times fall inside the general three-hour fuzzy duplicate tolerance. It continues allowing overlapping corrected times through deduplication. Exact four-slot regressions and a read-only check against the current venue records returned `isDuplicate=false` for all four missing candidates. The TypeScript build and compiled suite passed 509/509. The correct older Bookable Ice Time and MACPHEE records were not changed. No missing October 5 records were backfilled. Production behavior still needs a regular-run write audit.
+
+Two related issues remain separate: Bell Aliant's two “all pools open” windows never reached the 11 final payloads, and another Eastern Kings post produced a generic Friday 16:20 `RINGETTE` alongside the specific U12 listing. The first is an extraction omission; the second is a cross-source duplicate that this same-source slot guard does not change.
 
 ## Separate scope tracks
 

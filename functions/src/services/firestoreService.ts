@@ -3897,6 +3897,27 @@ function titlesDescribeDistinctSamePostItems(incoming: EventData, existing: Even
   return union > 0 && common / union < 0.6;
 }
 
+function hasSeparateSameDayTimeWindows(incoming: EventData, existing: EventData): boolean {
+  const date = String(incoming.startDate || '').trim();
+  if (!date || date !== String(existing.startDate || '').trim()) return false;
+  if (String(incoming.endDate || '').trim() !== date ||
+      String(existing.endDate || '').trim() !== date) return false;
+
+  const minutes = (value: unknown): number | null => {
+    const match = String(value || '').match(/^([01]\d|2[0-3]):([0-5]\d)$/);
+    return match ? Number(match[1]) * 60 + Number(match[2]) : null;
+  };
+  const incomingStart = minutes(incoming.startTime);
+  const incomingEnd = minutes(incoming.endTime);
+  const existingStart = minutes(existing.startTime);
+  const existingEnd = minutes(existing.endTime);
+  if (incomingStart === null || incomingEnd === null ||
+      existingStart === null || existingEnd === null ||
+      incomingEnd <= incomingStart || existingEnd <= existingStart) return false;
+
+  return incomingEnd <= existingStart || existingEnd <= incomingStart;
+}
+
 export function shouldSkipSiblingUniqueIdDuplicateCheck(
   incoming: EventData,
   existing: EventData
@@ -3918,6 +3939,9 @@ export function shouldSkipSiblingUniqueIdDuplicateCheck(
   const incomingStartTime = String(incoming.startTime || '').trim();
   const existingStartTime = String(existing.startTime || '').trim();
   if (incomingStartTime && existingStartTime && incomingStartTime !== existingStartTime) {
+    // Distinct slots in one post can have the same title and begin within the
+    // broad three-hour duplicate tolerance. Preserve nonoverlapping windows.
+    if (hasSeparateSameDayTimeWindows(incoming, existing)) return true;
     if (titlesDescribeDistinctSamePostItems(incoming, existing)) return true;
     if (isDuplicateEntry(incoming, existing, { requireEstablishmentMatch: false })) {
       return false;
