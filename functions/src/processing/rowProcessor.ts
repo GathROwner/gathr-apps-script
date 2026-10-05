@@ -5061,7 +5061,12 @@ interface DuplicateEventAuditContext {
   batchManager: BatchManager;
 }
 const PROFILE_IMAGE_COMPARE_TIMEOUT_MS = 10_000;
-const managedImageContentHashCache = new Map<string, string | null>();
+type ManagedImageProbeResult =
+  | { status: 'available'; contentHash: string }
+  | { status: 'missing'; httpStatus: 404 }
+  | { status: 'unknown'; httpStatus?: number };
+
+const managedImageProbeCache = new Map<string, ManagedImageProbeResult>();
 
 function selectParserProfilePicUrl(row: RawRowData, venue: VenueData | null): string {
   const rowProfile = asTrimmedString(row.profilePicUrl);
@@ -5096,8 +5101,13 @@ async function resolveCanonicalVenueIcon(params: {
   if (firstPartyPost && managedIncoming && managedIncoming !== venueProfile) {
     let shouldPromote = false;
     let promotionReason = '';
+    const incomingProbe = await getManagedImageProbe(managedIncoming);
 
-    if (!venueProfile) {
+    if (incomingProbe.status !== 'available') {
+      promotionReason = incomingProbe.status === 'missing'
+        ? 'incoming_profile_image_missing_404'
+        : 'incoming_profile_image_unverified';
+    } else if (!venueProfile) {
       shouldPromote = true;
       promotionReason = 'missing_profile';
     } else if (!isManagedBucketImageUrl(venueProfile)) {
@@ -5109,8 +5119,14 @@ async function resolveCanonicalVenueIcon(params: {
         venueProfileSourceSignature &&
         incomingSourceSignature === venueProfileSourceSignature
       );
-      const sameContent = await managedImagesHaveSameContent(venueProfile, managedIncoming);
-      if (sameContent === true) {
+      const existingProbe = await getManagedImageProbe(venueProfile);
+      const sameContent = existingProbe.status === 'available'
+        ? existingProbe.contentHash === incomingProbe.contentHash
+        : undefined;
+      if (existingProbe.status === 'missing') {
+        shouldPromote = true;
+        promotionReason = 'existing_profile_image_missing_404';
+      } else if (sameContent === true) {
         shouldPromote = false;
         promotionReason = 'same_image_content';
 
@@ -5203,8 +5219,17 @@ async function resolveCanonicalVenueIcon(params: {
   }
 
   if (venueProfile) return venueProfile;
-  if (firstPartyPost && managedIncoming) return managedIncoming;
+  if (firstPartyPost && managedIncoming) {
+    const probe = await getManagedImageProbe(managedIncoming);
+    if (probe.status === 'available') return managedIncoming;
+  }
   return undefined;
+}
+
+export async function resolveCanonicalVenueIconForRegression(
+  params: Parameters<typeof resolveCanonicalVenueIcon>[0]
+): Promise<string | undefined> {
+  return resolveCanonicalVenueIcon(params);
 }
 
 function getVenueProfileImage(venue: VenueData): string {
@@ -5244,64 +5269,50 @@ function isManagedBucketImageUrl(url: string): boolean {
   }
 }
 
-async function managedImagesHaveSameContent(
-  leftUrl: string,
-  rightUrl: string
-): Promise<boolean | undefined> {
-  const left = String(leftUrl || '').trim();
-  const right = String(rightUrl || '').trim();
-  if (!left || !right) return undefined;
-  if (left === right) return true;
-  if (!isManagedBucketImageUrl(left) || !isManagedBucketImageUrl(right)) return undefined;
-
-  const [leftHash, rightHash] = await Promise.all([
-    getManagedImageContentHash(left),
-    getManagedImageContentHash(right),
-  ]);
-  if (!leftHash || !rightHash) return undefined;
-  return leftHash === rightHash;
-}
-
-async function getManagedImageContentHash(url: string): Promise<string | undefined> {
+async function getManagedImageProbe(url: string): Promise<ManagedImageProbeResult> {
   const normalizedUrl = String(url || '').trim();
-  if (!normalizedUrl || !isManagedBucketImageUrl(normalizedUrl)) return undefined;
+  if (!normalizedUrl || !isManagedBucketImageUrl(normalizedUrl)) return { status: 'unknown' };
 
-  if (managedImageContentHashCache.has(normalizedUrl)) {
-    const cached = managedImageContentHashCache.get(normalizedUrl);
-    return cached || undefined;
-  }
+  const cached = managedImageProbeCache.get(normalizedUrl);
+  if (cached) return cached;
 
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), PROFILE_IMAGE_COMPARE_TIMEOUT_MS);
   try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), PROFILE_IMAGE_COMPARE_TIMEOUT_MS);
-    let response: Response;
-    try {
-      response = await fetch(normalizedUrl, {
-        method: 'GET',
-        redirect: 'follow',
-        signal: controller.signal,
-      });
-    } finally {
-      clearTimeout(timeout);
+    const response = await fetch(normalizedUrl, {
+      method: 'GET',
+      redirect: 'follow',
+      signal: controller.signal,
+    });
+    if (response.status === 404) {
+      const missing: ManagedImageProbeResult = { status: 'missing', httpStatus: 404 };
+      managedImageProbeCache.set(normalizedUrl, missing);
+      return missing;
     }
 
     if (!response.ok) {
-      managedImageContentHashCache.set(normalizedUrl, null);
-      return undefined;
+      return { status: 'unknown', httpStatus: response.status };
+    }
+
+    const contentType = String(response.headers.get('content-type') || '')
+      .split(';', 1)[0].trim().toLowerCase();
+    if (!contentType.startsWith('image/')) {
+      return { status: 'unknown', httpStatus: response.status };
     }
 
     const buffer = Buffer.from(await response.arrayBuffer());
     if (!buffer.length) {
-      managedImageContentHashCache.set(normalizedUrl, null);
-      return undefined;
+      return { status: 'unknown', httpStatus: response.status };
     }
 
     const hash = createHash('sha1').update(buffer).digest('hex');
-    managedImageContentHashCache.set(normalizedUrl, hash);
-    return hash;
+    const available: ManagedImageProbeResult = { status: 'available', contentHash: hash };
+    managedImageProbeCache.set(normalizedUrl, available);
+    return available;
   } catch {
-    managedImageContentHashCache.set(normalizedUrl, null);
-    return undefined;
+    return { status: 'unknown' };
+  } finally {
+    clearTimeout(timeout);
   }
 }
 

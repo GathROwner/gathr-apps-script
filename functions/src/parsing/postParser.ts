@@ -1014,10 +1014,11 @@ async function replayPostDataFromArtifactsCore(
     outputCount: displayImageUrls.length,
   });
 
-  const managedProfilePicUrl = await prepareManagedProfileIconUrl(profilePicUrl || '', {
+  const preparedProfileIcon = await prepareManagedProfileIconUrl(profilePicUrl || '', {
     postId,
   });
-  if (managedProfilePicUrl) cleanupImageUrls.add(managedProfilePicUrl);
+  const managedProfilePicUrl = preparedProfileIcon.url;
+  if (preparedProfileIcon.createdForThisParse) cleanupImageUrls.add(managedProfilePicUrl);
 
   const extractionImageUrls =
     displayImageUrls.length > 0 ? displayImageUrls : sourcePostMediaUrls;
@@ -1814,10 +1815,11 @@ async function parsePostDataCore(
     )) {
       return holdCalendarBandCanary('gallery_display_image_missing');
     }
-    const managedProfilePicUrl = await prepareManagedProfileIconUrl(profilePicUrl || '', {
+    const preparedProfileIcon = await prepareManagedProfileIconUrl(profilePicUrl || '', {
       postId: extractedData?.id || extractedData?.postId || '',
     });
-    if (managedProfilePicUrl) cleanupImageUrls.add(managedProfilePicUrl);
+    const managedProfilePicUrl = preparedProfileIcon.url;
+    if (preparedProfileIcon.createdForThisParse) cleanupImageUrls.add(managedProfilePicUrl);
     const isCalendarOrSchedule =
       resolvedContentType === 'CALENDAR' ||
       resolvedContentType === 'SCHEDULE';
@@ -4796,23 +4798,29 @@ function getAdvertisedImagePixelArea(rawUrl: string): number {
   return Number(match[1]) * Number(match[2]);
 }
 
+interface PreparedManagedProfileIconUrl {
+  url: string;
+  createdForThisParse: boolean;
+}
+
 async function prepareManagedProfileIconUrl(
   profilePicUrl: string,
   context: { postId?: string }
-): Promise<string> {
+): Promise<PreparedManagedProfileIconUrl> {
   const sourceUrl = String(profilePicUrl || '').trim();
-  if (!sourceUrl) return '';
-  if (isManagedImageUrl(sourceUrl)) return sourceUrl;
+  if (!sourceUrl) return { url: '', createdForThisParse: false };
+  // Existing managed venue images are persistent references, not disposable parse output.
+  if (isManagedImageUrl(sourceUrl)) return { url: sourceUrl, createdForThisParse: false };
 
   const cached = currentImageMaps().sourceManagedImageMap.get(sourceUrl);
-  if (cached && isManagedImageUrl(cached)) return cached;
+  if (cached && isManagedImageUrl(cached)) return { url: cached, createdForThisParse: true };
 
   const uploadUrl = process.env.IMAGE_UPLOAD_URL;
   if (!uploadUrl) {
     logger.warn('Profile icon upload disabled (IMAGE_UPLOAD_URL not set)', {
       postId: context.postId || '',
     });
-    return '';
+    return { url: '', createdForThisParse: false };
   }
 
   const uploadedUrls = await uploadImageForOcr(sourceUrl, uploadUrl, context, {
@@ -4822,14 +4830,23 @@ async function prepareManagedProfileIconUrl(
   const managedUrl = uploadedUrls && uploadedUrls.length > 0
     ? String(uploadedUrls[0] || '').trim()
     : '';
-  if (!managedUrl || !isManagedImageUrl(managedUrl)) return '';
+  if (!managedUrl || !isManagedImageUrl(managedUrl)) {
+    return { url: '', createdForThisParse: false };
+  }
 
   registerDisplayMapping(sourceUrl, managedUrl);
   logger.info('Profile icon upload summary', {
     postId: context.postId || '',
     uploaded: true,
   });
-  return managedUrl;
+  return { url: managedUrl, createdForThisParse: true };
+}
+
+export async function prepareManagedProfileIconUrlForRegression(
+  profilePicUrl: string,
+  context: { postId?: string } = {}
+): Promise<PreparedManagedProfileIconUrl> {
+  return prepareManagedProfileIconUrl(profilePicUrl, context);
 }
 
 async function uploadImageForOcr(
