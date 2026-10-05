@@ -95,6 +95,9 @@ test('public verified source routes to a public candidate while retaining user s
 });
 
 test('public shared route preserves stops and stays eligible for the spatial review queue', async () => {
+  const originalNow = Settings.now;
+  Settings.now = () => new Date('2026-08-23T12:00:00.000Z').getTime();
+  try {
   const parsed = await parseSharedEventPayload({
     sourceUrl: 'https://example.com/events/parade',
     title: 'Harbour Parade',
@@ -121,6 +124,9 @@ test('public shared route preserves stops and stays eligible for the spatial rev
   assert.ok(parsed.reviewReasons.includes('route_candidate_requires_geometry_review'));
   assert.equal(parsed.needsUserReview, false);
   assert.equal(parsed.routing, 'public_candidate');
+  } finally {
+    Settings.now = originalNow;
+  }
 });
 
 test('private share text cannot add route facts to a verified public candidate', async () => {
@@ -151,6 +157,9 @@ test('private share text cannot add route facts to a verified public candidate',
 });
 
 test('private image-share multi-location event keeps unordered location evidence private', async () => {
+  const originalNow = Settings.now;
+  Settings.now = () => new Date('2026-08-23T12:00:00.000Z').getTime();
+  try {
   const parsed = await parseSharedEventPayload({
     title: 'Downtown Busker Weekend',
     description: "Locations: Victoria Row; Founders Food Hall & Market; Peake's Quay",
@@ -171,6 +180,9 @@ test('private image-share multi-location event keeps unordered location evidence
   assert.equal(parsed.spatialEvidence?.kind, 'multi_location');
   assert.equal(parsed.spatialEvidence?.ordered, false);
   assert.equal(parsed.spatialEvidence?.locations.length, 3);
+  } finally {
+    Settings.now = originalNow;
+  }
 });
 
 test('calendar image extraction carries model route evidence into the shared event', async () => {
