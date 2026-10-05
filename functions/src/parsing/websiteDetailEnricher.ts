@@ -322,7 +322,7 @@ function extractUrlsFromText(text: string): string[] {
 }
 
 function normalizeCandidateUrl(raw: string): string | null {
-  const trimmed = String(raw || '').trim().replace(/[)\],!?;:]+$/g, '');
+  const trimmed = String(raw || '').trim().replace(/[)\],.!?;:]+$/g, '');
   if (!trimmed) return null;
   const withScheme = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
   try {
@@ -366,6 +366,7 @@ async function discoverLocariusCandidates(
   }
 
   const pairs: Array<{ endpoint: string; token: string }> = [];
+  const firstPartyEndpoints: string[] = [];
   for (const scriptUrl of firstPartyScripts) {
     summary.scriptFetchesAttempted += 1;
     const scriptText = await fetchText(scriptUrl, cfg.timeoutMs, cfg.maxHtmlBytes);
@@ -376,6 +377,7 @@ async function discoverLocariusCandidates(
         pairs.push(pair);
       }
     }
+    firstPartyEndpoints.push(...discoverFirstPartyLocariusEndpoints(scriptText, pageUrl));
   }
 
   const candidates: WebsiteCandidate[] = [];
@@ -388,6 +390,20 @@ async function discoverLocariusCandidates(
     if (!records.length) continue;
     summary.apiRecordsFetched += records.length;
 
+    for (const record of records) {
+      const resolved = normalizeLocariusRecord(record, timezone);
+      if (resolved) candidates.push(resolved);
+    }
+  }
+
+  for (const endpoint of dedupeStrings(firstPartyEndpoints).slice(0, MAX_LOCARIUS_ENDPOINTS - summary.apiRequestsAttempted)) {
+    summary.apiRequestsAttempted += 1;
+    const response = await fetchJson(endpoint, cfg.timeoutMs);
+    const records = Array.isArray((response as any)?.body?.result)
+      ? (response as any).body.result
+      : [];
+    if (!records.length) continue;
+    summary.apiRecordsFetched += records.length;
     for (const record of records) {
       const resolved = normalizeLocariusRecord(record, timezone);
       if (resolved) candidates.push(resolved);
@@ -438,6 +454,15 @@ function discoverLocariusEndpointPairs(scriptText: string): Array<{ endpoint: st
   return pairs;
 }
 
+function discoverFirstPartyLocariusEndpoints(scriptText: string, pageUrl: string): string[] {
+  // Some venues proxy Locarius through their own API instead of embedding a
+  // token in the client bundle. Follow only this observed first-party route.
+  if (!/baseURL\s*:\s*["']\/api["']/.test(scriptText)) return [];
+  if (!/\.get\(\s*["']\/events\/locarius["']/.test(scriptText)) return [];
+  const endpoint = resolveRelativeUrl('/api/events/locarius', pageUrl);
+  return endpoint && safeHostname(endpoint) === safeHostname(pageUrl) ? [endpoint] : [];
+}
+
 async function fetchJsonWithQueryToken(
   endpoint: string,
   token: string,
@@ -445,6 +470,10 @@ async function fetchJsonWithQueryToken(
 ): Promise<unknown> {
   const separator = endpoint.includes('?') ? '&' : '?';
   const url = `${endpoint}${separator}token=${encodeURIComponent(token)}`;
+  return fetchJson(url, timeoutMs);
+}
+
+async function fetchJson(url: string, timeoutMs: number): Promise<unknown> {
   if (jsonCache.has(url)) return jsonCache.get(url);
 
   const controller = new AbortController();
@@ -1231,6 +1260,14 @@ function findBestCandidateForItem(
     }
     let score = 0;
     const titleOverlap = scoreTokenOverlap(itemTokens, tokenize(candidate.title || ''));
+    if (candidate.source === 'locarius_api') {
+      const identityTokens = itemTokens.filter(token =>
+        token.length >= 3 && !TOKEN_STOP_WORDS.has(token) &&
+        !MONTH_LOOKUP.has(token) && !/^\d+$/.test(token)
+      );
+      if (identityTokens.length > 0 &&
+          scoreTokenOverlap(identityTokens, tokenize(candidate.title || '')) === 0) continue;
+    }
     if (candidate.source === 'article_paragraph' &&
         (!itemDate || candidate.date !== itemDate ||
           titleOverlap < Math.min(2, itemTokens.length))) continue;

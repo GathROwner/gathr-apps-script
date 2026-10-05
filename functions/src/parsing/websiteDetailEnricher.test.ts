@@ -236,6 +236,55 @@ test('Trailside-style website follow-up recovers explicit start times from locar
   }
 });
 
+test('first-party Locarius proxy recovers the matched show time without lending another same-day show', async () => {
+  const site = 'https://trailside-proxy.example/';
+  const restoreFetch = installFetchMap({
+    [site]: htmlResponse('<html><body><script src="/static/js/main.js"></script></body></html>'),
+    'https://trailside-proxy.example/static/js/main.js': jsResponse(
+      'const api=axios.create({baseURL:"/api"});api.get("/events/locarius")'
+    ),
+    'https://trailside-proxy.example/api/events/locarius': jsonResponse({
+      body: { result: [
+        { name: 'Other Band - October 8th', start: { timezone: 'America/Halifax',
+          local: 'Thursday, October 8, 2026 at 07:00 PM' } },
+        { name: 'Fucked Up - October 8th - Doors 6:30 PM - Showtime 8 PM',
+          url: 'https://locarius.io/events/4551/fucked-up',
+          start: { timezone: 'America/Halifax', local: 'Thursday, October 8, 2026 at 08:00 PM' } },
+      ] },
+    }),
+  });
+  try {
+    const item = buildEventItem({
+      name: 'Fucked Up with special guest opener Club Rat',
+      date: '2026-10-08', startTime: 'unknown',
+    });
+    const result = await enrichEventsFromVenueWebsite(
+      [item], 'Tickets on sale at www.trailside-proxy.example.', '',
+      '2026-10-05T12:00:00Z',
+      { name: 'Trailside Music Hall', website: site } as EstablishmentInfo,
+      DEFAULT_PARSING_CONFIG
+    );
+    assert.equal(result.summary.apiRequestsAttempted, 1);
+    assert.equal(result.summary.apiRecordsFetched, 2);
+    assert.equal(result.summary.appliedCount, 1);
+    assert.equal(result.items[0].startTime, '20:00');
+    assert.equal((result.items[0] as any).ticketLink, 'https://locarius.io/events/4551/fucked-up');
+
+    const unrelated = await enrichEventsFromVenueWebsite(
+      [buildEventItem({ name: 'Completely Different Performer',
+        date: '2026-10-08', startTime: 'unknown' })],
+      'Tickets on sale at www.trailside-proxy.example.', '',
+      '2026-10-05T12:00:00Z',
+      { name: 'Trailside Music Hall', website: site } as EstablishmentInfo,
+      DEFAULT_PARSING_CONFIG
+    );
+    assert.equal(unrelated.summary.appliedCount, 0);
+    assert.equal(unrelated.items[0].startTime, 'unknown');
+  } finally {
+    restoreFetch();
+  }
+});
+
 test('explicit named seatings split one website-backed gallery event without exactizing approximate ends', async () => {
   const detailUrl = 'https://fallflavours.ca/signature-event/taste-of-georgetown-2/';
   const restoreFetch = installFetchMap({
