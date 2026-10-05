@@ -163,3 +163,14 @@ export function isOnlineAdministrativeMilestone(event: {
   const remoteEvidence = /\b(?:online|virtual|website|social media|via\s+\S+\.\w{2,})\b/i.test(detail);
   return administrativeAction && !physicalPlace && remoteEvidence;
 }
+
+/** An election filing deadline printed beside a calendar is a notice, not a gathering. */
+export function isElectionNoticeWithoutVenue(event: {
+  name?: string;
+  venue?: string;
+}): boolean {
+  const name = String(event.name || '').trim();
+  return !String(event.venue || '').trim() &&
+    /\belections?\b/i.test(name) &&
+    /\b(?:nominations?|voting|registration)\s+(?:opens?|closes?|starts?|ends?|deadline)\b/i.test(name);
+}

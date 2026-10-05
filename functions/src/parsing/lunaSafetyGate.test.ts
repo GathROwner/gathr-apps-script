@@ -4,7 +4,7 @@ import { shouldHoldUndatedStandingSchedule, shouldRetrySeasonalLeagueWithLegacy,
   isSelectedLunaCanaryPost, isSampledLunaCanaryPost,
   isLunaStage3QuotaOrdinal,
   canRetryLunaCanaryWithLegacy, canaryGeneratedCleanupUrls,
-  hasMalformedLunaEventTitle, isOnlineAdministrativeMilestone,
+  hasMalformedLunaEventTitle, isOnlineAdministrativeMilestone, isElectionNoticeWithoutVenue,
   isRecentPastYearlessSourceDate } from './lunaSafetyGate.js';
 
 test('holds Harmony House yearless September dates rolled into 2027', () => {
@@ -17,6 +17,13 @@ test('holds Harmony House yearless September dates rolled into 2027', () => {
 test('an explicit next year and an older past date are not ambiguous recent rollovers', () => {
   assert.equal(isRecentPastYearlessSourceDate('September 25, 2027', '2026-10-03', '2027-09-25'), false);
   assert.equal(isRecentPastYearlessSourceDate('July 25', '2026-10-03', '2027-07-25'), false);
+});
+
+test('calendar election filing notices do not become activities', () => {
+  assert.equal(isElectionNoticeWithoutVenue({ name: 'Municipal Election Nominations Open', venue: '' }), true);
+  assert.equal(isElectionNoticeWithoutVenue({ name: 'Municipal Election Nomination Deadline', venue: '' }), true);
+  assert.equal(isElectionNoticeWithoutVenue({ name: 'North Milton WI', venue: 'Milton Community Hall' }), false);
+  assert.equal(isElectionNoticeWithoutVenue({ name: 'Election Information Session', venue: 'Library' }), false);
 });
 import { normalizeCommunityMealEvent } from './finalFormatter.js';
 import type { ExtractedItem, FormattedEvent } from './types.js';

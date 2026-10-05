@@ -48,7 +48,7 @@ import { resolveTimesWithOperatingHours } from './venueResolver.js';
 import { shouldHoldUndatedStandingSchedule, shouldRetrySeasonalLeagueWithLegacy,
   isSelectedLunaCanaryPost, isSampledLunaCanaryPost,
   canRetryLunaCanaryWithLegacy, canaryGeneratedCleanupUrls,
-  hasMalformedLunaEventTitle, isOnlineAdministrativeMilestone,
+  hasMalformedLunaEventTitle, isOnlineAdministrativeMilestone, isElectionNoticeWithoutVenue,
   isRecentPastYearlessSourceDate } from './lunaSafetyGate.js';
 import { parseBooleanEnv, parseNumberEnv, resolveStageModel } from './runtimeConfig.js';
 import { logger } from '../utils/logger.js';
@@ -2298,6 +2298,20 @@ async function parsePostDataCore(
         reason: 'Due to failing Stage 4 secondary validation',
       });
       return [];
+    }
+
+    if (lunaCanarySelected && resolvedContentType === 'CALENDAR') {
+      const beforeNotices = validatedData.length;
+      validatedData = validatedData.filter(item => !isElectionNoticeWithoutVenue(item));
+      if (validatedData.length !== beforeNotices) {
+        logger.info('Luna calendar election notices held', {
+          postId, heldCount: beforeNotices - validatedData.length,
+        });
+      }
+      if (validatedData.length === 0) {
+        await reportSkipReason({ stage: 'stage4', reason: 'Calendar contains only administrative notices' });
+        return [];
+      }
     }
 
     logger.info(`${validatedData.length} items passed secondary validation`, {

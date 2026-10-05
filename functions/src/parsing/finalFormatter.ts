@@ -290,32 +290,21 @@ Never return arrays of values for an item; each must be a JSON object.`;
     const canaryBatchSize = Number(cfg.stage5BatchSize || 0);
     let response: FormattingResult;
     if (canaryBatchSize >= 2 && canaryBatchSize <= 12 && expectedCount > canaryBatchSize) {
-      const formattedEvents: FormattedEvent[] = [];
-      for (let offset = 0; offset < expectedCount; offset += canaryBatchSize) {
-        const items = validatedData.slice(offset, offset + canaryBatchSize);
-        logger.info('Stage 5 canary formatting batch', {
-          offset, batchCount: items.length, totalCount: expectedCount,
-        });
-        const chunkHeader = `BATCH COUNT ENFORCEMENT: You are formatting exactly ${items.length} validated items.\n` +
-          `Return exactly ${items.length} objects in formattedEvents (one-to-one with the input order).\n` +
-          'Copy each input sourceItemIndex to the matching formatted event. Do not drop, merge, or reorder items.\n' +
-          'Never return arrays of values for an item; each must be a JSON object.';
-        const chunkPrompt = chunkHeader + '\n\n' +
-          createFormattingPrompt(items, userName, partialAddress, timestamp);
-        const chunkResponse = normalizeFormattingResponse(
-          await callGPTWithSchema(chunkPrompt, 'formatEvents', schema, cfg), items, items.length
-        );
-        if (chunkResponse.formattedEvents.length !== items.length) {
-          logger.warn('Stage 5 canary batch count mismatch', {
-            offset, expected: items.length, actual: chunkResponse.formattedEvents.length,
+      const formattedEvents = await formatStage5BatchesWithRecovery(
+        validatedData, canaryBatchSize, async (items, offset) => {
+          logger.info('Stage 5 canary formatting batch', {
+            offset, batchCount: items.length, totalCount: expectedCount,
           });
-          return [];
+          const chunkHeader = `BATCH COUNT ENFORCEMENT: You are formatting exactly ${items.length} validated items.\n` +
+            `Return exactly ${items.length} objects in formattedEvents (one-to-one with the input order).\n` +
+            'Copy each input sourceItemIndex to the matching formatted event. Do not drop, merge, or reorder items.\n' +
+            'Never return arrays of values for an item; each must be a JSON object.';
+          const chunkPrompt = chunkHeader + '\n\n' +
+            createFormattingPrompt(items, userName, partialAddress, timestamp);
+          return callGPTWithSchema(chunkPrompt, 'formatEvents', schema, cfg);
         }
-        const aligned = alignFormattedEventsToValidatedData(chunkResponse.formattedEvents, items);
-        formattedEvents.push(...aligned.map((entry, index) => ({
-          ...entry.event, sourceItemIndex: offset + index,
-        })));
-      }
+      );
+      if (!formattedEvents) return [];
       response = { formattedEvents, formattingDecisions: [] };
     } else {
       const prompt = batchHeader + '\n\n' +
@@ -546,6 +535,29 @@ function normalizeFormattingResult(parsed: FormattingResult): FormattingResult {
     result.formattingDecisions = [];
   }
   return result;
+}
+
+export function parseFormattingJsonResponse(text: string): FormattingResult {
+  // Structured Outputs already returns valid JSON. Repairing it first can mistake
+  // the slashes in a ticket URL for a comment and discard otherwise valid items.
+  const directParsed = tryParseJson(String(text || '').trim());
+  if (directParsed) return normalizeFormattingResult(directParsed);
+
+  const normalized = normalizeJsonText(text);
+  const parsed = tryParseJson(normalized);
+  if (parsed) return normalizeFormattingResult(parsed);
+
+  const repaired = repairMalformedJson(normalized);
+  const repairedParsed = tryParseJson(repaired);
+  if (repairedParsed) return normalizeFormattingResult(repairedParsed);
+
+  const trimmed = trimToLastCompleteJson(repaired);
+  if (trimmed) {
+    const trimmedParsed = tryParseJson(trimmed);
+    if (trimmedParsed) return normalizeFormattingResult(trimmedParsed);
+  }
+
+  return { formattedEvents: [], formattingDecisions: [], _parseError: true } as FormattingResult;
 }
 
 function normalizeJsonText(text: string): string {
@@ -830,7 +842,7 @@ function createFormattingSchema(): GPTFunctionSchema[] {
               type: 'object',
               additionalProperties: false,
               properties: {
-                sourceItemIndex: { type: 'integer', minimum: 0 },
+                sourceItemIndex: { type: 'integer' },
                 isEvent: { type: 'string', enum: ['Yes', 'No'] },
                 isFoodSpecial: { type: 'string', enum: ['Yes', 'No'] },
                 category: {
@@ -1930,6 +1942,47 @@ function isGeneralFestivalParent(event: Pick<FormattedEvent, 'name' | 'descripti
   return /\b(?:fest|festival|fair)\b/i.test(event.name || '') &&
     !/\b(?:music|concert|jazz|blues|rock|folk|comedy|improv)\b/i.test(event.name || '') &&
     /\b(?:vendors?|activities|attractions|crafts)\b/i.test(event.description || '');
+}
+
+/** Retry only a malformed Stage 5 batch in two smaller calls; never return a partial post. */
+export async function formatStage5BatchesWithRecovery(
+  validatedData: ExtractedItem[],
+  batchSize: number,
+  formatBatch: (items: ExtractedItem[], offset: number) => Promise<FormattingResult>
+): Promise<FormattedEvent[] | null> {
+  const formattedEvents: FormattedEvent[] = [];
+  const formatExactBatch = async (items: ExtractedItem[], offset: number): Promise<FormattedEvent[] | null> => {
+    const response = normalizeFormattingResponse(await formatBatch(items, offset), items, items.length);
+    if (response.formattedEvents.length !== items.length) {
+      logger.warn('Stage 5 canary batch count mismatch', {
+        offset, expected: items.length, actual: response.formattedEvents.length,
+      });
+      return null;
+    }
+    const aligned = alignFormattedEventsToValidatedData(response.formattedEvents, items);
+    if (getStage5SourceIdentityIssues(aligned).length > 0) {
+      logger.warn('Stage 5 canary batch source identity mismatch', { offset, batchCount: items.length });
+      return null;
+    }
+    return aligned.map((entry, index) => ({ ...entry.event, sourceItemIndex: offset + index }));
+  };
+
+  for (let offset = 0; offset < validatedData.length; offset += batchSize) {
+    const items = validatedData.slice(offset, offset + batchSize);
+    let batch = await formatExactBatch(items, offset);
+    if (!batch && items.length > 1) {
+      const midpoint = Math.ceil(items.length / 2);
+      logger.info('Stage 5 retrying failed batch as two smaller batches', {
+        offset, originalCount: items.length, firstCount: midpoint,
+      });
+      const first = await formatExactBatch(items.slice(0, midpoint), offset);
+      const second = first && await formatExactBatch(items.slice(midpoint), offset + midpoint);
+      batch = first && second ? [...first, ...second] : null;
+    }
+    if (!batch) return null;
+    formattedEvents.push(...batch);
+  }
+  return formattedEvents;
 }
 
 export function getStage5SourceIdentityIssues(
@@ -6018,34 +6071,6 @@ async function callGPTWithSchema(
     return chunks.join('');
   };
 
-  const parseJsonResponse = (text: string): FormattingResult => {
-    const normalized = normalizeJsonText(text);
-    const parsed = tryParseJson(normalized);
-    if (parsed) {
-      return normalizeFormattingResult(parsed);
-    }
-
-    const repaired = repairMalformedJson(normalized);
-    const repairedParsed = tryParseJson(repaired);
-    if (repairedParsed) {
-      return normalizeFormattingResult(repairedParsed);
-    }
-
-    const trimmed = trimToLastCompleteJson(repaired);
-    if (trimmed) {
-      const trimmedParsed = tryParseJson(trimmed);
-      if (trimmedParsed) {
-        return normalizeFormattingResult(trimmedParsed);
-      }
-    }
-
-    return {
-      formattedEvents: [],
-      formattingDecisions: [],
-      _parseError: true,
-    } as FormattingResult;
-  };
-
   const tools: OpenAI.Chat.Completions.ChatCompletionTool[] = schema.map((fn) => ({
     type: 'function' as const,
     function: {
@@ -6058,12 +6083,14 @@ async function callGPTWithSchema(
 
   try {
     if (usesResponses(model)) {
-      const schemaHint = JSON.stringify(schema[0]?.parameters || {}, null, 2);
-      const promptWithSchema = `${prompt}\n\nReturn ONLY valid JSON that matches this schema:\n${schemaHint}`;
       const callStart = Date.now();
       const response = await client.responses.create({
         model,
-        input: [{ role: 'user', content: [{ type: 'input_text', text: promptWithSchema }] }],
+        input: [{ role: 'user', content: [{ type: 'input_text', text: prompt }] }],
+        text: { format: {
+          type: 'json_schema', name: functionName, strict: true,
+          schema: schema[0].parameters,
+        } },
         max_output_tokens: stage5ResponsesMaxTokens,
         ...(stage5ReasoningEffort ? { reasoning: { effort: stage5ReasoningEffort } } : {}),
       });
@@ -6091,7 +6118,7 @@ async function callGPTWithSchema(
         tokens: usage.totalTokens,
       });
 
-      return parseJsonResponse(messageContent || '');
+      return parseFormattingJsonResponse(messageContent || '');
     }
 
     const callStart = Date.now();
