@@ -48,7 +48,8 @@ import { resolveTimesWithOperatingHours } from './venueResolver.js';
 import { shouldHoldUndatedStandingSchedule, shouldRetrySeasonalLeagueWithLegacy,
   isSelectedLunaCanaryPost, isSampledLunaCanaryPost,
   canRetryLunaCanaryWithLegacy, canaryGeneratedCleanupUrls,
-  hasMalformedLunaEventTitle, isOnlineAdministrativeMilestone } from './lunaSafetyGate.js';
+  hasMalformedLunaEventTitle, isOnlineAdministrativeMilestone,
+  isRecentPastYearlessSourceDate } from './lunaSafetyGate.js';
 import { parseBooleanEnv, parseNumberEnv, resolveStageModel } from './runtimeConfig.js';
 import { logger } from '../utils/logger.js';
 import { findRecoverableManagedSourceGallery } from '../services/firestoreService.js';
@@ -2159,6 +2160,27 @@ async function parsePostDataCore(
         });
         return retryCanaryWithLegacy('calendar_band_missing_expected_slots',
           missingSlots.join(','));
+      }
+    }
+
+    if (lunaFullImageRequested && rawExtractedData.length > 0) {
+      const postedLocalDate = DateTime.fromISO(timestamp, { zone: cfg.timezone }).toISODate() || '';
+      const held = rawExtractedData.filter(item => isRecentPastYearlessSourceDate(
+        extractionText, postedLocalDate, String(item.date || '')
+      ));
+      if (held.length > 0) {
+        logger.warn('Luna yearless recent-past date held', {
+          postId,
+          postedLocalDate,
+          heldCount: held.length,
+          dates: held.map(item => item.date),
+        });
+        rawExtractedData = rawExtractedData.filter(item => !held.includes(item));
+        await reportSkipReason({
+          stage: 'stage3',
+          reason: 'Yearless source date shortly before post date needs review before writing',
+        });
+        if (rawExtractedData.length === 0) return [];
       }
     }
 

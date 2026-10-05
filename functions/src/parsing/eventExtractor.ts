@@ -312,8 +312,12 @@ async function extractFoodSpecials(
         // Date correction based on weekday prefix
         const dateInfo = extractDateFromText(special.description, postedLocalDate);
         if (dateInfo.hasExplicitDayPrefix && dateInfo.date && special.date !== dateInfo.date) {
-          logger.debug(`Correcting date for "${special.name}": ${special.date} → ${dateInfo.date}`);
-          special.date = dateInfo.date;
+          if (dateMatchesWeekdayPrefix(special.description, special.date)) {
+            logger.debug(`Skipping date correction for "${special.name}" - extracted date matches weekday`);
+          } else {
+            logger.debug(`Correcting date for "${special.name}": ${special.date} → ${dateInfo.date}`);
+            special.date = dateInfo.date;
+          }
         }
 
         // Recurring pattern detection
@@ -4442,6 +4446,12 @@ export function extractDateFromText(
   } catch (e) {
     return { date: postedDate, isRecurring: false, hasExplicitDayPrefix: false };
   }
+}
+
+export function dateMatchesWeekdayPrefix(description: string, date: string): boolean {
+  const weekday = getDayOfWeekFromPrefix(description);
+  const extractedDate = DateTime.fromISO(date);
+  return weekday !== null && extractedDate.isValid && extractedDate.weekday % 7 === weekday;
 }
 
 /**

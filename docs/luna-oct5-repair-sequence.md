@@ -2,7 +2,7 @@
 
 Evidence: `docs/luna-stage3-oct5-50pct-production-audit.md` and `artifacts/luna-oct5-canary-audit/`. The regular 351-row run completed; these are repairs for the next run, not edits to that completed dataset.
 
-## 1. Resume replay and canary identity — in progress
+## 1. Resume replay and canary identity — deployed, awaiting next full-run proof
 
 The October 5 snapshots show rows 119–147 processed twice roughly 11 minutes apart. The second pass switched rows 121 and 145 from Luna to GPT-5.2 and row 147 from GPT-5.2 to Luna. Cloud Run logs confirm overlapping resume executions of the same run: one began row 119 at 13:03:22 UTC and reached row 147 at 13:07:54; another began row 119 at 13:13:21 while the first was still working. The first saved checkpoint row 148 at 13:13:44, then the overlapping execution saved row 146 at 13:20:22, moving durable progress backward. A resume request hit a 540-second timeout at 13:03:18. The logs establish overlap and a timeout in this period, but do not conclusively identify the task-dispatch event that initiated the second execution. The code proves two further weaknesses: checkpoints were saved only at batch pause, and Stage 3 selection used a mutable eligible ordinal while only logging the post ID.
 
@@ -12,9 +12,13 @@ Inspect Cloud Task and function logs to distinguish timeout retry from duplicate
 
 Gate: TypeScript build, replay test showing a post keeps its model at different ordinals, test of configured sample rates, narrow Firebase dry-run, no active large parse, then deploy the three parser entry points and read back revisions/environment. These checks passed on October 5. The narrow Firebase deploy completed at about 16:01 UTC. Firebase function readback shows `processDataset`, `processDatasetResume`, and `processDatasetSelectedRows` ACTIVE on source hash `84b4f6081296804c29cae9beeb1cf8427e2d8b58`, with Luna enabled, Stage 3 only, sample 50, reasoning effort high, and legacy fallback false. Independent Cloud Run revision/traffic readback remains unavailable to this account. Audit replay, checkpoint monotonicity, and counters on the next completed regular dataset.
 
-## 2. Wrong dates and five live records — pending
+## 2. Wrong dates and five live records — parser fix validated locally; live cleanup pending
 
-The Local Pub source says October 11–12 but two October 4–5 records were written. Harmony House's yearless September 25–26 source was rolled into 2027, although official source pages establish 2026. First trace the stage where each date changed; then repair the general date rule, retest these rows, and remove the five exact false records using the prewrite backup and update-time guards. Keep the already-correct Local Pub listings.
+The Local Pub source says October 11–12 but two October 4–5 records were written. Cloud Logging proves Luna extracted October 11–12, then the special weekday-prefix postprocessor changed them to October 4–5 based on the October 4 posting date. The event path already preserved an extracted date whose weekday matched the prefix; the food-special path lacked that check. The repair gives food specials the same protection. An exact-post dry run with the original source image kept October 11–12 through Stages 3 and 4. This run's model did not provide meal hours, so the final completeness check held both listings; the date repair is verified, but a complete event write is not established by that replay.
+
+Harmony House's yearless September 25–26 source was rolled into 2027 by Luna at Stage 3, although official source pages establish 2026. A narrow source-date guard now holds a Luna item when its yearless source month/day occurred within 30 days before the post and the extracted date uses either that past year or the next year. The hold applies per item and stops legacy fallback when it removes the whole post. The first exact-post replay exposed the fallback escape; after the fix, a second replay with fallback deliberately enabled held all three 2027 items, made no GPT-5.2 call, and produced no payloads.
+
+The five false live records remain. Remove only those exact paths using `artifacts/luna-oct5-canary-audit/wrong-date-prewrite-backup.json` and update-time guards after specific approval. Keep the already-correct Local Pub listings. After deployment, audit new date behavior in the next regular full run.
 
 ## 3. Source-grounded omissions — pending
 

@@ -4,7 +4,20 @@ import { shouldHoldUndatedStandingSchedule, shouldRetrySeasonalLeagueWithLegacy,
   isSelectedLunaCanaryPost, isSampledLunaCanaryPost,
   isLunaStage3QuotaOrdinal,
   canRetryLunaCanaryWithLegacy, canaryGeneratedCleanupUrls,
-  hasMalformedLunaEventTitle, isOnlineAdministrativeMilestone } from './lunaSafetyGate.js';
+  hasMalformedLunaEventTitle, isOnlineAdministrativeMilestone,
+  isRecentPastYearlessSourceDate } from './lunaSafetyGate.js';
+
+test('holds Harmony House yearless September dates rolled into 2027', () => {
+  const source = 'September 25th at 8:00 pm, and September 26th at 2:00 pm & 8:00 pm';
+  assert.equal(isRecentPastYearlessSourceDate(source, '2026-10-03', '2027-09-25'), true);
+  assert.equal(isRecentPastYearlessSourceDate(source, '2026-10-03', '2027-09-26'), true);
+  assert.equal(isRecentPastYearlessSourceDate(source, '2026-10-03', '2026-09-25'), true);
+});
+
+test('an explicit next year and an older past date are not ambiguous recent rollovers', () => {
+  assert.equal(isRecentPastYearlessSourceDate('September 25, 2027', '2026-10-03', '2027-09-25'), false);
+  assert.equal(isRecentPastYearlessSourceDate('July 25', '2026-10-03', '2027-07-25'), false);
+});
 import { normalizeCommunityMealEvent } from './finalFormatter.js';
 import type { ExtractedItem, FormattedEvent } from './types.js';
 

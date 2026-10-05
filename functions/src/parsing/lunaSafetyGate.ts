@@ -1,5 +1,35 @@
 import { createHash } from 'crypto';
 
+/** A recent, yearless past date must not be written as either stale or next year's event. */
+export function isRecentPastYearlessSourceDate(
+  sourceText: string,
+  postedLocalDate: string,
+  extractedDate: string
+): boolean {
+  const posted = new Date(`${postedLocalDate}T12:00:00Z`);
+  const extracted = new Date(`${extractedDate}T12:00:00Z`);
+  if (Number.isNaN(posted.getTime()) || Number.isNaN(extracted.getTime()) ||
+      ![posted.getUTCFullYear(), posted.getUTCFullYear() + 1]
+        .includes(extracted.getUTCFullYear())) return false;
+
+  const month = extracted.getUTCMonth() + 1;
+  const day = extracted.getUTCDate();
+  const currentYearDate = new Date(Date.UTC(posted.getUTCFullYear(), month - 1, day, 12));
+  const daysAgo = (posted.getTime() - currentYearDate.getTime()) / 86_400_000;
+  if (daysAgo < 0 || daysAgo > 30) return false;
+
+  const monthTokens = [
+    '', 'jan(?:uary)?', 'feb(?:ruary)?', 'mar(?:ch)?', 'apr(?:il)?', 'may',
+    'jun(?:e)?', 'jul(?:y)?', 'aug(?:ust)?', 'sep(?:t(?:ember)?)?',
+    'oct(?:ober)?', 'nov(?:ember)?', 'dec(?:ember)?',
+  ];
+  const datePattern = new RegExp(
+    `\\b${monthTokens[month]}\\s+${day}(?:st|nd|rd|th)?\\b(?:,?\\s+(20\\d{2}))?`, 'gi'
+  );
+  return [...String(sourceText || '').matchAll(datePattern)]
+    .some(match => !match[1]);
+}
+
 /** A standing weekday board must not be anchored to the post's arbitrary week. */
 export function shouldHoldUndatedStandingSchedule(sourceText: string): boolean {
   const text = String(sourceText || '');
