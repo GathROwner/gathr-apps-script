@@ -38,7 +38,14 @@ export function classifyResumeTaskClaim(
   heartbeatAgeMs: number,
   staleAfterMs = 570000
 ): 'claim' | 'busy' | 'stale' {
-  if (!checkpoint || lockStatus === 'completed' || lockStatus === 'failed') return 'stale';
+  if (lockStatus === 'completed' || lockStatus === 'failed') return 'stale';
+  // The first task from the Apify webhook has no checkpoint yet. It may claim
+  // only without an expected checkpoint; a fresh running lease remains busy.
+  if (!checkpoint) {
+    if (expected) return 'stale';
+    return lockStatus === 'paused' || heartbeatAgeMs >= staleAfterMs
+      ? 'claim' : 'busy';
+  }
   if (lockStatus === 'paused') {
     return !expected || matchesResumeTaskCheckpoint(expected, checkpoint)
       ? 'claim' : 'stale';

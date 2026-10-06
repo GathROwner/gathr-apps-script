@@ -25,6 +25,15 @@ test('resume claim permits a timed-out task to continue from newer row progress'
     'running', 600000), 'stale');
 });
 
+test('initial task may claim a paused lock without a checkpoint', () => {
+  assert.equal(classifyResumeTaskClaim(undefined, undefined, 'paused', 0), 'claim');
+  assert.equal(classifyResumeTaskClaim(undefined, undefined, 'running', 0), 'busy');
+  assert.equal(classifyResumeTaskClaim(undefined, undefined, 'running', 600000), 'claim');
+  assert.equal(classifyResumeTaskClaim({ rowIndex: 1, batchNumber: 1 }, undefined,
+    'paused', 0), 'stale');
+  assert.equal(classifyResumeTaskClaim(undefined, undefined, 'completed', 600000), 'stale');
+});
+
 test('matchesResumeTaskCheckpoint accepts the exact same checkpoint identity', () => {
   const expected = buildResumeTaskCheckpoint({ rowIndex: 135, batchNumber: 7 });
   assert.equal(

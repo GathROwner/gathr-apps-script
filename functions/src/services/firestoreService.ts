@@ -7670,15 +7670,17 @@ export async function claimProcessingResume(
     const [lockDoc, checkpointDoc] = await Promise.all([
       tx.get(lockRef), tx.get(checkpointRef),
     ]);
-    if (!lockDoc.exists || !checkpointDoc.exists) {
+    if (!lockDoc.exists) {
       return { claimed: false, reason: 'stale' as const };
     }
     const lock = lockDoc.data() as ProcessingLock;
-    const checkpoint = checkpointDoc.data() as CheckpointData;
-    if (lock.runId !== runId || (checkpoint.runId && checkpoint.runId !== runId)) {
+    const checkpoint = checkpointDoc.exists ? checkpointDoc.data() as CheckpointData : undefined;
+    if (lock.runId !== runId || (checkpoint?.runId && checkpoint.runId !== runId)) {
       return { claimed: false, reason: 'stale' as const };
     }
-    const current = { rowIndex: checkpoint.rowIndex, batchNumber: checkpoint.batchNumber };
+    const current = checkpoint
+      ? { rowIndex: checkpoint.rowIndex, batchNumber: checkpoint.batchNumber }
+      : undefined;
     const heartbeatMs = parseTimestampMillis(lock.lastHeartbeat);
     const verdict = classifyResumeTaskClaim(expectedCheckpoint, current, lock.status,
       heartbeatMs === null ? Number.POSITIVE_INFINITY : Math.max(0, now - heartbeatMs));
