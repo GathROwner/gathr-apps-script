@@ -46,6 +46,25 @@ test('an unsuccessful smaller retry holds the entire post', async () => {
   assert.equal(result, null);
 });
 
+test('concurrent batches preserve source order when the later batch finishes first', async () => {
+  let releaseFirst: (() => void) | undefined;
+  const firstPending = new Promise<void>((resolve) => { releaseFirst = resolve; });
+  let active = 0;
+  let maxActive = 0;
+  const result = await formatStage5BatchesWithRecovery(items, 9, async (batch, offset) => {
+    active++;
+    maxActive = Math.max(maxActive, active);
+    if (offset === 0) await firstPending;
+    if (offset === 9) releaseFirst?.();
+    active--;
+    return reply(batch);
+  }, 2);
+  assert.equal(maxActive, 2);
+  assert.deepEqual(result?.map(item => item.name), items.map(item => item.name));
+  assert.deepEqual(result?.map(item => (item as FormattedEvent & { sourceItemIndex: number }).sourceItemIndex),
+    items.map((_, index) => index));
+});
+
 test('a count-preserving calendar identity shift holds the entire post', async () => {
   const result = await formatStage5BatchesWithRecovery(items, 9, async (batch, offset) => {
     const formatted = reply(batch);

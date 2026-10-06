@@ -197,8 +197,12 @@ export interface ParsingConfig {
   };
   stage4ModelOverride?: string;
   stage5ModelOverride?: string;
-  /** Format large Luna canary inventories in bounded nano batches. */
+  /** Validate large inventories in bounded batches without changing the model. */
+  stage4BatchSize?: number;
+  stage4BatchConcurrency?: number;
+  /** Format large inventories in bounded nano batches. */
   stage5BatchSize?: number;
+  stage5BatchConcurrency?: number;
   lunaCanaryBypass?: boolean;
   /** Used only by regular full-dataset runs after Stage 2 has passed. */
   lunaStage3EligibleSelector?: (postId: string, percent: number) => boolean;

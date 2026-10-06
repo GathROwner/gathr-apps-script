@@ -37,6 +37,13 @@ test('large Luna review partitions every item once in source order', () => {
   assert.equal(partitionLunaValidationItems(items.slice(0, 16)).length, 2);
 });
 
+test('configured validation batches cover a dense legacy inventory in source order', () => {
+  const items = Array.from({ length: 37 }, (_, index) => ({ name: `Item ${index}` })) as any[];
+  const chunks = partitionLunaValidationItems(items, 15);
+  assert.deepEqual(chunks.map(chunk => chunk.length), [15, 15, 7]);
+  assert.deepEqual(chunks.flat().map(item => item.name), items.map(item => item.name));
+});
+
 test('Stage 4 JSON normalization preserves source URLs while removing comments', () => {
   const source = '{"validatedItems":[{"item":{"ticketLink":"https://citycinema.ca/movies/?film=hokum","name":"A // B"},"decision":"KEPT"}],/* note */"validationSummary":{"totalItems":1}}';
   const parsed = JSON.parse(normalizeStage4JsonForRegression(source));

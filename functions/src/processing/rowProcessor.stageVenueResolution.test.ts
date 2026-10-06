@@ -4,7 +4,27 @@ import assert from 'node:assert/strict';
 import { ProcessedEvent as ParserProcessedEvent } from '../parsing/types.js';
 import { MatchInfo, RawRowData, VenueData } from '../types/index.js';
 import { normalizeVenueName } from '../utils/similarity.js';
-import { resolveVenueForFullParserEventWithMatcherForRegression } from './rowProcessor.js';
+import {
+  createFullParserVenueLookupCache,
+  resolveVenueForFullParserEventWithMatcherForRegression,
+} from './rowProcessor.js';
+
+test('row-local venue cache reuses the same lookup while separating distinct candidates', async () => {
+  const calls: string[] = [];
+  const cache = createFullParserVenueLookupCache(async (candidate) => {
+    calls.push(candidate);
+    return { isMatch: false } as MatchInfo;
+  }, async (address) => {
+    calls.push(address);
+    return { isMatch: false } as MatchInfo;
+  });
+  await cache.matcher('Peake’s Quay', undefined, { regionHint: 'PE' });
+  await cache.matcher('Peake’s Quay', undefined, { regionHint: 'PE' });
+  await cache.matcher('Founders Hall', undefined, { regionHint: 'PE' });
+  await cache.addressMatcher('6 Prince St');
+  await cache.addressMatcher(' 6  Prince St ');
+  assert.deepEqual(calls, ['Peake’s Quay', 'Founders Hall', '6 Prince St']);
+});
 
 const foundersVenue: VenueData = {
   id: 'slug_foundersfoodhall',

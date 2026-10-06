@@ -91,6 +91,13 @@ export class BatchManager {
     return { ...this.state };
   }
 
+  async assertWorkerActive(): Promise<void> {
+    if (!this.workerId || !this.state.runId) return;
+    await firestoreService.assertProcessingWorkerActive(
+      this.state.fileId, this.state.runId, this.workerId
+    );
+  }
+
   /**
    * Get current stats
    */

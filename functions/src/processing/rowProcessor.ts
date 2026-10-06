@@ -3118,6 +3118,12 @@ export async function processRow(
         },
       };
       if (config?.lunaStage3EligibleQuota) {
+        // The full dataset needs bounded validation/formatting for either
+        // Stage 3 model. A large GPT-5.2 row can otherwise outlive its worker.
+        parserConfig.stage4BatchSize = 15;
+        parserConfig.stage4BatchConcurrency = 2;
+        parserConfig.stage5BatchSize = 9;
+        parserConfig.stage5BatchConcurrency = 2;
         parserConfig.lunaStage3EligibleSelector = (postId, percent) =>
           batchManager.selectEligibleLunaStage3Post(
             postId || row.uniqueId || `row:${rowIndex}`, percent);
@@ -3240,8 +3246,12 @@ export async function processRow(
         let newStandardEventsCreated = 0;
         let updatedFoodSpecials = 0;
         let updatedStandardEvents = 0;
+        // A calendar often names the same venue in dozens of cells. Keep
+        // lookup results within this row only, so retries still see fresh data.
+        const venueLookupCache = createFullParserVenueLookupCache();
 
         for (let index = 0; index < fullParserEvents.length; index++) {
+          await batchManager.assertWorkerActive();
           const fullParserEvent = fullParserEvents[index];
           const eventResult = await processFullParserEvent(
             fullParserEvent,
@@ -3250,7 +3260,9 @@ export async function processRow(
             index,
             venue,
             establishment,
-            batchManager
+            batchManager,
+            false,
+            venueLookupCache
           );
 
           if (eventResult.created) {
@@ -3638,6 +3650,7 @@ export async function processRow(
 
     return result;
   } catch (error) {
+    if (error instanceof Error && error.message === 'resume_worker_fenced') throw error;
     result.error = error instanceof Error ? error.message : String(error);
     batchManager.markRowError(rowIndex, error instanceof Error ? error : String(error));
 
@@ -3818,6 +3831,40 @@ type FullParserVenueMatcher = (
   facebookUrl?: string,
   context?: FullParserVenueMatchContext
 ) => Promise<MatchInfo>;
+
+export function createFullParserVenueLookupCache(
+  matcher: FullParserVenueMatcher = (candidate, facebookUrl, context) =>
+    firestoreService.findMatchingVenue(candidate, facebookUrl, context),
+  addressMatcher: (address: string) => Promise<MatchInfo> = (address) =>
+    firestoreService.findVenueByAddress(address)
+): { matcher: FullParserVenueMatcher; addressMatcher: (address: string) => Promise<MatchInfo> } {
+  const venueResults = new Map<string, Promise<MatchInfo>>();
+  const addressResults = new Map<string, Promise<MatchInfo>>();
+  return {
+    matcher: (candidate, facebookUrl, context) => {
+      const key = JSON.stringify([
+        String(candidate || '').trim().toLowerCase().replace(/\s+/g, ' '),
+        String(facebookUrl || '').trim().toLowerCase(),
+        context?.regionHint || '', context?.cityHint || '',
+      ]);
+      let result = venueResults.get(key);
+      if (!result) {
+        result = matcher(candidate, facebookUrl, context);
+        venueResults.set(key, result);
+      }
+      return result;
+    },
+    addressMatcher: (address) => {
+      const key = String(address || '').trim().toLowerCase().replace(/\s+/g, ' ');
+      let result = addressResults.get(key);
+      if (!result) {
+        result = addressMatcher(address);
+        addressResults.set(key, result);
+      }
+      return result;
+    },
+  };
+}
 
 function uniqueVenueCandidates(values: Array<unknown>): string[] {
   const seen = new Set<string>();
@@ -4097,7 +4144,8 @@ async function resolveVenueForFullParserEvent(
   rowVenue: VenueData | null,
   row: RawRowData,
   establishment: string,
-  rowIndex: number
+  rowIndex: number,
+  lookupCache?: ReturnType<typeof createFullParserVenueLookupCache>
 ): Promise<VenueData | null> {
   return resolveVenueForFullParserEventWithMatcherForRegression({
     item,
@@ -4105,9 +4153,10 @@ async function resolveVenueForFullParserEvent(
     row,
     establishment,
     rowIndex,
-    matcher: async (candidate, facebookUrl, context) =>
-      firestoreService.findMatchingVenue(candidate, facebookUrl, context),
-    addressMatcher: async (address) => firestoreService.findVenueByAddress(address),
+    matcher: lookupCache?.matcher || ((candidate, facebookUrl, context) =>
+      firestoreService.findMatchingVenue(candidate, facebookUrl, context)),
+    addressMatcher: lookupCache?.addressMatcher || ((address) =>
+      firestoreService.findVenueByAddress(address)),
   });
 }
 
@@ -4389,7 +4438,8 @@ async function processFullParserEvent(
   rowVenue: VenueData | null,
   establishment: string,
   batchManager: BatchManager,
-  previewOnly = false
+  previewOnly = false,
+  lookupCache?: ReturnType<typeof createFullParserVenueLookupCache>
 ): Promise<{
   created: boolean;
   updated: boolean;
@@ -4402,8 +4452,10 @@ async function processFullParserEvent(
     rowVenue,
     row,
     establishment,
-    rowIndex
+    rowIndex,
+    lookupCache
   );
+  if (!previewOnly) await batchManager.assertWorkerActive();
 
   if (!venue) {
     if (previewOnly) {
@@ -4763,6 +4815,7 @@ async function processFullParserEvent(
   });
 
   if (duplicateCheck.isDuplicate) {
+    await batchManager.assertWorkerActive();
     const existingEvent = duplicateCheck.existingEvent;
     if (existingEvent) {
       try {
@@ -4784,6 +4837,7 @@ async function processFullParserEvent(
           };
         }
       } catch (error) {
+        if (error instanceof Error && error.message === 'resume_worker_fenced') throw error;
         logger.error('Failed duplicate merge update (full5stage)', error, {
           rowIndex,
           venueId: venue.id,
@@ -4808,6 +4862,7 @@ async function processFullParserEvent(
   }
 
   const writeStart = Date.now();
+  await batchManager.assertWorkerActive();
   const eventId = await firestoreService.createEvent(venue.id, eventData);
   logTiming('write_event', writeStart, {
     rowIndex,

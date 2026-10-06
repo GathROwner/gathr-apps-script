@@ -287,12 +287,12 @@ Never return arrays of values for an item; each must be a JSON object.`;
   const schema = createFormattingSchema();
 
   try {
-    const canaryBatchSize = Number(cfg.stage5BatchSize || 0);
+    const batchSize = Number(cfg.stage5BatchSize || 0);
     let response: FormattingResult;
-    if (canaryBatchSize >= 2 && canaryBatchSize <= 12 && expectedCount > canaryBatchSize) {
+    if (batchSize >= 2 && batchSize <= 12 && expectedCount > batchSize) {
       const formattedEvents = await formatStage5BatchesWithRecovery(
-        validatedData, canaryBatchSize, async (items, offset) => {
-          logger.info('Stage 5 canary formatting batch', {
+        validatedData, batchSize, async (items, offset) => {
+          logger.info('Stage 5 formatting batch', {
             offset, batchCount: items.length, totalCount: expectedCount,
           });
           const chunkHeader = `BATCH COUNT ENFORCEMENT: You are formatting exactly ${items.length} validated items.\n` +
@@ -302,7 +302,7 @@ Never return arrays of values for an item; each must be a JSON object.`;
           const chunkPrompt = chunkHeader + '\n\n' +
             createFormattingPrompt(items, userName, partialAddress, timestamp);
           return callGPTWithSchema(chunkPrompt, 'formatEvents', schema, cfg);
-        }
+        }, Number(cfg.stage5BatchConcurrency || 1)
       );
       if (!formattedEvents) return [];
       response = { formattedEvents, formattingDecisions: [] };
@@ -324,7 +324,7 @@ Never return arrays of values for an item; each must be a JSON object.`;
       response.formattedEvents,
       validatedData
     );
-    if (canaryBatchSize >= 2) {
+    if (batchSize >= 2) {
       const identityIssues = getStage5SourceIdentityIssues(alignedFormattedEvents);
       if (identityIssues.length > 0) {
         logger.warn('Stage 5 canary source identity mismatch', {
@@ -1948,9 +1948,12 @@ function isGeneralFestivalParent(event: Pick<FormattedEvent, 'name' | 'descripti
 export async function formatStage5BatchesWithRecovery(
   validatedData: ExtractedItem[],
   batchSize: number,
-  formatBatch: (items: ExtractedItem[], offset: number) => Promise<FormattingResult>
+  formatBatch: (items: ExtractedItem[], offset: number) => Promise<FormattingResult>,
+  configuredConcurrency = 1
 ): Promise<FormattedEvent[] | null> {
   const formattedEvents: FormattedEvent[] = [];
+  const concurrency = Number.isInteger(configuredConcurrency)
+    ? Math.max(1, Math.min(3, configuredConcurrency)) : 1;
   const formatExactBatch = async (items: ExtractedItem[], offset: number): Promise<FormattedEvent[] | null> => {
     const response = normalizeFormattingResponse(await formatBatch(items, offset), items, items.length);
     if (response.formattedEvents.length !== items.length) {
@@ -1967,20 +1970,27 @@ export async function formatStage5BatchesWithRecovery(
     return aligned.map((entry, index) => ({ ...entry.event, sourceItemIndex: offset + index }));
   };
 
-  for (let offset = 0; offset < validatedData.length; offset += batchSize) {
-    const items = validatedData.slice(offset, offset + batchSize);
-    let batch = await formatExactBatch(items, offset);
-    if (!batch && items.length > 1) {
-      const midpoint = Math.ceil(items.length / 2);
-      logger.info('Stage 5 retrying failed batch as two smaller batches', {
-        offset, originalCount: items.length, firstCount: midpoint,
-      });
-      const first = await formatExactBatch(items.slice(0, midpoint), offset);
-      const second = first && await formatExactBatch(items.slice(midpoint), offset + midpoint);
-      batch = first && second ? [...first, ...second] : null;
-    }
-    if (!batch) return null;
-    formattedEvents.push(...batch);
+  const offsets = Array.from(
+    { length: Math.ceil(validatedData.length / batchSize) },
+    (_, index) => index * batchSize
+  );
+  for (let start = 0; start < offsets.length; start += concurrency) {
+    const batches = await Promise.all(offsets.slice(start, start + concurrency).map(async (offset) => {
+      const items = validatedData.slice(offset, offset + batchSize);
+      let batch = await formatExactBatch(items, offset);
+      if (!batch && items.length > 1) {
+        const midpoint = Math.ceil(items.length / 2);
+        logger.info('Stage 5 retrying failed batch as two smaller batches', {
+          offset, originalCount: items.length, firstCount: midpoint,
+        });
+        const first = await formatExactBatch(items.slice(0, midpoint), offset);
+        const second = first && await formatExactBatch(items.slice(midpoint), offset + midpoint);
+        batch = first && second ? [...first, ...second] : null;
+      }
+      return batch;
+    }));
+    if (batches.some((batch) => !batch)) return null;
+    for (const batch of batches) formattedEvents.push(...batch!);
   }
   return formattedEvents;
 }

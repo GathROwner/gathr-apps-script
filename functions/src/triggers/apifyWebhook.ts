@@ -686,6 +686,7 @@ async function enqueueInitialProcessingTask(
       {
         scheduleDelaySeconds: 0,
         id: taskId,
+        dispatchDeadlineSeconds: 1800,
       }
     );
 

@@ -7699,6 +7699,20 @@ export async function claimProcessingResume(
   });
 }
 
+/** Stop an older worker before it starts another per-event write after a lease handoff. */
+export async function assertProcessingWorkerActive(
+  fileId: string,
+  runId: string,
+  workerId: string
+): Promise<void> {
+  const lockDoc = await db.collection(COLLECTIONS.PROCESSING_LOCKS).doc(fileId).get();
+  const lock = lockDoc.data() as ProcessingLock | undefined;
+  if (!lock || lock.runId !== runId || lock.workerId !== workerId ||
+      lock.status !== 'running') {
+    throw new Error('resume_worker_fenced');
+  }
+}
+
 export async function releaseProcessingLock(
   fileId: string,
   runId: string,

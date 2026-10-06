@@ -22,6 +22,8 @@ import {
 } from '../processing/resumeTaskGuard.js';
 
 const TASK_QUEUE_LOCATION = 'northamerica-northeast1';
+const RESUME_TASK_DEADLINE_SECONDS = 1800;
+const BUSY_RESUME_PROBE_DELAY_SECONDS = 180;
 let fileProcessorPromise: Promise<typeof import('../processing/fileProcessor.js')> | null = null;
 
 function resolveParserModelEnv(name: 'GPT_MODEL_FAST' | 'GPT_MODEL_REASONING', fallback: string): string {
@@ -280,7 +282,7 @@ export const processDatasetResume = onTaskDispatched(
     rateLimits: {
       maxConcurrentDispatches: 1,
     },
-    timeoutSeconds: 540,
+    timeoutSeconds: 1740,
     memory: '1GiB',
     region: TASK_QUEUE_LOCATION, // Cloud Tasks not available in northeast2
   },
@@ -292,6 +294,7 @@ export const processDatasetResume = onTaskDispatched(
       parserMode = 'legacy',
       runId,
       expectedCheckpoint,
+      busyProbeGeneration = 0,
     } = request.data as {
       fileId: string;
       fileName?: string;
@@ -299,6 +302,7 @@ export const processDatasetResume = onTaskDispatched(
       parserMode?: 'legacy' | 'full5stage';
       runId?: string;
       expectedCheckpoint?: ResumeTaskCheckpoint;
+      busyProbeGeneration?: number;
     };
     const resumeMaxExecutionMsRaw = Number(process.env.RESUME_MAX_EXECUTION_MS);
     const resumeMaxExecutionMs = Number.isFinite(resumeMaxExecutionMsRaw)
@@ -309,6 +313,8 @@ export const processDatasetResume = onTaskDispatched(
     logger.info('Resuming processing from task queue');
     let stopHeartbeat: (() => Promise<void>) | undefined;
     let claimedWorkerId: string | undefined;
+    let busyClaim = false;
+    let schedulingNextBatch = false;
 
     try {
       if (!runId) {
@@ -319,8 +325,17 @@ export const processDatasetResume = onTaskDispatched(
       const claim = await firestoreService.claimProcessingResume(fileId, runId,
         expectedCheckpoint);
       if (!claim.claimed && claim.reason === 'busy') {
-        // Cloud Tasks retries after the active worker has finished or timed out.
-        throw new Error('resume_claim_busy');
+        busyClaim = true;
+        // An active worker may outlive every retry of one Cloud Task. Hand off
+        // a delayed probe, preserving the run and checkpoint guard.
+        await scheduleBusyResumeProbe({
+          fileId, fileName, runId, dryRun, parserMode, expectedCheckpoint,
+          generation: busyProbeGeneration + 1,
+        });
+        logger.info('Resume worker still active; delayed probe queued', {
+          busyProbeGeneration: busyProbeGeneration + 1,
+        });
+        return;
       }
       if (!claim.claimed) {
         logger.info('Resume skipped by stale checkpoint or lock guard', {
@@ -348,13 +363,15 @@ export const processDatasetResume = onTaskDispatched(
 
       // If still more work, schedule next batch
       if (result.nextBatchScheduled) {
+        schedulingNextBatch = true;
+        await scheduleNextBatch(fileId, fileName, runId, { dryRun, parserMode });
+        schedulingNextBatch = false;
         const paused = await firestoreService.refreshProcessingLock(fileId, runId, {
           status: 'paused',
           source: 'processDatasetResume',
           workerId,
         });
         if (!paused.refreshed) throw new Error('resume_worker_fenced');
-        await scheduleNextBatch(fileId, fileName, runId, { dryRun, parserMode });
       } else {
         const released = await firestoreService.releaseProcessingLock(
           fileId,
@@ -391,8 +408,8 @@ export const processDatasetResume = onTaskDispatched(
 
       logger.info('Resume processing complete', { result });
     } catch (error) {
-      if (error instanceof Error && error.message === 'resume_claim_busy') {
-        logger.info('Resume worker still active; Cloud Tasks will retry');
+      if (busyClaim || schedulingNextBatch || !claimedWorkerId) {
+        logger.error('Resume task could not start; leaving active lock untouched', error);
         throw error;
       }
       if (error instanceof Error && error.message === 'resume_worker_fenced') {
@@ -629,6 +646,7 @@ async function scheduleNextBatch(
       {
         scheduleDelaySeconds: Math.floor(delay / 1000),
         id: taskMeta?.taskId,
+        dispatchDeadlineSeconds: RESUME_TASK_DEADLINE_SECONDS,
       }
     );
 
@@ -642,7 +660,42 @@ async function scheduleNextBatch(
       return;
     }
     logger.error('Failed to schedule next batch', error);
-    // Don't throw - processing can be manually resumed
+    throw error;
+  }
+}
+
+async function scheduleBusyResumeProbe(params: {
+  fileId: string;
+  fileName?: string;
+  runId: string;
+  dryRun: boolean;
+  parserMode: 'legacy' | 'full5stage';
+  expectedCheckpoint?: ResumeTaskCheckpoint;
+  generation: number;
+}): Promise<void> {
+  const hash = createHash('sha1').update(JSON.stringify([
+    params.fileId, params.runId, params.expectedCheckpoint || null,
+    params.generation,
+  ])).digest('hex');
+  const queue = getFunctions().taskQueue(
+    `locations/${TASK_QUEUE_LOCATION}/functions/processDatasetResume`
+  );
+  try {
+    await queue.enqueue({
+      fileId: params.fileId,
+      fileName: params.fileName,
+      runId: params.runId,
+      dryRun: params.dryRun,
+      parserMode: params.parserMode,
+      expectedCheckpoint: params.expectedCheckpoint,
+      busyProbeGeneration: params.generation,
+    }, {
+      id: `probe-${hash}`,
+      scheduleDelaySeconds: BUSY_RESUME_PROBE_DELAY_SECONDS,
+      dispatchDeadlineSeconds: RESUME_TASK_DEADLINE_SECONDS,
+    });
+  } catch (error) {
+    if (!isTaskAlreadyExistsError(error)) throw error;
   }
 }
 

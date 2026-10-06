@@ -456,7 +456,7 @@ export async function performSecondaryValidation(
   userName: string,
   timestamp: string,
   config: Partial<ParsingConfig> = {},
-  skipLunaChunking = false
+  skipBatching = false
 ): Promise<ExtractedItem[]> {
   const cfg = { ...DEFAULT_PARSING_CONFIG, ...config };
 
@@ -468,8 +468,14 @@ export async function performSecondaryValidation(
     userName,
   });
 
-  if (!skipLunaChunking && cfg.lunaCalendarLiteralSourcePrompt && rawData.length > 15) {
-    const chunks = partitionLunaValidationItems(rawData);
+  const configuredBatchSize = Number(cfg.stage4BatchSize || 0);
+  const batchSize = configuredBatchSize >= 2 && configuredBatchSize <= 20
+    ? configuredBatchSize : cfg.lunaCalendarLiteralSourcePrompt ? 15 : 0;
+  if (!skipBatching && batchSize > 0 && rawData.length > batchSize) {
+    const chunks = partitionLunaValidationItems(rawData, batchSize);
+    const configuredConcurrency = Number(cfg.stage4BatchConcurrency || 1);
+    const concurrency = Number.isInteger(configuredConcurrency)
+      ? Math.max(1, Math.min(3, configuredConcurrency)) : 1;
     const kept: ExtractedItem[] = [];
     const aggregate = {
       _calendarDealAllDayNormalizationCount: 0,
@@ -478,24 +484,30 @@ export async function performSecondaryValidation(
       _operatingHoursOnlyRejectCount: 0,
     };
     const fallbackReasons: string[] = [];
-    for (const [index, chunk] of chunks.entries()) {
-      const result = await performSecondaryValidation(chunk, userName, timestamp, config, true);
-      for (const item of result) {
-        item._pipelineTotalStage3 = originalStage3Count;
-        kept.push(item);
-      }
-      for (const key of Object.keys(aggregate)) {
-        aggregate[key] += Number((result as any)[key] || 0);
-      }
-      if ((result as any)._validationFallbackReason) {
-        fallbackReasons.push(`chunk_${index + 1}:${(result as any)._validationFallbackReason}`);
+    for (let start = 0; start < chunks.length; start += concurrency) {
+      const results = await Promise.all(chunks.slice(start, start + concurrency).map(
+        (chunk) => performSecondaryValidation(chunk, userName, timestamp, config, true)
+      ));
+      for (const [groupIndex, result] of results.entries()) {
+        const index = start + groupIndex;
+        for (const item of result) {
+          item._pipelineTotalStage3 = originalStage3Count;
+          kept.push(item);
+        }
+        for (const key of Object.keys(aggregate)) {
+          aggregate[key] += Number((result as any)[key] || 0);
+        }
+        if ((result as any)._validationFallbackReason) {
+          fallbackReasons.push(`chunk_${index + 1}:${(result as any)._validationFallbackReason}`);
+        }
       }
     }
     Object.assign(kept, aggregate);
     if (fallbackReasons.length) (kept as any)._validationFallbackReason = fallbackReasons.join(',');
-    logger.info('Stage 4 Luna chunked validation summary', {
+    logger.info('Stage 4 batched validation summary', {
       inputCount: rawData.length,
       chunkCount: chunks.length,
+      concurrency,
       keptCount: kept.length,
       fallbackReasons,
     });
@@ -723,10 +735,12 @@ export async function performSecondaryValidation(
   }
 }
 
-export function partitionLunaValidationItems(items: ExtractedItem[]): ExtractedItem[][] {
+export function partitionLunaValidationItems(
+  items: ExtractedItem[], batchSize = 15
+): ExtractedItem[][] {
   const chunks: ExtractedItem[][] = [];
-  for (let start = 0; start < items.length; start += 15) {
-    chunks.push(items.slice(start, start + 15));
+  for (let start = 0; start < items.length; start += batchSize) {
+    chunks.push(items.slice(start, start + batchSize));
   }
   return chunks;
 }
