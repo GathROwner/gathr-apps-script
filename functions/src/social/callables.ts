@@ -40,6 +40,7 @@ import {
 import {
   createPrivateCheckInPlaceCandidate,
   discoverNearbyCheckInPlaces,
+  listNearbyCanonicalCheckInVenues,
 } from './nearbyCheckInPlaces.js';
 import { SOCIAL_REGION, SocialDomainError } from './validation.js';
 
@@ -237,6 +238,20 @@ export const discoverNearbyCheckInPlacesCallable = onCall(releaseTwoOptions, asy
   return run(async () => {
     await enforceSocialRateLimit(uid, 'nearby_check_in_places', 20, 24 * 60 * 60_000);
     return discoverNearbyCheckInPlaces(uid, {
+      latitude: data.latitude,
+      longitude: data.longitude,
+      accuracyMeters: data.accuracyMeters,
+      capturedAtMs: data.capturedAtMs,
+    });
+  });
+});
+
+export const listNearbyCanonicalCheckInVenuesCallable = onCall(releaseTwoOptions, async (request) => {
+  const uid = requireUid(request.auth);
+  const data = asData(request.data);
+  return run(async () => {
+    await enforceSocialRateLimit(uid, 'nearby_gathr_check_in_venues', 30, 60 * 60_000);
+    return listNearbyCanonicalCheckInVenues({
       latitude: data.latitude,
       longitude: data.longitude,
       accuracyMeters: data.accuracyMeters,

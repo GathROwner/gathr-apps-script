@@ -298,6 +298,23 @@ async function nearbyCanonicalVenues(
   return candidates.sort((left, right) => left.distanceMetres - right.distanceMetres);
 }
 
+/**
+ * Lists known GathR venues only. This path deliberately does not contact
+ * OpenStreetMap; external discovery is a separate, explicit user action.
+ */
+export async function listNearbyCanonicalCheckInVenues(
+  input: NearbyPlaceInput,
+  options: { db?: Firestore; now?: Timestamp } = {}
+): Promise<{ candidates: NearbyCheckInPlaceCandidate[]; expiresAt: Timestamp }> {
+  const db = options.db || getFirestore();
+  const now = options.now || Timestamp.now();
+  const { latitude, longitude, accuracyMeters } = parseFreshNearbyLocation(input, now);
+  return {
+    candidates: await nearbyCanonicalVenues(db, latitude, longitude, accuracyMeters, now),
+    expiresAt: Timestamp.fromMillis(now.toMillis() + CHECK_IN_PLACE_CANDIDATE_TTL_MS),
+  };
+}
+
 function externalMatchesCanonical(
   external: ParsedExternalPlace,
   canonical: NearbyCheckInPlaceCandidate[]
