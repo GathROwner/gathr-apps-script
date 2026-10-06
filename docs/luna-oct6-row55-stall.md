@@ -20,3 +20,9 @@ Dataset `1IcZOB0T9oxC1hugFaR0QbSD4nD_25t9I` (376 rows), run `f1e9ec56-544a-4ed6-
 - Audit row 55 writes against its source and verify no duplicate records or missing items.
 - Bound per-row work so one broad roundup cannot exceed the function timeout without a per-item checkpoint. Review venue lookup latency, per-row memoization, and retries; the nine-item Stage 4/5 model batching does not bound this later serial venue/write pass.
 - Audit the completed full run and all Luna-selected posts before making a rollout decision. Do not deploy parser changes while this run is active.
+
+## Second oversized row observed during the same run
+
+- Row 80 began at 18:34:33 UTC with the checkpoint at 80. Its five-stage parse alone took 612,017 ms, exceeding the 540-second worker request limit before per-event venue resolution and writes began.
+- The row was still making individual event writes at 19:02 UTC. The next queued resume had already made five unsuccessful busy-lease attempts and was scheduled for its sixth at 19:12 UTC. A fresh lock heartbeat meant the current worker was still active at the 19:01 audit.
+- This shows that the hardening must address bounded work and durable progress for any large row. Venue-match memoization alone cannot prevent a model parse that already exceeds the worker request limit. The current run remains active; no parser deployment was made.
