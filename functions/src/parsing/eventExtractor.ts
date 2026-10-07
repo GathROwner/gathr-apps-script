@@ -3740,6 +3740,7 @@ ${nameRule}
 - startTime: Start time.
 - endTime: End time (only if shown), If no end time is shown, set endTime="" (empty string).
 - venue: Venue name if different from ${userName}
+- ticketLink: Exact registration or ticket URL printed in this event's own caption block, if any. Never copy a link from another listed event. Otherwise use an empty string.
 - price: if no specific price mentioned, use empty string
 - relevantImageIndex: 0-based index of the provided image that visibly contains this exact event, performer, date, or time. The first attached image is 0, the second is 1, etc. If no attached image clearly matches this specific event, use 0.
 - recurringPattern: Set to "daily" ONLY if text says "Everyday" or "Daily". Set to "weekly_monday" through "weekly_sunday" ONLY if text says "Every Monday", "Every Tuesday", etc. Otherwise set to "none".
@@ -3791,14 +3792,17 @@ function createFoodSpecialExtractionPrompt(
   tz: string,
   clarifyPreorderWindow = false
 ): string {
-  return `Your job is to Extract ALL FOOD/DRINK SPECIALS that have cost savings from this content. IGNORE all events/entertainment.
+  return `Your job is to extract advertised FOOD/DRINK SPECIALS and DEALS from this content. IGNORE all events/entertainment.
 
 CONTENT:
 - Posted by: ${userName}
 - Posted at: ${timestamp}
 - Text: "${combinedText}"
 
-EXTRACT ALL SPECIALS (each MUST have pricing/savings):
+EXTRACT ALL QUALIFYING SPECIALS:
+- A printed price or discount qualifies.
+- An explicitly advertised daily special or deal also qualifies without a printed price. Extract only the named special or deal, not other menu items in the post.
+- A month-long featured menu item alone, such as a pizza of the month, does not qualify unless the source separately advertises it as a deal.
 
 TIME & EVIDENCE RULES (FOR SPECIALS — SAME AS EVENTS):
 - Read times ONLY from the text or image regions relevant to the special. Do not infer.
@@ -3817,6 +3821,7 @@ TIME & EVIDENCE RULES (FOR SPECIALS — SAME AS EVENTS):
 ✓ Breakfast/brunch specials (BREKKIE, pancakes, breakfast items, brunch items)
 ✓ Daily/recurring food specials (e.g., "Everyday- [special]", "Daily- [special]")
 ✓ Any cost savings on food/drinks
+✓ A named daily special or explicit deal even if no numeric price is printed
 
 CRITICAL: Extract ALL food/drink specials even if they say "Everyday", "Daily", or appear at the end of the post text.
 ${clarifyPreorderWindow ? `
@@ -3828,11 +3833,12 @@ PRE-ORDER WINDOW:
 IGNORE COMPLETELY:
 ✗ Live music, trivia, entertainment
 ✗ Menu items without deals
+✗ Month-long featured menu items without an explicit deal
 ✗ "All You Can Eat" without price
 
 For each SPECIAL found, extract:
 - name: Special name
-- description: Full details WITH pricing - IMPORTANT: If the original text has a weekday prefix (e.g., "Friday-", "Thursday-", "Saturday-"), you MUST preserve it at the start of the description field for date validation.
+- description: Full details, including printed pricing when present. Preserve explicit "daily special" or "deal" wording. If the original text has a weekday prefix (e.g., "Friday-", "Thursday-", "Saturday-"), you MUST preserve it at the start of the description field for date validation.
 - date: Specific date (YYYY-MM-DD) - NEVER use "recurring" here. For recurring specials, use the first occurrence date or posted date.
 - startTime: Start time
 - endTime: End time
@@ -3840,7 +3846,7 @@ For each SPECIAL found, extract:
 - pricing: Specific prices/discounts. - price: if no specific price mentioned, use empty string.
 - relevantImageIndex: 0-based index of the provided image that visibly contains this exact special, date, or time. The first attached image is 0, the second is 1, etc. If no attached image clearly matches this specific special, use 0.
 - recurringPattern: Set to "daily" ONLY if text says "Everyday" or "Daily". Set to "weekly_monday" through "weekly_sunday" ONLY if text says "Every Monday", "Every Tuesday", etc. Otherwise set to "none".
-- extractionReason: Why this was identified as a valid special with cost savings
+- extractionReason: Quote the source wording that makes this a priced offer, daily special, or deal
 
 SERIES SPLITTING RULE:
 - If one poster lists multiple named themed specials under an umbrella heading, output one item per named theme instead of one generic umbrella special.

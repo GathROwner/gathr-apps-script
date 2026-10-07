@@ -151,6 +151,8 @@ POST DETAILS:
 - Text: "${combinedText}"
 - Has images: ${hasImages}
 
+SPECIAL POLICY: An explicitly advertised daily special or deal qualifies even if no numeric price is printed. Extract only the advertised special or deal. An ordinary month-long featured menu item without a stated deal does not qualify.
+
 OCR TILING GUIDANCE (IMPORTANT):
 - "Calendar tiling" means splitting the image into many smaller tiles for OCR.
 - Recommend tiling ONLY when the image contains a calendar grid/schedule layout or dense small text that likely needs tiling to read.
@@ -162,14 +164,14 @@ Image Preprocessing
 
 VALID CONTENT:
 âœ“ Events: Live music, trivia, comedy, workshops, parties WITH specific timing
-âœ“ Food Specials: Happy hour, wing nights, drink deals WITH cost savings, food deal WITH cost savings
+âœ“ Food Specials: Happy hour, priced food/drink offers, and explicitly advertised daily specials or deals even without a printed price
 âœ“ Calendars or schedules showing multiple events/specials
 
 INVALID CONTENT:
 âœ— Business hours only
 âœ— Holiday greetings without events
 âœ— General marketing without specifics
-âœ— Menu announcements without deals
+âœ— Ordinary menu announcements and month-long featured menu items without an advertised deal
 âœ— "Visit us" without events/specials
 
 ANALYSIS REQUIREMENTS:

@@ -154,6 +154,13 @@ function hasPricingOrDiscount(item: ExtractedItem | undefined): boolean {
   return fields.some(hasNonEmptyValue);
 }
 
+/** Explicit promotional wording qualifies a special without a printed price. */
+export function isAdvertisedDailySpecialOrDealForRegression(item: ExtractedItem | undefined): boolean {
+  if (!item || String((item as any)._sourceType || '').toLowerCase() !== 'special') return false;
+  const text = `${String((item as any).name || '')} ${String((item as any).description || '')}`;
+  return /\b(?:daily|today'?s|tonight'?s|weekday)\s+(?:food\s+|drink\s+|lunch\s+|dinner\s+|breakfast\s+|brunch\s+)?specials?\b|\bspecials?\s+of\s+the\s+day\b|\bdeals?\b/i.test(text);
+}
+
 function isTimeBoundHappyHourSpecial(item: ExtractedItem | undefined): boolean {
   if (!item) return false;
   if (String((item as any)._sourceType || '').toLowerCase() !== 'special') return false;
@@ -630,6 +637,11 @@ export async function performSecondaryValidation(
           happyHourNoPriceOverrideCount++;
         }
 
+        if (decision === 'REJECTED' && isAdvertisedDailySpecialOrDealForRegression(item)) {
+          logger.info(`Stage 4 advertised daily special/deal override for "${item.name}"`);
+          decision = 'KEPT';
+        }
+
         // Targeted exception:
         // Calendar day-by-day deal cards are valid specials even without explicit clock times.
         if (
@@ -777,11 +789,12 @@ REMOVE items that are:
 ✗ General announcements without specific timing
 ✗ Holiday greetings WITHOUT events (e.g., "Happy Father's Day!")
 ✗ Menu items without discounts or deals
-✗ Food specials without specific pricing or cost savings
+✗ Ordinary menu items without an advertised special or deal
 ✗ Items from event extractor that aren't real events (e.g., forced interpretation of food as "celebration")
-✗ Items from special extractor that have no actual pricing/discount
+✗ Month-long featured menu items without an advertised deal
 
 EXCEPTION RULE (APPLY BEFORE REJECTING SPECIALS):
+- For _sourceType="special", KEEP a named daily special or explicitly advertised deal even when no numeric price/discount is printed. Keep only that special, not the post's other menu items. Do not treat a month-long featured menu item as a deal merely because it is featured.
 - For _sourceType="special", if the item is a Happy Hour and has a clear time window
   (start/end time, explicit range like "3-6", "from 3 PM to 6 PM", or "to close"),
   KEEP the item even when price/discount is missing.
@@ -790,6 +803,7 @@ KEEP items that are:
 ✓ Actual events with specific dates/times
 ✓ Events that happen to occur on holidays (e.g., "Father's Day Movie at 5pm")
 ✓ Food specials with specified cost savings and pricing
+✓ Named daily specials and explicitly advertised deals even without printed prices
 ✓ Any activity with specific timing and details
 ✓ Recurring specials (date="recurring") ARE VALID - these are daily/weekly specials like happy hours that happen regularly
 ✓ Items with date="recurring" should be KEPT if they have valid pricing, timing, and description

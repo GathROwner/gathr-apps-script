@@ -4179,6 +4179,27 @@ function fullParserAddressCandidates(
   ].map((value) => String(value || '').trim()).filter(looksLikeSpecificStreetAddress)));
 }
 
+export function findCaptionRegistrationUrlForEventForRegression(
+  caption: unknown,
+  eventName: unknown
+): string {
+  const name = normalizeVenueName(String(eventName || ''));
+  if (!name || name.length < 8) return '';
+  const lines = String(caption || '').split(/\r?\n/);
+  const heading = lines.findIndex(line => {
+    const normalized = normalizeVenueName(line);
+    return normalized === name || normalized.startsWith(`${name} `);
+  });
+  if (heading < 0) return '';
+  for (let index = heading; index < Math.min(lines.length, heading + 5); index++) {
+    const line = lines[index].trim();
+    if (index > heading && !line) break;
+    const match = line.match(/\b(?:inscription|registration|register|tickets?|book(?:ing)?)\b[^\n]{0,80}?(https?:\/\/[^\s<>"']+)/i);
+    if (match) return match[1].replace(/[.,;!?]+$/, '');
+  }
+  return '';
+}
+
 export async function resolveVenueForFullParserEventWithMatcherForRegression(params: {
   item: ParserProcessedEvent;
   rowVenue: VenueData | null;
@@ -4249,7 +4270,17 @@ export async function resolveVenueForFullParserEventWithMatcherForRegression(par
     // that event before its printed venue name is checked below.
     const hasDifferentPrintedVenue =
       itemSpecificVenueCandidates.length > 0 || additionalLocationVenueCandidates.length > 0;
+    const sourceAddressIdentities = new Set([
+      normalizeAddressForFallbackComparison(row.address),
+      normalizeAddressForFallbackComparison(rowVenue?.address),
+    ].filter(Boolean));
     for (const address of fullParserAddressCandidates(item, row, !hasDifferentPrintedVenue)) {
+      // Stage 5 can copy the organizer's address onto an item that names a
+      // different venue. That copied address must not win before the venue name.
+      if (
+        hasDifferentPrintedVenue &&
+        sourceAddressIdentities.has(normalizeAddressForFallbackComparison(address))
+      ) continue;
       const addressMatch = await addressMatcher(address);
       if (addressMatch.isMatch && addressMatch.matchedVenue) {
         logger.info('Resolved full-parser event through exact address identity', {
@@ -4666,6 +4697,7 @@ async function processFullParserEvent(
     normalizedVenueNames: normalizedVenueAliasNames,
     venueAddress,
   });
+  const captionRegistrationUrl = findCaptionRegistrationUrlForEventForRegression(row.text, name);
 
   const eventData = {
     uniqueId: buildExpandedEventStoredUniqueId({
@@ -4741,8 +4773,10 @@ async function processFullParserEvent(
       : undefined,
     addressUpdatedAt: resolvedAddress ? new Date() : undefined,
     ticketPrice: String(item.ticketPrice || '').trim() || undefined,
-    ticketLink: String(item.ticketLink || '').trim() || undefined,
-    ticketsBuyUrl: String(item.ticketsBuyUrl || row.ticketsBuyUrl || '').trim() || undefined,
+    ticketLink: String(item.ticketLink || '').trim() || captionRegistrationUrl || undefined,
+    ticketsBuyUrl: String(item.ticketsBuyUrl || '').trim() ||
+      captionRegistrationUrl ||
+      String(row.ticketsBuyUrl || '').trim() || undefined,
     externalLinks: row.externalLinks,
     isRecurring: item.isRecurring,
     recurringPattern: item.recurringPattern || undefined,

@@ -7,6 +7,7 @@ import { normalizeVenueName } from '../utils/similarity.js';
 import {
   createFullParserVenueLookupCache,
   resolveVenueForFullParserEventWithMatcherForRegression,
+  findCaptionRegistrationUrlForEventForRegression,
 } from './rowProcessor.js';
 
 test('row-local venue cache reuses the same lookup while separating distinct candidates', async () => {
@@ -220,6 +221,66 @@ test('an organizer street address cannot override a different printed event venu
   });
   assert.equal(resolved, null);
   assert.deepEqual(triedAddresses, []);
+});
+
+test('a copied organizer address cannot override the printed Wintermoor Orchard venue', async () => {
+  const organizer = { id: 'slug_carrefourdelislesaintjean', name: 'Carrefour ISJ',
+    normalizedName: 'carrefour isj', address: '5 Acadian Dr, Charlottetown, PE C1C 1M2, Canada' } as VenueData;
+  const orchard = { id: 'OrUJKHEoLQr9qLzXEfCj', name: 'Wintermoor Orchard',
+    normalizedName: 'wintermoor orchard', address: '906 York Road, York, PE C0A 1P0' } as VenueData;
+  const row = { uniqueId: '1531721385662502', text: 'Cueillette de pommes at Wintermoor Orchard',
+    mediaUrls: [], pageName: organizer.name, userName: organizer.name,
+    address: organizer.address, timestamp: '2026-10-05T12:41:01Z' } as RawRowData;
+  const triedAddresses: string[] = [];
+  const resolved = await resolveVenueForFullParserEventWithMatcherForRegression({
+    item: { name: 'Cueillette de pommes', establishment: organizer.name,
+      venue: organizer.name, additionalLocation: orchard.name,
+      address: organizer.address } as ParserProcessedEvent,
+    row, rowVenue: organizer, establishment: organizer.name, rowIndex: 184,
+    matcher: async candidate => candidate === orchard.name
+      ? { isMatch: true, matchType: 'exact', similarity: 1, matchedVenue: orchard }
+      : { isMatch: false, matchType: 'none', similarity: 0 },
+    addressMatcher: async address => {
+      triedAddresses.push(address);
+      return { isMatch: true, matchType: 'exact', similarity: 1, matchedVenue: organizer };
+    },
+  });
+  assert.equal(resolved?.id, orchard.id);
+  assert.deepEqual(triedAddresses, []);
+});
+
+test('Carrefour registration links stay with their own activity in a multi-event caption', () => {
+  const caption = [
+    'Citrouille & Crafts - 9 octobre | 17 h à 19 h',
+    'Décorez votre citrouille.',
+    'Inscription : https://form.jotform.com/CarrefourISJ/citrouille--crafts',
+    '',
+    'Cueillette de pommes - 17 octobre | 13 h à 16 h',
+    'Sortie au Wintermoor Orchard.',
+    'Inscription : https://form.jotform.com/CarrefourISJ/cueillette-de-pommes',
+    '',
+    'Soirée Halloween - 30 octobre | 17 h à 20 h',
+    'Inscription : https://form.jotform.com/CarrefourISJ/halloween',
+  ].join('\n');
+  assert.equal(
+    findCaptionRegistrationUrlForEventForRegression(caption, 'Cueillette de pommes'),
+    'https://form.jotform.com/CarrefourISJ/cueillette-de-pommes'
+  );
+  assert.equal(
+    findCaptionRegistrationUrlForEventForRegression(caption, 'Citrouille & Crafts'),
+    'https://form.jotform.com/CarrefourISJ/citrouille--crafts'
+  );
+});
+
+test('an event cannot borrow a later event registration link', () => {
+  const caption = [
+    'Free play - 10 octobre',
+    'Drop in and enjoy the games.',
+    '',
+    'Apple picking - 17 octobre',
+    'Registration: https://example.org/apple',
+  ].join('\n');
+  assert.equal(findCaptionRegistrationUrlForEventForRegression(caption, 'Free play'), '');
 });
 
 const foundersRow = {

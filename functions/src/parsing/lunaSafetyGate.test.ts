@@ -73,7 +73,7 @@ test('Luna sample is stable, bounded, and can exclude a reviewed post', () => {
   assert.deepEqual(selected, ids.filter(id => isSampledLunaCanaryPost(id, true, '15')));
   assert.equal(isSampledLunaCanaryPost(selected[0], true, '15', selected[0]), false);
   assert.equal(isSampledLunaCanaryPost(selected[0], false, '15'), false);
-  assert.equal(isSampledLunaCanaryPost(selected[0], true, '51'), false);
+  assert.equal(isSampledLunaCanaryPost(selected[0], true, '76'), false);
   assert.equal(isSampledLunaCanaryPost(selected[0], true, '*'), false);
 });
 
@@ -88,9 +88,11 @@ test('eligible Stage 3 ordinals allocate a stable, balanced 17 percent', () => {
   assert.deepEqual(selected, Array.from({ length: 90 }, (_, index) => index + 1)
     .filter(ordinal => isLunaStage3QuotaOrdinal(ordinal, 17, 'dataset-a')));
   assert.equal(isLunaStage3QuotaOrdinal(0, 17), false);
-  assert.equal(isLunaStage3QuotaOrdinal(1, 51), false);
+  assert.equal(isLunaStage3QuotaOrdinal(1, 76), false);
   assert.equal(Array.from({ length: 100 }, (_, index) => index + 1)
     .filter(ordinal => isLunaStage3QuotaOrdinal(ordinal, 50, 'dataset-a')).length, 50);
+  assert.equal(Array.from({ length: 100 }, (_, index) => index + 1)
+    .filter(ordinal => isLunaStage3QuotaOrdinal(ordinal, 75, 'dataset-a')).length, 75);
 });
 
 test('seasonal league timetable uses the reviewed legacy route until recurrence is defined', () => {

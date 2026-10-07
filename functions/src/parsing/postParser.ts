@@ -1576,7 +1576,7 @@ async function parsePostDataCore(
 
     if (lunaEligibleQuotaMode) {
       const percent = Number(process.env.LUNA_CANARY_SAMPLE_PERCENT || '');
-      if (!Number.isFinite(percent) || percent <= 0 || percent > 50) {
+      if (!Number.isFinite(percent) || percent <= 0 || percent > 75) {
         throw new Error(`Unsupported LUNA_CANARY_SAMPLE_PERCENT: ${percent}`);
       }
       const excludedIds = String(process.env.LUNA_CANARY_EXCLUDED_POST_IDS || '')

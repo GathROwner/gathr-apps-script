@@ -173,8 +173,9 @@ CLASSIFICATION CATEGORIES:
    Examples: "Live music tonight 8pm", "Trivia Tuesday at 7"
    NOTE: If FACEBOOK EVENT DATA is present above, this is likely an EVENT even if the text is promotional/biographical.
 
-2. FOOD_SPECIAL - Food/drink deals only
-   Examples: "Happy hour 5-7pm half price apps", "$0.50 wings tonight"
+2. FOOD_SPECIAL - Advertised food/drink specials or deals only
+   Examples: "Happy hour 5-7pm half price apps", "$0.50 wings tonight", "Today's lunch special"
+   A named daily special or explicit deal qualifies without a printed price. An ordinary month-long featured menu item does not.
 
 3. MIXED_EVENTS_AND_SPECIALS - Both events AND specials together
    Examples: "Live music 8pm plus happy hour 5-7pm"
