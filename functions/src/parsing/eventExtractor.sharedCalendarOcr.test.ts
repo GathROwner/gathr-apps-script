@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { parseCalendarOcrTextForRegression } from './eventExtractor.js';
+import { mergeCalendarItemsForRegression, parseCalendarOcrTextForRegression } from './eventExtractor.js';
 
 test('calendar OCR fallback extracts single flyer date line without explicit year', () => {
   const items = parseCalendarOcrTextForRegression(
@@ -36,4 +36,32 @@ test('calendar OCR fallback extracts single flyer date line without explicit yea
       extractionReason: 'calendar_ocr_explicit_date_line',
     }
   );
+});
+
+test('ice-time date separator cannot create a ten-minute clock range or duplicate the primary slot', () => {
+  const printed = [
+    'Available Ice Times',
+    'Saturday October 10-10:10am',
+    'Sunday October 18- 10:10am, 1:50pm',
+    'Tuesday October 20- 7:50pm',
+    'Sunday October 25-1:50pm',
+    'Tuesday Oct 27- 7:50pm',
+  ].join('\n');
+  const ocr = parseCalendarOcrTextForRegression(printed, '2026-10-07', 'Eastern Kings Sportsplex');
+  assert.equal(ocr.length, 6);
+  assert.ok(!ocr.some(item => item.startTime === '10:00' || item.endTime === '10:10'));
+
+  const slots = [
+    ['2026-10-10', '10:10 AM'],
+    ['2026-10-18', '10:10 AM'],
+    ['2026-10-18', '1:50 PM'],
+    ['2026-10-20', '7:50 PM'],
+    ['2026-10-25', '1:50 PM'],
+    ['2026-10-27', '7:50 PM'],
+  ];
+  const primary = slots.map(([date, startTime]) => ({
+    name: 'Available Ice Times', date, startTime,
+  }));
+  const merged = mergeCalendarItemsForRegression(primary as any, ocr);
+  assert.equal(merged.length, 6);
 });

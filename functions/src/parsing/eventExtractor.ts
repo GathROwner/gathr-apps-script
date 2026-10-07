@@ -3160,7 +3160,9 @@ function parseCalendarOcrText(
       const explicitYear = explicitDateMatch[3]
         ? Number(explicitDateMatch[3])
         : resolveCalendarOcrYear(fallbackDate, explicitMonth, explicitDay);
-      const rangeMatch = line.match(
+      // A date separator such as "October 10-10:10am" is not a time range.
+      const timePart = line.replace(explicitDateMatch[0], ' ');
+      const rangeMatch = timePart.match(
         /(\d{1,2}(?::\d{2})?|\d{3,4})\s*(am|pm)?\s*-\s*(\d{1,2}(?::\d{2})?|\d{3,4})\s*(am|pm)\b/i
       );
       const explicitDate = explicitMonth && Number.isFinite(explicitDay) && Number.isFinite(explicitYear)
@@ -3174,11 +3176,14 @@ function parseCalendarOcrText(
             rangeMatch[4] || ''
           )
         : null;
-      const lineWithoutDate = stripTimeTokens(line.replace(explicitDateMatch[0], ' '));
+      const lineWithoutDate = stripTimeTokens(timePart);
       const previousName = pendingNameParts.length > 0
         ? pendingNameParts[pendingNameParts.length - 1]
         : '';
-      const name = cleanOcrEventName(lineWithoutDate || previousName || lastEventName || 'Event');
+      const cleanedLineName = cleanOcrEventName(lineWithoutDate);
+      const name = /[\p{L}\p{N}]/u.test(cleanedLineName)
+        ? cleanedLineName
+        : cleanOcrEventName(previousName || lastEventName || 'Event');
 
       if (explicitDate && name && (resolvedRange?.startTime || extractTimeTokens(line).length > 0)) {
         const timeTokens = resolvedRange?.startTime ? [] : extractTimeTokens(line);
@@ -3292,8 +3297,10 @@ function parseExplicitDateLineCalendarOcrItems(
   for (let index = 0; index < lines.length; index += 1) {
     const line = lines[index].replace(/[\u2013\u2014]/g, '-');
     const explicitDateMatch = line.match(explicitDateRe);
-    const rangeMatch = line.match(rangeRe);
-    if (!explicitDateMatch || !rangeMatch) continue;
+    if (!explicitDateMatch) continue;
+    // Match a true clock range only after removing the printed date.
+    const rangeMatch = line.replace(explicitDateMatch[0], ' ').match(rangeRe);
+    if (!rangeMatch) continue;
 
     const explicitMonth = monthMap[String(explicitDateMatch[1] || '').toLowerCase()];
     const explicitDay = Number(explicitDateMatch[2]);
@@ -3403,6 +3410,21 @@ function mergeCalendarItems(
   }
 
   for (const item of supplemental || []) {
+    // The OCR supplement can use a generic title for a slot that the primary
+    // vision read already named. Do not create a second event at that exact
+    // date and clock just because the titles differ ("Event" versus
+    // "Available Ice Times"). Distinct same-time titles remain separate.
+    const supplementalTime = normalizeCalendarInventoryTime(item.startTime || '');
+    const supplementalName = normalizeCalendarKey(item.name || '');
+    const alreadyRepresented = supplementalTime && merged.some(existing => {
+      const existingTime = normalizeCalendarInventoryTime(existing.startTime || '');
+      const existingName = normalizeCalendarKey(existing.name || '');
+      return existing.date === item.date && existingTime === supplementalTime &&
+        (supplementalName === 'event' || existingName === 'event' ||
+          Boolean(supplementalName && existingName &&
+            (existingName.includes(supplementalName) || supplementalName.includes(existingName))));
+    });
+    if (alreadyRepresented) continue;
     const looseKey = buildCalendarKeyWithoutDate(item);
     const replacementIndex = merged.findIndex((existing) =>
       !String(existing.date || '').trim() &&
@@ -4455,6 +4477,12 @@ export function extractDateFromText(
   }
 }
 
+export function mergeCalendarItemsForRegression(
+  primary: CalendarItem[], supplemental: CalendarItem[]
+): CalendarItem[] {
+  return mergeCalendarItems(primary, supplemental);
+}
+
 export function dateMatchesWeekdayPrefix(description: string, date: string): boolean {
   const weekday = getDayOfWeekFromPrefix(description);
   const extractedDate = DateTime.fromISO(date);
@@ -4756,6 +4784,12 @@ async function callGPT(
  */
 function parseJSONResponse(response: string): Record<string, unknown> | null {
   try {
+    // A valid model response may contain https:// inside a JSON string. Parse it
+    // before applying any repair or comment handling.
+    const direct = tryParseJson(String(response || '').trim());
+    if (direct && !Array.isArray(direct)) {
+      return direct as Record<string, unknown>;
+    }
     const normalized = normalizeJsonText(response);
     const parsed = tryParseJson(normalized);
     if (parsed && !Array.isArray(parsed)) {
@@ -4787,6 +4821,8 @@ function parseJSONFallback(response: string, type: string): ExtractedItem[] {
   logger.debug(`Parsing ${type} response with fallback`);
 
   try {
+    const direct = extractArrayFromParsed(tryParseJson(String(response || '').trim()));
+    if (direct) return direct;
     const normalized = normalizeJsonText(response);
     const parsed = tryParseJson(normalized);
     const extracted = extractArrayFromParsed(parsed);
@@ -4887,7 +4923,50 @@ function normalizeJsonText(text: string): string {
 }
 
 function stripJsonComments(text: string): string {
-  return text.replace(/\/\/.*$/gm, '').replace(/\/\*[\s\S]*?\*\//g, '');
+  let result = '';
+  let inString = false;
+  let escaped = false;
+  for (let index = 0; index < text.length; index++) {
+    const char = text[index];
+    const next = text[index + 1];
+    if (inString) {
+      result += char;
+      if (escaped) escaped = false;
+      else if (char === '\\') escaped = true;
+      else if (char === '"') inString = false;
+      continue;
+    }
+    if (char === '"') {
+      inString = true;
+      result += char;
+      continue;
+    }
+    if (char === '/' && next === '/') {
+      index += 2;
+      while (index < text.length && text[index] !== '\n') index++;
+      if (index < text.length) result += '\n';
+      continue;
+    }
+    if (char === '/' && next === '*') {
+      index += 2;
+      while (index < text.length && !(text[index] === '*' && text[index + 1] === '/')) {
+        if (text[index] === '\n') result += '\n';
+        index++;
+      }
+      index++;
+      continue;
+    }
+    result += char;
+  }
+  return result;
+}
+
+export function parseStage3JsonForRegression(response: string): Record<string, unknown> | null {
+  return parseJSONResponse(response);
+}
+
+export function parseStage3FallbackForRegression(response: string): ExtractedItem[] {
+  return parseJSONFallback(response, 'regression');
 }
 
 function extractObjectsFromText(text: string): Array<Record<string, unknown>> {

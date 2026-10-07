@@ -24,6 +24,7 @@ test('eligible sampling stays bounded at the configured rate', () => {
     assert.ok(selected > 1000 * (percent / 100 - 0.05));
     assert.ok(selected < 1000 * (percent / 100 + 0.05));
   }
-  assert.equal(isSampledEligibleLunaStage3Post('dataset', 'post', 76), false);
+  assert.equal(isSampledEligibleLunaStage3Post('dataset', 'post', 100), true);
+  assert.equal(isSampledEligibleLunaStage3Post('dataset', 'post', 101), false);
   assert.equal(isSampledEligibleLunaStage3Post('dataset', '', 50), false);
 });

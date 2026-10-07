@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { enrichEventsFromVenueWebsite } from './websiteDetailEnricher.js';
+import { enrichEventsFromVenueWebsite, websiteCandidateTitleMatchesEventForRegression } from './websiteDetailEnricher.js';
 import { DEFAULT_PARSING_CONFIG, EstablishmentInfo, ExtractedItem } from './types.js';
 
 function buildEventItem(overrides: Partial<ExtractedItem> = {}): ExtractedItem {
@@ -57,6 +57,39 @@ function jsonResponse(value: unknown): Response {
     headers: { 'content-type': 'application/json; charset=utf-8' },
   });
 }
+
+test('a bookstore sub-event cannot lend its time to the campus fall open house', () => {
+  assert.equal(websiteCandidateTitleMatchesEventForRegression(
+    'Fall Open House', 'Bookstore Open House'), false);
+  assert.equal(websiteCandidateTitleMatchesEventForRegression(
+    'Fall Open House', 'UPEI Fall Open House'), true);
+  assert.equal(websiteCandidateTitleMatchesEventForRegression(
+    'Open House', 'Bookstore Open House'), false);
+  assert.equal(websiteCandidateTitleMatchesEventForRegression(
+    'Open House', 'Open House'), true);
+});
+
+test('a hidden historical schedule in an HTML comment cannot supply an open-house time', async () => {
+  const page = 'https://campus.example/future-students/open-house';
+  const restoreFetch = installFetchMap({
+    [page]: htmlResponse(`<html><head><title>Fall Open House</title></head><body>
+      <h1>Fall Open House</h1><p>Join us October 24, 2026. Register for details.</p>
+      <!-- <p>Fall Open House October 24, 2026 at 11:30 am to 12:15 pm.</p> -->
+    </body></html>`),
+  });
+  try {
+    const result = await enrichEventsFromVenueWebsite(
+      [buildEventItem({ name: 'Fall Open House', date: '2026-10-24', startTime: '' })],
+      `Details at ${page}`, '', '2026-10-07T12:00:00Z',
+      { name: 'Campus', website: page } as EstablishmentInfo,
+      { ...DEFAULT_PARSING_CONFIG, lunaCalendarLiteralSourcePrompt: true }
+    );
+    assert.equal(result.items[0].startTime, '');
+    assert.equal(result.summary.appliedCount, 0);
+  } finally {
+    restoreFetch();
+  }
+});
 
 test('a festival date-range page does not lend a child performance time to untimed parent days', async () => {
   const listing = 'https://riverclydearts.com/field';

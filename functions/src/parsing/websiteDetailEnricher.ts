@@ -1260,6 +1260,10 @@ function findBestCandidateForItem(
     }
     let score = 0;
     const titleOverlap = scoreTokenOverlap(itemTokens, tokenize(candidate.title || ''));
+    // A shared generic title such as "Open House" does not make a named
+    // sub-event's clock the parent event's clock. Date agreement alone is not
+    // enough to borrow a time from "Bookstore Open House" for "Fall Open House".
+    if (!websiteCandidateTitleMatchesEvent(item.name || '', candidate.title || '')) continue;
     if (candidate.source === 'locarius_api') {
       const identityTokens = itemTokens.filter(token =>
         token.length >= 3 && !TOKEN_STOP_WORDS.has(token) &&
@@ -1298,6 +1302,28 @@ function findBestCandidateForItem(
   }
 
   return bestScore >= 4 ? best : null;
+}
+
+const GENERIC_WEBSITE_EVENT_TITLE_TOKENS = new Set([
+  'open', 'house', 'event', 'events', 'live', 'music', 'show', 'festival',
+  'party', 'class', 'workshop', 'tour', 'session', 'sessions', 'the', 'a',
+]);
+
+function websiteCandidateTitleMatchesEvent(itemName: string, candidateTitle: string): boolean {
+  const itemTokens = tokenize(itemName);
+  const candidateTokens = tokenize(candidateTitle);
+  if (!itemTokens.length || !candidateTokens.length) return false;
+  if (itemTokens.join(' ') === candidateTokens.join(' ')) return true;
+  const distinguishingTokens = itemTokens.filter(token =>
+    !GENERIC_WEBSITE_EVENT_TITLE_TOKENS.has(token));
+  if (!distinguishingTokens.length) return false;
+  return scoreTokenOverlap(distinguishingTokens, candidateTokens) > 0;
+}
+
+export function websiteCandidateTitleMatchesEventForRegression(
+  itemName: string, candidateTitle: string
+): boolean {
+  return websiteCandidateTitleMatchesEvent(itemName, candidateTitle);
 }
 
 function collectRelevanceTokens(text: string, itemNames: string[]): string[] {
@@ -1355,8 +1381,11 @@ async function fetchHtml(url: string, timeoutMs: number, maxBytes: number): Prom
 
     const text = await response.text();
     const clipped = text.length > maxBytes ? text.slice(0, maxBytes) : text;
-    htmlCache.set(url, clipped);
-    return clipped;
+    // Publishers often retain obsolete schedules inside HTML comments. Those
+    // blocks are invisible to readers and must not supply event times or links.
+    const visibleHtml = clipped.replace(/<!--[\s\S]*?(?:-->|$)/g, ' ');
+    htmlCache.set(url, visibleHtml);
+    return visibleHtml;
   } catch (error) {
     logger.warn('Venue website fetch failed', {
       url,

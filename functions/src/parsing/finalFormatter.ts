@@ -477,7 +477,8 @@ Never return arrays of values for an item; each must be a JSON object.`;
     );
     const discreteEvents = filterOperationalHoursOnlyEvents(sourceGroundedEvents);
     const retailFilteredEvents = filterRetailMerchandisePromotions(discreteEvents);
-    const advisoryFilteredEvents = filterTrafficAdvisoryLogisticsEvents(retailFilteredEvents, combinedText);
+    const standaloneEvents = filterNonStandalonePostListings(retailFilteredEvents, combinedText);
+    const advisoryFilteredEvents = filterTrafficAdvisoryLogisticsEvents(standaloneEvents, combinedText);
     const cruiseFilteredEvents = filterCruiseShipLogisticsEvents(advisoryFilteredEvents, combinedText);
     const promotedFiniteWeeklyEvents = promoteFiniteWeeklyOneOffSequences(cruiseFilteredEvents);
     const collapsedProcessedEvents = collapseRecurringSeriesEvents(promotedFiniteWeeklyEvents);
@@ -2514,12 +2515,12 @@ function hasClosureOnlyPostCue(text: string): boolean {
 function hasFoodSpecialSourceCue(text: string): boolean {
   const normalized = normalizeWorkshopSupportText(text);
   if (!normalized) return false;
-  return /\b(daily specials?|special menu|menu item|chef s choice|burger|fries|quesadilla|rice bowl|philly|meatloaf|shepards pie|cheeseburger|mac cheese|mac n cheese|avocado)\b/.test(
+  return /\b(daily specials?|(?:weekend|dinner|lunch|breakfast|brunch|food|drink|meal|soup) specials?|special menu|menu item|chef s choice|burger|fries|quesadilla|rice bowl|philly|meatloaf|shepards pie|cheeseburger|mac cheese|mac n cheese|avocado)\b/.test(
     normalized
   );
 }
 
-function filterUnsupportedClosureFoodBleed(
+export function filterUnsupportedClosureFoodBleed(
   events: FormattedEvent[],
   combinedText: string
 ): FormattedEvent[] {
@@ -5763,6 +5764,44 @@ function reconcilePreorderOfferWindow(
     endTime: event.endTime,
   });
   return event;
+}
+
+/** Reject announcements that describe a transaction or filing, not an activity or food deal. */
+export function filterNonStandalonePostListings(
+  events: FormattedEvent[], sourceText: string
+): FormattedEvent[] {
+  const source = normalizeCruiseLogisticsText(sourceText);
+  const hasExplicitOffer = /\b(?:special|deal|discount|sale|happy hour)\b|\d+\s*%\s*off/i.test(sourceText);
+  return events.filter(event => {
+    const name = normalizeCruiseLogisticsText(event.name);
+    const detail = normalizeCruiseLogisticsText(event.description);
+    const special = event.isFoodSpecial === 'Yes' || FOOD_CATEGORIES.includes(event.category);
+    const publicActivity = /\b(?:workshop|class|u pick|pick your own|tour|festival|market day|tasting|demonstration|public meeting|meet and greet)\b/.test(name);
+    let reason = '';
+    if (special && /\bgiveaway\b/.test(name) &&
+        /\b(?:like|comment|share)\b/.test(source) && /\b(?:draw|winner)\b/.test(source)) {
+      reason = 'online_entry_giveaway';
+    } else if (special && /\bback in stock\b/.test(source) && !hasExplicitOffer) {
+      reason = 'ordinary_restock';
+    } else if (special && /\b(?:gifts?|baby items?|cozy finds|clothing|apparel|merchandise)\b/.test(detail) &&
+        !/\b(?:food|drink|meal|restaurant|dinner|lunch|breakfast|soup|coffee)\b/.test(detail)) {
+      reason = 'non_food_retail_sale';
+    } else if (special && !hasExplicitOffer &&
+        /\b(?:just picked|hand picked|freshly picked)\b/.test(source) &&
+        /\b(?:pumpkins?|gourds?|squash)\b/.test(name) && !publicActivity) {
+      reason = 'ordinary_produce_inventory';
+    } else if (/\b(?:nomination|filing)\b/.test(name) && /\bdeadline\b/.test(name) &&
+        /\b(?:elections? office|office hours|applications? accepted|nominations? accepted)\b/.test(detail) &&
+        !publicActivity) {
+      reason = 'administrative_filing_deadline';
+    } else if (!special && /\b(?:floral|flower)\b/.test(name) &&
+        /\b(?:pre.?order|pickup|pick.?up)\b/.test(detail) && !publicActivity) {
+      reason = 'retail_product_pickup';
+    }
+    if (!reason) return true;
+    logger.info('Dropped non-standalone post listing', { name: event.name, reason });
+    return false;
+  });
 }
 
 function applyWeekdayRangeCorrections(

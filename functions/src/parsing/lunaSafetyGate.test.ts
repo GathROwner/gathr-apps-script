@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { shouldHoldUndatedStandingSchedule, shouldRetrySeasonalLeagueWithLegacy,
-  isSelectedLunaCanaryPost, isSampledLunaCanaryPost,
+  isSelectedLunaCanaryPost, isSampledLunaCanaryPost, isSampledEligibleLunaStage3Post,
   isLunaStage3QuotaOrdinal,
   canRetryLunaCanaryWithLegacy, canaryGeneratedCleanupUrls,
   hasMalformedLunaEventTitle, isOnlineAdministrativeMilestone, isElectionNoticeWithoutVenue,
@@ -73,7 +73,8 @@ test('Luna sample is stable, bounded, and can exclude a reviewed post', () => {
   assert.deepEqual(selected, ids.filter(id => isSampledLunaCanaryPost(id, true, '15')));
   assert.equal(isSampledLunaCanaryPost(selected[0], true, '15', selected[0]), false);
   assert.equal(isSampledLunaCanaryPost(selected[0], false, '15'), false);
-  assert.equal(isSampledLunaCanaryPost(selected[0], true, '76'), false);
+  assert.equal(isSampledLunaCanaryPost(selected[0], true, '100'), true);
+  assert.equal(isSampledLunaCanaryPost(selected[0], true, '101'), false);
   assert.equal(isSampledLunaCanaryPost(selected[0], true, '*'), false);
 });
 
@@ -88,11 +89,17 @@ test('eligible Stage 3 ordinals allocate a stable, balanced 17 percent', () => {
   assert.deepEqual(selected, Array.from({ length: 90 }, (_, index) => index + 1)
     .filter(ordinal => isLunaStage3QuotaOrdinal(ordinal, 17, 'dataset-a')));
   assert.equal(isLunaStage3QuotaOrdinal(0, 17), false);
-  assert.equal(isLunaStage3QuotaOrdinal(1, 76), false);
+  assert.equal(Array.from({ length: 100 }, (_, index) => index + 1)
+    .filter(ordinal => isLunaStage3QuotaOrdinal(ordinal, 76, 'dataset-a')).length, 76);
   assert.equal(Array.from({ length: 100 }, (_, index) => index + 1)
     .filter(ordinal => isLunaStage3QuotaOrdinal(ordinal, 50, 'dataset-a')).length, 50);
   assert.equal(Array.from({ length: 100 }, (_, index) => index + 1)
     .filter(ordinal => isLunaStage3QuotaOrdinal(ordinal, 75, 'dataset-a')).length, 75);
+  assert.equal(Array.from({ length: 100 }, (_, index) => index + 1)
+    .filter(ordinal => isLunaStage3QuotaOrdinal(ordinal, 100, 'dataset-a')).length, 100);
+  assert.equal(isLunaStage3QuotaOrdinal(101, 101, 'dataset-a'), false);
+  assert.equal(isSampledEligibleLunaStage3Post('dataset-a', 'post-a', 100), true);
+  assert.equal(isSampledEligibleLunaStage3Post('dataset-a', 'post-a', 101), false);
 });
 
 test('seasonal league timetable uses the reviewed legacy route until recurrence is defined', () => {
