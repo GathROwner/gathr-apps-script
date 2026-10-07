@@ -32,6 +32,7 @@ export const CHECK_IN_SAMPLE_MAX_AGE_MS = 60_000;
 export const CHECK_IN_SAMPLE_MAX_FUTURE_MS = 10_000;
 export const CHECK_IN_COMPLETION_TTL_MS = 5 * 60_000;
 export const CHECK_IN_SESSION_TTL_MS = 10 * 60_000;
+export const CHECK_IN_POST_CHECKOUT_RESUME_MS = 10 * 60_000;
 
 export interface CheckInEligibilitySampleInput {
   sessionId: unknown;
@@ -310,9 +311,14 @@ export async function recordCheckInReadinessSample(
     .doc(checkInEligibilitySessionId(uid, sessionId));
   const ownerRef = db.collection('checkInEligibilitySessions')
     .doc(`${uid}__readiness_owner`);
+  const activeCheckInRef = db.collection('activeCheckIns').doc(uid);
 
   return db.runTransaction(async (transaction) => {
-    const [snapshot, ownerSnapshot] = await transaction.getAll(sessionRef, ownerRef);
+    const [snapshot, ownerSnapshot, activeCheckInSnapshot] = await transaction.getAll(
+      sessionRef,
+      ownerRef,
+      activeCheckInRef
+    );
     const previous = snapshot.data() || {};
     const owner = ownerSnapshot.data() || {};
     if (snapshot.exists && previous.uid !== uid) {
@@ -331,39 +337,69 @@ export async function recordCheckInReadinessSample(
     const ownerExpiryMs = timestampMillis(owner.expiresAt);
     const ownerExpired = ownerExpiryMs === null || ownerExpiryMs <= nowMs;
     const activeSessionId = ownerExpired ? '' : String(owner.activeSessionId || '');
+    const activeCheckInExpiresAtMs = timestampMillis(activeCheckInSnapshot.data()?.expiresAt);
+    const hasActiveCheckIn = activeCheckInSnapshot.exists
+      && (activeCheckInExpiresAtMs === null || activeCheckInExpiresAtMs > nowMs);
+    if (hasActiveCheckIn) {
+      throw new SocialDomainError('failed-precondition', 'Check out before preparing another check-in.');
+    }
     if (activeSessionId && activeSessionId !== sessionId && snapshot.exists && !expired) {
       throw new SocialDomainError('failed-precondition', 'Start a new check-in readiness session.');
     }
     const continuing = snapshot.exists && !expired && (!activeSessionId || activeSessionId === sessionId);
+    let checkoutContinuation: DocumentData | null = null;
+    const resumeSessionId = String(owner.resumeSessionId || '');
+    const resumeUntilMs = timestampMillis(owner.resumeUntilAt);
+    if (!snapshot.exists && !resetRequested && !ownerExpired
+      && activeSessionId && resumeSessionId === activeSessionId
+      && resumeUntilMs !== null && resumeUntilMs > nowMs) {
+      const resumedSessionRef = db.collection('checkInEligibilitySessions')
+        .doc(checkInEligibilitySessionId(uid, resumeSessionId));
+      const resumedSessionSnapshot = await transaction.get(resumedSessionRef);
+      const candidate = resumedSessionSnapshot.data() || {};
+      const candidateExpiresAtMs = timestampMillis(candidate.expiresAt);
+      if (resumedSessionSnapshot.exists
+        && candidate.uid === uid
+        && candidate.mode === 'prequalification_v1'
+        && candidate.boundAt
+        && candidate.consumedAt
+        && candidateExpiresAtMs !== null
+        && candidateExpiresAtMs > nowMs) {
+        checkoutContinuation = candidate;
+      }
+    }
+    const continuingAfterCheckOut = !continuing && checkoutContinuation !== null;
     const previousSequence = continuing ? Number(previous.sequence ?? -1) : -1;
     if (continuing && sequence <= previousSequence) {
       throw new SocialDomainError('failed-precondition', 'This location sample was already recorded.');
     }
 
-    let anchorLatitude = continuing && !resetRequested
-      ? parseLatitude(previous.anchorLatitude)
+    const evidenceSource = continuing && !resetRequested ? previous : checkoutContinuation;
+    let anchorLatitude = evidenceSource
+      ? parseLatitude(evidenceSource.anchorLatitude)
       : sample.latitude;
-    let anchorLongitude = continuing && !resetRequested
-      ? parseLongitude(previous.anchorLongitude)
+    let anchorLongitude = evidenceSource
+      ? parseLongitude(evidenceSource.anchorLongitude)
       : sample.longitude;
-    let hereQualifyingMs = continuing && !resetRequested
-      ? Math.max(0, Number(previous.hereQualifyingMs) || 0)
+    let hereQualifyingMs = evidenceSource
+      ? Math.max(0, Number(evidenceSource.hereQualifyingMs) || 0)
       : 0;
-    let placeQualifyingMs = continuing && !resetRequested
-      ? Math.max(0, Number(previous.placeQualifyingMs) || 0)
+    let placeQualifyingMs = evidenceSource
+      ? Math.max(0, Number(evidenceSource.placeQualifyingMs) || 0)
       : 0;
     const lastSeenMs = continuing && !resetRequested ? timestampMillis(previous.lastSeenAt) : null;
-    const lastCapturedAtMs = continuing && !resetRequested
-      ? Number(previous.lastCapturedAtMs)
+    const priorEvidence = continuing && !resetRequested ? previous : checkoutContinuation;
+    const lastCapturedAtMs = priorEvidence
+      ? Number(priorEvidence.lastCapturedAtMs)
       : Number.NaN;
-    const previousLatitude = continuing && !resetRequested
-      ? Number(previous.lastLatitude)
+    const previousLatitude = priorEvidence
+      ? Number(priorEvidence.lastLatitude)
       : Number.NaN;
-    const previousLongitude = continuing && !resetRequested
-      ? Number(previous.lastLongitude)
+    const previousLongitude = priorEvidence
+      ? Number(priorEvidence.lastLongitude)
       : Number.NaN;
-    const previousAccuracy = continuing && !resetRequested
-      ? Number(previous.lastAccuracyMeters)
+    const previousAccuracy = priorEvidence
+      ? Number(priorEvidence.lastAccuracyMeters)
       : Number.NaN;
     const previouslyInterrupted = continuing && !resetRequested
       && timestampMillis(previous.interruptedSinceAt) !== null;
@@ -407,6 +443,10 @@ export async function recordCheckInReadinessSample(
       placeQualifyingMs = 0;
       anchorLatitude = sample.latitude;
       anchorLongitude = sample.longitude;
+    } else if (reason === 'qualifying' && continuingAfterCheckOut) {
+      // A checkout continuation preserves earned dwell only. The fresh fix
+      // must still match the original anchor, and no time inside the check-in
+      // itself is credited to the readiness rings.
     } else if (reason === 'qualifying') {
       const captureGapMs = Number.isFinite(lastCapturedAtMs)
         ? sample.capturedAtMs - lastCapturedAtMs
@@ -488,6 +528,8 @@ export async function recordCheckInReadinessSample(
       uid,
       mode: 'prequalification_owner_v1',
       activeSessionId: sessionId,
+      resumeSessionId: null,
+      resumeUntilAt: null,
       drivingSuppressedUntilAt: drivingSuppressedUntilMs === null
         ? null
         : Timestamp.fromMillis(drivingSuppressedUntilMs),
@@ -665,6 +707,12 @@ export async function bindCheckInReadiness(
       completedAt: now,
       completedExpiresAt,
       expiresAt: completedExpiresAt,
+      lastLatitude: sample.latitude,
+      lastLongitude: sample.longitude,
+      lastAccuracyMeters: sample.accuracyMeters,
+      lastSpeedMetersPerSecond: sample.speedMetersPerSecond,
+      lastCapturedAtMs: sample.capturedAtMs,
+      lastSeenAt: now,
       updatedAt: now,
     });
     return {

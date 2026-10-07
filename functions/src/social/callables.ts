@@ -364,7 +364,8 @@ export const deleteFriendEventCallable = onCall(releaseTwoOptions, async (reques
 
 export const checkOutCallable = onCall(options, async (request) => {
   const uid = requireUid(request.auth);
-  return run(() => checkOut(uid));
+  const data = asData(request.data);
+  return run(() => checkOut(uid, undefined, data.expectedRevision));
 });
 
 export const deleteSocialAccountDataCallable = onCall(options, async (request) => {

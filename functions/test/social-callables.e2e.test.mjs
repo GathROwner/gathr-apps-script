@@ -167,8 +167,56 @@ test('deployed callable surface enforces Auth and completes the friend/check-in 
   assert.equal(resultOf(retried).revision, resultOf(checkedIn).revision);
   assert.equal((await db.doc('users/alice/friendActivity/bob').get()).data()?.venueId, 'venue-1');
 
-  await call('checkOutCallable', {}, bobToken);
+  const renewalWhileCheckedIn = await call('recordCheckInReadinessSampleCallable', {
+    protocolVersion: 1,
+    reset: false,
+    sessionId: 'callable-readiness-while-checked-in-001',
+    sequence: 0,
+    latitude: 46.2382,
+    longitude: -63.1311,
+    accuracyMeters: 8,
+    speedMetersPerSecond: 0,
+    capturedAtMs: Date.now(),
+  }, bobToken);
+  assert.equal(renewalWhileCheckedIn.response.ok, false);
+  assert.equal(renewalWhileCheckedIn.json.error.status, 'FAILED_PRECONDITION');
+
+  const staleCheckout = await call('checkOutCallable', { expectedRevision: 'stale-check-in-001' }, bobToken);
+  assert.equal(resultOf(staleCheckout).checkedOut, false);
+  assert.equal((await db.doc('activeCheckIns/bob').get()).data()?.revision, resultOf(checkedIn).revision);
+  const checkout = await call('checkOutCallable', { expectedRevision: resultOf(checkedIn).revision }, bobToken);
+  assert.equal(resultOf(checkout).checkedOut, true);
   assert.equal((await db.doc('users/alice/friendActivity/bob').get()).exists, false);
+
+  const renewedReadiness = await call('recordCheckInReadinessSampleCallable', {
+    protocolVersion: 1,
+    reset: false,
+    sessionId: 'callable-readiness-after-checkout-001',
+    sequence: 0,
+    latitude: 46.2382,
+    longitude: -63.1311,
+    accuracyMeters: 8,
+    speedMetersPerSecond: 0,
+    capturedAtMs: Date.now(),
+  }, bobToken);
+  assert.equal(renewedReadiness.response.ok, true, JSON.stringify(renewedReadiness.json));
+  assert.equal(resultOf(renewedReadiness).hereReady, true);
+  assert.equal(resultOf(renewedReadiness).placeReady, true);
+
+  const movedAfterCheckout = await call('recordCheckInReadinessSampleCallable', {
+    protocolVersion: 1,
+    reset: false,
+    sessionId: 'callable-readiness-after-checkout-001',
+    sequence: 1,
+    latitude: 46.239,
+    longitude: -63.1311,
+    accuracyMeters: 8,
+    speedMetersPerSecond: 0,
+    capturedAtMs: Date.now() + 100,
+  }, bobToken);
+  assert.equal(movedAfterCheckout.response.ok, true, JSON.stringify(movedAfterCheckout.json));
+  assert.equal(resultOf(movedAfterCheckout).hereReady, false);
+  assert.equal(resultOf(movedAfterCheckout).placeReady, false);
 
   const startAtMs = Date.now() + 24 * 60 * 60_000;
   const created = await call('createFriendEventCallable', {

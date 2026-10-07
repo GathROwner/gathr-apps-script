@@ -27,6 +27,8 @@ import {
   validateVenueId,
 } from './validation.js';
 import {
+  CHECK_IN_POST_CHECKOUT_RESUME_MS,
+  CHECK_IN_SESSION_TTL_MS,
   assertCompletedCheckInEligibility,
   checkInEligibilitySessionId,
 } from './checkInEligibility.js';
@@ -621,6 +623,9 @@ export async function createCheckIn(
       checkInEligibilitySessionId(ownerUid, eligibilitySessionId)
     )
     : null;
+  const readinessOwnerRef = eligibilityRef
+    ? db.collection('checkInEligibilitySessions').doc(`${ownerUid}__readiness_owner`)
+    : null;
   const createdAt = Timestamp.now();
   const expiresAt = Timestamp.fromMillis(
     createdAt.toMillis() + durationMinutes * 60_000
@@ -633,7 +638,7 @@ export async function createCheckIn(
       locationRef,
       checkInRef,
       operationRef,
-      ...(eligibilityRef ? [eligibilityRef] : [])
+      ...(eligibilityRef ? [eligibilityRef, readinessOwnerRef!] : [])
     );
     const previousOperation = baseSnapshots[3].data() || {};
     if (baseSnapshots[3].exists) {
@@ -774,10 +779,20 @@ export async function createCheckIn(
     };
     transaction.set(checkInRef, checkIn);
     if (needsEligibility && eligibilityRef) {
+      const retainedUntil = Timestamp.fromMillis(expiresAt.toMillis() + CHECK_IN_SESSION_TTL_MS);
       transaction.update(eligibilityRef, {
         consumedAt: createdAt,
         consumedCheckInRevision: revision,
+        // Keep the private readiness evidence only for the active check-in's
+        // lifetime so checkout can verify a fresh stationary return fix.
+        expiresAt: retainedUntil,
       });
+      if (readinessOwnerRef && baseSnapshots[5]?.exists) {
+        transaction.update(readinessOwnerRef, {
+          expiresAt: retainedUntil,
+          updatedAt: createdAt,
+        });
+      }
     }
     if (candidatePlace) {
       transaction.update(locationRef, {
@@ -837,19 +852,62 @@ export async function createCheckIn(
 
 export async function checkOut(
   ownerUidValue: unknown,
-  db = firestore()
-): Promise<{ checkedOut: true; removedViewerCount: number }> {
+  db = firestore(),
+  expectedRevisionValue?: unknown
+): Promise<{ checkedOut: boolean; removedViewerCount: number }> {
   const ownerUid = validateUid(ownerUidValue, 'ownerUid');
+  const expectedRevision = expectedRevisionValue === undefined
+    ? undefined
+    : validateSocialOperationId(expectedRevisionValue);
   const ref = activeCheckInRef(db, ownerUid);
+  const readinessOwnerRef = db.collection('checkInEligibilitySessions').doc(`${ownerUid}__readiness_owner`);
+  const now = Timestamp.now();
+  const resumeUntilAt = Timestamp.fromMillis(now.toMillis() + CHECK_IN_POST_CHECKOUT_RESUME_MS);
   return db.runTransaction(async (transaction) => {
     const snapshot = await transaction.get(ref);
-    if (!snapshot.exists) return { checkedOut: true, removedViewerCount: 0 };
+    if (!snapshot.exists) return { checkedOut: expectedRevision === undefined, removedViewerCount: 0 };
     const data = snapshot.data() || {};
+    if (expectedRevision !== undefined && data.revision !== expectedRevision) {
+      return { checkedOut: false, removedViewerCount: 0 };
+    }
+    const ownerSnapshot = await transaction.get(readinessOwnerRef);
+    const readinessOwner = ownerSnapshot.data() || {};
+    const readinessSessionId = typeof readinessOwner.activeSessionId === 'string'
+      ? readinessOwner.activeSessionId
+      : '';
+    let readinessSessionRef: DocumentReference | null = null;
+    let readinessSessionSnapshot: DocumentSnapshot | null = null;
+    if (readinessSessionId) {
+      try {
+        readinessSessionRef = db.collection('checkInEligibilitySessions')
+          .doc(checkInEligibilitySessionId(ownerUid, validateSocialOperationId(readinessSessionId)));
+        readinessSessionSnapshot = await transaction.get(readinessSessionRef);
+      } catch {
+        // A malformed readiness pointer must never prevent checkout.
+        readinessSessionRef = null;
+        readinessSessionSnapshot = null;
+      }
+    }
     const viewerUids = Array.isArray(data.viewerUids)
       ? data.viewerUids.map((uid: unknown) => validateUid(uid, 'viewerUid'))
       : [];
     for (const viewerUid of viewerUids) {
       transaction.delete(activityRef(db, viewerUid, ownerUid));
+    }
+    const readinessSession = readinessSessionSnapshot?.data() || {};
+    const canResumeReadiness = readinessSessionSnapshot?.exists === true
+      && readinessSession.uid === ownerUid
+      && readinessSession.mode === 'prequalification_v1'
+      && Boolean(readinessSession.boundAt)
+      && Boolean(readinessSession.consumedAt);
+    if (canResumeReadiness && readinessSessionRef) {
+      transaction.update(readinessSessionRef, { expiresAt: resumeUntilAt, updatedAt: now });
+      transaction.set(readinessOwnerRef, {
+        resumeSessionId: readinessSessionId,
+        resumeUntilAt,
+        expiresAt: resumeUntilAt,
+        updatedAt: now,
+      }, { merge: true });
     }
     transaction.delete(ref);
     return { checkedOut: true, removedViewerCount: viewerUids.length };
