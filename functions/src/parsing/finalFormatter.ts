@@ -284,7 +284,7 @@ Return exactly ${expectedCount} objects in formattedEvents (one-to-one with the 
 Copy each input sourceItemIndex to the matching formatted event. Do not drop, merge, or reorder items.
 Never return arrays of values for an item; each must be a JSON object.`;
 
-  const schema = createFormattingSchema();
+  const schema = createFormattingSchema(Boolean(cfg.stage5MinimalOutputProbe));
 
   try {
     const batchSize = Number(cfg.stage5BatchSize || 0);
@@ -300,16 +300,20 @@ Never return arrays of values for an item; each must be a JSON object.`;
             'Copy each input sourceItemIndex to the matching formatted event. Do not drop, merge, or reorder items.\n' +
             'Never return arrays of values for an item; each must be a JSON object.';
           const chunkPrompt = chunkHeader + '\n\n' +
-            createFormattingPrompt(items, userName, partialAddress, timestamp);
-          return callGPTWithSchema(chunkPrompt, 'formatEvents', schema, cfg);
+            createFormattingPrompt(items, userName, partialAddress, timestamp,
+              Boolean(cfg.stage5MinimalOutputProbe));
+          return callGPTWithSchema(chunkPrompt, 'formatEvents', schema, cfg,
+            { offset, itemCount: items.length });
         }, Number(cfg.stage5BatchConcurrency || 1)
       );
       if (!formattedEvents) return [];
       response = { formattedEvents, formattingDecisions: [] };
     } else {
       const prompt = batchHeader + '\n\n' +
-        createFormattingPrompt(validatedData, userName, partialAddress, timestamp);
-      response = await callGPTWithSchema(prompt, 'formatEvents', schema, cfg);
+        createFormattingPrompt(validatedData, userName, partialAddress, timestamp,
+          Boolean(cfg.stage5MinimalOutputProbe));
+      response = await callGPTWithSchema(prompt, 'formatEvents', schema, cfg,
+        { offset: 0, itemCount: expectedCount });
     }
 
     // Validate and normalize response
@@ -716,7 +720,8 @@ function createFormattingPrompt(
   items: ExtractedItem[],
   userName: string,
   partialAddress: string,
-  timestamp: string
+  timestamp: string,
+  minimalOutput = false
 ): string {
   const indexedItems = items.map((item, sourceItemIndex) => ({
     ...item,
@@ -814,7 +819,7 @@ VENUE MAPPING RULES:
 RESPONSE STRUCTURE:
 Return a JSON object with:
 1. "formattedEvents": array of formatted event records
-2. "formattingDecisions": array of objects explaining key formatting choices for each item
+${minimalOutput ? '' : '2. "formattingDecisions": array of objects explaining key formatting choices for each item'}
 
 HARD SHAPE & COUNT INVARIANTS:
 - The length of formattedEvents MUST equal items.length (one output object per input), and the order MUST be identical.
@@ -827,8 +832,8 @@ HARD SHAPE & COUNT INVARIANTS:
 /**
  * Create the formatting schema for GPT function calling
  */
-function createFormattingSchema(): GPTFunctionSchema[] {
-  return [
+function createFormattingSchema(minimalOutput = false): GPTFunctionSchema[] {
+  const schema: GPTFunctionSchema[] = [
     {
       name: 'formatEvents',
       description:
@@ -952,6 +957,11 @@ function createFormattingSchema(): GPTFunctionSchema[] {
       },
     },
   ];
+  if (minimalOutput) {
+    delete schema[0].parameters.properties.formattingDecisions;
+    schema[0].parameters.required = ['formattedEvents'];
+  }
+  return schema;
 }
 
 /**
@@ -6080,7 +6090,8 @@ async function callGPTWithSchema(
   prompt: string,
   functionName: string,
   schema: GPTFunctionSchema[],
-  config: ParsingConfig
+  config: ParsingConfig,
+  batch: { offset: number; itemCount: number }
 ): Promise<FormattingResult> {
   const client = getOpenAIClient();
   const explicitModelOverride = String(config.stage5ModelOverride || '').trim();
@@ -6102,9 +6113,9 @@ async function callGPTWithSchema(
     : 8000;
   const parseReasoningEffort = (
     value: string
-  ): 'low' | 'medium' | 'high' | null => {
+  ): 'minimal' | 'low' | 'medium' | 'high' | null => {
     const normalized = String(value || '').trim().toLowerCase();
-    if (normalized === 'low' || normalized === 'medium' || normalized === 'high') {
+    if (normalized === 'minimal' || normalized === 'low' || normalized === 'medium' || normalized === 'high') {
       return normalized;
     }
     return null;
@@ -6161,6 +6172,22 @@ async function callGPTWithSchema(
         durationMs,
       });
       const usage = extractTokenUsage(response.usage);
+      const messageContent = extractResponsesText(response);
+      const parsedResponse = parseFormattingJsonResponse(messageContent || '');
+      const diagnostics = {
+        ...config.diagnosticContext,
+        responseId: String(response.id || ''),
+        responseStatus: String(response.status || ''),
+        incompleteReason: String(response.incomplete_details?.reason || ''),
+        requestedMaxOutputTokens: stage5ResponsesMaxTokens,
+        reasoningTokens: Number(response.usage?.output_tokens_details?.reasoning_tokens || 0),
+        visibleOutputChars: messageContent.length,
+        parsedItemCount: parsedResponse.formattedEvents?.length || 0,
+        parseError: Boolean(parsedResponse._parseError),
+        batchOffset: batch.offset,
+        batchItemCount: batch.itemCount,
+      };
+      logger.info('Stage 5 Responses diagnostics', { model, durationMs, ...usage, ...diagnostics });
       await emitGptUsage(config, {
         stage: 'stage5',
         component: 'finalFormatter',
@@ -6168,15 +6195,15 @@ async function callGPTWithSchema(
         model,
         durationMs,
         ...usage,
+        ...diagnostics,
       });
 
-      const messageContent = extractResponsesText(response);
       logger.debug('GPT formatting response received (responses)', {
         model,
         tokens: usage.totalTokens,
       });
 
-      return parseFormattingJsonResponse(messageContent || '');
+      return parsedResponse;
     }
 
     const callStart = Date.now();

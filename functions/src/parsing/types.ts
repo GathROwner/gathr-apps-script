@@ -77,6 +77,15 @@ export interface GptUsageRecord {
   outputTokens?: number;
   totalTokens?: number;
   cachedInputTokens?: number;
+  responseId?: string;
+  responseStatus?: string;
+  incompleteReason?: string;
+  requestedMaxOutputTokens?: number;
+  reasoningTokens?: number;
+  visibleOutputChars?: number;
+  parsedItemCount?: number;
+  batchOffset?: number;
+  batchItemCount?: number;
 }
 
 export interface ParseStageArtifactsSnapshot {
@@ -203,6 +212,10 @@ export interface ParsingConfig {
   /** Format large inventories in bounded nano batches. */
   stage5BatchSize?: number;
   stage5BatchConcurrency?: number;
+  /** Local diagnostic only: omit unused formatting decision prose from Stage 5 output. */
+  stage5MinimalOutputProbe?: boolean;
+  /** Identifiers only, for correlating per-call timing without logging post content. */
+  diagnosticContext?: { fileId: string; runId: string; rowIndex: number; postId: string };
   lunaCanaryBypass?: boolean;
   /** Used only by regular full-dataset runs after Stage 2 has passed. */
   lunaStage3EligibleSelector?: (postId: string, percent: number) => boolean;

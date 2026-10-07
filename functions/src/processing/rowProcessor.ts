@@ -3110,6 +3110,12 @@ export async function processRow(
       let parserSkipReason: ParseSkipReason | undefined;
       let stageArtifactsSnapshot: ParseStageArtifactsSnapshot | undefined;
       const parserConfig: Partial<ParsingConfig> = {
+        diagnosticContext: {
+          fileId: batchManager.getState().fileId,
+          runId: String(batchManager.getState().runId || ''),
+          rowIndex,
+          postId: String(row.uniqueId || ''),
+        },
         skipReasonHandler: (skipReason: ParseSkipReason) => {
           parserSkipReason = skipReason;
         },

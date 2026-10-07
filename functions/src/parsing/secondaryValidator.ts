@@ -525,7 +525,7 @@ export async function performSecondaryValidation(
   const prompt = createValidationPrompt(rawData, userName, timestamp, currentYear);
 
   try {
-    const response = await callGPT(prompt, cfg);
+    const response = await callGPT(prompt, cfg, rawData.length);
     const validationResult = parseSecondaryValidationResponse(response);
     const responseCountMismatch = !validationResult._parseError &&
       validationResult.validatedItems.length !== originalStage3Count;
@@ -1210,7 +1210,7 @@ function isQuoteEscaped(str: string, index: number): boolean {
 /**
  * Call GPT for validation
  */
-async function callGPT(prompt: string, config: ParsingConfig): Promise<string> {
+async function callGPT(prompt: string, config: ParsingConfig, batchItemCount: number): Promise<string> {
   const client = getOpenAIClient();
   const explicitModelOverride = String(config.stage4ModelOverride || '').trim();
   const model = explicitModelOverride || resolveStageModel(config.gptModelFast, 'STAGE4_MODEL_OVERRIDE');
@@ -1224,9 +1224,9 @@ async function callGPT(prompt: string, config: ParsingConfig): Promise<string> {
     : 32000;
   const parseReasoningEffort = (
     value: string
-  ): 'low' | 'medium' | 'high' | null => {
+  ): 'minimal' | 'low' | 'medium' | 'high' | null => {
     const normalized = String(value || '').trim().toLowerCase();
-    if (normalized === 'low' || normalized === 'medium' || normalized === 'high') {
+    if (normalized === 'minimal' || normalized === 'low' || normalized === 'medium' || normalized === 'high') {
       return normalized;
     }
     return null;
@@ -1268,6 +1268,18 @@ async function callGPT(prompt: string, config: ParsingConfig): Promise<string> {
         durationMs,
       });
       const usage = extractTokenUsage(response.usage);
+      const messageContent = extractResponsesText(response);
+      const diagnostics = {
+        ...config.diagnosticContext,
+        batchItemCount,
+        responseId: String(response.id || ''),
+        responseStatus: String(response.status || ''),
+        incompleteReason: String(response.incomplete_details?.reason || ''),
+        requestedMaxOutputTokens: stage4ResponsesMaxTokens,
+        reasoningTokens: Number(response.usage?.output_tokens_details?.reasoning_tokens || 0),
+        visibleOutputChars: messageContent.length,
+      };
+      logger.info('Stage 4 Responses diagnostics', { model, durationMs, ...usage, ...diagnostics });
       await emitGptUsage(config, {
         stage: 'stage4',
         component: 'secondaryValidator',
@@ -1275,9 +1287,9 @@ async function callGPT(prompt: string, config: ParsingConfig): Promise<string> {
         model,
         durationMs,
         ...usage,
+        ...diagnostics,
       });
 
-      const messageContent = extractResponsesText(response);
       logger.debug('GPT validation response received (responses)', {
         model,
         tokens: usage.totalTokens,
