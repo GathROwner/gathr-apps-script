@@ -68,7 +68,7 @@ The readiness flow can accrue server-authorized evidence before the user chooses
 }
 ```
 
-The result reports server-timed `hereQualifyingMs`/`hereReady` for the 30-second approximate-private threshold and `placeQualifyingMs`/`placeReady` for the 90-second public/exact-private threshold, plus a short-lived numeric `expiresAtMs` receipt deadline. Client elapsed time alone is never accepted. Here permits accuracy up to 50 m; Place requires 25 m or better. A foreground interruption of at most five minutes can be credited only after a fresh, stationary return fix still matches the server-held anchor. The client gives transient GPS drift a short retry window before submitting a reset. Poor accuracy, movement, an older interruption, or an explicit reset clears the affected evidence. Driving-speed evidence clears both rings and starts a 30-second owner-level settling period that cannot be bypassed with a new session ID.
+The result reports server-timed `hereQualifyingMs`/`hereReady` for the 30-second private-check-in threshold and `placeQualifyingMs`/`placeReady` for the 90-second public-place threshold, plus a short-lived numeric `expiresAtMs` receipt deadline. Client elapsed time alone is never accepted. Here permits accuracy up to 50 m; Place requires 25 m or better. A foreground interruption of at most five minutes can be credited only after a fresh, stationary return fix still matches the server-held anchor. The client gives transient GPS drift a short retry window before submitting a reset. Poor accuracy, movement, an older interruption, or an explicit reset clears the affected evidence. Driving-speed evidence clears both rings and starts a 30-second owner-level settling period that cannot be bypassed with a new session ID.
 
 For spatial binding, the server stores only a short-lived, owner-private readiness session containing its anchor and latest coordinates, plus an owner-scoped active-session/cooldown record without coordinates. It never stores an address, never creates a check-in, and both records are removed by the existing eligibility-session cleanup. These coordinates are not returned to friends or copied into social projections.
 
@@ -88,7 +88,7 @@ After the user selects a target, `bindCheckInReadinessCallable` binds the sessio
 }
 ```
 
-Use exactly one of `venueId` or `placeCandidateId`. Binding checks the target against both the accumulated anchor and a fresh current sample. A private candidate can bind at the 30-second threshold for approximate sharing; `exactPrivateAllowed` is true only after 90 seconds. Public venues and external places cannot bind before 90 seconds. The same readiness cannot be rebound to another target.
+Use exactly one of `venueId` or `placeCandidateId`. Binding checks the target against both the accumulated anchor and a fresh current sample. A private candidate can bind at the 30-second Here threshold for approximate or exact sharing, subject to fresh Here accuracy and stationary checks. Exact sharing still requires the explicit opt-in and selected-friends audience; the grant itself is not consent. Public venues and external places cannot bind before the 90-second Place threshold. The same readiness cannot be rebound to another target.
 
 `createCheckInCallable` then consumes the returned `eligibilitySessionId`. It still enforces explicit user action, audience permissions, idempotency, expiry, and selected-friends-only exact private sharing. A 30-second private grant fails closed if exact sharing is requested.
 

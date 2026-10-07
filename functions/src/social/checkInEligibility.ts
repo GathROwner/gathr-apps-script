@@ -690,9 +690,9 @@ export async function bindCheckInReadiness(
     }
     const completedExpiresAt = Timestamp.fromMillis(nowMs + CHECK_IN_COMPLETION_TTL_MS);
     const exactPrivateAllowed = privatePlace
-      && placeQualifyingMs >= CHECK_IN_PLACE_TARGET_MS
-      && sample.accuracyMeters <= CHECK_IN_PLACE_MAX_ACCURACY_METRES
-      && Number(session.lastAccuracyMeters) <= CHECK_IN_PLACE_MAX_ACCURACY_METRES;
+      && hereQualifyingMs >= CHECK_IN_HERE_TARGET_MS
+      && sample.accuracyMeters <= CHECK_IN_HERE_MAX_ACCURACY_METRES
+      && Number(session.lastAccuracyMeters) <= CHECK_IN_HERE_MAX_ACCURACY_METRES;
     transaction.update(sessionRef, {
       boundAt: now,
       bindOperationId: operationId,
@@ -974,20 +974,14 @@ export function assertCompletedCheckInEligibility(
 ): void {
   const completedExpiresAt = session.completedExpiresAt;
   const prequalified = session.mode === 'prequalification_v1';
+  const privatePlaceEligibilityAllowed = target.locationType === 'private_place'
+    && (session.eligibilityLevel === 'here' || session.eligibilityLevel === 'place')
+    && (target.shareExactLocation !== true || session.exactPrivateAllowed === true);
+  const publicPlaceEligibilityAllowed = target.locationType !== 'private_place'
+    && session.eligibilityLevel === 'place';
   const prequalifiedLevelAllowed = !prequalified
-    || (
-      target.locationType === 'private_place'
-      && target.shareExactLocation !== true
-      && (session.eligibilityLevel === 'here' || session.eligibilityLevel === 'place')
-    )
-    || (
-      session.eligibilityLevel === 'place'
-      && (
-        target.locationType !== 'private_place'
-        || target.shareExactLocation !== true
-        || session.exactPrivateAllowed === true
-      )
-    );
+    || privatePlaceEligibilityAllowed
+    || publicPlaceEligibilityAllowed;
   if (
     session.uid !== uid
     || !(

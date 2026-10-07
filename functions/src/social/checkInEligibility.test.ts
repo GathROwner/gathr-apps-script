@@ -4,6 +4,8 @@ import test from 'node:test';
 import { Timestamp, type Firestore } from 'firebase-admin/firestore';
 
 import {
+  assertCompletedCheckInEligibility,
+  bindCheckInReadiness,
   CHECK_IN_POST_CHECKOUT_RESUME_MS,
   checkInEligibilitySessionId,
   recordCheckInReadinessSample,
@@ -105,6 +107,68 @@ function sample(sessionId: string, sequence: number, nowMs: number, overrides: R
     ...overrides,
   };
 }
+
+test('Here-level private binding can authorize an explicit exact-pin opt-in before Place readiness', async () => {
+  const now = Timestamp.fromMillis(startMs);
+  const db = new ReadinessFirestore();
+  const readinessSessionId = 'private-exact-here-session-001';
+  const placeCandidateId = 'private-exact-home-candidate-001';
+  const locationKey = `private:${'a'.repeat(32)}`;
+  const latitude = 46.2382;
+  const longitude = -63.1311;
+  const sessionPath = `checkInEligibilitySessions/${checkInEligibilitySessionId(uid, readinessSessionId)}`;
+  db.documents.set(ownerPath, {
+    uid,
+    mode: 'prequalification_owner_v1',
+    activeSessionId: readinessSessionId,
+    expiresAt: Timestamp.fromMillis(startMs + 120_000),
+  });
+  db.documents.set(sessionPath, {
+    uid,
+    mode: 'prequalification_v1',
+    sessionId: readinessSessionId,
+    expiresAt: Timestamp.fromMillis(startMs + 60_000),
+    hereQualifyingMs: 30_000,
+    placeQualifyingMs: 0,
+    anchorLatitude: latitude,
+    anchorLongitude: longitude,
+    lastLatitude: latitude,
+    lastLongitude: longitude,
+    lastAccuracyMeters: 8,
+    lastSpeedMetersPerSecond: 0,
+    lastSeenAt: now,
+  });
+  db.documents.set(`checkInPlaceCandidates/${placeCandidateId}`, {
+    uid,
+    candidateId: placeCandidateId,
+    source: 'user_private_place',
+    expiresAt: Timestamp.fromMillis(startMs + 60_000),
+    place: { type: 'private_place', name: 'Home', locationKey, latitude, longitude },
+  });
+
+  const grant = await bindCheckInReadiness(uid, {
+    protocolVersion: 1,
+    readinessSessionId,
+    operationId: 'private-exact-bind-operation-001',
+    placeCandidateId,
+    latitude,
+    longitude,
+    accuracyMeters: 8,
+    speedMetersPerSecond: 0,
+    capturedAtMs: startMs - 250,
+  }, db as unknown as Firestore, now);
+
+  const boundSession = db.documents.get(sessionPath);
+  assert.equal(grant.exactPrivateAllowed, true);
+  assert.equal(boundSession?.eligibilityLevel, 'here');
+  assert.equal(boundSession?.placeQualifyingMs, 0);
+  assert.doesNotThrow(() => assertCompletedCheckInEligibility(boundSession || {}, uid, {
+    placeCandidateId,
+    locationKey,
+    locationType: 'private_place',
+    shareExactLocation: true,
+  }, now));
+});
 
 test('checkout renews previously earned rings only after a fresh same-anchor fix', async () => {
   const nowMs = startMs;
