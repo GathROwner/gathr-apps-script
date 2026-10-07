@@ -1,0 +1,35 @@
+# October 6 regular parse: 50% eligible-post Luna Stage 3 audit
+
+## Run and allocation
+
+The regular 376-row post dataset `1IcZOB0T9oxC1hugFaR0QbSD4nD_25t9I` completed on October 7 at 00:14 UTC under run `f1e9ec56-544a-4ed6-bed0-1f853705db5e`. The processing lock and final batch state were `completed`; the processed-dataset marker existed; the checkpoint was absent. This was the recovered full run, not a selected-row replay or dry run. Final statistics were 60 processed, 100 skipped, 216 invalid, 8 duplicate, 0 error, 139 new events, 78 updates, and 160 parse-snapshot writes.
+
+Of 88 Stage 3 eligible image posts, 36 were hash-selected for Luna (40.9% realized under a 50% selection probability). The 160 production snapshots cover 160 distinct rows; two additional row-80 dry-run snapshots were excluded. Exactly 36 production snapshots had Luna calls, matching the selection count. No selected production snapshot also had GPT-5.2. The selected posts used GPT-5 mini in Stages 1–2, GPT-6 Luna high in Stage 3, and GPT-5 nano in Stages 4–5; unselected image posts retained GPT-5.2 in Stage 3. One selected post had an additional Luna OCR diagnostic call. Legacy GPT-5.2 fallback did not appear on selected posts.
+
+The selected-post ledger and ordered gallery URLs are saved in `functions/artifacts/luna-oct6-full-audit/selected-ledger.json`. The image fetch log, source images, and four contact sheets are in the same artifact directory. All 36 captions and the gallery order were reviewed; 61 of 62 source images loaded for a visual contact-sheet pass. The single failed fetch was a government statement post that produced no event. Larger originals were opened for disputed flyers. This is an image and source audit, not proof that every small text glyph on every poster was legible.
+
+## Recovery and replay integrity
+
+The repair in `d2abaec` bounded Stage 4 and Stage 5 calls on both Stage 3 model paths, cached repeated venue work within a row, increased the resume timeout and task deadline, added delayed guarded probes for busy claims, and checked worker ownership before item writes. Build, 38 focused tests, a safe row-80 dry replay, Firebase dry run, and live revision readback passed before the paused queue resumed. See `docs/luna-oct6-stall-repair.md`.
+
+Rows 55, 80, 257, and 258 had timed out before the repair and were replayed by guarded workers. For each, first-pass new event IDs were updated on replay rather than created again. Final same-source live records and selected other-source dedupe candidates were inspected for those rows. No duplicate creation from those four replays was found in the examined records, though the broad row-55 roundup was not exhaustively matched to every independent venue source. Row 80's safe post-repair dry replay parsed 37 candidates into 36 validated items in three Stage 4 chunks and 27 final listings in four nine-item Stage 5 chunks; parse time fell from the original 612-second overrun to 243 seconds. After resuming at row 274, observed checkpoint advances through row 376 were monotonic and no further worker stall occurred. Individual event writes are fenced with an ownership read immediately before writing, but that read and write are not atomic; this narrow race remains an engineering limitation.
+
+## Source-grounded content findings
+
+| Source row | Evidence and final disposition |
+| --- | --- |
+| 184 Carrefour ISJ | Luna yielded all four October family activities. The October 17 apple picking activity at Wintermoor Orchard was held as an unrecognized venue, while three Carrefour activities were live. Resolve the venue if that source can be verified; all bookable family activities are in scope. |
+| 203 Famous Peppers | Caption advertises the Rough Rider pizza throughout October, in person and online. No final special was produced. This is a concrete special omission after the selected Luna path. |
+| 136 Island Stone Pub | Caption explicitly dates the Kensington Dessert Trail October 5–9 and lists several venue offers. The post yielded no final payload because the recent-past yearless-date guard held it. The guard appears overconservative for a same-day announcement. |
+| 254 Tignish Co-op | A boxed Count Chocula cereal price became a live one-day food special at the store's operating hours. This looks like a product promotion outside the intended prepared-food/event scope; retain as a quality review item rather than deleting a live record without a separately approved exact-path repair. |
+| 355 Pints East | Three live-event candidates were extracted from a five-image gallery; one matched an existing Margarita Wayne event. A Taylor Abrahamse tour image also prints St. Peter's Bay, PEI on October 27, but no corresponding output or live listing was found. The precise PEI venue is not printed on that image, so this is an omission/venue-resolution lead, not a justified assumption that Pints East hosts it. |
+| 296 Bacon is Magic | A past fish-and-chips review was misread as a new food special with its post time as the start time. Unknown-venue handling held it; no false live write was found. |
+| 30 Brothers 2 | The source says turkey dinners October 10, 11, and 12, 4–9 p.m. The live record spans October 10–12 with `isRecurring=No`, which may present as one continuous multi-day offering rather than three daily dinner windows. Review materialization separately. |
+
+Other zero-output selected posts were primarily nondated recaps, giveaways, hiring, or general guides. Rows 57 and 111 were held by area/unknown-venue review, while rows 100, 271, and 283 matched or enriched existing listings. Milton row 273 produced 19 final calendar payloads; 14 appeared as same-source live records and five were duplicate/enrichment matches to other sources. The restored Stage 4/5 batching ran on this dense selected post. Row 219's six published arts activity dates matched its source. These checks do not establish a complete ground-truth score for all 376 input rows.
+
+## Prior repair checks and rollout decision
+
+The five previously deleted wrong-date records were still absent. The generic Eastern Kings U12 duplicate remained absent while its detailed keeper remained live. The 84 removed Ontario Cornwall events had not reappeared; its venue document was deliberately preserved. The corrected October 10 Bookable Ice Time and MACPHEE records and Side Door Tango October 17 listing remained in place. An older Olde Dublin managed venue profile URL still returned HTTP 404; the deployed protection prevents future cleanup of reused managed images but does not repair that already broken URL.
+
+**Decision:** Retain the 50% eligible-image-post Luna Stage 3 canary and the deployed stall repair. Do not expand to other stages or claim complete content parity yet. The run finished with zero error rows and no observed replay duplicate, while the isolated special/venue/gallery findings above need targeted follow-up. The five-minute completion monitor was paused after completion.

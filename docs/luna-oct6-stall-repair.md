@@ -21,3 +21,7 @@ While the queue was paused, the exact pending 600-second task was backed up at `
 ## Remaining evidence
 
 The full run has not yet completed at this checkpoint. Confirm final lock, processed dataset, batch state, absent checkpoint, selected Luna posts and actual writes. Reconcile first-pass/replay writes for rows 55, 80, 257, and 258 against source inventory and watch any further large row for latency, holds, and duplicate records. A per-item Firestore write is checked against worker ownership just before the write, but that read and write are not one transaction; an extremely narrow handoff race still remains possible and requires the final duplicate audit.
+
+## Completion, October 7 at 00:14 UTC
+
+The resumed regular dataset completed under the original run ID. Firestore readback showed `processing_locks/{fileId}` completed, `processed_datasets/{fileId}` present with `processedAt=2026-10-07T00:14:11.273Z`, `batch_states/{fileId}_1` completed at 376/376, and no `checkpoints/{fileId}` document. After the repaired task claimed row 274, 106 observed checkpoint advances reached 376 with no regression or further stall. Final batch statistics: 60 processed, 100 skipped, 216 invalid, 8 duplicate, 0 error rows; 139 new events and 78 event updates. The separate source and live-write audit is in `docs/luna-stage3-oct6-50pct-production-audit.md`.
