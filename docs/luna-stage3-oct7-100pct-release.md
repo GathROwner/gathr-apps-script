@@ -17,3 +17,17 @@ Craig approved the exact eight false event IDs listed in the October 7 audit. Th
 The next regular full parse will provide production proof for the all-eligible setting. The existing audit heartbeat was updated to begin no earlier than 11 a.m. Halifax time and inspect that next completed full dataset, with no map interaction.
 
 Firebase reported the repository's existing outdated `firebase-functions` package warning during deployment. No dependency was changed in this parser release.
+
+## October 7 Stage 4/5 diagnostic follow-up
+
+Commit `c1a61fe` adds per-call, content-free Responses diagnostics for Stage 4 and Stage 5, plus local no-write frozen-input comparison scripts. It does not change live model selection, effort, batch size, or output caps. The frozen-input results and the category difference that prevents an immediate Stage 5 minimal-effort rollout are documented in `docs/luna-stage3-oct7-live-latency-diagnostic.md`.
+
+The diagnostic build and compiled backend suite passed (540/540). At 18:14:58 UTC, Firestore had no running, active, or processing parser locks. The exact three-function Firebase dry run succeeded, followed by the same narrow production deploy to `gathr-migrated` / `gathr-functions`. Firebase repeated the existing outdated `firebase-functions` warning.
+
+Production readback at 18:20 UTC found all three functions ACTIVE on source hash `f08f2814c7d3ace967cd248d612093473bc9f785`, each serving 100% traffic:
+
+- `processDataset`: `processdataset-00456-jem` in `northamerica-northeast2`.
+- `processDatasetResume`: `processdatasetresume-00420-zin` in `northamerica-northeast1`.
+- `processDatasetSelectedRows`: `processdatasetselectedrows-00412-nex` in `northamerica-northeast1`.
+
+All three still have Luna enabled for 100% of eligible Stage 3 image posts, Stage 3 only at high effort, no excluded IDs, and legacy fallback disabled. Stage 1/2 stay GPT-5 mini, unselected or image-ineligible Stage 3 stays GPT-5.2, Stage 4 stays GPT-5 nano low, and Stage 5 stays GPT-5 nano medium with the 32,000-token configured output cap. The next full parse will test the 100% eligible-image rollout and collect per-call Stage 4/5 status, reasoning tokens, visible output length, item count, and latency.
