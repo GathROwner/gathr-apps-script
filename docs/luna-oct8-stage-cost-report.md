@@ -39,6 +39,30 @@ Cloud Run/Functions, Firestore, image storage and transfer, and scraping.
 Invoice charges can therefore differ. The Stage 3 source post selected for
 anchored-text parsing did not make a Luna vision call.
 
+## Why Stage 1 costs $0.8419
+
+Stage 1 is labeled content validation, but the current prompt asks GPT-5 mini
+to inspect every supplied image and transcribe exact event names, dates,
+times, and venues for schedules. It embeds the JSON schema in the request,
+defaults image detail to `high`, and requests a description plus complexity
+signals for every image. This is a substantial vision/OCR pass, not a short
+yes/no classifier.
+
+The 148 saved posts made 187 Stage 1 calls. The extra 39 calls are explained
+by October 8 Cloud Logs: 30 truncated-JSON retries at a larger output cap,
+three retries without images after an image call failed, and six deliberate
+full-gallery refreshes for eligible Luna posts whose initial mini pass had
+seen only the first four images. The 1,572,028 input tokens cost $0.2811
+after accounting for 497,536 cached tokens; 280,438 output tokens cost
+$0.5609. The output figure includes any model reasoning tokens, but the
+saved Stage 1 usage does not split reasoning from visible JSON.
+
+This is a candidate for a separate Stage 1 simplification experiment after
+the Luna quality pass: preserve accurate acceptance and the image/layout
+signals the downstream stages need, while avoiding full schedule
+transcription and repeated over-cap output. No Stage 1 behavior changed for
+this report.
+
 ## Next decision
 
 Keep production Stage 5 medium reasoning through the next regular full parse,
