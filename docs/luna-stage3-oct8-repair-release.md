@@ -45,10 +45,29 @@ selected post used an anchored text route.
 
 ## Release boundary
 
-Parser code can be deployed after the compiled suite and narrow Firebase dry
-run pass and a fresh check finds no active full parse. Deployment prevents new
-bad writes but does not change the 11 existing false listings, two wrong
-PowerSkating parents, or missing Hunter performances. Those live repairs need
-an exact guarded plan, current document readback, a fresh backup, and Craig's
-approval under the GathR event-integrity repair workflow. Do not delete media
-or alter the GathR map.
+The full compiled backend suite passed 549/549 tests and the narrow Firebase
+dry run passed. A Firestore read found zero running parser locks before deploy.
+Commit `0319ef9` was deployed to `gathr-migrated` with the codebase-qualified
+parser targets. The interrupted CLI session had updated `processDataset` and
+`processDatasetResume` but left `processDatasetSelectedRows` on the prior
+revision. A separate narrow dry run and deploy updated that function. The
+post-deploy readback found all three ACTIVE with Firebase source hash
+`6ec1fb03acc847610ed2dd5f3ef8ae2cf4e42b10`:
+
+| Function | Serving revision |
+| --- | --- |
+| `processDataset` | `processdataset-00457-yuh` |
+| `processDatasetResume` | `processdatasetresume-00421-tab` |
+| `processDatasetSelectedRows` | `processdatasetselectedrows-00413-yey` |
+
+All three retain the production model routing: Luna high for 100% of eligible
+Stage 3 image posts, GPT-5 mini for Stages 1–2, GPT-5 nano for Stages 4–5,
+GPT-5.2 for image-ineligible Stage 3, and no legacy fallback. The Firebase CLI
+warned that `firebase-functions` is outdated; upgrading it is outside this
+repair.
+
+The approved live record repairs were completed after deployment using exact
+guarded plans and complete backups. See `docs/luna-stage3-oct8-live-repair-plan.md`
+for target paths and independent Firestore and app-feed verification. Luna
+remains at 100% of eligible Stage 3 image posts for the next regular full-run
+audit. No media were deleted and the GathR map was not touched.
