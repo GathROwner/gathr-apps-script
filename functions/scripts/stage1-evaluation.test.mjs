@@ -262,7 +262,7 @@ test('semantic cue matching tolerates ordinal dates, time punctuation, possessiv
   const selected124 = selectImagesForCase(row124, 'full');
   const ordinaryMarketDescriptions = [
     'Toby’s Farm Market exterior with a flower.',
-    'Rows of pumpkins for sale in a field.',
+    'Rows of pumpkins displayed outdoors.',
     'Pumpkins beside a sign.',
     'Rutabagas and cabbages on a produce display.',
     'A bag of root vegetables, likely parsnips.',
@@ -303,6 +303,81 @@ test('semantic cue matching tolerates ordinal dates, time punctuation, possessiv
   }
 });
 
+test('fixture cue checks use visible image evidence and reject cross-poster swaps', () => {
+  const { manifest } = loadAndValidateManifest(manifestPath);
+  const row65 = manifest.cases.find((item) => item.sourceRow === 65);
+  const selected65 = selectImagesForCase(row65, 'full');
+  const keyholeDescription = 'Mysteries of the Keyhole House, October 30, at 124 Heather Moyse Dr.';
+  const row65Result = {
+    imageAnalysis: selected65.map((image) => ({
+      imageIndex: image.sourceGalleryIndex,
+      description: image.sourceGalleryIndex === 4 ? keyholeDescription : image.expectedCue,
+      relevanceToPost: 'Describes this source image only.',
+    })),
+  };
+  assert.equal(assessImageAnalysis(row65Result, selected65).semanticAssociationPassed, true);
+  assert.doesNotMatch(selected65[4].expectedCue, /Harbourfront/i);
+  assert.ok(selected65[4].expectedSemanticCueGroups.flat().some((cue) => /124 heather moyse/i.test(cue)));
+  const missingPrintedAddress = structuredClone(row65Result);
+  missingPrintedAddress.imageAnalysis[4].description = 'Harbourfront Theatre: Mysteries of the Keyhole House, October 30.';
+  assert.deepEqual(assessImageAnalysis(missingPrintedAddress, selected65).semanticMismatchedIndexes, [4]);
+
+  const row62 = manifest.cases.find((item) => item.sourceRow === 62);
+  const selected62 = selectImagesForCase(row62, 'full');
+  const coverDescription = 'Harbourfront Theatre exterior; leaves fall, the curtain rises.';
+  const row62Result = {
+    imageAnalysis: selected62.map((image) => ({
+      imageIndex: image.sourceGalleryIndex,
+      description: image.sourceGalleryIndex === 0
+        ? coverDescription
+        : image.sourceGalleryIndex === 4
+          ? 'Relive the Music 50s, 60s and 70s Show, October 19 at 7:00 PM.'
+          : image.expectedCue,
+      relevanceToPost: 'Describes this source image only.',
+    })),
+  };
+  assert.equal(assessImageAnalysis(row62Result, selected62).semanticAssociationPassed, true);
+
+  const wrongRow65 = structuredClone(row65Result);
+  wrongRow65.imageAnalysis[4].description = 'Relive the Music 50s, 60s and 70s Show, October 19 at 7:00 PM.';
+  assert.deepEqual(assessImageAnalysis(wrongRow65, selected65).semanticMismatchedIndexes, [4]);
+
+  const wrongRow62 = structuredClone(row62Result);
+  wrongRow62.imageAnalysis[0].description = keyholeDescription;
+  assert.deepEqual(assessImageAnalysis(wrongRow62, selected62).semanticMismatchedIndexes, [0]);
+
+  const crossPosterRow62 = structuredClone(row62Result);
+  crossPosterRow62.imageAnalysis[4].description = keyholeDescription;
+  assert.deepEqual(assessImageAnalysis(crossPosterRow62, selected62).semanticMismatchedIndexes, [4]);
+
+  const row150 = manifest.cases.find((item) => item.sourceRow === 150);
+  const dessertImage = row150.images[1];
+  assert.equal(dessertImage.expectedSemanticCueGroups[0].includes('dessert'), true);
+  assert.equal(dessertImage.expectedSemanticCueGroups[1].includes('drink'), true);
+  assert.equal(dessertImage.expectedSemanticCueGroups.flat().some((cue) => /toddy/i.test(cue)), false);
+  assert.equal(assessImageAnalysis({
+    imageAnalysis: [{
+      imageIndex: 1,
+      description: 'A dessert slice beside a glass of lemon drink.',
+      relevanceToPost: 'A food photo with no printed offer.',
+    }],
+  }, [dessertImage]).semanticAssociationPassed, true);
+
+  const row212 = manifest.cases.find((item) => item.sourceRow === 212);
+  assert.ok(row212.images[0].expectedSemanticCueGroups[2].includes('08 october 2026'));
+  assert.equal(assessImageAnalysis({
+    imageAnalysis: [{
+      imageIndex: 0,
+      description: 'Fucked Up with opener Club Rat, 08 OCTOBER 2026.',
+      relevanceToPost: 'Names the show and its date.',
+    }],
+  }, [row212.images[0]]).semanticAssociationPassed, true);
+
+  const row287 = manifest.cases.find((item) => item.sourceRow === 287);
+  assert.ok(row287.images[0].expectedSemanticCueGroups.flat().includes('u9 u11'));
+  assert.ok(row287.images[0].expectedSemanticCueGroups.flat().includes('u13 u15'));
+});
+
 test('dense PowerSkate layout flags are compared, while full date transcription is not required', () => {
   const { manifest } = loadAndValidateManifest(manifestPath);
   const row287 = manifest.cases.find((item) => item.sourceRow === 287);
@@ -310,7 +385,7 @@ test('dense PowerSkate layout flags are compared, while full date transcription 
   const checked = assessImageAnalysis({
     imageAnalysis: [{
       imageIndex: 0,
-      description: 'A two-column PowerSkating sessions schedule with Saturday and Sunday dates.',
+      description: 'U9-U11 Saturday and U13-U15 Sunday sessions in a two-column table.',
       relevanceToPost: 'The table lists multiple sessions.',
       imageComplexity: {
         hasCalendarGrid: true,

@@ -79,7 +79,7 @@ The usage record includes reasoning tokens separately; they are already part of 
 
 ## Local tests
 
-`npm run test:stage1-evaluation` builds the functions TypeScript and runs eleven mocked/offline checks. They cover production request-shape parity, compact Structured Outputs, production normalization and local gates, hash/path/gallery validation, per-image semantic association including ordinal dates, clock punctuation, possessives, plural forms and swapped descriptions, dense-layout flags, image-error/truncation/no-image fallback visibility, spend-stop behavior, JSONL resume and usage estimates, and the client’s retry/timeout settings. The fake transport is local; tests make no network calls.
+`npm run test:stage1-evaluation` builds the functions TypeScript and runs twelve mocked/offline checks. They cover production request-shape parity, compact Structured Outputs, production normalization and local gates, hash/path/gallery validation, per-image semantic association including ordinal dates, clock punctuation, possessives, plural forms, source-visible cue requirements and swapped descriptions, dense-layout flags, image-error/truncation/no-image fallback visibility, spend-stop behavior, JSONL resume and usage estimates, and the client’s retry/timeout settings. The fake transport is local; tests make no network calls.
 
 ## Minimal Cloud Run module bundle
 

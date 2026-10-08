@@ -177,14 +177,17 @@
           "path": "images/124-1.jpg",
           "sha256": "5fb117dbdbd46867907919cf6c2123d15edf542b90638ab42a582da59421cf41",
           "expectedRole": "supporting_or_non_event",
-          "expectedCue": "Rows of ordinary pumpkins for sale.",
+          "expectedCue": "Rows of pumpkins displayed outdoors.",
           "expectedSemanticCueGroups": [
             [
               "pumpkin"
             ],
             [
               "field",
-              "display"
+              "rows of pumpkins",
+              "displayed outdoors",
+              "pumpkins outdoors",
+              "outdoor display"
             ]
           ],
           "forbiddenSemanticCueGroups": []
@@ -382,7 +385,7 @@
           "path": "images/212-0.jpg",
           "sha256": "5c8a92e8fc41840fa3ae74c4706457442c9cca59c33ef70f475da33bfd7651ab",
           "expectedRole": "event_or_offer_identifier",
-          "expectedCue": "Fucked Up with opener Club Rat at Trailside Music Hall on October 8, 2026.",
+          "expectedCue": "Fucked Up with opener Club Rat at Trailside Music Hall; the poster prints 08 OCTOBER 2026.",
           "expectedSemanticCueGroups": [
             [
               "fucked up"
@@ -392,7 +395,8 @@
             ],
             [
               "october 8",
-              "oct 8"
+              "oct 8",
+              "08 october 2026"
             ]
           ],
           "forbiddenSemanticCueGroups": []
@@ -552,16 +556,19 @@
           "path": "images/287-0.jpg",
           "sha256": "1f478491a753c249478726bc896a9efc3c135a53df457e778dfc087c03a368d5",
           "expectedRole": "event_or_offer_identifier",
-          "expectedCue": "Two-column PowerSkate session table: Saturdays and Sundays, 20 dates from October 17, 2026 through January 3, 2027.",
+          "expectedCue": "PowerSkating Sessions poster with U9-U11 Saturdays and U13-U15 Sundays, 7:00-8:00 AM; two columns of dates from October 17 through January 3.",
           "expectedSemanticCueGroups": [
             [
-              "powerskate",
-              "powerskating"
+              "u9 u11"
             ],
             [
-              "table",
-              "schedule",
-              "calendar"
+              "u13 u15"
+            ],
+            [
+              "saturday"
+            ],
+            [
+              "sunday"
             ]
           ],
           "forbiddenSemanticCueGroups": [],
@@ -715,7 +722,7 @@
           "path": "images/65-4.jpg",
           "sha256": "0182ca590bebdeec16e336db47aba57d9a829db79f115999c845982a7cfe49ef",
           "expectedRole": "event_or_offer_identifier",
-          "expectedCue": "Harbourfront Theatre, 124 Heather Moyse Drive: Mysteries of the Keyhole House on October 30.",
+          "expectedCue": "Mysteries of the Keyhole House on Oct. 30 at 124 Heather Moyse Dr.",
           "expectedSemanticCueGroups": [
             [
               "keyhole house",
@@ -726,7 +733,8 @@
               "oct 30"
             ],
             [
-              "harbourfront"
+              "124 heather moyse drive",
+              "124 heather moyse dr"
             ]
           ],
           "forbiddenSemanticCueGroups": [
@@ -785,14 +793,19 @@
           "path": "images/62-0.jpg",
           "sha256": "040686181eca2693b5f4280d30d7d8432a13f3a58bf6bc844afbf826b83741ef",
           "expectedRole": "supporting_or_non_event",
-          "expectedCue": "Generic Harbourfront Theatre October cover; no individual show listed.",
+          "expectedCue": "Harbourfront Theatre logo and exterior with the message 'Leaves fall, the curtain rises' and a monthly live show teaser; no individual show title.",
           "expectedSemanticCueGroups": [
             [
               "harbourfront"
             ],
             [
               "october",
-              "oct"
+              "oct",
+              "curtain rises",
+              "curtain rise",
+              "theatre exterior",
+              "building exterior",
+              "leaves fall"
             ]
           ],
           "forbiddenSemanticCueGroups": [
@@ -980,14 +993,18 @@
           "path": "images/150-1.jpg",
           "sha256": "222718d6a281c242a9b9f4e037b493fc784c9821da8d6d0b4eabdd712fdfe430",
           "expectedRole": "supporting_or_non_event",
-          "expectedCue": "Photo of cake and a hot toddy; no trail title, date, or venue name printed.",
+          "expectedCue": "A plated triangular dessert slice with creamy topping beside a glass of golden drink with a lemon slice; no trail title, date, or venue name printed.",
           "expectedSemanticCueGroups": [
             [
-              "cake"
+              "cake",
+              "tart",
+              "dessert"
             ],
             [
-              "hot toddy",
-              "toddy"
+              "glass",
+              "mug",
+              "drink",
+              "lemon"
             ]
           ],
           "forbiddenSemanticCueGroups": [
