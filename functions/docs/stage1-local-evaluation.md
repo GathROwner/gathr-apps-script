@@ -1,5 +1,7 @@
 # Stage 1 local evaluation harness
 
+The coordinator completed paid local and hosted screens. See [October 8 results](stage1-oct8-dryrun-results.md). Production parser functions were not changed.
+
 This harness compares Stage 1 decisions and per-image descriptions on a frozen Oct. 8, 2026 source set. It does not process posts through later stages, read or write Firebase, mutate venues, or change release routing.
 
 The original production prompt, schema, normalization, local calendar overrides, output limits, and image-error/no-image fallback remain the baseline. The compact arms use the same accept/reject policy and response schema; they shorten image-description instructions and use Responses Structured Outputs. This separates the model comparison (`mini-current` vs. `luna-current`) from the compact-prompt/structured-output comparison within each model family.
@@ -105,3 +107,36 @@ node scripts/stage1-evaluation-runner.mjs --execute --manifest test/fixtures/sta
 ```
 
 The full gallery plan covers all 27 images across 12 cases and four arms. Its offline first-attempt estimate is about `$0.696`; retries can use the remainder up to the `$1.00` cap. The runner itself has no Firebase API import or venue-write capability; the service account and secret binding remain Cloud Run configuration owned by the coordinator.
+
+## Reproducible hosted bundle and manual execution
+
+From `functions`, build the TypeScript, then package an empty directory:
+
+```powershell
+npm run build
+node scripts/stage1-build-dryrun-bundle.mjs C:\Users\craig\.codex\stage1-evaluation-next-bundle
+```
+
+The builder copies only the allowlisted Stage 1 modules, runner, validated frozen images, and a pinned minimal OpenAI dependency lock. It refuses to overwrite a nonempty directory. Its default hosted smoke manifest selects rows 287, 65 and 62 with full galleries and all four arms; the complete 12-case manifest is also bundled.
+
+The existing manually invoked job is `stage1-dryrun-20261008`, project `gathr-migrated`, region `northamerica-northeast1`. It has no scheduler, one task, zero task retries, a 20-minute execution limit, and a dedicated service account with only secret-specific access to the existing OpenAI credential. It contains no event writer or Firebase client.
+
+To rebuild that isolated job, run from the new bundle directory:
+
+```powershell
+gcloud run jobs deploy stage1-dryrun-20261008 --source=. --project=gathr-migrated --region=northamerica-northeast1 --service-account=stage1-dryrun-20261008@gathr-migrated.iam.gserviceaccount.com --set-secrets=OPENAI_API_KEY=OPENAI_API_KEY:latest --tasks=1 --parallelism=1 --max-retries=0 --task-timeout=20m --cpu=1 --memory=512Mi --quiet
+```
+
+When another paid smoke test is wanted, execute it explicitly:
+
+```powershell
+gcloud run jobs execute stage1-dryrun-20261008 --project=gathr-migrated --region=northamerica-northeast1 --async
+```
+
+For a hosted offline preflight, override the image's CMD with arguments that omit `--execute`:
+
+```powershell
+gcloud run jobs execute stage1-dryrun-20261008 --project=gathr-migrated --region=northamerica-northeast1 --args="node,scripts/stage1-evaluation-runner.mjs,--image-set,full,--include-compact-luna,--output,-" --async
+```
+
+Use the returned execution name to inspect completion and collect Cloud Logging records. A successful job exit alone is not quality evidence: inspect its `case_result`, `request_attempt`, and `run_summary` records, source images, and held/incomplete status. The October 8 paid execution remains pinned to its recorded image digest; later fixture/scorer repairs do not alter its raw outputs.
