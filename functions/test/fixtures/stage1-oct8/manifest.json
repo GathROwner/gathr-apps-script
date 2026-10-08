@@ -1,0 +1,1045 @@
+{
+  "manifestVersion": 1,
+  "title": "GathR Stage 1 Oct 8 source-truth evaluation",
+  "frozenAt": "2026-10-08",
+  "sourceRoot": ".",
+  "sourceLedgerArtifact": "luna-oct8-full-audit/ledger.json",
+  "imageSetDefinitions": {
+    "initial": "First four images in source attachment order, matching the existing Stage 1 initial image budget.",
+    "full": "All source-gallery images up to the existing 16-image source gallery limit."
+  },
+  "scoringNotes": [
+    "Score each fresh decision against sourceTruth.expectedDecision.",
+    "Compare a candidate with mini-current in a separate parity field; disagreement with a historically false mini accept is not a source-truth regression.",
+    "Expected image analysis indexes cover every attached image in the selected image set, not just relevant images.",
+    "Semantic cue groups are image-local checks against each image description. A different gallery image title, time, or item in the description is a contamination mismatch."
+  ],
+  "cases": [
+    {
+      "caseId": "row-048-souris-election-administration",
+      "sourceRow": 48,
+      "postId": "1523609006460343",
+      "venue": "Town of Souris",
+      "postedAt": "2026-10-07T16:04:32.000Z",
+      "caption": "Nominations will be accepted between October 7 - 16th at Souris TownHall. Nomination forms are available there as well and can be picked up anytime now.\nMore information available online at http://peimunicipalelections.ca/node/324\n\nNominations are now officially open. Close of nominations is Friday, October 16th at 2:00pm. \nOur Election Office is our Town Hall Administration Office on the first floor. 75 Main Street, Souris.\n\nOCR TEXT:\nMay be an image of text\nMay be an image of text",
+      "sourceEvidence": {
+        "artifact": "ledger.json",
+        "snapshotId": "1kIx_zGW7BZMf8F55eCYTQYOeYuFq-VLv_48_1791463946274"
+      },
+      "sourceTruth": {
+        "expectedDecision": "reject",
+        "rationale": "Official municipal election administration notice about nomination filing dates and office hours. Dense dates alone do not make it a public event or food/drink special."
+      },
+      "priorRunObservation": {
+        "downstreamStageObserved": "stage2",
+        "stage1Calls": 1,
+        "rawStage1DecisionCaptured": false,
+        "knownHistoricalMiniFalseAccept": true,
+        "note": "Historical GPT-5 mini false accept; retain as a source-truth error and do not count a correct candidate rejection as a regression."
+      },
+      "gallery": {
+        "sourceImageCount": 1,
+        "initialImageLimit": 4,
+        "maximumSourceGalleryImages": 16
+      },
+      "expectedImageAnalysisIndexes": [
+        0
+      ],
+      "expectedRelevantImageIndexes": [],
+      "images": [
+        {
+          "sourceGalleryIndex": 0,
+          "path": "images/48-0.jpg",
+          "sha256": "40078e3c01763727caf395526bfdac8b8cc0555e6fa899807dbb55413cd2a91a",
+          "expectedRole": "supporting_or_non_event",
+          "expectedCue": "Official council nomination and election administration notice; no public gathering or bookable event.",
+          "expectedSemanticCueGroups": [
+            [
+              "election",
+              "nomination"
+            ],
+            [
+              "souris"
+            ]
+          ],
+          "forbiddenSemanticCueGroups": []
+        }
+      ]
+    },
+    {
+      "caseId": "row-236-christmas-decor-retail-sale",
+      "sourceRow": 236,
+      "postId": "1710132027779560",
+      "venue": "The PEI Co. Store",
+      "postedAt": "2026-10-08T11:00:34.000Z",
+      "caption": " Christmas has arrived at the PEI Co. Store! \n\nAdd a little Island charm to your holiday décor with our festive ornaments, wreaths, gnomes, snowmen & more. ❤️ And even better — Christmas décor is 25% OFF! \n\nStop by and find your favourites while they’re still here! ✨\n.\n.\n.\n#ShopLocalPEI #discovercharlottetown #PEICoStore #downtowncharlottetown\n\nOCR TEXT:\nMay be an image of pinecone and text",
+      "sourceEvidence": {
+        "artifact": "ledger.json",
+        "snapshotId": "1kIx_zGW7BZMf8F55eCYTQYOeYuFq-VLv_236_1791469278201"
+      },
+      "sourceTruth": {
+        "expectedDecision": "reject",
+        "rationale": "The advertised 25% discount applies to holiday merchandise, not food or drink, and the post has no qualifying event."
+      },
+      "priorRunObservation": {
+        "downstreamStageObserved": "stage2",
+        "stage1Calls": 1,
+        "rawStage1DecisionCaptured": false,
+        "knownHistoricalMiniFalseAccept": true,
+        "note": "Historical GPT-5 mini false accept; retain as a source-truth error and do not count a correct candidate rejection as a regression."
+      },
+      "gallery": {
+        "sourceImageCount": 1,
+        "initialImageLimit": 4,
+        "maximumSourceGalleryImages": 16
+      },
+      "expectedImageAnalysisIndexes": [
+        0
+      ],
+      "expectedRelevantImageIndexes": [],
+      "images": [
+        {
+          "sourceGalleryIndex": 0,
+          "path": "images/236-0.jpg",
+          "sha256": "a5bc906fe602c85c1281406bf6b7dffb369208a47fee64a024d1eb7566fe05a7",
+          "expectedRole": "supporting_or_non_event",
+          "expectedCue": "Retail holiday ornaments and decorations on sale; merchandise discount is outside the event and food/drink source truth.",
+          "expectedSemanticCueGroups": [
+            [
+              "christmas",
+              "holiday"
+            ],
+            [
+              "decor",
+              "ornament"
+            ]
+          ],
+          "forbiddenSemanticCueGroups": []
+        }
+      ]
+    },
+    {
+      "caseId": "row-124-farm-market-stock-update",
+      "sourceRow": 124,
+      "postId": "1719778346823624",
+      "venue": "Fortune Bridge Farms & Toby’s Farm Market",
+      "postedAt": "2026-10-07T14:20:51.000Z",
+      "caption": "We are fully stocked with fresh veggies and LOTS of  orange pumpkins   , all set for Thanksgiving weekend,  we will be open every day \nStop by and stock up \n\nThanksgiving day veggie boxes are available for pick-up starting thrursday October 8th \n\nIcecream shop is still open , and freezers are stocked with Icecream treats \n\n#tobysfarmmarket\n#buylocal \n#freshveggies\n\nOCR TEXT:\nMay be an image of text\nNo photo description available.\nMay be an image of corn and text\nMay be an image of collard greens\nNo photo description available.",
+      "sourceEvidence": {
+        "artifact": "ledger.json",
+        "snapshotId": "1kIx_zGW7BZMf8F55eCYTQYOeYuFq-VLv_124_1791466045022"
+      },
+      "sourceTruth": {
+        "expectedDecision": "reject",
+        "rationale": "The post shows an ordinary stocked farm market and veggie-box pickup. It advertises no special, deal, or bookable pumpkin-patch activity."
+      },
+      "priorRunObservation": {
+        "downstreamStageObserved": "stage2",
+        "stage1Calls": 4,
+        "rawStage1DecisionCaptured": false,
+        "knownHistoricalMiniFalseAccept": false,
+        "note": "Historical pipeline progression is contextual only; fresh model output is scored separately against source truth."
+      },
+      "gallery": {
+        "sourceImageCount": 5,
+        "initialImageLimit": 4,
+        "maximumSourceGalleryImages": 16
+      },
+      "expectedImageAnalysisIndexes": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "expectedRelevantImageIndexes": [],
+      "images": [
+        {
+          "sourceGalleryIndex": 0,
+          "path": "images/124-0.jpg",
+          "sha256": "675a458b4ce4fa0652d168d5d099156e5a56d4b5c93cdbba794754bc1d73bb76",
+          "expectedRole": "supporting_or_non_event",
+          "expectedCue": "Toby’s Farm Market exterior with flowers.",
+          "expectedSemanticCueGroups": [
+            [
+              "toby",
+              "farm market"
+            ],
+            [
+              "flowers",
+              "market exterior"
+            ]
+          ],
+          "forbiddenSemanticCueGroups": []
+        },
+        {
+          "sourceGalleryIndex": 1,
+          "path": "images/124-1.jpg",
+          "sha256": "5fb117dbdbd46867907919cf6c2123d15edf542b90638ab42a582da59421cf41",
+          "expectedRole": "supporting_or_non_event",
+          "expectedCue": "Rows of ordinary pumpkins for sale.",
+          "expectedSemanticCueGroups": [
+            [
+              "pumpkin"
+            ],
+            [
+              "field",
+              "display"
+            ]
+          ],
+          "forbiddenSemanticCueGroups": []
+        },
+        {
+          "sourceGalleryIndex": 2,
+          "path": "images/124-2.jpg",
+          "sha256": "d167cf3d47df600e80f5a001baf3f23af4d5162f2b5fac6a7cef2416f79f3e24",
+          "expectedRole": "supporting_or_non_event",
+          "expectedCue": "Pumpkin display and sign.",
+          "expectedSemanticCueGroups": [
+            [
+              "pumpkin"
+            ],
+            [
+              "sign"
+            ]
+          ],
+          "forbiddenSemanticCueGroups": []
+        },
+        {
+          "sourceGalleryIndex": 3,
+          "path": "images/124-3.jpg",
+          "sha256": "f2e4f9ad2f8b38f26c1e4044c09fe98e85c07023b72ce6345837b88ab4480909",
+          "expectedRole": "supporting_or_non_event",
+          "expectedCue": "Ordinary rutabagas and cabbage.",
+          "expectedSemanticCueGroups": [
+            [
+              "rutabaga",
+              "cabbage"
+            ],
+            [
+              "produce",
+              "vegetable"
+            ]
+          ],
+          "forbiddenSemanticCueGroups": []
+        },
+        {
+          "sourceGalleryIndex": 4,
+          "path": "images/124-4.jpg",
+          "sha256": "397e892e370e98c57983f8ad4f7d8e2e387b0b4f63843ff800ab68b911135288",
+          "expectedRole": "supporting_or_non_event",
+          "expectedCue": "Bagged root vegetables, likely parsnips.",
+          "expectedSemanticCueGroups": [
+            [
+              "root vegetable",
+              "parsnip"
+            ],
+            [
+              "bag"
+            ]
+          ],
+          "forbiddenSemanticCueGroups": []
+        }
+      ]
+    },
+    {
+      "caseId": "row-339-holmans-todays-flavours",
+      "sourceRow": 339,
+      "postId": "1702031875256121",
+      "venue": "Holman's Ice Cream Parlour",
+      "postedAt": "2026-10-07T15:50:38.000Z",
+      "caption": "What a beautiful sunny October day! ☀️ We all know the weather right now can be a surprise every day, so we are happy to see the sun shining today here at the parlour!! We also love putting surprises in our ice cream  \n\nPictured below is our CHOCOLATE SURPRISE!!! This batch features Nanaimo Bar, chocolate toffee crunch, Bueno bars, oatmeal crumble, peanut butter cups and chocolate chunks!  \n\nToday’s Flavours:\nVanilla* \nChocolate*\nSalted Caramel*\nStrawberries and Cream*\nCookies and Cream\nChocolate Surprise \nUnicorn*\nMint Girl Guide Cookie\nFluff and Nutter \nSnow White’s Delight*\nChocolate Strawberry Cheesecake\nSpiced Apple Swirl*\nLactose Free Chai Tea*\nSugar Free Butter Pecan*\nBlueberry Mojito Sorbet*\nApple Mango Sorbet*\n\n*Gluten Friendly*\n\nOCR TEXT:\nMay be an image of gelato and ice cream",
+      "sourceEvidence": {
+        "artifact": "ledger.json",
+        "snapshotId": "1kIx_zGW7BZMf8F55eCYTQYOeYuFq-VLv_339_1791473049212"
+      },
+      "sourceTruth": {
+        "expectedDecision": "reject",
+        "rationale": "A plain ice-cream photo and today’s available flavors are ordinary product/menu information, with no advertised deal or event."
+      },
+      "priorRunObservation": {
+        "downstreamStageObserved": "stage2",
+        "stage1Calls": 1,
+        "rawStage1DecisionCaptured": false,
+        "knownHistoricalMiniFalseAccept": false,
+        "note": "Historical pipeline progression is contextual only; fresh model output is scored separately against source truth."
+      },
+      "gallery": {
+        "sourceImageCount": 1,
+        "initialImageLimit": 4,
+        "maximumSourceGalleryImages": 16
+      },
+      "expectedImageAnalysisIndexes": [
+        0
+      ],
+      "expectedRelevantImageIndexes": [],
+      "images": [
+        {
+          "sourceGalleryIndex": 0,
+          "path": "images/339-0.jpg",
+          "sha256": "9da0cdedad3cd43a935a36c63ac34a7b94ee82547ae62eadd909eca476aee6d7",
+          "expectedRole": "supporting_or_non_event",
+          "expectedCue": "Plain scoop of ice cream; no event or offer text visible.",
+          "expectedSemanticCueGroups": [
+            [
+              "ice cream",
+              "scoop"
+            ]
+          ],
+          "forbiddenSemanticCueGroups": []
+        }
+      ]
+    },
+    {
+      "caseId": "row-118-aw-teen-burger-deal",
+      "sourceRow": 118,
+      "postId": "1918406662897686",
+      "venue": "A&W Restaurants, PEI",
+      "postedAt": "2026-10-07T13:11:20.000Z",
+      "caption": "$4.99 for a Teen Burger made with grass-fed beef? Now that’s a tasty deal. Offer available for a limited time only. \n\nOCR TEXT:\nMay be an image of burger and text",
+      "sourceEvidence": {
+        "artifact": "ledger.json",
+        "snapshotId": "1kIx_zGW7BZMf8F55eCYTQYOeYuFq-VLv_118_1791465850892"
+      },
+      "sourceTruth": {
+        "expectedDecision": "accept",
+        "rationale": "The post advertises a Teen Burger for $4.99 for a limited time, a qualifying food deal."
+      },
+      "priorRunObservation": {
+        "downstreamStageObserved": "stage2",
+        "stage1Calls": 1,
+        "rawStage1DecisionCaptured": false,
+        "knownHistoricalMiniFalseAccept": null,
+        "note": "Historical pipeline progression is contextual only; fresh model output is scored separately against source truth."
+      },
+      "gallery": {
+        "sourceImageCount": 1,
+        "initialImageLimit": 4,
+        "maximumSourceGalleryImages": 16
+      },
+      "expectedImageAnalysisIndexes": [
+        0
+      ],
+      "expectedRelevantImageIndexes": [
+        0
+      ],
+      "images": [
+        {
+          "sourceGalleryIndex": 0,
+          "path": "images/118-0.jpg",
+          "sha256": "458ea77c85734c08adfbb53efb13e7284d8be6d7ec7c97cbbdc4cf7cbb4af15c",
+          "expectedRole": "event_or_offer_identifier",
+          "expectedCue": "Teen Burger for $4.99; “limited time only” is visible.",
+          "expectedSemanticCueGroups": [
+            [
+              "teen burger"
+            ],
+            [
+              "4 99",
+              "4.99"
+            ]
+          ],
+          "forbiddenSemanticCueGroups": []
+        }
+      ]
+    },
+    {
+      "caseId": "row-212-trailside-october-8-show",
+      "sourceRow": 212,
+      "postId": "1552488536897478",
+      "venue": "Trailside Music Hall",
+      "postedAt": "2026-10-08T12:01:04.000Z",
+      "caption": "TONIGHT! Huge show at the Trailside this Thursday, October 8th with Fucked Up and special guest opener Club Rat. Tickets on sale now at www.trailside.ca.\n\nOCR TEXT:\nMay be an image of text",
+      "sourceEvidence": {
+        "artifact": "ledger.json",
+        "snapshotId": "1kIx_zGW7BZMf8F55eCYTQYOeYuFq-VLv_212_1791468548386"
+      },
+      "sourceTruth": {
+        "expectedDecision": "accept",
+        "rationale": "The Trailside poster and caption name a live show on October 8, 2026, with an opener and ticket information. The later Stage 3 yearless-date hold is a separate stage."
+      },
+      "priorRunObservation": {
+        "downstreamStageObserved": "stage2",
+        "stage1Calls": 1,
+        "rawStage1DecisionCaptured": false,
+        "knownHistoricalMiniFalseAccept": null,
+        "note": "Historical pipeline progression is contextual only; fresh model output is scored separately against source truth."
+      },
+      "gallery": {
+        "sourceImageCount": 1,
+        "initialImageLimit": 4,
+        "maximumSourceGalleryImages": 16
+      },
+      "expectedImageAnalysisIndexes": [
+        0
+      ],
+      "expectedRelevantImageIndexes": [
+        0
+      ],
+      "images": [
+        {
+          "sourceGalleryIndex": 0,
+          "path": "images/212-0.jpg",
+          "sha256": "5c8a92e8fc41840fa3ae74c4706457442c9cca59c33ef70f475da33bfd7651ab",
+          "expectedRole": "event_or_offer_identifier",
+          "expectedCue": "Fucked Up with opener Club Rat at Trailside Music Hall on October 8, 2026.",
+          "expectedSemanticCueGroups": [
+            [
+              "fucked up"
+            ],
+            [
+              "club rat"
+            ],
+            [
+              "october 8",
+              "oct 8"
+            ]
+          ],
+          "forbiddenSemanticCueGroups": []
+        }
+      ]
+    },
+    {
+      "caseId": "row-329-pancake-brunch-fundraiser",
+      "sourceRow": 329,
+      "postId": "1567422505413444",
+      "venue": "Town of Cornwall PEI",
+      "postedAt": "2026-10-08T12:36:26.000Z",
+      "caption": "Support St Francis of Assisi at the KofC Pancake  Breakfast on October 25th The Goodshepherd Pastoral Unit\n\nOCR TEXT:\nMay be an image of text",
+      "sourceEvidence": {
+        "artifact": "ledger.json",
+        "snapshotId": "1kIx_zGW7BZMf8F55eCYTQYOeYuFq-VLv_329_1791472614878"
+      },
+      "sourceTruth": {
+        "expectedDecision": "accept",
+        "rationale": "The fundraiser poster gives Sunday, October 25, 2026, and two serving times: 9:30 AM and 11:30 AM."
+      },
+      "priorRunObservation": {
+        "downstreamStageObserved": "stage2",
+        "stage1Calls": 1,
+        "rawStage1DecisionCaptured": false,
+        "knownHistoricalMiniFalseAccept": null,
+        "note": "Historical pipeline progression is contextual only; fresh model output is scored separately against source truth."
+      },
+      "gallery": {
+        "sourceImageCount": 1,
+        "initialImageLimit": 4,
+        "maximumSourceGalleryImages": 16
+      },
+      "expectedImageAnalysisIndexes": [
+        0
+      ],
+      "expectedRelevantImageIndexes": [
+        0
+      ],
+      "images": [
+        {
+          "sourceGalleryIndex": 0,
+          "path": "images/329-0.jpg",
+          "sha256": "c2aee8acaf31b0e591d9c78752dfa5e68330a8e02f060e858e7a95c5bb8cb6bb",
+          "expectedRole": "event_or_offer_identifier",
+          "expectedCue": "Pancake brunch fundraiser on October 25, 2026; donations accepted; 9:30 AM and 11:30 AM servings.",
+          "expectedSemanticCueGroups": [
+            [
+              "pancake"
+            ],
+            [
+              "october 25",
+              "oct 25"
+            ],
+            [
+              "9 30",
+              "9:30"
+            ]
+          ],
+          "forbiddenSemanticCueGroups": []
+        }
+      ]
+    },
+    {
+      "caseId": "row-343-peers-community-space",
+      "sourceRow": 343,
+      "postId": "1540680544753738",
+      "venue": "PEERS Alliance",
+      "postedAt": "2026-10-07T13:58:10.000Z",
+      "caption": "Hello people we love ❤ It is time to be together. \n\nWe’re grateful to announce that seven community organizations are coming together to host a 2SLGBTQ+ community space at The Arts Guild this Saturday. \n\nCome as you are to discuss, react, heal, support one another, and be supported. Rain Ward of Two Bear Indigenous Wellness will be starting us off with a restorative healing space with traditional ways of knowing at 1pm, then afterwards we will open the space for community time.\n\nSnacks and drinks will be provided, as well as some art supplies for community time. \n\nPLEASE NOTE: This is a closed space for the 2SLGBTQIA+ community. No need to register or RSVP. Come if you feel like being in community. \n\nWe love you, and we’re looking forward to coming together ❤\n\nOCR TEXT:\nMay be a doodle of text",
+      "sourceEvidence": {
+        "artifact": "ledger.json",
+        "snapshotId": "1kIx_zGW7BZMf8F55eCYTQYOeYuFq-VLv_343_1791473240188"
+      },
+      "sourceTruth": {
+        "expectedDecision": "accept",
+        "rationale": "A dated community event at The Arts Guild has a 1 PM restorative healing session followed by 3 PM community time; snacks, drinks, and supplies are provided."
+      },
+      "priorRunObservation": {
+        "downstreamStageObserved": "stage2",
+        "stage1Calls": 1,
+        "rawStage1DecisionCaptured": false,
+        "knownHistoricalMiniFalseAccept": null,
+        "note": "Historical pipeline progression is contextual only; fresh model output is scored separately against source truth."
+      },
+      "gallery": {
+        "sourceImageCount": 1,
+        "initialImageLimit": 4,
+        "maximumSourceGalleryImages": 16
+      },
+      "expectedImageAnalysisIndexes": [
+        0
+      ],
+      "expectedRelevantImageIndexes": [
+        0
+      ],
+      "images": [
+        {
+          "sourceGalleryIndex": 0,
+          "path": "images/343-0.jpg",
+          "sha256": "7a562539c17df501bd344079ff8d83b54a6cf0a0b3ded4effe6b2c1ab45c460e",
+          "expectedRole": "event_or_offer_identifier",
+          "expectedCue": "The Arts Guild, October 10, 2026: restorative healing begins at 1 PM, then open community time at 3 PM.",
+          "expectedSemanticCueGroups": [
+            [
+              "arts guild"
+            ],
+            [
+              "october 10",
+              "oct 10"
+            ],
+            [
+              "restorative",
+              "healing"
+            ]
+          ],
+          "forbiddenSemanticCueGroups": []
+        }
+      ]
+    },
+    {
+      "caseId": "row-287-powerskate-date-table",
+      "sourceRow": 287,
+      "postId": "1723226023140608",
+      "venue": "Cavendish Farms Community Events Centre",
+      "postedAt": "2026-10-07T14:05:46.000Z",
+      "caption": "Tyne Valley Skating Club is excited to launch a ten-hour PowerSkate program, running 2 separate groups.\n\nU9-U11 Saturdays from 7:00-8:00am and U13-U15 on Sundays from 7:00 to 8:00 am (Depending on interest)\n\nFall Session begins October 17th, 2026 @top fans\n\nSpace is limited, so early registration is encouraged.\n\nParticipants must be comfortable skating forwards, backwards, and able to stop using both feet—skills comparable to Canskate Stage 4 or higher.\n\nPlease note: U9-U11 players may have the option of attending the Sunday session depending on level of interest overall.\n\nRegister here -> https://forms.gle/TFag3avwFbpZ5k7G6\n\nOCR TEXT:\nMay be an image of text",
+      "sourceEvidence": {
+        "artifact": "ledger.json",
+        "snapshotId": "1kIx_zGW7BZMf8F55eCYTQYOeYuFq-VLv_287_1791471291610"
+      },
+      "sourceTruth": {
+        "expectedDecision": "accept",
+        "rationale": "The post advertises a bookable PowerSkate program and its poster contains a dense two-column schedule with 20 October-to-January dates."
+      },
+      "priorRunObservation": {
+        "downstreamStageObserved": "stage2",
+        "stage1Calls": 3,
+        "rawStage1DecisionCaptured": false,
+        "knownHistoricalMiniFalseAccept": null,
+        "note": "Historical pipeline progression is contextual only; fresh model output is scored separately against source truth."
+      },
+      "gallery": {
+        "sourceImageCount": 1,
+        "initialImageLimit": 4,
+        "maximumSourceGalleryImages": 16
+      },
+      "expectedImageAnalysisIndexes": [
+        0
+      ],
+      "expectedRelevantImageIndexes": [
+        0
+      ],
+      "images": [
+        {
+          "sourceGalleryIndex": 0,
+          "path": "images/287-0.jpg",
+          "sha256": "1f478491a753c249478726bc896a9efc3c135a53df457e778dfc087c03a368d5",
+          "expectedRole": "event_or_offer_identifier",
+          "expectedCue": "Two-column PowerSkate session table: Saturdays and Sundays, 20 dates from October 17, 2026 through January 3, 2027.",
+          "expectedSemanticCueGroups": [
+            [
+              "powerskate",
+              "powerskating"
+            ],
+            [
+              "table",
+              "schedule",
+              "calendar"
+            ]
+          ],
+          "forbiddenSemanticCueGroups": [],
+          "expectedComplexity": {
+            "hasCalendarGrid": true,
+            "hasDenseText": true,
+            "hasMultipleEventListings": true,
+            "recommendsTiling": true
+          }
+        }
+      ]
+    },
+    {
+      "caseId": "row-065-explore-summerside-october-plans",
+      "sourceRow": 65,
+      "postId": "1795422812047343",
+      "venue": "Explore Summerside",
+      "postedAt": "2026-10-07T14:41:51.000Z",
+      "caption": " 5 reasons October looks good on Summerside ✨\n\nOctober is giving us plenty of reasons to make plans, grab a friend and get out of the house.\n\n Get creative at Art Buds | 329 Water St.\n\nLean into spooky season with a Halloween Floral Pumpkin Acrylic Painting Workshop on October 23, or spend an evening creating your own miniature Halloween candy bucket at Tiny Treats on October 30. A fun excuse to get crafty with friends and leave with something you made yourself.\n️ https://www.artbuds.ca/creative-workshops\n\n Make time to unwind with Smooth Yoga with Greg | 293 Water Street.\n\nGreg’s Autumn Wellness Series is all about resetting for the season. Choose from Aroma Yoga, Reiki Infused Yoga or Yoga Touch and settle into a warm, relaxing session designed to help release tension and leave you feeling refreshed.\n️ https://www.eventbrite.com/cc/autumn-wellness-pop-up-events-in-summerside-4879721\n\n Treat yourself to a warm waffle at Holman's Ice Cream Parlour | 286 Fitzroy St.\n\nCool October days call for something warm. Stop into Holman’s for one of their warm waffles, ranging from $10.50–$15, and turn an ordinary fall afternoon into a pretty delicious one.\n\n Plan a night at Harbourfront Theatre | 124 Heather Moyse Dr.\n\nAdd a little mystery to your October with Mysteries of the Keyhole House. If you’re looking for something different to do after dinner or an excuse to plan a night out, this one belongs on the calendar.\n️ https://harbourfronttheatre.com/shows/mysteries-of-keyhole-house/\n\n Try the October specials at Famous Peppers & Crafters BBQ - Summerside | 110 Water St.\n\nCome hungry. The Mo Cheddar Mo Better burger stacks two PEI beef smash patties with cheddar, dijonaise, a crispy potato and chive patty and apple bacon relish. Or warm up with The Rough Rider, a Southwest-inspired pizza topped with BBQ pulled chicken, red onion, banana peppers, chipotle black bean and corn medley, and a taco sauce swirl.\n\nSo... which October plan are you picking first? \n\n#ExploreSummerside #TheCityByTheSea Tourism Industry Association of Prince Edward Island Prince Edward Island Tourism Meet PEI North Cape Coastal Drive\n\nOCR TEXT:\nMay be an image of text\nMay be an image of text\nMay be an image of yoga and text\nMay be an image of text\nMay be an image of text",
+      "sourceEvidence": {
+        "artifact": "ledger.json",
+        "snapshotId": "1kIx_zGW7BZMf8F55eCYTQYOeYuFq-VLv_65_1791464985305"
+      },
+      "sourceTruth": {
+        "expectedDecision": "accept",
+        "rationale": "The caption and five-image gallery identify specific yoga, craft-workshop, and theatre activities. The waffle image is ordinary product photography and is not used as event evidence."
+      },
+      "priorRunObservation": {
+        "downstreamStageObserved": "stage2",
+        "stage1Calls": 5,
+        "rawStage1DecisionCaptured": false,
+        "knownHistoricalMiniFalseAccept": null,
+        "note": "Historical pipeline progression is contextual only; fresh model output is scored separately against source truth."
+      },
+      "gallery": {
+        "sourceImageCount": 5,
+        "initialImageLimit": 4,
+        "maximumSourceGalleryImages": 16
+      },
+      "expectedImageAnalysisIndexes": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "expectedRelevantImageIndexes": [
+        2,
+        3,
+        4
+      ],
+      "images": [
+        {
+          "sourceGalleryIndex": 0,
+          "path": "images/65-0.jpg",
+          "sha256": "9910d5607fe110397854d9e2858a7907c10ee76f26493da9f0ef9bb55d20727e",
+          "expectedRole": "supporting_or_non_event",
+          "expectedCue": "Decorative autumn cover: “5 reasons October looks good on Summerside”; no specific activity on this image.",
+          "expectedSemanticCueGroups": [
+            [
+              "5 reasons",
+              "five reasons"
+            ],
+            [
+              "summerside"
+            ]
+          ],
+          "forbiddenSemanticCueGroups": [
+            [
+              "yoga",
+              "art buds",
+              "keyhole house",
+              "waffle"
+            ]
+          ]
+        },
+        {
+          "sourceGalleryIndex": 1,
+          "path": "images/65-1.jpg",
+          "sha256": "08c781982401e3b16c39c6e9579f5a4a3438019088df3d2259a17ecfb2b8ba4d",
+          "expectedRole": "supporting_or_non_event",
+          "expectedCue": "Warm waffle product photo; no discount or event printed on this image.",
+          "expectedSemanticCueGroups": [
+            [
+              "waffle"
+            ]
+          ],
+          "forbiddenSemanticCueGroups": [
+            [
+              "smooth yoga",
+              "art buds",
+              "keyhole house"
+            ]
+          ]
+        },
+        {
+          "sourceGalleryIndex": 2,
+          "path": "images/65-2.jpg",
+          "sha256": "9ef12dc2c25941a674e0da9e7dfb7c4ee0a59daac721d2cc1e1179e56dd6eb46",
+          "expectedRole": "event_or_offer_identifier",
+          "expectedCue": "Smooth Yoga with Greg, 293 Water Street: Aroma Yoga October 12, Reiki Infused Yoga October 13, and Yoga Touch October 15.",
+          "expectedSemanticCueGroups": [
+            [
+              "yoga"
+            ],
+            [
+              "greg",
+              "aroma",
+              "smooth yoga"
+            ]
+          ],
+          "forbiddenSemanticCueGroups": [
+            [
+              "art buds",
+              "keyhole house",
+              "waffle"
+            ]
+          ]
+        },
+        {
+          "sourceGalleryIndex": 3,
+          "path": "images/65-3.jpg",
+          "sha256": "1074f7792f71441997e7a391710fb1f22d2c2f85f14cc717e143eac1f2e05d90",
+          "expectedRole": "event_or_offer_identifier",
+          "expectedCue": "Art Buds, 329 Water Street: Floral Pumpkin Painting October 23 (1–3 PM) and Tiny Treats Mini Candy Bucket October 30 (6–9 PM).",
+          "expectedSemanticCueGroups": [
+            [
+              "pumpkin",
+              "tiny treats"
+            ],
+            [
+              "october 23",
+              "oct 23",
+              "october 30",
+              "oct 30"
+            ],
+            [
+              "art buds"
+            ]
+          ],
+          "forbiddenSemanticCueGroups": [
+            [
+              "smooth yoga",
+              "greg",
+              "keyhole house"
+            ]
+          ]
+        },
+        {
+          "sourceGalleryIndex": 4,
+          "path": "images/65-4.jpg",
+          "sha256": "0182ca590bebdeec16e336db47aba57d9a829db79f115999c845982a7cfe49ef",
+          "expectedRole": "event_or_offer_identifier",
+          "expectedCue": "Harbourfront Theatre, 124 Heather Moyse Drive: Mysteries of the Keyhole House on October 30.",
+          "expectedSemanticCueGroups": [
+            [
+              "keyhole house",
+              "mysteries"
+            ],
+            [
+              "october 30",
+              "oct 30"
+            ],
+            [
+              "harbourfront"
+            ]
+          ],
+          "forbiddenSemanticCueGroups": [
+            [
+              "smooth yoga",
+              "art buds",
+              "waffle"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "caseId": "row-062-harbourfront-october-gallery",
+      "sourceRow": 62,
+      "postId": "1724940962970200",
+      "venue": "Harbourfront Theatre",
+      "postedAt": "2026-10-07T13:13:50.000Z",
+      "caption": "October is packed at Harbourfront Theatre, and we’ve got something on stage for every corner of our community—from magical family mornings to high-energy tributes and mind-bending illusions!\n\nHere is what’s coming up this month:\n\nFrozen in Time | Sunday, Oct 11 • 11:00 AM & 2:00 PM\nA cozy, sing-along family afternoon with your favorite princesses! Dress up and bring the kids for pure magic (plus VIP meet-and-greet options!).\n\nFlashback | Tuesday, Oct 13 • 7:00 PM\nJoin us for a fantastic community night at the theatre—check our site for full show details!\n\nStill Standin': A Night of Elton John & Billy Joel | Oct 15, 16 & 17 • 7:30 PM\nCraig Fair and Ben Aitken back-to-back at two grand pianos, backed by a massive 16-piece orchestra. Three nights of pure piano-rock energy!\n\nRelive the Music - 50s, 60s & 70s Show | Monday, Oct 19 • 7:30 PM\nTake a walk down memory lane with a high-energy journey through three iconic decades of rock, pop, and soul classics.\n\nJason Cyrus Live - Beyond Limits | Friday, Oct 23 • 7:30 PM\nPrepare to be amazed (and laugh until your sides hurt) as Canada’s premiere hypnotist takes the stage for an interactive night of intrigue.\n\nHarbour Highlight: Mysteries of the Keyhole House | Friday, Oct 30 • 7:30 PM\nMaster illusionists Ted and Marion Outerbridge bring their spine-tingling ghost story and jaw-dropping magic straight from Hollywood's Magic Castle to Summerside!\n\nBonus: Join Ted and Marion for a FREE historical talk at the Eptek Art & Culture Centre on Thursday, Oct 29 at 6:00 PM to see the real 19th-century artifacts that inspired the show!\n\nGrab your tickets today: Head to harbourfronttheatre.com or call our box office at 902-888-2500. See you in the lobby!\n\nOCR TEXT:\nMay be an image of text\nMay be an image of text\nMay be an image of text\nMay be an image of text\nMay be an image of dancing and text",
+      "sourceEvidence": {
+        "artifact": "ledger.json",
+        "snapshotId": "1kIx_zGW7BZMf8F55eCYTQYOeYuFq-VLv_62_1791464632184"
+      },
+      "sourceTruth": {
+        "expectedDecision": "accept",
+        "rationale": "The caption and four event posters identify specific October theatre events. Each image description must stay tied to its own poster; the October 19 poster visibly says 7:00 PM while the caption says 7:30 PM."
+      },
+      "priorRunObservation": {
+        "downstreamStageObserved": "stage2",
+        "stage1Calls": 4,
+        "rawStage1DecisionCaptured": false,
+        "knownHistoricalMiniFalseAccept": null,
+        "note": "Historical pipeline progression is contextual only; fresh model output is scored separately against source truth."
+      },
+      "gallery": {
+        "sourceImageCount": 5,
+        "initialImageLimit": 4,
+        "maximumSourceGalleryImages": 16
+      },
+      "expectedImageAnalysisIndexes": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "expectedRelevantImageIndexes": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "images": [
+        {
+          "sourceGalleryIndex": 0,
+          "path": "images/62-0.jpg",
+          "sha256": "040686181eca2693b5f4280d30d7d8432a13f3a58bf6bc844afbf826b83741ef",
+          "expectedRole": "supporting_or_non_event",
+          "expectedCue": "Generic Harbourfront Theatre October cover; no individual show listed.",
+          "expectedSemanticCueGroups": [
+            [
+              "harbourfront"
+            ],
+            [
+              "october",
+              "oct"
+            ]
+          ],
+          "forbiddenSemanticCueGroups": [
+            [
+              "frozen in time",
+              "flashback",
+              "still standin",
+              "relive the music"
+            ]
+          ]
+        },
+        {
+          "sourceGalleryIndex": 1,
+          "path": "images/62-1.jpg",
+          "sha256": "c39b7524e50604761f15dc3b91c3dedfe1a24682e6e852997ce1f456e11c49b6",
+          "expectedRole": "event_or_offer_identifier",
+          "expectedCue": "Frozen in Time, October 11, 11 AM and 2 PM.",
+          "expectedSemanticCueGroups": [
+            [
+              "frozen in time"
+            ],
+            [
+              "october 11",
+              "oct 11"
+            ],
+            [
+              "11 am",
+              "2 pm",
+              "11 00 am"
+            ]
+          ],
+          "forbiddenSemanticCueGroups": [
+            [
+              "flashback",
+              "still standin",
+              "relive the music"
+            ]
+          ]
+        },
+        {
+          "sourceGalleryIndex": 2,
+          "path": "images/62-2.jpg",
+          "sha256": "07ebc857c54be0e47e8a26b94304ffe87babbba59f721d12f2986de8bab291fe",
+          "expectedRole": "event_or_offer_identifier",
+          "expectedCue": "Flashback, October 13, 7 PM.",
+          "expectedSemanticCueGroups": [
+            [
+              "flashback"
+            ],
+            [
+              "october 13",
+              "oct 13"
+            ],
+            [
+              "7 pm",
+              "7 00 pm"
+            ]
+          ],
+          "forbiddenSemanticCueGroups": [
+            [
+              "frozen in time",
+              "still standin",
+              "relive the music"
+            ]
+          ]
+        },
+        {
+          "sourceGalleryIndex": 3,
+          "path": "images/62-3.jpg",
+          "sha256": "3f8152a5fc523f8c15e4b90baf2e80da15d826b390a753eabe6011b814e386ae",
+          "expectedRole": "event_or_offer_identifier",
+          "expectedCue": "Still Standin’: A Night of Elton John & Billy Joel, October 15, 16, and 17, 7:30 PM.",
+          "expectedSemanticCueGroups": [
+            [
+              "still standin",
+              "elton john"
+            ],
+            [
+              "october 15",
+              "oct 15"
+            ],
+            [
+              "7 30 pm",
+              "7 30"
+            ]
+          ],
+          "forbiddenSemanticCueGroups": [
+            [
+              "frozen in time",
+              "flashback",
+              "relive the music"
+            ]
+          ]
+        },
+        {
+          "sourceGalleryIndex": 4,
+          "path": "images/62-4.jpg",
+          "sha256": "1115bf14e11ac27f48974918e6a1debf8c3b3395fdaec21d9e462b8a0fc5e95e",
+          "expectedRole": "event_or_offer_identifier",
+          "expectedCue": "Relive the Music - 50s, 60s & 70s Show, October 19; the poster itself displays 7:00 PM. Do not copy the caption’s 7:30 PM into this image description.",
+          "expectedSemanticCueGroups": [
+            [
+              "relive the music"
+            ],
+            [
+              "october 19",
+              "oct 19"
+            ],
+            [
+              "7 pm",
+              "7 00 pm"
+            ]
+          ],
+          "forbiddenSemanticCueGroups": [
+            [
+              "frozen in time",
+              "flashback",
+              "still standin",
+              "7 30 pm",
+              "7 30"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "caseId": "row-150-kensington-fall-dessert-trail",
+      "sourceRow": 150,
+      "postId": "1676688474466894",
+      "venue": "Island Stone Pub - Kensington Station",
+      "postedAt": "2026-10-07T18:45:00.000Z",
+      "caption": "Fall Dessert Trail in Kensington & Area\nThis week Oct 5-9 (check each location for their operating hours)\n\nIsland Stone Pub - Kensington Station  (closed on Tuesdays)\nApple Spice Cake — moist spiced apple cake with raisins, house made caramel and whipped cream.  \nOrchard Toddy —Steeped tea spiked with apple liqueur, pumpkin spice and lemon, served steaming.\n\nC&B Corner Cafe Kensington\nCreamy Chocolate Pie - topped with real whipped cream! \n\nThe Willow Bakery & Cafe\nWe have Brown Butter Maple Peach Swirls  \n\nRuby's Counter\nGinger bread cake with brown sugar sauce\n\nMary's Bake Shoppe \nPumpkin squares and Pumpkin Scones\n\n#kaccdesserttrail\n\nOCR TEXT:\nMay be an image of text\nMay be an image of text\nMay be an image of tart\nMay be an image of tart\nMay be an image of dessert\nMay be an image of dessert\nMay be an image of tart and cinnamon roll\nMay be an image of tart and cinnamon roll",
+      "sourceEvidence": {
+        "artifact": "ledger.json",
+        "snapshotId": "1kIx_zGW7BZMf8F55eCYTQYOeYuFq-VLv_150_1791467056793"
+      },
+      "sourceTruth": {
+        "expectedDecision": "accept",
+        "rationale": "A date-limited Fall Dessert Trail runs October 5–9 and advertises food and drink offerings across Kensington and area locations."
+      },
+      "priorRunObservation": {
+        "downstreamStageObserved": "stage2",
+        "stage1Calls": 2,
+        "rawStage1DecisionCaptured": false,
+        "knownHistoricalMiniFalseAccept": null,
+        "note": "Historical pipeline progression is contextual only; fresh model output is scored separately against source truth."
+      },
+      "gallery": {
+        "sourceImageCount": 4,
+        "initialImageLimit": 4,
+        "maximumSourceGalleryImages": 16
+      },
+      "expectedImageAnalysisIndexes": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "expectedRelevantImageIndexes": [
+        0
+      ],
+      "images": [
+        {
+          "sourceGalleryIndex": 0,
+          "path": "images/150-0.jpg",
+          "sha256": "de2b981214e2aa8ea23ce6f019db916f6df2234fa4de644ac873a4e24d2a3a07",
+          "expectedRole": "event_or_offer_identifier",
+          "expectedCue": "Kensington and Area Fall Dessert Trail, October 5–9; this is the only gallery image with the trail name and date.",
+          "expectedSemanticCueGroups": [
+            [
+              "dessert trail"
+            ],
+            [
+              "kensington"
+            ],
+            [
+              "october 5 9",
+              "oct 5 9"
+            ]
+          ],
+          "forbiddenSemanticCueGroups": []
+        },
+        {
+          "sourceGalleryIndex": 1,
+          "path": "images/150-1.jpg",
+          "sha256": "222718d6a281c242a9b9f4e037b493fc784c9821da8d6d0b4eabdd712fdfe430",
+          "expectedRole": "supporting_or_non_event",
+          "expectedCue": "Photo of cake and a hot toddy; no trail title, date, or venue name printed.",
+          "expectedSemanticCueGroups": [
+            [
+              "cake"
+            ],
+            [
+              "hot toddy",
+              "toddy"
+            ]
+          ],
+          "forbiddenSemanticCueGroups": [
+            [
+              "cream pie",
+              "pastry swirl",
+              "dessert trail"
+            ]
+          ]
+        },
+        {
+          "sourceGalleryIndex": 2,
+          "path": "images/150-2.jpg",
+          "sha256": "6370176769c15ad403f4bc19751400bc6ff3aef6910567b0650cb7a8beafec7b",
+          "expectedRole": "supporting_or_non_event",
+          "expectedCue": "Photo of a chocolate cream pie; no trail title, date, or venue name printed.",
+          "expectedSemanticCueGroups": [
+            [
+              "cream pie",
+              "chocolate pie"
+            ]
+          ],
+          "forbiddenSemanticCueGroups": [
+            [
+              "hot toddy",
+              "pastry swirl",
+              "dessert trail"
+            ]
+          ]
+        },
+        {
+          "sourceGalleryIndex": 3,
+          "path": "images/150-3.jpg",
+          "sha256": "3d99ede3803a272643eaef96687842b41e0259ade57dbdc10c5469bda6d51fbb",
+          "expectedRole": "supporting_or_non_event",
+          "expectedCue": "Photo of pastry swirls; no trail title, date, or venue name printed.",
+          "expectedSemanticCueGroups": [
+            [
+              "pastry",
+              "roll",
+              "swirl"
+            ]
+          ],
+          "forbiddenSemanticCueGroups": [
+            [
+              "hot toddy",
+              "cream pie",
+              "dessert trail"
+            ]
+          ]
+        }
+      ]
+    }
+  ]
+}

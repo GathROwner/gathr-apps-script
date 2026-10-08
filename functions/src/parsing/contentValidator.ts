@@ -27,6 +27,67 @@ import { logger } from '../utils/logger.js';
 // Initialize OpenAI client lazily
 let openaiClient: OpenAI | null = null;
 
+export type Stage1RequestKind = 'initial' | 'output_limit_retry' | 'no_image_fallback';
+
+export interface Stage1RequestPlan {
+  requestIndex: number;
+  requestKind: Stage1RequestKind;
+  model: string;
+  endpoint: 'responses' | 'chat';
+  imageCount: number;
+  maxOutputTokens: number;
+  inputTextChars: number;
+}
+
+export interface Stage1RequestAttempt extends Stage1RequestPlan {
+  status: 'completed' | 'incomplete' | 'error';
+  durationMs: number;
+  responseId?: string;
+  responseStatus?: string;
+  incompleteReason?: string;
+  inputTokens: number;
+  outputTokens: number;
+  totalTokens: number;
+  cachedInputTokens: number;
+  cacheWriteTokens: number;
+  reasoningTokens: number;
+  visibleOutput: string;
+  parsed: boolean;
+  errorMessage?: string;
+  reservationId?: string;
+}
+
+export interface Stage1ValidationEvaluationRun {
+  status: 'completed' | 'inconclusive' | 'request_error' | 'budget_stopped';
+  result: ValidationResult | null;
+  attempts: Stage1RequestAttempt[];
+  noImageFallbackUsed: boolean;
+  incompleteReason?: string;
+}
+
+export interface Stage1ValidationEvaluationOptions {
+  promptVariant: 'production' | 'compact';
+  structuredOutput: boolean;
+  client?: any;
+  onBeforeRequest?: (plan: Stage1RequestPlan) => string | undefined;
+  onAttempt?: (attempt: Stage1RequestAttempt) => void;
+}
+
+interface Stage1CallOptions {
+  structuredOutput?: boolean;
+  client?: any;
+  onBeforeRequest?: (plan: Stage1RequestPlan) => string | undefined;
+  onAttempt?: (attempt: Stage1RequestAttempt) => void;
+}
+
+function isStage1EvaluationBudgetStop(error: unknown): boolean {
+  return Boolean(
+    error &&
+      typeof error === 'object' &&
+      (error as { code?: unknown }).code === 'STAGE1_EVAL_BUDGET_STOP'
+  );
+}
+
 function getOpenAIClient(): OpenAI {
   if (!openaiClient) {
     const apiKey = process.env.OPENAI_API_KEY;
@@ -81,38 +142,7 @@ export async function validateContent(
     }
 
     // Local text signals (calendar/roundup heuristics)
-    const textSignals = detectCalendarSignals(combinedText);
-    logger.debug('Calendar signals detected', textSignals);
-
-    // Merge policy: if model rejected but text clearly looks like a calendar/roundup, override to PASS
-    if (
-      (!normalized.hasValidContent || normalized.validationDecision === 'VALIDATION_FAILED') &&
-      textSignals.hasCalendar
-    ) {
-      const prevReason = String(normalized.reason || '').trim();
-      normalized.hasValidContent = true;
-      normalized.validationDecision = 'VALIDATION_PASSED';
-      normalized.confidence = Math.max(Number(normalized.confidence || 0), 0.8);
-      normalized.reason =
-        (prevReason ? prevReason + ' | ' : '') +
-        'Text calendar/roundup detected (override PASS)';
-      logger.info('Validation overridden to PASS due to strong text calendar signals');
-    }
-
-    const linkedCalendarSignals = detectLinkedCalendarSignals(combinedText, imageUrls.length > 0);
-    if (
-      (!normalized.hasValidContent || normalized.validationDecision === 'VALIDATION_FAILED') &&
-      linkedCalendarSignals.hasLinkedCalendar
-    ) {
-      const prevReason = String(normalized.reason || '').trim();
-      normalized.hasValidContent = true;
-      normalized.validationDecision = 'VALIDATION_PASSED';
-      normalized.confidence = Math.max(Number(normalized.confidence || 0), 0.75);
-      normalized.reason =
-        (prevReason ? prevReason + ' | ' : '') +
-        linkedCalendarSignals.reason;
-      logger.info('Validation overridden to PASS due to linked calendar/program signals');
-    }
+    applyStage1LocalDecisionGates(normalized, combinedText, imageUrls.length > 0);
 
     logger.info(`Stage 1 Result: ${normalized.validationDecision}`, {
       confidence: normalized.confidence,
@@ -135,9 +165,99 @@ export async function validateContent(
 }
 
 /**
+ * Local evaluation entry point. It uses the same response normalization and local
+ * decision gates as production while allowing a fake transport and request hooks.
+ */
+export async function validateContentForStage1Evaluation(
+  combinedText: string,
+  imageUrls: string[],
+  userName: string,
+  timestamp: string,
+  model: string,
+  options: Stage1ValidationEvaluationOptions,
+  config: Partial<ParsingConfig> = {}
+): Promise<Stage1ValidationEvaluationRun> {
+  const cfg = { ...DEFAULT_PARSING_CONFIG, ...config, stage1ModelOverride: model };
+  const attempts: Stage1RequestAttempt[] = [];
+  const prompt =
+    options.promptVariant === 'compact'
+      ? createCompactValidationPrompt(combinedText, imageUrls.length > 0, userName, timestamp)
+      : createValidationPrompt(combinedText, imageUrls.length > 0, userName, timestamp);
+  const schema = createValidationSchema();
+
+  try {
+    const response = await callGPTWithSchema(
+      prompt,
+      imageUrls,
+      'validateContent',
+      schema,
+      cfg,
+      {
+        ...options,
+        onAttempt: (attempt) => {
+          attempts.push(attempt);
+          options.onAttempt?.(attempt);
+        },
+      }
+    );
+    const normalized = normalizeValidationResponse(response, combinedText, imageUrls.length > 0);
+    applyStage1LocalDecisionGates(normalized, combinedText, imageUrls.length > 0);
+
+    const noImageFallbackUsed = attempts.some(
+      (attempt) => attempt.requestKind === 'no_image_fallback'
+    );
+    const lastAttempt = attempts.at(-1);
+    const responseIncomplete =
+      lastAttempt?.responseStatus === 'incomplete' || lastAttempt?.status === 'incomplete';
+    const incompleteReason = responseIncomplete
+      ? lastAttempt.incompleteReason || 'The final API response was marked incomplete.'
+      : noImageFallbackUsed
+        ? 'Image request failed and production fallback retried without images.'
+        : undefined;
+
+    return {
+      status: noImageFallbackUsed || responseIncomplete ? 'inconclusive' : 'completed',
+      result: normalized,
+      attempts,
+      noImageFallbackUsed,
+      incompleteReason,
+    };
+  } catch (error) {
+    const noImageFallbackUsed = attempts.some(
+      (attempt) => attempt.requestKind === 'no_image_fallback'
+    );
+    if (isStage1EvaluationBudgetStop(error)) {
+      return {
+        status: 'budget_stopped',
+        result: null,
+        attempts,
+        noImageFallbackUsed,
+        incompleteReason: error instanceof Error ? error.message : String(error),
+      };
+    }
+
+    const heuristic = inferValidContentFromText(combinedText, imageUrls.length > 0);
+    const hasValidContent = heuristic.hasValidContent;
+    return {
+      status: 'request_error',
+      result: {
+        imageAnalysis: [],
+        hasValidContent,
+        confidence: heuristic.confidence,
+        validationDecision: hasValidContent ? 'VALIDATION_PASSED' : 'VALIDATION_FAILED',
+        reason: `Validation fallback after error: ${error instanceof Error ? error.message : 'Unknown error'} | ${heuristic.reason}`,
+      },
+      attempts,
+      noImageFallbackUsed,
+      incompleteReason: error instanceof Error ? error.message : String(error),
+    };
+  }
+}
+
+/**
  * Create the validation prompt - exact port from postParser.js
  */
-function createValidationPrompt(
+export function createValidationPrompt(
   combinedText: string,
   hasImages: boolean,
   userName: string,
@@ -190,10 +310,31 @@ DECISION POLICY (MUST FOLLOW):
 Analyze the content and determine if it contains valid extractable information.`;
 }
 
+export function createCompactValidationPrompt(
+  combinedText: string,
+  hasImages: boolean,
+  userName: string,
+  timestamp: string
+): string {
+  return `You are the first stage of a 5 stage Social Media post processer. Determine whether this social media post contains valid events or food/drink specials worth extracting.
+
+Valid content includes live music, trivia, comedy, workshops, parties with specific timing, food specials and advertised deals, and calendars or schedules with multiple events/specials. An explicitly advertised daily special or deal qualifies even without a printed price; an ordinary month-long featured menu item without a deal does not. Business hours only, holiday greetings without events, general marketing without specifics, ordinary menu announcements without an advertised deal, and "Visit us" without events/specials are invalid.
+
+Analyze every attached image in attachment order. Return exactly one populated imageAnalysis entry per image, with its 0-based index. Keep each short description and relevance specific to that image; do not copy details from the caption or another image into it. Keep visible event names, dates, times, and venues tied to the image where they appear. Set image complexity from the image itself. Recommend tiling only for a calendar grid or dense small text.
+
+Never reject solely because an image is decorative or generic when the text lists events. Reject only when both image and text lack extractable events or specials. Briefly explain the decision from the source evidence.
+
+POST DETAILS:
+- Posted by: ${userName}
+- Posted at: ${timestamp}
+- Text: "${combinedText}"
+- Has images: ${hasImages}`;
+}
+
 /**
  * Create the validation schema for GPT function calling
  */
-function createValidationSchema(): GPTFunctionSchema[] {
+export function createValidationSchema(): GPTFunctionSchema[] {
   return [
     {
       name: 'validateContent',
@@ -449,7 +590,7 @@ function detectLinkedCalendarSignals(
   };
 }
 
-function normalizeValidationResponse(
+export function normalizeValidationResponse(
   response: ValidationResult,
   text: string,
   hasImages: boolean
@@ -525,6 +666,43 @@ function normalizeValidationResponse(
     validationDecision,
     reason: reason || '',
   };
+}
+
+export function applyStage1LocalDecisionGates(
+  normalized: ValidationResult,
+  combinedText: string,
+  hasImages: boolean
+): void {
+  const textSignals = detectCalendarSignals(combinedText);
+  logger.debug('Calendar signals detected', textSignals);
+
+  if (
+    (!normalized.hasValidContent || normalized.validationDecision === 'VALIDATION_FAILED') &&
+    textSignals.hasCalendar
+  ) {
+    const previousReason = String(normalized.reason || '').trim();
+    normalized.hasValidContent = true;
+    normalized.validationDecision = 'VALIDATION_PASSED';
+    normalized.confidence = Math.max(Number(normalized.confidence || 0), 0.8);
+    normalized.reason =
+      (previousReason ? previousReason + ' | ' : '') +
+      'Text calendar/roundup detected (override PASS)';
+    logger.info('Validation overridden to PASS due to strong text calendar signals');
+  }
+
+  const linkedCalendarSignals = detectLinkedCalendarSignals(combinedText, hasImages);
+  if (
+    (!normalized.hasValidContent || normalized.validationDecision === 'VALIDATION_FAILED') &&
+    linkedCalendarSignals.hasLinkedCalendar
+  ) {
+    const previousReason = String(normalized.reason || '').trim();
+    normalized.hasValidContent = true;
+    normalized.validationDecision = 'VALIDATION_PASSED';
+    normalized.confidence = Math.max(Number(normalized.confidence || 0), 0.75);
+    normalized.reason =
+      (previousReason ? previousReason + ' | ' : '') + linkedCalendarSignals.reason;
+    logger.info('Validation overridden to PASS due to linked calendar/program signals');
+  }
 }
 
 /**
@@ -608,9 +786,10 @@ async function callGPTWithSchema(
   imageUrls: string[],
   functionName: string,
   schema: GPTFunctionSchema[],
-  config: ParsingConfig
+  config: ParsingConfig,
+  options: Stage1CallOptions = {}
 ): Promise<ValidationResult> {
-  const client = getOpenAIClient();
+  const client = options.client || getOpenAIClient();
   const model = config.stage1ModelOverride || resolveStageModel(config.gptModelFast, 'STAGE1_MODEL_OVERRIDE');
   const imageDetail = resolveImageDetail('STAGE1_IMAGE_DETAIL', 'high');
   const usesResponses = (value: string): boolean => /^gpt-(?:5|6)(?:\.|-)/.test(value);
@@ -654,10 +833,58 @@ async function callGPTWithSchema(
 
   class TruncatedValidationJsonError extends Error {}
 
-  const runOnce = async (urls: string[], outputTokenLimit?: number): Promise<ValidationResult> => {
+  let requestIndex = 0;
+
+  const reportAttempt = (attempt: Stage1RequestAttempt): void => {
+    try {
+      options.onAttempt?.(attempt);
+    } catch (error) {
+      if (!options.onBeforeRequest) {
+        logger.warn('Stage 1 attempt observer failed', {
+          error: error instanceof Error ? error.message : String(error),
+        });
+      } else {
+        throw error;
+      }
+    }
+  };
+
+  const createRequestAttempt = (
+    urls: string[],
+    kind: Stage1RequestKind,
+    endpoint: 'responses' | 'chat',
+    maxOutputTokens: number,
+    inputText: string
+  ): Stage1RequestAttempt => ({
+    requestIndex: ++requestIndex,
+    requestKind: kind,
+    model,
+    endpoint,
+    imageCount: urls.length,
+    maxOutputTokens,
+    inputTextChars: inputText.length,
+    status: 'error',
+    durationMs: 0,
+    inputTokens: 0,
+    outputTokens: 0,
+    totalTokens: 0,
+    cachedInputTokens: 0,
+    cacheWriteTokens: 0,
+    reasoningTokens: 0,
+    visibleOutput: '',
+    parsed: false,
+  });
+
+  const runOnce = async (
+    urls: string[],
+    outputTokenLimit?: number,
+    requestKind: Stage1RequestKind = 'initial'
+  ): Promise<ValidationResult> => {
     if (usesResponses(model)) {
       const schemaHint = JSON.stringify(schema[0]?.parameters || {}, null, 2);
-      const promptWithSchema = `${prompt}\n\nReturn ONLY valid JSON that matches this schema:\n${schemaHint}`;
+      const promptWithSchema = options.structuredOutput
+        ? prompt
+        : `${prompt}\n\nReturn ONLY valid JSON that matches this schema:\n${schemaHint}`;
       const content = [
         { type: 'input_text', text: promptWithSchema },
       ] as Array<{ type: string; text?: string; image_url?: string; detail?: string }>;
@@ -672,48 +899,98 @@ async function callGPTWithSchema(
         }
       }
 
-      const callStart = Date.now();
       const maxOutputTokens = outputTokenLimit ?? (model.startsWith('gpt-6') ? 6000 : 2000);
-      const response = await client.responses.create({
-        model,
-        input: [{ role: 'user', content }],
-        max_output_tokens: maxOutputTokens,
-        ...(model.startsWith('gpt-6') ? { reasoning: { effort: 'none' as any } } : {}),
-      });
-      const durationMs = Date.now() - callStart;
-      logger.info('Timing', {
-        step: 'gpt_call',
-        component: 'contentValidator',
-        endpoint: 'responses',
-        model,
-        imageCount: urls.length,
-        durationMs,
-      });
-      const usage = extractTokenUsage(response.usage);
-      await emitGptUsage(config, {
-        stage: 'stage1',
-        component: 'contentValidator',
-        endpoint: 'responses',
-        model,
-        imageCount: urls.length,
-        durationMs,
-        ...usage,
-      });
-
-      const messageContent = extractResponsesText(response);
-      logger.debug('GPT validation response received (responses)', {
-        model,
-        tokens: usage.totalTokens,
-      });
-
+      const attempt = createRequestAttempt(urls, requestKind, 'responses', maxOutputTokens, promptWithSchema);
+      const callStart = Date.now();
+      let response: any;
       try {
-        return parseJsonResponse(messageContent || '');
+        attempt.reservationId = options.onBeforeRequest?.(attempt);
+        response = await client.responses.create({
+          model,
+          input: [{ role: 'user', content }],
+          max_output_tokens: maxOutputTokens,
+          ...(model.startsWith('gpt-6') ? { reasoning: { effort: 'none' as any } } : {}),
+          ...(options.structuredOutput
+            ? {
+                text: {
+                  format: {
+                    type: 'json_schema',
+                    name: schema[0]?.name || functionName,
+                    strict: true,
+                    schema: schema[0]?.parameters || {},
+                  },
+                },
+              }
+            : {}),
+        });
+        attempt.durationMs = Date.now() - callStart;
+        attempt.responseId = typeof response?.id === 'string' ? response.id : undefined;
+        attempt.responseStatus = typeof response?.status === 'string' ? response.status : undefined;
+        attempt.incompleteReason =
+          typeof response?.incomplete_details?.reason === 'string'
+            ? response.incomplete_details.reason
+            : undefined;
+        const usage = extractTokenUsage(response.usage);
+        attempt.inputTokens = usage.inputTokens;
+        attempt.outputTokens = usage.outputTokens;
+        attempt.totalTokens = usage.totalTokens;
+        attempt.cachedInputTokens = usage.cachedInputTokens;
+        attempt.cacheWriteTokens = Number(response?.usage?.input_tokens_details?.cache_write_tokens || 0);
+        attempt.reasoningTokens = Number(response?.usage?.output_tokens_details?.reasoning_tokens || 0);
+        attempt.visibleOutput = extractResponsesText(response);
+
+        logger.info('Timing', {
+          step: 'gpt_call',
+          component: 'contentValidator',
+          endpoint: 'responses',
+          model,
+          imageCount: urls.length,
+          durationMs: attempt.durationMs,
+        });
+        await emitGptUsage(config, {
+          stage: 'stage1',
+          component: 'contentValidator',
+          endpoint: 'responses',
+          model,
+          imageCount: urls.length,
+          durationMs: attempt.durationMs,
+          ...usage,
+          responseId: attempt.responseId,
+          responseStatus: attempt.responseStatus,
+          incompleteReason: attempt.incompleteReason,
+          requestedMaxOutputTokens: maxOutputTokens,
+          reasoningTokens: attempt.reasoningTokens,
+          visibleOutputChars: attempt.visibleOutput.length,
+        });
+        logger.debug('GPT validation response received (responses)', {
+          model,
+          tokens: usage.totalTokens,
+        });
+
+        try {
+          const parsed = parseJsonResponse(attempt.visibleOutput || '');
+          attempt.parsed = true;
+          attempt.status = 'completed';
+          reportAttempt(attempt);
+          return parsed;
+        } catch (error) {
+          if (urls.length > 0 &&
+            (response.status === 'incomplete' || usage.outputTokens >= maxOutputTokens)) {
+            attempt.status = 'incomplete';
+            attempt.errorMessage = `Image validation JSON reached the ${maxOutputTokens}-token response limit`;
+            throw new TruncatedValidationJsonError(attempt.errorMessage);
+          }
+          attempt.errorMessage = error instanceof Error ? error.message : String(error);
+          throw error;
+        }
       } catch (error) {
-        if (urls.length > 0 &&
-          (response.status === 'incomplete' || usage.outputTokens >= maxOutputTokens)) {
-          throw new TruncatedValidationJsonError(
-            `Image validation JSON reached the ${maxOutputTokens}-token response limit`
-          );
+        if (!attempt.parsed) {
+          attempt.durationMs = Date.now() - callStart;
+          if (attempt.status !== 'incomplete') {
+            attempt.status = 'error';
+          }
+          attempt.errorMessage ||= error instanceof Error ? error.message : String(error);
+          reportAttempt(attempt);
         }
         throw error;
       }
@@ -732,75 +1009,112 @@ async function callGPTWithSchema(
       }
     }
 
+    const maxOutputTokens = 2000;
+    const attempt = createRequestAttempt(urls, requestKind, 'chat', maxOutputTokens, prompt);
     const callStart = Date.now();
-    const response = await client.chat.completions.create({
-      model,
-      messages: [{ role: 'user', content }],
-      tools,
-      tool_choice: { type: 'function', function: { name: functionName } },
-      max_tokens: 2000,
-      temperature: 0.3,
-    });
-    const durationMs = Date.now() - callStart;
-    logger.info('Timing', {
-      step: 'gpt_call',
-      component: 'contentValidator',
-      endpoint: 'chat',
-      model,
-      imageCount: urls.length,
-      durationMs,
-    });
-    const usage = extractTokenUsage(response.usage);
-    await emitGptUsage(config, {
-      stage: 'stage1',
-      component: 'contentValidator',
-      endpoint: 'chat',
-      model,
-      imageCount: urls.length,
-      durationMs,
-      ...usage,
-    });
-
-    const toolCall = response.choices[0]?.message?.tool_calls?.[0];
-    if (toolCall && toolCall.function?.arguments) {
-      const parsed = JSON.parse(toolCall.function.arguments);
-      logger.debug('GPT validation response received', {
+    try {
+      attempt.reservationId = options.onBeforeRequest?.(attempt);
+      const response = await client.chat.completions.create({
         model,
-        tokens: usage.totalTokens,
+        messages: [{ role: 'user', content }],
+        tools,
+        tool_choice: { type: 'function', function: { name: functionName } },
+        max_tokens: maxOutputTokens,
+        temperature: 0.3,
       });
-      return parsed as ValidationResult;
-    }
+      attempt.durationMs = Date.now() - callStart;
+      attempt.responseId = typeof response?.id === 'string' ? response.id : undefined;
+      const usage = extractTokenUsage(response.usage);
+      attempt.inputTokens = usage.inputTokens;
+      attempt.outputTokens = usage.outputTokens;
+      attempt.totalTokens = usage.totalTokens;
+      attempt.cachedInputTokens = usage.cachedInputTokens;
+      attempt.cacheWriteTokens = Number(response?.usage?.prompt_tokens_details?.cache_write_tokens || 0);
+      attempt.reasoningTokens = Number(response?.usage?.completion_tokens_details?.reasoning_tokens || 0);
 
-    // Fallback: try to parse content as JSON
-    const messageContent = response.choices[0]?.message?.content;
-    if (messageContent) {
-      try {
-        return JSON.parse(messageContent) as ValidationResult;
-      } catch {
-        return {
-          imageAnalysis: [],
-          hasValidContent: false,
-          confidence: 0,
-          validationDecision: 'VALIDATION_FAILED',
-          reason: messageContent,
-        };
+      logger.info('Timing', {
+        step: 'gpt_call',
+        component: 'contentValidator',
+        endpoint: 'chat',
+        model,
+        imageCount: urls.length,
+        durationMs: attempt.durationMs,
+      });
+      await emitGptUsage(config, {
+        stage: 'stage1',
+        component: 'contentValidator',
+        endpoint: 'chat',
+        model,
+        imageCount: urls.length,
+        durationMs: attempt.durationMs,
+        ...usage,
+        responseId: attempt.responseId,
+        requestedMaxOutputTokens: maxOutputTokens,
+        reasoningTokens: attempt.reasoningTokens,
+      });
+
+      const toolCall = response.choices[0]?.message?.tool_calls?.[0];
+      if (toolCall && toolCall.function?.arguments) {
+        attempt.visibleOutput = toolCall.function.arguments;
+        const parsed = JSON.parse(toolCall.function.arguments);
+        attempt.parsed = true;
+        attempt.status = 'completed';
+        reportAttempt(attempt);
+        logger.debug('GPT validation response received', {
+          model,
+          tokens: usage.totalTokens,
+        });
+        return parsed as ValidationResult;
       }
-    }
 
-    throw new Error('No valid response from GPT');
+      const messageContent = response.choices[0]?.message?.content;
+      if (messageContent) {
+        attempt.visibleOutput = messageContent;
+        try {
+          const parsed = JSON.parse(messageContent) as ValidationResult;
+          attempt.parsed = true;
+          attempt.status = 'completed';
+          reportAttempt(attempt);
+          return parsed;
+        } catch {
+          const parsed = {
+            imageAnalysis: [],
+            hasValidContent: false,
+            confidence: 0,
+            validationDecision: 'VALIDATION_FAILED' as const,
+            reason: messageContent,
+          };
+          attempt.parsed = true;
+          attempt.status = 'completed';
+          reportAttempt(attempt);
+          return parsed;
+        }
+      }
+
+      throw new Error('No valid response from GPT');
+    } catch (error) {
+      if (!attempt.parsed) {
+        attempt.durationMs = Date.now() - callStart;
+        attempt.errorMessage = error instanceof Error ? error.message : String(error);
+        reportAttempt(attempt);
+      }
+      throw error;
+    }
   };
 
   try {
-    return await runOnce(imageUrls);
+    return await runOnce(imageUrls, undefined, 'initial');
   } catch (error) {
+    if (isStage1EvaluationBudgetStop(error)) throw error;
     if (imageUrls && imageUrls.length > 0) {
       if (error instanceof TruncatedValidationJsonError) {
         logger.warn('Image validation JSON was truncated; retrying with images and a larger output cap', {
           error: error.message,
         });
         try {
-          return await runOnce(imageUrls, 4000);
+          return await runOnce(imageUrls, 4000, 'output_limit_retry');
         } catch (retryError) {
+          if (isStage1EvaluationBudgetStop(retryError)) throw retryError;
           logger.warn('Expanded image validation retry failed', {
             error: retryError instanceof Error ? retryError.message : String(retryError),
           });
@@ -809,7 +1123,7 @@ async function callGPTWithSchema(
       logger.warn('GPT call failed with images; retrying without images', {
         error: error instanceof Error ? error.message : String(error),
       });
-      return await runOnce([]);
+      return await runOnce([], undefined, 'no_image_fallback');
     }
     logger.error('GPT call failed', error);
     throw error;
