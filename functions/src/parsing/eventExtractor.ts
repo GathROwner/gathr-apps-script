@@ -1954,6 +1954,7 @@ function getSpecificThemeMatchKey(
 
 function hasExplicitMonthDaySignal(text: string): boolean {
   const normalized = String(text || '')
+    .replace(/^\s*may be an image[^\r\n]*/gim, '')
     .replace(/[\u2012-\u2015]/g, '-')
     .replace(/\s+/g, ' ')
     .trim();
@@ -2634,10 +2635,12 @@ async function refineUmbrellaThemeSeriesWithPosterDates(
 ): Promise<ExtractedItem[]> {
   if (!Array.isArray(rawData) || rawData.length === 0) return rawData;
 
+  // Theme/date remapping is for an ambiguous umbrella extraction. A schedule
+  // already containing separately named items on three dates is a complete
+  // inventory; replacing it can erase performers from other weekday tiles.
+  if (!shouldRefineUmbrellaThemeDatesForRegression(rawData, combinedText)) return rawData;
+
   const candidateLines = extractUmbrellaThemeCandidateLines(combinedText);
-  if (candidateLines.length < 2 || !hasExplicitMonthDaySignal(combinedText)) {
-    return rawData;
-  }
 
   const umbrellaName = extractUmbrellaDisplayName(combinedText, rawData);
   const themeDateMap = await extractUmbrellaThemeDateMap(
@@ -4016,6 +4019,11 @@ CONTENT:
 This appears to be a schedule/lineup with multiple performances.
 Extract EVERY performance/event listed.
 
+WEEKDAY LINEUP COVERAGE:
+- If the caption or poster names separate Thursday, Friday, Saturday, or Sunday activities for this week, make a checklist of those four day regions before producing JSON. Return an item for each named public activity, even when a later day has no time in the caption but its poster tile supplies one.
+- Match each performer's name to the date and time in that SAME day tile. Do not let a Thursday or Sunday item stand in for Friday or Saturday. A trivia activity and a later concert on the same Thursday are separate events when the schedule gives their own start times.
+- Before returning, compare the output against every weekday line in the caption and every dated tile in the image. If one of those source activities is missing, add it. Do not add an activity that appears only as background artwork.
+
 FESTIVAL PARENT RULE:
 - When the schedule is printed inside one named festival with shared admission, location, and hours, create one festival event for each festival date. Put that day's stage timetable, vendors, and activities in its description. Do not publish each stage act, vendor, or attraction as a separate event unless it has independent admission or a separate venue outside the festival.
 - Before returning, scan the schedule's activity listings for any named public activity at a venue outside the festival host. Such an activity needs its own event with its own printed time, even when grouped under the festival's "Things to Do" heading. A vendor business name or a room/stage within the host is not a different venue.
@@ -4475,6 +4483,23 @@ export function extractDateFromText(
   } catch (e) {
     return { date: postedDate, isRecurring: false, hasExplicitDayPrefix: false };
   }
+}
+
+function hasCompleteDatedScheduleInventory(rawData: ExtractedItem[]): boolean {
+  const dated = rawData.filter(item =>
+    /^\d{4}-\d{2}-\d{2}$/.test(String((item as any).date || '').trim()) &&
+    String((item as any).name || '').trim()
+  );
+  return dated.length >= 3 &&
+    new Set(dated.map(item => String((item as any).date).trim())).size >= 3;
+}
+
+export function shouldRefineUmbrellaThemeDatesForRegression(
+  rawData: ExtractedItem[], combinedText: string
+): boolean {
+  return !hasCompleteDatedScheduleInventory(rawData) &&
+    extractUmbrellaThemeCandidateLines(combinedText).length >= 2 &&
+    hasExplicitMonthDaySignal(combinedText);
 }
 
 export function mergeCalendarItemsForRegression(

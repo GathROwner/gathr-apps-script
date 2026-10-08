@@ -64,6 +64,21 @@ test('single-weekday row-scoped recurrence fallback still works when the row onl
   assert.equal(normalized.recurringPattern, 'weekly_tuesday');
 });
 
+test('a dated shop weekly-special tag is a finite offer, not indefinite Thursday recurrence', () => {
+  const normalized = applyRecurrenceNormalizationForRegression(
+    buildEvent({ name: 'Kraft Salad Mix Macaroni 200 g', category: 'Food Special',
+      isEvent: 'No', isFoodSpecial: 'Yes', description: 'Weekly special: $0.99 each.',
+      startDate: '2026-10-08', endDate: '2026-10-08',
+      recurringPattern: 'weekly_thursday', isRecurring: 'Yes' }),
+    buildOriginalItem({ name: 'Kraft Salad Mix Macaroni 200 g',
+      description: 'Weekly special: $0.99 each.', date: '2026-10-08',
+      recurringPattern: 'weekly_thursday' })
+  );
+  assert.equal(normalized.isRecurring, 'No');
+  assert.equal(normalized.recurringPattern, 'none');
+  assert.equal(normalized.totalOccurrences, undefined);
+});
+
 test('a year after a date does not turn a weekly October class into a one-off', () => {
   for (const [name, date, pattern, weekday] of [
     ['Contemporary Dance', '2026-10-07', 'weekly_wednesday', 'Wednesdays'],

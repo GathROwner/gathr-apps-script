@@ -54,3 +54,26 @@ test('a Monday closure does not erase an explicit weekend dinner special', () =>
   assert.deepEqual(filterUnsupportedClosureFoodBleed([dinner],
     'Closed Monday for Thanksgiving. Regular hours resume Tuesday.'), []);
 });
+
+test('October 8 source notices and ordinary food inventory do not become listings', () => {
+  const source = `Wednesday\nGrab ‘n Go Fresh Fridge;\n> Carrot + Ginger Soup $11\nSoup of the Day\nHam + Split Pea\nAll Day Special\nBeef Dip Melt $20`;
+  const records = [
+    listing('Carrot + Ginger Soup', 'Wednesday — Carrot + Ginger Soup, available from the Grab ‘n Go Fresh Fridge.'),
+    listing('Soup of the Day: Ham + Split Pea', 'Wednesday — Soup of the Day: Ham + Split Pea.'),
+    listing('Beef Dip Melt', 'Wednesday — All Day Special: Beef Dip Melt on a Hoagie w Fries, $20.'),
+  ];
+  assert.deepEqual(filterNonStandalonePostListings(records, source), records.slice(1));
+  assert.deepEqual(filterNonStandalonePostListings([
+    listing('Lattice Crust Apple Pies', 'New lattice crust apple pies, only $9.99 each.'),
+  ], 'We have NEW lattice crust apple pies, only $9.99 each.'), []);
+  assert.deepEqual(filterNonStandalonePostListings([
+    listing('All Pools Closed for Swimming Lessons', 'All pools are closed during this period.', 'Workshops & Classes'),
+    listing('Lane Swim', 'Lane swim is open 8–9 pm.', 'Sports'),
+  ], 'All pools CLOSED for Swimming Lessons 4–8 pm. Lane swim open 8–9 pm.'), [
+    listing('Lane Swim', 'Lane swim is open 8–9 pm.', 'Sports'),
+  ]);
+  assert.deepEqual(filterNonStandalonePostListings([
+    listing('Final-day council nomination submissions',
+      'Nominations can be submitted at the Election Office on Nomination Day.', 'Gatherings & Parties'),
+  ], 'Town of Souris nomination day notice.'), []);
+});

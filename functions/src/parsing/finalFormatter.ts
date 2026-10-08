@@ -484,7 +484,8 @@ Never return arrays of values for an item; each must be a JSON object.`;
     const standaloneEvents = filterNonStandalonePostListings(retailFilteredEvents, combinedText);
     const advisoryFilteredEvents = filterTrafficAdvisoryLogisticsEvents(standaloneEvents, combinedText);
     const cruiseFilteredEvents = filterCruiseShipLogisticsEvents(advisoryFilteredEvents, combinedText);
-    const promotedFiniteWeeklyEvents = promoteFiniteWeeklyOneOffSequences(cruiseFilteredEvents);
+    const exactSparseDateEvents = preserveSparseExplicitDateSequences(cruiseFilteredEvents);
+    const promotedFiniteWeeklyEvents = promoteFiniteWeeklyOneOffSequences(exactSparseDateEvents);
     const collapsedProcessedEvents = collapseRecurringSeriesEvents(promotedFiniteWeeklyEvents);
 
     // Final validation pass
@@ -2621,15 +2622,16 @@ export function filterRetailMerchandisePromotions(
   events: FormattedEvent[]
 ): FormattedEvent[] {
   return events.filter((event) => {
+    const rawText = [event.name, event.description].join(' ');
     const text = normalizeCruiseLogisticsText([
       event.name,
       event.description,
     ].join(' '));
     const hasRetailProductCue =
-      /\b(porch\s+goose|outfits?|clothing|apparel|merchandise|home\s+decor|garden\s+decor)\b/.test(text);
+      /\b(porch\s+goose|outfits?|clothing|apparel|merchandise|(?:home|garden|christmas)\s+decor|ornaments?|wreaths?|gnomes?)\b/.test(text);
     const hasSaleCue =
       /\b(price|priced|sale|on\s+sale|now\s+only|in\s+stock|shop\s+now)\b/.test(text) ||
-      /\$\s*\d+(?:\.\d{2})?/.test(text);
+      /\$\s*\d+(?:\.\d{2})?|\d+\s*%\s*off/i.test(rawText);
     if (!hasRetailProductCue || !hasSaleCue || hasPublicEventCue(text)) {
       return true;
     }
@@ -2644,6 +2646,7 @@ export function filterRetailMerchandisePromotions(
 
 function normalizeCruiseLogisticsText(value: unknown): string {
   return String(value || '')
+    .normalize('NFKD').replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
     .replace(/[\u2018\u2019]/g, "'")
     .replace(/[\u201c\u201d]/g, '"')
@@ -4309,6 +4312,19 @@ function normalizeRecurringForFormattedEvent(
   originalItem?: ExtractedItem
 ): FormattedEvent {
   const sourceText = buildRecurrenceSourceText(event, originalItem);
+  // A shop's "weekly special" describes its current offer window. It does not
+  // promise that the same product repeats every Thursday indefinitely.
+  if (FOOD_CATEGORIES.includes(event.category) && /\bweekly\s+special\b/i.test(sourceText) &&
+      !/\b(?:every|each)\s+(?:week|monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/i.test(sourceText)) {
+    event.isRecurring = 'No';
+    event.recurringPattern = 'none';
+    event.totalOccurrences = undefined;
+    event.recurrenceUntilDate = undefined;
+    event.recurringDaysOfWeek = undefined;
+    event.recurringWeekdaySequence = undefined;
+    event.recurringWeekInterval = undefined;
+    return event;
+  }
   const sourceWeekdayPatterns = collectDistinctWeekdayPatternsFromText(sourceText);
   const hasCue = hasRecurringCue(sourceText);
   const hasConcreteDate = hasConcreteDateReference(sourceText);
@@ -5585,8 +5601,10 @@ function buildFiniteWeeklyOneOffSequenceKey(event: FormattedEvent): string | nul
 
 function promoteFiniteWeeklyOneOffSequences(events: FormattedEvent[]): FormattedEvent[] {
   const groups = new Map<string, Array<{ index: number; startDate: string }>>();
+  const sparseExactDateIndexes = findSparseExplicitDateSequenceIndexes(events);
 
   events.forEach((event, index) => {
+    if (sparseExactDateIndexes.has(index)) return;
     const key = buildFiniteWeeklyOneOffSequenceKey(event);
     if (!key) return;
     const startDate = String(event.startDate || '').trim();
@@ -5776,6 +5794,65 @@ function reconcilePreorderOfferWindow(
   return event;
 }
 
+/** Find complete same-activity date lists whose gaps invalidate a weekly parent. */
+function findSparseExplicitDateSequenceIndexes(events: FormattedEvent[]): Set<number> {
+  const groups = new Map<string, Array<{ index: number; date: string }>>();
+  events.forEach((event, index) => {
+    const date = String(event.startDate || '').trim();
+    if (!parseIsoDate(date)) return;
+    const key = [
+      normalizeRecurringSeriesTextForKey(event.establishment),
+      normalizeRecurringSeriesTextForKey(event.additionalLocation),
+      normalizeRecurringSeriesTextForKey(event.name),
+      String(event.startTime || '').trim(),
+      String(event.endTime || '').trim(),
+    ].join('|');
+    const group = groups.get(key) || [];
+    group.push({ index, date });
+    groups.set(key, group);
+  });
+
+  const indexes = new Set<number>();
+  for (const group of groups.values()) {
+    const dates = [...new Set(group.map(entry => entry.date))].sort();
+    if (dates.length < 4) continue;
+    const weekday = patternFromIsoDate(dates[0]);
+    if (weekday === 'none' || !dates.every(date => patternFromIsoDate(date) === weekday)) continue;
+    const hasGap = dates.slice(1).some((date, index) =>
+      getDifferenceInDays(dates[index], date) > 7);
+    if (!hasGap) continue;
+
+    for (const { index } of group) indexes.add(index);
+  }
+  return indexes;
+}
+
+/** A dated poster with gaps cannot be represented by one simple weekly parent. */
+export function preserveSparseExplicitDateSequences(events: FormattedEvent[]): FormattedEvent[] {
+  const sparseIndexes = findSparseExplicitDateSequenceIndexes(events);
+  const result = events.map(event => ({ ...event }));
+  for (const index of sparseIndexes) {
+    result[index].isRecurring = 'No';
+    result[index].recurringPattern = 'none';
+    result[index].totalOccurrences = undefined;
+    result[index].recurrenceUntilDate = undefined;
+    result[index].recurringDaysOfWeek = undefined;
+    result[index].recurringWeekdaySequence = undefined;
+    result[index].recurringWeekInterval = undefined;
+    result[index].endDate = result[index].startDate;
+  }
+  if (sparseIndexes.size > 0) logger.info('Preserved sparse printed dates', {
+    itemCount: sparseIndexes.size,
+  });
+  return result;
+}
+
+export function promoteFiniteWeeklyOneOffSequencesForRegression(
+  events: FormattedEvent[]
+): FormattedEvent[] {
+  return promoteFiniteWeeklyOneOffSequences(events);
+}
+
 /** Reject announcements that describe a transaction or filing, not an activity or food deal. */
 export function filterNonStandalonePostListings(
   events: FormattedEvent[], sourceText: string
@@ -5787,8 +5864,18 @@ export function filterNonStandalonePostListings(
     const detail = normalizeCruiseLogisticsText(event.description);
     const special = event.isFoodSpecial === 'Yes' || FOOD_CATEGORIES.includes(event.category);
     const publicActivity = /\b(?:workshop|class|u pick|pick your own|tour|festival|market day|tasting|demonstration|public meeting|meet and greet)\b/.test(name);
+    const itemOffer = /\b(?:daily|all day|weekly|today'?s?)\s+special\b|\b(?:special|deal|discount|sale|happy hour)\b|\d+\s*%\s*off/.test(`${name} ${detail}`);
     let reason = '';
-    if (special && /\bgiveaway\b/.test(name) &&
+    if (/\ball\s+pools?\s+closed\b|\bpool\s+closure\b/.test(name) &&
+        !/\b(?:register|book|sign up|open to the public)\b/.test(detail)) {
+      reason = 'pool_closure_notice';
+    } else if (special && /\bgrab\s*'?\s*(?:n|and)\s*go\s+fresh\s+fridge\b/.test(detail) &&
+        !itemOffer) {
+      reason = 'ordinary_fresh_fridge_menu';
+    } else if (special && !itemOffer && /\bnew\b/.test(source) &&
+        /\b(?:pies?|cakes?|pastries?|products?)\b/.test(name) && !publicActivity) {
+      reason = 'ordinary_new_product';
+    } else if (special && /\bgiveaway\b/.test(name) &&
         /\b(?:like|comment|share)\b/.test(source) && /\b(?:draw|winner)\b/.test(source)) {
       reason = 'online_entry_giveaway';
     } else if (special && /\bback in stock\b/.test(source) && !hasExplicitOffer) {
@@ -5800,8 +5887,9 @@ export function filterNonStandalonePostListings(
         /\b(?:just picked|hand picked|freshly picked)\b/.test(source) &&
         /\b(?:pumpkins?|gourds?|squash)\b/.test(name) && !publicActivity) {
       reason = 'ordinary_produce_inventory';
-    } else if (/\b(?:nomination|filing)\b/.test(name) && /\bdeadline\b/.test(name) &&
-        /\b(?:elections? office|office hours|applications? accepted|nominations? accepted)\b/.test(detail) &&
+    } else if (/\b(?:nomination|nominations|filing)\b/.test(name) &&
+        /\b(?:deadline|submissions?|filing)\b/.test(name) &&
+        /\b(?:elections? office|nomination day|office hours|applications? accepted|nominations? accepted)\b/.test(detail) &&
         !publicActivity) {
       reason = 'administrative_filing_deadline';
     } else if (!special && /\b(?:floral|flower)\b/.test(name) &&

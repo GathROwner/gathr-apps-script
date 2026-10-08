@@ -16,7 +16,10 @@ export function isRecentPastYearlessSourceDate(
   const day = extracted.getUTCDate();
   const currentYearDate = new Date(Date.UTC(posted.getUTCFullYear(), month - 1, day, 12));
   const daysAgo = (posted.getTime() - currentYearDate.getTime()) / 86_400_000;
-  if (daysAgo < 0 || daysAgo > 30) return false;
+  // A same-day listing is anchored by the post date, even when the caption
+  // omits the year ("tonight, October 8"). The rollover ambiguity only
+  // starts once that date is genuinely in the past.
+  if (daysAgo <= 0 || daysAgo > 30) return false;
 
   const monthTokens = [
     '', 'jan(?:uary)?', 'feb(?:ruary)?', 'mar(?:ch)?', 'apr(?:il)?', 'may',

@@ -19,6 +19,15 @@ test('an explicit next year and an older past date are not ambiguous recent roll
   assert.equal(isRecentPastYearlessSourceDate('July 25', '2026-10-03', '2027-07-25'), false);
 });
 
+test('same-day tonight posts are not held as recent-past yearless dates', () => {
+  assert.equal(isRecentPastYearlessSourceDate(
+    'TONIGHT! Thursday, October 8th', '2026-10-08', '2026-10-08'), false);
+  assert.equal(isRecentPastYearlessSourceDate(
+    'Trivia is tonight, Wednesday October 7th', '2026-10-07', '2026-10-07'), false);
+  assert.equal(isRecentPastYearlessSourceDate(
+    'September 25th at 8pm', '2026-10-03', '2026-09-25'), true);
+});
+
 test('calendar election filing notices do not become activities', () => {
   assert.equal(isElectionNoticeWithoutVenue({ name: 'Municipal Election Nominations Open', venue: '' }), true);
   assert.equal(isElectionNoticeWithoutVenue({ name: 'Municipal Election Nomination Deadline', venue: '' }), true);

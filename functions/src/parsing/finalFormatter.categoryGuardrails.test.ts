@@ -300,3 +300,12 @@ test('keeps a real market event that happens to sell merchandise', () => {
 
   assert.deepEqual(filterRetailMerchandisePromotions([market]), [market]);
 });
+
+test('Christmas decor discount does not become a food special', () => {
+  const sale = formatted({
+    category: 'Food Special', isEvent: 'No', isFoodSpecial: 'Yes',
+    name: '25% Off Christmas Décor',
+    description: 'Christmas décor, ornaments, wreaths and gnomes are 25% off.',
+  });
+  assert.deepEqual(filterRetailMerchandisePromotions([sale]), []);
+});

@@ -4,7 +4,36 @@ import assert from 'node:assert/strict';
 import {
   parseScheduleTextForRegression,
   shouldPreferAnchoredScheduleTextParserForRegression,
+  shouldRefineUmbrellaThemeDatesForRegression,
 } from './eventExtractor.js';
+
+test('keeps a complete dated Thursday to Sunday lineup out of umbrella theme remapping', () => {
+  const source = `Weekend plans? Hunter's has you covered.
+Thursday: Trivia with Darcy at 9, then Brad & Isaac at 10
+Friday: Griff & Guest
+Saturday: Gin N Tonic
+Sunday: Music Trivia with Andrew Rollins at 9
+Good music, good people, good times!
+OCR TEXT:
+May be an image of text`;
+  const items = [
+    ['Trivia with Darcy', '2026-10-08'],
+    ['Brad & Isaac', '2026-10-08'],
+    ['Griff & Guest', '2026-10-09'],
+    ['Gin N Tonic', '2026-10-10'],
+    ['Sunday Music Trivia with Andrew Rollins', '2026-10-11'],
+  ].map(([name, date]) => ({ name, date }));
+  assert.equal(shouldRefineUmbrellaThemeDatesForRegression(items as any, source), false);
+  assert.equal(shouldRefineUmbrellaThemeDatesForRegression(items.slice(0, 2) as any, source), false);
+});
+
+test('still allows an ambiguous umbrella theme to map explicit printed dates', () => {
+  const source = `October 10, 17, 24
+Friday Lobster Feast
+Saturday Roast Dinner`;
+  assert.equal(shouldRefineUmbrellaThemeDatesForRegression(
+    [{ name: 'Fall food nights', date: '2026-10-10' }] as any, source), true);
+});
 
 test('anchored Downtown Charlottetown schedule text keeps performers attached to source venues', () => {
   const input = `What’s happening today in Downtown Charlottetown?
