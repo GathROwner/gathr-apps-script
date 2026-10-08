@@ -386,6 +386,16 @@ test('compact-v5 preserves public activity recall while separating daily offers,
   assert.doesNotMatch(prompt, /row-\d+|sourceRow|caseId/i);
 });
 
+test('compact-v5 prompt text stays frozen for the completed v5 run', () => {
+  const prompt = createCompactV5ValidationPrompt(
+    'No fixture text is included here.', true, 'Test venue', '2026-10-08'
+  );
+  assert.equal(
+    createHash('sha256').update(prompt).digest('hex'),
+    '26d1e2eec11c9d1671722ed98b4012467bbcf6aa12c6df024a45966563404bdd'
+  );
+});
+
 test('compact-v5 evaluation requests use the compact-v5 prompt', async () => {
   const caption = 'A public heritage site announces visitor hours for the coming weekend.';
   const { client, calls } = fakeClient([apiResponse(validationResult(1))]);
@@ -403,6 +413,36 @@ test('compact-v5 evaluation requests use the compact-v5 prompt', async () => {
   assert.equal(getInputText(calls[0]), `${expectedPrompt}\n\nReturn ONLY valid JSON that matches this schema:\n${JSON.stringify(createValidationSchema()[0].parameters, null, 2)}`);
 });
 
+test('GPT-6 Stage 1 reasoning stays none by default and changes only for the low evaluation arm', async () => {
+  const caption = 'A public tour is announced for a future date.';
+  const baseline = fakeClient([apiResponse(validationResult(1))]);
+  const baselineRun = await validateContentForStage1Evaluation(
+    caption,
+    ['data:image/jpeg;base64,Zm9v'],
+    'Test venue',
+    '2026-10-08T00:00:00.000Z',
+    'gpt-6-luna',
+    { promptVariant: 'compact-v5', structuredOutput: false, client: baseline.client }
+  );
+  const low = fakeClient([apiResponse(validationResult(1))]);
+  const lowRun = await validateContentForStage1Evaluation(
+    caption,
+    ['data:image/jpeg;base64,Zm9v'],
+    'Test venue',
+    '2026-10-08T00:00:00.000Z',
+    'gpt-6-luna',
+    { promptVariant: 'compact-v5', structuredOutput: false, reasoningEffort: 'low', client: low.client }
+  );
+
+  assert.equal(baselineRun.status, 'completed');
+  assert.equal(lowRun.status, 'completed');
+  assert.deepEqual(baseline.calls[0].reasoning, { effort: 'none' });
+  assert.deepEqual(low.calls[0].reasoning, { effort: 'low' });
+  assert.equal(baselineRun.attempts[0].requestedReasoningEffort, 'none');
+  assert.equal(lowRun.attempts[0].requestedReasoningEffort, 'low');
+  assert.equal(getInputText(baseline.calls[0]), getInputText(low.calls[0]));
+});
+
 test('offline v5 preflight records exact per-case prompt and compiled validator hashes', () => {
   const { manifest, sourceRoot } = loadAndValidateManifest(manifestPath);
   const caseData = manifest.cases[0];
@@ -411,7 +451,7 @@ test('offline v5 preflight records exact per-case prompt and compiled validator 
     runnerPath,
     '--manifest', manifestPath,
     '--case-ids', caseData.caseId,
-    '--variants', 'luna-compact-v5',
+    '--variants', 'luna-compact-v5,luna-compact-v5-low',
     '--image-set', 'initial',
     '--output', '-',
   ], { cwd: functionsRoot, encoding: 'utf8', timeout: 30000 });
@@ -429,6 +469,12 @@ test('offline v5 preflight records exact per-case prompt and compiled validator 
   assert.equal(plan.mode, 'offline_preflight');
   assert.equal(plan.sourceRoot, sourceRoot);
   assert.equal(plan.cases[0].effectivePromptSha256ByVariant['luna-compact-v5'], expectedPromptHash);
+  assert.equal(plan.cases[0].effectivePromptSha256ByVariant['luna-compact-v5-low'], expectedPromptHash);
+  assert.deepEqual(plan.requestedReasoningEffortByVariant, {
+    'luna-compact-v5': 'none',
+    'luna-compact-v5-low': 'low',
+  });
+  assert.deepEqual(plan.cases[0].requestedReasoningEffortByVariant, plan.requestedReasoningEffortByVariant);
   assert.equal(plan.compiledContentValidatorSha256, expectedValidatorHash);
   assert.match(plan.compiledContentValidatorSha256, /^[a-f0-9]{64}$/);
 });
@@ -649,6 +695,9 @@ test('selected variant and case lists reject unknown or duplicate IDs', () => {
   assert.deepEqual(selectVariants(['luna-compact-v5']).map((variant) => [variant.model, variant.promptVariant]), [
     ['gpt-6-luna', 'compact-v5'],
   ]);
+  assert.deepEqual(selectVariants(['luna-compact-v5-low']).map((variant) => [
+    variant.model, variant.promptVariant, variant.reasoningEffort,
+  ]), [['gpt-6-luna', 'compact-v5', 'low']]);
   assert.throws(() => selectVariants(['luna-compact-v2', 'luna-compact-v2']), /Duplicate variant ID/);
   assert.throws(() => selectVariants(['unknown-arm']), /Unknown variant ID/);
   const { manifest } = loadAndValidateManifest(manifestPath);
@@ -927,6 +976,15 @@ test('spend preflight stops before transport and the JSONL resume key ignores un
   const keys = getCompletedResumeKeys(records.map((record) => JSON.stringify(record)));
   assert.equal(keys.size, 2);
   assert.equal(keys.has('a\u0000mini-current\u0000initial'), true);
+  const variantKeys = getCompletedResumeKeys([JSON.stringify({
+    recordType: 'case_result',
+    caseId: 'same-case',
+    variantId: 'luna-compact-v5',
+    imageSet: 'full',
+    status: 'completed',
+  })]);
+  assert.equal(variantKeys.has('same-case\u0000luna-compact-v5\u0000full'), true);
+  assert.equal(variantKeys.has('same-case\u0000luna-compact-v5-low\u0000full'), false);
   assert.equal(historicalSpendFromCaseRecords([
     { recordType: 'case_result', requestAttempts: [{ retainedReserveUsd: 0.02 }, { retainedReserveUsd: 0.03 }] },
   ]), 0.05);

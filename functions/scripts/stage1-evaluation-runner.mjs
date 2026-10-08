@@ -43,6 +43,12 @@ const compiledContentValidatorSha256 = createHash('sha256')
   .update(fs.readFileSync(contentValidatorPath))
   .digest('hex');
 
+function requestedReasoningEffortForVariant(variant) {
+  return variant.model.startsWith('gpt-6')
+    ? variant.reasoningEffort || 'none'
+    : null;
+}
+
 const DEFAULT_MANIFEST = path.resolve('test/fixtures/stage1-oct8/manifest.json');
 const appendJsonl = appendJsonlRecord;
 
@@ -222,6 +228,9 @@ function buildPlan(manifest, cases, variants, imageSet, maxEstimatedUsd, concurr
   let selectedImageCount = 0;
   let estimatedInitialSpendUsd = 0;
   const casePlans = [];
+  const requestedReasoningEffortByVariant = Object.fromEntries(
+    variants.map((variant) => [variant.id, requestedReasoningEffortForVariant(variant)])
+  );
   for (const caseData of cases) {
     const images = selectImagesForCase(caseData, imageSet);
     selectedImageCount += images.length;
@@ -255,6 +264,7 @@ function buildPlan(manifest, cases, variants, imageSet, maxEstimatedUsd, concurr
       expectedDecision: caseData.sourceTruth.expectedDecision,
       goldDecisionAvailable: caseData.sourceTruth.expectedDecision !== 'review',
       effectivePromptSha256ByVariant: promptSha256ByVariant,
+      requestedReasoningEffortByVariant,
     });
   }
   return {
@@ -262,12 +272,16 @@ function buildPlan(manifest, cases, variants, imageSet, maxEstimatedUsd, concurr
     manifestVersion: manifest.manifestVersion,
     imageSet,
     selectedCaseIds: cases.map((item) => item.caseId),
-    variants: variants.map((variant) => ({ ...variant })),
+    variants: variants.map((variant) => ({
+      ...variant,
+      requestedReasoningEffort: requestedReasoningEffortForVariant(variant),
+    })),
     caseCount: cases.length,
     requestCount,
     concurrency,
     selectedImageCountAcrossCases: selectedImageCount,
     compiledContentValidatorSha256,
+    requestedReasoningEffortByVariant,
     estimatedInitialSpendUsd,
     maxEstimatedSpendUsd: maxEstimatedUsd,
     notes: [
@@ -362,6 +376,9 @@ async function main() {
     variantIds: variants.map((variant) => variant.id),
     concurrency: options.concurrency,
     compiledContentValidatorSha256,
+    requestedReasoningEffortByVariant: Object.fromEntries(
+      variants.map((variant) => [variant.id, requestedReasoningEffortForVariant(variant)])
+    ),
     resumedPairsSkipped: completedKeys.size,
     reviewCaseCount: cases.filter((item) => item.sourceTruth.expectedDecision === 'review').length,
     historicalSpendUsd,
@@ -371,6 +388,7 @@ async function main() {
     const selectedImages = selectImagesForCase(caseData, options.imageSet);
     const imageUrls = readImagesAsDataUrls(selectedImages, sourceRoot);
     const effectivePromptHash = effectivePromptSha256(caseData, variant);
+    const requestedReasoningEffort = requestedReasoningEffortForVariant(variant);
     const requestAttempts = [];
     const eventIdByReservation = new Map();
     const run = await validateContentForStage1Evaluation(
@@ -382,6 +400,7 @@ async function main() {
       {
         promptVariant: variant.promptVariant,
         structuredOutput: variant.structuredOutput,
+        reasoningEffort: variant.reasoningEffort,
         client: openai,
         onBeforeRequest: (requestPlan) => {
           const reservationId = budget.reserve(requestPlan);
@@ -399,6 +418,7 @@ async function main() {
             fileId: caseData.fileId || caseData.sourceFileId || null,
             variantId: variant.id,
             imageSet: options.imageSet,
+            requestedReasoningEffort,
             effectivePromptSha256: effectivePromptHash,
             compiledContentValidatorSha256,
             reservationId,
@@ -422,6 +442,7 @@ async function main() {
             fileId: caseData.fileId || caseData.sourceFileId || null,
             variantId: variant.id,
             imageSet: options.imageSet,
+            requestedReasoningEffort,
             effectivePromptSha256: effectivePromptHash,
             compiledContentValidatorSha256,
             attempt: attemptRecord,
@@ -450,6 +471,7 @@ async function main() {
       variantId: variant.id,
       model: variant.model,
       promptVariant: variant.promptVariant,
+      requestedReasoningEffort,
       effectivePromptSha256: effectivePromptHash,
       compiledContentValidatorSha256,
       structuredOutput: variant.structuredOutput,
@@ -543,6 +565,9 @@ async function main() {
     selectedCaseCount: cases.length,
     selectedVariantIds: variants.map((variant) => variant.id),
     compiledContentValidatorSha256,
+    requestedReasoningEffortByVariant: Object.fromEntries(
+      variants.map((variant) => [variant.id, requestedReasoningEffortForVariant(variant)])
+    ),
     selectedPairCount: cases.length * variants.length,
     startedPairCount,
     skippedPairCount,

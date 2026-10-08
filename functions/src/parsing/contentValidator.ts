@@ -33,6 +33,7 @@ export interface Stage1RequestPlan {
   requestIndex: number;
   requestKind: Stage1RequestKind;
   model: string;
+  requestedReasoningEffort: 'none' | 'low' | null;
   endpoint: 'responses' | 'chat';
   imageCount: number;
   maxOutputTokens: number;
@@ -69,6 +70,7 @@ export interface Stage1ValidationEvaluationRun {
 export interface Stage1ValidationEvaluationOptions {
   promptVariant: 'production' | 'compact' | 'compact-v2' | 'compact-v3' | 'compact-v4' | 'compact-v5';
   structuredOutput: boolean;
+  reasoningEffort?: 'none' | 'low';
   client?: any;
   onBeforeRequest?: (plan: Stage1RequestPlan) => string | undefined;
   onAttempt?: (attempt: Stage1RequestAttempt) => void;
@@ -76,6 +78,7 @@ export interface Stage1ValidationEvaluationOptions {
 
 interface Stage1CallOptions {
   structuredOutput?: boolean;
+  reasoningEffort?: 'none' | 'low';
   client?: any;
   onBeforeRequest?: (plan: Stage1RequestPlan) => string | undefined;
   onAttempt?: (attempt: Stage1RequestAttempt) => void;
@@ -983,6 +986,12 @@ async function callGPTWithSchema(
 ): Promise<ValidationResult> {
   const client = options.client || getOpenAIClient();
   const model = config.stage1ModelOverride || resolveStageModel(config.gptModelFast, 'STAGE1_MODEL_OVERRIDE');
+  if (options.reasoningEffort && !model.startsWith('gpt-6')) {
+    throw new Error('Stage 1 reasoningEffort is supported only for GPT-6 evaluation requests.');
+  }
+  const requestedReasoningEffort = model.startsWith('gpt-6')
+    ? options.reasoningEffort || 'none'
+    : null;
   const imageDetail = resolveImageDetail('STAGE1_IMAGE_DETAIL', 'high');
   const usesResponses = (value: string): boolean => /^gpt-(?:5|6)(?:\.|-)/.test(value);
 
@@ -1051,6 +1060,7 @@ async function callGPTWithSchema(
     requestIndex: ++requestIndex,
     requestKind: kind,
     model,
+    requestedReasoningEffort,
     endpoint,
     imageCount: urls.length,
     maxOutputTokens,
@@ -1110,7 +1120,9 @@ async function callGPTWithSchema(
           model,
           input: [{ role: 'user', content }],
           max_output_tokens: maxOutputTokens,
-          ...(model.startsWith('gpt-6') ? { reasoning: { effort: 'none' as any } } : {}),
+          ...(model.startsWith('gpt-6')
+            ? { reasoning: { effort: requestedReasoningEffort as 'none' | 'low' } }
+            : {}),
           ...(options.structuredOutput
             ? {
                 text: {

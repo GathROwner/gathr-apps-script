@@ -36,6 +36,8 @@ Add `--include-compact-luna` to include `luna-compact-structured`. The runner co
 
 Use `--variants mini-compact-v2,luna-compact-v2`, `--variants mini-compact-v3,luna-compact-v3`, `--variants mini-compact-v4,luna-compact-v4`, or `--variants mini-compact-v5,luna-compact-v5` to select a compact policy pair. The defaults remain unchanged. V2 explicitly includes bookable/public activities, open recreation, daily food/drink offers, and organized public food trails while excluding election procedure and ordinary retail/menu marketing. V3 adds public meetings and farm/attraction access, food drives and free visitor offers, self-guided trails, and explicit limits for rotating menus, past-only recaps, and broadcast-only airtime. V4 clarifies that named public activities and trails qualify without complete schedules, distinguishes dated recreation access from ordinary business hours, rejects purchase invitations as evidence of a food special, and requires its decision fields and reason to agree. V5 explicitly accepts unpriced daily specials and admission offers, public museum/heritage visitor access, named activities with missing details, and in-person food giveaways while excluding ordinary stock, month-long featured menus, non-food retail discounts, personal past outings, and online engagement contests. None of the prompts contains cohort row text or IDs.
 
+For a controlled reasoning-effort comparison, `luna-compact-v5-low` uses the exact same frozen `compact-v5` prompt and JSON response format as `luna-compact-v5`, while requesting GPT-6 reasoning effort `low` instead of the baseline `none`. Select it explicitly with `--variants luna-compact-v5,luna-compact-v5-low`; variant IDs keep their JSONL resume keys separate. The live/default GPT-6 Stage 1 path continues to request `none`.
+
 ## Local commands
 
 Run from the `functions` directory in PowerShell. The offline preflight reads the fixture and hashes, reports the variants and estimated budget, and makes no API request. It does not need `OPENAI_API_KEY`.
@@ -78,7 +80,7 @@ node scripts/stage1-evaluation-runner.mjs `
 
 This selects 49 requests and 72 images. The five-image Harbourfront case `oct8-row-62` is separately preflighted against `manifest-full-galleries.json`; it selects all five source images. Both commands remain offline without `--execute`. Change the variant to `luna-compact-v5` and use a separate output file to plan the next prompt version.
 
-The `run_started`, `request_reserved`, `request_attempt`, `case_result`, and `run_summary` records include the SHA-256 of the compiled `lib/parsing/contentValidator.js`. Each case result, request record, and preflight plan also includes a SHA-256 of the exact effective prompt text, including the appended schema instruction when applicable. These hashes support reproducibility without copying source posts into logs.
+The `run_started`, `request_reserved`, `request_attempt`, `case_result`, and `run_summary` records include the SHA-256 of the compiled `lib/parsing/contentValidator.js`. Each case result, request record, and preflight plan also includes a SHA-256 of the exact effective prompt text, including the appended schema instruction when applicable. The plan, run records, and request attempts explicitly record `requestedReasoningEffort` so `none`, `low`, and non-GPT-6 requests remain distinguishable. These fields support reproducibility without copying source posts into logs.
 
 ## Downstream routing replay
 
@@ -107,7 +109,7 @@ The usage record includes reasoning tokens separately; they are already part of 
 
 ## Local tests
 
-`npm run test:stage1-evaluation` builds the functions TypeScript and runs 30 mocked/offline checks. They cover production request-shape parity, v2–v5 prompt selection and policy fixtures, frozen v3/v4 prompt snapshots, exact prompt/module hash provenance, five-image 400-rejection handling, production normalization and local gates, hash/path/gallery validation, per-image semantic association, dense-layout flags, image-error/truncation/no-image fallback visibility, spend-stop behavior, JSONL resume and usage estimates, and the client’s retry/timeout settings. The fake transport is local; tests make no network calls. `node --test lib/parsing/stage2Routing.test.js` runs the three production-route parity tests.
+`npm run test:stage1-evaluation` builds the functions TypeScript and runs 32 mocked/offline checks. They cover production request-shape parity, v2–v5 prompt selection and policy fixtures, frozen v3–v5 prompt snapshots, exact prompt/module hash provenance, the unchanged GPT-6 default and low-effort evaluation arm, five-image 400-rejection handling, production normalization and local gates, hash/path/gallery validation, per-image semantic association, dense-layout flags, image-error/truncation/no-image fallback visibility, spend-stop behavior, JSONL resume and usage estimates, and the client’s retry/timeout settings. The fake transport is local; tests make no network calls. `node --test lib/parsing/stage2Routing.test.js` runs the three production-route parity tests.
 
 ## Minimal Cloud Run module bundle
 
