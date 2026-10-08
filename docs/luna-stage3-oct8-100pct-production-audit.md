@@ -41,3 +41,18 @@ The seven ordinary fridge records are in `live.json` row 192. All cited live IDs
 ## Decision and next work
 
 The 100% eligible-image routing operated, and the run completed without parser errors or resume stalls. Luna extracted useful dense content, including the PowerSkating dates at least through the Stage 4/5 handoff. **This is not yet a clean quality pass**: one simple music flyer lost two performances, and the recurrence writer saved a materially incorrect calendar; the false live administrative/retail/closure entries show that later gates also need repair. Keep the Stage 3 transition and the Stage 4/5 cost/latency discussion separate. First implement focused fixes, run exact-source no-write tests and a guarded replay, then review the next full parse before treating 100% as a settled rollout. Do not alter the GathR map. Any cleanup of the listed live records requires the exact backup/readback/approval process.
+
+## October 8 repair follow-up
+
+The confirmed defects above were subsequently addressed in parser commit
+`0319ef9`, deployed on the three parser functions with source hash
+`6ec1fb03acc847610ed2dd5f3ef8ae2cf4e42b10`. After Craig approved four
+exact, backed-up plans, the live repair removed 11 false listings and two
+incorrect weekly PowerSkating parents, changed the Tignish deal to a one-off,
+and added 20 printed PowerSkating sessions, Hunter's two missing shows, and
+Trailside's October 8 show. Firestore postconditions and the public app API
+were verified. The full target list, result artifacts, and the unresolved
+Hunter's Friday source conflict are in
+`docs/luna-stage3-oct8-live-repair-plan.md`. This follow-up does not change the
+historical October 8 audit counts. The next regular full run must establish
+whether the code repairs prevent recurrence.
