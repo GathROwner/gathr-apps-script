@@ -340,14 +340,63 @@ export function assessImageAnalysis(result, selectedImages) {
   };
 }
 
+const semanticPluralExceptions = new Map([
+  ['movies', 'movie'],
+  ['pies', 'pie'],
+  ['news', 'news'],
+  ['series', 'series'],
+  ['species', 'species'],
+  ['lens', 'lens'],
+  ['lenses', 'lens'],
+  ['business', 'business'],
+  ['businesses', 'business'],
+  ['status', 'status'],
+  ['statuses', 'status'],
+]);
+
 function normalizeSemanticText(value) {
-  return String(value || '')
+  const normalized = String(value || '')
     .toLowerCase()
     .normalize('NFKD')
     .replace(/\p{Diacritic}/gu, '')
+    // Normalize common time spellings before punctuation is converted to spaces.
+    .replace(/\b(\d{1,2})[:.](\d{2})\s*([ap])\.?\s*m\.?\b/gi, '$1 $2 $3m')
+    .replace(/\b([ap])\.?\s*m\.?\b/gi, '$1m')
+    // Apostrophe-s is grammatical, not part of the name cue (for example, Toby's).
+    .replace(/([a-z])['’]s\b/gi, '$1')
+    .replace(/([a-z])s['’](?=\s|$)/gi, '$1s')
+    // Calendar descriptions often render ordinal dates where the cue uses cardinals.
+    .replace(/\b(\d{1,2})(?:st|nd|rd|th)\b/gi, '$1')
     .replace(/[^a-z0-9]+/g, ' ')
     .trim()
     .replace(/\s+/g, ' ');
+
+  return normalized
+    .split(' ')
+    .filter(Boolean)
+    .map(normalizeCommonPlural)
+    .join(' ');
+}
+
+function normalizeCommonPlural(token) {
+  if (semanticPluralExceptions.has(token)) return semanticPluralExceptions.get(token);
+
+  // Conservative regular English plurals: flowers -> flower, activities -> activity,
+  // and dishes -> dish. Do not stem arbitrary terminal s/es words.
+  if (token.length >= 5 && /[^aeiou]ies$/.test(token)) {
+    return `${token.slice(0, -3)}y`;
+  }
+  if (token.length >= 5 && /(?:ches|shes|sses|xes|zes)$/.test(token)) {
+    return token.slice(0, -2);
+  }
+  if (
+    token.length >= 5 &&
+    token.endsWith('s') &&
+    !/(?:ss|us|is)$/.test(token)
+  ) {
+    return token.slice(0, -1);
+  }
+  return token;
 }
 
 export function getCompletedResumeKeys(lines) {

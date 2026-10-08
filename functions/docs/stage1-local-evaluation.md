@@ -16,7 +16,7 @@ The original production prompt, schema, normalization, local calendar overrides,
 
 Rows 48 and 236 are flagged as known historical GPT-5 mini false accepts. That historic observation is separate from fresh scoring: a candidate that correctly rejects either case matches source truth even if it disagrees with the old mini result. Historical raw Stage 1 JSON was not retained, so the manifest labels downstream progression as context rather than presenting it as a raw Stage 1 response.
 
-The manifest records the full gallery count and per-image source cues. The association check evaluates the description for each image index against that image’s cue groups and against neighboring-image cues that must not appear. It catches swapped, nonempty descriptions and the Harbourfront Oct. 19 poster time contamination (the image says 7:00 PM; the caption says 7:30 PM). Cue matching is a review signal: paraphrases can miss a cue, so inspect descriptions alongside the stored source image when a check fails.
+The manifest records the full gallery count and per-image source cues. The association check evaluates the description for each image index against that image’s cue groups and against neighboring-image cues that must not appear. Before matching, it normalizes ordinal date suffixes, common clock punctuation, possessive apostrophes, and regular plural forms. It catches swapped, nonempty descriptions and the Harbourfront Oct. 19 poster time contamination (the image says 7:00 PM; the caption says 7:30 PM). Cue matching is an advisory phrase check, not a semantic classifier: paraphrases can miss a cue, so inspect descriptions alongside the stored source image when a check fails.
 
 ## Image sets and variants
 
@@ -79,7 +79,7 @@ The usage record includes reasoning tokens separately; they are already part of 
 
 ## Local tests
 
-`npm run test:stage1-evaluation` builds the functions TypeScript and runs ten mocked/offline checks. They cover production request-shape parity, compact Structured Outputs, production normalization and local gates, hash/path/gallery validation, per-image semantic association, dense-layout flags, image-error/truncation/no-image fallback visibility, spend-stop behavior, JSONL resume and usage estimates, and the client’s retry/timeout settings. The fake transport is local; tests make no network calls.
+`npm run test:stage1-evaluation` builds the functions TypeScript and runs eleven mocked/offline checks. They cover production request-shape parity, compact Structured Outputs, production normalization and local gates, hash/path/gallery validation, per-image semantic association including ordinal dates, clock punctuation, possessives, plural forms and swapped descriptions, dense-layout flags, image-error/truncation/no-image fallback visibility, spend-stop behavior, JSONL resume and usage estimates, and the client’s retry/timeout settings. The fake transport is local; tests make no network calls.
 
 ## Minimal Cloud Run module bundle
 

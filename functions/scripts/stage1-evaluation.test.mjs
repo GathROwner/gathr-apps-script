@@ -256,6 +256,53 @@ test('semantic association catches swapped but nonempty image descriptions and c
   assert.equal(timeCheck.semanticAssociationPassed, false);
 });
 
+test('semantic cue matching tolerates ordinal dates, time punctuation, possessives, and common plurals', () => {
+  const { manifest } = loadAndValidateManifest(manifestPath);
+  const row124 = manifest.cases.find((item) => item.sourceRow === 124);
+  const selected124 = selectImagesForCase(row124, 'full');
+  const ordinaryMarketDescriptions = [
+    'Toby’s Farm Market exterior with a flower.',
+    'Rows of pumpkins for sale in a field.',
+    'Pumpkins beside a sign.',
+    'Rutabagas and cabbages on a produce display.',
+    'A bag of root vegetables, likely parsnips.',
+  ];
+  const marketResult = {
+    imageAnalysis: selected124.map((image) => ({
+      imageIndex: image.sourceGalleryIndex,
+      description: ordinaryMarketDescriptions[image.sourceGalleryIndex],
+      relevanceToPost: 'Describes this source image only.',
+    })),
+  };
+  const marketCheck = assessImageAnalysis(marketResult, selected124);
+  assert.equal(marketCheck.semanticAssociationPassed, true);
+  assert.deepEqual(marketCheck.semanticMismatchedIndexes, []);
+
+  const swappedMarket = structuredClone(marketResult);
+  [swappedMarket.imageAnalysis[1].description, swappedMarket.imageAnalysis[2].description] = [
+    swappedMarket.imageAnalysis[2].description,
+    swappedMarket.imageAnalysis[1].description,
+  ];
+  assert.deepEqual(assessImageAnalysis(swappedMarket, selected124).semanticMismatchedIndexes, [1, 2]);
+
+  for (const sourceRow of [329, 343]) {
+    const sourceCase = manifest.cases.find((item) => item.sourceRow === sourceRow);
+    const selected = selectImagesForCase(sourceCase, 'full');
+    const description = sourceRow === 329
+      ? 'Pancake brunch fundraiser October 25th, 2026; servings at 9.30 a.m. and 11:30AM.'
+      : 'The Arts Guild on October 10th, 2026: restorative healing at 1:00 p.m., then community time.';
+    const checked = assessImageAnalysis({
+      imageAnalysis: selected.map((image) => ({
+        imageIndex: image.sourceGalleryIndex,
+        description,
+        relevanceToPost: 'Describes this source image only.',
+      })),
+    }, selected);
+    assert.equal(checked.semanticAssociationPassed, true, `source row ${sourceRow}`);
+    assert.deepEqual(checked.semanticMismatchedIndexes, [], `source row ${sourceRow}`);
+  }
+});
+
 test('dense PowerSkate layout flags are compared, while full date transcription is not required', () => {
   const { manifest } = loadAndValidateManifest(manifestPath);
   const row287 = manifest.cases.find((item) => item.sourceRow === 287);
