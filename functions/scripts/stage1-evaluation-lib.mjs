@@ -94,6 +94,13 @@ export const VARIANTS = Object.freeze([
     structuredOutput: false,
     reasoningEffort: 'low',
   }),
+  Object.freeze({
+    id: 'luna-compact-v5-high',
+    model: 'gpt-6-luna',
+    promptVariant: 'compact-v5',
+    structuredOutput: false,
+    reasoningEffort: 'high',
+  }),
 ]);
 
 export const DEFAULT_VARIANT_IDS = Object.freeze([
