@@ -1,29 +1,44 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 import {
   applyStage1LocalDecisionGates,
   createCompactValidationPrompt,
+  createCompactV3ValidationPrompt,
+  createCompactV2ValidationPrompt,
   createValidationPrompt,
   createValidationSchema,
   detectCalendarSignals,
   normalizeValidationResponse,
+  Stage1EvaluationArtifactError,
   validateContentForStage1Evaluation,
 } from '../lib/parsing/contentValidator.js';
 import {
   assessImageAnalysis,
+  appendJsonlRecord,
   calculateObservedCostUsd,
+  DEFAULT_VARIANT_IDS,
+  getCaseSourceIdentity,
   estimateRequestCostUsd,
   getCompletedResumeKeys,
   getVariants,
   historicalSpendFromCaseRecords,
   historicalSpendFromOutputRecords,
   loadAndValidateManifest,
+  makeSourceTruthScore,
+  MAX_ESTIMATED_SPEND_USD,
+  readImagesAsDataUrls,
+  runWithConcurrency,
+  selectCases,
   selectImagesForCase,
+  selectVariants,
   Stage1EvaluationBudgetError,
   Stage1SpendBudget,
+  validateEstimatedSpendLimit,
+  validateEvaluationConcurrency,
 } from './stage1-evaluation-lib.mjs';
 
 const functionsRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -163,6 +178,210 @@ test('compact Structured Outputs arm uses the same schema without adding a new d
   assert.equal(request.input[0].content.filter((part) => part.type === 'input_image').length, 2);
 });
 
+test('compact-v2 prompt states activity, open facility, special, trail, and exclusion policy without fixture rows', () => {
+  const policyFixtures = [
+    { expected: 'accept', text: 'Registration is open for a bookable pottery class; dates will be confirmed after signup.' },
+    { expected: 'accept', text: 'Public swim availability is open for community bookings; the schedule is being posted.' },
+    { expected: 'accept', text: 'Today’s daily soup special is available; no price is printed.' },
+    { expected: 'accept', text: 'Visit the community dessert trail October 5 through 9.' },
+    { expected: 'accept', text: 'Join the community dessert trail; current participation is open.' },
+    { expected: 'accept', text: 'A retail sale is posted alongside a clearly advertised live performance.' },
+    { expected: 'reject', text: 'Retail sweaters are discounted by 20% this weekend.' },
+    { expected: 'reject', text: 'Fresh pumpkins are back in stock.' },
+    { expected: 'reject', text: 'Our new fall menu and featured dishes are here.' },
+    { expected: 'reject', text: 'Election candidate nomination forms are available at the office.' },
+    { expected: 'reject', text: 'A photo recap shows last week’s pottery activity with no current invitation.' },
+    { expected: 'reject', text: 'The facility is generally open from 9 AM to 5 PM.' },
+  ];
+  const prompt = createCompactV2ValidationPrompt('No fixture text is included here.', true, 'Test venue', '2026-10-08');
+  assert.match(prompt, /bookable activities.*even when a date or time is missing/i);
+  assert.match(prompt, /public open-swim or bookable rink availability.*even when a date or time is missing/i);
+  assert.match(prompt, /daily food\/drink specials or deals, even when no numeric price/i);
+  assert.match(prompt, /community food or dessert trails.*not required at Stage 1/i);
+  assert.match(prompt, /election administration, nomination, ballot, or candidate-filing/i);
+  assert.match(prompt, /retail merchandise discounts, sales, stock availability, or restock/i);
+  assert.match(prompt, /menu or featured-item announcements without an explicitly advertised daily special/i);
+  assert.match(prompt, /retrospective activity photos or recaps with no current invitation/i);
+  assert.match(prompt, /never from the venue name or business category alone/i);
+  assert.match(prompt, /If a post mixes qualifying activity\/special content.*accept the post for its qualifying portion/i);
+  assert.equal(policyFixtures.filter((item) => item.expected === 'accept').length, 6);
+  assert.equal(policyFixtures.filter((item) => item.expected === 'reject').length, 6);
+  for (const fixture of policyFixtures) assert.equal(prompt.includes(fixture.text), false);
+  assert.doesNotMatch(prompt, /row-\d+|sourceRow|caseId/i);
+});
+
+test('compact-v3 prompt distinguishes public events, public access, food offers, and non-events without fixture rows', () => {
+  const policyFixtures = [
+    { expected: 'accept', text: 'The public is invited to a council information session Thursday at 6 PM.' },
+    { expected: 'accept', text: 'Join the Fall Harvest Fair October 17–18.' },
+    { expected: 'accept', text: 'Visit the farm for an open farm day this Saturday; admission is $8.' },
+    { expected: 'accept', text: 'Book an interactive behind-the-scenes tour; reservations are open.' },
+    { expected: 'accept', text: 'Public swim is available today from noon to 4 PM.' },
+    { expected: 'accept', text: 'Apples and carrots are 20% off in our grocery store today.' },
+    { expected: 'accept', text: 'All residents are welcome at the public election forum on Saturday.' },
+    { expected: 'accept', text: 'Bring donations to the public community food drive Saturday from 11 AM to 2 PM.' },
+    { expected: 'accept', text: 'Free apples are available for visitors at the orchard today.' },
+    { expected: 'accept', text: 'Follow the self-guided local pastry trail with participating stops.' },
+    { expected: 'accept', text: 'The track race takes place Saturday and will also be carried on the local station.' },
+    { expected: 'reject', text: 'Candidate nomination forms are due Friday.' },
+    { expected: 'reject', text: 'Winter coats are 20% off this weekend.' },
+    { expected: 'reject', text: 'Our seasonal latte is back and available through October.' },
+    { expected: 'reject', text: 'New pies just arrived; quantities are limited.' },
+    { expected: 'reject', text: 'Friday’s radio programs air on the station at 7 PM.' },
+    { expected: 'reject', text: 'The facility is open Monday through Friday from 9 AM to 5 PM.' },
+    { expected: 'reject', text: 'Our fall cafe menu is now available.' },
+    { expected: 'reject', text: 'The featured dishes rotate throughout the month with no advertised deal.' },
+    { expected: 'reject', text: 'Photos recap last week’s workshop; no future session or booking is announced.' },
+  ];
+  const prompt = createCompactV3ValidationPrompt('No fixture text is included here.', true, 'Test venue', '2026-10-08');
+  assert.match(prompt, /Public meetings, hearings, forums, and information sessions.*public attendance/i);
+  assert.match(prompt, /Named or date-range public festivals, fairs, performances, and community activities/i);
+  assert.match(prompt, /Public farm or attraction visits, admission offers, interactive tours, and bookable classes or activities/i);
+  assert.match(prompt, /Public food drives and food collection\/drop-off events.*organized food trails or self-guided circuits/i);
+  assert.match(prompt, /free food or drink offers to visitors/i);
+  assert.match(prompt, /Public open-swim, rink, or similar recreational access/i);
+  assert.match(prompt, /food or drink specials, deals, and discounts, including grocery food offers/i);
+  assert.match(prompt, /Election administration notices.*A separately announced public meeting or forum can still qualify/i);
+  assert.match(prompt, /Discounts on non-food retail merchandise/i);
+  assert.match(prompt, /Month-long or rotating menus and featured flavors\/items without a specific food\/drink deal/i);
+  assert.match(prompt, /Past-only activity photos or recaps without a clear current or upcoming invitation/i);
+  assert.match(prompt, /Broadcast-only radio or show airtime without an announced public gathering/i);
+  assert.match(prompt, /When broadcast details confirm an underlying public event at a venue, accept the physical event and do not treat its coverage as a second event/i);
+  assert.match(prompt, /never from the venue name or business category alone/i);
+  assert.equal(policyFixtures.filter((item) => item.expected === 'accept').length, 11);
+  assert.equal(policyFixtures.filter((item) => item.expected === 'reject').length, 9);
+  for (const fixture of policyFixtures) assert.equal(prompt.includes(fixture.text), false);
+  assert.doesNotMatch(prompt, /row-\d+|sourceRow|caseId/i);
+});
+
+test('compact-v3 evaluation requests use the compact-v3 prompt', async () => {
+  const caption = 'Public farm tour this Saturday; booking is open.';
+  const { client, calls } = fakeClient([apiResponse(validationResult(2))]);
+  const run = await validateContentForStage1Evaluation(
+    caption,
+    ['data:image/jpeg;base64,Zm9v'],
+    'Test venue',
+    '2026-10-08T00:00:00.000Z',
+    'gpt-6-luna',
+    { promptVariant: 'compact-v3', structuredOutput: false, client }
+  );
+
+  assert.equal(run.status, 'completed');
+  const expectedPrompt = createCompactV3ValidationPrompt(caption, true, 'Test venue', '2026-10-08T00:00:00.000Z');
+  assert.equal(getInputText(calls[0]), `${expectedPrompt}\n\nReturn ONLY valid JSON that matches this schema:\n${JSON.stringify(createValidationSchema()[0].parameters, null, 2)}`);
+});
+
+test('compact-v3 sends a full five-image request and keeps a 400 no-image fallback inconclusive', async () => {
+  const rejectedFullGallery = Object.assign(new Error('mock provider rejected full gallery'), { status: 400 });
+  const { client, calls } = fakeClient([
+    rejectedFullGallery,
+    apiResponse(validationResult(0, true)),
+  ]);
+  const imageUrls = Array.from({ length: 5 }, (_, index) => `data:image/jpeg;base64,${Buffer.from(`image-${index}`).toString('base64')}`);
+  const run = await validateContentForStage1Evaluation(
+    'Caption without independently dated event details.',
+    imageUrls,
+    'Test venue',
+    '2026-10-08T00:00:00.000Z',
+    'gpt-6-luna',
+    { promptVariant: 'compact-v3', structuredOutput: false, client }
+  );
+
+  assert.equal(calls.length, 2);
+  assert.equal(calls[0].input[0].content.filter((part) => part.type === 'input_image').length, 5);
+  assert.equal(calls[1].input[0].content.filter((part) => part.type === 'input_image').length, 0);
+  assert.deepEqual(run.attempts.map((attempt) => [attempt.requestKind, attempt.imageCount]), [
+    ['initial', 5],
+    ['no_image_fallback', 0],
+  ]);
+  assert.equal(run.attempts[0].status, 'error');
+  assert.equal(run.status, 'inconclusive');
+  assert.equal(run.noImageFallbackUsed, true);
+  assert.equal(run.preGateResult.hasValidContent, true);
+});
+
+test('text-only cases send no images, retain an empty image array, and expose no-image coverage clearly', async () => {
+  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'stage1-text-only-'));
+  try {
+    const caseData = {
+      caseId: 'text-only-case',
+      sourceRow: 237,
+      fileId: 'source-file',
+      venue: 'Community Venue',
+      postedAt: '2026-10-08T12:00:00.000Z',
+      caption: [
+        'Monday at Venue One: music 7 PM',
+        'Tuesday at Venue Two: trivia 8 PM',
+        'Wednesday at Venue Three: comedy 9 PM',
+      ].join('\n'),
+      sourceTruth: { expectedDecision: 'review', rationale: 'No gold decision.' },
+      gallery: { sourceImageCount: 0 },
+      expectedImageAnalysisIndexes: [],
+      images: [],
+    };
+    const tempManifestPath = path.join(tempRoot, 'manifest.json');
+    fs.writeFileSync(tempManifestPath, JSON.stringify({
+      manifestVersion: 1,
+      sourceRoot: '.',
+      cases: [caseData],
+    }));
+    const loaded = loadAndValidateManifest(tempManifestPath);
+    const selectedImages = selectImagesForCase(loaded.manifest.cases[0], 'initial');
+    assert.deepEqual(selectedImages, []);
+    assert.deepEqual(readImagesAsDataUrls(selectedImages, loaded.sourceRoot), []);
+
+    const { client, calls } = fakeClient([apiResponse(validationResult(0, false))]);
+    const run = await validateContentForStage1Evaluation(
+      caseData.caption,
+      [],
+      caseData.venue,
+      caseData.postedAt,
+      'gpt-6-luna',
+      { promptVariant: 'compact-v2', structuredOutput: false, client }
+    );
+    assert.equal(run.status, 'completed');
+    assert.equal(run.preGateResult.hasValidContent, false);
+    assert.equal(run.result.hasValidContent, true);
+    assert.match(run.result.reason, /override PASS/);
+    assert.deepEqual(calls[0].input[0].content.map((part) => part.type), ['input_text']);
+    assert.match(getInputText(calls[0]), /Has images: false/);
+    assert.deepEqual(run.result.imageAnalysis, []);
+
+    const imageCoverage = assessImageAnalysis(run.result, selectedImages);
+    assert.equal(imageCoverage.hasImages, false);
+    assert.equal(imageCoverage.coverageStatus, 'not_applicable');
+    assert.deepEqual(imageCoverage.expectedIndexes, []);
+    assert.deepEqual(imageCoverage.observedIndexes, []);
+  } finally {
+    fs.rmSync(tempRoot, { recursive: true, force: true });
+  }
+});
+
+test('image MIME data URLs follow JPEG, PNG, and WebP bytes rather than filename extensions', () => {
+  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'stage1-image-mime-'));
+  try {
+    const fixtures = [
+      { name: 'png-with-jpg-extension.jpg', mime: 'image/png', bytes: Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x01]) },
+      { name: 'webp-with-png-extension.png', mime: 'image/webp', bytes: Buffer.from('RIFF0000WEBP', 'ascii') },
+      { name: 'jpeg-with-webp-extension.webp', mime: 'image/jpeg', bytes: Buffer.from([0xff, 0xd8, 0xff, 0xd9]) },
+    ];
+    for (const fixture of fixtures) fs.writeFileSync(path.join(tempRoot, fixture.name), fixture.bytes);
+
+    for (const fixture of fixtures) {
+      const [dataUrl] = readImagesAsDataUrls([{ path: fixture.name }], tempRoot);
+      assert.equal(dataUrl, `data:${fixture.mime};base64,${fixture.bytes.toString('base64')}`);
+    }
+    const unsupportedPath = path.join(tempRoot, 'unsupported.jpg');
+    fs.writeFileSync(unsupportedPath, Buffer.from('not an image'));
+    assert.throws(
+      () => readImagesAsDataUrls([{ path: 'unsupported.jpg' }], tempRoot),
+      /Unsupported image bytes/,
+    );
+  } finally {
+    fs.rmSync(tempRoot, { recursive: true, force: true });
+  }
+});
+
 test('production normalizer clamps image complexity and local calendar gates remain active', () => {
   const normalized = normalizeValidationResponse({
     imageAnalysis: [{
@@ -214,6 +433,60 @@ test('manifest pins hashes and distinguishes initial four-image coverage from fu
   const traversalManifest = path.join(path.dirname(tempManifest), 'path-manifest.json');
   fs.writeFileSync(traversalManifest, JSON.stringify(pathCopy));
   assert.throws(() => loadAndValidateManifest(traversalManifest, fixtureRoot), /must stay inside sourceRoot/);
+});
+
+test('case and variant selection supports repeated source rows and review-only source truth', () => {
+  const { manifest } = loadAndValidateManifest(manifestPath);
+  const row48 = manifest.cases.find((item) => item.sourceRow === 48);
+  const first = structuredClone(row48);
+  first.caseId = 'file-a-row-48';
+  first.dataset = 'october-8';
+  first.fileId = 'file-a';
+  first.sourceTruth.expectedDecision = 'review';
+  first.images[0].expectedSemanticCueGroups = [];
+  const second = structuredClone(first);
+  second.caseId = 'file-b-row-48';
+  second.fileId = 'file-b';
+  const tempRoot = fs.mkdtempSync(path.join(process.env.TEMP || process.env.TMP || '.', 'stage1-cohort-'));
+  const tempManifest = path.join(tempRoot, 'manifest.json');
+  fs.writeFileSync(tempManifest, JSON.stringify({
+    manifestVersion: 1,
+    sourceRoot: '.',
+    cases: [first, second],
+  }));
+  const loaded = loadAndValidateManifest(tempManifest, fixtureRoot).manifest;
+  assert.equal(loaded.cases.length, 2);
+  assert.equal(getCaseSourceIdentity(loaded.cases[0]), 'october-8/file-a#48');
+  assert.equal(getCaseSourceIdentity(loaded.cases[1]), 'october-8/file-b#48');
+  assert.deepEqual(loaded.cases[0].images[0].expectedSemanticCueGroups, []);
+  assert.equal(makeSourceTruthScore(loaded.cases[0], 'completed', { hasValidContent: true }).matches, null);
+  assert.equal(makeSourceTruthScore(loaded.cases[0], 'completed', { hasValidContent: true }).goldDecisionAvailable, false);
+
+  const duplicateIdentity = structuredClone(second);
+  duplicateIdentity.caseId = 'duplicate-file-a-row-48';
+  duplicateIdentity.fileId = 'file-a';
+  fs.writeFileSync(tempManifest, JSON.stringify({
+    manifestVersion: 1,
+    sourceRoot: '.',
+    cases: [first, duplicateIdentity],
+  }));
+  assert.throws(() => loadAndValidateManifest(tempManifest, fixtureRoot), /Duplicate source identity/);
+});
+
+test('selected variant and case lists reject unknown or duplicate IDs', () => {
+  assert.deepEqual(DEFAULT_VARIANT_IDS, ['mini-current', 'mini-compact-structured', 'luna-current']);
+  assert.deepEqual(selectVariants(['luna-compact-v2']).map((variant) => [variant.model, variant.promptVariant]), [
+    ['gpt-6-luna', 'compact-v2'],
+  ]);
+  assert.deepEqual(selectVariants(['luna-compact-v3']).map((variant) => [variant.model, variant.promptVariant]), [
+    ['gpt-6-luna', 'compact-v3'],
+  ]);
+  assert.throws(() => selectVariants(['luna-compact-v2', 'luna-compact-v2']), /Duplicate variant ID/);
+  assert.throws(() => selectVariants(['unknown-arm']), /Unknown variant ID/);
+  const { manifest } = loadAndValidateManifest(manifestPath);
+  const selected = selectCases(manifest, [manifest.cases[2].caseId]);
+  assert.deepEqual(selected.map((item) => item.caseId), [manifest.cases[2].caseId]);
+  assert.throws(() => selectCases(manifest, ['missing-case']), /Unknown case ID/);
 });
 
 test('semantic association catches swapped but nonempty image descriptions and cross-image time contamination', () => {
@@ -494,6 +767,189 @@ test('spend preflight stops before transport and the JSONL resume key ignores un
     { recordType: 'case_result', runId: 'new', requestAttempts: [{ retainedReserveUsd: 0.02 }] },
     { recordType: 'case_result', runId: 'old', requestAttempts: [{ retainedReserveUsd: 0.03 }] },
   ]), 0.05);
+});
+
+test('artifact logging failures propagate and never trigger model or no-image fallback', async () => {
+  const imageUrls = ['data:image/jpeg;base64,Zm9v', 'data:image/jpeg;base64,YmFy'];
+  let reservationAttemptCount = 0;
+  const reservationFailureClient = fakeClient([
+    apiResponse(validationResult(2)),
+    apiResponse(validationResult(0)),
+  ]);
+  await assert.rejects(
+    validateContentForStage1Evaluation(
+      'A current event invitation.', imageUrls, 'Venue', '2026-10-08', 'gpt-5-mini',
+      {
+        promptVariant: 'production',
+        structuredOutput: false,
+        client: reservationFailureClient.client,
+        onBeforeRequest: () => {
+          throw Object.assign(new Error('output file busy'), { code: 'EBUSY' });
+        },
+        onAttempt: () => { reservationAttemptCount++; },
+      }
+    ),
+    (error) => error instanceof Stage1EvaluationArtifactError &&
+      error.code === 'STAGE1_EVAL_ARTIFACT_WRITE' && /request reservation logging failed/.test(error.message)
+  );
+  assert.equal(reservationFailureClient.calls.length, 0);
+  assert.equal(reservationAttemptCount, 0);
+
+  let attemptLogCount = 0;
+  const attemptFailureClient = fakeClient([apiResponse(validationResult(2))]);
+  await assert.rejects(
+    validateContentForStage1Evaluation(
+      'A current event invitation.', imageUrls, 'Venue', '2026-10-08', 'gpt-5-mini',
+      {
+        promptVariant: 'production',
+        structuredOutput: false,
+        client: attemptFailureClient.client,
+        onBeforeRequest: () => 'reserved-attempt',
+        onAttempt: () => {
+          attemptLogCount++;
+          throw Object.assign(new Error('attempt file is read-only'), { code: 'EPERM' });
+        },
+      }
+    ),
+    (error) => error instanceof Stage1EvaluationArtifactError &&
+      error.code === 'STAGE1_EVAL_ARTIFACT_WRITE' && /attempt logging failed/.test(error.message)
+  );
+  assert.equal(attemptFailureClient.calls.length, 1);
+  assert.equal(attemptLogCount, 1);
+});
+
+test('JSONL append retries only transient open sharing errors and writes one complete record', () => {
+  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'stage1-append-retry-'));
+  const outputPath = path.join(tempRoot, 'events.jsonl');
+  const originalOpenSync = fs.openSync;
+  let openAttempts = 0;
+  try {
+    fs.openSync = (...args) => {
+      openAttempts++;
+      if (openAttempts <= 2) throw Object.assign(new Error('transient sharing violation'), { code: 'EBUSY' });
+      return originalOpenSync(...args);
+    };
+    const record = { recordType: 'request_reserved', attemptEventId: 'run:case:variant:1' };
+    appendJsonlRecord(outputPath, record);
+    assert.equal(openAttempts, 3);
+    const lines = fs.readFileSync(outputPath, 'utf8').trim().split(/\r?\n/);
+    assert.equal(lines.length, 1);
+    assert.deepEqual(JSON.parse(lines[0]), record);
+  } finally {
+    fs.openSync = originalOpenSync;
+    fs.rmSync(tempRoot, { recursive: true, force: true });
+  }
+
+  const deniedRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'stage1-append-denied-'));
+  try {
+    let deniedOpenAttempts = 0;
+    fs.openSync = () => {
+      deniedOpenAttempts++;
+      throw Object.assign(new Error('permission denied'), { code: 'EACCES' });
+    };
+    assert.throws(
+      () => appendJsonlRecord(path.join(deniedRoot, 'events.jsonl'), { recordType: 'test' }),
+      /Could not open JSONL output/,
+    );
+    assert.equal(deniedOpenAttempts, 1);
+  } finally {
+    fs.openSync = originalOpenSync;
+    fs.rmSync(deniedRoot, { recursive: true, force: true });
+  }
+});
+
+test('hard spend cap, in-flight reservations, concurrency ceiling, and reservation-first resume accounting', async () => {
+  assert.equal(MAX_ESTIMATED_SPEND_USD, 10);
+  assert.equal(validateEstimatedSpendLimit(10), 10);
+  assert.throws(() => validateEstimatedSpendLimit(10.01), /no more than \$10/);
+  assert.equal(validateEvaluationConcurrency(3), 3);
+  assert.throws(() => validateEvaluationConcurrency(4), /from 1 to 3/);
+
+  const plan = {
+    requestIndex: 1,
+    requestKind: 'initial',
+    model: 'gpt-5-mini',
+    endpoint: 'responses',
+    imageCount: 0,
+    maxOutputTokens: 2000,
+    inputTextChars: 0,
+  };
+  const oneRequestReserve = estimateRequestCostUsd(plan);
+  const budget = new Stage1SpendBudget(oneRequestReserve * 2);
+  const reservationA = budget.reserve(plan);
+  const reservationB = budget.reserve({ ...plan, requestIndex: 2 });
+  assert.equal(budget.describe().inFlightReserveUsd, oneRequestReserve * 2);
+  assert.throws(
+    () => budget.reserve({ ...plan, requestIndex: 3 }),
+    Stage1EvaluationBudgetError,
+  );
+  budget.settle({
+    reservationId: reservationA,
+    model: 'gpt-5-mini',
+    inputTokens: 1000,
+    outputTokens: 100,
+  });
+  assert.equal(budget.describe().inFlightReserveUsd, oneRequestReserve);
+  assert.ok(budget.reservedUsd < oneRequestReserve * 2);
+  assert.ok(budget.getReservation(reservationB));
+
+  const started = [];
+  let active = 0;
+  let maxActive = 0;
+  const concurrencyRun = await runWithConcurrency(
+    [0, 1, 2, 3, 4, 5],
+    3,
+    async (item) => {
+      started.push(item);
+      active++;
+      maxActive = Math.max(maxActive, active);
+      if (item === 1) {
+        await Promise.resolve();
+        active--;
+        return { status: 'budget_stopped' };
+      }
+      await new Promise((resolve) => setTimeout(resolve, 5));
+      active--;
+      return { status: 'completed' };
+    },
+    (result) => result.status === 'budget_stopped'
+  );
+  assert.equal(maxActive, 3);
+  assert.deepEqual(started, [0, 1, 2]);
+  assert.equal(concurrencyRun.stopped, true);
+  assert.equal(concurrencyRun.startedCount, 3);
+  assert.equal(concurrencyRun.skippedCount, 3);
+  assert.equal(active, 0, 'already-active requests finish before the runner returns');
+
+  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'stage1-reservations-'));
+  try {
+    const outputPath = path.join(tempRoot, 'resume.jsonl');
+    appendJsonlRecord(outputPath, {
+      recordType: 'request_reserved',
+      attemptEventId: 'run:case:variant:1',
+      runId: 'run',
+      estimatedReservedUsd: 0.02,
+    });
+    const reservedRecord = JSON.parse(fs.readFileSync(outputPath, 'utf8').trim());
+    assert.equal(historicalSpendFromOutputRecords([reservedRecord]), 0.02);
+
+    appendJsonlRecord(outputPath, {
+      recordType: 'request_attempt',
+      attemptEventId: 'run:case:variant:1',
+      runId: 'run',
+      attempt: {
+        usageCostEstimateUsd: 0.006,
+        retainedReserveUsd: 0.006,
+      },
+    });
+    const completedRecords = fs.readFileSync(outputPath, 'utf8')
+      .trim()
+      .split(/\r?\n/)
+      .map((line) => JSON.parse(line));
+    assert.equal(historicalSpendFromOutputRecords(completedRecords), 0.006);
+  } finally {
+    fs.rmSync(tempRoot, { recursive: true, force: true });
+  }
 });
 
 test('cost estimate includes cached input, reasoning output, and conservative GPT-6 cache-write reserve', () => {

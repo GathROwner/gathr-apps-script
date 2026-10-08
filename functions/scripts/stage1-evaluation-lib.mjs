@@ -4,7 +4,9 @@ import path from 'node:path';
 
 export const MAX_SOURCE_GALLERY_IMAGES = 16;
 export const INITIAL_STAGE1_IMAGE_LIMIT = 4;
-export const MAX_ESTIMATED_SPEND_USD = 1;
+export const MAX_ESTIMATED_SPEND_USD = 10;
+export const DEFAULT_ESTIMATED_SPEND_USD = 1;
+export const MAX_EVALUATION_CONCURRENCY = 3;
 export const IMAGE_TOKEN_RESERVE = 25_000;
 
 export const MODEL_RATES_PER_MILLION = Object.freeze({
@@ -31,20 +33,102 @@ export const VARIANTS = Object.freeze([
     promptVariant: 'production',
     structuredOutput: false,
   }),
+  Object.freeze({
+    id: 'luna-compact-structured',
+    model: 'gpt-6-luna',
+    promptVariant: 'compact',
+    structuredOutput: true,
+  }),
+  Object.freeze({
+    id: 'mini-compact-v2',
+    model: 'gpt-5-mini',
+    promptVariant: 'compact-v2',
+    structuredOutput: false,
+  }),
+  Object.freeze({
+    id: 'luna-compact-v2',
+    model: 'gpt-6-luna',
+    promptVariant: 'compact-v2',
+    structuredOutput: false,
+  }),
+  Object.freeze({
+    id: 'mini-compact-v3',
+    model: 'gpt-5-mini',
+    promptVariant: 'compact-v3',
+    structuredOutput: false,
+  }),
+  Object.freeze({
+    id: 'luna-compact-v3',
+    model: 'gpt-6-luna',
+    promptVariant: 'compact-v3',
+    structuredOutput: false,
+  }),
 ]);
 
+export const DEFAULT_VARIANT_IDS = Object.freeze([
+  'mini-current',
+  'mini-compact-structured',
+  'luna-current',
+]);
+
+const variantById = new Map(VARIANTS.map((variant) => [variant.id, variant]));
+
 export function getVariants(includeCompactLuna = false) {
-  return includeCompactLuna
-    ? [
-        ...VARIANTS,
-        {
-          id: 'luna-compact-structured',
-          model: 'gpt-6-luna',
-          promptVariant: 'compact',
-          structuredOutput: true,
-        },
-      ]
-    : [...VARIANTS];
+  const ids = includeCompactLuna
+    ? [...DEFAULT_VARIANT_IDS, 'luna-compact-structured']
+    : DEFAULT_VARIANT_IDS;
+  return ids.map((id) => variantById.get(id));
+}
+
+export function selectVariants(variantIds, includeCompactLuna = false) {
+  if (variantIds == null) return getVariants(includeCompactLuna);
+  if (!Array.isArray(variantIds) || variantIds.length === 0) {
+    throw new Error('Select at least one variant.');
+  }
+  const requested = variantIds.map((id) => String(id).trim()).filter(Boolean);
+  if (requested.length !== variantIds.length) throw new Error('Variant IDs cannot be empty.');
+  const duplicates = requested.filter((id, index) => requested.indexOf(id) !== index);
+  if (duplicates.length > 0) throw new Error(`Duplicate variant ID: ${duplicates[0]}`);
+  const unknown = requested.filter((id) => !variantById.has(id));
+  if (unknown.length > 0) throw new Error(`Unknown variant ID: ${unknown[0]}`);
+  return requested.map((id) => variantById.get(id));
+}
+
+export function selectCases(manifest, caseIds) {
+  if (caseIds == null) return [...manifest.cases];
+  if (!Array.isArray(caseIds) || caseIds.length === 0) throw new Error('Select at least one case ID.');
+  const requested = caseIds.map((id) => String(id).trim()).filter(Boolean);
+  if (requested.length !== caseIds.length) throw new Error('Case IDs cannot be empty.');
+  const duplicates = requested.filter((id, index) => requested.indexOf(id) !== index);
+  if (duplicates.length > 0) throw new Error(`Duplicate case ID: ${duplicates[0]}`);
+  const byId = new Map(manifest.cases.map((item) => [item.caseId, item]));
+  const unknown = requested.filter((id) => !byId.has(id));
+  if (unknown.length > 0) throw new Error(`Unknown case ID: ${unknown[0]}`);
+  const requestedSet = new Set(requested);
+  return manifest.cases.filter((item) => requestedSet.has(item.caseId));
+}
+
+export function getCaseSourceIdentity(item) {
+  const dataset = String(item.dataset || item.datasetId || '').trim();
+  const fileId = String(item.fileId || item.sourceFileId || '').trim();
+  const datasetFile = [dataset, fileId].filter(Boolean).join('/');
+  return `${datasetFile || `case:${item.caseId}`}#${item.sourceRow}`;
+}
+
+export function validateEvaluationConcurrency(value) {
+  const concurrency = Number(value);
+  if (!Number.isInteger(concurrency) || concurrency < 1 || concurrency > MAX_EVALUATION_CONCURRENCY) {
+    throw new Error(`--concurrency must be an integer from 1 to ${MAX_EVALUATION_CONCURRENCY}.`);
+  }
+  return concurrency;
+}
+
+export function validateEstimatedSpendLimit(value) {
+  const maxUsd = Number(value);
+  if (!Number.isFinite(maxUsd) || maxUsd <= 0 || maxUsd > MAX_ESTIMATED_SPEND_USD) {
+    throw new Error(`--max-estimated-usd must be greater than 0 and no more than $${MAX_ESTIMATED_SPEND_USD}.`);
+  }
+  return maxUsd;
 }
 
 export function estimateRequestCostUsd(plan, imageTokenReserve = IMAGE_TOKEN_RESERVE) {
@@ -88,9 +172,9 @@ export class Stage1EvaluationBudgetError extends Error {
 }
 
 export class Stage1SpendBudget {
-  constructor(maxUsd = MAX_ESTIMATED_SPEND_USD, historicalSpendUsd = 0) {
+  constructor(maxUsd = DEFAULT_ESTIMATED_SPEND_USD, historicalSpendUsd = 0) {
     if (!Number.isFinite(maxUsd) || maxUsd <= 0 || maxUsd > MAX_ESTIMATED_SPEND_USD) {
-      throw new Error(`--max-estimated-usd must be greater than 0 and no more than ${MAX_ESTIMATED_SPEND_USD}`);
+      throw new Error(`--max-estimated-usd must be greater than 0 and no more than $${MAX_ESTIMATED_SPEND_USD}.`);
     }
     this.maxUsd = maxUsd;
     this.historicalSpendUsd = Math.max(0, Number(historicalSpendUsd || 0));
@@ -105,7 +189,7 @@ export class Stage1SpendBudget {
   reserve(plan) {
     const estimateUsd = estimateRequestCostUsd(plan);
     const projectedUsd = this.reservedUsd + estimateUsd;
-    if (projectedUsd > this.maxUsd) {
+    if (projectedUsd > this.maxUsd + 1e-12) {
       throw new Stage1EvaluationBudgetError(
         `Estimated spend cap reached before request ${plan.requestIndex}: reserved $${this.reservedUsd.toFixed(4)}, next request reserve $${estimateUsd.toFixed(4)}, cap $${this.maxUsd.toFixed(2)}.`
       );
@@ -115,8 +199,19 @@ export class Stage1SpendBudget {
       estimateUsd,
       currentUsd: estimateUsd,
       observedUsd: null,
+      inFlight: true,
     });
     return reservationId;
+  }
+
+  getReservation(reservationId) {
+    const reservation = this.reservations.get(reservationId);
+    if (!reservation) return null;
+    return {
+      estimatedReservedUsd: reservation.estimateUsd,
+      currentReservedUsd: reservation.currentUsd,
+      usageCostEstimateUsd: reservation.observedUsd,
+    };
   }
 
   settle(attempt) {
@@ -126,6 +221,7 @@ export class Stage1SpendBudget {
       reservation.observedUsd = calculateObservedCostUsd(attempt);
       reservation.currentUsd = reservation.observedUsd;
     }
+    reservation.inFlight = false;
     return {
       estimatedReservedUsd: reservation.estimateUsd,
       usageCostEstimateUsd: reservation.observedUsd,
@@ -140,17 +236,143 @@ export class Stage1SpendBudget {
       (sum, row) => sum + (row.observedUsd == null ? row.currentUsd : 0),
       0
     );
+    const inFlightReserveUsd = reservations.reduce(
+      (sum, row) => sum + (row.inFlight ? row.currentUsd : 0),
+      0
+    );
     return {
       capUsd: this.maxUsd,
       estimatedOrObservedReservedUsd: this.reservedUsd,
       usageCostEstimateUsd,
       historicalSpendUsd: this.historicalSpendUsd,
       unresolvedReserveUsd,
+      inFlightReserveUsd,
       requestCount: reservations.length,
       imageTokenReservePerImage: IMAGE_TOKEN_RESERVE,
       pricingBasis: 'Conservative Standard API token estimate as of 2026-10-08; uncached GPT-6 Luna input reserves at the cache-write rate.',
     };
   }
+}
+
+export async function runWithConcurrency(items, concurrency, worker, stopWhen = () => false) {
+  const limit = validateEvaluationConcurrency(concurrency);
+  const results = new Array(items.length);
+  let cursor = 0;
+  let startedCount = 0;
+  let stopped = false;
+  let failure = null;
+
+  async function runWorker() {
+    while (!stopped) {
+      const index = cursor;
+      if (index >= items.length) return;
+      cursor++;
+      startedCount++;
+      try {
+        const result = await worker(items[index], index);
+        results[index] = result;
+        if (stopWhen(result)) stopped = true;
+      } catch (error) {
+        failure ||= error;
+        stopped = true;
+      }
+    }
+  }
+
+  const workerCount = Math.min(limit, items.length);
+  await Promise.all(Array.from({ length: workerCount }, () => runWorker()));
+  if (failure) throw failure;
+  return {
+    results,
+    stopped,
+    startedCount,
+    skippedCount: items.length - startedCount,
+  };
+}
+
+export function appendJsonlRecord(outputPath, record) {
+  const line = `${JSON.stringify(record)}\n`;
+  if (outputPath === '-') {
+    process.stdout.write(line);
+    return;
+  }
+  const retryDelaysMs = [25, 50, 100, 200, 400];
+  const waitCell = new Int32Array(new SharedArrayBuffer(Int32Array.BYTES_PER_ELEMENT));
+  let fd = null;
+  for (let attempt = 0; attempt <= retryDelaysMs.length; attempt++) {
+    try {
+      fd = fs.openSync(outputPath, 'a');
+      break;
+    } catch (error) {
+      const retryable = ['EBUSY', 'EPERM'].includes(error?.code);
+      if (!retryable || attempt === retryDelaysMs.length) {
+        const suffix = retryable
+          ? ` after ${attempt + 1} bounded open attempts`
+          : '';
+        throw new Error(
+          `Could not open JSONL output ${outputPath}${suffix}: ${error instanceof Error ? error.message : String(error)}`,
+          { cause: error }
+        );
+      }
+      Atomics.wait(waitCell, 0, 0, retryDelaysMs[attempt]);
+    }
+  }
+  if (fd == null) throw new Error(`Could not open JSONL output ${outputPath}.`);
+
+  const bytes = Buffer.from(line, 'utf8');
+  let writeError = null;
+  let originalSize = null;
+  try {
+    originalSize = fs.fstatSync(fd).size;
+    let offset = 0;
+    while (offset < bytes.length) {
+      const written = fs.writeSync(fd, bytes, offset, bytes.length - offset, null);
+      if (written <= 0) throw new Error('JSONL append returned a zero-byte write.');
+      offset += written;
+    }
+    fs.fsyncSync(fd);
+  } catch (error) {
+    writeError = error;
+    if (originalSize != null) {
+      try {
+        fs.ftruncateSync(fd, originalSize);
+        fs.fsyncSync(fd);
+      } catch (rollbackError) {
+        writeError = new AggregateError(
+          [error, rollbackError],
+          `JSONL append failed and partial-record rollback also failed for ${outputPath}.`
+        );
+      }
+    }
+  }
+  try {
+    fs.closeSync(fd);
+  } catch (error) {
+    writeError ||= error;
+  }
+  if (writeError) {
+    throw new Error(
+      `Could not durably append one JSONL record to ${outputPath}: ${writeError instanceof Error ? writeError.message : String(writeError)}`,
+      { cause: writeError }
+    );
+  }
+}
+
+export function makeSourceTruthScore(caseData, status, result) {
+  const expected = caseData.sourceTruth.expectedDecision;
+  const observedDecision = status === 'completed' && result
+    ? (result.hasValidContent ? 'accept' : 'reject')
+    : null;
+  const goldDecisionAvailable = expected !== 'review';
+  return {
+    expectedDecision: expected,
+    observedDecision,
+    matches: !goldDecisionAvailable || observedDecision == null
+      ? null
+      : observedDecision === expected,
+    goldDecisionAvailable,
+    scoredOnlyOnCompletedImageRequest: true,
+  };
 }
 
 function assertInside(root, candidate, label) {
@@ -172,19 +394,31 @@ export function loadAndValidateManifest(manifestPath, sourceRootOverride) {
   );
   const realSourceRoot = fs.realpathSync(sourceRoot);
   const seenCaseIds = new Set();
-  const seenRows = new Set();
+  const seenSourceRows = new Set();
 
   for (const item of manifest.cases) {
     if (!item.caseId || seenCaseIds.has(item.caseId)) throw new Error(`Missing or duplicate caseId: ${item.caseId}`);
-    if (seenRows.has(item.sourceRow)) throw new Error(`Duplicate source row: ${item.sourceRow}`);
+    if (item.sourceRow == null || String(item.sourceRow).trim() === '') {
+      throw new Error(`${item.caseId} must define sourceRow`);
+    }
+    const dataset = String(item.dataset || item.datasetId || '').trim();
+    const fileId = String(item.fileId || item.sourceFileId || '').trim();
+    const sourceFileIdentity = [dataset, fileId].filter(Boolean).join('/') || `case:${item.caseId}`;
+    const sourceRowIdentity = `${sourceFileIdentity}\u0000${item.sourceRow}`;
+    if (seenSourceRows.has(sourceRowIdentity)) {
+      throw new Error(`Duplicate source identity: ${sourceFileIdentity} row ${item.sourceRow}`);
+    }
     seenCaseIds.add(item.caseId);
-    seenRows.add(item.sourceRow);
-    if (!Array.isArray(item.images) || item.images.length === 0) throw new Error(`${item.caseId} has no image files`);
+    seenSourceRows.add(sourceRowIdentity);
+    if (!Array.isArray(item.images)) throw new Error(`${item.caseId} images must be an array`);
+    if (item.images.length === 0 && item.gallery?.sourceImageCount !== 0) {
+      throw new Error(`${item.caseId} without images must declare gallery.sourceImageCount as 0`);
+    }
     if (item.images.length > MAX_SOURCE_GALLERY_IMAGES) {
       throw new Error(`${item.caseId} exceeds the ${MAX_SOURCE_GALLERY_IMAGES}-image source gallery limit`);
     }
-    if (!['accept', 'reject'].includes(item.sourceTruth?.expectedDecision)) {
-      throw new Error(`${item.caseId} must define sourceTruth.expectedDecision as accept or reject`);
+    if (!['accept', 'reject', 'review'].includes(item.sourceTruth?.expectedDecision)) {
+      throw new Error(`${item.caseId} must define sourceTruth.expectedDecision as accept, reject, or review`);
     }
     const indexes = item.images.map((image) => image.sourceGalleryIndex);
     if (indexes.some((index, position) => index !== position)) {
@@ -203,8 +437,8 @@ export function loadAndValidateManifest(manifestPath, sourceRootOverride) {
       const realImagePath = fs.realpathSync(imagePath);
       assertInside(realSourceRoot, realImagePath, `${item.caseId} resolved image path`);
       if (!fs.statSync(realImagePath).isFile()) throw new Error(`Fixture is not a file: ${realImagePath}`);
-      if (!Array.isArray(image.expectedSemanticCueGroups) || image.expectedSemanticCueGroups.length === 0) {
-        throw new Error(`${item.caseId} image ${image.sourceGalleryIndex} needs semantic cue groups`);
+      if (image.expectedSemanticCueGroups != null && !Array.isArray(image.expectedSemanticCueGroups)) {
+        throw new Error(`${item.caseId} image ${image.sourceGalleryIndex} expectedSemanticCueGroups must be an array when supplied`);
       }
       const bytes = fs.readFileSync(realImagePath);
       const sha256 = createHash('sha256').update(bytes).digest('hex');
@@ -225,9 +459,24 @@ export function selectImagesForCase(item, imageSet) {
 
 export function readImagesAsDataUrls(images, sourceRoot) {
   return images.map((image) => {
-    const extension = path.extname(image.path).toLowerCase();
-    const mime = extension === '.png' ? 'image/png' : extension === '.webp' ? 'image/webp' : 'image/jpeg';
     const bytes = fs.readFileSync(path.resolve(sourceRoot, image.path));
+    let mime;
+    if (bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) {
+      mime = 'image/jpeg';
+    } else if (
+      bytes.length >= 8 &&
+      bytes.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))
+    ) {
+      mime = 'image/png';
+    } else if (
+      bytes.length >= 12 &&
+      bytes.toString('ascii', 0, 4) === 'RIFF' &&
+      bytes.toString('ascii', 8, 12) === 'WEBP'
+    ) {
+      mime = 'image/webp';
+    } else {
+      throw new Error(`Unsupported image bytes for ${image.path}; expected JPEG, PNG, or WebP.`);
+    }
     return `data:${mime};base64,${bytes.toString('base64')}`;
   });
 }
@@ -314,6 +563,7 @@ export function assessImageAnalysis(result, selectedImages) {
     .map((check) => check.imageIndex);
 
   return {
+    hasImages: expectedIndexes.length > 0,
     expectedImageCount: expectedIndexes.length,
     observedImageAnalysisCount: analyses.length,
     expectedIndexes,
@@ -330,6 +580,16 @@ export function assessImageAnalysis(result, selectedImages) {
     semanticAssociationPassed:
       uncheckedSemanticIndexes.length === 0 && semanticMismatchedIndexes.length === 0,
     expectedLayoutChecks,
+    coverageStatus: expectedIndexes.length === 0
+      ? 'not_applicable'
+      : analyses.length === expectedIndexes.length &&
+        missingIndexes.length === 0 &&
+        duplicateIndexes.length === 0 &&
+        unexpectedIndexes.length === 0 &&
+        blankDescriptionIndexes.length === 0 &&
+        blankRelevanceIndexes.length === 0
+        ? 'complete'
+        : 'incomplete',
     onePopulatedEntryPerImage:
       analyses.length === expectedIndexes.length &&
       missingIndexes.length === 0 &&
@@ -426,21 +686,33 @@ export function historicalSpendFromCaseRecords(records) {
 
 export function historicalSpendFromOutputRecords(records) {
   const requestEvents = records.filter((record) => record.recordType === 'request_attempt');
-  if (requestEvents.length === 0) {
+  const reservationEvents = records.filter((record) => record.recordType === 'request_reserved');
+  if (requestEvents.length === 0 && reservationEvents.length === 0) {
     return historicalSpendFromCaseRecords(records.filter((record) => record.recordType === 'case_result'));
   }
-  const seen = new Set();
-  const eventRunIds = new Set(requestEvents.map((event) => event.runId).filter(Boolean));
-  const eventSpend = requestEvents.reduce((sum, event) => {
-      const eventId = event.attemptEventId;
-      if (eventId && seen.has(eventId)) return sum;
-      if (eventId) seen.add(eventId);
-      const attempt = event.attempt || {};
-      const retained = Number(attempt.retainedReserveUsd);
-      if (Number.isFinite(retained)) return sum + Math.max(0, retained);
-      const usageEstimate = Number(attempt.usageCostEstimateUsd);
-      if (Number.isFinite(usageEstimate)) return sum + Math.max(0, usageEstimate);
-      return sum + Math.max(0, Number(attempt.estimatedReservedUsd) || 0);
+  const eventRunIds = new Set(
+    [...requestEvents, ...reservationEvents].map((event) => event.runId).filter(Boolean)
+  );
+  const spendByAttempt = new Map();
+  for (const event of reservationEvents) {
+    if (!event.attemptEventId) continue;
+    spendByAttempt.set(event.attemptEventId, {
+      runId: event.runId,
+      estimatedReservedUsd: event.estimatedReservedUsd,
+    });
+  }
+  for (const event of requestEvents) {
+    const eventId = event.attemptEventId || `legacy:${event.runId || ''}:${spendByAttempt.size}`;
+    spendByAttempt.set(eventId, { ...spendByAttempt.get(eventId), ...event });
+  }
+  const eventSpend = [...spendByAttempt.values()].reduce((sum, event) => {
+    const attempt = event.attempt || {};
+    const retained = Number(attempt.retainedReserveUsd);
+    if (Number.isFinite(retained)) return sum + Math.max(0, retained);
+    const usageEstimate = Number(attempt.usageCostEstimateUsd);
+    if (Number.isFinite(usageEstimate)) return sum + Math.max(0, usageEstimate);
+    const estimated = Number(attempt.estimatedReservedUsd ?? event.estimatedReservedUsd);
+    return sum + Math.max(0, Number.isFinite(estimated) ? estimated : 0);
   }, 0);
   const legacyResults = records.filter(
     (record) => record.recordType === 'case_result' && !eventRunIds.has(record.runId)

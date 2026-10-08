@@ -35,6 +35,9 @@ import {
   Stage45ReplayArtifacts,
 } from './types.js';
 import { detectCalendarSignals, validateContent } from './contentValidator.js';
+import { resolveStage2ScoreRouting, selectLunaDenseFrameIndices } from './stage2Routing.js';
+import type { Stage2ScoreRoutingDecision } from './stage2Routing.js';
+export { resolveStage2ScoreRouting };
 import { classifyContent } from './contentClassifier.js';
 import { extractContentByType, extractOcrDebugText } from './eventExtractor.js';
 import { enrichEventsFromTicketLinks } from './ticketLinkEnricher.js';
@@ -323,55 +326,6 @@ async function emitStageArtifacts(
   }
 }
 
-interface Stage2ScoreThresholds {
-  calendarScoreMin: number;
-  calendarMarginMin: number;
-  scheduleScoreMin: number;
-  scheduleMarginMin: number;
-  smallPostMaxItems: number;
-  tiledCalendarScoreMin: number;
-  tiledMinItems: number;
-  scheduleBlockIfGrid: boolean;
-  ambiguousRoute: 'CALENDAR_BASIC' | 'KEEP_MODEL';
-}
-
-interface Stage2ScoreRoutingDecision {
-  enabled: boolean;
-  shadowEnabled: boolean;
-  forceContentTypeOverride: boolean;
-  shouldUseRoutedContentType: boolean;
-  originalContentType: ContentType;
-  routedContentType: ContentType;
-  routingReason: string;
-  calendarScore: number;
-  scheduleScore: number;
-  scoreDelta: number;
-  isAmbiguous: boolean;
-  ocrMode: 'basic' | 'tiled';
-  shouldUseCalendarTiles: boolean;
-  legacyShouldUseCalendarTiles: boolean;
-  signals: {
-    hasCalendarGrid: boolean;
-    recommendsTiling: boolean;
-    hasDenseText: boolean;
-    maxTextDensityScore: number;
-    allPromotionalPhoto: boolean;
-    organizationStyle: string;
-    weekdayCount: number;
-    timeLines: number;
-    hasTextCalendarSignal: boolean;
-    hasLinkedCalendarSignal: boolean;
-    estimatedItemCount: number;
-    hasEvents: boolean;
-    hasFoodSpecials: boolean;
-    hasMultipleItems: boolean;
-    hasMultipleEventListings: boolean;
-    hasComplexitySignals: boolean;
-    recommendsTilingCount: number;
-  };
-  thresholds: Stage2ScoreThresholds;
-}
-
 interface ModelRouterConfig {
   enabled: boolean;
   shadowEnabled: boolean;
@@ -605,303 +559,6 @@ function resolveStage3ModelRouting(
         mixedHighMinItemsForMultipleListings: router.mixedHighMinItemsForMultipleListings,
       },
     };
-}
-
-function detectLinkedCalendarSignal(text: string, hasImages: boolean): boolean {
-  const t = String(text || '');
-  const hasEventsLink =
-    /\b(?:https?:\/\/|www\.)[^\s"'<>]*\/(?:events?|calendar|programs?)(?:[\/?#][^\s"'<>]*)?/i.test(
-      t
-    );
-  const hasProgramLanguage =
-    /\b(this week|weekly|month calendar|upcoming|programs?|schedule|what'?s on|full list|at the library)\b/i.test(
-      t
-    );
-  return hasEventsLink && (hasProgramLanguage || hasImages);
-}
-
-function resolveSmallPostFallbackType(
-  classification: any,
-  scheduleScore: number,
-  thresholds: Stage2ScoreThresholds
-): ContentType {
-  const hasFoodSpecials = Boolean(classification?.contentAnalysis?.hasFoodSpecials);
-  const hasEvents = Boolean(classification?.contentAnalysis?.hasEvents);
-  if (hasFoodSpecials && hasEvents) return 'MIXED_EVENTS_AND_SPECIALS';
-  if (hasFoodSpecials) return 'FOOD_SPECIAL';
-  if (scheduleScore >= thresholds.scheduleScoreMin) return 'SCHEDULE';
-  return 'EVENT';
-}
-
-function shouldForceEventRowToCalendar(
-  originalContentType: ContentType,
-  hasFoodSpecials: boolean,
-  estimatedItemCount: number,
-  calendarScore: number,
-  hasCalendarGrid: boolean,
-  recommendsTiling: boolean,
-  hasMultipleEventListings: boolean,
-  allPromotionalPhoto: boolean,
-  hasTextCalendarSignal: boolean,
-  hasLinkedCalendarSignal: boolean,
-  organizationStyle: string,
-  thresholds: Stage2ScoreThresholds
-): boolean {
-  const isEventLike =
-    originalContentType === 'EVENT' || originalContentType === 'MIXED_EVENTS_AND_SPECIALS';
-  if (!isEventLike) return false;
-  if (hasFoodSpecials) return false;
-  if (allPromotionalPhoto) return false;
-  if (!hasMultipleEventListings) return false;
-
-  const strongImageCalendarSignal =
-    hasCalendarGrid ||
-    (recommendsTiling && hasMultipleEventListings);
-  if (!strongImageCalendarSignal) return false;
-
-  const hasScheduleLikeSupport =
-    hasTextCalendarSignal ||
-    hasLinkedCalendarSignal ||
-    organizationStyle.includes('date') ||
-    organizationStyle.includes('time') ||
-    hasCalendarGrid;
-  if (!hasScheduleLikeSupport) return false;
-
-  const requiredItemCount = Math.max(thresholds.tiledMinItems, 8);
-  if (estimatedItemCount < requiredItemCount) return false;
-
-  const requiredCalendarScore = Math.max(
-    thresholds.calendarScoreMin,
-    thresholds.tiledCalendarScoreMin
-  );
-  if (calendarScore < requiredCalendarScore) return false;
-
-  return true;
-}
-
-export function resolveStage2ScoreRouting(
-  combinedText: string,
-  classification: any,
-  validation: any
-): Stage2ScoreRoutingDecision {
-  const thresholds: Stage2ScoreThresholds = {
-    calendarScoreMin: parseNumberEnv('STAGE2_CALENDAR_SCORE_MIN', 8),
-    calendarMarginMin: parseNumberEnv('STAGE2_CALENDAR_MARGIN_MIN', 2),
-    scheduleScoreMin: parseNumberEnv('STAGE2_SCHEDULE_SCORE_MIN', 7),
-    scheduleMarginMin: parseNumberEnv('STAGE2_SCHEDULE_MARGIN_MIN', 2),
-    smallPostMaxItems: parseNumberEnv('STAGE2_SMALL_POST_MAX_ITEMS', 5),
-    tiledCalendarScoreMin: parseNumberEnv('STAGE2_TILED_CALENDAR_SCORE_MIN', 10),
-    tiledMinItems: parseNumberEnv('STAGE2_TILED_MIN_ITEMS', 8),
-    scheduleBlockIfGrid: parseBooleanEnv('STAGE2_SCHEDULE_BLOCK_IF_GRID', true),
-    ambiguousRoute:
-      String(process.env.STAGE2_AMBIGUOUS_ROUTE || 'CALENDAR_BASIC')
-        .trim()
-        .toUpperCase() === 'KEEP_MODEL'
-        ? 'KEEP_MODEL'
-        : 'CALENDAR_BASIC',
-  };
-
-  const enabled = parseBooleanEnv('ENABLE_STAGE2_SCORE_ROUTING', false);
-  const shadowEnabled = parseBooleanEnv('ENABLE_STAGE2_SCORE_SHADOW_LOG', true);
-
-  const originalContentType = (classification?.contentType || 'EVENT') as ContentType;
-  const complexitySignals = (validation?.imageAnalysis || [])
-    .map((img: any) => img?.imageComplexity)
-    .filter(Boolean);
-  const hasComplexitySignals = complexitySignals.length > 0;
-  const recommendsTilingCount = complexitySignals.filter((c: any) => c?.recommendsTiling).length;
-  const legacyIsCalendarOrSchedule =
-    originalContentType === 'CALENDAR' || originalContentType === 'SCHEDULE';
-  const legacyShouldUseCalendarTiles =
-    legacyIsCalendarOrSchedule && (!hasComplexitySignals || recommendsTilingCount > 0);
-
-  const hasCalendarGrid = complexitySignals.some((c: any) => Boolean(c?.hasCalendarGrid));
-  const recommendsTiling = complexitySignals.some((c: any) => Boolean(c?.recommendsTiling));
-  const hasDenseText = complexitySignals.some((c: any) => Boolean(c?.hasDenseText));
-  const hasMultipleEventListings = complexitySignals.some((c: any) =>
-    Boolean(c?.hasMultipleEventListings)
-  );
-  const maxTextDensityScore = complexitySignals.reduce(
-    (max: number, c: any) => Math.max(max, Number(c?.textDensityScore || 0)),
-    0
-  );
-  const allPromotionalPhoto =
-    complexitySignals.length > 0 &&
-    complexitySignals.every((c: any) => Boolean(c?.isPromotionalPhoto));
-
-  const textSignals = detectCalendarSignals(combinedText);
-  const hasTextCalendarSignal = Boolean(textSignals?.hasCalendar);
-  const hasLinkedCalendarSignal = detectLinkedCalendarSignal(combinedText, hasComplexitySignals);
-  const organizationStyle = String(classification?.contentAnalysis?.organizationStyle || '').toLowerCase();
-  const hasEvents = Boolean(classification?.contentAnalysis?.hasEvents);
-  const hasFoodSpecials = Boolean(classification?.contentAnalysis?.hasFoodSpecials);
-  const hasMultipleItems = Boolean(classification?.contentAnalysis?.hasMultipleItems);
-  const estimatedItemCount = Number(classification?.estimatedItemCount || 0);
-
-  let calendarScore = 0;
-  let scheduleScore = 0;
-
-  if (hasCalendarGrid) {
-    calendarScore += 5;
-    scheduleScore -= 5;
-  }
-  if (recommendsTiling) {
-    calendarScore += 3;
-    scheduleScore -= 2;
-  }
-  if (hasDenseText) {
-    calendarScore += 1;
-  }
-  if (maxTextDensityScore >= 0.85) {
-    calendarScore += 2;
-  } else if (maxTextDensityScore >= 0.65) {
-    calendarScore += 1;
-  }
-  if (allPromotionalPhoto) {
-    calendarScore -= 4;
-    scheduleScore += 2;
-  }
-  if (organizationStyle.includes('by date') || organizationStyle.includes('calendar')) {
-    calendarScore += 3;
-    scheduleScore -= 1;
-  }
-  if (organizationStyle.includes('time')) {
-    scheduleScore += 4;
-  }
-  if (Number(textSignals?.weekdayCount || 0) >= 3) {
-    calendarScore += 1;
-    scheduleScore += 2;
-  }
-  if (Number(textSignals?.timeLines || 0) >= 3) {
-    scheduleScore += 2;
-  }
-  if (estimatedItemCount >= 20) {
-    calendarScore += 3;
-    scheduleScore += 1;
-  } else if (estimatedItemCount >= 8) {
-    calendarScore += 2;
-  } else if (estimatedItemCount >= 6) {
-    calendarScore += 1;
-  } else if (estimatedItemCount > 0 && estimatedItemCount <= thresholds.smallPostMaxItems) {
-    calendarScore -= 4;
-    scheduleScore -= 1;
-  }
-  if (hasLinkedCalendarSignal) {
-    calendarScore += 2;
-  }
-  if (hasTextCalendarSignal) {
-    calendarScore += 2;
-  }
-
-  const smallPostGuard = estimatedItemCount > 0 && estimatedItemCount <= thresholds.smallPostMaxItems;
-  const calendarEligible =
-    calendarScore >= thresholds.calendarScoreMin &&
-    calendarScore - scheduleScore >= thresholds.calendarMarginMin;
-  const scheduleBlockedByGrid = thresholds.scheduleBlockIfGrid && hasCalendarGrid;
-  const scheduleEligible =
-    scheduleScore >= thresholds.scheduleScoreMin &&
-    scheduleScore - calendarScore >= thresholds.scheduleMarginMin &&
-    !scheduleBlockedByGrid;
-  const isAmbiguous =
-    calendarScore >= thresholds.calendarScoreMin &&
-    scheduleScore >= thresholds.scheduleScoreMin &&
-    Math.abs(calendarScore - scheduleScore) <
-      Math.max(thresholds.calendarMarginMin, thresholds.scheduleMarginMin);
-
-  let routedContentType: ContentType = originalContentType;
-  let routingReason = 'keep_model';
-  let forceContentTypeOverride = false;
-
-  if (
-    shouldForceEventRowToCalendar(
-      originalContentType,
-      hasFoodSpecials,
-      estimatedItemCount,
-      calendarScore,
-      hasCalendarGrid,
-      recommendsTiling,
-      hasMultipleEventListings,
-      allPromotionalPhoto,
-      hasTextCalendarSignal,
-      hasLinkedCalendarSignal,
-      organizationStyle,
-      thresholds
-    )
-  ) {
-    routedContentType = 'CALENDAR';
-    routingReason = 'image_calendar_guard';
-    forceContentTypeOverride = true;
-  }
-
-  if (
-    !forceContentTypeOverride &&
-    (originalContentType === 'CALENDAR' || originalContentType === 'SCHEDULE')
-  ) {
-    if (smallPostGuard && originalContentType === 'CALENDAR') {
-      routedContentType = resolveSmallPostFallbackType(classification, scheduleScore, thresholds);
-      routingReason = 'small_post_guard';
-    } else if (calendarEligible) {
-      routedContentType = 'CALENDAR';
-      routingReason = 'calendar_score';
-    } else if (scheduleEligible) {
-      routedContentType = 'SCHEDULE';
-      routingReason = 'schedule_score';
-    } else if (isAmbiguous && thresholds.ambiguousRoute === 'CALENDAR_BASIC') {
-      routedContentType = 'CALENDAR';
-      routingReason = 'ambiguous_calendar_basic';
-    }
-  }
-
-  const hasTiledSignal =
-    hasCalendarGrid || recommendsTiling || maxTextDensityScore >= 0.75;
-  const shouldUseTiledCalendarOcr =
-    routedContentType === 'CALENDAR' &&
-    !smallPostGuard &&
-    calendarScore >= thresholds.tiledCalendarScoreMin &&
-    estimatedItemCount >= thresholds.tiledMinItems &&
-    hasTiledSignal;
-
-  const shouldUseRoutedContentType = enabled || forceContentTypeOverride;
-  const shouldUseCalendarTiles = shouldUseRoutedContentType
-    ? shouldUseTiledCalendarOcr
-    : legacyShouldUseCalendarTiles;
-
-  return {
-    enabled,
-    shadowEnabled,
-    forceContentTypeOverride,
-    shouldUseRoutedContentType,
-    originalContentType,
-    routedContentType,
-    routingReason,
-    calendarScore,
-    scheduleScore,
-    scoreDelta: calendarScore - scheduleScore,
-    isAmbiguous,
-    ocrMode: shouldUseTiledCalendarOcr ? 'tiled' : 'basic',
-    shouldUseCalendarTiles,
-    legacyShouldUseCalendarTiles,
-    signals: {
-      hasCalendarGrid,
-      recommendsTiling,
-      hasDenseText,
-      maxTextDensityScore,
-      allPromotionalPhoto,
-      organizationStyle,
-      weekdayCount: Number(textSignals?.weekdayCount || 0),
-      timeLines: Number(textSignals?.timeLines || 0),
-      hasTextCalendarSignal,
-      hasLinkedCalendarSignal,
-      estimatedItemCount,
-      hasEvents,
-      hasFoodSpecials,
-      hasMultipleItems,
-      hasMultipleEventListings,
-      hasComplexitySignals,
-      recommendsTilingCount,
-    },
-    thresholds,
-  };
 }
 
 function normalizeReplayArtifacts(
@@ -1228,6 +885,35 @@ async function parsePostDataCore(
   config: Partial<ParsingConfig>
 ): Promise<ProcessedEvent[]> {
   const cfg = { ...DEFAULT_PARSING_CONFIG, ...config };
+  if (cfg.stage1EvaluationValidationOverride) {
+    const override = cfg.stage1EvaluationValidationOverride;
+    if (process.env.DRY_RUN !== 'true' || process.env.PARSER_DRY_RUN_LOCAL_IMAGES !== 'true') {
+      throw new Error(
+        'Stage 1 evaluation injection requires DRY_RUN=true and PARSER_DRY_RUN_LOCAL_IMAGES=true.'
+      );
+    }
+    if (process.env.IMAGE_UPLOAD_URL || process.env.IMAGE_DELETE_URL) {
+      throw new Error(
+        'Stage 1 evaluation injection requires IMAGE_UPLOAD_URL and IMAGE_DELETE_URL to be unset.'
+      );
+    }
+    const overridePostId = String(input.extractedData?.id || input.extractedData?.postId || '');
+    const exactDryRunCanarySelected = cfg.lunaCanaryBypass !== true &&
+      isSelectedLunaCanaryPost(
+        overridePostId,
+        parseBooleanEnv('LUNA_CANARY_ENABLED', false),
+        String(process.env.LUNA_CANARY_POST_IDS || '')
+      );
+    if (!exactDryRunCanarySelected && cfg.lunaCanaryBypass !== true) {
+      throw new Error(
+        'Stage 1 evaluation injection requires an exact Luna canary post ID or explicit bypass.'
+      );
+    }
+    if (!Array.isArray(override.imageAnalysis) || typeof override.hasValidContent !== 'boolean' ||
+        !['VALIDATION_PASSED', 'VALIDATION_FAILED'].includes(override.validationDecision)) {
+      throw new Error('Stage 1 evaluation injection requires a normalized ValidationResult.');
+    }
+  }
   const reportSkipReason = async (skipReason: ParseSkipReason): Promise<void> => {
     if (typeof cfg.skipReasonHandler !== 'function') return;
     try {
@@ -1510,13 +1196,15 @@ async function parsePostDataCore(
       stage1AppliedModel === cfg.gptModelFast
         ? cfg
         : ({ ...cfg, gptModelFast: stage1AppliedModel } as ParsingConfig);
-    let validation = await validateContent(
-      combinedText,
-      ocrImageUrls,
-      userName,
-      timestamp,
-      stage1Config
-    );
+    let validation = cfg.stage1EvaluationValidationOverride
+      ? deepCloneJson(cfg.stage1EvaluationValidationOverride)
+      : await validateContent(
+          combinedText,
+          ocrImageUrls,
+          userName,
+          timestamp,
+          stage1Config
+        );
     logTiming('stage1_validate', stage1Start, { postId });
 
     if (!validation.hasValidContent || validation.validationDecision === 'VALIDATION_FAILED') {
@@ -1868,6 +1556,40 @@ async function parsePostDataCore(
           (requireManagedGallery && frame.sourceGalleryIndex >= 0 && !isManagedImageUrl(frame.displayUrl))))) {
       return retryCanaryWithLegacy('analysis_frame_source_mapping_missing');
     }
+    if (cfg.stage1EvaluationValidationOverride) {
+      const imageFrameManifest = lunaAnalysisFrames?.map((frame, frameIndex) => ({
+        frameIndex,
+        sourceGalleryIndex: frame.sourceGalleryIndex,
+        kind: frame.kind,
+        ...(frame.region ? { region: frame.region } : {}),
+      })) || [];
+      await emitStageArtifacts(cfg, {
+        source: 'live',
+        contentType: resolvedContentType,
+        stage1Validation: deepCloneJson(validation),
+        stage2Classification: deepCloneJson(classification),
+        stage2Routing: deepCloneJson(stage2Routing),
+        stage2RoutingEnvironment: {
+          ENABLE_STAGE2_SCORE_ROUTING: String(stage2Routing.enabled),
+          ENABLE_STAGE2_SCORE_SHADOW_LOG: String(stage2Routing.shadowEnabled),
+          STAGE2_CALENDAR_SCORE_MIN: String(stage2Routing.thresholds.calendarScoreMin),
+          STAGE2_CALENDAR_MARGIN_MIN: String(stage2Routing.thresholds.calendarMarginMin),
+          STAGE2_SCHEDULE_SCORE_MIN: String(stage2Routing.thresholds.scheduleScoreMin),
+          STAGE2_SCHEDULE_MARGIN_MIN: String(stage2Routing.thresholds.scheduleMarginMin),
+          STAGE2_SMALL_POST_MAX_ITEMS: String(stage2Routing.thresholds.smallPostMaxItems),
+          STAGE2_TILED_CALENDAR_SCORE_MIN: String(stage2Routing.thresholds.tiledCalendarScoreMin),
+          STAGE2_TILED_MIN_ITEMS: String(stage2Routing.thresholds.tiledMinItems),
+          STAGE2_SCHEDULE_BLOCK_IF_GRID: String(stage2Routing.thresholds.scheduleBlockIfGrid),
+          STAGE2_AMBIGUOUS_ROUTE: stage2Routing.thresholds.ambiguousRoute,
+        },
+        imageFrameManifest,
+        lunaFullImageReady,
+        lunaDenseFrameIndices: selectLunaDenseFrameIndices(
+          validation,
+          lunaAnalysisFrames || []
+        ),
+      });
+    }
     const hasComplexitySignals = stage2Routing.signals.hasComplexitySignals;
     const recommendsTilingCount = stage2Routing.signals.recommendsTilingCount;
     // The Luna route already has a preprocessed whole-image (or reviewed band)
@@ -1968,21 +1690,13 @@ async function parsePostDataCore(
       if (stage3Model === 'gpt-6-luna' && lunaFullImageReady &&
           bandRules.length === 0 && resolvedContentType === 'CALENDAR' &&
           cfg.calendarInventoryAudit?.enabled && lunaAnalysisFrames) {
-        const denseSourceIndexes = new Set((validation.imageAnalysis || [])
-          .filter(image => !image.imageComplexity?.isPromotionalPhoto &&
-            Number(image.imageComplexity?.textDensityScore || 0) >= 0.65 &&
-            (image.imageComplexity?.hasDenseText ||
-              image.imageComplexity?.recommendsTiling))
-          .map(image => image.imageIndex));
         stage3Cfg.calendarInventoryAudit = {
           ...cfg.calendarInventoryAudit,
           applyAdditions: lunaCanarySelected &&
             cfg.calendarInventoryAudit.applyAdditions === true,
           estimatedItemCount: classification.estimatedItemCount,
           frameSourceGalleryIndices: lunaAnalysisFrames.map(frame => frame.sourceGalleryIndex),
-          denseFrameIndices: lunaAnalysisFrames.flatMap((frame, index) =>
-            frame.kind === 'whole' && denseSourceIndexes.has(frame.sourceGalleryIndex)
-              ? [index] : []),
+          denseFrameIndices: selectLunaDenseFrameIndices(validation, lunaAnalysisFrames),
         };
       } else {
         stage3Cfg.calendarInventoryAudit = undefined;

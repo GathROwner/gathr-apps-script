@@ -6,6 +6,7 @@
 import type { ModelSpatialEvidence, SpatialEventClassification } from './spatialEventClassifier.js';
 import type { CalendarInventoryAdditionDecision, CalendarInventoryListing,
   CalendarInventoryReconciliation } from './calendarInventoryReconciliation.js';
+import type { Stage2ScoreRoutingDecision } from './stage2Routing.js';
 
 // ===================
 // Venue/Hours Types (also in main types, duplicated here for module independence)
@@ -91,6 +92,12 @@ export interface GptUsageRecord {
 export interface ParseStageArtifactsSnapshot {
   source: 'live' | 'replay';
   contentType?: ContentType;
+  stage1Validation?: ValidationResult;
+  stage2Classification?: ClassificationResult;
+  stage2Routing?: Stage2ScoreRoutingDecision;
+  stage2RoutingEnvironment?: Record<string, string>;
+  lunaDenseFrameIndices?: number[];
+  lunaFullImageReady?: boolean;
   imageFrameManifest?: Array<{
     frameIndex: number;
     sourceGalleryIndex: number;
@@ -176,6 +183,8 @@ export interface ParsingConfig {
   gptUsageHandler?: (usage: GptUsageRecord) => void | Promise<void>;
   stageArtifactsHandler?: (snapshot: ParseStageArtifactsSnapshot) => void | Promise<void>;
   replayArtifacts?: Stage45ReplayArtifacts;
+  /** Local evaluator input. parsePostData rejects this unless both dry-run guards are enabled. */
+  stage1EvaluationValidationOverride?: ValidationResult;
   stage1ModelOverride?: string;
   stage2ModelOverride?: string;
   stage3ModelOverride?: string;

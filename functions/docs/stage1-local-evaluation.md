@@ -1,10 +1,10 @@
 # Stage 1 local evaluation harness
 
-The coordinator completed paid local and hosted screens. See [October 8 results](stage1-oct8-dryrun-results.md). Production parser functions were not changed.
+The coordinator completed paid local and hosted screens. See [October 8 results](stage1-oct8-dryrun-results.md). The production Stage 1 prompt and decision path remain unchanged. The Stage 2 routing resolver was extracted for exact offline comparison, and evaluation-only Stage 1 overrides are guarded by dry-run/local-image checks.
 
 This harness compares Stage 1 decisions and per-image descriptions on a frozen Oct. 8, 2026 source set. It does not process posts through later stages, read or write Firebase, mutate venues, or change release routing.
 
-The original production prompt, schema, normalization, local calendar overrides, output limits, and image-error/no-image fallback remain the baseline. The compact arms use the same accept/reject policy and response schema; they shorten image-description instructions and use Responses Structured Outputs. This separates the model comparison (`mini-current` vs. `luna-current`) from the compact-prompt/structured-output comparison within each model family.
+The original production prompt, schema, normalization, local calendar overrides, output limits, and image-error/no-image fallback remain the baseline. `compact-v2` and `compact-v3` are separate policy candidates added for evaluation; the v2 text remains frozen as the v3 comparison baseline. Both return the same response schema using the normal JSON response path. A failed image request can use the existing caption-only fallback, but that pair is marked inconclusive and is not scored as an image pass.
 
 ## Frozen source set
 
@@ -34,6 +34,8 @@ The default arms are:
 
 Add `--include-compact-luna` to include `luna-compact-structured`. The runner compares each candidate with the fresh `mini-current` decision in a separate parity field and scores decisions independently against `sourceTruth.expectedDecision`.
 
+Use `--variants mini-compact-v2,luna-compact-v2` or `--variants mini-compact-v3,luna-compact-v3` to select a compact policy pair. The defaults remain unchanged. V2 explicitly includes bookable/public activities, open recreation, daily food/drink offers, and organized public food trails while excluding election procedure and ordinary retail/menu marketing. V3 adds public meetings and farm/attraction access, food drives and free visitor offers, self-guided trails, and explicit limits for rotating menus, past-only recaps, and broadcast-only airtime. Neither prompt contains cohort row text or IDs.
+
 ## Local commands
 
 Run from the `functions` directory in PowerShell. The offline preflight reads the fixture and hashes, reports the variants and estimated budget, and makes no API request. It does not need `OPENAI_API_KEY`.
@@ -58,9 +60,31 @@ node scripts/stage1-evaluation-runner.mjs `
   --max-estimated-usd 1
 ```
 
-The final two commands are offline unless `--execute` is added. Paid API execution is intentionally outside this local implementation; the coordinator owns the approved replay command and credential use.
+The final two commands are offline unless `--execute` is added. The evaluator supports paid requests only when that flag is present; the coordinator owns credential use and the approved run scope.
 
 For an approved local replay, add `--execute` to the chosen command and set `OPENAI_API_KEY` in the process environment. The runner does not load `.env` files. It fixes the API base URL to `https://api.openai.com/v1`, disables SDK retries (`maxRetries: 0`), and uses a 60-second request timeout so every request is visible to the budget and JSONL log.
+
+For the coordinator's 49-case regression manifest, the v3 preflight is:
+
+```powershell
+node scripts/stage1-evaluation-runner.mjs `
+  --manifest C:\Users\craig\.codex\stage1-evaluation-20261008\cohort\manifest-repair-regressions.json `
+  --variants luna-compact-v3 `
+  --image-set full `
+  --concurrency 3 `
+  --max-estimated-usd 10 `
+  --output C:\Users\craig\.codex\stage1-evaluation-20261008\luna-compact-v3-regressions.jsonl
+```
+
+This selects 49 requests and 72 images. The five-image Harbourfront case `oct8-row-62` is separately preflighted against `manifest-full-galleries.json`; it selects all five source images. Both commands remain offline without `--execute`.
+
+## Downstream routing replay
+
+`stage1-candidate-downstream-replay.mjs` takes completed, accepted Stage 1 records and runs the real parser's Stage 2–5 path so the candidate image descriptions and layout flags can be checked downstream. It requires `--execute`, explicit case IDs (no more than 50), selected variants, and an image set. It reads local media from the frozen manifest and appends route snapshots, downstream items, and actual model usage to a separate JSONL output. Keep the output outside the manifest's source root.
+
+The adapter requires `DRY_RUN=true`, `PARSER_DRY_RUN_LOCAL_IMAGES=true`, an OpenAI key, and unset image upload/delete URLs. Image cases use the exact source post ID for the Stage 3 Luna canary with the full saved gallery, high reasoning effort, original image detail, and legacy fallback disabled. Text-only cases bypass Luna and retain GPT-5.2 Stage 3 with the current default reasoning setting. Stage 2 remains Mini; Stages 4 and 5 remain Nano, with Stage 5 batch size 9. The adapter does not write to Firestore, Storage, venues, or release channels.
+
+`stage2-route-comparison.mjs` can recompute route decisions and dense-frame selections from downstream JSONL snapshots using the same exported production resolver and selector. It reports whether each recomputed route matches the route actually captured during replay.
 
 ## JSONL, retries, and resume
 
@@ -70,7 +94,7 @@ When reusing the same JSONL file, completed and inconclusive case/variant pairs 
 
 ## Estimated spend guard
 
-The default stop is `$1.00`; `--max-estimated-usd` accepts a smaller positive limit and refuses values above `$1.00`. Before each API request, the runner reserves the model’s maximum output tokens and 25,000 input tokens per attached image, plus a conservative text-token estimate. It preflights every initial, output-limit retry, and no-image fallback request. It then replaces the reservation with a usage-based estimate when token usage is returned. Unknown-cost network failures retain their reservation.
+The default stop is `$1.00`; `--max-estimated-usd` accepts a positive limit up to the hard `$10.00` ceiling. Before each API request, the runner reserves the model’s maximum output tokens and 25,000 input tokens per attached image, plus a conservative text-token estimate. It preflights every initial, output-limit retry, and no-image fallback request. It then replaces the reservation with a usage-based estimate when token usage is returned. Unknown-cost network failures retain their reservation.
 
 The usage record includes reasoning tokens separately; they are already part of output-token billing and are not added a second time. The reserve is a spend guard, not an invoice guarantee: provider-side image tokenization and cache-write billing may vary. GPT-6 Luna’s estimate reserves uncached input at the published cache-write rate where usage details do not distinguish writes. Rates are pinned to Standard API pricing on 2026-10-08: [GPT-5 mini](https://developers.openai.com/api/docs/models/gpt-5-mini) and [GPT-6 Luna](https://developers.openai.com/api/docs/models/gpt-6-luna).
 
@@ -81,7 +105,7 @@ The usage record includes reasoning tokens separately; they are already part of 
 
 ## Local tests
 
-`npm run test:stage1-evaluation` builds the functions TypeScript and runs twelve mocked/offline checks. They cover production request-shape parity, compact Structured Outputs, production normalization and local gates, hash/path/gallery validation, per-image semantic association including ordinal dates, clock punctuation, possessives, plural forms, source-visible cue requirements and swapped descriptions, dense-layout flags, image-error/truncation/no-image fallback visibility, spend-stop behavior, JSONL resume and usage estimates, and the client’s retry/timeout settings. The fake transport is local; tests make no network calls.
+`npm run test:stage1-evaluation` builds the functions TypeScript and runs 23 mocked/offline checks. They cover production request-shape parity, v2/v3 prompt selection and policy fixtures, five-image 400-rejection handling, production normalization and local gates, hash/path/gallery validation, per-image semantic association, dense-layout flags, image-error/truncation/no-image fallback visibility, spend-stop behavior, JSONL resume and usage estimates, and the client’s retry/timeout settings. The fake transport is local; tests make no network calls. `node --test lib/parsing/stage2Routing.test.js` runs the three production-route parity tests.
 
 ## Minimal Cloud Run module bundle
 

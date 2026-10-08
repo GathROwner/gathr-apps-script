@@ -59,6 +59,7 @@ export interface Stage1RequestAttempt extends Stage1RequestPlan {
 
 export interface Stage1ValidationEvaluationRun {
   status: 'completed' | 'inconclusive' | 'request_error' | 'budget_stopped';
+  preGateResult: ValidationResult | null;
   result: ValidationResult | null;
   attempts: Stage1RequestAttempt[];
   noImageFallbackUsed: boolean;
@@ -66,7 +67,7 @@ export interface Stage1ValidationEvaluationRun {
 }
 
 export interface Stage1ValidationEvaluationOptions {
-  promptVariant: 'production' | 'compact';
+  promptVariant: 'production' | 'compact' | 'compact-v2' | 'compact-v3';
   structuredOutput: boolean;
   client?: any;
   onBeforeRequest?: (plan: Stage1RequestPlan) => string | undefined;
@@ -86,6 +87,30 @@ function isStage1EvaluationBudgetStop(error: unknown): boolean {
       typeof error === 'object' &&
       (error as { code?: unknown }).code === 'STAGE1_EVAL_BUDGET_STOP'
   );
+}
+
+export class Stage1EvaluationArtifactError extends Error {
+  code = 'STAGE1_EVAL_ARTIFACT_WRITE';
+
+  constructor(phase: string, cause: unknown) {
+    const detail = cause instanceof Error ? cause.message : String(cause);
+    super(`Stage 1 evaluation ${phase} logging failed: ${detail}`, { cause });
+    this.name = 'Stage1EvaluationArtifactError';
+  }
+}
+
+function isStage1EvaluationArtifactError(error: unknown): boolean {
+  return Boolean(
+    error && typeof error === 'object' &&
+    (error as { code?: unknown }).code === 'STAGE1_EVAL_ARTIFACT_WRITE'
+  );
+}
+
+function wrapStage1EvaluationArtifactError(phase: string, error: unknown): Error {
+  if (isStage1EvaluationBudgetStop(error) || isStage1EvaluationArtifactError(error)) {
+    return error as Error;
+  }
+  return new Stage1EvaluationArtifactError(phase, error);
 }
 
 function getOpenAIClient(): OpenAI {
@@ -180,7 +205,11 @@ export async function validateContentForStage1Evaluation(
   const cfg = { ...DEFAULT_PARSING_CONFIG, ...config, stage1ModelOverride: model };
   const attempts: Stage1RequestAttempt[] = [];
   const prompt =
-    options.promptVariant === 'compact'
+    options.promptVariant === 'compact-v3'
+      ? createCompactV3ValidationPrompt(combinedText, imageUrls.length > 0, userName, timestamp)
+      : options.promptVariant === 'compact-v2'
+      ? createCompactV2ValidationPrompt(combinedText, imageUrls.length > 0, userName, timestamp)
+      : options.promptVariant === 'compact'
       ? createCompactValidationPrompt(combinedText, imageUrls.length > 0, userName, timestamp)
       : createValidationPrompt(combinedText, imageUrls.length > 0, userName, timestamp);
   const schema = createValidationSchema();
@@ -201,6 +230,7 @@ export async function validateContentForStage1Evaluation(
       }
     );
     const normalized = normalizeValidationResponse(response, combinedText, imageUrls.length > 0);
+    const preGateResult = JSON.parse(JSON.stringify(normalized)) as ValidationResult;
     applyStage1LocalDecisionGates(normalized, combinedText, imageUrls.length > 0);
 
     const noImageFallbackUsed = attempts.some(
@@ -217,18 +247,21 @@ export async function validateContentForStage1Evaluation(
 
     return {
       status: noImageFallbackUsed || responseIncomplete ? 'inconclusive' : 'completed',
+      preGateResult,
       result: normalized,
       attempts,
       noImageFallbackUsed,
       incompleteReason,
     };
   } catch (error) {
+    if (isStage1EvaluationArtifactError(error)) throw error;
     const noImageFallbackUsed = attempts.some(
       (attempt) => attempt.requestKind === 'no_image_fallback'
     );
     if (isStage1EvaluationBudgetStop(error)) {
       return {
         status: 'budget_stopped',
+        preGateResult: null,
         result: null,
         attempts,
         noImageFallbackUsed,
@@ -240,6 +273,7 @@ export async function validateContentForStage1Evaluation(
     const hasValidContent = heuristic.hasValidContent;
     return {
       status: 'request_error',
+      preGateResult: null,
       result: {
         imageAnalysis: [],
         hasValidContent,
@@ -323,6 +357,73 @@ Valid content includes live music, trivia, comedy, workshops, parties with speci
 Analyze every attached image in attachment order. Return exactly one populated imageAnalysis entry per image, with its 0-based index. Keep each short description and relevance specific to that image; do not copy details from the caption or another image into it. Keep visible event names, dates, times, and venues tied to the image where they appear. Set image complexity from the image itself. Recommend tiling only for a calendar grid or dense small text.
 
 Never reject solely because an image is decorative or generic when the text lists events. Reject only when both image and text lack extractable events or specials. Briefly explain the decision from the source evidence.
+
+POST DETAILS:
+- Posted by: ${userName}
+- Posted at: ${timestamp}
+- Text: "${combinedText}"
+- Has images: ${hasImages}`;
+}
+
+export function createCompactV2ValidationPrompt(
+  combinedText: string,
+  hasImages: boolean,
+  userName: string,
+  timestamp: string
+): string {
+  return `You are the first stage of a 5 stage Social Media post processer. Determine whether this post contains a specific, extractable event, activity, food/drink special, or time-limited community food trail.
+
+INCLUDE:
+- Clearly advertised bookable activities such as classes, lessons, workshops, and sessions. A current invitation, registration, booking, or open-availability notice is enough even when a date or time is missing; later stages can resolve or hold incomplete dates.
+- Clearly advertised public open-swim or bookable rink availability, even when a date or time is missing. Generic facility/business hours alone do not qualify.
+- Explicitly advertised daily food/drink specials or deals, even when no numeric price is printed.
+- Community food or dessert trails presented as a current organized trail or invitation. A stated date window supports the match but is not required at Stage 1.
+
+EXCLUDE:
+- Election administration, nomination, ballot, or candidate-filing notices.
+- Ordinary retail merchandise discounts, sales, stock availability, or restock announcements.
+- General menu or featured-item announcements without an explicitly advertised daily special/deal.
+- General business/facility hours, greetings, and marketing without a specific qualifying activity or offer.
+- Retrospective activity photos or recaps with no current invitation, booking, or public-availability information.
+
+Decide from concrete source content, never from the venue name or business category alone. A shop can host a bookable activity and a restaurant can post an ordinary menu; the source details determine the decision. If a post mixes qualifying activity/special content with unrelated retail, recap, or administrative material, accept the post for its qualifying portion and ignore the unrelated material. Nonqualifying material does not cancel a clearly advertised performance, bookable activity, open public session, or special.
+
+Analyze every image in attachment order. Return exactly one populated imageAnalysis entry per image with its 0-based index. Keep each description, relevance, and complexity signals specific to what is visible in that image. Do not copy caption or neighboring-image details into an image description. Recommend tiling only for a calendar grid or dense small text. Briefly explain the decision from the source evidence.
+
+POST DETAILS:
+- Posted by: ${userName}
+- Posted at: ${timestamp}
+- Text: "${combinedText}"
+- Has images: ${hasImages}`;
+}
+
+export function createCompactV3ValidationPrompt(
+  combinedText: string,
+  hasImages: boolean,
+  userName: string,
+  timestamp: string
+): string {
+  return `You are the first stage of a 5 stage social media post processor. Decide whether the post contains a specific, extractable public event, activity, or food/drink offer.
+
+INCLUDE:
+- Public meetings, hearings, forums, and information sessions when the source invites or announces public attendance.
+- Named or date-range public festivals, fairs, performances, and community activities. A detailed timetable is not required at Stage 1.
+- Public farm or attraction visits, admission offers, interactive tours, and bookable classes or activities. A current invitation or advertised access is enough; later stages can resolve or hold missing details.
+- Public food drives and food collection/drop-off events with announced participation details, organized food trails or self-guided circuits, and free food or drink offers to visitors. An exact date window is not required for an active public invitation.
+- Public open-swim, rink, or similar recreational access when it is actively offered to the public. Generic business or facility hours alone do not qualify.
+- Explicit food or drink specials, deals, and discounts, including grocery food offers, even if no numeric price is shown.
+
+EXCLUDE:
+- Election administration notices such as filing forms, ballot information, candidate deadlines, or procedural reminders. A separately announced public meeting or forum can still qualify.
+- Discounts on non-food retail merchandise.
+- Month-long or rotating menus and featured flavors/items without a specific food/drink deal; new products, restocks, and limited-stock or season-ending notices without a qualifying offer or activity.
+- Past-only activity photos or recaps without a clear current or upcoming invitation, booking, public session, or offer.
+- Broadcast-only radio or show airtime without an announced public gathering, live participation, or in-person activity. When broadcast details confirm an underlying public event at a venue, accept the physical event and do not treat its coverage as a second event.
+- Generic business/facility hours, greetings, and general marketing without a qualifying event, activity, or offer.
+
+Decide from concrete source content, never from the venue name or business category alone. When qualifying content appears alongside unrelated merchandise, marketing, or administrative information, accept for the qualifying content and ignore the unrelated material.
+
+Analyze every image in attachment order. Return exactly one populated imageAnalysis entry per image with its 0-based index. Keep each description, relevance, and complexity signals specific to what is visible in that image. Do not copy caption or neighboring-image details into an image description. Recommend tiling only for a calendar grid or dense small text. Briefly explain the decision from the source evidence.
 
 POST DETAILS:
 - Posted by: ${userName}
@@ -844,7 +945,7 @@ async function callGPTWithSchema(
           error: error instanceof Error ? error.message : String(error),
         });
       } else {
-        throw error;
+        throw wrapStage1EvaluationArtifactError('attempt', error);
       }
     }
   };
@@ -875,6 +976,15 @@ async function callGPTWithSchema(
     parsed: false,
   });
 
+  const reserveRequest = (attempt: Stage1RequestAttempt): string | undefined => {
+    if (!options.onBeforeRequest) return undefined;
+    try {
+      return options.onBeforeRequest(attempt);
+    } catch (error) {
+      throw wrapStage1EvaluationArtifactError('request reservation', error);
+    }
+  };
+
   const runOnce = async (
     urls: string[],
     outputTokenLimit?: number,
@@ -904,7 +1014,7 @@ async function callGPTWithSchema(
       const callStart = Date.now();
       let response: any;
       try {
-        attempt.reservationId = options.onBeforeRequest?.(attempt);
+        attempt.reservationId = reserveRequest(attempt);
         response = await client.responses.create({
           model,
           input: [{ role: 'user', content }],
@@ -984,6 +1094,7 @@ async function callGPTWithSchema(
           throw error;
         }
       } catch (error) {
+        if (isStage1EvaluationArtifactError(error)) throw error;
         if (!attempt.parsed) {
           attempt.durationMs = Date.now() - callStart;
           if (attempt.status !== 'incomplete') {
@@ -1013,7 +1124,7 @@ async function callGPTWithSchema(
     const attempt = createRequestAttempt(urls, requestKind, 'chat', maxOutputTokens, prompt);
     const callStart = Date.now();
     try {
-      attempt.reservationId = options.onBeforeRequest?.(attempt);
+      attempt.reservationId = reserveRequest(attempt);
       const response = await client.chat.completions.create({
         model,
         messages: [{ role: 'user', content }],
@@ -1093,6 +1204,7 @@ async function callGPTWithSchema(
 
       throw new Error('No valid response from GPT');
     } catch (error) {
+      if (isStage1EvaluationArtifactError(error)) throw error;
       if (!attempt.parsed) {
         attempt.durationMs = Date.now() - callStart;
         attempt.errorMessage = error instanceof Error ? error.message : String(error);
@@ -1106,6 +1218,7 @@ async function callGPTWithSchema(
     return await runOnce(imageUrls, undefined, 'initial');
   } catch (error) {
     if (isStage1EvaluationBudgetStop(error)) throw error;
+    if (isStage1EvaluationArtifactError(error)) throw error;
     if (imageUrls && imageUrls.length > 0) {
       if (error instanceof TruncatedValidationJsonError) {
         logger.warn('Image validation JSON was truncated; retrying with images and a larger output cap', {
@@ -1115,6 +1228,7 @@ async function callGPTWithSchema(
           return await runOnce(imageUrls, 4000, 'output_limit_retry');
         } catch (retryError) {
           if (isStage1EvaluationBudgetStop(retryError)) throw retryError;
+          if (isStage1EvaluationArtifactError(retryError)) throw retryError;
           logger.warn('Expanded image validation retry failed', {
             error: retryError instanceof Error ? retryError.message : String(retryError),
           });
