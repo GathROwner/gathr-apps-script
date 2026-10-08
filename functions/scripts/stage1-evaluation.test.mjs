@@ -1,4 +1,6 @@
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
+import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -7,6 +9,8 @@ import test from 'node:test';
 import {
   applyStage1LocalDecisionGates,
   createCompactValidationPrompt,
+  createCompactV5ValidationPrompt,
+  createCompactV4ValidationPrompt,
   createCompactV3ValidationPrompt,
   createCompactV2ValidationPrompt,
   createValidationPrompt,
@@ -254,6 +258,16 @@ test('compact-v3 prompt distinguishes public events, public access, food offers,
   assert.doesNotMatch(prompt, /row-\d+|sourceRow|caseId/i);
 });
 
+test('compact-v3 prompt text stays frozen for the completed v3 run', () => {
+  const prompt = createCompactV3ValidationPrompt(
+    'No fixture text is included here.', true, 'Test venue', '2026-10-08'
+  );
+  assert.equal(
+    createHash('sha256').update(prompt).digest('hex'),
+    '3a0cb4cbbc0f43b6a646fb5ec362efdea5fc653cd4ab88fca4ecec921076cb78'
+  );
+});
+
 test('compact-v3 evaluation requests use the compact-v3 prompt', async () => {
   const caption = 'Public farm tour this Saturday; booking is open.';
   const { client, calls } = fakeClient([apiResponse(validationResult(2))]);
@@ -269,6 +283,154 @@ test('compact-v3 evaluation requests use the compact-v3 prompt', async () => {
   assert.equal(run.status, 'completed');
   const expectedPrompt = createCompactV3ValidationPrompt(caption, true, 'Test venue', '2026-10-08T00:00:00.000Z');
   assert.equal(getInputText(calls[0]), `${expectedPrompt}\n\nReturn ONLY valid JSON that matches this schema:\n${JSON.stringify(createValidationSchema()[0].parameters, null, 2)}`);
+});
+
+test('compact-v4 policy accepts named activities and dated recreation while rejecting ordinary stock and hours', () => {
+  const policyFixtures = [
+    { expected: 'accept', text: 'TRIVIA NIGHT' },
+    { expected: 'accept', text: 'The fitness room and track are open to the public on October 12 from 7 AM to 10:30 PM.' },
+    { expected: 'accept', text: 'Follow the named self-guided cinnamon roll circuit; the participating locations will be shared later.' },
+    { expected: 'accept', text: 'Free apple samples for visitors this Saturday.' },
+    { expected: 'accept', text: 'Apples and carrots are 20% off at the grocery store today.' },
+    { expected: 'accept', text: 'Our pork belly omelette is a limited-time offer.' },
+    { expected: 'reject', text: 'Our dairy-free watermelon flavor is available now; get it before it is gone. The shop closes for the season at month end.' },
+    { expected: 'reject', text: 'We are fully stocked with pumpkins and freezer treats. Stop by and stock up this weekend.' },
+    { expected: 'reject', text: 'The retail shop is open Monday through Friday from 9 AM to 5 PM.' },
+    { expected: 'reject', text: 'Christmas décor is 25% off this week.' },
+    { expected: 'reject', text: 'Our featured dishes rotate throughout the month with no deal or special.' },
+    { expected: 'reject', text: 'Photos recap last week’s workshop, with no future session announced.' },
+  ];
+  const prompt = createCompactV4ValidationPrompt('No fixture text is included here.', true, 'Test venue', '2026-10-08');
+  assert.match(prompt, /Event posters or program listings with a concrete public activity title, including trivia, live music, comedy, workshops, classes/i);
+  assert.match(prompt, /The poster itself counts as the current announcement even if the caption is empty and no date, time, schedule, or extra invitation text is shown/i);
+  assert.match(prompt, /Public access windows for recreational facilities such as fitness rooms, tracks, pools, and rinks.*specific date or period/i);
+  assert.match(prompt, /A named organized public food trail, circuit, or self-guided tour.*Missing dates, routes, participating locations, or schedules do not make the named activity invalid/i);
+  assert.match(prompt, /Ordinary product, produce, flavor, menu, and stock availability.*General invitations to visit, shop, buy, stock up, try an item, or get it before it is gone do not turn ordinary inventory into a special or deal/i);
+  assert.match(prompt, /A clearly stated free giveaway, sample, or no-cost promotion to the public also qualifies/i);
+  assert.match(prompt, /hasValidContent to true exactly when validationDecision is VALIDATION_PASSED/i);
+  assert.match(prompt, /hasValidContent to false exactly when validationDecision is VALIDATION_FAILED/i);
+  assert.match(prompt, /The reason must plainly support that same decision/i);
+  assert.equal(policyFixtures.filter((item) => item.expected === 'accept').length, 6);
+  assert.equal(policyFixtures.filter((item) => item.expected === 'reject').length, 6);
+  for (const fixture of policyFixtures) assert.equal(prompt.includes(fixture.text), false);
+  assert.doesNotMatch(prompt, /row-\d+|sourceRow|caseId/i);
+});
+
+test('compact-v4 prompt text stays frozen for the completed v4 run', () => {
+  const prompt = createCompactV4ValidationPrompt(
+    'No fixture text is included here.', true, 'Test venue', '2026-10-08'
+  );
+  assert.equal(
+    createHash('sha256').update(prompt).digest('hex'),
+    '3c9ced9cc88d9a0ebe9b7fc5cccc272e3c5c7d3734b3ff22551a06fa914ba202'
+  );
+});
+
+test('compact-v4 evaluation requests use the compact-v4 prompt', async () => {
+  const caption = 'A community trivia night is announced on the attached poster.';
+  const { client, calls } = fakeClient([apiResponse(validationResult(1))]);
+  const run = await validateContentForStage1Evaluation(
+    caption,
+    ['data:image/jpeg;base64,Zm9v'],
+    'Test venue',
+    '2026-10-08T00:00:00.000Z',
+    'gpt-6-luna',
+    { promptVariant: 'compact-v4', structuredOutput: false, client }
+  );
+
+  assert.equal(run.status, 'completed');
+  const expectedPrompt = createCompactV4ValidationPrompt(caption, true, 'Test venue', '2026-10-08T00:00:00.000Z');
+  assert.equal(getInputText(calls[0]), `${expectedPrompt}\n\nReturn ONLY valid JSON that matches this schema:\n${JSON.stringify(createValidationSchema()[0].parameters, null, 2)}`);
+});
+
+test('compact-v5 preserves public activity recall while separating daily offers, ordinary inventory, and online engagement', () => {
+  const policyFixtures = [
+    { expected: 'accept', text: 'TRIVIA NIGHT' },
+    { expected: 'accept', text: 'Today’s feature is a sandwich-and-beverage combo; the price is not listed.' },
+    { expected: 'accept', text: 'A fall admission sale is on now; the notice gives no numeric amount.' },
+    { expected: 'accept', text: 'Visit the heritage museum through October 16; public hours are weekdays from 10 AM to 4 PM.' },
+    { expected: 'accept', text: 'The public fitness room and track are available Sunday from 7 AM to 9 PM.' },
+    { expected: 'accept', text: 'The self-guided community food circuit is returning; route details will follow.' },
+    { expected: 'accept', text: 'Free cider samples are offered in person to visitors today.' },
+    { expected: 'accept', text: 'The public community food drive accepts drop-offs Saturday from noon to 2 PM.' },
+    { expected: 'accept', text: 'A public interactive tour is announced for a future date; schedule details will follow.' },
+    { expected: 'accept', text: 'The daily soup special is available today; no price is printed.' },
+    { expected: 'accept', text: 'A grocery food deal is advertised without a numeric discount.' },
+    { expected: 'accept', text: 'Join our live virtual trivia at 7 PM on Thursday.' },
+    { expected: 'reject', text: 'Our featured menu rotates throughout the month; there is no special or deal.' },
+    { expected: 'reject', text: 'The seasonal berry flavor is in stock; get it before it is gone.' },
+    { expected: 'reject', text: 'Ordinary produce boxes are available for pickup this week.' },
+    { expected: 'reject', text: 'Christmas ornaments are 25% off.' },
+    { expected: 'reject', text: 'Like this post and comment to enter the online dessert prize draw.' },
+    { expected: 'reject', text: 'Answer this trivia question in the comments and check back next week.' },
+    { expected: 'reject', text: 'Photos show the author’s past apple-picking family outing.' },
+    { expected: 'reject', text: 'The office is open Monday through Friday from 9 AM to 5 PM.' },
+    { expected: 'reject', text: 'Candidate filing forms are due Friday.' },
+    { expected: 'reject', text: 'The radio station airs a recorded program at 7 PM.' },
+  ];
+  const prompt = createCompactV5ValidationPrompt('No fixture text is included here.', true, 'Test venue', '2026-10-08');
+  assert.match(prompt, /A concrete public event\/activity title in a poster or program listing.*trivia, live music, comedy, workshops, classes/i);
+  assert.match(prompt, /The poster itself is a current announcement even if the caption is empty or it gives no date, time, schedule/i);
+  assert.match(prompt, /Public visitor access at museums, heritage sites, cultural attractions, farms, and similar attractions.*even if it is described as opening hours/i);
+  assert.match(prompt, /An advertised public admission offer or admission sale, even when no numeric price or discount amount is printed/i);
+  assert.match(prompt, /Explicit food\/drink specials, deals, discounts, and grocery food offers, even without a numeric price/i);
+  assert.match(prompt, /today's or a specific day's feature\/special also qualifies without a price/i);
+  assert.match(prompt, /Month-long or rotating menu announcements and featured dishes\/flavors without an explicit special, deal, discount, or promotional offer/i);
+  assert.match(prompt, /free food\/drink sample or giveaway offered in person to visitors or through public pickup/i);
+  assert.match(prompt, /Online prize draws, like\/comment\/share contests, or asynchronous social-media quizzes/i);
+  assert.match(prompt, /Personal past outings, visits, or activity recaps/i);
+  assert.match(prompt, /CONSISTENCY REQUIREMENT/);
+  assert.equal(policyFixtures.filter((item) => item.expected === 'accept').length, 12);
+  assert.equal(policyFixtures.filter((item) => item.expected === 'reject').length, 10);
+  for (const fixture of policyFixtures) assert.equal(prompt.includes(fixture.text), false);
+  assert.doesNotMatch(prompt, /row-\d+|sourceRow|caseId/i);
+});
+
+test('compact-v5 evaluation requests use the compact-v5 prompt', async () => {
+  const caption = 'A public heritage site announces visitor hours for the coming weekend.';
+  const { client, calls } = fakeClient([apiResponse(validationResult(1))]);
+  const run = await validateContentForStage1Evaluation(
+    caption,
+    ['data:image/jpeg;base64,Zm9v'],
+    'Test venue',
+    '2026-10-08T00:00:00.000Z',
+    'gpt-6-luna',
+    { promptVariant: 'compact-v5', structuredOutput: false, client }
+  );
+
+  assert.equal(run.status, 'completed');
+  const expectedPrompt = createCompactV5ValidationPrompt(caption, true, 'Test venue', '2026-10-08T00:00:00.000Z');
+  assert.equal(getInputText(calls[0]), `${expectedPrompt}\n\nReturn ONLY valid JSON that matches this schema:\n${JSON.stringify(createValidationSchema()[0].parameters, null, 2)}`);
+});
+
+test('offline v5 preflight records exact per-case prompt and compiled validator hashes', () => {
+  const { manifest, sourceRoot } = loadAndValidateManifest(manifestPath);
+  const caseData = manifest.cases[0];
+  const runnerPath = path.join(functionsRoot, 'scripts', 'stage1-evaluation-runner.mjs');
+  const result = spawnSync(process.execPath, [
+    runnerPath,
+    '--manifest', manifestPath,
+    '--case-ids', caseData.caseId,
+    '--variants', 'luna-compact-v5',
+    '--image-set', 'initial',
+    '--output', '-',
+  ], { cwd: functionsRoot, encoding: 'utf8', timeout: 30000 });
+  assert.equal(result.status, 0, result.stderr || result.error?.message);
+  const plan = JSON.parse(result.stderr);
+  const selectedImages = selectImagesForCase(caseData, 'initial');
+  const rawPrompt = createCompactV5ValidationPrompt(
+    caseData.caption, selectedImages.length > 0, caseData.venue, caseData.postedAt
+  );
+  const exactPrompt = `${rawPrompt}\n\nReturn ONLY valid JSON that matches this schema:\n${JSON.stringify(createValidationSchema()[0].parameters, null, 2)}`;
+  const expectedPromptHash = createHash('sha256').update(exactPrompt).digest('hex');
+  const validatorPath = path.join(functionsRoot, 'lib', 'parsing', 'contentValidator.js');
+  const expectedValidatorHash = createHash('sha256').update(fs.readFileSync(validatorPath)).digest('hex');
+
+  assert.equal(plan.mode, 'offline_preflight');
+  assert.equal(plan.sourceRoot, sourceRoot);
+  assert.equal(plan.cases[0].effectivePromptSha256ByVariant['luna-compact-v5'], expectedPromptHash);
+  assert.equal(plan.compiledContentValidatorSha256, expectedValidatorHash);
+  assert.match(plan.compiledContentValidatorSha256, /^[a-f0-9]{64}$/);
 });
 
 test('compact-v3 sends a full five-image request and keeps a 400 no-image fallback inconclusive', async () => {
@@ -480,6 +642,12 @@ test('selected variant and case lists reject unknown or duplicate IDs', () => {
   ]);
   assert.deepEqual(selectVariants(['luna-compact-v3']).map((variant) => [variant.model, variant.promptVariant]), [
     ['gpt-6-luna', 'compact-v3'],
+  ]);
+  assert.deepEqual(selectVariants(['luna-compact-v4']).map((variant) => [variant.model, variant.promptVariant]), [
+    ['gpt-6-luna', 'compact-v4'],
+  ]);
+  assert.deepEqual(selectVariants(['luna-compact-v5']).map((variant) => [variant.model, variant.promptVariant]), [
+    ['gpt-6-luna', 'compact-v5'],
   ]);
   assert.throws(() => selectVariants(['luna-compact-v2', 'luna-compact-v2']), /Duplicate variant ID/);
   assert.throws(() => selectVariants(['unknown-arm']), /Unknown variant ID/);

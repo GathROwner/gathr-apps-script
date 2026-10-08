@@ -63,6 +63,30 @@ export const VARIANTS = Object.freeze([
     promptVariant: 'compact-v3',
     structuredOutput: false,
   }),
+  Object.freeze({
+    id: 'mini-compact-v4',
+    model: 'gpt-5-mini',
+    promptVariant: 'compact-v4',
+    structuredOutput: false,
+  }),
+  Object.freeze({
+    id: 'luna-compact-v4',
+    model: 'gpt-6-luna',
+    promptVariant: 'compact-v4',
+    structuredOutput: false,
+  }),
+  Object.freeze({
+    id: 'mini-compact-v5',
+    model: 'gpt-5-mini',
+    promptVariant: 'compact-v5',
+    structuredOutput: false,
+  }),
+  Object.freeze({
+    id: 'luna-compact-v5',
+    model: 'gpt-6-luna',
+    promptVariant: 'compact-v5',
+    structuredOutput: false,
+  }),
 ]);
 
 export const DEFAULT_VARIANT_IDS = Object.freeze([

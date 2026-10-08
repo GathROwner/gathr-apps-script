@@ -4,7 +4,7 @@ The coordinator completed paid local and hosted screens. See [October 8 results]
 
 This harness compares Stage 1 decisions and per-image descriptions on a frozen Oct. 8, 2026 source set. It does not process posts through later stages, read or write Firebase, mutate venues, or change release routing.
 
-The original production prompt, schema, normalization, local calendar overrides, output limits, and image-error/no-image fallback remain the baseline. `compact-v2` and `compact-v3` are separate policy candidates added for evaluation; the v2 text remains frozen as the v3 comparison baseline. Both return the same response schema using the normal JSON response path. A failed image request can use the existing caption-only fallback, but that pair is marked inconclusive and is not scored as an image pass.
+The original production prompt, schema, normalization, local calendar overrides, output limits, and image-error/no-image fallback remain the baseline. `compact-v2` through `compact-v5` are separate policy candidates added for evaluation; each prompt remains frozen after its run. They return the same response schema using the normal JSON response path. A failed image request can use the existing caption-only fallback, but that pair is marked inconclusive and is not scored as an image pass.
 
 ## Frozen source set
 
@@ -34,7 +34,7 @@ The default arms are:
 
 Add `--include-compact-luna` to include `luna-compact-structured`. The runner compares each candidate with the fresh `mini-current` decision in a separate parity field and scores decisions independently against `sourceTruth.expectedDecision`.
 
-Use `--variants mini-compact-v2,luna-compact-v2` or `--variants mini-compact-v3,luna-compact-v3` to select a compact policy pair. The defaults remain unchanged. V2 explicitly includes bookable/public activities, open recreation, daily food/drink offers, and organized public food trails while excluding election procedure and ordinary retail/menu marketing. V3 adds public meetings and farm/attraction access, food drives and free visitor offers, self-guided trails, and explicit limits for rotating menus, past-only recaps, and broadcast-only airtime. Neither prompt contains cohort row text or IDs.
+Use `--variants mini-compact-v2,luna-compact-v2`, `--variants mini-compact-v3,luna-compact-v3`, `--variants mini-compact-v4,luna-compact-v4`, or `--variants mini-compact-v5,luna-compact-v5` to select a compact policy pair. The defaults remain unchanged. V2 explicitly includes bookable/public activities, open recreation, daily food/drink offers, and organized public food trails while excluding election procedure and ordinary retail/menu marketing. V3 adds public meetings and farm/attraction access, food drives and free visitor offers, self-guided trails, and explicit limits for rotating menus, past-only recaps, and broadcast-only airtime. V4 clarifies that named public activities and trails qualify without complete schedules, distinguishes dated recreation access from ordinary business hours, rejects purchase invitations as evidence of a food special, and requires its decision fields and reason to agree. V5 explicitly accepts unpriced daily specials and admission offers, public museum/heritage visitor access, named activities with missing details, and in-person food giveaways while excluding ordinary stock, month-long featured menus, non-food retail discounts, personal past outings, and online engagement contests. None of the prompts contains cohort row text or IDs.
 
 ## Local commands
 
@@ -76,7 +76,9 @@ node scripts/stage1-evaluation-runner.mjs `
   --output C:\Users\craig\.codex\stage1-evaluation-20261008\luna-compact-v3-regressions.jsonl
 ```
 
-This selects 49 requests and 72 images. The five-image Harbourfront case `oct8-row-62` is separately preflighted against `manifest-full-galleries.json`; it selects all five source images. Both commands remain offline without `--execute`.
+This selects 49 requests and 72 images. The five-image Harbourfront case `oct8-row-62` is separately preflighted against `manifest-full-galleries.json`; it selects all five source images. Both commands remain offline without `--execute`. Change the variant to `luna-compact-v5` and use a separate output file to plan the next prompt version.
+
+The `run_started`, `request_reserved`, `request_attempt`, `case_result`, and `run_summary` records include the SHA-256 of the compiled `lib/parsing/contentValidator.js`. Each case result, request record, and preflight plan also includes a SHA-256 of the exact effective prompt text, including the appended schema instruction when applicable. These hashes support reproducibility without copying source posts into logs.
 
 ## Downstream routing replay
 
@@ -105,7 +107,7 @@ The usage record includes reasoning tokens separately; they are already part of 
 
 ## Local tests
 
-`npm run test:stage1-evaluation` builds the functions TypeScript and runs 23 mocked/offline checks. They cover production request-shape parity, v2/v3 prompt selection and policy fixtures, five-image 400-rejection handling, production normalization and local gates, hash/path/gallery validation, per-image semantic association, dense-layout flags, image-error/truncation/no-image fallback visibility, spend-stop behavior, JSONL resume and usage estimates, and the client’s retry/timeout settings. The fake transport is local; tests make no network calls. `node --test lib/parsing/stage2Routing.test.js` runs the three production-route parity tests.
+`npm run test:stage1-evaluation` builds the functions TypeScript and runs 30 mocked/offline checks. They cover production request-shape parity, v2–v5 prompt selection and policy fixtures, frozen v3/v4 prompt snapshots, exact prompt/module hash provenance, five-image 400-rejection handling, production normalization and local gates, hash/path/gallery validation, per-image semantic association, dense-layout flags, image-error/truncation/no-image fallback visibility, spend-stop behavior, JSONL resume and usage estimates, and the client’s retry/timeout settings. The fake transport is local; tests make no network calls. `node --test lib/parsing/stage2Routing.test.js` runs the three production-route parity tests.
 
 ## Minimal Cloud Run module bundle
 

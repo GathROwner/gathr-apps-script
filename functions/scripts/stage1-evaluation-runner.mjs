@@ -1,8 +1,12 @@
 import fs from 'node:fs';
+import { createHash } from 'node:crypto';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import OpenAI from 'openai';
 import {
   createCompactValidationPrompt,
+  createCompactV5ValidationPrompt,
+  createCompactV4ValidationPrompt,
   createCompactV3ValidationPrompt,
   createCompactV2ValidationPrompt,
   createValidationPrompt,
@@ -30,6 +34,14 @@ import {
   validateEstimatedSpendLimit,
   validateEvaluationConcurrency,
 } from './stage1-evaluation-lib.mjs';
+
+const contentValidatorPath = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  '../lib/parsing/contentValidator.js'
+);
+const compiledContentValidatorSha256 = createHash('sha256')
+  .update(fs.readFileSync(contentValidatorPath))
+  .digest('hex');
 
 const DEFAULT_MANIFEST = path.resolve('test/fixtures/stage1-oct8/manifest.json');
 const appendJsonl = appendJsonlRecord;
@@ -118,7 +130,7 @@ Options:
   --image-set initial|full     Use first 4 images or the full source gallery (default: initial)
   --output PATH|-              Append JSONL case results to a file, or write JSONL to stdout
   --max-estimated-usd N        Spend stop, default $1, hard ceiling $10
-  --variants ID,...            Select one or more arms; e.g. luna-compact-v3
+  --variants ID,...            Select one or more arms; e.g. luna-compact-v5
   --case-ids ID,...            Select caseId values from the manifest
   --concurrency N              Parallel case/variant pairs, from 1 to 3 (default: 1)
   --include-compact-luna       Add the legacy Luna compact+Structured Outputs arm to defaults
@@ -130,18 +142,26 @@ The runner reads only OPENAI_API_KEY from the environment, does not load .env fi
 and has no Firebase, Firestore, Storage, venue-write, or release capability.`);
 }
 
-function effectivePromptChars(caseData, variant) {
+function effectivePromptText(caseData, variant) {
   const hasImages = caseData.images.length > 0;
   const prompt = variant.promptVariant === 'compact'
     ? createCompactValidationPrompt(caseData.caption, hasImages, caseData.venue, caseData.postedAt)
-    : variant.promptVariant === 'compact-v3'
+    : variant.promptVariant === 'compact-v5'
+      ? createCompactV5ValidationPrompt(caseData.caption, hasImages, caseData.venue, caseData.postedAt)
+      : variant.promptVariant === 'compact-v4'
+      ? createCompactV4ValidationPrompt(caseData.caption, hasImages, caseData.venue, caseData.postedAt)
+      : variant.promptVariant === 'compact-v3'
       ? createCompactV3ValidationPrompt(caseData.caption, hasImages, caseData.venue, caseData.postedAt)
       : variant.promptVariant === 'compact-v2'
       ? createCompactV2ValidationPrompt(caseData.caption, hasImages, caseData.venue, caseData.postedAt)
     : createValidationPrompt(caseData.caption, hasImages, caseData.venue, caseData.postedAt);
   return variant.structuredOutput
-    ? prompt.length
-    : `${prompt}\n\nReturn ONLY valid JSON that matches this schema:\n${JSON.stringify(createValidationSchema()[0].parameters, null, 2)}`.length;
+    ? prompt
+    : `${prompt}\n\nReturn ONLY valid JSON that matches this schema:\n${JSON.stringify(createValidationSchema()[0].parameters, null, 2)}`;
+}
+
+function effectivePromptSha256(caseData, variant) {
+  return createHash('sha256').update(effectivePromptText(caseData, variant)).digest('hex');
 }
 
 function resolveOutputPath(output) {
@@ -205,13 +225,16 @@ function buildPlan(manifest, cases, variants, imageSet, maxEstimatedUsd, concurr
   for (const caseData of cases) {
     const images = selectImagesForCase(caseData, imageSet);
     selectedImageCount += images.length;
+    const promptSha256ByVariant = {};
     for (const variant of variants) {
+      const promptText = effectivePromptText(caseData, variant);
+      promptSha256ByVariant[variant.id] = createHash('sha256').update(promptText).digest('hex');
       const maxOutputTokens = variant.model === 'gpt-6-luna' ? 6000 : 2000;
       estimatedInitialSpendUsd += estimateRequestCostUsd({
         model: variant.model,
         imageCount: images.length,
         maxOutputTokens,
-        inputTextChars: effectivePromptChars(caseData, variant),
+        inputTextChars: promptText.length,
       });
       requestCount++;
     }
@@ -231,6 +254,7 @@ function buildPlan(manifest, cases, variants, imageSet, maxEstimatedUsd, concurr
       },
       expectedDecision: caseData.sourceTruth.expectedDecision,
       goldDecisionAvailable: caseData.sourceTruth.expectedDecision !== 'review',
+      effectivePromptSha256ByVariant: promptSha256ByVariant,
     });
   }
   return {
@@ -243,6 +267,7 @@ function buildPlan(manifest, cases, variants, imageSet, maxEstimatedUsd, concurr
     requestCount,
     concurrency,
     selectedImageCountAcrossCases: selectedImageCount,
+    compiledContentValidatorSha256,
     estimatedInitialSpendUsd,
     maxEstimatedSpendUsd: maxEstimatedUsd,
     notes: [
@@ -336,6 +361,7 @@ async function main() {
     selectedCaseIds: cases.map((item) => item.caseId),
     variantIds: variants.map((variant) => variant.id),
     concurrency: options.concurrency,
+    compiledContentValidatorSha256,
     resumedPairsSkipped: completedKeys.size,
     reviewCaseCount: cases.filter((item) => item.sourceTruth.expectedDecision === 'review').length,
     historicalSpendUsd,
@@ -344,6 +370,7 @@ async function main() {
   async function runPair({ caseData, variant, resumeKey }) {
     const selectedImages = selectImagesForCase(caseData, options.imageSet);
     const imageUrls = readImagesAsDataUrls(selectedImages, sourceRoot);
+    const effectivePromptHash = effectivePromptSha256(caseData, variant);
     const requestAttempts = [];
     const eventIdByReservation = new Map();
     const run = await validateContentForStage1Evaluation(
@@ -372,6 +399,8 @@ async function main() {
             fileId: caseData.fileId || caseData.sourceFileId || null,
             variantId: variant.id,
             imageSet: options.imageSet,
+            effectivePromptSha256: effectivePromptHash,
+            compiledContentValidatorSha256,
             reservationId,
             estimatedReservedUsd: reservation.estimatedReservedUsd,
             requestPlan,
@@ -393,6 +422,8 @@ async function main() {
             fileId: caseData.fileId || caseData.sourceFileId || null,
             variantId: variant.id,
             imageSet: options.imageSet,
+            effectivePromptSha256: effectivePromptHash,
+            compiledContentValidatorSha256,
             attempt: attemptRecord,
           });
         },
@@ -419,6 +450,8 @@ async function main() {
       variantId: variant.id,
       model: variant.model,
       promptVariant: variant.promptVariant,
+      effectivePromptSha256: effectivePromptHash,
+      compiledContentValidatorSha256,
       structuredOutput: variant.structuredOutput,
       imageSet: options.imageSet,
       selectedImageCount: selectedImages.length,
@@ -509,6 +542,7 @@ async function main() {
     runId,
     selectedCaseCount: cases.length,
     selectedVariantIds: variants.map((variant) => variant.id),
+    compiledContentValidatorSha256,
     selectedPairCount: cases.length * variants.length,
     startedPairCount,
     skippedPairCount,

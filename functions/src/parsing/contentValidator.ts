@@ -67,7 +67,7 @@ export interface Stage1ValidationEvaluationRun {
 }
 
 export interface Stage1ValidationEvaluationOptions {
-  promptVariant: 'production' | 'compact' | 'compact-v2' | 'compact-v3';
+  promptVariant: 'production' | 'compact' | 'compact-v2' | 'compact-v3' | 'compact-v4' | 'compact-v5';
   structuredOutput: boolean;
   client?: any;
   onBeforeRequest?: (plan: Stage1RequestPlan) => string | undefined;
@@ -205,7 +205,11 @@ export async function validateContentForStage1Evaluation(
   const cfg = { ...DEFAULT_PARSING_CONFIG, ...config, stage1ModelOverride: model };
   const attempts: Stage1RequestAttempt[] = [];
   const prompt =
-    options.promptVariant === 'compact-v3'
+    options.promptVariant === 'compact-v5'
+      ? createCompactV5ValidationPrompt(combinedText, imageUrls.length > 0, userName, timestamp)
+      : options.promptVariant === 'compact-v4'
+      ? createCompactV4ValidationPrompt(combinedText, imageUrls.length > 0, userName, timestamp)
+      : options.promptVariant === 'compact-v3'
       ? createCompactV3ValidationPrompt(combinedText, imageUrls.length > 0, userName, timestamp)
       : options.promptVariant === 'compact-v2'
       ? createCompactV2ValidationPrompt(combinedText, imageUrls.length > 0, userName, timestamp)
@@ -422,6 +426,93 @@ EXCLUDE:
 - Generic business/facility hours, greetings, and general marketing without a qualifying event, activity, or offer.
 
 Decide from concrete source content, never from the venue name or business category alone. When qualifying content appears alongside unrelated merchandise, marketing, or administrative information, accept for the qualifying content and ignore the unrelated material.
+
+Analyze every image in attachment order. Return exactly one populated imageAnalysis entry per image with its 0-based index. Keep each description, relevance, and complexity signals specific to what is visible in that image. Do not copy caption or neighboring-image details into an image description. Recommend tiling only for a calendar grid or dense small text. Briefly explain the decision from the source evidence.
+
+POST DETAILS:
+- Posted by: ${userName}
+- Posted at: ${timestamp}
+- Text: "${combinedText}"
+- Has images: ${hasImages}`;
+}
+
+export function createCompactV4ValidationPrompt(
+  combinedText: string,
+  hasImages: boolean,
+  userName: string,
+  timestamp: string
+): string {
+  return `You are the first stage of a 5 stage social media post processor. Decide whether this post or its images identify a specific public event, activity, or explicit food/drink offer. Stage 1 may accept a named activity before its schedule or route is complete; later stages can resolve or hold missing details.
+
+INCLUDE:
+- Event posters or program listings with a concrete public activity title, including trivia, live music, comedy, workshops, classes, performances, fairs, and festivals. The poster itself counts as the current announcement even if the caption is empty and no date, time, schedule, or extra invitation text is shown. Later stages can resolve or hold missing details.
+- Public meetings, hearings, forums, and information sessions when announced for public attendance.
+- Public access windows for recreational facilities such as fitness rooms, tracks, pools, and rinks when tied to a specific date or period. These qualify even when described as facility hours; ordinary shop, office, or business hours do not.
+- Public farm or attraction visits, admission offers, interactive tours, and bookable activities.
+- A named organized public food trail, circuit, or self-guided tour. Missing dates, routes, participating locations, or schedules do not make the named activity invalid at Stage 1.
+- Organized public food drives or collection/drop-off events with an announced participation window.
+- Explicit food/drink specials, deals, discounts, or promotional offers, including grocery offers. A clearly stated free giveaway, sample, or no-cost promotion to the public also qualifies. An explicitly advertised limited-time special qualifies; ordinary short-term availability does not.
+
+EXCLUDE:
+- Ordinary product, produce, flavor, menu, and stock availability; new or restocked items; ordinary produce boxes for purchase or pickup; or seasonal closing dates, by themselves. General invitations to visit, shop, buy, stock up, try an item, or get it before it is gone do not turn ordinary inventory into a special or deal. Require an explicit food/drink special, discount, deal, or free promotional offer.
+- Discounts on non-food retail merchandise.
+- Ordinary retail, office, or business hours without a dated public recreational access window or another qualifying activity.
+- Election administration notices such as filing forms, ballot information, candidate deadlines, or procedural reminders. A separately announced public meeting or forum can still qualify.
+- Past-only activity photos or recaps without a clear current or upcoming event, invitation, public session, or offer.
+- Broadcast-only radio or show airtime without a public gathering, live participation, or in-person activity. If broadcast details confirm an underlying physical event, accept the physical event and do not count its coverage as a second event.
+
+Decide from concrete source content, never from the venue name or business category alone. If a post mixes qualifying and unrelated material, accept for its qualifying portion and ignore the unrelated material.
+
+CONSISTENCY REQUIREMENT (MUST FOLLOW):
+- Set hasValidContent to true exactly when validationDecision is VALIDATION_PASSED.
+- Set hasValidContent to false exactly when validationDecision is VALIDATION_FAILED.
+- The reason must plainly support that same decision. Never return a passed decision while the reason says the post does not qualify, or a failed decision while the reason says it qualifies.
+- Before returning, check all three fields and correct any conflict.
+
+Analyze every image in attachment order. Return exactly one populated imageAnalysis entry per image with its 0-based index. Keep each description, relevance, and complexity signals specific to what is visible in that image. Do not copy caption or neighboring-image details into an image description. Recommend tiling only for a calendar grid or dense small text. Briefly explain the decision from the source evidence.
+
+POST DETAILS:
+- Posted by: ${userName}
+- Posted at: ${timestamp}
+- Text: "${combinedText}"
+- Has images: ${hasImages}`;
+}
+
+export function createCompactV5ValidationPrompt(
+  combinedText: string,
+  hasImages: boolean,
+  userName: string,
+  timestamp: string
+): string {
+  return `You are the first stage of a 5 stage social media post processor. Identify a current or upcoming public event, activity, visitor access offer, or explicit food/drink special. Stage 1 needs to identify the activity or offer; later stages can resolve or hold missing details. Do not require every date, time, route, location, or price needed for a final event record.
+
+INCLUDE:
+- A concrete public event/activity title in a poster or program listing, including trivia, live music, comedy, workshops, classes, performances, fairs, and festivals. The poster itself is a current announcement even if the caption is empty or it gives no date, time, schedule, or extra invitation text.
+- Public meetings, hearings, forums, and information sessions announced for public attendance.
+- Public access to recreational facilities such as fitness rooms, tracks, pools, and rinks when tied to a date or period. Public visitor access at museums, heritage sites, cultural attractions, farms, and similar attractions also qualifies when the source announces a visiting/open period, even if it is described as opening hours; no separate event title is needed.
+- Public tours, demonstrations, classes, bookable activities, and future visitor activities announced for a later date. Missing schedule details do not invalidate the Stage 1 announcement.
+- An advertised public admission offer or admission sale, even when no numeric price or discount amount is printed.
+- A named organized public food trail, circuit, or self-guided tour even when dates, route, locations, or schedule are missing; and organized public food drives or collection/drop-off events with announced participation details.
+- Explicit food/drink specials, deals, discounts, and grocery food offers, even without a numeric price. A food/drink item explicitly promoted as today's or a specific day's feature/special also qualifies without a price.
+- A clearly stated free food/drink sample or giveaway offered in person to visitors or through public pickup.
+
+EXCLUDE:
+- Ordinary product, produce, flavor, menu, or stock availability; new or restocked items; ordinary produce boxes for purchase/pickup; or seasonal closing dates by themselves. General invitations to visit, buy, stock up, try an item, or get it before it is gone do not make ordinary inventory a special or deal.
+- Month-long or rotating menu announcements and featured dishes/flavors without an explicit special, deal, discount, or promotional offer. This does not exclude a daily or date-specific food/drink special or an explicitly advertised limited-time promotion.
+- Discounts on non-food retail merchandise, regardless of the percentage or wording of the sale.
+- Online prize draws, like/comment/share contests, or asynchronous social-media quizzes. They are not public events or in-person food offers; a separately announced scheduled live or in-person activity can qualify.
+- Personal past outings, visits, or activity recaps without a clear current/upcoming public invitation or visitor-access notice. Do not infer an event from what a venue normally offers.
+- Ordinary retail, office, and business hours. A dated public recreation access window or announced museum/heritage/attraction visitor period is different and can qualify.
+- Election administration notices such as candidate filing forms, ballot information, procedural reminders, or deadlines. A separately announced public meeting or forum can still qualify.
+- Broadcast-only airtime without a public gathering, live participation, or in-person event. If coverage confirms an underlying physical event, accept that event and do not count the broadcast as another event.
+
+Decide from concrete source content, never from the venue name or business category alone. If a post mixes qualifying and unrelated content, accept for its qualifying portion and ignore the unrelated material.
+
+CONSISTENCY REQUIREMENT (MUST FOLLOW):
+- Set hasValidContent to true exactly when validationDecision is VALIDATION_PASSED.
+- Set hasValidContent to false exactly when validationDecision is VALIDATION_FAILED.
+- The reason must plainly support the same decision. Never return a passed decision while the reason says the post does not qualify, or a failed decision while the reason says it qualifies.
+- Before returning, check all three fields and correct any conflict.
 
 Analyze every image in attachment order. Return exactly one populated imageAnalysis entry per image with its 0-based index. Keep each description, relevance, and complexity signals specific to what is visible in that image. Do not copy caption or neighboring-image details into an image description. Recommend tiling only for a calendar grid or dense small text. Briefly explain the decision from the source evidence.
 
