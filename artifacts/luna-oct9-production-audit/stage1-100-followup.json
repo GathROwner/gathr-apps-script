@@ -1,0 +1,13 @@
+{
+  "automationId": "luna-repaired-canary-next-full-run-audit",
+  "status": "ACTIVE",
+  "dates": [
+    "2026-10-10",
+    "2026-10-11"
+  ],
+  "timezone": "America/Halifax",
+  "firstCheckLocal": "11:00",
+  "lastCheckLocal": "18:00",
+  "pauseAfterBothAudits": true,
+  "reviewRejectedAndAcceptedPosts": true
+}
