@@ -1,0 +1,2717 @@
+{
+  "auditDate": "2026-10-09",
+  "baselineCommit": "3d38654",
+  "mode": "Local no-write API replay; no production changes",
+  "cases": 98,
+  "imageCases": 78,
+  "textCases": 20,
+  "production": [
+    {
+      "day": "2026-10-07",
+      "fileId": "1eREpzt2nL6mpIX9St-GoKOvTDrdX4WwU",
+      "snapshots": 158,
+      "totalRows": 377,
+      "completion": {
+        "lock": "completed",
+        "batch": "completed",
+        "checkpointPresent": false,
+        "processedMarkerPresent": true
+      },
+      "stage2Usage": {
+        "calls": 90,
+        "inputTokens": 521359,
+        "outputTokens": 49833,
+        "cachedInputTokens": 20352
+      },
+      "stage2CostUsd": 0.22542654999999998
+    },
+    {
+      "day": "2026-10-08",
+      "fileId": "1kIx_zGW7BZMf8F55eCYTQYOeYuFq-VLv",
+      "snapshots": 148,
+      "totalRows": 368,
+      "completion": {
+        "lock": "completed",
+        "batch": "completed",
+        "checkpointPresent": false,
+        "processedMarkerPresent": true
+      },
+      "stage2Usage": {
+        "calls": 79,
+        "inputTokens": 551709,
+        "outputTokens": 45324,
+        "cachedInputTokens": 85376
+      },
+      "stage2CostUsd": 0.20936565
+    },
+    {
+      "day": "2026-10-09",
+      "fileId": "1NpfngSPGDDOm9Fb5DcYseMuCe4BdKjGq",
+      "snapshots": 164,
+      "totalRows": 385,
+      "completion": {
+        "lock": "completed",
+        "batch": "completed",
+        "checkpointPresent": false,
+        "processedMarkerPresent": true
+      },
+      "stage2Usage": {
+        "calls": 85,
+        "inputTokens": 611301,
+        "outputTokens": 49143,
+        "cachedInputTokens": 77952
+      },
+      "stage2CostUsd": 0.23357204999999998
+    }
+  ],
+  "stats": {
+    "mini-current": {
+      "cases": 98,
+      "errors": [],
+      "fallback": [],
+      "confidenceHolds": [
+        "oct9-row-239",
+        "oct9-row-82"
+      ],
+      "requests": 98,
+      "incomplete": [],
+      "costUsd": 0.14152680000000004,
+      "totalSeconds": 433.532,
+      "medianSeconds": 4.346,
+      "p95Seconds": 6.805,
+      "maxSeconds": 8.354,
+      "inputTokens": 138880,
+      "outputTokens": 54829,
+      "reasoningTokens": 34176
+    },
+    "luna-none": {
+      "cases": 98,
+      "errors": [],
+      "fallback": [],
+      "confidenceHolds": [
+        "oct9-row-239",
+        "oct9-row-342",
+        "oct9-row-58",
+        "oct9-row-64"
+      ],
+      "requests": 98,
+      "incomplete": [],
+      "costUsd": 0.02356034999999999,
+      "totalSeconds": 269.762,
+      "medianSeconds": 2.566,
+      "p95Seconds": 3.733,
+      "maxSeconds": 16.823,
+      "inputTokens": 138880,
+      "outputTokens": 16047,
+      "reasoningTokens": 0
+    },
+    "luna-high": {
+      "cases": 98,
+      "errors": [],
+      "fallback": [],
+      "confidenceHolds": [
+        "oct9-row-186",
+        "oct9-row-239",
+        "oct9-row-251",
+        "oct9-row-342",
+        "oct9-row-58",
+        "oct9-row-82"
+      ],
+      "requests": 98,
+      "incomplete": [],
+      "costUsd": 0.035624420000000004,
+      "totalSeconds": 458.678,
+      "medianSeconds": 4.082,
+      "p95Seconds": 7.532,
+      "maxSeconds": 13.871,
+      "inputTokens": 138880,
+      "outputTokens": 37687,
+      "reasoningTokens": 22080
+    }
+  },
+  "promptParityCases": 98,
+  "apiCompletedCalls": 294,
+  "differences": [
+    {
+      "caseId": "oct9-row-51",
+      "row": 51,
+      "venue": "Prince Edward Island Marathon",
+      "arm": "luna-high",
+      "changed": [
+        "resolvedContentType"
+      ],
+      "baseline": {
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": true,
+          "organizationStyle": "date-organized (Saturday / Sunday race lineup)"
+        },
+        "contentType": "EVENT",
+        "confidence": 0.92,
+        "classificationReason": "The post is a registration/price-change announcement for the Prince Edward Island Marathon weekend (Oct 16-18, 2026) and the accompanying image lists multiple race activities by day (Saturday and Sunday). There are no food or drink deals. Although the image shows a schedule of many race options, the overall content is clearly promoting a single event (a multi-race marathon weekend) rather than a generic calendar or a food special. Presence of posted-by / event registration link further indicates this is an event promotion, increasing confidence.",
+        "estimatedItemCount": 12
+      },
+      "candidate": {
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": true,
+          "organizationStyle": "Organized by date, with race activities listed under Saturday and Sunday"
+        },
+        "contentType": "CALENDAR",
+        "confidence": 0.88,
+        "classificationReason": "The post promotes marathon registration and a price-change deadline, but the accompanying image lists multiple race activities organized across Saturday and Sunday. This is date-organized content with many activities, so CALENDAR fits better than a single EVENT or a time-based SCHEDULE. No food or drink specials are present, and no Facebook Event Data is provided.",
+        "estimatedItemCount": 12
+      },
+      "baselineRoute": "EVENT",
+      "candidateRoute": "CALENDAR"
+    },
+    {
+      "caseId": "oct9-row-58",
+      "row": 58,
+      "venue": "Downtown Charlottetown Inc.",
+      "arm": "luna-none",
+      "changed": [
+        "passesConfidenceGate"
+      ],
+      "baseline": {
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": true,
+          "organizationStyle": "unstructured"
+        },
+        "contentType": "EVENT",
+        "confidence": 0.78,
+        "classificationReason": "The post promotes a downloadable/printable 'Kid's Do List' of kid-friendly activities and spots in Downtown Charlottetown—it is advertising activities and places to visit rather than a specific dated event or time-based schedule. There are no food/drink deals, prices, or explicit specials, and no date/time listings or calendar layout. The content points to multiple activities and locations (multiple items) in an unstructured guide format, so the best available category among the provided choices is EVENT (single/few entertainment activities category) since it centers on activities rather than a calendar, schedule, or food special.",
+        "estimatedItemCount": 10
+      },
+      "candidate": {
+        "contentAnalysis": {
+          "hasEvents": false,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": false,
+          "organizationStyle": "Unstructured promotional post advertising a guide to kid-friendly downtown activities; no individual events or deals are listed."
+        },
+        "contentType": "EVENT",
+        "confidence": 0.43,
+        "classificationReason": "The post promotes a free guide to multiple kid-friendly places and activities, but does not list specific events, dates, or times. It is not a food special: Dairy Farmers of PEI is identified as a sponsor, with no advertised food or drink deal. Since the available categories do not include general activity-guide promotions, EVENT is the closest fit, though confidence is limited because no individual entertainment activity is described. No Facebook Event Data is present.",
+        "estimatedItemCount": 0
+      },
+      "baselineRoute": "EVENT",
+      "candidateRoute": "EVENT"
+    },
+    {
+      "caseId": "oct9-row-58",
+      "row": 58,
+      "venue": "Downtown Charlottetown Inc.",
+      "arm": "luna-high",
+      "changed": [
+        "passesConfidenceGate"
+      ],
+      "baseline": {
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": true,
+          "organizationStyle": "unstructured"
+        },
+        "contentType": "EVENT",
+        "confidence": 0.78,
+        "classificationReason": "The post promotes a downloadable/printable 'Kid's Do List' of kid-friendly activities and spots in Downtown Charlottetown—it is advertising activities and places to visit rather than a specific dated event or time-based schedule. There are no food/drink deals, prices, or explicit specials, and no date/time listings or calendar layout. The content points to multiple activities and locations (multiple items) in an unstructured guide format, so the best available category among the provided choices is EVENT (single/few entertainment activities category) since it centers on activities rather than a calendar, schedule, or food special.",
+        "estimatedItemCount": 10
+      },
+      "candidate": {
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": false,
+          "organizationStyle": "Unstructured promotional text; no dates or times"
+        },
+        "contentType": "EVENT",
+        "confidence": 0.58,
+        "classificationReason": "The post promotes a guide to kid-friendly activities and places in Downtown Charlottetown, so EVENT is the closest available category. It does not list specific scheduled events, food or drink deals, or a date- or time-organized lineup. The guide refers generally to multiple spots, but none are individually listed in the post, so there are no multiple extractable events or specials. No Facebook Event Data is provided.",
+        "estimatedItemCount": 1
+      },
+      "baselineRoute": "EVENT",
+      "candidateRoute": "EVENT"
+    },
+    {
+      "caseId": "oct9-row-64",
+      "row": 64,
+      "venue": "Fortune Bridge Farms & Toby’s Farm Market",
+      "arm": "luna-none",
+      "changed": [
+        "passesConfidenceGate"
+      ],
+      "baseline": {
+        "contentAnalysis": {
+          "hasEvents": false,
+          "hasFoodSpecials": true,
+          "hasMultipleItems": false,
+          "organizationStyle": "unstructured"
+        },
+        "contentType": "FOOD_SPECIAL",
+        "confidence": 0.91,
+        "classificationReason": "The post is a promotional message from a farm/market announcing they are open, fully stocked with fresh vegetables, and offering Thanksgiving Day boxes available for pickup (with options for special quantities). This is an advertised food/product availability offer rather than an entertainment event or a schedule/calendar of events. There are no multiple distinct events or time-organized listings, so it fits the FOOD_SPECIAL category.",
+        "estimatedItemCount": 1
+      },
+      "candidate": {
+        "contentAnalysis": {
+          "hasEvents": false,
+          "hasFoodSpecials": true,
+          "hasMultipleItems": false,
+          "organizationStyle": "Unstructured business and availability announcement"
+        },
+        "contentType": "FOOD_SPECIAL",
+        "confidence": 0.46,
+        "classificationReason": "The post announces that the farm market is open and stocked with fresh vegetables, and that Thanksgiving Day produce boxes are available for pickup. It does not describe entertainment or activities, nor does it advertise a discount, price, or explicit food deal. Since the available categories do not include general business or product announcements, FOOD_SPECIAL is the closest fit because the content promotes food products for purchase; confidence is limited because this is not a clearly stated special or deal.",
+        "estimatedItemCount": 1
+      },
+      "baselineRoute": "FOOD_SPECIAL",
+      "candidateRoute": "FOOD_SPECIAL"
+    },
+    {
+      "caseId": "oct9-row-73",
+      "row": 73,
+      "venue": "Red Sands Golf Course",
+      "arm": "luna-none",
+      "changed": [
+        "resolvedContentType"
+      ],
+      "baseline": {
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": true,
+          "organizationStyle": "time-organized (group/hole draw list for a tournament)"
+        },
+        "contentType": "SCHEDULE",
+        "confidence": 0.88,
+        "classificationReason": "The post states 'Final draw for Oktoberfest' and the image shows a detailed draw/listing with many grouped entries by hole (a shotgun tournament draw). This is a time/slot-organized lineup of participants rather than a single event announcement or a food/drink special. The content contains many items (multiple groups/players), so it fits the SCHEDULE category.",
+        "estimatedItemCount": 72
+      },
+      "candidate": {
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": true,
+          "organizationStyle": "Unstructured tournament draw organized by hole and group, listing multiple golfers"
+        },
+        "contentType": "EVENT",
+        "confidence": 0.96,
+        "classificationReason": "The post announces the final draw for an Oktoberfest golf tournament and notes changes. The image lists multiple golfers assigned to holes and groups, making this a single sporting event with multiple participants rather than a calendar or schedule of separate events. No food or drink specials are advertised, and no Facebook Event Data is provided.",
+        "estimatedItemCount": 1
+      },
+      "baselineRoute": "CALENDAR",
+      "candidateRoute": "EVENT"
+    },
+    {
+      "caseId": "oct9-row-73",
+      "row": 73,
+      "venue": "Red Sands Golf Course",
+      "arm": "luna-high",
+      "changed": [
+        "resolvedContentType"
+      ],
+      "baseline": {
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": true,
+          "organizationStyle": "time-organized (group/hole draw list for a tournament)"
+        },
+        "contentType": "SCHEDULE",
+        "confidence": 0.88,
+        "classificationReason": "The post states 'Final draw for Oktoberfest' and the image shows a detailed draw/listing with many grouped entries by hole (a shotgun tournament draw). This is a time/slot-organized lineup of participants rather than a single event announcement or a food/drink special. The content contains many items (multiple groups/players), so it fits the SCHEDULE category.",
+        "estimatedItemCount": 72
+      },
+      "candidate": {
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": false,
+          "organizationStyle": "One tournament, with participants organized by hole and group"
+        },
+        "contentType": "EVENT",
+        "confidence": 0.91,
+        "classificationReason": "The post announces the final draw for the Oktoberfest golf tournament. The image lists golfers assigned to groups and holes for this single tournament; those assignments are not separate events or a schedule of multiple activities. No food or drink specials are advertised, and no Facebook Event data is present.",
+        "estimatedItemCount": 1
+      },
+      "baselineRoute": "CALENDAR",
+      "candidateRoute": "EVENT"
+    },
+    {
+      "caseId": "oct9-row-82",
+      "row": 82,
+      "venue": "Maritimes Maven",
+      "arm": "luna-none",
+      "changed": [
+        "passesConfidenceGate"
+      ],
+      "baseline": {
+        "contentAnalysis": {
+          "hasEvents": false,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": false,
+          "organizationStyle": "unstructured"
+        },
+        "contentType": "EVENT",
+        "confidence": 0.35,
+        "classificationReason": "The content is a promotional blog post about a fall road trip through several New Brunswick towns (Rothesay, Quispamsis, Hampton, Grand Bay-Westfield) with a link to more information. It does not contain any explicit event listings, dates/times, or food/drink specials, nor does it present a calendar or schedule. None of the provided categories perfectly match a travel/blog post; EVENT was chosen as the closest single-category option despite the mismatch. There is no Facebook event data present, so confidence is low.",
+        "estimatedItemCount": 0
+      },
+      "candidate": {
+        "contentAnalysis": {
+          "hasEvents": false,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": false,
+          "organizationStyle": "Unstructured travel promotion; it suggests a road trip itinerary but does not list dated or scheduled activities."
+        },
+        "contentType": "EVENT",
+        "confidence": 0.93,
+        "classificationReason": "The post promotes a fall road trip through several towns and links to an itinerary, but it does not advertise a specific entertainment event, food or drink special, calendar, or schedule. Since the allowed categories have no general travel or tourism category, EVENT is the closest available fit for an activity-oriented promotion. No Facebook event data is present, so confidence is based on the post text and images.",
+        "estimatedItemCount": 1
+      },
+      "baselineRoute": "EVENT",
+      "candidateRoute": "EVENT"
+    },
+    {
+      "caseId": "oct9-row-186",
+      "row": 186,
+      "venue": "Royalty Crossing",
+      "arm": "luna-high",
+      "changed": [
+        "passesConfidenceGate"
+      ],
+      "baseline": {
+        "contentAnalysis": {
+          "hasEvents": false,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": true,
+          "organizationStyle": "unstructured"
+        },
+        "contentType": "FOOD_SPECIAL",
+        "confidence": 0.62,
+        "classificationReason": "The content is a retail promotion advertising sales: a clearance up to 60% off and a buy-one-get-one-50%-off offer. There are no entertainment events, dates, or schedules present. It contains multiple promotional offers (two distinct specials). None of the provided categories exactly match a retail clothing sale; the only category that covers 'specials' is FOOD_SPECIAL, so that was chosen as the closest fit despite the offer being for apparel/footwear rather than food/drink. Organization is unstructured promotional text rather than date- or time-organized content.",
+        "estimatedItemCount": 2
+      },
+      "candidate": {
+        "contentAnalysis": {
+          "hasEvents": false,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": true,
+          "organizationStyle": "Unstructured promotional copy"
+        },
+        "contentType": "FOOD_SPECIAL",
+        "confidence": 0.34,
+        "classificationReason": "The post advertises two retail footwear offers: clearance savings of up to 60% and a buy-one-get-one 50%-off deal. It contains no entertainment activities or food and drink specials, so it does not strictly fit any listed category. FOOD_SPECIAL is the closest available deal-oriented category, though the offers are for merchandise rather than food or drinks.",
+        "estimatedItemCount": 2
+      },
+      "baselineRoute": "FOOD_SPECIAL",
+      "candidateRoute": "FOOD_SPECIAL"
+    },
+    {
+      "caseId": "oct9-row-213",
+      "row": 213,
+      "venue": "Seaside Pharmacy & Medical",
+      "arm": "luna-none",
+      "changed": [
+        "resolvedContentType"
+      ],
+      "baseline": {
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": true,
+          "hasMultipleItems": false,
+          "organizationStyle": "time-specific single event"
+        },
+        "contentType": "MIXED_EVENTS_AND_SPECIALS",
+        "confidence": 0.92,
+        "classificationReason": "The post advertises a specific clinic taking place 'TODAY | 9 AM – 4 PM' with walk-in pharmacist assessments and vaccinations available. This is a single, time-bound activity rather than a food/drink promotion, a list of multiple events, or a calendar/schedule. No food specials are mentioned. The presence of a clear date/time and a single activity makes it an EVENT. | Safeguard: detected clear food-special signals (e.g., happy hour/deal/brunch), reclassified from EVENT.",
+        "estimatedItemCount": 1
+      },
+      "candidate": {
+        "contentAnalysis": {
+          "hasEvents": false,
+          "hasFoodSpecials": true,
+          "hasMultipleItems": false,
+          "organizationStyle": "Unstructured promotion of walk-in pharmacy services available today during stated hours"
+        },
+        "contentType": "FOOD_SPECIAL",
+        "confidence": 0.78,
+        "classificationReason": "The post promotes a one-day walk-in clinic with a pharmacist available from 9 AM to 4 PM, alongside vaccinations and minor-ailment assessments. It is a healthcare service promotion rather than an entertainment activity or food special, and it does not list multiple dated activities or a schedule. Of the available categories, EVENT is the closest fit because the offering is a single, time-limited activity. No Facebook Event data is provided. | Safeguard: detected clear food-special signals (e.g., happy hour/deal/brunch), reclassified from EVENT.",
+        "estimatedItemCount": 1
+      },
+      "baselineRoute": "MIXED_EVENTS_AND_SPECIALS",
+      "candidateRoute": "FOOD_SPECIAL"
+    },
+    {
+      "caseId": "oct9-row-214",
+      "row": 214,
+      "venue": "Seaside Pharmacy & Medical",
+      "arm": "luna-none",
+      "changed": [
+        "resolvedContentType"
+      ],
+      "baseline": {
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": true,
+          "hasMultipleItems": true,
+          "organizationStyle": "by date"
+        },
+        "contentType": "MIXED_EVENTS_AND_SPECIALS",
+        "confidence": 0.88,
+        "classificationReason": "The post lists a dated activity (Rxtra Care Clinic from 11-4 on Thursday, October 8th) which is an event, and also announces a food-related item arrival (Honeycrisp Apples). This combines an event and a food/product promotion in the same post, so it fits MIXED_EVENTS_AND_SPECIALS rather than a pure EVENT or pure FOOD_SPECIAL. The content is organized around a specific date, not a multi-day calendar or schedule.",
+        "estimatedItemCount": 2
+      },
+      "candidate": {
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": true,
+          "organizationStyle": "Organized under a single date, with two listed items"
+        },
+        "contentType": "EVENT",
+        "confidence": 0.78,
+        "classificationReason": "The post lists a clinic visit from 11–4, which is an activity, alongside the arrival of Honeycrisp apples. The apple announcement is not an explicit food deal or named daily special. Although there are two items, this is not a date-organized calendar with many events or a schedule of multiple time-organized events. No Facebook event data is provided.",
+        "estimatedItemCount": 2
+      },
+      "baselineRoute": "MIXED_EVENTS_AND_SPECIALS",
+      "candidateRoute": "EVENT"
+    },
+    {
+      "caseId": "oct9-row-214",
+      "row": 214,
+      "venue": "Seaside Pharmacy & Medical",
+      "arm": "luna-high",
+      "changed": [
+        "resolvedContentType"
+      ],
+      "baseline": {
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": true,
+          "hasMultipleItems": true,
+          "organizationStyle": "by date"
+        },
+        "contentType": "MIXED_EVENTS_AND_SPECIALS",
+        "confidence": 0.88,
+        "classificationReason": "The post lists a dated activity (Rxtra Care Clinic from 11-4 on Thursday, October 8th) which is an event, and also announces a food-related item arrival (Honeycrisp Apples). This combines an event and a food/product promotion in the same post, so it fits MIXED_EVENTS_AND_SPECIALS rather than a pure EVENT or pure FOOD_SPECIAL. The content is organized around a specific date, not a multi-day calendar or schedule.",
+        "estimatedItemCount": 2
+      },
+      "candidate": {
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": true,
+          "organizationStyle": "A single date heading followed by two bullet-point announcements"
+        },
+        "contentType": "EVENT",
+        "confidence": 0.78,
+        "classificationReason": "The post lists a scheduled Rxtra Care Clinic from 11 to 4, which is an activity with a specific time. The Honeycrisp apples arriving is a product announcement, not an advertised food deal or special. There are two announcements, but the post is not a calendar or multi-day schedule, and it does not combine an event with a food special.",
+        "estimatedItemCount": 2
+      },
+      "baselineRoute": "MIXED_EVENTS_AND_SPECIALS",
+      "candidateRoute": "EVENT"
+    },
+    {
+      "caseId": "oct9-row-251",
+      "row": 251,
+      "venue": "Pearl Sauna & Steambath",
+      "arm": "luna-high",
+      "changed": [
+        "passesConfidenceGate"
+      ],
+      "baseline": {
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": false,
+          "organizationStyle": "unstructured (promotional copy with booking link, no dates or times)"
+        },
+        "contentType": "EVENT",
+        "confidence": 0.75,
+        "classificationReason": "The post is a promotional call-to-book for a service session (foot care / massage) and invites users to 'Book your favourite session today' with a booking link. That constitutes a single activity/session offering rather than a food/drink special, a multi-item schedule, or a date-organized calendar. There are no dates, times, or multiple listed events/specials, so it is best categorized as a single EVENT-like promotional activity. No Facebook Event metadata is present, so confidence is moderate-high.",
+        "estimatedItemCount": 1
+      },
+      "candidate": {
+        "contentAnalysis": {
+          "hasEvents": false,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": false,
+          "organizationStyle": "Unstructured promotional text; no dates or times"
+        },
+        "contentType": "EVENT",
+        "confidence": 0.28,
+        "classificationReason": "This is a promotion for foot-care services with booking information, not a dated entertainment event, food or drink special, calendar, or schedule. Since the available categories have no general service-advertisement option, EVENT is the closest fit because the post promotes booking a service session; confidence is low because it is not actually an event. No Facebook Event Data is present.",
+        "estimatedItemCount": 0
+      },
+      "baselineRoute": "EVENT",
+      "candidateRoute": "EVENT"
+    },
+    {
+      "caseId": "oct9-row-274",
+      "row": 274,
+      "venue": "Robert McMillan Pottery",
+      "arm": "luna-none",
+      "changed": [
+        "resolvedContentType"
+      ],
+      "baseline": {
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": true,
+          "hasMultipleItems": false,
+          "organizationStyle": "unstructured narrative with incidental opening hours and invitation to visit"
+        },
+        "contentType": "MIXED_EVENTS_AND_SPECIALS",
+        "confidence": 0.85,
+        "classificationReason": "The post is a studio/gallery update that primarily invites people to visit, take a tour, meet the potter, and notes regular open hours (Saturday and Sunday 10-5, open by appointment Wed–Fri). That constitutes a single ongoing visitor activity/open-studio type event rather than a food/drink special, a multi-item schedule, or a calendar of many events. The content is narrative and promotional rather than time-organized, and no Facebook event metadata is present, so labeling it as an EVENT (open studio/visit) is most appropriate. | Safeguard: detected clear food-special signals (e.g., happy hour/deal/brunch), reclassified from EVENT.",
+        "estimatedItemCount": 1
+      },
+      "candidate": {
+        "contentAnalysis": {
+          "hasEvents": false,
+          "hasFoodSpecials": true,
+          "hasMultipleItems": false,
+          "organizationStyle": "Unstructured studio update with visiting hours; no list of events or specials"
+        },
+        "contentType": "FOOD_SPECIAL",
+        "confidence": 0.78,
+        "classificationReason": "The post mainly shares a pottery-studio update and promotes a gallery visit, with regular opening hours and an invitation to stop by. It does not advertise a distinct entertainment activity, food or drink deal, calendar, or time-organized lineup. Since the available categories require choosing one, EVENT is the closest fit because it includes an invitation to visit and take a studio tour, though this is not a clearly defined single entertainment event. No Facebook Event Data is present. | Safeguard: detected clear food-special signals (e.g., happy hour/deal/brunch), reclassified from EVENT.",
+        "estimatedItemCount": 1
+      },
+      "baselineRoute": "MIXED_EVENTS_AND_SPECIALS",
+      "candidateRoute": "FOOD_SPECIAL"
+    },
+    {
+      "caseId": "oct9-row-328",
+      "row": 328,
+      "venue": "Evermoore: Island Dining & Brewing",
+      "arm": "luna-none",
+      "changed": [
+        "resolvedContentType"
+      ],
+      "baseline": {
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": true,
+          "hasMultipleItems": true,
+          "organizationStyle": "unstructured"
+        },
+        "contentType": "MIXED_EVENTS_AND_SPECIALS",
+        "confidence": 0.9,
+        "classificationReason": "The post explicitly advertises a food deal (half-size fish cakes at half price), which qualifies as a FOOD_SPECIAL. It also mentions a recurring entertainment activity (Trivia) and a notice that there is no trivia tonight, which constitutes event-related content. Because the post contains both a promotional food special and an event-related notice, it fits the MIXED_EVENTS_AND_SPECIALS category. The text is informal and not organized by date/time, so it is unstructured. No Facebook event data is present to change confidence.",
+        "estimatedItemCount": 2
+      },
+      "candidate": {
+        "contentAnalysis": {
+          "hasEvents": false,
+          "hasFoodSpecials": true,
+          "hasMultipleItems": false,
+          "organizationStyle": "Unstructured promotional post; no date- or time-organized listings"
+        },
+        "contentType": "FOOD_SPECIAL",
+        "confidence": 0.96,
+        "classificationReason": "The post promotes fish cakes with an explicit deal: customers can order a half-size portion for half the price. Switching the side is offered as an accommodation, not a separate special. The trivia mention only clarifies that there is no trivia tonight and says regular Thursdays resume next week; it does not advertise an upcoming entertainment activity. Therefore, the post is best classified as a food special rather than an event or mixed content.",
+        "estimatedItemCount": 1
+      },
+      "baselineRoute": "MIXED_EVENTS_AND_SPECIALS",
+      "candidateRoute": "FOOD_SPECIAL"
+    },
+    {
+      "caseId": "oct9-row-342",
+      "row": 342,
+      "venue": "Ruby's Counter",
+      "arm": "luna-none",
+      "changed": [
+        "resolvedContentType",
+        "passesConfidenceGate"
+      ],
+      "baseline": {
+        "contentAnalysis": {
+          "hasEvents": false,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": false,
+          "organizationStyle": "time-organized"
+        },
+        "contentType": "SCHEDULE",
+        "confidence": 0.9,
+        "classificationReason": "The post is a business hours/closure notice specifying days the venue will be closed and when it will reopen (Saturday, Sunday, Monday closed; back Tuesday). It contains no event listings or food/drink deals. Because it conveys time-specific operational information (dates/days) it best fits the SCHEDULE category rather than EVENT or FOOD_SPECIAL. No Facebook event data is present.",
+        "estimatedItemCount": 0
+      },
+      "candidate": {
+        "contentAnalysis": {
+          "hasEvents": false,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": false,
+          "organizationStyle": "Unstructured closure announcement mentioning several days"
+        },
+        "contentType": "EVENT",
+        "confidence": 0.18,
+        "classificationReason": "The post announces holiday business closures and a reopening, not entertainment activities or food specials. It does not fit the available categories well; EVENT is the closest option only in that it mentions specific days, but these are operating hours rather than events. No Facebook Event Data is present.",
+        "estimatedItemCount": 0
+      },
+      "baselineRoute": "SCHEDULE",
+      "candidateRoute": "EVENT"
+    },
+    {
+      "caseId": "oct9-row-342",
+      "row": 342,
+      "venue": "Ruby's Counter",
+      "arm": "luna-high",
+      "changed": [
+        "passesConfidenceGate"
+      ],
+      "baseline": {
+        "contentAnalysis": {
+          "hasEvents": false,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": false,
+          "organizationStyle": "time-organized"
+        },
+        "contentType": "SCHEDULE",
+        "confidence": 0.9,
+        "classificationReason": "The post is a business hours/closure notice specifying days the venue will be closed and when it will reopen (Saturday, Sunday, Monday closed; back Tuesday). It contains no event listings or food/drink deals. Because it conveys time-specific operational information (dates/days) it best fits the SCHEDULE category rather than EVENT or FOOD_SPECIAL. No Facebook event data is present.",
+        "estimatedItemCount": 0
+      },
+      "candidate": {
+        "contentAnalysis": {
+          "hasEvents": false,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": false,
+          "organizationStyle": "Unstructured announcement listing several closure days and a reopening day"
+        },
+        "contentType": "SCHEDULE",
+        "confidence": 0.32,
+        "classificationReason": "This is a Thanksgiving business-closure announcement, not an entertainment event or food special. It lists multiple days the restaurant will be closed and says it will reopen Tuesday, so SCHEDULE is the closest available category, although the post is not a schedule of events as that category usually describes. No Facebook Event Data is present.",
+        "estimatedItemCount": 0
+      },
+      "baselineRoute": "SCHEDULE",
+      "candidateRoute": "SCHEDULE"
+    },
+    {
+      "caseId": "oct9-row-352",
+      "row": 352,
+      "venue": "Nature Space Resort & Retreat Centre",
+      "arm": "luna-none",
+      "changed": [
+        "resolvedContentType"
+      ],
+      "baseline": {
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": true,
+          "hasMultipleItems": false,
+          "organizationStyle": "unstructured"
+        },
+        "contentType": "MIXED_EVENTS_AND_SPECIALS",
+        "confidence": 0.9,
+        "classificationReason": "The post advertises a time-limited promotional stay for 'Islander Halloween weekend' with specific nightly rates, booking instructions, and stay restrictions. It is a single promotional event/offer tied to a particular weekend (Halloween weekend). There are no food or drink deals mentioned and the content is not a calendar or multi-item schedule. The message is promotional/unstructured rather than date-organized, so it best fits the EVENT category. | Safeguard: detected clear food-special signals (e.g., happy hour/deal/brunch), reclassified from EVENT.",
+        "estimatedItemCount": 1
+      },
+      "candidate": {
+        "contentAnalysis": {
+          "hasEvents": false,
+          "hasFoodSpecials": true,
+          "hasMultipleItems": false,
+          "organizationStyle": "Unstructured promotional offer for Halloween-weekend accommodation"
+        },
+        "contentType": "FOOD_SPECIAL",
+        "confidence": 0.91,
+        "classificationReason": "This is a promotional lodging-rate offer for a Halloween weekend, not a listed entertainment event or food/drink special. However, among the available categories, EVENT is the closest fit because the promotion is tied to a specific seasonal weekend. The rates, amenities, and booking instructions describe the accommodation offer rather than multiple separately extractable events. No Facebook Event Data is provided. | Safeguard: detected clear food-special signals (e.g., happy hour/deal/brunch), reclassified from EVENT.",
+        "estimatedItemCount": 1
+      },
+      "baselineRoute": "MIXED_EVENTS_AND_SPECIALS",
+      "candidateRoute": "FOOD_SPECIAL"
+    },
+    {
+      "caseId": "oct9-row-352",
+      "row": 352,
+      "venue": "Nature Space Resort & Retreat Centre",
+      "arm": "luna-high",
+      "changed": [
+        "resolvedContentType"
+      ],
+      "baseline": {
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": true,
+          "hasMultipleItems": false,
+          "organizationStyle": "unstructured"
+        },
+        "contentType": "MIXED_EVENTS_AND_SPECIALS",
+        "confidence": 0.9,
+        "classificationReason": "The post advertises a time-limited promotional stay for 'Islander Halloween weekend' with specific nightly rates, booking instructions, and stay restrictions. It is a single promotional event/offer tied to a particular weekend (Halloween weekend). There are no food or drink deals mentioned and the content is not a calendar or multi-item schedule. The message is promotional/unstructured rather than date-organized, so it best fits the EVENT category. | Safeguard: detected clear food-special signals (e.g., happy hour/deal/brunch), reclassified from EVENT.",
+        "estimatedItemCount": 1
+      },
+      "candidate": {
+        "contentAnalysis": {
+          "hasEvents": false,
+          "hasFoodSpecials": true,
+          "hasMultipleItems": false,
+          "organizationStyle": "Unstructured promotional text referencing Halloween weekend"
+        },
+        "contentType": "FOOD_SPECIAL",
+        "confidence": 0.78,
+        "classificationReason": "This is primarily a limited-time lodging-rate promotion for a Halloween weekend, not a food or drink deal. It does not advertise a specific entertainment activity, and the listed amenities are resort features rather than scheduled events. Since the available categories do not include general accommodation promotions, EVENT is the closest fit because the offer is tied to a particular seasonal weekend; this is an imperfect match. No Facebook event data is provided. | Safeguard: detected clear food-special signals (e.g., happy hour/deal/brunch), reclassified from EVENT.",
+        "estimatedItemCount": 1
+      },
+      "baselineRoute": "MIXED_EVENTS_AND_SPECIALS",
+      "candidateRoute": "FOOD_SPECIAL"
+    },
+    {
+      "caseId": "2026-10-08-text-330",
+      "row": 330,
+      "venue": "APM Centre",
+      "arm": "luna-none",
+      "changed": [
+        "resolvedContentType"
+      ],
+      "baseline": {
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": true,
+          "organizationStyle": "date-organized (specific dates with times)"
+        },
+        "contentType": "EVENT",
+        "confidence": 0.9,
+        "classificationReason": "The post lists specific open-ice session dates and times (Oct 8, Oct 10 with two times, Oct 12) and contact info to sign up. This is a set of scheduled activity instances (events) rather than any food/drink promotion. There are a few occurrences (four time slots), so it fits the EVENT category (single/few activities) rather than a full calendar or a recurring schedule pattern. No Facebook event metadata is present.",
+        "estimatedItemCount": 4
+      },
+      "candidate": {
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": true,
+          "organizationStyle": "Organized by date, with several open-ice times listed"
+        },
+        "contentType": "SCHEDULE",
+        "confidence": 0.94,
+        "classificationReason": "The post lists multiple open-ice sessions on different dates and times, making it a time-organized schedule of activities rather than a single event or a broad calendar. It contains no food or drink specials. No Facebook event data is present.",
+        "estimatedItemCount": 4
+      },
+      "baselineRoute": "EVENT",
+      "candidateRoute": "SCHEDULE"
+    },
+    {
+      "caseId": "2026-10-08-text-330",
+      "row": 330,
+      "venue": "APM Centre",
+      "arm": "luna-high",
+      "changed": [
+        "resolvedContentType"
+      ],
+      "baseline": {
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": true,
+          "organizationStyle": "date-organized (specific dates with times)"
+        },
+        "contentType": "EVENT",
+        "confidence": 0.9,
+        "classificationReason": "The post lists specific open-ice session dates and times (Oct 8, Oct 10 with two times, Oct 12) and contact info to sign up. This is a set of scheduled activity instances (events) rather than any food/drink promotion. There are a few occurrences (four time slots), so it fits the EVENT category (single/few activities) rather than a full calendar or a recurring schedule pattern. No Facebook event metadata is present.",
+        "estimatedItemCount": 4
+      },
+      "candidate": {
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": true,
+          "organizationStyle": "Chronological dates with specific times"
+        },
+        "contentType": "CALENDAR",
+        "confidence": 0.88,
+        "classificationReason": "The post lists four open-ice sessions across several dates, organized chronologically by date with a time for each session. This is a date-organized set of activities, so CALENDAR fits best. There are no food or drink specials, and no Facebook Event data is provided.",
+        "estimatedItemCount": 4
+      },
+      "baselineRoute": "EVENT",
+      "candidateRoute": "SCHEDULE"
+    },
+    {
+      "caseId": "oct8-fixture-row-287-powerskate-date-table",
+      "row": 287,
+      "venue": "Cavendish Farms Community Events Centre",
+      "arm": "luna-none",
+      "changed": [
+        "resolvedContentType"
+      ],
+      "baseline": {
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": true,
+          "organizationStyle": "date-organized (listed session dates with associated weekly time slots)"
+        },
+        "contentType": "CALENDAR",
+        "confidence": 0.92,
+        "classificationReason": "The content advertises a PowerSkate program with two age-group sessions and an explicit list of many specific dates and weekly time slots. It is not a food/drink offer and contains multiple scheduled session dates laid out like a mini-calendar. The post includes event metadata (posted by a community events centre) and a registration link, which reinforces that this is a date-organized series of events rather than a single event or a simple promotional special.",
+        "estimatedItemCount": 20
+      },
+      "candidate": {
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": true,
+          "organizationStyle": "By date and time, with two age-group sessions listed on recurring weekly days"
+        },
+        "contentType": "EVENT",
+        "confidence": 0.91,
+        "classificationReason": "This advertises one PowerSkate program, with separate sessions for two age groups. The listed Saturdays and Sundays are dates within that single program, not a lineup of distinct entertainment events or a date-organized calendar of many unrelated activities. There are no food or drink specials. No Facebook Event Data is provided.",
+        "estimatedItemCount": 1
+      },
+      "baselineRoute": "CALENDAR",
+      "candidateRoute": "EVENT"
+    },
+    {
+      "caseId": "oct8-fixture-row-287-powerskate-date-table",
+      "row": 287,
+      "venue": "Cavendish Farms Community Events Centre",
+      "arm": "luna-high",
+      "changed": [
+        "resolvedContentType"
+      ],
+      "baseline": {
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": true,
+          "organizationStyle": "date-organized (listed session dates with associated weekly time slots)"
+        },
+        "contentType": "CALENDAR",
+        "confidence": 0.92,
+        "classificationReason": "The content advertises a PowerSkate program with two age-group sessions and an explicit list of many specific dates and weekly time slots. It is not a food/drink offer and contains multiple scheduled session dates laid out like a mini-calendar. The post includes event metadata (posted by a community events centre) and a registration link, which reinforces that this is a date-organized series of events rather than a single event or a simple promotional special.",
+        "estimatedItemCount": 20
+      },
+      "candidate": {
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": true,
+          "organizationStyle": "Recurring sessions organized by age group, weekday, time, and individual dates"
+        },
+        "contentType": "SCHEDULE",
+        "confidence": 0.91,
+        "classificationReason": "The post advertises a PowerSkate program with two age-group sessions that recur on specified weekdays and times. It lists multiple session dates for each group, making this a time-organized schedule rather than a single activity listing or a general calendar. There are no food or drink specials, and no Facebook Event Data is provided.",
+        "estimatedItemCount": 20
+      },
+      "baselineRoute": "CALENDAR",
+      "candidateRoute": "SCHEDULE"
+    },
+    {
+      "caseId": "oct8-fixture-row-062-harbourfront-october-gallery",
+      "row": 62,
+      "venue": "Harbourfront Theatre",
+      "arm": "luna-none",
+      "changed": [
+        "resolvedContentType"
+      ],
+      "baseline": {
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": true,
+          "organizationStyle": "date-organized"
+        },
+        "contentType": "CALENDAR",
+        "confidence": 0.92,
+        "classificationReason": "The content is a promotional listing of multiple live shows occurring on specific dates throughout October (Frozen in Time Oct 11; Flashback Oct 13; Still Standin' Oct 15-17; Relive the Music Oct 19; Jason Cyrus Oct 23; Mysteries of the Keyhole House Oct 30, plus a related free talk Oct 29). There are many date-organized events (a monthly lineup), no food or drink specials, and the items are presented as a calendar-style monthly schedule rather than a single event or an hourly/daily recurring schedule.",
+        "estimatedItemCount": 8
+      },
+      "candidate": {
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": true,
+          "organizationStyle": "Date-organized monthly listing of multiple events, each with its own date and often a time."
+        },
+        "contentType": "CALENDAR",
+        "confidence": 0.98,
+        "classificationReason": "The post presents a month-long October lineup with numerous distinct entertainment events listed by date, including shows on October 11, 13, 15–17, 19, 23, and 30, plus a related free historical talk on October 29. This is a date-organized collection of events, so CALENDAR fits better than a single/few-event EVENT or a time-organized SCHEDULE. No food or drink specials are advertised. No Facebook Event Data is provided.",
+        "estimatedItemCount": 8
+      },
+      "baselineRoute": "CALENDAR",
+      "candidateRoute": "SCHEDULE"
+    },
+    {
+      "caseId": "oct8-fixture-row-150-kensington-fall-dessert-trail",
+      "row": 150,
+      "venue": "Island Stone Pub - Kensington Station",
+      "arm": "luna-none",
+      "changed": [
+        "resolvedContentType"
+      ],
+      "baseline": {
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": true,
+          "hasMultipleItems": true,
+          "organizationStyle": "unstructured list by location with a date range (Oct 5-9)"
+        },
+        "contentType": "MIXED_EVENTS_AND_SPECIALS",
+        "confidence": 0.92,
+        "classificationReason": "The post promotes a time-limited community 'Fall Dessert Trail' with specific dates (Oct 5-9) — indicating an event — and also lists specific food/drink offerings at multiple businesses (desserts and a spiked tea), which are food specials. Multiple locations and multiple menu items are listed, so the content contains both an event and advertised specials, fitting the MIXED_EVENTS_AND_SPECIALS category.",
+        "estimatedItemCount": 7
+      },
+      "candidate": {
+        "contentAnalysis": {
+          "hasEvents": false,
+          "hasFoodSpecials": true,
+          "hasMultipleItems": true,
+          "organizationStyle": "Unstructured list of participating locations and featured desserts/drink, with an overall date range"
+        },
+        "contentType": "FOOD_SPECIAL",
+        "confidence": 0.95,
+        "classificationReason": "The post advertises several food and drink offerings available during a fall dessert trail, including cakes, pie, pastries, and an apple toddy. These are featured menu items rather than entertainment activities, so this is not an EVENT or a mixed category. Although the trail spans October 5–9 and includes multiple locations, it is not a date-organized calendar or time-organized event schedule. No Facebook Event Data is present.",
+        "estimatedItemCount": 6
+      },
+      "baselineRoute": "MIXED_EVENTS_AND_SPECIALS",
+      "candidateRoute": "FOOD_SPECIAL"
+    },
+    {
+      "caseId": "oct8-fixture-row-150-kensington-fall-dessert-trail",
+      "row": 150,
+      "venue": "Island Stone Pub - Kensington Station",
+      "arm": "luna-high",
+      "changed": [
+        "resolvedContentType"
+      ],
+      "baseline": {
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": true,
+          "hasMultipleItems": true,
+          "organizationStyle": "unstructured list by location with a date range (Oct 5-9)"
+        },
+        "contentType": "MIXED_EVENTS_AND_SPECIALS",
+        "confidence": 0.92,
+        "classificationReason": "The post promotes a time-limited community 'Fall Dessert Trail' with specific dates (Oct 5-9) — indicating an event — and also lists specific food/drink offerings at multiple businesses (desserts and a spiked tea), which are food specials. Multiple locations and multiple menu items are listed, so the content contains both an event and advertised specials, fitting the MIXED_EVENTS_AND_SPECIALS category.",
+        "estimatedItemCount": 7
+      },
+      "candidate": {
+        "contentAnalysis": {
+          "hasEvents": false,
+          "hasFoodSpecials": true,
+          "hasMultipleItems": true,
+          "organizationStyle": "Organized by participating venue, with a shared date range of October 5–9"
+        },
+        "contentType": "FOOD_SPECIAL",
+        "confidence": 0.91,
+        "classificationReason": "The post promotes a short-term Fall Dessert Trail and lists specific seasonal desserts and a drink available at participating businesses from October 5–9. These are limited-time food and drink offerings, not entertainment activities or a schedule of events. The trail format does not include separate activities beyond the featured offerings. No Facebook Event Data is present.",
+        "estimatedItemCount": 7
+      },
+      "baselineRoute": "MIXED_EVENTS_AND_SPECIALS",
+      "candidateRoute": "FOOD_SPECIAL"
+    }
+  ],
+  "exclusions": [
+    {
+      "row": 222,
+      "reason": "captured gallery image unavailable"
+    },
+    {
+      "row": 224,
+      "reason": "captured gallery image unavailable"
+    }
+  ],
+  "downstream": [
+    {
+      "caseId": "2026-10-08-text-330",
+      "arm": "luna-high",
+      "elapsedMs": 111521,
+      "stage3Count": 4,
+      "stage4Count": 4,
+      "finalCount": 4,
+      "stage3Calls": 1,
+      "models": [
+        "gpt-6-luna",
+        "gpt-5-nano"
+      ],
+      "skips": [],
+      "stage3Items": [
+        {
+          "name": "Open Ice",
+          "date": "2026-10-08",
+          "startTime": "18:20",
+          "endTime": "",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Open Ice",
+          "date": "2026-10-10",
+          "startTime": "09:20",
+          "endTime": "",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Open Ice",
+          "date": "2026-10-10",
+          "startTime": "18:40",
+          "endTime": "",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Open Ice",
+          "date": "2026-10-12",
+          "startTime": "18:20",
+          "endTime": "",
+          "recurringPattern": "none"
+        }
+      ],
+      "events": [
+        {
+          "name": "Open Ice",
+          "startDate": "2026-10-08",
+          "startTime": "18:20",
+          "endDate": "2026-10-08",
+          "endTime": "20:20",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        },
+        {
+          "name": "Open Ice",
+          "startDate": "2026-10-10",
+          "startTime": "09:20",
+          "endDate": "2026-10-10",
+          "endTime": "11:20",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        },
+        {
+          "name": "Open Ice",
+          "startDate": "2026-10-10",
+          "startTime": "18:40",
+          "endDate": "2026-10-10",
+          "endTime": "20:40",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        },
+        {
+          "name": "Open Ice",
+          "startDate": "2026-10-12",
+          "startTime": "18:20",
+          "endDate": "2026-10-12",
+          "endTime": "20:20",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        }
+      ]
+    },
+    {
+      "caseId": "2026-10-08-text-330",
+      "arm": "mini-current",
+      "elapsedMs": 91784,
+      "stage3Count": 4,
+      "stage4Count": 4,
+      "finalCount": 4,
+      "stage3Calls": 1,
+      "models": [
+        "gpt-6-luna",
+        "gpt-5-nano"
+      ],
+      "skips": [],
+      "stage3Items": [
+        {
+          "name": "Open Ice",
+          "date": "2026-10-08",
+          "startTime": "18:20",
+          "endTime": "",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Open Ice",
+          "date": "2026-10-10",
+          "startTime": "09:20",
+          "endTime": "",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Open Ice",
+          "date": "2026-10-10",
+          "startTime": "18:40",
+          "endTime": "",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Open Ice",
+          "date": "2026-10-12",
+          "startTime": "18:20",
+          "endTime": "",
+          "recurringPattern": "none"
+        }
+      ],
+      "events": [
+        {
+          "name": "Open Ice",
+          "startDate": "2026-10-08",
+          "startTime": "18:20",
+          "endDate": "2026-10-08",
+          "endTime": "23:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        },
+        {
+          "name": "Open Ice",
+          "startDate": "2026-10-10",
+          "startTime": "09:20",
+          "endDate": "2026-10-10",
+          "endTime": "23:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        },
+        {
+          "name": "Open Ice",
+          "startDate": "2026-10-10",
+          "startTime": "18:40",
+          "endDate": "2026-10-10",
+          "endTime": "23:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        },
+        {
+          "name": "Open Ice",
+          "startDate": "2026-10-12",
+          "startTime": "18:20",
+          "endDate": "2026-10-12",
+          "endTime": "23:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        }
+      ]
+    },
+    {
+      "caseId": "oct8-fixture-row-287-powerskate-date-table",
+      "arm": "luna-high",
+      "elapsedMs": 145962,
+      "stage3Count": 20,
+      "stage4Count": 20,
+      "finalCount": 20,
+      "stage3Calls": 1,
+      "models": [
+        "gpt-6-luna",
+        "gpt-5-nano"
+      ],
+      "skips": [],
+      "stage3Items": [
+        {
+          "name": "PowerSkating Sessions — U9-U11",
+          "date": "2026-10-17",
+          "startTime": "07:00",
+          "endTime": "08:00",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "PowerSkating Sessions — U9-U11",
+          "date": "2026-10-24",
+          "startTime": "07:00",
+          "endTime": "08:00",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "PowerSkating Sessions — U9-U11",
+          "date": "2026-10-31",
+          "startTime": "07:00",
+          "endTime": "08:00",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "PowerSkating Sessions — U9-U11",
+          "date": "2026-11-14",
+          "startTime": "07:00",
+          "endTime": "08:00",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "PowerSkating Sessions — U9-U11",
+          "date": "2026-11-21",
+          "startTime": "07:00",
+          "endTime": "08:00",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "PowerSkating Sessions — U9-U11",
+          "date": "2026-11-28",
+          "startTime": "07:00",
+          "endTime": "08:00",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "PowerSkating Sessions — U9-U11",
+          "date": "2026-12-05",
+          "startTime": "07:00",
+          "endTime": "08:00",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "PowerSkating Sessions — U9-U11",
+          "date": "2026-12-12",
+          "startTime": "07:00",
+          "endTime": "08:00",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "PowerSkating Sessions — U9-U11",
+          "date": "2026-12-19",
+          "startTime": "07:00",
+          "endTime": "08:00",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "PowerSkating Sessions — U9-U11",
+          "date": "2027-01-02",
+          "startTime": "07:00",
+          "endTime": "08:00",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "PowerSkating Sessions — U13-U15",
+          "date": "2026-10-18",
+          "startTime": "07:00",
+          "endTime": "08:00",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "PowerSkating Sessions — U13-U15",
+          "date": "2026-10-25",
+          "startTime": "07:00",
+          "endTime": "08:00",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "PowerSkating Sessions — U13-U15",
+          "date": "2026-11-01",
+          "startTime": "07:00",
+          "endTime": "08:00",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "PowerSkating Sessions — U13-U15",
+          "date": "2026-11-15",
+          "startTime": "07:00",
+          "endTime": "08:00",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "PowerSkating Sessions — U13-U15",
+          "date": "2026-11-22",
+          "startTime": "07:00",
+          "endTime": "08:00",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "PowerSkating Sessions — U13-U15",
+          "date": "2026-11-29",
+          "startTime": "07:00",
+          "endTime": "08:00",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "PowerSkating Sessions — U13-U15",
+          "date": "2026-12-06",
+          "startTime": "07:00",
+          "endTime": "08:00",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "PowerSkating Sessions — U13-U15",
+          "date": "2026-12-13",
+          "startTime": "07:00",
+          "endTime": "08:00",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "PowerSkating Sessions — U13-U15",
+          "date": "2026-12-20",
+          "startTime": "07:00",
+          "endTime": "08:00",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "PowerSkating Sessions — U13-U15",
+          "date": "2027-01-03",
+          "startTime": "07:00",
+          "endTime": "08:00",
+          "recurringPattern": "none"
+        }
+      ],
+      "events": [
+        {
+          "name": "PowerSkating Sessions — U9-U11",
+          "startDate": "2026-10-17",
+          "startTime": "07:00",
+          "endDate": "2026-10-17",
+          "endTime": "08:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        },
+        {
+          "name": "PowerSkating Sessions — U9-U11",
+          "startDate": "2026-10-24",
+          "startTime": "07:00",
+          "endDate": "2026-10-24",
+          "endTime": "08:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        },
+        {
+          "name": "PowerSkating Sessions — U9-U11",
+          "startDate": "2026-10-31",
+          "startTime": "07:00",
+          "endDate": "2026-10-31",
+          "endTime": "08:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        },
+        {
+          "name": "PowerSkating Sessions — U9-U11",
+          "startDate": "2026-11-14",
+          "startTime": "07:00",
+          "endDate": "2026-11-14",
+          "endTime": "08:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        },
+        {
+          "name": "PowerSkating Sessions — U9-U11",
+          "startDate": "2026-11-21",
+          "startTime": "07:00",
+          "endDate": "2026-11-21",
+          "endTime": "08:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        },
+        {
+          "name": "PowerSkating Sessions — U9-U11",
+          "startDate": "2026-11-28",
+          "startTime": "07:00",
+          "endDate": "2026-11-28",
+          "endTime": "08:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        },
+        {
+          "name": "PowerSkating Sessions — U9-U11",
+          "startDate": "2026-12-05",
+          "startTime": "07:00",
+          "endDate": "2026-12-05",
+          "endTime": "08:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        },
+        {
+          "name": "PowerSkating Sessions — U9-U11",
+          "startDate": "2026-12-12",
+          "startTime": "07:00",
+          "endDate": "2026-12-12",
+          "endTime": "08:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        },
+        {
+          "name": "PowerSkating Sessions — U9-U11",
+          "startDate": "2026-12-19",
+          "startTime": "07:00",
+          "endDate": "2026-12-19",
+          "endTime": "08:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        },
+        {
+          "name": "PowerSkating Sessions — U9-U11",
+          "startDate": "2027-01-02",
+          "startTime": "07:00",
+          "endDate": "2027-01-02",
+          "endTime": "08:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        },
+        {
+          "name": "PowerSkating Sessions — U13-U15",
+          "startDate": "2026-10-18",
+          "startTime": "07:00",
+          "endDate": "2026-10-18",
+          "endTime": "08:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        },
+        {
+          "name": "PowerSkating Sessions — U13-U15",
+          "startDate": "2026-10-25",
+          "startTime": "07:00",
+          "endDate": "2026-10-25",
+          "endTime": "08:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        },
+        {
+          "name": "PowerSkating Sessions — U13-U15",
+          "startDate": "2026-11-01",
+          "startTime": "07:00",
+          "endDate": "2026-11-01",
+          "endTime": "08:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        },
+        {
+          "name": "PowerSkating Sessions — U13-U15",
+          "startDate": "2026-11-15",
+          "startTime": "07:00",
+          "endDate": "2026-11-15",
+          "endTime": "08:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        },
+        {
+          "name": "PowerSkating Sessions — U13-U15",
+          "startDate": "2026-11-22",
+          "startTime": "07:00",
+          "endDate": "2026-11-22",
+          "endTime": "08:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        },
+        {
+          "name": "PowerSkating Sessions — U13-U15",
+          "startDate": "2026-11-29",
+          "startTime": "07:00",
+          "endDate": "2026-11-29",
+          "endTime": "08:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        },
+        {
+          "name": "PowerSkating Sessions — U13-U15",
+          "startDate": "2026-12-06",
+          "startTime": "07:00",
+          "endDate": "2026-12-06",
+          "endTime": "08:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        },
+        {
+          "name": "PowerSkating Sessions — U13-U15",
+          "startDate": "2026-12-13",
+          "startTime": "07:00",
+          "endDate": "2026-12-13",
+          "endTime": "08:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        },
+        {
+          "name": "PowerSkating Sessions — U13-U15",
+          "startDate": "2026-12-20",
+          "startTime": "07:00",
+          "endDate": "2026-12-20",
+          "endTime": "08:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        },
+        {
+          "name": "PowerSkating Sessions — U13-U15",
+          "startDate": "2027-01-03",
+          "startTime": "07:00",
+          "endDate": "2027-01-03",
+          "endTime": "08:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        }
+      ]
+    },
+    {
+      "caseId": "oct8-fixture-row-287-powerskate-date-table",
+      "arm": "luna-none",
+      "elapsedMs": 214039,
+      "stage3Count": 20,
+      "stage4Count": 20,
+      "finalCount": 20,
+      "stage3Calls": 1,
+      "models": [
+        "gpt-6-luna",
+        "gpt-5-nano"
+      ],
+      "skips": [],
+      "stage3Items": [
+        {
+          "name": "POWERSKATING SESSIONS — U9 - U11",
+          "date": "2026-10-17",
+          "startTime": "07:00",
+          "endTime": "08:00",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U9 - U11",
+          "date": "2026-10-24",
+          "startTime": "07:00",
+          "endTime": "08:00",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U9 - U11",
+          "date": "2026-10-31",
+          "startTime": "07:00",
+          "endTime": "08:00",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U9 - U11",
+          "date": "2026-11-14",
+          "startTime": "07:00",
+          "endTime": "08:00",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U9 - U11",
+          "date": "2026-11-21",
+          "startTime": "07:00",
+          "endTime": "08:00",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U9 - U11",
+          "date": "2026-11-28",
+          "startTime": "07:00",
+          "endTime": "08:00",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U9 - U11",
+          "date": "2026-12-05",
+          "startTime": "07:00",
+          "endTime": "08:00",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U9 - U11",
+          "date": "2026-12-12",
+          "startTime": "07:00",
+          "endTime": "08:00",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U9 - U11",
+          "date": "2026-12-19",
+          "startTime": "07:00",
+          "endTime": "08:00",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U9 - U11",
+          "date": "2027-01-02",
+          "startTime": "07:00",
+          "endTime": "08:00",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U13-U15",
+          "date": "2026-10-18",
+          "startTime": "07:00",
+          "endTime": "08:00",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U13-U15",
+          "date": "2026-10-25",
+          "startTime": "07:00",
+          "endTime": "08:00",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U13-U15",
+          "date": "2026-11-01",
+          "startTime": "07:00",
+          "endTime": "08:00",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U13-U15",
+          "date": "2026-11-15",
+          "startTime": "07:00",
+          "endTime": "08:00",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U13-U15",
+          "date": "2026-11-22",
+          "startTime": "07:00",
+          "endTime": "08:00",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U13-U15",
+          "date": "2026-11-29",
+          "startTime": "07:00",
+          "endTime": "08:00",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U13-U15",
+          "date": "2026-12-06",
+          "startTime": "07:00",
+          "endTime": "08:00",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U13-U15",
+          "date": "2026-12-13",
+          "startTime": "07:00",
+          "endTime": "08:00",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U13-U15",
+          "date": "2026-12-20",
+          "startTime": "07:00",
+          "endTime": "08:00",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U13-U15",
+          "date": "2027-01-03",
+          "startTime": "07:00",
+          "endTime": "08:00",
+          "recurringPattern": "none"
+        }
+      ],
+      "events": [
+        {
+          "name": "POWERSKATING SESSIONS — U9 - U11",
+          "startDate": "2026-10-17",
+          "startTime": "07:00",
+          "endDate": "2026-10-17",
+          "endTime": "08:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U9 - U11",
+          "startDate": "2026-10-24",
+          "startTime": "07:00",
+          "endDate": "2026-10-24",
+          "endTime": "08:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U9 - U11",
+          "startDate": "2026-10-31",
+          "startTime": "07:00",
+          "endDate": "2026-10-31",
+          "endTime": "08:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U9 - U11",
+          "startDate": "2026-11-14",
+          "startTime": "07:00",
+          "endDate": "2026-11-14",
+          "endTime": "08:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U9 - U11",
+          "startDate": "2026-11-21",
+          "startTime": "07:00",
+          "endDate": "2026-11-21",
+          "endTime": "08:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U9 - U11",
+          "startDate": "2026-11-28",
+          "startTime": "07:00",
+          "endDate": "2026-11-28",
+          "endTime": "08:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U9 - U11",
+          "startDate": "2026-12-05",
+          "startTime": "07:00",
+          "endDate": "2026-12-05",
+          "endTime": "08:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U9 - U11",
+          "startDate": "2026-12-12",
+          "startTime": "07:00",
+          "endDate": "2026-12-12",
+          "endTime": "08:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U9 - U11",
+          "startDate": "2026-12-19",
+          "startTime": "07:00",
+          "endDate": "2026-12-19",
+          "endTime": "08:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U9 - U11",
+          "startDate": "2027-01-02",
+          "startTime": "07:00",
+          "endDate": "2027-01-02",
+          "endTime": "08:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U13-U15",
+          "startDate": "2026-10-18",
+          "startTime": "07:00",
+          "endDate": "2026-10-18",
+          "endTime": "08:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U13-U15",
+          "startDate": "2026-10-25",
+          "startTime": "07:00",
+          "endDate": "2026-10-25",
+          "endTime": "08:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U13-U15",
+          "startDate": "2026-11-01",
+          "startTime": "07:00",
+          "endDate": "2026-11-01",
+          "endTime": "08:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U13-U15",
+          "startDate": "2026-11-15",
+          "startTime": "07:00",
+          "endDate": "2026-11-15",
+          "endTime": "08:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U13-U15",
+          "startDate": "2026-11-22",
+          "startTime": "07:00",
+          "endDate": "2026-11-22",
+          "endTime": "08:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U13-U15",
+          "startDate": "2026-11-29",
+          "startTime": "07:00",
+          "endDate": "2026-11-29",
+          "endTime": "08:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U13-U15",
+          "startDate": "2026-12-06",
+          "startTime": "07:00",
+          "endDate": "2026-12-06",
+          "endTime": "08:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U13-U15",
+          "startDate": "2026-12-13",
+          "startTime": "07:00",
+          "endDate": "2026-12-13",
+          "endTime": "08:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U13-U15",
+          "startDate": "2026-12-20",
+          "startTime": "07:00",
+          "endDate": "2026-12-20",
+          "endTime": "08:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U13-U15",
+          "startDate": "2027-01-03",
+          "startTime": "07:00",
+          "endDate": "2027-01-03",
+          "endTime": "08:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        }
+      ]
+    },
+    {
+      "caseId": "oct8-fixture-row-287-powerskate-date-table",
+      "arm": "mini-current",
+      "elapsedMs": 193002,
+      "stage3Count": 20,
+      "stage4Count": 20,
+      "finalCount": 20,
+      "stage3Calls": 1,
+      "models": [
+        "gpt-6-luna",
+        "gpt-5-nano"
+      ],
+      "skips": [],
+      "stage3Items": [
+        {
+          "name": "POWERSKATING SESSIONS — U9-U11",
+          "date": "2026-10-17",
+          "startTime": "7:00 AM",
+          "endTime": "8:00 AM"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U13-U15",
+          "date": "2026-10-18",
+          "startTime": "7:00 AM",
+          "endTime": "8:00 AM"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U9-U11",
+          "date": "2026-10-24",
+          "startTime": "7:00 AM",
+          "endTime": "8:00 AM"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U13-U15",
+          "date": "2026-10-25",
+          "startTime": "7:00 AM",
+          "endTime": "8:00 AM"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U9-U11",
+          "date": "2026-10-31",
+          "startTime": "7:00 AM",
+          "endTime": "8:00 AM"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U13-U15",
+          "date": "2026-11-01",
+          "startTime": "7:00 AM",
+          "endTime": "8:00 AM"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U9-U11",
+          "date": "2026-11-14",
+          "startTime": "7:00 AM",
+          "endTime": "8:00 AM"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U13-U15",
+          "date": "2026-11-15",
+          "startTime": "7:00 AM",
+          "endTime": "8:00 AM"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U9-U11",
+          "date": "2026-11-21",
+          "startTime": "7:00 AM",
+          "endTime": "8:00 AM"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U13-U15",
+          "date": "2026-11-22",
+          "startTime": "7:00 AM",
+          "endTime": "8:00 AM"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U9-U11",
+          "date": "2026-11-28",
+          "startTime": "7:00 AM",
+          "endTime": "8:00 AM"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U13-U15",
+          "date": "2026-11-29",
+          "startTime": "7:00 AM",
+          "endTime": "8:00 AM"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U9-U11",
+          "date": "2026-12-05",
+          "startTime": "7:00 AM",
+          "endTime": "8:00 AM"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U13-U15",
+          "date": "2026-12-06",
+          "startTime": "7:00 AM",
+          "endTime": "8:00 AM"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U9-U11",
+          "date": "2026-12-12",
+          "startTime": "7:00 AM",
+          "endTime": "8:00 AM"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U13-U15",
+          "date": "2026-12-13",
+          "startTime": "7:00 AM",
+          "endTime": "8:00 AM"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U9-U11",
+          "date": "2026-12-19",
+          "startTime": "7:00 AM",
+          "endTime": "8:00 AM"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U13-U15",
+          "date": "2026-12-20",
+          "startTime": "7:00 AM",
+          "endTime": "8:00 AM"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U9-U11",
+          "date": "2027-01-02",
+          "startTime": "7:00 AM",
+          "endTime": "8:00 AM"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U13-U15",
+          "date": "2027-01-03",
+          "startTime": "7:00 AM",
+          "endTime": "8:00 AM"
+        }
+      ],
+      "events": [
+        {
+          "name": "POWERSKATING SESSIONS — U9-U11",
+          "startDate": "2026-10-17",
+          "startTime": "07:00",
+          "endDate": "2026-10-17",
+          "endTime": "08:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U13-U15",
+          "startDate": "2026-10-18",
+          "startTime": "07:00",
+          "endDate": "2026-10-18",
+          "endTime": "08:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U9-U11",
+          "startDate": "2026-10-24",
+          "startTime": "07:00",
+          "endDate": "2026-10-24",
+          "endTime": "08:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U13-U15",
+          "startDate": "2026-10-25",
+          "startTime": "07:00",
+          "endDate": "2026-10-25",
+          "endTime": "08:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U9-U11",
+          "startDate": "2026-10-31",
+          "startTime": "07:00",
+          "endDate": "2026-10-31",
+          "endTime": "08:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U13-U15",
+          "startDate": "2026-11-01",
+          "startTime": "07:00",
+          "endDate": "2026-11-01",
+          "endTime": "08:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U9-U11",
+          "startDate": "2026-11-14",
+          "startTime": "07:00",
+          "endDate": "2026-11-14",
+          "endTime": "08:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U13-U15",
+          "startDate": "2026-11-15",
+          "startTime": "07:00",
+          "endDate": "2026-11-15",
+          "endTime": "08:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U9-U11",
+          "startDate": "2026-11-21",
+          "startTime": "07:00",
+          "endDate": "2026-11-21",
+          "endTime": "08:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U13-U15",
+          "startDate": "2026-11-22",
+          "startTime": "07:00",
+          "endDate": "2026-11-22",
+          "endTime": "08:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U9-U11",
+          "startDate": "2026-11-28",
+          "startTime": "07:00",
+          "endDate": "2026-11-28",
+          "endTime": "08:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U13-U15",
+          "startDate": "2026-11-29",
+          "startTime": "07:00",
+          "endDate": "2026-11-29",
+          "endTime": "08:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U9-U11",
+          "startDate": "2026-12-05",
+          "startTime": "07:00",
+          "endDate": "2026-12-05",
+          "endTime": "08:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U13-U15",
+          "startDate": "2026-12-06",
+          "startTime": "07:00",
+          "endDate": "2026-12-06",
+          "endTime": "08:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U9-U11",
+          "startDate": "2026-12-12",
+          "startTime": "07:00",
+          "endDate": "2026-12-12",
+          "endTime": "08:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U13-U15",
+          "startDate": "2026-12-13",
+          "startTime": "07:00",
+          "endDate": "2026-12-13",
+          "endTime": "08:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U9-U11",
+          "startDate": "2026-12-19",
+          "startTime": "07:00",
+          "endDate": "2026-12-19",
+          "endTime": "08:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U13-U15",
+          "startDate": "2026-12-20",
+          "startTime": "07:00",
+          "endDate": "2026-12-20",
+          "endTime": "08:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U9-U11",
+          "startDate": "2027-01-02",
+          "startTime": "07:00",
+          "endDate": "2027-01-02",
+          "endTime": "08:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U13-U15",
+          "startDate": "2027-01-03",
+          "startTime": "07:00",
+          "endDate": "2027-01-03",
+          "endTime": "08:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        }
+      ]
+    },
+    {
+      "caseId": "oct9-row-213",
+      "arm": "luna-high",
+      "elapsedMs": 46013,
+      "stage3Count": 1,
+      "stage4Count": 1,
+      "finalCount": 1,
+      "stage3Calls": 3,
+      "models": [
+        "gpt-6-luna",
+        "gpt-5-nano"
+      ],
+      "skips": [],
+      "stage3Items": [
+        {
+          "name": "Rxtra Care Clinic Walk-ins",
+          "date": "2026-10-09",
+          "startTime": "21:00",
+          "endTime": "16:00",
+          "recurringPattern": "none"
+        }
+      ],
+      "events": [
+        {
+          "name": "Rxtra Care Clinic Walk-ins",
+          "startDate": "2026-10-09",
+          "startTime": "21:00",
+          "endDate": "2026-10-10",
+          "endTime": "16:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        }
+      ]
+    },
+    {
+      "caseId": "oct9-row-213",
+      "arm": "luna-none",
+      "elapsedMs": 60914,
+      "stage3Count": 1,
+      "stage4Count": 1,
+      "finalCount": 1,
+      "stage3Calls": 2,
+      "models": [
+        "gpt-6-luna",
+        "gpt-5-nano"
+      ],
+      "skips": [],
+      "stage3Items": [
+        {
+          "name": "Rxtra Care Clinic",
+          "date": "2026-10-09",
+          "startTime": "09:00",
+          "endTime": "16:00",
+          "recurringPattern": "none"
+        }
+      ],
+      "events": [
+        {
+          "name": "Rxtra Care Clinic",
+          "startDate": "2026-10-09",
+          "startTime": "09:00",
+          "endDate": "2026-10-09",
+          "endTime": "16:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        }
+      ]
+    },
+    {
+      "caseId": "oct9-row-213",
+      "arm": "mini-current",
+      "elapsedMs": 53560,
+      "stage3Count": 1,
+      "stage4Count": 1,
+      "finalCount": 1,
+      "stage3Calls": 3,
+      "models": [
+        "gpt-6-luna",
+        "gpt-5-nano"
+      ],
+      "skips": [],
+      "stage3Items": [
+        {
+          "name": "Rxtra Care Clinic",
+          "date": "2026-10-09",
+          "startTime": "09:00",
+          "endTime": "16:00",
+          "recurringPattern": "none"
+        }
+      ],
+      "events": [
+        {
+          "name": "Rxtra Care Clinic",
+          "startDate": "2026-10-09",
+          "startTime": "09:00",
+          "endDate": "2026-10-09",
+          "endTime": "16:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        }
+      ]
+    },
+    {
+      "caseId": "oct9-row-214",
+      "arm": "luna-none",
+      "elapsedMs": 40400,
+      "stage3Count": 1,
+      "stage4Count": 1,
+      "finalCount": 1,
+      "stage3Calls": 1,
+      "models": [
+        "gpt-6-luna",
+        "gpt-5-nano"
+      ],
+      "skips": [],
+      "stage3Items": [
+        {
+          "name": "Rxtra Care Clinic",
+          "date": "2026-10-08",
+          "startTime": "11:00",
+          "endTime": "16:00",
+          "recurringPattern": "none"
+        }
+      ],
+      "events": [
+        {
+          "name": "Rxtra Care Clinic",
+          "startDate": "2026-10-08",
+          "startTime": "11:00",
+          "endDate": "2026-10-08",
+          "endTime": "16:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        }
+      ]
+    },
+    {
+      "caseId": "oct9-row-214",
+      "arm": "mini-current",
+      "elapsedMs": 36646,
+      "stage3Count": 1,
+      "stage4Count": 1,
+      "finalCount": 1,
+      "stage3Calls": 2,
+      "models": [
+        "gpt-6-luna",
+        "gpt-5-nano"
+      ],
+      "skips": [],
+      "stage3Items": [
+        {
+          "name": "Rxtra Care Clinic",
+          "date": "2026-10-08",
+          "startTime": "11:00",
+          "endTime": "16:00",
+          "recurringPattern": "none"
+        }
+      ],
+      "events": [
+        {
+          "name": "Rxtra Care Clinic",
+          "startDate": "2026-10-08",
+          "startTime": "11:00",
+          "endDate": "2026-10-08",
+          "endTime": "16:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        }
+      ]
+    },
+    {
+      "caseId": "oct9-row-274",
+      "arm": "luna-none",
+      "elapsedMs": 53292,
+      "stage3Count": 2,
+      "stage4Count": 2,
+      "finalCount": 2,
+      "stage3Calls": 2,
+      "models": [
+        "gpt-6-luna",
+        "gpt-5-nano"
+      ],
+      "skips": [],
+      "stage3Items": [
+        {
+          "name": "Studio and Gallery Visit and Tour",
+          "date": "2026-10-10",
+          "startTime": "10:00",
+          "endTime": "17:00",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Studio and Gallery Visit and Tour",
+          "date": "2026-10-11",
+          "startTime": "10:00",
+          "endTime": "17:00",
+          "recurringPattern": "none"
+        }
+      ],
+      "events": [
+        {
+          "name": "Studio and Gallery Visit and Tour",
+          "startDate": "2026-10-10",
+          "startTime": "10:00",
+          "endDate": "2026-10-10",
+          "endTime": "17:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        },
+        {
+          "name": "Studio and Gallery Visit and Tour",
+          "startDate": "2026-10-11",
+          "startTime": "10:00",
+          "endDate": "2026-10-11",
+          "endTime": "17:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        }
+      ]
+    },
+    {
+      "caseId": "oct9-row-274",
+      "arm": "mini-current",
+      "elapsedMs": 47172,
+      "stage3Count": 2,
+      "stage4Count": 2,
+      "finalCount": 2,
+      "stage3Calls": 2,
+      "models": [
+        "gpt-6-luna",
+        "gpt-5-nano"
+      ],
+      "skips": [],
+      "stage3Items": [
+        {
+          "name": "Studio Tour and Gallery Experience",
+          "date": "2026-10-10",
+          "startTime": "10:00",
+          "endTime": "17:00",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Studio Tour and Gallery Experience",
+          "date": "2026-10-11",
+          "startTime": "10:00",
+          "endTime": "17:00",
+          "recurringPattern": "none"
+        }
+      ],
+      "events": [
+        {
+          "name": "Studio Tour and Gallery Experience",
+          "startDate": "2026-10-10",
+          "startTime": "10:00",
+          "endDate": "2026-10-10",
+          "endTime": "17:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        },
+        {
+          "name": "Studio Tour and Gallery Experience",
+          "startDate": "2026-10-11",
+          "startTime": "10:00",
+          "endDate": "2026-10-11",
+          "endTime": "17:00",
+          "recurringPattern": "none",
+          "isRecurring": "No"
+        }
+      ]
+    },
+    {
+      "caseId": "oct9-row-51",
+      "arm": "luna-high",
+      "elapsedMs": 80571,
+      "stage3Count": 13,
+      "stage4Count": 1,
+      "finalCount": 0,
+      "stage3Calls": 1,
+      "models": [
+        "gpt-6-luna",
+        "gpt-5-nano"
+      ],
+      "skips": [
+        {
+          "stage": "stage5",
+          "reason": "Luna canary requires source review",
+          "detail": "stage5_no_items"
+        }
+      ],
+      "stage3Items": [
+        {
+          "name": "10K Run",
+          "date": "2026-10-17",
+          "startTime": "",
+          "endTime": ""
+        },
+        {
+          "name": "10K Walk",
+          "date": "2026-10-17",
+          "startTime": "",
+          "endTime": ""
+        },
+        {
+          "name": "5K Run",
+          "date": "2026-10-17",
+          "startTime": "",
+          "endTime": ""
+        },
+        {
+          "name": "5K Walk",
+          "date": "2026-10-17",
+          "startTime": "",
+          "endTime": ""
+        },
+        {
+          "name": "2K Wheelchair",
+          "date": "2026-10-17",
+          "startTime": "",
+          "endTime": ""
+        },
+        {
+          "name": "Kids Fox Trot",
+          "date": "2026-10-17",
+          "startTime": "",
+          "endTime": ""
+        },
+        {
+          "name": "Full Marathon",
+          "date": "2026-10-18",
+          "startTime": "",
+          "endTime": ""
+        },
+        {
+          "name": "Team Relay",
+          "date": "2026-10-18",
+          "startTime": "",
+          "endTime": ""
+        },
+        {
+          "name": "Half Marathon Run",
+          "date": "2026-10-18",
+          "startTime": "",
+          "endTime": ""
+        },
+        {
+          "name": "Half Marathon Walk",
+          "date": "2026-10-18",
+          "startTime": "",
+          "endTime": ""
+        },
+        {
+          "name": "15K Run",
+          "date": "2026-10-18",
+          "startTime": "",
+          "endTime": ""
+        },
+        {
+          "name": "15K Walk",
+          "date": "2026-10-18",
+          "startTime": "",
+          "endTime": ""
+        },
+        {
+          "name": "Registration Price Change Deadline",
+          "date": "2026-10-09",
+          "startTime": "11:59 PM AST",
+          "endTime": ""
+        }
+      ],
+      "events": []
+    },
+    {
+      "caseId": "oct9-row-51",
+      "arm": "mini-current",
+      "elapsedMs": 55327,
+      "stage3Count": 12,
+      "stage4Count": 0,
+      "finalCount": 0,
+      "stage3Calls": 1,
+      "models": [
+        "gpt-6-luna",
+        "gpt-5-nano"
+      ],
+      "skips": [
+        {
+          "stage": "stage4",
+          "reason": "Luna canary requires source review",
+          "detail": "stage4_no_items"
+        }
+      ],
+      "stage3Items": [
+        {
+          "name": "10K RUN",
+          "date": "2026-10-17",
+          "startTime": "unknown",
+          "endTime": "",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "10K WALK",
+          "date": "2026-10-17",
+          "startTime": "unknown",
+          "endTime": "",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "5K RUN",
+          "date": "2026-10-17",
+          "startTime": "unknown",
+          "endTime": "",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "5K WALK",
+          "date": "2026-10-17",
+          "startTime": "unknown",
+          "endTime": "",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "2K WHEELCHAIR",
+          "date": "2026-10-17",
+          "startTime": "unknown",
+          "endTime": "",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "KIDS FOX TROT",
+          "date": "2026-10-17",
+          "startTime": "unknown",
+          "endTime": "",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "FULL MARATHON",
+          "date": "2026-10-18",
+          "startTime": "unknown",
+          "endTime": "",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "TEAM RELAY",
+          "date": "2026-10-18",
+          "startTime": "unknown",
+          "endTime": "",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "HALF MARATHON RUN",
+          "date": "2026-10-18",
+          "startTime": "unknown",
+          "endTime": "",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "HALF MARATHON WALK",
+          "date": "2026-10-18",
+          "startTime": "unknown",
+          "endTime": "",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "15K RUN",
+          "date": "2026-10-18",
+          "startTime": "unknown",
+          "endTime": "",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "15K WALK",
+          "date": "2026-10-18",
+          "startTime": "unknown",
+          "endTime": "",
+          "recurringPattern": "none"
+        }
+      ],
+      "events": []
+    },
+    {
+      "caseId": "oct9-row-73",
+      "arm": "luna-high",
+      "elapsedMs": 15621,
+      "stage3Count": 1,
+      "stage4Count": 0,
+      "finalCount": 0,
+      "stage3Calls": 1,
+      "models": [
+        "gpt-6-luna",
+        "gpt-5-nano"
+      ],
+      "skips": [
+        {
+          "stage": "stage4",
+          "reason": "Luna canary requires source review",
+          "detail": "stage4_no_items"
+        }
+      ],
+      "stage3Items": [
+        {
+          "name": "Oktoberfest Shotgun Tournament",
+          "startTime": "10:03",
+          "endTime": "",
+          "recurringPattern": "none"
+        }
+      ],
+      "events": []
+    },
+    {
+      "caseId": "oct9-row-73",
+      "arm": "mini-current",
+      "elapsedMs": 51452,
+      "stage3Count": 1,
+      "stage4Count": 0,
+      "finalCount": 0,
+      "stage3Calls": 2,
+      "models": [
+        "gpt-6-luna",
+        "gpt-5-nano"
+      ],
+      "skips": [
+        {
+          "stage": "stage4",
+          "reason": "Luna canary requires source review",
+          "detail": "stage4_no_items"
+        }
+      ],
+      "stage3Items": [
+        {
+          "name": "Oktoberfest Shotgun Tournament",
+          "startTime": "10:03 am",
+          "endTime": ""
+        }
+      ],
+      "events": []
+    }
+  ]
+}
