@@ -72,3 +72,41 @@ All three live parser functions were ACTIVE on source hash
 Prepared code does not itself prove that the pilot is deployed or enabled.
 
 Final local release gates: TypeScript build passed, all 557 compiled backend tests passed, 40 evaluator tests passed, and git diff --check passed.
+
+## Verified production release
+
+Parser commit `977a72a` was narrowly deployed to `gathr-migrated`, codebase
+`gathr-functions`, while Firestore confirmed zero running parser locks.
+The exact dry-run and deployment target was:
+
+```powershell
+firebase deploy --only "functions:gathr-functions:processDataset,functions:gathr-functions:processDatasetResume,functions:gathr-functions:processDatasetSelectedRows" --project gathr-migrated --dry-run --non-interactive
+firebase deploy --only "functions:gathr-functions:processDataset,functions:gathr-functions:processDatasetResume,functions:gathr-functions:processDatasetSelectedRows" --project gathr-migrated --non-interactive
+```
+
+Both commands succeeded. Readback confirms all three ACTIVE, all traffic on the
+latest revision, and common Firebase source hash
+`76ac783b8f752d5d211c247972e3012840fb8eba`:
+
+| Function | Revision |
+| --- | --- |
+| processDataset | processdataset-00458-lov |
+| processDatasetResume | processdatasetresume-00422-wef |
+| processDatasetSelectedRows | processdatasetselectedrows-00414-fex |
+
+All three have Stage 1 pilot enabled at 50%, default Stage 1/Stage 2 Mini,
+Stage 3 Luna high at 100% of eligible image posts, legacy fallback false,
+Stage 4 Nano low, and Stage 5 Nano medium. Runtime selection overrides Mini
+only for selected Stage 1 posts. Environment rollback backup is saved privately
+as `pilot-before-env.local` in the external evidence directory.
+
+Evidence: `pilot-deploy-dry-run.log`, `pilot-deploy.log`, `pilot-live-after.json`,
+`pilot-release-final-suite.log` (557 passed), `pilot-evaluation-final.log`
+(40 passed), the no-write replays and production-entry smoke described above.
+The Firebase CLI reported the existing outdated firebase-functions warning;
+no dependency upgrade was performed. No live event records or media were changed.
+
+The existing daily audit retains its 11 a.m. Halifax start and now includes
+Stage 1 routing, rejected-post recall, costs and both occurrence safeguards.
+The first regular live parse remains the next validation gate; this release
+is a 50% pilot, not a claim that Stage 1 is ready for 100%.
