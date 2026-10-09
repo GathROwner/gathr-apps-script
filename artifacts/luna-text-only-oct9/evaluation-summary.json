@@ -1,0 +1,2202 @@
+{
+  "snapshotCount": 36,
+  "distinctSourceCaptionTimestampCases": 30,
+  "standaloneStage1Accepted": 23,
+  "standaloneStage1Rejected": 13,
+  "fullReplayFinalItems": 40,
+  "fullReplayPositivePosts": 17,
+  "fullReplayHeldOrRejectedPosts": 13,
+  "correctedFullReplays": 5,
+  "boundaryControls": 5,
+  "modelCalls": {
+    "('stage1', 'gpt-6-luna')": 30,
+    "('stage2', 'gpt-5-mini')": 20,
+    "('stage3', 'gpt-6-luna')": 28,
+    "('stage4', 'gpt-5-nano')": 18,
+    "('stage5', 'gpt-5-nano')": 18
+  },
+  "cases": [
+    {
+      "day": "2026-10-05",
+      "row": 19,
+      "postId": "1712523240875955",
+      "sourceUrl": "https://www.facebook.com/1712523240875955",
+      "venue": "Georgetown Inn & Restaurant",
+      "snapshotPath": "parse_snapshots/1SqTJqEcU5Er6RqAErHDOtB4ptdiXniVM_19_1791204238305",
+      "baselineFinalItems": 0,
+      "stage1Accepted": false,
+      "stage3Items": 0,
+      "events": [],
+      "holds": [
+        {
+          "stage": "stage1",
+          "reason": "Due to failing Stage 1 validation",
+          "detail": "The post only announces that the restaurant has closed for the season and thanks past customers. A seasonal closing notice by itself is not a public event, visitor-access offer, or food/drink special."
+        }
+      ],
+      "finalCodeTargetedReplay": false,
+      "calls": [
+        {
+          "stage": "stage1",
+          "model": "gpt-6-luna",
+          "component": "contentValidator",
+          "durationMs": 2437,
+          "inputTokens": 3343,
+          "outputTokens": 117
+        }
+      ]
+    },
+    {
+      "day": "2026-10-05",
+      "row": 134,
+      "postId": "1710926094375311",
+      "sourceUrl": "https://www.facebook.com/1710926094375311",
+      "venue": "PEI-Pho Vietnam Restaurant",
+      "snapshotPath": "parse_snapshots/1SqTJqEcU5Er6RqAErHDOtB4ptdiXniVM_134_1791206147597",
+      "baselineFinalItems": 0,
+      "stage1Accepted": false,
+      "stage3Items": 0,
+      "events": [],
+      "holds": [
+        {
+          "stage": "stage1",
+          "reason": "Due to failing Stage 1 validation",
+          "detail": "The caption mentions \u201c#farmdays\u201d at Queen Street and says there is fun and activities, but it does not identify a concrete public activity or clearly invite the public to attend or participate. No images are attached."
+        }
+      ],
+      "finalCodeTargetedReplay": false,
+      "calls": [
+        {
+          "stage": "stage1",
+          "model": "gpt-6-luna",
+          "component": "contentValidator",
+          "durationMs": 3450,
+          "inputTokens": 3334,
+          "outputTokens": 177
+        }
+      ]
+    },
+    {
+      "day": "2026-10-05",
+      "row": 237,
+      "postId": "1747093147424315",
+      "sourceUrl": "https://www.facebook.com/1747093147424315",
+      "venue": "Kenny's Restaurant & Dairy Bar",
+      "snapshotPath": "parse_snapshots/1SqTJqEcU5Er6RqAErHDOtB4ptdiXniVM_237_1791208486467",
+      "baselineFinalItems": 0,
+      "stage1Accepted": true,
+      "stage3Items": 1,
+      "events": [
+        {
+          "name": "Sunday Special \u2014 2pc Fish (Haddock) & Chips",
+          "startDate": "2026-10-04",
+          "endDate": "2026-10-04",
+          "startTime": "10:11",
+          "endTime": "21:00",
+          "category": "Food Special",
+          "isEvent": "No",
+          "isFoodSpecial": "Yes",
+          "ticketPrice": "",
+          "ticketLink": "",
+          "timeResolution": {
+            "hoursUsed": false,
+            "reason": "no_place_match",
+            "startFromPostTime": true,
+            "endFromHours": "category_default"
+          }
+        }
+      ],
+      "holds": [],
+      "finalCodeTargetedReplay": false,
+      "calls": [
+        {
+          "stage": "stage1",
+          "model": "gpt-6-luna",
+          "component": "contentValidator",
+          "durationMs": 3597,
+          "inputTokens": 3369,
+          "outputTokens": 145
+        },
+        {
+          "stage": "stage2",
+          "model": "gpt-5-mini",
+          "component": "contentClassifier",
+          "durationMs": 3336,
+          "inputTokens": 753,
+          "outputTokens": 439
+        },
+        {
+          "stage": "stage3",
+          "model": "gpt-6-luna",
+          "component": "eventExtractor",
+          "durationMs": 5685,
+          "inputTokens": 1448,
+          "outputTokens": 507
+        },
+        {
+          "stage": "stage4",
+          "model": "gpt-5-nano",
+          "component": "secondaryValidator",
+          "durationMs": 5233,
+          "inputTokens": 2155,
+          "outputTokens": 624
+        },
+        {
+          "stage": "stage5",
+          "model": "gpt-5-nano",
+          "component": "finalFormatter",
+          "durationMs": 25374,
+          "inputTokens": 2125,
+          "outputTokens": 4173
+        }
+      ]
+    },
+    {
+      "day": "2026-10-06",
+      "row": 109,
+      "postId": "1521711283316782",
+      "sourceUrl": "https://www.facebook.com/1521711283316782",
+      "venue": "Town of Souris",
+      "snapshotPath": "parse_snapshots/1IcZOB0T9oxC1hugFaR0QbSD4nD_25t9I_109_1791315413758",
+      "baselineFinalItems": 1,
+      "stage1Accepted": true,
+      "stage3Items": 1,
+      "events": [
+        {
+          "name": "Souris Town Council Meeting",
+          "startDate": "2026-10-13",
+          "endDate": "2026-10-13",
+          "startTime": "19:00",
+          "endTime": "23:00",
+          "category": "Gatherings & Parties",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "ticketPrice": "",
+          "ticketLink": "",
+          "timeResolution": {
+            "hoursUsed": false,
+            "reason": "no_place_match",
+            "endFromHours": "category_default"
+          }
+        }
+      ],
+      "holds": [],
+      "finalCodeTargetedReplay": false,
+      "calls": [
+        {
+          "stage": "stage1",
+          "model": "gpt-6-luna",
+          "component": "contentValidator",
+          "durationMs": 2487,
+          "inputTokens": 3369,
+          "outputTokens": 129
+        },
+        {
+          "stage": "stage2",
+          "model": "gpt-5-mini",
+          "component": "contentClassifier",
+          "durationMs": 3612,
+          "inputTokens": 753,
+          "outputTokens": 356
+        },
+        {
+          "stage": "stage3",
+          "model": "gpt-6-luna",
+          "component": "eventExtractor",
+          "durationMs": 2149,
+          "inputTokens": 2425,
+          "outputTokens": 108
+        },
+        {
+          "stage": "stage3",
+          "model": "gpt-6-luna",
+          "component": "eventExtractor",
+          "durationMs": 2674,
+          "inputTokens": 631,
+          "outputTokens": 297
+        },
+        {
+          "stage": "stage4",
+          "model": "gpt-5-nano",
+          "component": "secondaryValidator",
+          "durationMs": 5010,
+          "inputTokens": 2171,
+          "outputTokens": 612
+        },
+        {
+          "stage": "stage5",
+          "model": "gpt-5-nano",
+          "component": "finalFormatter",
+          "durationMs": 32577,
+          "inputTokens": 2135,
+          "outputTokens": 3693
+        }
+      ]
+    },
+    {
+      "day": "2026-10-06",
+      "row": 248,
+      "postId": "1700006188792023",
+      "sourceUrl": "https://www.facebook.com/1700006188792023",
+      "venue": "Holman's Ice Cream Parlour",
+      "snapshotPath": "parse_snapshots/1IcZOB0T9oxC1hugFaR0QbSD4nD_25t9I_248_1791320306704",
+      "baselineFinalItems": 0,
+      "stage1Accepted": false,
+      "stage3Items": 0,
+      "events": [],
+      "holds": [
+        {
+          "stage": "stage1",
+          "reason": "Due to failing Stage 1 validation",
+          "detail": "The post only reports that sugar-free ice cream is currently out of stock and that more will be available tomorrow. This is ordinary product availability/restocking, not an advertised food special, deal, discount, or free offer."
+        }
+      ],
+      "finalCodeTargetedReplay": false,
+      "calls": [
+        {
+          "stage": "stage1",
+          "model": "gpt-6-luna",
+          "component": "contentValidator",
+          "durationMs": 2607,
+          "inputTokens": 3350,
+          "outputTokens": 133
+        }
+      ]
+    },
+    {
+      "day": "2026-10-06",
+      "row": 288,
+      "postId": "122315565422189551",
+      "sourceUrl": "https://www.facebook.com/122315565422189551",
+      "venue": "Ruby's Counter",
+      "snapshotPath": "parse_snapshots/1IcZOB0T9oxC1hugFaR0QbSD4nD_25t9I_288_1791330596549",
+      "baselineFinalItems": 2,
+      "stage1Accepted": true,
+      "stage3Items": 1,
+      "events": [
+        {
+          "name": "Shaved Pork Sammy with Apple Slaw on Focaccia",
+          "startDate": "2026-10-05",
+          "endDate": "2026-10-05",
+          "startTime": "09:23",
+          "endTime": "21:00",
+          "category": "Food Special",
+          "isEvent": "No",
+          "isFoodSpecial": "Yes",
+          "ticketPrice": "",
+          "ticketLink": "",
+          "timeResolution": {
+            "hoursUsed": false,
+            "reason": "no_place_match",
+            "startFromPostTime": true,
+            "endFromHours": "category_default"
+          }
+        }
+      ],
+      "holds": [],
+      "finalCodeTargetedReplay": false,
+      "calls": [
+        {
+          "stage": "stage1",
+          "model": "gpt-6-luna",
+          "component": "contentValidator",
+          "durationMs": 2107,
+          "inputTokens": 3398,
+          "outputTokens": 143
+        },
+        {
+          "stage": "stage2",
+          "model": "gpt-5-mini",
+          "component": "contentClassifier",
+          "durationMs": 3345,
+          "inputTokens": 782,
+          "outputTokens": 478
+        },
+        {
+          "stage": "stage3",
+          "model": "gpt-6-luna",
+          "component": "eventExtractor",
+          "durationMs": 8439,
+          "inputTokens": 1474,
+          "outputTokens": 772
+        },
+        {
+          "stage": "stage4",
+          "model": "gpt-5-nano",
+          "component": "secondaryValidator",
+          "durationMs": 8607,
+          "inputTokens": 2190,
+          "outputTokens": 807
+        },
+        {
+          "stage": "stage5",
+          "model": "gpt-5-nano",
+          "component": "finalFormatter",
+          "durationMs": 24386,
+          "inputTokens": 2151,
+          "outputTokens": 3546
+        }
+      ]
+    },
+    {
+      "day": "2026-10-06",
+      "row": 304,
+      "postId": "28532972386330238",
+      "sourceUrl": "https://www.facebook.com/28532972386330238",
+      "venue": "Farmers Bank At Rustico",
+      "snapshotPath": "parse_snapshots/1IcZOB0T9oxC1hugFaR0QbSD4nD_25t9I_304_1791330999229",
+      "baselineFinalItems": 0,
+      "stage1Accepted": true,
+      "stage3Items": 10,
+      "events": [
+        {
+          "name": "Farmersbank Museum and the Doucet House",
+          "startDate": "2026-10-05",
+          "endDate": "2026-10-05",
+          "startTime": "10:00",
+          "endTime": "16:00",
+          "category": "Gatherings & Parties",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "ticketPrice": "",
+          "ticketLink": "",
+          "timeResolution": {
+            "hoursUsed": false
+          }
+        },
+        {
+          "name": "Farmersbank Museum and the Doucet House",
+          "startDate": "2026-10-06",
+          "endDate": "2026-10-06",
+          "startTime": "10:00",
+          "endTime": "16:00",
+          "category": "Gatherings & Parties",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "ticketPrice": "",
+          "ticketLink": "",
+          "timeResolution": {
+            "hoursUsed": false
+          }
+        },
+        {
+          "name": "Farmersbank Museum and the Doucet House",
+          "startDate": "2026-10-07",
+          "endDate": "2026-10-07",
+          "startTime": "10:00",
+          "endTime": "16:00",
+          "category": "Gatherings & Parties",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "ticketPrice": "",
+          "ticketLink": "",
+          "timeResolution": {
+            "hoursUsed": false
+          }
+        },
+        {
+          "name": "Farmersbank Museum and the Doucet House",
+          "startDate": "2026-10-08",
+          "endDate": "2026-10-08",
+          "startTime": "10:00",
+          "endTime": "16:00",
+          "category": "Gatherings & Parties",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "ticketPrice": "",
+          "ticketLink": "",
+          "timeResolution": {
+            "hoursUsed": false
+          }
+        },
+        {
+          "name": "Farmersbank Museum and the Doucet House",
+          "startDate": "2026-10-09",
+          "endDate": "2026-10-09",
+          "startTime": "10:00",
+          "endTime": "16:00",
+          "category": "Gatherings & Parties",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "ticketPrice": "",
+          "ticketLink": "",
+          "timeResolution": {
+            "hoursUsed": false
+          }
+        },
+        {
+          "name": "Farmersbank Museum and the Doucet House",
+          "startDate": "2026-10-12",
+          "endDate": "2026-10-12",
+          "startTime": "10:00",
+          "endTime": "16:00",
+          "category": "Gatherings & Parties",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "ticketPrice": "",
+          "ticketLink": "",
+          "timeResolution": {
+            "hoursUsed": false
+          }
+        },
+        {
+          "name": "Farmersbank Museum and the Doucet House",
+          "startDate": "2026-10-13",
+          "endDate": "2026-10-13",
+          "startTime": "10:00",
+          "endTime": "16:00",
+          "category": "Gatherings & Parties",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "ticketPrice": "",
+          "ticketLink": "",
+          "timeResolution": {
+            "hoursUsed": false
+          }
+        },
+        {
+          "name": "Farmersbank Museum and the Doucet House",
+          "startDate": "2026-10-14",
+          "endDate": "2026-10-14",
+          "startTime": "10:00",
+          "endTime": "16:00",
+          "category": "Gatherings & Parties",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "ticketPrice": "",
+          "ticketLink": "",
+          "timeResolution": {
+            "hoursUsed": false
+          }
+        },
+        {
+          "name": "Farmersbank Museum and the Doucet House",
+          "startDate": "2026-10-15",
+          "endDate": "2026-10-15",
+          "startTime": "10:00",
+          "endTime": "16:00",
+          "category": "Gatherings & Parties",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "ticketPrice": "",
+          "ticketLink": "",
+          "timeResolution": {
+            "hoursUsed": false
+          }
+        },
+        {
+          "name": "Farmersbank Museum and the Doucet House",
+          "startDate": "2026-10-16",
+          "endDate": "2026-10-16",
+          "startTime": "10:00",
+          "endTime": "16:00",
+          "category": "Gatherings & Parties",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "ticketPrice": "",
+          "ticketLink": "",
+          "timeResolution": {
+            "hoursUsed": false
+          }
+        }
+      ],
+      "holds": [],
+      "finalCodeTargetedReplay": false,
+      "calls": [
+        {
+          "stage": "stage1",
+          "model": "gpt-6-luna",
+          "component": "contentValidator",
+          "durationMs": 2997,
+          "inputTokens": 3362,
+          "outputTokens": 162
+        },
+        {
+          "stage": "stage2",
+          "model": "gpt-5-mini",
+          "component": "contentClassifier",
+          "durationMs": 4024,
+          "inputTokens": 746,
+          "outputTokens": 585
+        },
+        {
+          "stage": "stage3",
+          "model": "gpt-6-luna",
+          "component": "eventExtractor",
+          "durationMs": 51148,
+          "inputTokens": 2419,
+          "outputTokens": 6651
+        },
+        {
+          "stage": "stage4",
+          "model": "gpt-5-nano",
+          "component": "secondaryValidator",
+          "durationMs": 47892,
+          "inputTokens": 6471,
+          "outputTokens": 5607
+        },
+        {
+          "stage": "stage5",
+          "model": "gpt-5-nano",
+          "component": "finalFormatter",
+          "durationMs": 20871,
+          "inputTokens": 2379,
+          "outputTokens": 2374
+        },
+        {
+          "stage": "stage5",
+          "model": "gpt-5-nano",
+          "component": "finalFormatter",
+          "durationMs": 86535,
+          "inputTokens": 6059,
+          "outputTokens": 7314
+        }
+      ]
+    },
+    {
+      "day": "2026-10-07",
+      "row": 50,
+      "postId": "1627862376019005",
+      "sourceUrl": "https://www.facebook.com/1627862376019005",
+      "venue": "Jade Garden Restaurant",
+      "snapshotPath": "parse_snapshots/1eREpzt2nL6mpIX9St-GoKOvTDrdX4WwU_50_1791377552361",
+      "baselineFinalItems": 0,
+      "stage1Accepted": false,
+      "stage3Items": 0,
+      "events": [],
+      "holds": [
+        {
+          "stage": "stage1",
+          "reason": "Due to failing Stage 1 validation",
+          "detail": "The post only announces a temporary restaurant renovation closure and the date the restaurant will reopen. A return to ordinary business operations is not a public event, activity, visitor-access offer, or food/drink special."
+        }
+      ],
+      "finalCodeTargetedReplay": false,
+      "calls": [
+        {
+          "stage": "stage1",
+          "model": "gpt-6-luna",
+          "component": "contentValidator",
+          "durationMs": 2550,
+          "inputTokens": 3353,
+          "outputTokens": 137
+        }
+      ]
+    },
+    {
+      "day": "2026-10-07",
+      "row": 243,
+      "postId": "1665188375068547",
+      "sourceUrl": "https://www.facebook.com/1665188375068547",
+      "venue": "Eastern Kings Sportsplex",
+      "snapshotPath": "parse_snapshots/1eREpzt2nL6mpIX9St-GoKOvTDrdX4WwU_243_1791382686154",
+      "baselineFinalItems": 0,
+      "stage1Accepted": true,
+      "stage3Items": 0,
+      "events": [],
+      "holds": [
+        {
+          "stage": "stage3",
+          "reason": "Luna canary requires source review",
+          "detail": "stage3_no_items"
+        }
+      ],
+      "finalCodeTargetedReplay": false,
+      "calls": [
+        {
+          "stage": "stage1",
+          "model": "gpt-6-luna",
+          "component": "contentValidator",
+          "durationMs": 2219,
+          "inputTokens": 3340,
+          "outputTokens": 133
+        },
+        {
+          "stage": "stage2",
+          "model": "gpt-5-mini",
+          "component": "contentClassifier",
+          "durationMs": 2837,
+          "inputTokens": 724,
+          "outputTokens": 410
+        },
+        {
+          "stage": "stage3",
+          "model": "gpt-6-luna",
+          "component": "eventExtractor",
+          "durationMs": 2713,
+          "inputTokens": 2396,
+          "outputTokens": 171
+        },
+        {
+          "stage": "stage3",
+          "model": "gpt-6-luna",
+          "component": "eventExtractor",
+          "durationMs": 1812,
+          "inputTokens": 602,
+          "outputTokens": 139
+        }
+      ]
+    },
+    {
+      "day": "2026-10-07",
+      "row": 295,
+      "postId": "1749302547203375",
+      "sourceUrl": "https://www.facebook.com/1749302547203375",
+      "venue": "Kenny's Restaurant & Dairy Bar",
+      "snapshotPath": "parse_snapshots/1eREpzt2nL6mpIX9St-GoKOvTDrdX4WwU_295_1791385777093",
+      "baselineFinalItems": 1,
+      "stage1Accepted": true,
+      "stage3Items": 1,
+      "events": [
+        {
+          "name": "Bacon Mozza Burger & Fries",
+          "startDate": "2026-10-06",
+          "endDate": "2026-10-06",
+          "startTime": "11:24",
+          "endTime": "21:00",
+          "category": "Food Special",
+          "isEvent": "No",
+          "isFoodSpecial": "Yes",
+          "ticketPrice": "",
+          "ticketLink": "",
+          "timeResolution": {
+            "hoursUsed": false,
+            "reason": "no_place_match",
+            "startFromPostTime": true,
+            "endFromHours": "category_default"
+          }
+        }
+      ],
+      "holds": [],
+      "finalCodeTargetedReplay": false,
+      "calls": [
+        {
+          "stage": "stage1",
+          "model": "gpt-6-luna",
+          "component": "contentValidator",
+          "durationMs": 2318,
+          "inputTokens": 3337,
+          "outputTokens": 131
+        },
+        {
+          "stage": "stage2",
+          "model": "gpt-5-mini",
+          "component": "contentClassifier",
+          "durationMs": 2396,
+          "inputTokens": 721,
+          "outputTokens": 313
+        },
+        {
+          "stage": "stage3",
+          "model": "gpt-6-luna",
+          "component": "eventExtractor",
+          "durationMs": 4743,
+          "inputTokens": 1416,
+          "outputTokens": 421
+        },
+        {
+          "stage": "stage4",
+          "model": "gpt-5-nano",
+          "component": "secondaryValidator",
+          "durationMs": 6026,
+          "inputTokens": 2154,
+          "outputTokens": 756
+        },
+        {
+          "stage": "stage5",
+          "model": "gpt-5-nano",
+          "component": "finalFormatter",
+          "durationMs": 22597,
+          "inputTokens": 2124,
+          "outputTokens": 3272
+        }
+      ]
+    },
+    {
+      "day": "2026-10-07",
+      "row": 321,
+      "postId": "122315767850189551",
+      "sourceUrl": "https://www.facebook.com/122315767850189551",
+      "venue": "Ruby's Counter",
+      "snapshotPath": "parse_snapshots/1eREpzt2nL6mpIX9St-GoKOvTDrdX4WwU_321_1791386722210",
+      "baselineFinalItems": 3,
+      "stage1Accepted": true,
+      "stage3Items": 3,
+      "events": [
+        {
+          "name": "Chicken & Broccoli Casserole",
+          "startDate": "2026-10-06",
+          "endDate": "2026-10-06",
+          "startTime": "10:05",
+          "endTime": "21:00",
+          "category": "Food Special",
+          "isEvent": "No",
+          "isFoodSpecial": "Yes",
+          "ticketPrice": "",
+          "ticketLink": "",
+          "timeResolution": {
+            "hoursUsed": false,
+            "reason": "no_place_match",
+            "startFromPostTime": true,
+            "endFromHours": "category_default"
+          }
+        },
+        {
+          "name": "Meatloaf w/ Mashed potatoes & Veggies",
+          "startDate": "2026-10-06",
+          "endDate": "2026-10-06",
+          "startTime": "10:05",
+          "endTime": "21:00",
+          "category": "Food Special",
+          "isEvent": "No",
+          "isFoodSpecial": "Yes",
+          "ticketPrice": "",
+          "ticketLink": "",
+          "timeResolution": {
+            "hoursUsed": false,
+            "reason": "no_place_match",
+            "startFromPostTime": true,
+            "endFromHours": "category_default"
+          }
+        },
+        {
+          "name": "Beef Barley Soup",
+          "startDate": "2026-10-06",
+          "endDate": "2026-10-06",
+          "startTime": "10:05",
+          "endTime": "21:00",
+          "category": "Food Special",
+          "isEvent": "No",
+          "isFoodSpecial": "Yes",
+          "ticketPrice": "",
+          "ticketLink": "",
+          "timeResolution": {
+            "hoursUsed": false,
+            "reason": "no_place_match",
+            "startFromPostTime": true,
+            "endFromHours": "category_default"
+          }
+        }
+      ],
+      "holds": [],
+      "finalCodeTargetedReplay": false,
+      "calls": [
+        {
+          "stage": "stage1",
+          "model": "gpt-6-luna",
+          "component": "contentValidator",
+          "durationMs": 3003,
+          "inputTokens": 3358,
+          "outputTokens": 145
+        },
+        {
+          "stage": "stage2",
+          "model": "gpt-5-mini",
+          "component": "contentClassifier",
+          "durationMs": 3509,
+          "inputTokens": 742,
+          "outputTokens": 372
+        },
+        {
+          "stage": "stage3",
+          "model": "gpt-6-luna",
+          "component": "eventExtractor",
+          "durationMs": 4746,
+          "inputTokens": 1434,
+          "outputTokens": 529
+        },
+        {
+          "stage": "stage4",
+          "model": "gpt-5-nano",
+          "component": "secondaryValidator",
+          "durationMs": 7256,
+          "inputTokens": 2411,
+          "outputTokens": 1115
+        },
+        {
+          "stage": "stage5",
+          "model": "gpt-5-nano",
+          "component": "finalFormatter",
+          "durationMs": 63980,
+          "inputTokens": 2390,
+          "outputTokens": 7793
+        }
+      ]
+    },
+    {
+      "day": "2026-10-07",
+      "row": 322,
+      "postId": "122315751440189551",
+      "sourceUrl": "https://www.facebook.com/122315751440189551",
+      "venue": "Ruby's Counter",
+      "snapshotPath": "parse_snapshots/1eREpzt2nL6mpIX9St-GoKOvTDrdX4WwU_322_1791386810267",
+      "baselineFinalItems": 1,
+      "stage1Accepted": true,
+      "stage3Items": 1,
+      "events": [
+        {
+          "name": "Roast Beef Dinner",
+          "startDate": "2026-10-09",
+          "endDate": "2026-10-09",
+          "startTime": "15:00",
+          "endTime": "18:00",
+          "category": "Food Special",
+          "isEvent": "No",
+          "isFoodSpecial": "Yes",
+          "ticketPrice": "$20 per person",
+          "ticketLink": "",
+          "timeResolution": {
+            "hoursUsed": false
+          }
+        }
+      ],
+      "holds": [],
+      "finalCodeTargetedReplay": false,
+      "calls": [
+        {
+          "stage": "stage1",
+          "model": "gpt-6-luna",
+          "component": "contentValidator",
+          "durationMs": 2634,
+          "inputTokens": 3391,
+          "outputTokens": 141
+        },
+        {
+          "stage": "stage2",
+          "model": "gpt-5-mini",
+          "component": "contentClassifier",
+          "durationMs": 4275,
+          "inputTokens": 775,
+          "outputTokens": 536
+        },
+        {
+          "stage": "stage3",
+          "model": "gpt-6-luna",
+          "component": "eventExtractor",
+          "durationMs": 7754,
+          "inputTokens": 1467,
+          "outputTokens": 734
+        },
+        {
+          "stage": "stage4",
+          "model": "gpt-5-nano",
+          "component": "secondaryValidator",
+          "durationMs": 8752,
+          "inputTokens": 2208,
+          "outputTokens": 703
+        },
+        {
+          "stage": "stage5",
+          "model": "gpt-5-nano",
+          "component": "finalFormatter",
+          "durationMs": 23971,
+          "inputTokens": 2169,
+          "outputTokens": 3906
+        }
+      ]
+    },
+    {
+      "day": "2026-10-08",
+      "row": 58,
+      "postId": "1410979264555198",
+      "sourceUrl": "https://www.facebook.com/1410979264555198",
+      "venue": "Albert & Crown Pub",
+      "snapshotPath": "parse_snapshots/1kIx_zGW7BZMf8F55eCYTQYOeYuFq-VLv_58_1791464241188",
+      "baselineFinalItems": 7,
+      "stage1Accepted": true,
+      "stage3Items": 7,
+      "events": [
+        {
+          "name": "Live Music - Joey Doucette",
+          "startDate": "2026-10-08",
+          "endDate": "2026-10-08",
+          "startTime": "20:00",
+          "endTime": "23:00",
+          "category": "Live Music",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "ticketPrice": "",
+          "ticketLink": "",
+          "timeResolution": {
+            "hoursUsed": false
+          }
+        },
+        {
+          "name": "Live Music - Floyd Gaudet",
+          "startDate": "2026-10-09",
+          "endDate": "2026-10-09",
+          "startTime": "18:00",
+          "endTime": "21:00",
+          "category": "Live Music",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "ticketPrice": "",
+          "ticketLink": "",
+          "timeResolution": {
+            "hoursUsed": false
+          }
+        },
+        {
+          "name": "Live Music - Nick Hoben",
+          "startDate": "2026-10-10",
+          "endDate": "2026-10-10",
+          "startTime": "19:00",
+          "endTime": "22:00",
+          "category": "Live Music",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "ticketPrice": "",
+          "ticketLink": "",
+          "timeResolution": {
+            "hoursUsed": false
+          }
+        },
+        {
+          "name": "Southwest Crispy Chicken Wrap & Fries",
+          "startDate": "2026-10-07",
+          "endDate": "2026-10-07",
+          "startTime": "11:22",
+          "endTime": "21:00",
+          "category": "Food Special",
+          "isEvent": "No",
+          "isFoodSpecial": "Yes",
+          "ticketPrice": "$15",
+          "ticketLink": "",
+          "timeResolution": {
+            "hoursUsed": false,
+            "reason": "no_place_match",
+            "startFromPostTime": true,
+            "endFromHours": "category_default"
+          }
+        },
+        {
+          "name": "Seafood Chowder",
+          "startDate": "2026-10-07",
+          "endDate": "2026-10-07",
+          "startTime": "11:22",
+          "endTime": "21:00",
+          "category": "Food Special",
+          "isEvent": "No",
+          "isFoodSpecial": "Yes",
+          "ticketPrice": "$20",
+          "ticketLink": "",
+          "timeResolution": {
+            "hoursUsed": false,
+            "reason": "no_place_match",
+            "startFromPostTime": true,
+            "endFromHours": "category_default"
+          }
+        },
+        {
+          "name": "Beef Soup",
+          "startDate": "2026-10-07",
+          "endDate": "2026-10-07",
+          "startTime": "11:22",
+          "endTime": "21:00",
+          "category": "Food Special",
+          "isEvent": "No",
+          "isFoodSpecial": "Yes",
+          "ticketPrice": "$8",
+          "ticketLink": "",
+          "timeResolution": {
+            "hoursUsed": false,
+            "reason": "no_place_match",
+            "startFromPostTime": true,
+            "endFromHours": "category_default"
+          }
+        },
+        {
+          "name": "Soup & Sandwich Combo",
+          "startDate": "2026-10-07",
+          "endDate": "2026-10-07",
+          "startTime": "11:22",
+          "endTime": "21:00",
+          "category": "Food Special",
+          "isEvent": "No",
+          "isFoodSpecial": "Yes",
+          "ticketPrice": "$15",
+          "ticketLink": "",
+          "timeResolution": {
+            "hoursUsed": false,
+            "reason": "no_place_match",
+            "startFromPostTime": true,
+            "endFromHours": "category_default"
+          }
+        }
+      ],
+      "holds": [],
+      "finalCodeTargetedReplay": false,
+      "calls": [
+        {
+          "stage": "stage1",
+          "model": "gpt-6-luna",
+          "component": "contentValidator",
+          "durationMs": 3131,
+          "inputTokens": 3418,
+          "outputTokens": 179
+        },
+        {
+          "stage": "stage2",
+          "model": "gpt-5-mini",
+          "component": "contentClassifier",
+          "durationMs": 4874,
+          "inputTokens": 802,
+          "outputTokens": 526
+        },
+        {
+          "stage": "stage3",
+          "model": "gpt-6-luna",
+          "component": "eventExtractor",
+          "durationMs": 11907,
+          "inputTokens": 2474,
+          "outputTokens": 1447
+        },
+        {
+          "stage": "stage3",
+          "model": "gpt-6-luna",
+          "component": "eventExtractor",
+          "durationMs": 9110,
+          "inputTokens": 1495,
+          "outputTokens": 1099
+        },
+        {
+          "stage": "stage4",
+          "model": "gpt-5-nano",
+          "component": "secondaryValidator",
+          "durationMs": 33847,
+          "inputTokens": 3508,
+          "outputTokens": 2476
+        },
+        {
+          "stage": "stage5",
+          "model": "gpt-5-nano",
+          "component": "finalFormatter",
+          "durationMs": 87096,
+          "inputTokens": 3526,
+          "outputTokens": 9427
+        }
+      ]
+    },
+    {
+      "day": "2026-10-08",
+      "row": 159,
+      "postId": "122215907462899881",
+      "sourceUrl": "https://www.facebook.com/122215907462899881",
+      "venue": "Charlottetown Royal Canadian Legion Branch 1",
+      "snapshotPath": "parse_snapshots/1kIx_zGW7BZMf8F55eCYTQYOeYuFq-VLv_159_1791467153182",
+      "baselineFinalItems": 0,
+      "stage1Accepted": false,
+      "stage3Items": 0,
+      "events": [],
+      "holds": [
+        {
+          "stage": "stage1",
+          "reason": "Due to failing Stage 1 validation",
+          "detail": "The post asks for volunteers to distribute poppy cans and sell poppies during the approaching poppy season. It does not announce a specific public event, visitor activity, or qualifying food or admission offer."
+        }
+      ],
+      "finalCodeTargetedReplay": false,
+      "calls": [
+        {
+          "stage": "stage1",
+          "model": "gpt-6-luna",
+          "component": "contentValidator",
+          "durationMs": 5133,
+          "inputTokens": 3398,
+          "outputTokens": 371
+        }
+      ]
+    },
+    {
+      "day": "2026-10-08",
+      "row": 160,
+      "postId": "122215907420899881",
+      "sourceUrl": "https://www.facebook.com/122215907420899881",
+      "venue": "Charlottetown Royal Canadian Legion Branch 1",
+      "snapshotPath": "parse_snapshots/1kIx_zGW7BZMf8F55eCYTQYOeYuFq-VLv_160_1791467159338",
+      "baselineFinalItems": 0,
+      "stage1Accepted": false,
+      "stage3Items": 0,
+      "events": [],
+      "holds": [
+        {
+          "stage": "stage1",
+          "reason": "Due to failing Stage 1 validation",
+          "detail": "The post recruits volunteers to distribute poppy cans and sell poppies at different locations. It does not announce a public event, scheduled activity, visitor-access offer, or qualifying food or drink special."
+        }
+      ],
+      "finalCodeTargetedReplay": false,
+      "calls": [
+        {
+          "stage": "stage1",
+          "model": "gpt-6-luna",
+          "component": "contentValidator",
+          "durationMs": 3801,
+          "inputTokens": 3398,
+          "outputTokens": 304
+        }
+      ]
+    },
+    {
+      "day": "2026-10-08",
+      "row": 253,
+      "postId": "122315943278189551",
+      "sourceUrl": "https://www.facebook.com/122315943278189551",
+      "venue": "Ruby's Counter",
+      "snapshotPath": "parse_snapshots/1kIx_zGW7BZMf8F55eCYTQYOeYuFq-VLv_253_1791469587544",
+      "baselineFinalItems": 1,
+      "stage1Accepted": true,
+      "stage3Items": 4,
+      "events": [
+        {
+          "name": "BBQ Chicken Nachos",
+          "startDate": "2026-10-07",
+          "endDate": "2026-10-07",
+          "startTime": "10:02",
+          "endTime": "21:00",
+          "category": "Food Special",
+          "isEvent": "No",
+          "isFoodSpecial": "Yes",
+          "ticketPrice": "",
+          "ticketLink": "",
+          "timeResolution": {
+            "hoursUsed": false,
+            "reason": "no_place_match",
+            "startFromPostTime": true,
+            "endFromHours": "category_default"
+          }
+        },
+        {
+          "name": "Burrito Bowl",
+          "startDate": "2026-10-07",
+          "endDate": "2026-10-07",
+          "startTime": "10:02",
+          "endTime": "21:00",
+          "category": "Food Special",
+          "isEvent": "No",
+          "isFoodSpecial": "Yes",
+          "ticketPrice": "",
+          "ticketLink": "",
+          "timeResolution": {
+            "hoursUsed": false,
+            "reason": "no_place_match",
+            "startFromPostTime": true,
+            "endFromHours": "category_default"
+          }
+        },
+        {
+          "name": "Beef Stroganoff",
+          "startDate": "2026-10-07",
+          "endDate": "2026-10-07",
+          "startTime": "10:02",
+          "endTime": "21:00",
+          "category": "Food Special",
+          "isEvent": "No",
+          "isFoodSpecial": "Yes",
+          "ticketPrice": "",
+          "ticketLink": "",
+          "timeResolution": {
+            "hoursUsed": false,
+            "reason": "no_place_match",
+            "startFromPostTime": true,
+            "endFromHours": "category_default"
+          }
+        },
+        {
+          "name": "Corn Beef Boiled Dinner",
+          "startDate": "2026-10-07",
+          "endDate": "2026-10-07",
+          "startTime": "10:02",
+          "endTime": "21:00",
+          "category": "Food Special",
+          "isEvent": "No",
+          "isFoodSpecial": "Yes",
+          "ticketPrice": "",
+          "ticketLink": "",
+          "timeResolution": {
+            "hoursUsed": false,
+            "reason": "no_place_match",
+            "startFromPostTime": true,
+            "endFromHours": "category_default"
+          }
+        }
+      ],
+      "holds": [],
+      "finalCodeTargetedReplay": false,
+      "calls": [
+        {
+          "stage": "stage1",
+          "model": "gpt-6-luna",
+          "component": "contentValidator",
+          "durationMs": 2578,
+          "inputTokens": 3376,
+          "outputTokens": 209
+        },
+        {
+          "stage": "stage2",
+          "model": "gpt-5-mini",
+          "component": "contentClassifier",
+          "durationMs": 3599,
+          "inputTokens": 760,
+          "outputTokens": 419
+        },
+        {
+          "stage": "stage3",
+          "model": "gpt-6-luna",
+          "component": "eventExtractor",
+          "durationMs": 14119,
+          "inputTokens": 1452,
+          "outputTokens": 1604
+        },
+        {
+          "stage": "stage4",
+          "model": "gpt-5-nano",
+          "component": "secondaryValidator",
+          "durationMs": 15409,
+          "inputTokens": 2684,
+          "outputTokens": 1348
+        },
+        {
+          "stage": "stage5",
+          "model": "gpt-5-nano",
+          "component": "finalFormatter",
+          "durationMs": 53945,
+          "inputTokens": 2672,
+          "outputTokens": 5621
+        }
+      ]
+    },
+    {
+      "day": "2026-10-08",
+      "row": 262,
+      "postId": "1544090384413093",
+      "sourceUrl": "https://www.facebook.com/1544090384413093",
+      "venue": "North Rustico Lions Club",
+      "snapshotPath": "parse_snapshots/1kIx_zGW7BZMf8F55eCYTQYOeYuFq-VLv_262_1791469682736",
+      "baselineFinalItems": 1,
+      "stage1Accepted": true,
+      "stage3Items": 1,
+      "events": [
+        {
+          "name": "Jacob Hemphill Duo featuring special guest Em Peters",
+          "startDate": "2026-10-10",
+          "endDate": "2026-10-11",
+          "startTime": "20:00",
+          "endTime": "01:00",
+          "category": "Live Music",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "ticketPrice": "By donation",
+          "ticketLink": "",
+          "timeResolution": {
+            "hoursUsed": false,
+            "reason": "no_place_match",
+            "endFromHours": "category_default"
+          }
+        }
+      ],
+      "holds": [],
+      "finalCodeTargetedReplay": true,
+      "calls": [
+        {
+          "stage": "stage1",
+          "model": "gpt-6-luna",
+          "component": "contentValidator",
+          "durationMs": 2443,
+          "inputTokens": 3530,
+          "outputTokens": 131
+        },
+        {
+          "stage": "stage2",
+          "model": "gpt-5-mini",
+          "component": "contentClassifier",
+          "durationMs": 2823,
+          "inputTokens": 855,
+          "outputTokens": 346
+        },
+        {
+          "stage": "stage3",
+          "model": "gpt-6-luna",
+          "component": "eventExtractor",
+          "durationMs": 6006,
+          "inputTokens": 2693,
+          "outputTokens": 607
+        },
+        {
+          "stage": "stage3",
+          "model": "gpt-6-luna",
+          "component": "eventExtractor",
+          "durationMs": 2059,
+          "inputTokens": 1549,
+          "outputTokens": 105
+        },
+        {
+          "stage": "stage4",
+          "model": "gpt-5-nano",
+          "component": "secondaryValidator",
+          "durationMs": 7570,
+          "inputTokens": 2295,
+          "outputTokens": 904
+        },
+        {
+          "stage": "stage5",
+          "model": "gpt-5-nano",
+          "component": "finalFormatter",
+          "durationMs": 43386,
+          "inputTokens": 2262,
+          "outputTokens": 4275
+        }
+      ]
+    },
+    {
+      "day": "2026-10-08",
+      "row": 263,
+      "postId": "1544059534416178",
+      "sourceUrl": "https://www.facebook.com/1544059534416178",
+      "venue": "North Rustico Lions Club",
+      "snapshotPath": "parse_snapshots/1kIx_zGW7BZMf8F55eCYTQYOeYuFq-VLv_263_1791469756756",
+      "baselineFinalItems": 1,
+      "stage1Accepted": true,
+      "stage3Items": 1,
+      "events": [
+        {
+          "name": "Trivia Night",
+          "startDate": "2026-10-09",
+          "endDate": "2026-10-09",
+          "startTime": "19:30",
+          "endTime": "22:00",
+          "category": "Trivia Night",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "ticketPrice": "$5 to play",
+          "ticketLink": "",
+          "timeResolution": {
+            "hoursUsed": false,
+            "reason": "no_place_match",
+            "endFromHours": "category_default"
+          }
+        }
+      ],
+      "holds": [],
+      "finalCodeTargetedReplay": true,
+      "calls": [
+        {
+          "stage": "stage1",
+          "model": "gpt-6-luna",
+          "component": "contentValidator",
+          "durationMs": 3152,
+          "inputTokens": 3553,
+          "outputTokens": 159
+        },
+        {
+          "stage": "stage2",
+          "model": "gpt-5-mini",
+          "component": "contentClassifier",
+          "durationMs": 3324,
+          "inputTokens": 878,
+          "outputTokens": 424
+        },
+        {
+          "stage": "stage3",
+          "model": "gpt-6-luna",
+          "component": "eventExtractor",
+          "durationMs": 7056,
+          "inputTokens": 2716,
+          "outputTokens": 739
+        },
+        {
+          "stage": "stage3",
+          "model": "gpt-6-luna",
+          "component": "eventExtractor",
+          "durationMs": 2224,
+          "inputTokens": 1572,
+          "outputTokens": 116
+        },
+        {
+          "stage": "stage4",
+          "model": "gpt-5-nano",
+          "component": "secondaryValidator",
+          "durationMs": 8634,
+          "inputTokens": 2297,
+          "outputTokens": 716
+        },
+        {
+          "stage": "stage5",
+          "model": "gpt-5-nano",
+          "component": "finalFormatter",
+          "durationMs": 45495,
+          "inputTokens": 2264,
+          "outputTokens": 4706
+        }
+      ]
+    },
+    {
+      "day": "2026-10-08",
+      "row": 330,
+      "postId": "1738024658328355",
+      "sourceUrl": "https://www.facebook.com/1738024658328355",
+      "venue": "APM Centre",
+      "snapshotPath": "parse_snapshots/1kIx_zGW7BZMf8F55eCYTQYOeYuFq-VLv_330_1791472762473",
+      "baselineFinalItems": 4,
+      "stage1Accepted": true,
+      "stage3Items": 4,
+      "events": [
+        {
+          "name": "Open Ice",
+          "startDate": "2026-10-08",
+          "endDate": "2026-10-08",
+          "startTime": "18:20",
+          "endTime": "20:20",
+          "category": "Sports",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "ticketPrice": "",
+          "ticketLink": "",
+          "timeResolution": {
+            "hoursUsed": false,
+            "reason": "no_place_match",
+            "endFromHours": "duration_default"
+          }
+        },
+        {
+          "name": "Open Ice",
+          "startDate": "2026-10-10",
+          "endDate": "2026-10-10",
+          "startTime": "09:20",
+          "endTime": "11:20",
+          "category": "Sports",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "ticketPrice": "",
+          "ticketLink": "",
+          "timeResolution": {
+            "hoursUsed": false,
+            "reason": "no_place_match",
+            "endFromHours": "duration_default"
+          }
+        },
+        {
+          "name": "Open Ice",
+          "startDate": "2026-10-10",
+          "endDate": "2026-10-10",
+          "startTime": "18:40",
+          "endTime": "20:40",
+          "category": "Sports",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "ticketPrice": "",
+          "ticketLink": "",
+          "timeResolution": {
+            "hoursUsed": false,
+            "reason": "no_place_match",
+            "endFromHours": "duration_default"
+          }
+        },
+        {
+          "name": "Open Ice",
+          "startDate": "2026-10-12",
+          "endDate": "2026-10-12",
+          "startTime": "18:20",
+          "endTime": "20:20",
+          "category": "Sports",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "ticketPrice": "",
+          "ticketLink": "",
+          "timeResolution": {
+            "hoursUsed": false,
+            "reason": "no_place_match",
+            "endFromHours": "duration_default"
+          }
+        }
+      ],
+      "holds": [],
+      "finalCodeTargetedReplay": false,
+      "calls": [
+        {
+          "stage": "stage1",
+          "model": "gpt-6-luna",
+          "component": "contentValidator",
+          "durationMs": 2221,
+          "inputTokens": 3392,
+          "outputTokens": 160
+        },
+        {
+          "stage": "stage2",
+          "model": "gpt-5-mini",
+          "component": "contentClassifier",
+          "durationMs": 5283,
+          "inputTokens": 776,
+          "outputTokens": 728
+        },
+        {
+          "stage": "stage3",
+          "model": "gpt-6-luna",
+          "component": "eventExtractor",
+          "durationMs": 9636,
+          "inputTokens": 1639,
+          "outputTokens": 1217
+        },
+        {
+          "stage": "stage4",
+          "model": "gpt-5-nano",
+          "component": "secondaryValidator",
+          "durationMs": 16023,
+          "inputTokens": 2856,
+          "outputTokens": 1586
+        },
+        {
+          "stage": "stage5",
+          "model": "gpt-5-nano",
+          "component": "finalFormatter",
+          "durationMs": 53579,
+          "inputTokens": 2844,
+          "outputTokens": 4415
+        }
+      ]
+    },
+    {
+      "day": "2026-10-09",
+      "row": 11,
+      "postId": "1524672246354019",
+      "sourceUrl": "https://www.facebook.com/1524672246354019",
+      "venue": "Town of Souris",
+      "snapshotPath": "parse_snapshots/1NpfngSPGDDOm9Fb5DcYseMuCe4BdKjGq_11_1791549614537",
+      "baselineFinalItems": 0,
+      "stage1Accepted": true,
+      "stage3Items": 1,
+      "events": [],
+      "holds": [
+        {
+          "stage": "stage4",
+          "reason": "Luna canary requires source review",
+          "detail": "stage4_no_items"
+        }
+      ],
+      "finalCodeTargetedReplay": false,
+      "calls": [
+        {
+          "stage": "stage1",
+          "model": "gpt-6-luna",
+          "component": "contentValidator",
+          "durationMs": 5762,
+          "inputTokens": 3640,
+          "outputTokens": 517
+        },
+        {
+          "stage": "stage2",
+          "model": "gpt-5-mini",
+          "component": "contentClassifier",
+          "durationMs": 2835,
+          "inputTokens": 1024,
+          "outputTokens": 395
+        },
+        {
+          "stage": "stage3",
+          "model": "gpt-6-luna",
+          "component": "eventExtractor",
+          "durationMs": 6766,
+          "inputTokens": 2696,
+          "outputTokens": 707
+        },
+        {
+          "stage": "stage3",
+          "model": "gpt-6-luna",
+          "component": "eventExtractor",
+          "durationMs": 1433,
+          "inputTokens": 1717,
+          "outputTokens": 89
+        },
+        {
+          "stage": "stage4",
+          "model": "gpt-5-nano",
+          "component": "secondaryValidator",
+          "durationMs": 7771,
+          "inputTokens": 2283,
+          "outputTokens": 875
+        }
+      ]
+    },
+    {
+      "day": "2026-10-09",
+      "row": 214,
+      "postId": "1792623465880969",
+      "sourceUrl": "https://www.facebook.com/1792623465880969",
+      "venue": "Seaside Pharmacy & Medical",
+      "snapshotPath": "parse_snapshots/1NpfngSPGDDOm9Fb5DcYseMuCe4BdKjGq_214_1791553252238",
+      "baselineFinalItems": 1,
+      "stage1Accepted": true,
+      "stage3Items": 1,
+      "events": [
+        {
+          "name": "Rxtra Care Clinic",
+          "startDate": "2026-10-08",
+          "endDate": "2026-10-08",
+          "startTime": "11:00",
+          "endTime": "16:00",
+          "category": "Gatherings & Parties",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "ticketPrice": "",
+          "ticketLink": "",
+          "timeResolution": {
+            "hoursUsed": false
+          }
+        }
+      ],
+      "holds": [],
+      "finalCodeTargetedReplay": true,
+      "calls": [
+        {
+          "stage": "stage1",
+          "model": "gpt-6-luna",
+          "component": "contentValidator",
+          "durationMs": 2709,
+          "inputTokens": 3405,
+          "outputTokens": 140
+        },
+        {
+          "stage": "stage2",
+          "model": "gpt-5-mini",
+          "component": "contentClassifier",
+          "durationMs": 7048,
+          "inputTokens": 730,
+          "outputTokens": 828
+        },
+        {
+          "stage": "stage3",
+          "model": "gpt-6-luna",
+          "component": "eventExtractor",
+          "durationMs": 8217,
+          "inputTokens": 2568,
+          "outputTokens": 795
+        },
+        {
+          "stage": "stage3",
+          "model": "gpt-6-luna",
+          "component": "eventExtractor",
+          "durationMs": 2746,
+          "inputTokens": 1424,
+          "outputTokens": 105
+        },
+        {
+          "stage": "stage4",
+          "model": "gpt-5-nano",
+          "component": "secondaryValidator",
+          "durationMs": 6457,
+          "inputTokens": 2222,
+          "outputTokens": 665
+        },
+        {
+          "stage": "stage5",
+          "model": "gpt-5-nano",
+          "component": "finalFormatter",
+          "durationMs": 41497,
+          "inputTokens": 2189,
+          "outputTokens": 4416
+        }
+      ]
+    },
+    {
+      "day": "2026-10-09",
+      "row": 223,
+      "postId": "1667138711540180",
+      "sourceUrl": "https://www.facebook.com/1667138711540180",
+      "venue": "Eastern Kings Sportsplex",
+      "snapshotPath": "parse_snapshots/1NpfngSPGDDOm9Fb5DcYseMuCe4BdKjGq_223_1791553441205",
+      "baselineFinalItems": 1,
+      "stage1Accepted": true,
+      "stage3Items": 1,
+      "events": [
+        {
+          "name": "Bookable Time Slot",
+          "startDate": "2026-10-11",
+          "endDate": "2026-10-11",
+          "startTime": "13:50",
+          "endTime": "23:00",
+          "category": "Sports",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "ticketPrice": "",
+          "ticketLink": "",
+          "timeResolution": {
+            "hoursUsed": false,
+            "reason": "no_place_match",
+            "endFromHours": "category_default"
+          }
+        }
+      ],
+      "holds": [],
+      "finalCodeTargetedReplay": true,
+      "calls": [
+        {
+          "stage": "stage1",
+          "model": "gpt-6-luna",
+          "component": "contentValidator",
+          "durationMs": 2703,
+          "inputTokens": 3414,
+          "outputTokens": 209
+        },
+        {
+          "stage": "stage2",
+          "model": "gpt-5-mini",
+          "component": "contentClassifier",
+          "durationMs": 4644,
+          "inputTokens": 739,
+          "outputTokens": 486
+        },
+        {
+          "stage": "stage3",
+          "model": "gpt-6-luna",
+          "component": "eventExtractor",
+          "durationMs": 4515,
+          "inputTokens": 2576,
+          "outputTokens": 626
+        },
+        {
+          "stage": "stage4",
+          "model": "gpt-5-nano",
+          "component": "secondaryValidator",
+          "durationMs": 8163,
+          "inputTokens": 2298,
+          "outputTokens": 898
+        },
+        {
+          "stage": "stage5",
+          "model": "gpt-5-nano",
+          "component": "finalFormatter",
+          "durationMs": 42240,
+          "inputTokens": 2262,
+          "outputTokens": 4772
+        }
+      ]
+    },
+    {
+      "day": "2026-10-09",
+      "row": 272,
+      "postId": "1923952445725424",
+      "sourceUrl": "https://www.facebook.com/1923952445725424",
+      "venue": "Milton Community Hall",
+      "snapshotPath": "parse_snapshots/1NpfngSPGDDOm9Fb5DcYseMuCe4BdKjGq_272_1791555227687",
+      "baselineFinalItems": 0,
+      "stage1Accepted": false,
+      "stage3Items": 0,
+      "events": [],
+      "holds": [
+        {
+          "stage": "stage1",
+          "reason": "Due to failing Stage 1 validation",
+          "detail": "The post is a birthday greeting to a hall staff member and does not announce a public event, activity, visitor-access offer, or food/drink special."
+        }
+      ],
+      "finalCodeTargetedReplay": false,
+      "calls": [
+        {
+          "stage": "stage1",
+          "model": "gpt-6-luna",
+          "component": "contentValidator",
+          "durationMs": 2287,
+          "inputTokens": 3342,
+          "outputTokens": 104
+        }
+      ]
+    },
+    {
+      "day": "2026-10-09",
+      "row": 285,
+      "postId": "1741429411321134",
+      "sourceUrl": "https://www.facebook.com/1741429411321134",
+      "venue": "Montague Curling Club",
+      "snapshotPath": "parse_snapshots/1NpfngSPGDDOm9Fb5DcYseMuCe4BdKjGq_285_1791555933186",
+      "baselineFinalItems": 1,
+      "stage1Accepted": true,
+      "stage3Items": 1,
+      "events": [
+        {
+          "name": "Poker (Registration/Check-in)",
+          "startDate": "2026-10-08",
+          "endDate": "2026-10-08",
+          "startTime": "18:30",
+          "endTime": "23:00",
+          "category": "Sports",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "ticketPrice": "",
+          "ticketLink": "",
+          "timeResolution": {
+            "hoursUsed": false,
+            "reason": "no_place_match",
+            "endFromHours": "category_default"
+          }
+        }
+      ],
+      "holds": [],
+      "finalCodeTargetedReplay": true,
+      "calls": [
+        {
+          "stage": "stage1",
+          "model": "gpt-6-luna",
+          "component": "contentValidator",
+          "durationMs": 2321,
+          "inputTokens": 3392,
+          "outputTokens": 139
+        },
+        {
+          "stage": "stage2",
+          "model": "gpt-5-mini",
+          "component": "contentClassifier",
+          "durationMs": 4998,
+          "inputTokens": 717,
+          "outputTokens": 355
+        },
+        {
+          "stage": "stage3",
+          "model": "gpt-6-luna",
+          "component": "eventExtractor",
+          "durationMs": 7719,
+          "inputTokens": 2555,
+          "outputTokens": 992
+        },
+        {
+          "stage": "stage4",
+          "model": "gpt-5-nano",
+          "component": "secondaryValidator",
+          "durationMs": 9614,
+          "inputTokens": 2258,
+          "outputTokens": 826
+        },
+        {
+          "stage": "stage5",
+          "model": "gpt-5-nano",
+          "component": "finalFormatter",
+          "durationMs": 29644,
+          "inputTokens": 2225,
+          "outputTokens": 2919
+        }
+      ]
+    },
+    {
+      "day": "2026-10-09",
+      "row": 297,
+      "postId": "2034323124167743",
+      "sourceUrl": "https://www.facebook.com/2034323124167743",
+      "venue": "West Kent Home and School",
+      "snapshotPath": "parse_snapshots/1NpfngSPGDDOm9Fb5DcYseMuCe4BdKjGq_297_1791556891335",
+      "baselineFinalItems": 0,
+      "stage1Accepted": false,
+      "stage3Items": 0,
+      "events": [],
+      "holds": [
+        {
+          "stage": "stage1",
+          "reason": "Due to failing Stage 1 validation",
+          "detail": "The post is a school transportation notice stating that a bus will be late. It does not announce a public event, activity, visitor-access offer, or food/drink special."
+        }
+      ],
+      "finalCodeTargetedReplay": false,
+      "calls": [
+        {
+          "stage": "stage1",
+          "model": "gpt-6-luna",
+          "component": "contentValidator",
+          "durationMs": 2279,
+          "inputTokens": 3342,
+          "outputTokens": 126
+        }
+      ]
+    },
+    {
+      "day": "2026-10-09",
+      "row": 298,
+      "postId": "2033399010926821",
+      "sourceUrl": "https://www.facebook.com/2033399010926821",
+      "venue": "West Kent Home and School",
+      "snapshotPath": "parse_snapshots/1NpfngSPGDDOm9Fb5DcYseMuCe4BdKjGq_298_1791556895146",
+      "baselineFinalItems": 0,
+      "stage1Accepted": false,
+      "stage3Items": 0,
+      "events": [],
+      "holds": [
+        {
+          "stage": "stage1",
+          "reason": "Due to failing Stage 1 validation",
+          "detail": "The post only reports that a school bus is running one hour late. This is a transportation service notice, not a public event, activity, visitor-access offer, or food/drink special."
+        }
+      ],
+      "finalCodeTargetedReplay": false,
+      "calls": [
+        {
+          "stage": "stage1",
+          "model": "gpt-6-luna",
+          "component": "contentValidator",
+          "durationMs": 2049,
+          "inputTokens": 3340,
+          "outputTokens": 116
+        }
+      ]
+    },
+    {
+      "day": "2026-10-09",
+      "row": 301,
+      "postId": "1545008297654635",
+      "sourceUrl": "https://www.facebook.com/1545008297654635",
+      "venue": "North Rustico Lions Club",
+      "snapshotPath": "parse_snapshots/1NpfngSPGDDOm9Fb5DcYseMuCe4BdKjGq_301_1791556899924",
+      "baselineFinalItems": 0,
+      "stage1Accepted": false,
+      "stage3Items": 0,
+      "events": [],
+      "holds": [
+        {
+          "stage": "stage1",
+          "reason": "Due to failing Stage 1 validation",
+          "detail": "The post is recruiting a snow shoveler for the upcoming winter season. This is a job opportunity, not a public event, activity, visitor-access offer, or food/drink special."
+        }
+      ],
+      "finalCodeTargetedReplay": false,
+      "calls": [
+        {
+          "stage": "stage1",
+          "model": "gpt-6-luna",
+          "component": "contentValidator",
+          "durationMs": 2222,
+          "inputTokens": 3406,
+          "outputTokens": 119
+        }
+      ]
+    },
+    {
+      "day": "2026-10-09",
+      "row": 340,
+      "postId": "122316337478189551",
+      "sourceUrl": "https://www.facebook.com/122316337478189551",
+      "venue": "Ruby's Counter",
+      "snapshotPath": "parse_snapshots/1NpfngSPGDDOm9Fb5DcYseMuCe4BdKjGq_340_1791557586034",
+      "baselineFinalItems": 1,
+      "stage1Accepted": true,
+      "stage3Items": 1,
+      "events": [
+        {
+          "name": "Pulled Pork Nachos Feature",
+          "startDate": "2026-10-09",
+          "endDate": "2026-10-09",
+          "startTime": "09:37",
+          "endTime": "21:00",
+          "category": "Food Special",
+          "isEvent": "No",
+          "isFoodSpecial": "Yes",
+          "ticketPrice": "$16",
+          "ticketLink": "",
+          "timeResolution": {
+            "hoursUsed": false,
+            "reason": "no_place_match",
+            "startFromPostTime": true,
+            "endFromHours": "category_default"
+          }
+        }
+      ],
+      "holds": [],
+      "finalCodeTargetedReplay": false,
+      "calls": [
+        {
+          "stage": "stage1",
+          "model": "gpt-6-luna",
+          "component": "contentValidator",
+          "durationMs": 2210,
+          "inputTokens": 3391,
+          "outputTokens": 140
+        },
+        {
+          "stage": "stage2",
+          "model": "gpt-5-mini",
+          "component": "contentClassifier",
+          "durationMs": 4743,
+          "inputTokens": 775,
+          "outputTokens": 486
+        },
+        {
+          "stage": "stage3",
+          "model": "gpt-6-luna",
+          "component": "eventExtractor",
+          "durationMs": 5019,
+          "inputTokens": 1467,
+          "outputTokens": 504
+        },
+        {
+          "stage": "stage4",
+          "model": "gpt-5-nano",
+          "component": "secondaryValidator",
+          "durationMs": 6012,
+          "inputTokens": 2183,
+          "outputTokens": 687
+        },
+        {
+          "stage": "stage5",
+          "model": "gpt-5-nano",
+          "component": "finalFormatter",
+          "durationMs": 31584,
+          "inputTokens": 2144,
+          "outputTokens": 3757
+        }
+      ]
+    },
+    {
+      "day": "2026-10-09",
+      "row": 341,
+      "postId": "122316333740189551",
+      "sourceUrl": "https://www.facebook.com/122316333740189551",
+      "venue": "Ruby's Counter",
+      "snapshotPath": "parse_snapshots/1NpfngSPGDDOm9Fb5DcYseMuCe4BdKjGq_341_1791557664491",
+      "baselineFinalItems": 1,
+      "stage1Accepted": true,
+      "stage3Items": 1,
+      "events": [
+        {
+          "name": "Friday Dinner Day \u2014 Roast Beef Dinner",
+          "startDate": "2026-10-09",
+          "endDate": "2026-10-09",
+          "startTime": "15:00",
+          "endTime": "18:00",
+          "category": "Food Special",
+          "isEvent": "No",
+          "isFoodSpecial": "Yes",
+          "ticketPrice": "$20 per person",
+          "ticketLink": "",
+          "timeResolution": {
+            "hoursUsed": false
+          }
+        }
+      ],
+      "holds": [],
+      "finalCodeTargetedReplay": false,
+      "calls": [
+        {
+          "stage": "stage1",
+          "model": "gpt-6-luna",
+          "component": "contentValidator",
+          "durationMs": 2711,
+          "inputTokens": 3390,
+          "outputTokens": 144
+        },
+        {
+          "stage": "stage2",
+          "model": "gpt-5-mini",
+          "component": "contentClassifier",
+          "durationMs": 4353,
+          "inputTokens": 774,
+          "outputTokens": 528
+        },
+        {
+          "stage": "stage3",
+          "model": "gpt-6-luna",
+          "component": "eventExtractor",
+          "durationMs": 11089,
+          "inputTokens": 1466,
+          "outputTokens": 1262
+        },
+        {
+          "stage": "stage4",
+          "model": "gpt-5-nano",
+          "component": "secondaryValidator",
+          "durationMs": 9500,
+          "inputTokens": 2219,
+          "outputTokens": 936
+        },
+        {
+          "stage": "stage5",
+          "model": "gpt-5-nano",
+          "component": "finalFormatter",
+          "durationMs": 51561,
+          "inputTokens": 2180,
+          "outputTokens": 4128
+        }
+      ]
+    },
+    {
+      "day": "2026-10-09",
+      "row": 342,
+      "postId": "122316168806189551",
+      "sourceUrl": "https://www.facebook.com/122316168806189551",
+      "venue": "Ruby's Counter",
+      "snapshotPath": "parse_snapshots/1NpfngSPGDDOm9Fb5DcYseMuCe4BdKjGq_342_1791557701252",
+      "baselineFinalItems": 0,
+      "stage1Accepted": true,
+      "stage3Items": 0,
+      "events": [],
+      "holds": [
+        {
+          "stage": "stage3",
+          "reason": "Luna canary requires source review",
+          "detail": "stage3_no_items"
+        }
+      ],
+      "finalCodeTargetedReplay": false,
+      "calls": [
+        {
+          "stage": "stage1",
+          "model": "gpt-6-luna",
+          "component": "contentValidator",
+          "durationMs": 3416,
+          "inputTokens": 3390,
+          "outputTokens": 158
+        },
+        {
+          "stage": "stage2",
+          "model": "gpt-5-mini",
+          "component": "contentClassifier",
+          "durationMs": 4639,
+          "inputTokens": 774,
+          "outputTokens": 559
+        },
+        {
+          "stage": "stage3",
+          "model": "gpt-6-luna",
+          "component": "eventExtractor",
+          "durationMs": 4987,
+          "inputTokens": 1637,
+          "outputTokens": 382
+        },
+        {
+          "stage": "stage3",
+          "model": "gpt-6-luna",
+          "component": "eventExtractor",
+          "durationMs": 1087,
+          "inputTokens": 654,
+          "outputTokens": 31
+        }
+      ]
+    }
+  ],
+  "controlSummary": [
+    {
+      "name": "ordinary_table_booking",
+      "expected": false,
+      "actual": false,
+      "status": "completed"
+    },
+    {
+      "name": "generic_salon_link",
+      "expected": false,
+      "actual": false,
+      "status": "completed"
+    },
+    {
+      "name": "product_pickup",
+      "expected": false,
+      "actual": false,
+      "status": "completed"
+    },
+    {
+      "name": "museum_visit",
+      "expected": true,
+      "actual": true,
+      "status": "completed"
+    },
+    {
+      "name": "clinic",
+      "expected": true,
+      "actual": true,
+      "status": "completed"
+    }
+  ]
+}
