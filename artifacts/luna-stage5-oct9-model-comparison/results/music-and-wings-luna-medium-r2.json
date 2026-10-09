@@ -1,0 +1,218 @@
+{
+  "caseId": "music-and-wings",
+  "arm": "luna-medium",
+  "repeat": 2,
+  "model": "gpt-6-luna",
+  "effort": "medium",
+  "noLiveWrites": true,
+  "sourceSha256": "2cf41edf01bafc1e412189fefc1c53abfee10ec166bfb0041818817a8321806d",
+  "inputCount": 2,
+  "outputCount": 2,
+  "wallMs": 8089,
+  "events": [
+    {
+      "isEvent": "Yes",
+      "isFoodSpecial": "No",
+      "category": "Live Music",
+      "name": "Daniel",
+      "description": "Daniel will be here tonight 6-8pm!",
+      "establishment": "Tipsy Farmers",
+      "address": "",
+      "startDate": "2026-10-08",
+      "endDate": "2026-10-08",
+      "startTime": "18:00",
+      "endTime": "20:00",
+      "ticketPrice": "",
+      "ticketLink": "",
+      "relevantImageIndex": 0,
+      "venue": "",
+      "additionalLocation": "",
+      "isRecurring": "No",
+      "recurringPattern": "none",
+      "_categoryOriginal": "Live Music",
+      "_categoryHintOriginal": "",
+      "_categorySource": "model_final",
+      "_categoryNormalizationReason": "kept allowed model category \"Live Music\"",
+      "_sourceType": "event",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "6-8pm"
+        },
+        "end": {
+          "source": "explicit",
+          "toClose": false,
+          "evidence": "6-8pm"
+        }
+      },
+      "spatial": {
+        "kind": "unknown",
+        "locations": [],
+        "confirmedStreets": [],
+        "ordered": false,
+        "evidenceNotes": "The caption says “here” but does not explicitly name a venue or address."
+      }
+    },
+    {
+      "isEvent": "No",
+      "isFoodSpecial": "Yes",
+      "category": "Food Special",
+      "name": "Wings",
+      "description": "Wings $10/lb All Day",
+      "establishment": "Tipsy Farmers",
+      "address": "",
+      "startDate": "2026-10-08",
+      "endDate": "2026-10-08",
+      "startTime": "",
+      "endTime": "",
+      "ticketPrice": "$10/lb",
+      "ticketLink": "",
+      "relevantImageIndex": 0,
+      "venue": "Tipsy Farmers",
+      "additionalLocation": "Tipsy Farmers",
+      "isRecurring": "No",
+      "recurringPattern": "none",
+      "_categoryOriginal": "Food Special",
+      "_categoryHintOriginal": "",
+      "_categorySource": "model_final",
+      "_categoryNormalizationReason": "kept allowed model category \"Food Special\"",
+      "_sourceType": "special",
+      "timeFlags": {
+        "start": {
+          "source": "semantic",
+          "evidence": "All Day"
+        },
+        "end": {
+          "source": "none",
+          "toClose": true,
+          "evidence": ""
+        }
+      }
+    }
+  ],
+  "usage": [
+    {
+      "stage": "stage5",
+      "component": "finalFormatter",
+      "endpoint": "responses",
+      "model": "gpt-6-luna",
+      "durationMs": 8040,
+      "inputTokens": 2408,
+      "outputTokens": 1106,
+      "totalTokens": 3514,
+      "cachedInputTokens": 2405,
+      "fileId": "stage5-frozen-comparison",
+      "postId": "1133015359255496",
+      "rowIndex": 231,
+      "runId": "local-2",
+      "responseId": "resp_0e84f0fffd522133006ac95ce04be487d2b46f7573a4b1ecfc",
+      "responseStatus": "completed",
+      "incompleteReason": "",
+      "requestedMaxOutputTokens": 32000,
+      "reasoningTokens": 421,
+      "visibleOutputChars": 2540,
+      "parsedItemCount": 2,
+      "parseError": false,
+      "batchOffset": 0,
+      "batchItemCount": 2
+    }
+  ],
+  "requests": [
+    {
+      "model": "gpt-6-luna",
+      "effort": "medium",
+      "httpStatus": 200,
+      "status": "completed",
+      "incompleteDetails": null,
+      "error": null,
+      "promptSha256": "d43f0c41285794392c7adc9a2e7b34c1cdf4247a8754655c4a2489993aa95332",
+      "schemaSha256": "59358b2596cac4fee3da5bb48d44ccb1567c8d0cb0dcc085033efdd174af073f",
+      "maxOutputTokens": 32000,
+      "durationMs": 8036,
+      "usage": {
+        "input_tokens": 2408,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 2405
+        },
+        "output_tokens": 1106,
+        "output_tokens_details": {
+          "reasoning_tokens": 421
+        },
+        "total_tokens": 3514
+      },
+      "visibleOutputChars": 2540,
+      "rawResult": {
+        "formattedEvents": [
+          {
+            "sourceItemIndex": 0,
+            "isEvent": "Yes",
+            "isFoodSpecial": "No",
+            "category": "Live Music",
+            "name": "Daniel",
+            "description": "Daniel will be here tonight 6-8pm!",
+            "establishment": "Tipsy Farmers",
+            "address": "",
+            "startDate": "2026-10-08",
+            "endDate": "2026-10-08",
+            "startTime": "18:00",
+            "endTime": "20:00",
+            "ticketPrice": "",
+            "ticketLink": "",
+            "relevantImageIndex": 0,
+            "venue": "",
+            "additionalLocation": "",
+            "isRecurring": false,
+            "recurringPattern": "none",
+            "totalOccurrences": 0,
+            "recurrenceUntilDate": ""
+          },
+          {
+            "sourceItemIndex": 1,
+            "isEvent": "No",
+            "isFoodSpecial": "Yes",
+            "category": "Wing Night",
+            "name": "Wings",
+            "description": "Wings $10/lb All Day",
+            "establishment": "Tipsy Farmers",
+            "address": "",
+            "startDate": "2026-10-08",
+            "endDate": "2026-10-08",
+            "startTime": "",
+            "endTime": "",
+            "ticketPrice": "$10/lb",
+            "ticketLink": "",
+            "relevantImageIndex": 0,
+            "venue": "Tipsy Farmers",
+            "additionalLocation": "Tipsy Farmers",
+            "isRecurring": false,
+            "recurringPattern": "none",
+            "totalOccurrences": 0,
+            "recurrenceUntilDate": ""
+          }
+        ],
+        "formattingDecisions": [
+          {
+            "itemName": "Daniel",
+            "typeDecision": "Event; the post advertises a performer appearing tonight.",
+            "categoryDecision": "Live Music; the performer name and music context identify a performance.",
+            "assumptions": "Resolved “tonight” to the posted date, 2026-10-08. Preserved the explicit 6–8pm time range.",
+            "venueDecision": "No venue value was provided; used Tipsy Farmers as the establishment from the posting context.",
+            "establishmentDecision": "Tipsy Farmers, based on the posted-by context.",
+            "additionalLocationDecision": "Left blank because the item's venue field is empty."
+          },
+          {
+            "itemName": "Wings",
+            "typeDecision": "Food special; the post advertises a priced wing offer.",
+            "categoryDecision": "Wing Night; this is a wing special.",
+            "assumptions": "Kept start and end times blank because “All Day” does not provide clock times. The offer is dated 2026-10-08 and is not marked recurring.",
+            "venueDecision": "The venue field is Tipsy Farmers.",
+            "establishmentDecision": "Tipsy Farmers.",
+            "additionalLocationDecision": "Copied the nonempty venue value, Tipsy Farmers, as required."
+          }
+        ]
+      },
+      "parseError": false
+    }
+  ]
+}

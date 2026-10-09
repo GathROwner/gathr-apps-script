@@ -1,0 +1,483 @@
+{
+  "caseId": "pool-tail-6",
+  "arm": "luna-low",
+  "repeat": 1,
+  "model": "gpt-6-luna",
+  "effort": "low",
+  "noLiveWrites": true,
+  "sourceSha256": "e190ac1892cb9cabb098369eee27c1de9e72cdd933ef9abd9d5f77f071a798ea",
+  "inputCount": 6,
+  "outputCount": 6,
+  "wallMs": 13723,
+  "events": [
+    {
+      "isEvent": "Yes",
+      "isFoodSpecial": "No",
+      "category": "Sports",
+      "name": "All pools open",
+      "description": "",
+      "establishment": "Bell Aliant Centre",
+      "address": "",
+      "startDate": "2026-10-07",
+      "endDate": "2026-10-07",
+      "startTime": "09:30",
+      "endTime": "11:30",
+      "ticketPrice": "",
+      "ticketLink": "",
+      "relevantImageIndex": 0,
+      "venue": "",
+      "additionalLocation": "",
+      "isRecurring": "No",
+      "recurringPattern": "none",
+      "_categoryOriginal": "Sports",
+      "_categoryHintOriginal": "",
+      "_categorySource": "model_final",
+      "_categoryNormalizationReason": "kept allowed model category \"Sports\"",
+      "_sourceType": "schedule",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "9:30 am - 11:30 am"
+        },
+        "end": {
+          "source": "explicit",
+          "toClose": false,
+          "evidence": "9:30 am - 11:30 am"
+        }
+      }
+    },
+    {
+      "isEvent": "Yes",
+      "isFoodSpecial": "No",
+      "category": "Sports",
+      "name": "All pools open",
+      "description": "",
+      "establishment": "Bell Aliant Centre",
+      "address": "",
+      "startDate": "2026-10-07",
+      "endDate": "2026-10-07",
+      "startTime": "12:30",
+      "endTime": "16:00",
+      "ticketPrice": "",
+      "ticketLink": "",
+      "relevantImageIndex": 0,
+      "venue": "",
+      "additionalLocation": "",
+      "isRecurring": "No",
+      "recurringPattern": "none",
+      "_categoryOriginal": "Sports",
+      "_categoryHintOriginal": "",
+      "_categorySource": "model_final",
+      "_categoryNormalizationReason": "kept allowed model category \"Sports\"",
+      "_sourceType": "schedule",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "12:30 pm - 4:00 pm"
+        },
+        "end": {
+          "source": "explicit",
+          "toClose": false,
+          "evidence": "12:30 pm - 4:00 pm"
+        }
+      }
+    },
+    {
+      "isEvent": "Yes",
+      "isFoodSpecial": "No",
+      "category": "Workshops & Classes",
+      "name": "Sunrise Fitness",
+      "description": "Aquafit class.",
+      "establishment": "Bell Aliant Centre",
+      "address": "",
+      "startDate": "2026-10-07",
+      "endDate": "2026-10-07",
+      "startTime": "07:00",
+      "endTime": "",
+      "ticketPrice": "",
+      "ticketLink": "",
+      "relevantImageIndex": 0,
+      "venue": "",
+      "additionalLocation": "",
+      "isRecurring": "No",
+      "recurringPattern": "none",
+      "_categoryOriginal": "Workshops & Classes",
+      "_categoryHintOriginal": "",
+      "_categorySource": "model_final",
+      "_categoryNormalizationReason": "kept allowed model category \"Workshops & Classes\"",
+      "_sourceType": "schedule",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "7:00 am"
+        },
+        "end": {
+          "source": "none",
+          "toClose": false,
+          "evidence": ""
+        }
+      }
+    },
+    {
+      "isEvent": "Yes",
+      "isFoodSpecial": "No",
+      "category": "Workshops & Classes",
+      "name": "Cardio Craze",
+      "description": "Aquafit class.",
+      "establishment": "Bell Aliant Centre",
+      "address": "",
+      "startDate": "2026-10-07",
+      "endDate": "2026-10-07",
+      "startTime": "08:45",
+      "endTime": "",
+      "ticketPrice": "",
+      "ticketLink": "",
+      "relevantImageIndex": 0,
+      "venue": "",
+      "additionalLocation": "",
+      "isRecurring": "No",
+      "recurringPattern": "none",
+      "_categoryOriginal": "Workshops & Classes",
+      "_categoryHintOriginal": "",
+      "_categorySource": "model_final",
+      "_categoryNormalizationReason": "kept allowed model category \"Workshops & Classes\"",
+      "_sourceType": "schedule",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "8:45 am"
+        },
+        "end": {
+          "source": "none",
+          "toClose": false,
+          "evidence": ""
+        }
+      }
+    },
+    {
+      "isEvent": "Yes",
+      "isFoodSpecial": "No",
+      "category": "Workshops & Classes",
+      "name": "UFIT Aqua",
+      "description": "Aquafit class.",
+      "establishment": "Bell Aliant Centre",
+      "address": "",
+      "startDate": "2026-10-07",
+      "endDate": "2026-10-07",
+      "startTime": "11:45",
+      "endTime": "",
+      "ticketPrice": "",
+      "ticketLink": "",
+      "relevantImageIndex": 0,
+      "venue": "",
+      "additionalLocation": "",
+      "isRecurring": "No",
+      "recurringPattern": "none",
+      "_categoryOriginal": "Workshops & Classes",
+      "_categoryHintOriginal": "",
+      "_categorySource": "model_final",
+      "_categoryNormalizationReason": "kept allowed model category \"Workshops & Classes\"",
+      "_sourceType": "schedule",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "11:45 am"
+        },
+        "end": {
+          "source": "none",
+          "toClose": false,
+          "evidence": ""
+        }
+      }
+    },
+    {
+      "isEvent": "Yes",
+      "isFoodSpecial": "No",
+      "category": "Workshops & Classes",
+      "name": "Aqua Zumba",
+      "description": "Aquafit class.",
+      "establishment": "Bell Aliant Centre",
+      "address": "",
+      "startDate": "2026-10-07",
+      "endDate": "2026-10-07",
+      "startTime": "18:00",
+      "endTime": "",
+      "ticketPrice": "",
+      "ticketLink": "",
+      "relevantImageIndex": 0,
+      "venue": "",
+      "additionalLocation": "",
+      "isRecurring": "No",
+      "recurringPattern": "none",
+      "_categoryOriginal": "Workshops & Classes",
+      "_categoryHintOriginal": "",
+      "_categorySource": "model_final",
+      "_categoryNormalizationReason": "kept allowed model category \"Workshops & Classes\"",
+      "_sourceType": "schedule",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "6:00 pm"
+        },
+        "end": {
+          "source": "none",
+          "toClose": false,
+          "evidence": ""
+        }
+      }
+    }
+  ],
+  "usage": [
+    {
+      "stage": "stage5",
+      "component": "finalFormatter",
+      "endpoint": "responses",
+      "model": "gpt-6-luna",
+      "durationMs": 13675,
+      "inputTokens": 3198,
+      "outputTokens": 1943,
+      "totalTokens": 5141,
+      "cachedInputTokens": 3195,
+      "fileId": "stage5-frozen-comparison",
+      "postId": "1525045012976750",
+      "rowIndex": 172,
+      "runId": "local-1",
+      "responseId": "resp_04aa812360d25195006ac95b64429887d2bd5641eac400e2b6",
+      "responseStatus": "completed",
+      "incompleteReason": "",
+      "requestedMaxOutputTokens": 32000,
+      "reasoningTokens": 123,
+      "visibleOutputChars": 7066,
+      "parsedItemCount": 6,
+      "parseError": false,
+      "batchOffset": 0,
+      "batchItemCount": 6
+    }
+  ],
+  "requests": [
+    {
+      "model": "gpt-6-luna",
+      "effort": "low",
+      "httpStatus": 200,
+      "status": "completed",
+      "incompleteDetails": null,
+      "error": null,
+      "promptSha256": "0bbb9252d58de4e73a1072e53b889f80bc0e220017e7a3f2372cddcaa2465d5a",
+      "schemaSha256": "59358b2596cac4fee3da5bb48d44ccb1567c8d0cb0dcc085033efdd174af073f",
+      "maxOutputTokens": 32000,
+      "durationMs": 13672,
+      "usage": {
+        "input_tokens": 3198,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 3195
+        },
+        "output_tokens": 1943,
+        "output_tokens_details": {
+          "reasoning_tokens": 123
+        },
+        "total_tokens": 5141
+      },
+      "visibleOutputChars": 7066,
+      "rawResult": {
+        "formattedEvents": [
+          {
+            "sourceItemIndex": 0,
+            "isEvent": "Yes",
+            "isFoodSpecial": "No",
+            "category": "Sports",
+            "name": "All pools open",
+            "description": "",
+            "establishment": "Bell Aliant Centre",
+            "address": "",
+            "startDate": "2026-10-07",
+            "endDate": "2026-10-07",
+            "startTime": "09:30",
+            "endTime": "11:30",
+            "ticketPrice": "",
+            "ticketLink": "",
+            "relevantImageIndex": 0,
+            "venue": "",
+            "additionalLocation": "",
+            "isRecurring": false,
+            "recurringPattern": "none",
+            "totalOccurrences": 0,
+            "recurrenceUntilDate": ""
+          },
+          {
+            "sourceItemIndex": 1,
+            "isEvent": "Yes",
+            "isFoodSpecial": "No",
+            "category": "Sports",
+            "name": "All pools open",
+            "description": "",
+            "establishment": "Bell Aliant Centre",
+            "address": "",
+            "startDate": "2026-10-07",
+            "endDate": "2026-10-07",
+            "startTime": "12:30",
+            "endTime": "16:00",
+            "ticketPrice": "",
+            "ticketLink": "",
+            "relevantImageIndex": 0,
+            "venue": "",
+            "additionalLocation": "",
+            "isRecurring": false,
+            "recurringPattern": "none",
+            "totalOccurrences": 0,
+            "recurrenceUntilDate": ""
+          },
+          {
+            "sourceItemIndex": 2,
+            "isEvent": "Yes",
+            "isFoodSpecial": "No",
+            "category": "Workshops & Classes",
+            "name": "Sunrise Fitness",
+            "description": "Aquafit class.",
+            "establishment": "Bell Aliant Centre",
+            "address": "",
+            "startDate": "2026-10-07",
+            "endDate": "2026-10-07",
+            "startTime": "07:00",
+            "endTime": "",
+            "ticketPrice": "",
+            "ticketLink": "",
+            "relevantImageIndex": 0,
+            "venue": "",
+            "additionalLocation": "",
+            "isRecurring": false,
+            "recurringPattern": "none",
+            "totalOccurrences": 0,
+            "recurrenceUntilDate": ""
+          },
+          {
+            "sourceItemIndex": 3,
+            "isEvent": "Yes",
+            "isFoodSpecial": "No",
+            "category": "Workshops & Classes",
+            "name": "Cardio Craze",
+            "description": "Aquafit class.",
+            "establishment": "Bell Aliant Centre",
+            "address": "",
+            "startDate": "2026-10-07",
+            "endDate": "2026-10-07",
+            "startTime": "08:45",
+            "endTime": "",
+            "ticketPrice": "",
+            "ticketLink": "",
+            "relevantImageIndex": 0,
+            "venue": "",
+            "additionalLocation": "",
+            "isRecurring": false,
+            "recurringPattern": "none",
+            "totalOccurrences": 0,
+            "recurrenceUntilDate": ""
+          },
+          {
+            "sourceItemIndex": 4,
+            "isEvent": "Yes",
+            "isFoodSpecial": "No",
+            "category": "Workshops & Classes",
+            "name": "UFIT Aqua",
+            "description": "Aquafit class.",
+            "establishment": "Bell Aliant Centre",
+            "address": "",
+            "startDate": "2026-10-07",
+            "endDate": "2026-10-07",
+            "startTime": "11:45",
+            "endTime": "",
+            "ticketPrice": "",
+            "ticketLink": "",
+            "relevantImageIndex": 0,
+            "venue": "",
+            "additionalLocation": "",
+            "isRecurring": false,
+            "recurringPattern": "none",
+            "totalOccurrences": 0,
+            "recurrenceUntilDate": ""
+          },
+          {
+            "sourceItemIndex": 5,
+            "isEvent": "Yes",
+            "isFoodSpecial": "No",
+            "category": "Workshops & Classes",
+            "name": "Aqua Zumba",
+            "description": "Aquafit class.",
+            "establishment": "Bell Aliant Centre",
+            "address": "",
+            "startDate": "2026-10-07",
+            "endDate": "2026-10-07",
+            "startTime": "18:00",
+            "endTime": "",
+            "ticketPrice": "",
+            "ticketLink": "",
+            "relevantImageIndex": 0,
+            "venue": "",
+            "additionalLocation": "",
+            "isRecurring": false,
+            "recurringPattern": "none",
+            "totalOccurrences": 0,
+            "recurrenceUntilDate": ""
+          }
+        ],
+        "formattingDecisions": [
+          {
+            "itemName": "All pools open",
+            "typeDecision": "Classified as an event, not a special.",
+            "categoryDecision": "Sports: a pool availability block.",
+            "assumptions": "Used the listed date and explicit time range; no recurrence was specified.",
+            "venueDecision": "No venue value was provided; establishment is Bell Aliant Centre.",
+            "establishmentDecision": "Used the post's establishment.",
+            "additionalLocationDecision": "Left empty because no venue was specified."
+          },
+          {
+            "itemName": "All pools open",
+            "typeDecision": "Classified as an event, not a special.",
+            "categoryDecision": "Sports: a pool availability block.",
+            "assumptions": "Used the listed date and explicit time range; no recurrence was specified.",
+            "venueDecision": "No venue value was provided; establishment is Bell Aliant Centre.",
+            "establishmentDecision": "Used the post's establishment.",
+            "additionalLocationDecision": "Left empty because no venue was specified."
+          },
+          {
+            "itemName": "Sunrise Fitness",
+            "typeDecision": "Classified as an event, not a special.",
+            "categoryDecision": "Workshops & Classes: description identifies an Aquafit class.",
+            "assumptions": "Used the listed date and explicit start time; no end time or recurrence was provided.",
+            "venueDecision": "No venue value was provided; establishment is Bell Aliant Centre.",
+            "establishmentDecision": "Used the post's establishment.",
+            "additionalLocationDecision": "Left empty because no venue was specified."
+          },
+          {
+            "itemName": "Cardio Craze",
+            "typeDecision": "Classified as an event, not a special.",
+            "categoryDecision": "Workshops & Classes: description identifies an Aquafit class.",
+            "assumptions": "Used the listed date and explicit start time; no end time or recurrence was provided.",
+            "venueDecision": "No venue value was provided; establishment is Bell Aliant Centre.",
+            "establishmentDecision": "Used the post's establishment.",
+            "additionalLocationDecision": "Left empty because no venue was specified."
+          },
+          {
+            "itemName": "UFIT Aqua",
+            "typeDecision": "Classified as an event, not a special.",
+            "categoryDecision": "Workshops & Classes: description identifies an Aquafit class.",
+            "assumptions": "Used the listed date and explicit start time; no end time or recurrence was provided.",
+            "venueDecision": "No venue value was provided; establishment is Bell Aliant Centre.",
+            "establishmentDecision": "Used the post's establishment.",
+            "additionalLocationDecision": "Left empty because no venue was specified."
+          },
+          {
+            "itemName": "Aqua Zumba",
+            "typeDecision": "Classified as an event, not a special.",
+            "categoryDecision": "Workshops & Classes: description identifies an Aquafit class.",
+            "assumptions": "Used the listed date and explicit start time; no end time or recurrence was provided.",
+            "venueDecision": "No venue value was provided; establishment is Bell Aliant Centre.",
+            "establishmentDecision": "Used the post's establishment.",
+            "additionalLocationDecision": "Left empty because no venue was specified."
+          }
+        ]
+      },
+      "parseError": false
+    }
+  ]
+}

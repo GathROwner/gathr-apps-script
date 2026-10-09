@@ -1,0 +1,157 @@
+{
+  "caseId": "course-single",
+  "arm": "nano-medium",
+  "repeat": 1,
+  "model": "gpt-5-nano",
+  "effort": "medium",
+  "noLiveWrites": true,
+  "sourceSha256": "d21872599c0164d83efc8ea761034af1362d65ec15aae992777acfaa31824fc5",
+  "inputCount": 1,
+  "outputCount": 1,
+  "wallMs": 25085,
+  "events": [
+    {
+      "isEvent": "Yes",
+      "isFoodSpecial": "No",
+      "category": "Workshops & Classes",
+      "name": "NCCP Managing Conflict",
+      "description": "Must attend both Classes – Oct 13 & 14, 2026. 6:00 pm – 9:00 pm each night. Virtual.",
+      "establishment": "Virtual",
+      "address": "",
+      "startDate": "2026-10-13",
+      "endDate": "2026-10-14",
+      "startTime": "18:00",
+      "endTime": "21:00",
+      "ticketPrice": "",
+      "ticketLink": "https://thelocker.coach.ca/event/registration/15590",
+      "relevantImageIndex": 0,
+      "venue": "Virtual",
+      "additionalLocation": "Virtual",
+      "isRecurring": "No",
+      "recurringPattern": "none",
+      "_categoryOriginal": "Workshops & Classes",
+      "_categoryHintOriginal": "",
+      "_categorySource": "model_final",
+      "_categoryNormalizationReason": "kept allowed model category \"Workshops & Classes\"",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "6:00 pm – 9:00 pm each night"
+        },
+        "end": {
+          "source": "explicit",
+          "toClose": false,
+          "evidence": "6:00 pm – 9:00 pm each night"
+        }
+      },
+      "spatial": {
+        "kind": "online",
+        "locations": [
+          {
+            "label": "Virtual",
+            "address": "",
+            "role": "location",
+            "certainty": "confirmed",
+            "sourceText": "Virtual"
+          }
+        ],
+        "confirmedStreets": [],
+        "ordered": false,
+        "evidenceNotes": "The course is explicitly marked Virtual."
+      }
+    }
+  ],
+  "usage": [
+    {
+      "stage": "stage5",
+      "component": "finalFormatter",
+      "endpoint": "responses",
+      "model": "gpt-5-nano",
+      "durationMs": 25045,
+      "inputTokens": 2271,
+      "outputTokens": 5026,
+      "totalTokens": 7297,
+      "cachedInputTokens": 0,
+      "fileId": "stage5-frozen-comparison",
+      "postId": "course-single",
+      "rowIndex": 0,
+      "runId": "local-1",
+      "responseId": "resp_003da2be3ea097c0006ac95b9a8d1087d2942f4b065082cff5",
+      "responseStatus": "completed",
+      "incompleteReason": "",
+      "requestedMaxOutputTokens": 32000,
+      "reasoningTokens": 4736,
+      "visibleOutputChars": 1043,
+      "parsedItemCount": 1,
+      "parseError": false,
+      "batchOffset": 0,
+      "batchItemCount": 1
+    }
+  ],
+  "requests": [
+    {
+      "model": "gpt-5-nano",
+      "effort": "medium",
+      "httpStatus": 200,
+      "status": "completed",
+      "incompleteDetails": null,
+      "error": null,
+      "promptSha256": "c20721724b287b350f1fbd517f743e0fb53385662eb8ce55cb6ddd8842db1aa4",
+      "schemaSha256": "59358b2596cac4fee3da5bb48d44ccb1567c8d0cb0dcc085033efdd174af073f",
+      "maxOutputTokens": 32000,
+      "durationMs": 25040,
+      "usage": {
+        "input_tokens": 2271,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "output_tokens": 5026,
+        "output_tokens_details": {
+          "reasoning_tokens": 4736
+        },
+        "total_tokens": 7297
+      },
+      "visibleOutputChars": 1043,
+      "rawResult": {
+        "formattedEvents": [
+          {
+            "sourceItemIndex": 0,
+            "isEvent": "Yes",
+            "isFoodSpecial": "No",
+            "category": "Workshops & Classes",
+            "name": "NCCP Managing Conflict",
+            "description": "Must attend both Classes – Oct 13 & 14, 2026. 6:00 pm – 9:00 pm each night. Virtual.",
+            "establishment": "",
+            "address": "",
+            "startDate": "2026-10-13",
+            "endDate": "2026-10-14",
+            "startTime": "18:00",
+            "endTime": "21:00",
+            "ticketPrice": "",
+            "ticketLink": "https://thelocker.coach.ca/event/registration/15590",
+            "relevantImageIndex": 0,
+            "venue": "Virtual",
+            "additionalLocation": "Virtual",
+            "isRecurring": false,
+            "recurringPattern": "none",
+            "totalOccurrences": 0,
+            "recurrenceUntilDate": ""
+          }
+        ],
+        "formattingDecisions": [
+          {
+            "itemName": "NCCP Managing Conflict",
+            "typeDecision": "Event",
+            "categoryDecision": "Workshops & Classes",
+            "assumptions": "Two-night class series inferred from description; dates converted to 2026-10-13 to 2026-10-14; times are for both nights.",
+            "venueDecision": "Virtual",
+            "establishmentDecision": "",
+            "additionalLocationDecision": "Set to venue value since venue is provided (Virtual), per venue preservation rule."
+          }
+        ]
+      },
+      "parseError": false
+    }
+  ]
+}

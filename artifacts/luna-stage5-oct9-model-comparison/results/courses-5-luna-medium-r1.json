@@ -1,0 +1,437 @@
+{
+  "caseId": "courses-5",
+  "arm": "luna-medium",
+  "repeat": 1,
+  "model": "gpt-6-luna",
+  "effort": "medium",
+  "noLiveWrites": true,
+  "sourceSha256": "6ef529be75c6919c656af1fec7a72c50b980c3d8de718214c3a7e92a5ac57cee",
+  "inputCount": 5,
+  "outputCount": 4,
+  "wallMs": 14326,
+  "events": [
+    {
+      "isEvent": "Yes",
+      "isFoodSpecial": "No",
+      "category": "Workshops & Classes",
+      "name": "NCCP Managing Conflict",
+      "description": "Must attend both Classes – Oct 13 & 14, 2026. 6:00 pm – 9:00 pm each night. Virtual.",
+      "establishment": "Virtual",
+      "address": "",
+      "startDate": "2026-10-13",
+      "endDate": "2026-10-13",
+      "startTime": "18:00",
+      "endTime": "21:00",
+      "ticketPrice": "",
+      "ticketLink": "https://thelocker.coach.ca/event/registration/15590",
+      "relevantImageIndex": 0,
+      "venue": "Virtual",
+      "additionalLocation": "Virtual",
+      "isRecurring": "No",
+      "recurringPattern": "none",
+      "_categoryOriginal": "Workshops & Classes",
+      "_categoryHintOriginal": "",
+      "_categorySource": "model_final",
+      "_categoryNormalizationReason": "kept allowed model category \"Workshops & Classes\"",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "6:00 pm – 9:00 pm each night"
+        },
+        "end": {
+          "source": "explicit",
+          "toClose": false,
+          "evidence": "6:00 pm – 9:00 pm each night"
+        }
+      },
+      "spatial": {
+        "kind": "online",
+        "locations": [
+          {
+            "label": "Virtual",
+            "address": "",
+            "role": "location",
+            "certainty": "confirmed",
+            "sourceText": "Virtual"
+          }
+        ],
+        "confirmedStreets": [],
+        "ordered": false,
+        "evidenceNotes": "The course is explicitly marked Virtual."
+      }
+    },
+    {
+      "isEvent": "Yes",
+      "isFoodSpecial": "No",
+      "category": "Workshops & Classes",
+      "name": "NCCP Managing Conflict",
+      "description": "Must attend both Classes – Oct 13 & 14, 2026. 6:00 pm – 9:00 pm each night. Virtual.",
+      "establishment": "Virtual",
+      "address": "",
+      "startDate": "2026-10-14",
+      "endDate": "2026-10-14",
+      "startTime": "18:00",
+      "endTime": "21:00",
+      "ticketPrice": "",
+      "ticketLink": "https://thelocker.coach.ca/event/registration/15590",
+      "relevantImageIndex": 0,
+      "venue": "Virtual",
+      "additionalLocation": "Virtual",
+      "isRecurring": "No",
+      "recurringPattern": "none",
+      "_categoryOriginal": "Workshops & Classes",
+      "_categoryHintOriginal": "",
+      "_categorySource": "model_final",
+      "_categoryNormalizationReason": "kept allowed model category \"Workshops & Classes\"",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "6:00 pm – 9:00 pm each night"
+        },
+        "end": {
+          "source": "explicit",
+          "toClose": false,
+          "evidence": "6:00 pm – 9:00 pm each night"
+        }
+      },
+      "spatial": {
+        "kind": "online",
+        "locations": [
+          {
+            "label": "Virtual",
+            "address": "",
+            "role": "location",
+            "certainty": "confirmed",
+            "sourceText": "Virtual"
+          }
+        ],
+        "confirmedStreets": [],
+        "ordered": false,
+        "evidenceNotes": "The course is explicitly marked Virtual."
+      }
+    },
+    {
+      "isEvent": "Yes",
+      "isFoodSpecial": "No",
+      "category": "Workshops & Classes",
+      "name": "NCCP Basic Mental Skills",
+      "description": "October 27, 2026. 6:00 pm – 10:00 pm. Virtual.",
+      "establishment": "Virtual",
+      "address": "",
+      "startDate": "2026-10-27",
+      "endDate": "2026-10-27",
+      "startTime": "18:00",
+      "endTime": "22:00",
+      "ticketPrice": "",
+      "ticketLink": "https://thelocker.coach.ca/event/registration/16071",
+      "relevantImageIndex": 0,
+      "venue": "Virtual",
+      "additionalLocation": "Virtual",
+      "isRecurring": "No",
+      "recurringPattern": "none",
+      "_categoryOriginal": "Workshops & Classes",
+      "_categoryHintOriginal": "",
+      "_categorySource": "model_final",
+      "_categoryNormalizationReason": "kept allowed model category \"Workshops & Classes\"",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "6:00 pm - 10:00 pm"
+        },
+        "end": {
+          "source": "explicit",
+          "toClose": false,
+          "evidence": "6:00 pm - 10:00 pm"
+        }
+      },
+      "spatial": {
+        "kind": "online",
+        "locations": [
+          {
+            "label": "Virtual",
+            "address": "",
+            "role": "location",
+            "certainty": "confirmed",
+            "sourceText": "Virtual"
+          }
+        ],
+        "confirmedStreets": [],
+        "ordered": false,
+        "evidenceNotes": "The course is explicitly marked Virtual."
+      }
+    },
+    {
+      "isEvent": "Yes",
+      "isFoodSpecial": "No",
+      "category": "Workshops & Classes",
+      "name": "NCCP Planning a Practice",
+      "description": "Must attend both Classes - Oct 28 & Nov 4, 2026. 6:30 pm – 9:00 pm each night. Virtual.",
+      "establishment": "Virtual",
+      "address": "",
+      "startDate": "2026-10-28",
+      "endDate": "2026-10-28",
+      "startTime": "18:30",
+      "endTime": "21:00",
+      "ticketPrice": "",
+      "ticketLink": "https://thelocker.coach.ca/event/registration/15921",
+      "relevantImageIndex": 0,
+      "venue": "Virtual",
+      "additionalLocation": "Virtual",
+      "isRecurring": true,
+      "recurringPattern": "weekly_wednesday",
+      "totalOccurrences": 2,
+      "recurrenceUntilDate": "2026-11-04",
+      "_categoryOriginal": "Workshops & Classes",
+      "_categoryHintOriginal": "",
+      "_categorySource": "model_final",
+      "_categoryNormalizationReason": "kept allowed model category \"Workshops & Classes\"",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "6:30 pm - 9:00 pm each night"
+        },
+        "end": {
+          "source": "explicit",
+          "toClose": false,
+          "evidence": "6:30 pm - 9:00 pm each night"
+        }
+      },
+      "spatial": {
+        "kind": "online",
+        "locations": [
+          {
+            "label": "Virtual",
+            "address": "",
+            "role": "location",
+            "certainty": "confirmed",
+            "sourceText": "Virtual"
+          }
+        ],
+        "confirmedStreets": [],
+        "ordered": false,
+        "evidenceNotes": "The course is explicitly marked Virtual."
+      }
+    }
+  ],
+  "usage": [
+    {
+      "stage": "stage5",
+      "component": "finalFormatter",
+      "endpoint": "responses",
+      "model": "gpt-6-luna",
+      "durationMs": 14265,
+      "inputTokens": 3688,
+      "outputTokens": 1996,
+      "totalTokens": 5684,
+      "cachedInputTokens": 0,
+      "fileId": "stage5-frozen-comparison",
+      "postId": "courses-5",
+      "rowIndex": 0,
+      "runId": "local-1",
+      "responseId": "resp_0aeb3b5941c672a9006ac95b85e5d087d2a49cad427c32956b",
+      "responseStatus": "completed",
+      "incompleteReason": "",
+      "requestedMaxOutputTokens": 32000,
+      "reasoningTokens": 286,
+      "visibleOutputChars": 6374,
+      "parsedItemCount": 5,
+      "parseError": false,
+      "batchOffset": 0,
+      "batchItemCount": 5
+    }
+  ],
+  "requests": [
+    {
+      "model": "gpt-6-luna",
+      "effort": "medium",
+      "httpStatus": 200,
+      "status": "completed",
+      "incompleteDetails": null,
+      "error": null,
+      "promptSha256": "a2b72795685789a5620491b4ecee9cf6f3cf54c48a08d808f9dde80fa7d6c967",
+      "schemaSha256": "59358b2596cac4fee3da5bb48d44ccb1567c8d0cb0dcc085033efdd174af073f",
+      "maxOutputTokens": 32000,
+      "durationMs": 14262,
+      "usage": {
+        "input_tokens": 3688,
+        "input_tokens_details": {
+          "cache_write_tokens": 3685,
+          "cached_tokens": 0
+        },
+        "output_tokens": 1996,
+        "output_tokens_details": {
+          "reasoning_tokens": 286
+        },
+        "total_tokens": 5684
+      },
+      "visibleOutputChars": 6374,
+      "rawResult": {
+        "formattedEvents": [
+          {
+            "sourceItemIndex": 0,
+            "isEvent": "Yes",
+            "isFoodSpecial": "No",
+            "category": "Workshops & Classes",
+            "name": "NCCP Managing Conflict",
+            "description": "Must attend both Classes – Oct 13 & 14, 2026. 6:00 pm – 9:00 pm each night. Virtual.",
+            "establishment": "Sport PEI",
+            "address": "",
+            "startDate": "2026-10-13",
+            "endDate": "2026-10-13",
+            "startTime": "18:00",
+            "endTime": "21:00",
+            "ticketPrice": "",
+            "ticketLink": "https://thelocker.coach.ca/event/registration/15590",
+            "relevantImageIndex": 0,
+            "venue": "",
+            "additionalLocation": "Virtual",
+            "isRecurring": false,
+            "recurringPattern": "none",
+            "totalOccurrences": 0,
+            "recurrenceUntilDate": ""
+          },
+          {
+            "sourceItemIndex": 1,
+            "isEvent": "Yes",
+            "isFoodSpecial": "No",
+            "category": "Workshops & Classes",
+            "name": "NCCP Managing Conflict",
+            "description": "Must attend both Classes – Oct 13 & 14, 2026. 6:00 pm – 9:00 pm each night. Virtual.",
+            "establishment": "Sport PEI",
+            "address": "",
+            "startDate": "2026-10-14",
+            "endDate": "2026-10-14",
+            "startTime": "18:00",
+            "endTime": "21:00",
+            "ticketPrice": "",
+            "ticketLink": "https://thelocker.coach.ca/event/registration/15590",
+            "relevantImageIndex": 0,
+            "venue": "",
+            "additionalLocation": "Virtual",
+            "isRecurring": false,
+            "recurringPattern": "none",
+            "totalOccurrences": 0,
+            "recurrenceUntilDate": ""
+          },
+          {
+            "sourceItemIndex": 2,
+            "isEvent": "Yes",
+            "isFoodSpecial": "No",
+            "category": "Workshops & Classes",
+            "name": "NCCP Basic Mental Skills",
+            "description": "October 27, 2026. 6:00 pm – 10:00 pm. Virtual.",
+            "establishment": "Sport PEI",
+            "address": "",
+            "startDate": "2026-10-27",
+            "endDate": "2026-10-27",
+            "startTime": "18:00",
+            "endTime": "22:00",
+            "ticketPrice": "",
+            "ticketLink": "https://thelocker.coach.ca/event/registration/16071",
+            "relevantImageIndex": 0,
+            "venue": "",
+            "additionalLocation": "Virtual",
+            "isRecurring": false,
+            "recurringPattern": "none",
+            "totalOccurrences": 0,
+            "recurrenceUntilDate": ""
+          },
+          {
+            "sourceItemIndex": 3,
+            "isEvent": "Yes",
+            "isFoodSpecial": "No",
+            "category": "Workshops & Classes",
+            "name": "NCCP Planning a Practice",
+            "description": "Must attend both Classes - Oct 28 & Nov 4, 2026. 6:30 pm – 9:00 pm each night. Virtual.",
+            "establishment": "Sport PEI",
+            "address": "",
+            "startDate": "2026-10-28",
+            "endDate": "2026-10-28",
+            "startTime": "18:30",
+            "endTime": "21:00",
+            "ticketPrice": "",
+            "ticketLink": "https://thelocker.coach.ca/event/registration/15921",
+            "relevantImageIndex": 0,
+            "venue": "",
+            "additionalLocation": "Virtual",
+            "isRecurring": false,
+            "recurringPattern": "none",
+            "totalOccurrences": 0,
+            "recurrenceUntilDate": ""
+          },
+          {
+            "sourceItemIndex": 4,
+            "isEvent": "Yes",
+            "isFoodSpecial": "No",
+            "category": "Workshops & Classes",
+            "name": "NCCP Planning a Practice",
+            "description": "Must attend both Classes - Oct 28 & Nov 4, 2026. 6:30 pm – 9:00 pm each night. Virtual.",
+            "establishment": "Sport PEI",
+            "address": "",
+            "startDate": "2026-11-04",
+            "endDate": "2026-11-04",
+            "startTime": "18:30",
+            "endTime": "21:00",
+            "ticketPrice": "",
+            "ticketLink": "https://thelocker.coach.ca/event/registration/15921",
+            "relevantImageIndex": 0,
+            "venue": "",
+            "additionalLocation": "Virtual",
+            "isRecurring": false,
+            "recurringPattern": "none",
+            "totalOccurrences": 0,
+            "recurrenceUntilDate": ""
+          }
+        ],
+        "formattingDecisions": [
+          {
+            "itemName": "NCCP Managing Conflict",
+            "typeDecision": "Event; educational coaching class.",
+            "categoryDecision": "Workshops & Classes because the item is a named class.",
+            "assumptions": "Used the supplied date and times; kept this date as a separate event occurrence.",
+            "venueDecision": "Mapped the supplied venue to additionalLocation.",
+            "establishmentDecision": "Used Sport PEI, the posting organization.",
+            "additionalLocationDecision": "Virtual"
+          },
+          {
+            "itemName": "NCCP Managing Conflict",
+            "typeDecision": "Event; educational coaching class.",
+            "categoryDecision": "Workshops & Classes because the item is a named class.",
+            "assumptions": "Used the supplied date and times; kept this date as a separate event occurrence.",
+            "venueDecision": "Mapped the supplied venue to additionalLocation.",
+            "establishmentDecision": "Used Sport PEI, the posting organization.",
+            "additionalLocationDecision": "Virtual"
+          },
+          {
+            "itemName": "NCCP Basic Mental Skills",
+            "typeDecision": "Event; educational coaching course.",
+            "categoryDecision": "Workshops & Classes because the item is a named coaching course.",
+            "assumptions": "Used the supplied date and times.",
+            "venueDecision": "Mapped the supplied venue to additionalLocation.",
+            "establishmentDecision": "Used Sport PEI, the posting organization.",
+            "additionalLocationDecision": "Virtual"
+          },
+          {
+            "itemName": "NCCP Planning a Practice",
+            "typeDecision": "Event; educational coaching class.",
+            "categoryDecision": "Workshops & Classes because the item is a named class.",
+            "assumptions": "Used the supplied date and times; kept this date as a separate event occurrence.",
+            "venueDecision": "Mapped the supplied venue to additionalLocation.",
+            "establishmentDecision": "Used Sport PEI, the posting organization.",
+            "additionalLocationDecision": "Virtual"
+          },
+          {
+            "itemName": "NCCP Planning a Practice",
+            "typeDecision": "Event; educational coaching class.",
+            "categoryDecision": "Workshops & Classes because the item is a named class.",
+            "assumptions": "Used the supplied date and times; kept this date as a separate event occurrence.",
+            "venueDecision": "Mapped the supplied venue to additionalLocation.",
+            "establishmentDecision": "Used Sport PEI, the posting organization.",
+            "additionalLocationDecision": "Virtual"
+          }
+        ]
+      },
+      "parseError": false
+    }
+  ]
+}

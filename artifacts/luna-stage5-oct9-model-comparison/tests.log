@@ -1,0 +1,562 @@
+TAP version 13
+# {"severity":"WARNING","message":"Stage 5 canary batch count mismatch","timestamp":"2026-10-09T21:23:09.455Z","context":{"offset":18,"expected":2,"actual":0}}
+# {"severity":"INFO","message":"Stage 5 retrying failed batch as two smaller batches","timestamp":"2026-10-09T21:23:09.459Z","context":{"offset":18,"originalCount":2,"firstCount":1}}
+# {"severity":"WARNING","message":"Stage 5 canary batch count mismatch","timestamp":"2026-10-09T21:23:09.465Z","context":{"offset":18,"expected":2,"actual":0}}
+# {"severity":"INFO","message":"Stage 5 retrying failed batch as two smaller batches","timestamp":"2026-10-09T21:23:09.465Z","context":{"offset":18,"originalCount":2,"firstCount":1}}
+# {"severity":"WARNING","message":"Stage 5 canary batch count mismatch","timestamp":"2026-10-09T21:23:09.466Z","context":{"offset":18,"expected":1,"actual":0}}
+# {"severity":"WARNING","message":"Stage 5 canary batch source identity mismatch","timestamp":"2026-10-09T21:23:09.473Z","context":{"offset":18,"batchCount":2}}
+# {"severity":"INFO","message":"Stage 5 retrying failed batch as two smaller batches","timestamp":"2026-10-09T21:23:09.473Z","context":{"offset":18,"originalCount":2,"firstCount":1}}
+# {"severity":"WARNING","message":"Stage 5 canary batch source identity mismatch","timestamp":"2026-10-09T21:23:09.473Z","context":{"offset":18,"batchCount":1}}
+# Subtest: a malformed final two-item batch retries only its two items and preserves all twenty
+ok 1 - a malformed final two-item batch retries only its two items and preserves all twenty
+  ---
+  duration_ms: 14.107
+  ...
+# Subtest: an unsuccessful smaller retry holds the entire post
+ok 2 - an unsuccessful smaller retry holds the entire post
+  ---
+  duration_ms: 3.1042
+  ...
+# Subtest: concurrent batches preserve source order when the later batch finishes first
+ok 3 - concurrent batches preserve source order when the later batch finishes first
+  ---
+  duration_ms: 3.271
+  ...
+# Subtest: a count-preserving calendar identity shift holds the entire post
+ok 4 - a count-preserving calendar identity shift holds the entire post
+  ---
+  duration_ms: 3.744
+  ...
+# Subtest: valid Stage 5 JSON keeps ticket URLs containing double slashes
+ok 5 - valid Stage 5 JSON keeps ticket URLs containing double slashes
+  ---
+  duration_ms: 0.7389
+  ...
+# {"severity":"DEBUG","message":"Forced explicitly dated festival or holiday item to one-off for \\"Town of Stratford Fall Fest\\"","timestamp":"2026-10-09T21:23:09.531Z","context":{"extractionReason":"","startDate":"2026-09-26","endDate":"2026-09-26"}}
+# {"severity":"DEBUG","message":"Category correction: \\"Improv at the Beer Garden\\" → Comedy","timestamp":"2026-10-09T21:23:09.536Z"}
+# {"severity":"DEBUG","message":"Category safeguard: \\"$6 Beer Special\\" → Food Special","timestamp":"2026-10-09T21:23:09.558Z"}
+# {"severity":"DEBUG","message":"Correcting type flags for food special \\"$6 Beer Special\\"","timestamp":"2026-10-09T21:23:09.558Z","context":{"category":"Food Special"}}
+# {"severity":"DEBUG","message":"Category safeguard: \\"3 Course Menu Special\\" → Food Special","timestamp":"2026-10-09T21:23:09.560Z"}
+# {"severity":"DEBUG","message":"Correcting type flags for food special \\"3 Course Menu Special\\"","timestamp":"2026-10-09T21:23:09.560Z","context":{"category":"Food Special"}}
+# {"severity":"DEBUG","message":"Category alias normalization: \\"Toddler Tunesdays\\" -> Gatherings & Parties","timestamp":"2026-10-09T21:23:09.563Z","context":{"from":"Family Friendly","to":"Gatherings & Parties"}}
+# {"severity":"DEBUG","message":"Category inference: \\"Toddler Tunesdays\\" → Live Music (content/default)","timestamp":"2026-10-09T21:23:09.563Z"}
+# {"severity":"DEBUG","message":"Dropped retail merchandise promotion \\"Porch Goose Price\\"","timestamp":"2026-10-09T21:23:09.566Z","context":{"category":"Food Special","venue":"Kool Breeze Farms"}}
+# {"severity":"DEBUG","message":"Dropped retail merchandise promotion \\"Porch Goose Outfits Sale (Now $19.99)\\"","timestamp":"2026-10-09T21:23:09.567Z","context":{"category":"Food Special","venue":"Kool Breeze Farms"}}
+# {"severity":"DEBUG","message":"Dropped retail merchandise promotion \\"25% Off Christmas Décor\\"","timestamp":"2026-10-09T21:23:09.569Z","context":{"category":"Food Special","venue":"Beer Garden"}}
+# Subtest: Beer Garden venue wording does not turn a named performer into a food special
+ok 6 - Beer Garden venue wording does not turn a named performer into a food special
+  ---
+  duration_ms: 14.0112
+  ...
+# Subtest: a pizza sponsor does not turn a kids race into a food special
+ok 7 - a pizza sponsor does not turn a kids race into a food special
+  ---
+  duration_ms: 0.7681
+  ...
+# Subtest: a lunchtime live performer at a food hall remains an event
+ok 8 - a lunchtime live performer at a food hall remains an event
+  ---
+  duration_ms: 1.2388
+  ...
+# Subtest: a vendors market inside a festival schedule is a gathering
+ok 9 - a vendors market inside a festival schedule is a gathering
+  ---
+  duration_ms: 2.6626
+  ...
+# Subtest: festival with an Improvement Group vendor remains a dated gathering
+ok 10 - festival with an Improvement Group vendor remains a dated gathering
+  ---
+  duration_ms: 13.5116
+  ...
+# Subtest: an actual improv performance remains Comedy
+ok 11 - an actual improv performance remains Comedy
+  ---
+  duration_ms: 0.6476
+  ...
+# Subtest: an Improvement Group mention does not turn live music into Comedy
+ok 12 - an Improvement Group mention does not turn live music into Comedy
+  ---
+  duration_ms: 0.8354
+  ...
+# Subtest: a festival explicitly advertised every Saturday stays recurring
+ok 13 - a festival explicitly advertised every Saturday stays recurring
+  ---
+  duration_ms: 19.6013
+  ...
+# Subtest: an actual beer special is still categorized as a food or drink special
+ok 14 - an actual beer special is still categorized as a food or drink special
+  ---
+  duration_ms: 1.7185
+  ...
+# Subtest: meal courses do not make menu specials workshops
+ok 15 - meal courses do not make menu specials workshops
+  ---
+  duration_ms: 1.7808
+  ...
+# Subtest: real educational courses still remain workshops
+ok 16 - real educational courses still remain workshops
+  ---
+  duration_ms: 0.9041
+  ...
+# Subtest: legacy Family Friendly output is converted to a real primary category
+ok 17 - legacy Family Friendly output is converted to a real primary category
+  ---
+  duration_ms: 1.0078
+  ...
+# Subtest: family wording does not replace a specific primary category
+ok 18 - family wording does not replace a specific primary category
+  ---
+  duration_ms: 0.4756
+  ...
+# Subtest: drops the audited Porch Goose merchandise ads even if the model calls them food specials
+ok 19 - drops the audited Porch Goose merchandise ads even if the model calls them food specials
+  ---
+  duration_ms: 3.7577
+  ...
+# Subtest: keeps a real market event that happens to sell merchandise
+ok 20 - keeps a real market event that happens to sell merchandise
+  ---
+  duration_ms: 0.5336
+  ...
+# Subtest: Christmas decor discount does not become a food special
+ok 21 - Christmas decor discount does not become a food special
+  ---
+  duration_ms: 0.6143
+  ...
+# {"severity":"DEBUG","message":"Dropped cruise ship logistics listing \\"Victory I (Cruise Arrival)\\"","timestamp":"2026-10-09T21:23:09.607Z","context":{"venue":"Port Charlottetown","startDate":"2026-04-20","startTime":"07:00"}}
+# {"severity":"DEBUG","message":"Dropped cruise ship logistics listing \\"Pearl Mist - Departure\\"","timestamp":"2026-10-09T21:23:09.611Z","context":{"venue":"Port Charlottetown","startDate":"2026-05-12","startTime":"20:00"}}
+# {"severity":"DEBUG","message":"Dropped cruise ship logistics listing \\"Volendam\\"","timestamp":"2026-10-09T21:23:09.615Z","context":{"venue":"Port Charlottetown","startDate":"2026-05-26","startTime":"08:00"}}
+# {"severity":"DEBUG","message":"Dropped cruise ship logistics listing \\"Pearl Mist Port Visit\\"","timestamp":"2026-10-09T21:23:09.618Z","context":{"venue":"Port Charlottetown","startDate":"2026-04-20","startTime":"07:00"}}
+# {"severity":"DEBUG","message":"Dropped cruise ship logistics listing \\"Mein Schiff 1 Port Visit\\"","timestamp":"2026-10-09T21:23:09.618Z","context":{"venue":"Port Charlottetown","startDate":"2026-04-20","startTime":"07:00"}}
+# Subtest: drops cruise ship arrival rows parsed from a Port Charlottetown cruise schedule
+ok 22 - drops cruise ship arrival rows parsed from a Port Charlottetown cruise schedule
+  ---
+  duration_ms: 9.5513
+  ...
+# Subtest: drops bare ship names when the event description carries the passenger-count logistics cue
+ok 23 - drops bare ship names when the event description carries the passenger-count logistics cue
+  ---
+  duration_ms: 0.598
+  ...
+# Subtest: keeps public cruise-themed events that are not ship-call logistics
+ok 24 - keeps public cruise-themed events that are not ship-call logistics
+  ---
+  duration_ms: 1.1964
+  ...
+# Subtest: a two-ship welcome notice is logistics even when the model calls it a Port Visit
+ok 25 - a two-ship welcome notice is logistics even when the model calls it a Port Visit
+  ---
+  duration_ms: 1.6728
+  ...
+# Subtest: printed schedule slot retains its own date and does not inherit a registration deadline weekday
+ok 26 - printed schedule slot retains its own date and does not inherit a registration deadline weekday
+  ---
+  duration_ms: 4.4979
+  ...
+# Subtest: explicit weekly schedule remains recurring
+ok 27 - explicit weekly schedule remains recurring
+  ---
+  duration_ms: 1.2938
+  ...
+# Subtest: dated gallery performance keeps its source date when clock evidence omits month and day
+ok 28 - dated gallery performance keeps its source date when clock evidence omits month and day
+  ---
+  duration_ms: 0.5924
+  ...
+# {"severity":"DEBUG","message":"Category safeguard: \\"3 Course Menu Special\\" → Food Special","timestamp":"2026-10-09T21:23:09.734Z"}
+# {"severity":"DEBUG","message":"Correcting type flags for food special \\"3 Course Menu Special\\"","timestamp":"2026-10-09T21:23:09.743Z","context":{"category":"Food Special"}}
+# Subtest: meal courses do not make menu specials workshops
+ok 29 - meal courses do not make menu specials workshops
+  ---
+  duration_ms: 15.8652
+  ...
+# Subtest: real educational courses still remain workshops
+ok 30 - real educational courses still remain workshops
+  ---
+  duration_ms: 1.7846
+  ...
+# {"severity":"INFO","message":"Dropped non-standalone post listing","timestamp":"2026-10-09T21:23:09.764Z","context":{"name":"Thanksgiving Giveaway","reason":"online_entry_giveaway"}}
+# {"severity":"INFO","message":"Dropped non-standalone post listing","timestamp":"2026-10-09T21:23:09.769Z","context":{"name":"Mitchell’s Soups","reason":"ordinary_restock"}}
+# {"severity":"INFO","message":"Dropped non-standalone post listing","timestamp":"2026-10-09T21:23:09.770Z","context":{"name":"50% Off Sale","reason":"non_food_retail_sale"}}
+# {"severity":"INFO","message":"Dropped non-standalone post listing","timestamp":"2026-10-09T21:23:09.771Z","context":{"name":"Pumpkins, gourds & squash","reason":"ordinary_produce_inventory"}}
+# {"severity":"INFO","message":"Dropped non-standalone post listing","timestamp":"2026-10-09T21:23:09.771Z","context":{"name":"Small pumpkin","reason":"ordinary_produce_inventory"}}
+# {"severity":"INFO","message":"Dropped non-standalone post listing","timestamp":"2026-10-09T21:23:09.771Z","context":{"name":"Municipal Council nomination deadline","reason":"administrative_filing_deadline"}}
+# {"severity":"INFO","message":"Dropped non-standalone post listing","timestamp":"2026-10-09T21:23:09.772Z","context":{"name":"Thanksgiving Pumpkin Floral Arrangement","reason":"retail_product_pickup"}}
+# {"severity":"DEBUG","message":"Dropped unsupported food-special bleed item from closure-only post \\"Thanksgiving Turkey Dinner Special\\"","timestamp":"2026-10-09T21:23:09.776Z","context":{"category":"Food Special"}}
+# {"severity":"DEBUG","message":"Dropped unsupported food-special bleed item from closure-only post \\"Pumpkin Pie\\"","timestamp":"2026-10-09T21:23:09.777Z","context":{"category":"Food Special"}}
+# {"severity":"DEBUG","message":"Dropped unsupported food-special bleed item from closure-only post \\"Pumpkin Pie\\"","timestamp":"2026-10-09T21:23:09.778Z","context":{"category":"Food Special"}}
+# {"severity":"DEBUG","message":"Dropped unsupported food-special bleed item from closure-only post \\"Day-old bread\\"","timestamp":"2026-10-09T21:23:09.778Z","context":{"category":"Food Special"}}
+# {"severity":"DEBUG","message":"Dropped unsupported food-special bleed item from closure-only post \\"Pumpkin Pie\\"","timestamp":"2026-10-09T21:23:09.779Z","context":{"category":"Food Special"}}
+# {"severity":"INFO","message":"Dropped non-standalone post listing","timestamp":"2026-10-09T21:23:09.780Z","context":{"name":"Registration Price Change Alert","reason":"registration_administrative_deadline"}}
+# {"severity":"INFO","message":"Dropped non-standalone post listing","timestamp":"2026-10-09T21:23:09.780Z","context":{"name":"Carrot + Ginger Soup","reason":"ordinary_fresh_fridge_menu"}}
+# {"severity":"INFO","message":"Dropped non-standalone post listing","timestamp":"2026-10-09T21:23:09.780Z","context":{"name":"Lattice Crust Apple Pies","reason":"ordinary_new_product"}}
+# {"severity":"INFO","message":"Dropped non-standalone post listing","timestamp":"2026-10-09T21:23:09.781Z","context":{"name":"All Pools Closed for Swimming Lessons","reason":"pool_closure_notice"}}
+# {"severity":"INFO","message":"Dropped non-standalone post listing","timestamp":"2026-10-09T21:23:09.781Z","context":{"name":"Final-day council nomination submissions","reason":"administrative_filing_deadline"}}
+# Subtest: Oct 7 non-event announcements cannot become activities or food deals
+ok 31 - Oct 7 non-event announcements cannot become activities or food deals
+  ---
+  duration_ms: 12.3589
+  ...
+# Subtest: keeps genuine food deals, public activities, and political gatherings
+ok 32 - keeps genuine food deals, public activities, and political gatherings
+  ---
+  duration_ms: 1.012
+  ...
+# Subtest: a Monday closure does not erase an explicit weekend dinner special
+ok 33 - a Monday closure does not erase an explicit weekend dinner special
+  ---
+  duration_ms: 2.1454
+  ...
+# Subtest: mixed bakery closure keeps the named first-time bread offer, not the ordinary pie prices
+ok 34 - mixed bakery closure keeps the named first-time bread offer, not the ordinary pie prices
+  ---
+  duration_ms: 2.0486
+  ...
+# Subtest: registration price-change deadline is excluded but race and attendee pickup remain
+ok 35 - registration price-change deadline is excluded but race and attendee pickup remain
+  ---
+  duration_ms: 0.7996
+  ...
+# Subtest: October 8 source notices and ordinary food inventory do not become listings
+ok 36 - October 8 source notices and ordinary food inventory do not become listings
+  ---
+  duration_ms: 1.2086
+  ...
+# {"severity":"DEBUG","message":"Dropped operating-hours-only listing \\"Regular Farm Hours (Hands-on Experiences)\\"","timestamp":"2026-10-09T21:23:09.829Z","context":{"startDate":"2026-08-01","startTime":"10:00","venue":"Venue"}}
+# {"severity":"DEBUG","message":"Dropped operating-hours-only listing \\"Casino Gaming\\"","timestamp":"2026-10-09T21:23:09.833Z","context":{"startDate":"2026-08-01","startTime":"10:00","venue":"Venue"}}
+# {"severity":"DEBUG","message":"Dropped operating-hours-only listing \\"Open daily 12-6 (closed Wednesdays)\\"","timestamp":"2026-10-09T21:23:09.833Z","context":{"startDate":"2026-08-01","startTime":"10:00","venue":"Venue"}}
+# {"severity":"DEBUG","message":"Dropped operating-hours-only listing \\"Robert McMillan Pottery Gallery & Studio Open (Friday)\\"","timestamp":"2026-10-09T21:23:09.834Z","context":{"startDate":"2026-08-01","startTime":"10:00","venue":"Venue"}}
+# {"severity":"DEBUG","message":"Dropped operating-hours-only listing \\"All pools open\\"","timestamp":"2026-10-09T21:23:09.837Z","context":{"startDate":"2026-10-05","startTime":"","venue":"Venue"}}
+# {"severity":"DEBUG","message":"Dropped operating-hours-only listing \\"Regular Farm Hours\\"","timestamp":"2026-10-09T21:23:09.837Z","context":{"startDate":"2026-08-01","startTime":"10:00","venue":"Venue"}}
+# Subtest: drops operating-hours-only records from the event output
+ok 37 - drops operating-hours-only records from the event output
+  ---
+  duration_ms: 10.8011
+  ...
+# Subtest: keeps dated public pool access windows while still filtering ordinary venue hours
+ok 38 - keeps dated public pool access windows while still filtering ordinary venue hours
+  ---
+  duration_ms: 1.5287
+  ...
+# Subtest: keeps a discrete public event even when its venue is open daily
+ok 39 - keeps a discrete public event even when its venue is open daily
+  ---
+  duration_ms: 0.467
+  ...
+# {"severity":"WARNING","message":"Dropped duplicate Stage 5 sourceItemIndex","timestamp":"2026-10-09T21:23:10.471Z","context":{"sourceItemIndex":0,"eventName":"Gin & Tonic"}}
+# Subtest: sourceItemIndex preserves Downtown schedule venue identity when Stage 5 reorders rows
+ok 40 - sourceItemIndex preserves Downtown schedule venue identity when Stage 5 reorders rows
+  ---
+  duration_ms: 4.415
+  ...
+# Subtest: guarded content matching aligns reordered legacy output that lacks sourceItemIndex
+ok 41 - guarded content matching aligns reordered legacy output that lacks sourceItemIndex
+  ---
+  duration_ms: 1.0823
+  ...
+# Subtest: duplicate sourceItemIndex cannot repaint a different source row
+ok 42 - duplicate sourceItemIndex cannot repaint a different source row
+  ---
+  duration_ms: 5.3602
+  ...
+# Subtest: dense calendar guard detects a count-preserving shift and repeated later entries
+ok 43 - dense calendar guard detects a count-preserving shift and repeated later entries
+  ---
+  duration_ms: 3.3632
+  ...
+# {"severity":"INFO","message":"Preserved sparse printed dates","timestamp":"2026-10-09T21:23:10.459Z","context":{"itemCount":20}}
+# {"severity":"INFO","message":"Preserved sparse printed dates","timestamp":"2026-10-09T21:23:10.470Z","context":{"itemCount":10}}
+# Subtest: preserves all ten printed PowerSkating dates across the November gap
+ok 44 - preserves all ten printed PowerSkating dates across the November gap
+  ---
+  duration_ms: 10.9405
+  ...
+# Subtest: keeps an ordinary consecutive weekly series intact
+ok 45 - keeps an ordinary consecutive weekly series intact
+  ---
+  duration_ms: 0.4824
+  ...
+# Subtest: does not re-promote a consecutive category fragment inside a sparse dated series
+ok 46 - does not re-promote a consecutive category fragment inside a sparse dated series
+  ---
+  duration_ms: 2.4524
+  ...
+# Subtest: Stage 5 cannot discard Stage-3 route evidence
+ok 47 - Stage 5 cannot discard Stage-3 route evidence
+  ---
+  duration_ms: 5.7346
+  ...
+# Subtest: Stage 5 spatial evidence is retained when it is already present
+ok 48 - Stage 5 spatial evidence is retained when it is already present
+  ---
+  duration_ms: 1.2062
+  ...
+# {"severity":"DEBUG","message":"Dropped traffic advisory logistics listing \\"Temporary Traffic Disruption - Route 2 Winsloe (Traffic Advisory)\\"","timestamp":"2026-10-09T21:23:10.671Z","context":{"venue":"Route 2, Winsloe (near Campbell Road), Charlottetown","startDate":"2026-07-30","startTime":"09:00"}}
+# Subtest: drops municipal traffic advisory rows parsed as events
+ok 49 - drops municipal traffic advisory rows parsed as events
+  ---
+  duration_ms: 9.3993
+  ...
+# Subtest: keeps public events that mention street closures as logistics
+ok 50 - keeps public events that mention street closures as logistics
+  ---
+  duration_ms: 1.1678
+  ...
+# {"severity":"DEBUG","message":"Applied explicit date range correction for \\"Beach Boys show (Trailside Music Hall)\\"","timestamp":"2026-10-09T21:23:10.807Z","context":{"startDateFrom":"2026-05-07","startDateTo":"2026-05-07","endDateFrom":"2026-05-07","endDateTo":"2026-05-09"}}
+# {"severity":"DEBUG","message":"Repairing generic title-fragment venue","timestamp":"2026-10-09T21:23:10.812Z","context":{"eventName":"Wellness on the Waterfront","fromVenue":"Waterfront","fromEstablishment":"Waterfront","fromAdditionalLocation":"Waterfront","to":"Founders' Food Hall and Market"}}
+# Subtest: holds a printed 7 h 00 without AM/PM while retaining a corroborated time
+ok 51 - holds a printed 7 h 00 without AM/PM while retaining a corroborated time
+  ---
+  duration_ms: 3.3109
+  ...
+# Subtest: restores only unambiguous printed start times when formatting omits them
+ok 52 - restores only unambiguous printed start times when formatting omits them
+  ---
+  duration_ms: 3.1283
+  ...
+# Subtest: restores a printed same-day end when Stage 5 collapses it to the start
+ok 53 - restores a printed same-day end when Stage 5 collapses it to the start
+  ---
+  duration_ms: 1.2697
+  ...
+# Subtest: explicit date-range correction preserves split single-date items produced from multi-item stage 3 extraction
+ok 54 - explicit date-range correction preserves split single-date items produced from multi-item stage 3 extraction
+  ---
+  duration_ms: 2.0866
+  ...
+# Subtest: explicit date-range correction still widens a true single extracted item to the poster range
+ok 55 - explicit date-range correction still widens a true single extracted item to the poster range
+  ---
+  duration_ms: 8.972
+  ...
+# Subtest: formatted metadata rehydration restores a recovered ticket link when Stage 5 leaves it blank
+ok 56 - formatted metadata rehydration restores a recovered ticket link when Stage 5 leaves it blank
+  ---
+  duration_ms: 0.3552
+  ...
+# Subtest: formatted metadata rehydration preserves image-aware relevant image index
+ok 57 - formatted metadata rehydration preserves image-aware relevant image index
+  ---
+  duration_ms: 0.2165
+  ...
+# Subtest: formatted metadata rehydration keeps linked-calendar entries off unrelated post images
+ok 58 - formatted metadata rehydration keeps linked-calendar entries off unrelated post images
+  ---
+  duration_ms: 0.2538
+  ...
+# Subtest: generic title-fragment venue does not override the row venue
+ok 59 - generic title-fragment venue does not override the row venue
+  ---
+  duration_ms: 1.2087
+  ...
+# {"severity":"DEBUG","message":"Rejected mixed-board row-scoped weekday fallback for \\"Special Guest\\"","timestamp":"2026-10-09T21:23:10.872Z","context":{"recurringPatternFrom":"weekly_wednesday","startDate":"2026-04-10","sourceText":"Special Guest Live at the club. What's up at the club this week?! Blues jam session every Wednesday night 7pm. Dan McCarthy on the mic Friday 4pm. Open mic Sunday, every friggin' Sunday! weekly board poster with Wednesda"}}
+# {"severity":"DEBUG","message":"Forced explicit dated weekly item to one-off for \\"YYG Annual Runway Run\\"","timestamp":"2026-10-09T21:23:10.881Z","context":{"recurringPatternFrom":"weekly_saturday","startDate":"2026-05-09","sourceText":"YYG Annual Runway Run Save the Date! Ever wondered what it's like to run on an airport runway? Mark your calendar because YYG's annual Runway Run takes off on May 9 at 9:00 AM! Stay tuned for registration details."}}
+# {"severity":"DEBUG","message":"Forced explicit dated weekly item to one-off for \\"Live Soccer Final Watch Party\\"","timestamp":"2026-10-09T21:23:10.881Z","context":{"recurringPatternFrom":"weekly_saturday","startDate":"2026-05-30","sourceText":"Live Soccer Final Watch Party The Soccer Final is HERE this Saturday, May 30th! Kick off starts at 1PM and you won't want to miss a second of the action."}}
+# {"severity":"DEBUG","message":"Forced single explicit-date weekly item to one-off for \\"A Shot of Islandness: Cocktail Pop-up\\"","timestamp":"2026-10-09T21:23:10.883Z","context":{"recurringPatternFrom":"weekly_saturday","startDate":"2026-04-18","sourceText":"A Shot of Islandness: Cocktail Pop-up Saturday, April 18 | 4pm to close | Red Island Cider. A culminating project of the UPEI MAIS program, brought to life right here at the taproom."}}
+# {"severity":"DEBUG","message":"Forced single explicit-date weekly item to one-off for \\"Progressive Organ Concert (Trinity United Church)\\"","timestamp":"2026-10-09T21:23:10.885Z","context":{"recurringPatternFrom":"weekly_sunday","startDate":"2026-06-28","sourceText":"Progressive Organ Concert (Trinity United Church) Annual Progressive Organ Concert on Sun, June 28. Proceed to Trinity United Church (Prince Street) for a 2:30 p.m. concert. Each concert is about 30 minutes. Admission is"}}
+# {"severity":"DEBUG","message":"Forced single explicit-date weekly item to one-off for \\"Progressive Organ Concert (St. Dunstan's Basilica)\\"","timestamp":"2026-10-09T21:23:10.886Z","context":{"recurringPatternFrom":"weekly_sunday","startDate":"2026-06-28","sourceText":"Progressive Organ Concert (St. Dunstan's Basilica) Annual Progressive Organ Concert on Sun, June 28. Conclude the afternoon of music at St. Dunstan's Basilica (Great George Street) at 3:30 p.m. Each concert is about 30 m"}}
+# {"severity":"DEBUG","message":"Forced weak weekday special to one-off for \\"Monday Special - Homemade Pulled Pork Hoagie\\"","timestamp":"2026-10-09T21:23:10.891Z","context":{"recurringPatternFrom":"weekly_monday","startDate":"2026-06-08","sourceText":"Monday Special - Homemade Pulled Pork Hoagie Monday Special At The Road House Our Homemade Pulled Pork Hoagie For 17.99 Toasted Sub Bun, Coleslaw, Pickles & Pulled Pork With Your Choice Of Side!"}}
+# {"severity":"DEBUG","message":"Forced explicit dated weekly item to one-off for \\"Tuesday Live (BluRobin Music)\\"","timestamp":"2026-10-09T21:23:10.894Z","context":{"recurringPatternFrom":"weekly_tuesday","startDate":"2026-06-09","sourceText":"Tuesday Live (BluRobin Music) Tuesday Live - BluRobin Music 6 to 8pm (June 9th)."}}
+# {"severity":"DEBUG","message":"Forced this-week performer lineup row to one-off for \\"We 3\\"","timestamp":"2026-10-09T21:23:10.894Z","context":{"recurringPatternFrom":"weekly_sunday","startDate":"2026-07-19","sourceText":"We 3 Live music every night this week."}}
+# {"severity":"DEBUG","message":"Forced schedule-header custom recurrence to one-off for \\"Billy White\\"","timestamp":"2026-10-09T21:23:10.896Z","context":{"recurringPatternFrom":"weekly_custom","recurringDaysOfWeek":["friday","saturday"],"startDate":"2026-07-17","sourceText":"Billy White Red Shores Unplugged Entertainment Series (acoustic weekend entertainment series). Friday & Saturday evenings."}}
+# {"severity":"DEBUG","message":"Forced finite recurring run with one explicit date to one-off for \\"Early Test Screening (Invite Only) - Courtesy of MUBI and Camp Miasma Pictures LLC\\"","timestamp":"2026-10-09T21:23:10.898Z","context":{"recurringPatternFrom":"weekly_friday","startDateFrom":"2026-08-07","startDateTo":"2026-08-14","endDateTo":"2026-08-14","sourceText":"Early Test Screening (Invite Only) - Courtesy of MUBI and Camp Miasma Pictures LLC Early test screening invite only alongside Aug 14th at 7:00PM."}}
+# {"severity":"DEBUG","message":"Refined recurring pattern for \\"Trivia Night\\"","timestamp":"2026-10-09T21:23:10.900Z","context":{"from":"daily","to":"weekly_tuesday","source":"standalone_weekday"}}
+# {"severity":"DEBUG","message":"Realigned recurring anchor date for \\"Trivia Night\\"","timestamp":"2026-10-09T21:23:10.900Z","context":{"recurringPattern":"weekly_tuesday","startDateFrom":"2026-08-01","startDateTo":"2026-08-04","endDateFrom":"2026-08-01","endDateTo":"2026-08-04"}}
+# {"severity":"DEBUG","message":"Removed unsupported daily recurrence for \\"Family Rates Available (Day on the Farm)\\"","timestamp":"2026-10-09T21:23:10.901Z","context":{"sourceWeekdayPatterns":["weekly_sunday"],"sourceText":"Family Rates Available (Day on the Farm) Sunday - Family Rates Available. Bring the whole family."}}
+# Subtest: single-weekday row-scoped recurrence fallback still works when the row only supports one weekday
+ok 60 - single-weekday row-scoped recurrence fallback still works when the row only supports one weekday
+  ---
+  duration_ms: 21.618
+  ...
+# Subtest: a dated shop weekly-special tag is a finite offer, not indefinite Thursday recurrence
+ok 61 - a dated shop weekly-special tag is a finite offer, not indefinite Thursday recurrence
+  ---
+  duration_ms: 0.5646
+  ...
+# Subtest: a year after a date does not turn a weekly October class into a one-off
+ok 62 - a year after a date does not turn a weekly October class into a one-off
+  ---
+  duration_ms: 4.7412
+  ...
+# Subtest: mixed weekly board text does not let a Wednesday cue overwrite a Friday item
+ok 63 - mixed weekly board text does not let a Wednesday cue overwrite a Friday item
+  ---
+  duration_ms: 1.3021
+  ...
+# Subtest: multi-weekday board text does not assign a weekday when item-local support is weak
+ok 64 - multi-weekday board text does not assign a weekday when item-local support is weak
+  ---
+  duration_ms: 4.1135
+  ...
+# Subtest: MWF shorthand expands to a weekly_custom multi-day recurrence
+ok 65 - MWF shorthand expands to a weekly_custom multi-day recurrence
+  ---
+  duration_ms: 4.7387
+  ...
+# Subtest: explicit one-off dates are not kept as simple weekly recurring events
+ok 66 - explicit one-off dates are not kept as simple weekly recurring events
+  ---
+  duration_ms: 4.1527
+  ...
+# Subtest: single-date concerts with duration-only each wording are not kept as weekly recurring
+ok 67 - single-date concerts with duration-only each wording are not kept as weekly recurring
+  ---
+  duration_ms: 2.3329
+  ...
+# Subtest: actual recurring concerts still keep every Sunday wording with duration details
+ok 68 - actual recurring concerts still keep every Sunday wording with duration details
+  ---
+  duration_ms: 0.8855
+  ...
+# Subtest: generic singular weekday food specials are not inferred as weekly recurring
+ok 69 - generic singular weekday food specials are not inferred as weekly recurring
+  ---
+  duration_ms: 2.004
+  ...
+# Subtest: generic singular weekday food specials are demoted when extracted as weekly
+ok 70 - generic singular weekday food specials are demoted when extracted as weekly
+  ---
+  duration_ms: 1.6623
+  ...
+# Subtest: explicit recurrence wording still keeps weekly food specials
+ok 71 - explicit recurrence wording still keeps weekly food specials
+  ---
+  duration_ms: 1.0051
+  ...
+# Subtest: explicit every single day wording keeps daily food specials
+ok 72 - explicit every single day wording keeps daily food specials
+  ---
+  duration_ms: 0.4329
+  ...
+# Subtest: plural weekday wording still keeps weekly food specials
+ok 73 - plural weekday wording still keeps weekly food specials
+  ---
+  duration_ms: 0.4576
+  ...
+# Subtest: dated performer weekday live posts are not kept as weekly recurring
+ok 74 - dated performer weekday live posts are not kept as weekly recurring
+  ---
+  duration_ms: 0.5182
+  ...
+# Subtest: this-week every-night performer lineups are not kept as open-ended weekly recurrence
+ok 75 - this-week every-night performer lineups are not kept as open-ended weekly recurrence
+  ---
+  duration_ms: 1.0595
+  ...
+# Subtest: dated performer rows do not inherit a Friday and Saturday series header as open-ended recurrence
+ok 76 - dated performer rows do not inherit a Friday and Saturday series header as open-ended recurrence
+  ---
+  duration_ms: 1.4571
+  ...
+# Subtest: single-date screening rows do not become finite weekly recurring runs
+ok 77 - single-date screening rows do not become finite weekly recurring runs
+  ---
+  duration_ms: 1.7095
+  ...
+# Subtest: real camp recurrence wording is still treated as recurring
+ok 78 - real camp recurrence wording is still treated as recurring
+  ---
+  duration_ms: 0.7536
+  ...
+# Subtest: true multi-day live music series containers can still stay recurring
+ok 79 - true multi-day live music series containers can still stay recurring
+  ---
+  duration_ms: 0.8009
+  ...
+# Subtest: an explicit every-Tuesday source corrects a bad daily model result and anchor date
+ok 80 - an explicit every-Tuesday source corrects a bad daily model result and anchor date
+  ---
+  duration_ms: 0.7544
+  ...
+# Subtest: a singular weekday listing cannot remain an open-ended daily recurrence
+ok 81 - a singular weekday listing cannot remain an open-ended daily recurrence
+  ---
+  duration_ms: 0.5075
+  ...
+# {"severity":"INFO","message":"Stage 5: Starting final formatting","timestamp":"2026-10-09T21:23:10.927Z","context":{"itemCount":1,"userName":"Test venue"}}
+# {"severity":"INFO","message":"Timing","timestamp":"2026-10-09T21:23:10.941Z","context":{"step":"gpt_call","component":"finalFormatter","endpoint":"responses","model":"gpt-6-luna","durationMs":8}}
+# {"severity":"INFO","message":"Stage 5 Responses diagnostics","timestamp":"2026-10-09T21:23:10.942Z","context":{"model":"gpt-6-luna","durationMs":8,"inputTokens":1,"outputTokens":1,"totalTokens":2,"cachedInputTokens":0,"responseId":"local-test","responseStatus":"completed","incompleteReason":"","requestedMaxOutputTokens":32000,"reasoningTokens":0,"visibleOutputChars":47,"parsedItemCount":0,"parseError":false,"batchOffset":0,"batchItemCount":1}}
+# {"severity":"DEBUG","message":"GPT formatting response received (responses)","timestamp":"2026-10-09T21:23:10.942Z","context":{"model":"gpt-6-luna","tokens":2}}
+# {"severity":"DEBUG","message":"Category inference: \\"Test concert\\" → Live Music (content/default)","timestamp":"2026-10-09T21:23:10.946Z"}
+# {"severity":"DEBUG","message":"Formatted \\"Test concert\\"","timestamp":"2026-10-09T21:23:10.964Z","context":{"isEvent":"Yes","category":"Live Music","establishment":""}}
+# {"severity":"INFO","message":"Stage 5 Result: Formatted 1 items","timestamp":"2026-10-09T21:23:10.969Z"}
+# {"severity":"INFO","message":"Stage 5 category normalization summary","timestamp":"2026-10-09T21:23:10.969Z","context":{"modelFinalKept":1,"normalizedByAlias":0,"aliasFromModelFinal":0,"filledFromHint":0,"stage3HintDirect":0,"aliasFromStage3Hint":0,"inferredByKeywords":0,"defaultFallbacks":0,"unknownCategoryLabelCount":0,"unknownCategoryLabels":[],"allowedCategoryCount":15}}
+# {"severity":"INFO","message":"Stage 5: Starting final formatting","timestamp":"2026-10-09T21:23:10.971Z","context":{"itemCount":1,"userName":"Test venue"}}
+# {"severity":"INFO","message":"Timing","timestamp":"2026-10-09T21:23:10.972Z","context":{"step":"gpt_call","component":"finalFormatter","endpoint":"responses","model":"gpt-6-luna","durationMs":1}}
+# {"severity":"INFO","message":"Stage 5 Responses diagnostics","timestamp":"2026-10-09T21:23:10.972Z","context":{"model":"gpt-6-luna","durationMs":1,"inputTokens":1,"outputTokens":1,"totalTokens":2,"cachedInputTokens":0,"responseId":"local-test","responseStatus":"completed","incompleteReason":"","requestedMaxOutputTokens":32000,"reasoningTokens":0,"visibleOutputChars":47,"parsedItemCount":0,"parseError":false,"batchOffset":0,"batchItemCount":1}}
+# {"severity":"DEBUG","message":"GPT formatting response received (responses)","timestamp":"2026-10-09T21:23:10.972Z","context":{"model":"gpt-6-luna","tokens":2}}
+# {"severity":"DEBUG","message":"Category inference: \\"Test concert\\" → Live Music (content/default)","timestamp":"2026-10-09T21:23:10.973Z"}
+# {"severity":"DEBUG","message":"Formatted \\"Test concert\\"","timestamp":"2026-10-09T21:23:10.976Z","context":{"isEvent":"Yes","category":"Live Music","establishment":""}}
+# {"severity":"INFO","message":"Stage 5 Result: Formatted 1 items","timestamp":"2026-10-09T21:23:10.977Z"}
+# {"severity":"INFO","message":"Stage 5 category normalization summary","timestamp":"2026-10-09T21:23:10.977Z","context":{"modelFinalKept":1,"normalizedByAlias":0,"aliasFromModelFinal":0,"filledFromHint":0,"stage3HintDirect":0,"aliasFromStage3Hint":0,"inferredByKeywords":0,"defaultFallbacks":0,"unknownCategoryLabelCount":0,"unknownCategoryLabels":[],"allowedCategoryCount":15}}
+# {"severity":"INFO","message":"Stage 5: Starting final formatting","timestamp":"2026-10-09T21:23:10.978Z","context":{"itemCount":1,"userName":"Test venue"}}
+# {"severity":"INFO","message":"Timing","timestamp":"2026-10-09T21:23:10.979Z","context":{"step":"gpt_call","component":"finalFormatter","endpoint":"responses","model":"gpt-6-luna","durationMs":1}}
+# {"severity":"INFO","message":"Stage 5 Responses diagnostics","timestamp":"2026-10-09T21:23:10.979Z","context":{"model":"gpt-6-luna","durationMs":1,"inputTokens":1,"outputTokens":1,"totalTokens":2,"cachedInputTokens":0,"responseId":"local-test","responseStatus":"completed","incompleteReason":"","requestedMaxOutputTokens":32000,"reasoningTokens":0,"visibleOutputChars":47,"parsedItemCount":0,"parseError":false,"batchOffset":0,"batchItemCount":1}}
+# {"severity":"DEBUG","message":"GPT formatting response received (responses)","timestamp":"2026-10-09T21:23:10.979Z","context":{"model":"gpt-6-luna","tokens":2}}
+# {"severity":"DEBUG","message":"Category inference: \\"Test concert\\" → Live Music (content/default)","timestamp":"2026-10-09T21:23:10.979Z"}
+# {"severity":"DEBUG","message":"Formatted \\"Test concert\\"","timestamp":"2026-10-09T21:23:10.979Z","context":{"isEvent":"Yes","category":"Live Music","establishment":""}}
+# {"severity":"INFO","message":"Stage 5 Result: Formatted 1 items","timestamp":"2026-10-09T21:23:10.979Z"}
+# {"severity":"INFO","message":"Stage 5 category normalization summary","timestamp":"2026-10-09T21:23:10.980Z","context":{"modelFinalKept":1,"normalizedByAlias":0,"aliasFromModelFinal":0,"filledFromHint":0,"stage3HintDirect":0,"aliasFromStage3Hint":0,"inferredByKeywords":0,"defaultFallbacks":0,"unknownCategoryLabelCount":0,"unknownCategoryLabels":[],"allowedCategoryCount":15}}
+# {"severity":"INFO","message":"Stage 5: Starting final formatting","timestamp":"2026-10-09T21:23:10.980Z","context":{"itemCount":1,"userName":"Test venue"}}
+# {"severity":"INFO","message":"Timing","timestamp":"2026-10-09T21:23:10.981Z","context":{"step":"gpt_call","component":"finalFormatter","endpoint":"responses","model":"gpt-5-nano","durationMs":1}}
+# {"severity":"INFO","message":"Stage 5 Responses diagnostics","timestamp":"2026-10-09T21:23:10.981Z","context":{"model":"gpt-5-nano","durationMs":1,"inputTokens":1,"outputTokens":1,"totalTokens":2,"cachedInputTokens":0,"responseId":"local-test","responseStatus":"completed","incompleteReason":"","requestedMaxOutputTokens":32000,"reasoningTokens":0,"visibleOutputChars":47,"parsedItemCount":0,"parseError":false,"batchOffset":0,"batchItemCount":1}}
+# {"severity":"DEBUG","message":"GPT formatting response received (responses)","timestamp":"2026-10-09T21:23:10.981Z","context":{"model":"gpt-5-nano","tokens":2}}
+# {"severity":"DEBUG","message":"Category inference: \\"Test concert\\" → Live Music (content/default)","timestamp":"2026-10-09T21:23:10.981Z"}
+# {"severity":"DEBUG","message":"Formatted \\"Test concert\\"","timestamp":"2026-10-09T21:23:10.981Z","context":{"isEvent":"Yes","category":"Live Music","establishment":""}}
+# {"severity":"INFO","message":"Stage 5 Result: Formatted 1 items","timestamp":"2026-10-09T21:23:10.982Z"}
+# {"severity":"INFO","message":"Stage 5 category normalization summary","timestamp":"2026-10-09T21:23:10.982Z","context":{"modelFinalKept":1,"normalizedByAlias":0,"aliasFromModelFinal":0,"filledFromHint":0,"stage3HintDirect":0,"aliasFromStage3Hint":0,"inferredByKeywords":0,"defaultFallbacks":0,"unknownCategoryLabelCount":0,"unknownCategoryLabels":[],"allowedCategoryCount":15}}
+# {"severity":"INFO","message":"Stage 5: Starting final formatting","timestamp":"2026-10-09T21:23:10.982Z","context":{"itemCount":1,"userName":"Test venue"}}
+# {"severity":"INFO","message":"Timing","timestamp":"2026-10-09T21:23:10.983Z","context":{"step":"gpt_call","component":"finalFormatter","endpoint":"responses","model":"gpt-5-nano","durationMs":1}}
+# {"severity":"INFO","message":"Stage 5 Responses diagnostics","timestamp":"2026-10-09T21:23:10.983Z","context":{"model":"gpt-5-nano","durationMs":1,"inputTokens":1,"outputTokens":1,"totalTokens":2,"cachedInputTokens":0,"responseId":"local-test","responseStatus":"completed","incompleteReason":"","requestedMaxOutputTokens":32000,"reasoningTokens":0,"visibleOutputChars":47,"parsedItemCount":0,"parseError":false,"batchOffset":0,"batchItemCount":1}}
+# {"severity":"DEBUG","message":"GPT formatting response received (responses)","timestamp":"2026-10-09T21:23:10.983Z","context":{"model":"gpt-5-nano","tokens":2}}
+# {"severity":"DEBUG","message":"Category inference: \\"Test concert\\" → Live Music (content/default)","timestamp":"2026-10-09T21:23:10.983Z"}
+# {"severity":"DEBUG","message":"Formatted \\"Test concert\\"","timestamp":"2026-10-09T21:23:10.984Z","context":{"isEvent":"Yes","category":"Live Music","establishment":""}}
+# {"severity":"INFO","message":"Stage 5 Result: Formatted 1 items","timestamp":"2026-10-09T21:23:10.984Z"}
+# {"severity":"INFO","message":"Stage 5 category normalization summary","timestamp":"2026-10-09T21:23:10.984Z","context":{"modelFinalKept":1,"normalizedByAlias":0,"aliasFromModelFinal":0,"filledFromHint":0,"stage3HintDirect":0,"aliasFromStage3Hint":0,"inferredByKeywords":0,"defaultFallbacks":0,"unknownCategoryLabelCount":0,"unknownCategoryLabels":[],"allowedCategoryCount":15}}
+# {"severity":"INFO","message":"Stage 5: Starting final formatting","timestamp":"2026-10-09T21:23:10.984Z","context":{"itemCount":1,"userName":"Test venue"}}
+# {"severity":"INFO","message":"Timing","timestamp":"2026-10-09T21:23:10.985Z","context":{"step":"gpt_call","component":"finalFormatter","endpoint":"responses","model":"gpt-5-nano","durationMs":1}}
+# {"severity":"INFO","message":"Stage 5 Responses diagnostics","timestamp":"2026-10-09T21:23:10.985Z","context":{"model":"gpt-5-nano","durationMs":1,"inputTokens":1,"outputTokens":1,"totalTokens":2,"cachedInputTokens":0,"responseId":"local-test","responseStatus":"completed","incompleteReason":"","requestedMaxOutputTokens":32000,"reasoningTokens":0,"visibleOutputChars":47,"parsedItemCount":0,"parseError":false,"batchOffset":0,"batchItemCount":1}}
+# {"severity":"DEBUG","message":"GPT formatting response received (responses)","timestamp":"2026-10-09T21:23:10.985Z","context":{"model":"gpt-5-nano","tokens":2}}
+# {"severity":"DEBUG","message":"Category inference: \\"Test concert\\" → Live Music (content/default)","timestamp":"2026-10-09T21:23:10.986Z"}
+# {"severity":"DEBUG","message":"Formatted \\"Test concert\\"","timestamp":"2026-10-09T21:23:10.986Z","context":{"isEvent":"Yes","category":"Live Music","establishment":""}}
+# {"severity":"INFO","message":"Stage 5 Result: Formatted 1 items","timestamp":"2026-10-09T21:23:10.986Z"}
+# {"severity":"INFO","message":"Stage 5 category normalization summary","timestamp":"2026-10-09T21:23:10.986Z","context":{"modelFinalKept":1,"normalizedByAlias":0,"aliasFromModelFinal":0,"filledFromHint":0,"stage3HintDirect":0,"aliasFromStage3Hint":0,"inferredByKeywords":0,"defaultFallbacks":0,"unknownCategoryLabelCount":0,"unknownCategoryLabels":[],"allowedCategoryCount":15}}
+# Subtest: gpt-6-luna reasoning none reaches the request correctly
+ok 82 - gpt-6-luna reasoning none reaches the request correctly
+  ---
+  duration_ms: 44.2387
+  ...
+# Subtest: gpt-6-luna reasoning low reaches the request correctly
+ok 83 - gpt-6-luna reasoning low reaches the request correctly
+  ---
+  duration_ms: 6.8833
+  ...
+# Subtest: gpt-6-luna reasoning medium reaches the request correctly
+ok 84 - gpt-6-luna reasoning medium reaches the request correctly
+  ---
+  duration_ms: 2.1623
+  ...
+# Subtest: gpt-5-nano reasoning medium reaches the request correctly
+ok 85 - gpt-5-nano reasoning medium reaches the request correctly
+  ---
+  duration_ms: 2.0479
+  ...
+# Subtest: gpt-5-nano reasoning none reaches the request correctly
+ok 86 - gpt-5-nano reasoning none reaches the request correctly
+  ---
+  duration_ms: 2.3812
+  ...
+# Subtest: gpt-5-nano reasoning omitted reaches the request correctly
+ok 87 - gpt-5-nano reasoning omitted reaches the request correctly
+  ---
+  duration_ms: 2.0632
+  ...
+1..87
+# tests 87
+# suites 0
+# pass 87
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 2490.5195

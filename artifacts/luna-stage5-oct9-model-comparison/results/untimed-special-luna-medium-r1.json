@@ -1,0 +1,132 @@
+{
+  "caseId": "untimed-special",
+  "arm": "luna-medium",
+  "repeat": 1,
+  "model": "gpt-6-luna",
+  "effort": "medium",
+  "noLiveWrites": true,
+  "sourceSha256": "738da331f4b7388d532aec788b99d69cc318182ebfb46282da6490fac142d836",
+  "inputCount": 1,
+  "outputCount": 1,
+  "wallMs": 8350,
+  "events": [
+    {
+      "isEvent": "No",
+      "isFoodSpecial": "Yes",
+      "category": "Food Special",
+      "name": "Thanksgiving Dinner Special",
+      "description": "Offering a Thanksgiving Dinner Special all weekend long (Saturday and Sunday).",
+      "establishment": "Clamdiggers Beach House & Restaurant",
+      "address": "",
+      "startDate": "2026-10-10",
+      "endDate": "2026-10-10",
+      "startTime": "",
+      "endTime": "",
+      "ticketPrice": "",
+      "ticketLink": "",
+      "relevantImageIndex": 0,
+      "venue": "Clamdiggers Beach House & Restaurant",
+      "additionalLocation": "Clamdiggers Beach House & Restaurant",
+      "isRecurring": "No",
+      "recurringPattern": "none",
+      "_categoryOriginal": "Food Special",
+      "_categoryHintOriginal": "",
+      "_categorySource": "model_final",
+      "_categoryNormalizationReason": "kept allowed model category \"Food Special\"",
+      "_sourceType": "special"
+    }
+  ],
+  "usage": [
+    {
+      "stage": "stage5",
+      "component": "finalFormatter",
+      "endpoint": "responses",
+      "model": "gpt-6-luna",
+      "durationMs": 8277,
+      "inputTokens": 2133,
+      "outputTokens": 803,
+      "totalTokens": 2936,
+      "cachedInputTokens": 0,
+      "fileId": "stage5-frozen-comparison",
+      "postId": "1948682749859000",
+      "rowIndex": 75,
+      "runId": "local-1",
+      "responseId": "resp_06b2aa9ceb1de263006ac95bad53b487d29c09fb13abab3aa1",
+      "responseStatus": "completed",
+      "incompleteReason": "",
+      "requestedMaxOutputTokens": 32000,
+      "reasoningTokens": 410,
+      "visibleOutputChars": 1553,
+      "parsedItemCount": 1,
+      "parseError": false,
+      "batchOffset": 0,
+      "batchItemCount": 1
+    }
+  ],
+  "requests": [
+    {
+      "model": "gpt-6-luna",
+      "effort": "medium",
+      "httpStatus": 200,
+      "status": "completed",
+      "incompleteDetails": null,
+      "error": null,
+      "promptSha256": "a3ba4544b32fd757fcb03af2b533f0c7f6199c578f80a5bc9c6e78aff78900d1",
+      "schemaSha256": "59358b2596cac4fee3da5bb48d44ccb1567c8d0cb0dcc085033efdd174af073f",
+      "maxOutputTokens": 32000,
+      "durationMs": 8271,
+      "usage": {
+        "input_tokens": 2133,
+        "input_tokens_details": {
+          "cache_write_tokens": 2130,
+          "cached_tokens": 0
+        },
+        "output_tokens": 803,
+        "output_tokens_details": {
+          "reasoning_tokens": 410
+        },
+        "total_tokens": 2936
+      },
+      "visibleOutputChars": 1553,
+      "rawResult": {
+        "formattedEvents": [
+          {
+            "sourceItemIndex": 0,
+            "isEvent": "No",
+            "isFoodSpecial": "Yes",
+            "category": "Food Special",
+            "name": "Thanksgiving Dinner Special",
+            "description": "Offering a Thanksgiving Dinner Special all weekend long (Saturday and Sunday).",
+            "establishment": "Clamdiggers Beach House & Restaurant",
+            "address": "",
+            "startDate": "2026-10-10",
+            "endDate": "2026-10-11",
+            "startTime": "",
+            "endTime": "",
+            "ticketPrice": "",
+            "ticketLink": "",
+            "relevantImageIndex": 0,
+            "venue": "Clamdiggers Beach House & Restaurant",
+            "additionalLocation": "Clamdiggers Beach House & Restaurant",
+            "isRecurring": false,
+            "recurringPattern": "none",
+            "totalOccurrences": 0,
+            "recurrenceUntilDate": ""
+          }
+        ],
+        "formattingDecisions": [
+          {
+            "itemName": "Thanksgiving Dinner Special",
+            "typeDecision": "Formatted as a food special, not an event.",
+            "categoryDecision": "Food Special, as this is a Thanksgiving dinner offering.",
+            "assumptions": "Interpreted “all weekend long (Saturday and Sunday)” as running from 2026-10-10 through 2026-10-11. No clock times or price were provided.",
+            "venueDecision": "Used the posted-by establishment as the establishment and preserved the supplied venue in additionalLocation.",
+            "establishmentDecision": "Used the posted-by context: Clamdiggers Beach House & Restaurant.",
+            "additionalLocationDecision": "Copied the non-empty venue value as required."
+          }
+        ]
+      },
+      "parseError": false
+    }
+  ]
+}

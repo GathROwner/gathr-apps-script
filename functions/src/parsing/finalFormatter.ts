@@ -6262,8 +6262,11 @@ async function callGPTWithSchema(
     : 8000;
   const parseReasoningEffort = (
     value: string
-  ): 'minimal' | 'low' | 'medium' | 'high' | null => {
+  ): 'none' | 'minimal' | 'low' | 'medium' | 'high' | null => {
     const normalized = String(value || '').trim().toLowerCase();
+    // GPT-6 Luna supports explicit no-reasoning Responses. Keep the existing
+    // GPT-5 request behavior; unsupported "none" must not reach Nano.
+    if (normalized === 'none' && model === 'gpt-6-luna') return 'none';
     if (normalized === 'minimal' || normalized === 'low' || normalized === 'medium' || normalized === 'high') {
       return normalized;
     }

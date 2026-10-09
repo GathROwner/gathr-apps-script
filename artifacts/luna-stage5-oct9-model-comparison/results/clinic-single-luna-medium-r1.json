@@ -1,0 +1,143 @@
+{
+  "caseId": "clinic-single",
+  "arm": "luna-medium",
+  "repeat": 1,
+  "model": "gpt-6-luna",
+  "effort": "medium",
+  "noLiveWrites": true,
+  "sourceSha256": "986b08d56232ed09f5ba00fb9097c5e1ee20611b767b152d762fdcfae11204e0",
+  "inputCount": 1,
+  "outputCount": 1,
+  "wallMs": 6325,
+  "events": [
+    {
+      "isEvent": "Yes",
+      "isFoodSpecial": "No",
+      "category": "Workshops & Classes",
+      "name": "Rxtra Care Clinic",
+      "description": "Walk-in pharmacist assessments for minor ailments and other questions; flu shots and COVID-19 vaccines are also available.",
+      "establishment": "Seaside Pharmacy, 51 Main Street, Souris",
+      "address": "51 Main Street, Souris",
+      "startDate": "2026-10-09",
+      "endDate": "2026-10-09",
+      "startTime": "09:00",
+      "endTime": "16:00",
+      "ticketPrice": "",
+      "ticketLink": "",
+      "relevantImageIndex": -1,
+      "venue": "Seaside Pharmacy, 51 Main Street, Souris",
+      "additionalLocation": "Seaside Pharmacy, 51 Main Street, Souris",
+      "isRecurring": "No",
+      "recurringPattern": "none",
+      "_categoryOriginal": "Workshops & Classes",
+      "_categoryHintOriginal": "",
+      "_categorySource": "model_final",
+      "_categoryNormalizationReason": "kept allowed model category \"Workshops & Classes\"",
+      "_sourceType": "event",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "The post text says walk-in assessments are available today from 9 AM."
+        },
+        "end": {
+          "source": "explicit",
+          "toClose": false,
+          "evidence": "The post text gives the end time as 4 PM."
+        }
+      }
+    }
+  ],
+  "usage": [
+    {
+      "stage": "stage5",
+      "component": "finalFormatter",
+      "endpoint": "responses",
+      "model": "gpt-6-luna",
+      "durationMs": 6260,
+      "inputTokens": 2168,
+      "outputTokens": 719,
+      "totalTokens": 2887,
+      "cachedInputTokens": 0,
+      "fileId": "stage5-frozen-comparison",
+      "postId": "1793693025774013",
+      "rowIndex": 213,
+      "runId": "local-1",
+      "responseId": "resp_0ade5890dc623db6006ac95c0da00087d29423c5bc7d7c4131",
+      "responseStatus": "completed",
+      "incompleteReason": "",
+      "requestedMaxOutputTokens": 32000,
+      "reasoningTokens": 296,
+      "visibleOutputChars": 1722,
+      "parsedItemCount": 1,
+      "parseError": false,
+      "batchOffset": 0,
+      "batchItemCount": 1
+    }
+  ],
+  "requests": [
+    {
+      "model": "gpt-6-luna",
+      "effort": "medium",
+      "httpStatus": 200,
+      "status": "completed",
+      "incompleteDetails": null,
+      "error": null,
+      "promptSha256": "57dd84e03fd82a39331526fd0af5685ca6469d91c87e8dad22b4a2be4ae65b78",
+      "schemaSha256": "59358b2596cac4fee3da5bb48d44ccb1567c8d0cb0dcc085033efdd174af073f",
+      "maxOutputTokens": 32000,
+      "durationMs": 6256,
+      "usage": {
+        "input_tokens": 2168,
+        "input_tokens_details": {
+          "cache_write_tokens": 2165,
+          "cached_tokens": 0
+        },
+        "output_tokens": 719,
+        "output_tokens_details": {
+          "reasoning_tokens": 296
+        },
+        "total_tokens": 2887
+      },
+      "visibleOutputChars": 1722,
+      "rawResult": {
+        "formattedEvents": [
+          {
+            "sourceItemIndex": 0,
+            "isEvent": "Yes",
+            "isFoodSpecial": "No",
+            "category": "Workshops & Classes",
+            "name": "Rxtra Care Clinic",
+            "description": "Walk-in pharmacist assessments for minor ailments and other questions; flu shots and COVID-19 vaccines are also available.",
+            "establishment": "Seaside Pharmacy & Medical",
+            "address": "51 Main Street, Souris",
+            "startDate": "2026-10-09",
+            "endDate": "2026-10-09",
+            "startTime": "09:00",
+            "endTime": "16:00",
+            "ticketPrice": "",
+            "ticketLink": "",
+            "relevantImageIndex": -1,
+            "venue": "Seaside Pharmacy, 51 Main Street, Souris",
+            "additionalLocation": "Seaside Pharmacy, 51 Main Street, Souris",
+            "isRecurring": false,
+            "recurringPattern": "none",
+            "totalOccurrences": 0,
+            "recurrenceUntilDate": ""
+          }
+        ],
+        "formattingDecisions": [
+          {
+            "itemName": "Rxtra Care Clinic",
+            "typeDecision": "Treated as an event because the clinic is advertised for a specific date and hours.",
+            "categoryDecision": "Workshops & Classes selected as the closest available category for pharmacist assessments and questions; the other categories do not fit the clinic service.",
+            "assumptions": "Used the posted-by organization as the establishment and parsed the street address from the venue text. No ticket information or image index was provided.",
+            "venueDecision": "Preserved the venue value and copied it to additionalLocation as required.",
+            "establishmentDecision": "Used Seaside Pharmacy & Medical from the post context.",
+            "additionalLocationDecision": "Copied the non-empty venue value exactly."
+          }
+        ]
+      },
+      "parseError": false
+    }
+  ]
+}
