@@ -38,3 +38,19 @@ After success, record parser commit, all three revisions, common source hash, AC
 ## Rollout decision
 
 Continue Stage 1 at 50% and Stage 3 at 100%. Do not expand Stage 1 based only on this first live pilot. Record the completed audit, pause its existing heartbeat, and retain the identified downstream timing/source-enrichment work as explicit follow-up.
+
+## Verified production release
+
+Parser commit **`609cedf`** deployed successfully on October 9. A fresh running-lock check immediately before deployment at 16:58:13 UTC returned no active parser run. The exact three-function Firebase deployment completed successfully; no unrelated function was deployed.
+
+Fresh function readback verified all three ACTIVE, all traffic on their latest revision, and common source hash **`cfa133001c0368bae01796af16081078352521e6`**:
+
+| Function | Verified revision |
+| --- | --- |
+| processDataset | processdataset-00459-fal |
+| processDatasetResume | processdatasetresume-00423-zuw |
+| processDatasetSelectedRows | processdatasetselectedrows-00415-xep |
+
+Every selected Luna/Stage environment setting matched the predeployment readback exactly: Stage 1 pilot enabled at 50%, eligible image Stage 3 at 100% Luna high with no exclusions or legacy fallback, Mini in Stages 1–2 outside the Stage 1 pilot, GPT-5.2 for image-ineligible Stage 3, and Nano low/medium in Stages 4–5 with 32,000 output-token limits. Filtered evidence is saved in `artifacts/luna-oct9-production-audit/postdeploy-readback.json`; full private environment readbacks remain outside the repository.
+
+The four existing false listings were freshly backed up with exact paths, source identities, hashes and update times in `live-cleanup-manifest.json` and `live-cleanup-backup.json` in the same artifact directory. Their deletion approval is pending; no live event record was changed by this release. Future regular-run validation remains necessary to confirm these parsing repairs in production.

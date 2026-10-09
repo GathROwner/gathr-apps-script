@@ -1,0 +1,59 @@
+{
+  "project": "gathr-migrated",
+  "createdAt": "2026-10-09T16:59:06.558Z",
+  "backupPath": "C:/Users/craig/.codex/worktrees/luna-pilot-release/gathr-apps-script/artifacts/luna-oct9-production-audit/live-cleanup-backup.json",
+  "targets": [
+    {
+      "path": "venues/slug_downtowncharlottetowninc/events/V6LjjXKCsId9KMoqpNU1",
+      "sourceId": "1587492483175007",
+      "reason": "Ship-call logistics, not an advertised public activity",
+      "title": "Pearl Mist Port Visit",
+      "startDate": "2026-10-08",
+      "startTime": "07:00",
+      "updateTime": {
+        "seconds": 1791552173,
+        "nanoseconds": 933151000
+      },
+      "dataHash": "fb2b505aba724a87a532ed1e77ebd944d3906838d916f8ea9debfaaf79d09988"
+    },
+    {
+      "path": "venues/slug_downtowncharlottetowninc/events/qkhBdqusxIOd2rZRFOUz",
+      "sourceId": "1587492483175007",
+      "reason": "Ship-call logistics, not an advertised public activity",
+      "title": "Mein Schiff 1 Port Visit",
+      "startDate": "2026-10-08",
+      "startTime": "07:00",
+      "updateTime": {
+        "seconds": 1791552174,
+        "nanoseconds": 177773000
+      },
+      "dataHash": "440893a0399c6ed3d8414061efceeb02f1f15054fd84557c63e178f6c9ddec06"
+    },
+    {
+      "path": "venues/slug_peimarathon/events/vRk1hxxG2icQtvX72hJT",
+      "sourceId": "1515399363943565",
+      "reason": "Administrative registration-price deadline",
+      "title": "Registration Price Change Alert",
+      "startDate": "2026-10-09",
+      "startTime": "23:59",
+      "updateTime": {
+        "seconds": 1791550472,
+        "nanoseconds": 218405000
+      },
+      "dataHash": "7ab6b67eb8e50c78198f9382570b62f1c3e285b549dd35e08237e39ca7a4df5b"
+    },
+    {
+      "path": "venues/4OcLMCRKRGoKO5eQncLi/events/VY3mZPcNTRSgSjaj65mj",
+      "sourceId": "1140431992044087",
+      "reason": "Weekend market incorrectly dated Thursday October 8",
+      "title": "WEEKEND MARKET",
+      "startDate": "2026-10-08",
+      "startTime": "10:00",
+      "updateTime": {
+        "seconds": 1791556084,
+        "nanoseconds": 211252000
+      },
+      "dataHash": "6919e62e68a0fd3cac5388029444709916fd5a046f692b2f8d42ea806917285f"
+    }
+  ]
+}

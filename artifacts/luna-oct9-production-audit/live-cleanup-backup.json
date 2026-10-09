@@ -1,0 +1,587 @@
+[
+  {
+    "path": "venues/slug_downtowncharlottetowninc/events/V6LjjXKCsId9KMoqpNU1",
+    "updateTime": {
+      "seconds": 1791552173,
+      "nanoseconds": 933151000
+    },
+    "data": {
+      "uniqueId": "1587492483175007_63e808374e14c700",
+      "establishment": "Port Charlottetown",
+      "locationScope": "venue",
+      "locationLabel": "Port Charlottetown",
+      "locationPrecision": "exact",
+      "locationReviewStatus": "not_needed",
+      "eventType": "gatherings_parties",
+      "eventName": "Pearl Mist Port Visit",
+      "description": "Pearl Mist visits Port Charlottetown as part of a two-ship day.",
+      "startDate": "2026-10-08",
+      "endDate": "2026-10-08",
+      "startTime": "07:00",
+      "endTime": "23:00",
+      "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791552071344-65inv0.webp",
+      "mediaUrls": [
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791552071344-65inv0.webp"
+      ],
+      "facebookUrl": "https://www.facebook.com/portcharlottetown/",
+      "sourceTimestamp": {
+        "_seconds": 1791463998,
+        "_nanoseconds": 0
+      },
+      "likes": 46,
+      "shares": 3,
+      "topReactionsCount": 3,
+      "venueId": "slug_downtowncharlottetowninc",
+      "category": "Gatherings & Parties",
+      "isEvent": "Yes",
+      "isFoodSpecial": "No",
+      "name": "Pearl Mist Port Visit",
+      "address": "1 Weymouth St, Charlottetown, PE C1A 8W1",
+      "rawAddress": "1 Weymouth St, Charlottetown, PE C1A 8W1",
+      "normalizedAddress": "1 Weymouth St, Charlottetown, PE C1A 8W1",
+      "addressSource": "google_places",
+      "addressNormalizationIssues": [],
+      "externalLinks": [],
+      "isRecurring": "No",
+      "recurringPattern": "none",
+      "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1791552071635-skzvzy.webp",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791552071344-65inv0.webp",
+      "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791552071344-65inv0.webp",
+      "cleanedFacebookUrl": "https://www.facebook.com/portcharlottetown/",
+      "latitude": 46.233726,
+      "longitude": -63.118739999999995,
+      "timeResolution": {
+        "hoursUsed": false
+      },
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "Image: “PEARL MIST 7:00AM - 11:00PM”"
+        },
+        "end": {
+          "source": "explicit",
+          "toClose": false,
+          "evidence": "Image: “PEARL MIST 7:00AM - 11:00PM”"
+        }
+      },
+      "_sourceType": "event",
+      "familyFriendlyScore": 15,
+      "familyFriendlyLevel": "unlikely",
+      "familyFriendlyReasons": [
+        "insufficient_family_evidence"
+      ],
+      "familyFriendlyScoringVersion": "family-friendly-v4",
+      "addressUpdatedAt": {
+        "_seconds": 1791552173,
+        "_nanoseconds": 911000000
+      },
+      "lastSeenAt": {
+        "_seconds": 1791552173,
+        "_nanoseconds": 911000000
+      },
+      "createdAt": {
+        "_seconds": 1791552173,
+        "_nanoseconds": 911000000
+      },
+      "imageProvenance": {
+        "version": 1,
+        "primarySource": "post_media",
+        "primaryField": "relevantImageUrl",
+        "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791552071344-65inv0.webp",
+        "isFallback": false,
+        "sourceFields": [
+          "relevantImageUrl",
+          "image",
+          "imageUrl",
+          "icon",
+          "mediaUrls"
+        ],
+        "media": [
+          {
+            "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791552071344-65inv0.webp",
+            "source": "post_media",
+            "field": "relevantImageUrl",
+            "isPrimary": true,
+            "isFallback": false
+          },
+          {
+            "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791552071344-65inv0.webp",
+            "source": "post_media",
+            "field": "image",
+            "isPrimary": false,
+            "isFallback": false
+          },
+          {
+            "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791552071344-65inv0.webp",
+            "source": "post_media",
+            "field": "imageUrl",
+            "isPrimary": false,
+            "isFallback": false
+          },
+          {
+            "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1791552071635-skzvzy.webp",
+            "source": "profile_image",
+            "field": "icon",
+            "isPrimary": false,
+            "isFallback": true
+          },
+          {
+            "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791552071344-65inv0.webp",
+            "source": "post_media",
+            "field": "mediaUrls",
+            "isPrimary": false,
+            "isFallback": false
+          }
+        ],
+        "selectionReason": "model_selected_analysis_frame_source",
+        "updatedBy": "parser",
+        "setAt": {
+          "_seconds": 1791552173,
+          "_nanoseconds": 911000000
+        }
+      },
+      "updatedAt": {
+        "_seconds": 1791552173,
+        "_nanoseconds": 911000000
+      }
+    }
+  },
+  {
+    "path": "venues/slug_downtowncharlottetowninc/events/qkhBdqusxIOd2rZRFOUz",
+    "updateTime": {
+      "seconds": 1791552174,
+      "nanoseconds": 177773000
+    },
+    "data": {
+      "uniqueId": "1587492483175007_2e446a9a78db7692",
+      "establishment": "Port Charlottetown",
+      "locationScope": "venue",
+      "locationLabel": "Port Charlottetown",
+      "locationPrecision": "exact",
+      "locationReviewStatus": "not_needed",
+      "eventType": "gatherings_parties",
+      "eventName": "Mein Schiff 1 Port Visit",
+      "description": "Mein Schiff 1 visits Port Charlottetown as part of a two-ship day.",
+      "startDate": "2026-10-08",
+      "endDate": "2026-10-08",
+      "startTime": "07:00",
+      "endTime": "17:00",
+      "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791552071344-65inv0.webp",
+      "mediaUrls": [
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791552071344-65inv0.webp"
+      ],
+      "facebookUrl": "https://www.facebook.com/portcharlottetown/",
+      "sourceTimestamp": {
+        "_seconds": 1791463998,
+        "_nanoseconds": 0
+      },
+      "likes": 46,
+      "shares": 3,
+      "topReactionsCount": 3,
+      "venueId": "slug_downtowncharlottetowninc",
+      "category": "Gatherings & Parties",
+      "isEvent": "Yes",
+      "isFoodSpecial": "No",
+      "name": "Mein Schiff 1 Port Visit",
+      "address": "1 Weymouth St, Charlottetown, PE C1A 8W1",
+      "rawAddress": "1 Weymouth St, Charlottetown, PE C1A 8W1",
+      "normalizedAddress": "1 Weymouth St, Charlottetown, PE C1A 8W1",
+      "addressSource": "google_places",
+      "addressNormalizationIssues": [],
+      "externalLinks": [],
+      "isRecurring": "No",
+      "recurringPattern": "none",
+      "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1791552071635-skzvzy.webp",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791552071344-65inv0.webp",
+      "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791552071344-65inv0.webp",
+      "cleanedFacebookUrl": "https://www.facebook.com/portcharlottetown/",
+      "latitude": 46.233726,
+      "longitude": -63.118739999999995,
+      "timeResolution": {
+        "hoursUsed": false
+      },
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "Image: “MEIN SCHIFF 1 7:00AM - 5:00PM”"
+        },
+        "end": {
+          "source": "explicit",
+          "toClose": false,
+          "evidence": "Image: “MEIN SCHIFF 1 7:00AM - 5:00PM”"
+        }
+      },
+      "_sourceType": "event",
+      "familyFriendlyScore": 15,
+      "familyFriendlyLevel": "unlikely",
+      "familyFriendlyReasons": [
+        "insufficient_family_evidence"
+      ],
+      "familyFriendlyScoringVersion": "family-friendly-v4",
+      "addressUpdatedAt": {
+        "_seconds": 1791552174,
+        "_nanoseconds": 158000000
+      },
+      "lastSeenAt": {
+        "_seconds": 1791552174,
+        "_nanoseconds": 158000000
+      },
+      "createdAt": {
+        "_seconds": 1791552174,
+        "_nanoseconds": 158000000
+      },
+      "imageProvenance": {
+        "version": 1,
+        "primarySource": "post_media",
+        "primaryField": "relevantImageUrl",
+        "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791552071344-65inv0.webp",
+        "isFallback": false,
+        "sourceFields": [
+          "relevantImageUrl",
+          "image",
+          "imageUrl",
+          "icon",
+          "mediaUrls"
+        ],
+        "media": [
+          {
+            "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791552071344-65inv0.webp",
+            "source": "post_media",
+            "field": "relevantImageUrl",
+            "isPrimary": true,
+            "isFallback": false
+          },
+          {
+            "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791552071344-65inv0.webp",
+            "source": "post_media",
+            "field": "image",
+            "isPrimary": false,
+            "isFallback": false
+          },
+          {
+            "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791552071344-65inv0.webp",
+            "source": "post_media",
+            "field": "imageUrl",
+            "isPrimary": false,
+            "isFallback": false
+          },
+          {
+            "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1791552071635-skzvzy.webp",
+            "source": "profile_image",
+            "field": "icon",
+            "isPrimary": false,
+            "isFallback": true
+          },
+          {
+            "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791552071344-65inv0.webp",
+            "source": "post_media",
+            "field": "mediaUrls",
+            "isPrimary": false,
+            "isFallback": false
+          }
+        ],
+        "selectionReason": "model_selected_analysis_frame_source",
+        "updatedBy": "parser",
+        "setAt": {
+          "_seconds": 1791552174,
+          "_nanoseconds": 158000000
+        }
+      },
+      "updatedAt": {
+        "_seconds": 1791552174,
+        "_nanoseconds": 158000000
+      }
+    }
+  },
+  {
+    "path": "venues/slug_peimarathon/events/vRk1hxxG2icQtvX72hJT",
+    "updateTime": {
+      "seconds": 1791550472,
+      "nanoseconds": 218405000
+    },
+    "data": {
+      "uniqueId": "1515399363943565_375ca851b634a033",
+      "establishment": "Prince Edward Island Marathon",
+      "locationScope": "venue",
+      "locationLabel": "Prince Edward Island Marathon",
+      "locationPrecision": "exact",
+      "locationReviewStatus": "not_needed",
+      "eventType": "sports",
+      "eventName": "Registration Price Change Alert",
+      "description": "Registration prices are changing at this deadline. Register before then to lock in the current price. Registration link: https://raceroster.com/events/2026/113063/22nd-annual-prince-edward-island-marathon",
+      "startDate": "2026-10-09",
+      "endDate": "2026-10-10",
+      "startTime": "23:59",
+      "endTime": "01:59",
+      "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791550330956-aovd9f.webp",
+      "mediaUrls": [
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791550330956-aovd9f.webp"
+      ],
+      "facebookUrl": "https://www.facebook.com/peimarathon",
+      "sourceTimestamp": {
+        "_seconds": 1791457218,
+        "_nanoseconds": 0
+      },
+      "likes": 16,
+      "shares": 5,
+      "topReactionsCount": 3,
+      "venueId": "slug_peimarathon",
+      "category": "Sports",
+      "isEvent": "Yes",
+      "isFoodSpecial": "No",
+      "name": "Registration Price Change Alert",
+      "address": "40 Enman Crescent, Charlottetown, PE C1E 2G2, Canada",
+      "rawAddress": "40 Enman Crescent, Charlottetown, PE C1E 2G2, Canada",
+      "normalizedAddress": "40 Enman Crescent, Charlottetown, PE C1E 2G2, Canada",
+      "addressSource": "venue",
+      "addressNormalizationIssues": [],
+      "ticketLink": "https://raceroster.com/events/2026/113063/22nd-annual-prince-edward-island-marathon",
+      "ticketsBuyUrl": "https://raceroster.com/events/2026/113063/22nd-annual-prince-edward-island-marathon",
+      "externalLinks": [],
+      "isRecurring": "No",
+      "recurringPattern": "none",
+      "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1784646895437-sh7gwm.webp",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791550330956-aovd9f.webp",
+      "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791550330956-aovd9f.webp",
+      "cleanedFacebookUrl": "https://www.facebook.com/peimarathon",
+      "latitude": 46.2606463,
+      "longitude": -63.1493277,
+      "timeResolution": {
+        "hoursUsed": false,
+        "reason": "no_place_match",
+        "endFromHours": "duration_default"
+      },
+      "_sourceType": "calendar",
+      "familyFriendlyScore": 0,
+      "familyFriendlyLevel": "unlikely",
+      "familyFriendlyReasons": [
+        "very_late_start",
+        "insufficient_family_evidence"
+      ],
+      "familyFriendlyScoringVersion": "family-friendly-v4",
+      "addressUpdatedAt": {
+        "_seconds": 1791550472,
+        "_nanoseconds": 193000000
+      },
+      "lastSeenAt": {
+        "_seconds": 1791550472,
+        "_nanoseconds": 193000000
+      },
+      "createdAt": {
+        "_seconds": 1791550472,
+        "_nanoseconds": 193000000
+      },
+      "imageProvenance": {
+        "version": 1,
+        "primarySource": "post_media",
+        "primaryField": "relevantImageUrl",
+        "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791550330956-aovd9f.webp",
+        "isFallback": true,
+        "sourceFields": [
+          "relevantImageUrl",
+          "image",
+          "imageUrl",
+          "icon",
+          "mediaUrls"
+        ],
+        "media": [
+          {
+            "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791550330956-aovd9f.webp",
+            "source": "post_media",
+            "field": "relevantImageUrl",
+            "isPrimary": true,
+            "isFallback": true
+          },
+          {
+            "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791550330956-aovd9f.webp",
+            "source": "post_media",
+            "field": "image",
+            "isPrimary": false,
+            "isFallback": false
+          },
+          {
+            "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791550330956-aovd9f.webp",
+            "source": "post_media",
+            "field": "imageUrl",
+            "isPrimary": false,
+            "isFallback": false
+          },
+          {
+            "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1784646895437-sh7gwm.webp",
+            "source": "profile_image",
+            "field": "icon",
+            "isPrimary": false,
+            "isFallback": true
+          },
+          {
+            "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791550330956-aovd9f.webp",
+            "source": "post_media",
+            "field": "mediaUrls",
+            "isPrimary": false,
+            "isFallback": false
+          }
+        ],
+        "selectionReason": "caption_only_post_media_context",
+        "updatedBy": "parser",
+        "setAt": {
+          "_seconds": 1791550472,
+          "_nanoseconds": 193000000
+        }
+      },
+      "updatedAt": {
+        "_seconds": 1791550472,
+        "_nanoseconds": 193000000
+      }
+    }
+  },
+  {
+    "path": "venues/4OcLMCRKRGoKO5eQncLi/events/VY3mZPcNTRSgSjaj65mj",
+    "updateTime": {
+      "seconds": 1791556084,
+      "nanoseconds": 211252000
+    },
+    "data": {
+      "uniqueId": "1140431992044087_cb50493beb8f5f61",
+      "establishment": "Island Hill Farm",
+      "locationScope": "venue",
+      "locationLabel": "Island Hill Farm",
+      "locationPrecision": "exact",
+      "locationReviewStatus": "not_needed",
+      "eventType": "gatherings_parties",
+      "eventName": "WEEKEND MARKET",
+      "description": "The poster advertises a Weekend Market, while the post describes it as the Weekend Local Vendor Market. The market is open 10–4 PM and requires no admission. No specific calendar date is shown; the post date is used as the date fallback.",
+      "startDate": "2026-10-08",
+      "endDate": "2026-10-08",
+      "startTime": "10:00",
+      "endTime": "16:00",
+      "price": "No admission required",
+      "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791555996698-abpdb4.webp",
+      "mediaUrls": [
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791555996698-abpdb4.webp"
+      ],
+      "facebookUrl": "https://www.facebook.com/islandhillfarm",
+      "sourceTimestamp": {
+        "_seconds": 1791499170,
+        "_nanoseconds": 0
+      },
+      "likes": 14,
+      "shares": 9,
+      "comments": 1,
+      "topReactionsCount": 2,
+      "venueId": "4OcLMCRKRGoKO5eQncLi",
+      "category": "Gatherings & Parties",
+      "isEvent": "Yes",
+      "isFoodSpecial": "No",
+      "name": "WEEKEND MARKET",
+      "address": "351 Route 225, Hampshire, PE C0A 1Y0, Canada",
+      "rawAddress": "351 Route 225, Hampshire, PE C0A 1Y0, Canada",
+      "normalizedAddress": "351 Route 225, Hampshire, PE C0A 1Y0, Canada",
+      "addressSource": "venue",
+      "addressNormalizationIssues": [],
+      "ticketPrice": "No admission required",
+      "externalLinks": [],
+      "isRecurring": "No",
+      "recurringPattern": "none",
+      "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1779892988106-qmt5ng.webp",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791555996698-abpdb4.webp",
+      "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791555996698-abpdb4.webp",
+      "cleanedFacebookUrl": "https://www.facebook.com/islandhillfarm",
+      "latitude": 46.2811448,
+      "longitude": -63.2416402,
+      "timeResolution": {
+        "hoursUsed": false
+      },
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "OPEN 10-4 PM"
+        },
+        "end": {
+          "source": "explicit",
+          "toClose": false,
+          "evidence": "4 PM"
+        }
+      },
+      "_sourceType": "event",
+      "familyFriendlyScore": 15,
+      "familyFriendlyLevel": "unlikely",
+      "familyFriendlyReasons": [
+        "insufficient_family_evidence"
+      ],
+      "familyFriendlyScoringVersion": "family-friendly-v4",
+      "addressUpdatedAt": {
+        "_seconds": 1791556084,
+        "_nanoseconds": 188000000
+      },
+      "lastSeenAt": {
+        "_seconds": 1791556084,
+        "_nanoseconds": 188000000
+      },
+      "createdAt": {
+        "_seconds": 1791556084,
+        "_nanoseconds": 188000000
+      },
+      "imageProvenance": {
+        "version": 1,
+        "primarySource": "post_media",
+        "primaryField": "relevantImageUrl",
+        "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791555996698-abpdb4.webp",
+        "isFallback": false,
+        "sourceFields": [
+          "relevantImageUrl",
+          "image",
+          "imageUrl",
+          "icon",
+          "mediaUrls"
+        ],
+        "media": [
+          {
+            "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791555996698-abpdb4.webp",
+            "source": "post_media",
+            "field": "relevantImageUrl",
+            "isPrimary": true,
+            "isFallback": false
+          },
+          {
+            "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791555996698-abpdb4.webp",
+            "source": "post_media",
+            "field": "image",
+            "isPrimary": false,
+            "isFallback": false
+          },
+          {
+            "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791555996698-abpdb4.webp",
+            "source": "post_media",
+            "field": "imageUrl",
+            "isPrimary": false,
+            "isFallback": false
+          },
+          {
+            "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1779892988106-qmt5ng.webp",
+            "source": "profile_image",
+            "field": "icon",
+            "isPrimary": false,
+            "isFallback": true
+          },
+          {
+            "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791555996698-abpdb4.webp",
+            "source": "post_media",
+            "field": "mediaUrls",
+            "isPrimary": false,
+            "isFallback": false
+          }
+        ],
+        "selectionReason": "model_selected_analysis_frame_source",
+        "updatedBy": "parser",
+        "setAt": {
+          "_seconds": 1791556084,
+          "_nanoseconds": 188000000
+        }
+      },
+      "updatedAt": {
+        "_seconds": 1791556084,
+        "_nanoseconds": 188000000
+      }
+    }
+  }
+]

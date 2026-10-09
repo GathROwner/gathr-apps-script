@@ -113,3 +113,34 @@ On 2026-08-14:
 - A real public market mentioning clothing, food, and home decor remains accepted as a counterexample.
 - PQ-001 was deployed on 2026-08-14 to `processDataset`, `processDatasetResume`, and `processDatasetSelectedRows`: the source and resolved venue IDs must differ and the parsed address must equal the source venue address before the resolved venue address and coordinates replace it. The exact Highland Storm regression and an off-site-address counterexample pass. Existing live documents still require a separately backed-up repair or selected-row replay.
 - The PQ-001 parser fix was deployed, but no deletion, repair, or replay of the existing live bad event documents was performed.
+
+## October 9 Luna pilot follow-up
+
+Regular dataset `1NpfngSPGDDOm9Fb5DcYseMuCe4BdKjGq` completed all 385 rows.
+Parser repair `609cedf` addresses mixed closure/named food offers, omitted
+explicit public-pool caption windows, between/and range corruption, unsupported
+activity post-date fallback, registration-deadline noise, ship-call logistics
+and advertised public studio tours rejected as plain shop hours. Bounded
+intermediate stage evidence is enabled for future snapshots. See
+`docs/luna-oct9-production-audit.md` and its selected-source ledger for the
+actual source IDs, writes, holds, replays and release evidence. No resume
+checkpoint regression or repeated row start was observed in this run.
+
+The public tour exception does not reverse the ordinary-hours exclusion:
+plain store hours still fail; the offered studio-floor tour in the October 9
+control is a public activity under Craig's explicit bookable-activity rule.
+
+Open downstream timing cases: row 214's text-only Rxtra clinic says “11–4”
+but acquired a 21:00 category default; row 279's brunch has serving starts
+but no printed end and acquired 21:00; row 173's Bay Fortune booking offer
+has an October 12 deadline but acquired a 00:39 end. Do not treat those
+fallback ends as source facts. Untimed activities need trusted enrichment
+or an explicit product policy rather than invented starts. Art Buds' cropped
+schedule and the unavailable Eastern Kings/Regals images are source limits.
+Stratford's correct October 24, 2–5 p.m. felting activity remains in unknown
+venue queue `uv_d54f0f035d5dde2a36e99d5c`, owned by the location-queue task.
+
+The four false October 9 live records have a fresh guarded deletion manifest
+and complete backup under `artifacts/luna-oct9-production-audit`; exact
+approval is pending. Parser prevention alone does not delete them. Stage 1
+remains a 50% pilot and eligible-image Stage 3 remains 100% Luna high.
