@@ -206,7 +206,7 @@ async function extractEvents(
   const postedLocalPretty = postedDt.toFormat('yyyy-MM-dd EEE HH:mm:ss');
   const postedLocalDate = postedDt.toFormat('yyyy-MM-dd');
 
-  const prompt = createEventExtractionPrompt(
+  const prompt = captionOnlyActivityExtractionRules(imageUrls.length) + createEventExtractionPrompt(
     combinedText,
     userName,
     timestamp,
@@ -1485,7 +1485,7 @@ async function extractFallbackItems(
   const postedLocalPretty = postedDt.toFormat('yyyy-MM-dd EEE HH:mm:ss');
   const postedLocalDate = postedDt.toFormat('yyyy-MM-dd');
 
-  const prompt = createFallbackExtractionPrompt(
+  const prompt = captionOnlyActivityExtractionRules(imageUrls.length) + createFallbackExtractionPrompt(
     combinedText,
     userName,
     timestamp,
@@ -2638,7 +2638,7 @@ async function refineUmbrellaThemeSeriesWithPosterDates(
   // Theme/date remapping is for an ambiguous umbrella extraction. A schedule
   // already containing separately named items on three dates is a complete
   // inventory; replacing it can erase performers from other weekday tiles.
-  if (!shouldRefineUmbrellaThemeDatesForRegression(rawData, combinedText)) return rawData;
+  if (!shouldRefineUmbrellaThemeDatesForRegression(rawData, combinedText, imageUrls.length > 0)) return rawData;
 
   const candidateLines = extractUmbrellaThemeCandidateLines(combinedText);
 
@@ -3706,6 +3706,11 @@ function formatDateFromParts(year: number, month: number, day: number): string {
 // Prompt Generators
 // ===================
 
+export function captionOnlyActivityExtractionRules(imageCount: number): string {
+  if (imageCount !== 0) return '';
+  return 'CAPTION-ONLY PUBLIC ACCESS: A recreation facility explicitly offering a dated time slot for people to book is a qualifying public activity even when the caption does not repeat the sport. Extract that slot at the stated date/time with a neutral title such as Bookable Time Slot and the posting facility as venue. Do not invent the sport, duration or end time. Ordinary restaurant reservations, generic booking links, individual service appointments and product pickups do not qualify. A dated public care or walk-in clinic session also qualifies; ordinary product arrivals in the same caption do not. For a dated activity whose only printed time is attendee-facing same-day check-in or on-site registration, use that advertised access time as the listing start and label it as check-in/registration, without claiming it is the game or performance start. Administrative registration deadlines remain excluded.\n\n';
+}
+
 function createEventExtractionPrompt(
   combinedText: string,
   userName: string,
@@ -4517,8 +4522,15 @@ function hasCompleteDatedScheduleInventory(rawData: ExtractedItem[]): boolean {
 }
 
 export function shouldRefineUmbrellaThemeDatesForRegression(
-  rawData: ExtractedItem[], combinedText: string
+  rawData: ExtractedItem[], combinedText: string, hasSourceImages = true
 ): boolean {
+  // A caption with one printed date and an already timed event has no series
+  // dates to remap. Promotional headings must not replace its performer title.
+  if (!hasSourceImages && rawData.length === 1 &&
+      /^\d{2}:\d{2}$/.test(String(rawData[0].startTime || ''))) {
+    const dates = extractExplicitOccurrenceDateListForSplit(combinedText, rawData[0].date);
+    if (dates.length === 1 && dates[0] === rawData[0].date) return false;
+  }
   return !hasCompleteDatedScheduleInventory(rawData) &&
     extractUmbrellaThemeCandidateLines(combinedText).length >= 2 &&
     hasExplicitMonthDaySignal(combinedText);

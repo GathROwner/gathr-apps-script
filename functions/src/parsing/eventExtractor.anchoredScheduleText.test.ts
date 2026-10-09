@@ -46,6 +46,18 @@ Saturday Roast Dinner`;
     [{ name: 'Fall food nights', date: '2026-10-10' }] as any, source), true);
 });
 
+test('single-date timed caption keeps its performer title while multi-date themes remain eligible', () => {
+  const source = `Get ready for an incredible night of live music this weekend!
+Jacob Hemphill Duo, featuring special guest Em Peters
+Date: Saturday, October 10th
+Time: 8:00 PM
+Cover: By donation`;
+  const items = [{ name: 'Jacob Hemphill Duo with Em Peters', date: '2026-10-10', startTime: '20:00' }];
+  assert.equal(shouldRefineUmbrellaThemeDatesForRegression(items as any, source, false), false);
+  assert.equal(shouldRefineUmbrellaThemeDatesForRegression(items as any,
+    'October 10, 17, 24\nFriday Lobster Feast\nSaturday Roast Dinner', false), true);
+});
+
 test('anchored Downtown Charlottetown schedule text keeps performers attached to source venues', () => {
   const input = `What’s happening today in Downtown Charlottetown?
 

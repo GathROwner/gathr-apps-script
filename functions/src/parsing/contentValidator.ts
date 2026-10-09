@@ -619,6 +619,9 @@ export function createCompactV9ValidationPrompt(
 export function createCompactV10ValidationPrompt(
   combinedText: string, imageCount: number, userName: string, timestamp: string
 ): string {
+  const captionBookingRule = imageCount === 0
+    ? 'CAPTION-ONLY BOOKING CHECK: A recreation facility explicitly offering a dated time slot for people to book is advertising bookable public access, even if the caption does not repeat the activity name. The posting facility identifies the venue/context; do not invent the sport, duration or other missing details. This does not qualify ordinary restaurant table reservations, generic booking links, product pickups, service recaps or staff appointments without an advertised leisure/public activity. A dated public care clinic or walk-in clinic with an advertised session window also qualifies, including a pharmacy caption such as Rxtra Care Clinic from 11-4; routine individual appointment availability does not. In a mixed clinic/stock announcement, retain only the public clinic and exclude ordinary product arrivals.\n\n'
+    : '';
   const refinements = `PUBLIC ACCESS VERSUS INCIDENTAL REFERENCES:
 - A current-tense offer of family/group visitor experiences at an orchard, U-pick, attraction or recreation facility qualifies even when most of the caption recounts its history. Read the entire caption for the current offer. Public access need not use the literal words "come", "book" or "open today". Preserve separately offered ongoing activities within a retrospective story.
 - When a public arcade/game venue promotes use of its real games or play space, a playful first-person narrative about the value of playing can be its promotional invitation. Retain that ongoing leisure offering even without a schedule or literal booking instruction. Distinguish a venue promoting its own public leisure facilities from a private person's past outing or a mere product/customer-service photo. Do not require every public-access promotion to be a formal event announcement.
@@ -628,7 +631,7 @@ export function createCompactV10ValidationPrompt(
 
 `;
   return createCompactV9ValidationPrompt(combinedText, imageCount, userName, timestamp)
-    .replace('POST DETAILS:\n', refinements + 'POST DETAILS:\n');
+    .replace('POST DETAILS:\n', refinements + captionBookingRule + 'POST DETAILS:\n');
 }
 
 /**

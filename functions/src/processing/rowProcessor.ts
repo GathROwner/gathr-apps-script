@@ -2236,6 +2236,7 @@ function mergeStageArtifactsSnapshot(
     stage3HeldItems: [...(base?.stage3HeldItems || []), ...(incoming.stage3HeldItems || [])],
     stage1Validation: incoming.stage1Validation || base?.stage1Validation,
     stage1Pilot: incoming.stage1Pilot || base?.stage1Pilot,
+    stage3InputKind: incoming.stage3InputKind || base?.stage3InputKind,
     stage4Items,
     stage37TicketUrl,
   };
@@ -2263,6 +2264,7 @@ function sanitizeStageArtifactsSnapshot(
     stage3HeldItems: truncateItems(snapshot.stage3HeldItems) as ParseStageArtifactsSnapshot['stage3HeldItems'],
     stage1Validation: snapshot.stage1Validation,
     stage1Pilot: snapshot.stage1Pilot,
+    stage3InputKind: snapshot.stage3InputKind,
     stage4Items: truncateItems(snapshot.stage4Items) as ParseStageArtifactsSnapshot['stage4Items'],
   });
 }
