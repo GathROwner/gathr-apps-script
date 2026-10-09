@@ -409,9 +409,25 @@ export function preserveValidatedItemSourceType(
 export function hasMissingValidatedSourceIdentity(
   rawData: ExtractedItem[], validatedItems: ValidatedItem[]
 ): boolean {
+  // Stage 4 may reject a source row, but must not invent dates or reassign
+  // age groups inside an explicitly dated multi-occurrence inventory.
+  const normalizeName = (value: unknown): string => String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const sourceDates = new Map<string, Set<string>>();
+  for (const item of rawData) {
+    if (item.recurringPattern !== 'none' || item.timeFlags?.start?.source !== 'explicit' ||
+        !/^\d{4}-\d{2}-\d{2}$/.test(String(item.date || ''))) continue;
+    const name = normalizeName(item.name);
+    if (!name) continue;
+    const dates = sourceDates.get(name) || new Set<string>();
+    dates.add(item.date);
+    sourceDates.set(name, dates);
+  }
   return validatedItems.some((entry, index) => {
     const original = rawData[index];
     if (!original) return false;
+    if ((sourceDates.get(normalizeName(original.name))?.size || 0) >= 4 &&
+        (original.date !== entry?.item?.date ||
+          normalizeName(original.name) !== normalizeName(entry?.item?.name))) return true;
     return Boolean(
       (String(original.name || '').trim() && !String(entry?.item?.name || '').trim()) ||
       (String(original.date || '').trim() && !String(entry?.item?.date || '').trim())

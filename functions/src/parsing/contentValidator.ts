@@ -166,11 +166,14 @@ export async function validateContent(
     imageCount: imageUrls.length,
   });
 
-  const prompt = createValidationPrompt(combinedText, imageUrls.length > 0, userName, timestamp);
+  const prompt = cfg.stage1LunaPilot
+    ? createCompactV10ValidationPrompt(combinedText, imageUrls.length, userName, timestamp)
+    : createValidationPrompt(combinedText, imageUrls.length > 0, userName, timestamp);
   const schema = createValidationSchema();
 
   try {
-    const response = await callGPTWithSchema(prompt, imageUrls, 'validateContent', schema, cfg);
+    const response = await callGPTWithSchema(prompt, imageUrls, 'validateContent', schema, cfg,
+      cfg.stage1LunaPilot ? { reasoningEffort: 'high' } : {});
     const normalized = normalizeValidationResponse(response, combinedText, imageUrls.length > 0);
 
     // Log image analysis
@@ -191,7 +194,8 @@ export async function validateContent(
     }
 
     // Local text signals (calendar/roundup heuristics)
-    applyStage1LocalDecisionGates(normalized, combinedText, imageUrls.length > 0);
+    applyStage1LocalDecisionGates(normalized, combinedText, imageUrls.length > 0,
+      cfg.stage1LunaPilot ? 'source-menu-guards' : 'production');
 
     logger.info(`Stage 1 Result: ${normalized.validationDecision}`, {
       confidence: normalized.confidence,

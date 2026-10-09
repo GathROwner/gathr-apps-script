@@ -1,0 +1,822 @@
+[
+  {
+    "name": "POWERSKATING SESSIONS — U9 - U11",
+    "description": "Saturdays — U9-U11 PowerSkate session, part of the 10-hour program focusing on balance, control & agility. Participants must be comfortable skating forwards, backwards, and able to stop using both feet—skills comparable to Canskate Stage 4 or higher. Space is limited; early registration is encouraged. U9-U11 players may have the option of attending the Sunday session depending on overall interest. The program is capped at 25 skaters.",
+    "date": "2026-10-17",
+    "startTime": "07:00",
+    "endTime": "08:00",
+    "venue": "",
+    "ticketLink": "https://forms.gle/TFag3avwFbpZ5k7G6",
+    "price": "$225",
+    "relevantImageIndex": 0,
+    "recurringPattern": "none",
+    "extractionReason": "A separately dated U9-U11 PowerSkating session with an explicitly listed Saturday time.",
+    "timeFlags": {
+      "start": {
+        "source": "explicit",
+        "evidence": "SATURDAYS - 7:00AM-8:00AM"
+      },
+      "end": {
+        "source": "explicit",
+        "toClose": false,
+        "evidence": "SATURDAYS - 7:00AM-8:00AM"
+      }
+    },
+    "spatial": {
+      "kind": "single_location",
+      "locations": [
+        {
+          "label": "CAVENDISH FARMS COMMUNITY EVENTS CENTRE",
+          "address": "",
+          "role": "location",
+          "certainty": "confirmed",
+          "sourceText": "CAVENDISH FARMS COMMUNITY EVENTS CENTRE"
+        }
+      ],
+      "confirmedStreets": [],
+      "ordered": false,
+      "evidenceNotes": "The poster names the community events centre as the program location."
+    },
+    "_pipelineIndex": 1,
+    "_pipelineTotalStage3": 20
+  },
+  {
+    "name": "POWERSKATING SESSIONS — U9 - U11",
+    "description": "Saturdays — U9-U11 PowerSkate session, part of the 10-hour program focusing on balance, control & agility. Participants must be comfortable skating forwards, backwards, and able to stop using both feet—skills comparable to Canskate Stage 4 or higher. Space is limited; early registration is encouraged. U9-U11 players may have the option of attending the Sunday session depending on overall interest. The program is capped at 25 skaters.",
+    "date": "2026-10-24",
+    "startTime": "07:00",
+    "endTime": "08:00",
+    "venue": "",
+    "ticketLink": "https://forms.gle/TFag3avwFbpZ5k7G6",
+    "price": "$225",
+    "relevantImageIndex": 0,
+    "recurringPattern": "none",
+    "extractionReason": "A separately dated U9-U11 PowerSkating session with an explicitly listed Saturday time.",
+    "timeFlags": {
+      "start": {
+        "source": "explicit",
+        "evidence": "SATURDAYS - 7:00AM-8:00AM"
+      },
+      "end": {
+        "source": "explicit",
+        "toClose": false,
+        "evidence": "SATURDAYS - 7:00AM-8:00AM"
+      }
+    },
+    "spatial": {
+      "kind": "single_location",
+      "locations": [
+        {
+          "label": "CAVENDISH FARMS COMMUNITY EVENTS CENTRE",
+          "address": "",
+          "role": "location",
+          "certainty": "confirmed",
+          "sourceText": "CAVENDISH FARMS COMMUNITY EVENTS CENTRE"
+        }
+      ],
+      "confirmedStreets": [],
+      "ordered": false,
+      "evidenceNotes": "The poster names the community events centre as the program location."
+    },
+    "_pipelineIndex": 2,
+    "_pipelineTotalStage3": 20
+  },
+  {
+    "name": "POWERSKATING SESSIONS — U9 - U11",
+    "description": "Saturdays — U9-U11 PowerSkate session, part of the 10-hour program focusing on balance, control & agility. Participants must be comfortable skating forwards, backwards, and able to stop using both feet—skills comparable to Canskate Stage 4 or higher. Space is limited; early registration is encouraged. U9-U11 players may have the option of attending the Sunday session depending on overall interest. The program is capped at 25 skaters.",
+    "date": "2026-10-31",
+    "startTime": "07:00",
+    "endTime": "08:00",
+    "venue": "",
+    "ticketLink": "https://forms.gle/TFag3avwFbpZ5k7G6",
+    "price": "$225",
+    "relevantImageIndex": 0,
+    "recurringPattern": "none",
+    "extractionReason": "A separately dated U9-U11 PowerSkating session with an explicitly listed Saturday time.",
+    "timeFlags": {
+      "start": {
+        "source": "explicit",
+        "evidence": "SATURDAYS - 7:00AM-8:00AM"
+      },
+      "end": {
+        "source": "explicit",
+        "toClose": false,
+        "evidence": "SATURDAYS - 7:00AM-8:00AM"
+      }
+    },
+    "spatial": {
+      "kind": "single_location",
+      "locations": [
+        {
+          "label": "CAVENDISH FARMS COMMUNITY EVENTS CENTRE",
+          "address": "",
+          "role": "location",
+          "certainty": "confirmed",
+          "sourceText": "CAVENDISH FARMS COMMUNITY EVENTS CENTRE"
+        }
+      ],
+      "confirmedStreets": [],
+      "ordered": false,
+      "evidenceNotes": "The poster names the community events centre as the program location."
+    },
+    "_pipelineIndex": 3,
+    "_pipelineTotalStage3": 20
+  },
+  {
+    "name": "POWERSKATING SESSIONS — U9 - U11",
+    "description": "Saturdays — U9-U11 PowerSkate session, part of the 10-hour program focusing on balance, control & agility. Participants must be comfortable skating forwards, backwards, and able to stop using both feet—skills comparable to Canskate Stage 4 or higher. Space is limited; early registration is encouraged. U9-U11 players may have the option of attending the Sunday session depending on overall interest. The program is capped at 25 skaters.",
+    "date": "2026-11-14",
+    "startTime": "07:00",
+    "endTime": "08:00",
+    "venue": "",
+    "ticketLink": "https://forms.gle/TFag3avwFbpZ5k7G6",
+    "price": "$225",
+    "relevantImageIndex": 0,
+    "recurringPattern": "none",
+    "extractionReason": "A separately dated U9-U11 PowerSkating session with an explicitly listed Saturday time.",
+    "timeFlags": {
+      "start": {
+        "source": "explicit",
+        "evidence": "SATURDAYS - 7:00AM-8:00AM"
+      },
+      "end": {
+        "source": "explicit",
+        "toClose": false,
+        "evidence": "SATURDAYS - 7:00AM-8:00AM"
+      }
+    },
+    "spatial": {
+      "kind": "single_location",
+      "locations": [
+        {
+          "label": "CAVENDISH FARMS COMMUNITY EVENTS CENTRE",
+          "address": "",
+          "role": "location",
+          "certainty": "confirmed",
+          "sourceText": "CAVENDISH FARMS COMMUNITY EVENTS CENTRE"
+        }
+      ],
+      "confirmedStreets": [],
+      "ordered": false,
+      "evidenceNotes": "The poster names the community events centre as the program location."
+    },
+    "_pipelineIndex": 4,
+    "_pipelineTotalStage3": 20
+  },
+  {
+    "name": "POWERSKATING SESSIONS — U9 - U11",
+    "description": "Saturdays — U9-U11 PowerSkate session, part of the 10-hour program focusing on balance, control & agility. Participants must be comfortable skating forwards, backwards, and able to stop using both feet—skills comparable to Canskate Stage 4 or higher. Space is limited; early registration is encouraged. U9-U11 players may have the option of attending the Sunday session depending on overall interest. The program is capped at 25 skaters.",
+    "date": "2026-11-21",
+    "startTime": "07:00",
+    "endTime": "08:00",
+    "venue": "",
+    "ticketLink": "https://forms.gle/TFag3avwFbpZ5k7G6",
+    "price": "$225",
+    "relevantImageIndex": 0,
+    "recurringPattern": "none",
+    "extractionReason": "A separately dated U9-U11 PowerSkating session with an explicitly listed Saturday time.",
+    "timeFlags": {
+      "start": {
+        "source": "explicit",
+        "evidence": "SATURDAYS - 7:00AM-8:00AM"
+      },
+      "end": {
+        "source": "explicit",
+        "toClose": false,
+        "evidence": "SATURDAYS - 7:00AM-8:00AM"
+      }
+    },
+    "spatial": {
+      "kind": "single_location",
+      "locations": [
+        {
+          "label": "CAVENDISH FARMS COMMUNITY EVENTS CENTRE",
+          "address": "",
+          "role": "location",
+          "certainty": "confirmed",
+          "sourceText": "CAVENDISH FARMS COMMUNITY EVENTS CENTRE"
+        }
+      ],
+      "confirmedStreets": [],
+      "ordered": false,
+      "evidenceNotes": "The poster names the community events centre as the program location."
+    },
+    "_pipelineIndex": 5,
+    "_pipelineTotalStage3": 20
+  },
+  {
+    "name": "POWERSKATING SESSIONS — U9 - U11",
+    "description": "Saturdays — U9-U11 PowerSkate session, part of the 10-hour program focusing on balance, control & agility. Participants must be comfortable skating forwards, backwards, and able to stop using both feet—skills comparable to Canskate Stage 4 or higher. Space is limited; early registration is encouraged. U9-U11 players may have the option of attending the Sunday session depending on overall interest. The program is capped at 25 skaters.",
+    "date": "2026-11-28",
+    "startTime": "07:00",
+    "endTime": "08:00",
+    "venue": "",
+    "ticketLink": "https://forms.gle/TFag3avwFbpZ5k7G6",
+    "price": "$225",
+    "relevantImageIndex": 0,
+    "recurringPattern": "none",
+    "extractionReason": "A separately dated U9-U11 PowerSkating session with an explicitly listed Saturday time.",
+    "timeFlags": {
+      "start": {
+        "source": "explicit",
+        "evidence": "SATURDAYS - 7:00AM-8:00AM"
+      },
+      "end": {
+        "source": "explicit",
+        "toClose": false,
+        "evidence": "SATURDAYS - 7:00AM-8:00AM"
+      }
+    },
+    "spatial": {
+      "kind": "single_location",
+      "locations": [
+        {
+          "label": "CAVENDISH FARMS COMMUNITY EVENTS CENTRE",
+          "address": "",
+          "role": "location",
+          "certainty": "confirmed",
+          "sourceText": "CAVENDISH FARMS COMMUNITY EVENTS CENTRE"
+        }
+      ],
+      "confirmedStreets": [],
+      "ordered": false,
+      "evidenceNotes": "The poster names the community events centre as the program location."
+    },
+    "_pipelineIndex": 6,
+    "_pipelineTotalStage3": 20
+  },
+  {
+    "name": "POWERSKATING SESSIONS — U9 - U11",
+    "description": "Saturdays — U9-U11 PowerSkate session, part of the 10-hour program focusing on balance, control & agility. Participants must be comfortable skating forwards, backwards, and able to stop using both feet—skills comparable to Canskate Stage 4 or higher. Space is limited; early registration is encouraged. U9-U11 players may have the option of attending the Sunday session depending on overall interest. The program is capped at 25 skaters.",
+    "date": "2026-12-05",
+    "startTime": "07:00",
+    "endTime": "08:00",
+    "venue": "",
+    "ticketLink": "https://forms.gle/TFag3avwFbpZ5k7G6",
+    "price": "$225",
+    "relevantImageIndex": 0,
+    "recurringPattern": "none",
+    "extractionReason": "A separately dated U9-U11 PowerSkating session with an explicitly listed Saturday time.",
+    "timeFlags": {
+      "start": {
+        "source": "explicit",
+        "evidence": "SATURDAYS - 7:00AM-8:00AM"
+      },
+      "end": {
+        "source": "explicit",
+        "toClose": false,
+        "evidence": "SATURDAYS - 7:00AM-8:00AM"
+      }
+    },
+    "spatial": {
+      "kind": "single_location",
+      "locations": [
+        {
+          "label": "CAVENDISH FARMS COMMUNITY EVENTS CENTRE",
+          "address": "",
+          "role": "location",
+          "certainty": "confirmed",
+          "sourceText": "CAVENDISH FARMS COMMUNITY EVENTS CENTRE"
+        }
+      ],
+      "confirmedStreets": [],
+      "ordered": false,
+      "evidenceNotes": "The poster names the community events centre as the program location."
+    },
+    "_pipelineIndex": 7,
+    "_pipelineTotalStage3": 20
+  },
+  {
+    "name": "POWERSKATING SESSIONS — U9 - U11",
+    "description": "Saturdays — U9-U11 PowerSkate session, part of the 10-hour program focusing on balance, control & agility. Participants must be comfortable skating forwards, backwards, and able to stop using both feet—skills comparable to Canskate Stage 4 or higher. Space is limited; early registration is encouraged. U9-U11 players may have the option of attending the Sunday session depending on overall interest. The program is capped at 25 skaters.",
+    "date": "2026-12-12",
+    "startTime": "07:00",
+    "endTime": "08:00",
+    "venue": "",
+    "ticketLink": "https://forms.gle/TFag3avwFbpZ5k7G6",
+    "price": "$225",
+    "relevantImageIndex": 0,
+    "recurringPattern": "none",
+    "extractionReason": "A separately dated U9-U11 PowerSkating session with an explicitly listed Saturday time.",
+    "timeFlags": {
+      "start": {
+        "source": "explicit",
+        "evidence": "SATURDAYS - 7:00AM-8:00AM"
+      },
+      "end": {
+        "source": "explicit",
+        "toClose": false,
+        "evidence": "SATURDAYS - 7:00AM-8:00AM"
+      }
+    },
+    "spatial": {
+      "kind": "single_location",
+      "locations": [
+        {
+          "label": "CAVENDISH FARMS COMMUNITY EVENTS CENTRE",
+          "address": "",
+          "role": "location",
+          "certainty": "confirmed",
+          "sourceText": "CAVENDISH FARMS COMMUNITY EVENTS CENTRE"
+        }
+      ],
+      "confirmedStreets": [],
+      "ordered": false,
+      "evidenceNotes": "The poster names the community events centre as the program location."
+    },
+    "_pipelineIndex": 8,
+    "_pipelineTotalStage3": 20
+  },
+  {
+    "name": "POWERSKATING SESSIONS — U9 - U11",
+    "description": "Saturdays — U9-U11 PowerSkate session, part of the 10-hour program focusing on balance, control & agility. Participants must be comfortable skating forwards, backwards, and able to stop using both feet—skills comparable to Canskate Stage 4 or higher. Space is limited; early registration is encouraged. U9-U11 players may have the option of attending the Sunday session depending on overall interest. The program is capped at 25 skaters.",
+    "date": "2026-12-19",
+    "startTime": "07:00",
+    "endTime": "08:00",
+    "venue": "",
+    "ticketLink": "https://forms.gle/TFag3avwFbpZ5k7G6",
+    "price": "$225",
+    "relevantImageIndex": 0,
+    "recurringPattern": "none",
+    "extractionReason": "A separately dated U9-U11 PowerSkating session with an explicitly listed Saturday time.",
+    "timeFlags": {
+      "start": {
+        "source": "explicit",
+        "evidence": "SATURDAYS - 7:00AM-8:00AM"
+      },
+      "end": {
+        "source": "explicit",
+        "toClose": false,
+        "evidence": "SATURDAYS - 7:00AM-8:00AM"
+      }
+    },
+    "spatial": {
+      "kind": "single_location",
+      "locations": [
+        {
+          "label": "CAVENDISH FARMS COMMUNITY EVENTS CENTRE",
+          "address": "",
+          "role": "location",
+          "certainty": "confirmed",
+          "sourceText": "CAVENDISH FARMS COMMUNITY EVENTS CENTRE"
+        }
+      ],
+      "confirmedStreets": [],
+      "ordered": false,
+      "evidenceNotes": "The poster names the community events centre as the program location."
+    },
+    "_pipelineIndex": 9,
+    "_pipelineTotalStage3": 20
+  },
+  {
+    "name": "POWERSKATING SESSIONS — U9 - U11",
+    "description": "Saturdays — U9-U11 PowerSkate session, part of the 10-hour program focusing on balance, control & agility. Participants must be comfortable skating forwards, backwards, and able to stop using both feet—skills comparable to Canskate Stage 4 or higher. Space is limited; early registration is encouraged. U9-U11 players may have the option of attending the Sunday session depending on overall interest. The program is capped at 25 skaters.",
+    "date": "2027-01-02",
+    "startTime": "07:00",
+    "endTime": "08:00",
+    "venue": "",
+    "ticketLink": "https://forms.gle/TFag3avwFbpZ5k7G6",
+    "price": "$225",
+    "relevantImageIndex": 0,
+    "recurringPattern": "none",
+    "extractionReason": "A separately dated U9-U11 PowerSkating session with an explicitly listed Saturday time.",
+    "timeFlags": {
+      "start": {
+        "source": "explicit",
+        "evidence": "SATURDAYS - 7:00AM-8:00AM"
+      },
+      "end": {
+        "source": "explicit",
+        "toClose": false,
+        "evidence": "SATURDAYS - 7:00AM-8:00AM"
+      }
+    },
+    "spatial": {
+      "kind": "single_location",
+      "locations": [
+        {
+          "label": "CAVENDISH FARMS COMMUNITY EVENTS CENTRE",
+          "address": "",
+          "role": "location",
+          "certainty": "confirmed",
+          "sourceText": "CAVENDISH FARMS COMMUNITY EVENTS CENTRE"
+        }
+      ],
+      "confirmedStreets": [],
+      "ordered": false,
+      "evidenceNotes": "The poster names the community events centre as the program location."
+    },
+    "_pipelineIndex": 10,
+    "_pipelineTotalStage3": 20
+  },
+  {
+    "name": "POWERSKATING SESSIONS — U13-U15",
+    "description": "Sundays — U13-U15 PowerSkate session, part of the 10-hour program focusing on balance, control & agility. This group is listed as depending on interest. Participants must be comfortable skating forwards, backwards, and able to stop using both feet—skills comparable to Canskate Stage 4 or higher. Space is limited; early registration is encouraged. The program is capped at 25 skaters.",
+    "date": "2026-10-18",
+    "startTime": "07:00",
+    "endTime": "08:00",
+    "venue": "",
+    "ticketLink": "https://forms.gle/TFag3avwFbpZ5k7G6",
+    "price": "$225",
+    "relevantImageIndex": 0,
+    "recurringPattern": "none",
+    "extractionReason": "A separately dated U13-U15 PowerSkating session with an explicitly listed Sunday time.",
+    "timeFlags": {
+      "start": {
+        "source": "explicit",
+        "evidence": "SUNDAYS - 7:00AM-8:00AM"
+      },
+      "end": {
+        "source": "explicit",
+        "toClose": false,
+        "evidence": "SUNDAYS - 7:00AM-8:00AM"
+      }
+    },
+    "spatial": {
+      "kind": "single_location",
+      "locations": [
+        {
+          "label": "CAVENDISH FARMS COMMUNITY EVENTS CENTRE",
+          "address": "",
+          "role": "location",
+          "certainty": "confirmed",
+          "sourceText": "CAVENDISH FARMS COMMUNITY EVENTS CENTRE"
+        }
+      ],
+      "confirmedStreets": [],
+      "ordered": false,
+      "evidenceNotes": "The poster names the community events centre as the program location."
+    },
+    "_pipelineIndex": 11,
+    "_pipelineTotalStage3": 20
+  },
+  {
+    "name": "POWERSKATING SESSIONS — U13-U15",
+    "description": "Sundays — U13-U15 PowerSkate session, part of the 10-hour program focusing on balance, control & agility. This group is listed as depending on interest. Participants must be comfortable skating forwards, backwards, and able to stop using both feet—skills comparable to Canskate Stage 4 or higher. Space is limited; early registration is encouraged. The program is capped at 25 skaters.",
+    "date": "2026-10-25",
+    "startTime": "07:00",
+    "endTime": "08:00",
+    "venue": "",
+    "ticketLink": "https://forms.gle/TFag3avwFbpZ5k7G6",
+    "price": "$225",
+    "relevantImageIndex": 0,
+    "recurringPattern": "none",
+    "extractionReason": "A separately dated U13-U15 PowerSkating session with an explicitly listed Sunday time.",
+    "timeFlags": {
+      "start": {
+        "source": "explicit",
+        "evidence": "SUNDAYS - 7:00AM-8:00AM"
+      },
+      "end": {
+        "source": "explicit",
+        "toClose": false,
+        "evidence": "SUNDAYS - 7:00AM-8:00AM"
+      }
+    },
+    "spatial": {
+      "kind": "single_location",
+      "locations": [
+        {
+          "label": "CAVENDISH FARMS COMMUNITY EVENTS CENTRE",
+          "address": "",
+          "role": "location",
+          "certainty": "confirmed",
+          "sourceText": "CAVENDISH FARMS COMMUNITY EVENTS CENTRE"
+        }
+      ],
+      "confirmedStreets": [],
+      "ordered": false,
+      "evidenceNotes": "The poster names the community events centre as the program location."
+    },
+    "_pipelineIndex": 12,
+    "_pipelineTotalStage3": 20
+  },
+  {
+    "name": "POWERSKATING SESSIONS — U13-U15",
+    "description": "Sundays — U13-U15 PowerSkate session, part of the 10-hour program focusing on balance, control & agility. This group is listed as depending on interest. Participants must be comfortable skating forwards, backwards, and able to stop using both feet—skills comparable to Canskate Stage 4 or higher. Space is limited; early registration is encouraged. The program is capped at 25 skaters.",
+    "date": "2026-11-01",
+    "startTime": "07:00",
+    "endTime": "08:00",
+    "venue": "",
+    "ticketLink": "https://forms.gle/TFag3avwFbpZ5k7G6",
+    "price": "$225",
+    "relevantImageIndex": 0,
+    "recurringPattern": "none",
+    "extractionReason": "A separately dated U13-U15 PowerSkating session with an explicitly listed Sunday time.",
+    "timeFlags": {
+      "start": {
+        "source": "explicit",
+        "evidence": "SUNDAYS - 7:00AM-8:00AM"
+      },
+      "end": {
+        "source": "explicit",
+        "toClose": false,
+        "evidence": "SUNDAYS - 7:00AM-8:00AM"
+      }
+    },
+    "spatial": {
+      "kind": "single_location",
+      "locations": [
+        {
+          "label": "CAVENDISH FARMS COMMUNITY EVENTS CENTRE",
+          "address": "",
+          "role": "location",
+          "certainty": "confirmed",
+          "sourceText": "CAVENDISH FARMS COMMUNITY EVENTS CENTRE"
+        }
+      ],
+      "confirmedStreets": [],
+      "ordered": false,
+      "evidenceNotes": "The poster names the community events centre as the program location."
+    },
+    "_pipelineIndex": 13,
+    "_pipelineTotalStage3": 20
+  },
+  {
+    "name": "POWERSKATING SESSIONS — U13-U15",
+    "description": "Sundays — U13-U15 PowerSkate session, part of the 10-hour program focusing on balance, control & agility. This group is listed as depending on interest. Participants must be comfortable skating forwards, backwards, and able to stop using both feet—skills comparable to Canskate Stage 4 or higher. Space is limited; early registration is encouraged. The program is capped at 25 skaters.",
+    "date": "2026-11-15",
+    "startTime": "07:00",
+    "endTime": "08:00",
+    "venue": "",
+    "ticketLink": "https://forms.gle/TFag3avwFbpZ5k7G6",
+    "price": "$225",
+    "relevantImageIndex": 0,
+    "recurringPattern": "none",
+    "extractionReason": "A separately dated U13-U15 PowerSkating session with an explicitly listed Sunday time.",
+    "timeFlags": {
+      "start": {
+        "source": "explicit",
+        "evidence": "SUNDAYS - 7:00AM-8:00AM"
+      },
+      "end": {
+        "source": "explicit",
+        "toClose": false,
+        "evidence": "SUNDAYS - 7:00AM-8:00AM"
+      }
+    },
+    "spatial": {
+      "kind": "single_location",
+      "locations": [
+        {
+          "label": "CAVENDISH FARMS COMMUNITY EVENTS CENTRE",
+          "address": "",
+          "role": "location",
+          "certainty": "confirmed",
+          "sourceText": "CAVENDISH FARMS COMMUNITY EVENTS CENTRE"
+        }
+      ],
+      "confirmedStreets": [],
+      "ordered": false,
+      "evidenceNotes": "The poster names the community events centre as the program location."
+    },
+    "_pipelineIndex": 14,
+    "_pipelineTotalStage3": 20
+  },
+  {
+    "name": "POWERSKATING SESSIONS — U13-U15",
+    "description": "Sundays — U13-U15 PowerSkate session, part of the 10-hour program focusing on balance, control & agility. This group is listed as depending on interest. Participants must be comfortable skating forwards, backwards, and able to stop using both feet—skills comparable to Canskate Stage 4 or higher. Space is limited; early registration is encouraged. The program is capped at 25 skaters.",
+    "date": "2026-11-22",
+    "startTime": "07:00",
+    "endTime": "08:00",
+    "venue": "",
+    "ticketLink": "https://forms.gle/TFag3avwFbpZ5k7G6",
+    "price": "$225",
+    "relevantImageIndex": 0,
+    "recurringPattern": "none",
+    "extractionReason": "A separately dated U13-U15 PowerSkating session with an explicitly listed Sunday time.",
+    "timeFlags": {
+      "start": {
+        "source": "explicit",
+        "evidence": "SUNDAYS - 7:00AM-8:00AM"
+      },
+      "end": {
+        "source": "explicit",
+        "toClose": false,
+        "evidence": "SUNDAYS - 7:00AM-8:00AM"
+      }
+    },
+    "spatial": {
+      "kind": "single_location",
+      "locations": [
+        {
+          "label": "CAVENDISH FARMS COMMUNITY EVENTS CENTRE",
+          "address": "",
+          "role": "location",
+          "certainty": "confirmed",
+          "sourceText": "CAVENDISH FARMS COMMUNITY EVENTS CENTRE"
+        }
+      ],
+      "confirmedStreets": [],
+      "ordered": false,
+      "evidenceNotes": "The poster names the community events centre as the program location."
+    },
+    "_pipelineIndex": 15,
+    "_pipelineTotalStage3": 20
+  },
+  {
+    "name": "POWERSKATING SESSIONS — U13-U15",
+    "description": "Sundays — U13-U15 PowerSkate session, part of the 10-hour program focusing on balance, control & agility. This group is listed as depending on interest. Participants must be comfortable skating forwards, backwards, and able to stop using both feet—skills comparable to Canskate Stage 4 or higher. Space is limited; early registration is encouraged. The program is capped at 25 skaters.",
+    "date": "2026-11-29",
+    "startTime": "07:00",
+    "endTime": "08:00",
+    "venue": "",
+    "ticketLink": "https://forms.gle/TFag3avwFbpZ5k7G6",
+    "price": "$225",
+    "relevantImageIndex": 0,
+    "recurringPattern": "none",
+    "extractionReason": "A separately dated U13-U15 PowerSkating session with an explicitly listed Sunday time.",
+    "timeFlags": {
+      "start": {
+        "source": "explicit",
+        "evidence": "SUNDAYS - 7:00AM-8:00AM"
+      },
+      "end": {
+        "source": "explicit",
+        "toClose": false,
+        "evidence": "SUNDAYS - 7:00AM-8:00AM"
+      }
+    },
+    "spatial": {
+      "kind": "single_location",
+      "locations": [
+        {
+          "label": "CAVENDISH FARMS COMMUNITY EVENTS CENTRE",
+          "address": "",
+          "role": "location",
+          "certainty": "confirmed",
+          "sourceText": "CAVENDISH FARMS COMMUNITY EVENTS CENTRE"
+        }
+      ],
+      "confirmedStreets": [],
+      "ordered": false,
+      "evidenceNotes": "The poster names the community events centre as the program location."
+    },
+    "_pipelineIndex": 16,
+    "_pipelineTotalStage3": 20
+  },
+  {
+    "name": "POWERSKATING SESSIONS — U13-U15",
+    "description": "Sundays — U13-U15 PowerSkate session, part of the 10-hour program focusing on balance, control & agility. This group is listed as depending on interest. Participants must be comfortable skating forwards, backwards, and able to stop using both feet—skills comparable to Canskate Stage 4 or higher. Space is limited; early registration is encouraged. The program is capped at 25 skaters.",
+    "date": "2026-12-06",
+    "startTime": "07:00",
+    "endTime": "08:00",
+    "venue": "",
+    "ticketLink": "https://forms.gle/TFag3avwFbpZ5k7G6",
+    "price": "$225",
+    "relevantImageIndex": 0,
+    "recurringPattern": "none",
+    "extractionReason": "A separately dated U13-U15 PowerSkating session with an explicitly listed Sunday time.",
+    "timeFlags": {
+      "start": {
+        "source": "explicit",
+        "evidence": "SUNDAYS - 7:00AM-8:00AM"
+      },
+      "end": {
+        "source": "explicit",
+        "toClose": false,
+        "evidence": "SUNDAYS - 7:00AM-8:00AM"
+      }
+    },
+    "spatial": {
+      "kind": "single_location",
+      "locations": [
+        {
+          "label": "CAVENDISH FARMS COMMUNITY EVENTS CENTRE",
+          "address": "",
+          "role": "location",
+          "certainty": "confirmed",
+          "sourceText": "CAVENDISH FARMS COMMUNITY EVENTS CENTRE"
+        }
+      ],
+      "confirmedStreets": [],
+      "ordered": false,
+      "evidenceNotes": "The poster names the community events centre as the program location."
+    },
+    "_pipelineIndex": 17,
+    "_pipelineTotalStage3": 20
+  },
+  {
+    "name": "POWERSKATING SESSIONS — U13-U15",
+    "description": "Sundays — U13-U15 PowerSkate session, part of the 10-hour program focusing on balance, control & agility. This group is listed as depending on interest. Participants must be comfortable skating forwards, backwards, and able to stop using both feet—skills comparable to Canskate Stage 4 or higher. Space is limited; early registration is encouraged. The program is capped at 25 skaters.",
+    "date": "2026-12-13",
+    "startTime": "07:00",
+    "endTime": "08:00",
+    "venue": "",
+    "ticketLink": "https://forms.gle/TFag3avwFbpZ5k7G6",
+    "price": "$225",
+    "relevantImageIndex": 0,
+    "recurringPattern": "none",
+    "extractionReason": "A separately dated U13-U15 PowerSkating session with an explicitly listed Sunday time.",
+    "timeFlags": {
+      "start": {
+        "source": "explicit",
+        "evidence": "SUNDAYS - 7:00AM-8:00AM"
+      },
+      "end": {
+        "source": "explicit",
+        "toClose": false,
+        "evidence": "SUNDAYS - 7:00AM-8:00AM"
+      }
+    },
+    "spatial": {
+      "kind": "single_location",
+      "locations": [
+        {
+          "label": "CAVENDISH FARMS COMMUNITY EVENTS CENTRE",
+          "address": "",
+          "role": "location",
+          "certainty": "confirmed",
+          "sourceText": "CAVENDISH FARMS COMMUNITY EVENTS CENTRE"
+        }
+      ],
+      "confirmedStreets": [],
+      "ordered": false,
+      "evidenceNotes": "The poster names the community events centre as the program location."
+    },
+    "_pipelineIndex": 18,
+    "_pipelineTotalStage3": 20
+  },
+  {
+    "name": "POWERSKATING SESSIONS — U13-U15",
+    "description": "Sundays — U13-U15 PowerSkate session, part of the 10-hour program focusing on balance, control & agility. This group is listed as depending on interest. Participants must be comfortable skating forwards, backwards, and able to stop using both feet—skills comparable to Canskate Stage 4 or higher. Space is limited; early registration is encouraged. The program is capped at 25 skaters.",
+    "date": "2026-12-20",
+    "startTime": "07:00",
+    "endTime": "08:00",
+    "venue": "",
+    "ticketLink": "https://forms.gle/TFag3avwFbpZ5k7G6",
+    "price": "$225",
+    "relevantImageIndex": 0,
+    "recurringPattern": "none",
+    "extractionReason": "A separately dated U13-U15 PowerSkating session with an explicitly listed Sunday time.",
+    "timeFlags": {
+      "start": {
+        "source": "explicit",
+        "evidence": "SUNDAYS - 7:00AM-8:00AM"
+      },
+      "end": {
+        "source": "explicit",
+        "toClose": false,
+        "evidence": "SUNDAYS - 7:00AM-8:00AM"
+      }
+    },
+    "spatial": {
+      "kind": "single_location",
+      "locations": [
+        {
+          "label": "CAVENDISH FARMS COMMUNITY EVENTS CENTRE",
+          "address": "",
+          "role": "location",
+          "certainty": "confirmed",
+          "sourceText": "CAVENDISH FARMS COMMUNITY EVENTS CENTRE"
+        }
+      ],
+      "confirmedStreets": [],
+      "ordered": false,
+      "evidenceNotes": "The poster names the community events centre as the program location."
+    },
+    "_pipelineIndex": 19,
+    "_pipelineTotalStage3": 20
+  },
+  {
+    "name": "POWERSKATING SESSIONS — U13-U15",
+    "description": "Sundays — U13-U15 PowerSkate session, part of the 10-hour program focusing on balance, control & agility. This group is listed as depending on interest. Participants must be comfortable skating forwards, backwards, and able to stop using both feet—skills comparable to Canskate Stage 4 or higher. Space is limited; early registration is encouraged. The program is capped at 25 skaters.",
+    "date": "2027-01-03",
+    "startTime": "07:00",
+    "endTime": "08:00",
+    "venue": "",
+    "ticketLink": "https://forms.gle/TFag3avwFbpZ5k7G6",
+    "price": "$225",
+    "relevantImageIndex": 0,
+    "recurringPattern": "none",
+    "extractionReason": "A separately dated U13-U15 PowerSkating session with an explicitly listed Sunday time.",
+    "timeFlags": {
+      "start": {
+        "source": "explicit",
+        "evidence": "SUNDAYS - 7:00AM-8:00AM"
+      },
+      "end": {
+        "source": "explicit",
+        "toClose": false,
+        "evidence": "SUNDAYS - 7:00AM-8:00AM"
+      }
+    },
+    "spatial": {
+      "kind": "single_location",
+      "locations": [
+        {
+          "label": "CAVENDISH FARMS COMMUNITY EVENTS CENTRE",
+          "address": "",
+          "role": "location",
+          "certainty": "confirmed",
+          "sourceText": "CAVENDISH FARMS COMMUNITY EVENTS CENTRE"
+        }
+      ],
+      "confirmedStreets": [],
+      "ordered": false,
+      "evidenceNotes": "The poster names the community events centre as the program location."
+    },
+    "_pipelineIndex": 20,
+    "_pipelineTotalStage3": 20
+  }
+]

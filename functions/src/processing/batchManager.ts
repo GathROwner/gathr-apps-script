@@ -34,6 +34,8 @@ export function initializeStats(): ProcessingStats {
     parseSnapshotWrites: 0,
     unknownVenueCount: 0,
     lunaStage3EligibleCount: 0,
+    lunaStage1EligibleCount: 0,
+    lunaStage1SelectedCount: 0,
     lunaStage3SelectedCount: 0,
   };
 }
@@ -134,6 +136,11 @@ export class BatchManager {
       percent,
     });
     return selected;
+  }
+
+  recordStage1PilotAllocation(selected: boolean): void {
+    this.state.stats.lunaStage1EligibleCount = Number(this.state.stats.lunaStage1EligibleCount || 0) + 1;
+    if (selected) this.state.stats.lunaStage1SelectedCount = Number(this.state.stats.lunaStage1SelectedCount || 0) + 1;
   }
 
   /**

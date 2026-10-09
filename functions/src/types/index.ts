@@ -72,6 +72,8 @@ export interface ProcessingStats {
   unknownVenueCount?: number;
   /** Posts that passed Stage 2 and entered the Stage 3 canary allocation. */
   lunaStage3EligibleCount?: number;
+  lunaStage1EligibleCount?: number;
+  lunaStage1SelectedCount?: number;
   /** Posts allocated to Luna within that eligible cohort. */
   lunaStage3SelectedCount?: number;
 }

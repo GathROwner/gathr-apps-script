@@ -35,6 +35,7 @@ import {
   Stage45ReplayArtifacts,
 } from './types.js';
 import { detectCalendarSignals, validateContent } from './contentValidator.js';
+import { selectStage1LunaPilot } from './stage1Pilot.js';
 import { resolveStage2ScoreRouting, selectLunaDenseFrameIndices } from './stage2Routing.js';
 import type { Stage2ScoreRoutingDecision } from './stage2Routing.js';
 export { resolveStage2ScoreRouting };
@@ -52,7 +53,7 @@ import { shouldHoldUndatedStandingSchedule, shouldRetrySeasonalLeagueWithLegacy,
   isSelectedLunaCanaryPost, isSampledLunaCanaryPost,
   canRetryLunaCanaryWithLegacy, canaryGeneratedCleanupUrls,
   hasMalformedLunaEventTitle, isOnlineAdministrativeMilestone, isElectionNoticeWithoutVenue,
-  isRecentPastYearlessSourceDate } from './lunaSafetyGate.js';
+  partitionRecentPastYearlessItems } from './lunaSafetyGate.js';
 import { parseBooleanEnv, parseNumberEnv, resolveStageModel } from './runtimeConfig.js';
 import { logger } from '../utils/logger.js';
 import { findRecoverableManagedSourceGallery } from '../services/firestoreService.js';
@@ -1010,6 +1011,7 @@ async function parsePostDataCore(
     logger.info('Exact-post Luna canary selected', { postId });
   };
   if (lunaCanarySelected) configureLunaCanary();
+  let sourceDateHoldEncountered = false;
   const holdCalendarBandCanary = async (reason: string, detail = ''): Promise<ProcessedEvent[]> => {
     logger.warn('Exact-post calendar band canary held for review', { postId, reason, detail });
     const stage: ParseSkipReason['stage'] = reason.includes('stage1') ? 'stage1'
@@ -1029,6 +1031,7 @@ async function parsePostDataCore(
     'LUNA_CANARY_LEGACY_FALLBACK_ENABLED', true
   );
   const retryCanaryWithLegacy = async (reason: string, detail = ''): Promise<ProcessedEvent[]> => {
+    if (sourceDateHoldEncountered) return [];
     if (!lunaLegacyFallbackEnabled) {
       return holdCalendarBandCanary(reason, detail);
     }
@@ -1192,10 +1195,28 @@ async function parsePostDataCore(
         appliedModel: stage1AppliedModel,
       });
     }
-    const stage1Config =
+    let stage1Config =
       stage1AppliedModel === cfg.gptModelFast
         ? cfg
         : ({ ...cfg, gptModelFast: stage1AppliedModel } as ParsingConfig);
+    const stage1Pilot = selectStage1LunaPilot(
+      cfg.diagnosticContext?.fileId || '', postId, ocrImageUrls.length);
+    const stage1ActualModel = stage1Pilot.selected ? 'gpt-6-luna'
+      : stage1Config.stage1ModelOverride || String(process.env.STAGE1_MODEL_OVERRIDE || '').trim()
+        || stage1Config.gptModelFast;
+    if (!cfg.stage1EvaluationValidationOverride && stage1Pilot.eligible) {
+      cfg.stage1PilotAllocationHandler?.(stage1Pilot.selected);
+      logger.info('Luna Stage 1 pilot allocation', {
+        ...cfg.diagnosticContext, postId, ...stage1Pilot,
+        model: stage1ActualModel,
+        prompt: stage1Pilot.selected ? 'compact-v10' : 'production',
+        reasoningEffort: stage1Pilot.selected ? 'high' : 'default',
+        localGatePolicy: stage1Pilot.selected ? 'source-menu-guards' : 'production',
+      });
+    }
+    if (stage1Pilot.selected && !cfg.stage1EvaluationValidationOverride) {
+      stage1Config = { ...stage1Config, stage1ModelOverride: 'gpt-6-luna', stage1LunaPilot: true };
+    }
     let validation = cfg.stage1EvaluationValidationOverride
       ? deepCloneJson(cfg.stage1EvaluationValidationOverride)
       : await validateContent(
@@ -1206,6 +1227,11 @@ async function parsePostDataCore(
           stage1Config
         );
     logTiming('stage1_validate', stage1Start, { postId });
+    await emitStageArtifacts(cfg, {
+      source: 'live', stage1Validation: deepCloneJson(validation),
+      stage1Pilot: cfg.stage1EvaluationValidationOverride ? undefined
+        : { ...stage1Pilot, model: stage1ActualModel },
+    });
 
     if (!validation.hasValidContent || validation.validationDecision === 'VALIDATION_FAILED') {
       if (lunaCanarySelected) return retryCanaryWithLegacy('stage1_validation_failed');
@@ -1801,6 +1827,25 @@ async function parsePostDataCore(
         attempt,
       });
 
+      // Apply on every extraction attempt, after enrichment, so a retry cannot
+      // reintroduce a held item. A mixed post retains its unaffected positives.
+      if ((stage3Model === 'gpt-6-luna' || sourceDateHoldEncountered) && stage3Items.length > 0) {
+        const postedLocalDate = DateTime.fromISO(timestamp, { zone: cfg.timezone }).toISODate() || '';
+        const partition = partitionRecentPastYearlessItems(stage3Items, extractionText, postedLocalDate);
+        if (partition.held.length > 0) {
+          sourceDateHoldEncountered = true;
+          await emitStageArtifacts(cfg, { source: 'live', contentType: resolvedContentType,
+            stage3HeldItems: deepCloneJson(partition.held) });
+          logger.warn('Luna yearless recent-past date held', {
+            postId, attempt, postedLocalDate, heldCount: partition.held.length,
+            dates: partition.held.map(item => item.date),
+          });
+          await reportSkipReason({ stage: 'stage3',
+            reason: 'Yearless source date shortly before post date needs review before writing',
+            detail: `Held ${partition.held.length} source item(s); attempt=${attempt}` });
+        }
+        stage3Items = partition.kept;
+      }
       return {
         items: stage3Items,
         ticketUrl,
@@ -1819,7 +1864,7 @@ async function parsePostDataCore(
     rawExtractedData = stage3Result.items;
     stage37TicketUrl = stage3Result.ticketUrl || stage37TicketUrl;
 
-    if ((!rawExtractedData || rawExtractedData.length === 0) && stage3CanFallback) {
+    if ((!rawExtractedData || rawExtractedData.length === 0) && stage3CanFallback && !sourceDateHoldEncountered) {
       fallbackAttempted = true;
       logger.warn('Stage 3 fallback retry triggered (no extracted items)', {
         contentType: resolvedContentType,
@@ -1832,6 +1877,7 @@ async function parsePostDataCore(
     }
 
     if (!rawExtractedData || rawExtractedData.length === 0) {
+      if (sourceDateHoldEncountered) return [];
       if (lunaCanarySelected) return retryCanaryWithLegacy('stage3_no_items');
       logger.info('No content extracted');
       await reportSkipReason({
@@ -1876,27 +1922,6 @@ async function parsePostDataCore(
         });
         return retryCanaryWithLegacy('calendar_band_missing_expected_slots',
           missingSlots.join(','));
-      }
-    }
-
-    if (lunaFullImageRequested && rawExtractedData.length > 0) {
-      const postedLocalDate = DateTime.fromISO(timestamp, { zone: cfg.timezone }).toISODate() || '';
-      const held = rawExtractedData.filter(item => isRecentPastYearlessSourceDate(
-        extractionText, postedLocalDate, String(item.date || '')
-      ));
-      if (held.length > 0) {
-        logger.warn('Luna yearless recent-past date held', {
-          postId,
-          postedLocalDate,
-          heldCount: held.length,
-          dates: held.map(item => item.date),
-        });
-        rawExtractedData = rawExtractedData.filter(item => !held.includes(item));
-        await reportSkipReason({
-          stage: 'stage3',
-          reason: 'Yearless source date shortly before post date needs review before writing',
-        });
-        if (rawExtractedData.length === 0) return [];
       }
     }
 
@@ -1972,7 +1997,7 @@ async function parsePostDataCore(
       validatedCount: validatedData?.length || 0,
     });
 
-    if ((!validatedData || validatedData.length === 0) && stage3CanFallback && !fallbackAttempted) {
+    if ((!validatedData || validatedData.length === 0) && stage3CanFallback && !fallbackAttempted && !sourceDateHoldEncountered) {
       fallbackAttempted = true;
       logger.warn('Stage 3 fallback retry triggered (Stage 4 validation failed)', {
         contentType: resolvedContentType,

@@ -28,3 +28,15 @@ test('eligible sampling stays bounded at the configured rate', () => {
   assert.equal(isSampledEligibleLunaStage3Post('dataset', 'post', 101), false);
   assert.equal(isSampledEligibleLunaStage3Post('dataset', '', 50), false);
 });
+
+test('Stage 1 pilot counters resume independently of Stage 3 selection', () => {
+  const state = createBatchState('dataset', 'dataset', 200, 2);
+  state.stats.lunaStage1EligibleCount = 80;
+  state.stats.lunaStage1SelectedCount = 41;
+  const resumed = new BatchManager(state);
+  resumed.recordStage1PilotAllocation(false);
+  resumed.recordStage1PilotAllocation(true);
+  assert.equal(resumed.getStats().lunaStage1EligibleCount, 82);
+  assert.equal(resumed.getStats().lunaStage1SelectedCount, 42);
+  assert.equal(resumed.getStats().lunaStage3SelectedCount, 0);
+});

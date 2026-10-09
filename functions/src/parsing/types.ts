@@ -105,6 +105,8 @@ export interface ParseStageArtifactsSnapshot {
     region?: { left: number; top: number; width: number; height: number };
   }>;
   stage3Items?: ExtractedItem[];
+  stage3HeldItems?: ExtractedItem[];
+  stage1Pilot?: { eligible: boolean; selected: boolean; percent: number; model: string };
   stage4Items?: ExtractedItem[];
   stage37TicketUrl?: string;
 }
@@ -186,6 +188,9 @@ export interface ParsingConfig {
   /** Local evaluator input. parsePostData rejects this unless both dry-run guards are enabled. */
   stage1EvaluationValidationOverride?: ValidationResult;
   stage1ModelOverride?: string;
+  /** Production pilot: frozen compact-v10 prompt, high effort and menu gates. */
+  stage1LunaPilot?: boolean;
+  stage1PilotAllocationHandler?: (selected: boolean) => void;
   stage2ModelOverride?: string;
   stage3ModelOverride?: string;
   stage3ReasoningEffort?: 'none' | 'low' | 'medium' | 'high' | 'xhigh' | 'max';

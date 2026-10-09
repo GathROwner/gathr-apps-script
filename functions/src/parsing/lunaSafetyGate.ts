@@ -1,4 +1,32 @@
 import { createHash } from 'crypto';
+import type { ExtractedItem } from './types.js';
+
+/** Check each item's image transcription as well as the caption. Do not use its
+ * normalized ISO date as evidence that the source printed an explicit year. */
+export function partitionRecentPastYearlessItems(
+  items: ExtractedItem[], sourceText: string, postedLocalDate: string
+): { kept: ExtractedItem[]; held: ExtractedItem[] } {
+  const kept: ExtractedItem[] = [];
+  const held: ExtractedItem[] = [];
+  for (const item of items) {
+    const date = String(item.date || '');
+    // A verbatim caption year outranks a shortened model description. Image-only
+    // items still use their own transcription; normalized ISO dates do not count.
+    const parsed = new Date(`${date}T12:00:00Z`);
+    const monthToken = ['jan(?:uary)?', 'feb(?:ruary)?', 'mar(?:ch)?', 'apr(?:il)?', 'may',
+      'jun(?:e)?', 'jul(?:y)?', 'aug(?:ust)?', 'sep(?:t(?:ember)?)?', 'oct(?:ober)?',
+      'nov(?:ember)?', 'dec(?:ember)?'][parsed.getUTCMonth()];
+    const captionHasYear = monthToken && new RegExp(
+      `\\b${monthToken}\\s+${parsed.getUTCDate()}(?:st|nd|rd|th)?\\b,?\\s+${parsed.getUTCFullYear()}\\b`, 'i'
+    ).test(sourceText);
+    if (captionHasYear) { kept.push(item); continue; }
+    const evidence = [sourceText, item.name, item.description, item.extractionReason,
+      item.timeFlags?.start?.evidence, item.timeFlags?.end?.evidence].filter(Boolean).join('\n');
+    (isRecentPastYearlessSourceDate(evidence, postedLocalDate, date)
+      ? held : kept).push(item);
+  }
+  return { kept, held };
+}
 
 /** A recent, yearless past date must not be written as either stale or next year's event. */
 export function isRecentPastYearlessSourceDate(

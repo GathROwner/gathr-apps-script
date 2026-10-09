@@ -387,6 +387,7 @@ Never return arrays of values for an item; each must be a JSON object.`;
     const processedEvents = sourceReadyFormattedEvents.map(({ event: alignedEvent, originalItem }) => {
       let event = { ...alignedEvent } as FormattedEvent & { sourceItemIndex?: number };
       delete event.sourceItemIndex;
+      event = preserveValidatedOccurrence(event, originalItem);
 
       // Restore venue information from validated data if GPT changed it
       if (originalItem && 'venue' in originalItem && originalItem.venue && originalItem.venue.trim() !== '') {
@@ -452,6 +453,7 @@ Never return arrays of values for an item; each must be a JSON object.`;
       }
 
       event = rehydrateFormattedEventMetadata(event, originalItem);
+      event = preserveValidatedOccurrence(event, originalItem);
 
       // Run after recurrence normalization so pickup weekdays cannot turn a
       // finite ordering window into an open weekly series.
@@ -1177,6 +1179,46 @@ export function alignFormattedEventsToValidatedDataForRegression(
   validatedData: ExtractedItem[]
 ): Array<{ event: FormattedEvent; originalItem: ExtractedItem; inputIndex: number }> {
   return alignFormattedEventsToValidatedData(formattedEvents, validatedData);
+}
+
+/** Stage 4 owns occurrence identity. Formatting must not move a validated date
+ * or create recurrence from an explicitly validated one-off. The existing
+ * finite-series pass can still combine truly consecutive source occurrences. */
+export function preserveValidatedOccurrence(
+  event: FormattedEvent, originalItem: ExtractedItem
+): FormattedEvent {
+  const date = String(originalItem.date || '').trim();
+  if (!parseIsoDate(date)) return event;
+  const restored = { ...event };
+  const singleDay = event.startDate === event.endDate;
+  restored.startDate = date;
+  if (singleDay) restored.endDate = date;
+  if (originalItem.recurringPattern === 'none') {
+    // A fabricated recurring span is not an explicit multi-day source window.
+    if (event.recurringPattern !== 'none') restored.endDate = date;
+    restored.isRecurring = 'No';
+    restored.recurringPattern = 'none';
+    restored.totalOccurrences = undefined;
+    restored.recurrenceUntilDate = undefined;
+    restored.recurringDaysOfWeek = undefined;
+    restored.recurringWeekdaySequence = undefined;
+    restored.recurringWeekInterval = undefined;
+  } else if (VALID_RECURRING_PATTERNS.includes(originalItem.recurringPattern)) {
+    restored.isRecurring = 'Yes';
+    restored.recurringPattern = originalItem.recurringPattern;
+    for (const key of ['totalOccurrences', 'recurrenceUntilDate', 'recurringDaysOfWeek',
+      'recurringWeekdaySequence', 'recurringWeekInterval'] as const) {
+      const value = originalItem[key];
+      if (value !== undefined && value !== '') (restored as any)[key] = value;
+    }
+  }
+  for (const field of ['start', 'end'] as const) {
+    if (originalItem.timeFlags?.[field]?.source !== 'explicit') continue;
+    const key = field === 'start' ? 'startTime' : 'endTime';
+    const time = normalizeUnambiguousSourceStartTime(String(originalItem[key] || ''));
+    if (time) restored[key] = time;
+  }
+  return restored;
 }
 
 export function rehydrateFormattedEventMetadata(

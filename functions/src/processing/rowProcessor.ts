@@ -2232,6 +2232,9 @@ function mergeStageArtifactsSnapshot(
     contentType,
     imageFrameManifest,
     stage3Items,
+    stage3HeldItems: [...(base?.stage3HeldItems || []), ...(incoming.stage3HeldItems || [])],
+    stage1Validation: incoming.stage1Validation || base?.stage1Validation,
+    stage1Pilot: incoming.stage1Pilot || base?.stage1Pilot,
     stage4Items,
     stage37TicketUrl,
   };
@@ -2256,6 +2259,9 @@ function sanitizeStageArtifactsSnapshot(
     imageFrameManifest: snapshot.imageFrameManifest?.slice(0, 64),
     stage37TicketUrl: snapshot.stage37TicketUrl,
     stage3Items: truncateItems(snapshot.stage3Items) as ParseStageArtifactsSnapshot['stage3Items'],
+    stage3HeldItems: truncateItems(snapshot.stage3HeldItems) as ParseStageArtifactsSnapshot['stage3HeldItems'],
+    stage1Validation: snapshot.stage1Validation,
+    stage1Pilot: snapshot.stage1Pilot,
     stage4Items: truncateItems(snapshot.stage4Items) as ParseStageArtifactsSnapshot['stage4Items'],
   };
 }
@@ -3110,6 +3116,7 @@ export async function processRow(
       let parserSkipReason: ParseSkipReason | undefined;
       let stageArtifactsSnapshot: ParseStageArtifactsSnapshot | undefined;
       const parserConfig: Partial<ParsingConfig> = {
+        stage1PilotAllocationHandler: selected => batchManager.recordStage1PilotAllocation(selected),
         diagnosticContext: {
           fileId: batchManager.getState().fileId,
           runId: String(batchManager.getState().runId || ''),
