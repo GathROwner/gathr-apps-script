@@ -1,0 +1,295 @@
+{
+  "asOf": "2026-10-09",
+  "currency": "USD",
+  "scope": "API token cost only; cohort totals are not additive or daily forecasts",
+  "ratesPerMillion": {
+    "gpt-5-mini": {
+      "input": 0.25,
+      "cachedInput": 0.025,
+      "output": 2
+    },
+    "gpt-5.2": {
+      "input": 1.75,
+      "cachedInput": 0.175,
+      "output": 14
+    },
+    "gpt-5-nano": {
+      "input": 0.05,
+      "cachedInput": 0.005,
+      "output": 0.4
+    },
+    "gpt-6-luna": {
+      "input": 0.1,
+      "cachedInput": 0.01,
+      "cacheWrite": 0.125,
+      "output": 0.5
+    }
+  },
+  "stage1": {
+    "candidate": "luna-compact-v10-high-menu-guard",
+    "source": "C:/Users/craig/.codex/stage1-evaluation-20261008/stage1-final-evidence.json",
+    "sourceSha256": "aecfbd7d2c222cfa9b80a0c6b2604522114effad80e3f7553491c03e42ca1320",
+    "comparison": {
+      "mini": {
+        "completed": 48,
+        "scored": 47,
+        "correct": 44,
+        "falseAccept": [
+          "oct6-row-108",
+          "oct7-row-206",
+          "oct8-row-236"
+        ],
+        "falseReject": [],
+        "uncertain": [
+          "oct8-row-124"
+        ],
+        "usd": 0.1251818,
+        "coldInputOutputUsd": 0.12659299999999998,
+        "inputTokens": 102516,
+        "cachedInputTokens": 6272,
+        "outputTokens": 50482,
+        "reasoningTokens": 24512
+      },
+      "luna": {
+        "completed": 48,
+        "scored": 47,
+        "correct": 47,
+        "falseAccept": [],
+        "falseReject": [],
+        "uncertain": [
+          "oct8-row-124"
+        ],
+        "usd": 0.033267985,
+        "coldInputOutputUsd": 0.03639149999999999,
+        "inputTokens": 191700,
+        "cachedInputTokens": 27161,
+        "outputTokens": 24858,
+        "reasoningTokens": 8106
+      },
+      "measuredSavingPercent": 73.42426375080085,
+      "coldScenarioSavingPercent": 71.25314985820701
+    },
+    "limit": "Reported Luna estimate conservatively prices non-read input at cache-write rate where writes are not separately identified; original Mini versus compact Luna also changes prompt and policy"
+  },
+  "stage2": {
+    "source": "artifacts/luna-stage2-oct9-readiness/summary.json",
+    "stats": {
+      "mini-current": {
+        "cases": 119,
+        "calls": 119,
+        "highReviews": 0,
+        "accepted": 110,
+        "held": 9,
+        "observedUsd": 0.28202469999999985,
+        "uncachedUsd": 0.3255414999999999,
+        "inputTokens": 782886,
+        "cachedInputTokens": 193408,
+        "reasoningTokens": 43456,
+        "outputTokens": 64910,
+        "summedSeconds": 636.63,
+        "medianSeconds": 4.951,
+        "p95Seconds": 9.074,
+        "maxSeconds": 12.945
+      },
+      "luna-negative-review": {
+        "cases": 119,
+        "calls": 135,
+        "highReviews": 16,
+        "accepted": 111,
+        "held": 8,
+        "observedUsd": 0.09257583000000001,
+        "uncachedUsd": 0.08762809999999999,
+        "inputTokens": 756561,
+        "cachedInputTokens": 121358,
+        "reasoningTokens": 5481,
+        "outputTokens": 23944,
+        "summedSeconds": 499.285,
+        "medianSeconds": 3.114,
+        "p95Seconds": 11.161,
+        "maxSeconds": 18.849
+      }
+    },
+    "costSavingUncachedPercent": 73.08235662734243
+  },
+  "stage3": {
+    "source": "docs/luna-oct2-stage3-swap-comparison.md",
+    "attemptedPosts": 88,
+    "measuredLegacyUsd": null,
+    "reportedLunaUsdUpperBound": 0.123737,
+    "tokenOnlyLegacyIllustrationUsd": 2.777661,
+    "limit": "Legacy snapshots lack per-call usage; pricing Luna tokens as GPT-5.2 is an illustration, not measured legacy spend"
+  },
+  "stage4": {
+    "source": "artifacts/luna-stage4-oct9-model-comparison/summary.json",
+    "recommendation": "retain nano-low; luna-none is a quality challenger pending guard fix",
+    "stats": {
+      "nano-low": {
+        "runs": 25,
+        "calls": 27,
+        "inputItems": 170,
+        "keptItems": 130,
+        "summedWallMs": 322193,
+        "medianWallMs": 11063,
+        "maxWallMs": 28842,
+        "observedUsd": 0.031050820000000007,
+        "uncachedUsd": 0.0319897,
+        "inputTokens": 94770,
+        "outputTokens": 68128,
+        "reasoningTokens": 11840,
+        "incompleteCalls": 0,
+        "httpErrors": 0,
+        "jsonErrors": 1,
+        "fallbackRuns": 4,
+        "decisionDiscrepancies": 5,
+        "changedSourceFields": 1,
+        "gradedItems": 145,
+        "reviewOnlyItems": 25
+      },
+      "luna-none": {
+        "runs": 25,
+        "calls": 27,
+        "inputItems": 170,
+        "keptItems": 125,
+        "summedWallMs": 292793,
+        "medianWallMs": 10130,
+        "maxWallMs": 27653,
+        "observedUsd": 0.03543697,
+        "uncachedUsd": 0.0355235,
+        "inputTokens": 94770,
+        "outputTokens": 52093,
+        "reasoningTokens": 0,
+        "incompleteCalls": 0,
+        "httpErrors": 0,
+        "jsonErrors": 0,
+        "fallbackRuns": 0,
+        "decisionDiscrepancies": 1,
+        "changedSourceFields": 0,
+        "gradedItems": 145,
+        "reviewOnlyItems": 25
+      },
+      "luna-low": {
+        "runs": 25,
+        "calls": 27,
+        "inputItems": 170,
+        "keptItems": 128,
+        "summedWallMs": 300901,
+        "medianWallMs": 9076,
+        "maxWallMs": 35070,
+        "observedUsd": 0.033789969999999996,
+        "uncachedUsd": 0.0338765,
+        "inputTokens": 94770,
+        "outputTokens": 48799,
+        "reasoningTokens": 1672,
+        "incompleteCalls": 0,
+        "httpErrors": 0,
+        "jsonErrors": 0,
+        "fallbackRuns": 0,
+        "decisionDiscrepancies": 3,
+        "changedSourceFields": 0,
+        "gradedItems": 145,
+        "reviewOnlyItems": 25
+      },
+      "luna-medium": {
+        "runs": 25,
+        "calls": 27,
+        "inputItems": 170,
+        "keptItems": 123,
+        "summedWallMs": 348157,
+        "medianWallMs": 9766,
+        "maxWallMs": 33303,
+        "observedUsd": 0.037072469999999996,
+        "uncachedUsd": 0.03715899999999999,
+        "inputTokens": 94770,
+        "outputTokens": 55364,
+        "reasoningTokens": 3744,
+        "incompleteCalls": 0,
+        "httpErrors": 0,
+        "jsonErrors": 0,
+        "fallbackRuns": 0,
+        "decisionDiscrepancies": 5,
+        "changedSourceFields": 0,
+        "gradedItems": 145,
+        "reviewOnlyItems": 25
+      }
+    }
+  },
+  "stage5": {
+    "source": "artifacts/luna-stage5-oct9-model-comparison/summary.json",
+    "recommendation": "luna-none pending completion and field-preservation safeguards plus shadow test",
+    "stats": {
+      "nano-medium": {
+        "runs": 13,
+        "calls": 22,
+        "inputItems": 104,
+        "finalRecords": 101,
+        "summedWallMs": 568771,
+        "medianWallMs": 31275,
+        "maxWallMs": 172704,
+        "observedUsd": 0.057857439999999996,
+        "uncachedUsd": 0.0589576,
+        "inputTokens": 75120,
+        "outputTokens": 138004,
+        "reasoningTokens": 103040,
+        "requestErrors": 0,
+        "incomplete": 0,
+        "parseErrors": 0
+      },
+      "luna-none": {
+        "runs": 13,
+        "calls": 20,
+        "inputItems": 104,
+        "finalRecords": 101,
+        "summedWallMs": 166902,
+        "medianWallMs": 11190,
+        "maxWallMs": 32528,
+        "observedUsd": 0.021351070000000003,
+        "uncachedUsd": 0.022541299999999997,
+        "inputTokens": 68288,
+        "outputTokens": 31425,
+        "reasoningTokens": 0,
+        "requestErrors": 0,
+        "incomplete": 0,
+        "parseErrors": 0
+      },
+      "luna-low": {
+        "runs": 13,
+        "calls": 22,
+        "inputItems": 104,
+        "finalRecords": 101,
+        "summedWallMs": 218656,
+        "medianWallMs": 13723,
+        "maxWallMs": 45724,
+        "observedUsd": 0.025355044999999996,
+        "uncachedUsd": 0.026375000000000003,
+        "inputTokens": 75105,
+        "outputTokens": 37729,
+        "reasoningTokens": 4002,
+        "requestErrors": 0,
+        "incomplete": 0,
+        "parseErrors": 0
+      },
+      "luna-medium": {
+        "runs": 13,
+        "calls": 20,
+        "inputItems": 104,
+        "finalRecords": 101,
+        "summedWallMs": 231607,
+        "medianWallMs": 17435,
+        "maxWallMs": 45506,
+        "observedUsd": 0.028433069999999998,
+        "uncachedUsd": 0.029623299999999995,
+        "inputTokens": 68288,
+        "outputTokens": 45589,
+        "reasoningTokens": 6988,
+        "requestErrors": 0,
+        "incomplete": 0,
+        "parseErrors": 0
+      }
+    }
+  },
+  "releaseReferences": [
+    "docs/luna-text-only-oct9-evaluation-and-release.md",
+    "docs/luna-stage2-oct9-release-readiness.md"
+  ],
+  "statusBasis": "Recorded October 9 releases; no fresh production readback or configuration changes for this reference"
+}
