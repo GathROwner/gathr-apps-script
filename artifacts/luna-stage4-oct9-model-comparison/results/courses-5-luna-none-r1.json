@@ -1,0 +1,727 @@
+{
+  "caseId": "courses-5",
+  "arm": "luna-none",
+  "repeat": 1,
+  "model": "gpt-6-luna",
+  "effort": "none",
+  "noLiveWrites": true,
+  "sourceSha256": "be8e4fd70eeeb7835e8cd54ee3382e6d2393bf9c1a8906f8014a94ffc6843b47",
+  "inputCount": 5,
+  "outputCount": 5,
+  "wallMs": 15224,
+  "items": [
+    {
+      "name": "NCCP Managing Conflict",
+      "description": "Must attend both Classes – Oct 13 & 14, 2026. 6:00 pm – 9:00 pm each night. Virtual.",
+      "date": "2026-10-13",
+      "startTime": "18:00",
+      "endTime": "21:00",
+      "venue": "Virtual",
+      "ticketLink": "https://thelocker.coach.ca/event/registration/15590",
+      "price": "",
+      "relevantImageIndex": 0,
+      "recurringPattern": "none",
+      "extractionReason": "A named coaching course with an explicitly listed date and time; the two class dates are emitted as separate events.",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "6:00 pm – 9:00 pm each night"
+        },
+        "end": {
+          "source": "explicit",
+          "toClose": false,
+          "evidence": "6:00 pm – 9:00 pm each night"
+        }
+      },
+      "spatial": {
+        "kind": "online",
+        "locations": [
+          {
+            "label": "Virtual",
+            "address": "",
+            "role": "location",
+            "certainty": "confirmed",
+            "sourceText": "Virtual"
+          }
+        ],
+        "confirmedStreets": [],
+        "ordered": false,
+        "evidenceNotes": "The course is explicitly marked Virtual."
+      },
+      "_pipelineIndex": 1,
+      "_pipelineTotalStage3": 5
+    },
+    {
+      "name": "NCCP Managing Conflict",
+      "description": "Must attend both Classes – Oct 13 & 14, 2026. 6:00 pm – 9:00 pm each night. Virtual.",
+      "date": "2026-10-14",
+      "startTime": "18:00",
+      "endTime": "21:00",
+      "venue": "Virtual",
+      "ticketLink": "https://thelocker.coach.ca/event/registration/15590",
+      "price": "",
+      "relevantImageIndex": 0,
+      "recurringPattern": "none",
+      "extractionReason": "A named coaching course with an explicitly listed date and time; the two class dates are emitted as separate events.",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "6:00 pm – 9:00 pm each night"
+        },
+        "end": {
+          "source": "explicit",
+          "toClose": false,
+          "evidence": "6:00 pm – 9:00 pm each night"
+        }
+      },
+      "spatial": {
+        "kind": "online",
+        "locations": [
+          {
+            "label": "Virtual",
+            "address": "",
+            "role": "location",
+            "certainty": "confirmed",
+            "sourceText": "Virtual"
+          }
+        ],
+        "confirmedStreets": [],
+        "ordered": false,
+        "evidenceNotes": "The course is explicitly marked Virtual."
+      },
+      "_pipelineIndex": 2,
+      "_pipelineTotalStage3": 5
+    },
+    {
+      "name": "NCCP Basic Mental Skills",
+      "description": "October 27, 2026. 6:00 pm – 10:00 pm. Virtual.",
+      "date": "2026-10-27",
+      "startTime": "18:00",
+      "endTime": "22:00",
+      "venue": "Virtual",
+      "ticketLink": "https://thelocker.coach.ca/event/registration/16071",
+      "price": "",
+      "relevantImageIndex": 0,
+      "recurringPattern": "none",
+      "extractionReason": "A named coaching course with an explicitly listed date and time.",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "6:00 pm - 10:00 pm"
+        },
+        "end": {
+          "source": "explicit",
+          "toClose": false,
+          "evidence": "6:00 pm - 10:00 pm"
+        }
+      },
+      "spatial": {
+        "kind": "online",
+        "locations": [
+          {
+            "label": "Virtual",
+            "address": "",
+            "role": "location",
+            "certainty": "confirmed",
+            "sourceText": "Virtual"
+          }
+        ],
+        "confirmedStreets": [],
+        "ordered": false,
+        "evidenceNotes": "The course is explicitly marked Virtual."
+      },
+      "_pipelineIndex": 3,
+      "_pipelineTotalStage3": 5
+    },
+    {
+      "name": "NCCP Planning a Practice",
+      "description": "Must attend both Classes - Oct 28 & Nov 4, 2026. 6:30 pm – 9:00 pm each night. Virtual.",
+      "date": "2026-10-28",
+      "startTime": "18:30",
+      "endTime": "21:00",
+      "venue": "Virtual",
+      "ticketLink": "https://thelocker.coach.ca/event/registration/15921",
+      "price": "",
+      "relevantImageIndex": 0,
+      "recurringPattern": "none",
+      "extractionReason": "A named coaching course with two explicitly listed class dates; this date is emitted as its own event.",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "6:30 pm - 9:00 pm each night"
+        },
+        "end": {
+          "source": "explicit",
+          "toClose": false,
+          "evidence": "6:30 pm - 9:00 pm each night"
+        }
+      },
+      "spatial": {
+        "kind": "online",
+        "locations": [
+          {
+            "label": "Virtual",
+            "address": "",
+            "role": "location",
+            "certainty": "confirmed",
+            "sourceText": "Virtual"
+          }
+        ],
+        "confirmedStreets": [],
+        "ordered": false,
+        "evidenceNotes": "The course is explicitly marked Virtual."
+      },
+      "_pipelineIndex": 4,
+      "_pipelineTotalStage3": 5
+    },
+    {
+      "name": "NCCP Planning a Practice",
+      "description": "Must attend both Classes - Oct 28 & Nov 4, 2026. 6:30 pm – 9:00 pm each night. Virtual.",
+      "date": "2026-11-04",
+      "startTime": "18:30",
+      "endTime": "21:00",
+      "venue": "Virtual",
+      "ticketLink": "https://thelocker.coach.ca/event/registration/15921",
+      "price": "",
+      "relevantImageIndex": 0,
+      "recurringPattern": "none",
+      "extractionReason": "A named coaching course with two explicitly listed class dates; this date is emitted as its own event.",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "6:30 pm - 9:00 pm each night"
+        },
+        "end": {
+          "source": "explicit",
+          "toClose": false,
+          "evidence": "6:30 pm - 9:00 pm each night"
+        }
+      },
+      "spatial": {
+        "kind": "online",
+        "locations": [
+          {
+            "label": "Virtual",
+            "address": "",
+            "role": "location",
+            "certainty": "confirmed",
+            "sourceText": "Virtual"
+          }
+        ],
+        "confirmedStreets": [],
+        "ordered": false,
+        "evidenceNotes": "The course is explicitly marked Virtual."
+      },
+      "_pipelineIndex": 5,
+      "_pipelineTotalStage3": 5
+    }
+  ],
+  "metadata": {
+    "_happyHourNoPriceOverrideCount": 0,
+    "_calendarDealAllDayOverrideCount": 0,
+    "_calendarDealAllDayNormalizationCount": 0,
+    "_operatingHoursOnlyRejectCount": 0
+  },
+  "usage": [
+    {
+      "stage": "stage4",
+      "component": "secondaryValidator",
+      "endpoint": "responses",
+      "model": "gpt-6-luna",
+      "durationMs": 15201,
+      "inputTokens": 3691,
+      "outputTokens": 2111,
+      "totalTokens": 5802,
+      "cachedInputTokens": 0,
+      "fileId": "stage4-frozen-comparison",
+      "postId": "1551113687056886",
+      "rowIndex": 0,
+      "runId": "local-1",
+      "batchItemCount": 5,
+      "responseId": "resp_00948ce9c2394255006ac96f0432a487d2a9638993562d6972",
+      "responseStatus": "completed",
+      "incompleteReason": "",
+      "requestedMaxOutputTokens": 32000,
+      "reasoningTokens": 0,
+      "visibleOutputChars": 8454
+    }
+  ],
+  "requests": [
+    {
+      "model": "gpt-6-luna",
+      "effort": "none",
+      "responseId": "resp_00948ce9c2394255006ac96f0432a487d2a9638993562d6972",
+      "httpStatus": 200,
+      "status": "completed",
+      "incompleteDetails": null,
+      "error": null,
+      "promptSha256": "e535aac4605b46fbe249397c3029c0421232c923dc4183d84a2725fdd6a15486",
+      "outputContractSha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "batchItems": [
+        {
+          "name": "NCCP Managing Conflict",
+          "description": "Must attend both Classes – Oct 13 & 14, 2026. 6:00 pm – 9:00 pm each night. Virtual.",
+          "date": "2026-10-13",
+          "startTime": "18:00",
+          "endTime": "21:00",
+          "venue": "Virtual",
+          "ticketLink": "https://thelocker.coach.ca/event/registration/15590",
+          "price": "",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "A named coaching course with an explicitly listed date and time; the two class dates are emitted as separate events.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "6:00 pm – 9:00 pm each night"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "6:00 pm – 9:00 pm each night"
+            }
+          },
+          "spatial": {
+            "kind": "online",
+            "locations": [
+              {
+                "label": "Virtual",
+                "address": "",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "Virtual"
+              }
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The course is explicitly marked Virtual."
+          },
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 5
+        },
+        {
+          "name": "NCCP Managing Conflict",
+          "description": "Must attend both Classes – Oct 13 & 14, 2026. 6:00 pm – 9:00 pm each night. Virtual.",
+          "date": "2026-10-14",
+          "startTime": "18:00",
+          "endTime": "21:00",
+          "venue": "Virtual",
+          "ticketLink": "https://thelocker.coach.ca/event/registration/15590",
+          "price": "",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "A named coaching course with an explicitly listed date and time; the two class dates are emitted as separate events.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "6:00 pm – 9:00 pm each night"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "6:00 pm – 9:00 pm each night"
+            }
+          },
+          "spatial": {
+            "kind": "online",
+            "locations": [
+              {
+                "label": "Virtual",
+                "address": "",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "Virtual"
+              }
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The course is explicitly marked Virtual."
+          },
+          "_pipelineIndex": 2,
+          "_pipelineTotalStage3": 5
+        },
+        {
+          "name": "NCCP Basic Mental Skills",
+          "description": "October 27, 2026. 6:00 pm – 10:00 pm. Virtual.",
+          "date": "2026-10-27",
+          "startTime": "18:00",
+          "endTime": "22:00",
+          "venue": "Virtual",
+          "ticketLink": "https://thelocker.coach.ca/event/registration/16071",
+          "price": "",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "A named coaching course with an explicitly listed date and time.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "6:00 pm - 10:00 pm"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "6:00 pm - 10:00 pm"
+            }
+          },
+          "spatial": {
+            "kind": "online",
+            "locations": [
+              {
+                "label": "Virtual",
+                "address": "",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "Virtual"
+              }
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The course is explicitly marked Virtual."
+          },
+          "_pipelineIndex": 3,
+          "_pipelineTotalStage3": 5
+        },
+        {
+          "name": "NCCP Planning a Practice",
+          "description": "Must attend both Classes - Oct 28 & Nov 4, 2026. 6:30 pm – 9:00 pm each night. Virtual.",
+          "date": "2026-10-28",
+          "startTime": "18:30",
+          "endTime": "21:00",
+          "venue": "Virtual",
+          "ticketLink": "https://thelocker.coach.ca/event/registration/15921",
+          "price": "",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "A named coaching course with two explicitly listed class dates; this date is emitted as its own event.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "6:30 pm - 9:00 pm each night"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "6:30 pm - 9:00 pm each night"
+            }
+          },
+          "spatial": {
+            "kind": "online",
+            "locations": [
+              {
+                "label": "Virtual",
+                "address": "",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "Virtual"
+              }
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The course is explicitly marked Virtual."
+          },
+          "_pipelineIndex": 4,
+          "_pipelineTotalStage3": 5
+        },
+        {
+          "name": "NCCP Planning a Practice",
+          "description": "Must attend both Classes - Oct 28 & Nov 4, 2026. 6:30 pm – 9:00 pm each night. Virtual.",
+          "date": "2026-11-04",
+          "startTime": "18:30",
+          "endTime": "21:00",
+          "venue": "Virtual",
+          "ticketLink": "https://thelocker.coach.ca/event/registration/15921",
+          "price": "",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "A named coaching course with two explicitly listed class dates; this date is emitted as its own event.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "6:30 pm - 9:00 pm each night"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "6:30 pm - 9:00 pm each night"
+            }
+          },
+          "spatial": {
+            "kind": "online",
+            "locations": [
+              {
+                "label": "Virtual",
+                "address": "",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "Virtual"
+              }
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The course is explicitly marked Virtual."
+          },
+          "_pipelineIndex": 5,
+          "_pipelineTotalStage3": 5
+        }
+      ],
+      "maxOutputTokens": 32000,
+      "durationMs": 15197,
+      "usage": {
+        "input_tokens": 3691,
+        "input_tokens_details": {
+          "cache_write_tokens": 3688,
+          "cached_tokens": 0
+        },
+        "output_tokens": 2111,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 5802
+      },
+      "visibleOutputChars": 8454,
+      "rawText": "{\n  \"validatedItems\": [\n    {\n      \"item\": {\n        \"name\": \"NCCP Managing Conflict\",\n        \"description\": \"Must attend both Classes – Oct 13 & 14, 2026. 6:00 pm – 9:00 pm each night. Virtual.\",\n        \"date\": \"2026-10-13\",\n        \"startTime\": \"18:00\",\n        \"endTime\": \"21:00\",\n        \"venue\": \"Virtual\",\n        \"ticketLink\": \"https://thelocker.coach.ca/event/registration/15590\",\n        \"price\": \"\",\n        \"relevantImageIndex\": 0,\n        \"recurringPattern\": \"none\",\n        \"extractionReason\": \"A named coaching course with an explicitly listed date and time; the two class dates are emitted as separate events.\",\n        \"timeFlags\": {\n          \"start\": {\n            \"source\": \"explicit\",\n            \"evidence\": \"6:00 pm – 9:00 pm each night\"\n          },\n          \"end\": {\n            \"source\": \"explicit\",\n            \"toClose\": false,\n            \"evidence\": \"6:00 pm – 9:00 pm each night\"\n          }\n        },\n        \"spatial\": {\n          \"kind\": \"online\",\n          \"locations\": [\n            {\n              \"label\": \"Virtual\",\n              \"address\": \"\",\n              \"role\": \"location\",\n              \"certainty\": \"confirmed\",\n              \"sourceText\": \"Virtual\"\n            }\n          ],\n          \"confirmedStreets\": [],\n          \"ordered\": false,\n          \"evidenceNotes\": \"The course is explicitly marked Virtual.\"\n        },\n        \"_pipelineIndex\": 1,\n        \"_pipelineTotalStage3\": 5\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"This is a named course session with a specific date and start time. The two class dates are separate valid sessions, and the online venue and end time are explicitly provided.\",\n      \"corrections\": {}\n    },\n    {\n      \"item\": {\n        \"name\": \"NCCP Managing Conflict\",\n        \"description\": \"Must attend both Classes – Oct 13 & 14, 2026. 6:00 pm – 9:00 pm each night. Virtual.\",\n        \"date\": \"2026-10-14\",\n        \"startTime\": \"18:00\",\n        \"endTime\": \"21:00\",\n        \"venue\": \"Virtual\",\n        \"ticketLink\": \"https://thelocker.coach.ca/event/registration/15590\",\n        \"price\": \"\",\n        \"relevantImageIndex\": 0,\n        \"recurringPattern\": \"none\",\n        \"extractionReason\": \"A named coaching course with an explicitly listed date and time; the two class dates are emitted as separate events.\",\n        \"timeFlags\": {\n          \"start\": {\n            \"source\": \"explicit\",\n            \"evidence\": \"6:00 pm – 9:00 pm each night\"\n          },\n          \"end\": {\n            \"source\": \"explicit\",\n            \"toClose\": false,\n            \"evidence\": \"6:00 pm – 9:00 pm each night\"\n          }\n        },\n        \"spatial\": {\n          \"kind\": \"online\",\n          \"locations\": [\n            {\n              \"label\": \"Virtual\",\n              \"address\": \"\",\n              \"role\": \"location\",\n              \"certainty\": \"confirmed\",\n              \"sourceText\": \"Virtual\"\n            }\n          ],\n          \"confirmedStreets\": [],\n          \"ordered\": false,\n          \"evidenceNotes\": \"The course is explicitly marked Virtual.\"\n        },\n        \"_pipelineIndex\": 2,\n        \"_pipelineTotalStage3\": 5\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"This is the second specifically dated session of the course, with an explicit start time. It is on a different date from the other session, so it is not a duplicate.\",\n      \"corrections\": {}\n    },\n    {\n      \"item\": {\n        \"name\": \"NCCP Basic Mental Skills\",\n        \"description\": \"October 27, 2026. 6:00 pm – 10:00 pm. Virtual.\",\n        \"date\": \"2026-10-27\",\n        \"startTime\": \"18:00\",\n        \"endTime\": \"22:00\",\n        \"venue\": \"Virtual\",\n        \"ticketLink\": \"https://thelocker.coach.ca/event/registration/16071\",\n        \"price\": \"\",\n        \"relevantImageIndex\": 0,\n        \"recurringPattern\": \"none\",\n        \"extractionReason\": \"A named coaching course with an explicitly listed date and time.\",\n        \"timeFlags\": {\n          \"start\": {\n            \"source\": \"explicit\",\n            \"evidence\": \"6:00 pm - 10:00 pm\"\n          },\n          \"end\": {\n            \"source\": \"explicit\",\n            \"toClose\": false,\n            \"evidence\": \"6:00 pm - 10:00 pm\"\n          }\n        },\n        \"spatial\": {\n          \"kind\": \"online\",\n          \"locations\": [\n            {\n              \"label\": \"Virtual\",\n              \"address\": \"\",\n              \"role\": \"location\",\n              \"certainty\": \"confirmed\",\n              \"sourceText\": \"Virtual\"\n            }\n          ],\n          \"confirmedStreets\": [],\n          \"ordered\": false,\n          \"evidenceNotes\": \"The course is explicitly marked Virtual.\"\n        },\n        \"_pipelineIndex\": 3,\n        \"_pipelineTotalStage3\": 5\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"This is a named course with a specific date and explicit start time. Its virtual venue and end time are also stated.\",\n      \"corrections\": {}\n    },\n    {\n      \"item\": {\n        \"name\": \"NCCP Planning a Practice\",\n        \"description\": \"Must attend both Classes - Oct 28 & Nov 4, 2026. 6:30 pm – 9:00 pm each night. Virtual.\",\n        \"date\": \"2026-10-28\",\n        \"startTime\": \"18:30\",\n        \"endTime\": \"21:00\",\n        \"venue\": \"Virtual\",\n        \"ticketLink\": \"https://thelocker.coach.ca/event/registration/15921\",\n        \"price\": \"\",\n        \"relevantImageIndex\": 0,\n        \"recurringPattern\": \"none\",\n        \"extractionReason\": \"A named coaching course with two explicitly listed class dates; this date is emitted as its own event.\",\n        \"timeFlags\": {\n          \"start\": {\n            \"source\": \"explicit\",\n            \"evidence\": \"6:30 pm - 9:00 pm each night\"\n          },\n          \"end\": {\n            \"source\": \"explicit\",\n            \"toClose\": false,\n            \"evidence\": \"6:30 pm - 9:00 pm each night\"\n          }\n        },\n        \"spatial\": {\n          \"kind\": \"online\",\n          \"locations\": [\n            {\n              \"label\": \"Virtual\",\n              \"address\": \"\",\n              \"role\": \"location\",\n              \"certainty\": \"confirmed\",\n              \"sourceText\": \"Virtual\"\n            }\n          ],\n          \"confirmedStreets\": [],\n          \"ordered\": false,\n          \"evidenceNotes\": \"The course is explicitly marked Virtual.\"\n        },\n        \"_pipelineIndex\": 4,\n        \"_pipelineTotalStage3\": 5\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"This is a specifically dated session of a named course with an explicit start time. The course's two dates are distinct sessions.\",\n      \"corrections\": {}\n    },\n    {\n      \"item\": {\n        \"name\": \"NCCP Planning a Practice\",\n        \"description\": \"Must attend both Classes - Oct 28 & Nov 4, 2026. 6:30 pm – 9:00 pm each night. Virtual.\",\n        \"date\": \"2026-11-04\",\n        \"startTime\": \"18:30\",\n        \"endTime\": \"21:00\",\n        \"venue\": \"Virtual\",\n        \"ticketLink\": \"https://thelocker.coach.ca/event/registration/15921\",\n        \"price\": \"\",\n        \"relevantImageIndex\": 0,\n        \"recurringPattern\": \"none\",\n        \"extractionReason\": \"A named coaching course with two explicitly listed class dates; this date is emitted as its own event.\",\n        \"timeFlags\": {\n          \"start\": {\n            \"source\": \"explicit\",\n            \"evidence\": \"6:30 pm - 9:00 pm each night\"\n          },\n          \"end\": {\n            \"source\": \"explicit\",\n            \"toClose\": false,\n            \"evidence\": \"6:30 pm - 9:00 pm each night\"\n          }\n        },\n        \"spatial\": {\n          \"kind\": \"online\",\n          \"locations\": [\n            {\n              \"label\": \"Virtual\",\n              \"address\": \"\",\n              \"role\": \"location\",\n              \"certainty\": \"confirmed\",\n              \"sourceText\": \"Virtual\"\n            }\n          ],\n          \"confirmedStreets\": [],\n          \"ordered\": false,\n          \"evidenceNotes\": \"The course is explicitly marked Virtual.\"\n        },\n        \"_pipelineIndex\": 5,\n        \"_pipelineTotalStage3\": 5\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"This is the second specifically dated session of the course, with an explicit start time. It occurs on a different date from the other session and is not a duplicate.\",\n      \"corrections\": {}\n    }\n  ],\n  \"validationSummary\": {\n    \"totalItems\": 5,\n    \"itemsKept\": 5,\n    \"itemsRejected\": 0,\n    \"recurringCorrections\": 0,\n    \"overallNotes\": \"All five items are explicitly dated coaching course sessions with valid start times. Multi-date courses are represented as separate sessions, so the distinct dates are retained.\"\n  }\n}",
+      "rawResult": {
+        "validatedItems": [
+          {
+            "item": {
+              "name": "NCCP Managing Conflict",
+              "description": "Must attend both Classes – Oct 13 & 14, 2026. 6:00 pm – 9:00 pm each night. Virtual.",
+              "date": "2026-10-13",
+              "startTime": "18:00",
+              "endTime": "21:00",
+              "venue": "Virtual",
+              "ticketLink": "https://thelocker.coach.ca/event/registration/15590",
+              "price": "",
+              "relevantImageIndex": 0,
+              "recurringPattern": "none",
+              "extractionReason": "A named coaching course with an explicitly listed date and time; the two class dates are emitted as separate events.",
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "6:00 pm – 9:00 pm each night"
+                },
+                "end": {
+                  "source": "explicit",
+                  "toClose": false,
+                  "evidence": "6:00 pm – 9:00 pm each night"
+                }
+              },
+              "spatial": {
+                "kind": "online",
+                "locations": [
+                  {
+                    "label": "Virtual",
+                    "address": "",
+                    "role": "location",
+                    "certainty": "confirmed",
+                    "sourceText": "Virtual"
+                  }
+                ],
+                "confirmedStreets": [],
+                "ordered": false,
+                "evidenceNotes": "The course is explicitly marked Virtual."
+              },
+              "_pipelineIndex": 1,
+              "_pipelineTotalStage3": 5
+            },
+            "decision": "KEPT",
+            "reason": "This is a named course session with a specific date and start time. The two class dates are separate valid sessions, and the online venue and end time are explicitly provided.",
+            "corrections": {}
+          },
+          {
+            "item": {
+              "name": "NCCP Managing Conflict",
+              "description": "Must attend both Classes – Oct 13 & 14, 2026. 6:00 pm – 9:00 pm each night. Virtual.",
+              "date": "2026-10-14",
+              "startTime": "18:00",
+              "endTime": "21:00",
+              "venue": "Virtual",
+              "ticketLink": "https://thelocker.coach.ca/event/registration/15590",
+              "price": "",
+              "relevantImageIndex": 0,
+              "recurringPattern": "none",
+              "extractionReason": "A named coaching course with an explicitly listed date and time; the two class dates are emitted as separate events.",
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "6:00 pm – 9:00 pm each night"
+                },
+                "end": {
+                  "source": "explicit",
+                  "toClose": false,
+                  "evidence": "6:00 pm – 9:00 pm each night"
+                }
+              },
+              "spatial": {
+                "kind": "online",
+                "locations": [
+                  {
+                    "label": "Virtual",
+                    "address": "",
+                    "role": "location",
+                    "certainty": "confirmed",
+                    "sourceText": "Virtual"
+                  }
+                ],
+                "confirmedStreets": [],
+                "ordered": false,
+                "evidenceNotes": "The course is explicitly marked Virtual."
+              },
+              "_pipelineIndex": 2,
+              "_pipelineTotalStage3": 5
+            },
+            "decision": "KEPT",
+            "reason": "This is the second specifically dated session of the course, with an explicit start time. It is on a different date from the other session, so it is not a duplicate.",
+            "corrections": {}
+          },
+          {
+            "item": {
+              "name": "NCCP Basic Mental Skills",
+              "description": "October 27, 2026. 6:00 pm – 10:00 pm. Virtual.",
+              "date": "2026-10-27",
+              "startTime": "18:00",
+              "endTime": "22:00",
+              "venue": "Virtual",
+              "ticketLink": "https://thelocker.coach.ca/event/registration/16071",
+              "price": "",
+              "relevantImageIndex": 0,
+              "recurringPattern": "none",
+              "extractionReason": "A named coaching course with an explicitly listed date and time.",
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "6:00 pm - 10:00 pm"
+                },
+                "end": {
+                  "source": "explicit",
+                  "toClose": false,
+                  "evidence": "6:00 pm - 10:00 pm"
+                }
+              },
+              "spatial": {
+                "kind": "online",
+                "locations": [
+                  {
+                    "label": "Virtual",
+                    "address": "",
+                    "role": "location",
+                    "certainty": "confirmed",
+                    "sourceText": "Virtual"
+                  }
+                ],
+                "confirmedStreets": [],
+                "ordered": false,
+                "evidenceNotes": "The course is explicitly marked Virtual."
+              },
+              "_pipelineIndex": 3,
+              "_pipelineTotalStage3": 5
+            },
+            "decision": "KEPT",
+            "reason": "This is a named course with a specific date and explicit start time. Its virtual venue and end time are also stated.",
+            "corrections": {}
+          },
+          {
+            "item": {
+              "name": "NCCP Planning a Practice",
+              "description": "Must attend both Classes - Oct 28 & Nov 4, 2026. 6:30 pm – 9:00 pm each night. Virtual.",
+              "date": "2026-10-28",
+              "startTime": "18:30",
+              "endTime": "21:00",
+              "venue": "Virtual",
+              "ticketLink": "https://thelocker.coach.ca/event/registration/15921",
+              "price": "",
+              "relevantImageIndex": 0,
+              "recurringPattern": "none",
+              "extractionReason": "A named coaching course with two explicitly listed class dates; this date is emitted as its own event.",
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "6:30 pm - 9:00 pm each night"
+                },
+                "end": {
+                  "source": "explicit",
+                  "toClose": false,
+                  "evidence": "6:30 pm - 9:00 pm each night"
+                }
+              },
+              "spatial": {
+                "kind": "online",
+                "locations": [
+                  {
+                    "label": "Virtual",
+                    "address": "",
+                    "role": "location",
+                    "certainty": "confirmed",
+                    "sourceText": "Virtual"
+                  }
+                ],
+                "confirmedStreets": [],
+                "ordered": false,
+                "evidenceNotes": "The course is explicitly marked Virtual."
+              },
+              "_pipelineIndex": 4,
+              "_pipelineTotalStage3": 5
+            },
+            "decision": "KEPT",
+            "reason": "This is a specifically dated session of a named course with an explicit start time. The course's two dates are distinct sessions.",
+            "corrections": {}
+          },
+          {
+            "item": {
+              "name": "NCCP Planning a Practice",
+              "description": "Must attend both Classes - Oct 28 & Nov 4, 2026. 6:30 pm – 9:00 pm each night. Virtual.",
+              "date": "2026-11-04",
+              "startTime": "18:30",
+              "endTime": "21:00",
+              "venue": "Virtual",
+              "ticketLink": "https://thelocker.coach.ca/event/registration/15921",
+              "price": "",
+              "relevantImageIndex": 0,
+              "recurringPattern": "none",
+              "extractionReason": "A named coaching course with two explicitly listed class dates; this date is emitted as its own event.",
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "6:30 pm - 9:00 pm each night"
+                },
+                "end": {
+                  "source": "explicit",
+                  "toClose": false,
+                  "evidence": "6:30 pm - 9:00 pm each night"
+                }
+              },
+              "spatial": {
+                "kind": "online",
+                "locations": [
+                  {
+                    "label": "Virtual",
+                    "address": "",
+                    "role": "location",
+                    "certainty": "confirmed",
+                    "sourceText": "Virtual"
+                  }
+                ],
+                "confirmedStreets": [],
+                "ordered": false,
+                "evidenceNotes": "The course is explicitly marked Virtual."
+              },
+              "_pipelineIndex": 5,
+              "_pipelineTotalStage3": 5
+            },
+            "decision": "KEPT",
+            "reason": "This is the second specifically dated session of the course, with an explicit start time. It occurs on a different date from the other session and is not a duplicate.",
+            "corrections": {}
+          }
+        ],
+        "validationSummary": {
+          "totalItems": 5,
+          "itemsKept": 5,
+          "itemsRejected": 0,
+          "recurringCorrections": 0,
+          "overallNotes": "All five items are explicitly dated coaching course sessions with valid start times. Multi-date courses are represented as separate sessions, so the distinct dates are retained."
+        }
+      },
+      "parseError": false
+    }
+  ]
+}

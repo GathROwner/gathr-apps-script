@@ -1,0 +1,1357 @@
+{
+  "caseId": "theatre-10",
+  "arm": "luna-medium",
+  "repeat": 1,
+  "model": "gpt-6-luna",
+  "effort": "medium",
+  "noLiveWrites": true,
+  "sourceSha256": "0cf8ff34a51076572d78f62e06cd8ec3b7a661540e13edfe79f74c92c9714158",
+  "inputCount": 10,
+  "outputCount": 10,
+  "wallMs": 26621,
+  "items": [
+    {
+      "name": "FROZEN IN TIME",
+      "description": "Sunday, Oct 11 • 11:00 AM. A cozy, sing-along family afternoon with your favorite princesses! Dress up and bring the kids for pure magic (plus VIP meet-and-greet options!).",
+      "date": "2026-10-11",
+      "startTime": "11:00",
+      "endTime": "",
+      "venue": "",
+      "ticketLink": "harbourfronttheatre.com",
+      "price": "",
+      "relevantImageIndex": 1,
+      "recurringPattern": "none",
+      "extractionReason": "A scheduled family entertainment show with an explicit date and time.",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "11:00 AM"
+        },
+        "end": {
+          "source": "none",
+          "toClose": false,
+          "evidence": ""
+        }
+      },
+      "spatial": {
+        "kind": "single_location",
+        "locations": [
+          {
+            "label": "Harbourfront Theatre",
+            "address": "",
+            "role": "location",
+            "certainty": "confirmed",
+            "sourceText": "October is packed at Harbourfront Theatre"
+          }
+        ],
+        "confirmedStreets": [],
+        "ordered": false,
+        "evidenceNotes": "The monthly program is introduced as being at Harbourfront Theatre."
+      },
+      "_pipelineIndex": 1,
+      "_pipelineTotalStage3": 10
+    },
+    {
+      "name": "FROZEN IN TIME",
+      "description": "Sunday, Oct 11 • 2:00 PM. A cozy, sing-along family afternoon with your favorite princesses! Dress up and bring the kids for pure magic (plus VIP meet-and-greet options!).",
+      "date": "2026-10-11",
+      "startTime": "14:00",
+      "endTime": "",
+      "venue": "",
+      "ticketLink": "harbourfronttheatre.com",
+      "price": "",
+      "relevantImageIndex": 1,
+      "recurringPattern": "none",
+      "extractionReason": "The show advertises two distinct performance times on the same date, so each session is listed separately.",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "2:00 PM"
+        },
+        "end": {
+          "source": "none",
+          "toClose": false,
+          "evidence": ""
+        }
+      },
+      "spatial": {
+        "kind": "single_location",
+        "locations": [
+          {
+            "label": "Harbourfront Theatre",
+            "address": "",
+            "role": "location",
+            "certainty": "confirmed",
+            "sourceText": "October is packed at Harbourfront Theatre"
+          }
+        ],
+        "confirmedStreets": [],
+        "ordered": false,
+        "evidenceNotes": "The monthly program is introduced as being at Harbourfront Theatre."
+      },
+      "_pipelineIndex": 2,
+      "_pipelineTotalStage3": 10
+    },
+    {
+      "name": "FLASHBACK",
+      "description": "Tuesday, October 13 • 7:00 pm. A community night at the theatre, direct from Las Vegas. The show features Frankie Valli & The Four Seasons, The Beach Boys, The Beatles, The Bee Gees, and Motown, and is from the creators of the hit shows OH WHAT A NIGHT! & FOUR BY FOUR.",
+      "date": "2026-10-13",
+      "startTime": "19:00",
+      "endTime": "",
+      "venue": "",
+      "ticketLink": "harbourfronttheatre.com",
+      "price": "",
+      "relevantImageIndex": 2,
+      "recurringPattern": "none",
+      "extractionReason": "A scheduled live entertainment show with a printed date and time; the poster also identifies its musical acts and inspirations.",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "7:00 pm"
+        },
+        "end": {
+          "source": "none",
+          "toClose": false,
+          "evidence": ""
+        }
+      },
+      "spatial": {
+        "kind": "single_location",
+        "locations": [
+          {
+            "label": "Harbourfront Theatre",
+            "address": "",
+            "role": "location",
+            "certainty": "confirmed",
+            "sourceText": "October is packed at Harbourfront Theatre"
+          }
+        ],
+        "confirmedStreets": [],
+        "ordered": false,
+        "evidenceNotes": "The text also describes this as a community night at the theatre."
+      },
+      "_pipelineIndex": 3,
+      "_pipelineTotalStage3": 10
+    },
+    {
+      "name": "Still Standin': A Night of Elton John & Billy Joel",
+      "description": "October 15 • 7:30 PM. Craig Fair and Ben Aitken perform back-to-back at two grand pianos, backed by a 16-piece orchestra.",
+      "date": "2026-10-15",
+      "startTime": "19:30",
+      "endTime": "",
+      "venue": "",
+      "ticketLink": "harbourfronttheatre.com",
+      "price": "",
+      "relevantImageIndex": 3,
+      "recurringPattern": "none",
+      "extractionReason": "A scheduled concert with an explicit date and time. The three advertised dates are listed as separate events.",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "7:30 PM"
+        },
+        "end": {
+          "source": "none",
+          "toClose": false,
+          "evidence": ""
+        }
+      },
+      "spatial": {
+        "kind": "single_location",
+        "locations": [
+          {
+            "label": "Harbourfront Theatre",
+            "address": "",
+            "role": "location",
+            "certainty": "confirmed",
+            "sourceText": "October is packed at Harbourfront Theatre"
+          }
+        ],
+        "confirmedStreets": [],
+        "ordered": false,
+        "evidenceNotes": "The monthly program is introduced as being at Harbourfront Theatre."
+      },
+      "_pipelineIndex": 4,
+      "_pipelineTotalStage3": 10
+    },
+    {
+      "name": "Still Standin': A Night of Elton John & Billy Joel",
+      "description": "October 16 • 7:30 PM. Craig Fair and Ben Aitken perform back-to-back at two grand pianos, backed by a 16-piece orchestra.",
+      "date": "2026-10-16",
+      "startTime": "19:30",
+      "endTime": "",
+      "venue": "",
+      "ticketLink": "harbourfronttheatre.com",
+      "price": "",
+      "relevantImageIndex": 3,
+      "recurringPattern": "none",
+      "extractionReason": "A scheduled concert with an explicit date and time. The three advertised dates are listed as separate events.",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "7:30 PM"
+        },
+        "end": {
+          "source": "none",
+          "toClose": false,
+          "evidence": ""
+        }
+      },
+      "spatial": {
+        "kind": "single_location",
+        "locations": [
+          {
+            "label": "Harbourfront Theatre",
+            "address": "",
+            "role": "location",
+            "certainty": "confirmed",
+            "sourceText": "October is packed at Harbourfront Theatre"
+          }
+        ],
+        "confirmedStreets": [],
+        "ordered": false,
+        "evidenceNotes": "The monthly program is introduced as being at Harbourfront Theatre."
+      },
+      "_pipelineIndex": 5,
+      "_pipelineTotalStage3": 10
+    },
+    {
+      "name": "Still Standin': A Night of Elton John & Billy Joel",
+      "description": "October 17 • 7:30 PM. Craig Fair and Ben Aitken perform back-to-back at two grand pianos, backed by a 16-piece orchestra.",
+      "date": "2026-10-17",
+      "startTime": "19:30",
+      "endTime": "",
+      "venue": "",
+      "ticketLink": "harbourfronttheatre.com",
+      "price": "",
+      "relevantImageIndex": 3,
+      "recurringPattern": "none",
+      "extractionReason": "A scheduled concert with an explicit date and time. The three advertised dates are listed as separate events.",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "7:30 PM"
+        },
+        "end": {
+          "source": "none",
+          "toClose": false,
+          "evidence": ""
+        }
+      },
+      "spatial": {
+        "kind": "single_location",
+        "locations": [
+          {
+            "label": "Harbourfront Theatre",
+            "address": "",
+            "role": "location",
+            "certainty": "confirmed",
+            "sourceText": "October is packed at Harbourfront Theatre"
+          }
+        ],
+        "confirmedStreets": [],
+        "ordered": false,
+        "evidenceNotes": "The monthly program is introduced as being at Harbourfront Theatre."
+      },
+      "_pipelineIndex": 6,
+      "_pipelineTotalStage3": 10
+    },
+    {
+      "name": "RELIVE THE MUSIC.CA 50s 60s 70s SHOW",
+      "description": "Monday, October 19. A high-energy journey through three iconic decades of rock, pop, and soul classics. The accompanying text lists the show time as 7:30 PM, while the event poster shows 7:00 pm.",
+      "date": "2026-10-19",
+      "startTime": "19:00",
+      "endTime": "",
+      "venue": "",
+      "ticketLink": "harbourfronttheatre.com",
+      "price": "",
+      "relevantImageIndex": 4,
+      "recurringPattern": "none",
+      "extractionReason": "A dated music show. The poster gives an explicit 7:00 pm start, which conflicts with the accompanying text's 7:30 PM listing.",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "7:00 pm"
+        },
+        "end": {
+          "source": "none",
+          "toClose": false,
+          "evidence": ""
+        }
+      },
+      "spatial": {
+        "kind": "single_location",
+        "locations": [
+          {
+            "label": "Harbourfront Theatre",
+            "address": "",
+            "role": "location",
+            "certainty": "confirmed",
+            "sourceText": "October is packed at Harbourfront Theatre"
+          }
+        ],
+        "confirmedStreets": [],
+        "ordered": false,
+        "evidenceNotes": "The monthly program is introduced as being at Harbourfront Theatre."
+      },
+      "_pipelineIndex": 7,
+      "_pipelineTotalStage3": 10
+    },
+    {
+      "name": "Jason Cyrus Live - Beyond Limits",
+      "description": "Friday, Oct 23 • 7:30 PM. Canada’s premiere hypnotist takes the stage for an interactive night of intrigue, with comedy and audience participation.",
+      "date": "2026-10-23",
+      "startTime": "19:30",
+      "endTime": "",
+      "venue": "",
+      "ticketLink": "harbourfronttheatre.com",
+      "price": "",
+      "relevantImageIndex": 0,
+      "recurringPattern": "none",
+      "extractionReason": "A dated, timed interactive hypnotism and comedy show. No attached image specifically identifies this event.",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "7:30 PM"
+        },
+        "end": {
+          "source": "none",
+          "toClose": false,
+          "evidence": ""
+        }
+      },
+      "spatial": {
+        "kind": "single_location",
+        "locations": [
+          {
+            "label": "Harbourfront Theatre",
+            "address": "",
+            "role": "location",
+            "certainty": "confirmed",
+            "sourceText": "October is packed at Harbourfront Theatre"
+          }
+        ],
+        "confirmedStreets": [],
+        "ordered": false,
+        "evidenceNotes": "The monthly program is introduced as being at Harbourfront Theatre."
+      },
+      "_pipelineIndex": 8,
+      "_pipelineTotalStage3": 10
+    },
+    {
+      "name": "Harbour Highlight: Mysteries of the Keyhole House",
+      "description": "Friday, Oct 30 • 7:30 PM. Master illusionists Ted and Marion Outerbridge bring their spine-tingling ghost story and jaw-dropping magic to Summerside, straight from Hollywood's Magic Castle.",
+      "date": "2026-10-30",
+      "startTime": "19:30",
+      "endTime": "",
+      "venue": "",
+      "ticketLink": "harbourfronttheatre.com",
+      "price": "",
+      "relevantImageIndex": 0,
+      "recurringPattern": "none",
+      "extractionReason": "A scheduled magic and ghost-story performance with an explicit date and time. No attached image specifically identifies this event.",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "7:30 PM"
+        },
+        "end": {
+          "source": "none",
+          "toClose": false,
+          "evidence": ""
+        }
+      },
+      "spatial": {
+        "kind": "single_location",
+        "locations": [
+          {
+            "label": "Harbourfront Theatre",
+            "address": "",
+            "role": "location",
+            "certainty": "confirmed",
+            "sourceText": "October is packed at Harbourfront Theatre"
+          }
+        ],
+        "confirmedStreets": [],
+        "ordered": false,
+        "evidenceNotes": "The monthly program is introduced as being at Harbourfront Theatre."
+      },
+      "_pipelineIndex": 9,
+      "_pipelineTotalStage3": 10
+    },
+    {
+      "name": "Historical Talk with Ted and Marion Outerbridge",
+      "description": "Thursday, Oct 29 at 6:00 PM. A free historical talk at the Eptek Art & Culture Centre about the real 19th-century artifacts that inspired their show.",
+      "date": "2026-10-29",
+      "startTime": "18:00",
+      "endTime": "",
+      "venue": "Eptek Art & Culture Centre",
+      "ticketLink": "",
+      "price": "Free",
+      "relevantImageIndex": 0,
+      "recurringPattern": "none",
+      "extractionReason": "A separately advertised, free historical talk with its own date, time, and venue.",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "6:00 PM"
+        },
+        "end": {
+          "source": "none",
+          "toClose": false,
+          "evidence": ""
+        }
+      },
+      "spatial": {
+        "kind": "single_location",
+        "locations": [
+          {
+            "label": "Eptek Art & Culture Centre",
+            "address": "",
+            "role": "location",
+            "certainty": "confirmed",
+            "sourceText": "at the Eptek Art & Culture Centre"
+          }
+        ],
+        "confirmedStreets": [],
+        "ordered": false,
+        "evidenceNotes": "The talk is explicitly advertised at the Eptek Art & Culture Centre."
+      },
+      "_pipelineIndex": 10,
+      "_pipelineTotalStage3": 10
+    }
+  ],
+  "metadata": {
+    "_happyHourNoPriceOverrideCount": 0,
+    "_calendarDealAllDayOverrideCount": 0,
+    "_calendarDealAllDayNormalizationCount": 0,
+    "_operatingHoursOnlyRejectCount": 0
+  },
+  "usage": [
+    {
+      "stage": "stage4",
+      "component": "secondaryValidator",
+      "endpoint": "responses",
+      "model": "gpt-6-luna",
+      "durationMs": 26600,
+      "inputTokens": 5418,
+      "outputTokens": 4140,
+      "totalTokens": 9558,
+      "cachedInputTokens": 0,
+      "fileId": "stage4-frozen-comparison",
+      "postId": "1724940962970200",
+      "rowIndex": 62,
+      "runId": "local-1",
+      "batchItemCount": 10,
+      "responseId": "resp_0bcb77db090daf51006ac96f52869887d28f36734f6e18f07c",
+      "responseStatus": "completed",
+      "incompleteReason": "",
+      "requestedMaxOutputTokens": 32000,
+      "reasoningTokens": 135,
+      "visibleOutputChars": 17110
+    }
+  ],
+  "requests": [
+    {
+      "model": "gpt-6-luna",
+      "effort": "medium",
+      "responseId": "resp_0bcb77db090daf51006ac96f52869887d28f36734f6e18f07c",
+      "httpStatus": 200,
+      "status": "completed",
+      "incompleteDetails": null,
+      "error": null,
+      "promptSha256": "181d675e902b66ebb4e86b7cb07000d034f5fbd64e514ca169aa31e09ab8b6a9",
+      "outputContractSha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "batchItems": [
+        {
+          "name": "FROZEN IN TIME",
+          "description": "Sunday, Oct 11 • 11:00 AM. A cozy, sing-along family afternoon with your favorite princesses! Dress up and bring the kids for pure magic (plus VIP meet-and-greet options!).",
+          "date": "2026-10-11",
+          "startTime": "11:00",
+          "endTime": "",
+          "venue": "",
+          "ticketLink": "harbourfronttheatre.com",
+          "price": "",
+          "relevantImageIndex": 1,
+          "recurringPattern": "none",
+          "extractionReason": "A scheduled family entertainment show with an explicit date and time.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "11:00 AM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              {
+                "label": "Harbourfront Theatre",
+                "address": "",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "October is packed at Harbourfront Theatre"
+              }
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The monthly program is introduced as being at Harbourfront Theatre."
+          },
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 10
+        },
+        {
+          "name": "FROZEN IN TIME",
+          "description": "Sunday, Oct 11 • 2:00 PM. A cozy, sing-along family afternoon with your favorite princesses! Dress up and bring the kids for pure magic (plus VIP meet-and-greet options!).",
+          "date": "2026-10-11",
+          "startTime": "14:00",
+          "endTime": "",
+          "venue": "",
+          "ticketLink": "harbourfronttheatre.com",
+          "price": "",
+          "relevantImageIndex": 1,
+          "recurringPattern": "none",
+          "extractionReason": "The show advertises two distinct performance times on the same date, so each session is listed separately.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "2:00 PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              {
+                "label": "Harbourfront Theatre",
+                "address": "",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "October is packed at Harbourfront Theatre"
+              }
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The monthly program is introduced as being at Harbourfront Theatre."
+          },
+          "_pipelineIndex": 2,
+          "_pipelineTotalStage3": 10
+        },
+        {
+          "name": "FLASHBACK",
+          "description": "Tuesday, October 13 • 7:00 pm. A community night at the theatre, direct from Las Vegas. The show features Frankie Valli & The Four Seasons, The Beach Boys, The Beatles, The Bee Gees, and Motown, and is from the creators of the hit shows OH WHAT A NIGHT! & FOUR BY FOUR.",
+          "date": "2026-10-13",
+          "startTime": "19:00",
+          "endTime": "",
+          "venue": "",
+          "ticketLink": "harbourfronttheatre.com",
+          "price": "",
+          "relevantImageIndex": 2,
+          "recurringPattern": "none",
+          "extractionReason": "A scheduled live entertainment show with a printed date and time; the poster also identifies its musical acts and inspirations.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "7:00 pm"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              {
+                "label": "Harbourfront Theatre",
+                "address": "",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "October is packed at Harbourfront Theatre"
+              }
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The text also describes this as a community night at the theatre."
+          },
+          "_pipelineIndex": 3,
+          "_pipelineTotalStage3": 10
+        },
+        {
+          "name": "Still Standin': A Night of Elton John & Billy Joel",
+          "description": "October 15 • 7:30 PM. Craig Fair and Ben Aitken perform back-to-back at two grand pianos, backed by a 16-piece orchestra.",
+          "date": "2026-10-15",
+          "startTime": "19:30",
+          "endTime": "",
+          "venue": "",
+          "ticketLink": "harbourfronttheatre.com",
+          "price": "",
+          "relevantImageIndex": 3,
+          "recurringPattern": "none",
+          "extractionReason": "A scheduled concert with an explicit date and time. The three advertised dates are listed as separate events.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "7:30 PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              {
+                "label": "Harbourfront Theatre",
+                "address": "",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "October is packed at Harbourfront Theatre"
+              }
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The monthly program is introduced as being at Harbourfront Theatre."
+          },
+          "_pipelineIndex": 4,
+          "_pipelineTotalStage3": 10
+        },
+        {
+          "name": "Still Standin': A Night of Elton John & Billy Joel",
+          "description": "October 16 • 7:30 PM. Craig Fair and Ben Aitken perform back-to-back at two grand pianos, backed by a 16-piece orchestra.",
+          "date": "2026-10-16",
+          "startTime": "19:30",
+          "endTime": "",
+          "venue": "",
+          "ticketLink": "harbourfronttheatre.com",
+          "price": "",
+          "relevantImageIndex": 3,
+          "recurringPattern": "none",
+          "extractionReason": "A scheduled concert with an explicit date and time. The three advertised dates are listed as separate events.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "7:30 PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              {
+                "label": "Harbourfront Theatre",
+                "address": "",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "October is packed at Harbourfront Theatre"
+              }
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The monthly program is introduced as being at Harbourfront Theatre."
+          },
+          "_pipelineIndex": 5,
+          "_pipelineTotalStage3": 10
+        },
+        {
+          "name": "Still Standin': A Night of Elton John & Billy Joel",
+          "description": "October 17 • 7:30 PM. Craig Fair and Ben Aitken perform back-to-back at two grand pianos, backed by a 16-piece orchestra.",
+          "date": "2026-10-17",
+          "startTime": "19:30",
+          "endTime": "",
+          "venue": "",
+          "ticketLink": "harbourfronttheatre.com",
+          "price": "",
+          "relevantImageIndex": 3,
+          "recurringPattern": "none",
+          "extractionReason": "A scheduled concert with an explicit date and time. The three advertised dates are listed as separate events.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "7:30 PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              {
+                "label": "Harbourfront Theatre",
+                "address": "",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "October is packed at Harbourfront Theatre"
+              }
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The monthly program is introduced as being at Harbourfront Theatre."
+          },
+          "_pipelineIndex": 6,
+          "_pipelineTotalStage3": 10
+        },
+        {
+          "name": "RELIVE THE MUSIC.CA 50s 60s 70s SHOW",
+          "description": "Monday, October 19. A high-energy journey through three iconic decades of rock, pop, and soul classics. The accompanying text lists the show time as 7:30 PM, while the event poster shows 7:00 pm.",
+          "date": "2026-10-19",
+          "startTime": "19:00",
+          "endTime": "",
+          "venue": "",
+          "ticketLink": "harbourfronttheatre.com",
+          "price": "",
+          "relevantImageIndex": 4,
+          "recurringPattern": "none",
+          "extractionReason": "A dated music show. The poster gives an explicit 7:00 pm start, which conflicts with the accompanying text's 7:30 PM listing.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "7:00 pm"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              {
+                "label": "Harbourfront Theatre",
+                "address": "",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "October is packed at Harbourfront Theatre"
+              }
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The monthly program is introduced as being at Harbourfront Theatre."
+          },
+          "_pipelineIndex": 7,
+          "_pipelineTotalStage3": 10
+        },
+        {
+          "name": "Jason Cyrus Live - Beyond Limits",
+          "description": "Friday, Oct 23 • 7:30 PM. Canada’s premiere hypnotist takes the stage for an interactive night of intrigue, with comedy and audience participation.",
+          "date": "2026-10-23",
+          "startTime": "19:30",
+          "endTime": "",
+          "venue": "",
+          "ticketLink": "harbourfronttheatre.com",
+          "price": "",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "A dated, timed interactive hypnotism and comedy show. No attached image specifically identifies this event.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "7:30 PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              {
+                "label": "Harbourfront Theatre",
+                "address": "",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "October is packed at Harbourfront Theatre"
+              }
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The monthly program is introduced as being at Harbourfront Theatre."
+          },
+          "_pipelineIndex": 8,
+          "_pipelineTotalStage3": 10
+        },
+        {
+          "name": "Harbour Highlight: Mysteries of the Keyhole House",
+          "description": "Friday, Oct 30 • 7:30 PM. Master illusionists Ted and Marion Outerbridge bring their spine-tingling ghost story and jaw-dropping magic to Summerside, straight from Hollywood's Magic Castle.",
+          "date": "2026-10-30",
+          "startTime": "19:30",
+          "endTime": "",
+          "venue": "",
+          "ticketLink": "harbourfronttheatre.com",
+          "price": "",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "A scheduled magic and ghost-story performance with an explicit date and time. No attached image specifically identifies this event.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "7:30 PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              {
+                "label": "Harbourfront Theatre",
+                "address": "",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "October is packed at Harbourfront Theatre"
+              }
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The monthly program is introduced as being at Harbourfront Theatre."
+          },
+          "_pipelineIndex": 9,
+          "_pipelineTotalStage3": 10
+        },
+        {
+          "name": "Historical Talk with Ted and Marion Outerbridge",
+          "description": "Thursday, Oct 29 at 6:00 PM. A free historical talk at the Eptek Art & Culture Centre about the real 19th-century artifacts that inspired their show.",
+          "date": "2026-10-29",
+          "startTime": "18:00",
+          "endTime": "",
+          "venue": "Eptek Art & Culture Centre",
+          "ticketLink": "",
+          "price": "Free",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "A separately advertised, free historical talk with its own date, time, and venue.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "6:00 PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              {
+                "label": "Eptek Art & Culture Centre",
+                "address": "",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "at the Eptek Art & Culture Centre"
+              }
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The talk is explicitly advertised at the Eptek Art & Culture Centre."
+          },
+          "_pipelineIndex": 10,
+          "_pipelineTotalStage3": 10
+        }
+      ],
+      "maxOutputTokens": 32000,
+      "durationMs": 26595,
+      "usage": {
+        "input_tokens": 5418,
+        "input_tokens_details": {
+          "cache_write_tokens": 5415,
+          "cached_tokens": 0
+        },
+        "output_tokens": 4140,
+        "output_tokens_details": {
+          "reasoning_tokens": 135
+        },
+        "total_tokens": 9558
+      },
+      "visibleOutputChars": 17110,
+      "rawText": "{\n  \"validatedItems\": [\n    {\n      \"item\": {\n        \"name\": \"FROZEN IN TIME\",\n        \"description\": \"Sunday, Oct 11 • 11:00 AM. A cozy, sing-along family afternoon with your favorite princesses! Dress up and bring the kids for pure magic (plus VIP meet-and-greet options!).\",\n        \"date\": \"2026-10-11\",\n        \"startTime\": \"11:00\",\n        \"endTime\": \"\",\n        \"venue\": \"\",\n        \"ticketLink\": \"harbourfronttheatre.com\",\n        \"price\": \"\",\n        \"relevantImageIndex\": 1,\n        \"recurringPattern\": \"none\",\n        \"extractionReason\": \"A scheduled family entertainment show with an explicit date and time.\",\n        \"timeFlags\": {\n          \"start\": {\n            \"source\": \"explicit\",\n            \"evidence\": \"11:00 AM\"\n          },\n          \"end\": {\n            \"source\": \"none\",\n            \"toClose\": false,\n            \"evidence\": \"\"\n          }\n        },\n        \"spatial\": {\n          \"kind\": \"single_location\",\n          \"locations\": [\n            {\n              \"label\": \"Harbourfront Theatre\",\n              \"address\": \"\",\n              \"role\": \"location\",\n              \"certainty\": \"confirmed\",\n              \"sourceText\": \"October is packed at Harbourfront Theatre\"\n            }\n          ],\n          \"confirmedStreets\": [],\n          \"ordered\": false,\n          \"evidenceNotes\": \"The monthly program is introduced as being at Harbourfront Theatre.\"\n        },\n        \"_pipelineIndex\": 1,\n        \"_pipelineTotalStage3\": 10\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"This is a scheduled family entertainment event with a specific date and start time. The venue, end time, and price are optional.\"\n    },\n    {\n      \"item\": {\n        \"name\": \"FROZEN IN TIME\",\n        \"description\": \"Sunday, Oct 11 • 2:00 PM. A cozy, sing-along family afternoon with your favorite princesses! Dress up and bring the kids for pure magic (plus VIP meet-and-greet options!).\",\n        \"date\": \"2026-10-11\",\n        \"startTime\": \"14:00\",\n        \"endTime\": \"\",\n        \"venue\": \"\",\n        \"ticketLink\": \"harbourfronttheatre.com\",\n        \"price\": \"\",\n        \"relevantImageIndex\": 1,\n        \"recurringPattern\": \"none\",\n        \"extractionReason\": \"The show advertises two distinct performance times on the same date, so each session is listed separately.\",\n        \"timeFlags\": {\n          \"start\": {\n            \"source\": \"explicit\",\n            \"evidence\": \"2:00 PM\"\n          },\n          \"end\": {\n            \"source\": \"none\",\n            \"toClose\": false,\n            \"evidence\": \"\"\n          }\n        },\n        \"spatial\": {\n          \"kind\": \"single_location\",\n          \"locations\": [\n            {\n              \"label\": \"Harbourfront Theatre\",\n              \"address\": \"\",\n              \"role\": \"location\",\n              \"certainty\": \"confirmed\",\n              \"sourceText\": \"October is packed at Harbourfront Theatre\"\n            }\n          ],\n          \"confirmedStreets\": [],\n          \"ordered\": false,\n          \"evidenceNotes\": \"The monthly program is introduced as being at Harbourfront Theatre.\"\n        },\n        \"_pipelineIndex\": 2,\n        \"_pipelineTotalStage3\": 10\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"This is a separately timed performance of the show on the same date. Different session times are valid separate events.\"\n    },\n    {\n      \"item\": {\n        \"name\": \"FLASHBACK\",\n        \"description\": \"Tuesday, October 13 • 7:00 pm. A community night at the theatre, direct from Las Vegas. The show features Frankie Valli & The Four Seasons, The Beach Boys, The Beatles, The Bee Gees, and Motown, and is from the creators of the hit shows OH WHAT A NIGHT! & FOUR BY FOUR.\",\n        \"date\": \"2026-10-13\",\n        \"startTime\": \"19:00\",\n        \"endTime\": \"\",\n        \"venue\": \"\",\n        \"ticketLink\": \"harbourfronttheatre.com\",\n        \"price\": \"\",\n        \"relevantImageIndex\": 2,\n        \"recurringPattern\": \"none\",\n        \"extractionReason\": \"A scheduled live entertainment show with a printed date and time; the poster also identifies its musical acts and inspirations.\",\n        \"timeFlags\": {\n          \"start\": {\n            \"source\": \"explicit\",\n            \"evidence\": \"7:00 pm\"\n          },\n          \"end\": {\n            \"source\": \"none\",\n            \"toClose\": false,\n            \"evidence\": \"\"\n          }\n        },\n        \"spatial\": {\n          \"kind\": \"single_location\",\n          \"locations\": [\n            {\n              \"label\": \"Harbourfront Theatre\",\n              \"address\": \"\",\n              \"role\": \"location\",\n              \"certainty\": \"confirmed\",\n              \"sourceText\": \"October is packed at Harbourfront Theatre\"\n            }\n          ],\n          \"confirmedStreets\": [],\n          \"ordered\": false,\n          \"evidenceNotes\": \"The text also describes this as a community night at the theatre.\"\n        },\n        \"_pipelineIndex\": 3,\n        \"_pipelineTotalStage3\": 10\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"This is a live entertainment event with a specific date and start time. The venue and other optional fields do not need to be populated.\"\n    },\n    {\n      \"item\": {\n        \"name\": \"Still Standin': A Night of Elton John & Billy Joel\",\n        \"description\": \"October 15 • 7:30 PM. Craig Fair and Ben Aitken perform back-to-back at two grand pianos, backed by a 16-piece orchestra.\",\n        \"date\": \"2026-10-15\",\n        \"startTime\": \"19:30\",\n        \"endTime\": \"\",\n        \"venue\": \"\",\n        \"ticketLink\": \"harbourfronttheatre.com\",\n        \"price\": \"\",\n        \"relevantImageIndex\": 3,\n        \"recurringPattern\": \"none\",\n        \"extractionReason\": \"A scheduled concert with an explicit date and time. The three advertised dates are listed as separate events.\",\n        \"timeFlags\": {\n          \"start\": {\n            \"source\": \"explicit\",\n            \"evidence\": \"7:30 PM\"\n          },\n          \"end\": {\n            \"source\": \"none\",\n            \"toClose\": false,\n            \"evidence\": \"\"\n          }\n        },\n        \"spatial\": {\n          \"kind\": \"single_location\",\n          \"locations\": [\n            {\n              \"label\": \"Harbourfront Theatre\",\n              \"address\": \"\",\n              \"role\": \"location\",\n              \"certainty\": \"confirmed\",\n              \"sourceText\": \"October is packed at Harbourfront Theatre\"\n            }\n          ],\n          \"confirmedStreets\": [],\n          \"ordered\": false,\n          \"evidenceNotes\": \"The monthly program is introduced as being at Harbourfront Theatre.\"\n        },\n        \"_pipelineIndex\": 4,\n        \"_pipelineTotalStage3\": 10\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"This concert has a specific date and start time. It is one of the separately advertised performances.\"\n    },\n    {\n      \"item\": {\n        \"name\": \"Still Standin': A Night of Elton John & Billy Joel\",\n        \"description\": \"October 16 • 7:30 PM. Craig Fair and Ben Aitken perform back-to-back at two grand pianos, backed by a 16-piece orchestra.\",\n        \"date\": \"2026-10-16\",\n        \"startTime\": \"19:30\",\n        \"endTime\": \"\",\n        \"venue\": \"\",\n        \"ticketLink\": \"harbourfronttheatre.com\",\n        \"price\": \"\",\n        \"relevantImageIndex\": 3,\n        \"recurringPattern\": \"none\",\n        \"extractionReason\": \"A scheduled concert with an explicit date and time. The three advertised dates are listed as separate events.\",\n        \"timeFlags\": {\n          \"start\": {\n            \"source\": \"explicit\",\n            \"evidence\": \"7:30 PM\"\n          },\n          \"end\": {\n            \"source\": \"none\",\n            \"toClose\": false,\n            \"evidence\": \"\"\n          }\n        },\n        \"spatial\": {\n          \"kind\": \"single_location\",\n          \"locations\": [\n            {\n              \"label\": \"Harbourfront Theatre\",\n              \"address\": \"\",\n              \"role\": \"location\",\n              \"certainty\": \"confirmed\",\n              \"sourceText\": \"October is packed at Harbourfront Theatre\"\n            }\n          ],\n          \"confirmedStreets\": [],\n          \"ordered\": false,\n          \"evidenceNotes\": \"The monthly program is introduced as being at Harbourfront Theatre.\"\n        },\n        \"_pipelineIndex\": 5,\n        \"_pipelineTotalStage3\": 10\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"This is a separately dated performance of the concert, not a duplicate of the October 15 listing.\"\n    },\n    {\n      \"item\": {\n        \"name\": \"Still Standin': A Night of Elton John & Billy Joel\",\n        \"description\": \"October 17 • 7:30 PM. Craig Fair and Ben Aitken perform back-to-back at two grand pianos, backed by a 16-piece orchestra.\",\n        \"date\": \"2026-10-17\",\n        \"startTime\": \"19:30\",\n        \"endTime\": \"\",\n        \"venue\": \"\",\n        \"ticketLink\": \"harbourfronttheatre.com\",\n        \"price\": \"\",\n        \"relevantImageIndex\": 3,\n        \"recurringPattern\": \"none\",\n        \"extractionReason\": \"A scheduled concert with an explicit date and time. The three advertised dates are listed as separate events.\",\n        \"timeFlags\": {\n          \"start\": {\n            \"source\": \"explicit\",\n            \"evidence\": \"7:30 PM\"\n          },\n          \"end\": {\n            \"source\": \"none\",\n            \"toClose\": false,\n            \"evidence\": \"\"\n          }\n        },\n        \"spatial\": {\n          \"kind\": \"single_location\",\n          \"locations\": [\n            {\n              \"label\": \"Harbourfront Theatre\",\n              \"address\": \"\",\n              \"role\": \"location\",\n              \"certainty\": \"confirmed\",\n              \"sourceText\": \"October is packed at Harbourfront Theatre\"\n            }\n          ],\n          \"confirmedStreets\": [],\n          \"ordered\": false,\n          \"evidenceNotes\": \"The monthly program is introduced as being at Harbourfront Theatre.\"\n        },\n        \"_pipelineIndex\": 6,\n        \"_pipelineTotalStage3\": 10\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"This is a separately dated performance of the concert, not a duplicate of the other listed dates.\"\n    },\n    {\n      \"item\": {\n        \"name\": \"RELIVE THE MUSIC.CA 50s 60s 70s SHOW\",\n        \"description\": \"Monday, October 19. A high-energy journey through three iconic decades of rock, pop, and soul classics. The accompanying text lists the show time as 7:30 PM, while the event poster shows 7:00 pm.\",\n        \"date\": \"2026-10-19\",\n        \"startTime\": \"19:00\",\n        \"endTime\": \"\",\n        \"venue\": \"\",\n        \"ticketLink\": \"harbourfronttheatre.com\",\n        \"price\": \"\",\n        \"relevantImageIndex\": 4,\n        \"recurringPattern\": \"none\",\n        \"extractionReason\": \"A dated music show. The poster gives an explicit 7:00 pm start, which conflicts with the accompanying text's 7:30 PM listing.\",\n        \"timeFlags\": {\n          \"start\": {\n            \"source\": \"explicit\",\n            \"evidence\": \"7:00 pm\"\n          },\n          \"end\": {\n            \"source\": \"none\",\n            \"toClose\": false,\n            \"evidence\": \"\"\n          }\n        },\n        \"spatial\": {\n          \"kind\": \"single_location\",\n          \"locations\": [\n            {\n              \"label\": \"Harbourfront Theatre\",\n              \"address\": \"\",\n              \"role\": \"location\",\n              \"certainty\": \"confirmed\",\n              \"sourceText\": \"October is packed at Harbourfront Theatre\"\n            }\n          ],\n          \"confirmedStreets\": [],\n          \"ordered\": false,\n          \"evidenceNotes\": \"The monthly program is introduced as being at Harbourfront Theatre.\"\n        },\n        \"_pipelineIndex\": 7,\n        \"_pipelineTotalStage3\": 10\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"This is a dated music event with an explicit start time. The time conflict is noted in the description, and the item retains the poster's printed 7:00 PM time.\"\n    },\n    {\n      \"item\": {\n        \"name\": \"Jason Cyrus Live - Beyond Limits\",\n        \"description\": \"Friday, Oct 23 • 7:30 PM. Canada’s premiere hypnotist takes the stage for an interactive night of intrigue, with comedy and audience participation.\",\n        \"date\": \"2026-10-23\",\n        \"startTime\": \"19:30\",\n        \"endTime\": \"\",\n        \"venue\": \"\",\n        \"ticketLink\": \"harbourfronttheatre.com\",\n        \"price\": \"\",\n        \"relevantImageIndex\": 0,\n        \"recurringPattern\": \"none\",\n        \"extractionReason\": \"A dated, timed interactive hypnotism and comedy show. No attached image specifically identifies this event.\",\n        \"timeFlags\": {\n          \"start\": {\n            \"source\": \"explicit\",\n            \"evidence\": \"7:30 PM\"\n          },\n          \"end\": {\n            \"source\": \"none\",\n            \"toClose\": false,\n            \"evidence\": \"\"\n          }\n        },\n        \"spatial\": {\n          \"kind\": \"single_location\",\n          \"locations\": [\n            {\n              \"label\": \"Harbourfront Theatre\",\n              \"address\": \"\",\n              \"role\": \"location\",\n              \"certainty\": \"confirmed\",\n              \"sourceText\": \"October is packed at Harbourfront Theatre\"\n            }\n          ],\n          \"confirmedStreets\": [],\n          \"ordered\": false,\n          \"evidenceNotes\": \"The monthly program is introduced as being at Harbourfront Theatre.\"\n        },\n        \"_pipelineIndex\": 8,\n        \"_pipelineTotalStage3\": 10\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"This is a scheduled hypnotism and comedy show with a specific date and start time. The image association does not affect its validity.\"\n    },\n    {\n      \"item\": {\n        \"name\": \"Harbour Highlight: Mysteries of the Keyhole House\",\n        \"description\": \"Friday, Oct 30 • 7:30 PM. Master illusionists Ted and Marion Outerbridge bring their spine-tingling ghost story and jaw-dropping magic to Summerside, straight from Hollywood's Magic Castle.\",\n        \"date\": \"2026-10-30\",\n        \"startTime\": \"19:30\",\n        \"endTime\": \"\",\n        \"venue\": \"\",\n        \"ticketLink\": \"harbourfronttheatre.com\",\n        \"price\": \"\",\n        \"relevantImageIndex\": 0,\n        \"recurringPattern\": \"none\",\n        \"extractionReason\": \"A scheduled magic and ghost-story performance with an explicit date and time. No attached image specifically identifies this event.\",\n        \"timeFlags\": {\n          \"start\": {\n            \"source\": \"explicit\",\n            \"evidence\": \"7:30 PM\"\n          },\n          \"end\": {\n            \"source\": \"none\",\n            \"toClose\": false,\n            \"evidence\": \"\"\n          }\n        },\n        \"spatial\": {\n          \"kind\": \"single_location\",\n          \"locations\": [\n            {\n              \"label\": \"Harbourfront Theatre\",\n              \"address\": \"\",\n              \"role\": \"location\",\n              \"certainty\": \"confirmed\",\n              \"sourceText\": \"October is packed at Harbourfront Theatre\"\n            }\n          ],\n          \"confirmedStreets\": [],\n          \"ordered\": false,\n          \"evidenceNotes\": \"The monthly program is introduced as being at Harbourfront Theatre.\"\n        },\n        \"_pipelineIndex\": 9,\n        \"_pipelineTotalStage3\": 10\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"This is a scheduled magic and ghost-story performance with a specific date and start time.\"\n    },\n    {\n      \"item\": {\n        \"name\": \"Historical Talk with Ted and Marion Outerbridge\",\n        \"description\": \"Thursday, Oct 29 at 6:00 PM. A free historical talk at the Eptek Art & Culture Centre about the real 19th-century artifacts that inspired their show.\",\n        \"date\": \"2026-10-29\",\n        \"startTime\": \"18:00\",\n        \"endTime\": \"\",\n        \"venue\": \"Eptek Art & Culture Centre\",\n        \"ticketLink\": \"\",\n        \"price\": \"Free\",\n        \"relevantImageIndex\": 0,\n        \"recurringPattern\": \"none\",\n        \"extractionReason\": \"A separately advertised, free historical talk with its own date, time, and venue.\",\n        \"timeFlags\": {\n          \"start\": {\n            \"source\": \"explicit\",\n            \"evidence\": \"6:00 PM\"\n          },\n          \"end\": {\n            \"source\": \"none\",\n            \"toClose\": false,\n            \"evidence\": \"\"\n          }\n        },\n        \"spatial\": {\n          \"kind\": \"single_location\",\n          \"locations\": [\n            {\n              \"label\": \"Eptek Art & Culture Centre\",\n              \"address\": \"\",\n              \"role\": \"location\",\n              \"certainty\": \"confirmed\",\n              \"sourceText\": \"at the Eptek Art & Culture Centre\"\n            }\n          ],\n          \"confirmedStreets\": [],\n          \"ordered\": false,\n          \"evidenceNotes\": \"The talk is explicitly advertised at the Eptek Art & Culture Centre.\"\n        },\n        \"_pipelineIndex\": 10,\n        \"_pipelineTotalStage3\": 10\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"This is a separately advertised historical talk with a specific date, start time, and named venue. Its free admission does not affect validity.\"\n    }\n  ],\n  \"validationSummary\": {\n    \"totalItems\": 10,\n    \"itemsKept\": 10,\n    \"itemsRejected\": 0,\n    \"recurringCorrections\": 0,\n    \"overallNotes\": \"All items are genuine, specifically dated events with explicit start times. The repeated concert listings are valid performances on different dates, and the two FROZEN IN TIME listings are separate sessions. No recurring-pattern corrections are needed.\"\n  }\n}",
+      "rawResult": {
+        "validatedItems": [
+          {
+            "item": {
+              "name": "FROZEN IN TIME",
+              "description": "Sunday, Oct 11 • 11:00 AM. A cozy, sing-along family afternoon with your favorite princesses! Dress up and bring the kids for pure magic (plus VIP meet-and-greet options!).",
+              "date": "2026-10-11",
+              "startTime": "11:00",
+              "endTime": "",
+              "venue": "",
+              "ticketLink": "harbourfronttheatre.com",
+              "price": "",
+              "relevantImageIndex": 1,
+              "recurringPattern": "none",
+              "extractionReason": "A scheduled family entertainment show with an explicit date and time.",
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "11:00 AM"
+                },
+                "end": {
+                  "source": "none",
+                  "toClose": false,
+                  "evidence": ""
+                }
+              },
+              "spatial": {
+                "kind": "single_location",
+                "locations": [
+                  {
+                    "label": "Harbourfront Theatre",
+                    "address": "",
+                    "role": "location",
+                    "certainty": "confirmed",
+                    "sourceText": "October is packed at Harbourfront Theatre"
+                  }
+                ],
+                "confirmedStreets": [],
+                "ordered": false,
+                "evidenceNotes": "The monthly program is introduced as being at Harbourfront Theatre."
+              },
+              "_pipelineIndex": 1,
+              "_pipelineTotalStage3": 10
+            },
+            "decision": "KEPT",
+            "reason": "This is a scheduled family entertainment event with a specific date and start time. The venue, end time, and price are optional."
+          },
+          {
+            "item": {
+              "name": "FROZEN IN TIME",
+              "description": "Sunday, Oct 11 • 2:00 PM. A cozy, sing-along family afternoon with your favorite princesses! Dress up and bring the kids for pure magic (plus VIP meet-and-greet options!).",
+              "date": "2026-10-11",
+              "startTime": "14:00",
+              "endTime": "",
+              "venue": "",
+              "ticketLink": "harbourfronttheatre.com",
+              "price": "",
+              "relevantImageIndex": 1,
+              "recurringPattern": "none",
+              "extractionReason": "The show advertises two distinct performance times on the same date, so each session is listed separately.",
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "2:00 PM"
+                },
+                "end": {
+                  "source": "none",
+                  "toClose": false,
+                  "evidence": ""
+                }
+              },
+              "spatial": {
+                "kind": "single_location",
+                "locations": [
+                  {
+                    "label": "Harbourfront Theatre",
+                    "address": "",
+                    "role": "location",
+                    "certainty": "confirmed",
+                    "sourceText": "October is packed at Harbourfront Theatre"
+                  }
+                ],
+                "confirmedStreets": [],
+                "ordered": false,
+                "evidenceNotes": "The monthly program is introduced as being at Harbourfront Theatre."
+              },
+              "_pipelineIndex": 2,
+              "_pipelineTotalStage3": 10
+            },
+            "decision": "KEPT",
+            "reason": "This is a separately timed performance of the show on the same date. Different session times are valid separate events."
+          },
+          {
+            "item": {
+              "name": "FLASHBACK",
+              "description": "Tuesday, October 13 • 7:00 pm. A community night at the theatre, direct from Las Vegas. The show features Frankie Valli & The Four Seasons, The Beach Boys, The Beatles, The Bee Gees, and Motown, and is from the creators of the hit shows OH WHAT A NIGHT! & FOUR BY FOUR.",
+              "date": "2026-10-13",
+              "startTime": "19:00",
+              "endTime": "",
+              "venue": "",
+              "ticketLink": "harbourfronttheatre.com",
+              "price": "",
+              "relevantImageIndex": 2,
+              "recurringPattern": "none",
+              "extractionReason": "A scheduled live entertainment show with a printed date and time; the poster also identifies its musical acts and inspirations.",
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "7:00 pm"
+                },
+                "end": {
+                  "source": "none",
+                  "toClose": false,
+                  "evidence": ""
+                }
+              },
+              "spatial": {
+                "kind": "single_location",
+                "locations": [
+                  {
+                    "label": "Harbourfront Theatre",
+                    "address": "",
+                    "role": "location",
+                    "certainty": "confirmed",
+                    "sourceText": "October is packed at Harbourfront Theatre"
+                  }
+                ],
+                "confirmedStreets": [],
+                "ordered": false,
+                "evidenceNotes": "The text also describes this as a community night at the theatre."
+              },
+              "_pipelineIndex": 3,
+              "_pipelineTotalStage3": 10
+            },
+            "decision": "KEPT",
+            "reason": "This is a live entertainment event with a specific date and start time. The venue and other optional fields do not need to be populated."
+          },
+          {
+            "item": {
+              "name": "Still Standin': A Night of Elton John & Billy Joel",
+              "description": "October 15 • 7:30 PM. Craig Fair and Ben Aitken perform back-to-back at two grand pianos, backed by a 16-piece orchestra.",
+              "date": "2026-10-15",
+              "startTime": "19:30",
+              "endTime": "",
+              "venue": "",
+              "ticketLink": "harbourfronttheatre.com",
+              "price": "",
+              "relevantImageIndex": 3,
+              "recurringPattern": "none",
+              "extractionReason": "A scheduled concert with an explicit date and time. The three advertised dates are listed as separate events.",
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "7:30 PM"
+                },
+                "end": {
+                  "source": "none",
+                  "toClose": false,
+                  "evidence": ""
+                }
+              },
+              "spatial": {
+                "kind": "single_location",
+                "locations": [
+                  {
+                    "label": "Harbourfront Theatre",
+                    "address": "",
+                    "role": "location",
+                    "certainty": "confirmed",
+                    "sourceText": "October is packed at Harbourfront Theatre"
+                  }
+                ],
+                "confirmedStreets": [],
+                "ordered": false,
+                "evidenceNotes": "The monthly program is introduced as being at Harbourfront Theatre."
+              },
+              "_pipelineIndex": 4,
+              "_pipelineTotalStage3": 10
+            },
+            "decision": "KEPT",
+            "reason": "This concert has a specific date and start time. It is one of the separately advertised performances."
+          },
+          {
+            "item": {
+              "name": "Still Standin': A Night of Elton John & Billy Joel",
+              "description": "October 16 • 7:30 PM. Craig Fair and Ben Aitken perform back-to-back at two grand pianos, backed by a 16-piece orchestra.",
+              "date": "2026-10-16",
+              "startTime": "19:30",
+              "endTime": "",
+              "venue": "",
+              "ticketLink": "harbourfronttheatre.com",
+              "price": "",
+              "relevantImageIndex": 3,
+              "recurringPattern": "none",
+              "extractionReason": "A scheduled concert with an explicit date and time. The three advertised dates are listed as separate events.",
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "7:30 PM"
+                },
+                "end": {
+                  "source": "none",
+                  "toClose": false,
+                  "evidence": ""
+                }
+              },
+              "spatial": {
+                "kind": "single_location",
+                "locations": [
+                  {
+                    "label": "Harbourfront Theatre",
+                    "address": "",
+                    "role": "location",
+                    "certainty": "confirmed",
+                    "sourceText": "October is packed at Harbourfront Theatre"
+                  }
+                ],
+                "confirmedStreets": [],
+                "ordered": false,
+                "evidenceNotes": "The monthly program is introduced as being at Harbourfront Theatre."
+              },
+              "_pipelineIndex": 5,
+              "_pipelineTotalStage3": 10
+            },
+            "decision": "KEPT",
+            "reason": "This is a separately dated performance of the concert, not a duplicate of the October 15 listing."
+          },
+          {
+            "item": {
+              "name": "Still Standin': A Night of Elton John & Billy Joel",
+              "description": "October 17 • 7:30 PM. Craig Fair and Ben Aitken perform back-to-back at two grand pianos, backed by a 16-piece orchestra.",
+              "date": "2026-10-17",
+              "startTime": "19:30",
+              "endTime": "",
+              "venue": "",
+              "ticketLink": "harbourfronttheatre.com",
+              "price": "",
+              "relevantImageIndex": 3,
+              "recurringPattern": "none",
+              "extractionReason": "A scheduled concert with an explicit date and time. The three advertised dates are listed as separate events.",
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "7:30 PM"
+                },
+                "end": {
+                  "source": "none",
+                  "toClose": false,
+                  "evidence": ""
+                }
+              },
+              "spatial": {
+                "kind": "single_location",
+                "locations": [
+                  {
+                    "label": "Harbourfront Theatre",
+                    "address": "",
+                    "role": "location",
+                    "certainty": "confirmed",
+                    "sourceText": "October is packed at Harbourfront Theatre"
+                  }
+                ],
+                "confirmedStreets": [],
+                "ordered": false,
+                "evidenceNotes": "The monthly program is introduced as being at Harbourfront Theatre."
+              },
+              "_pipelineIndex": 6,
+              "_pipelineTotalStage3": 10
+            },
+            "decision": "KEPT",
+            "reason": "This is a separately dated performance of the concert, not a duplicate of the other listed dates."
+          },
+          {
+            "item": {
+              "name": "RELIVE THE MUSIC.CA 50s 60s 70s SHOW",
+              "description": "Monday, October 19. A high-energy journey through three iconic decades of rock, pop, and soul classics. The accompanying text lists the show time as 7:30 PM, while the event poster shows 7:00 pm.",
+              "date": "2026-10-19",
+              "startTime": "19:00",
+              "endTime": "",
+              "venue": "",
+              "ticketLink": "harbourfronttheatre.com",
+              "price": "",
+              "relevantImageIndex": 4,
+              "recurringPattern": "none",
+              "extractionReason": "A dated music show. The poster gives an explicit 7:00 pm start, which conflicts with the accompanying text's 7:30 PM listing.",
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "7:00 pm"
+                },
+                "end": {
+                  "source": "none",
+                  "toClose": false,
+                  "evidence": ""
+                }
+              },
+              "spatial": {
+                "kind": "single_location",
+                "locations": [
+                  {
+                    "label": "Harbourfront Theatre",
+                    "address": "",
+                    "role": "location",
+                    "certainty": "confirmed",
+                    "sourceText": "October is packed at Harbourfront Theatre"
+                  }
+                ],
+                "confirmedStreets": [],
+                "ordered": false,
+                "evidenceNotes": "The monthly program is introduced as being at Harbourfront Theatre."
+              },
+              "_pipelineIndex": 7,
+              "_pipelineTotalStage3": 10
+            },
+            "decision": "KEPT",
+            "reason": "This is a dated music event with an explicit start time. The time conflict is noted in the description, and the item retains the poster's printed 7:00 PM time."
+          },
+          {
+            "item": {
+              "name": "Jason Cyrus Live - Beyond Limits",
+              "description": "Friday, Oct 23 • 7:30 PM. Canada’s premiere hypnotist takes the stage for an interactive night of intrigue, with comedy and audience participation.",
+              "date": "2026-10-23",
+              "startTime": "19:30",
+              "endTime": "",
+              "venue": "",
+              "ticketLink": "harbourfronttheatre.com",
+              "price": "",
+              "relevantImageIndex": 0,
+              "recurringPattern": "none",
+              "extractionReason": "A dated, timed interactive hypnotism and comedy show. No attached image specifically identifies this event.",
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "7:30 PM"
+                },
+                "end": {
+                  "source": "none",
+                  "toClose": false,
+                  "evidence": ""
+                }
+              },
+              "spatial": {
+                "kind": "single_location",
+                "locations": [
+                  {
+                    "label": "Harbourfront Theatre",
+                    "address": "",
+                    "role": "location",
+                    "certainty": "confirmed",
+                    "sourceText": "October is packed at Harbourfront Theatre"
+                  }
+                ],
+                "confirmedStreets": [],
+                "ordered": false,
+                "evidenceNotes": "The monthly program is introduced as being at Harbourfront Theatre."
+              },
+              "_pipelineIndex": 8,
+              "_pipelineTotalStage3": 10
+            },
+            "decision": "KEPT",
+            "reason": "This is a scheduled hypnotism and comedy show with a specific date and start time. The image association does not affect its validity."
+          },
+          {
+            "item": {
+              "name": "Harbour Highlight: Mysteries of the Keyhole House",
+              "description": "Friday, Oct 30 • 7:30 PM. Master illusionists Ted and Marion Outerbridge bring their spine-tingling ghost story and jaw-dropping magic to Summerside, straight from Hollywood's Magic Castle.",
+              "date": "2026-10-30",
+              "startTime": "19:30",
+              "endTime": "",
+              "venue": "",
+              "ticketLink": "harbourfronttheatre.com",
+              "price": "",
+              "relevantImageIndex": 0,
+              "recurringPattern": "none",
+              "extractionReason": "A scheduled magic and ghost-story performance with an explicit date and time. No attached image specifically identifies this event.",
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "7:30 PM"
+                },
+                "end": {
+                  "source": "none",
+                  "toClose": false,
+                  "evidence": ""
+                }
+              },
+              "spatial": {
+                "kind": "single_location",
+                "locations": [
+                  {
+                    "label": "Harbourfront Theatre",
+                    "address": "",
+                    "role": "location",
+                    "certainty": "confirmed",
+                    "sourceText": "October is packed at Harbourfront Theatre"
+                  }
+                ],
+                "confirmedStreets": [],
+                "ordered": false,
+                "evidenceNotes": "The monthly program is introduced as being at Harbourfront Theatre."
+              },
+              "_pipelineIndex": 9,
+              "_pipelineTotalStage3": 10
+            },
+            "decision": "KEPT",
+            "reason": "This is a scheduled magic and ghost-story performance with a specific date and start time."
+          },
+          {
+            "item": {
+              "name": "Historical Talk with Ted and Marion Outerbridge",
+              "description": "Thursday, Oct 29 at 6:00 PM. A free historical talk at the Eptek Art & Culture Centre about the real 19th-century artifacts that inspired their show.",
+              "date": "2026-10-29",
+              "startTime": "18:00",
+              "endTime": "",
+              "venue": "Eptek Art & Culture Centre",
+              "ticketLink": "",
+              "price": "Free",
+              "relevantImageIndex": 0,
+              "recurringPattern": "none",
+              "extractionReason": "A separately advertised, free historical talk with its own date, time, and venue.",
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "6:00 PM"
+                },
+                "end": {
+                  "source": "none",
+                  "toClose": false,
+                  "evidence": ""
+                }
+              },
+              "spatial": {
+                "kind": "single_location",
+                "locations": [
+                  {
+                    "label": "Eptek Art & Culture Centre",
+                    "address": "",
+                    "role": "location",
+                    "certainty": "confirmed",
+                    "sourceText": "at the Eptek Art & Culture Centre"
+                  }
+                ],
+                "confirmedStreets": [],
+                "ordered": false,
+                "evidenceNotes": "The talk is explicitly advertised at the Eptek Art & Culture Centre."
+              },
+              "_pipelineIndex": 10,
+              "_pipelineTotalStage3": 10
+            },
+            "decision": "KEPT",
+            "reason": "This is a separately advertised historical talk with a specific date, start time, and named venue. Its free admission does not affect validity."
+          }
+        ],
+        "validationSummary": {
+          "totalItems": 10,
+          "itemsKept": 10,
+          "itemsRejected": 0,
+          "recurringCorrections": 0,
+          "overallNotes": "All items are genuine, specifically dated events with explicit start times. The repeated concert listings are valid performances on different dates, and the two FROZEN IN TIME listings are separate sessions. No recurring-pattern corrections are needed."
+        }
+      },
+      "parseError": false
+    }
+  ]
+}

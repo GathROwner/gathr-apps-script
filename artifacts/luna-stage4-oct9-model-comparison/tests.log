@@ -1,0 +1,224 @@
+TAP version 13
+# Subtest: a free calendar lunch with a printed start is not an all-day deal card
+ok 1 - a free calendar lunch with a printed start is not an all-day deal card
+  ---
+  duration_ms: 2.7907
+  ...
+# Subtest: validation preserves the flyer frame chosen by image-aware extraction
+ok 2 - validation preserves the flyer frame chosen by image-aware extraction
+  ---
+  duration_ms: 1.9887
+  ...
+# Subtest: validation preserves the web-only marker instead of claiming a flyer
+ok 3 - validation preserves the web-only marker instead of claiming a flyer
+  ---
+  duration_ms: 0.3996
+  ...
+# Subtest: validation rejects a counted response that erased source names and dates
+ok 4 - validation rejects a counted response that erased source names and dates
+  ---
+  duration_ms: 2.2292
+  ...
+# Subtest: large Luna review partitions every item once in source order
+ok 5 - large Luna review partitions every item once in source order
+  ---
+  duration_ms: 2.2225
+  ...
+# Subtest: configured validation batches cover a dense legacy inventory in source order
+ok 6 - configured validation batches cover a dense legacy inventory in source order
+  ---
+  duration_ms: 0.758
+  ...
+# Subtest: Stage 4 JSON normalization preserves source URLs while removing comments
+ok 7 - Stage 4 JSON normalization preserves source URLs while removing comments
+  ---
+  duration_ms: 1.219
+  ...
+# Subtest: rejects operating-hours-only extracted event items
+ok 8 - rejects operating-hours-only extracted event items
+  ---
+  duration_ms: 7.2802
+  ...
+# Subtest: rejects store hours split into weekday schedule rows
+ok 9 - rejects store hours split into weekday schedule rows
+  ---
+  duration_ms: 1.9911
+  ...
+# Subtest: keeps actual happy hour specials even when they include a weekday range
+ok 10 - keeps actual happy hour specials even when they include a weekday range
+  ---
+  duration_ms: 0.901
+  ...
+# Subtest: keeps pool and swim activities that include public session times
+ok 11 - keeps pool and swim activities that include public session times
+  ---
+  duration_ms: 0.3458
+  ...
+# Subtest: keeps season opening announcements that merely mention hours
+ok 12 - keeps season opening announcements that merely mention hours
+  ---
+  duration_ms: 1.676
+  ...
+# Subtest: public studio tours remain activities even when access uses weekend opening hours
+ok 13 - public studio tours remain activities even when access uses weekend opening hours
+  ---
+  duration_ms: 0.607
+  ...
+# Subtest: preserves a source-copied schedule listing rejected solely for an unusual printed time
+ok 14 - preserves a source-copied schedule listing rejected solely for an unusual printed time
+  ---
+  duration_ms: 5.657
+  ...
+# Subtest: does not protect inferred times or unrelated invalid listings
+ok 15 - does not protect inferred times or unrelated invalid listings
+  ---
+  duration_ms: 1.4304
+  ...
+# Subtest: an explicitly advertised daily special qualifies without a printed price
+ok 16 - an explicitly advertised daily special qualifies without a printed price
+  ---
+  duration_ms: 2.2215
+  ...
+# Subtest: a stated deal qualifies without a numeric price
+ok 17 - a stated deal qualifies without a numeric price
+  ---
+  duration_ms: 0.7434
+  ...
+# Subtest: Famous Peppers month-long featured pizza is an ordinary menu feature
+ok 18 - Famous Peppers month-long featured pizza is an ordinary menu feature
+  ---
+  duration_ms: 0.3197
+  ...
+# Subtest: a menu item beside a deal is not promoted by source type alone
+ok 19 - a menu item beside a deal is not promoted by source type alone
+  ---
+  duration_ms: 0.399
+  ...
+# Subtest: event extractor items cannot take the special-only exception
+ok 20 - event extractor items cannot take the special-only exception
+  ---
+  duration_ms: 0.58
+  ...
+# {"severity":"INFO","message":"Stage 4: Starting secondary validation","timestamp":"2026-10-09T22:46:46.984Z","context":{"itemCount":1,"userName":"Test venue"}}
+# {"severity":"INFO","message":"Timing","timestamp":"2026-10-09T22:46:47.000Z","context":{"step":"gpt_call","component":"secondaryValidator","endpoint":"responses","model":"gpt-6-luna","durationMs":8}}
+# {"severity":"INFO","message":"Stage 4 Responses diagnostics","timestamp":"2026-10-09T22:46:47.000Z","context":{"model":"gpt-6-luna","durationMs":8,"inputTokens":1,"outputTokens":1,"totalTokens":2,"cachedInputTokens":0,"batchItemCount":1,"responseId":"local-test","responseStatus":"completed","incompleteReason":"","requestedMaxOutputTokens":32000,"reasoningTokens":0,"visibleOutputChars":170}}
+# {"severity":"DEBUG","message":"GPT validation response received (responses)","timestamp":"2026-10-09T22:46:47.001Z","context":{"model":"gpt-6-luna","tokens":2}}
+# {"severity":"DEBUG","message":"Parsing validation response","timestamp":"2026-10-09T22:46:47.001Z"}
+# {"severity":"DEBUG","message":"Parsed validation result (no repair needed)","timestamp":"2026-10-09T22:46:47.002Z"}
+# {"severity":"INFO","message":"Stage 4 validation summary","timestamp":"2026-10-09T22:46:47.002Z","context":{"totalItems":1,"itemsKept":1,"itemsRejected":0,"recurringCorrections":0}}
+# {"severity":"DEBUG","message":"Item 1: \\"Test concert\\"","timestamp":"2026-10-09T22:46:47.004Z","context":{"decision":"KEPT","reason":"Valid event with explicit timing"}}
+# {"severity":"DEBUG","message":"Stage 4 normalized recurring pattern for \\"Test concert\\"","timestamp":"2026-10-09T22:46:47.004Z","context":{"to":"none"}}
+# {"severity":"INFO","message":"Stage 4 Result: 1 kept, 0 rejected","timestamp":"2026-10-09T22:46:47.005Z","context":{"recurringCorrections":0,"happyHourNoPriceOverrides":0,"calendarDealAllDayOverrides":0,"calendarDealAllDayNormalizations":0,"operatingHoursOnlyRejects":0}}
+# {"severity":"INFO","message":"Stage 4 Happy Hour no-price overrides: 0","timestamp":"2026-10-09T22:46:47.005Z"}
+# {"severity":"INFO","message":"Stage 4 Calendar deal all-day overrides: 0","timestamp":"2026-10-09T22:46:47.005Z"}
+# {"severity":"INFO","message":"Stage 4 Calendar deal all-day normalizations: 0","timestamp":"2026-10-09T22:46:47.005Z"}
+# {"severity":"INFO","message":"Stage 4 operating-hours-only rejects: 0","timestamp":"2026-10-09T22:46:47.005Z"}
+# {"severity":"INFO","message":"Stage 4: Starting secondary validation","timestamp":"2026-10-09T22:46:47.007Z","context":{"itemCount":1,"userName":"Test venue"}}
+# {"severity":"INFO","message":"Timing","timestamp":"2026-10-09T22:46:47.008Z","context":{"step":"gpt_call","component":"secondaryValidator","endpoint":"responses","model":"gpt-6-luna","durationMs":1}}
+# {"severity":"INFO","message":"Stage 4 Responses diagnostics","timestamp":"2026-10-09T22:46:47.008Z","context":{"model":"gpt-6-luna","durationMs":1,"inputTokens":1,"outputTokens":1,"totalTokens":2,"cachedInputTokens":0,"batchItemCount":1,"responseId":"local-test","responseStatus":"completed","incompleteReason":"","requestedMaxOutputTokens":32000,"reasoningTokens":0,"visibleOutputChars":170}}
+# {"severity":"DEBUG","message":"GPT validation response received (responses)","timestamp":"2026-10-09T22:46:47.008Z","context":{"model":"gpt-6-luna","tokens":2}}
+# {"severity":"DEBUG","message":"Parsing validation response","timestamp":"2026-10-09T22:46:47.008Z"}
+# {"severity":"DEBUG","message":"Parsed validation result (no repair needed)","timestamp":"2026-10-09T22:46:47.008Z"}
+# {"severity":"INFO","message":"Stage 4 validation summary","timestamp":"2026-10-09T22:46:47.008Z","context":{"totalItems":1,"itemsKept":1,"itemsRejected":0,"recurringCorrections":0}}
+# {"severity":"DEBUG","message":"Item 1: \\"Test concert\\"","timestamp":"2026-10-09T22:46:47.009Z","context":{"decision":"KEPT","reason":"Valid event with explicit timing"}}
+# {"severity":"DEBUG","message":"Stage 4 normalized recurring pattern for \\"Test concert\\"","timestamp":"2026-10-09T22:46:47.009Z","context":{"to":"none"}}
+# {"severity":"INFO","message":"Stage 4 Result: 1 kept, 0 rejected","timestamp":"2026-10-09T22:46:47.009Z","context":{"recurringCorrections":0,"happyHourNoPriceOverrides":0,"calendarDealAllDayOverrides":0,"calendarDealAllDayNormalizations":0,"operatingHoursOnlyRejects":0}}
+# {"severity":"INFO","message":"Stage 4 Happy Hour no-price overrides: 0","timestamp":"2026-10-09T22:46:47.009Z"}
+# {"severity":"INFO","message":"Stage 4 Calendar deal all-day overrides: 0","timestamp":"2026-10-09T22:46:47.009Z"}
+# {"severity":"INFO","message":"Stage 4 Calendar deal all-day normalizations: 0","timestamp":"2026-10-09T22:46:47.009Z"}
+# {"severity":"INFO","message":"Stage 4 operating-hours-only rejects: 0","timestamp":"2026-10-09T22:46:47.009Z"}
+# {"severity":"INFO","message":"Stage 4: Starting secondary validation","timestamp":"2026-10-09T22:46:47.010Z","context":{"itemCount":1,"userName":"Test venue"}}
+# {"severity":"INFO","message":"Timing","timestamp":"2026-10-09T22:46:47.011Z","context":{"step":"gpt_call","component":"secondaryValidator","endpoint":"responses","model":"gpt-6-luna","durationMs":1}}
+# {"severity":"INFO","message":"Stage 4 Responses diagnostics","timestamp":"2026-10-09T22:46:47.011Z","context":{"model":"gpt-6-luna","durationMs":1,"inputTokens":1,"outputTokens":1,"totalTokens":2,"cachedInputTokens":0,"batchItemCount":1,"responseId":"local-test","responseStatus":"completed","incompleteReason":"","requestedMaxOutputTokens":32000,"reasoningTokens":0,"visibleOutputChars":170}}
+# {"severity":"DEBUG","message":"GPT validation response received (responses)","timestamp":"2026-10-09T22:46:47.011Z","context":{"model":"gpt-6-luna","tokens":2}}
+# {"severity":"DEBUG","message":"Parsing validation response","timestamp":"2026-10-09T22:46:47.011Z"}
+# {"severity":"DEBUG","message":"Parsed validation result (no repair needed)","timestamp":"2026-10-09T22:46:47.011Z"}
+# {"severity":"INFO","message":"Stage 4 validation summary","timestamp":"2026-10-09T22:46:47.011Z","context":{"totalItems":1,"itemsKept":1,"itemsRejected":0,"recurringCorrections":0}}
+# {"severity":"DEBUG","message":"Item 1: \\"Test concert\\"","timestamp":"2026-10-09T22:46:47.011Z","context":{"decision":"KEPT","reason":"Valid event with explicit timing"}}
+# {"severity":"DEBUG","message":"Stage 4 normalized recurring pattern for \\"Test concert\\"","timestamp":"2026-10-09T22:46:47.011Z","context":{"to":"none"}}
+# {"severity":"INFO","message":"Stage 4 Result: 1 kept, 0 rejected","timestamp":"2026-10-09T22:46:47.011Z","context":{"recurringCorrections":0,"happyHourNoPriceOverrides":0,"calendarDealAllDayOverrides":0,"calendarDealAllDayNormalizations":0,"operatingHoursOnlyRejects":0}}
+# {"severity":"INFO","message":"Stage 4 Happy Hour no-price overrides: 0","timestamp":"2026-10-09T22:46:47.011Z"}
+# {"severity":"INFO","message":"Stage 4 Calendar deal all-day overrides: 0","timestamp":"2026-10-09T22:46:47.011Z"}
+# {"severity":"INFO","message":"Stage 4 Calendar deal all-day normalizations: 0","timestamp":"2026-10-09T22:46:47.011Z"}
+# {"severity":"INFO","message":"Stage 4 operating-hours-only rejects: 0","timestamp":"2026-10-09T22:46:47.011Z"}
+# {"severity":"INFO","message":"Stage 4: Starting secondary validation","timestamp":"2026-10-09T22:46:47.012Z","context":{"itemCount":1,"userName":"Test venue"}}
+# {"severity":"INFO","message":"Timing","timestamp":"2026-10-09T22:46:47.013Z","context":{"step":"gpt_call","component":"secondaryValidator","endpoint":"responses","model":"gpt-5-nano","durationMs":1}}
+# {"severity":"INFO","message":"Stage 4 Responses diagnostics","timestamp":"2026-10-09T22:46:47.013Z","context":{"model":"gpt-5-nano","durationMs":1,"inputTokens":1,"outputTokens":1,"totalTokens":2,"cachedInputTokens":0,"batchItemCount":1,"responseId":"local-test","responseStatus":"completed","incompleteReason":"","requestedMaxOutputTokens":32000,"reasoningTokens":0,"visibleOutputChars":170}}
+# {"severity":"DEBUG","message":"GPT validation response received (responses)","timestamp":"2026-10-09T22:46:47.013Z","context":{"model":"gpt-5-nano","tokens":2}}
+# {"severity":"DEBUG","message":"Parsing validation response","timestamp":"2026-10-09T22:46:47.013Z"}
+# {"severity":"DEBUG","message":"Parsed validation result (no repair needed)","timestamp":"2026-10-09T22:46:47.013Z"}
+# {"severity":"INFO","message":"Stage 4 validation summary","timestamp":"2026-10-09T22:46:47.013Z","context":{"totalItems":1,"itemsKept":1,"itemsRejected":0,"recurringCorrections":0}}
+# {"severity":"DEBUG","message":"Item 1: \\"Test concert\\"","timestamp":"2026-10-09T22:46:47.014Z","context":{"decision":"KEPT","reason":"Valid event with explicit timing"}}
+# {"severity":"DEBUG","message":"Stage 4 normalized recurring pattern for \\"Test concert\\"","timestamp":"2026-10-09T22:46:47.014Z","context":{"to":"none"}}
+# {"severity":"INFO","message":"Stage 4 Result: 1 kept, 0 rejected","timestamp":"2026-10-09T22:46:47.014Z","context":{"recurringCorrections":0,"happyHourNoPriceOverrides":0,"calendarDealAllDayOverrides":0,"calendarDealAllDayNormalizations":0,"operatingHoursOnlyRejects":0}}
+# {"severity":"INFO","message":"Stage 4 Happy Hour no-price overrides: 0","timestamp":"2026-10-09T22:46:47.014Z"}
+# {"severity":"INFO","message":"Stage 4 Calendar deal all-day overrides: 0","timestamp":"2026-10-09T22:46:47.014Z"}
+# {"severity":"INFO","message":"Stage 4 Calendar deal all-day normalizations: 0","timestamp":"2026-10-09T22:46:47.014Z"}
+# {"severity":"INFO","message":"Stage 4 operating-hours-only rejects: 0","timestamp":"2026-10-09T22:46:47.014Z"}
+# {"severity":"INFO","message":"Stage 4: Starting secondary validation","timestamp":"2026-10-09T22:46:47.014Z","context":{"itemCount":1,"userName":"Test venue"}}
+# {"severity":"INFO","message":"Timing","timestamp":"2026-10-09T22:46:47.015Z","context":{"step":"gpt_call","component":"secondaryValidator","endpoint":"responses","model":"gpt-5-nano","durationMs":0}}
+# {"severity":"INFO","message":"Stage 4 Responses diagnostics","timestamp":"2026-10-09T22:46:47.016Z","context":{"model":"gpt-5-nano","durationMs":0,"inputTokens":1,"outputTokens":1,"totalTokens":2,"cachedInputTokens":0,"batchItemCount":1,"responseId":"local-test","responseStatus":"completed","incompleteReason":"","requestedMaxOutputTokens":32000,"reasoningTokens":0,"visibleOutputChars":170}}
+# {"severity":"DEBUG","message":"GPT validation response received (responses)","timestamp":"2026-10-09T22:46:47.016Z","context":{"model":"gpt-5-nano","tokens":2}}
+# {"severity":"DEBUG","message":"Parsing validation response","timestamp":"2026-10-09T22:46:47.016Z"}
+# {"severity":"DEBUG","message":"Parsed validation result (no repair needed)","timestamp":"2026-10-09T22:46:47.016Z"}
+# {"severity":"INFO","message":"Stage 4 validation summary","timestamp":"2026-10-09T22:46:47.016Z","context":{"totalItems":1,"itemsKept":1,"itemsRejected":0,"recurringCorrections":0}}
+# {"severity":"DEBUG","message":"Item 1: \\"Test concert\\"","timestamp":"2026-10-09T22:46:47.016Z","context":{"decision":"KEPT","reason":"Valid event with explicit timing"}}
+# {"severity":"DEBUG","message":"Stage 4 normalized recurring pattern for \\"Test concert\\"","timestamp":"2026-10-09T22:46:47.016Z","context":{"to":"none"}}
+# {"severity":"INFO","message":"Stage 4 Result: 1 kept, 0 rejected","timestamp":"2026-10-09T22:46:47.016Z","context":{"recurringCorrections":0,"happyHourNoPriceOverrides":0,"calendarDealAllDayOverrides":0,"calendarDealAllDayNormalizations":0,"operatingHoursOnlyRejects":0}}
+# {"severity":"INFO","message":"Stage 4 Happy Hour no-price overrides: 0","timestamp":"2026-10-09T22:46:47.016Z"}
+# {"severity":"INFO","message":"Stage 4 Calendar deal all-day overrides: 0","timestamp":"2026-10-09T22:46:47.016Z"}
+# {"severity":"INFO","message":"Stage 4 Calendar deal all-day normalizations: 0","timestamp":"2026-10-09T22:46:47.016Z"}
+# {"severity":"INFO","message":"Stage 4 operating-hours-only rejects: 0","timestamp":"2026-10-09T22:46:47.016Z"}
+# {"severity":"INFO","message":"Stage 4: Starting secondary validation","timestamp":"2026-10-09T22:46:47.016Z","context":{"itemCount":1,"userName":"Test venue"}}
+# {"severity":"INFO","message":"Timing","timestamp":"2026-10-09T22:46:47.017Z","context":{"step":"gpt_call","component":"secondaryValidator","endpoint":"responses","model":"gpt-5-nano","durationMs":1}}
+# {"severity":"INFO","message":"Stage 4 Responses diagnostics","timestamp":"2026-10-09T22:46:47.017Z","context":{"model":"gpt-5-nano","durationMs":1,"inputTokens":1,"outputTokens":1,"totalTokens":2,"cachedInputTokens":0,"batchItemCount":1,"responseId":"local-test","responseStatus":"completed","incompleteReason":"","requestedMaxOutputTokens":32000,"reasoningTokens":0,"visibleOutputChars":170}}
+# {"severity":"DEBUG","message":"GPT validation response received (responses)","timestamp":"2026-10-09T22:46:47.017Z","context":{"model":"gpt-5-nano","tokens":2}}
+# {"severity":"DEBUG","message":"Parsing validation response","timestamp":"2026-10-09T22:46:47.017Z"}
+# {"severity":"DEBUG","message":"Parsed validation result (no repair needed)","timestamp":"2026-10-09T22:46:47.017Z"}
+# {"severity":"INFO","message":"Stage 4 validation summary","timestamp":"2026-10-09T22:46:47.017Z","context":{"totalItems":1,"itemsKept":1,"itemsRejected":0,"recurringCorrections":0}}
+# {"severity":"DEBUG","message":"Item 1: \\"Test concert\\"","timestamp":"2026-10-09T22:46:47.017Z","context":{"decision":"KEPT","reason":"Valid event with explicit timing"}}
+# {"severity":"DEBUG","message":"Stage 4 normalized recurring pattern for \\"Test concert\\"","timestamp":"2026-10-09T22:46:47.017Z","context":{"to":"none"}}
+# {"severity":"INFO","message":"Stage 4 Result: 1 kept, 0 rejected","timestamp":"2026-10-09T22:46:47.017Z","context":{"recurringCorrections":0,"happyHourNoPriceOverrides":0,"calendarDealAllDayOverrides":0,"calendarDealAllDayNormalizations":0,"operatingHoursOnlyRejects":0}}
+# {"severity":"INFO","message":"Stage 4 Happy Hour no-price overrides: 0","timestamp":"2026-10-09T22:46:47.017Z"}
+# {"severity":"INFO","message":"Stage 4 Calendar deal all-day overrides: 0","timestamp":"2026-10-09T22:46:47.017Z"}
+# {"severity":"INFO","message":"Stage 4 Calendar deal all-day normalizations: 0","timestamp":"2026-10-09T22:46:47.017Z"}
+# {"severity":"INFO","message":"Stage 4 operating-hours-only rejects: 0","timestamp":"2026-10-09T22:46:47.018Z"}
+# Subtest: gpt-6-luna Stage 4 reasoning none reaches the request correctly
+ok 21 - gpt-6-luna Stage 4 reasoning none reaches the request correctly
+  ---
+  duration_ms: 23.1973
+  ...
+# Subtest: gpt-6-luna Stage 4 reasoning low reaches the request correctly
+ok 22 - gpt-6-luna Stage 4 reasoning low reaches the request correctly
+  ---
+  duration_ms: 2.723
+  ...
+# Subtest: gpt-6-luna Stage 4 reasoning medium reaches the request correctly
+ok 23 - gpt-6-luna Stage 4 reasoning medium reaches the request correctly
+  ---
+  duration_ms: 2.1292
+  ...
+# Subtest: gpt-5-nano Stage 4 reasoning low reaches the request correctly
+ok 24 - gpt-5-nano Stage 4 reasoning low reaches the request correctly
+  ---
+  duration_ms: 2.3868
+  ...
+# Subtest: gpt-5-nano Stage 4 reasoning none reaches the request correctly
+ok 25 - gpt-5-nano Stage 4 reasoning none reaches the request correctly
+  ---
+  duration_ms: 1.873
+  ...
+# Subtest: gpt-5-nano Stage 4 reasoning omitted reaches the request correctly
+ok 26 - gpt-5-nano Stage 4 reasoning omitted reaches the request correctly
+  ---
+  duration_ms: 1.4649
+  ...
+1..26
+# tests 26
+# suites 0
+# pass 26
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1856.3091

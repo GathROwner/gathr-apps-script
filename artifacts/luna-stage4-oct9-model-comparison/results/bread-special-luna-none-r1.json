@@ -1,0 +1,176 @@
+{
+  "caseId": "bread-special",
+  "arm": "luna-none",
+  "repeat": 1,
+  "model": "gpt-6-luna",
+  "effort": "none",
+  "noLiveWrites": true,
+  "sourceSha256": "b7b69a2acb332c62afd7c20bfaf0a60a849fdc29b3558cd0f91412fbc6767d6b",
+  "inputCount": 1,
+  "outputCount": 1,
+  "wallMs": 2993,
+  "items": [
+    {
+      "name": "Day-old bread offer",
+      "description": "First-time offer: Day-old bread for $1.49 per loaf, perfect for stuffing and holiday meals. Offer subject to availability.",
+      "date": "2026-10-09",
+      "startTime": "",
+      "endTime": "",
+      "timeFlags": {
+        "start": {
+          "source": "none",
+          "evidence": ""
+        },
+        "end": {
+          "toClose": false,
+          "source": "none",
+          "evidence": ""
+        }
+      },
+      "venue": "Mary's Bake Shoppe",
+      "pricing": {
+        "price": "$1.49/loaf"
+      },
+      "relevantImageIndex": 0,
+      "recurringPattern": "none",
+      "extractionReason": "\"FIRST-TIME SPECIAL! Day-old bread for just $1.49/loaf*\"",
+      "_sourceType": "special",
+      "_pipelineIndex": 1,
+      "_pipelineTotalStage3": 1
+    }
+  ],
+  "metadata": {
+    "_happyHourNoPriceOverrideCount": 0,
+    "_calendarDealAllDayOverrideCount": 0,
+    "_calendarDealAllDayNormalizationCount": 0,
+    "_operatingHoursOnlyRejectCount": 0
+  },
+  "usage": [
+    {
+      "stage": "stage4",
+      "component": "secondaryValidator",
+      "endpoint": "responses",
+      "model": "gpt-6-luna",
+      "durationMs": 2973,
+      "inputTokens": 2188,
+      "outputTokens": 371,
+      "totalTokens": 2559,
+      "cachedInputTokens": 0,
+      "fileId": "stage4-frozen-comparison",
+      "postId": "1549619793637990",
+      "rowIndex": 335,
+      "runId": "local-1",
+      "batchItemCount": 1,
+      "responseId": "resp_0b7bb2f6f84bdcca006ac96f989f7887d28a7db884760bbc73",
+      "responseStatus": "completed",
+      "incompleteReason": "",
+      "requestedMaxOutputTokens": 32000,
+      "reasoningTokens": 0,
+      "visibleOutputChars": 1428
+    }
+  ],
+  "requests": [
+    {
+      "model": "gpt-6-luna",
+      "effort": "none",
+      "responseId": "resp_0b7bb2f6f84bdcca006ac96f989f7887d28a7db884760bbc73",
+      "httpStatus": 200,
+      "status": "completed",
+      "incompleteDetails": null,
+      "error": null,
+      "promptSha256": "db68257614fab263681bba1fb769f1f525ea5fa8a2a7db895357d3ca16a6b8ae",
+      "outputContractSha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "batchItems": [
+        {
+          "name": "Day-old bread offer",
+          "description": "First-time offer: Day-old bread for $1.49 per loaf, perfect for stuffing and holiday meals. Offer subject to availability.",
+          "date": "2026-10-09",
+          "startTime": "",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "none",
+              "evidence": ""
+            },
+            "end": {
+              "toClose": false,
+              "source": "none",
+              "evidence": ""
+            }
+          },
+          "venue": "Mary's Bake Shoppe",
+          "pricing": {
+            "price": "$1.49/loaf"
+          },
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "\"FIRST-TIME SPECIAL! Day-old bread for just $1.49/loaf*\"",
+          "_sourceType": "special",
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 1
+        }
+      ],
+      "maxOutputTokens": 32000,
+      "durationMs": 2965,
+      "usage": {
+        "input_tokens": 2188,
+        "input_tokens_details": {
+          "cache_write_tokens": 2185,
+          "cached_tokens": 0
+        },
+        "output_tokens": 371,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 2559
+      },
+      "visibleOutputChars": 1428,
+      "rawText": "{\n  \"validatedItems\": [\n    {\n      \"item\": {\n        \"name\": \"Day-old bread offer\",\n        \"description\": \"First-time offer: Day-old bread for $1.49 per loaf, perfect for stuffing and holiday meals. Offer subject to availability.\",\n        \"date\": \"2026-10-09\",\n        \"startTime\": \"\",\n        \"endTime\": \"\",\n        \"timeFlags\": {\n          \"start\": {\n            \"source\": \"none\",\n            \"evidence\": \"\"\n          },\n          \"end\": {\n            \"toClose\": false,\n            \"source\": \"none\",\n            \"evidence\": \"\"\n          }\n        },\n        \"venue\": \"Mary's Bake Shoppe\",\n        \"pricing\": {\n          \"price\": \"$1.49/loaf\"\n        },\n        \"relevantImageIndex\": 0,\n        \"recurringPattern\": \"none\",\n        \"extractionReason\": \"\\\"FIRST-TIME SPECIAL! Day-old bread for just $1.49/loaf*\\\"\",\n        \"_sourceType\": \"special\",\n        \"_pipelineIndex\": 1,\n        \"_pipelineTotalStage3\": 1\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"This is an explicitly advertised first-time offer with a specific price, so it qualifies as a food special. The holiday-meal reference does not make it a holiday event, and no recurring-pattern correction is needed.\",\n      \"corrections\": {}\n    }\n  ],\n  \"validationSummary\": {\n    \"totalItems\": 1,\n    \"itemsKept\": 1,\n    \"itemsRejected\": 0,\n    \"recurringCorrections\": 0,\n    \"overallNotes\": \"The single item is a clearly priced special and is retained.\"\n  }\n}",
+      "rawResult": {
+        "validatedItems": [
+          {
+            "item": {
+              "name": "Day-old bread offer",
+              "description": "First-time offer: Day-old bread for $1.49 per loaf, perfect for stuffing and holiday meals. Offer subject to availability.",
+              "date": "2026-10-09",
+              "startTime": "",
+              "endTime": "",
+              "timeFlags": {
+                "start": {
+                  "source": "none",
+                  "evidence": ""
+                },
+                "end": {
+                  "toClose": false,
+                  "source": "none",
+                  "evidence": ""
+                }
+              },
+              "venue": "Mary's Bake Shoppe",
+              "pricing": {
+                "price": "$1.49/loaf"
+              },
+              "relevantImageIndex": 0,
+              "recurringPattern": "none",
+              "extractionReason": "\"FIRST-TIME SPECIAL! Day-old bread for just $1.49/loaf*\"",
+              "_sourceType": "special",
+              "_pipelineIndex": 1,
+              "_pipelineTotalStage3": 1
+            },
+            "decision": "KEPT",
+            "reason": "This is an explicitly advertised first-time offer with a specific price, so it qualifies as a food special. The holiday-meal reference does not make it a holiday event, and no recurring-pattern correction is needed.",
+            "corrections": {}
+          }
+        ],
+        "validationSummary": {
+          "totalItems": 1,
+          "itemsKept": 1,
+          "itemsRejected": 0,
+          "recurringCorrections": 0,
+          "overallNotes": "The single item is a clearly priced special and is retained."
+        }
+      },
+      "parseError": false
+    }
+  ]
+}

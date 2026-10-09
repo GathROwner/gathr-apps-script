@@ -1,0 +1,341 @@
+{
+  "caseId": "studio-tours",
+  "arm": "luna-none",
+  "repeat": 1,
+  "model": "gpt-6-luna",
+  "effort": "none",
+  "noLiveWrites": true,
+  "sourceSha256": "3ce8be617cbe2c8ac55cb6ecca40f0c95961f9dabc628a39d49f2f3a883dc472",
+  "inputCount": 2,
+  "outputCount": 2,
+  "wallMs": 6993,
+  "items": [
+    {
+      "name": "Studio Tour and Gallery Experience",
+      "description": "Saturday: Visitors are invited to tour the studio floor and see how Robert McMillan makes and applies his multilayered glazes. The gallery experience also includes a photo screen for family and friends fall photos, with music, laughter, stories, and socializing.",
+      "date": "2026-10-10",
+      "startTime": "10:00",
+      "endTime": "17:00",
+      "venue": "",
+      "ticketLink": "",
+      "price": "",
+      "relevantImageIndex": 0,
+      "recurringPattern": "none",
+      "extractionReason": "The post explicitly invites visitors to take a studio tour and enjoy a gallery experience, including a photo opportunity, during the stated Saturday access hours.",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "Saturday and Sunday 10-5pm"
+        },
+        "end": {
+          "source": "explicit",
+          "toClose": false,
+          "evidence": "Saturday and Sunday 10-5pm"
+        }
+      },
+      "spatial": {
+        "kind": "single_location",
+        "locations": [
+          {
+            "label": "Robert McMillan Pottery",
+            "address": "17 Broadway Road, Hope River, PEI",
+            "role": "location",
+            "certainty": "confirmed",
+            "sourceText": "stop in this weekend to 17 Broadway Road, Hope River, PEI"
+          }
+        ],
+        "confirmedStreets": [],
+        "ordered": false,
+        "evidenceNotes": "The post gives the studio's street address as the visitor destination."
+      },
+      "_pipelineIndex": 1,
+      "_pipelineTotalStage3": 2
+    },
+    {
+      "name": "Studio Tour and Gallery Experience",
+      "description": "Sunday: Visitors are invited to tour the studio floor and see how Robert McMillan makes and applies his multilayered glazes. The gallery experience also includes a photo screen for family and friends fall photos, with music, laughter, stories, and socializing.",
+      "date": "2026-10-11",
+      "startTime": "10:00",
+      "endTime": "17:00",
+      "venue": "",
+      "ticketLink": "",
+      "price": "",
+      "relevantImageIndex": 0,
+      "recurringPattern": "none",
+      "extractionReason": "The post explicitly invites visitors to take a studio tour and enjoy a gallery experience, including a photo opportunity, during the stated Sunday access hours.",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "Saturday and Sunday 10-5pm"
+        },
+        "end": {
+          "source": "explicit",
+          "toClose": false,
+          "evidence": "Saturday and Sunday 10-5pm"
+        }
+      },
+      "spatial": {
+        "kind": "single_location",
+        "locations": [
+          {
+            "label": "Robert McMillan Pottery",
+            "address": "17 Broadway Road, Hope River, PEI",
+            "role": "location",
+            "certainty": "confirmed",
+            "sourceText": "stop in this weekend to 17 Broadway Road, Hope River, PEI"
+          }
+        ],
+        "confirmedStreets": [],
+        "ordered": false,
+        "evidenceNotes": "The post gives the studio's street address as the visitor destination."
+      },
+      "_pipelineIndex": 2,
+      "_pipelineTotalStage3": 2
+    }
+  ],
+  "metadata": {
+    "_happyHourNoPriceOverrideCount": 0,
+    "_calendarDealAllDayOverrideCount": 0,
+    "_calendarDealAllDayNormalizationCount": 0,
+    "_operatingHoursOnlyRejectCount": 0
+  },
+  "usage": [
+    {
+      "stage": "stage4",
+      "component": "secondaryValidator",
+      "endpoint": "responses",
+      "model": "gpt-6-luna",
+      "durationMs": 6976,
+      "inputTokens": 2737,
+      "outputTokens": 963,
+      "totalTokens": 3700,
+      "cachedInputTokens": 0,
+      "fileId": "stage4-frozen-comparison",
+      "postId": "1667779975261824",
+      "rowIndex": 274,
+      "runId": "local-1",
+      "batchItemCount": 2,
+      "responseId": "resp_0d4ef78909e8f127006ac96f6d8d0487d29f3a50a518d9fbfb",
+      "responseStatus": "completed",
+      "incompleteReason": "",
+      "requestedMaxOutputTokens": 32000,
+      "reasoningTokens": 0,
+      "visibleOutputChars": 4227
+    }
+  ],
+  "requests": [
+    {
+      "model": "gpt-6-luna",
+      "effort": "none",
+      "responseId": "resp_0d4ef78909e8f127006ac96f6d8d0487d29f3a50a518d9fbfb",
+      "httpStatus": 200,
+      "status": "completed",
+      "incompleteDetails": null,
+      "error": null,
+      "promptSha256": "5e9a5e9569641dcbff2c62a3ac69471d9bb7a6c5bb6575988b94d70c7b7808b0",
+      "outputContractSha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "batchItems": [
+        {
+          "name": "Studio Tour and Gallery Experience",
+          "description": "Saturday: Visitors are invited to tour the studio floor and see how Robert McMillan makes and applies his multilayered glazes. The gallery experience also includes a photo screen for family and friends fall photos, with music, laughter, stories, and socializing.",
+          "date": "2026-10-10",
+          "startTime": "10:00",
+          "endTime": "17:00",
+          "venue": "",
+          "ticketLink": "",
+          "price": "",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "The post explicitly invites visitors to take a studio tour and enjoy a gallery experience, including a photo opportunity, during the stated Saturday access hours.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Saturday and Sunday 10-5pm"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "Saturday and Sunday 10-5pm"
+            }
+          },
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              {
+                "label": "Robert McMillan Pottery",
+                "address": "17 Broadway Road, Hope River, PEI",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "stop in this weekend to 17 Broadway Road, Hope River, PEI"
+              }
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The post gives the studio's street address as the visitor destination."
+          },
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 2
+        },
+        {
+          "name": "Studio Tour and Gallery Experience",
+          "description": "Sunday: Visitors are invited to tour the studio floor and see how Robert McMillan makes and applies his multilayered glazes. The gallery experience also includes a photo screen for family and friends fall photos, with music, laughter, stories, and socializing.",
+          "date": "2026-10-11",
+          "startTime": "10:00",
+          "endTime": "17:00",
+          "venue": "",
+          "ticketLink": "",
+          "price": "",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "The post explicitly invites visitors to take a studio tour and enjoy a gallery experience, including a photo opportunity, during the stated Sunday access hours.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Saturday and Sunday 10-5pm"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "Saturday and Sunday 10-5pm"
+            }
+          },
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              {
+                "label": "Robert McMillan Pottery",
+                "address": "17 Broadway Road, Hope River, PEI",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "stop in this weekend to 17 Broadway Road, Hope River, PEI"
+              }
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The post gives the studio's street address as the visitor destination."
+          },
+          "_pipelineIndex": 2,
+          "_pipelineTotalStage3": 2
+        }
+      ],
+      "maxOutputTokens": 32000,
+      "durationMs": 6972,
+      "usage": {
+        "input_tokens": 2737,
+        "input_tokens_details": {
+          "cache_write_tokens": 2734,
+          "cached_tokens": 0
+        },
+        "output_tokens": 963,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 3700
+      },
+      "visibleOutputChars": 4227,
+      "rawText": "{\n  \"validatedItems\": [\n    {\n      \"item\": {\n        \"name\": \"Studio Tour and Gallery Experience\",\n        \"description\": \"Saturday: Visitors are invited to tour the studio floor and see how Robert McMillan makes and applies his multilayered glazes. The gallery experience also includes a photo screen for family and friends fall photos, with music, laughter, stories, and socializing.\",\n        \"date\": \"2026-10-10\",\n        \"startTime\": \"10:00\",\n        \"endTime\": \"17:00\",\n        \"venue\": \"\",\n        \"ticketLink\": \"\",\n        \"price\": \"\",\n        \"relevantImageIndex\": 0,\n        \"recurringPattern\": \"none\",\n        \"extractionReason\": \"The post explicitly invites visitors to take a studio tour and enjoy a gallery experience, including a photo opportunity, during the stated Saturday access hours.\",\n        \"timeFlags\": {\n          \"start\": {\n            \"source\": \"explicit\",\n            \"evidence\": \"Saturday and Sunday 10-5pm\"\n          },\n          \"end\": {\n            \"source\": \"explicit\",\n            \"toClose\": false,\n            \"evidence\": \"Saturday and Sunday 10-5pm\"\n          }\n        },\n        \"spatial\": {\n          \"kind\": \"single_location\",\n          \"locations\": [\n            {\n              \"label\": \"Robert McMillan Pottery\",\n              \"address\": \"17 Broadway Road, Hope River, PEI\",\n              \"role\": \"location\",\n              \"certainty\": \"confirmed\",\n              \"sourceText\": \"stop in this weekend to 17 Broadway Road, Hope River, PEI\"\n            }\n          ],\n          \"confirmedStreets\": [],\n          \"ordered\": false,\n          \"evidenceNotes\": \"The post gives the studio's street address as the visitor destination.\"\n        },\n        \"_pipelineIndex\": 1,\n        \"_pipelineTotalStage3\": 2\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"This is a specifically dated studio tour and gallery activity with explicit hours and a stated destination, not merely a business-hours listing.\"\n    },\n    {\n      \"item\": {\n        \"name\": \"Studio Tour and Gallery Experience\",\n        \"description\": \"Sunday: Visitors are invited to tour the studio floor and see how Robert McMillan makes and applies his multilayered glazes. The gallery experience also includes a photo screen for family and friends fall photos, with music, laughter, stories, and socializing.\",\n        \"date\": \"2026-10-11\",\n        \"startTime\": \"10:00\",\n        \"endTime\": \"17:00\",\n        \"venue\": \"\",\n        \"ticketLink\": \"\",\n        \"price\": \"\",\n        \"relevantImageIndex\": 0,\n        \"recurringPattern\": \"none\",\n        \"extractionReason\": \"The post explicitly invites visitors to take a studio tour and enjoy a gallery experience, including a photo opportunity, during the stated Sunday access hours.\",\n        \"timeFlags\": {\n          \"start\": {\n            \"source\": \"explicit\",\n            \"evidence\": \"Saturday and Sunday 10-5pm\"\n          },\n          \"end\": {\n            \"source\": \"explicit\",\n            \"toClose\": false,\n            \"evidence\": \"Saturday and Sunday 10-5pm\"\n          }\n        },\n        \"spatial\": {\n          \"kind\": \"single_location\",\n          \"locations\": [\n            {\n              \"label\": \"Robert McMillan Pottery\",\n              \"address\": \"17 Broadway Road, Hope River, PEI\",\n              \"role\": \"location\",\n              \"certainty\": \"confirmed\",\n              \"sourceText\": \"stop in this weekend to 17 Broadway Road, Hope River, PEI\"\n            }\n          ],\n          \"confirmedStreets\": [],\n          \"ordered\": false,\n          \"evidenceNotes\": \"The post gives the studio's street address as the visitor destination.\"\n        },\n        \"_pipelineIndex\": 2,\n        \"_pipelineTotalStage3\": 2\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"This is a specifically dated studio tour and gallery activity with explicit hours and a stated destination, not merely a business-hours listing. It is a separate Sunday occurrence from the Saturday item.\"\n    }\n  ],\n  \"validationSummary\": {\n    \"totalItems\": 2,\n    \"itemsKept\": 2,\n    \"itemsRejected\": 0,\n    \"recurringCorrections\": 0,\n    \"overallNotes\": \"Both dated studio-tour and gallery experiences are valid activities. The Saturday and Sunday listings are separate occurrences, not duplicates.\"\n  }\n}",
+      "rawResult": {
+        "validatedItems": [
+          {
+            "item": {
+              "name": "Studio Tour and Gallery Experience",
+              "description": "Saturday: Visitors are invited to tour the studio floor and see how Robert McMillan makes and applies his multilayered glazes. The gallery experience also includes a photo screen for family and friends fall photos, with music, laughter, stories, and socializing.",
+              "date": "2026-10-10",
+              "startTime": "10:00",
+              "endTime": "17:00",
+              "venue": "",
+              "ticketLink": "",
+              "price": "",
+              "relevantImageIndex": 0,
+              "recurringPattern": "none",
+              "extractionReason": "The post explicitly invites visitors to take a studio tour and enjoy a gallery experience, including a photo opportunity, during the stated Saturday access hours.",
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "Saturday and Sunday 10-5pm"
+                },
+                "end": {
+                  "source": "explicit",
+                  "toClose": false,
+                  "evidence": "Saturday and Sunday 10-5pm"
+                }
+              },
+              "spatial": {
+                "kind": "single_location",
+                "locations": [
+                  {
+                    "label": "Robert McMillan Pottery",
+                    "address": "17 Broadway Road, Hope River, PEI",
+                    "role": "location",
+                    "certainty": "confirmed",
+                    "sourceText": "stop in this weekend to 17 Broadway Road, Hope River, PEI"
+                  }
+                ],
+                "confirmedStreets": [],
+                "ordered": false,
+                "evidenceNotes": "The post gives the studio's street address as the visitor destination."
+              },
+              "_pipelineIndex": 1,
+              "_pipelineTotalStage3": 2
+            },
+            "decision": "KEPT",
+            "reason": "This is a specifically dated studio tour and gallery activity with explicit hours and a stated destination, not merely a business-hours listing."
+          },
+          {
+            "item": {
+              "name": "Studio Tour and Gallery Experience",
+              "description": "Sunday: Visitors are invited to tour the studio floor and see how Robert McMillan makes and applies his multilayered glazes. The gallery experience also includes a photo screen for family and friends fall photos, with music, laughter, stories, and socializing.",
+              "date": "2026-10-11",
+              "startTime": "10:00",
+              "endTime": "17:00",
+              "venue": "",
+              "ticketLink": "",
+              "price": "",
+              "relevantImageIndex": 0,
+              "recurringPattern": "none",
+              "extractionReason": "The post explicitly invites visitors to take a studio tour and enjoy a gallery experience, including a photo opportunity, during the stated Sunday access hours.",
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "Saturday and Sunday 10-5pm"
+                },
+                "end": {
+                  "source": "explicit",
+                  "toClose": false,
+                  "evidence": "Saturday and Sunday 10-5pm"
+                }
+              },
+              "spatial": {
+                "kind": "single_location",
+                "locations": [
+                  {
+                    "label": "Robert McMillan Pottery",
+                    "address": "17 Broadway Road, Hope River, PEI",
+                    "role": "location",
+                    "certainty": "confirmed",
+                    "sourceText": "stop in this weekend to 17 Broadway Road, Hope River, PEI"
+                  }
+                ],
+                "confirmedStreets": [],
+                "ordered": false,
+                "evidenceNotes": "The post gives the studio's street address as the visitor destination."
+              },
+              "_pipelineIndex": 2,
+              "_pipelineTotalStage3": 2
+            },
+            "decision": "KEPT",
+            "reason": "This is a specifically dated studio tour and gallery activity with explicit hours and a stated destination, not merely a business-hours listing. It is a separate Sunday occurrence from the Saturday item."
+          }
+        ],
+        "validationSummary": {
+          "totalItems": 2,
+          "itemsKept": 2,
+          "itemsRejected": 0,
+          "recurringCorrections": 0,
+          "overallNotes": "Both dated studio-tour and gallery experiences are valid activities. The Saturday and Sunday listings are separate occurrences, not duplicates."
+        }
+      },
+      "parseError": false
+    }
+  ]
+}

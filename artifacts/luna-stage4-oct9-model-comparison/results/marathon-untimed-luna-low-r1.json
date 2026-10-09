@@ -1,0 +1,734 @@
+{
+  "caseId": "marathon-untimed",
+  "arm": "luna-low",
+  "repeat": 1,
+  "model": "gpt-6-luna",
+  "effort": "low",
+  "noLiveWrites": true,
+  "sourceSha256": "79fa0288bc6e0aeabc8b72930f69e86bbcbe2cce84bcaf9d1decd92b405b4ba7",
+  "inputCount": 13,
+  "outputCount": 1,
+  "wallMs": 16401,
+  "items": [
+    {
+      "name": "Prince Edward Island Marathon Registration Price Change",
+      "type": "special",
+      "date": "2026-10-09",
+      "startTime": "11:59 PM AST",
+      "endTime": "",
+      "venue": "",
+      "price": "",
+      "description": "Registration prices change at this time. Register before the change to lock in the current price and save. Registration link: https://raceroster.com/events/2026/113063/22nd-annual-prince-edward-island-marathon",
+      "extractionReason": "The caption explicitly advertises a registration price change on Friday, October 9, at 11:59 PM AST, and encourages readers to register now and save. This is a caption-only price special, not pictured in the image.",
+      "relevantImageIndex": -1,
+      "spatial": {
+        "kind": "unspecified",
+        "locations": [],
+        "confirmedStreets": [],
+        "ordered": false,
+        "evidenceNotes": "No physical location is stated."
+      },
+      "_sourceType": "calendar",
+      "_pipelineIndex": 13,
+      "_pipelineTotalStage3": 13,
+      "recurringPattern": "none"
+    }
+  ],
+  "metadata": {
+    "_happyHourNoPriceOverrideCount": 0,
+    "_calendarDealAllDayOverrideCount": 0,
+    "_calendarDealAllDayNormalizationCount": 0,
+    "_operatingHoursOnlyRejectCount": 0
+  },
+  "usage": [
+    {
+      "stage": "stage4",
+      "component": "secondaryValidator",
+      "endpoint": "responses",
+      "model": "gpt-6-luna",
+      "durationMs": 16382,
+      "inputTokens": 4678,
+      "outputTokens": 2723,
+      "totalTokens": 7401,
+      "cachedInputTokens": 0,
+      "fileId": "stage4-frozen-comparison",
+      "postId": "1515399363943565",
+      "rowIndex": 51,
+      "runId": "local-1",
+      "batchItemCount": 13,
+      "responseId": "resp_0d40a3f83c2133a6006ac96f9c4d8487d2837062d6d9be9752",
+      "responseStatus": "completed",
+      "incompleteReason": "",
+      "requestedMaxOutputTokens": 32000,
+      "reasoningTokens": 198,
+      "visibleOutputChars": 10383
+    }
+  ],
+  "requests": [
+    {
+      "model": "gpt-6-luna",
+      "effort": "low",
+      "responseId": "resp_0d40a3f83c2133a6006ac96f9c4d8487d2837062d6d9be9752",
+      "httpStatus": 200,
+      "status": "completed",
+      "incompleteDetails": null,
+      "error": null,
+      "promptSha256": "6dea4318999f00c79c0c42b7cf37e7e6f52908eae912c6f2b185e6f6f98c3e14",
+      "outputContractSha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "batchItems": [
+        {
+          "name": "10K Run",
+          "type": "event",
+          "date": "2026-10-17",
+          "startTime": "",
+          "endTime": "",
+          "venue": "",
+          "price": "",
+          "description": "Listed under Saturday as part of the 2026 Prince Edward Island Marathon.",
+          "extractionReason": "The poster lists “10K RUN” in its Saturday column. The poster dates the marathon October 16–18, 2026; Saturday is October 17.",
+          "relevantImageIndex": 0,
+          "spatial": {
+            "kind": "unspecified",
+            "locations": [],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "No venue, street, or route details are shown."
+          },
+          "_sourceType": "calendar",
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 13
+        },
+        {
+          "name": "10K Walk",
+          "type": "event",
+          "date": "2026-10-17",
+          "startTime": "",
+          "endTime": "",
+          "venue": "",
+          "price": "",
+          "description": "Listed under Saturday as part of the 2026 Prince Edward Island Marathon.",
+          "extractionReason": "The poster lists “10K WALK” in its Saturday column. The poster dates the marathon October 16–18, 2026; Saturday is October 17.",
+          "relevantImageIndex": 0,
+          "spatial": {
+            "kind": "unspecified",
+            "locations": [],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "No venue, street, or route details are shown."
+          },
+          "_sourceType": "calendar",
+          "_pipelineIndex": 2,
+          "_pipelineTotalStage3": 13
+        },
+        {
+          "name": "5K Run",
+          "type": "event",
+          "date": "2026-10-17",
+          "startTime": "",
+          "endTime": "",
+          "venue": "",
+          "price": "",
+          "description": "Listed under Saturday as part of the 2026 Prince Edward Island Marathon.",
+          "extractionReason": "The poster lists “5K RUN” in its Saturday column. The poster dates the marathon October 16–18, 2026; Saturday is October 17.",
+          "relevantImageIndex": 0,
+          "spatial": {
+            "kind": "unspecified",
+            "locations": [],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "No venue, street, or route details are shown."
+          },
+          "_sourceType": "calendar",
+          "_pipelineIndex": 3,
+          "_pipelineTotalStage3": 13
+        },
+        {
+          "name": "5K Walk",
+          "type": "event",
+          "date": "2026-10-17",
+          "startTime": "",
+          "endTime": "",
+          "venue": "",
+          "price": "",
+          "description": "Listed under Saturday as part of the 2026 Prince Edward Island Marathon.",
+          "extractionReason": "The poster lists “5K WALK” in its Saturday column. The poster dates the marathon October 16–18, 2026; Saturday is October 17.",
+          "relevantImageIndex": 0,
+          "spatial": {
+            "kind": "unspecified",
+            "locations": [],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "No venue, street, or route details are shown."
+          },
+          "_sourceType": "calendar",
+          "_pipelineIndex": 4,
+          "_pipelineTotalStage3": 13
+        },
+        {
+          "name": "2K Wheelchair",
+          "type": "event",
+          "date": "2026-10-17",
+          "startTime": "",
+          "endTime": "",
+          "venue": "",
+          "price": "",
+          "description": "Listed under Saturday as part of the 2026 Prince Edward Island Marathon.",
+          "extractionReason": "The poster lists “2K WHEELCHAIR” in its Saturday column. The poster dates the marathon October 16–18, 2026; Saturday is October 17.",
+          "relevantImageIndex": 0,
+          "spatial": {
+            "kind": "unspecified",
+            "locations": [],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "No venue, street, or route details are shown."
+          },
+          "_sourceType": "calendar",
+          "_pipelineIndex": 5,
+          "_pipelineTotalStage3": 13
+        },
+        {
+          "name": "Kids Fox Trot",
+          "type": "event",
+          "date": "2026-10-17",
+          "startTime": "",
+          "endTime": "",
+          "venue": "",
+          "price": "",
+          "description": "Listed under Saturday as part of the 2026 Prince Edward Island Marathon.",
+          "extractionReason": "The poster lists “KIDS FOX TROT” in its Saturday column. The poster dates the marathon October 16–18, 2026; Saturday is October 17.",
+          "relevantImageIndex": 0,
+          "spatial": {
+            "kind": "unspecified",
+            "locations": [],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "No venue, street, or route details are shown."
+          },
+          "_sourceType": "calendar",
+          "_pipelineIndex": 6,
+          "_pipelineTotalStage3": 13
+        },
+        {
+          "name": "Full Marathon",
+          "type": "event",
+          "date": "2026-10-18",
+          "startTime": "",
+          "endTime": "",
+          "venue": "",
+          "price": "",
+          "description": "Listed under Sunday as part of the 2026 Prince Edward Island Marathon.",
+          "extractionReason": "The poster lists “FULL MARATHON” in its Sunday column. The poster dates the marathon October 16–18, 2026; Sunday is October 18.",
+          "relevantImageIndex": 0,
+          "spatial": {
+            "kind": "unspecified",
+            "locations": [],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "No venue, street, or route details are shown."
+          },
+          "_sourceType": "calendar",
+          "_pipelineIndex": 7,
+          "_pipelineTotalStage3": 13
+        },
+        {
+          "name": "Team Relay",
+          "type": "event",
+          "date": "2026-10-18",
+          "startTime": "",
+          "endTime": "",
+          "venue": "",
+          "price": "",
+          "description": "Listed under Sunday as part of the 2026 Prince Edward Island Marathon.",
+          "extractionReason": "The poster lists “TEAM RELAY” in its Sunday column. The poster dates the marathon October 16–18, 2026; Sunday is October 18.",
+          "relevantImageIndex": 0,
+          "spatial": {
+            "kind": "unspecified",
+            "locations": [],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "No venue, street, or route details are shown."
+          },
+          "_sourceType": "calendar",
+          "_pipelineIndex": 8,
+          "_pipelineTotalStage3": 13
+        },
+        {
+          "name": "Half Marathon Run",
+          "type": "event",
+          "date": "2026-10-18",
+          "startTime": "",
+          "endTime": "",
+          "venue": "",
+          "price": "",
+          "description": "Listed under Sunday as part of the 2026 Prince Edward Island Marathon.",
+          "extractionReason": "The poster lists “HALF MARATHON RUN” in its Sunday column. The poster dates the marathon October 16–18, 2026; Sunday is October 18.",
+          "relevantImageIndex": 0,
+          "spatial": {
+            "kind": "unspecified",
+            "locations": [],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "No venue, street, or route details are shown."
+          },
+          "_sourceType": "calendar",
+          "_pipelineIndex": 9,
+          "_pipelineTotalStage3": 13
+        },
+        {
+          "name": "Half Marathon Walk",
+          "type": "event",
+          "date": "2026-10-18",
+          "startTime": "",
+          "endTime": "",
+          "venue": "",
+          "price": "",
+          "description": "Listed under Sunday as part of the 2026 Prince Edward Island Marathon.",
+          "extractionReason": "The poster lists “HALF MARATHON WALK” in its Sunday column. The poster dates the marathon October 16–18, 2026; Sunday is October 18.",
+          "relevantImageIndex": 0,
+          "spatial": {
+            "kind": "unspecified",
+            "locations": [],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "No venue, street, or route details are shown."
+          },
+          "_sourceType": "calendar",
+          "_pipelineIndex": 10,
+          "_pipelineTotalStage3": 13
+        },
+        {
+          "name": "15K Run",
+          "type": "event",
+          "date": "2026-10-18",
+          "startTime": "",
+          "endTime": "",
+          "venue": "",
+          "price": "",
+          "description": "Listed under Sunday as part of the 2026 Prince Edward Island Marathon.",
+          "extractionReason": "The poster lists “15K RUN” in its Sunday column. The poster dates the marathon October 16–18, 2026; Sunday is October 18.",
+          "relevantImageIndex": 0,
+          "spatial": {
+            "kind": "unspecified",
+            "locations": [],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "No venue, street, or route details are shown."
+          },
+          "_sourceType": "calendar",
+          "_pipelineIndex": 11,
+          "_pipelineTotalStage3": 13
+        },
+        {
+          "name": "15K Walk",
+          "type": "event",
+          "date": "2026-10-18",
+          "startTime": "",
+          "endTime": "",
+          "venue": "",
+          "price": "",
+          "description": "Listed under Sunday as part of the 2026 Prince Edward Island Marathon.",
+          "extractionReason": "The poster lists “15K WALK” in its Sunday column. The poster dates the marathon October 16–18, 2026; Sunday is October 18.",
+          "relevantImageIndex": 0,
+          "spatial": {
+            "kind": "unspecified",
+            "locations": [],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "No venue, street, or route details are shown."
+          },
+          "_sourceType": "calendar",
+          "_pipelineIndex": 12,
+          "_pipelineTotalStage3": 13
+        },
+        {
+          "name": "Prince Edward Island Marathon Registration Price Change",
+          "type": "special",
+          "date": "2026-10-09",
+          "startTime": "11:59 PM AST",
+          "endTime": "",
+          "venue": "",
+          "price": "",
+          "description": "Registration prices change at this time. Register before the change to lock in the current price and save. Registration link: https://raceroster.com/events/2026/113063/22nd-annual-prince-edward-island-marathon",
+          "extractionReason": "The caption explicitly advertises a registration price change on Friday, October 9, at 11:59 PM AST, and encourages readers to register now and save. This is a caption-only price special, not pictured in the image.",
+          "relevantImageIndex": -1,
+          "spatial": {
+            "kind": "unspecified",
+            "locations": [],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "No physical location is stated."
+          },
+          "_sourceType": "calendar",
+          "_pipelineIndex": 13,
+          "_pipelineTotalStage3": 13
+        }
+      ],
+      "maxOutputTokens": 32000,
+      "durationMs": 16376,
+      "usage": {
+        "input_tokens": 4678,
+        "input_tokens_details": {
+          "cache_write_tokens": 4675,
+          "cached_tokens": 0
+        },
+        "output_tokens": 2723,
+        "output_tokens_details": {
+          "reasoning_tokens": 198
+        },
+        "total_tokens": 7401
+      },
+      "visibleOutputChars": 10383,
+      "rawText": "{\"validatedItems\":[{\"item\":{\"name\":\"10K Run\",\"type\":\"event\",\"date\":\"2026-10-17\",\"startTime\":\"\",\"endTime\":\"\",\"venue\":\"\",\"price\":\"\",\"description\":\"Listed under Saturday as part of the 2026 Prince Edward Island Marathon.\",\"extractionReason\":\"The poster lists “10K RUN” in its Saturday column. The poster dates the marathon October 16–18, 2026; Saturday is October 17.\",\"relevantImageIndex\":0,\"spatial\":{\"kind\":\"unspecified\",\"locations\":[],\"confirmedStreets\":[],\"ordered\":false,\"evidenceNotes\":\"No venue, street, or route details are shown.\"},\"_sourceType\":\"calendar\",\"_pipelineIndex\":1,\"_pipelineTotalStage3\":13},\"decision\":\"REJECTED\",\"reason\":\"The date and named activity are present, but calendar events require a start time. The startTime field is empty.\"},{\"item\":{\"name\":\"10K Walk\",\"type\":\"event\",\"date\":\"2026-10-17\",\"startTime\":\"\",\"endTime\":\"\",\"venue\":\"\",\"price\":\"\",\"description\":\"Listed under Saturday as part of the 2026 Prince Edward Island Marathon.\",\"extractionReason\":\"The poster lists “10K WALK” in its Saturday column. The poster dates the marathon October 16–18, 2026; Saturday is October 17.\",\"relevantImageIndex\":0,\"spatial\":{\"kind\":\"unspecified\",\"locations\":[],\"confirmedStreets\":[],\"ordered\":false,\"evidenceNotes\":\"No venue, street, or route details are shown.\"},\"_sourceType\":\"calendar\",\"_pipelineIndex\":2,\"_pipelineTotalStage3\":13},\"decision\":\"REJECTED\",\"reason\":\"The date and named activity are present, but calendar events require a start time. The startTime field is empty.\"},{\"item\":{\"name\":\"5K Run\",\"type\":\"event\",\"date\":\"2026-10-17\",\"startTime\":\"\",\"endTime\":\"\",\"venue\":\"\",\"price\":\"\",\"description\":\"Listed under Saturday as part of the 2026 Prince Edward Island Marathon.\",\"extractionReason\":\"The poster lists “5K RUN” in its Saturday column. The poster dates the marathon October 16–18, 2026; Saturday is October 17.\",\"relevantImageIndex\":0,\"spatial\":{\"kind\":\"unspecified\",\"locations\":[],\"confirmedStreets\":[],\"ordered\":false,\"evidenceNotes\":\"No venue, street, or route details are shown.\"},\"_sourceType\":\"calendar\",\"_pipelineIndex\":3,\"_pipelineTotalStage3\":13},\"decision\":\"REJECTED\",\"reason\":\"The date and named activity are present, but calendar events require a start time. The startTime field is empty.\"},{\"item\":{\"name\":\"5K Walk\",\"type\":\"event\",\"date\":\"2026-10-17\",\"startTime\":\"\",\"endTime\":\"\",\"venue\":\"\",\"price\":\"\",\"description\":\"Listed under Saturday as part of the 2026 Prince Edward Island Marathon.\",\"extractionReason\":\"The poster lists “5K WALK” in its Saturday column. The poster dates the marathon October 16–18, 2026; Saturday is October 17.\",\"relevantImageIndex\":0,\"spatial\":{\"kind\":\"unspecified\",\"locations\":[],\"confirmedStreets\":[],\"ordered\":false,\"evidenceNotes\":\"No venue, street, or route details are shown.\"},\"_sourceType\":\"calendar\",\"_pipelineIndex\":4,\"_pipelineTotalStage3\":13},\"decision\":\"REJECTED\",\"reason\":\"The date and named activity are present, but calendar events require a start time. The startTime field is empty.\"},{\"item\":{\"name\":\"2K Wheelchair\",\"type\":\"event\",\"date\":\"2026-10-17\",\"startTime\":\"\",\"endTime\":\"\",\"venue\":\"\",\"price\":\"\",\"description\":\"Listed under Saturday as part of the 2026 Prince Edward Island Marathon.\",\"extractionReason\":\"The poster lists “2K WHEELCHAIR” in its Saturday column. The poster dates the marathon October 16–18, 2026; Saturday is October 17.\",\"relevantImageIndex\":0,\"spatial\":{\"kind\":\"unspecified\",\"locations\":[],\"confirmedStreets\":[],\"ordered\":false,\"evidenceNotes\":\"No venue, street, or route details are shown.\"},\"_sourceType\":\"calendar\",\"_pipelineIndex\":5,\"_pipelineTotalStage3\":13},\"decision\":\"REJECTED\",\"reason\":\"The date and named activity are present, but calendar events require a start time. The startTime field is empty.\"},{\"item\":{\"name\":\"Kids Fox Trot\",\"type\":\"event\",\"date\":\"2026-10-17\",\"startTime\":\"\",\"endTime\":\"\",\"venue\":\"\",\"price\":\"\",\"description\":\"Listed under Saturday as part of the 2026 Prince Edward Island Marathon.\",\"extractionReason\":\"The poster lists “KIDS FOX TROT” in its Saturday column. The poster dates the marathon October 16–18, 2026; Saturday is October 17.\",\"relevantImageIndex\":0,\"spatial\":{\"kind\":\"unspecified\",\"locations\":[],\"confirmedStreets\":[],\"ordered\":false,\"evidenceNotes\":\"No venue, street, or route details are shown.\"},\"_sourceType\":\"calendar\",\"_pipelineIndex\":6,\"_pipelineTotalStage3\":13},\"decision\":\"REJECTED\",\"reason\":\"The date and named activity are present, but calendar events require a start time. The startTime field is empty.\"},{\"item\":{\"name\":\"Full Marathon\",\"type\":\"event\",\"date\":\"2026-10-18\",\"startTime\":\"\",\"endTime\":\"\",\"venue\":\"\",\"price\":\"\",\"description\":\"Listed under Sunday as part of the 2026 Prince Edward Island Marathon.\",\"extractionReason\":\"The poster lists “FULL MARATHON” in its Sunday column. The poster dates the marathon October 16–18, 2026; Sunday is October 18.\",\"relevantImageIndex\":0,\"spatial\":{\"kind\":\"unspecified\",\"locations\":[],\"confirmedStreets\":[],\"ordered\":false,\"evidenceNotes\":\"No venue, street, or route details are shown.\"},\"_sourceType\":\"calendar\",\"_pipelineIndex\":7,\"_pipelineTotalStage3\":13},\"decision\":\"REJECTED\",\"reason\":\"The date and named activity are present, but calendar events require a start time. The startTime field is empty.\"},{\"item\":{\"name\":\"Team Relay\",\"type\":\"event\",\"date\":\"2026-10-18\",\"startTime\":\"\",\"endTime\":\"\",\"venue\":\"\",\"price\":\"\",\"description\":\"Listed under Sunday as part of the 2026 Prince Edward Island Marathon.\",\"extractionReason\":\"The poster lists “TEAM RELAY” in its Sunday column. The poster dates the marathon October 16–18, 2026; Sunday is October 18.\",\"relevantImageIndex\":0,\"spatial\":{\"kind\":\"unspecified\",\"locations\":[],\"confirmedStreets\":[],\"ordered\":false,\"evidenceNotes\":\"No venue, street, or route details are shown.\"},\"_sourceType\":\"calendar\",\"_pipelineIndex\":8,\"_pipelineTotalStage3\":13},\"decision\":\"REJECTED\",\"reason\":\"The date and named activity are present, but calendar events require a start time. The startTime field is empty.\"},{\"item\":{\"name\":\"Half Marathon Run\",\"type\":\"event\",\"date\":\"2026-10-18\",\"startTime\":\"\",\"endTime\":\"\",\"venue\":\"\",\"price\":\"\",\"description\":\"Listed under Sunday as part of the 2026 Prince Edward Island Marathon.\",\"extractionReason\":\"The poster lists “HALF MARATHON RUN” in its Sunday column. The poster dates the marathon October 16–18, 2026; Sunday is October 18.\",\"relevantImageIndex\":0,\"spatial\":{\"kind\":\"unspecified\",\"locations\":[],\"confirmedStreets\":[],\"ordered\":false,\"evidenceNotes\":\"No venue, street, or route details are shown.\"},\"_sourceType\":\"calendar\",\"_pipelineIndex\":9,\"_pipelineTotalStage3\":13},\"decision\":\"REJECTED\",\"reason\":\"The date and named activity are present, but calendar events require a start time. The startTime field is empty.\"},{\"item\":{\"name\":\"Half Marathon Walk\",\"type\":\"event\",\"date\":\"2026-10-18\",\"startTime\":\"\",\"endTime\":\"\",\"venue\":\"\",\"price\":\"\",\"description\":\"Listed under Sunday as part of the 2026 Prince Edward Island Marathon.\",\"extractionReason\":\"The poster lists “HALF MARATHON WALK” in its Sunday column. The poster dates the marathon October 16–18, 2026; Sunday is October 18.\",\"relevantImageIndex\":0,\"spatial\":{\"kind\":\"unspecified\",\"locations\":[],\"confirmedStreets\":[],\"ordered\":false,\"evidenceNotes\":\"No venue, street, or route details are shown.\"},\"_sourceType\":\"calendar\",\"_pipelineIndex\":10,\"_pipelineTotalStage3\":13},\"decision\":\"REJECTED\",\"reason\":\"The date and named activity are present, but calendar events require a start time. The startTime field is empty.\"},{\"item\":{\"name\":\"15K Run\",\"type\":\"event\",\"date\":\"2026-10-18\",\"startTime\":\"\",\"endTime\":\"\",\"venue\":\"\",\"price\":\"\",\"description\":\"Listed under Sunday as part of the 2026 Prince Edward Island Marathon.\",\"extractionReason\":\"The poster lists “15K RUN” in its Sunday column. The poster dates the marathon October 16–18, 2026; Sunday is October 18.\",\"relevantImageIndex\":0,\"spatial\":{\"kind\":\"unspecified\",\"locations\":[],\"confirmedStreets\":[],\"ordered\":false,\"evidenceNotes\":\"No venue, street, or route details are shown.\"},\"_sourceType\":\"calendar\",\"_pipelineIndex\":11,\"_pipelineTotalStage3\":13},\"decision\":\"REJECTED\",\"reason\":\"The date and named activity are present, but calendar events require a start time. The startTime field is empty.\"},{\"item\":{\"name\":\"15K Walk\",\"type\":\"event\",\"date\":\"2026-10-18\",\"startTime\":\"\",\"endTime\":\"\",\"venue\":\"\",\"price\":\"\",\"description\":\"Listed under Sunday as part of the 2026 Prince Edward Island Marathon.\",\"extractionReason\":\"The poster lists “15K WALK” in its Sunday column. The poster dates the marathon October 16–18, 2026; Sunday is October 18.\",\"relevantImageIndex\":0,\"spatial\":{\"kind\":\"unspecified\",\"locations\":[],\"confirmedStreets\":[],\"ordered\":false,\"evidenceNotes\":\"No venue, street, or route details are shown.\"},\"_sourceType\":\"calendar\",\"_pipelineIndex\":12,\"_pipelineTotalStage3\":13},\"decision\":\"REJECTED\",\"reason\":\"The date and named activity are present, but calendar events require a start time. The startTime field is empty.\"},{\"item\":{\"name\":\"Prince Edward Island Marathon Registration Price Change\",\"type\":\"special\",\"date\":\"2026-10-09\",\"startTime\":\"11:59 PM AST\",\"endTime\":\"\",\"venue\":\"\",\"price\":\"\",\"description\":\"Registration prices change at this time. Register before the change to lock in the current price and save. Registration link: https://raceroster.com/events/2026/113063/22nd-annual-prince-edward-island-marathon\",\"extractionReason\":\"The caption explicitly advertises a registration price change on Friday, October 9, at 11:59 PM AST, and encourages readers to register now and save. This is a caption-only price special, not pictured in the image.\",\"relevantImageIndex\":-1,\"spatial\":{\"kind\":\"unspecified\",\"locations\":[],\"confirmedStreets\":[],\"ordered\":false,\"evidenceNotes\":\"No physical location is stated.\"},\"_sourceType\":\"calendar\",\"_pipelineIndex\":13,\"_pipelineTotalStage3\":13},\"decision\":\"KEPT\",\"reason\":\"This is a specifically timed registration price-change promotion that encourages registering before the deadline to save. Its explicit timing and advertised savings make it a valid special.\"}],\"validationSummary\":{\"totalItems\":13,\"itemsKept\":1,\"itemsRejected\":12,\"recurringCorrections\":0,\"overallNotes\":\"The 12 calendar-listed race activities have dates but no start times, so they fail the required minimum fields for calendar events. The explicitly timed registration price-change promotion is kept as a valid deal. No recurring-pattern corrections apply.\"}}",
+      "rawResult": {
+        "validatedItems": [
+          {
+            "item": {
+              "name": "10K Run",
+              "type": "event",
+              "date": "2026-10-17",
+              "startTime": "",
+              "endTime": "",
+              "venue": "",
+              "price": "",
+              "description": "Listed under Saturday as part of the 2026 Prince Edward Island Marathon.",
+              "extractionReason": "The poster lists “10K RUN” in its Saturday column. The poster dates the marathon October 16–18, 2026; Saturday is October 17.",
+              "relevantImageIndex": 0,
+              "spatial": {
+                "kind": "unspecified",
+                "locations": [],
+                "confirmedStreets": [],
+                "ordered": false,
+                "evidenceNotes": "No venue, street, or route details are shown."
+              },
+              "_sourceType": "calendar",
+              "_pipelineIndex": 1,
+              "_pipelineTotalStage3": 13
+            },
+            "decision": "REJECTED",
+            "reason": "The date and named activity are present, but calendar events require a start time. The startTime field is empty."
+          },
+          {
+            "item": {
+              "name": "10K Walk",
+              "type": "event",
+              "date": "2026-10-17",
+              "startTime": "",
+              "endTime": "",
+              "venue": "",
+              "price": "",
+              "description": "Listed under Saturday as part of the 2026 Prince Edward Island Marathon.",
+              "extractionReason": "The poster lists “10K WALK” in its Saturday column. The poster dates the marathon October 16–18, 2026; Saturday is October 17.",
+              "relevantImageIndex": 0,
+              "spatial": {
+                "kind": "unspecified",
+                "locations": [],
+                "confirmedStreets": [],
+                "ordered": false,
+                "evidenceNotes": "No venue, street, or route details are shown."
+              },
+              "_sourceType": "calendar",
+              "_pipelineIndex": 2,
+              "_pipelineTotalStage3": 13
+            },
+            "decision": "REJECTED",
+            "reason": "The date and named activity are present, but calendar events require a start time. The startTime field is empty."
+          },
+          {
+            "item": {
+              "name": "5K Run",
+              "type": "event",
+              "date": "2026-10-17",
+              "startTime": "",
+              "endTime": "",
+              "venue": "",
+              "price": "",
+              "description": "Listed under Saturday as part of the 2026 Prince Edward Island Marathon.",
+              "extractionReason": "The poster lists “5K RUN” in its Saturday column. The poster dates the marathon October 16–18, 2026; Saturday is October 17.",
+              "relevantImageIndex": 0,
+              "spatial": {
+                "kind": "unspecified",
+                "locations": [],
+                "confirmedStreets": [],
+                "ordered": false,
+                "evidenceNotes": "No venue, street, or route details are shown."
+              },
+              "_sourceType": "calendar",
+              "_pipelineIndex": 3,
+              "_pipelineTotalStage3": 13
+            },
+            "decision": "REJECTED",
+            "reason": "The date and named activity are present, but calendar events require a start time. The startTime field is empty."
+          },
+          {
+            "item": {
+              "name": "5K Walk",
+              "type": "event",
+              "date": "2026-10-17",
+              "startTime": "",
+              "endTime": "",
+              "venue": "",
+              "price": "",
+              "description": "Listed under Saturday as part of the 2026 Prince Edward Island Marathon.",
+              "extractionReason": "The poster lists “5K WALK” in its Saturday column. The poster dates the marathon October 16–18, 2026; Saturday is October 17.",
+              "relevantImageIndex": 0,
+              "spatial": {
+                "kind": "unspecified",
+                "locations": [],
+                "confirmedStreets": [],
+                "ordered": false,
+                "evidenceNotes": "No venue, street, or route details are shown."
+              },
+              "_sourceType": "calendar",
+              "_pipelineIndex": 4,
+              "_pipelineTotalStage3": 13
+            },
+            "decision": "REJECTED",
+            "reason": "The date and named activity are present, but calendar events require a start time. The startTime field is empty."
+          },
+          {
+            "item": {
+              "name": "2K Wheelchair",
+              "type": "event",
+              "date": "2026-10-17",
+              "startTime": "",
+              "endTime": "",
+              "venue": "",
+              "price": "",
+              "description": "Listed under Saturday as part of the 2026 Prince Edward Island Marathon.",
+              "extractionReason": "The poster lists “2K WHEELCHAIR” in its Saturday column. The poster dates the marathon October 16–18, 2026; Saturday is October 17.",
+              "relevantImageIndex": 0,
+              "spatial": {
+                "kind": "unspecified",
+                "locations": [],
+                "confirmedStreets": [],
+                "ordered": false,
+                "evidenceNotes": "No venue, street, or route details are shown."
+              },
+              "_sourceType": "calendar",
+              "_pipelineIndex": 5,
+              "_pipelineTotalStage3": 13
+            },
+            "decision": "REJECTED",
+            "reason": "The date and named activity are present, but calendar events require a start time. The startTime field is empty."
+          },
+          {
+            "item": {
+              "name": "Kids Fox Trot",
+              "type": "event",
+              "date": "2026-10-17",
+              "startTime": "",
+              "endTime": "",
+              "venue": "",
+              "price": "",
+              "description": "Listed under Saturday as part of the 2026 Prince Edward Island Marathon.",
+              "extractionReason": "The poster lists “KIDS FOX TROT” in its Saturday column. The poster dates the marathon October 16–18, 2026; Saturday is October 17.",
+              "relevantImageIndex": 0,
+              "spatial": {
+                "kind": "unspecified",
+                "locations": [],
+                "confirmedStreets": [],
+                "ordered": false,
+                "evidenceNotes": "No venue, street, or route details are shown."
+              },
+              "_sourceType": "calendar",
+              "_pipelineIndex": 6,
+              "_pipelineTotalStage3": 13
+            },
+            "decision": "REJECTED",
+            "reason": "The date and named activity are present, but calendar events require a start time. The startTime field is empty."
+          },
+          {
+            "item": {
+              "name": "Full Marathon",
+              "type": "event",
+              "date": "2026-10-18",
+              "startTime": "",
+              "endTime": "",
+              "venue": "",
+              "price": "",
+              "description": "Listed under Sunday as part of the 2026 Prince Edward Island Marathon.",
+              "extractionReason": "The poster lists “FULL MARATHON” in its Sunday column. The poster dates the marathon October 16–18, 2026; Sunday is October 18.",
+              "relevantImageIndex": 0,
+              "spatial": {
+                "kind": "unspecified",
+                "locations": [],
+                "confirmedStreets": [],
+                "ordered": false,
+                "evidenceNotes": "No venue, street, or route details are shown."
+              },
+              "_sourceType": "calendar",
+              "_pipelineIndex": 7,
+              "_pipelineTotalStage3": 13
+            },
+            "decision": "REJECTED",
+            "reason": "The date and named activity are present, but calendar events require a start time. The startTime field is empty."
+          },
+          {
+            "item": {
+              "name": "Team Relay",
+              "type": "event",
+              "date": "2026-10-18",
+              "startTime": "",
+              "endTime": "",
+              "venue": "",
+              "price": "",
+              "description": "Listed under Sunday as part of the 2026 Prince Edward Island Marathon.",
+              "extractionReason": "The poster lists “TEAM RELAY” in its Sunday column. The poster dates the marathon October 16–18, 2026; Sunday is October 18.",
+              "relevantImageIndex": 0,
+              "spatial": {
+                "kind": "unspecified",
+                "locations": [],
+                "confirmedStreets": [],
+                "ordered": false,
+                "evidenceNotes": "No venue, street, or route details are shown."
+              },
+              "_sourceType": "calendar",
+              "_pipelineIndex": 8,
+              "_pipelineTotalStage3": 13
+            },
+            "decision": "REJECTED",
+            "reason": "The date and named activity are present, but calendar events require a start time. The startTime field is empty."
+          },
+          {
+            "item": {
+              "name": "Half Marathon Run",
+              "type": "event",
+              "date": "2026-10-18",
+              "startTime": "",
+              "endTime": "",
+              "venue": "",
+              "price": "",
+              "description": "Listed under Sunday as part of the 2026 Prince Edward Island Marathon.",
+              "extractionReason": "The poster lists “HALF MARATHON RUN” in its Sunday column. The poster dates the marathon October 16–18, 2026; Sunday is October 18.",
+              "relevantImageIndex": 0,
+              "spatial": {
+                "kind": "unspecified",
+                "locations": [],
+                "confirmedStreets": [],
+                "ordered": false,
+                "evidenceNotes": "No venue, street, or route details are shown."
+              },
+              "_sourceType": "calendar",
+              "_pipelineIndex": 9,
+              "_pipelineTotalStage3": 13
+            },
+            "decision": "REJECTED",
+            "reason": "The date and named activity are present, but calendar events require a start time. The startTime field is empty."
+          },
+          {
+            "item": {
+              "name": "Half Marathon Walk",
+              "type": "event",
+              "date": "2026-10-18",
+              "startTime": "",
+              "endTime": "",
+              "venue": "",
+              "price": "",
+              "description": "Listed under Sunday as part of the 2026 Prince Edward Island Marathon.",
+              "extractionReason": "The poster lists “HALF MARATHON WALK” in its Sunday column. The poster dates the marathon October 16–18, 2026; Sunday is October 18.",
+              "relevantImageIndex": 0,
+              "spatial": {
+                "kind": "unspecified",
+                "locations": [],
+                "confirmedStreets": [],
+                "ordered": false,
+                "evidenceNotes": "No venue, street, or route details are shown."
+              },
+              "_sourceType": "calendar",
+              "_pipelineIndex": 10,
+              "_pipelineTotalStage3": 13
+            },
+            "decision": "REJECTED",
+            "reason": "The date and named activity are present, but calendar events require a start time. The startTime field is empty."
+          },
+          {
+            "item": {
+              "name": "15K Run",
+              "type": "event",
+              "date": "2026-10-18",
+              "startTime": "",
+              "endTime": "",
+              "venue": "",
+              "price": "",
+              "description": "Listed under Sunday as part of the 2026 Prince Edward Island Marathon.",
+              "extractionReason": "The poster lists “15K RUN” in its Sunday column. The poster dates the marathon October 16–18, 2026; Sunday is October 18.",
+              "relevantImageIndex": 0,
+              "spatial": {
+                "kind": "unspecified",
+                "locations": [],
+                "confirmedStreets": [],
+                "ordered": false,
+                "evidenceNotes": "No venue, street, or route details are shown."
+              },
+              "_sourceType": "calendar",
+              "_pipelineIndex": 11,
+              "_pipelineTotalStage3": 13
+            },
+            "decision": "REJECTED",
+            "reason": "The date and named activity are present, but calendar events require a start time. The startTime field is empty."
+          },
+          {
+            "item": {
+              "name": "15K Walk",
+              "type": "event",
+              "date": "2026-10-18",
+              "startTime": "",
+              "endTime": "",
+              "venue": "",
+              "price": "",
+              "description": "Listed under Sunday as part of the 2026 Prince Edward Island Marathon.",
+              "extractionReason": "The poster lists “15K WALK” in its Sunday column. The poster dates the marathon October 16–18, 2026; Sunday is October 18.",
+              "relevantImageIndex": 0,
+              "spatial": {
+                "kind": "unspecified",
+                "locations": [],
+                "confirmedStreets": [],
+                "ordered": false,
+                "evidenceNotes": "No venue, street, or route details are shown."
+              },
+              "_sourceType": "calendar",
+              "_pipelineIndex": 12,
+              "_pipelineTotalStage3": 13
+            },
+            "decision": "REJECTED",
+            "reason": "The date and named activity are present, but calendar events require a start time. The startTime field is empty."
+          },
+          {
+            "item": {
+              "name": "Prince Edward Island Marathon Registration Price Change",
+              "type": "special",
+              "date": "2026-10-09",
+              "startTime": "11:59 PM AST",
+              "endTime": "",
+              "venue": "",
+              "price": "",
+              "description": "Registration prices change at this time. Register before the change to lock in the current price and save. Registration link: https://raceroster.com/events/2026/113063/22nd-annual-prince-edward-island-marathon",
+              "extractionReason": "The caption explicitly advertises a registration price change on Friday, October 9, at 11:59 PM AST, and encourages readers to register now and save. This is a caption-only price special, not pictured in the image.",
+              "relevantImageIndex": -1,
+              "spatial": {
+                "kind": "unspecified",
+                "locations": [],
+                "confirmedStreets": [],
+                "ordered": false,
+                "evidenceNotes": "No physical location is stated."
+              },
+              "_sourceType": "calendar",
+              "_pipelineIndex": 13,
+              "_pipelineTotalStage3": 13
+            },
+            "decision": "KEPT",
+            "reason": "This is a specifically timed registration price-change promotion that encourages registering before the deadline to save. Its explicit timing and advertised savings make it a valid special."
+          }
+        ],
+        "validationSummary": {
+          "totalItems": 13,
+          "itemsKept": 1,
+          "itemsRejected": 12,
+          "recurringCorrections": 0,
+          "overallNotes": "The 12 calendar-listed race activities have dates but no start times, so they fail the required minimum fields for calendar events. The explicitly timed registration price-change promotion is kept as a valid deal. No recurring-pattern corrections apply."
+        }
+      },
+      "parseError": false
+    }
+  ]
+}

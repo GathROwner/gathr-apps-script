@@ -1,0 +1,263 @@
+{
+  "caseId": "dinner-seatings",
+  "arm": "luna-low",
+  "repeat": 1,
+  "model": "gpt-6-luna",
+  "effort": "low",
+  "noLiveWrites": true,
+  "sourceSha256": "f84a3a18569e36c1591ed1dca645597be25af9cd8186ce4606b58381d5861733",
+  "inputCount": 2,
+  "outputCount": 2,
+  "wallMs": 5145,
+  "items": [
+    {
+      "name": "Thanksgiving Turkey Dinner Special",
+      "description": "Saturday: Turkey Dinner Special with an appetizer of Squash Soup and Pumpkin Pie for dessert. Available for $35.",
+      "date": "2026-10-10",
+      "startTime": "",
+      "endTime": "",
+      "timeFlags": {
+        "start": {
+          "source": "none",
+          "evidence": ""
+        },
+        "end": {
+          "toClose": false,
+          "source": "none",
+          "evidence": ""
+        }
+      },
+      "venue": "Clamdiggers Beach House & Restaurant",
+      "pricing": {
+        "price": "$35"
+      },
+      "relevantImageIndex": 0,
+      "recurringPattern": "none",
+      "extractionReason": "“Turkey Dinner Special” and “Available both Saturday & Sunday, for just $35”",
+      "_sourceType": "special",
+      "_pipelineIndex": 1,
+      "_pipelineTotalStage3": 2
+    },
+    {
+      "name": "Thanksgiving Turkey Dinner Special",
+      "description": "Sunday: Turkey Dinner Special with an appetizer of Squash Soup and Pumpkin Pie for dessert. Available for $35.",
+      "date": "2026-10-11",
+      "startTime": "",
+      "endTime": "",
+      "timeFlags": {
+        "start": {
+          "source": "none",
+          "evidence": ""
+        },
+        "end": {
+          "toClose": false,
+          "source": "none",
+          "evidence": ""
+        }
+      },
+      "venue": "Clamdiggers Beach House & Restaurant",
+      "pricing": {
+        "price": "$35"
+      },
+      "relevantImageIndex": 0,
+      "recurringPattern": "none",
+      "extractionReason": "“Turkey Dinner Special” and “Available both Saturday & Sunday, for just $35”",
+      "_sourceType": "special",
+      "_pipelineIndex": 2,
+      "_pipelineTotalStage3": 2
+    }
+  ],
+  "metadata": {
+    "_happyHourNoPriceOverrideCount": 0,
+    "_calendarDealAllDayOverrideCount": 0,
+    "_calendarDealAllDayNormalizationCount": 0,
+    "_operatingHoursOnlyRejectCount": 0
+  },
+  "usage": [
+    {
+      "stage": "stage4",
+      "component": "secondaryValidator",
+      "endpoint": "responses",
+      "model": "gpt-6-luna",
+      "durationMs": 5125,
+      "inputTokens": 2403,
+      "outputTokens": 636,
+      "totalTokens": 3039,
+      "cachedInputTokens": 0,
+      "fileId": "stage4-frozen-comparison",
+      "postId": "1947709906622951",
+      "rowIndex": 0,
+      "runId": "local-1",
+      "batchItemCount": 2,
+      "responseId": "resp_01ba5f337b822dc5006ac96f15d16487d287c2e99d1b4f33c5",
+      "responseStatus": "completed",
+      "incompleteReason": "",
+      "requestedMaxOutputTokens": 32000,
+      "reasoningTokens": 0,
+      "visibleOutputChars": 2662
+    }
+  ],
+  "requests": [
+    {
+      "model": "gpt-6-luna",
+      "effort": "low",
+      "responseId": "resp_01ba5f337b822dc5006ac96f15d16487d287c2e99d1b4f33c5",
+      "httpStatus": 200,
+      "status": "completed",
+      "incompleteDetails": null,
+      "error": null,
+      "promptSha256": "aa2f659156c36febbe969d5f34bba6884062330c6fa1309fc77b50da7951df34",
+      "outputContractSha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "batchItems": [
+        {
+          "name": "Thanksgiving Turkey Dinner Special",
+          "description": "Saturday: Turkey Dinner Special with an appetizer of Squash Soup and Pumpkin Pie for dessert. Available for $35.",
+          "date": "2026-10-10",
+          "startTime": "",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "none",
+              "evidence": ""
+            },
+            "end": {
+              "toClose": false,
+              "source": "none",
+              "evidence": ""
+            }
+          },
+          "venue": "Clamdiggers Beach House & Restaurant",
+          "pricing": {
+            "price": "$35"
+          },
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "“Turkey Dinner Special” and “Available both Saturday & Sunday, for just $35”",
+          "_sourceType": "special",
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 2
+        },
+        {
+          "name": "Thanksgiving Turkey Dinner Special",
+          "description": "Sunday: Turkey Dinner Special with an appetizer of Squash Soup and Pumpkin Pie for dessert. Available for $35.",
+          "date": "2026-10-11",
+          "startTime": "",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "none",
+              "evidence": ""
+            },
+            "end": {
+              "toClose": false,
+              "source": "none",
+              "evidence": ""
+            }
+          },
+          "venue": "Clamdiggers Beach House & Restaurant",
+          "pricing": {
+            "price": "$35"
+          },
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "“Turkey Dinner Special” and “Available both Saturday & Sunday, for just $35”",
+          "_sourceType": "special",
+          "_pipelineIndex": 2,
+          "_pipelineTotalStage3": 2
+        }
+      ],
+      "maxOutputTokens": 32000,
+      "durationMs": 5119,
+      "usage": {
+        "input_tokens": 2403,
+        "input_tokens_details": {
+          "cache_write_tokens": 2400,
+          "cached_tokens": 0
+        },
+        "output_tokens": 636,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 3039
+      },
+      "visibleOutputChars": 2662,
+      "rawText": "{\n  \"validatedItems\": [\n    {\n      \"item\": {\n        \"name\": \"Thanksgiving Turkey Dinner Special\",\n        \"description\": \"Saturday: Turkey Dinner Special with an appetizer of Squash Soup and Pumpkin Pie for dessert. Available for $35.\",\n        \"date\": \"2026-10-10\",\n        \"startTime\": \"\",\n        \"endTime\": \"\",\n        \"timeFlags\": {\n          \"start\": {\n            \"source\": \"none\",\n            \"evidence\": \"\"\n          },\n          \"end\": {\n            \"toClose\": false,\n            \"source\": \"none\",\n            \"evidence\": \"\"\n          }\n        },\n        \"venue\": \"Clamdiggers Beach House & Restaurant\",\n        \"pricing\": {\n          \"price\": \"$35\"\n        },\n        \"relevantImageIndex\": 0,\n        \"recurringPattern\": \"none\",\n        \"extractionReason\": \"“Turkey Dinner Special” and “Available both Saturday & Sunday, for just $35”\",\n        \"_sourceType\": \"special\",\n        \"_pipelineIndex\": 1,\n        \"_pipelineTotalStage3\": 2\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"This is a named food special advertised for $35 and explicitly offered on Saturday. The special extractor exception permits keeping advertised specials without requiring a time.\"\n    },\n    {\n      \"item\": {\n        \"name\": \"Thanksgiving Turkey Dinner Special\",\n        \"description\": \"Sunday: Turkey Dinner Special with an appetizer of Squash Soup and Pumpkin Pie for dessert. Available for $35.\",\n        \"date\": \"2026-10-11\",\n        \"startTime\": \"\",\n        \"endTime\": \"\",\n        \"timeFlags\": {\n          \"start\": {\n            \"source\": \"none\",\n            \"evidence\": \"\"\n          },\n          \"end\": {\n            \"toClose\": false,\n            \"source\": \"none\",\n            \"evidence\": \"\"\n          }\n        },\n        \"venue\": \"Clamdiggers Beach House & Restaurant\",\n        \"pricing\": {\n          \"price\": \"$35\"\n        },\n        \"relevantImageIndex\": 0,\n        \"recurringPattern\": \"none\",\n        \"extractionReason\": \"“Turkey Dinner Special” and “Available both Saturday & Sunday, for just $35”\",\n        \"_sourceType\": \"special\",\n        \"_pipelineIndex\": 2,\n        \"_pipelineTotalStage3\": 2\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"This is the same named $35 food special offered on a different explicitly identified day. It is a valid separate date-specific special, not a duplicate.\"\n    }\n  ],\n  \"validationSummary\": {\n    \"totalItems\": 2,\n    \"itemsKept\": 2,\n    \"itemsRejected\": 0,\n    \"recurringCorrections\": 0,\n    \"overallNotes\": \"Both dated entries are explicitly advertised $35 turkey dinner specials. Neither requires a start time under the special validation rules, and their different dates mean both are retained.\"\n  }\n}",
+      "rawResult": {
+        "validatedItems": [
+          {
+            "item": {
+              "name": "Thanksgiving Turkey Dinner Special",
+              "description": "Saturday: Turkey Dinner Special with an appetizer of Squash Soup and Pumpkin Pie for dessert. Available for $35.",
+              "date": "2026-10-10",
+              "startTime": "",
+              "endTime": "",
+              "timeFlags": {
+                "start": {
+                  "source": "none",
+                  "evidence": ""
+                },
+                "end": {
+                  "toClose": false,
+                  "source": "none",
+                  "evidence": ""
+                }
+              },
+              "venue": "Clamdiggers Beach House & Restaurant",
+              "pricing": {
+                "price": "$35"
+              },
+              "relevantImageIndex": 0,
+              "recurringPattern": "none",
+              "extractionReason": "“Turkey Dinner Special” and “Available both Saturday & Sunday, for just $35”",
+              "_sourceType": "special",
+              "_pipelineIndex": 1,
+              "_pipelineTotalStage3": 2
+            },
+            "decision": "KEPT",
+            "reason": "This is a named food special advertised for $35 and explicitly offered on Saturday. The special extractor exception permits keeping advertised specials without requiring a time."
+          },
+          {
+            "item": {
+              "name": "Thanksgiving Turkey Dinner Special",
+              "description": "Sunday: Turkey Dinner Special with an appetizer of Squash Soup and Pumpkin Pie for dessert. Available for $35.",
+              "date": "2026-10-11",
+              "startTime": "",
+              "endTime": "",
+              "timeFlags": {
+                "start": {
+                  "source": "none",
+                  "evidence": ""
+                },
+                "end": {
+                  "toClose": false,
+                  "source": "none",
+                  "evidence": ""
+                }
+              },
+              "venue": "Clamdiggers Beach House & Restaurant",
+              "pricing": {
+                "price": "$35"
+              },
+              "relevantImageIndex": 0,
+              "recurringPattern": "none",
+              "extractionReason": "“Turkey Dinner Special” and “Available both Saturday & Sunday, for just $35”",
+              "_sourceType": "special",
+              "_pipelineIndex": 2,
+              "_pipelineTotalStage3": 2
+            },
+            "decision": "KEPT",
+            "reason": "This is the same named $35 food special offered on a different explicitly identified day. It is a valid separate date-specific special, not a duplicate."
+          }
+        ],
+        "validationSummary": {
+          "totalItems": 2,
+          "itemsKept": 2,
+          "itemsRejected": 0,
+          "recurringCorrections": 0,
+          "overallNotes": "Both dated entries are explicitly advertised $35 turkey dinner specials. Neither requires a start time under the special validation rules, and their different dates mean both are retained."
+        }
+      },
+      "parseError": false
+    }
+  ]
+}

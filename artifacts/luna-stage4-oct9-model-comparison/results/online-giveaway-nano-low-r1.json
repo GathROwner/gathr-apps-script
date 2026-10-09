@@ -1,0 +1,179 @@
+{
+  "caseId": "online-giveaway",
+  "arm": "nano-low",
+  "repeat": 1,
+  "model": "gpt-5-nano",
+  "effort": "low",
+  "noLiveWrites": true,
+  "sourceSha256": "543325bdb143589ecd4c695abc63a312d99da248b7b3d615e751cec55ae02c44",
+  "inputCount": 1,
+  "outputCount": 1,
+  "wallMs": 5250,
+  "items": [
+    {
+      "name": "Thanksgiving Giveaway",
+      "description": "Enter for a chance to win 1 whole chicken, Irish Cobbler potatoes, 1 bag of chicken seasoning, and 1 bag of potato seasoning. Like the post, comment with what you are most thankful for this Thanksgiving, and share the post. The draw takes place Friday, October 9.",
+      "date": "2026-10-06",
+      "startTime": "",
+      "endTime": "",
+      "timeFlags": {
+        "start": {
+          "source": "none",
+          "evidence": ""
+        },
+        "end": {
+          "toClose": false,
+          "source": "none",
+          "evidence": ""
+        }
+      },
+      "venue": "",
+      "pricing": {
+        "price": ""
+      },
+      "relevantImageIndex": 0,
+      "recurringPattern": "none",
+      "extractionReason": "\"THANKSGIVING GIVEAWAY!\" and \"WHAT YOU COULD WIN\" advertise a chance to win a bundle of food.",
+      "_sourceType": "special",
+      "_pipelineIndex": 1,
+      "_pipelineTotalStage3": 1
+    }
+  ],
+  "metadata": {
+    "_happyHourNoPriceOverrideCount": 0,
+    "_calendarDealAllDayOverrideCount": 0,
+    "_calendarDealAllDayNormalizationCount": 0,
+    "_operatingHoursOnlyRejectCount": 0
+  },
+  "usage": [
+    {
+      "stage": "stage4",
+      "component": "secondaryValidator",
+      "endpoint": "responses",
+      "model": "gpt-5-nano",
+      "durationMs": 5238,
+      "inputTokens": 2214,
+      "outputTokens": 1059,
+      "totalTokens": 3273,
+      "cachedInputTokens": 0,
+      "fileId": "stage4-frozen-comparison",
+      "postId": "1703137428484552",
+      "rowIndex": 0,
+      "runId": "local-1",
+      "batchItemCount": 1,
+      "responseId": "resp_006acd8511c7d322006ac96fad255887d28185748c9980437d",
+      "responseStatus": "completed",
+      "incompleteReason": "",
+      "requestedMaxOutputTokens": 32000,
+      "reasoningTokens": 576,
+      "visibleOutputChars": 1898
+    }
+  ],
+  "requests": [
+    {
+      "model": "gpt-5-nano",
+      "effort": "low",
+      "responseId": "resp_006acd8511c7d322006ac96fad255887d28185748c9980437d",
+      "httpStatus": 200,
+      "status": "completed",
+      "incompleteDetails": null,
+      "error": null,
+      "promptSha256": "89e0f9eec781eb3737f4392252a5f5786b56af6d08de61a6556079d5e5473f27",
+      "outputContractSha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "batchItems": [
+        {
+          "name": "Thanksgiving Giveaway",
+          "description": "Enter for a chance to win 1 whole chicken, Irish Cobbler potatoes, 1 bag of chicken seasoning, and 1 bag of potato seasoning. Like the post, comment with what you are most thankful for this Thanksgiving, and share the post. The draw takes place Friday, October 9.",
+          "date": "2026-10-06",
+          "startTime": "",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "none",
+              "evidence": ""
+            },
+            "end": {
+              "toClose": false,
+              "source": "none",
+              "evidence": ""
+            }
+          },
+          "venue": "",
+          "pricing": {
+            "price": ""
+          },
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "\"THANKSGIVING GIVEAWAY!\" and \"WHAT YOU COULD WIN\" advertise a chance to win a bundle of food.",
+          "_sourceType": "special",
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 1
+        }
+      ],
+      "maxOutputTokens": 32000,
+      "durationMs": 5233,
+      "usage": {
+        "input_tokens": 2214,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "output_tokens": 1059,
+        "output_tokens_details": {
+          "reasoning_tokens": 576
+        },
+        "total_tokens": 3273
+      },
+      "visibleOutputChars": 1898,
+      "rawText": "{\n  \"validatedItems\": [\n    {\n      \"item\": {\n        \"name\": \"Thanksgiving Giveaway\",\n        \"description\": \"Enter for a chance to win 1 whole chicken, Irish Cobbler potatoes, 1 bag of chicken seasoning, and 1 bag of potato seasoning. Like the post, comment with what you are most thankful for this Thanksgiving, and share the post. The draw takes place Friday, October 9.\",\n        \"date\": \"2026-10-06\",\n        \"startTime\": \"\",\n        \"endTime\": \"\",\n        \"timeFlags\": {\n          \"start\": {\n            \"source\": \"none\",\n            \"evidence\": \"\"\n          },\n          \"end\": {\n            \"toClose\": false,\n            \"source\": \"none\",\n            \"evidence\": \"\"\n          }\n        },\n        \"venue\": \"\",\n        \"pricing\": {\n          \"price\": \"\"\n        },\n        \"relevantImageIndex\": 0,\n        \"recurringPattern\": \"none\",\n        \"extractionReason\": \"\\\"THANKSGIVING GIVEAWAY!\\\" and \\\"WHAT YOU COULD WIN\\\" advertise a chance to win a bundle of food.\",\n        \"_sourceType\": \"special\",\n        \"_pipelineIndex\": 1,\n        \"_pipelineTotalStage3\": 1\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"This item is a named promotional giveaway (special) with a defined date (2026-10-06) and a specific event (draw on Friday, Oct 9). As a special extractor item, it qualifies for retention as a named daily/explicit deal type, and does not require a listed price to be kept. It is not a generic promo and has explicit promotional intent.\",\n      \"corrections\": {\n        \"recurringPattern\": \"none\",\n        \"correctionReason\": \"No holiday or recurring pattern adjustment needed.\"\n      }\n    }\n  ],\n  \"validationSummary\": {\n    \"totalItems\": 1,\n    \"itemsKept\": 1,\n    \"itemsRejected\": 0,\n    \"recurringCorrections\": 0,\n    \"overallNotes\": \"Single item kept as a valid special promotional item with a defined date and event draw. No holiday recurrence corrections necessary.\"\n  }\n}",
+      "rawResult": {
+        "validatedItems": [
+          {
+            "item": {
+              "name": "Thanksgiving Giveaway",
+              "description": "Enter for a chance to win 1 whole chicken, Irish Cobbler potatoes, 1 bag of chicken seasoning, and 1 bag of potato seasoning. Like the post, comment with what you are most thankful for this Thanksgiving, and share the post. The draw takes place Friday, October 9.",
+              "date": "2026-10-06",
+              "startTime": "",
+              "endTime": "",
+              "timeFlags": {
+                "start": {
+                  "source": "none",
+                  "evidence": ""
+                },
+                "end": {
+                  "toClose": false,
+                  "source": "none",
+                  "evidence": ""
+                }
+              },
+              "venue": "",
+              "pricing": {
+                "price": ""
+              },
+              "relevantImageIndex": 0,
+              "recurringPattern": "none",
+              "extractionReason": "\"THANKSGIVING GIVEAWAY!\" and \"WHAT YOU COULD WIN\" advertise a chance to win a bundle of food.",
+              "_sourceType": "special",
+              "_pipelineIndex": 1,
+              "_pipelineTotalStage3": 1
+            },
+            "decision": "KEPT",
+            "reason": "This item is a named promotional giveaway (special) with a defined date (2026-10-06) and a specific event (draw on Friday, Oct 9). As a special extractor item, it qualifies for retention as a named daily/explicit deal type, and does not require a listed price to be kept. It is not a generic promo and has explicit promotional intent.",
+            "corrections": {
+              "recurringPattern": "none",
+              "correctionReason": "No holiday or recurring pattern adjustment needed."
+            }
+          }
+        ],
+        "validationSummary": {
+          "totalItems": 1,
+          "itemsKept": 1,
+          "itemsRejected": 0,
+          "recurringCorrections": 0,
+          "overallNotes": "Single item kept as a valid special promotional item with a defined date and event draw. No holiday recurrence corrections necessary."
+        }
+      },
+      "parseError": false
+    }
+  ]
+}

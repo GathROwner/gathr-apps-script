@@ -1,0 +1,451 @@
+{
+  "caseId": "mixed-menu-and-activities",
+  "arm": "nano-low",
+  "repeat": 1,
+  "model": "gpt-5-nano",
+  "effort": "low",
+  "noLiveWrites": true,
+  "sourceSha256": "e17982bc92d606c11d7477b625451a2b6bfe26a35d33593645db7048d3a42bd4",
+  "inputCount": 8,
+  "outputCount": 4,
+  "wallMs": 11221,
+  "items": [
+    {
+      "name": "Happy Thanksgiving",
+      "type": "event",
+      "date": "",
+      "startTime": "",
+      "endTime": "",
+      "venue": "",
+      "price": "",
+      "description": "A holiday greeting to our customers.",
+      "relevantImageIndex": 0,
+      "recurringPattern": "none",
+      "_sourceType": "event",
+      "_pipelineIndex": 4,
+      "_pipelineTotalStage3": 8
+    },
+    {
+      "name": "Today's Soup Special",
+      "type": "event",
+      "date": "2026-10-17",
+      "startTime": "",
+      "endTime": "",
+      "venue": "",
+      "price": "",
+      "description": "Today's soup special is roasted squash soup.",
+      "relevantImageIndex": 0,
+      "recurringPattern": "none",
+      "_sourceType": "special",
+      "_pipelineIndex": 6,
+      "_pipelineTotalStage3": 8
+    },
+    {
+      "name": "Happy Hour",
+      "type": "event",
+      "date": "2026-10-17",
+      "startTime": "16:00",
+      "endTime": "18:00",
+      "venue": "",
+      "price": "",
+      "description": "Happy Hour from 4-6 pm; price not printed.",
+      "relevantImageIndex": 0,
+      "recurringPattern": "none",
+      "_sourceType": "special",
+      "_pipelineIndex": 7,
+      "_pipelineTotalStage3": 8
+    },
+    {
+      "name": "Weekend Vendor Market",
+      "type": "event",
+      "date": "2026-10-17",
+      "startTime": "11:00",
+      "endTime": "",
+      "venue": "",
+      "price": "",
+      "description": "Public local vendor market on October 17 at 11 am.",
+      "relevantImageIndex": 0,
+      "recurringPattern": "none",
+      "_sourceType": "event",
+      "_pipelineIndex": 8,
+      "_pipelineTotalStage3": 8
+    }
+  ],
+  "metadata": {
+    "_happyHourNoPriceOverrideCount": 0,
+    "_calendarDealAllDayOverrideCount": 0,
+    "_calendarDealAllDayNormalizationCount": 0,
+    "_operatingHoursOnlyRejectCount": 0
+  },
+  "usage": [
+    {
+      "stage": "stage4",
+      "component": "secondaryValidator",
+      "endpoint": "responses",
+      "model": "gpt-5-nano",
+      "durationMs": 11199,
+      "inputTokens": 2904,
+      "outputTokens": 2403,
+      "totalTokens": 5307,
+      "cachedInputTokens": 0,
+      "fileId": "stage4-frozen-comparison",
+      "postId": "mixed-menu-and-activities",
+      "rowIndex": 0,
+      "runId": "local-1",
+      "batchItemCount": 8,
+      "responseId": "resp_0ae63cdf5bd9b283006ac96fb8dca487d28cfabc04a21394d8",
+      "responseStatus": "completed",
+      "incompleteReason": "",
+      "requestedMaxOutputTokens": 32000,
+      "reasoningTokens": 768,
+      "visibleOutputChars": 6258
+    }
+  ],
+  "requests": [
+    {
+      "model": "gpt-5-nano",
+      "effort": "low",
+      "responseId": "resp_0ae63cdf5bd9b283006ac96fb8dca487d28cfabc04a21394d8",
+      "httpStatus": 200,
+      "status": "completed",
+      "incompleteDetails": null,
+      "error": null,
+      "promptSha256": "f36a86762b6d52ec715b9584650d848c2f0a00b52455ac7088bf2a9011d426f6",
+      "outputContractSha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "batchItems": [
+        {
+          "name": "October Featured Burger",
+          "type": "event",
+          "date": "2026-10-17",
+          "startTime": "11:00",
+          "endTime": "",
+          "venue": "",
+          "price": "$18",
+          "description": "A featured menu item offered throughout October at its ordinary menu price.",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "_sourceType": "special",
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 8
+        },
+        {
+          "name": "Tomato Soup",
+          "type": "event",
+          "date": "2026-10-17",
+          "startTime": "11:00",
+          "endTime": "",
+          "venue": "",
+          "price": "$9",
+          "description": "Regular soup on the everyday menu.",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "_sourceType": "special",
+          "_pipelineIndex": 2,
+          "_pipelineTotalStage3": 8
+        },
+        {
+          "name": "Kitchen Opening Hours",
+          "type": "event",
+          "date": "2026-10-17",
+          "startTime": "17:00",
+          "endTime": "21:00",
+          "venue": "",
+          "price": "",
+          "description": "Regular kitchen operating hours every evening.",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "_sourceType": "event",
+          "_pipelineIndex": 3,
+          "_pipelineTotalStage3": 8
+        },
+        {
+          "name": "Happy Thanksgiving",
+          "type": "event",
+          "date": "",
+          "startTime": "",
+          "endTime": "",
+          "venue": "",
+          "price": "",
+          "description": "A holiday greeting to our customers.",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "_sourceType": "event",
+          "_pipelineIndex": 4,
+          "_pipelineTotalStage3": 8
+        },
+        {
+          "name": "Private Pool Closure",
+          "type": "event",
+          "date": "2026-10-17",
+          "startTime": "10:00",
+          "endTime": "12:00",
+          "venue": "",
+          "price": "",
+          "description": "Pool closed to the public during a private staff-only booking.",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "_sourceType": "event",
+          "_pipelineIndex": 5,
+          "_pipelineTotalStage3": 8
+        },
+        {
+          "name": "Today's Soup Special",
+          "type": "event",
+          "date": "2026-10-17",
+          "startTime": "",
+          "endTime": "",
+          "venue": "",
+          "price": "",
+          "description": "Today's soup special is roasted squash soup.",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "_sourceType": "special",
+          "_pipelineIndex": 6,
+          "_pipelineTotalStage3": 8
+        },
+        {
+          "name": "Happy Hour",
+          "type": "event",
+          "date": "2026-10-17",
+          "startTime": "16:00",
+          "endTime": "18:00",
+          "venue": "",
+          "price": "",
+          "description": "Happy Hour from 4-6 pm; price not printed.",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "_sourceType": "special",
+          "_pipelineIndex": 7,
+          "_pipelineTotalStage3": 8
+        },
+        {
+          "name": "Weekend Vendor Market",
+          "type": "event",
+          "date": "2026-10-17",
+          "startTime": "11:00",
+          "endTime": "",
+          "venue": "",
+          "price": "",
+          "description": "Public local vendor market on October 17 at 11 am.",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "_sourceType": "event",
+          "_pipelineIndex": 8,
+          "_pipelineTotalStage3": 8
+        }
+      ],
+      "maxOutputTokens": 32000,
+      "durationMs": 11195,
+      "usage": {
+        "input_tokens": 2904,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "output_tokens": 2403,
+        "output_tokens_details": {
+          "reasoning_tokens": 768
+        },
+        "total_tokens": 5307
+      },
+      "visibleOutputChars": 6258,
+      "rawText": "{\n  \"validatedItems\": [\n    {\n      \"item\": {\n        \"name\": \"October Featured Burger\",\n        \"type\": \"event\",\n        \"date\": \"2026-10-17\",\n        \"startTime\": \"11:00\",\n        \"endTime\": \"\",\n        \"venue\": \"\",\n        \"price\": \"$18\",\n        \"description\": \"A featured menu item offered throughout October at its ordinary menu price.\",\n        \"relevantImageIndex\": 0,\n        \"recurringPattern\": \"none\",\n        \"_sourceType\": \"special\",\n        \"_pipelineIndex\": 1,\n        \"_pipelineTotalStage3\": 8\n      },\n      \"decision\": \"REJECTED\",\n      \"reason\": \"Month-long featured menu item without an advertised deal or discount (price shown is the ordinary menu price). Per rules, such items should be removed unless they represent a named daily/explicit promotional deal.\",\n      \"corrections\": {\n        \"recurringPattern\": \"\",\n        \"correctionReason\": \"\"\n      }\n    },\n    {\n      \"item\": {\n        \"name\": \"Tomato Soup\",\n        \"type\": \"event\",\n        \"date\": \"2026-10-17\",\n        \"startTime\": \"11:00\",\n        \"endTime\": \"\",\n        \"venue\": \"\",\n        \"price\": \"$9\",\n        \"description\": \"Regular soup on the everyday menu.\",\n        \"relevantImageIndex\": 0,\n        \"recurringPattern\": \"none\",\n        \"_sourceType\": \"special\",\n        \"_pipelineIndex\": 2,\n        \"_pipelineTotalStage3\": 8\n      },\n      \"decision\": \"REJECTED\",\n      \"reason\": \"Regular menu item with price; no explicit deal or special promotional context. Not a valid special or event per validation rules.\",\n      \"corrections\": {\n        \"recurringPattern\": \"\",\n        \"correctionReason\": \"\"\n      }\n    },\n    {\n      \"item\": {\n        \"name\": \"Kitchen Opening Hours\",\n        \"type\": \"event\",\n        \"date\": \"2026-10-17\",\n        \"startTime\": \"17:00\",\n        \"endTime\": \"21:00\",\n        \"venue\": \"\",\n        \"price\": \"\",\n        \"description\": \"Regular kitchen operating hours every evening.\",\n        \"relevantImageIndex\": 0,\n        \"recurringPattern\": \"none\",\n        \"_sourceType\": \"event\",\n        \"_pipelineIndex\": 3,\n        \"_pipelineTotalStage3\": 8\n      },\n      \"decision\": \"REJECTED\",\n      \"reason\": \"This is a business operating schedule rather than a public-facing event or promotional deal. Excluded by rules.\",\n      \"corrections\": {\n        \"recurringPattern\": \"\",\n        \"correctionReason\": \"\"\n      }\n    },\n    {\n      \"item\": {\n        \"name\": \"Happy Thanksgiving\",\n        \"type\": \"event\",\n        \"date\": \"\",\n        \"startTime\": \"\",\n        \"endTime\": \"\",\n        \"venue\": \"\",\n        \"price\": \"\",\n        \"description\": \"A holiday greeting to our customers.\",\n        \"relevantImageIndex\": 0,\n        \"recurringPattern\": \"none\",\n        \"_sourceType\": \"event\",\n        \"_pipelineIndex\": 4,\n        \"_pipelineTotalStage3\": 8\n      },\n      \"decision\": \"REJECTED\",\n      \"reason\": \"Holiday greeting without an associated event date/time is not a valid event or special under the given rules.\",\n      \"corrections\": {\n        \"recurringPattern\": \"\",\n        \"correctionReason\": \"\"\n      }\n    },\n    {\n      \"item\": {\n        \"name\": \"Private Pool Closure\",\n        \"type\": \"event\",\n        \"date\": \"2026-10-17\",\n        \"startTime\": \"10:00\",\n        \"endTime\": \"12:00\",\n        \"venue\": \"\",\n        \"price\": \"\",\n        \"description\": \"Pool closed to the public during a private staff-only booking.\",\n        \"relevantImageIndex\": 0,\n        \"recurringPattern\": \"none\",\n        \"_sourceType\": \"event\",\n        \"_pipelineIndex\": 5,\n        \"_pipelineTotalStage3\": 8\n      },\n      \"decision\": \"REJECTED\",\n      \"reason\": \"Pool closures or private/staff-only schedules are explicitly excluded from validation results.\",\n      \"corrections\": {\n        \"recurringPattern\": \"\",\n        \"correctionReason\": \"\"\n      }\n    },\n    {\n      \"item\": {\n        \"name\": \"Today's Soup Special\",\n        \"type\": \"event\",\n        \"date\": \"2026-10-17\",\n        \"startTime\": \"\",\n        \"endTime\": \"\",\n        \"venue\": \"\",\n        \"price\": \"\",\n        \"description\": \"Today's soup special is roasted squash soup.\",\n        \"relevantImageIndex\": 0,\n        \"recurringPattern\": \"none\",\n        \"_sourceType\": \"special\",\n        \"_pipelineIndex\": 6,\n        \"_pipelineTotalStage3\": 8\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"Named daily special with explicit description. Fits special rules for keeping a daily special even without explicit price.\",\n      \"corrections\": {\n        \"recurringPattern\": \"\",\n        \"correctionReason\": \"\"\n      }\n    },\n    {\n      \"item\": {\n        \"name\": \"Happy Hour\",\n        \"type\": \"event\",\n        \"date\": \"2026-10-17\",\n        \"startTime\": \"16:00\",\n        \"endTime\": \"18:00\",\n        \"venue\": \"\",\n        \"price\": \"\",\n        \"description\": \"Happy Hour from 4-6 pm; price not printed.\",\n        \"relevantImageIndex\": 0,\n        \"recurringPattern\": \"none\",\n        \"_sourceType\": \"special\",\n        \"_pipelineIndex\": 7,\n        \"_pipelineTotalStage3\": 8\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"Happy Hour with a clear time window is a valid time-bounded special kept even if price is not printed.\",\n      \"corrections\": {\n        \"recurringPattern\": \"\",\n        \"correctionReason\": \"\"\n      }\n    },\n    {\n      \"item\": {\n        \"name\": \"Weekend Vendor Market\",\n        \"type\": \"event\",\n        \"date\": \"2026-10-17\",\n        \"startTime\": \"11:00\",\n        \"endTime\": \"\",\n        \"venue\": \"\",\n        \"price\": \"\",\n        \"description\": \"Public local vendor market on October 17 at 11 am.\",\n        \"relevantImageIndex\": 0,\n        \"recurringPattern\": \"none\",\n        \"_sourceType\": \"event\",\n        \"_pipelineIndex\": 8,\n        \"_pipelineTotalStage3\": 8\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"Actual event with specific date and start time; valid per rules.\",\n      \"corrections\": {\n        \"recurringPattern\": \"\",\n        \"correctionReason\": \"\"\n      }\n    }\n  ],\n  \"validationSummary\": {\n    \"totalItems\": 8,\n    \"itemsKept\": 3,\n    \"itemsRejected\": 5,\n    \"recurringCorrections\": 0,\n    \"overallNotes\": \"Kept items include a named soup special, Happy Hour with a time window, and a weekend market. Rejected items include non-deal menu features, generic operating hours, a holiday greeting, a private pool closure, and a regular soup item without a promotional context.\"\n  }\n}",
+      "rawResult": {
+        "validatedItems": [
+          {
+            "item": {
+              "name": "October Featured Burger",
+              "type": "event",
+              "date": "2026-10-17",
+              "startTime": "11:00",
+              "endTime": "",
+              "venue": "",
+              "price": "$18",
+              "description": "A featured menu item offered throughout October at its ordinary menu price.",
+              "relevantImageIndex": 0,
+              "recurringPattern": "none",
+              "_sourceType": "special",
+              "_pipelineIndex": 1,
+              "_pipelineTotalStage3": 8
+            },
+            "decision": "REJECTED",
+            "reason": "Month-long featured menu item without an advertised deal or discount (price shown is the ordinary menu price). Per rules, such items should be removed unless they represent a named daily/explicit promotional deal.",
+            "corrections": {
+              "recurringPattern": "",
+              "correctionReason": ""
+            }
+          },
+          {
+            "item": {
+              "name": "Tomato Soup",
+              "type": "event",
+              "date": "2026-10-17",
+              "startTime": "11:00",
+              "endTime": "",
+              "venue": "",
+              "price": "$9",
+              "description": "Regular soup on the everyday menu.",
+              "relevantImageIndex": 0,
+              "recurringPattern": "none",
+              "_sourceType": "special",
+              "_pipelineIndex": 2,
+              "_pipelineTotalStage3": 8
+            },
+            "decision": "REJECTED",
+            "reason": "Regular menu item with price; no explicit deal or special promotional context. Not a valid special or event per validation rules.",
+            "corrections": {
+              "recurringPattern": "",
+              "correctionReason": ""
+            }
+          },
+          {
+            "item": {
+              "name": "Kitchen Opening Hours",
+              "type": "event",
+              "date": "2026-10-17",
+              "startTime": "17:00",
+              "endTime": "21:00",
+              "venue": "",
+              "price": "",
+              "description": "Regular kitchen operating hours every evening.",
+              "relevantImageIndex": 0,
+              "recurringPattern": "none",
+              "_sourceType": "event",
+              "_pipelineIndex": 3,
+              "_pipelineTotalStage3": 8
+            },
+            "decision": "REJECTED",
+            "reason": "This is a business operating schedule rather than a public-facing event or promotional deal. Excluded by rules.",
+            "corrections": {
+              "recurringPattern": "",
+              "correctionReason": ""
+            }
+          },
+          {
+            "item": {
+              "name": "Happy Thanksgiving",
+              "type": "event",
+              "date": "",
+              "startTime": "",
+              "endTime": "",
+              "venue": "",
+              "price": "",
+              "description": "A holiday greeting to our customers.",
+              "relevantImageIndex": 0,
+              "recurringPattern": "none",
+              "_sourceType": "event",
+              "_pipelineIndex": 4,
+              "_pipelineTotalStage3": 8
+            },
+            "decision": "REJECTED",
+            "reason": "Holiday greeting without an associated event date/time is not a valid event or special under the given rules.",
+            "corrections": {
+              "recurringPattern": "",
+              "correctionReason": ""
+            }
+          },
+          {
+            "item": {
+              "name": "Private Pool Closure",
+              "type": "event",
+              "date": "2026-10-17",
+              "startTime": "10:00",
+              "endTime": "12:00",
+              "venue": "",
+              "price": "",
+              "description": "Pool closed to the public during a private staff-only booking.",
+              "relevantImageIndex": 0,
+              "recurringPattern": "none",
+              "_sourceType": "event",
+              "_pipelineIndex": 5,
+              "_pipelineTotalStage3": 8
+            },
+            "decision": "REJECTED",
+            "reason": "Pool closures or private/staff-only schedules are explicitly excluded from validation results.",
+            "corrections": {
+              "recurringPattern": "",
+              "correctionReason": ""
+            }
+          },
+          {
+            "item": {
+              "name": "Today's Soup Special",
+              "type": "event",
+              "date": "2026-10-17",
+              "startTime": "",
+              "endTime": "",
+              "venue": "",
+              "price": "",
+              "description": "Today's soup special is roasted squash soup.",
+              "relevantImageIndex": 0,
+              "recurringPattern": "none",
+              "_sourceType": "special",
+              "_pipelineIndex": 6,
+              "_pipelineTotalStage3": 8
+            },
+            "decision": "KEPT",
+            "reason": "Named daily special with explicit description. Fits special rules for keeping a daily special even without explicit price.",
+            "corrections": {
+              "recurringPattern": "",
+              "correctionReason": ""
+            }
+          },
+          {
+            "item": {
+              "name": "Happy Hour",
+              "type": "event",
+              "date": "2026-10-17",
+              "startTime": "16:00",
+              "endTime": "18:00",
+              "venue": "",
+              "price": "",
+              "description": "Happy Hour from 4-6 pm; price not printed.",
+              "relevantImageIndex": 0,
+              "recurringPattern": "none",
+              "_sourceType": "special",
+              "_pipelineIndex": 7,
+              "_pipelineTotalStage3": 8
+            },
+            "decision": "KEPT",
+            "reason": "Happy Hour with a clear time window is a valid time-bounded special kept even if price is not printed.",
+            "corrections": {
+              "recurringPattern": "",
+              "correctionReason": ""
+            }
+          },
+          {
+            "item": {
+              "name": "Weekend Vendor Market",
+              "type": "event",
+              "date": "2026-10-17",
+              "startTime": "11:00",
+              "endTime": "",
+              "venue": "",
+              "price": "",
+              "description": "Public local vendor market on October 17 at 11 am.",
+              "relevantImageIndex": 0,
+              "recurringPattern": "none",
+              "_sourceType": "event",
+              "_pipelineIndex": 8,
+              "_pipelineTotalStage3": 8
+            },
+            "decision": "KEPT",
+            "reason": "Actual event with specific date and start time; valid per rules.",
+            "corrections": {
+              "recurringPattern": "",
+              "correctionReason": ""
+            }
+          }
+        ],
+        "validationSummary": {
+          "totalItems": 8,
+          "itemsKept": 3,
+          "itemsRejected": 5,
+          "recurringCorrections": 0,
+          "overallNotes": "Kept items include a named soup special, Happy Hour with a time window, and a weekend market. Rejected items include non-deal menu features, generic operating hours, a holiday greeting, a private pool closure, and a regular soup item without a promotional context."
+        }
+      },
+      "parseError": false
+    }
+  ]
+}

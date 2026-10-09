@@ -1,0 +1,369 @@
+{
+  "caseId": "holiday-recurrence-and-distinct-dates",
+  "arm": "luna-medium",
+  "repeat": 1,
+  "model": "gpt-6-luna",
+  "effort": "medium",
+  "noLiveWrites": true,
+  "sourceSha256": "9b21285f37b4a5ad38e72bbe753f59a5072a24cc9fe4dc3187fb57f88de0d2ce",
+  "inputCount": 5,
+  "outputCount": 5,
+  "wallMs": 8082,
+  "items": [
+    {
+      "name": "Thanksgiving Dinner",
+      "type": "event",
+      "date": "2026-10-12",
+      "startTime": "17:00",
+      "endTime": "19:00",
+      "venue": "",
+      "price": "$25",
+      "description": "Thanksgiving-only dinner on October 12 from 5 to 7 pm. This is the holiday menu.",
+      "relevantImageIndex": 0,
+      "recurringPattern": "none",
+      "_sourceType": "special",
+      "_pipelineIndex": 1,
+      "_pipelineTotalStage3": 5
+    },
+    {
+      "name": "Friday Fish and Chips Deal",
+      "type": "event",
+      "date": "recurring",
+      "startTime": "17:00",
+      "endTime": "20:00",
+      "venue": "",
+      "price": "$15",
+      "description": "Every Friday fish and chips deal from 5-8 pm for $15.",
+      "relevantImageIndex": 0,
+      "recurringPattern": "weekly_friday",
+      "_sourceType": "special",
+      "_pipelineIndex": 2,
+      "_pipelineTotalStage3": 5
+    },
+    {
+      "name": "Live Concert",
+      "type": "event",
+      "date": "2026-10-17",
+      "startTime": "20:00",
+      "endTime": "",
+      "venue": "",
+      "price": "",
+      "description": "Public concert October 17 at 8 pm.",
+      "relevantImageIndex": 0,
+      "recurringPattern": "none",
+      "_sourceType": "event",
+      "_pipelineIndex": 3,
+      "_pipelineTotalStage3": 5
+    },
+    {
+      "name": "Live Concert",
+      "type": "event",
+      "date": "2026-10-24",
+      "startTime": "20:00",
+      "endTime": "",
+      "venue": "",
+      "price": "",
+      "description": "Public concert October 24 at 8 pm.",
+      "relevantImageIndex": 0,
+      "recurringPattern": "none",
+      "_sourceType": "event",
+      "_pipelineIndex": 4,
+      "_pipelineTotalStage3": 5
+    },
+    {
+      "name": "Public Skate",
+      "type": "event",
+      "date": "2026-10-17",
+      "startTime": "03:15",
+      "endTime": "04:15",
+      "venue": "",
+      "price": "",
+      "description": "The printed schedule explicitly says public skate at 3:15 AM to 4:15 AM on October 17.",
+      "relevantImageIndex": 0,
+      "recurringPattern": "none",
+      "_sourceType": "calendar",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "3:15 AM"
+        },
+        "end": {
+          "source": "explicit",
+          "toClose": false,
+          "evidence": "4:15 AM"
+        }
+      },
+      "_pipelineIndex": 5,
+      "_pipelineTotalStage3": 5
+    }
+  ],
+  "metadata": {
+    "_happyHourNoPriceOverrideCount": 0,
+    "_calendarDealAllDayOverrideCount": 0,
+    "_calendarDealAllDayNormalizationCount": 0,
+    "_operatingHoursOnlyRejectCount": 0
+  },
+  "usage": [
+    {
+      "stage": "stage4",
+      "component": "secondaryValidator",
+      "endpoint": "responses",
+      "model": "gpt-6-luna",
+      "durationMs": 8061,
+      "inputTokens": 2663,
+      "outputTokens": 1188,
+      "totalTokens": 3851,
+      "cachedInputTokens": 0,
+      "fileId": "stage4-frozen-comparison",
+      "postId": "holiday-recurrence-and-distinct-dates",
+      "rowIndex": 0,
+      "runId": "local-1",
+      "batchItemCount": 5,
+      "responseId": "resp_0de794a764b28958006ac97035eb4087d2a0bf6c7af41e7137",
+      "responseStatus": "completed",
+      "incompleteReason": "",
+      "requestedMaxOutputTokens": 32000,
+      "reasoningTokens": 106,
+      "visibleOutputChars": 4174
+    }
+  ],
+  "requests": [
+    {
+      "model": "gpt-6-luna",
+      "effort": "medium",
+      "responseId": "resp_0de794a764b28958006ac97035eb4087d2a0bf6c7af41e7137",
+      "httpStatus": 200,
+      "status": "completed",
+      "incompleteDetails": null,
+      "error": null,
+      "promptSha256": "63d97e2dfb9698f77132af5de01aeedd7a3ffbe3c189c5375074b78ca34940d3",
+      "outputContractSha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "batchItems": [
+        {
+          "name": "Thanksgiving Dinner",
+          "type": "event",
+          "date": "2026-10-12",
+          "startTime": "17:00",
+          "endTime": "19:00",
+          "venue": "",
+          "price": "$25",
+          "description": "Thanksgiving-only dinner on October 12 from 5 to 7 pm. This is the holiday menu.",
+          "relevantImageIndex": 0,
+          "recurringPattern": "weekly_monday",
+          "_sourceType": "special",
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 5
+        },
+        {
+          "name": "Friday Fish and Chips Deal",
+          "type": "event",
+          "date": "recurring",
+          "startTime": "17:00",
+          "endTime": "20:00",
+          "venue": "",
+          "price": "$15",
+          "description": "Every Friday fish and chips deal from 5-8 pm for $15.",
+          "relevantImageIndex": 0,
+          "recurringPattern": "weekly_friday",
+          "_sourceType": "special",
+          "_pipelineIndex": 2,
+          "_pipelineTotalStage3": 5
+        },
+        {
+          "name": "Live Concert",
+          "type": "event",
+          "date": "2026-10-17",
+          "startTime": "20:00",
+          "endTime": "",
+          "venue": "",
+          "price": "",
+          "description": "Public concert October 17 at 8 pm.",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "_sourceType": "event",
+          "_pipelineIndex": 3,
+          "_pipelineTotalStage3": 5
+        },
+        {
+          "name": "Live Concert",
+          "type": "event",
+          "date": "2026-10-24",
+          "startTime": "20:00",
+          "endTime": "",
+          "venue": "",
+          "price": "",
+          "description": "Public concert October 24 at 8 pm.",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "_sourceType": "event",
+          "_pipelineIndex": 4,
+          "_pipelineTotalStage3": 5
+        },
+        {
+          "name": "Public Skate",
+          "type": "event",
+          "date": "2026-10-17",
+          "startTime": "03:15",
+          "endTime": "04:15",
+          "venue": "",
+          "price": "",
+          "description": "The printed schedule explicitly says public skate at 3:15 AM to 4:15 AM on October 17.",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "3:15 AM"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "4:15 AM"
+            }
+          },
+          "_pipelineIndex": 5,
+          "_pipelineTotalStage3": 5
+        }
+      ],
+      "maxOutputTokens": 32000,
+      "durationMs": 8056,
+      "usage": {
+        "input_tokens": 2663,
+        "input_tokens_details": {
+          "cache_write_tokens": 2660,
+          "cached_tokens": 0
+        },
+        "output_tokens": 1188,
+        "output_tokens_details": {
+          "reasoning_tokens": 106
+        },
+        "total_tokens": 3851
+      },
+      "visibleOutputChars": 4174,
+      "rawText": "{\n  \"validatedItems\": [\n    {\n      \"item\": {\n        \"name\": \"Thanksgiving Dinner\",\n        \"type\": \"event\",\n        \"date\": \"2026-10-12\",\n        \"startTime\": \"17:00\",\n        \"endTime\": \"19:00\",\n        \"venue\": \"\",\n        \"price\": \"$25\",\n        \"description\": \"Thanksgiving-only dinner on October 12 from 5 to 7 pm. This is the holiday menu.\",\n        \"relevantImageIndex\": 0,\n        \"recurringPattern\": \"none\",\n        \"_sourceType\": \"special\",\n        \"_pipelineIndex\": 1,\n        \"_pipelineTotalStage3\": 5\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"This is a named, timed Thanksgiving dinner with a stated price. Because it is a holiday-specific, one-day menu, its recurring pattern is corrected from weekly_monday to none.\",\n      \"corrections\": {\n        \"recurringPattern\": \"none\",\n        \"correctionReason\": \"The description explicitly identifies this as a Thanksgiving-only holiday dinner, so it is not a weekly Monday special.\"\n      }\n    },\n    {\n      \"item\": {\n        \"name\": \"Friday Fish and Chips Deal\",\n        \"type\": \"event\",\n        \"date\": \"recurring\",\n        \"startTime\": \"17:00\",\n        \"endTime\": \"20:00\",\n        \"venue\": \"\",\n        \"price\": \"$15\",\n        \"description\": \"Every Friday fish and chips deal from 5-8 pm for $15.\",\n        \"relevantImageIndex\": 0,\n        \"recurringPattern\": \"weekly_friday\",\n        \"_sourceType\": \"special\",\n        \"_pipelineIndex\": 2,\n        \"_pipelineTotalStage3\": 5\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"This is an explicitly advertised recurring Friday deal with a clear time window and price.\"\n    },\n    {\n      \"item\": {\n        \"name\": \"Live Concert\",\n        \"type\": \"event\",\n        \"date\": \"2026-10-17\",\n        \"startTime\": \"20:00\",\n        \"endTime\": \"\",\n        \"venue\": \"\",\n        \"price\": \"\",\n        \"description\": \"Public concert October 17 at 8 pm.\",\n        \"relevantImageIndex\": 0,\n        \"recurringPattern\": \"none\",\n        \"_sourceType\": \"event\",\n        \"_pipelineIndex\": 3,\n        \"_pipelineTotalStage3\": 5\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"This is a public event with a specific date and start time. Missing venue, end time, and price are optional.\"\n    },\n    {\n      \"item\": {\n        \"name\": \"Live Concert\",\n        \"type\": \"event\",\n        \"date\": \"2026-10-24\",\n        \"startTime\": \"20:00\",\n        \"endTime\": \"\",\n        \"venue\": \"\",\n        \"price\": \"\",\n        \"description\": \"Public concert October 24 at 8 pm.\",\n        \"relevantImageIndex\": 0,\n        \"recurringPattern\": \"none\",\n        \"_sourceType\": \"event\",\n        \"_pipelineIndex\": 4,\n        \"_pipelineTotalStage3\": 5\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"This is a public event with a specific date and start time. It is a separate performance on a different date from the other concert listing.\"\n    },\n    {\n      \"item\": {\n        \"name\": \"Public Skate\",\n        \"type\": \"event\",\n        \"date\": \"2026-10-17\",\n        \"startTime\": \"03:15\",\n        \"endTime\": \"04:15\",\n        \"venue\": \"\",\n        \"price\": \"\",\n        \"description\": \"The printed schedule explicitly says public skate at 3:15 AM to 4:15 AM on October 17.\",\n        \"relevantImageIndex\": 0,\n        \"recurringPattern\": \"none\",\n        \"_sourceType\": \"calendar\",\n        \"timeFlags\": {\n          \"start\": {\n            \"source\": \"explicit\",\n            \"evidence\": \"3:15 AM\"\n          },\n          \"end\": {\n            \"source\": \"explicit\",\n            \"toClose\": false,\n            \"evidence\": \"4:15 AM\"\n          }\n        },\n        \"_pipelineIndex\": 5,\n        \"_pipelineTotalStage3\": 5\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"This is a specifically dated public recreation activity with an explicitly printed start time. The printed time is retained as given, even if it seems implausible.\"\n    }\n  ],\n  \"validationSummary\": {\n    \"totalItems\": 5,\n    \"itemsKept\": 5,\n    \"itemsRejected\": 0,\n    \"recurringCorrections\": 1,\n    \"overallNotes\": \"All items meet validation criteria. The Thanksgiving dinner's recurring pattern was corrected to none because it is explicitly a one-day holiday variation; the two concerts are valid performances on different dates.\"\n  }\n}",
+      "rawResult": {
+        "validatedItems": [
+          {
+            "item": {
+              "name": "Thanksgiving Dinner",
+              "type": "event",
+              "date": "2026-10-12",
+              "startTime": "17:00",
+              "endTime": "19:00",
+              "venue": "",
+              "price": "$25",
+              "description": "Thanksgiving-only dinner on October 12 from 5 to 7 pm. This is the holiday menu.",
+              "relevantImageIndex": 0,
+              "recurringPattern": "none",
+              "_sourceType": "special",
+              "_pipelineIndex": 1,
+              "_pipelineTotalStage3": 5
+            },
+            "decision": "KEPT",
+            "reason": "This is a named, timed Thanksgiving dinner with a stated price. Because it is a holiday-specific, one-day menu, its recurring pattern is corrected from weekly_monday to none.",
+            "corrections": {
+              "recurringPattern": "none",
+              "correctionReason": "The description explicitly identifies this as a Thanksgiving-only holiday dinner, so it is not a weekly Monday special."
+            }
+          },
+          {
+            "item": {
+              "name": "Friday Fish and Chips Deal",
+              "type": "event",
+              "date": "recurring",
+              "startTime": "17:00",
+              "endTime": "20:00",
+              "venue": "",
+              "price": "$15",
+              "description": "Every Friday fish and chips deal from 5-8 pm for $15.",
+              "relevantImageIndex": 0,
+              "recurringPattern": "weekly_friday",
+              "_sourceType": "special",
+              "_pipelineIndex": 2,
+              "_pipelineTotalStage3": 5
+            },
+            "decision": "KEPT",
+            "reason": "This is an explicitly advertised recurring Friday deal with a clear time window and price."
+          },
+          {
+            "item": {
+              "name": "Live Concert",
+              "type": "event",
+              "date": "2026-10-17",
+              "startTime": "20:00",
+              "endTime": "",
+              "venue": "",
+              "price": "",
+              "description": "Public concert October 17 at 8 pm.",
+              "relevantImageIndex": 0,
+              "recurringPattern": "none",
+              "_sourceType": "event",
+              "_pipelineIndex": 3,
+              "_pipelineTotalStage3": 5
+            },
+            "decision": "KEPT",
+            "reason": "This is a public event with a specific date and start time. Missing venue, end time, and price are optional."
+          },
+          {
+            "item": {
+              "name": "Live Concert",
+              "type": "event",
+              "date": "2026-10-24",
+              "startTime": "20:00",
+              "endTime": "",
+              "venue": "",
+              "price": "",
+              "description": "Public concert October 24 at 8 pm.",
+              "relevantImageIndex": 0,
+              "recurringPattern": "none",
+              "_sourceType": "event",
+              "_pipelineIndex": 4,
+              "_pipelineTotalStage3": 5
+            },
+            "decision": "KEPT",
+            "reason": "This is a public event with a specific date and start time. It is a separate performance on a different date from the other concert listing."
+          },
+          {
+            "item": {
+              "name": "Public Skate",
+              "type": "event",
+              "date": "2026-10-17",
+              "startTime": "03:15",
+              "endTime": "04:15",
+              "venue": "",
+              "price": "",
+              "description": "The printed schedule explicitly says public skate at 3:15 AM to 4:15 AM on October 17.",
+              "relevantImageIndex": 0,
+              "recurringPattern": "none",
+              "_sourceType": "calendar",
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "3:15 AM"
+                },
+                "end": {
+                  "source": "explicit",
+                  "toClose": false,
+                  "evidence": "4:15 AM"
+                }
+              },
+              "_pipelineIndex": 5,
+              "_pipelineTotalStage3": 5
+            },
+            "decision": "KEPT",
+            "reason": "This is a specifically dated public recreation activity with an explicitly printed start time. The printed time is retained as given, even if it seems implausible."
+          }
+        ],
+        "validationSummary": {
+          "totalItems": 5,
+          "itemsKept": 5,
+          "itemsRejected": 0,
+          "recurringCorrections": 1,
+          "overallNotes": "All items meet validation criteria. The Thanksgiving dinner's recurring pattern was corrected to none because it is explicitly a one-day holiday variation; the two concerts are valid performances on different dates."
+        }
+      },
+      "parseError": false
+    }
+  ]
+}

@@ -1,0 +1,167 @@
+{
+  "caseId": "clinic-single",
+  "arm": "luna-medium",
+  "repeat": 1,
+  "model": "gpt-6-luna",
+  "effort": "medium",
+  "noLiveWrites": true,
+  "sourceSha256": "0700013f5d357ce425fa20952836122e018cae6b7857d97a1962308c53fb7380",
+  "inputCount": 1,
+  "outputCount": 1,
+  "wallMs": 4054,
+  "items": [
+    {
+      "name": "Rxtra Care Clinic",
+      "description": "Walk-in pharmacist assessments for minor ailments and other questions; flu shots and COVID-19 vaccines are also available.",
+      "date": "2026-10-09",
+      "startTime": "09:00",
+      "endTime": "16:00",
+      "venue": "Seaside Pharmacy, 51 Main Street, Souris",
+      "price": "",
+      "recurringPattern": "none",
+      "extractionReason": "The post advertises the clinic for today and explicitly gives the hours as 9 AM–4 PM.",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "The post text says walk-in assessments are available today from 9 AM."
+        },
+        "end": {
+          "source": "explicit",
+          "toClose": false,
+          "evidence": "The post text gives the end time as 4 PM."
+        }
+      },
+      "_sourceType": "event",
+      "_pipelineIndex": 1,
+      "_pipelineTotalStage3": 1
+    }
+  ],
+  "metadata": {
+    "_happyHourNoPriceOverrideCount": 0,
+    "_calendarDealAllDayOverrideCount": 0,
+    "_calendarDealAllDayNormalizationCount": 0,
+    "_operatingHoursOnlyRejectCount": 0
+  },
+  "usage": [
+    {
+      "stage": "stage4",
+      "component": "secondaryValidator",
+      "endpoint": "responses",
+      "model": "gpt-6-luna",
+      "durationMs": 4034,
+      "inputTokens": 2201,
+      "outputTokens": 464,
+      "totalTokens": 2665,
+      "cachedInputTokens": 0,
+      "fileId": "stage4-frozen-comparison",
+      "postId": "1793693025774013",
+      "rowIndex": 213,
+      "runId": "local-1",
+      "batchItemCount": 1,
+      "responseId": "resp_068b3fa76ff91495006ac96f60ef1087d295c4ea23507292f7",
+      "responseStatus": "completed",
+      "incompleteReason": "",
+      "requestedMaxOutputTokens": 32000,
+      "reasoningTokens": 79,
+      "visibleOutputChars": 1540
+    }
+  ],
+  "requests": [
+    {
+      "model": "gpt-6-luna",
+      "effort": "medium",
+      "responseId": "resp_068b3fa76ff91495006ac96f60ef1087d295c4ea23507292f7",
+      "httpStatus": 200,
+      "status": "completed",
+      "incompleteDetails": null,
+      "error": null,
+      "promptSha256": "0e9b45762cf91c4060c67cfd99190f3ccc6f3a02011873abaa4c1ffe3b3cc079",
+      "outputContractSha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "batchItems": [
+        {
+          "name": "Rxtra Care Clinic",
+          "description": "Walk-in pharmacist assessments for minor ailments and other questions; flu shots and COVID-19 vaccines are also available.",
+          "date": "2026-10-09",
+          "startTime": "09:00",
+          "endTime": "16:00",
+          "venue": "Seaside Pharmacy, 51 Main Street, Souris",
+          "price": "",
+          "recurringPattern": "none",
+          "extractionReason": "The post advertises the clinic for today and explicitly gives the hours as 9 AM–4 PM.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "The post text says walk-in assessments are available today from 9 AM."
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "The post text gives the end time as 4 PM."
+            }
+          },
+          "_sourceType": "event",
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 1
+        }
+      ],
+      "maxOutputTokens": 32000,
+      "durationMs": 4028,
+      "usage": {
+        "input_tokens": 2201,
+        "input_tokens_details": {
+          "cache_write_tokens": 2198,
+          "cached_tokens": 0
+        },
+        "output_tokens": 464,
+        "output_tokens_details": {
+          "reasoning_tokens": 79
+        },
+        "total_tokens": 2665
+      },
+      "visibleOutputChars": 1540,
+      "rawText": "{\n  \"validatedItems\": [\n    {\n      \"item\": {\n        \"name\": \"Rxtra Care Clinic\",\n        \"description\": \"Walk-in pharmacist assessments for minor ailments and other questions; flu shots and COVID-19 vaccines are also available.\",\n        \"date\": \"2026-10-09\",\n        \"startTime\": \"09:00\",\n        \"endTime\": \"16:00\",\n        \"venue\": \"Seaside Pharmacy, 51 Main Street, Souris\",\n        \"price\": \"\",\n        \"recurringPattern\": \"none\",\n        \"extractionReason\": \"The post advertises the clinic for today and explicitly gives the hours as 9 AM–4 PM.\",\n        \"timeFlags\": {\n          \"start\": {\n            \"source\": \"explicit\",\n            \"evidence\": \"The post text says walk-in assessments are available today from 9 AM.\"\n          },\n          \"end\": {\n            \"source\": \"explicit\",\n            \"toClose\": false,\n            \"evidence\": \"The post text gives the end time as 4 PM.\"\n          }\n        },\n        \"_sourceType\": \"event\",\n        \"_pipelineIndex\": 1,\n        \"_pipelineTotalStage3\": 1\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"This is a specifically dated, time-bounded pharmacist clinic offering walk-in assessments and vaccinations, not merely a general business operating schedule. It has the required event name, date, and start time.\",\n      \"corrections\": {}\n    }\n  ],\n  \"validationSummary\": {\n    \"totalItems\": 1,\n    \"itemsKept\": 1,\n    \"itemsRejected\": 0,\n    \"recurringCorrections\": 0,\n    \"overallNotes\": \"The clinic is a dated activity with explicit hours and passes event validation.\"\n  }\n}",
+      "rawResult": {
+        "validatedItems": [
+          {
+            "item": {
+              "name": "Rxtra Care Clinic",
+              "description": "Walk-in pharmacist assessments for minor ailments and other questions; flu shots and COVID-19 vaccines are also available.",
+              "date": "2026-10-09",
+              "startTime": "09:00",
+              "endTime": "16:00",
+              "venue": "Seaside Pharmacy, 51 Main Street, Souris",
+              "price": "",
+              "recurringPattern": "none",
+              "extractionReason": "The post advertises the clinic for today and explicitly gives the hours as 9 AM–4 PM.",
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "The post text says walk-in assessments are available today from 9 AM."
+                },
+                "end": {
+                  "source": "explicit",
+                  "toClose": false,
+                  "evidence": "The post text gives the end time as 4 PM."
+                }
+              },
+              "_sourceType": "event",
+              "_pipelineIndex": 1,
+              "_pipelineTotalStage3": 1
+            },
+            "decision": "KEPT",
+            "reason": "This is a specifically dated, time-bounded pharmacist clinic offering walk-in assessments and vaccinations, not merely a general business operating schedule. It has the required event name, date, and start time.",
+            "corrections": {}
+          }
+        ],
+        "validationSummary": {
+          "totalItems": 1,
+          "itemsKept": 1,
+          "itemsRejected": 0,
+          "recurringCorrections": 0,
+          "overallNotes": "The clinic is a dated activity with explicit hours and passes event validation."
+        }
+      },
+      "parseError": false
+    }
+  ]
+}

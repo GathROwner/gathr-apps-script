@@ -1,0 +1,1407 @@
+{
+  "caseId": "pool-15",
+  "arm": "luna-medium",
+  "repeat": 1,
+  "model": "gpt-6-luna",
+  "effort": "medium",
+  "noLiveWrites": true,
+  "sourceSha256": "fc25a95b8d23dcd18c66f507c33d255bdf15dfa6f0c3d95828726888030e58e7",
+  "inputCount": 15,
+  "outputCount": 15,
+  "wallMs": 28789,
+  "items": [
+    {
+      "name": "Public Skate",
+      "day": "Wednesday",
+      "date": "2026-10-07",
+      "recurringPattern": "none",
+      "startTime": "11:15",
+      "endTime": "13:00",
+      "venue": "",
+      "price": "",
+      "description": "MacLauchlan Arena B. Helmets are mandatory for all skaters.",
+      "extractionReason": "Listed as a scheduled public skate with an explicit time range.",
+      "relevantImageIndex": 0,
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "11:15 am - 1:00 pm"
+        },
+        "end": {
+          "source": "explicit",
+          "toClose": false,
+          "evidence": "11:15 am - 1:00 pm"
+        }
+      },
+      "type": "event",
+      "_sourceType": "schedule",
+      "_pipelineIndex": 1,
+      "_pipelineTotalStage3": 15
+    },
+    {
+      "name": "Lane swim",
+      "day": "Wednesday",
+      "date": "2026-10-07",
+      "recurringPattern": "none",
+      "startTime": "05:30",
+      "endTime": "07:00",
+      "venue": "",
+      "price": "",
+      "description": "",
+      "extractionReason": "Listed as a lane-swim availability block with an explicit time range.",
+      "relevantImageIndex": 0,
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "5:30 am - 7:00 am"
+        },
+        "end": {
+          "source": "explicit",
+          "toClose": false,
+          "evidence": "5:30 am - 7:00 am"
+        }
+      },
+      "type": "event",
+      "_sourceType": "schedule",
+      "_pipelineIndex": 2,
+      "_pipelineTotalStage3": 15
+    },
+    {
+      "name": "Lane swim",
+      "day": "Wednesday",
+      "date": "2026-10-07",
+      "recurringPattern": "none",
+      "startTime": "07:00",
+      "endTime": "12:00",
+      "venue": "",
+      "price": "",
+      "description": "",
+      "extractionReason": "Listed as a lane-swim availability block with an explicit time range.",
+      "relevantImageIndex": 0,
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "7:00 am - 12:00 pm"
+        },
+        "end": {
+          "source": "explicit",
+          "toClose": false,
+          "evidence": "7:00 am - 12:00 pm"
+        }
+      },
+      "type": "event",
+      "_sourceType": "schedule",
+      "_pipelineIndex": 3,
+      "_pipelineTotalStage3": 15
+    },
+    {
+      "name": "Lane swim",
+      "day": "Wednesday",
+      "date": "2026-10-07",
+      "recurringPattern": "none",
+      "startTime": "12:00",
+      "endTime": "13:00",
+      "venue": "",
+      "price": "",
+      "description": "1 lane only.",
+      "extractionReason": "Listed as a lane-swim availability block with an explicit time range and a one-lane limitation.",
+      "relevantImageIndex": 0,
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "1 lane only 12:00pm - 1:00 pm"
+        },
+        "end": {
+          "source": "explicit",
+          "toClose": false,
+          "evidence": "1 lane only 12:00pm - 1:00 pm"
+        }
+      },
+      "type": "event",
+      "_sourceType": "schedule",
+      "_pipelineIndex": 4,
+      "_pipelineTotalStage3": 15
+    },
+    {
+      "name": "Lane swim",
+      "day": "Wednesday",
+      "date": "2026-10-07",
+      "recurringPattern": "none",
+      "startTime": "13:00",
+      "endTime": "16:00",
+      "venue": "",
+      "price": "",
+      "description": "",
+      "extractionReason": "Listed as a lane-swim availability block with an explicit time range.",
+      "relevantImageIndex": 0,
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "1:00pm - 4:00pm"
+        },
+        "end": {
+          "source": "explicit",
+          "toClose": false,
+          "evidence": "1:00pm - 4:00pm"
+        }
+      },
+      "type": "event",
+      "_sourceType": "schedule",
+      "_pipelineIndex": 5,
+      "_pipelineTotalStage3": 15
+    },
+    {
+      "name": "Lane swim",
+      "day": "Wednesday",
+      "date": "2026-10-07",
+      "recurringPattern": "none",
+      "startTime": "19:30",
+      "endTime": "21:00",
+      "venue": "",
+      "price": "",
+      "description": "",
+      "extractionReason": "Listed as a lane-swim availability block with an explicit time range.",
+      "relevantImageIndex": 0,
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "7:30 pm - 9:00 pm"
+        },
+        "end": {
+          "source": "explicit",
+          "toClose": false,
+          "evidence": "7:30 pm - 9:00 pm"
+        }
+      },
+      "type": "event",
+      "_sourceType": "schedule",
+      "_pipelineIndex": 6,
+      "_pipelineTotalStage3": 15
+    },
+    {
+      "name": "Leisure pool open",
+      "day": "Wednesday",
+      "date": "2026-10-07",
+      "recurringPattern": "none",
+      "startTime": "05:30",
+      "endTime": "16:00",
+      "venue": "",
+      "price": "",
+      "description": "",
+      "extractionReason": "Listed as a leisure-pool availability block with an explicit time range.",
+      "relevantImageIndex": 0,
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "5:30 am - 4:00 pm"
+        },
+        "end": {
+          "source": "explicit",
+          "toClose": false,
+          "evidence": "5:30 am - 4:00 pm"
+        }
+      },
+      "type": "event",
+      "_sourceType": "schedule",
+      "_pipelineIndex": 7,
+      "_pipelineTotalStage3": 15
+    },
+    {
+      "name": "Leisure pool open",
+      "day": "Wednesday",
+      "date": "2026-10-07",
+      "recurringPattern": "none",
+      "startTime": "17:30",
+      "endTime": "21:00",
+      "venue": "",
+      "price": "",
+      "description": "",
+      "extractionReason": "Listed as a leisure-pool availability block with an explicit time range.",
+      "relevantImageIndex": 0,
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "5:30 pm - 9:00 pm"
+        },
+        "end": {
+          "source": "explicit",
+          "toClose": false,
+          "evidence": "5:30 pm - 9:00 pm"
+        }
+      },
+      "type": "event",
+      "_sourceType": "schedule",
+      "_pipelineIndex": 8,
+      "_pipelineTotalStage3": 15
+    },
+    {
+      "name": "Toddler Pool open",
+      "day": "Wednesday",
+      "date": "2026-10-07",
+      "recurringPattern": "none",
+      "startTime": "05:30",
+      "endTime": "21:00",
+      "venue": "",
+      "price": "",
+      "description": "",
+      "extractionReason": "Listed as toddler-pool availability with an explicit time range.",
+      "relevantImageIndex": 0,
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "5:30 am - 9:00 pm"
+        },
+        "end": {
+          "source": "explicit",
+          "toClose": false,
+          "evidence": "5:30 am - 9:00 pm"
+        }
+      },
+      "type": "event",
+      "_sourceType": "schedule",
+      "_pipelineIndex": 9,
+      "_pipelineTotalStage3": 15
+    },
+    {
+      "name": "All pools open",
+      "day": "Wednesday",
+      "date": "2026-10-07",
+      "recurringPattern": "none",
+      "startTime": "09:30",
+      "endTime": "11:30",
+      "venue": "",
+      "price": "",
+      "description": "",
+      "extractionReason": "Listed as an all-pools availability block with an explicit time range.",
+      "relevantImageIndex": 0,
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "9:30 am - 11:30 am"
+        },
+        "end": {
+          "source": "explicit",
+          "toClose": false,
+          "evidence": "9:30 am - 11:30 am"
+        }
+      },
+      "type": "event",
+      "_sourceType": "schedule",
+      "_pipelineIndex": 10,
+      "_pipelineTotalStage3": 15
+    },
+    {
+      "name": "All pools open",
+      "day": "Wednesday",
+      "date": "2026-10-07",
+      "recurringPattern": "none",
+      "startTime": "12:30",
+      "endTime": "16:00",
+      "venue": "",
+      "price": "",
+      "description": "",
+      "extractionReason": "Listed as an all-pools availability block with an explicit time range.",
+      "relevantImageIndex": 0,
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "12:30 pm - 4:00 pm"
+        },
+        "end": {
+          "source": "explicit",
+          "toClose": false,
+          "evidence": "12:30 pm - 4:00 pm"
+        }
+      },
+      "type": "event",
+      "_sourceType": "schedule",
+      "_pipelineIndex": 11,
+      "_pipelineTotalStage3": 15
+    },
+    {
+      "name": "Sunrise Fitness",
+      "day": "Wednesday",
+      "date": "2026-10-07",
+      "recurringPattern": "none",
+      "startTime": "07:00",
+      "endTime": "",
+      "venue": "",
+      "price": "",
+      "description": "Aquafit class.",
+      "extractionReason": "Named Aquafit class listed with a start time.",
+      "relevantImageIndex": 0,
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "7:00 am"
+        },
+        "end": {
+          "source": "none",
+          "toClose": false,
+          "evidence": ""
+        }
+      },
+      "type": "event",
+      "_sourceType": "schedule",
+      "_pipelineIndex": 12,
+      "_pipelineTotalStage3": 15
+    },
+    {
+      "name": "Cardio Craze",
+      "day": "Wednesday",
+      "date": "2026-10-07",
+      "recurringPattern": "none",
+      "startTime": "08:45",
+      "endTime": "",
+      "venue": "",
+      "price": "",
+      "description": "Aquafit class.",
+      "extractionReason": "Named Aquafit class listed with a start time.",
+      "relevantImageIndex": 0,
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "8:45 am"
+        },
+        "end": {
+          "source": "none",
+          "toClose": false,
+          "evidence": ""
+        }
+      },
+      "type": "event",
+      "_sourceType": "schedule",
+      "_pipelineIndex": 13,
+      "_pipelineTotalStage3": 15
+    },
+    {
+      "name": "UFIT Aqua",
+      "day": "Wednesday",
+      "date": "2026-10-07",
+      "recurringPattern": "none",
+      "startTime": "11:45",
+      "endTime": "",
+      "venue": "",
+      "price": "",
+      "description": "Aquafit class.",
+      "extractionReason": "Named Aquafit class listed with a start time.",
+      "relevantImageIndex": 0,
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "11:45 am"
+        },
+        "end": {
+          "source": "none",
+          "toClose": false,
+          "evidence": ""
+        }
+      },
+      "type": "event",
+      "_sourceType": "schedule",
+      "_pipelineIndex": 14,
+      "_pipelineTotalStage3": 15
+    },
+    {
+      "name": "Aqua Zumba",
+      "day": "Wednesday",
+      "date": "2026-10-07",
+      "recurringPattern": "none",
+      "startTime": "18:00",
+      "endTime": "",
+      "venue": "",
+      "price": "",
+      "description": "Aquafit class.",
+      "extractionReason": "Named Aquafit class listed with a start time.",
+      "relevantImageIndex": 0,
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "6:00 pm"
+        },
+        "end": {
+          "source": "none",
+          "toClose": false,
+          "evidence": ""
+        }
+      },
+      "type": "event",
+      "_sourceType": "schedule",
+      "_pipelineIndex": 15,
+      "_pipelineTotalStage3": 15
+    }
+  ],
+  "metadata": {
+    "_happyHourNoPriceOverrideCount": 0,
+    "_calendarDealAllDayOverrideCount": 0,
+    "_calendarDealAllDayNormalizationCount": 0,
+    "_operatingHoursOnlyRejectCount": 0
+  },
+  "usage": [
+    {
+      "stage": "stage4",
+      "component": "secondaryValidator",
+      "endpoint": "responses",
+      "model": "gpt-6-luna",
+      "durationMs": 28757,
+      "inputTokens": 5169,
+      "outputTokens": 4059,
+      "totalTokens": 9228,
+      "cachedInputTokens": 0,
+      "fileId": "stage4-frozen-comparison",
+      "postId": "1525045012976750",
+      "rowIndex": 172,
+      "runId": "local-1",
+      "batchItemCount": 15,
+      "responseId": "resp_0a64a59d822059bd006ac96ed7b23887d28828984a742de2fd",
+      "responseStatus": "completed",
+      "incompleteReason": "",
+      "requestedMaxOutputTokens": 32000,
+      "reasoningTokens": 132,
+      "visibleOutputChars": 15162
+    }
+  ],
+  "requests": [
+    {
+      "model": "gpt-6-luna",
+      "effort": "medium",
+      "responseId": "resp_0a64a59d822059bd006ac96ed7b23887d28828984a742de2fd",
+      "httpStatus": 200,
+      "status": "completed",
+      "incompleteDetails": null,
+      "error": null,
+      "promptSha256": "ddcc8cda979650db80ce35134de0d5367c09141c26039760750b1edf2127f1cc",
+      "outputContractSha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "batchItems": [
+        {
+          "name": "Public Skate",
+          "day": "Wednesday",
+          "date": "2026-10-07",
+          "recurringPattern": "none",
+          "startTime": "11:15",
+          "endTime": "13:00",
+          "venue": "",
+          "price": "",
+          "description": "MacLauchlan Arena B. Helmets are mandatory for all skaters.",
+          "extractionReason": "Listed as a scheduled public skate with an explicit time range.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "11:15 am - 1:00 pm"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "11:15 am - 1:00 pm"
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 15
+        },
+        {
+          "name": "Lane swim",
+          "day": "Wednesday",
+          "date": "2026-10-07",
+          "recurringPattern": "none",
+          "startTime": "05:30",
+          "endTime": "07:00",
+          "venue": "",
+          "price": "",
+          "description": "",
+          "extractionReason": "Listed as a lane-swim availability block with an explicit time range.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "5:30 am - 7:00 am"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "5:30 am - 7:00 am"
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_pipelineIndex": 2,
+          "_pipelineTotalStage3": 15
+        },
+        {
+          "name": "Lane swim",
+          "day": "Wednesday",
+          "date": "2026-10-07",
+          "recurringPattern": "none",
+          "startTime": "07:00",
+          "endTime": "12:00",
+          "venue": "",
+          "price": "",
+          "description": "",
+          "extractionReason": "Listed as a lane-swim availability block with an explicit time range.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "7:00 am - 12:00 pm"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "7:00 am - 12:00 pm"
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_pipelineIndex": 3,
+          "_pipelineTotalStage3": 15
+        },
+        {
+          "name": "Lane swim",
+          "day": "Wednesday",
+          "date": "2026-10-07",
+          "recurringPattern": "none",
+          "startTime": "12:00",
+          "endTime": "13:00",
+          "venue": "",
+          "price": "",
+          "description": "1 lane only.",
+          "extractionReason": "Listed as a lane-swim availability block with an explicit time range and a one-lane limitation.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "1 lane only 12:00pm - 1:00 pm"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "1 lane only 12:00pm - 1:00 pm"
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_pipelineIndex": 4,
+          "_pipelineTotalStage3": 15
+        },
+        {
+          "name": "Lane swim",
+          "day": "Wednesday",
+          "date": "2026-10-07",
+          "recurringPattern": "none",
+          "startTime": "13:00",
+          "endTime": "16:00",
+          "venue": "",
+          "price": "",
+          "description": "",
+          "extractionReason": "Listed as a lane-swim availability block with an explicit time range.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "1:00pm - 4:00pm"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "1:00pm - 4:00pm"
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_pipelineIndex": 5,
+          "_pipelineTotalStage3": 15
+        },
+        {
+          "name": "Lane swim",
+          "day": "Wednesday",
+          "date": "2026-10-07",
+          "recurringPattern": "none",
+          "startTime": "19:30",
+          "endTime": "21:00",
+          "venue": "",
+          "price": "",
+          "description": "",
+          "extractionReason": "Listed as a lane-swim availability block with an explicit time range.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "7:30 pm - 9:00 pm"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "7:30 pm - 9:00 pm"
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_pipelineIndex": 6,
+          "_pipelineTotalStage3": 15
+        },
+        {
+          "name": "Leisure pool open",
+          "day": "Wednesday",
+          "date": "2026-10-07",
+          "recurringPattern": "none",
+          "startTime": "05:30",
+          "endTime": "16:00",
+          "venue": "",
+          "price": "",
+          "description": "",
+          "extractionReason": "Listed as a leisure-pool availability block with an explicit time range.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "5:30 am - 4:00 pm"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "5:30 am - 4:00 pm"
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_pipelineIndex": 7,
+          "_pipelineTotalStage3": 15
+        },
+        {
+          "name": "Leisure pool open",
+          "day": "Wednesday",
+          "date": "2026-10-07",
+          "recurringPattern": "none",
+          "startTime": "17:30",
+          "endTime": "21:00",
+          "venue": "",
+          "price": "",
+          "description": "",
+          "extractionReason": "Listed as a leisure-pool availability block with an explicit time range.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "5:30 pm - 9:00 pm"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "5:30 pm - 9:00 pm"
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_pipelineIndex": 8,
+          "_pipelineTotalStage3": 15
+        },
+        {
+          "name": "Toddler Pool open",
+          "day": "Wednesday",
+          "date": "2026-10-07",
+          "recurringPattern": "none",
+          "startTime": "05:30",
+          "endTime": "21:00",
+          "venue": "",
+          "price": "",
+          "description": "",
+          "extractionReason": "Listed as toddler-pool availability with an explicit time range.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "5:30 am - 9:00 pm"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "5:30 am - 9:00 pm"
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_pipelineIndex": 9,
+          "_pipelineTotalStage3": 15
+        },
+        {
+          "name": "All pools open",
+          "day": "Wednesday",
+          "date": "2026-10-07",
+          "recurringPattern": "none",
+          "startTime": "09:30",
+          "endTime": "11:30",
+          "venue": "",
+          "price": "",
+          "description": "",
+          "extractionReason": "Listed as an all-pools availability block with an explicit time range.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "9:30 am - 11:30 am"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "9:30 am - 11:30 am"
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_pipelineIndex": 10,
+          "_pipelineTotalStage3": 15
+        },
+        {
+          "name": "All pools open",
+          "day": "Wednesday",
+          "date": "2026-10-07",
+          "recurringPattern": "none",
+          "startTime": "12:30",
+          "endTime": "16:00",
+          "venue": "",
+          "price": "",
+          "description": "",
+          "extractionReason": "Listed as an all-pools availability block with an explicit time range.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "12:30 pm - 4:00 pm"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "12:30 pm - 4:00 pm"
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_pipelineIndex": 11,
+          "_pipelineTotalStage3": 15
+        },
+        {
+          "name": "Sunrise Fitness",
+          "day": "Wednesday",
+          "date": "2026-10-07",
+          "recurringPattern": "none",
+          "startTime": "07:00",
+          "endTime": "",
+          "venue": "",
+          "price": "",
+          "description": "Aquafit class.",
+          "extractionReason": "Named Aquafit class listed with a start time.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "7:00 am"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_pipelineIndex": 12,
+          "_pipelineTotalStage3": 15
+        },
+        {
+          "name": "Cardio Craze",
+          "day": "Wednesday",
+          "date": "2026-10-07",
+          "recurringPattern": "none",
+          "startTime": "08:45",
+          "endTime": "",
+          "venue": "",
+          "price": "",
+          "description": "Aquafit class.",
+          "extractionReason": "Named Aquafit class listed with a start time.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "8:45 am"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_pipelineIndex": 13,
+          "_pipelineTotalStage3": 15
+        },
+        {
+          "name": "UFIT Aqua",
+          "day": "Wednesday",
+          "date": "2026-10-07",
+          "recurringPattern": "none",
+          "startTime": "11:45",
+          "endTime": "",
+          "venue": "",
+          "price": "",
+          "description": "Aquafit class.",
+          "extractionReason": "Named Aquafit class listed with a start time.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "11:45 am"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_pipelineIndex": 14,
+          "_pipelineTotalStage3": 15
+        },
+        {
+          "name": "Aqua Zumba",
+          "day": "Wednesday",
+          "date": "2026-10-07",
+          "recurringPattern": "none",
+          "startTime": "18:00",
+          "endTime": "",
+          "venue": "",
+          "price": "",
+          "description": "Aquafit class.",
+          "extractionReason": "Named Aquafit class listed with a start time.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "6:00 pm"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_pipelineIndex": 15,
+          "_pipelineTotalStage3": 15
+        }
+      ],
+      "maxOutputTokens": 32000,
+      "durationMs": 28750,
+      "usage": {
+        "input_tokens": 5169,
+        "input_tokens_details": {
+          "cache_write_tokens": 5166,
+          "cached_tokens": 0
+        },
+        "output_tokens": 4059,
+        "output_tokens_details": {
+          "reasoning_tokens": 132
+        },
+        "total_tokens": 9228
+      },
+      "visibleOutputChars": 15162,
+      "rawText": "{\n  \"validatedItems\": [\n    {\n      \"item\": {\n        \"name\": \"Public Skate\",\n        \"day\": \"Wednesday\",\n        \"date\": \"2026-10-07\",\n        \"recurringPattern\": \"none\",\n        \"startTime\": \"11:15\",\n        \"endTime\": \"13:00\",\n        \"venue\": \"\",\n        \"price\": \"\",\n        \"description\": \"MacLauchlan Arena B. Helmets are mandatory for all skaters.\",\n        \"extractionReason\": \"Listed as a scheduled public skate with an explicit time range.\",\n        \"relevantImageIndex\": 0,\n        \"timeFlags\": {\n          \"start\": {\n            \"source\": \"explicit\",\n            \"evidence\": \"11:15 am - 1:00 pm\"\n          },\n          \"end\": {\n            \"source\": \"explicit\",\n            \"toClose\": false,\n            \"evidence\": \"11:15 am - 1:00 pm\"\n          }\n        },\n        \"type\": \"event\",\n        \"_sourceType\": \"schedule\",\n        \"_pipelineIndex\": 1,\n        \"_pipelineTotalStage3\": 15\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"This is a specifically dated public skate with an explicit time range, which qualifies as a public recreation activity.\"\n    },\n    {\n      \"item\": {\n        \"name\": \"Lane swim\",\n        \"day\": \"Wednesday\",\n        \"date\": \"2026-10-07\",\n        \"recurringPattern\": \"none\",\n        \"startTime\": \"05:30\",\n        \"endTime\": \"07:00\",\n        \"venue\": \"\",\n        \"price\": \"\",\n        \"description\": \"\",\n        \"extractionReason\": \"Listed as a lane-swim availability block with an explicit time range.\",\n        \"relevantImageIndex\": 0,\n        \"timeFlags\": {\n          \"start\": {\n            \"source\": \"explicit\",\n            \"evidence\": \"5:30 am - 7:00 am\"\n          },\n          \"end\": {\n            \"source\": \"explicit\",\n            \"toClose\": false,\n            \"evidence\": \"5:30 am - 7:00 am\"\n          }\n        },\n        \"type\": \"event\",\n        \"_sourceType\": \"schedule\",\n        \"_pipelineIndex\": 2,\n        \"_pipelineTotalStage3\": 15\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"This is a specifically dated lane-swim access window with an explicit time range. Public recreation access windows are kept.\"\n    },\n    {\n      \"item\": {\n        \"name\": \"Lane swim\",\n        \"day\": \"Wednesday\",\n        \"date\": \"2026-10-07\",\n        \"recurringPattern\": \"none\",\n        \"startTime\": \"07:00\",\n        \"endTime\": \"12:00\",\n        \"venue\": \"\",\n        \"price\": \"\",\n        \"description\": \"\",\n        \"extractionReason\": \"Listed as a lane-swim availability block with an explicit time range.\",\n        \"relevantImageIndex\": 0,\n        \"timeFlags\": {\n          \"start\": {\n            \"source\": \"explicit\",\n            \"evidence\": \"7:00 am - 12:00 pm\"\n          },\n          \"end\": {\n            \"source\": \"explicit\",\n            \"toClose\": false,\n            \"evidence\": \"7:00 am - 12:00 pm\"\n          }\n        },\n        \"type\": \"event\",\n        \"_sourceType\": \"schedule\",\n        \"_pipelineIndex\": 3,\n        \"_pipelineTotalStage3\": 15\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"This is a separately listed, specifically dated lane-swim access window with an explicit time range. Retain the distinct source window.\"\n    },\n    {\n      \"item\": {\n        \"name\": \"Lane swim\",\n        \"day\": \"Wednesday\",\n        \"date\": \"2026-10-07\",\n        \"recurringPattern\": \"none\",\n        \"startTime\": \"12:00\",\n        \"endTime\": \"13:00\",\n        \"venue\": \"\",\n        \"price\": \"\",\n        \"description\": \"1 lane only.\",\n        \"extractionReason\": \"Listed as a lane-swim availability block with an explicit time range and a one-lane limitation.\",\n        \"relevantImageIndex\": 0,\n        \"timeFlags\": {\n          \"start\": {\n            \"source\": \"explicit\",\n            \"evidence\": \"1 lane only 12:00pm - 1:00 pm\"\n          },\n          \"end\": {\n            \"source\": \"explicit\",\n            \"toClose\": false,\n            \"evidence\": \"1 lane only 12:00pm - 1:00 pm\"\n          }\n        },\n        \"type\": \"event\",\n        \"_sourceType\": \"schedule\",\n        \"_pipelineIndex\": 4,\n        \"_pipelineTotalStage3\": 15\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"This is a specifically dated lane-swim access window with an explicit time range and a one-lane limitation.\"\n    },\n    {\n      \"item\": {\n        \"name\": \"Lane swim\",\n        \"day\": \"Wednesday\",\n        \"date\": \"2026-10-07\",\n        \"recurringPattern\": \"none\",\n        \"startTime\": \"13:00\",\n        \"endTime\": \"16:00\",\n        \"venue\": \"\",\n        \"price\": \"\",\n        \"description\": \"\",\n        \"extractionReason\": \"Listed as a lane-swim availability block with an explicit time range.\",\n        \"relevantImageIndex\": 0,\n        \"timeFlags\": {\n          \"start\": {\n            \"source\": \"explicit\",\n            \"evidence\": \"1:00pm - 4:00pm\"\n          },\n          \"end\": {\n            \"source\": \"explicit\",\n            \"toClose\": false,\n            \"evidence\": \"1:00pm - 4:00pm\"\n          }\n        },\n        \"type\": \"event\",\n        \"_sourceType\": \"schedule\",\n        \"_pipelineIndex\": 5,\n        \"_pipelineTotalStage3\": 15\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"This is a separately listed, specifically dated lane-swim access window with an explicit time range.\"\n    },\n    {\n      \"item\": {\n        \"name\": \"Lane swim\",\n        \"day\": \"Wednesday\",\n        \"date\": \"2026-10-07\",\n        \"recurringPattern\": \"none\",\n        \"startTime\": \"19:30\",\n        \"endTime\": \"21:00\",\n        \"venue\": \"\",\n        \"price\": \"\",\n        \"description\": \"\",\n        \"extractionReason\": \"Listed as a lane-swim availability block with an explicit time range.\",\n        \"relevantImageIndex\": 0,\n        \"timeFlags\": {\n          \"start\": {\n            \"source\": \"explicit\",\n            \"evidence\": \"7:30 pm - 9:00 pm\"\n          },\n          \"end\": {\n            \"source\": \"explicit\",\n            \"toClose\": false,\n            \"evidence\": \"7:30 pm - 9:00 pm\"\n          }\n        },\n        \"type\": \"event\",\n        \"_sourceType\": \"schedule\",\n        \"_pipelineIndex\": 6,\n        \"_pipelineTotalStage3\": 15\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"This is a specifically dated lane-swim access window with an explicit time range.\"\n    },\n    {\n      \"item\": {\n        \"name\": \"Leisure pool open\",\n        \"day\": \"Wednesday\",\n        \"date\": \"2026-10-07\",\n        \"recurringPattern\": \"none\",\n        \"startTime\": \"05:30\",\n        \"endTime\": \"16:00\",\n        \"venue\": \"\",\n        \"price\": \"\",\n        \"description\": \"\",\n        \"extractionReason\": \"Listed as a leisure-pool availability block with an explicit time range.\",\n        \"relevantImageIndex\": 0,\n        \"timeFlags\": {\n          \"start\": {\n            \"source\": \"explicit\",\n            \"evidence\": \"5:30 am - 4:00 pm\"\n          },\n          \"end\": {\n            \"source\": \"explicit\",\n            \"toClose\": false,\n            \"evidence\": \"5:30 am - 4:00 pm\"\n          }\n        },\n        \"type\": \"event\",\n        \"_sourceType\": \"schedule\",\n        \"_pipelineIndex\": 7,\n        \"_pipelineTotalStage3\": 15\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"This is a specifically dated leisure-pool public recreation access window with an explicit time range, not general business hours.\"\n    },\n    {\n      \"item\": {\n        \"name\": \"Leisure pool open\",\n        \"day\": \"Wednesday\",\n        \"date\": \"2026-10-07\",\n        \"recurringPattern\": \"none\",\n        \"startTime\": \"17:30\",\n        \"endTime\": \"21:00\",\n        \"venue\": \"\",\n        \"price\": \"\",\n        \"description\": \"\",\n        \"extractionReason\": \"Listed as a leisure-pool availability block with an explicit time range.\",\n        \"relevantImageIndex\": 0,\n        \"timeFlags\": {\n          \"start\": {\n            \"source\": \"explicit\",\n            \"evidence\": \"5:30 pm - 9:00 pm\"\n          },\n          \"end\": {\n            \"source\": \"explicit\",\n            \"toClose\": false,\n            \"evidence\": \"5:30 pm - 9:00 pm\"\n          }\n        },\n        \"type\": \"event\",\n        \"_sourceType\": \"schedule\",\n        \"_pipelineIndex\": 8,\n        \"_pipelineTotalStage3\": 15\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"This is a separately listed, specifically dated leisure-pool public recreation access window with an explicit time range.\"\n    },\n    {\n      \"item\": {\n        \"name\": \"Toddler Pool open\",\n        \"day\": \"Wednesday\",\n        \"date\": \"2026-10-07\",\n        \"recurringPattern\": \"none\",\n        \"startTime\": \"05:30\",\n        \"endTime\": \"21:00\",\n        \"venue\": \"\",\n        \"price\": \"\",\n        \"description\": \"\",\n        \"extractionReason\": \"Listed as toddler-pool availability with an explicit time range.\",\n        \"relevantImageIndex\": 0,\n        \"timeFlags\": {\n          \"start\": {\n            \"source\": \"explicit\",\n            \"evidence\": \"5:30 am - 9:00 pm\"\n          },\n          \"end\": {\n            \"source\": \"explicit\",\n            \"toClose\": false,\n            \"evidence\": \"5:30 am - 9:00 pm\"\n          }\n        },\n        \"type\": \"event\",\n        \"_sourceType\": \"schedule\",\n        \"_pipelineIndex\": 9,\n        \"_pipelineTotalStage3\": 15\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"This is a specifically dated toddler-pool public recreation access window with an explicit time range.\"\n    },\n    {\n      \"item\": {\n        \"name\": \"All pools open\",\n        \"day\": \"Wednesday\",\n        \"date\": \"2026-10-07\",\n        \"recurringPattern\": \"none\",\n        \"startTime\": \"09:30\",\n        \"endTime\": \"11:30\",\n        \"venue\": \"\",\n        \"price\": \"\",\n        \"description\": \"\",\n        \"extractionReason\": \"Listed as an all-pools availability block with an explicit time range.\",\n        \"relevantImageIndex\": 0,\n        \"timeFlags\": {\n          \"start\": {\n            \"source\": \"explicit\",\n            \"evidence\": \"9:30 am - 11:30 am\"\n          },\n          \"end\": {\n            \"source\": \"explicit\",\n            \"toClose\": false,\n            \"evidence\": \"9:30 am - 11:30 am\"\n          }\n        },\n        \"type\": \"event\",\n        \"_sourceType\": \"schedule\",\n        \"_pipelineIndex\": 10,\n        \"_pipelineTotalStage3\": 15\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"This is a specifically dated all-pools public recreation access window with an explicit time range.\"\n    },\n    {\n      \"item\": {\n        \"name\": \"All pools open\",\n        \"day\": \"Wednesday\",\n        \"date\": \"2026-10-07\",\n        \"recurringPattern\": \"none\",\n        \"startTime\": \"12:30\",\n        \"endTime\": \"16:00\",\n        \"venue\": \"\",\n        \"price\": \"\",\n        \"description\": \"\",\n        \"extractionReason\": \"Listed as an all-pools availability block with an explicit time range.\",\n        \"relevantImageIndex\": 0,\n        \"timeFlags\": {\n          \"start\": {\n            \"source\": \"explicit\",\n            \"evidence\": \"12:30 pm - 4:00 pm\"\n          },\n          \"end\": {\n            \"source\": \"explicit\",\n            \"toClose\": false,\n            \"evidence\": \"12:30 pm - 4:00 pm\"\n          }\n        },\n        \"type\": \"event\",\n        \"_sourceType\": \"schedule\",\n        \"_pipelineIndex\": 11,\n        \"_pipelineTotalStage3\": 15\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"This is a separately listed, specifically dated all-pools public recreation access window with an explicit time range.\"\n    },\n    {\n      \"item\": {\n        \"name\": \"Sunrise Fitness\",\n        \"day\": \"Wednesday\",\n        \"date\": \"2026-10-07\",\n        \"recurringPattern\": \"none\",\n        \"startTime\": \"07:00\",\n        \"endTime\": \"\",\n        \"venue\": \"\",\n        \"price\": \"\",\n        \"description\": \"Aquafit class.\",\n        \"extractionReason\": \"Named Aquafit class listed with a start time.\",\n        \"relevantImageIndex\": 0,\n        \"timeFlags\": {\n          \"start\": {\n            \"source\": \"explicit\",\n            \"evidence\": \"7:00 am\"\n          },\n          \"end\": {\n            \"source\": \"none\",\n            \"toClose\": false,\n            \"evidence\": \"\"\n          }\n        },\n        \"type\": \"event\",\n        \"_sourceType\": \"schedule\",\n        \"_pipelineIndex\": 12,\n        \"_pipelineTotalStage3\": 15\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"This is a named Aquafit class with a specific date and explicit start time. An end time is optional.\"\n    },\n    {\n      \"item\": {\n        \"name\": \"Cardio Craze\",\n        \"day\": \"Wednesday\",\n        \"date\": \"2026-10-07\",\n        \"recurringPattern\": \"none\",\n        \"startTime\": \"08:45\",\n        \"endTime\": \"\",\n        \"venue\": \"\",\n        \"price\": \"\",\n        \"description\": \"Aquafit class.\",\n        \"extractionReason\": \"Named Aquafit class listed with a start time.\",\n        \"relevantImageIndex\": 0,\n        \"timeFlags\": {\n          \"start\": {\n            \"source\": \"explicit\",\n            \"evidence\": \"8:45 am\"\n          },\n          \"end\": {\n            \"source\": \"none\",\n            \"toClose\": false,\n            \"evidence\": \"\"\n          }\n        },\n        \"type\": \"event\",\n        \"_sourceType\": \"schedule\",\n        \"_pipelineIndex\": 13,\n        \"_pipelineTotalStage3\": 15\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"This is a named Aquafit class with a specific date and explicit start time. An end time is optional.\"\n    },\n    {\n      \"item\": {\n        \"name\": \"UFIT Aqua\",\n        \"day\": \"Wednesday\",\n        \"date\": \"2026-10-07\",\n        \"recurringPattern\": \"none\",\n        \"startTime\": \"11:45\",\n        \"endTime\": \"\",\n        \"venue\": \"\",\n        \"price\": \"\",\n        \"description\": \"Aquafit class.\",\n        \"extractionReason\": \"Named Aquafit class listed with a start time.\",\n        \"relevantImageIndex\": 0,\n        \"timeFlags\": {\n          \"start\": {\n            \"source\": \"explicit\",\n            \"evidence\": \"11:45 am\"\n          },\n          \"end\": {\n            \"source\": \"none\",\n            \"toClose\": false,\n            \"evidence\": \"\"\n          }\n        },\n        \"type\": \"event\",\n        \"_sourceType\": \"schedule\",\n        \"_pipelineIndex\": 14,\n        \"_pipelineTotalStage3\": 15\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"This is a named Aquafit class with a specific date and explicit start time. An end time is optional.\"\n    },\n    {\n      \"item\": {\n        \"name\": \"Aqua Zumba\",\n        \"day\": \"Wednesday\",\n        \"date\": \"2026-10-07\",\n        \"recurringPattern\": \"none\",\n        \"startTime\": \"18:00\",\n        \"endTime\": \"\",\n        \"venue\": \"\",\n        \"price\": \"\",\n        \"description\": \"Aquafit class.\",\n        \"extractionReason\": \"Named Aquafit class listed with a start time.\",\n        \"relevantImageIndex\": 0,\n        \"timeFlags\": {\n          \"start\": {\n            \"source\": \"explicit\",\n            \"evidence\": \"6:00 pm\"\n          },\n          \"end\": {\n            \"source\": \"none\",\n            \"toClose\": false,\n            \"evidence\": \"\"\n          }\n        },\n        \"type\": \"event\",\n        \"_sourceType\": \"schedule\",\n        \"_pipelineIndex\": 15,\n        \"_pipelineTotalStage3\": 15\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"This is a named Aquafit class with a specific date and explicit start time. An end time is optional.\"\n    }\n  ],\n  \"validationSummary\": {\n    \"totalItems\": 15,\n    \"itemsKept\": 15,\n    \"itemsRejected\": 0,\n    \"recurringCorrections\": 0,\n    \"overallNotes\": \"All items are specifically dated Wednesday activities or public recreation access windows with explicit timing. Separate pool and lane-swim windows are retained; no duplicates or recurring-pattern corrections apply.\"\n  }\n}",
+      "rawResult": {
+        "validatedItems": [
+          {
+            "item": {
+              "name": "Public Skate",
+              "day": "Wednesday",
+              "date": "2026-10-07",
+              "recurringPattern": "none",
+              "startTime": "11:15",
+              "endTime": "13:00",
+              "venue": "",
+              "price": "",
+              "description": "MacLauchlan Arena B. Helmets are mandatory for all skaters.",
+              "extractionReason": "Listed as a scheduled public skate with an explicit time range.",
+              "relevantImageIndex": 0,
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "11:15 am - 1:00 pm"
+                },
+                "end": {
+                  "source": "explicit",
+                  "toClose": false,
+                  "evidence": "11:15 am - 1:00 pm"
+                }
+              },
+              "type": "event",
+              "_sourceType": "schedule",
+              "_pipelineIndex": 1,
+              "_pipelineTotalStage3": 15
+            },
+            "decision": "KEPT",
+            "reason": "This is a specifically dated public skate with an explicit time range, which qualifies as a public recreation activity."
+          },
+          {
+            "item": {
+              "name": "Lane swim",
+              "day": "Wednesday",
+              "date": "2026-10-07",
+              "recurringPattern": "none",
+              "startTime": "05:30",
+              "endTime": "07:00",
+              "venue": "",
+              "price": "",
+              "description": "",
+              "extractionReason": "Listed as a lane-swim availability block with an explicit time range.",
+              "relevantImageIndex": 0,
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "5:30 am - 7:00 am"
+                },
+                "end": {
+                  "source": "explicit",
+                  "toClose": false,
+                  "evidence": "5:30 am - 7:00 am"
+                }
+              },
+              "type": "event",
+              "_sourceType": "schedule",
+              "_pipelineIndex": 2,
+              "_pipelineTotalStage3": 15
+            },
+            "decision": "KEPT",
+            "reason": "This is a specifically dated lane-swim access window with an explicit time range. Public recreation access windows are kept."
+          },
+          {
+            "item": {
+              "name": "Lane swim",
+              "day": "Wednesday",
+              "date": "2026-10-07",
+              "recurringPattern": "none",
+              "startTime": "07:00",
+              "endTime": "12:00",
+              "venue": "",
+              "price": "",
+              "description": "",
+              "extractionReason": "Listed as a lane-swim availability block with an explicit time range.",
+              "relevantImageIndex": 0,
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "7:00 am - 12:00 pm"
+                },
+                "end": {
+                  "source": "explicit",
+                  "toClose": false,
+                  "evidence": "7:00 am - 12:00 pm"
+                }
+              },
+              "type": "event",
+              "_sourceType": "schedule",
+              "_pipelineIndex": 3,
+              "_pipelineTotalStage3": 15
+            },
+            "decision": "KEPT",
+            "reason": "This is a separately listed, specifically dated lane-swim access window with an explicit time range. Retain the distinct source window."
+          },
+          {
+            "item": {
+              "name": "Lane swim",
+              "day": "Wednesday",
+              "date": "2026-10-07",
+              "recurringPattern": "none",
+              "startTime": "12:00",
+              "endTime": "13:00",
+              "venue": "",
+              "price": "",
+              "description": "1 lane only.",
+              "extractionReason": "Listed as a lane-swim availability block with an explicit time range and a one-lane limitation.",
+              "relevantImageIndex": 0,
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "1 lane only 12:00pm - 1:00 pm"
+                },
+                "end": {
+                  "source": "explicit",
+                  "toClose": false,
+                  "evidence": "1 lane only 12:00pm - 1:00 pm"
+                }
+              },
+              "type": "event",
+              "_sourceType": "schedule",
+              "_pipelineIndex": 4,
+              "_pipelineTotalStage3": 15
+            },
+            "decision": "KEPT",
+            "reason": "This is a specifically dated lane-swim access window with an explicit time range and a one-lane limitation."
+          },
+          {
+            "item": {
+              "name": "Lane swim",
+              "day": "Wednesday",
+              "date": "2026-10-07",
+              "recurringPattern": "none",
+              "startTime": "13:00",
+              "endTime": "16:00",
+              "venue": "",
+              "price": "",
+              "description": "",
+              "extractionReason": "Listed as a lane-swim availability block with an explicit time range.",
+              "relevantImageIndex": 0,
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "1:00pm - 4:00pm"
+                },
+                "end": {
+                  "source": "explicit",
+                  "toClose": false,
+                  "evidence": "1:00pm - 4:00pm"
+                }
+              },
+              "type": "event",
+              "_sourceType": "schedule",
+              "_pipelineIndex": 5,
+              "_pipelineTotalStage3": 15
+            },
+            "decision": "KEPT",
+            "reason": "This is a separately listed, specifically dated lane-swim access window with an explicit time range."
+          },
+          {
+            "item": {
+              "name": "Lane swim",
+              "day": "Wednesday",
+              "date": "2026-10-07",
+              "recurringPattern": "none",
+              "startTime": "19:30",
+              "endTime": "21:00",
+              "venue": "",
+              "price": "",
+              "description": "",
+              "extractionReason": "Listed as a lane-swim availability block with an explicit time range.",
+              "relevantImageIndex": 0,
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "7:30 pm - 9:00 pm"
+                },
+                "end": {
+                  "source": "explicit",
+                  "toClose": false,
+                  "evidence": "7:30 pm - 9:00 pm"
+                }
+              },
+              "type": "event",
+              "_sourceType": "schedule",
+              "_pipelineIndex": 6,
+              "_pipelineTotalStage3": 15
+            },
+            "decision": "KEPT",
+            "reason": "This is a specifically dated lane-swim access window with an explicit time range."
+          },
+          {
+            "item": {
+              "name": "Leisure pool open",
+              "day": "Wednesday",
+              "date": "2026-10-07",
+              "recurringPattern": "none",
+              "startTime": "05:30",
+              "endTime": "16:00",
+              "venue": "",
+              "price": "",
+              "description": "",
+              "extractionReason": "Listed as a leisure-pool availability block with an explicit time range.",
+              "relevantImageIndex": 0,
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "5:30 am - 4:00 pm"
+                },
+                "end": {
+                  "source": "explicit",
+                  "toClose": false,
+                  "evidence": "5:30 am - 4:00 pm"
+                }
+              },
+              "type": "event",
+              "_sourceType": "schedule",
+              "_pipelineIndex": 7,
+              "_pipelineTotalStage3": 15
+            },
+            "decision": "KEPT",
+            "reason": "This is a specifically dated leisure-pool public recreation access window with an explicit time range, not general business hours."
+          },
+          {
+            "item": {
+              "name": "Leisure pool open",
+              "day": "Wednesday",
+              "date": "2026-10-07",
+              "recurringPattern": "none",
+              "startTime": "17:30",
+              "endTime": "21:00",
+              "venue": "",
+              "price": "",
+              "description": "",
+              "extractionReason": "Listed as a leisure-pool availability block with an explicit time range.",
+              "relevantImageIndex": 0,
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "5:30 pm - 9:00 pm"
+                },
+                "end": {
+                  "source": "explicit",
+                  "toClose": false,
+                  "evidence": "5:30 pm - 9:00 pm"
+                }
+              },
+              "type": "event",
+              "_sourceType": "schedule",
+              "_pipelineIndex": 8,
+              "_pipelineTotalStage3": 15
+            },
+            "decision": "KEPT",
+            "reason": "This is a separately listed, specifically dated leisure-pool public recreation access window with an explicit time range."
+          },
+          {
+            "item": {
+              "name": "Toddler Pool open",
+              "day": "Wednesday",
+              "date": "2026-10-07",
+              "recurringPattern": "none",
+              "startTime": "05:30",
+              "endTime": "21:00",
+              "venue": "",
+              "price": "",
+              "description": "",
+              "extractionReason": "Listed as toddler-pool availability with an explicit time range.",
+              "relevantImageIndex": 0,
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "5:30 am - 9:00 pm"
+                },
+                "end": {
+                  "source": "explicit",
+                  "toClose": false,
+                  "evidence": "5:30 am - 9:00 pm"
+                }
+              },
+              "type": "event",
+              "_sourceType": "schedule",
+              "_pipelineIndex": 9,
+              "_pipelineTotalStage3": 15
+            },
+            "decision": "KEPT",
+            "reason": "This is a specifically dated toddler-pool public recreation access window with an explicit time range."
+          },
+          {
+            "item": {
+              "name": "All pools open",
+              "day": "Wednesday",
+              "date": "2026-10-07",
+              "recurringPattern": "none",
+              "startTime": "09:30",
+              "endTime": "11:30",
+              "venue": "",
+              "price": "",
+              "description": "",
+              "extractionReason": "Listed as an all-pools availability block with an explicit time range.",
+              "relevantImageIndex": 0,
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "9:30 am - 11:30 am"
+                },
+                "end": {
+                  "source": "explicit",
+                  "toClose": false,
+                  "evidence": "9:30 am - 11:30 am"
+                }
+              },
+              "type": "event",
+              "_sourceType": "schedule",
+              "_pipelineIndex": 10,
+              "_pipelineTotalStage3": 15
+            },
+            "decision": "KEPT",
+            "reason": "This is a specifically dated all-pools public recreation access window with an explicit time range."
+          },
+          {
+            "item": {
+              "name": "All pools open",
+              "day": "Wednesday",
+              "date": "2026-10-07",
+              "recurringPattern": "none",
+              "startTime": "12:30",
+              "endTime": "16:00",
+              "venue": "",
+              "price": "",
+              "description": "",
+              "extractionReason": "Listed as an all-pools availability block with an explicit time range.",
+              "relevantImageIndex": 0,
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "12:30 pm - 4:00 pm"
+                },
+                "end": {
+                  "source": "explicit",
+                  "toClose": false,
+                  "evidence": "12:30 pm - 4:00 pm"
+                }
+              },
+              "type": "event",
+              "_sourceType": "schedule",
+              "_pipelineIndex": 11,
+              "_pipelineTotalStage3": 15
+            },
+            "decision": "KEPT",
+            "reason": "This is a separately listed, specifically dated all-pools public recreation access window with an explicit time range."
+          },
+          {
+            "item": {
+              "name": "Sunrise Fitness",
+              "day": "Wednesday",
+              "date": "2026-10-07",
+              "recurringPattern": "none",
+              "startTime": "07:00",
+              "endTime": "",
+              "venue": "",
+              "price": "",
+              "description": "Aquafit class.",
+              "extractionReason": "Named Aquafit class listed with a start time.",
+              "relevantImageIndex": 0,
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "7:00 am"
+                },
+                "end": {
+                  "source": "none",
+                  "toClose": false,
+                  "evidence": ""
+                }
+              },
+              "type": "event",
+              "_sourceType": "schedule",
+              "_pipelineIndex": 12,
+              "_pipelineTotalStage3": 15
+            },
+            "decision": "KEPT",
+            "reason": "This is a named Aquafit class with a specific date and explicit start time. An end time is optional."
+          },
+          {
+            "item": {
+              "name": "Cardio Craze",
+              "day": "Wednesday",
+              "date": "2026-10-07",
+              "recurringPattern": "none",
+              "startTime": "08:45",
+              "endTime": "",
+              "venue": "",
+              "price": "",
+              "description": "Aquafit class.",
+              "extractionReason": "Named Aquafit class listed with a start time.",
+              "relevantImageIndex": 0,
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "8:45 am"
+                },
+                "end": {
+                  "source": "none",
+                  "toClose": false,
+                  "evidence": ""
+                }
+              },
+              "type": "event",
+              "_sourceType": "schedule",
+              "_pipelineIndex": 13,
+              "_pipelineTotalStage3": 15
+            },
+            "decision": "KEPT",
+            "reason": "This is a named Aquafit class with a specific date and explicit start time. An end time is optional."
+          },
+          {
+            "item": {
+              "name": "UFIT Aqua",
+              "day": "Wednesday",
+              "date": "2026-10-07",
+              "recurringPattern": "none",
+              "startTime": "11:45",
+              "endTime": "",
+              "venue": "",
+              "price": "",
+              "description": "Aquafit class.",
+              "extractionReason": "Named Aquafit class listed with a start time.",
+              "relevantImageIndex": 0,
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "11:45 am"
+                },
+                "end": {
+                  "source": "none",
+                  "toClose": false,
+                  "evidence": ""
+                }
+              },
+              "type": "event",
+              "_sourceType": "schedule",
+              "_pipelineIndex": 14,
+              "_pipelineTotalStage3": 15
+            },
+            "decision": "KEPT",
+            "reason": "This is a named Aquafit class with a specific date and explicit start time. An end time is optional."
+          },
+          {
+            "item": {
+              "name": "Aqua Zumba",
+              "day": "Wednesday",
+              "date": "2026-10-07",
+              "recurringPattern": "none",
+              "startTime": "18:00",
+              "endTime": "",
+              "venue": "",
+              "price": "",
+              "description": "Aquafit class.",
+              "extractionReason": "Named Aquafit class listed with a start time.",
+              "relevantImageIndex": 0,
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "6:00 pm"
+                },
+                "end": {
+                  "source": "none",
+                  "toClose": false,
+                  "evidence": ""
+                }
+              },
+              "type": "event",
+              "_sourceType": "schedule",
+              "_pipelineIndex": 15,
+              "_pipelineTotalStage3": 15
+            },
+            "decision": "KEPT",
+            "reason": "This is a named Aquafit class with a specific date and explicit start time. An end time is optional."
+          }
+        ],
+        "validationSummary": {
+          "totalItems": 15,
+          "itemsKept": 15,
+          "itemsRejected": 0,
+          "recurringCorrections": 0,
+          "overallNotes": "All items are specifically dated Wednesday activities or public recreation access windows with explicit timing. Separate pool and lane-swim windows are retained; no duplicates or recurring-pattern corrections apply."
+        }
+      },
+      "parseError": false
+    }
+  ]
+}

@@ -1,0 +1,283 @@
+{
+  "caseId": "bookable-family-and-calendar",
+  "arm": "luna-low",
+  "repeat": 1,
+  "model": "gpt-6-luna",
+  "effort": "low",
+  "noLiveWrites": true,
+  "sourceSha256": "ec6c52a87614de0f1d4c6b16c3cc23723efbf9a47a9f846224e8c5b841e7273c",
+  "inputCount": 4,
+  "outputCount": 4,
+  "wallMs": 5570,
+  "items": [
+    {
+      "name": "Bookable Ice Time",
+      "type": "event",
+      "date": "2026-10-17",
+      "startTime": "10:30",
+      "endTime": "11:30",
+      "venue": "",
+      "price": "",
+      "description": "Publicly bookable family ice time October 17 10:30-11:30 am.",
+      "relevantImageIndex": 0,
+      "recurringPattern": "none",
+      "_sourceType": "calendar",
+      "_pipelineIndex": 1,
+      "_pipelineTotalStage3": 4
+    },
+    {
+      "name": "Family Leisure Pool",
+      "type": "event",
+      "date": "2026-10-17",
+      "startTime": "13:00",
+      "endTime": "15:00",
+      "venue": "",
+      "price": "",
+      "description": "Public family leisure pool access October 17 1-3 pm.",
+      "relevantImageIndex": 0,
+      "recurringPattern": "none",
+      "_sourceType": "calendar",
+      "_pipelineIndex": 2,
+      "_pipelineTotalStage3": 4
+    },
+    {
+      "name": "Studio Tour",
+      "type": "event",
+      "date": "2026-10-17",
+      "startTime": "14:00",
+      "endTime": "",
+      "venue": "",
+      "price": "",
+      "description": "Bookable public studio tour October 17 at 2 pm.",
+      "relevantImageIndex": 0,
+      "recurringPattern": "none",
+      "_sourceType": "event",
+      "_pipelineIndex": 3,
+      "_pipelineTotalStage3": 4
+    },
+    {
+      "name": "Sunday Dinner Deal",
+      "type": "event",
+      "date": "2026-10-18",
+      "startTime": "",
+      "endTime": "",
+      "venue": "",
+      "price": "",
+      "description": "Advertised Sunday dinner deal. No price or clock time printed.",
+      "relevantImageIndex": 0,
+      "recurringPattern": "none",
+      "_sourceType": "special",
+      "_pipelineIndex": 4,
+      "_pipelineTotalStage3": 4
+    }
+  ],
+  "metadata": {
+    "_happyHourNoPriceOverrideCount": 0,
+    "_calendarDealAllDayOverrideCount": 0,
+    "_calendarDealAllDayNormalizationCount": 0,
+    "_operatingHoursOnlyRejectCount": 0
+  },
+  "usage": [
+    {
+      "stage": "stage4",
+      "component": "secondaryValidator",
+      "endpoint": "responses",
+      "model": "gpt-6-luna",
+      "durationMs": 5554,
+      "inputTokens": 2457,
+      "outputTokens": 828,
+      "totalTokens": 3285,
+      "cachedInputTokens": 0,
+      "fileId": "stage4-frozen-comparison",
+      "postId": "bookable-family-and-calendar",
+      "rowIndex": 0,
+      "runId": "local-1",
+      "batchItemCount": 4,
+      "responseId": "resp_05a830b8d3f07e7a006ac96fc7893c87d2bf70455ad9db0de7",
+      "responseStatus": "completed",
+      "incompleteReason": "",
+      "requestedMaxOutputTokens": 32000,
+      "reasoningTokens": 44,
+      "visibleOutputChars": 3028
+    }
+  ],
+  "requests": [
+    {
+      "model": "gpt-6-luna",
+      "effort": "low",
+      "responseId": "resp_05a830b8d3f07e7a006ac96fc7893c87d2bf70455ad9db0de7",
+      "httpStatus": 200,
+      "status": "completed",
+      "incompleteDetails": null,
+      "error": null,
+      "promptSha256": "2983ebe296d4be2777d727e4c83528a3ccc7181677186c6788fd2ae461a600db",
+      "outputContractSha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "batchItems": [
+        {
+          "name": "Bookable Ice Time",
+          "type": "event",
+          "date": "2026-10-17",
+          "startTime": "10:30",
+          "endTime": "11:30",
+          "venue": "",
+          "price": "",
+          "description": "Publicly bookable family ice time October 17 10:30-11:30 am.",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "_sourceType": "calendar",
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 4
+        },
+        {
+          "name": "Family Leisure Pool",
+          "type": "event",
+          "date": "2026-10-17",
+          "startTime": "13:00",
+          "endTime": "15:00",
+          "venue": "",
+          "price": "",
+          "description": "Public family leisure pool access October 17 1-3 pm.",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "_sourceType": "calendar",
+          "_pipelineIndex": 2,
+          "_pipelineTotalStage3": 4
+        },
+        {
+          "name": "Studio Tour",
+          "type": "event",
+          "date": "2026-10-17",
+          "startTime": "14:00",
+          "endTime": "",
+          "venue": "",
+          "price": "",
+          "description": "Bookable public studio tour October 17 at 2 pm.",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "_sourceType": "event",
+          "_pipelineIndex": 3,
+          "_pipelineTotalStage3": 4
+        },
+        {
+          "name": "Sunday Dinner Deal",
+          "type": "event",
+          "date": "2026-10-18",
+          "startTime": "",
+          "endTime": "",
+          "venue": "",
+          "price": "",
+          "description": "Advertised Sunday dinner deal. No price or clock time printed.",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "_sourceType": "special",
+          "_pipelineIndex": 4,
+          "_pipelineTotalStage3": 4
+        }
+      ],
+      "maxOutputTokens": 32000,
+      "durationMs": 5550,
+      "usage": {
+        "input_tokens": 2457,
+        "input_tokens_details": {
+          "cache_write_tokens": 2454,
+          "cached_tokens": 0
+        },
+        "output_tokens": 828,
+        "output_tokens_details": {
+          "reasoning_tokens": 44
+        },
+        "total_tokens": 3285
+      },
+      "visibleOutputChars": 3028,
+      "rawText": "{\n  \"validatedItems\": [\n    {\n      \"item\": {\n        \"name\": \"Bookable Ice Time\",\n        \"type\": \"event\",\n        \"date\": \"2026-10-17\",\n        \"startTime\": \"10:30\",\n        \"endTime\": \"11:30\",\n        \"venue\": \"\",\n        \"price\": \"\",\n        \"description\": \"Publicly bookable family ice time October 17 10:30-11:30 am.\",\n        \"relevantImageIndex\": 0,\n        \"recurringPattern\": \"none\",\n        \"_sourceType\": \"calendar\",\n        \"_pipelineIndex\": 1,\n        \"_pipelineTotalStage3\": 4\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"This is a specifically dated, publicly bookable ice activity with a start time. Public ice windows are valid activities, and the missing venue does not invalidate a calendar event.\"\n    },\n    {\n      \"item\": {\n        \"name\": \"Family Leisure Pool\",\n        \"type\": \"event\",\n        \"date\": \"2026-10-17\",\n        \"startTime\": \"13:00\",\n        \"endTime\": \"15:00\",\n        \"venue\": \"\",\n        \"price\": \"\",\n        \"description\": \"Public family leisure pool access October 17 1-3 pm.\",\n        \"relevantImageIndex\": 0,\n        \"recurringPattern\": \"none\",\n        \"_sourceType\": \"calendar\",\n        \"_pipelineIndex\": 2,\n        \"_pipelineTotalStage3\": 4\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"This is explicitly dated public family leisure pool access with a start time. Public pool access is a valid activity, not ordinary operating hours.\"\n    },\n    {\n      \"item\": {\n        \"name\": \"Studio Tour\",\n        \"type\": \"event\",\n        \"date\": \"2026-10-17\",\n        \"startTime\": \"14:00\",\n        \"endTime\": \"\",\n        \"venue\": \"\",\n        \"price\": \"\",\n        \"description\": \"Bookable public studio tour October 17 at 2 pm.\",\n        \"relevantImageIndex\": 0,\n        \"recurringPattern\": \"none\",\n        \"_sourceType\": \"event\",\n        \"_pipelineIndex\": 3,\n        \"_pipelineTotalStage3\": 4\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"This is a bookable public event with a specific date and start time. An end time, venue, and price are optional.\"\n    },\n    {\n      \"item\": {\n        \"name\": \"Sunday Dinner Deal\",\n        \"type\": \"event\",\n        \"date\": \"2026-10-18\",\n        \"startTime\": \"\",\n        \"endTime\": \"\",\n        \"venue\": \"\",\n        \"price\": \"\",\n        \"description\": \"Advertised Sunday dinner deal. No price or clock time printed.\",\n        \"relevantImageIndex\": 0,\n        \"recurringPattern\": \"none\",\n        \"_sourceType\": \"special\",\n        \"_pipelineIndex\": 4,\n        \"_pipelineTotalStage3\": 4\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"This is a named, explicitly advertised dinner deal from the special extractor. The special exception allows keeping it without a printed price or clock time.\"\n    }\n  ],\n  \"validationSummary\": {\n    \"totalItems\": 4,\n    \"itemsKept\": 4,\n    \"itemsRejected\": 0,\n    \"recurringCorrections\": 0,\n    \"overallNotes\": \"Both public recreation calendar activities, the specifically timed studio tour, and the advertised Sunday dinner deal pass validation. No recurring-pattern corrections were needed.\"\n  }\n}",
+      "rawResult": {
+        "validatedItems": [
+          {
+            "item": {
+              "name": "Bookable Ice Time",
+              "type": "event",
+              "date": "2026-10-17",
+              "startTime": "10:30",
+              "endTime": "11:30",
+              "venue": "",
+              "price": "",
+              "description": "Publicly bookable family ice time October 17 10:30-11:30 am.",
+              "relevantImageIndex": 0,
+              "recurringPattern": "none",
+              "_sourceType": "calendar",
+              "_pipelineIndex": 1,
+              "_pipelineTotalStage3": 4
+            },
+            "decision": "KEPT",
+            "reason": "This is a specifically dated, publicly bookable ice activity with a start time. Public ice windows are valid activities, and the missing venue does not invalidate a calendar event."
+          },
+          {
+            "item": {
+              "name": "Family Leisure Pool",
+              "type": "event",
+              "date": "2026-10-17",
+              "startTime": "13:00",
+              "endTime": "15:00",
+              "venue": "",
+              "price": "",
+              "description": "Public family leisure pool access October 17 1-3 pm.",
+              "relevantImageIndex": 0,
+              "recurringPattern": "none",
+              "_sourceType": "calendar",
+              "_pipelineIndex": 2,
+              "_pipelineTotalStage3": 4
+            },
+            "decision": "KEPT",
+            "reason": "This is explicitly dated public family leisure pool access with a start time. Public pool access is a valid activity, not ordinary operating hours."
+          },
+          {
+            "item": {
+              "name": "Studio Tour",
+              "type": "event",
+              "date": "2026-10-17",
+              "startTime": "14:00",
+              "endTime": "",
+              "venue": "",
+              "price": "",
+              "description": "Bookable public studio tour October 17 at 2 pm.",
+              "relevantImageIndex": 0,
+              "recurringPattern": "none",
+              "_sourceType": "event",
+              "_pipelineIndex": 3,
+              "_pipelineTotalStage3": 4
+            },
+            "decision": "KEPT",
+            "reason": "This is a bookable public event with a specific date and start time. An end time, venue, and price are optional."
+          },
+          {
+            "item": {
+              "name": "Sunday Dinner Deal",
+              "type": "event",
+              "date": "2026-10-18",
+              "startTime": "",
+              "endTime": "",
+              "venue": "",
+              "price": "",
+              "description": "Advertised Sunday dinner deal. No price or clock time printed.",
+              "relevantImageIndex": 0,
+              "recurringPattern": "none",
+              "_sourceType": "special",
+              "_pipelineIndex": 4,
+              "_pipelineTotalStage3": 4
+            },
+            "decision": "KEPT",
+            "reason": "This is a named, explicitly advertised dinner deal from the special extractor. The special exception allows keeping it without a printed price or clock time."
+          }
+        ],
+        "validationSummary": {
+          "totalItems": 4,
+          "itemsKept": 4,
+          "itemsRejected": 0,
+          "recurringCorrections": 0,
+          "overallNotes": "Both public recreation calendar activities, the specifically timed studio tour, and the advertised Sunday dinner deal pass validation. No recurring-pattern corrections were needed."
+        }
+      },
+      "parseError": false
+    }
+  ]
+}

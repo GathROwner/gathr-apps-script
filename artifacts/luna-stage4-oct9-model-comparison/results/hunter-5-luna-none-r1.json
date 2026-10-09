@@ -1,0 +1,602 @@
+{
+  "caseId": "hunter-5",
+  "arm": "luna-none",
+  "repeat": 1,
+  "model": "gpt-6-luna",
+  "effort": "none",
+  "noLiveWrites": true,
+  "sourceSha256": "ef60526d3b0abcc5da6e29be2b122e285639589700cbd37712b4dfc24718213b",
+  "inputCount": 5,
+  "outputCount": 5,
+  "wallMs": 9917,
+  "items": [
+    {
+      "name": "TRIVIA WITH DARCY",
+      "description": "Thursday- TRIVIA WITH DARCY FROM 9.P.M.",
+      "date": "2026-10-08",
+      "startTime": "21:00",
+      "endTime": "",
+      "venue": "",
+      "ticketLink": "",
+      "price": "",
+      "relevantImageIndex": 0,
+      "recurringPattern": "none",
+      "extractionReason": "A trivia event is explicitly listed for Thursday, with a start time shown.",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "FROM 9.P.M."
+        },
+        "end": {
+          "source": "none",
+          "toClose": false,
+          "evidence": ""
+        }
+      },
+      "spatial": {
+        "kind": "unknown",
+        "locations": [],
+        "confirmedStreets": [],
+        "ordered": false,
+        "evidenceNotes": "Hunter's Ale House appears as poster branding, but no specific event location is stated."
+      },
+      "_pipelineIndex": 1,
+      "_pipelineTotalStage3": 5
+    },
+    {
+      "name": "BRAD & ISAAC ACOUSTIC NIGHT",
+      "description": "Thursday- BRAD & ISAAC ACOUSTIC NIGHT - 10.PM",
+      "date": "2026-10-08",
+      "startTime": "22:00",
+      "endTime": "",
+      "venue": "",
+      "ticketLink": "",
+      "price": "",
+      "relevantImageIndex": 0,
+      "recurringPattern": "none",
+      "extractionReason": "An acoustic music event featuring Brad & Isaac is explicitly listed for Thursday.",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "10.PM"
+        },
+        "end": {
+          "source": "none",
+          "toClose": false,
+          "evidence": ""
+        }
+      },
+      "spatial": {
+        "kind": "unknown",
+        "locations": [],
+        "confirmedStreets": [],
+        "ordered": false,
+        "evidenceNotes": "Hunter's Ale House appears as poster branding, but no specific event location is stated."
+      },
+      "_pipelineIndex": 2,
+      "_pipelineTotalStage3": 5
+    },
+    {
+      "name": "GRIFF & GUEST LIVE MUSIC NIGHT",
+      "description": "Friday- GRIFF & GUEST LIVE MUSIC NIGHT - 10.PM",
+      "date": "2026-10-09",
+      "startTime": "22:00",
+      "endTime": "",
+      "venue": "",
+      "ticketLink": "",
+      "price": "",
+      "relevantImageIndex": 0,
+      "recurringPattern": "none",
+      "extractionReason": "A live music night featuring Griff & Guest is explicitly listed for Friday.",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "10.PM"
+        },
+        "end": {
+          "source": "none",
+          "toClose": false,
+          "evidence": ""
+        }
+      },
+      "spatial": {
+        "kind": "unknown",
+        "locations": [],
+        "confirmedStreets": [],
+        "ordered": false,
+        "evidenceNotes": "Hunter's Ale House appears as poster branding, but no specific event location is stated."
+      },
+      "_pipelineIndex": 3,
+      "_pipelineTotalStage3": 5
+    },
+    {
+      "name": "GIN N TONIC LIVE MUSIC NIGHT",
+      "description": "Saturday- GIN N TONIC LIVE MUSIC NIGHT - 10.PM",
+      "date": "2026-10-10",
+      "startTime": "22:00",
+      "endTime": "",
+      "venue": "",
+      "ticketLink": "",
+      "price": "",
+      "relevantImageIndex": 0,
+      "recurringPattern": "none",
+      "extractionReason": "A live music night featuring Gin N Tonic is explicitly listed for Saturday.",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "10.PM"
+        },
+        "end": {
+          "source": "none",
+          "toClose": false,
+          "evidence": ""
+        }
+      },
+      "spatial": {
+        "kind": "unknown",
+        "locations": [],
+        "confirmedStreets": [],
+        "ordered": false,
+        "evidenceNotes": "Hunter's Ale House appears as poster branding, but no specific event location is stated."
+      },
+      "_pipelineIndex": 4,
+      "_pipelineTotalStage3": 5
+    },
+    {
+      "name": "SUNDAY MUSIC TRIVIA W/ ANDREW ROLLINS",
+      "description": "Sunday- SUNDAY MUSIC TRIVIA W/ ANDREW ROLLINS - 9.PM",
+      "date": "2026-10-11",
+      "startTime": "21:00",
+      "endTime": "",
+      "venue": "",
+      "ticketLink": "",
+      "price": "",
+      "relevantImageIndex": 0,
+      "recurringPattern": "none",
+      "extractionReason": "A music trivia event featuring Andrew Rollins is explicitly listed for Sunday.",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "9.PM"
+        },
+        "end": {
+          "source": "none",
+          "toClose": false,
+          "evidence": ""
+        }
+      },
+      "spatial": {
+        "kind": "unknown",
+        "locations": [],
+        "confirmedStreets": [],
+        "ordered": false,
+        "evidenceNotes": "Hunter's Ale House appears as poster branding, but no specific event location is stated."
+      },
+      "_pipelineIndex": 5,
+      "_pipelineTotalStage3": 5
+    }
+  ],
+  "metadata": {
+    "_happyHourNoPriceOverrideCount": 0,
+    "_calendarDealAllDayOverrideCount": 0,
+    "_calendarDealAllDayNormalizationCount": 0,
+    "_operatingHoursOnlyRejectCount": 0
+  },
+  "usage": [
+    {
+      "stage": "stage4",
+      "component": "secondaryValidator",
+      "endpoint": "responses",
+      "model": "gpt-6-luna",
+      "durationMs": 9899,
+      "inputTokens": 3269,
+      "outputTokens": 1635,
+      "totalTokens": 4904,
+      "cachedInputTokens": 0,
+      "fileId": "stage4-frozen-comparison",
+      "postId": "1558017193012165",
+      "rowIndex": 16,
+      "runId": "local-1",
+      "batchItemCount": 5,
+      "responseId": "resp_09e71723a7cc41c0006ac96f1a839487d2a23ce50104ada00b",
+      "responseStatus": "completed",
+      "incompleteReason": "",
+      "requestedMaxOutputTokens": 32000,
+      "reasoningTokens": 0,
+      "visibleOutputChars": 6537
+    }
+  ],
+  "requests": [
+    {
+      "model": "gpt-6-luna",
+      "effort": "none",
+      "responseId": "resp_09e71723a7cc41c0006ac96f1a839487d2a23ce50104ada00b",
+      "httpStatus": 200,
+      "status": "completed",
+      "incompleteDetails": null,
+      "error": null,
+      "promptSha256": "63a57bb713c5882851b7b04dca8dffd0d7c6ce2af7899f274a6bf2b03d53aab0",
+      "outputContractSha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "batchItems": [
+        {
+          "name": "TRIVIA WITH DARCY",
+          "description": "Thursday- TRIVIA WITH DARCY FROM 9.P.M.",
+          "date": "2026-10-08",
+          "startTime": "21:00",
+          "endTime": "",
+          "venue": "",
+          "ticketLink": "",
+          "price": "",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "A trivia event is explicitly listed for Thursday, with a start time shown.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "FROM 9.P.M."
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "spatial": {
+            "kind": "unknown",
+            "locations": [],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "Hunter's Ale House appears as poster branding, but no specific event location is stated."
+          },
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 5
+        },
+        {
+          "name": "BRAD & ISAAC ACOUSTIC NIGHT",
+          "description": "Thursday- BRAD & ISAAC ACOUSTIC NIGHT - 10.PM",
+          "date": "2026-10-08",
+          "startTime": "22:00",
+          "endTime": "",
+          "venue": "",
+          "ticketLink": "",
+          "price": "",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "An acoustic music event featuring Brad & Isaac is explicitly listed for Thursday.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "10.PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "spatial": {
+            "kind": "unknown",
+            "locations": [],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "Hunter's Ale House appears as poster branding, but no specific event location is stated."
+          },
+          "_pipelineIndex": 2,
+          "_pipelineTotalStage3": 5
+        },
+        {
+          "name": "GRIFF & GUEST LIVE MUSIC NIGHT",
+          "description": "Friday- GRIFF & GUEST LIVE MUSIC NIGHT - 10.PM",
+          "date": "2026-10-09",
+          "startTime": "22:00",
+          "endTime": "",
+          "venue": "",
+          "ticketLink": "",
+          "price": "",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "A live music night featuring Griff & Guest is explicitly listed for Friday.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "10.PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "spatial": {
+            "kind": "unknown",
+            "locations": [],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "Hunter's Ale House appears as poster branding, but no specific event location is stated."
+          },
+          "_pipelineIndex": 3,
+          "_pipelineTotalStage3": 5
+        },
+        {
+          "name": "GIN N TONIC LIVE MUSIC NIGHT",
+          "description": "Saturday- GIN N TONIC LIVE MUSIC NIGHT - 10.PM",
+          "date": "2026-10-10",
+          "startTime": "22:00",
+          "endTime": "",
+          "venue": "",
+          "ticketLink": "",
+          "price": "",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "A live music night featuring Gin N Tonic is explicitly listed for Saturday.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "10.PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "spatial": {
+            "kind": "unknown",
+            "locations": [],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "Hunter's Ale House appears as poster branding, but no specific event location is stated."
+          },
+          "_pipelineIndex": 4,
+          "_pipelineTotalStage3": 5
+        },
+        {
+          "name": "SUNDAY MUSIC TRIVIA W/ ANDREW ROLLINS",
+          "description": "Sunday- SUNDAY MUSIC TRIVIA W/ ANDREW ROLLINS - 9.PM",
+          "date": "2026-10-11",
+          "startTime": "21:00",
+          "endTime": "",
+          "venue": "",
+          "ticketLink": "",
+          "price": "",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "A music trivia event featuring Andrew Rollins is explicitly listed for Sunday.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "9.PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "spatial": {
+            "kind": "unknown",
+            "locations": [],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "Hunter's Ale House appears as poster branding, but no specific event location is stated."
+          },
+          "_pipelineIndex": 5,
+          "_pipelineTotalStage3": 5
+        }
+      ],
+      "maxOutputTokens": 32000,
+      "durationMs": 9896,
+      "usage": {
+        "input_tokens": 3269,
+        "input_tokens_details": {
+          "cache_write_tokens": 3266,
+          "cached_tokens": 0
+        },
+        "output_tokens": 1635,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 4904
+      },
+      "visibleOutputChars": 6537,
+      "rawText": "{\n  \"validatedItems\": [\n    {\n      \"item\": {\n        \"name\": \"TRIVIA WITH DARCY\",\n        \"description\": \"Thursday- TRIVIA WITH DARCY FROM 9.P.M.\",\n        \"date\": \"2026-10-08\",\n        \"startTime\": \"21:00\",\n        \"endTime\": \"\",\n        \"venue\": \"\",\n        \"ticketLink\": \"\",\n        \"price\": \"\",\n        \"relevantImageIndex\": 0,\n        \"recurringPattern\": \"none\",\n        \"extractionReason\": \"A trivia event is explicitly listed for Thursday, with a start time shown.\",\n        \"timeFlags\": {\n          \"start\": {\n            \"source\": \"explicit\",\n            \"evidence\": \"FROM 9.P.M.\"\n          },\n          \"end\": {\n            \"source\": \"none\",\n            \"toClose\": false,\n            \"evidence\": \"\"\n          }\n        },\n        \"spatial\": {\n          \"kind\": \"unknown\",\n          \"locations\": [],\n          \"confirmedStreets\": [],\n          \"ordered\": false,\n          \"evidenceNotes\": \"Hunter's Ale House appears as poster branding, but no specific event location is stated.\"\n        },\n        \"_pipelineIndex\": 1,\n        \"_pipelineTotalStage3\": 5\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"This is a specifically dated trivia event with an explicit 21:00 start time. The empty venue and end time do not invalidate it.\"\n    },\n    {\n      \"item\": {\n        \"name\": \"BRAD & ISAAC ACOUSTIC NIGHT\",\n        \"description\": \"Thursday- BRAD & ISAAC ACOUSTIC NIGHT - 10.PM\",\n        \"date\": \"2026-10-08\",\n        \"startTime\": \"22:00\",\n        \"endTime\": \"\",\n        \"venue\": \"\",\n        \"ticketLink\": \"\",\n        \"price\": \"\",\n        \"relevantImageIndex\": 0,\n        \"recurringPattern\": \"none\",\n        \"extractionReason\": \"An acoustic music event featuring Brad & Isaac is explicitly listed for Thursday.\",\n        \"timeFlags\": {\n          \"start\": {\n            \"source\": \"explicit\",\n            \"evidence\": \"10.PM\"\n          },\n          \"end\": {\n            \"source\": \"none\",\n            \"toClose\": false,\n            \"evidence\": \"\"\n          }\n        },\n        \"spatial\": {\n          \"kind\": \"unknown\",\n          \"locations\": [],\n          \"confirmedStreets\": [],\n          \"ordered\": false,\n          \"evidenceNotes\": \"Hunter's Ale House appears as poster branding, but no specific event location is stated.\"\n        },\n        \"_pipelineIndex\": 2,\n        \"_pipelineTotalStage3\": 5\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"This is a specifically dated acoustic music event with an explicit 22:00 start time. The empty venue and end time do not invalidate it.\"\n    },\n    {\n      \"item\": {\n        \"name\": \"GRIFF & GUEST LIVE MUSIC NIGHT\",\n        \"description\": \"Friday- GRIFF & GUEST LIVE MUSIC NIGHT - 10.PM\",\n        \"date\": \"2026-10-09\",\n        \"startTime\": \"22:00\",\n        \"endTime\": \"\",\n        \"venue\": \"\",\n        \"ticketLink\": \"\",\n        \"price\": \"\",\n        \"relevantImageIndex\": 0,\n        \"recurringPattern\": \"none\",\n        \"extractionReason\": \"A live music night featuring Griff & Guest is explicitly listed for Friday.\",\n        \"timeFlags\": {\n          \"start\": {\n            \"source\": \"explicit\",\n            \"evidence\": \"10.PM\"\n          },\n          \"end\": {\n            \"source\": \"none\",\n            \"toClose\": false,\n            \"evidence\": \"\"\n          }\n        },\n        \"spatial\": {\n          \"kind\": \"unknown\",\n          \"locations\": [],\n          \"confirmedStreets\": [],\n          \"ordered\": false,\n          \"evidenceNotes\": \"Hunter's Ale House appears as poster branding, but no specific event location is stated.\"\n        },\n        \"_pipelineIndex\": 3,\n        \"_pipelineTotalStage3\": 5\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"This is a specifically dated live music event with an explicit 22:00 start time. The empty venue and end time do not invalidate it.\"\n    },\n    {\n      \"item\": {\n        \"name\": \"GIN N TONIC LIVE MUSIC NIGHT\",\n        \"description\": \"Saturday- GIN N TONIC LIVE MUSIC NIGHT - 10.PM\",\n        \"date\": \"2026-10-10\",\n        \"startTime\": \"22:00\",\n        \"endTime\": \"\",\n        \"venue\": \"\",\n        \"ticketLink\": \"\",\n        \"price\": \"\",\n        \"relevantImageIndex\": 0,\n        \"recurringPattern\": \"none\",\n        \"extractionReason\": \"A live music night featuring Gin N Tonic is explicitly listed for Saturday.\",\n        \"timeFlags\": {\n          \"start\": {\n            \"source\": \"explicit\",\n            \"evidence\": \"10.PM\"\n          },\n          \"end\": {\n            \"source\": \"none\",\n            \"toClose\": false,\n            \"evidence\": \"\"\n          }\n        },\n        \"spatial\": {\n          \"kind\": \"unknown\",\n          \"locations\": [],\n          \"confirmedStreets\": [],\n          \"ordered\": false,\n          \"evidenceNotes\": \"Hunter's Ale House appears as poster branding, but no specific event location is stated.\"\n        },\n        \"_pipelineIndex\": 4,\n        \"_pipelineTotalStage3\": 5\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"This is a specifically dated live music event with an explicit 22:00 start time. The empty venue and end time do not invalidate it.\"\n    },\n    {\n      \"item\": {\n        \"name\": \"SUNDAY MUSIC TRIVIA W/ ANDREW ROLLINS\",\n        \"description\": \"Sunday- SUNDAY MUSIC TRIVIA W/ ANDREW ROLLINS - 9.PM\",\n        \"date\": \"2026-10-11\",\n        \"startTime\": \"21:00\",\n        \"endTime\": \"\",\n        \"venue\": \"\",\n        \"ticketLink\": \"\",\n        \"price\": \"\",\n        \"relevantImageIndex\": 0,\n        \"recurringPattern\": \"none\",\n        \"extractionReason\": \"A music trivia event featuring Andrew Rollins is explicitly listed for Sunday.\",\n        \"timeFlags\": {\n          \"start\": {\n            \"source\": \"explicit\",\n            \"evidence\": \"9.PM\"\n          },\n          \"end\": {\n            \"source\": \"none\",\n            \"toClose\": false,\n            \"evidence\": \"\"\n          }\n        },\n        \"spatial\": {\n          \"kind\": \"unknown\",\n          \"locations\": [],\n          \"confirmedStreets\": [],\n          \"ordered\": false,\n          \"evidenceNotes\": \"Hunter's Ale House appears as poster branding, but no specific event location is stated.\"\n        },\n        \"_pipelineIndex\": 5,\n        \"_pipelineTotalStage3\": 5\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"This is a specifically dated music trivia event with an explicit 21:00 start time. The empty venue and end time do not invalidate it.\"\n    }\n  ],\n  \"validationSummary\": {\n    \"totalItems\": 5,\n    \"itemsKept\": 5,\n    \"itemsRejected\": 0,\n    \"recurringCorrections\": 0,\n    \"overallNotes\": \"All items are dated events with explicit start times. No duplicates or holiday-related recurring-pattern corrections apply.\"\n  }\n}",
+      "rawResult": {
+        "validatedItems": [
+          {
+            "item": {
+              "name": "TRIVIA WITH DARCY",
+              "description": "Thursday- TRIVIA WITH DARCY FROM 9.P.M.",
+              "date": "2026-10-08",
+              "startTime": "21:00",
+              "endTime": "",
+              "venue": "",
+              "ticketLink": "",
+              "price": "",
+              "relevantImageIndex": 0,
+              "recurringPattern": "none",
+              "extractionReason": "A trivia event is explicitly listed for Thursday, with a start time shown.",
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "FROM 9.P.M."
+                },
+                "end": {
+                  "source": "none",
+                  "toClose": false,
+                  "evidence": ""
+                }
+              },
+              "spatial": {
+                "kind": "unknown",
+                "locations": [],
+                "confirmedStreets": [],
+                "ordered": false,
+                "evidenceNotes": "Hunter's Ale House appears as poster branding, but no specific event location is stated."
+              },
+              "_pipelineIndex": 1,
+              "_pipelineTotalStage3": 5
+            },
+            "decision": "KEPT",
+            "reason": "This is a specifically dated trivia event with an explicit 21:00 start time. The empty venue and end time do not invalidate it."
+          },
+          {
+            "item": {
+              "name": "BRAD & ISAAC ACOUSTIC NIGHT",
+              "description": "Thursday- BRAD & ISAAC ACOUSTIC NIGHT - 10.PM",
+              "date": "2026-10-08",
+              "startTime": "22:00",
+              "endTime": "",
+              "venue": "",
+              "ticketLink": "",
+              "price": "",
+              "relevantImageIndex": 0,
+              "recurringPattern": "none",
+              "extractionReason": "An acoustic music event featuring Brad & Isaac is explicitly listed for Thursday.",
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "10.PM"
+                },
+                "end": {
+                  "source": "none",
+                  "toClose": false,
+                  "evidence": ""
+                }
+              },
+              "spatial": {
+                "kind": "unknown",
+                "locations": [],
+                "confirmedStreets": [],
+                "ordered": false,
+                "evidenceNotes": "Hunter's Ale House appears as poster branding, but no specific event location is stated."
+              },
+              "_pipelineIndex": 2,
+              "_pipelineTotalStage3": 5
+            },
+            "decision": "KEPT",
+            "reason": "This is a specifically dated acoustic music event with an explicit 22:00 start time. The empty venue and end time do not invalidate it."
+          },
+          {
+            "item": {
+              "name": "GRIFF & GUEST LIVE MUSIC NIGHT",
+              "description": "Friday- GRIFF & GUEST LIVE MUSIC NIGHT - 10.PM",
+              "date": "2026-10-09",
+              "startTime": "22:00",
+              "endTime": "",
+              "venue": "",
+              "ticketLink": "",
+              "price": "",
+              "relevantImageIndex": 0,
+              "recurringPattern": "none",
+              "extractionReason": "A live music night featuring Griff & Guest is explicitly listed for Friday.",
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "10.PM"
+                },
+                "end": {
+                  "source": "none",
+                  "toClose": false,
+                  "evidence": ""
+                }
+              },
+              "spatial": {
+                "kind": "unknown",
+                "locations": [],
+                "confirmedStreets": [],
+                "ordered": false,
+                "evidenceNotes": "Hunter's Ale House appears as poster branding, but no specific event location is stated."
+              },
+              "_pipelineIndex": 3,
+              "_pipelineTotalStage3": 5
+            },
+            "decision": "KEPT",
+            "reason": "This is a specifically dated live music event with an explicit 22:00 start time. The empty venue and end time do not invalidate it."
+          },
+          {
+            "item": {
+              "name": "GIN N TONIC LIVE MUSIC NIGHT",
+              "description": "Saturday- GIN N TONIC LIVE MUSIC NIGHT - 10.PM",
+              "date": "2026-10-10",
+              "startTime": "22:00",
+              "endTime": "",
+              "venue": "",
+              "ticketLink": "",
+              "price": "",
+              "relevantImageIndex": 0,
+              "recurringPattern": "none",
+              "extractionReason": "A live music night featuring Gin N Tonic is explicitly listed for Saturday.",
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "10.PM"
+                },
+                "end": {
+                  "source": "none",
+                  "toClose": false,
+                  "evidence": ""
+                }
+              },
+              "spatial": {
+                "kind": "unknown",
+                "locations": [],
+                "confirmedStreets": [],
+                "ordered": false,
+                "evidenceNotes": "Hunter's Ale House appears as poster branding, but no specific event location is stated."
+              },
+              "_pipelineIndex": 4,
+              "_pipelineTotalStage3": 5
+            },
+            "decision": "KEPT",
+            "reason": "This is a specifically dated live music event with an explicit 22:00 start time. The empty venue and end time do not invalidate it."
+          },
+          {
+            "item": {
+              "name": "SUNDAY MUSIC TRIVIA W/ ANDREW ROLLINS",
+              "description": "Sunday- SUNDAY MUSIC TRIVIA W/ ANDREW ROLLINS - 9.PM",
+              "date": "2026-10-11",
+              "startTime": "21:00",
+              "endTime": "",
+              "venue": "",
+              "ticketLink": "",
+              "price": "",
+              "relevantImageIndex": 0,
+              "recurringPattern": "none",
+              "extractionReason": "A music trivia event featuring Andrew Rollins is explicitly listed for Sunday.",
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "9.PM"
+                },
+                "end": {
+                  "source": "none",
+                  "toClose": false,
+                  "evidence": ""
+                }
+              },
+              "spatial": {
+                "kind": "unknown",
+                "locations": [],
+                "confirmedStreets": [],
+                "ordered": false,
+                "evidenceNotes": "Hunter's Ale House appears as poster branding, but no specific event location is stated."
+              },
+              "_pipelineIndex": 5,
+              "_pipelineTotalStage3": 5
+            },
+            "decision": "KEPT",
+            "reason": "This is a specifically dated music trivia event with an explicit 21:00 start time. The empty venue and end time do not invalidate it."
+          }
+        ],
+        "validationSummary": {
+          "totalItems": 5,
+          "itemsKept": 5,
+          "itemsRejected": 0,
+          "recurringCorrections": 0,
+          "overallNotes": "All items are dated events with explicit start times. No duplicates or holiday-related recurring-pattern corrections apply."
+        }
+      },
+      "parseError": false
+    }
+  ]
+}

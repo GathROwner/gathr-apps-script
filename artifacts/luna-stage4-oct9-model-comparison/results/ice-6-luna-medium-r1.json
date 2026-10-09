@@ -1,0 +1,549 @@
+{
+  "caseId": "ice-6",
+  "arm": "luna-medium",
+  "repeat": 1,
+  "model": "gpt-6-luna",
+  "effort": "medium",
+  "noLiveWrites": true,
+  "sourceSha256": "aa6c0e80efe32f45790a5b88de422905d9c0abd060c6cba8e674db94f0942ee2",
+  "inputCount": 6,
+  "outputCount": 6,
+  "wallMs": 14753,
+  "items": [
+    {
+      "name": "Available Ice Times",
+      "type": "event",
+      "date": "2026-10-10",
+      "startTime": "10:10 AM",
+      "endTime": "",
+      "venue": "Eastern Kings Sportsplex",
+      "price": "",
+      "description": "Booking contact: 902-687-2323 or 902-380-2935.",
+      "extractionReason": "The image lists Saturday October 10 at 10:10am under “Available Ice Times.” The year 2026 is inferred from the post date and the matching weekday.",
+      "relevantImageIndex": 0,
+      "spatial": {
+        "kind": "single_location",
+        "locations": [
+          "Eastern Kings Sportsplex, Souris, PEI"
+        ],
+        "confirmedStreets": [],
+        "ordered": false,
+        "evidenceNotes": "The flyer identifies Eastern Kings Sportsplex in Souris, PEI."
+      },
+      "_sourceType": "calendar",
+      "_pipelineIndex": 1,
+      "_pipelineTotalStage3": 6,
+      "recurringPattern": "none"
+    },
+    {
+      "name": "Available Ice Times",
+      "type": "event",
+      "date": "2026-10-18",
+      "startTime": "10:10 AM",
+      "endTime": "",
+      "venue": "Eastern Kings Sportsplex",
+      "price": "",
+      "description": "Booking contact: 902-687-2323 or 902-380-2935.",
+      "extractionReason": "The image lists Sunday October 18 at 10:10am under “Available Ice Times.” The year 2026 is inferred from the post date and the matching weekday.",
+      "relevantImageIndex": 0,
+      "spatial": {
+        "kind": "single_location",
+        "locations": [
+          "Eastern Kings Sportsplex, Souris, PEI"
+        ],
+        "confirmedStreets": [],
+        "ordered": false,
+        "evidenceNotes": "The flyer identifies Eastern Kings Sportsplex in Souris, PEI."
+      },
+      "_sourceType": "calendar",
+      "_pipelineIndex": 2,
+      "_pipelineTotalStage3": 6,
+      "recurringPattern": "none"
+    },
+    {
+      "name": "Available Ice Times",
+      "type": "event",
+      "date": "2026-10-18",
+      "startTime": "1:50 PM",
+      "endTime": "",
+      "venue": "Eastern Kings Sportsplex",
+      "price": "",
+      "description": "Booking contact: 902-687-2323 or 902-380-2935.",
+      "extractionReason": "The image lists Sunday October 18 at 1:50pm as a separate available ice time. The year 2026 is inferred from the post date and the matching weekday.",
+      "relevantImageIndex": 0,
+      "spatial": {
+        "kind": "single_location",
+        "locations": [
+          "Eastern Kings Sportsplex, Souris, PEI"
+        ],
+        "confirmedStreets": [],
+        "ordered": false,
+        "evidenceNotes": "The flyer identifies Eastern Kings Sportsplex in Souris, PEI."
+      },
+      "_sourceType": "calendar",
+      "_pipelineIndex": 3,
+      "_pipelineTotalStage3": 6,
+      "recurringPattern": "none"
+    },
+    {
+      "name": "Available Ice Times",
+      "type": "event",
+      "date": "2026-10-20",
+      "startTime": "7:50 PM",
+      "endTime": "",
+      "venue": "Eastern Kings Sportsplex",
+      "price": "",
+      "description": "Booking contact: 902-687-2323 or 902-380-2935.",
+      "extractionReason": "The image lists Tuesday October 20 at 7:50pm under “Available Ice Times.” The year 2026 is inferred from the post date and the matching weekday.",
+      "relevantImageIndex": 0,
+      "spatial": {
+        "kind": "single_location",
+        "locations": [
+          "Eastern Kings Sportsplex, Souris, PEI"
+        ],
+        "confirmedStreets": [],
+        "ordered": false,
+        "evidenceNotes": "The flyer identifies Eastern Kings Sportsplex in Souris, PEI."
+      },
+      "_sourceType": "calendar",
+      "_pipelineIndex": 4,
+      "_pipelineTotalStage3": 6,
+      "recurringPattern": "none"
+    },
+    {
+      "name": "Available Ice Times",
+      "type": "event",
+      "date": "2026-10-25",
+      "startTime": "1:50 PM",
+      "endTime": "",
+      "venue": "Eastern Kings Sportsplex",
+      "price": "",
+      "description": "Booking contact: 902-687-2323 or 902-380-2935.",
+      "extractionReason": "The image lists Sunday October 25 at 1:50pm under “Available Ice Times.” The year 2026 is inferred from the post date and the matching weekday.",
+      "relevantImageIndex": 0,
+      "spatial": {
+        "kind": "single_location",
+        "locations": [
+          "Eastern Kings Sportsplex, Souris, PEI"
+        ],
+        "confirmedStreets": [],
+        "ordered": false,
+        "evidenceNotes": "The flyer identifies Eastern Kings Sportsplex in Souris, PEI."
+      },
+      "_sourceType": "calendar",
+      "_pipelineIndex": 5,
+      "_pipelineTotalStage3": 6,
+      "recurringPattern": "none"
+    },
+    {
+      "name": "Available Ice Times",
+      "type": "event",
+      "date": "2026-10-27",
+      "startTime": "7:50 PM",
+      "endTime": "",
+      "venue": "Eastern Kings Sportsplex",
+      "price": "",
+      "description": "Booking contact: 902-687-2323 or 902-380-2935.",
+      "extractionReason": "The image lists Tuesday October 27 at 7:50pm under “Available Ice Times.” The year 2026 is inferred from the post date and the matching weekday.",
+      "relevantImageIndex": 0,
+      "spatial": {
+        "kind": "single_location",
+        "locations": [
+          "Eastern Kings Sportsplex, Souris, PEI"
+        ],
+        "confirmedStreets": [],
+        "ordered": false,
+        "evidenceNotes": "The flyer identifies Eastern Kings Sportsplex in Souris, PEI."
+      },
+      "_sourceType": "calendar",
+      "_pipelineIndex": 6,
+      "_pipelineTotalStage3": 6,
+      "recurringPattern": "none"
+    }
+  ],
+  "metadata": {
+    "_happyHourNoPriceOverrideCount": 0,
+    "_calendarDealAllDayOverrideCount": 0,
+    "_calendarDealAllDayNormalizationCount": 0,
+    "_operatingHoursOnlyRejectCount": 0
+  },
+  "usage": [
+    {
+      "stage": "stage4",
+      "component": "secondaryValidator",
+      "endpoint": "responses",
+      "model": "gpt-6-luna",
+      "durationMs": 14733,
+      "inputTokens": 3384,
+      "outputTokens": 1875,
+      "totalTokens": 5259,
+      "cachedInputTokens": 0,
+      "fileId": "stage4-frozen-comparison",
+      "postId": "1664781341775917",
+      "rowIndex": 244,
+      "runId": "local-1",
+      "batchItemCount": 6,
+      "responseId": "resp_00ffac2f3eb1ef4a006ac96ef4784087d2acf72cb9739624a8",
+      "responseStatus": "completed",
+      "incompleteReason": "",
+      "requestedMaxOutputTokens": 32000,
+      "reasoningTokens": 47,
+      "visibleOutputChars": 7218
+    }
+  ],
+  "requests": [
+    {
+      "model": "gpt-6-luna",
+      "effort": "medium",
+      "responseId": "resp_00ffac2f3eb1ef4a006ac96ef4784087d2acf72cb9739624a8",
+      "httpStatus": 200,
+      "status": "completed",
+      "incompleteDetails": null,
+      "error": null,
+      "promptSha256": "11ede4516842876d67f26639325a2179b7a24090a6bdd4b98e86990666e8177b",
+      "outputContractSha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "batchItems": [
+        {
+          "name": "Available Ice Times",
+          "type": "event",
+          "date": "2026-10-10",
+          "startTime": "10:10 AM",
+          "endTime": "",
+          "venue": "Eastern Kings Sportsplex",
+          "price": "",
+          "description": "Booking contact: 902-687-2323 or 902-380-2935.",
+          "extractionReason": "The image lists Saturday October 10 at 10:10am under “Available Ice Times.” The year 2026 is inferred from the post date and the matching weekday.",
+          "relevantImageIndex": 0,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Eastern Kings Sportsplex, Souris, PEI"
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The flyer identifies Eastern Kings Sportsplex in Souris, PEI."
+          },
+          "_sourceType": "calendar",
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 6
+        },
+        {
+          "name": "Available Ice Times",
+          "type": "event",
+          "date": "2026-10-18",
+          "startTime": "10:10 AM",
+          "endTime": "",
+          "venue": "Eastern Kings Sportsplex",
+          "price": "",
+          "description": "Booking contact: 902-687-2323 or 902-380-2935.",
+          "extractionReason": "The image lists Sunday October 18 at 10:10am under “Available Ice Times.” The year 2026 is inferred from the post date and the matching weekday.",
+          "relevantImageIndex": 0,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Eastern Kings Sportsplex, Souris, PEI"
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The flyer identifies Eastern Kings Sportsplex in Souris, PEI."
+          },
+          "_sourceType": "calendar",
+          "_pipelineIndex": 2,
+          "_pipelineTotalStage3": 6
+        },
+        {
+          "name": "Available Ice Times",
+          "type": "event",
+          "date": "2026-10-18",
+          "startTime": "1:50 PM",
+          "endTime": "",
+          "venue": "Eastern Kings Sportsplex",
+          "price": "",
+          "description": "Booking contact: 902-687-2323 or 902-380-2935.",
+          "extractionReason": "The image lists Sunday October 18 at 1:50pm as a separate available ice time. The year 2026 is inferred from the post date and the matching weekday.",
+          "relevantImageIndex": 0,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Eastern Kings Sportsplex, Souris, PEI"
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The flyer identifies Eastern Kings Sportsplex in Souris, PEI."
+          },
+          "_sourceType": "calendar",
+          "_pipelineIndex": 3,
+          "_pipelineTotalStage3": 6
+        },
+        {
+          "name": "Available Ice Times",
+          "type": "event",
+          "date": "2026-10-20",
+          "startTime": "7:50 PM",
+          "endTime": "",
+          "venue": "Eastern Kings Sportsplex",
+          "price": "",
+          "description": "Booking contact: 902-687-2323 or 902-380-2935.",
+          "extractionReason": "The image lists Tuesday October 20 at 7:50pm under “Available Ice Times.” The year 2026 is inferred from the post date and the matching weekday.",
+          "relevantImageIndex": 0,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Eastern Kings Sportsplex, Souris, PEI"
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The flyer identifies Eastern Kings Sportsplex in Souris, PEI."
+          },
+          "_sourceType": "calendar",
+          "_pipelineIndex": 4,
+          "_pipelineTotalStage3": 6
+        },
+        {
+          "name": "Available Ice Times",
+          "type": "event",
+          "date": "2026-10-25",
+          "startTime": "1:50 PM",
+          "endTime": "",
+          "venue": "Eastern Kings Sportsplex",
+          "price": "",
+          "description": "Booking contact: 902-687-2323 or 902-380-2935.",
+          "extractionReason": "The image lists Sunday October 25 at 1:50pm under “Available Ice Times.” The year 2026 is inferred from the post date and the matching weekday.",
+          "relevantImageIndex": 0,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Eastern Kings Sportsplex, Souris, PEI"
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The flyer identifies Eastern Kings Sportsplex in Souris, PEI."
+          },
+          "_sourceType": "calendar",
+          "_pipelineIndex": 5,
+          "_pipelineTotalStage3": 6
+        },
+        {
+          "name": "Available Ice Times",
+          "type": "event",
+          "date": "2026-10-27",
+          "startTime": "7:50 PM",
+          "endTime": "",
+          "venue": "Eastern Kings Sportsplex",
+          "price": "",
+          "description": "Booking contact: 902-687-2323 or 902-380-2935.",
+          "extractionReason": "The image lists Tuesday October 27 at 7:50pm under “Available Ice Times.” The year 2026 is inferred from the post date and the matching weekday.",
+          "relevantImageIndex": 0,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Eastern Kings Sportsplex, Souris, PEI"
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The flyer identifies Eastern Kings Sportsplex in Souris, PEI."
+          },
+          "_sourceType": "calendar",
+          "_pipelineIndex": 6,
+          "_pipelineTotalStage3": 6
+        }
+      ],
+      "maxOutputTokens": 32000,
+      "durationMs": 14729,
+      "usage": {
+        "input_tokens": 3384,
+        "input_tokens_details": {
+          "cache_write_tokens": 3381,
+          "cached_tokens": 0
+        },
+        "output_tokens": 1875,
+        "output_tokens_details": {
+          "reasoning_tokens": 47
+        },
+        "total_tokens": 5259
+      },
+      "visibleOutputChars": 7218,
+      "rawText": "{\n  \"validatedItems\": [\n    {\n      \"item\": {\n        \"name\": \"Available Ice Times\",\n        \"type\": \"event\",\n        \"date\": \"2026-10-10\",\n        \"startTime\": \"10:10 AM\",\n        \"endTime\": \"\",\n        \"venue\": \"Eastern Kings Sportsplex\",\n        \"price\": \"\",\n        \"description\": \"Booking contact: 902-687-2323 or 902-380-2935.\",\n        \"extractionReason\": \"The image lists Saturday October 10 at 10:10am under “Available Ice Times.” The year 2026 is inferred from the post date and the matching weekday.\",\n        \"relevantImageIndex\": 0,\n        \"spatial\": {\n          \"kind\": \"single_location\",\n          \"locations\": [\n            \"Eastern Kings Sportsplex, Souris, PEI\"\n          ],\n          \"confirmedStreets\": [],\n          \"ordered\": false,\n          \"evidenceNotes\": \"The flyer identifies Eastern Kings Sportsplex in Souris, PEI.\"\n        },\n        \"_sourceType\": \"calendar\",\n        \"_pipelineIndex\": 1,\n        \"_pipelineTotalStage3\": 6\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"This is a specifically dated, bookable public ice time with a named activity and start time. Calendar events require only a name, date, and start time; the optional end time and price are not needed.\"\n    },\n    {\n      \"item\": {\n        \"name\": \"Available Ice Times\",\n        \"type\": \"event\",\n        \"date\": \"2026-10-18\",\n        \"startTime\": \"10:10 AM\",\n        \"endTime\": \"\",\n        \"venue\": \"Eastern Kings Sportsplex\",\n        \"price\": \"\",\n        \"description\": \"Booking contact: 902-687-2323 or 902-380-2935.\",\n        \"extractionReason\": \"The image lists Sunday October 18 at 10:10am under “Available Ice Times.” The year 2026 is inferred from the post date and the matching weekday.\",\n        \"relevantImageIndex\": 0,\n        \"spatial\": {\n          \"kind\": \"single_location\",\n          \"locations\": [\n            \"Eastern Kings Sportsplex, Souris, PEI\"\n          ],\n          \"confirmedStreets\": [],\n          \"ordered\": false,\n          \"evidenceNotes\": \"The flyer identifies Eastern Kings Sportsplex in Souris, PEI.\"\n        },\n        \"_sourceType\": \"calendar\",\n        \"_pipelineIndex\": 2,\n        \"_pipelineTotalStage3\": 6\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"This is a specifically dated, bookable public ice time with a named activity and start time. It is a distinct date from the other listed windows.\"\n    },\n    {\n      \"item\": {\n        \"name\": \"Available Ice Times\",\n        \"type\": \"event\",\n        \"date\": \"2026-10-18\",\n        \"startTime\": \"1:50 PM\",\n        \"endTime\": \"\",\n        \"venue\": \"Eastern Kings Sportsplex\",\n        \"price\": \"\",\n        \"description\": \"Booking contact: 902-687-2323 or 902-380-2935.\",\n        \"extractionReason\": \"The image lists Sunday October 18 at 1:50pm as a separate available ice time. The year 2026 is inferred from the post date and the matching weekday.\",\n        \"relevantImageIndex\": 0,\n        \"spatial\": {\n          \"kind\": \"single_location\",\n          \"locations\": [\n            \"Eastern Kings Sportsplex, Souris, PEI\"\n          ],\n          \"confirmedStreets\": [],\n          \"ordered\": false,\n          \"evidenceNotes\": \"The flyer identifies Eastern Kings Sportsplex in Souris, PEI.\"\n        },\n        \"_sourceType\": \"calendar\",\n        \"_pipelineIndex\": 3,\n        \"_pipelineTotalStage3\": 6\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"This is a specifically dated, bookable public ice time with a named activity and start time. Its different start time makes it a separate window from the other October 18 listing.\"\n    },\n    {\n      \"item\": {\n        \"name\": \"Available Ice Times\",\n        \"type\": \"event\",\n        \"date\": \"2026-10-20\",\n        \"startTime\": \"7:50 PM\",\n        \"endTime\": \"\",\n        \"venue\": \"Eastern Kings Sportsplex\",\n        \"price\": \"\",\n        \"description\": \"Booking contact: 902-687-2323 or 902-380-2935.\",\n        \"extractionReason\": \"The image lists Tuesday October 20 at 7:50pm under “Available Ice Times.” The year 2026 is inferred from the post date and the matching weekday.\",\n        \"relevantImageIndex\": 0,\n        \"spatial\": {\n          \"kind\": \"single_location\",\n          \"locations\": [\n            \"Eastern Kings Sportsplex, Souris, PEI\"\n          ],\n          \"confirmedStreets\": [],\n          \"ordered\": false,\n          \"evidenceNotes\": \"The flyer identifies Eastern Kings Sportsplex in Souris, PEI.\"\n        },\n        \"_sourceType\": \"calendar\",\n        \"_pipelineIndex\": 4,\n        \"_pipelineTotalStage3\": 6\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"This is a specifically dated, bookable public ice time with a named activity and start time.\"\n    },\n    {\n      \"item\": {\n        \"name\": \"Available Ice Times\",\n        \"type\": \"event\",\n        \"date\": \"2026-10-25\",\n        \"startTime\": \"1:50 PM\",\n        \"endTime\": \"\",\n        \"venue\": \"Eastern Kings Sportsplex\",\n        \"price\": \"\",\n        \"description\": \"Booking contact: 902-687-2323 or 902-380-2935.\",\n        \"extractionReason\": \"The image lists Sunday October 25 at 1:50pm under “Available Ice Times.” The year 2026 is inferred from the post date and the matching weekday.\",\n        \"relevantImageIndex\": 0,\n        \"spatial\": {\n          \"kind\": \"single_location\",\n          \"locations\": [\n            \"Eastern Kings Sportsplex, Souris, PEI\"\n          ],\n          \"confirmedStreets\": [],\n          \"ordered\": false,\n          \"evidenceNotes\": \"The flyer identifies Eastern Kings Sportsplex in Souris, PEI.\"\n        },\n        \"_sourceType\": \"calendar\",\n        \"_pipelineIndex\": 5,\n        \"_pipelineTotalStage3\": 6\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"This is a specifically dated, bookable public ice time with a named activity and start time. It is a distinct date from the other listed windows.\"\n    },\n    {\n      \"item\": {\n        \"name\": \"Available Ice Times\",\n        \"type\": \"event\",\n        \"date\": \"2026-10-27\",\n        \"startTime\": \"7:50 PM\",\n        \"endTime\": \"\",\n        \"venue\": \"Eastern Kings Sportsplex\",\n        \"price\": \"\",\n        \"description\": \"Booking contact: 902-687-2323 or 902-380-2935.\",\n        \"extractionReason\": \"The image lists Tuesday October 27 at 7:50pm under “Available Ice Times.” The year 2026 is inferred from the post date and the matching weekday.\",\n        \"relevantImageIndex\": 0,\n        \"spatial\": {\n          \"kind\": \"single_location\",\n          \"locations\": [\n            \"Eastern Kings Sportsplex, Souris, PEI\"\n          ],\n          \"confirmedStreets\": [],\n          \"ordered\": false,\n          \"evidenceNotes\": \"The flyer identifies Eastern Kings Sportsplex in Souris, PEI.\"\n        },\n        \"_sourceType\": \"calendar\",\n        \"_pipelineIndex\": 6,\n        \"_pipelineTotalStage3\": 6\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"This is a specifically dated, bookable public ice time with a named activity and start time. It is a distinct date from the other listed windows.\"\n    }\n  ],\n  \"validationSummary\": {\n    \"totalItems\": 6,\n    \"itemsKept\": 6,\n    \"itemsRejected\": 0,\n    \"recurringCorrections\": 0,\n    \"overallNotes\": \"All six items are explicitly dated bookable ice windows. The separate October 18 times are retained as distinct windows; no true duplicates or recurring-pattern corrections were identified.\"\n  }\n}",
+      "rawResult": {
+        "validatedItems": [
+          {
+            "item": {
+              "name": "Available Ice Times",
+              "type": "event",
+              "date": "2026-10-10",
+              "startTime": "10:10 AM",
+              "endTime": "",
+              "venue": "Eastern Kings Sportsplex",
+              "price": "",
+              "description": "Booking contact: 902-687-2323 or 902-380-2935.",
+              "extractionReason": "The image lists Saturday October 10 at 10:10am under “Available Ice Times.” The year 2026 is inferred from the post date and the matching weekday.",
+              "relevantImageIndex": 0,
+              "spatial": {
+                "kind": "single_location",
+                "locations": [
+                  "Eastern Kings Sportsplex, Souris, PEI"
+                ],
+                "confirmedStreets": [],
+                "ordered": false,
+                "evidenceNotes": "The flyer identifies Eastern Kings Sportsplex in Souris, PEI."
+              },
+              "_sourceType": "calendar",
+              "_pipelineIndex": 1,
+              "_pipelineTotalStage3": 6
+            },
+            "decision": "KEPT",
+            "reason": "This is a specifically dated, bookable public ice time with a named activity and start time. Calendar events require only a name, date, and start time; the optional end time and price are not needed."
+          },
+          {
+            "item": {
+              "name": "Available Ice Times",
+              "type": "event",
+              "date": "2026-10-18",
+              "startTime": "10:10 AM",
+              "endTime": "",
+              "venue": "Eastern Kings Sportsplex",
+              "price": "",
+              "description": "Booking contact: 902-687-2323 or 902-380-2935.",
+              "extractionReason": "The image lists Sunday October 18 at 10:10am under “Available Ice Times.” The year 2026 is inferred from the post date and the matching weekday.",
+              "relevantImageIndex": 0,
+              "spatial": {
+                "kind": "single_location",
+                "locations": [
+                  "Eastern Kings Sportsplex, Souris, PEI"
+                ],
+                "confirmedStreets": [],
+                "ordered": false,
+                "evidenceNotes": "The flyer identifies Eastern Kings Sportsplex in Souris, PEI."
+              },
+              "_sourceType": "calendar",
+              "_pipelineIndex": 2,
+              "_pipelineTotalStage3": 6
+            },
+            "decision": "KEPT",
+            "reason": "This is a specifically dated, bookable public ice time with a named activity and start time. It is a distinct date from the other listed windows."
+          },
+          {
+            "item": {
+              "name": "Available Ice Times",
+              "type": "event",
+              "date": "2026-10-18",
+              "startTime": "1:50 PM",
+              "endTime": "",
+              "venue": "Eastern Kings Sportsplex",
+              "price": "",
+              "description": "Booking contact: 902-687-2323 or 902-380-2935.",
+              "extractionReason": "The image lists Sunday October 18 at 1:50pm as a separate available ice time. The year 2026 is inferred from the post date and the matching weekday.",
+              "relevantImageIndex": 0,
+              "spatial": {
+                "kind": "single_location",
+                "locations": [
+                  "Eastern Kings Sportsplex, Souris, PEI"
+                ],
+                "confirmedStreets": [],
+                "ordered": false,
+                "evidenceNotes": "The flyer identifies Eastern Kings Sportsplex in Souris, PEI."
+              },
+              "_sourceType": "calendar",
+              "_pipelineIndex": 3,
+              "_pipelineTotalStage3": 6
+            },
+            "decision": "KEPT",
+            "reason": "This is a specifically dated, bookable public ice time with a named activity and start time. Its different start time makes it a separate window from the other October 18 listing."
+          },
+          {
+            "item": {
+              "name": "Available Ice Times",
+              "type": "event",
+              "date": "2026-10-20",
+              "startTime": "7:50 PM",
+              "endTime": "",
+              "venue": "Eastern Kings Sportsplex",
+              "price": "",
+              "description": "Booking contact: 902-687-2323 or 902-380-2935.",
+              "extractionReason": "The image lists Tuesday October 20 at 7:50pm under “Available Ice Times.” The year 2026 is inferred from the post date and the matching weekday.",
+              "relevantImageIndex": 0,
+              "spatial": {
+                "kind": "single_location",
+                "locations": [
+                  "Eastern Kings Sportsplex, Souris, PEI"
+                ],
+                "confirmedStreets": [],
+                "ordered": false,
+                "evidenceNotes": "The flyer identifies Eastern Kings Sportsplex in Souris, PEI."
+              },
+              "_sourceType": "calendar",
+              "_pipelineIndex": 4,
+              "_pipelineTotalStage3": 6
+            },
+            "decision": "KEPT",
+            "reason": "This is a specifically dated, bookable public ice time with a named activity and start time."
+          },
+          {
+            "item": {
+              "name": "Available Ice Times",
+              "type": "event",
+              "date": "2026-10-25",
+              "startTime": "1:50 PM",
+              "endTime": "",
+              "venue": "Eastern Kings Sportsplex",
+              "price": "",
+              "description": "Booking contact: 902-687-2323 or 902-380-2935.",
+              "extractionReason": "The image lists Sunday October 25 at 1:50pm under “Available Ice Times.” The year 2026 is inferred from the post date and the matching weekday.",
+              "relevantImageIndex": 0,
+              "spatial": {
+                "kind": "single_location",
+                "locations": [
+                  "Eastern Kings Sportsplex, Souris, PEI"
+                ],
+                "confirmedStreets": [],
+                "ordered": false,
+                "evidenceNotes": "The flyer identifies Eastern Kings Sportsplex in Souris, PEI."
+              },
+              "_sourceType": "calendar",
+              "_pipelineIndex": 5,
+              "_pipelineTotalStage3": 6
+            },
+            "decision": "KEPT",
+            "reason": "This is a specifically dated, bookable public ice time with a named activity and start time. It is a distinct date from the other listed windows."
+          },
+          {
+            "item": {
+              "name": "Available Ice Times",
+              "type": "event",
+              "date": "2026-10-27",
+              "startTime": "7:50 PM",
+              "endTime": "",
+              "venue": "Eastern Kings Sportsplex",
+              "price": "",
+              "description": "Booking contact: 902-687-2323 or 902-380-2935.",
+              "extractionReason": "The image lists Tuesday October 27 at 7:50pm under “Available Ice Times.” The year 2026 is inferred from the post date and the matching weekday.",
+              "relevantImageIndex": 0,
+              "spatial": {
+                "kind": "single_location",
+                "locations": [
+                  "Eastern Kings Sportsplex, Souris, PEI"
+                ],
+                "confirmedStreets": [],
+                "ordered": false,
+                "evidenceNotes": "The flyer identifies Eastern Kings Sportsplex in Souris, PEI."
+              },
+              "_sourceType": "calendar",
+              "_pipelineIndex": 6,
+              "_pipelineTotalStage3": 6
+            },
+            "decision": "KEPT",
+            "reason": "This is a specifically dated, bookable public ice time with a named activity and start time. It is a distinct date from the other listed windows."
+          }
+        ],
+        "validationSummary": {
+          "totalItems": 6,
+          "itemsKept": 6,
+          "itemsRejected": 0,
+          "recurringCorrections": 0,
+          "overallNotes": "All six items are explicitly dated bookable ice windows. The separate October 18 times are retained as distinct windows; no true duplicates or recurring-pattern corrections were identified."
+        }
+      },
+      "parseError": false
+    }
+  ]
+}

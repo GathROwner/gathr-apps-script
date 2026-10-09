@@ -1,0 +1,147 @@
+{
+  "caseId": "online-giveaway",
+  "arm": "luna-none",
+  "repeat": 1,
+  "model": "gpt-6-luna",
+  "effort": "none",
+  "noLiveWrites": true,
+  "sourceSha256": "543325bdb143589ecd4c695abc63a312d99da248b7b3d615e751cec55ae02c44",
+  "inputCount": 1,
+  "outputCount": 0,
+  "wallMs": 4017,
+  "items": [],
+  "metadata": {
+    "_happyHourNoPriceOverrideCount": 0,
+    "_calendarDealAllDayOverrideCount": 0,
+    "_calendarDealAllDayNormalizationCount": 0,
+    "_operatingHoursOnlyRejectCount": 0
+  },
+  "usage": [
+    {
+      "stage": "stage4",
+      "component": "secondaryValidator",
+      "endpoint": "responses",
+      "model": "gpt-6-luna",
+      "durationMs": 3999,
+      "inputTokens": 2214,
+      "outputTokens": 412,
+      "totalTokens": 2626,
+      "cachedInputTokens": 0,
+      "fileId": "stage4-frozen-comparison",
+      "postId": "1703137428484552",
+      "rowIndex": 0,
+      "runId": "local-1",
+      "batchItemCount": 1,
+      "responseId": "resp_0a3b81d51ffcaf21006ac96fad409c87d28e4bd6f0d54d6bb7",
+      "responseStatus": "completed",
+      "incompleteReason": "",
+      "requestedMaxOutputTokens": 32000,
+      "reasoningTokens": 0,
+      "visibleOutputChars": 1666
+    }
+  ],
+  "requests": [
+    {
+      "model": "gpt-6-luna",
+      "effort": "none",
+      "responseId": "resp_0a3b81d51ffcaf21006ac96fad409c87d28e4bd6f0d54d6bb7",
+      "httpStatus": 200,
+      "status": "completed",
+      "incompleteDetails": null,
+      "error": null,
+      "promptSha256": "89e0f9eec781eb3737f4392252a5f5786b56af6d08de61a6556079d5e5473f27",
+      "outputContractSha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "batchItems": [
+        {
+          "name": "Thanksgiving Giveaway",
+          "description": "Enter for a chance to win 1 whole chicken, Irish Cobbler potatoes, 1 bag of chicken seasoning, and 1 bag of potato seasoning. Like the post, comment with what you are most thankful for this Thanksgiving, and share the post. The draw takes place Friday, October 9.",
+          "date": "2026-10-06",
+          "startTime": "",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "none",
+              "evidence": ""
+            },
+            "end": {
+              "toClose": false,
+              "source": "none",
+              "evidence": ""
+            }
+          },
+          "venue": "",
+          "pricing": {
+            "price": ""
+          },
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "\"THANKSGIVING GIVEAWAY!\" and \"WHAT YOU COULD WIN\" advertise a chance to win a bundle of food.",
+          "_sourceType": "special",
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 1
+        }
+      ],
+      "maxOutputTokens": 32000,
+      "durationMs": 3994,
+      "usage": {
+        "input_tokens": 2214,
+        "input_tokens_details": {
+          "cache_write_tokens": 2211,
+          "cached_tokens": 0
+        },
+        "output_tokens": 412,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 2626
+      },
+      "visibleOutputChars": 1666,
+      "rawText": "{\n  \"validatedItems\": [\n    {\n      \"item\": {\n        \"name\": \"Thanksgiving Giveaway\",\n        \"description\": \"Enter for a chance to win 1 whole chicken, Irish Cobbler potatoes, 1 bag of chicken seasoning, and 1 bag of potato seasoning. Like the post, comment with what you are most thankful for this Thanksgiving, and share the post. The draw takes place Friday, October 9.\",\n        \"date\": \"2026-10-06\",\n        \"startTime\": \"\",\n        \"endTime\": \"\",\n        \"timeFlags\": {\n          \"start\": {\n            \"source\": \"none\",\n            \"evidence\": \"\"\n          },\n          \"end\": {\n            \"toClose\": false,\n            \"source\": \"none\",\n            \"evidence\": \"\"\n          }\n        },\n        \"venue\": \"\",\n        \"pricing\": {\n          \"price\": \"\"\n        },\n        \"relevantImageIndex\": 0,\n        \"recurringPattern\": \"none\",\n        \"extractionReason\": \"\\\"THANKSGIVING GIVEAWAY!\\\" and \\\"WHAT YOU COULD WIN\\\" advertise a chance to win a bundle of food.\",\n        \"_sourceType\": \"special\",\n        \"_pipelineIndex\": 1,\n        \"_pipelineTotalStage3\": 1\n      },\n      \"decision\": \"REJECTED\",\n      \"reason\": \"This is a giveaway contest rather than a named daily food special or explicitly advertised food deal. The October 9 draw date does not make it a qualifying event, and the item has no event start time.\",\n      \"corrections\": {}\n    }\n  ],\n  \"validationSummary\": {\n    \"totalItems\": 1,\n    \"itemsKept\": 0,\n    \"itemsRejected\": 1,\n    \"recurringCorrections\": 0,\n    \"overallNotes\": \"The special extractor identified a food giveaway, but the special exception applies to named daily specials and advertised deals, not contests to win food.\"\n  }\n}",
+      "rawResult": {
+        "validatedItems": [
+          {
+            "item": {
+              "name": "Thanksgiving Giveaway",
+              "description": "Enter for a chance to win 1 whole chicken, Irish Cobbler potatoes, 1 bag of chicken seasoning, and 1 bag of potato seasoning. Like the post, comment with what you are most thankful for this Thanksgiving, and share the post. The draw takes place Friday, October 9.",
+              "date": "2026-10-06",
+              "startTime": "",
+              "endTime": "",
+              "timeFlags": {
+                "start": {
+                  "source": "none",
+                  "evidence": ""
+                },
+                "end": {
+                  "toClose": false,
+                  "source": "none",
+                  "evidence": ""
+                }
+              },
+              "venue": "",
+              "pricing": {
+                "price": ""
+              },
+              "relevantImageIndex": 0,
+              "recurringPattern": "none",
+              "extractionReason": "\"THANKSGIVING GIVEAWAY!\" and \"WHAT YOU COULD WIN\" advertise a chance to win a bundle of food.",
+              "_sourceType": "special",
+              "_pipelineIndex": 1,
+              "_pipelineTotalStage3": 1
+            },
+            "decision": "REJECTED",
+            "reason": "This is a giveaway contest rather than a named daily food special or explicitly advertised food deal. The October 9 draw date does not make it a qualifying event, and the item has no event start time.",
+            "corrections": {}
+          }
+        ],
+        "validationSummary": {
+          "totalItems": 1,
+          "itemsKept": 0,
+          "itemsRejected": 1,
+          "recurringCorrections": 0,
+          "overallNotes": "The special extractor identified a food giveaway, but the special exception applies to named daily specials and advertised deals, not contests to win food."
+        }
+      },
+      "parseError": false
+    }
+  ]
+}

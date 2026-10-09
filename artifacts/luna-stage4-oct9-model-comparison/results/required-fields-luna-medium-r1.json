@@ -1,0 +1,242 @@
+{
+  "caseId": "required-fields",
+  "arm": "luna-medium",
+  "repeat": 1,
+  "model": "gpt-6-luna",
+  "effort": "medium",
+  "noLiveWrites": true,
+  "sourceSha256": "a4556aaf57ef5ff95b5f5db3ab9bea6c7ec6e8a80f96a6d65cb688c11b2573ec",
+  "inputCount": 4,
+  "outputCount": 1,
+  "wallMs": 6886,
+  "items": [
+    {
+      "name": "Concert at Posting Venue",
+      "type": "event",
+      "date": "2026-10-17",
+      "startTime": "11:00",
+      "endTime": "",
+      "venue": "",
+      "price": "",
+      "description": "October 17 at 11 am at our venue; end time and price not printed.",
+      "relevantImageIndex": 0,
+      "recurringPattern": "none",
+      "_sourceType": "event",
+      "_pipelineIndex": 3,
+      "_pipelineTotalStage3": 4
+    }
+  ],
+  "metadata": {
+    "_happyHourNoPriceOverrideCount": 0,
+    "_calendarDealAllDayOverrideCount": 0,
+    "_calendarDealAllDayNormalizationCount": 0,
+    "_operatingHoursOnlyRejectCount": 0
+  },
+  "usage": [
+    {
+      "stage": "stage4",
+      "component": "secondaryValidator",
+      "endpoint": "responses",
+      "model": "gpt-6-luna",
+      "durationMs": 6868,
+      "inputTokens": 2420,
+      "outputTokens": 828,
+      "totalTokens": 3248,
+      "cachedInputTokens": 0,
+      "fileId": "stage4-frozen-comparison",
+      "postId": "required-fields",
+      "rowIndex": 0,
+      "runId": "local-1",
+      "batchItemCount": 4,
+      "responseId": "resp_0f658fee3285ead3006ac96fbdbf6c87d2835860948a9b7191",
+      "responseStatus": "completed",
+      "incompleteReason": "",
+      "requestedMaxOutputTokens": 32000,
+      "reasoningTokens": 63,
+      "visibleOutputChars": 2959
+    }
+  ],
+  "requests": [
+    {
+      "model": "gpt-6-luna",
+      "effort": "medium",
+      "responseId": "resp_0f658fee3285ead3006ac96fbdbf6c87d2835860948a9b7191",
+      "httpStatus": 200,
+      "status": "completed",
+      "incompleteDetails": null,
+      "error": null,
+      "promptSha256": "5f2773ebdab1cd983d1e7eec300452bd6204e1741eeacd853717d0e1eae2098a",
+      "outputContractSha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "batchItems": [
+        {
+          "name": "Undated Concert",
+          "type": "event",
+          "date": "",
+          "startTime": "11:00",
+          "endTime": "",
+          "venue": "",
+          "price": "",
+          "description": "An unspecified future concert without a date.",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "_sourceType": "event",
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 4
+        },
+        {
+          "name": "Unscheduled Workshop",
+          "type": "event",
+          "date": "2026-10-17",
+          "startTime": "unknown",
+          "endTime": "",
+          "venue": "",
+          "price": "",
+          "description": "No start time is supplied for this workshop.",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "_sourceType": "event",
+          "_pipelineIndex": 2,
+          "_pipelineTotalStage3": 4
+        },
+        {
+          "name": "Concert at Posting Venue",
+          "type": "event",
+          "date": "2026-10-17",
+          "startTime": "11:00",
+          "endTime": "",
+          "venue": "",
+          "price": "",
+          "description": "October 17 at 11 am at our venue; end time and price not printed.",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "_sourceType": "event",
+          "_pipelineIndex": 3,
+          "_pipelineTotalStage3": 4
+        },
+        {
+          "name": "Membership Announcement",
+          "type": "event",
+          "date": "",
+          "startTime": "",
+          "endTime": "",
+          "venue": "",
+          "price": "",
+          "description": "We are pleased to welcome a new member of our team.",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "_sourceType": "event",
+          "_pipelineIndex": 4,
+          "_pipelineTotalStage3": 4
+        }
+      ],
+      "maxOutputTokens": 32000,
+      "durationMs": 6864,
+      "usage": {
+        "input_tokens": 2420,
+        "input_tokens_details": {
+          "cache_write_tokens": 2417,
+          "cached_tokens": 0
+        },
+        "output_tokens": 828,
+        "output_tokens_details": {
+          "reasoning_tokens": 63
+        },
+        "total_tokens": 3248
+      },
+      "visibleOutputChars": 2959,
+      "rawText": "{\n  \"validatedItems\": [\n    {\n      \"item\": {\n        \"name\": \"Undated Concert\",\n        \"type\": \"event\",\n        \"date\": \"\",\n        \"startTime\": \"11:00\",\n        \"endTime\": \"\",\n        \"venue\": \"\",\n        \"price\": \"\",\n        \"description\": \"An unspecified future concert without a date.\",\n        \"relevantImageIndex\": 0,\n        \"recurringPattern\": \"none\",\n        \"_sourceType\": \"event\",\n        \"_pipelineIndex\": 1,\n        \"_pipelineTotalStage3\": 4\n      },\n      \"decision\": \"REJECTED\",\n      \"reason\": \"A regular event requires a specific YYYY-MM-DD date. This concert has no date, so it does not pass validation.\",\n      \"corrections\": {}\n    },\n    {\n      \"item\": {\n        \"name\": \"Unscheduled Workshop\",\n        \"type\": \"event\",\n        \"date\": \"2026-10-17\",\n        \"startTime\": \"unknown\",\n        \"endTime\": \"\",\n        \"venue\": \"\",\n        \"price\": \"\",\n        \"description\": \"No start time is supplied for this workshop.\",\n        \"relevantImageIndex\": 0,\n        \"recurringPattern\": \"none\",\n        \"_sourceType\": \"event\",\n        \"_pipelineIndex\": 2,\n        \"_pipelineTotalStage3\": 4\n      },\n      \"decision\": \"REJECTED\",\n      \"reason\": \"A regular event requires a valid start time. The value \\\"unknown\\\" does not provide a specific time.\",\n      \"corrections\": {}\n    },\n    {\n      \"item\": {\n        \"name\": \"Concert at Posting Venue\",\n        \"type\": \"event\",\n        \"date\": \"2026-10-17\",\n        \"startTime\": \"11:00\",\n        \"endTime\": \"\",\n        \"venue\": \"\",\n        \"price\": \"\",\n        \"description\": \"October 17 at 11 am at our venue; end time and price not printed.\",\n        \"relevantImageIndex\": 0,\n        \"recurringPattern\": \"none\",\n        \"_sourceType\": \"event\",\n        \"_pipelineIndex\": 3,\n        \"_pipelineTotalStage3\": 4\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"This event has a specific date and start time. The empty venue is acceptable because it indicates the posting venue, and end time and price are optional.\",\n      \"corrections\": {}\n    },\n    {\n      \"item\": {\n        \"name\": \"Membership Announcement\",\n        \"type\": \"event\",\n        \"date\": \"\",\n        \"startTime\": \"\",\n        \"endTime\": \"\",\n        \"venue\": \"\",\n        \"price\": \"\",\n        \"description\": \"We are pleased to welcome a new member of our team.\",\n        \"relevantImageIndex\": 0,\n        \"recurringPattern\": \"none\",\n        \"_sourceType\": \"event\",\n        \"_pipelineIndex\": 4,\n        \"_pipelineTotalStage3\": 4\n      },\n      \"decision\": \"REJECTED\",\n      \"reason\": \"This is a general membership announcement, not a timed event, and it has no specific date or start time.\",\n      \"corrections\": {}\n    }\n  ],\n  \"validationSummary\": {\n    \"totalItems\": 4,\n    \"itemsKept\": 1,\n    \"itemsRejected\": 3,\n    \"recurringCorrections\": 0,\n    \"overallNotes\": \"Kept the dated, timed concert at the posting venue. Rejected the undated concert, the workshop without a valid start time, and the general membership announcement.\"\n  }\n}",
+      "rawResult": {
+        "validatedItems": [
+          {
+            "item": {
+              "name": "Undated Concert",
+              "type": "event",
+              "date": "",
+              "startTime": "11:00",
+              "endTime": "",
+              "venue": "",
+              "price": "",
+              "description": "An unspecified future concert without a date.",
+              "relevantImageIndex": 0,
+              "recurringPattern": "none",
+              "_sourceType": "event",
+              "_pipelineIndex": 1,
+              "_pipelineTotalStage3": 4
+            },
+            "decision": "REJECTED",
+            "reason": "A regular event requires a specific YYYY-MM-DD date. This concert has no date, so it does not pass validation.",
+            "corrections": {}
+          },
+          {
+            "item": {
+              "name": "Unscheduled Workshop",
+              "type": "event",
+              "date": "2026-10-17",
+              "startTime": "unknown",
+              "endTime": "",
+              "venue": "",
+              "price": "",
+              "description": "No start time is supplied for this workshop.",
+              "relevantImageIndex": 0,
+              "recurringPattern": "none",
+              "_sourceType": "event",
+              "_pipelineIndex": 2,
+              "_pipelineTotalStage3": 4
+            },
+            "decision": "REJECTED",
+            "reason": "A regular event requires a valid start time. The value \"unknown\" does not provide a specific time.",
+            "corrections": {}
+          },
+          {
+            "item": {
+              "name": "Concert at Posting Venue",
+              "type": "event",
+              "date": "2026-10-17",
+              "startTime": "11:00",
+              "endTime": "",
+              "venue": "",
+              "price": "",
+              "description": "October 17 at 11 am at our venue; end time and price not printed.",
+              "relevantImageIndex": 0,
+              "recurringPattern": "none",
+              "_sourceType": "event",
+              "_pipelineIndex": 3,
+              "_pipelineTotalStage3": 4
+            },
+            "decision": "KEPT",
+            "reason": "This event has a specific date and start time. The empty venue is acceptable because it indicates the posting venue, and end time and price are optional.",
+            "corrections": {}
+          },
+          {
+            "item": {
+              "name": "Membership Announcement",
+              "type": "event",
+              "date": "",
+              "startTime": "",
+              "endTime": "",
+              "venue": "",
+              "price": "",
+              "description": "We are pleased to welcome a new member of our team.",
+              "relevantImageIndex": 0,
+              "recurringPattern": "none",
+              "_sourceType": "event",
+              "_pipelineIndex": 4,
+              "_pipelineTotalStage3": 4
+            },
+            "decision": "REJECTED",
+            "reason": "This is a general membership announcement, not a timed event, and it has no specific date or start time.",
+            "corrections": {}
+          }
+        ],
+        "validationSummary": {
+          "totalItems": 4,
+          "itemsKept": 1,
+          "itemsRejected": 3,
+          "recurringCorrections": 0,
+          "overallNotes": "Kept the dated, timed concert at the posting venue. Rejected the undated concert, the workshop without a valid start time, and the general membership announcement."
+        }
+      },
+      "parseError": false
+    }
+  ]
+}

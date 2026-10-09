@@ -1,0 +1,1259 @@
+{
+  "caseId": "pool-13",
+  "arm": "nano-low",
+  "repeat": 1,
+  "model": "gpt-5-nano",
+  "effort": "low",
+  "noLiveWrites": true,
+  "sourceSha256": "51b0e15e53a2b5b3a60c29ddb87f93c0b7f0b3e37f00db35d6b2ca14fe187e2e",
+  "inputCount": 13,
+  "outputCount": 13,
+  "wallMs": 19698,
+  "items": [
+    {
+      "name": "Friday Fun swim",
+      "day": "Friday",
+      "date": "2026-10-09",
+      "recurringPattern": "none",
+      "startTime": "12:00",
+      "endTime": "16:00",
+      "venue": "",
+      "price": "$4.50 per person",
+      "description": "",
+      "extractionReason": "Named public swim activity with a printed time period and price.",
+      "relevantImageIndex": 0,
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "between 12:00 pm and 4:00 pm"
+        },
+        "end": {
+          "source": "explicit",
+          "toClose": false,
+          "evidence": "between 12:00 pm and 4:00 pm"
+        }
+      },
+      "type": "event",
+      "_sourceType": "schedule",
+      "_pipelineIndex": 1,
+      "_pipelineTotalStage3": 13
+    },
+    {
+      "name": "Sunrise Fitness",
+      "day": "Friday",
+      "date": "2026-10-09",
+      "recurringPattern": "none",
+      "startTime": "07:00",
+      "endTime": "",
+      "venue": "",
+      "price": "",
+      "description": "Aquafit.",
+      "extractionReason": "Named Aquafit class with a printed start time.",
+      "relevantImageIndex": 0,
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "7:00 am"
+        },
+        "end": {
+          "source": "none",
+          "toClose": false,
+          "evidence": ""
+        }
+      },
+      "type": "event",
+      "_sourceType": "schedule",
+      "_pipelineIndex": 2,
+      "_pipelineTotalStage3": 13
+    },
+    {
+      "name": "Cardio Craze",
+      "day": "Friday",
+      "date": "2026-10-09",
+      "recurringPattern": "none",
+      "startTime": "08:45",
+      "endTime": "",
+      "venue": "",
+      "price": "",
+      "description": "Aquafit.",
+      "extractionReason": "Named Aquafit class with a printed start time.",
+      "relevantImageIndex": 0,
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "8:45 am"
+        },
+        "end": {
+          "source": "none",
+          "toClose": false,
+          "evidence": ""
+        }
+      },
+      "type": "event",
+      "_sourceType": "schedule",
+      "_pipelineIndex": 3,
+      "_pipelineTotalStage3": 13
+    },
+    {
+      "name": "UFIT Aqua",
+      "day": "Friday",
+      "date": "2026-10-09",
+      "recurringPattern": "none",
+      "startTime": "11:45",
+      "endTime": "",
+      "venue": "",
+      "price": "",
+      "description": "Aquafit.",
+      "extractionReason": "Named Aquafit class with a printed start time.",
+      "relevantImageIndex": 0,
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "11:45 am"
+        },
+        "end": {
+          "source": "none",
+          "toClose": false,
+          "evidence": ""
+        }
+      },
+      "type": "event",
+      "_sourceType": "schedule",
+      "_pipelineIndex": 4,
+      "_pipelineTotalStage3": 13
+    },
+    {
+      "name": "Aqua Zumba",
+      "day": "Friday",
+      "date": "2026-10-09",
+      "recurringPattern": "none",
+      "startTime": "17:45",
+      "endTime": "",
+      "venue": "",
+      "price": "",
+      "description": "Aquafit.",
+      "extractionReason": "Named Aquafit class with a printed start time.",
+      "relevantImageIndex": 0,
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "5:45 pm"
+        },
+        "end": {
+          "source": "none",
+          "toClose": false,
+          "evidence": ""
+        }
+      },
+      "type": "event",
+      "_sourceType": "schedule",
+      "_pipelineIndex": 5,
+      "_pipelineTotalStage3": 13
+    },
+    {
+      "name": "Lane swim",
+      "type": "event",
+      "date": "2026-10-09",
+      "startTime": "05:30",
+      "endTime": "07:00",
+      "venue": "Bell Aliant Centre",
+      "price": "",
+      "description": "Lane swim - 5:30 am - 7:00 am *2 lanes only*, 7:00 am -4:00 pm, 4:00 pm - 7:30 pm *2 lanes only*",
+      "extractionReason": "schedule_text_public_access",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "5:30 am - 7:00 am"
+        },
+        "end": {
+          "source": "explicit",
+          "toClose": false,
+          "evidence": "5:30 am - 7:00 am"
+        }
+      },
+      "_sourceType": "schedule",
+      "relevantImageIndex": -1,
+      "recurringPattern": "none",
+      "_pipelineIndex": 6,
+      "_pipelineTotalStage3": 13
+    },
+    {
+      "name": "Lane swim",
+      "type": "event",
+      "date": "2026-10-09",
+      "startTime": "07:00",
+      "endTime": "16:00",
+      "venue": "Bell Aliant Centre",
+      "price": "",
+      "description": "Lane swim - 5:30 am - 7:00 am *2 lanes only*, 7:00 am -4:00 pm, 4:00 pm - 7:30 pm *2 lanes only*",
+      "extractionReason": "schedule_text_public_access",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "7:00 am -4:00 pm"
+        },
+        "end": {
+          "source": "explicit",
+          "toClose": false,
+          "evidence": "7:00 am -4:00 pm"
+        }
+      },
+      "_sourceType": "schedule",
+      "relevantImageIndex": -1,
+      "recurringPattern": "none",
+      "_pipelineIndex": 7,
+      "_pipelineTotalStage3": 13
+    },
+    {
+      "name": "Lane swim",
+      "type": "event",
+      "date": "2026-10-09",
+      "startTime": "16:00",
+      "endTime": "19:30",
+      "venue": "Bell Aliant Centre",
+      "price": "",
+      "description": "Lane swim - 5:30 am - 7:00 am *2 lanes only*, 7:00 am -4:00 pm, 4:00 pm - 7:30 pm *2 lanes only*",
+      "extractionReason": "schedule_text_public_access",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "4:00 pm - 7:30 pm"
+        },
+        "end": {
+          "source": "explicit",
+          "toClose": false,
+          "evidence": "4:00 pm - 7:30 pm"
+        }
+      },
+      "_sourceType": "schedule",
+      "relevantImageIndex": -1,
+      "recurringPattern": "none",
+      "_pipelineIndex": 8,
+      "_pipelineTotalStage3": 13
+    },
+    {
+      "name": "Leisure pool open",
+      "type": "event",
+      "date": "2026-10-09",
+      "startTime": "05:30",
+      "endTime": "16:00",
+      "venue": "Bell Aliant Centre",
+      "price": "",
+      "description": "Leisure pool open - 5:30 am - 4:00 pm, 5:30 pm - 9:00 pm",
+      "extractionReason": "schedule_text_public_access",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "5:30 am - 4:00 pm"
+        },
+        "end": {
+          "source": "explicit",
+          "toClose": false,
+          "evidence": "5:30 am - 4:00 pm"
+        }
+      },
+      "_sourceType": "schedule",
+      "relevantImageIndex": -1,
+      "recurringPattern": "none",
+      "_pipelineIndex": 9,
+      "_pipelineTotalStage3": 13
+    },
+    {
+      "name": "Leisure pool open",
+      "type": "event",
+      "date": "2026-10-09",
+      "startTime": "17:30",
+      "endTime": "21:00",
+      "venue": "Bell Aliant Centre",
+      "price": "",
+      "description": "Leisure pool open - 5:30 am - 4:00 pm, 5:30 pm - 9:00 pm",
+      "extractionReason": "schedule_text_public_access",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "5:30 pm - 9:00 pm"
+        },
+        "end": {
+          "source": "explicit",
+          "toClose": false,
+          "evidence": "5:30 pm - 9:00 pm"
+        }
+      },
+      "_sourceType": "schedule",
+      "relevantImageIndex": -1,
+      "recurringPattern": "none",
+      "_pipelineIndex": 10,
+      "_pipelineTotalStage3": 13
+    },
+    {
+      "name": "Toddler Pool open",
+      "type": "event",
+      "date": "2026-10-09",
+      "startTime": "05:30",
+      "endTime": "21:00",
+      "venue": "Bell Aliant Centre",
+      "price": "",
+      "description": "Toddler Pool open - 5:30 am - 9:00 pm",
+      "extractionReason": "schedule_text_public_access",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "5:30 am - 9:00 pm"
+        },
+        "end": {
+          "source": "explicit",
+          "toClose": false,
+          "evidence": "5:30 am - 9:00 pm"
+        }
+      },
+      "_sourceType": "schedule",
+      "relevantImageIndex": -1,
+      "recurringPattern": "none",
+      "_pipelineIndex": 11,
+      "_pipelineTotalStage3": 13
+    },
+    {
+      "name": "All pools open",
+      "type": "event",
+      "date": "2026-10-09",
+      "startTime": "12:30",
+      "endTime": "16:00",
+      "venue": "Bell Aliant Centre",
+      "price": "",
+      "description": "All pools open -  12:30 pm - 4:00 pm",
+      "extractionReason": "schedule_text_public_access",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "12:30 pm - 4:00 pm"
+        },
+        "end": {
+          "source": "explicit",
+          "toClose": false,
+          "evidence": "12:30 pm - 4:00 pm"
+        }
+      },
+      "_sourceType": "schedule",
+      "relevantImageIndex": -1,
+      "recurringPattern": "none",
+      "_pipelineIndex": 12,
+      "_pipelineTotalStage3": 13
+    },
+    {
+      "name": "Waterslide open",
+      "type": "event",
+      "date": "2026-10-09",
+      "startTime": "18:30",
+      "endTime": "19:30",
+      "venue": "Bell Aliant Centre",
+      "price": "",
+      "description": "Waterslide open - 6:30 pm - 7:30 pm",
+      "extractionReason": "schedule_text_public_access",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "6:30 pm - 7:30 pm"
+        },
+        "end": {
+          "source": "explicit",
+          "toClose": false,
+          "evidence": "6:30 pm - 7:30 pm"
+        }
+      },
+      "_sourceType": "schedule",
+      "relevantImageIndex": -1,
+      "recurringPattern": "none",
+      "_pipelineIndex": 13,
+      "_pipelineTotalStage3": 13
+    }
+  ],
+  "metadata": {
+    "_happyHourNoPriceOverrideCount": 0,
+    "_calendarDealAllDayOverrideCount": 0,
+    "_calendarDealAllDayNormalizationCount": 0,
+    "_operatingHoursOnlyRejectCount": 0
+  },
+  "usage": [
+    {
+      "stage": "stage4",
+      "component": "secondaryValidator",
+      "endpoint": "responses",
+      "model": "gpt-5-nano",
+      "durationMs": 19683,
+      "inputTokens": 4873,
+      "outputTokens": 4432,
+      "totalTokens": 9305,
+      "cachedInputTokens": 0,
+      "fileId": "stage4-frozen-comparison",
+      "postId": "1526976716116913",
+      "rowIndex": 198,
+      "runId": "local-1",
+      "batchItemCount": 13,
+      "responseId": "resp_0a075b665f3c8682006ac96f71931087d28fb400d2e7a94a5f",
+      "responseStatus": "completed",
+      "incompleteReason": "",
+      "requestedMaxOutputTokens": 32000,
+      "reasoningTokens": 576,
+      "visibleOutputChars": 14172
+    }
+  ],
+  "requests": [
+    {
+      "model": "gpt-5-nano",
+      "effort": "low",
+      "responseId": "resp_0a075b665f3c8682006ac96f71931087d28fb400d2e7a94a5f",
+      "httpStatus": 200,
+      "status": "completed",
+      "incompleteDetails": null,
+      "error": null,
+      "promptSha256": "a2cd75e26f7de2df54e0a6c02d57ae79ca56d453f678ce0ddef826f315714090",
+      "outputContractSha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "batchItems": [
+        {
+          "name": "Friday Fun swim",
+          "day": "Friday",
+          "date": "2026-10-09",
+          "recurringPattern": "none",
+          "startTime": "12:00",
+          "endTime": "16:00",
+          "venue": "",
+          "price": "$4.50 per person",
+          "description": "",
+          "extractionReason": "Named public swim activity with a printed time period and price.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "between 12:00 pm and 4:00 pm"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "between 12:00 pm and 4:00 pm"
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 13
+        },
+        {
+          "name": "Sunrise Fitness",
+          "day": "Friday",
+          "date": "2026-10-09",
+          "recurringPattern": "none",
+          "startTime": "07:00",
+          "endTime": "",
+          "venue": "",
+          "price": "",
+          "description": "Aquafit.",
+          "extractionReason": "Named Aquafit class with a printed start time.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "7:00 am"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_pipelineIndex": 2,
+          "_pipelineTotalStage3": 13
+        },
+        {
+          "name": "Cardio Craze",
+          "day": "Friday",
+          "date": "2026-10-09",
+          "recurringPattern": "none",
+          "startTime": "08:45",
+          "endTime": "",
+          "venue": "",
+          "price": "",
+          "description": "Aquafit.",
+          "extractionReason": "Named Aquafit class with a printed start time.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "8:45 am"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_pipelineIndex": 3,
+          "_pipelineTotalStage3": 13
+        },
+        {
+          "name": "UFIT Aqua",
+          "day": "Friday",
+          "date": "2026-10-09",
+          "recurringPattern": "none",
+          "startTime": "11:45",
+          "endTime": "",
+          "venue": "",
+          "price": "",
+          "description": "Aquafit.",
+          "extractionReason": "Named Aquafit class with a printed start time.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "11:45 am"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_pipelineIndex": 4,
+          "_pipelineTotalStage3": 13
+        },
+        {
+          "name": "Aqua Zumba",
+          "day": "Friday",
+          "date": "2026-10-09",
+          "recurringPattern": "none",
+          "startTime": "17:45",
+          "endTime": "",
+          "venue": "",
+          "price": "",
+          "description": "Aquafit.",
+          "extractionReason": "Named Aquafit class with a printed start time.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "5:45 pm"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_pipelineIndex": 5,
+          "_pipelineTotalStage3": 13
+        },
+        {
+          "name": "Lane swim",
+          "type": "event",
+          "date": "2026-10-09",
+          "startTime": "05:30",
+          "endTime": "07:00",
+          "venue": "Bell Aliant Centre",
+          "price": "",
+          "description": "Lane swim - 5:30 am - 7:00 am *2 lanes only*, 7:00 am -4:00 pm, 4:00 pm - 7:30 pm *2 lanes only*",
+          "extractionReason": "schedule_text_public_access",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "5:30 am - 7:00 am"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "5:30 am - 7:00 am"
+            }
+          },
+          "_sourceType": "schedule",
+          "relevantImageIndex": -1,
+          "recurringPattern": "none",
+          "_pipelineIndex": 6,
+          "_pipelineTotalStage3": 13
+        },
+        {
+          "name": "Lane swim",
+          "type": "event",
+          "date": "2026-10-09",
+          "startTime": "07:00",
+          "endTime": "16:00",
+          "venue": "Bell Aliant Centre",
+          "price": "",
+          "description": "Lane swim - 5:30 am - 7:00 am *2 lanes only*, 7:00 am -4:00 pm, 4:00 pm - 7:30 pm *2 lanes only*",
+          "extractionReason": "schedule_text_public_access",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "7:00 am -4:00 pm"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "7:00 am -4:00 pm"
+            }
+          },
+          "_sourceType": "schedule",
+          "relevantImageIndex": -1,
+          "recurringPattern": "none",
+          "_pipelineIndex": 7,
+          "_pipelineTotalStage3": 13
+        },
+        {
+          "name": "Lane swim",
+          "type": "event",
+          "date": "2026-10-09",
+          "startTime": "16:00",
+          "endTime": "19:30",
+          "venue": "Bell Aliant Centre",
+          "price": "",
+          "description": "Lane swim - 5:30 am - 7:00 am *2 lanes only*, 7:00 am -4:00 pm, 4:00 pm - 7:30 pm *2 lanes only*",
+          "extractionReason": "schedule_text_public_access",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "4:00 pm - 7:30 pm"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "4:00 pm - 7:30 pm"
+            }
+          },
+          "_sourceType": "schedule",
+          "relevantImageIndex": -1,
+          "recurringPattern": "none",
+          "_pipelineIndex": 8,
+          "_pipelineTotalStage3": 13
+        },
+        {
+          "name": "Leisure pool open",
+          "type": "event",
+          "date": "2026-10-09",
+          "startTime": "05:30",
+          "endTime": "16:00",
+          "venue": "Bell Aliant Centre",
+          "price": "",
+          "description": "Leisure pool open - 5:30 am - 4:00 pm, 5:30 pm - 9:00 pm",
+          "extractionReason": "schedule_text_public_access",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "5:30 am - 4:00 pm"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "5:30 am - 4:00 pm"
+            }
+          },
+          "_sourceType": "schedule",
+          "relevantImageIndex": -1,
+          "recurringPattern": "none",
+          "_pipelineIndex": 9,
+          "_pipelineTotalStage3": 13
+        },
+        {
+          "name": "Leisure pool open",
+          "type": "event",
+          "date": "2026-10-09",
+          "startTime": "17:30",
+          "endTime": "21:00",
+          "venue": "Bell Aliant Centre",
+          "price": "",
+          "description": "Leisure pool open - 5:30 am - 4:00 pm, 5:30 pm - 9:00 pm",
+          "extractionReason": "schedule_text_public_access",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "5:30 pm - 9:00 pm"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "5:30 pm - 9:00 pm"
+            }
+          },
+          "_sourceType": "schedule",
+          "relevantImageIndex": -1,
+          "recurringPattern": "none",
+          "_pipelineIndex": 10,
+          "_pipelineTotalStage3": 13
+        },
+        {
+          "name": "Toddler Pool open",
+          "type": "event",
+          "date": "2026-10-09",
+          "startTime": "05:30",
+          "endTime": "21:00",
+          "venue": "Bell Aliant Centre",
+          "price": "",
+          "description": "Toddler Pool open - 5:30 am - 9:00 pm",
+          "extractionReason": "schedule_text_public_access",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "5:30 am - 9:00 pm"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "5:30 am - 9:00 pm"
+            }
+          },
+          "_sourceType": "schedule",
+          "relevantImageIndex": -1,
+          "recurringPattern": "none",
+          "_pipelineIndex": 11,
+          "_pipelineTotalStage3": 13
+        },
+        {
+          "name": "All pools open",
+          "type": "event",
+          "date": "2026-10-09",
+          "startTime": "12:30",
+          "endTime": "16:00",
+          "venue": "Bell Aliant Centre",
+          "price": "",
+          "description": "All pools open -  12:30 pm - 4:00 pm",
+          "extractionReason": "schedule_text_public_access",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "12:30 pm - 4:00 pm"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "12:30 pm - 4:00 pm"
+            }
+          },
+          "_sourceType": "schedule",
+          "relevantImageIndex": -1,
+          "recurringPattern": "none",
+          "_pipelineIndex": 12,
+          "_pipelineTotalStage3": 13
+        },
+        {
+          "name": "Waterslide open",
+          "type": "event",
+          "date": "2026-10-09",
+          "startTime": "18:30",
+          "endTime": "19:30",
+          "venue": "Bell Aliant Centre",
+          "price": "",
+          "description": "Waterslide open - 6:30 pm - 7:30 pm",
+          "extractionReason": "schedule_text_public_access",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "6:30 pm - 7:30 pm"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "6:30 pm - 7:30 pm"
+            }
+          },
+          "_sourceType": "schedule",
+          "relevantImageIndex": -1,
+          "recurringPattern": "none",
+          "_pipelineIndex": 13,
+          "_pipelineTotalStage3": 13
+        }
+      ],
+      "maxOutputTokens": 32000,
+      "durationMs": 19678,
+      "usage": {
+        "input_tokens": 4873,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "output_tokens": 4432,
+        "output_tokens_details": {
+          "reasoning_tokens": 576
+        },
+        "total_tokens": 9305
+      },
+      "visibleOutputChars": 14172,
+      "rawText": "{\n  \"validatedItems\": [\n    {\n      \"item\": {\n        \"name\": \"Friday Fun swim\",\n        \"day\": \"Friday\",\n        \"date\": \"2026-10-09\",\n        \"recurringPattern\": \"none\",\n        \"startTime\": \"12:00\",\n        \"endTime\": \"16:00\",\n        \"venue\": \"\",\n        \"price\": \"$4.50 per person\",\n        \"description\": \"\",\n        \"extractionReason\": \"Named public swim activity with a printed time period and price.\",\n        \"relevantImageIndex\": 0,\n        \"timeFlags\": {\n          \"start\": {\n            \"source\": \"explicit\",\n            \"evidence\": \"between 12:00 pm and 4:00 pm\"\n          },\n          \"end\": {\n            \"source\": \"explicit\",\n            \"toClose\": false,\n            \"evidence\": \"between 12:00 pm and 4:00 pm\"\n          }\n        },\n        \"type\": \"event\",\n        \"_sourceType\": \"schedule\",\n        \"_pipelineIndex\": 1,\n        \"_pipelineTotalStage3\": 13\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"Explicitly dated event with a defined start and end window on a Friday; public recreation access activity.\",\n      \"corrections\": {\n        \"recurringPattern\": null,\n        \"correctionReason\": \"No correction needed; pattern already 'none'.\"\n      }\n    },\n    {\n      \"item\": {\n        \"name\": \"Sunrise Fitness\",\n        \"day\": \"Friday\",\n        \"date\": \"2026-10-09\",\n        \"recurringPattern\": \"none\",\n        \"startTime\": \"07:00\",\n        \"endTime\": \"\",\n        \"venue\": \"\",\n        \"price\": \"\",\n        \"description\": \"Aquafit.\",\n        \"extractionReason\": \"Named Aquafit class with a printed start time.\",\n        \"relevantImageIndex\": 0,\n        \"timeFlags\": {\n          \"start\": {\n            \"source\": \"explicit\",\n            \"evidence\": \"7:00 am\"\n          },\n          \"end\": {\n            \"source\": \"none\",\n            \"toClose\": false,\n            \"evidence\": \"\"\n          }\n        },\n        \"type\": \"event\",\n        \"_sourceType\": \"schedule\",\n        \"_pipelineIndex\": 2,\n        \"_pipelineTotalStage3\": 13\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"Named event with a specific start time; falls under public recreation/activity.\",\n      \"corrections\": {\n        \"recurringPattern\": null,\n        \"correctionReason\": \"No correction needed.\"\n      }\n    },\n    {\n      \"item\": {\n        \"name\": \"Cardio Craze\",\n        \"day\": \"Friday\",\n        \"date\": \"2026-10-09\",\n        \"recurringPattern\": \"none\",\n        \"startTime\": \"08:45\",\n        \"endTime\": \"\",\n        \"venue\": \"\",\n        \"price\": \"\",\n        \"description\": \"Aquafit.\",\n        \"extractionReason\": \"Named Aquafit class with a printed start time.\",\n        \"relevantImageIndex\": 0,\n        \"timeFlags\": {\n          \"start\": {\n            \"source\": \"explicit\",\n            \"evidence\": \"8:45 am\"\n          },\n          \"end\": {\n            \"source\": \"none\",\n            \"toClose\": false,\n            \"evidence\": \"\"\n          }\n        },\n        \"type\": \"event\",\n        \"_sourceType\": \"schedule\",\n        \"_pipelineIndex\": 3,\n        \"_pipelineTotalStage3\": 13\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"Named Aquafit class with a specific start time; valid event.\",\n      \"corrections\": {\n        \"recurringPattern\": null,\n        \"correctionReason\": \"No correction needed.\"\n      }\n    },\n    {\n      \"item\": {\n        \"name\": \"UFIT Aqua\",\n        \"day\": \"Friday\",\n        \"date\": \"2026-10-09\",\n        \"recurringPattern\": \"none\",\n        \"startTime\": \"11:45\",\n        \"endTime\": \"\",\n        \"venue\": \"\",\n        \"price\": \"\",\n        \"description\": \"Aquafit.\",\n        \"extractionReason\": \"Named Aquafit class with a printed start time.\",\n        \"relevantImageIndex\": 0,\n        \"timeFlags\": {\n          \"start\": {\n            \"source\": \"explicit\",\n            \"evidence\": \"11:45 am\"\n          },\n          \"end\": {\n            \"source\": \"none\",\n            \"toClose\": false,\n            \"evidence\": \"\"\n          }\n        },\n        \"type\": \"event\",\n        \"_sourceType\": \"schedule\",\n        \"_pipelineIndex\": 4,\n        \"_pipelineTotalStage3\": 13\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"Named Aquafit class with a specific start time; valid event.\",\n      \"corrections\": {\n        \"recurringPattern\": null,\n        \"correctionReason\": \"No correction needed.\"\n      }\n    },\n    {\n      \"item\": {\n        \"name\": \"Aqua Zumba\",\n        \"day\": \"Friday\",\n        \"date\": \"2026-10-09\",\n        \"recurringPattern\": \"none\",\n        \"startTime\": \"17:45\",\n        \"endTime\": \"\",\n        \"venue\": \"\",\n        \"price\": \"\",\n        \"description\": \"Aquafit.\",\n        \"extractionReason\": \"Named Aquafit class with a printed start time.\",\n        \"relevantImageIndex\": 0,\n        \"timeFlags\": {\n          \"start\": {\n            \"source\": \"explicit\",\n            \"evidence\": \"5:45 pm\"\n          },\n          \"end\": {\n            \"source\": \"none\",\n            \"toClose\": false,\n            \"evidence\": \"\"\n          }\n        },\n        \"type\": \"event\",\n        \"_sourceType\": \"schedule\",\n        \"_pipelineIndex\": 5,\n        \"_pipelineTotalStage3\": 13\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"Named Aquafit class with a specific start time; valid event.\",\n      \"corrections\": {\n        \"recurringPattern\": null,\n        \"correctionReason\": \"No correction needed.\"\n      }\n    },\n    {\n      \"item\": {\n        \"name\": \"Lane swim\",\n        \"type\": \"event\",\n        \"date\": \"2026-10-09\",\n        \"startTime\": \"05:30\",\n        \"endTime\": \"07:00\",\n        \"venue\": \"Bell Aliant Centre\",\n        \"price\": \"\",\n        \"description\": \"Lane swim - 5:30 am - 7:00 am *2 lanes only*, 7:00 am -4:00 pm, 4:00 pm - 7:30 pm *2 lanes only*\",\n        \"extractionReason\": \"schedule_text_public_access\",\n        \"timeFlags\": {\n          \"start\": {\n            \"source\": \"explicit\",\n            \"evidence\": \"5:30 am - 7:00 am\"\n          },\n          \"end\": {\n            \"source\": \"explicit\",\n            \"toClose\": false,\n            \"evidence\": \"5:30 am - 7:00 am\"\n          }\n        },\n        \"_sourceType\": \"schedule\",\n        \"relevantImageIndex\": -1,\n        \"recurringPattern\": \"none\",\n        \"_pipelineIndex\": 6,\n        \"_pipelineTotalStage3\": 13\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"Explicit, dated lane swim session with public access; valid activity.\",\n      \"corrections\": {\n        \"recurringPattern\": null,\n        \"correctionReason\": \"No correction needed.\"\n      }\n    },\n    {\n      \"item\": {\n        \"name\": \"Lane swim\",\n        \"type\": \"event\",\n        \"date\": \"2026-10-09\",\n        \"startTime\": \"07:00\",\n        \"endTime\": \"16:00\",\n        \"venue\": \"Bell Aliant Centre\",\n        \"price\": \"\",\n        \"description\": \"Lane swim - 5:30 am - 7:00 am *2 lanes only*, 7:00 am -4:00 pm, 4:00 pm - 7:30 pm *2 lanes only*\",\n        \"extractionReason\": \"schedule_text_public_access\",\n        \"timeFlags\": {\n          \"start\": {\n            \"source\": \"explicit\",\n            \"evidence\": \"7:00 am -4:00 pm\"\n          },\n          \"end\": {\n            \"source\": \"explicit\",\n            \"toClose\": false,\n            \"evidence\": \"7:00 am -4:00 pm\"\n          }\n        },\n        \"_sourceType\": \"schedule\",\n        \"relevantImageIndex\": -1,\n        \"recurringPattern\": \"none\",\n        \"_pipelineIndex\": 7,\n        \"_pipelineTotalStage3\": 13\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"Second time window for lane swim on same day; valid as separate session.\",\n      \"corrections\": {\n        \"recurringPattern\": null,\n        \"correctionReason\": \"No correction needed.\"\n      }\n    },\n    {\n      \"item\": {\n        \"name\": \"Lane swim\",\n        \"type\": \"event\",\n        \"date\": \"2026-10-09\",\n        \"startTime\": \"16:00\",\n        \"endTime\": \"19:30\",\n        \"venue\": \"Bell Aliant Centre\",\n        \"price\": \"\",\n        \"description\": \"Lane swim - 5:30 am - 7:00 am *2 lanes only*, 7:00 am -4:00 pm, 4:00 pm - 7:30 pm *2 lanes only*\",\n        \"extractionReason\": \"schedule_text_public_access\",\n        \"timeFlags\": {\n          \"start\": {\n            \"source\": \"explicit\",\n            \"evidence\": \"4:00 pm - 7:30 pm\"\n          },\n          \"end\": {\n            \"source\": \"explicit\",\n            \"toClose\": false,\n            \"evidence\": \"4:00 pm - 7:30 pm\"\n          }\n        },\n        \"_sourceType\": \"schedule\",\n        \"relevantImageIndex\": -1,\n        \"recurringPattern\": \"none\",\n        \"_pipelineIndex\": 8,\n        \"_pipelineTotalStage3\": 13\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"Evening lane swim window on same day; separate session from morning.\",\n      \"corrections\": {\n        \"recurringPattern\": null,\n        \"correctionReason\": \"No correction needed.\"\n      }\n    },\n    {\n      \"item\": {\n        \"name\": \"Leisure pool open\",\n        \"type\": \"event\",\n        \"date\": \"2026-10-09\",\n        \"startTime\": \"05:30\",\n        \"endTime\": \"16:00\",\n        \"venue\": \"Bell Aliant Centre\",\n        \"price\": \"\",\n        \"description\": \"Leisure pool open - 5:30 am - 4:00 pm, 5:30 pm - 9:00 pm\",\n        \"extractionReason\": \"schedule_text_public_access\",\n        \"timeFlags\": {\n          \"start\": {\n            \"source\": \"explicit\",\n            \"evidence\": \"5:30 am - 4:00 pm\"\n          },\n          \"end\": {\n            \"source\": \"explicit\",\n            \"toClose\": false,\n            \"evidence\": \"5:30 am - 4:00 pm\"\n          }\n        },\n        \"_sourceType\": \"schedule\",\n        \"relevantImageIndex\": -1,\n        \"recurringPattern\": \"none\",\n        \"_pipelineIndex\": 9,\n        \"_pipelineTotalStage3\": 13\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"Public recreation activity with clear time window.\",\n      \"corrections\": {\n        \"recurringPattern\": null,\n        \"correctionReason\": \"No correction needed.\"\n      }\n    },\n    {\n      \"item\": {\n        \"name\": \"Leisure pool open\",\n        \"day\": \"Friday\",\n        \"date\": \"2026-10-09\",\n        \"recurringPattern\": \"none\",\n        \"startTime\": \"17:30\",\n        \"endTime\": \"21:00\",\n        \"venue\": \"Bell Aliant Centre\",\n        \"price\": \"\",\n        \"description\": \"Leisure pool open - 5:30 am - 4:00 pm, 5:30 pm - 9:00 pm\",\n        \"extractionReason\": \"schedule_text_public_access\",\n        \"timeFlags\": {\n          \"start\": {\n            \"source\": \"explicit\",\n            \"evidence\": \"5:30 pm - 9:00 pm\"\n          },\n          \"end\": {\n            \"source\": \"explicit\",\n            \"toClose\": false,\n            \"evidence\": \"5:30 pm - 9:00 pm\"\n          }\n        },\n        \"_sourceType\": \"schedule\",\n        \"relevantImageIndex\": -1,\n        \"recurringPattern\": \"none\",\n        \"_pipelineIndex\": 10,\n        \"_pipelineTotalStage3\": 13\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"Public recreation activity with evening window; valid session.\",\n      \"corrections\": {\n        \"recurringPattern\": null,\n        \"correctionReason\": \"No correction needed.\"\n      }\n    },\n    {\n      \"item\": {\n        \"name\": \"Toddler Pool open\",\n        \"type\": \"event\",\n        \"date\": \"2026-10-09\",\n        \"startTime\": \"05:30\",\n        \"endTime\": \"21:00\",\n        \"venue\": \"Bell Aliant Centre\",\n        \"price\": \"\",\n        \"description\": \"Toddler Pool open - 5:30 am - 9:00 pm\",\n        \"extractionReason\": \"schedule_text_public_access\",\n        \"timeFlags\": {\n          \"start\": {\n            \"source\": \"explicit\",\n            \"evidence\": \"5:30 am - 9:00 pm\"\n          },\n          \"end\": {\n            \"source\": \"explicit\",\n            \"toClose\": false,\n            \"evidence\": \"5:30 am - 9:00 pm\"\n          }\n        },\n        \"_sourceType\": \"schedule\",\n        \"relevantImageIndex\": -1,\n        \"recurringPattern\": \"none\",\n        \"_pipelineIndex\": 11,\n        \"_pipelineTotalStage3\": 13\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"Public recreation activity with extended toddler pool hours.\",\n      \"corrections\": {\n        \"recurringPattern\": null,\n        \"correctionReason\": \"No correction needed.\"\n      }\n    },\n    {\n      \"item\": {\n        \"name\": \"All pools open\",\n        \"type\": \"event\",\n        \"date\": \"2026-10-09\",\n        \"startTime\": \"12:30\",\n        \"endTime\": \"16:00\",\n        \"venue\": \"Bell Aliant Centre\",\n        \"price\": \"\",\n        \"description\": \"All pools open -  12:30 pm - 4:00 pm\",\n        \"extractionReason\": \"schedule_text_public_access\",\n        \"timeFlags\": {\n          \"start\": {\n            \"source\": \"explicit\",\n            \"evidence\": \"12:30 pm - 4:00 pm\"\n          },\n          \"end\": {\n            \"source\": \"explicit\",\n            \"toClose\": false,\n            \"evidence\": \"12:30 pm - 4:00 pm\"\n          }\n        },\n        \"_sourceType\": \"schedule\",\n        \"relevantImageIndex\": -1,\n        \"recurringPattern\": \"none\",\n        \"_pipelineIndex\": 12,\n        \"_pipelineTotalStage3\": 13\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"Public recreation activity; all pools open during specified window.\",\n      \"corrections\": {\n        \"recurringPattern\": null,\n        \"correctionReason\": \"No correction needed.\"\n      }\n    },\n    {\n      \"item\": {\n        \"name\": \"Waterslide open\",\n        \"type\": \"event\",\n        \"date\": \"2026-10-09\",\n        \"startTime\": \"18:30\",\n        \"endTime\": \"19:30\",\n        \"venue\": \"Bell Aliant Centre\",\n        \"price\": \"\",\n        \"description\": \"Waterslide open - 6:30 pm - 7:30 pm\",\n        \"extractionReason\": \"schedule_text_public_access\",\n        \"timeFlags\": {\n          \"start\": {\n            \"source\": \"explicit\",\n            \"evidence\": \"6:30 pm - 7:30 pm\"\n          },\n          \"end\": {\n            \"source\": \"explicit\",\n            \"toClose\": false,\n            \"evidence\": \"6:30 pm - 7:30 pm\"\n          }\n        },\n        \"_sourceType\": \"schedule\",\n        \"relevantImageIndex\": -1,\n        \"recurringPattern\": \"none\",\n        \"_pipelineIndex\": 13,\n        \"_pipelineTotalStage3\": 13\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"Public recreation activity; explicit waterslide window.\",\n      \"corrections\": {\n        \"recurringPattern\": null,\n        \"correctionReason\": \"No correction needed.\"\n      }\n    }\n  ],\n  \"validationSummary\": {\n    \"totalItems\": 13,\n    \"itemsKept\": 13,\n    \"itemsRejected\": 0,\n    \"recurringCorrections\": 0,\n    \"overallNotes\": \"All items are valid dated events or public recreation sessions. No holiday-related corrections needed. Recurring patterns already specified as 'none' and require no changes.\"\n  }\n}",
+      "rawResult": {
+        "validatedItems": [
+          {
+            "item": {
+              "name": "Friday Fun swim",
+              "day": "Friday",
+              "date": "2026-10-09",
+              "recurringPattern": "none",
+              "startTime": "12:00",
+              "endTime": "16:00",
+              "venue": "",
+              "price": "$4.50 per person",
+              "description": "",
+              "extractionReason": "Named public swim activity with a printed time period and price.",
+              "relevantImageIndex": 0,
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "between 12:00 pm and 4:00 pm"
+                },
+                "end": {
+                  "source": "explicit",
+                  "toClose": false,
+                  "evidence": "between 12:00 pm and 4:00 pm"
+                }
+              },
+              "type": "event",
+              "_sourceType": "schedule",
+              "_pipelineIndex": 1,
+              "_pipelineTotalStage3": 13
+            },
+            "decision": "KEPT",
+            "reason": "Explicitly dated event with a defined start and end window on a Friday; public recreation access activity.",
+            "corrections": {
+              "recurringPattern": null,
+              "correctionReason": "No correction needed; pattern already 'none'."
+            }
+          },
+          {
+            "item": {
+              "name": "Sunrise Fitness",
+              "day": "Friday",
+              "date": "2026-10-09",
+              "recurringPattern": "none",
+              "startTime": "07:00",
+              "endTime": "",
+              "venue": "",
+              "price": "",
+              "description": "Aquafit.",
+              "extractionReason": "Named Aquafit class with a printed start time.",
+              "relevantImageIndex": 0,
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "7:00 am"
+                },
+                "end": {
+                  "source": "none",
+                  "toClose": false,
+                  "evidence": ""
+                }
+              },
+              "type": "event",
+              "_sourceType": "schedule",
+              "_pipelineIndex": 2,
+              "_pipelineTotalStage3": 13
+            },
+            "decision": "KEPT",
+            "reason": "Named event with a specific start time; falls under public recreation/activity.",
+            "corrections": {
+              "recurringPattern": null,
+              "correctionReason": "No correction needed."
+            }
+          },
+          {
+            "item": {
+              "name": "Cardio Craze",
+              "day": "Friday",
+              "date": "2026-10-09",
+              "recurringPattern": "none",
+              "startTime": "08:45",
+              "endTime": "",
+              "venue": "",
+              "price": "",
+              "description": "Aquafit.",
+              "extractionReason": "Named Aquafit class with a printed start time.",
+              "relevantImageIndex": 0,
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "8:45 am"
+                },
+                "end": {
+                  "source": "none",
+                  "toClose": false,
+                  "evidence": ""
+                }
+              },
+              "type": "event",
+              "_sourceType": "schedule",
+              "_pipelineIndex": 3,
+              "_pipelineTotalStage3": 13
+            },
+            "decision": "KEPT",
+            "reason": "Named Aquafit class with a specific start time; valid event.",
+            "corrections": {
+              "recurringPattern": null,
+              "correctionReason": "No correction needed."
+            }
+          },
+          {
+            "item": {
+              "name": "UFIT Aqua",
+              "day": "Friday",
+              "date": "2026-10-09",
+              "recurringPattern": "none",
+              "startTime": "11:45",
+              "endTime": "",
+              "venue": "",
+              "price": "",
+              "description": "Aquafit.",
+              "extractionReason": "Named Aquafit class with a printed start time.",
+              "relevantImageIndex": 0,
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "11:45 am"
+                },
+                "end": {
+                  "source": "none",
+                  "toClose": false,
+                  "evidence": ""
+                }
+              },
+              "type": "event",
+              "_sourceType": "schedule",
+              "_pipelineIndex": 4,
+              "_pipelineTotalStage3": 13
+            },
+            "decision": "KEPT",
+            "reason": "Named Aquafit class with a specific start time; valid event.",
+            "corrections": {
+              "recurringPattern": null,
+              "correctionReason": "No correction needed."
+            }
+          },
+          {
+            "item": {
+              "name": "Aqua Zumba",
+              "day": "Friday",
+              "date": "2026-10-09",
+              "recurringPattern": "none",
+              "startTime": "17:45",
+              "endTime": "",
+              "venue": "",
+              "price": "",
+              "description": "Aquafit.",
+              "extractionReason": "Named Aquafit class with a printed start time.",
+              "relevantImageIndex": 0,
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "5:45 pm"
+                },
+                "end": {
+                  "source": "none",
+                  "toClose": false,
+                  "evidence": ""
+                }
+              },
+              "type": "event",
+              "_sourceType": "schedule",
+              "_pipelineIndex": 5,
+              "_pipelineTotalStage3": 13
+            },
+            "decision": "KEPT",
+            "reason": "Named Aquafit class with a specific start time; valid event.",
+            "corrections": {
+              "recurringPattern": null,
+              "correctionReason": "No correction needed."
+            }
+          },
+          {
+            "item": {
+              "name": "Lane swim",
+              "type": "event",
+              "date": "2026-10-09",
+              "startTime": "05:30",
+              "endTime": "07:00",
+              "venue": "Bell Aliant Centre",
+              "price": "",
+              "description": "Lane swim - 5:30 am - 7:00 am *2 lanes only*, 7:00 am -4:00 pm, 4:00 pm - 7:30 pm *2 lanes only*",
+              "extractionReason": "schedule_text_public_access",
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "5:30 am - 7:00 am"
+                },
+                "end": {
+                  "source": "explicit",
+                  "toClose": false,
+                  "evidence": "5:30 am - 7:00 am"
+                }
+              },
+              "_sourceType": "schedule",
+              "relevantImageIndex": -1,
+              "recurringPattern": "none",
+              "_pipelineIndex": 6,
+              "_pipelineTotalStage3": 13
+            },
+            "decision": "KEPT",
+            "reason": "Explicit, dated lane swim session with public access; valid activity.",
+            "corrections": {
+              "recurringPattern": null,
+              "correctionReason": "No correction needed."
+            }
+          },
+          {
+            "item": {
+              "name": "Lane swim",
+              "type": "event",
+              "date": "2026-10-09",
+              "startTime": "07:00",
+              "endTime": "16:00",
+              "venue": "Bell Aliant Centre",
+              "price": "",
+              "description": "Lane swim - 5:30 am - 7:00 am *2 lanes only*, 7:00 am -4:00 pm, 4:00 pm - 7:30 pm *2 lanes only*",
+              "extractionReason": "schedule_text_public_access",
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "7:00 am -4:00 pm"
+                },
+                "end": {
+                  "source": "explicit",
+                  "toClose": false,
+                  "evidence": "7:00 am -4:00 pm"
+                }
+              },
+              "_sourceType": "schedule",
+              "relevantImageIndex": -1,
+              "recurringPattern": "none",
+              "_pipelineIndex": 7,
+              "_pipelineTotalStage3": 13
+            },
+            "decision": "KEPT",
+            "reason": "Second time window for lane swim on same day; valid as separate session.",
+            "corrections": {
+              "recurringPattern": null,
+              "correctionReason": "No correction needed."
+            }
+          },
+          {
+            "item": {
+              "name": "Lane swim",
+              "type": "event",
+              "date": "2026-10-09",
+              "startTime": "16:00",
+              "endTime": "19:30",
+              "venue": "Bell Aliant Centre",
+              "price": "",
+              "description": "Lane swim - 5:30 am - 7:00 am *2 lanes only*, 7:00 am -4:00 pm, 4:00 pm - 7:30 pm *2 lanes only*",
+              "extractionReason": "schedule_text_public_access",
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "4:00 pm - 7:30 pm"
+                },
+                "end": {
+                  "source": "explicit",
+                  "toClose": false,
+                  "evidence": "4:00 pm - 7:30 pm"
+                }
+              },
+              "_sourceType": "schedule",
+              "relevantImageIndex": -1,
+              "recurringPattern": "none",
+              "_pipelineIndex": 8,
+              "_pipelineTotalStage3": 13
+            },
+            "decision": "KEPT",
+            "reason": "Evening lane swim window on same day; separate session from morning.",
+            "corrections": {
+              "recurringPattern": null,
+              "correctionReason": "No correction needed."
+            }
+          },
+          {
+            "item": {
+              "name": "Leisure pool open",
+              "type": "event",
+              "date": "2026-10-09",
+              "startTime": "05:30",
+              "endTime": "16:00",
+              "venue": "Bell Aliant Centre",
+              "price": "",
+              "description": "Leisure pool open - 5:30 am - 4:00 pm, 5:30 pm - 9:00 pm",
+              "extractionReason": "schedule_text_public_access",
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "5:30 am - 4:00 pm"
+                },
+                "end": {
+                  "source": "explicit",
+                  "toClose": false,
+                  "evidence": "5:30 am - 4:00 pm"
+                }
+              },
+              "_sourceType": "schedule",
+              "relevantImageIndex": -1,
+              "recurringPattern": "none",
+              "_pipelineIndex": 9,
+              "_pipelineTotalStage3": 13
+            },
+            "decision": "KEPT",
+            "reason": "Public recreation activity with clear time window.",
+            "corrections": {
+              "recurringPattern": null,
+              "correctionReason": "No correction needed."
+            }
+          },
+          {
+            "item": {
+              "name": "Leisure pool open",
+              "day": "Friday",
+              "date": "2026-10-09",
+              "recurringPattern": "none",
+              "startTime": "17:30",
+              "endTime": "21:00",
+              "venue": "Bell Aliant Centre",
+              "price": "",
+              "description": "Leisure pool open - 5:30 am - 4:00 pm, 5:30 pm - 9:00 pm",
+              "extractionReason": "schedule_text_public_access",
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "5:30 pm - 9:00 pm"
+                },
+                "end": {
+                  "source": "explicit",
+                  "toClose": false,
+                  "evidence": "5:30 pm - 9:00 pm"
+                }
+              },
+              "_sourceType": "schedule",
+              "relevantImageIndex": -1,
+              "_pipelineIndex": 10,
+              "_pipelineTotalStage3": 13
+            },
+            "decision": "KEPT",
+            "reason": "Public recreation activity with evening window; valid session.",
+            "corrections": {
+              "recurringPattern": null,
+              "correctionReason": "No correction needed."
+            }
+          },
+          {
+            "item": {
+              "name": "Toddler Pool open",
+              "type": "event",
+              "date": "2026-10-09",
+              "startTime": "05:30",
+              "endTime": "21:00",
+              "venue": "Bell Aliant Centre",
+              "price": "",
+              "description": "Toddler Pool open - 5:30 am - 9:00 pm",
+              "extractionReason": "schedule_text_public_access",
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "5:30 am - 9:00 pm"
+                },
+                "end": {
+                  "source": "explicit",
+                  "toClose": false,
+                  "evidence": "5:30 am - 9:00 pm"
+                }
+              },
+              "_sourceType": "schedule",
+              "relevantImageIndex": -1,
+              "recurringPattern": "none",
+              "_pipelineIndex": 11,
+              "_pipelineTotalStage3": 13
+            },
+            "decision": "KEPT",
+            "reason": "Public recreation activity with extended toddler pool hours.",
+            "corrections": {
+              "recurringPattern": null,
+              "correctionReason": "No correction needed."
+            }
+          },
+          {
+            "item": {
+              "name": "All pools open",
+              "type": "event",
+              "date": "2026-10-09",
+              "startTime": "12:30",
+              "endTime": "16:00",
+              "venue": "Bell Aliant Centre",
+              "price": "",
+              "description": "All pools open -  12:30 pm - 4:00 pm",
+              "extractionReason": "schedule_text_public_access",
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "12:30 pm - 4:00 pm"
+                },
+                "end": {
+                  "source": "explicit",
+                  "toClose": false,
+                  "evidence": "12:30 pm - 4:00 pm"
+                }
+              },
+              "_sourceType": "schedule",
+              "relevantImageIndex": -1,
+              "recurringPattern": "none",
+              "_pipelineIndex": 12,
+              "_pipelineTotalStage3": 13
+            },
+            "decision": "KEPT",
+            "reason": "Public recreation activity; all pools open during specified window.",
+            "corrections": {
+              "recurringPattern": null,
+              "correctionReason": "No correction needed."
+            }
+          },
+          {
+            "item": {
+              "name": "Waterslide open",
+              "type": "event",
+              "date": "2026-10-09",
+              "startTime": "18:30",
+              "endTime": "19:30",
+              "venue": "Bell Aliant Centre",
+              "price": "",
+              "description": "Waterslide open - 6:30 pm - 7:30 pm",
+              "extractionReason": "schedule_text_public_access",
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "6:30 pm - 7:30 pm"
+                },
+                "end": {
+                  "source": "explicit",
+                  "toClose": false,
+                  "evidence": "6:30 pm - 7:30 pm"
+                }
+              },
+              "_sourceType": "schedule",
+              "relevantImageIndex": -1,
+              "recurringPattern": "none",
+              "_pipelineIndex": 13,
+              "_pipelineTotalStage3": 13
+            },
+            "decision": "KEPT",
+            "reason": "Public recreation activity; explicit waterslide window.",
+            "corrections": {
+              "recurringPattern": null,
+              "correctionReason": "No correction needed."
+            }
+          }
+        ],
+        "validationSummary": {
+          "totalItems": 13,
+          "itemsKept": 13,
+          "itemsRejected": 0,
+          "recurringCorrections": 0,
+          "overallNotes": "All items are valid dated events or public recreation sessions. No holiday-related corrections needed. Recurring patterns already specified as 'none' and require no changes."
+        }
+      },
+      "parseError": false
+    }
+  ]
+}

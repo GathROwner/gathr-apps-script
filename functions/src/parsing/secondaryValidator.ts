@@ -1251,8 +1251,11 @@ async function callGPT(prompt: string, config: ParsingConfig, batchItemCount: nu
     : 32000;
   const parseReasoningEffort = (
     value: string
-  ): 'minimal' | 'low' | 'medium' | 'high' | null => {
+  ): 'none' | 'minimal' | 'low' | 'medium' | 'high' | null => {
     const normalized = String(value || '').trim().toLowerCase();
+    // Allow an explicit no-reasoning Luna comparison without changing Nano's
+    // existing request behavior or any production default.
+    if (normalized === 'none' && model === 'gpt-6-luna') return 'none';
     if (normalized === 'minimal' || normalized === 'low' || normalized === 'medium' || normalized === 'high') {
       return normalized;
     }

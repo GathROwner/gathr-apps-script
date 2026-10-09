@@ -1,0 +1,172 @@
+{
+  "caseId": "untimed-special",
+  "arm": "luna-none",
+  "repeat": 1,
+  "model": "gpt-6-luna",
+  "effort": "none",
+  "noLiveWrites": true,
+  "sourceSha256": "7510f38d9102f0f70ef4170cdd17ba50b2492d0248b56ed71f6b45a1204466f3",
+  "inputCount": 1,
+  "outputCount": 1,
+  "wallMs": 4506,
+  "items": [
+    {
+      "name": "Thanksgiving Dinner Special",
+      "description": "Offering a Thanksgiving Dinner Special all weekend long (Saturday and Sunday).",
+      "date": "2026-10-10",
+      "startTime": "",
+      "endTime": "",
+      "venue": "Clamdiggers Beach House & Restaurant",
+      "pricing": {
+        "price": ""
+      },
+      "relevantImageIndex": 0,
+      "recurringPattern": "none",
+      "timeFlags": {
+        "start": {
+          "source": "none",
+          "evidence": ""
+        },
+        "end": {
+          "toClose": false,
+          "evidence": ""
+        }
+      },
+      "extractionReason": "“will be offering a Thanksgiving Dinner Special all weekend long!”",
+      "_sourceType": "special",
+      "_pipelineIndex": 1,
+      "_pipelineTotalStage3": 1
+    }
+  ],
+  "metadata": {
+    "_happyHourNoPriceOverrideCount": 0,
+    "_calendarDealAllDayOverrideCount": 0,
+    "_calendarDealAllDayNormalizationCount": 0,
+    "_operatingHoursOnlyRejectCount": 0
+  },
+  "usage": [
+    {
+      "stage": "stage4",
+      "component": "secondaryValidator",
+      "endpoint": "responses",
+      "model": "gpt-6-luna",
+      "durationMs": 4490,
+      "inputTokens": 2157,
+      "outputTokens": 356,
+      "totalTokens": 2513,
+      "cachedInputTokens": 0,
+      "fileId": "stage4-frozen-comparison",
+      "postId": "1948682749859000",
+      "rowIndex": 75,
+      "runId": "local-1",
+      "batchItemCount": 1,
+      "responseId": "resp_0a1e9832237b9442006ac96f10cccc87d2848513d412975ce7",
+      "responseStatus": "completed",
+      "incompleteReason": "",
+      "requestedMaxOutputTokens": 32000,
+      "reasoningTokens": 0,
+      "visibleOutputChars": 1494
+    }
+  ],
+  "requests": [
+    {
+      "model": "gpt-6-luna",
+      "effort": "none",
+      "responseId": "resp_0a1e9832237b9442006ac96f10cccc87d2848513d412975ce7",
+      "httpStatus": 200,
+      "status": "completed",
+      "incompleteDetails": null,
+      "error": null,
+      "promptSha256": "a60e630cb1c51727cdfa79e751bf5aa6e53972e79151554ef4075bffac6c6db0",
+      "outputContractSha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "batchItems": [
+        {
+          "name": "Thanksgiving Dinner Special",
+          "description": "Offering a Thanksgiving Dinner Special all weekend long (Saturday and Sunday).",
+          "date": "2026-10-10",
+          "startTime": "",
+          "endTime": "",
+          "venue": "Clamdiggers Beach House & Restaurant",
+          "pricing": {
+            "price": ""
+          },
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "timeFlags": {
+            "start": {
+              "source": "none",
+              "evidence": ""
+            },
+            "end": {
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "extractionReason": "“will be offering a Thanksgiving Dinner Special all weekend long!”",
+          "_sourceType": "special",
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 1
+        }
+      ],
+      "maxOutputTokens": 32000,
+      "durationMs": 4487,
+      "usage": {
+        "input_tokens": 2157,
+        "input_tokens_details": {
+          "cache_write_tokens": 2154,
+          "cached_tokens": 0
+        },
+        "output_tokens": 356,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 2513
+      },
+      "visibleOutputChars": 1494,
+      "rawText": "{\n  \"validatedItems\": [\n    {\n      \"item\": {\n        \"name\": \"Thanksgiving Dinner Special\",\n        \"description\": \"Offering a Thanksgiving Dinner Special all weekend long (Saturday and Sunday).\",\n        \"date\": \"2026-10-10\",\n        \"startTime\": \"\",\n        \"endTime\": \"\",\n        \"venue\": \"Clamdiggers Beach House & Restaurant\",\n        \"pricing\": {\n          \"price\": \"\"\n        },\n        \"relevantImageIndex\": 0,\n        \"recurringPattern\": \"none\",\n        \"timeFlags\": {\n          \"start\": {\n            \"source\": \"none\",\n            \"evidence\": \"\"\n          },\n          \"end\": {\n            \"toClose\": false,\n            \"evidence\": \"\"\n          }\n        },\n        \"extractionReason\": \"“will be offering a Thanksgiving Dinner Special all weekend long!”\",\n        \"_sourceType\": \"special\",\n        \"_pipelineIndex\": 1,\n        \"_pipelineTotalStage3\": 1\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"This is a named food special explicitly advertised for the weekend. Under the special-extractor exception, a named special can be kept without a printed price or specific start time. The item is dated Saturday, October 10, 2026, and its recurring pattern is correctly set to none.\"\n    }\n  ],\n  \"validationSummary\": {\n    \"totalItems\": 1,\n    \"itemsKept\": 1,\n    \"itemsRejected\": 0,\n    \"recurringCorrections\": 0,\n    \"overallNotes\": \"The explicitly advertised Thanksgiving Dinner Special qualifies under the special-extractor exception despite missing pricing and times.\"\n  }\n}",
+      "rawResult": {
+        "validatedItems": [
+          {
+            "item": {
+              "name": "Thanksgiving Dinner Special",
+              "description": "Offering a Thanksgiving Dinner Special all weekend long (Saturday and Sunday).",
+              "date": "2026-10-10",
+              "startTime": "",
+              "endTime": "",
+              "venue": "Clamdiggers Beach House & Restaurant",
+              "pricing": {
+                "price": ""
+              },
+              "relevantImageIndex": 0,
+              "recurringPattern": "none",
+              "timeFlags": {
+                "start": {
+                  "source": "none",
+                  "evidence": ""
+                },
+                "end": {
+                  "toClose": false,
+                  "evidence": ""
+                }
+              },
+              "extractionReason": "“will be offering a Thanksgiving Dinner Special all weekend long!”",
+              "_sourceType": "special",
+              "_pipelineIndex": 1,
+              "_pipelineTotalStage3": 1
+            },
+            "decision": "KEPT",
+            "reason": "This is a named food special explicitly advertised for the weekend. Under the special-extractor exception, a named special can be kept without a printed price or specific start time. The item is dated Saturday, October 10, 2026, and its recurring pattern is correctly set to none."
+          }
+        ],
+        "validationSummary": {
+          "totalItems": 1,
+          "itemsKept": 1,
+          "itemsRejected": 0,
+          "recurringCorrections": 0,
+          "overallNotes": "The explicitly advertised Thanksgiving Dinner Special qualifies under the special-extractor exception despite missing pricing and times."
+        }
+      },
+      "parseError": false
+    }
+  ]
+}

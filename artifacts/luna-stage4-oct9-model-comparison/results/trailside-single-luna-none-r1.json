@@ -1,0 +1,221 @@
+{
+  "caseId": "trailside-single",
+  "arm": "luna-none",
+  "repeat": 1,
+  "model": "gpt-6-luna",
+  "effort": "none",
+  "noLiveWrites": true,
+  "sourceSha256": "06f80297f1d031d293dd8222cac148039cda388ac2d2b3d5d0a59392a46c6632",
+  "inputCount": 1,
+  "outputCount": 1,
+  "wallMs": 5382,
+  "items": [
+    {
+      "name": "Fucked Up with opener Club Rat",
+      "description": "Thursday, October 8th: Huge show at the Trailside with Fucked Up and special guest opener Club Rat. The poster also displays “ZODIAC.”",
+      "date": "2026-10-08",
+      "startTime": "20:00",
+      "endTime": "",
+      "venue": "",
+      "ticketLink": "www.trailside.ca",
+      "price": "",
+      "relevantImageIndex": 0,
+      "recurringPattern": "none",
+      "extractionReason": "Live music event with Fucked Up and special guest opener Club Rat, advertised for October 8, 2026.",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "venue_website:https://locarius.io/events/4551/fucked-up-october-8th-30-advance35-dos-doors-630-pm-showtime-8-pm-19"
+        },
+        "end": {
+          "source": "none",
+          "toClose": false,
+          "evidence": ""
+        }
+      },
+      "spatial": {
+        "kind": "single_location",
+        "locations": [
+          {
+            "label": "Trailside Music Hall",
+            "address": "",
+            "role": "location",
+            "certainty": "confirmed",
+            "sourceText": "TRAILSIDE MUSIC HALL"
+          }
+        ],
+        "confirmedStreets": [],
+        "ordered": false,
+        "evidenceNotes": "Trailside Music Hall is named as the event venue."
+      },
+      "_sourceType": "event",
+      "_ticketImageUrl": "https://img.locarius.io/1820/d093071f-7d45-490f-8342-60ba63458557/original.jpg",
+      "_pipelineIndex": 1,
+      "_pipelineTotalStage3": 1
+    }
+  ],
+  "metadata": {
+    "_happyHourNoPriceOverrideCount": 0,
+    "_calendarDealAllDayOverrideCount": 0,
+    "_calendarDealAllDayNormalizationCount": 0,
+    "_operatingHoursOnlyRejectCount": 0
+  },
+  "usage": [
+    {
+      "stage": "stage4",
+      "component": "secondaryValidator",
+      "endpoint": "responses",
+      "model": "gpt-6-luna",
+      "durationMs": 5364,
+      "inputTokens": 2383,
+      "outputTokens": 573,
+      "totalTokens": 2956,
+      "cachedInputTokens": 0,
+      "fileId": "stage4-frozen-comparison",
+      "postId": "1552488536897478",
+      "rowIndex": 212,
+      "runId": "local-1",
+      "batchItemCount": 1,
+      "responseId": "resp_0eb3295ce6954987006ac96f28d8f487d28755e13a2c9e4cd0",
+      "responseStatus": "completed",
+      "incompleteReason": "",
+      "requestedMaxOutputTokens": 32000,
+      "reasoningTokens": 0,
+      "visibleOutputChars": 2194
+    }
+  ],
+  "requests": [
+    {
+      "model": "gpt-6-luna",
+      "effort": "none",
+      "responseId": "resp_0eb3295ce6954987006ac96f28d8f487d28755e13a2c9e4cd0",
+      "httpStatus": 200,
+      "status": "completed",
+      "incompleteDetails": null,
+      "error": null,
+      "promptSha256": "2b0cc307bc5e7aa281383a5c6a54d488ab24e657fa43d99be424f42973531419",
+      "outputContractSha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "batchItems": [
+        {
+          "name": "Fucked Up with opener Club Rat",
+          "description": "Thursday, October 8th: Huge show at the Trailside with Fucked Up and special guest opener Club Rat. The poster also displays “ZODIAC.”",
+          "date": "2026-10-08",
+          "startTime": "20:00",
+          "endTime": "",
+          "venue": "",
+          "ticketLink": "www.trailside.ca",
+          "price": "",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "Live music event with Fucked Up and special guest opener Club Rat, advertised for October 8, 2026.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "venue_website:https://locarius.io/events/4551/fucked-up-october-8th-30-advance35-dos-doors-630-pm-showtime-8-pm-19"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              {
+                "label": "Trailside Music Hall",
+                "address": "",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "TRAILSIDE MUSIC HALL"
+              }
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "Trailside Music Hall is named as the event venue."
+          },
+          "_sourceType": "event",
+          "_ticketImageUrl": "https://img.locarius.io/1820/d093071f-7d45-490f-8342-60ba63458557/original.jpg",
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 1
+        }
+      ],
+      "maxOutputTokens": 32000,
+      "durationMs": 5361,
+      "usage": {
+        "input_tokens": 2383,
+        "input_tokens_details": {
+          "cache_write_tokens": 2380,
+          "cached_tokens": 0
+        },
+        "output_tokens": 573,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 2956
+      },
+      "visibleOutputChars": 2194,
+      "rawText": "{\n  \"validatedItems\": [\n    {\n      \"item\": {\n        \"name\": \"Fucked Up with opener Club Rat\",\n        \"description\": \"Thursday, October 8th: Huge show at the Trailside with Fucked Up and special guest opener Club Rat. The poster also displays “ZODIAC.”\",\n        \"date\": \"2026-10-08\",\n        \"startTime\": \"20:00\",\n        \"endTime\": \"\",\n        \"venue\": \"\",\n        \"ticketLink\": \"www.trailside.ca\",\n        \"price\": \"\",\n        \"relevantImageIndex\": 0,\n        \"recurringPattern\": \"none\",\n        \"extractionReason\": \"Live music event with Fucked Up and special guest opener Club Rat, advertised for October 8, 2026.\",\n        \"timeFlags\": {\n          \"start\": {\n            \"source\": \"explicit\",\n            \"evidence\": \"venue_website:https://locarius.io/events/4551/fucked-up-october-8th-30-advance35-dos-doors-630-pm-showtime-8-pm-19\"\n          },\n          \"end\": {\n            \"source\": \"none\",\n            \"toClose\": false,\n            \"evidence\": \"\"\n          }\n        },\n        \"spatial\": {\n          \"kind\": \"single_location\",\n          \"locations\": [\n            {\n              \"label\": \"Trailside Music Hall\",\n              \"address\": \"\",\n              \"role\": \"location\",\n              \"certainty\": \"confirmed\",\n              \"sourceText\": \"TRAILSIDE MUSIC HALL\"\n            }\n          ],\n          \"confirmedStreets\": [],\n          \"ordered\": false,\n          \"evidenceNotes\": \"Trailside Music Hall is named as the event venue.\"\n        },\n        \"_sourceType\": \"event\",\n        \"_ticketImageUrl\": \"https://img.locarius.io/1820/d093071f-7d45-490f-8342-60ba63458557/original.jpg\",\n        \"_pipelineIndex\": 1,\n        \"_pipelineTotalStage3\": 1\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"This is a specifically dated live music event with a name and explicit 8:00 PM start time. The venue, end time, and price are optional for regular events; the spatial metadata also identifies Trailside Music Hall.\",\n      \"corrections\": {}\n    }\n  ],\n  \"validationSummary\": {\n    \"totalItems\": 1,\n    \"itemsKept\": 1,\n    \"itemsRejected\": 0,\n    \"recurringCorrections\": 0,\n    \"overallNotes\": \"The dated music event meets the required name, date, and start-time criteria.\"\n  }\n}",
+      "rawResult": {
+        "validatedItems": [
+          {
+            "item": {
+              "name": "Fucked Up with opener Club Rat",
+              "description": "Thursday, October 8th: Huge show at the Trailside with Fucked Up and special guest opener Club Rat. The poster also displays “ZODIAC.”",
+              "date": "2026-10-08",
+              "startTime": "20:00",
+              "endTime": "",
+              "venue": "",
+              "ticketLink": "www.trailside.ca",
+              "price": "",
+              "relevantImageIndex": 0,
+              "recurringPattern": "none",
+              "extractionReason": "Live music event with Fucked Up and special guest opener Club Rat, advertised for October 8, 2026.",
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "venue_website:https://locarius.io/events/4551/fucked-up-october-8th-30-advance35-dos-doors-630-pm-showtime-8-pm-19"
+                },
+                "end": {
+                  "source": "none",
+                  "toClose": false,
+                  "evidence": ""
+                }
+              },
+              "spatial": {
+                "kind": "single_location",
+                "locations": [
+                  {
+                    "label": "Trailside Music Hall",
+                    "address": "",
+                    "role": "location",
+                    "certainty": "confirmed",
+                    "sourceText": "TRAILSIDE MUSIC HALL"
+                  }
+                ],
+                "confirmedStreets": [],
+                "ordered": false,
+                "evidenceNotes": "Trailside Music Hall is named as the event venue."
+              },
+              "_sourceType": "event",
+              "_ticketImageUrl": "https://img.locarius.io/1820/d093071f-7d45-490f-8342-60ba63458557/original.jpg",
+              "_pipelineIndex": 1,
+              "_pipelineTotalStage3": 1
+            },
+            "decision": "KEPT",
+            "reason": "This is a specifically dated live music event with a name and explicit 8:00 PM start time. The venue, end time, and price are optional for regular events; the spatial metadata also identifies Trailside Music Hall.",
+            "corrections": {}
+          }
+        ],
+        "validationSummary": {
+          "totalItems": 1,
+          "itemsKept": 1,
+          "itemsRejected": 0,
+          "recurringCorrections": 0,
+          "overallNotes": "The dated music event meets the required name, date, and start-time criteria."
+        }
+      },
+      "parseError": false
+    }
+  ]
+}

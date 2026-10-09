@@ -1,0 +1,20 @@
+{"severity":"INFO","message":"Stage 4: Starting secondary validation","timestamp":"2026-10-09T22:51:28.778Z","context":{"itemCount":5,"userName":"Island Hill Farm Inc"}}
+{"severity":"INFO","message":"Timing","timestamp":"2026-10-09T22:51:37.256Z","context":{"step":"gpt_call","component":"secondaryValidator","endpoint":"responses","model":"gpt-5-nano","durationMs":8473}}
+{"severity":"INFO","message":"Stage 4 Responses diagnostics","timestamp":"2026-10-09T22:51:37.257Z","context":{"model":"gpt-5-nano","durationMs":8473,"inputTokens":3426,"outputTokens":2158,"totalTokens":5584,"cachedInputTokens":3328,"fileId":"stage4-frozen-comparison","postId":"1140431992044087","rowIndex":287,"runId":"local-2","batchItemCount":5,"responseId":"resp_0321dcc346458ec0006ac96ff12f6487d2bd3cb660fac7b2f7","responseStatus":"completed","incompleteReason":"","requestedMaxOutputTokens":32000,"reasoningTokens":256,"visibleOutputChars":7951}}
+{"severity":"DEBUG","message":"GPT validation response received (responses)","timestamp":"2026-10-09T22:51:37.262Z","context":{"model":"gpt-5-nano","tokens":5584}}
+{"severity":"DEBUG","message":"Parsing validation response","timestamp":"2026-10-09T22:51:37.263Z"}
+{"severity":"DEBUG","message":"Parsed validation result (no repair needed)","timestamp":"2026-10-09T22:51:37.263Z"}
+{"severity":"INFO","message":"Stage 4 validation summary","timestamp":"2026-10-09T22:51:37.263Z","context":{"totalItems":5,"itemsKept":2,"itemsRejected":3,"recurringCorrections":0}}
+{"severity":"DEBUG","message":"Item 1: \"Weekend Market\"","timestamp":"2026-10-09T22:51:37.267Z","context":{"decision":"KEPT","reason":"Explicit date and time for a named event. Meets minimum fields for a regular event; valid scheduled "}}
+{"severity":"DEBUG","message":"Item 2: \"Weekend Market\"","timestamp":"2026-10-09T22:51:37.268Z","context":{"decision":"KEPT","reason":"Explicit date and time for a named event. Valid scheduled activity; separate from Saturday listing."}}
+{"severity":"DEBUG","message":"Item 3: \"Fibre Workshop with Farmer Flory\"","timestamp":"2026-10-09T22:51:37.269Z","context":{"decision":"REJECTED","reason":"No date or time available; cannot validate as a proper event."}}
+{"severity":"WARNING","message":"Contradiction detected for \"Baking Class\" - overriding to KEPT","timestamp":"2026-10-09T22:51:37.269Z","context":{"originalDecision":"REJECTED","reason":"No date/time or location; general mention of baking class is not a valid event without specifics."}}
+{"severity":"DEBUG","message":"Item 4: \"Baking Class\"","timestamp":"2026-10-09T22:51:37.269Z","context":{"decision":"KEPT","reason":"No date/time or location; general mention of baking class is not a valid event without specifics."}}
+{"severity":"WARNING","message":"Contradiction detected for \"Sketching Class\" - overriding to KEPT","timestamp":"2026-10-09T22:51:37.269Z","context":{"originalDecision":"REJECTED","reason":"No date/time or location; general mention of sketching class is not a valid event without specifics."}}
+{"severity":"DEBUG","message":"Item 5: \"Sketching Class\"","timestamp":"2026-10-09T22:51:37.269Z","context":{"decision":"KEPT","reason":"No date/time or location; general mention of sketching class is not a valid event without specifics."}}
+{"severity":"INFO","message":"Stage 4 Result: 4 kept, 1 rejected","timestamp":"2026-10-09T22:51:37.269Z","context":{"recurringCorrections":0,"happyHourNoPriceOverrides":0,"calendarDealAllDayOverrides":0,"calendarDealAllDayNormalizations":0,"operatingHoursOnlyRejects":0}}
+{"severity":"INFO","message":"Stage 4 Happy Hour no-price overrides: 0","timestamp":"2026-10-09T22:51:37.269Z"}
+{"severity":"INFO","message":"Stage 4 Calendar deal all-day overrides: 0","timestamp":"2026-10-09T22:51:37.270Z"}
+{"severity":"INFO","message":"Stage 4 Calendar deal all-day normalizations: 0","timestamp":"2026-10-09T22:51:37.270Z"}
+{"severity":"INFO","message":"Stage 4 operating-hours-only rejects: 0","timestamp":"2026-10-09T22:51:37.270Z"}
+{"caseId":"market-and-unscheduled-classes","arm":"nano-low","repeat":"2","inputs":5,"outputs":4,"wallMs":8493,"calls":1}

@@ -1,0 +1,18 @@
+{"severity":"INFO","message":"Stage 4: Starting secondary validation","timestamp":"2026-10-09T22:50:37.004Z","context":{"itemCount":4,"userName":"Policy fixture venue"}}
+{"severity":"INFO","message":"Timing","timestamp":"2026-10-09T22:50:41.506Z","context":{"step":"gpt_call","component":"secondaryValidator","endpoint":"responses","model":"gpt-6-luna","durationMs":4497}}
+{"severity":"INFO","message":"Stage 4 Responses diagnostics","timestamp":"2026-10-09T22:50:41.507Z","context":{"model":"gpt-6-luna","durationMs":4497,"inputTokens":2420,"outputTokens":716,"totalTokens":3136,"cachedInputTokens":0,"fileId":"stage4-frozen-comparison","postId":"required-fields","rowIndex":0,"runId":"local-1","batchItemCount":4,"responseId":"resp_0659f48c25c318e3006ac96fbd649c87d292635eaf83df1888","responseStatus":"completed","incompleteReason":"","requestedMaxOutputTokens":32000,"reasoningTokens":0,"visibleOutputChars":2796}}
+{"severity":"DEBUG","message":"GPT validation response received (responses)","timestamp":"2026-10-09T22:50:41.512Z","context":{"model":"gpt-6-luna","tokens":3136}}
+{"severity":"DEBUG","message":"Parsing validation response","timestamp":"2026-10-09T22:50:41.512Z"}
+{"severity":"DEBUG","message":"Parsed validation result (no repair needed)","timestamp":"2026-10-09T22:50:41.513Z"}
+{"severity":"INFO","message":"Stage 4 validation summary","timestamp":"2026-10-09T22:50:41.514Z","context":{"totalItems":4,"itemsKept":1,"itemsRejected":3,"recurringCorrections":0}}
+{"severity":"DEBUG","message":"Item 1: \"Undated Concert\"","timestamp":"2026-10-09T22:50:41.515Z","context":{"decision":"REJECTED","reason":"A regular event requires a specific YYYY-MM-DD date. This concert has no date."}}
+{"severity":"DEBUG","message":"Item 2: \"Unscheduled Workshop\"","timestamp":"2026-10-09T22:50:41.515Z","context":{"decision":"REJECTED","reason":"A regular event requires a start time, and this item has no valid start time; the value is unknown."}}
+{"severity":"DEBUG","message":"Item 3: \"Concert at Posting Venue\"","timestamp":"2026-10-09T22:50:41.517Z","context":{"decision":"KEPT","reason":"This is a named event with a specific date and start time. An empty venue is acceptable because it i"}}
+{"severity":"WARNING","message":"Contradiction detected for \"Membership Announcement\" - overriding to KEPT","timestamp":"2026-10-09T22:50:41.517Z","context":{"originalDecision":"REJECTED","reason":"This is a general membership announcement without specific event timing, not a valid event."}}
+{"severity":"DEBUG","message":"Item 4: \"Membership Announcement\"","timestamp":"2026-10-09T22:50:41.518Z","context":{"decision":"KEPT","reason":"This is a general membership announcement without specific event timing, not a valid event."}}
+{"severity":"INFO","message":"Stage 4 Result: 2 kept, 2 rejected","timestamp":"2026-10-09T22:50:41.518Z","context":{"recurringCorrections":0,"happyHourNoPriceOverrides":0,"calendarDealAllDayOverrides":0,"calendarDealAllDayNormalizations":0,"operatingHoursOnlyRejects":0}}
+{"severity":"INFO","message":"Stage 4 Happy Hour no-price overrides: 0","timestamp":"2026-10-09T22:50:41.518Z"}
+{"severity":"INFO","message":"Stage 4 Calendar deal all-day overrides: 0","timestamp":"2026-10-09T22:50:41.519Z"}
+{"severity":"INFO","message":"Stage 4 Calendar deal all-day normalizations: 0","timestamp":"2026-10-09T22:50:41.519Z"}
+{"severity":"INFO","message":"Stage 4 operating-hours-only rejects: 0","timestamp":"2026-10-09T22:50:41.519Z"}
+{"caseId":"required-fields","arm":"luna-low","repeat":"1","inputs":4,"outputs":2,"wallMs":4516,"calls":1}

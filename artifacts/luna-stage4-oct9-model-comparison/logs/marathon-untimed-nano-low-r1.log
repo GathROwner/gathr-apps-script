@@ -1,0 +1,40 @@
+{"severity":"INFO","message":"Stage 4: Starting secondary validation","timestamp":"2026-10-09T22:50:00.803Z","context":{"itemCount":13,"userName":"Prince Edward Island Marathon"}}
+{"severity":"INFO","message":"Timing","timestamp":"2026-10-09T22:50:23.572Z","context":{"step":"gpt_call","component":"secondaryValidator","endpoint":"responses","model":"gpt-5-nano","durationMs":22762}}
+{"severity":"INFO","message":"Stage 4 Responses diagnostics","timestamp":"2026-10-09T22:50:23.574Z","context":{"model":"gpt-5-nano","durationMs":22762,"inputTokens":4678,"outputTokens":4886,"totalTokens":9564,"cachedInputTokens":0,"fileId":"stage4-frozen-comparison","postId":"1515399363943565","rowIndex":51,"runId":"local-1","batchItemCount":13,"responseId":"resp_08efe6ff4a6ff9fb006ac96f99386887d280f749db1d895f84","responseStatus":"completed","incompleteReason":"","requestedMaxOutputTokens":32000,"reasoningTokens":1024,"visibleOutputChars":15305}}
+{"severity":"DEBUG","message":"GPT validation response received (responses)","timestamp":"2026-10-09T22:50:23.580Z","context":{"model":"gpt-5-nano","tokens":9564}}
+{"severity":"DEBUG","message":"Parsing validation response","timestamp":"2026-10-09T22:50:23.580Z"}
+{"severity":"DEBUG","message":"Parsed validation result (no repair needed)","timestamp":"2026-10-09T22:50:23.581Z"}
+{"severity":"INFO","message":"Stage 4 validation summary","timestamp":"2026-10-09T22:50:23.581Z","context":{"totalItems":14,"itemsKept":1,"itemsRejected":13,"recurringCorrections":0}}
+{"severity":"DEBUG","message":"Item 1: \"10K Run\"","timestamp":"2026-10-09T22:50:23.582Z","context":{"decision":"REJECTED","reason":"Calendar events require a startTime. This item has an empty startTime, so it does not meet the minim"}}
+{"severity":"DEBUG","message":"Stage 4 normalized recurring pattern for \"10K Run\"","timestamp":"2026-10-09T22:50:23.582Z","context":{"to":"none"}}
+{"severity":"DEBUG","message":"Item 2: \"10K Walk\"","timestamp":"2026-10-09T22:50:23.583Z","context":{"decision":"REJECTED","reason":"Calendar events require a startTime. This item has an empty startTime, so it does not meet the minim"}}
+{"severity":"DEBUG","message":"Stage 4 normalized recurring pattern for \"10K Walk\"","timestamp":"2026-10-09T22:50:23.583Z","context":{"to":"none"}}
+{"severity":"DEBUG","message":"Item 3: \"5K Run\"","timestamp":"2026-10-09T22:50:23.583Z","context":{"decision":"REJECTED","reason":"Calendar events require a startTime. This item has an empty startTime, so it does not meet the minim"}}
+{"severity":"DEBUG","message":"Stage 4 normalized recurring pattern for \"5K Run\"","timestamp":"2026-10-09T22:50:23.583Z","context":{"to":"none"}}
+{"severity":"DEBUG","message":"Item 4: \"5K Walk\"","timestamp":"2026-10-09T22:50:23.583Z","context":{"decision":"REJECTED","reason":"Calendar events require a startTime. This item has an empty startTime, so it does not meet the minim"}}
+{"severity":"DEBUG","message":"Stage 4 normalized recurring pattern for \"5K Walk\"","timestamp":"2026-10-09T22:50:23.583Z","context":{"to":"none"}}
+{"severity":"DEBUG","message":"Item 5: \"2K Wheelchair\"","timestamp":"2026-10-09T22:50:23.583Z","context":{"decision":"REJECTED","reason":"Calendar events require a startTime. This item has an empty startTime, so it does not meet the minim"}}
+{"severity":"DEBUG","message":"Stage 4 normalized recurring pattern for \"2K Wheelchair\"","timestamp":"2026-10-09T22:50:23.583Z","context":{"to":"none"}}
+{"severity":"DEBUG","message":"Item 6: \"Kids Fox Trot\"","timestamp":"2026-10-09T22:50:23.583Z","context":{"decision":"REJECTED","reason":"Calendar events require a startTime. This item has an empty startTime, so it does not meet the minim"}}
+{"severity":"DEBUG","message":"Stage 4 normalized recurring pattern for \"Kids Fox Trot\"","timestamp":"2026-10-09T22:50:23.583Z","context":{"to":"none"}}
+{"severity":"DEBUG","message":"Item 7: \"Full Marathon\"","timestamp":"2026-10-09T22:50:23.583Z","context":{"decision":"REJECTED","reason":"Calendar events require a startTime. This item has an empty startTime, so it does not meet the minim"}}
+{"severity":"DEBUG","message":"Stage 4 normalized recurring pattern for \"Full Marathon\"","timestamp":"2026-10-09T22:50:23.584Z","context":{"to":"none"}}
+{"severity":"DEBUG","message":"Item 8: \"Team Relay\"","timestamp":"2026-10-09T22:50:23.584Z","context":{"decision":"REJECTED","reason":"Calendar events require a startTime. This item has an empty startTime, so it does not meet the minim"}}
+{"severity":"DEBUG","message":"Stage 4 normalized recurring pattern for \"Team Relay\"","timestamp":"2026-10-09T22:50:23.584Z","context":{"to":"none"}}
+{"severity":"DEBUG","message":"Item 9: \"Half Marathon Run\"","timestamp":"2026-10-09T22:50:23.584Z","context":{"decision":"REJECTED","reason":"Calendar events require a startTime. This item has an empty startTime, so it does not meet the minim"}}
+{"severity":"DEBUG","message":"Stage 4 normalized recurring pattern for \"Half Marathon Run\"","timestamp":"2026-10-09T22:50:23.584Z","context":{"to":"none"}}
+{"severity":"DEBUG","message":"Item 10: \"Half Marathon Walk\"","timestamp":"2026-10-09T22:50:23.584Z","context":{"decision":"REJECTED","reason":"Calendar events require a startTime. This item has an empty startTime, so it does not meet the minim"}}
+{"severity":"DEBUG","message":"Stage 4 normalized recurring pattern for \"Half Marathon Walk\"","timestamp":"2026-10-09T22:50:23.584Z","context":{"to":"none"}}
+{"severity":"DEBUG","message":"Item 11: \"15K Run\"","timestamp":"2026-10-09T22:50:23.584Z","context":{"decision":"REJECTED","reason":"Calendar events require a startTime. This item has an empty startTime, so it does not meet the minim"}}
+{"severity":"DEBUG","message":"Stage 4 normalized recurring pattern for \"15K Run\"","timestamp":"2026-10-09T22:50:23.584Z","context":{"to":"none"}}
+{"severity":"DEBUG","message":"Item 12: \"15K Walk\"","timestamp":"2026-10-09T22:50:23.585Z","context":{"decision":"REJECTED","reason":"Calendar events require a startTime. This item has an empty startTime, so it does not meet the minim"}}
+{"severity":"DEBUG","message":"Stage 4 normalized recurring pattern for \"15K Walk\"","timestamp":"2026-10-09T22:50:23.585Z","context":{"to":"none"}}
+{"severity":"WARNING","message":"Contradiction detected for \"Prince Edward Island Marathon Registration Price Change\" - overriding to KEPT","timestamp":"2026-10-09T22:50:23.585Z","context":{"originalDecision":"REJECTED","reason":"This item is a time-bound price-change notice within a calendar feed. It lacks a scheduled event tim"}}
+{"severity":"DEBUG","message":"Item 13: \"Prince Edward Island Marathon Registration Price Change\"","timestamp":"2026-10-09T22:50:23.587Z","context":{"decision":"KEPT","reason":"This item is a time-bound price-change notice within a calendar feed. It lacks a scheduled event tim"}}
+{"severity":"DEBUG","message":"Stage 4 normalized recurring pattern for \"Prince Edward Island Marathon Registration Price Change\"","timestamp":"2026-10-09T22:50:23.587Z","context":{"to":"none"}}
+{"severity":"INFO","message":"Stage 4 Result: 1 kept, 12 rejected","timestamp":"2026-10-09T22:50:23.587Z","context":{"recurringCorrections":0,"happyHourNoPriceOverrides":0,"calendarDealAllDayOverrides":0,"calendarDealAllDayNormalizations":0,"operatingHoursOnlyRejects":0}}
+{"severity":"INFO","message":"Stage 4 Happy Hour no-price overrides: 0","timestamp":"2026-10-09T22:50:23.587Z"}
+{"severity":"INFO","message":"Stage 4 Calendar deal all-day overrides: 0","timestamp":"2026-10-09T22:50:23.587Z"}
+{"severity":"INFO","message":"Stage 4 Calendar deal all-day normalizations: 0","timestamp":"2026-10-09T22:50:23.587Z"}
+{"severity":"INFO","message":"Stage 4 operating-hours-only rejects: 0","timestamp":"2026-10-09T22:50:23.587Z"}
+{"caseId":"marathon-untimed","arm":"nano-low","repeat":"1","inputs":13,"outputs":1,"wallMs":22785,"calls":1}

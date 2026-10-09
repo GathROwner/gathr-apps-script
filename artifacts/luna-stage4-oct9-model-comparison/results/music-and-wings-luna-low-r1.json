@@ -1,0 +1,275 @@
+{
+  "caseId": "music-and-wings",
+  "arm": "luna-low",
+  "repeat": 1,
+  "model": "gpt-6-luna",
+  "effort": "low",
+  "noLiveWrites": true,
+  "sourceSha256": "f69e1314dbcd99765a62d1991fc9464745716dbaaca6971eec4c6e0288d382fc",
+  "inputCount": 2,
+  "outputCount": 2,
+  "wallMs": 4709,
+  "items": [
+    {
+      "name": "Daniel",
+      "description": "Daniel will be here tonight 6-8pm!",
+      "date": "2026-10-08",
+      "startTime": "18:00",
+      "endTime": "20:00",
+      "venue": "",
+      "ticketLink": "",
+      "price": "",
+      "relevantImageIndex": 0,
+      "recurringPattern": "none",
+      "extractionReason": "The post advertises Daniel appearing tonight, and the surrounding music context and guitar image indicate a live music performance. “Tonight” resolves to the posted local date, 2026-10-08.",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "6-8pm"
+        },
+        "end": {
+          "source": "explicit",
+          "toClose": false,
+          "evidence": "6-8pm"
+        }
+      },
+      "spatial": {
+        "kind": "unknown",
+        "locations": [],
+        "confirmedStreets": [],
+        "ordered": false,
+        "evidenceNotes": "The caption says “here” but does not explicitly name a venue or address."
+      },
+      "_sourceType": "event",
+      "_pipelineIndex": 1,
+      "_pipelineTotalStage3": 2
+    },
+    {
+      "name": "Wings",
+      "description": "Wings $10/lb All Day",
+      "date": "2026-10-08",
+      "startTime": "",
+      "endTime": "",
+      "timeFlags": {
+        "start": {
+          "source": "semantic",
+          "evidence": "All Day"
+        },
+        "end": {
+          "toClose": true
+        }
+      },
+      "venue": "Tipsy Farmers",
+      "pricing": {
+        "price": "$10/lb"
+      },
+      "relevantImageIndex": 0,
+      "recurringPattern": "none",
+      "extractionReason": "“Wings $10/lb All Day” is an explicitly priced food offer.",
+      "_sourceType": "special",
+      "_pipelineIndex": 2,
+      "_pipelineTotalStage3": 2
+    }
+  ],
+  "metadata": {
+    "_happyHourNoPriceOverrideCount": 0,
+    "_calendarDealAllDayOverrideCount": 0,
+    "_calendarDealAllDayNormalizationCount": 0,
+    "_operatingHoursOnlyRejectCount": 0
+  },
+  "usage": [
+    {
+      "stage": "stage4",
+      "component": "secondaryValidator",
+      "endpoint": "responses",
+      "model": "gpt-6-luna",
+      "durationMs": 4692,
+      "inputTokens": 2439,
+      "outputTokens": 640,
+      "totalTokens": 3079,
+      "cachedInputTokens": 0,
+      "fileId": "stage4-frozen-comparison",
+      "postId": "1133015359255496",
+      "rowIndex": 231,
+      "runId": "local-1",
+      "batchItemCount": 2,
+      "responseId": "resp_0720122c454c63ca006ac96f64900487d28856c1bf897ae137",
+      "responseStatus": "completed",
+      "incompleteReason": "",
+      "requestedMaxOutputTokens": 32000,
+      "reasoningTokens": 0,
+      "visibleOutputChars": 2485
+    }
+  ],
+  "requests": [
+    {
+      "model": "gpt-6-luna",
+      "effort": "low",
+      "responseId": "resp_0720122c454c63ca006ac96f64900487d28856c1bf897ae137",
+      "httpStatus": 200,
+      "status": "completed",
+      "incompleteDetails": null,
+      "error": null,
+      "promptSha256": "31ba631609ab626e9556eb4b14b6cf21e5da94873668fa2275f125e591cafe31",
+      "outputContractSha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "batchItems": [
+        {
+          "name": "Daniel",
+          "description": "Daniel will be here tonight 6-8pm!",
+          "date": "2026-10-08",
+          "startTime": "18:00",
+          "endTime": "20:00",
+          "venue": "",
+          "ticketLink": "",
+          "price": "",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "The post advertises Daniel appearing tonight, and the surrounding music context and guitar image indicate a live music performance. “Tonight” resolves to the posted local date, 2026-10-08.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "6-8pm"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "6-8pm"
+            }
+          },
+          "spatial": {
+            "kind": "unknown",
+            "locations": [],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The caption says “here” but does not explicitly name a venue or address."
+          },
+          "_sourceType": "event",
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 2
+        },
+        {
+          "name": "Wings",
+          "description": "Wings $10/lb All Day",
+          "date": "2026-10-08",
+          "startTime": "",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "semantic",
+              "evidence": "All Day"
+            },
+            "end": {
+              "toClose": true
+            }
+          },
+          "venue": "Tipsy Farmers",
+          "pricing": {
+            "price": "$10/lb"
+          },
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "“Wings $10/lb All Day” is an explicitly priced food offer.",
+          "_sourceType": "special",
+          "_pipelineIndex": 2,
+          "_pipelineTotalStage3": 2
+        }
+      ],
+      "maxOutputTokens": 32000,
+      "durationMs": 4687,
+      "usage": {
+        "input_tokens": 2439,
+        "input_tokens_details": {
+          "cache_write_tokens": 2436,
+          "cached_tokens": 0
+        },
+        "output_tokens": 640,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 3079
+      },
+      "visibleOutputChars": 2485,
+      "rawText": "{\n  \"validatedItems\": [\n    {\n      \"item\": {\n        \"name\": \"Daniel\",\n        \"description\": \"Daniel will be here tonight 6-8pm!\",\n        \"date\": \"2026-10-08\",\n        \"startTime\": \"18:00\",\n        \"endTime\": \"20:00\",\n        \"venue\": \"\",\n        \"ticketLink\": \"\",\n        \"price\": \"\",\n        \"relevantImageIndex\": 0,\n        \"recurringPattern\": \"none\",\n        \"extractionReason\": \"The post advertises Daniel appearing tonight, and the surrounding music context and guitar image indicate a live music performance. “Tonight” resolves to the posted local date, 2026-10-08.\",\n        \"timeFlags\": {\n          \"start\": {\n            \"source\": \"explicit\",\n            \"evidence\": \"6-8pm\"\n          },\n          \"end\": {\n            \"source\": \"explicit\",\n            \"toClose\": false,\n            \"evidence\": \"6-8pm\"\n          }\n        },\n        \"spatial\": {\n          \"kind\": \"unknown\",\n          \"locations\": [],\n          \"confirmedStreets\": [],\n          \"ordered\": false,\n          \"evidenceNotes\": \"The caption says “here” but does not explicitly name a venue or address.\"\n        },\n        \"_sourceType\": \"event\",\n        \"_pipelineIndex\": 1,\n        \"_pipelineTotalStage3\": 2\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"This is a specific live performance with a name, date, and explicit start time. The empty venue does not invalidate it.\"\n    },\n    {\n      \"item\": {\n        \"name\": \"Wings\",\n        \"description\": \"Wings $10/lb All Day\",\n        \"date\": \"2026-10-08\",\n        \"startTime\": \"\",\n        \"endTime\": \"\",\n        \"timeFlags\": {\n          \"start\": {\n            \"source\": \"semantic\",\n            \"evidence\": \"All Day\"\n          },\n          \"end\": {\n            \"toClose\": true\n          }\n        },\n        \"venue\": \"Tipsy Farmers\",\n        \"pricing\": {\n          \"price\": \"$10/lb\"\n        },\n        \"relevantImageIndex\": 0,\n        \"recurringPattern\": \"none\",\n        \"extractionReason\": \"“Wings $10/lb All Day” is an explicitly priced food offer.\",\n        \"_sourceType\": \"special\",\n        \"_pipelineIndex\": 2,\n        \"_pipelineTotalStage3\": 2\n      },\n      \"decision\": \"KEPT\",\n      \"reason\": \"This is an explicitly priced food offer advertised for the day, so it qualifies as a special.\"\n    }\n  ],\n  \"validationSummary\": {\n    \"totalItems\": 2,\n    \"itemsKept\": 2,\n    \"itemsRejected\": 0,\n    \"recurringCorrections\": 0,\n    \"overallNotes\": \"Both the timed live performance and the explicitly priced wings offer meet validation criteria.\"\n  }\n}",
+      "rawResult": {
+        "validatedItems": [
+          {
+            "item": {
+              "name": "Daniel",
+              "description": "Daniel will be here tonight 6-8pm!",
+              "date": "2026-10-08",
+              "startTime": "18:00",
+              "endTime": "20:00",
+              "venue": "",
+              "ticketLink": "",
+              "price": "",
+              "relevantImageIndex": 0,
+              "recurringPattern": "none",
+              "extractionReason": "The post advertises Daniel appearing tonight, and the surrounding music context and guitar image indicate a live music performance. “Tonight” resolves to the posted local date, 2026-10-08.",
+              "timeFlags": {
+                "start": {
+                  "source": "explicit",
+                  "evidence": "6-8pm"
+                },
+                "end": {
+                  "source": "explicit",
+                  "toClose": false,
+                  "evidence": "6-8pm"
+                }
+              },
+              "spatial": {
+                "kind": "unknown",
+                "locations": [],
+                "confirmedStreets": [],
+                "ordered": false,
+                "evidenceNotes": "The caption says “here” but does not explicitly name a venue or address."
+              },
+              "_sourceType": "event",
+              "_pipelineIndex": 1,
+              "_pipelineTotalStage3": 2
+            },
+            "decision": "KEPT",
+            "reason": "This is a specific live performance with a name, date, and explicit start time. The empty venue does not invalidate it."
+          },
+          {
+            "item": {
+              "name": "Wings",
+              "description": "Wings $10/lb All Day",
+              "date": "2026-10-08",
+              "startTime": "",
+              "endTime": "",
+              "timeFlags": {
+                "start": {
+                  "source": "semantic",
+                  "evidence": "All Day"
+                },
+                "end": {
+                  "toClose": true
+                }
+              },
+              "venue": "Tipsy Farmers",
+              "pricing": {
+                "price": "$10/lb"
+              },
+              "relevantImageIndex": 0,
+              "recurringPattern": "none",
+              "extractionReason": "“Wings $10/lb All Day” is an explicitly priced food offer.",
+              "_sourceType": "special",
+              "_pipelineIndex": 2,
+              "_pipelineTotalStage3": 2
+            },
+            "decision": "KEPT",
+            "reason": "This is an explicitly priced food offer advertised for the day, so it qualifies as a special."
+          }
+        ],
+        "validationSummary": {
+          "totalItems": 2,
+          "itemsKept": 2,
+          "itemsRejected": 0,
+          "recurringCorrections": 0,
+          "overallNotes": "Both the timed live performance and the explicitly priced wings offer meet validation criteria."
+        }
+      },
+      "parseError": false
+    }
+  ]
+}
