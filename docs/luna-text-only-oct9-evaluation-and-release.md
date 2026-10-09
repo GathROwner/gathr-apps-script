@@ -40,7 +40,7 @@ Existing hours/category end-time defaults still run downstream and can supply an
 
 ## Deployment
 
-Preflight at 18:24:18 UTC found no running parser locks. Fresh readback confirmed all three functions ACTIVE on the accepted common source hash `013c7457d17b150aa10da3d42d1c2e6219bdd9b7` with latest-revision traffic and the existing model settings.
+Preflight at 18:24:18 UTC and again immediately before deployment at 18:27:47 UTC found no running parser locks. Fresh readback confirmed all three functions ACTIVE on the accepted common source hash `013c7457d17b150aa10da3d42d1c2e6219bdd9b7` with latest-revision traffic and the existing model settings.
 
 Deploy only these functions in project `gathr-migrated`, codebase `gathr-functions`:
 
@@ -49,10 +49,18 @@ firebase deploy --only "functions:gathr-functions:processDataset,functions:gathr
 firebase deploy --only "functions:gathr-functions:processDataset,functions:gathr-functions:processDatasetResume,functions:gathr-functions:processDatasetSelectedRows" --project gathr-migrated --non-interactive
 ```
 
-Release readback and exact revisions will be recorded after successful deployment. Full environment comparison must show only the new text-only flag, preserving the previous model and worker settings. The pre-existing outdated `firebase-functions` warning is outside this release.
+The exact three-function Firebase dry run and production deployment succeeded. Fresh function and Cloud Run readback verified all three ACTIVE on common source hash **`53c15f4a10bd3f5e04b1057023e23302803ba0bc`**, with 100% actual traffic on these latest revisions:
+
+| Function | Revision |
+| --- | --- |
+| processDataset | processdataset-00461-xey |
+| processDatasetResume | processdatasetresume-00425-nav |
+| processDatasetSelectedRows | processdatasetselectedrows-00417-gaq |
+
+The full before/after runtime environment comparison confirmed **only** `LUNA_TEXT_ONLY_ENABLED` was added, with value `true`, on every function. The underlying legacy override values remain available to existing exceptional image-ineligible routing; selected text/image posts receive their Luna overrides in code, as confirmed by replay usage. Safe readback: `artifacts/luna-text-only-oct9/release-readback.json`. Private deployment logs and full readbacks remain outside the repository. The pre-existing outdated `firebase-functions` warning is outside this release. No live event records or media were changed.
 
 Rollback for text-only routing: set `LUNA_TEXT_ONLY_ENABLED=false` on all three functions through the same release gates. Preserve the accepted 100% image routing and prior parser repairs.
 
 ## Follow-up
 
-Reuse the existing October 10–11 heartbeat starting at 11 a.m. Halifax, with no checks today or overnight. Both daily audits must reconcile text/image allocation counters against actual calls, review rejections and final writes, and inspect these caption-only cases alongside all prior quality and resume checks. Pause after both daily audits. No live record mutations or map interactions are part of this release.
+The existing heartbeat was updated successfully and renamed Luna text and image two-day audits. Its October 10–11 schedule starting at 11 a.m. Halifax was preserved, with no checks today or overnight. Both daily audits must reconcile text/image allocation counters against actual calls, review rejections and final writes, and inspect these caption-only cases alongside all prior quality and resume checks. Pause after both daily audits. No live record mutations or map interactions are part of this release.
