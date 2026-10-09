@@ -22,6 +22,7 @@ import {
   resolveStageModel,
 } from './runtimeConfig.js';
 import { logger } from '../utils/logger.js';
+import { detectStage2FoodSpecialSignals } from './stage2FoodSignals.js';
 
 // Initialize OpenAI client lazily
 let openaiClient: OpenAI | null = null;
@@ -66,7 +67,26 @@ export async function classifyContent(
 
   try {
     const response = await callGPTWithSchema(prompt, imageUrls, 'classifyContent', schema, cfg);
-    const normalized = normalizeClassificationResponse(response, combinedText);
+    let normalized = normalizeClassificationResponse(response, combinedText);
+    const model = cfg.stage2ModelOverride || resolveStageModel(cfg.gptModelFast, 'STAGE2_MODEL_OVERRIDE');
+    // Opt-in local/pilot safeguard: reassess a negative fast result once with
+    // the same Luna model at high effort. Positive fast results stay one call.
+    if (cfg.stage2LunaNegativeRecheck && model === 'gpt-6-luna' &&
+        (cfg.stage2ReasoningEffort || 'none') === 'none' &&
+        normalized.confidence < cfg.confidenceThreshold) {
+      logger.info('Stage 2: Rechecking negative Luna classification at high effort');
+      try {
+        const reviewed = await callGPTWithSchema(prompt, imageUrls, 'classifyContent', schema,
+          { ...cfg, stage2ReasoningEffort: 'high' });
+        normalized = normalizeClassificationResponse(reviewed, combinedText);
+      } catch (error) {
+        // Preserve the first hold if adjudication fails; never substitute a
+        // permissive heuristic for an unsuccessful negative-result recheck.
+        logger.warn('Stage 2: Negative Luna recheck failed; retaining initial hold', {
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+    }
 
     // Log content analysis
     if (normalized.contentAnalysis) {
@@ -93,7 +113,9 @@ export async function classifyContent(
       normalized.classificationReason =
         (normalized.classificationReason || '') +
         ' | Corrected: No food specials detected, reclassified as EVENT.';
-      normalized.confidence = Math.max(normalized.confidence, 0.75);
+      if (normalized.contentAnalysis.hasEvents) {
+        normalized.confidence = Math.max(normalized.confidence, 0.75);
+      }
     }
 
     // POST-PROCESSING: Boost confidence for confirmed Facebook Events
@@ -169,13 +191,18 @@ CONTENT:
 
 CLASSIFICATION CATEGORIES:
 
-1. EVENT - Single or few entertainment activities
-   Examples: "Live music tonight 8pm", "Trivia Tuesday at 7"
+1. EVENT - Single or few public or bookable activities
+   Includes entertainment, recreation, open swim/skate or bookable ice time, classes, clinics, workshops, studio tours, and public visits with advertised dates or hours.
+   Examples: "Live music tonight 8pm", "Walk-in clinic today 9-4", "Studio tours Saturday and Sunday 10-5"
+   A useful activity does not have to be entertainment, ticketed, or free. Do not mark hasEvents=false merely because it is a clinic, tour, or bookable activity.
+   Invitations to register for a sport/class or book an activity also qualify when their dates are only on a linked page. Missing dates are for extraction/validation to resolve, not a reason to deny the activity here. A generic downloadable guide or shopping advertisement is not itself an activity invitation.
+   Organized, date-limited food trails, tastings, and festivals are public activities even without discounts. Do not confuse them with an ordinary featured menu. Mark hasEvents=true for the organized activity; mark hasFoodSpecials=true only when food/drink specials are also advertised.
    NOTE: If FACEBOOK EVENT DATA is present above, this is likely an EVENT even if the text is promotional/biographical.
 
 2. FOOD_SPECIAL - Advertised food/drink specials or deals only
    Examples: "Happy hour 5-7pm half price apps", "$0.50 wings tonight", "Today's lunch special"
    A named daily special or explicit deal qualifies without a printed price. An ordinary month-long featured menu item does not.
+   Food/drink context is required: Main Street, a special gift/guest, retail discounts, admission fees, service prices, and lodging offers are not food specials. Ordinary stock arrivals are not deals.
 
 3. MIXED_EVENTS_AND_SPECIALS - Both events AND specials together
    Examples: "Live music 8pm plus happy hour 5-7pm"
@@ -189,8 +216,10 @@ CLASSIFICATION CATEGORIES:
 ANALYSIS REQUIREMENTS:
 1. Analyze what content elements are present
 2. Determine which category best fits
-3. Provide detailed reasoning for your classification choice
+3. Give a brief reason grounded in the source. Count activities/slots, not participants in a draw or entries in a menu.
 4. If FACEBOOK EVENT DATA is present, factor that into your confidence level
+5. Stage 1 already validated usefulness. Classify an advertised activity confidently even if it is not traditional entertainment. A closure, generic advertisement, or product restock without an activity or food/drink special should have low confidence and both presence flags false.
+6. CALENDAR and SCHEDULE cover recreation/classes/bookable slots as well as performances. Keep date/time-organized multi-activity inventories on these routes; never infer extra recurring dates here.
 
 Analyze and classify into exactly ONE category.`;
 }
@@ -213,7 +242,7 @@ function createClassificationSchema(): GPTFunctionSchema[] {
             properties: {
               hasEvents: {
                 type: 'boolean',
-                description: 'Whether entertainment/activities are present',
+                description: 'Whether public or bookable activities, including clinics, tours, classes and recreation, are present',
               },
               hasFoodSpecials: {
                 type: 'boolean',
@@ -305,8 +334,6 @@ function inferClassificationFromText(text: string): ClassificationResult {
     /\b(mon|tue|tues|wed|thu|thur|fri|sat|sun|monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/i;
   const eventKeywords =
     /\b(live music|music|trivia|karaoke|open mic|comedy|show|concert|party|festival|class|workshop|lesson|league|tournament|dance|swim|skate|public skate|lane swim)\b/i;
-  const foodKeywords =
-    /\b(happy hour|wings|apps|appetizers|dinner|lunch|brunch|special|half[-\s]?price|deal|two[-\s]?for[-\s]?one)\b/i;
   const linkedCalendarUrl =
     /\b(?:https?:\/\/|www\.)[^\s"'<>]*\/(?:events?|calendar|programs?)(?:[\/?#][^\s"'<>]*)?/i;
   const weekProgramSignals =
@@ -315,8 +342,7 @@ function inferClassificationFromText(text: string): ClassificationResult {
   const timeLines = lines.filter((line) => timeRe.test(line) || timeRangeRe.test(line)).length;
   const monthCount = (t.match(monthRe) || []).length;
   const weekdayCount = (t.match(weekdayRe) || []).length;
-  const hasPrice = /\$\s*\d+/.test(t);
-  const hasFoodSpecials = hasPrice || foodKeywords.test(t);
+  const hasFoodSpecials = detectStage2FoodSpecialSignals(t).hasAny;
   const hasLinkedCalendarSignals = linkedCalendarUrl.test(t) && weekProgramSignals.test(t);
   const hasEvents = timeLines > 0 || eventKeywords.test(t) || hasLinkedCalendarSignals;
   const hasMultipleItems = timeLines >= 2 || lines.length >= 6 || hasLinkedCalendarSignals;
@@ -362,44 +388,6 @@ function inferClassificationFromText(text: string): ClassificationResult {
   };
 }
 
-function detectFoodSpecialSignals(text: string): {
-  hasAny: boolean;
-  hasStrong: boolean;
-} {
-  const t = String(text || '').toLowerCase();
-
-  const strongPatterns = [
-    /\bhappy\s*hour\b/,
-    /\bwing\s*night\b/,
-    /\btwo\s+can\s+dine\b/,
-    /\b\d+\s*can\s+dine\b/,
-    /\bfood\s+special\b/,
-    /\bdrink\s+special\b/,
-    /\bbrunch\s+special\b/,
-  ];
-
-  const anyPatterns = [
-    ...strongPatterns,
-    /\bbrunch\b/,
-    /\bbreakfast\b/,
-    /\blunch\b/,
-    /\bdinner\b/,
-    /\bmenu\b/,
-    /\bappetizer\b/,
-    /\bmains?\b/,
-    /\bdessert\b/,
-    /\bcocktail\b/,
-    /\bdeal\b/,
-    /\bspecial\b/,
-    /\$\s*\d+/,
-  ];
-
-  return {
-    hasAny: anyPatterns.some((pattern) => pattern.test(t)),
-    hasStrong: strongPatterns.some((pattern) => pattern.test(t)),
-  };
-}
-
 function normalizeClassificationResponse(
   response: Partial<ClassificationResult> | null | undefined,
   text: string
@@ -440,15 +428,23 @@ function normalizeClassificationResponse(
   let classificationReason = response.classificationReason || fallback.classificationReason;
 
   // Safeguard: force food-special-aware routing when strong special cues are present.
-  const foodSignals = detectFoodSpecialSignals(text);
-  if ((foodSignals.hasStrong || foodSignals.hasAny) && !contentAnalysis.hasFoodSpecials) {
+  const foodSignals = detectStage2FoodSpecialSignals(text);
+  if (foodSignals.hasAny && !contentAnalysis.hasFoodSpecials) {
     contentAnalysis.hasFoodSpecials = true;
   }
 
   if (contentType === 'EVENT' && contentAnalysis.hasFoodSpecials) {
     contentType = contentAnalysis.hasEvents ? 'MIXED_EVENTS_AND_SPECIALS' : 'FOOD_SPECIAL';
-    confidence = Math.max(confidence, 0.78);
-    classificationReason = `${classificationReason} | Safeguard: detected clear food-special signals (e.g., happy hour/deal/brunch), reclassified from EVENT.`;
+    // Model flags alone must not promote a low-confidence unrelated offer.
+    if (foodSignals.hasAny) confidence = Math.max(confidence, 0.78);
+    classificationReason = `${classificationReason} | Safeguard: food-special-aware routing from source cues or model analysis.`;
+  }
+
+  // The schema requires a category even when none fits. Confidence in that
+  // closest label must not override an explicit finding of no extractable items.
+  if (!contentAnalysis.hasEvents && !contentAnalysis.hasFoodSpecials) {
+    confidence = 0;
+    classificationReason += ' | Safeguard: no activities or food/drink specials identified.';
   }
 
   return {
@@ -617,7 +613,7 @@ async function callGPTWithSchema(
         model,
         input: [{ role: 'user', content }],
         max_output_tokens: model.startsWith('gpt-6') ? 6000 : 1500,
-        ...(model.startsWith('gpt-6') ? { reasoning: { effort: 'none' as any } } : {}),
+        ...(model.startsWith('gpt-6') ? { reasoning: { effort: (config.stage2ReasoningEffort || 'none') as any } } : {}),
       });
       const durationMs = Date.now() - callStart;
       logger.info('Timing', {

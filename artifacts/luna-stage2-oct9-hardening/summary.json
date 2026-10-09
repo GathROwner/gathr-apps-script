@@ -1,0 +1,5284 @@
+{
+  "date": "2026-10-09",
+  "baselineCommit": "6a856a3",
+  "productionChanges": false,
+  "sourceSha256": {
+    "functions/src/parsing/contentClassifier.ts": "c32b0cf1f96500d211ae512378463e9cd9334ae56ea256dc658fd104a6f935ed",
+    "functions/src/parsing/stage2FoodSignals.ts": "1b211bd7e22746eb4a5a847b8aafbcebe327993f4902f86628476fb4e4bbba9f",
+    "functions/src/parsing/types.ts": "c8fa3000ae01c7ac9e895ba074e46e6c9f6a0ace22f3d948867b77046d492f6b"
+  },
+  "stats": {
+    "mini-current": {
+      "cases": 98,
+      "failures": [],
+      "holds": [
+        "oct9-row-186",
+        "oct9-row-239",
+        "oct9-row-342",
+        "oct9-row-58"
+      ],
+      "costUsd": 0.1474564,
+      "totalSeconds": 429.903,
+      "medianSeconds": 3.928,
+      "reasoningTokens": 34112,
+      "coldCostUsd": 0.14780200000000002
+    },
+    "luna-none": {
+      "cases": 98,
+      "failures": [],
+      "holds": [
+        "oct9-row-186",
+        "oct9-row-239",
+        "oct9-row-320",
+        "oct9-row-342",
+        "oct9-row-348",
+        "oct9-row-352",
+        "oct9-row-58",
+        "oct9-row-64",
+        "oct9-row-82"
+      ],
+      "costUsd": 0.028072594999999995,
+      "totalSeconds": 243.878,
+      "medianSeconds": 2.209,
+      "reasoningTokens": 0,
+      "coldCostUsd": 0.023927999999999998
+    },
+    "luna-high": {
+      "cases": 98,
+      "failures": [],
+      "holds": [
+        "oct9-row-186",
+        "oct9-row-239",
+        "oct9-row-342",
+        "oct9-row-352",
+        "oct9-row-58",
+        "oct9-row-64"
+      ],
+      "costUsd": 0.04041109500000001,
+      "totalSeconds": 454.013,
+      "medianSeconds": 3.786,
+      "reasoningTokens": 24497,
+      "coldCostUsd": 0.036266500000000014
+    },
+    "luna-negative-review": {
+      "cases": 98,
+      "requests": 107,
+      "rechecked": [
+        {
+          "caseId": "oct9-row-175",
+          "passesConfidenceGate": true
+        },
+        {
+          "caseId": "oct9-row-186",
+          "passesConfidenceGate": false
+        },
+        {
+          "caseId": "oct9-row-239",
+          "passesConfidenceGate": false
+        },
+        {
+          "caseId": "oct9-row-342",
+          "passesConfidenceGate": false
+        },
+        {
+          "caseId": "oct9-row-348",
+          "passesConfidenceGate": true
+        },
+        {
+          "caseId": "oct9-row-352",
+          "passesConfidenceGate": true
+        },
+        {
+          "caseId": "oct9-row-58",
+          "passesConfidenceGate": false
+        },
+        {
+          "caseId": "oct9-row-64",
+          "passesConfidenceGate": true
+        },
+        {
+          "caseId": "oct9-row-82",
+          "passesConfidenceGate": true
+        }
+      ],
+      "holds": [
+        "oct9-row-186",
+        "oct9-row-239",
+        "oct9-row-342",
+        "oct9-row-58"
+      ],
+      "costUsd": 0.01168702,
+      "coldCostUsd": 0.0288493,
+      "totalSeconds": 303.2749999999999
+    }
+  },
+  "positiveChecks": [
+    {
+      "caseId": "oct9-row-213",
+      "arms": {
+        "mini-current": {
+          "pass": true,
+          "route": "EVENT",
+          "hasEvents": true,
+          "hasFoodSpecials": false
+        },
+        "luna-none": {
+          "pass": true,
+          "route": "EVENT",
+          "hasEvents": true,
+          "hasFoodSpecials": false
+        },
+        "luna-high": {
+          "pass": true,
+          "route": "EVENT",
+          "hasEvents": true,
+          "hasFoodSpecials": false
+        },
+        "luna-negative-review": {
+          "pass": true,
+          "route": "EVENT",
+          "hasEvents": true,
+          "hasFoodSpecials": false
+        }
+      }
+    },
+    {
+      "caseId": "oct9-row-214",
+      "arms": {
+        "mini-current": {
+          "pass": true,
+          "route": "EVENT",
+          "hasEvents": true,
+          "hasFoodSpecials": false
+        },
+        "luna-none": {
+          "pass": true,
+          "route": "EVENT",
+          "hasEvents": true,
+          "hasFoodSpecials": false
+        },
+        "luna-high": {
+          "pass": true,
+          "route": "EVENT",
+          "hasEvents": true,
+          "hasFoodSpecials": false
+        },
+        "luna-negative-review": {
+          "pass": true,
+          "route": "EVENT",
+          "hasEvents": true,
+          "hasFoodSpecials": false
+        }
+      }
+    },
+    {
+      "caseId": "oct9-row-274",
+      "arms": {
+        "mini-current": {
+          "pass": true,
+          "route": "EVENT",
+          "hasEvents": true,
+          "hasFoodSpecials": false
+        },
+        "luna-none": {
+          "pass": true,
+          "route": "EVENT",
+          "hasEvents": true,
+          "hasFoodSpecials": false
+        },
+        "luna-high": {
+          "pass": true,
+          "route": "EVENT",
+          "hasEvents": true,
+          "hasFoodSpecials": false
+        },
+        "luna-negative-review": {
+          "pass": true,
+          "route": "EVENT",
+          "hasEvents": true,
+          "hasFoodSpecials": false
+        }
+      }
+    },
+    {
+      "caseId": "2026-10-07-text-243",
+      "arms": {
+        "mini-current": {
+          "pass": true,
+          "route": "EVENT",
+          "hasEvents": true,
+          "hasFoodSpecials": false
+        },
+        "luna-none": {
+          "pass": true,
+          "route": "EVENT",
+          "hasEvents": true,
+          "hasFoodSpecials": false
+        },
+        "luna-high": {
+          "pass": true,
+          "route": "EVENT",
+          "hasEvents": true,
+          "hasFoodSpecials": false
+        },
+        "luna-negative-review": {
+          "pass": true,
+          "route": "EVENT",
+          "hasEvents": true,
+          "hasFoodSpecials": false
+        }
+      }
+    },
+    {
+      "caseId": "oct8-fixture-row-150-kensington-fall-dessert-trail",
+      "arms": {
+        "mini-current": {
+          "pass": true,
+          "route": "MIXED_EVENTS_AND_SPECIALS",
+          "hasEvents": true,
+          "hasFoodSpecials": true
+        },
+        "luna-none": {
+          "pass": true,
+          "route": "EVENT",
+          "hasEvents": true,
+          "hasFoodSpecials": false
+        },
+        "luna-high": {
+          "pass": true,
+          "route": "MIXED_EVENTS_AND_SPECIALS",
+          "hasEvents": true,
+          "hasFoodSpecials": true
+        },
+        "luna-negative-review": {
+          "pass": true,
+          "route": "EVENT",
+          "hasEvents": true,
+          "hasFoodSpecials": false
+        }
+      }
+    },
+    {
+      "caseId": "oct8-fixture-row-287-powerskate-date-table",
+      "arms": {
+        "mini-current": {
+          "pass": true,
+          "route": "EVENT",
+          "hasEvents": true,
+          "hasFoodSpecials": false
+        },
+        "luna-none": {
+          "pass": true,
+          "route": "SCHEDULE",
+          "hasEvents": true,
+          "hasFoodSpecials": false
+        },
+        "luna-high": {
+          "pass": true,
+          "route": "SCHEDULE",
+          "hasEvents": true,
+          "hasFoodSpecials": false
+        },
+        "luna-negative-review": {
+          "pass": true,
+          "route": "SCHEDULE",
+          "hasEvents": true,
+          "hasFoodSpecials": false
+        }
+      }
+    },
+    {
+      "caseId": "2026-10-08-text-330",
+      "arms": {
+        "mini-current": {
+          "pass": true,
+          "route": "EVENT",
+          "hasEvents": true,
+          "hasFoodSpecials": false
+        },
+        "luna-none": {
+          "pass": true,
+          "route": "SCHEDULE",
+          "hasEvents": true,
+          "hasFoodSpecials": false
+        },
+        "luna-high": {
+          "pass": true,
+          "route": "EVENT",
+          "hasEvents": true,
+          "hasFoodSpecials": false
+        },
+        "luna-negative-review": {
+          "pass": true,
+          "route": "EVENT",
+          "hasEvents": true,
+          "hasFoodSpecials": false
+        }
+      }
+    }
+  ],
+  "differences": [
+    {
+      "caseId": "oct9-row-51",
+      "venue": "Prince Edward Island Marathon",
+      "arm": "luna-high",
+      "baseline": {
+        "route": "EVENT",
+        "pass": true
+      },
+      "candidate": {
+        "route": "CALENDAR",
+        "pass": true
+      },
+      "reason": "The image lists 13 marathon-weekend race and recreation activities, organized by Saturday and Sunday. The registration price-change text promotes participation, and the multiple date-organized activities fit CALENDAR. No food or drink specials are advertised."
+    },
+    {
+      "caseId": "oct9-row-64",
+      "venue": "Fortune Bridge Farms & Toby’s Farm Market",
+      "arm": "luna-none",
+      "baseline": {
+        "route": "EVENT",
+        "pass": true
+      },
+      "candidate": {
+        "route": "FOOD_SPECIAL",
+        "pass": false
+      },
+      "reason": "The post announces that the farm market is open and stocked with fresh vegetables, and offers Thanksgiving boxes for pickup. These are ordinary product availability and purchasing information, not a food/drink deal or an advertised public activity. None of the listed categories cleanly represents this generic retail announcement; FOOD_SPECIAL is the closest available category. | Safeguard: no activities or food/drink specials identified."
+    },
+    {
+      "caseId": "oct9-row-64",
+      "venue": "Fortune Bridge Farms & Toby’s Farm Market",
+      "arm": "luna-high",
+      "baseline": {
+        "route": "EVENT",
+        "pass": true
+      },
+      "candidate": {
+        "route": "EVENT",
+        "pass": false
+      },
+      "reason": "The post announces fresh produce availability, a pickup window for Thanksgiving boxes, and that the market will be open on Thanksgiving. It does not advertise a distinct public activity or a food/drink deal; the dated opening and pickup information make EVENT the closest available category, but this is primarily a retail availability announcement. | Safeguard: no activities or food/drink specials identified."
+    },
+    {
+      "caseId": "oct9-row-82",
+      "venue": "Maritimes Maven",
+      "arm": "luna-none",
+      "baseline": {
+        "route": "EVENT",
+        "pass": true
+      },
+      "candidate": {
+        "route": "EVENT",
+        "pass": false
+      },
+      "reason": "The post promotes a fall road-trip itinerary through Rothesay, Quispamsis, Hampton, and Grand Bay-Westfield, but it does not advertise a dated or bookable public activity. It is a general travel guide invitation, not an event, food special, calendar, or schedule. The towns and pictured landmarks are destinations, not separate activities to count. | Safeguard: no activities or food/drink specials identified."
+    },
+    {
+      "caseId": "oct9-row-173",
+      "venue": "The Inn at Bay Fortune",
+      "arm": "luna-none",
+      "baseline": {
+        "route": "MIXED_EVENTS_AND_SPECIALS",
+        "pass": true
+      },
+      "candidate": {
+        "route": "EVENT",
+        "pass": true
+      },
+      "reason": "The post advertises Chefs’ Harvest, a bookable culinary dining series running October 15–17, with a guided foraging adventure available in the retreat package. These are organized public/bookable activities, not food or drink deals; the other dates shown in the image are separate future series listings, not a schedule to extract here."
+    },
+    {
+      "caseId": "oct9-row-173",
+      "venue": "The Inn at Bay Fortune",
+      "arm": "luna-high",
+      "baseline": {
+        "route": "MIXED_EVENTS_AND_SPECIALS",
+        "pass": true
+      },
+      "candidate": {
+        "route": "EVENT",
+        "pass": true
+      },
+      "reason": "The post and image list four date-specific Chefs' Harvest dining-series weekends, making this a date-organized set of multiple bookable activities. The featured tasting menu and retreat package are not advertised food or drink specials."
+    },
+    {
+      "caseId": "oct9-row-186",
+      "venue": "Royalty Crossing",
+      "arm": "luna-none",
+      "baseline": {
+        "route": "EVENT",
+        "pass": false
+      },
+      "candidate": {
+        "route": "FOOD_SPECIAL",
+        "pass": false
+      },
+      "reason": "The post advertises retail clothing and footwear discounts: clearance savings up to 60% and a buy-one-get-one 50% offer. These are not activities or food/drink specials. The listed deals are unstructured, so none of the available categories accurately describes this retail advertisement; FOOD_SPECIAL is the closest available category. | Safeguard: no activities or food/drink specials identified."
+    },
+    {
+      "caseId": "oct9-row-246",
+      "venue": "Moth Lane Brewing",
+      "arm": "luna-none",
+      "baseline": {
+        "route": "MIXED_EVENTS_AND_SPECIALS",
+        "pass": true
+      },
+      "candidate": {
+        "route": "FOOD_SPECIAL",
+        "pass": true
+      },
+      "reason": "The post advertises a wing deal tonight starting at 6 PM: 10 wings for $5, with a drink purchase required. This is a food special, not a separate public activity; the sauce choices are options for the same deal."
+    },
+    {
+      "caseId": "oct9-row-246",
+      "venue": "Moth Lane Brewing",
+      "arm": "luna-high",
+      "baseline": {
+        "route": "MIXED_EVENTS_AND_SPECIALS",
+        "pass": true
+      },
+      "candidate": {
+        "route": "FOOD_SPECIAL",
+        "pass": true
+      },
+      "reason": "The post advertises one food deal: 10 wings for $5 starting at 6 PM, with a drink purchase required. The sauce choices are options within the offer, not separate events or specials."
+    },
+    {
+      "caseId": "oct9-row-289",
+      "venue": "Albert & Crown Pub",
+      "arm": "luna-none",
+      "baseline": {
+        "route": "EVENT",
+        "pass": true
+      },
+      "candidate": {
+        "route": "CALENDAR",
+        "pass": true
+      },
+      "reason": "The post lists multiple live music performances on specific dates and times, making it a date-organized lineup of events. The Thanksgiving text separately mentions Friday and Saturday performers, but no food or drink specials are advertised."
+    },
+    {
+      "caseId": "oct9-row-289",
+      "venue": "Albert & Crown Pub",
+      "arm": "luna-high",
+      "baseline": {
+        "route": "EVENT",
+        "pass": true
+      },
+      "candidate": {
+        "route": "CALENDAR",
+        "pass": true
+      },
+      "reason": "The image presents an October 2026 live music lineup organized by dates, with multiple performances and their times. The post text highlights the Friday and Saturday performances, which also appear in the poster; Sunday is listed as closed, not as an activity. Cover charges are admission fees, not food or drink specials."
+    },
+    {
+      "caseId": "oct9-row-290",
+      "venue": "Albert & Crown Pub",
+      "arm": "luna-high",
+      "baseline": {
+        "route": "MIXED_EVENTS_AND_SPECIALS",
+        "pass": true
+      },
+      "candidate": {
+        "route": "CALENDAR",
+        "pass": true
+      },
+      "reason": "The image lists live music across multiple October dates, making this a date-organized calendar of events. The post also advertises food specials, but the multi-date event calendar is the primary structure."
+    },
+    {
+      "caseId": "oct9-row-320",
+      "venue": "Wintermoor Orchard",
+      "arm": "luna-none",
+      "baseline": {
+        "route": "EVENT",
+        "pass": true
+      },
+      "candidate": {
+        "route": "EVENT",
+        "pass": false
+      },
+      "reason": "The post points out that visitors can take selfie and group photos at the orchard’s pumpkin displays, but it does not advertise a dated or bookable activity. It lists no food or drink deals; the multiple pumpkins shown are photo props, not separate events or specials. No applicable category is provided for this generic invitation, so EVENT is the closest fit. | Safeguard: no activities or food/drink specials identified."
+    },
+    {
+      "caseId": "oct9-row-328",
+      "venue": "Evermoore: Island Dining & Brewing",
+      "arm": "luna-none",
+      "baseline": {
+        "route": "MIXED_EVENTS_AND_SPECIALS",
+        "pass": true
+      },
+      "candidate": {
+        "route": "FOOD_SPECIAL",
+        "pass": true
+      },
+      "reason": "The post advertises a half-size order of fish cakes for half the price, an explicit food deal. The salad or fries are customization options, not separate specials. The trivia reminder only clarifies that there is no trivia tonight and does not advertise an activity."
+    },
+    {
+      "caseId": "oct9-row-335",
+      "venue": "Mary's Bake Shoppe",
+      "arm": "luna-none",
+      "baseline": {
+        "route": "MIXED_EVENTS_AND_SPECIALS",
+        "pass": true
+      },
+      "candidate": {
+        "route": "FOOD_SPECIAL",
+        "pass": true
+      },
+      "reason": "The post advertises a food deal: day-old bread for $1.49 per loaf. It also promotes baked goods for Thanksgiving, but the pickup days are business hours for ordering or collection, not public activities or multiple events. The featured products and one explicit deal make this a food-special post, not a calendar or schedule."
+    },
+    {
+      "caseId": "oct9-row-335",
+      "venue": "Mary's Bake Shoppe",
+      "arm": "luna-high",
+      "baseline": {
+        "route": "MIXED_EVENTS_AND_SPECIALS",
+        "pass": true
+      },
+      "candidate": {
+        "route": "FOOD_SPECIAL",
+        "pass": true
+      },
+      "reason": "The post advertises an explicit food deal: day-old bread for $1.49 per loaf. The listed pies and rolls are regular menu offerings, and the Friday and Saturday hours are pickup hours rather than public activities or a multi-event schedule."
+    },
+    {
+      "caseId": "oct9-row-341",
+      "venue": "Ruby's Counter",
+      "arm": "luna-none",
+      "baseline": {
+        "route": "MIXED_EVENTS_AND_SPECIALS",
+        "pass": true
+      },
+      "candidate": {
+        "route": "FOOD_SPECIAL",
+        "pass": true
+      },
+      "reason": "Ruby’s advertises a Friday roast beef dinner for $20 per person, making this a food special. Pickup and dine-in hours describe how to get the meal, not separate public activities."
+    },
+    {
+      "caseId": "oct9-row-341",
+      "venue": "Ruby's Counter",
+      "arm": "luna-high",
+      "baseline": {
+        "route": "MIXED_EVENTS_AND_SPECIALS",
+        "pass": true
+      },
+      "candidate": {
+        "route": "FOOD_SPECIAL",
+        "pass": true
+      },
+      "reason": "Ruby's Counter advertises a named Friday dinner special: roast beef dinner for $20 per person. The pickup and dine-in hours describe availability for the meal, not separate public activities. The biscuit or roll choices are options within the same special."
+    },
+    {
+      "caseId": "oct9-row-348",
+      "venue": "Rodd Brudenell River Resort",
+      "arm": "luna-none",
+      "baseline": {
+        "route": "EVENT",
+        "pass": true
+      },
+      "candidate": {
+        "route": "EVENT",
+        "pass": false
+      },
+      "reason": "The post previews a 2026 golf tournament, which is a single recreational event. No food or drink specials or other activities are advertised; the image does not add separate event details. | Safeguard: no activities or food/drink specials identified."
+    },
+    {
+      "caseId": "oct9-row-352",
+      "venue": "Nature Space Resort & Retreat Centre",
+      "arm": "luna-none",
+      "baseline": {
+        "route": "EVENT",
+        "pass": true
+      },
+      "candidate": {
+        "route": "EVENT",
+        "pass": false
+      },
+      "reason": "This is primarily a lodging promotion offering discounted overnight rates for Halloween weekend, not a food or drink special. The hot tubs, saunas, cold plunges, fire pits, trails, and labyrinth are amenities described as part of the stay, not separately advertised activities. Under the available categories, the weekend-specific bookable offer is best classified as EVENT, with one offer to extract. | Safeguard: no activities or food/drink specials identified."
+    },
+    {
+      "caseId": "oct9-row-352",
+      "venue": "Nature Space Resort & Retreat Centre",
+      "arm": "luna-high",
+      "baseline": {
+        "route": "EVENT",
+        "pass": true
+      },
+      "candidate": {
+        "route": "EVENT",
+        "pass": false
+      },
+      "reason": "The post advertises discounted lodging rates for Halloween weekend, not a public or bookable activity or a food/drink deal. The accommodation types and resort amenities are part of the lodging offer, not separate activities. Since the available categories have no general lodging-promotion option, EVENT is the closest fallback, with low confidence. | Safeguard: no activities or food/drink specials identified."
+    },
+    {
+      "caseId": "2026-10-07-text-322",
+      "venue": "Ruby's Counter",
+      "arm": "luna-none",
+      "baseline": {
+        "route": "MIXED_EVENTS_AND_SPECIALS",
+        "pass": true
+      },
+      "candidate": {
+        "route": "FOOD_SPECIAL",
+        "pass": true
+      },
+      "reason": "The post advertises a roast beef dinner for $20 per person, a food offering with an explicit price. The Friday pickup and dine-in hours describe when the dinner is available, not a separate public activity."
+    },
+    {
+      "caseId": "2026-10-07-text-322",
+      "venue": "Ruby's Counter",
+      "arm": "luna-high",
+      "baseline": {
+        "route": "MIXED_EVENTS_AND_SPECIALS",
+        "pass": true
+      },
+      "candidate": {
+        "route": "FOOD_SPECIAL",
+        "pass": true
+      },
+      "reason": "The post advertises one priced roast beef dinner for Friday, with pickup or dine-in hours. This is a food offering, not a separate public activity; the biscuit-or-roll choice does not make it multiple items."
+    },
+    {
+      "caseId": "2026-10-08-text-330",
+      "venue": "APM Centre",
+      "arm": "luna-none",
+      "baseline": {
+        "route": "EVENT",
+        "pass": true
+      },
+      "candidate": {
+        "route": "SCHEDULE",
+        "pass": true
+      },
+      "reason": "The post advertises four bookable open-ice time slots on separate dates. This is a date- and time-organized inventory of recreation activities, so it fits SCHEDULE rather than a single-event listing. No food or drink specials are mentioned."
+    },
+    {
+      "caseId": "oct8-fixture-row-287-powerskate-date-table",
+      "venue": "Cavendish Farms Community Events Centre",
+      "arm": "luna-none",
+      "baseline": {
+        "route": "EVENT",
+        "pass": true
+      },
+      "candidate": {
+        "route": "SCHEDULE",
+        "pass": true
+      },
+      "reason": "The PowerSkate program offers two groups of skating sessions, each organized by weekday and time, with multiple specific session dates listed. This is a time-organized schedule of recreation activities, not a food special."
+    },
+    {
+      "caseId": "oct8-fixture-row-287-powerskate-date-table",
+      "venue": "Cavendish Farms Community Events Centre",
+      "arm": "luna-high",
+      "baseline": {
+        "route": "EVENT",
+        "pass": true
+      },
+      "candidate": {
+        "route": "SCHEDULE",
+        "pass": true
+      },
+      "reason": "The post advertises a PowerSkate program with two groups, each listing ten dated sessions at set weekly times. These multiple recreation-class slots are organized by date and time, so SCHEDULE is the best fit."
+    },
+    {
+      "caseId": "oct8-fixture-row-065-explore-summerside-october-plans",
+      "venue": "Explore Summerside",
+      "arm": "luna-none",
+      "baseline": {
+        "route": "MIXED_EVENTS_AND_SPECIALS",
+        "pass": true
+      },
+      "candidate": {
+        "route": "EVENT",
+        "pass": true
+      },
+      "reason": "The post advertises multiple public or bookable activities: three yoga sessions, two Halloween craft workshops, and a theatre show. The warm waffles and October restaurant items are featured food offerings, not explicit deals or food/drink specials. This is a collection of activities rather than a date-organized calendar or time-organized schedule."
+    },
+    {
+      "caseId": "oct8-fixture-row-062-harbourfront-october-gallery",
+      "venue": "Harbourfront Theatre",
+      "arm": "luna-none",
+      "baseline": {
+        "route": "CALENDAR",
+        "pass": true
+      },
+      "candidate": {
+        "route": "SCHEDULE",
+        "pass": true
+      },
+      "reason": "The content lists multiple theatre performances and activities, each organized by its date and time. It is a date- and time-organized lineup rather than a calendar grid, and no food or drink specials are advertised."
+    },
+    {
+      "caseId": "oct8-fixture-row-150-kensington-fall-dessert-trail",
+      "venue": "Island Stone Pub - Kensington Station",
+      "arm": "luna-none",
+      "baseline": {
+        "route": "MIXED_EVENTS_AND_SPECIALS",
+        "pass": true
+      },
+      "candidate": {
+        "route": "EVENT",
+        "pass": true
+      },
+      "reason": "The Fall Dessert Trail is an organized, date-limited public food activity running October 5–9. Although several featured items are listed, no explicit deals or discounts are advertised; the trail itself is the activity, so EVENT is the best fit."
+    }
+  ],
+  "downstream": [
+    {
+      "caseId": "2026-10-08-text-330",
+      "arm": "luna-none",
+      "elapsedMs": 95479,
+      "stage3Count": 4,
+      "stage4Count": 4,
+      "stage3Calls": 1,
+      "events": [
+        {
+          "name": "Open Ice",
+          "startDate": "2026-10-08",
+          "startTime": "18:20",
+          "endDate": "2026-10-08",
+          "endTime": "23:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Open Ice",
+          "startDate": "2026-10-10",
+          "startTime": "09:20",
+          "endDate": "2026-10-10",
+          "endTime": "23:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Open Ice",
+          "startDate": "2026-10-10",
+          "startTime": "18:40",
+          "endDate": "2026-10-10",
+          "endTime": "23:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Open Ice",
+          "startDate": "2026-10-12",
+          "startTime": "18:20",
+          "endDate": "2026-10-12",
+          "endTime": "23:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        }
+      ],
+      "usage": [
+        {
+          "stage": "stage3",
+          "component": "eventExtractor",
+          "endpoint": "responses",
+          "model": "gpt-6-luna",
+          "imageCount": 0,
+          "durationMs": 14415,
+          "inputTokens": 2612,
+          "outputTokens": 1986,
+          "totalTokens": 4598,
+          "cachedInputTokens": 2609
+        },
+        {
+          "stage": "stage4",
+          "component": "secondaryValidator",
+          "endpoint": "responses",
+          "model": "gpt-5-nano",
+          "durationMs": 12796,
+          "inputTokens": 3270,
+          "outputTokens": 1910,
+          "totalTokens": 5180,
+          "cachedInputTokens": 0,
+          "batchItemCount": 4,
+          "responseId": "resp_013d80da161fd218006ac93ed622b087d2b4dce891359e98bb",
+          "responseStatus": "completed",
+          "incompleteReason": "",
+          "requestedMaxOutputTokens": 32000,
+          "reasoningTokens": 192,
+          "visibleOutputChars": 6813
+        },
+        {
+          "stage": "stage5",
+          "component": "finalFormatter",
+          "endpoint": "responses",
+          "model": "gpt-5-nano",
+          "durationMs": 60998,
+          "inputTokens": 3258,
+          "outputTokens": 7050,
+          "totalTokens": 10308,
+          "cachedInputTokens": 0,
+          "responseId": "resp_0209c4f177f888a1006ac93ee2f59887d2b95e2607cdcc2bfb",
+          "responseStatus": "completed",
+          "incompleteReason": "",
+          "requestedMaxOutputTokens": 32000,
+          "reasoningTokens": 5696,
+          "visibleOutputChars": 4759,
+          "parsedItemCount": 4,
+          "parseError": false,
+          "batchOffset": 0,
+          "batchItemCount": 4
+        }
+      ],
+      "skips": []
+    },
+    {
+      "caseId": "2026-10-08-text-330",
+      "arm": "mini-current",
+      "elapsedMs": 114752,
+      "stage3Count": 4,
+      "stage4Count": 4,
+      "stage3Calls": 1,
+      "events": [
+        {
+          "name": "Open Ice times 2026",
+          "startDate": "2026-10-08",
+          "startTime": "18:20",
+          "endDate": "2026-10-08",
+          "endTime": "23:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Open Ice times 2026",
+          "startDate": "2026-10-10",
+          "startTime": "09:20",
+          "endDate": "2026-10-10",
+          "endTime": "23:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Open Ice times 2026",
+          "startDate": "2026-10-10",
+          "startTime": "18:40",
+          "endDate": "2026-10-10",
+          "endTime": "23:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Open Ice times 2026",
+          "startDate": "2026-10-12",
+          "startTime": "18:20",
+          "endDate": "2026-10-12",
+          "endTime": "23:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        }
+      ],
+      "usage": [
+        {
+          "stage": "stage3",
+          "component": "eventExtractor",
+          "endpoint": "responses",
+          "model": "gpt-6-luna",
+          "imageCount": 0,
+          "durationMs": 12837,
+          "inputTokens": 2612,
+          "outputTokens": 1903,
+          "totalTokens": 4515,
+          "cachedInputTokens": 2609
+        },
+        {
+          "stage": "stage4",
+          "component": "secondaryValidator",
+          "endpoint": "responses",
+          "model": "gpt-5-nano",
+          "durationMs": 18126,
+          "inputTokens": 3280,
+          "outputTokens": 1951,
+          "totalTokens": 5231,
+          "cachedInputTokens": 0,
+          "batchItemCount": 4,
+          "responseId": "resp_0bddb6a532faa9e8006ac93e79639887d2b367cf23ce951867",
+          "responseStatus": "completed",
+          "incompleteReason": "",
+          "requestedMaxOutputTokens": 32000,
+          "reasoningTokens": 256,
+          "visibleOutputChars": 6646
+        },
+        {
+          "stage": "stage5",
+          "component": "finalFormatter",
+          "endpoint": "responses",
+          "model": "gpt-5-nano",
+          "durationMs": 70445,
+          "inputTokens": 3268,
+          "outputTokens": 6367,
+          "totalTokens": 9635,
+          "cachedInputTokens": 0,
+          "responseId": "resp_029eaddf5dbb8dd0006ac93e8b7a6487d290d25272acad5144",
+          "responseStatus": "completed",
+          "incompleteReason": "",
+          "requestedMaxOutputTokens": 32000,
+          "reasoningTokens": 5120,
+          "visibleOutputChars": 4301,
+          "parsedItemCount": 4,
+          "parseError": false,
+          "batchOffset": 0,
+          "batchItemCount": 4
+        }
+      ],
+      "skips": []
+    },
+    {
+      "caseId": "oct8-fixture-row-287-powerskate-date-table",
+      "arm": "luna-none",
+      "elapsedMs": 147703,
+      "stage3Count": 20,
+      "stage4Count": 20,
+      "stage3Calls": 1,
+      "events": [
+        {
+          "name": "Tyne Valley Skating Club PowerSkate — U9-U11",
+          "startDate": "2026-10-17",
+          "startTime": "07:00",
+          "endDate": "2026-10-17",
+          "endTime": "08:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Tyne Valley Skating Club PowerSkate — U9-U11",
+          "startDate": "2026-10-24",
+          "startTime": "07:00",
+          "endDate": "2026-10-24",
+          "endTime": "08:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Tyne Valley Skating Club PowerSkate — U9-U11",
+          "startDate": "2026-10-31",
+          "startTime": "07:00",
+          "endDate": "2026-10-31",
+          "endTime": "08:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Tyne Valley Skating Club PowerSkate — U9-U11",
+          "startDate": "2026-11-14",
+          "startTime": "07:00",
+          "endDate": "2026-11-14",
+          "endTime": "08:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Tyne Valley Skating Club PowerSkate — U9-U11",
+          "startDate": "2026-11-21",
+          "startTime": "07:00",
+          "endDate": "2026-11-21",
+          "endTime": "08:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Tyne Valley Skating Club PowerSkate — U9-U11",
+          "startDate": "2026-11-28",
+          "startTime": "07:00",
+          "endDate": "2026-11-28",
+          "endTime": "08:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Tyne Valley Skating Club PowerSkate — U9-U11",
+          "startDate": "2026-12-05",
+          "startTime": "07:00",
+          "endDate": "2026-12-05",
+          "endTime": "08:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Tyne Valley Skating Club PowerSkate — U9-U11",
+          "startDate": "2026-12-12",
+          "startTime": "07:00",
+          "endDate": "2026-12-12",
+          "endTime": "08:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Tyne Valley Skating Club PowerSkate — U9-U11",
+          "startDate": "2026-12-19",
+          "startTime": "07:00",
+          "endDate": "2026-12-19",
+          "endTime": "08:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Tyne Valley Skating Club PowerSkate — U9-U11",
+          "startDate": "2027-01-02",
+          "startTime": "07:00",
+          "endDate": "2027-01-02",
+          "endTime": "08:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Tyne Valley Skating Club PowerSkate — U13-U15",
+          "startDate": "2026-10-18",
+          "startTime": "07:00",
+          "endDate": "2026-10-18",
+          "endTime": "08:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Tyne Valley Skating Club PowerSkate — U13-U15",
+          "startDate": "2026-10-25",
+          "startTime": "07:00",
+          "endDate": "2026-10-25",
+          "endTime": "08:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Tyne Valley Skating Club PowerSkate — U13-U15",
+          "startDate": "2026-11-01",
+          "startTime": "07:00",
+          "endDate": "2026-11-01",
+          "endTime": "08:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Tyne Valley Skating Club PowerSkate — U13-U15",
+          "startDate": "2026-11-15",
+          "startTime": "07:00",
+          "endDate": "2026-11-15",
+          "endTime": "08:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Tyne Valley Skating Club PowerSkate — U13-U15",
+          "startDate": "2026-11-22",
+          "startTime": "07:00",
+          "endDate": "2026-11-22",
+          "endTime": "08:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Tyne Valley Skating Club PowerSkate — U13-U15",
+          "startDate": "2026-11-29",
+          "startTime": "07:00",
+          "endDate": "2026-11-29",
+          "endTime": "08:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Tyne Valley Skating Club PowerSkate — U13-U15",
+          "startDate": "2026-12-06",
+          "startTime": "07:00",
+          "endDate": "2026-12-06",
+          "endTime": "08:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Tyne Valley Skating Club PowerSkate — U13-U15",
+          "startDate": "2026-12-13",
+          "startTime": "07:00",
+          "endDate": "2026-12-13",
+          "endTime": "08:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Tyne Valley Skating Club PowerSkate — U13-U15",
+          "startDate": "2026-12-20",
+          "startTime": "07:00",
+          "endDate": "2026-12-20",
+          "endTime": "08:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Tyne Valley Skating Club PowerSkate — U13-U15",
+          "startDate": "2027-01-03",
+          "startTime": "07:00",
+          "endDate": "2027-01-03",
+          "endTime": "08:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        }
+      ],
+      "usage": [
+        {
+          "stage": "stage3",
+          "component": "eventExtractor",
+          "endpoint": "responses",
+          "model": "gpt-6-luna",
+          "imageCount": 1,
+          "durationMs": 30403,
+          "inputTokens": 2195,
+          "outputTokens": 5602,
+          "totalTokens": 7797,
+          "cachedInputTokens": 2192
+        },
+        {
+          "stage": "stage4",
+          "component": "secondaryValidator",
+          "endpoint": "responses",
+          "model": "gpt-5-nano",
+          "durationMs": 22109,
+          "inputTokens": 3226,
+          "outputTokens": 2047,
+          "totalTokens": 5273,
+          "cachedInputTokens": 0,
+          "batchItemCount": 5,
+          "responseId": "resp_0bef285655dbffa9006ac93e528b7087d283e5fc6437da19b7",
+          "responseStatus": "completed",
+          "incompleteReason": "",
+          "requestedMaxOutputTokens": 32000,
+          "reasoningTokens": 320,
+          "visibleOutputChars": 6281
+        },
+        {
+          "stage": "stage4",
+          "component": "secondaryValidator",
+          "endpoint": "responses",
+          "model": "gpt-5-nano",
+          "durationMs": 48582,
+          "inputTokens": 5746,
+          "outputTokens": 5718,
+          "totalTokens": 11464,
+          "cachedInputTokens": 0,
+          "batchItemCount": 15,
+          "responseId": "resp_090b1dab91666d49006ac93e52718c87d2a422445250fb3dcc",
+          "responseStatus": "completed",
+          "incompleteReason": "",
+          "requestedMaxOutputTokens": 32000,
+          "reasoningTokens": 768,
+          "visibleOutputChars": 18352
+        },
+        {
+          "stage": "stage5",
+          "component": "finalFormatter",
+          "endpoint": "responses",
+          "model": "gpt-5-nano",
+          "durationMs": 39040,
+          "inputTokens": 4274,
+          "outputTokens": 6017,
+          "totalTokens": 10291,
+          "cachedInputTokens": 0,
+          "responseId": "resp_04ba536639725b31006ac93e83073487d288f1d2ff2397402f",
+          "responseStatus": "completed",
+          "incompleteReason": "",
+          "requestedMaxOutputTokens": 32000,
+          "reasoningTokens": 3200,
+          "visibleOutputChars": 10221,
+          "parsedItemCount": 9,
+          "parseError": false,
+          "batchOffset": 0,
+          "batchItemCount": 9
+        },
+        {
+          "stage": "stage5",
+          "component": "finalFormatter",
+          "endpoint": "responses",
+          "model": "gpt-5-nano",
+          "durationMs": 47185,
+          "inputTokens": 4276,
+          "outputTokens": 7328,
+          "totalTokens": 11604,
+          "cachedInputTokens": 0,
+          "responseId": "resp_03aa1ebd934f4cbd006ac93e832f0087d2999be5dccc42db2b",
+          "responseStatus": "completed",
+          "incompleteReason": "",
+          "requestedMaxOutputTokens": 32000,
+          "reasoningTokens": 4544,
+          "visibleOutputChars": 10092,
+          "parsedItemCount": 9,
+          "parseError": false,
+          "batchOffset": 9,
+          "batchItemCount": 9
+        },
+        {
+          "stage": "stage5",
+          "component": "finalFormatter",
+          "endpoint": "responses",
+          "model": "gpt-5-nano",
+          "durationMs": 21442,
+          "inputTokens": 2455,
+          "outputTokens": 2829,
+          "totalTokens": 5284,
+          "cachedInputTokens": 0,
+          "responseId": "resp_09659eabad25a6d5006ac93eb235c887d283eafbe13e2ae3d2",
+          "responseStatus": "completed",
+          "incompleteReason": "",
+          "requestedMaxOutputTokens": 32000,
+          "reasoningTokens": 2368,
+          "visibleOutputChars": 1799,
+          "parsedItemCount": 2,
+          "parseError": false,
+          "batchOffset": 18,
+          "batchItemCount": 2
+        }
+      ],
+      "skips": []
+    },
+    {
+      "caseId": "oct8-fixture-row-287-powerskate-date-table",
+      "arm": "mini-current",
+      "elapsedMs": 287797,
+      "stage3Count": 20,
+      "stage4Count": 20,
+      "stage3Calls": 1,
+      "events": [
+        {
+          "name": "POWERSKATING SESSIONS — U9 - U11",
+          "startDate": "2026-10-17",
+          "startTime": "07:00",
+          "endDate": "2026-10-17",
+          "endTime": "08:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U13-U15",
+          "startDate": "2026-10-18",
+          "startTime": "07:00",
+          "endDate": "2026-10-18",
+          "endTime": "08:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U9 - U11",
+          "startDate": "2026-10-24",
+          "startTime": "07:00",
+          "endDate": "2026-10-24",
+          "endTime": "08:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U13-U15",
+          "startDate": "2026-10-25",
+          "startTime": "07:00",
+          "endDate": "2026-10-25",
+          "endTime": "08:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U9 - U11",
+          "startDate": "2026-10-31",
+          "startTime": "07:00",
+          "endDate": "2026-10-31",
+          "endTime": "08:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U13-U15",
+          "startDate": "2026-11-01",
+          "startTime": "07:00",
+          "endDate": "2026-11-01",
+          "endTime": "08:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U9 - U11",
+          "startDate": "2026-11-14",
+          "startTime": "07:00",
+          "endDate": "2026-11-14",
+          "endTime": "08:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U13-U15",
+          "startDate": "2026-11-15",
+          "startTime": "07:00",
+          "endDate": "2026-11-15",
+          "endTime": "08:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U9 - U11",
+          "startDate": "2026-11-21",
+          "startTime": "07:00",
+          "endDate": "2026-11-21",
+          "endTime": "08:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U13-U15",
+          "startDate": "2026-11-22",
+          "startTime": "07:00",
+          "endDate": "2026-11-22",
+          "endTime": "08:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U9 - U11",
+          "startDate": "2026-11-28",
+          "startTime": "07:00",
+          "endDate": "2026-11-28",
+          "endTime": "08:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U13-U15",
+          "startDate": "2026-11-29",
+          "startTime": "07:00",
+          "endDate": "2026-11-29",
+          "endTime": "08:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U9 - U11",
+          "startDate": "2026-12-05",
+          "startTime": "07:00",
+          "endDate": "2026-12-05",
+          "endTime": "08:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U13-U15",
+          "startDate": "2026-12-06",
+          "startTime": "07:00",
+          "endDate": "2026-12-06",
+          "endTime": "08:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U9 - U11",
+          "startDate": "2026-12-12",
+          "startTime": "07:00",
+          "endDate": "2026-12-12",
+          "endTime": "08:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U13-U15",
+          "startDate": "2026-12-13",
+          "startTime": "07:00",
+          "endDate": "2026-12-13",
+          "endTime": "08:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U9 - U11",
+          "startDate": "2026-12-19",
+          "startTime": "07:00",
+          "endDate": "2026-12-19",
+          "endTime": "08:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U13-U15",
+          "startDate": "2026-12-20",
+          "startTime": "07:00",
+          "endDate": "2026-12-20",
+          "endTime": "08:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U9 - U11",
+          "startDate": "2027-01-02",
+          "startTime": "07:00",
+          "endDate": "2027-01-02",
+          "endTime": "08:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "POWERSKATING SESSIONS — U13-U15",
+          "startDate": "2027-01-03",
+          "startTime": "07:00",
+          "endDate": "2027-01-03",
+          "endTime": "08:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        }
+      ],
+      "usage": [
+        {
+          "stage": "stage3",
+          "component": "eventExtractor",
+          "endpoint": "responses",
+          "model": "gpt-6-luna",
+          "imageCount": 1,
+          "durationMs": 40159,
+          "inputTokens": 2267,
+          "outputTokens": 7577,
+          "totalTokens": 9844,
+          "cachedInputTokens": 2264
+        },
+        {
+          "stage": "stage4",
+          "component": "secondaryValidator",
+          "endpoint": "responses",
+          "model": "gpt-5-nano",
+          "durationMs": 22305,
+          "inputTokens": 3504,
+          "outputTokens": 2458,
+          "totalTokens": 5962,
+          "cachedInputTokens": 0,
+          "batchItemCount": 5,
+          "responseId": "resp_06a616788b3520b6006ac93e4fbb4c87d2b8b9e5c5291ac9e6",
+          "responseStatus": "completed",
+          "incompleteReason": "",
+          "requestedMaxOutputTokens": 32000,
+          "reasoningTokens": 448,
+          "visibleOutputChars": 8147
+        },
+        {
+          "stage": "stage4",
+          "component": "secondaryValidator",
+          "endpoint": "responses",
+          "model": "gpt-5-nano",
+          "durationMs": 83478,
+          "inputTokens": 6585,
+          "outputTokens": 6595,
+          "totalTokens": 13180,
+          "cachedInputTokens": 0,
+          "batchItemCount": 15,
+          "responseId": "resp_0f8846c84dead3a5006ac93e4fa28087d2a5aa9feefe0aaf2d",
+          "responseStatus": "completed",
+          "incompleteReason": "",
+          "requestedMaxOutputTokens": 32000,
+          "reasoningTokens": 640,
+          "visibleOutputChars": 24351
+        },
+        {
+          "stage": "stage5",
+          "component": "finalFormatter",
+          "endpoint": "responses",
+          "model": "gpt-5-nano",
+          "durationMs": 38760,
+          "inputTokens": 4844,
+          "outputTokens": 6403,
+          "totalTokens": 11247,
+          "cachedInputTokens": 0,
+          "responseId": "resp_0413d1bc7f3931be006ac93ea3330887d2909ac1e7269dcb1d",
+          "responseStatus": "completed",
+          "incompleteReason": "",
+          "requestedMaxOutputTokens": 32000,
+          "reasoningTokens": 3712,
+          "visibleOutputChars": 11329,
+          "parsedItemCount": 9,
+          "parseError": false,
+          "batchOffset": 9,
+          "batchItemCount": 9
+        },
+        {
+          "stage": "stage5",
+          "component": "finalFormatter",
+          "endpoint": "responses",
+          "model": "gpt-5-nano",
+          "durationMs": 53990,
+          "inputTokens": 4869,
+          "outputTokens": 9092,
+          "totalTokens": 13961,
+          "cachedInputTokens": 0,
+          "responseId": "resp_0443d4f169417b57006ac93ea31f1487d2a9ebaa0fd7d940a8",
+          "responseStatus": "completed",
+          "incompleteReason": "",
+          "requestedMaxOutputTokens": 32000,
+          "reasoningTokens": 5504,
+          "visibleOutputChars": 13820,
+          "parsedItemCount": 9,
+          "parseError": false,
+          "batchOffset": 0,
+          "batchItemCount": 9
+        },
+        {
+          "stage": "stage5",
+          "component": "finalFormatter",
+          "endpoint": "responses",
+          "model": "gpt-5-nano",
+          "durationMs": 46948,
+          "inputTokens": 3569,
+          "outputTokens": 6746,
+          "totalTokens": 10315,
+          "cachedInputTokens": 0,
+          "responseId": "resp_09c4b0bc14997a1c006ac93ed91f7887d2af99c1bd201bdac0",
+          "responseStatus": "completed",
+          "incompleteReason": "",
+          "requestedMaxOutputTokens": 32000,
+          "reasoningTokens": 5312,
+          "visibleOutputChars": 5680,
+          "parsedItemCount": 5,
+          "parseError": false,
+          "batchOffset": 0,
+          "batchItemCount": 5
+        },
+        {
+          "stage": "stage5",
+          "component": "finalFormatter",
+          "endpoint": "responses",
+          "model": "gpt-5-nano",
+          "durationMs": 26411,
+          "inputTokens": 3225,
+          "outputTokens": 4770,
+          "totalTokens": 7995,
+          "cachedInputTokens": 0,
+          "responseId": "resp_05ac89ce606273b9006ac93f08161087d2b917a907b11d4602",
+          "responseStatus": "completed",
+          "incompleteReason": "",
+          "requestedMaxOutputTokens": 32000,
+          "reasoningTokens": 3520,
+          "visibleOutputChars": 4965,
+          "parsedItemCount": 4,
+          "parseError": false,
+          "batchOffset": 5,
+          "batchItemCount": 4
+        },
+        {
+          "stage": "stage5",
+          "component": "finalFormatter",
+          "endpoint": "responses",
+          "model": "gpt-5-nano",
+          "durationMs": 36753,
+          "inputTokens": 2589,
+          "outputTokens": 5233,
+          "totalTokens": 7822,
+          "cachedInputTokens": 0,
+          "responseId": "resp_020cdeb204c491af006ac93f22783087d2acac28bedddc1c84",
+          "responseStatus": "completed",
+          "incompleteReason": "",
+          "requestedMaxOutputTokens": 32000,
+          "reasoningTokens": 4608,
+          "visibleOutputChars": 2444,
+          "parsedItemCount": 2,
+          "parseError": false,
+          "batchOffset": 18,
+          "batchItemCount": 2
+        }
+      ],
+      "skips": []
+    },
+    {
+      "caseId": "oct9-row-213",
+      "arm": "luna-none",
+      "elapsedMs": 49732,
+      "stage3Count": 1,
+      "stage4Count": 1,
+      "stage3Calls": 2,
+      "events": [
+        {
+          "name": "Rxtra Care Clinic",
+          "startDate": "2026-10-09",
+          "startTime": "09:00",
+          "endDate": "2026-10-09",
+          "endTime": "16:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        }
+      ],
+      "usage": [
+        {
+          "stage": "stage3",
+          "component": "eventExtractor",
+          "endpoint": "responses",
+          "model": "gpt-6-luna",
+          "imageCount": 1,
+          "durationMs": 2457,
+          "inputTokens": 2907,
+          "outputTokens": 180,
+          "totalTokens": 3087,
+          "cachedInputTokens": 2904
+        },
+        {
+          "stage": "stage3",
+          "component": "eventExtractor",
+          "endpoint": "responses",
+          "model": "gpt-6-luna",
+          "imageCount": 1,
+          "durationMs": 7929,
+          "inputTokens": 1112,
+          "outputTokens": 723,
+          "totalTokens": 1835,
+          "cachedInputTokens": 1109
+        },
+        {
+          "stage": "stage4",
+          "component": "secondaryValidator",
+          "endpoint": "responses",
+          "model": "gpt-5-nano",
+          "durationMs": 8148,
+          "inputTokens": 2216,
+          "outputTokens": 740,
+          "totalTokens": 2956,
+          "cachedInputTokens": 0,
+          "batchItemCount": 1,
+          "responseId": "resp_05053b9c4d4b6d22006ac93df8e73087d29fdfa311368d5f51",
+          "responseStatus": "completed",
+          "incompleteReason": "",
+          "requestedMaxOutputTokens": 32000,
+          "reasoningTokens": 256,
+          "visibleOutputChars": 1794
+        },
+        {
+          "stage": "stage5",
+          "component": "finalFormatter",
+          "endpoint": "responses",
+          "model": "gpt-5-nano",
+          "durationMs": 30989,
+          "inputTokens": 2183,
+          "outputTokens": 3273,
+          "totalTokens": 5456,
+          "cachedInputTokens": 0,
+          "responseId": "resp_0477aa813dbcd76d006ac93e010ea887d2bc9e4783f3178267",
+          "responseStatus": "completed",
+          "incompleteReason": "",
+          "requestedMaxOutputTokens": 32000,
+          "reasoningTokens": 2880,
+          "visibleOutputChars": 1376,
+          "parsedItemCount": 1,
+          "parseError": false,
+          "batchOffset": 0,
+          "batchItemCount": 1
+        }
+      ],
+      "skips": []
+    },
+    {
+      "caseId": "oct9-row-213",
+      "arm": "mini-current",
+      "elapsedMs": 57086,
+      "stage3Count": 1,
+      "stage4Count": 1,
+      "stage3Calls": 2,
+      "events": [
+        {
+          "name": "Rxtra Care Clinic",
+          "startDate": "2026-10-09",
+          "startTime": "09:00",
+          "endDate": "2026-10-09",
+          "endTime": "16:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        }
+      ],
+      "usage": [
+        {
+          "stage": "stage3",
+          "component": "eventExtractor",
+          "endpoint": "responses",
+          "model": "gpt-6-luna",
+          "imageCount": 1,
+          "durationMs": 2211,
+          "inputTokens": 2907,
+          "outputTokens": 138,
+          "totalTokens": 3045,
+          "cachedInputTokens": 2904
+        },
+        {
+          "stage": "stage3",
+          "component": "eventExtractor",
+          "endpoint": "responses",
+          "model": "gpt-6-luna",
+          "imageCount": 1,
+          "durationMs": 7540,
+          "inputTokens": 1112,
+          "outputTokens": 675,
+          "totalTokens": 1787,
+          "cachedInputTokens": 0
+        },
+        {
+          "stage": "stage4",
+          "component": "secondaryValidator",
+          "endpoint": "responses",
+          "model": "gpt-5-nano",
+          "durationMs": 8356,
+          "inputTokens": 2250,
+          "outputTokens": 839,
+          "totalTokens": 3089,
+          "cachedInputTokens": 0,
+          "batchItemCount": 1,
+          "responseId": "resp_0112545071f80fc0006ac93df837c087d29cb051924f314738",
+          "responseStatus": "completed",
+          "incompleteReason": "",
+          "requestedMaxOutputTokens": 32000,
+          "reasoningTokens": 256,
+          "visibleOutputChars": 2006
+        },
+        {
+          "stage": "stage5",
+          "component": "finalFormatter",
+          "endpoint": "responses",
+          "model": "gpt-5-nano",
+          "durationMs": 38867,
+          "inputTokens": 2217,
+          "outputTokens": 4389,
+          "totalTokens": 6606,
+          "cachedInputTokens": 0,
+          "responseId": "resp_0d046457eddea1c7006ac93e00992c87d2a1c54feaffbc545f",
+          "responseStatus": "completed",
+          "incompleteReason": "",
+          "requestedMaxOutputTokens": 32000,
+          "reasoningTokens": 4096,
+          "visibleOutputChars": 1185,
+          "parsedItemCount": 1,
+          "parseError": false,
+          "batchOffset": 0,
+          "batchItemCount": 1
+        }
+      ],
+      "skips": []
+    },
+    {
+      "caseId": "oct9-row-214",
+      "arm": "luna-none",
+      "elapsedMs": 39921,
+      "stage3Count": 1,
+      "stage4Count": 1,
+      "stage3Calls": 1,
+      "events": [
+        {
+          "name": "Rxtra Care Clinic",
+          "startDate": "2026-10-08",
+          "startTime": "11:00",
+          "endDate": "2026-10-08",
+          "endTime": "16:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        }
+      ],
+      "usage": [
+        {
+          "stage": "stage3",
+          "component": "eventExtractor",
+          "endpoint": "responses",
+          "model": "gpt-6-luna",
+          "imageCount": 0,
+          "durationMs": 9186,
+          "inputTokens": 2568,
+          "outputTokens": 1026,
+          "totalTokens": 3594,
+          "cachedInputTokens": 0
+        },
+        {
+          "stage": "stage4",
+          "component": "secondaryValidator",
+          "endpoint": "responses",
+          "model": "gpt-5-nano",
+          "durationMs": 7351,
+          "inputTokens": 2239,
+          "outputTokens": 791,
+          "totalTokens": 3030,
+          "cachedInputTokens": 0,
+          "batchItemCount": 1,
+          "responseId": "resp_00e446ebe11fc480006ac93ee8782887d29298d891b77eab38",
+          "responseStatus": "completed",
+          "incompleteReason": "",
+          "requestedMaxOutputTokens": 32000,
+          "reasoningTokens": 256,
+          "visibleOutputChars": 1864
+        },
+        {
+          "stage": "stage5",
+          "component": "finalFormatter",
+          "endpoint": "responses",
+          "model": "gpt-5-nano",
+          "durationMs": 23363,
+          "inputTokens": 2206,
+          "outputTokens": 2810,
+          "totalTokens": 5016,
+          "cachedInputTokens": 0,
+          "responseId": "resp_0b9b6bffc9aad138006ac93eefd41087d2a3b0b5b757fe0417",
+          "responseStatus": "completed",
+          "incompleteReason": "",
+          "requestedMaxOutputTokens": 32000,
+          "reasoningTokens": 2560,
+          "visibleOutputChars": 953,
+          "parsedItemCount": 1,
+          "parseError": false,
+          "batchOffset": 0,
+          "batchItemCount": 1
+        }
+      ],
+      "skips": []
+    },
+    {
+      "caseId": "oct9-row-274",
+      "arm": "luna-none",
+      "elapsedMs": 76384,
+      "stage3Count": 2,
+      "stage4Count": 2,
+      "stage3Calls": 1,
+      "events": [
+        {
+          "name": "Studio Tour and Gallery Experience",
+          "startDate": "2026-10-10",
+          "startTime": "10:00",
+          "endDate": "2026-10-10",
+          "endTime": "17:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Studio Tour and Gallery Experience",
+          "startDate": "2026-10-11",
+          "startTime": "10:00",
+          "endDate": "2026-10-11",
+          "endTime": "17:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        }
+      ],
+      "usage": [
+        {
+          "stage": "stage3",
+          "component": "eventExtractor",
+          "endpoint": "responses",
+          "model": "gpt-6-luna",
+          "imageCount": 5,
+          "durationMs": 19972,
+          "inputTokens": 4857,
+          "outputTokens": 2804,
+          "totalTokens": 7661,
+          "cachedInputTokens": 4854
+        },
+        {
+          "stage": "stage4",
+          "component": "secondaryValidator",
+          "endpoint": "responses",
+          "model": "gpt-5-nano",
+          "durationMs": 9928,
+          "inputTokens": 2705,
+          "outputTokens": 1265,
+          "totalTokens": 3970,
+          "cachedInputTokens": 0,
+          "batchItemCount": 2,
+          "responseId": "resp_00e0527fecde0373006ac93e3426b087d28873248912d35ad9",
+          "responseStatus": "completed",
+          "incompleteReason": "",
+          "requestedMaxOutputTokens": 32000,
+          "reasoningTokens": 256,
+          "visibleOutputChars": 4234
+        },
+        {
+          "stage": "stage5",
+          "component": "finalFormatter",
+          "endpoint": "responses",
+          "model": "gpt-5-nano",
+          "durationMs": 46451,
+          "inputTokens": 2681,
+          "outputTokens": 4634,
+          "totalTokens": 7315,
+          "cachedInputTokens": 0,
+          "responseId": "resp_03ecaf61190ce5d3006ac93e3e107c87d2a8bd6a03c5d612a1",
+          "responseStatus": "completed",
+          "incompleteReason": "",
+          "requestedMaxOutputTokens": 32000,
+          "reasoningTokens": 4096,
+          "visibleOutputChars": 2110,
+          "parsedItemCount": 2,
+          "parseError": false,
+          "batchOffset": 0,
+          "batchItemCount": 2
+        }
+      ],
+      "skips": []
+    },
+    {
+      "caseId": "oct9-row-274",
+      "arm": "mini-current",
+      "elapsedMs": 69616,
+      "stage3Count": 2,
+      "stage4Count": 2,
+      "stage3Calls": 1,
+      "events": [
+        {
+          "name": "Studio Tour and Gallery Experience",
+          "startDate": "2026-10-10",
+          "startTime": "10:00",
+          "endDate": "2026-10-10",
+          "endTime": "17:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Studio Tour and Gallery Experience",
+          "startDate": "2026-10-11",
+          "startTime": "10:00",
+          "endDate": "2026-10-11",
+          "endTime": "17:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        }
+      ],
+      "usage": [
+        {
+          "stage": "stage3",
+          "component": "eventExtractor",
+          "endpoint": "responses",
+          "model": "gpt-6-luna",
+          "imageCount": 5,
+          "durationMs": 14864,
+          "inputTokens": 4857,
+          "outputTokens": 1998,
+          "totalTokens": 6855,
+          "cachedInputTokens": 4854
+        },
+        {
+          "stage": "stage4",
+          "component": "secondaryValidator",
+          "endpoint": "responses",
+          "model": "gpt-5-nano",
+          "durationMs": 14919,
+          "inputTokens": 2701,
+          "outputTokens": 1336,
+          "totalTokens": 4037,
+          "cachedInputTokens": 0,
+          "batchItemCount": 2,
+          "responseId": "resp_0c73d50cd5443c4b006ac93dfd659087d2a20fe1d747b43105",
+          "responseStatus": "completed",
+          "incompleteReason": "",
+          "requestedMaxOutputTokens": 32000,
+          "reasoningTokens": 256,
+          "visibleOutputChars": 4418
+        },
+        {
+          "stage": "stage5",
+          "component": "finalFormatter",
+          "endpoint": "responses",
+          "model": "gpt-5-nano",
+          "durationMs": 39634,
+          "inputTokens": 2677,
+          "outputTokens": 4159,
+          "totalTokens": 6836,
+          "cachedInputTokens": 0,
+          "responseId": "resp_0af407aabaf8aa83006ac93e0c55ec87d28fb8e53ec021090e",
+          "responseStatus": "completed",
+          "incompleteReason": "",
+          "requestedMaxOutputTokens": 32000,
+          "reasoningTokens": 3584,
+          "visibleOutputChars": 2292,
+          "parsedItemCount": 2,
+          "parseError": false,
+          "batchOffset": 0,
+          "batchItemCount": 2
+        }
+      ],
+      "skips": []
+    },
+    {
+      "caseId": "2026-10-08-text-330",
+      "arm": "luna-negative-review",
+      "elapsedMs": 121641,
+      "stage3Count": 4,
+      "stage4Count": 4,
+      "stage3Calls": 1,
+      "events": [
+        {
+          "name": "Open Ice",
+          "startDate": "2026-10-08",
+          "startTime": "18:20",
+          "endDate": "2026-10-08",
+          "endTime": "23:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Open Ice",
+          "startDate": "2026-10-10",
+          "startTime": "09:20",
+          "endDate": "2026-10-10",
+          "endTime": "23:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Open Ice",
+          "startDate": "2026-10-10",
+          "startTime": "18:40",
+          "endDate": "2026-10-10",
+          "endTime": "23:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Open Ice",
+          "startDate": "2026-10-12",
+          "startTime": "18:20",
+          "endDate": "2026-10-12",
+          "endTime": "23:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        }
+      ],
+      "usage": [
+        {
+          "stage": "stage3",
+          "component": "eventExtractor",
+          "endpoint": "responses",
+          "model": "gpt-6-luna",
+          "imageCount": 0,
+          "durationMs": 11724,
+          "inputTokens": 2612,
+          "outputTokens": 1824,
+          "totalTokens": 4436,
+          "cachedInputTokens": 2609
+        },
+        {
+          "stage": "stage4",
+          "component": "secondaryValidator",
+          "endpoint": "responses",
+          "model": "gpt-5-nano",
+          "durationMs": 19479,
+          "inputTokens": 3275,
+          "outputTokens": 1998,
+          "totalTokens": 5273,
+          "cachedInputTokens": 0,
+          "batchItemCount": 4,
+          "responseId": "resp_0780cad779c898d0006ac9401454b887d2ab535783d6ddab63",
+          "responseStatus": "completed",
+          "incompleteReason": "",
+          "requestedMaxOutputTokens": 32000,
+          "reasoningTokens": 256,
+          "visibleOutputChars": 6950
+        },
+        {
+          "stage": "stage5",
+          "component": "finalFormatter",
+          "endpoint": "responses",
+          "model": "gpt-5-nano",
+          "durationMs": 78411,
+          "inputTokens": 3263,
+          "outputTokens": 5905,
+          "totalTokens": 9168,
+          "cachedInputTokens": 0,
+          "responseId": "resp_02a523c868411ed4006ac94027da4087d2a063fa533a318837",
+          "responseStatus": "completed",
+          "incompleteReason": "",
+          "requestedMaxOutputTokens": 32000,
+          "reasoningTokens": 4608,
+          "visibleOutputChars": 4301,
+          "parsedItemCount": 4,
+          "parseError": false,
+          "batchOffset": 0,
+          "batchItemCount": 4
+        }
+      ],
+      "skips": []
+    },
+    {
+      "caseId": "oct8-fixture-row-287-powerskate-date-table",
+      "arm": "luna-negative-review",
+      "elapsedMs": 166193,
+      "stage3Count": 20,
+      "stage4Count": 20,
+      "stage3Calls": 1,
+      "events": [
+        {
+          "name": "Tyne Valley Skating Club PowerSkate — U9-U11",
+          "startDate": "2026-10-17",
+          "startTime": "07:00",
+          "endDate": "2026-10-17",
+          "endTime": "08:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Tyne Valley Skating Club PowerSkate — U9-U11",
+          "startDate": "2026-10-24",
+          "startTime": "07:00",
+          "endDate": "2026-10-24",
+          "endTime": "08:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Tyne Valley Skating Club PowerSkate — U9-U11",
+          "startDate": "2026-10-31",
+          "startTime": "07:00",
+          "endDate": "2026-10-31",
+          "endTime": "08:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Tyne Valley Skating Club PowerSkate — U9-U11",
+          "startDate": "2026-11-14",
+          "startTime": "07:00",
+          "endDate": "2026-11-14",
+          "endTime": "08:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Tyne Valley Skating Club PowerSkate — U9-U11",
+          "startDate": "2026-11-21",
+          "startTime": "07:00",
+          "endDate": "2026-11-21",
+          "endTime": "08:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Tyne Valley Skating Club PowerSkate — U9-U11",
+          "startDate": "2026-11-28",
+          "startTime": "07:00",
+          "endDate": "2026-11-28",
+          "endTime": "08:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Tyne Valley Skating Club PowerSkate — U9-U11",
+          "startDate": "2026-12-05",
+          "startTime": "07:00",
+          "endDate": "2026-12-05",
+          "endTime": "08:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Tyne Valley Skating Club PowerSkate — U9-U11",
+          "startDate": "2026-12-12",
+          "startTime": "07:00",
+          "endDate": "2026-12-12",
+          "endTime": "08:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Tyne Valley Skating Club PowerSkate — U9-U11",
+          "startDate": "2026-12-19",
+          "startTime": "07:00",
+          "endDate": "2026-12-19",
+          "endTime": "08:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Tyne Valley Skating Club PowerSkate — U9-U11",
+          "startDate": "2027-01-02",
+          "startTime": "07:00",
+          "endDate": "2027-01-02",
+          "endTime": "08:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Tyne Valley Skating Club PowerSkate — U13-U15",
+          "startDate": "2026-10-18",
+          "startTime": "07:00",
+          "endDate": "2026-10-18",
+          "endTime": "08:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Tyne Valley Skating Club PowerSkate — U13-U15",
+          "startDate": "2026-10-25",
+          "startTime": "07:00",
+          "endDate": "2026-10-25",
+          "endTime": "08:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Tyne Valley Skating Club PowerSkate — U13-U15",
+          "startDate": "2026-11-01",
+          "startTime": "07:00",
+          "endDate": "2026-11-01",
+          "endTime": "08:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Tyne Valley Skating Club PowerSkate — U13-U15",
+          "startDate": "2026-11-15",
+          "startTime": "07:00",
+          "endDate": "2026-11-15",
+          "endTime": "08:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Tyne Valley Skating Club PowerSkate — U13-U15",
+          "startDate": "2026-11-22",
+          "startTime": "07:00",
+          "endDate": "2026-11-22",
+          "endTime": "08:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Tyne Valley Skating Club PowerSkate — U13-U15",
+          "startDate": "2026-11-29",
+          "startTime": "07:00",
+          "endDate": "2026-11-29",
+          "endTime": "08:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Tyne Valley Skating Club PowerSkate — U13-U15",
+          "startDate": "2026-12-06",
+          "startTime": "07:00",
+          "endDate": "2026-12-06",
+          "endTime": "08:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Tyne Valley Skating Club PowerSkate — U13-U15",
+          "startDate": "2026-12-13",
+          "startTime": "07:00",
+          "endDate": "2026-12-13",
+          "endTime": "08:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Tyne Valley Skating Club PowerSkate — U13-U15",
+          "startDate": "2026-12-20",
+          "startTime": "07:00",
+          "endDate": "2026-12-20",
+          "endTime": "08:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Tyne Valley Skating Club PowerSkate — U13-U15",
+          "startDate": "2027-01-03",
+          "startTime": "07:00",
+          "endDate": "2027-01-03",
+          "endTime": "08:00",
+          "isRecurring": "No",
+          "recurringPattern": "none"
+        }
+      ],
+      "usage": [
+        {
+          "stage": "stage3",
+          "component": "eventExtractor",
+          "endpoint": "responses",
+          "model": "gpt-6-luna",
+          "imageCount": 1,
+          "durationMs": 31685,
+          "inputTokens": 2195,
+          "outputTokens": 5716,
+          "totalTokens": 7911,
+          "cachedInputTokens": 2192
+        },
+        {
+          "stage": "stage4",
+          "component": "secondaryValidator",
+          "endpoint": "responses",
+          "model": "gpt-5-nano",
+          "durationMs": 23120,
+          "inputTokens": 3274,
+          "outputTokens": 2033,
+          "totalTokens": 5307,
+          "cachedInputTokens": 0,
+          "batchItemCount": 5,
+          "responseId": "resp_07625eb33dfc2b23006ac94028979c87d28b3243c062bb366a",
+          "responseStatus": "completed",
+          "incompleteReason": "",
+          "requestedMaxOutputTokens": 32000,
+          "reasoningTokens": 256,
+          "visibleOutputChars": 6680
+        },
+        {
+          "stage": "stage4",
+          "component": "secondaryValidator",
+          "endpoint": "responses",
+          "model": "gpt-5-nano",
+          "durationMs": 50577,
+          "inputTokens": 5804,
+          "outputTokens": 5622,
+          "totalTokens": 11426,
+          "cachedInputTokens": 0,
+          "batchItemCount": 15,
+          "responseId": "resp_07fade87b665b063006ac94028627487d2b997636e830f8092",
+          "responseStatus": "completed",
+          "incompleteReason": "",
+          "requestedMaxOutputTokens": 32000,
+          "reasoningTokens": 448,
+          "visibleOutputChars": 19684
+        },
+        {
+          "stage": "stage5",
+          "component": "finalFormatter",
+          "endpoint": "responses",
+          "model": "gpt-5-nano",
+          "durationMs": 44100,
+          "inputTokens": 4283,
+          "outputTokens": 5291,
+          "totalTokens": 9574,
+          "cachedInputTokens": 0,
+          "responseId": "resp_0e9a48bca24af1cf006ac9405afa2c87d2b966bc65986195b0",
+          "responseStatus": "completed",
+          "incompleteReason": "",
+          "requestedMaxOutputTokens": 32000,
+          "reasoningTokens": 2368,
+          "visibleOutputChars": 10410,
+          "parsedItemCount": 9,
+          "parseError": false,
+          "batchOffset": 0,
+          "batchItemCount": 9
+        },
+        {
+          "stage": "stage5",
+          "component": "finalFormatter",
+          "endpoint": "responses",
+          "model": "gpt-5-nano",
+          "durationMs": 50901,
+          "inputTokens": 4352,
+          "outputTokens": 6083,
+          "totalTokens": 10435,
+          "cachedInputTokens": 0,
+          "responseId": "resp_05c57aa6381c3add006ac9405b167087d2b6caf36e9b23bdd7",
+          "responseStatus": "completed",
+          "incompleteReason": "",
+          "requestedMaxOutputTokens": 32000,
+          "reasoningTokens": 3072,
+          "visibleOutputChars": 11144,
+          "parsedItemCount": 9,
+          "parseError": false,
+          "batchOffset": 9,
+          "batchItemCount": 9
+        },
+        {
+          "stage": "stage5",
+          "component": "finalFormatter",
+          "endpoint": "responses",
+          "model": "gpt-5-nano",
+          "durationMs": 32826,
+          "inputTokens": 2476,
+          "outputTokens": 3912,
+          "totalTokens": 6388,
+          "cachedInputTokens": 0,
+          "responseId": "resp_0075518877ed5352006ac9408de68887d287e807a805176638",
+          "responseStatus": "completed",
+          "incompleteReason": "",
+          "requestedMaxOutputTokens": 32000,
+          "reasoningTokens": 3328,
+          "visibleOutputChars": 2155,
+          "parsedItemCount": 2,
+          "parseError": false,
+          "batchOffset": 18,
+          "batchItemCount": 2
+        }
+      ],
+      "skips": []
+    }
+  ],
+  "downstreamClassificationComparisons": [
+    {
+      "caseId": "2026-10-08-text-330",
+      "arm": "luna-none",
+      "earlierSignature": {
+        "route": "EVENT",
+        "estimatedItemCount": 4,
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": true,
+          "organizationStyle": "by date and time"
+        }
+      },
+      "finalSignature": {
+        "route": "SCHEDULE",
+        "estimatedItemCount": 4,
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": true,
+          "organizationStyle": "by date and time"
+        }
+      }
+    },
+    {
+      "caseId": "2026-10-08-text-330",
+      "arm": "mini-current",
+      "earlierSignature": {
+        "route": "EVENT",
+        "estimatedItemCount": 4,
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": true,
+          "organizationStyle": "by date"
+        }
+      },
+      "finalSignature": {
+        "route": "EVENT",
+        "estimatedItemCount": 4,
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": true,
+          "organizationStyle": "date"
+        }
+      }
+    },
+    {
+      "caseId": "oct8-fixture-row-287-powerskate-date-table",
+      "arm": "luna-none",
+      "earlierSignature": {
+        "route": "SCHEDULE",
+        "estimatedItemCount": 20,
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": true,
+          "organizationStyle": "By date and time, with two groups meeting on different days"
+        }
+      },
+      "finalSignature": {
+        "route": "SCHEDULE",
+        "estimatedItemCount": 20,
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": true,
+          "organizationStyle": "by date and time"
+        }
+      }
+    },
+    {
+      "caseId": "oct8-fixture-row-287-powerskate-date-table",
+      "arm": "mini-current",
+      "earlierSignature": {
+        "route": "CALENDAR",
+        "estimatedItemCount": 20,
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": true,
+          "organizationStyle": "date-organized"
+        }
+      },
+      "finalSignature": {
+        "route": "EVENT",
+        "estimatedItemCount": 20,
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": true,
+          "organizationStyle": "by date and time"
+        }
+      }
+    },
+    {
+      "caseId": "oct9-row-213",
+      "arm": "luna-none",
+      "earlierSignature": {
+        "route": "EVENT",
+        "estimatedItemCount": 1,
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": false,
+          "organizationStyle": "Unstructured, with a single clinic advertised for today and its hours"
+        }
+      },
+      "finalSignature": {
+        "route": "EVENT",
+        "estimatedItemCount": 1,
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": false,
+          "organizationStyle": "By date and time"
+        }
+      }
+    },
+    {
+      "caseId": "oct9-row-213",
+      "arm": "mini-current",
+      "earlierSignature": {
+        "route": "EVENT",
+        "estimatedItemCount": 1,
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": false,
+          "organizationStyle": "time"
+        }
+      },
+      "finalSignature": {
+        "route": "EVENT",
+        "estimatedItemCount": 1,
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": false,
+          "organizationStyle": "time"
+        }
+      }
+    },
+    {
+      "caseId": "oct9-row-214",
+      "arm": "luna-none",
+      "earlierSignature": {
+        "route": "EVENT",
+        "estimatedItemCount": 1,
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": true,
+          "organizationStyle": "by date"
+        }
+      },
+      "finalSignature": {
+        "route": "EVENT",
+        "estimatedItemCount": 1,
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": true,
+          "organizationStyle": "By date, with one activity time and a product arrival"
+        }
+      }
+    },
+    {
+      "caseId": "oct9-row-274",
+      "arm": "luna-none",
+      "earlierSignature": {
+        "route": "EVENT",
+        "estimatedItemCount": 1,
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": false,
+          "organizationStyle": "Unstructured"
+        }
+      },
+      "finalSignature": {
+        "route": "EVENT",
+        "estimatedItemCount": 1,
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": false,
+          "organizationStyle": "Unstructured promotional post with studio and gallery visiting hours"
+        }
+      }
+    },
+    {
+      "caseId": "oct9-row-274",
+      "arm": "mini-current",
+      "earlierSignature": {
+        "route": "EVENT",
+        "estimatedItemCount": 2,
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": false,
+          "organizationStyle": "unstructured (narrative with hours and appointment info)"
+        }
+      },
+      "finalSignature": {
+        "route": "EVENT",
+        "estimatedItemCount": 3,
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": true,
+          "organizationStyle": "by date/time (days of week with hours and by-appointment slots)"
+        }
+      }
+    }
+  ],
+  "semantic": [
+    {
+      "caseId": "constructed-formal-event",
+      "arm": "mini-current",
+      "source": "Constructed semantic fixture, not a real source or live write",
+      "expected": {
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "pass": true
+      },
+      "actual": {
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "pass": true
+      },
+      "classification": {
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": false,
+          "organizationStyle": "date/time"
+        },
+        "contentType": "EVENT",
+        "confidence": 0.95,
+        "classificationReason": "Text explicitly references a concert with tickets and Facebook Event data supplies a confirmed structured event date/time (2026-10-17 22:00 UTC). No food/drink specials mentioned and only a single event is indicated.",
+        "estimatedItemCount": 1
+      },
+      "requests": [
+        {
+          "model": "gpt-5-mini",
+          "effort": "model_default",
+          "maxOutputTokens": 1500,
+          "imageCount": 0,
+          "promptSha256": "d749d9623f22dec85d7ff1983708dcfdfafa3c302ff1a0d2311afefa262ada2a",
+          "durationMs": 2999,
+          "httpStatus": 200,
+          "status": "completed",
+          "incompleteDetails": null,
+          "usage": {
+            "input_tokens": 1122,
+            "input_tokens_details": {
+              "cache_write_tokens": 0,
+              "cached_tokens": 0
+            },
+            "output_tokens": 381,
+            "output_tokens_details": {
+              "reasoning_tokens": 192
+            },
+            "total_tokens": 1503
+          },
+          "error": null
+        }
+      ]
+    },
+    {
+      "caseId": "constructed-formal-event",
+      "arm": "luna-none",
+      "source": "Constructed semantic fixture, not a real source or live write",
+      "expected": {
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "pass": true
+      },
+      "actual": {
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "pass": true
+      },
+      "classification": {
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": false,
+          "organizationStyle": "unstructured"
+        },
+        "contentType": "EVENT",
+        "confidence": 0.96,
+        "classificationReason": "The text mentions an artist biography and concert tickets, and the confirmed Facebook Event data provides a specific date and time. This indicates one public, ticketed event. No food or drink specials or additional activities are listed.",
+        "estimatedItemCount": 1
+      },
+      "requests": [
+        {
+          "model": "gpt-6-luna",
+          "effort": "none",
+          "maxOutputTokens": 6000,
+          "imageCount": 0,
+          "promptSha256": "d749d9623f22dec85d7ff1983708dcfdfafa3c302ff1a0d2311afefa262ada2a",
+          "durationMs": 1724,
+          "httpStatus": 200,
+          "status": "completed",
+          "incompleteDetails": null,
+          "usage": {
+            "input_tokens": 1122,
+            "input_tokens_details": {
+              "cache_write_tokens": 0,
+              "cached_tokens": 1119
+            },
+            "output_tokens": 122,
+            "output_tokens_details": {
+              "reasoning_tokens": 0
+            },
+            "total_tokens": 1244
+          },
+          "error": null
+        }
+      ]
+    },
+    {
+      "caseId": "constructed-formal-event",
+      "arm": "luna-high",
+      "source": "Constructed semantic fixture, not a real source or live write",
+      "expected": {
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "pass": true
+      },
+      "actual": {
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "pass": true
+      },
+      "classification": {
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": false,
+          "organizationStyle": "Single activity with structured date and time"
+        },
+        "contentType": "EVENT",
+        "confidence": 0.98,
+        "classificationReason": "The confirmed Facebook Event data provides a specific date and time, identifying one event despite the text being primarily biographical and promotional. No food or drink specials are advertised.",
+        "estimatedItemCount": 1
+      },
+      "requests": [
+        {
+          "model": "gpt-6-luna",
+          "effort": "high",
+          "maxOutputTokens": 6000,
+          "imageCount": 0,
+          "promptSha256": "d749d9623f22dec85d7ff1983708dcfdfafa3c302ff1a0d2311afefa262ada2a",
+          "durationMs": 2820,
+          "httpStatus": 200,
+          "status": "completed",
+          "incompleteDetails": null,
+          "usage": {
+            "input_tokens": 1122,
+            "input_tokens_details": {
+              "cache_write_tokens": 1119,
+              "cached_tokens": 0
+            },
+            "output_tokens": 189,
+            "output_tokens_details": {
+              "reasoning_tokens": 70
+            },
+            "total_tokens": 1311
+          },
+          "error": null
+        }
+      ]
+    },
+    {
+      "caseId": "constructed-formal-event",
+      "arm": "luna-negative-review",
+      "source": "Constructed semantic fixture, not a real source or live write",
+      "expected": {
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "pass": true
+      },
+      "actual": {
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "pass": true
+      },
+      "classification": {
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": false,
+          "organizationStyle": "unstructured"
+        },
+        "contentType": "EVENT",
+        "confidence": 0.96,
+        "classificationReason": "The text is biographical/promotional, but the confirmed Facebook Event data provides a structured date and time for one event. There are no advertised food or drink specials, and only one event is indicated.",
+        "estimatedItemCount": 1
+      },
+      "requests": [
+        {
+          "model": "gpt-6-luna",
+          "effort": "none",
+          "maxOutputTokens": 6000,
+          "imageCount": 0,
+          "promptSha256": "d749d9623f22dec85d7ff1983708dcfdfafa3c302ff1a0d2311afefa262ada2a",
+          "durationMs": 1704,
+          "httpStatus": 200,
+          "status": "completed",
+          "incompleteDetails": null,
+          "usage": {
+            "input_tokens": 1122,
+            "input_tokens_details": {
+              "cache_write_tokens": 1119,
+              "cached_tokens": 0
+            },
+            "output_tokens": 119,
+            "output_tokens_details": {
+              "reasoning_tokens": 0
+            },
+            "total_tokens": 1241
+          },
+          "error": null
+        }
+      ]
+    },
+    {
+      "caseId": "constructed-clinic-address",
+      "arm": "mini-current",
+      "source": "Constructed semantic fixture, not a real source or live write",
+      "expected": {
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "pass": true
+      },
+      "actual": {
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "pass": true
+      },
+      "classification": {
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": false,
+          "organizationStyle": "date/time"
+        },
+        "contentType": "EVENT",
+        "confidence": 0.95,
+        "classificationReason": "The text advertises a single walk-in clinic with a specific date (Friday, October 16), time (9am-4pm), and location — this is a public event/clinic. No food or drink specials are mentioned and only one activity is listed.",
+        "estimatedItemCount": 1
+      },
+      "requests": [
+        {
+          "model": "gpt-5-mini",
+          "effort": "model_default",
+          "maxOutputTokens": 1500,
+          "imageCount": 0,
+          "promptSha256": "4ff7d53f8961700ebfc2ba7bdcd6db002fa1cdc3edcd8cfd4ebf323e1e99ec96",
+          "durationMs": 3255,
+          "httpStatus": 200,
+          "status": "completed",
+          "incompleteDetails": null,
+          "usage": {
+            "input_tokens": 1088,
+            "input_tokens_details": {
+              "cache_write_tokens": 0,
+              "cached_tokens": 0
+            },
+            "output_tokens": 429,
+            "output_tokens_details": {
+              "reasoning_tokens": 256
+            },
+            "total_tokens": 1517
+          },
+          "error": null
+        }
+      ]
+    },
+    {
+      "caseId": "constructed-clinic-address",
+      "arm": "luna-none",
+      "source": "Constructed semantic fixture, not a real source or live write",
+      "expected": {
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "pass": true
+      },
+      "actual": {
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "pass": true
+      },
+      "classification": {
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": false,
+          "organizationStyle": "unstructured"
+        },
+        "contentType": "EVENT",
+        "confidence": 0.99,
+        "classificationReason": "The text advertises one walk-in clinic on Friday, October 16, from 9am to 4pm at a stated location. A clinic with advertised hours qualifies as an event; no food or drink special is mentioned.",
+        "estimatedItemCount": 1
+      },
+      "requests": [
+        {
+          "model": "gpt-6-luna",
+          "effort": "none",
+          "maxOutputTokens": 6000,
+          "imageCount": 0,
+          "promptSha256": "4ff7d53f8961700ebfc2ba7bdcd6db002fa1cdc3edcd8cfd4ebf323e1e99ec96",
+          "durationMs": 1793,
+          "httpStatus": 200,
+          "status": "completed",
+          "incompleteDetails": null,
+          "usage": {
+            "input_tokens": 1088,
+            "input_tokens_details": {
+              "cache_write_tokens": 1085,
+              "cached_tokens": 0
+            },
+            "output_tokens": 125,
+            "output_tokens_details": {
+              "reasoning_tokens": 0
+            },
+            "total_tokens": 1213
+          },
+          "error": null
+        }
+      ]
+    },
+    {
+      "caseId": "constructed-clinic-address",
+      "arm": "luna-high",
+      "source": "Constructed semantic fixture, not a real source or live write",
+      "expected": {
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "pass": true
+      },
+      "actual": {
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "pass": true
+      },
+      "classification": {
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": false,
+          "organizationStyle": "by date and time"
+        },
+        "contentType": "EVENT",
+        "confidence": 0.99,
+        "classificationReason": "The text advertises one walk-in clinic with a specific date, hours, and location. A clinic is a public activity, and there are no food or drink specials.",
+        "estimatedItemCount": 1
+      },
+      "requests": [
+        {
+          "model": "gpt-6-luna",
+          "effort": "high",
+          "maxOutputTokens": 6000,
+          "imageCount": 0,
+          "promptSha256": "4ff7d53f8961700ebfc2ba7bdcd6db002fa1cdc3edcd8cfd4ebf323e1e99ec96",
+          "durationMs": 2194,
+          "httpStatus": 200,
+          "status": "completed",
+          "incompleteDetails": null,
+          "usage": {
+            "input_tokens": 1088,
+            "input_tokens_details": {
+              "cache_write_tokens": 1085,
+              "cached_tokens": 0
+            },
+            "output_tokens": 192,
+            "output_tokens_details": {
+              "reasoning_tokens": 75
+            },
+            "total_tokens": 1280
+          },
+          "error": null
+        }
+      ]
+    },
+    {
+      "caseId": "constructed-clinic-address",
+      "arm": "luna-negative-review",
+      "source": "Constructed semantic fixture, not a real source or live write",
+      "expected": {
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "pass": true
+      },
+      "actual": {
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "pass": true
+      },
+      "classification": {
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": false,
+          "organizationStyle": "Single activity organized by date and time"
+        },
+        "contentType": "EVENT",
+        "confidence": 0.99,
+        "classificationReason": "The text advertises one walk-in clinic on Friday, October 16, from 9am to 4pm, with a location and no appointment required. A clinic is a qualifying public activity; no food or drink deal is mentioned.",
+        "estimatedItemCount": 1
+      },
+      "requests": [
+        {
+          "model": "gpt-6-luna",
+          "effort": "none",
+          "maxOutputTokens": 6000,
+          "imageCount": 0,
+          "promptSha256": "4ff7d53f8961700ebfc2ba7bdcd6db002fa1cdc3edcd8cfd4ebf323e1e99ec96",
+          "durationMs": 1899,
+          "httpStatus": 200,
+          "status": "completed",
+          "incompleteDetails": null,
+          "usage": {
+            "input_tokens": 1088,
+            "input_tokens_details": {
+              "cache_write_tokens": 0,
+              "cached_tokens": 1085
+            },
+            "output_tokens": 132,
+            "output_tokens_details": {
+              "reasoning_tokens": 0
+            },
+            "total_tokens": 1220
+          },
+          "error": null
+        }
+      ]
+    },
+    {
+      "caseId": "constructed-public-tour-gift",
+      "arm": "mini-current",
+      "source": "Constructed semantic fixture, not a real source or live write",
+      "expected": {
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "pass": true
+      },
+      "actual": {
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "pass": true
+      },
+      "classification": {
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": true,
+          "organizationStyle": "by date"
+        },
+        "contentType": "EVENT",
+        "confidence": 0.95,
+        "classificationReason": "The text advertises studio tours with specific dates and times (Saturday October 17 and Sunday October 18, 10am-5pm), which are public/bookable activities. No food or drink specials are mentioned. Two date/time slots are listed, so multiple items are present. No Facebook event data was provided.",
+        "estimatedItemCount": 2
+      },
+      "requests": [
+        {
+          "model": "gpt-5-mini",
+          "effort": "model_default",
+          "maxOutputTokens": 1500,
+          "imageCount": 0,
+          "promptSha256": "0ea58be8f5ca22df5a6fe30670f0728cb35edc50efd7d57b6ea8894f98ad4fcc",
+          "durationMs": 4782,
+          "httpStatus": 200,
+          "status": "completed",
+          "incompleteDetails": null,
+          "usage": {
+            "input_tokens": 1095,
+            "input_tokens_details": {
+              "cache_write_tokens": 0,
+              "cached_tokens": 0
+            },
+            "output_tokens": 489,
+            "output_tokens_details": {
+              "reasoning_tokens": 320
+            },
+            "total_tokens": 1584
+          },
+          "error": null
+        }
+      ]
+    },
+    {
+      "caseId": "constructed-public-tour-gift",
+      "arm": "luna-none",
+      "source": "Constructed semantic fixture, not a real source or live write",
+      "expected": {
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "pass": true
+      },
+      "actual": {
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "pass": true
+      },
+      "classification": {
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": false,
+          "organizationStyle": "by date"
+        },
+        "contentType": "EVENT",
+        "confidence": 0.99,
+        "classificationReason": "The text advertises pottery studio tours with dates and hours, which are public activities. The invitation to find a special gift is retail promotion, not a food or drink special. The tours are one activity offered across two dates, not a calendar of multiple activities.",
+        "estimatedItemCount": 1
+      },
+      "requests": [
+        {
+          "model": "gpt-6-luna",
+          "effort": "none",
+          "maxOutputTokens": 6000,
+          "imageCount": 0,
+          "promptSha256": "0ea58be8f5ca22df5a6fe30670f0728cb35edc50efd7d57b6ea8894f98ad4fcc",
+          "durationMs": 2288,
+          "httpStatus": 200,
+          "status": "completed",
+          "incompleteDetails": null,
+          "usage": {
+            "input_tokens": 1095,
+            "input_tokens_details": {
+              "cache_write_tokens": 0,
+              "cached_tokens": 1092
+            },
+            "output_tokens": 131,
+            "output_tokens_details": {
+              "reasoning_tokens": 0
+            },
+            "total_tokens": 1226
+          },
+          "error": null
+        }
+      ]
+    },
+    {
+      "caseId": "constructed-public-tour-gift",
+      "arm": "luna-high",
+      "source": "Constructed semantic fixture, not a real source or live write",
+      "expected": {
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "pass": true
+      },
+      "actual": {
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "pass": true
+      },
+      "classification": {
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": true,
+          "organizationStyle": "by date"
+        },
+        "contentType": "EVENT",
+        "confidence": 0.98,
+        "classificationReason": "The post advertises public pottery studio tours on Saturday, October 17, and Sunday, October 18, from 10am to 5pm. These are two dated tour slots, so this is an event rather than a calendar of many activities. The mention of finding a special gift is not a food or drink deal.",
+        "estimatedItemCount": 2
+      },
+      "requests": [
+        {
+          "model": "gpt-6-luna",
+          "effort": "high",
+          "maxOutputTokens": 6000,
+          "imageCount": 0,
+          "promptSha256": "0ea58be8f5ca22df5a6fe30670f0728cb35edc50efd7d57b6ea8894f98ad4fcc",
+          "durationMs": 3053,
+          "httpStatus": 200,
+          "status": "completed",
+          "incompleteDetails": null,
+          "usage": {
+            "input_tokens": 1095,
+            "input_tokens_details": {
+              "cache_write_tokens": 1092,
+              "cached_tokens": 0
+            },
+            "output_tokens": 242,
+            "output_tokens_details": {
+              "reasoning_tokens": 95
+            },
+            "total_tokens": 1337
+          },
+          "error": null
+        }
+      ]
+    },
+    {
+      "caseId": "constructed-public-tour-gift",
+      "arm": "luna-negative-review",
+      "source": "Constructed semantic fixture, not a real source or live write",
+      "expected": {
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "pass": true
+      },
+      "actual": {
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "pass": true
+      },
+      "classification": {
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": false,
+          "organizationStyle": "By date, with hours"
+        },
+        "contentType": "EVENT",
+        "confidence": 0.98,
+        "classificationReason": "The post advertises pottery studio tours on two dates with specific hours, making this a public activity. The mention of finding a special gift is shopping language, not a food or drink special. The tours are one activity offered across two dates, not a multi-event calendar or schedule.",
+        "estimatedItemCount": 1
+      },
+      "requests": [
+        {
+          "model": "gpt-6-luna",
+          "effort": "none",
+          "maxOutputTokens": 6000,
+          "imageCount": 0,
+          "promptSha256": "0ea58be8f5ca22df5a6fe30670f0728cb35edc50efd7d57b6ea8894f98ad4fcc",
+          "durationMs": 6704,
+          "httpStatus": 200,
+          "status": "completed",
+          "incompleteDetails": null,
+          "usage": {
+            "input_tokens": 1095,
+            "input_tokens_details": {
+              "cache_write_tokens": 1092,
+              "cached_tokens": 0
+            },
+            "output_tokens": 138,
+            "output_tokens_details": {
+              "reasoning_tokens": 0
+            },
+            "total_tokens": 1233
+          },
+          "error": null
+        }
+      ]
+    },
+    {
+      "caseId": "constructed-bookable-ice",
+      "arm": "mini-current",
+      "source": "Constructed semantic fixture, not a real source or live write",
+      "expected": {
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "pass": true
+      },
+      "actual": {
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "pass": true
+      },
+      "classification": {
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": true,
+          "organizationStyle": "date and time"
+        },
+        "contentType": "EVENT",
+        "confidence": 0.95,
+        "classificationReason": "The text advertises bookable ice time on a specific date (October 17) with two distinct time slots (9:20am-10:20am and 6:40pm-7:40pm), which qualifies as a public/bookable activity listing. No food or drink specials are mentioned and there are two separate slots listed.",
+        "estimatedItemCount": 2
+      },
+      "requests": [
+        {
+          "model": "gpt-5-mini",
+          "effort": "model_default",
+          "maxOutputTokens": 1500,
+          "imageCount": 0,
+          "promptSha256": "caae1d8434a3be358e6405c88a86fb179e104e04f26114745acad545e2e7a5f5",
+          "durationMs": 4103,
+          "httpStatus": 200,
+          "status": "completed",
+          "incompleteDetails": null,
+          "usage": {
+            "input_tokens": 1104,
+            "input_tokens_details": {
+              "cache_write_tokens": 0,
+              "cached_tokens": 0
+            },
+            "output_tokens": 447,
+            "output_tokens_details": {
+              "reasoning_tokens": 256
+            },
+            "total_tokens": 1551
+          },
+          "error": null
+        }
+      ]
+    },
+    {
+      "caseId": "constructed-bookable-ice",
+      "arm": "luna-none",
+      "source": "Constructed semantic fixture, not a real source or live write",
+      "expected": {
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "pass": true
+      },
+      "actual": {
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "pass": true
+      },
+      "classification": {
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": true,
+          "organizationStyle": "By date and time"
+        },
+        "contentType": "EVENT",
+        "confidence": 0.98,
+        "classificationReason": "The post advertises bookable ice time on October 17, which is a qualifying recreational activity. It lists two bookable time slots on one date, so this is a single-date activity offering rather than a calendar or multi-date schedule.",
+        "estimatedItemCount": 2
+      },
+      "requests": [
+        {
+          "model": "gpt-6-luna",
+          "effort": "none",
+          "maxOutputTokens": 6000,
+          "imageCount": 0,
+          "promptSha256": "caae1d8434a3be358e6405c88a86fb179e104e04f26114745acad545e2e7a5f5",
+          "durationMs": 1827,
+          "httpStatus": 200,
+          "status": "completed",
+          "incompleteDetails": null,
+          "usage": {
+            "input_tokens": 1104,
+            "input_tokens_details": {
+              "cache_write_tokens": 0,
+              "cached_tokens": 1101
+            },
+            "output_tokens": 129,
+            "output_tokens_details": {
+              "reasoning_tokens": 0
+            },
+            "total_tokens": 1233
+          },
+          "error": null
+        }
+      ]
+    },
+    {
+      "caseId": "constructed-bookable-ice",
+      "arm": "luna-high",
+      "source": "Constructed semantic fixture, not a real source or live write",
+      "expected": {
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "pass": true
+      },
+      "actual": {
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "pass": true
+      },
+      "classification": {
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": true,
+          "organizationStyle": "organized by date and time"
+        },
+        "contentType": "EVENT",
+        "confidence": 0.97,
+        "classificationReason": "The post advertises two bookable ice-time slots on October 17. These are public recreation activities, and the small number of slots fits EVENT rather than a broader schedule or calendar. No food or drink specials are mentioned.",
+        "estimatedItemCount": 2
+      },
+      "requests": [
+        {
+          "model": "gpt-6-luna",
+          "effort": "high",
+          "maxOutputTokens": 6000,
+          "imageCount": 0,
+          "promptSha256": "caae1d8434a3be358e6405c88a86fb179e104e04f26114745acad545e2e7a5f5",
+          "durationMs": 3145,
+          "httpStatus": 200,
+          "status": "completed",
+          "incompleteDetails": null,
+          "usage": {
+            "input_tokens": 1104,
+            "input_tokens_details": {
+              "cache_write_tokens": 1101,
+              "cached_tokens": 0
+            },
+            "output_tokens": 227,
+            "output_tokens_details": {
+              "reasoning_tokens": 98
+            },
+            "total_tokens": 1331
+          },
+          "error": null
+        }
+      ]
+    },
+    {
+      "caseId": "constructed-bookable-ice",
+      "arm": "luna-negative-review",
+      "source": "Constructed semantic fixture, not a real source or live write",
+      "expected": {
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "pass": true
+      },
+      "actual": {
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "pass": true
+      },
+      "classification": {
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": true,
+          "organizationStyle": "By time"
+        },
+        "contentType": "SCHEDULE",
+        "confidence": 0.98,
+        "classificationReason": "The post advertises two bookable ice-time slots on October 17, organized by their times. Bookable recreation qualifies as an activity, and the multiple time-organized slots fit SCHEDULE.",
+        "estimatedItemCount": 2
+      },
+      "requests": [
+        {
+          "model": "gpt-6-luna",
+          "effort": "none",
+          "maxOutputTokens": 6000,
+          "imageCount": 0,
+          "promptSha256": "caae1d8434a3be358e6405c88a86fb179e104e04f26114745acad545e2e7a5f5",
+          "durationMs": 1941,
+          "httpStatus": 200,
+          "status": "completed",
+          "incompleteDetails": null,
+          "usage": {
+            "input_tokens": 1104,
+            "input_tokens_details": {
+              "cache_write_tokens": 1101,
+              "cached_tokens": 0
+            },
+            "output_tokens": 119,
+            "output_tokens_details": {
+              "reasoning_tokens": 0
+            },
+            "total_tokens": 1223
+          },
+          "error": null
+        }
+      ]
+    },
+    {
+      "caseId": "constructed-open-pool",
+      "arm": "mini-current",
+      "source": "Constructed semantic fixture, not a real source or live write",
+      "expected": {
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "pass": true
+      },
+      "actual": {
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "pass": true
+      },
+      "classification": {
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": false,
+          "organizationStyle": "date-organized"
+        },
+        "contentType": "EVENT",
+        "confidence": 0.92,
+        "classificationReason": "The text advertises a single public activity with a specific date and time (Public family swim Saturday October 17, 1pm-3pm) and an admission price. This is a standalone event (open swim) rather than a food/drink special or a multi-item calendar.",
+        "estimatedItemCount": 1
+      },
+      "requests": [
+        {
+          "model": "gpt-5-mini",
+          "effort": "model_default",
+          "maxOutputTokens": 1500,
+          "imageCount": 0,
+          "promptSha256": "398b3a6f40811721ce614c1c286e673ceef618c8bf2157f6744a74952bdbb6ae",
+          "durationMs": 3604,
+          "httpStatus": 200,
+          "status": "completed",
+          "incompleteDetails": null,
+          "usage": {
+            "input_tokens": 1084,
+            "input_tokens_details": {
+              "cache_write_tokens": 0,
+              "cached_tokens": 0
+            },
+            "output_tokens": 370,
+            "output_tokens_details": {
+              "reasoning_tokens": 192
+            },
+            "total_tokens": 1454
+          },
+          "error": null
+        }
+      ]
+    },
+    {
+      "caseId": "constructed-open-pool",
+      "arm": "luna-none",
+      "source": "Constructed semantic fixture, not a real source or live write",
+      "expected": {
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "pass": true
+      },
+      "actual": {
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "pass": true
+      },
+      "classification": {
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": false,
+          "organizationStyle": "By date and time"
+        },
+        "contentType": "EVENT",
+        "confidence": 0.99,
+        "classificationReason": "The text advertises one public family swim activity on Saturday, October 17, from 1pm to 3pm. The $5 admission is an activity fee, not a food or drink special.",
+        "estimatedItemCount": 1
+      },
+      "requests": [
+        {
+          "model": "gpt-6-luna",
+          "effort": "none",
+          "maxOutputTokens": 6000,
+          "imageCount": 0,
+          "promptSha256": "398b3a6f40811721ce614c1c286e673ceef618c8bf2157f6744a74952bdbb6ae",
+          "durationMs": 1833,
+          "httpStatus": 200,
+          "status": "completed",
+          "incompleteDetails": null,
+          "usage": {
+            "input_tokens": 1084,
+            "input_tokens_details": {
+              "cache_write_tokens": 1081,
+              "cached_tokens": 0
+            },
+            "output_tokens": 96,
+            "output_tokens_details": {
+              "reasoning_tokens": 0
+            },
+            "total_tokens": 1180
+          },
+          "error": null
+        }
+      ]
+    },
+    {
+      "caseId": "constructed-open-pool",
+      "arm": "luna-high",
+      "source": "Constructed semantic fixture, not a real source or live write",
+      "expected": {
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "pass": true
+      },
+      "actual": {
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "pass": true
+      },
+      "classification": {
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": false,
+          "organizationStyle": "By date and time"
+        },
+        "contentType": "EVENT",
+        "confidence": 0.99,
+        "classificationReason": "The post advertises one public family swim on Saturday, October 17, from 1pm to 3pm. The $5 per-person admission is an activity fee, not a food or drink special.",
+        "estimatedItemCount": 1
+      },
+      "requests": [
+        {
+          "model": "gpt-6-luna",
+          "effort": "high",
+          "maxOutputTokens": 6000,
+          "imageCount": 0,
+          "promptSha256": "398b3a6f40811721ce614c1c286e673ceef618c8bf2157f6744a74952bdbb6ae",
+          "durationMs": 2374,
+          "httpStatus": 200,
+          "status": "completed",
+          "incompleteDetails": null,
+          "usage": {
+            "input_tokens": 1084,
+            "input_tokens_details": {
+              "cache_write_tokens": 1081,
+              "cached_tokens": 0
+            },
+            "output_tokens": 168,
+            "output_tokens_details": {
+              "reasoning_tokens": 43
+            },
+            "total_tokens": 1252
+          },
+          "error": null
+        }
+      ]
+    },
+    {
+      "caseId": "constructed-open-pool",
+      "arm": "luna-negative-review",
+      "source": "Constructed semantic fixture, not a real source or live write",
+      "expected": {
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "pass": true
+      },
+      "actual": {
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "pass": true
+      },
+      "classification": {
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": false,
+          "organizationStyle": "by date and time"
+        },
+        "contentType": "EVENT",
+        "confidence": 0.99,
+        "classificationReason": "The text advertises one public family swim activity on Saturday, October 17, from 1pm to 3pm. The $5 admission is an activity fee, not a food or drink special. This is a single dated activity, not a multi-event calendar or schedule.",
+        "estimatedItemCount": 1
+      },
+      "requests": [
+        {
+          "model": "gpt-6-luna",
+          "effort": "none",
+          "maxOutputTokens": 6000,
+          "imageCount": 0,
+          "promptSha256": "398b3a6f40811721ce614c1c286e673ceef618c8bf2157f6744a74952bdbb6ae",
+          "durationMs": 1981,
+          "httpStatus": 200,
+          "status": "completed",
+          "incompleteDetails": null,
+          "usage": {
+            "input_tokens": 1084,
+            "input_tokens_details": {
+              "cache_write_tokens": 0,
+              "cached_tokens": 1081
+            },
+            "output_tokens": 137,
+            "output_tokens_details": {
+              "reasoning_tokens": 0
+            },
+            "total_tokens": 1221
+          },
+          "error": null
+        }
+      ]
+    },
+    {
+      "caseId": "constructed-unpriced-special",
+      "arm": "mini-current",
+      "source": "Constructed semantic fixture, not a real source or live write",
+      "expected": {
+        "hasEvents": false,
+        "hasFoodSpecials": true,
+        "pass": true
+      },
+      "actual": {
+        "hasEvents": false,
+        "hasFoodSpecials": true,
+        "pass": true
+      },
+      "classification": {
+        "contentAnalysis": {
+          "hasEvents": false,
+          "hasFoodSpecials": true,
+          "hasMultipleItems": false,
+          "organizationStyle": "time"
+        },
+        "contentType": "FOOD_SPECIAL",
+        "confidence": 0.95,
+        "classificationReason": "The text explicitly advertises a single food lunch special ('Today's lunch special is fishcakes and chow') with an availability time ('Available until 4pm'), so this is a food/drink special rather than an event or a multi-item schedule.",
+        "estimatedItemCount": 1
+      },
+      "requests": [
+        {
+          "model": "gpt-5-mini",
+          "effort": "model_default",
+          "maxOutputTokens": 1500,
+          "imageCount": 0,
+          "promptSha256": "7a60a791ceaec507258b691ae1c4aea295bbd4c00a8754544d7ae7298548a6e6",
+          "durationMs": 4020,
+          "httpStatus": 200,
+          "status": "completed",
+          "incompleteDetails": null,
+          "usage": {
+            "input_tokens": 1078,
+            "input_tokens_details": {
+              "cache_write_tokens": 0,
+              "cached_tokens": 0
+            },
+            "output_tokens": 501,
+            "output_tokens_details": {
+              "reasoning_tokens": 320
+            },
+            "total_tokens": 1579
+          },
+          "error": null
+        }
+      ]
+    },
+    {
+      "caseId": "constructed-unpriced-special",
+      "arm": "luna-none",
+      "source": "Constructed semantic fixture, not a real source or live write",
+      "expected": {
+        "hasEvents": false,
+        "hasFoodSpecials": true,
+        "pass": true
+      },
+      "actual": {
+        "hasEvents": false,
+        "hasFoodSpecials": true,
+        "pass": true
+      },
+      "classification": {
+        "contentAnalysis": {
+          "hasEvents": false,
+          "hasFoodSpecials": true,
+          "hasMultipleItems": false,
+          "organizationStyle": "unstructured"
+        },
+        "contentType": "FOOD_SPECIAL",
+        "confidence": 0.99,
+        "classificationReason": "The text explicitly advertises today's lunch special, a food offering available until 4pm. It lists one special and no public or bookable activity.",
+        "estimatedItemCount": 1
+      },
+      "requests": [
+        {
+          "model": "gpt-6-luna",
+          "effort": "none",
+          "maxOutputTokens": 6000,
+          "imageCount": 0,
+          "promptSha256": "7a60a791ceaec507258b691ae1c4aea295bbd4c00a8754544d7ae7298548a6e6",
+          "durationMs": 1780,
+          "httpStatus": 200,
+          "status": "completed",
+          "incompleteDetails": null,
+          "usage": {
+            "input_tokens": 1078,
+            "input_tokens_details": {
+              "cache_write_tokens": 1075,
+              "cached_tokens": 0
+            },
+            "output_tokens": 111,
+            "output_tokens_details": {
+              "reasoning_tokens": 0
+            },
+            "total_tokens": 1189
+          },
+          "error": null
+        }
+      ]
+    },
+    {
+      "caseId": "constructed-unpriced-special",
+      "arm": "luna-high",
+      "source": "Constructed semantic fixture, not a real source or live write",
+      "expected": {
+        "hasEvents": false,
+        "hasFoodSpecials": true,
+        "pass": true
+      },
+      "actual": {
+        "hasEvents": false,
+        "hasFoodSpecials": true,
+        "pass": true
+      },
+      "classification": {
+        "contentAnalysis": {
+          "hasEvents": false,
+          "hasFoodSpecials": true,
+          "hasMultipleItems": false,
+          "organizationStyle": "unstructured"
+        },
+        "contentType": "FOOD_SPECIAL",
+        "confidence": 0.99,
+        "classificationReason": "The post advertises one named lunch special, fishcakes and chow, available until 4pm. It does not describe a public or bookable activity or list multiple items.",
+        "estimatedItemCount": 1
+      },
+      "requests": [
+        {
+          "model": "gpt-6-luna",
+          "effort": "high",
+          "maxOutputTokens": 6000,
+          "imageCount": 0,
+          "promptSha256": "7a60a791ceaec507258b691ae1c4aea295bbd4c00a8754544d7ae7298548a6e6",
+          "durationMs": 2117,
+          "httpStatus": 200,
+          "status": "completed",
+          "incompleteDetails": null,
+          "usage": {
+            "input_tokens": 1078,
+            "input_tokens_details": {
+              "cache_write_tokens": 1075,
+              "cached_tokens": 0
+            },
+            "output_tokens": 190,
+            "output_tokens_details": {
+              "reasoning_tokens": 72
+            },
+            "total_tokens": 1268
+          },
+          "error": null
+        }
+      ]
+    },
+    {
+      "caseId": "constructed-unpriced-special",
+      "arm": "luna-negative-review",
+      "source": "Constructed semantic fixture, not a real source or live write",
+      "expected": {
+        "hasEvents": false,
+        "hasFoodSpecials": true,
+        "pass": true
+      },
+      "actual": {
+        "hasEvents": false,
+        "hasFoodSpecials": true,
+        "pass": true
+      },
+      "classification": {
+        "contentAnalysis": {
+          "hasEvents": false,
+          "hasFoodSpecials": true,
+          "hasMultipleItems": false,
+          "organizationStyle": "unstructured"
+        },
+        "contentType": "FOOD_SPECIAL",
+        "confidence": 0.99,
+        "classificationReason": "The text advertises today's lunch special, a food offering available until 4pm. It describes one special and no public activity or event.",
+        "estimatedItemCount": 1
+      },
+      "requests": [
+        {
+          "model": "gpt-6-luna",
+          "effort": "none",
+          "maxOutputTokens": 6000,
+          "imageCount": 0,
+          "promptSha256": "7a60a791ceaec507258b691ae1c4aea295bbd4c00a8754544d7ae7298548a6e6",
+          "durationMs": 1837,
+          "httpStatus": 200,
+          "status": "completed",
+          "incompleteDetails": null,
+          "usage": {
+            "input_tokens": 1078,
+            "input_tokens_details": {
+              "cache_write_tokens": 0,
+              "cached_tokens": 1075
+            },
+            "output_tokens": 109,
+            "output_tokens_details": {
+              "reasoning_tokens": 0
+            },
+            "total_tokens": 1187
+          },
+          "error": null
+        }
+      ]
+    },
+    {
+      "caseId": "constructed-mixed-special",
+      "arm": "mini-current",
+      "source": "Constructed semantic fixture, not a real source or live write",
+      "expected": {
+        "hasEvents": true,
+        "hasFoodSpecials": true,
+        "pass": true
+      },
+      "actual": {
+        "hasEvents": true,
+        "hasFoodSpecials": true,
+        "pass": true
+      },
+      "classification": {
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": true,
+          "hasMultipleItems": true,
+          "organizationStyle": "unstructured"
+        },
+        "contentType": "MIXED_EVENTS_AND_SPECIALS",
+        "confidence": 0.9,
+        "classificationReason": "Text advertises a specific event ('Live music Friday October 16 at 8pm') and also a dinner special ('Dinner special tonight: fishcakes and chow'), so it contains both an event and a food/drink special. The content is presented as short unstructured sentences rather than a calendar or schedule.",
+        "estimatedItemCount": 2
+      },
+      "requests": [
+        {
+          "model": "gpt-5-mini",
+          "effort": "model_default",
+          "maxOutputTokens": 1500,
+          "imageCount": 0,
+          "promptSha256": "3ed6570e80c80c1a0ebfd1b7d405f4cd9943b0dcedf43229eae55e94efc1ce95",
+          "durationMs": 3703,
+          "httpStatus": 200,
+          "status": "completed",
+          "incompleteDetails": null,
+          "usage": {
+            "input_tokens": 1083,
+            "input_tokens_details": {
+              "cache_write_tokens": 0,
+              "cached_tokens": 0
+            },
+            "output_tokens": 497,
+            "output_tokens_details": {
+              "reasoning_tokens": 320
+            },
+            "total_tokens": 1580
+          },
+          "error": null
+        }
+      ]
+    },
+    {
+      "caseId": "constructed-mixed-special",
+      "arm": "luna-none",
+      "source": "Constructed semantic fixture, not a real source or live write",
+      "expected": {
+        "hasEvents": true,
+        "hasFoodSpecials": true,
+        "pass": true
+      },
+      "actual": {
+        "hasEvents": true,
+        "hasFoodSpecials": true,
+        "pass": true
+      },
+      "classification": {
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": true,
+          "hasMultipleItems": true,
+          "organizationStyle": "Unstructured; one dated music event and one food special"
+        },
+        "contentType": "MIXED_EVENTS_AND_SPECIALS",
+        "confidence": 0.99,
+        "classificationReason": "The text advertises live music on Friday October 16 at 8pm, which is a public event, and a dinner special of fishcakes and chow, which is a food special. These are two distinct items, not a multi-date calendar or schedule.",
+        "estimatedItemCount": 2
+      },
+      "requests": [
+        {
+          "model": "gpt-6-luna",
+          "effort": "none",
+          "maxOutputTokens": 6000,
+          "imageCount": 0,
+          "promptSha256": "3ed6570e80c80c1a0ebfd1b7d405f4cd9943b0dcedf43229eae55e94efc1ce95",
+          "durationMs": 1888,
+          "httpStatus": 200,
+          "status": "completed",
+          "incompleteDetails": null,
+          "usage": {
+            "input_tokens": 1083,
+            "input_tokens_details": {
+              "cache_write_tokens": 0,
+              "cached_tokens": 1080
+            },
+            "output_tokens": 146,
+            "output_tokens_details": {
+              "reasoning_tokens": 0
+            },
+            "total_tokens": 1229
+          },
+          "error": null
+        }
+      ]
+    },
+    {
+      "caseId": "constructed-mixed-special",
+      "arm": "luna-high",
+      "source": "Constructed semantic fixture, not a real source or live write",
+      "expected": {
+        "hasEvents": true,
+        "hasFoodSpecials": true,
+        "pass": true
+      },
+      "actual": {
+        "hasEvents": true,
+        "hasFoodSpecials": true,
+        "pass": true
+      },
+      "classification": {
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": true,
+          "hasMultipleItems": true,
+          "organizationStyle": "Unstructured"
+        },
+        "contentType": "MIXED_EVENTS_AND_SPECIALS",
+        "confidence": 0.98,
+        "classificationReason": "The post advertises live music on Friday, October 16 at 8pm, which is an event, and a dinner special of fishcakes and chow, which is a food special. These are two distinct items, not a multi-date calendar or schedule.",
+        "estimatedItemCount": 2
+      },
+      "requests": [
+        {
+          "model": "gpt-6-luna",
+          "effort": "high",
+          "maxOutputTokens": 6000,
+          "imageCount": 0,
+          "promptSha256": "3ed6570e80c80c1a0ebfd1b7d405f4cd9943b0dcedf43229eae55e94efc1ce95",
+          "durationMs": 2321,
+          "httpStatus": 200,
+          "status": "completed",
+          "incompleteDetails": null,
+          "usage": {
+            "input_tokens": 1083,
+            "input_tokens_details": {
+              "cache_write_tokens": 1080,
+              "cached_tokens": 0
+            },
+            "output_tokens": 198,
+            "output_tokens_details": {
+              "reasoning_tokens": 59
+            },
+            "total_tokens": 1281
+          },
+          "error": null
+        }
+      ]
+    },
+    {
+      "caseId": "constructed-mixed-special",
+      "arm": "luna-negative-review",
+      "source": "Constructed semantic fixture, not a real source or live write",
+      "expected": {
+        "hasEvents": true,
+        "hasFoodSpecials": true,
+        "pass": true
+      },
+      "actual": {
+        "hasEvents": true,
+        "hasFoodSpecials": true,
+        "pass": true
+      },
+      "classification": {
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": true,
+          "hasMultipleItems": true,
+          "organizationStyle": "Unstructured; one dated music event and one food special"
+        },
+        "contentType": "MIXED_EVENTS_AND_SPECIALS",
+        "confidence": 0.99,
+        "classificationReason": "The text advertises live music on Friday, October 16 at 8pm, which is an event, and a fishcakes-and-chow dinner special, which is a food special. Both are present, so the content is mixed.",
+        "estimatedItemCount": 2
+      },
+      "requests": [
+        {
+          "model": "gpt-6-luna",
+          "effort": "none",
+          "maxOutputTokens": 6000,
+          "imageCount": 0,
+          "promptSha256": "3ed6570e80c80c1a0ebfd1b7d405f4cd9943b0dcedf43229eae55e94efc1ce95",
+          "durationMs": 2090,
+          "httpStatus": 200,
+          "status": "completed",
+          "incompleteDetails": null,
+          "usage": {
+            "input_tokens": 1083,
+            "input_tokens_details": {
+              "cache_write_tokens": 1080,
+              "cached_tokens": 0
+            },
+            "output_tokens": 142,
+            "output_tokens_details": {
+              "reasoning_tokens": 0
+            },
+            "total_tokens": 1225
+          },
+          "error": null
+        }
+      ]
+    },
+    {
+      "caseId": "constructed-ordinary-month-menu",
+      "arm": "mini-current",
+      "source": "Constructed semantic fixture, not a real source or live write",
+      "expected": {
+        "hasEvents": false,
+        "hasFoodSpecials": false,
+        "pass": false
+      },
+      "actual": {
+        "hasEvents": false,
+        "hasFoodSpecials": true,
+        "pass": true
+      },
+      "classification": {
+        "contentAnalysis": {
+          "hasEvents": false,
+          "hasFoodSpecials": true,
+          "hasMultipleItems": false,
+          "organizationStyle": "unstructured"
+        },
+        "contentType": "FOOD_SPECIAL",
+        "confidence": 0.6,
+        "classificationReason": "The text advertises a single featured menu item (pumpkin soup) available throughout October with no dates/times for an activity. This is a food/drink promotion (one item) rather than an event or multi-item calendar. Confidence is moderate because it's a month-long featured menu item (not an explicit discount or daily special), but it is still a promoted food offering.",
+        "estimatedItemCount": 1
+      },
+      "requests": [
+        {
+          "model": "gpt-5-mini",
+          "effort": "model_default",
+          "maxOutputTokens": 1500,
+          "imageCount": 0,
+          "promptSha256": "a090198116bd00c2a6abf5bf7cd2a6360a53d8e3616b0169580a41deaf49f796",
+          "durationMs": 8233,
+          "httpStatus": 200,
+          "status": "completed",
+          "incompleteDetails": null,
+          "usage": {
+            "input_tokens": 1085,
+            "input_tokens_details": {
+              "cache_write_tokens": 0,
+              "cached_tokens": 0
+            },
+            "output_tokens": 943,
+            "output_tokens_details": {
+              "reasoning_tokens": 768
+            },
+            "total_tokens": 2028
+          },
+          "error": null
+        }
+      ]
+    },
+    {
+      "caseId": "constructed-ordinary-month-menu",
+      "arm": "luna-none",
+      "source": "Constructed semantic fixture, not a real source or live write",
+      "expected": {
+        "hasEvents": false,
+        "hasFoodSpecials": false,
+        "pass": false
+      },
+      "actual": {
+        "hasEvents": false,
+        "hasFoodSpecials": false,
+        "pass": false
+      },
+      "classification": {
+        "contentAnalysis": {
+          "hasEvents": false,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": false,
+          "organizationStyle": "unstructured"
+        },
+        "contentType": "FOOD_SPECIAL",
+        "confidence": 0,
+        "classificationReason": "The post advertises one featured menu item, pumpkin soup, for all of October at the usual menu price. An ordinary month-long featured menu item is not a food special under the criteria, and no activity or deal is advertised. FOOD_SPECIAL is the closest available category, though neither presence flag applies. | Safeguard: no activities or food/drink specials identified.",
+        "estimatedItemCount": 0
+      },
+      "requests": [
+        {
+          "model": "gpt-6-luna",
+          "effort": "none",
+          "maxOutputTokens": 6000,
+          "imageCount": 0,
+          "promptSha256": "a090198116bd00c2a6abf5bf7cd2a6360a53d8e3616b0169580a41deaf49f796",
+          "durationMs": 2086,
+          "httpStatus": 200,
+          "status": "completed",
+          "incompleteDetails": null,
+          "usage": {
+            "input_tokens": 1085,
+            "input_tokens_details": {
+              "cache_write_tokens": 0,
+              "cached_tokens": 1082
+            },
+            "output_tokens": 141,
+            "output_tokens_details": {
+              "reasoning_tokens": 0
+            },
+            "total_tokens": 1226
+          },
+          "error": null
+        }
+      ]
+    },
+    {
+      "caseId": "constructed-ordinary-month-menu",
+      "arm": "luna-high",
+      "source": "Constructed semantic fixture, not a real source or live write",
+      "expected": {
+        "hasEvents": false,
+        "hasFoodSpecials": false,
+        "pass": false
+      },
+      "actual": {
+        "hasEvents": false,
+        "hasFoodSpecials": false,
+        "pass": false
+      },
+      "classification": {
+        "contentAnalysis": {
+          "hasEvents": false,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": false,
+          "organizationStyle": "unstructured"
+        },
+        "contentType": "FOOD_SPECIAL",
+        "confidence": 0,
+        "classificationReason": "The post advertises one featured menu item throughout October at the usual menu price. It describes neither a public or bookable activity nor a food/drink deal; an ordinary month-long featured menu item is not a food special. FOOD_SPECIAL is the closest available category, but the presence flags remain false. | Safeguard: no activities or food/drink specials identified.",
+        "estimatedItemCount": 0
+      },
+      "requests": [
+        {
+          "model": "gpt-6-luna",
+          "effort": "high",
+          "maxOutputTokens": 6000,
+          "imageCount": 0,
+          "promptSha256": "a090198116bd00c2a6abf5bf7cd2a6360a53d8e3616b0169580a41deaf49f796",
+          "durationMs": 4240,
+          "httpStatus": 200,
+          "status": "completed",
+          "incompleteDetails": null,
+          "usage": {
+            "input_tokens": 1085,
+            "input_tokens_details": {
+              "cache_write_tokens": 1082,
+              "cached_tokens": 0
+            },
+            "output_tokens": 382,
+            "output_tokens_details": {
+              "reasoning_tokens": 239
+            },
+            "total_tokens": 1467
+          },
+          "error": null
+        }
+      ]
+    },
+    {
+      "caseId": "constructed-ordinary-month-menu",
+      "arm": "luna-negative-review",
+      "source": "Constructed semantic fixture, not a real source or live write",
+      "expected": {
+        "hasEvents": false,
+        "hasFoodSpecials": false,
+        "pass": false
+      },
+      "actual": {
+        "hasEvents": false,
+        "hasFoodSpecials": false,
+        "pass": false
+      },
+      "classification": {
+        "contentAnalysis": {
+          "hasEvents": false,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": false,
+          "organizationStyle": "unstructured"
+        },
+        "contentType": "FOOD_SPECIAL",
+        "confidence": 0,
+        "classificationReason": "The post advertises one featured menu item for October, but explicitly says it is sold at the usual menu price. An ordinary month-long featured item is not a food special under the criteria, and no activity is advertised. FOOD_SPECIAL is the closest available category, though neither presence flag is true. | Safeguard: no activities or food/drink specials identified.",
+        "estimatedItemCount": 0
+      },
+      "requests": [
+        {
+          "model": "gpt-6-luna",
+          "effort": "none",
+          "maxOutputTokens": 6000,
+          "imageCount": 0,
+          "promptSha256": "a090198116bd00c2a6abf5bf7cd2a6360a53d8e3616b0169580a41deaf49f796",
+          "durationMs": 2016,
+          "httpStatus": 200,
+          "status": "completed",
+          "incompleteDetails": null,
+          "usage": {
+            "input_tokens": 1085,
+            "input_tokens_details": {
+              "cache_write_tokens": 1082,
+              "cached_tokens": 0
+            },
+            "output_tokens": 122,
+            "output_tokens_details": {
+              "reasoning_tokens": 0
+            },
+            "total_tokens": 1207
+          },
+          "error": null
+        },
+        {
+          "model": "gpt-6-luna",
+          "effort": "high",
+          "maxOutputTokens": 6000,
+          "imageCount": 0,
+          "promptSha256": "a090198116bd00c2a6abf5bf7cd2a6360a53d8e3616b0169580a41deaf49f796",
+          "durationMs": 3881,
+          "httpStatus": 200,
+          "status": "completed",
+          "incompleteDetails": null,
+          "usage": {
+            "input_tokens": 1085,
+            "input_tokens_details": {
+              "cache_write_tokens": 0,
+              "cached_tokens": 1082
+            },
+            "output_tokens": 379,
+            "output_tokens_details": {
+              "reasoning_tokens": 237
+            },
+            "total_tokens": 1464
+          },
+          "error": null
+        }
+      ]
+    },
+    {
+      "caseId": "constructed-ordinary-restock",
+      "arm": "mini-current",
+      "source": "Constructed semantic fixture, not a real source or live write",
+      "expected": {
+        "hasEvents": false,
+        "hasFoodSpecials": false,
+        "pass": false
+      },
+      "actual": {
+        "hasEvents": false,
+        "hasFoodSpecials": false,
+        "pass": false
+      },
+      "classification": {
+        "contentAnalysis": {
+          "hasEvents": false,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": false,
+          "organizationStyle": "unstructured"
+        },
+        "contentType": "EVENT",
+        "confidence": 0,
+        "classificationReason": "This is a simple product restock notice for soup with a generic instruction to pick up during regular shopping hours. It does not advertise a public/bookable activity or a food/drink special. Because the taxonomy requires one of the predefined categories, it is labeled EVENT with low confidence to reflect that no true event or special is present. | Safeguard: no activities or food/drink specials identified.",
+        "estimatedItemCount": 0
+      },
+      "requests": [
+        {
+          "model": "gpt-5-mini",
+          "effort": "model_default",
+          "maxOutputTokens": 1500,
+          "imageCount": 0,
+          "promptSha256": "a8794f08a6ffd23a2b835555a3e8d7ac786e9e7e8febbbabd064571096f8aa54",
+          "durationMs": 7213,
+          "httpStatus": 200,
+          "status": "completed",
+          "incompleteDetails": null,
+          "usage": {
+            "input_tokens": 1087,
+            "input_tokens_details": {
+              "cache_write_tokens": 0,
+              "cached_tokens": 0
+            },
+            "output_tokens": 1081,
+            "output_tokens_details": {
+              "reasoning_tokens": 896
+            },
+            "total_tokens": 2168
+          },
+          "error": null
+        }
+      ]
+    },
+    {
+      "caseId": "constructed-ordinary-restock",
+      "arm": "luna-none",
+      "source": "Constructed semantic fixture, not a real source or live write",
+      "expected": {
+        "hasEvents": false,
+        "hasFoodSpecials": false,
+        "pass": false
+      },
+      "actual": {
+        "hasEvents": false,
+        "hasFoodSpecials": false,
+        "pass": false
+      },
+      "classification": {
+        "contentAnalysis": {
+          "hasEvents": false,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": false,
+          "organizationStyle": "unstructured"
+        },
+        "contentType": "FOOD_SPECIAL",
+        "confidence": 0,
+        "classificationReason": "The text describes soup being restocked as ordinary grocery inventory. It advertises no public or bookable activity and no food/drink deal, so neither presence flag is true. The selected category is the closest available option, though this is not actually a food special. | Safeguard: no activities or food/drink specials identified.",
+        "estimatedItemCount": 0
+      },
+      "requests": [
+        {
+          "model": "gpt-6-luna",
+          "effort": "none",
+          "maxOutputTokens": 6000,
+          "imageCount": 0,
+          "promptSha256": "a8794f08a6ffd23a2b835555a3e8d7ac786e9e7e8febbbabd064571096f8aa54",
+          "durationMs": 1564,
+          "httpStatus": 200,
+          "status": "completed",
+          "incompleteDetails": null,
+          "usage": {
+            "input_tokens": 1087,
+            "input_tokens_details": {
+              "cache_write_tokens": 1084,
+              "cached_tokens": 0
+            },
+            "output_tokens": 134,
+            "output_tokens_details": {
+              "reasoning_tokens": 0
+            },
+            "total_tokens": 1221
+          },
+          "error": null
+        }
+      ]
+    },
+    {
+      "caseId": "constructed-ordinary-restock",
+      "arm": "luna-high",
+      "source": "Constructed semantic fixture, not a real source or live write",
+      "expected": {
+        "hasEvents": false,
+        "hasFoodSpecials": false,
+        "pass": false
+      },
+      "actual": {
+        "hasEvents": false,
+        "hasFoodSpecials": false,
+        "pass": false
+      },
+      "classification": {
+        "contentAnalysis": {
+          "hasEvents": false,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": false,
+          "organizationStyle": "unstructured"
+        },
+        "contentType": "EVENT",
+        "confidence": 0,
+        "classificationReason": "The text reports an ordinary soup restock and invites shoppers to pick one up during regular shopping hours. It advertises no public or bookable activity and no food or drink deal. No matching category is available for a product restock without an activity or special, so EVENT is selected as a low-confidence fallback. | Safeguard: no activities or food/drink specials identified.",
+        "estimatedItemCount": 0
+      },
+      "requests": [
+        {
+          "model": "gpt-6-luna",
+          "effort": "high",
+          "maxOutputTokens": 6000,
+          "imageCount": 0,
+          "promptSha256": "a8794f08a6ffd23a2b835555a3e8d7ac786e9e7e8febbbabd064571096f8aa54",
+          "durationMs": 3990,
+          "httpStatus": 200,
+          "status": "completed",
+          "incompleteDetails": null,
+          "usage": {
+            "input_tokens": 1087,
+            "input_tokens_details": {
+              "cache_write_tokens": 1084,
+              "cached_tokens": 0
+            },
+            "output_tokens": 278,
+            "output_tokens_details": {
+              "reasoning_tokens": 135
+            },
+            "total_tokens": 1365
+          },
+          "error": null
+        }
+      ]
+    },
+    {
+      "caseId": "constructed-ordinary-restock",
+      "arm": "luna-negative-review",
+      "source": "Constructed semantic fixture, not a real source or live write",
+      "expected": {
+        "hasEvents": false,
+        "hasFoodSpecials": false,
+        "pass": false
+      },
+      "actual": {
+        "hasEvents": false,
+        "hasFoodSpecials": false,
+        "pass": false
+      },
+      "classification": {
+        "contentAnalysis": {
+          "hasEvents": false,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": false,
+          "organizationStyle": "unstructured"
+        },
+        "contentType": "EVENT",
+        "confidence": 0,
+        "classificationReason": "The text describes soup being restocked for ordinary shopping hours. It advertises no public or bookable activity and no food or drink deal; an ordinary stock arrival is not a special. EVENT is selected only because the required categories provide no option for content with neither events nor specials. | Safeguard: no activities or food/drink specials identified.",
+        "estimatedItemCount": 0
+      },
+      "requests": [
+        {
+          "model": "gpt-6-luna",
+          "effort": "none",
+          "maxOutputTokens": 6000,
+          "imageCount": 0,
+          "promptSha256": "a8794f08a6ffd23a2b835555a3e8d7ac786e9e7e8febbbabd064571096f8aa54",
+          "durationMs": 1724,
+          "httpStatus": 200,
+          "status": "completed",
+          "incompleteDetails": null,
+          "usage": {
+            "input_tokens": 1087,
+            "input_tokens_details": {
+              "cache_write_tokens": 0,
+              "cached_tokens": 1084
+            },
+            "output_tokens": 123,
+            "output_tokens_details": {
+              "reasoning_tokens": 0
+            },
+            "total_tokens": 1210
+          },
+          "error": null
+        },
+        {
+          "model": "gpt-6-luna",
+          "effort": "high",
+          "maxOutputTokens": 6000,
+          "imageCount": 0,
+          "promptSha256": "a8794f08a6ffd23a2b835555a3e8d7ac786e9e7e8febbbabd064571096f8aa54",
+          "durationMs": 12213,
+          "httpStatus": 200,
+          "status": "completed",
+          "incompleteDetails": null,
+          "usage": {
+            "input_tokens": 1087,
+            "input_tokens_details": {
+              "cache_write_tokens": 0,
+              "cached_tokens": 1084
+            },
+            "output_tokens": 424,
+            "output_tokens_details": {
+              "reasoning_tokens": 313
+            },
+            "total_tokens": 1511
+          },
+          "error": null
+        }
+      ]
+    },
+    {
+      "caseId": "constructed-retail-sale",
+      "arm": "mini-current",
+      "source": "Constructed semantic fixture, not a real source or live write",
+      "expected": {
+        "hasEvents": false,
+        "hasFoodSpecials": false,
+        "pass": false
+      },
+      "actual": {
+        "hasEvents": false,
+        "hasFoodSpecials": false,
+        "pass": false
+      },
+      "classification": {
+        "contentAnalysis": {
+          "hasEvents": false,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": false,
+          "organizationStyle": "unstructured"
+        },
+        "contentType": "EVENT",
+        "confidence": 0.55,
+        "classificationReason": "Heuristic classification from text signals | GPT error: Expected ',' or '}' after property value in JSON at position 152 (line 7 column 4)",
+        "estimatedItemCount": 1
+      },
+      "requests": [
+        {
+          "model": "gpt-5-mini",
+          "effort": "model_default",
+          "maxOutputTokens": 1500,
+          "imageCount": 0,
+          "promptSha256": "5abc439549fc9f25ad21f76c17f319a4c980a1b2c9e177115eb5f154402779f8",
+          "durationMs": 9894,
+          "httpStatus": 200,
+          "status": "incomplete",
+          "incompleteDetails": {
+            "reason": "max_output_tokens"
+          },
+          "usage": {
+            "input_tokens": 1081,
+            "input_tokens_details": {
+              "cache_write_tokens": 0,
+              "cached_tokens": 0
+            },
+            "output_tokens": 1500,
+            "output_tokens_details": {
+              "reasoning_tokens": 1344
+            },
+            "total_tokens": 2581
+          },
+          "error": null
+        }
+      ]
+    },
+    {
+      "caseId": "constructed-retail-sale",
+      "arm": "luna-none",
+      "source": "Constructed semantic fixture, not a real source or live write",
+      "expected": {
+        "hasEvents": false,
+        "hasFoodSpecials": false,
+        "pass": false
+      },
+      "actual": {
+        "hasEvents": false,
+        "hasFoodSpecials": false,
+        "pass": false
+      },
+      "classification": {
+        "contentAnalysis": {
+          "hasEvents": false,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": false,
+          "organizationStyle": "unstructured"
+        },
+        "contentType": "EVENT",
+        "confidence": 0,
+        "classificationReason": "This is a retail clothing discount advertised for the weekend, not a public or bookable activity and not a food or drink special. No activities or multiple listings are present. The categories provide no retail-promotion option, so EVENT is selected as the closest available category. | Safeguard: no activities or food/drink specials identified.",
+        "estimatedItemCount": 0
+      },
+      "requests": [
+        {
+          "model": "gpt-6-luna",
+          "effort": "none",
+          "maxOutputTokens": 6000,
+          "imageCount": 0,
+          "promptSha256": "5abc439549fc9f25ad21f76c17f319a4c980a1b2c9e177115eb5f154402779f8",
+          "durationMs": 2082,
+          "httpStatus": 200,
+          "status": "completed",
+          "incompleteDetails": null,
+          "usage": {
+            "input_tokens": 1081,
+            "input_tokens_details": {
+              "cache_write_tokens": 1078,
+              "cached_tokens": 0
+            },
+            "output_tokens": 132,
+            "output_tokens_details": {
+              "reasoning_tokens": 0
+            },
+            "total_tokens": 1213
+          },
+          "error": null
+        }
+      ]
+    },
+    {
+      "caseId": "constructed-retail-sale",
+      "arm": "luna-high",
+      "source": "Constructed semantic fixture, not a real source or live write",
+      "expected": {
+        "hasEvents": false,
+        "hasFoodSpecials": false,
+        "pass": false
+      },
+      "actual": {
+        "hasEvents": false,
+        "hasFoodSpecials": false,
+        "pass": false
+      },
+      "classification": {
+        "contentAnalysis": {
+          "hasEvents": false,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": false,
+          "organizationStyle": "unstructured"
+        },
+        "contentType": "EVENT",
+        "confidence": 0,
+        "classificationReason": "This is a retail discount on coats, not a public or bookable activity and not a food or drink special. No matching category is available for a generic shopping advertisement, so EVENT is the closest available option with low confidence. | Safeguard: no activities or food/drink specials identified.",
+        "estimatedItemCount": 0
+      },
+      "requests": [
+        {
+          "model": "gpt-6-luna",
+          "effort": "high",
+          "maxOutputTokens": 6000,
+          "imageCount": 0,
+          "promptSha256": "5abc439549fc9f25ad21f76c17f319a4c980a1b2c9e177115eb5f154402779f8",
+          "durationMs": 2332,
+          "httpStatus": 200,
+          "status": "completed",
+          "incompleteDetails": null,
+          "usage": {
+            "input_tokens": 1081,
+            "input_tokens_details": {
+              "cache_write_tokens": 1078,
+              "cached_tokens": 0
+            },
+            "output_tokens": 211,
+            "output_tokens_details": {
+              "reasoning_tokens": 85
+            },
+            "total_tokens": 1292
+          },
+          "error": null
+        }
+      ]
+    },
+    {
+      "caseId": "constructed-retail-sale",
+      "arm": "luna-negative-review",
+      "source": "Constructed semantic fixture, not a real source or live write",
+      "expected": {
+        "hasEvents": false,
+        "hasFoodSpecials": false,
+        "pass": false
+      },
+      "actual": {
+        "hasEvents": false,
+        "hasFoodSpecials": false,
+        "pass": false
+      },
+      "classification": {
+        "contentAnalysis": {
+          "hasEvents": false,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": false,
+          "organizationStyle": "unstructured"
+        },
+        "contentType": "EVENT",
+        "confidence": 0,
+        "classificationReason": "The post advertises a retail discount on coats, not a public or bookable activity or a food/drink special. No listed category directly fits a general shopping advertisement, so EVENT is selected only as the closest available option; neither events nor food specials are present. | Safeguard: no activities or food/drink specials identified.",
+        "estimatedItemCount": 0
+      },
+      "requests": [
+        {
+          "model": "gpt-6-luna",
+          "effort": "none",
+          "maxOutputTokens": 6000,
+          "imageCount": 0,
+          "promptSha256": "5abc439549fc9f25ad21f76c17f319a4c980a1b2c9e177115eb5f154402779f8",
+          "durationMs": 2225,
+          "httpStatus": 200,
+          "status": "completed",
+          "incompleteDetails": null,
+          "usage": {
+            "input_tokens": 1081,
+            "input_tokens_details": {
+              "cache_write_tokens": 0,
+              "cached_tokens": 1078
+            },
+            "output_tokens": 123,
+            "output_tokens_details": {
+              "reasoning_tokens": 0
+            },
+            "total_tokens": 1204
+          },
+          "error": null
+        },
+        {
+          "model": "gpt-6-luna",
+          "effort": "high",
+          "maxOutputTokens": 6000,
+          "imageCount": 0,
+          "promptSha256": "5abc439549fc9f25ad21f76c17f319a4c980a1b2c9e177115eb5f154402779f8",
+          "durationMs": 2600,
+          "httpStatus": 200,
+          "status": "completed",
+          "incompleteDetails": null,
+          "usage": {
+            "input_tokens": 1081,
+            "input_tokens_details": {
+              "cache_write_tokens": 0,
+              "cached_tokens": 1078
+            },
+            "output_tokens": 238,
+            "output_tokens_details": {
+              "reasoning_tokens": 104
+            },
+            "total_tokens": 1319
+          },
+          "error": null
+        }
+      ]
+    },
+    {
+      "caseId": "constructed-closure",
+      "arm": "mini-current",
+      "source": "Constructed semantic fixture, not a real source or live write",
+      "expected": {
+        "hasEvents": false,
+        "hasFoodSpecials": false,
+        "pass": false
+      },
+      "actual": {
+        "hasEvents": false,
+        "hasFoodSpecials": false,
+        "pass": false
+      },
+      "classification": {
+        "contentAnalysis": {
+          "hasEvents": false,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": false,
+          "organizationStyle": "date"
+        },
+        "contentType": "EVENT",
+        "confidence": 0,
+        "classificationReason": "The message is a date-specific business hours/closure notice ('Closed for Thanksgiving Monday October 12. Reopening Tuesday at our usual hours.'). It does not advertise an activity or food/drink special. Of the available categories, the closest single category is EVENT because it references a specific date, but this is a closure rather than a public/bookable activity, so confidence is low. | Safeguard: no activities or food/drink specials identified.",
+        "estimatedItemCount": 0
+      },
+      "requests": [
+        {
+          "model": "gpt-5-mini",
+          "effort": "model_default",
+          "maxOutputTokens": 1500,
+          "imageCount": 0,
+          "promptSha256": "cdf0b3053dcd044d55226d1efeeea09516b94aaa9c811c586b1f66b0be1ff8f5",
+          "durationMs": 7487,
+          "httpStatus": 200,
+          "status": "completed",
+          "incompleteDetails": null,
+          "usage": {
+            "input_tokens": 1079,
+            "input_tokens_details": {
+              "cache_write_tokens": 0,
+              "cached_tokens": 0
+            },
+            "output_tokens": 1011,
+            "output_tokens_details": {
+              "reasoning_tokens": 832
+            },
+            "total_tokens": 2090
+          },
+          "error": null
+        }
+      ]
+    },
+    {
+      "caseId": "constructed-closure",
+      "arm": "luna-none",
+      "source": "Constructed semantic fixture, not a real source or live write",
+      "expected": {
+        "hasEvents": false,
+        "hasFoodSpecials": false,
+        "pass": false
+      },
+      "actual": {
+        "hasEvents": false,
+        "hasFoodSpecials": false,
+        "pass": false
+      },
+      "classification": {
+        "contentAnalysis": {
+          "hasEvents": false,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": false,
+          "organizationStyle": "unstructured"
+        },
+        "contentType": "EVENT",
+        "confidence": 0,
+        "classificationReason": "The text announces a holiday closure and reopening, not a public or bookable activity, food/drink special, calendar, or schedule. No extractable activities or specials are present. | Safeguard: no activities or food/drink specials identified.",
+        "estimatedItemCount": 0
+      },
+      "requests": [
+        {
+          "model": "gpt-6-luna",
+          "effort": "none",
+          "maxOutputTokens": 6000,
+          "imageCount": 0,
+          "promptSha256": "cdf0b3053dcd044d55226d1efeeea09516b94aaa9c811c586b1f66b0be1ff8f5",
+          "durationMs": 1607,
+          "httpStatus": 200,
+          "status": "completed",
+          "incompleteDetails": null,
+          "usage": {
+            "input_tokens": 1079,
+            "input_tokens_details": {
+              "cache_write_tokens": 0,
+              "cached_tokens": 1076
+            },
+            "output_tokens": 115,
+            "output_tokens_details": {
+              "reasoning_tokens": 0
+            },
+            "total_tokens": 1194
+          },
+          "error": null
+        }
+      ]
+    },
+    {
+      "caseId": "constructed-closure",
+      "arm": "luna-high",
+      "source": "Constructed semantic fixture, not a real source or live write",
+      "expected": {
+        "hasEvents": false,
+        "hasFoodSpecials": false,
+        "pass": false
+      },
+      "actual": {
+        "hasEvents": false,
+        "hasFoodSpecials": false,
+        "pass": false
+      },
+      "classification": {
+        "contentAnalysis": {
+          "hasEvents": false,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": false,
+          "organizationStyle": "unstructured"
+        },
+        "contentType": "EVENT",
+        "confidence": 0,
+        "classificationReason": "The post announces a Thanksgiving Monday closure and a reopening time, not a public or bookable activity or a food/drink special. No extractable events or specials are present; EVENT is selected only because the schema requires one category. | Safeguard: no activities or food/drink specials identified.",
+        "estimatedItemCount": 0
+      },
+      "requests": [
+        {
+          "model": "gpt-6-luna",
+          "effort": "high",
+          "maxOutputTokens": 6000,
+          "imageCount": 0,
+          "promptSha256": "cdf0b3053dcd044d55226d1efeeea09516b94aaa9c811c586b1f66b0be1ff8f5",
+          "durationMs": 3314,
+          "httpStatus": 200,
+          "status": "completed",
+          "incompleteDetails": null,
+          "usage": {
+            "input_tokens": 1079,
+            "input_tokens_details": {
+              "cache_write_tokens": 1076,
+              "cached_tokens": 0
+            },
+            "output_tokens": 233,
+            "output_tokens_details": {
+              "reasoning_tokens": 132
+            },
+            "total_tokens": 1312
+          },
+          "error": null
+        }
+      ]
+    },
+    {
+      "caseId": "constructed-closure",
+      "arm": "luna-negative-review",
+      "source": "Constructed semantic fixture, not a real source or live write",
+      "expected": {
+        "hasEvents": false,
+        "hasFoodSpecials": false,
+        "pass": false
+      },
+      "actual": {
+        "hasEvents": false,
+        "hasFoodSpecials": false,
+        "pass": false
+      },
+      "classification": {
+        "contentAnalysis": {
+          "hasEvents": false,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": false,
+          "organizationStyle": "unstructured"
+        },
+        "contentType": "EVENT",
+        "confidence": 0,
+        "classificationReason": "The text announces a holiday closure and reopening, not a public or bookable activity or a food/drink special. EVENT is selected only because the schema provides no category for a closure announcement. | Safeguard: no activities or food/drink specials identified.",
+        "estimatedItemCount": 0
+      },
+      "requests": [
+        {
+          "model": "gpt-6-luna",
+          "effort": "none",
+          "maxOutputTokens": 6000,
+          "imageCount": 0,
+          "promptSha256": "cdf0b3053dcd044d55226d1efeeea09516b94aaa9c811c586b1f66b0be1ff8f5",
+          "durationMs": 1645,
+          "httpStatus": 200,
+          "status": "completed",
+          "incompleteDetails": null,
+          "usage": {
+            "input_tokens": 1079,
+            "input_tokens_details": {
+              "cache_write_tokens": 1076,
+              "cached_tokens": 0
+            },
+            "output_tokens": 100,
+            "output_tokens_details": {
+              "reasoning_tokens": 0
+            },
+            "total_tokens": 1179
+          },
+          "error": null
+        },
+        {
+          "model": "gpt-6-luna",
+          "effort": "high",
+          "maxOutputTokens": 6000,
+          "imageCount": 0,
+          "promptSha256": "cdf0b3053dcd044d55226d1efeeea09516b94aaa9c811c586b1f66b0be1ff8f5",
+          "durationMs": 3146,
+          "httpStatus": 200,
+          "status": "completed",
+          "incompleteDetails": null,
+          "usage": {
+            "input_tokens": 1079,
+            "input_tokens_details": {
+              "cache_write_tokens": 0,
+              "cached_tokens": 1076
+            },
+            "output_tokens": 273,
+            "output_tokens_details": {
+              "reasoning_tokens": 154
+            },
+            "total_tokens": 1352
+          },
+          "error": null
+        }
+      ]
+    },
+    {
+      "caseId": "constructed-service-price",
+      "arm": "mini-current",
+      "source": "Constructed semantic fixture, not a real source or live write",
+      "expected": {
+        "hasEvents": false,
+        "hasFoodSpecials": false,
+        "pass": false
+      },
+      "actual": {
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "pass": true
+      },
+      "classification": {
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": false,
+          "organizationStyle": "unstructured"
+        },
+        "contentType": "EVENT",
+        "confidence": 0.62,
+        "classificationReason": "This is an advertisement for a bookable service (standard bookkeeping) with a price and a call to 'Call for an appointment', which constitutes a single bookable activity. No dates or times are provided and the text is unstructured, so it's classified as a single EVENT (bookable appointment) with moderate confidence.",
+        "estimatedItemCount": 1
+      },
+      "requests": [
+        {
+          "model": "gpt-5-mini",
+          "effort": "model_default",
+          "maxOutputTokens": 1500,
+          "imageCount": 0,
+          "promptSha256": "3986afd5c76816841c76eec3532c4af6414055285a50b73701e4dd34c00f6931",
+          "durationMs": 5155,
+          "httpStatus": 200,
+          "status": "completed",
+          "incompleteDetails": null,
+          "usage": {
+            "input_tokens": 1076,
+            "input_tokens_details": {
+              "cache_write_tokens": 0,
+              "cached_tokens": 0
+            },
+            "output_tokens": 687,
+            "output_tokens_details": {
+              "reasoning_tokens": 512
+            },
+            "total_tokens": 1763
+          },
+          "error": null
+        }
+      ]
+    },
+    {
+      "caseId": "constructed-service-price",
+      "arm": "luna-none",
+      "source": "Constructed semantic fixture, not a real source or live write",
+      "expected": {
+        "hasEvents": false,
+        "hasFoodSpecials": false,
+        "pass": false
+      },
+      "actual": {
+        "hasEvents": false,
+        "hasFoodSpecials": false,
+        "pass": false
+      },
+      "classification": {
+        "contentAnalysis": {
+          "hasEvents": false,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": false,
+          "organizationStyle": "unstructured"
+        },
+        "contentType": "EVENT",
+        "confidence": 0,
+        "classificationReason": "The text advertises a bookkeeping service for $250 and invites people to call for an appointment. It lists no public or bookable activity, food or drink special, or date-organized content. The available categories do not include a general service advertisement, so none fits; EVENT is selected as the required category. | Safeguard: no activities or food/drink specials identified.",
+        "estimatedItemCount": 0
+      },
+      "requests": [
+        {
+          "model": "gpt-6-luna",
+          "effort": "none",
+          "maxOutputTokens": 6000,
+          "imageCount": 0,
+          "promptSha256": "3986afd5c76816841c76eec3532c4af6414055285a50b73701e4dd34c00f6931",
+          "durationMs": 1893,
+          "httpStatus": 200,
+          "status": "completed",
+          "incompleteDetails": null,
+          "usage": {
+            "input_tokens": 1076,
+            "input_tokens_details": {
+              "cache_write_tokens": 0,
+              "cached_tokens": 1073
+            },
+            "output_tokens": 141,
+            "output_tokens_details": {
+              "reasoning_tokens": 0
+            },
+            "total_tokens": 1217
+          },
+          "error": null
+        }
+      ]
+    },
+    {
+      "caseId": "constructed-service-price",
+      "arm": "luna-high",
+      "source": "Constructed semantic fixture, not a real source or live write",
+      "expected": {
+        "hasEvents": false,
+        "hasFoodSpecials": false,
+        "pass": false
+      },
+      "actual": {
+        "hasEvents": false,
+        "hasFoodSpecials": false,
+        "pass": false
+      },
+      "classification": {
+        "contentAnalysis": {
+          "hasEvents": false,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": false,
+          "organizationStyle": "unstructured"
+        },
+        "contentType": "EVENT",
+        "confidence": 0,
+        "classificationReason": "The post advertises a bookkeeping service for $250 and invites people to call for an appointment. It lists no public or bookable activity and no food or drink special, so none of the available categories fits; EVENT is selected only as the closest available category, with low confidence. | Safeguard: no activities or food/drink specials identified.",
+        "estimatedItemCount": 0
+      },
+      "requests": [
+        {
+          "model": "gpt-6-luna",
+          "effort": "high",
+          "maxOutputTokens": 6000,
+          "imageCount": 0,
+          "promptSha256": "3986afd5c76816841c76eec3532c4af6414055285a50b73701e4dd34c00f6931",
+          "durationMs": 5269,
+          "httpStatus": 200,
+          "status": "completed",
+          "incompleteDetails": null,
+          "usage": {
+            "input_tokens": 1076,
+            "input_tokens_details": {
+              "cache_write_tokens": 0,
+              "cached_tokens": 1073
+            },
+            "output_tokens": 233,
+            "output_tokens_details": {
+              "reasoning_tokens": 96
+            },
+            "total_tokens": 1309
+          },
+          "error": null
+        }
+      ]
+    },
+    {
+      "caseId": "constructed-service-price",
+      "arm": "luna-negative-review",
+      "source": "Constructed semantic fixture, not a real source or live write",
+      "expected": {
+        "hasEvents": false,
+        "hasFoodSpecials": false,
+        "pass": false
+      },
+      "actual": {
+        "hasEvents": false,
+        "hasFoodSpecials": false,
+        "pass": false
+      },
+      "classification": {
+        "contentAnalysis": {
+          "hasEvents": false,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": false,
+          "organizationStyle": "unstructured"
+        },
+        "contentType": "EVENT",
+        "confidence": 0,
+        "classificationReason": "The text advertises a bookkeeping service for $250 and invites callers to make an appointment. It lists no public or bookable activity and no food or drink special. Since the available categories have no general-service-advertisement option, EVENT is selected as the closest available category with low confidence. | Safeguard: no activities or food/drink specials identified.",
+        "estimatedItemCount": 0
+      },
+      "requests": [
+        {
+          "model": "gpt-6-luna",
+          "effort": "none",
+          "maxOutputTokens": 6000,
+          "imageCount": 0,
+          "promptSha256": "3986afd5c76816841c76eec3532c4af6414055285a50b73701e4dd34c00f6931",
+          "durationMs": 1915,
+          "httpStatus": 200,
+          "status": "completed",
+          "incompleteDetails": null,
+          "usage": {
+            "input_tokens": 1076,
+            "input_tokens_details": {
+              "cache_write_tokens": 1073,
+              "cached_tokens": 0
+            },
+            "output_tokens": 146,
+            "output_tokens_details": {
+              "reasoning_tokens": 0
+            },
+            "total_tokens": 1222
+          },
+          "error": null
+        },
+        {
+          "model": "gpt-6-luna",
+          "effort": "high",
+          "maxOutputTokens": 6000,
+          "imageCount": 0,
+          "promptSha256": "3986afd5c76816841c76eec3532c4af6414055285a50b73701e4dd34c00f6931",
+          "durationMs": 3205,
+          "httpStatus": 200,
+          "status": "completed",
+          "incompleteDetails": null,
+          "usage": {
+            "input_tokens": 1076,
+            "input_tokens_details": {
+              "cache_write_tokens": 1073,
+              "cached_tokens": 0
+            },
+            "output_tokens": 250,
+            "output_tokens_details": {
+              "reasoning_tokens": 111
+            },
+            "total_tokens": 1326
+          },
+          "error": null
+        }
+      ]
+    }
+  ],
+  "limits": [
+    "Original captured color images, not exact production preprocessing",
+    "Full galleries directly classified, not the production first-four/refresh sequence",
+    "No live Firestore writer or live deduplication tested",
+    "Formal Facebook metadata API fixtures are constructed, not real scraped Facebook Events",
+    "Earlier downstream replays used first revised prompt; frozen classification signatures recorded for comparison with final prompt"
+  ]
+}

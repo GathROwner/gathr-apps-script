@@ -82,6 +82,8 @@ This is a model/routing comparison, not a complete independent audit of every ev
 
 ## Proposed sequence
 
+Follow-up: the [local hardening evaluation](luna-stage2-oct9-local-hardening.md) implements and tests the next safeguards, including a candidate that rechecks negative no-reasoning Luna results at high effort. Its results supersede the starting-arm recommendation below; production Stage 2 remains Mini.
+
 1. Preserve tomorrow's approved Stage 1/3 baseline and collect its real cost/quality results.
 2. In local Stage 2 experiments, explicitly include public recreation, bookable activities, clinics, tours, and classes in EVENT. Stage 1 already decides whether content qualifies; a poor fit to an entertainment-only label should not silently discard a useful post.
 3. Narrow the shared food guard so addresses, generic gifts/services, and unrelated prices do not manufacture food-special routing. Preserve advertised unpriced daily food/drink specials and genuine event-plus-special posts.

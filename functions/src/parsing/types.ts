@@ -194,6 +194,10 @@ export interface ParsingConfig {
   stage1LunaPilot?: boolean;
   stage1PilotAllocationHandler?: (selected: boolean) => void;
   stage2ModelOverride?: string;
+  /** GPT-6 Stage 2 only; omitted preserves the existing no-reasoning default. */
+  stage2ReasoningEffort?: 'none' | 'low' | 'medium' | 'high' | 'xhigh' | 'max';
+  /** Opt-in bounded same-model high-effort review before accepting a fast Stage 2 hold. */
+  stage2LunaNegativeRecheck?: boolean;
   stage3ModelOverride?: string;
   stage3ReasoningEffort?: 'none' | 'low' | 'medium' | 'high' | 'xhigh' | 'max';
   stage3ImageDetail?: 'low' | 'high' | 'original' | 'auto';
