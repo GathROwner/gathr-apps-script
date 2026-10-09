@@ -16,6 +16,7 @@
  */
 
 import { DateTime } from 'luxon';
+import { reconcilePublicPoolWindows, hasUnsupportedPostDateFallback } from './sourceOccurrenceGuards.js';
 import { AsyncLocalStorage } from 'async_hooks';
 import { execFile } from 'child_process';
 import { promisify } from 'util';
@@ -1826,6 +1827,19 @@ async function parsePostDataCore(
         model: stage3Model,
         attempt,
       });
+
+      const sourceLocalDate = DateTime.fromISO(timestamp, { zone: cfg.timezone }).toISODate() || '';
+      stage3Items = reconcilePublicPoolWindows(stage3Items, combinedText, sourceLocalDate, userName);
+      const unsupportedDateItems = stage3Items.filter(item => hasUnsupportedPostDateFallback(item, sourceLocalDate));
+      if (unsupportedDateItems.length) {
+        sourceDateHoldEncountered = true;
+        stage3Items = stage3Items.filter(item => !hasUnsupportedPostDateFallback(item, sourceLocalDate));
+        await emitStageArtifacts(cfg, { source: 'live', contentType: resolvedContentType,
+          stage3HeldItems: deepCloneJson(unsupportedDateItems) });
+        await reportSkipReason({ stage: 'stage3', reason: 'Activity has no source-grounded date; post-date fallback held',
+          detail: unsupportedDateItems.map(item => item.name).join('; ') });
+        logger.warn('Held unsupported activity post-date fallback', { postId, count: unsupportedDateItems.length });
+      }
 
       // Apply on every extraction attempt, after enrichment, so a retry cannot
       // reintroduce a held item. A mixed post retains its unaffected positives.
@@ -3835,9 +3849,12 @@ function extractExplicitTimeRangeFromEvidence(
     `(${endpointPattern})\\s*(AM|PM)?\\s*(?:[-\\u2013\\u2014]|to|until|til|till)\\s*(${endpointPattern})\\s*(AM|PM)?`,
     'i'
   );
+  const betweenPattern = new RegExp(
+    `\\bbetween\\s+(${endpointPattern})\\s*(AM|PM)?\\s+and\\s+(${endpointPattern})\\s*(AM|PM)?`, 'i'
+  );
 
   for (const raw of candidates) {
-    const rangeMatch = raw.match(rangePattern);
+    const rangeMatch = raw.match(rangePattern) || raw.match(betweenPattern);
     if (!rangeMatch) continue;
 
     const resolvedRange = resolveExplicitRangeTimes(
@@ -3864,6 +3881,8 @@ function extractExplicitTimeRangeFromEvidence(
 function extractExplicitEndTimeFromEvidence(value: unknown): string {
   const raw = String(value || '').trim();
   if (!raw) return '';
+  const explicitRange = extractExplicitTimeRangeFromEvidence(raw, '');
+  if (explicitRange) return explicitRange.endTime;
 
   const rangeMatch = raw.match(
     /(\d{1,2}(?::\d{2})?|midnight|noon)\s*(AM|PM)?\s*[-\u2013\u2014]\s*(\d{1,2}(?::\d{2})?|midnight|noon)\s*(AM|PM)?/i

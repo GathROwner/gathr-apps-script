@@ -1,0 +1,99 @@
+{
+  "row": 175,
+  "postId": "1587492483175007",
+  "elapsedMs": 16563,
+  "events": [],
+  "usage": [
+    {
+      "stage": "stage1",
+      "component": "contentValidator",
+      "endpoint": "responses",
+      "model": "gpt-5-mini",
+      "imageCount": 1,
+      "durationMs": 6865,
+      "inputTokens": 1770,
+      "outputTokens": 1063,
+      "totalTokens": 2833,
+      "cachedInputTokens": 1664,
+      "responseId": "resp_0afb0b821a552edd006ac91ac214d487d2ac20e6ef56f8c5d3",
+      "responseStatus": "completed",
+      "requestedMaxOutputTokens": 2000,
+      "reasoningTokens": 576,
+      "visibleOutputChars": 1816
+    },
+    {
+      "stage": "stage2",
+      "component": "contentClassifier",
+      "endpoint": "responses",
+      "model": "gpt-5-mini",
+      "imageCount": 1,
+      "durationMs": 5009,
+      "inputTokens": 1099,
+      "outputTokens": 551,
+      "totalTokens": 1650,
+      "cachedInputTokens": 0
+    },
+    {
+      "stage": "stage3",
+      "component": "eventExtractor",
+      "endpoint": "responses",
+      "model": "gpt-6-luna",
+      "imageCount": 1,
+      "durationMs": 3141,
+      "inputTokens": 2714,
+      "outputTokens": 180,
+      "totalTokens": 2894,
+      "cachedInputTokens": 2711
+    },
+    {
+      "stage": "stage3",
+      "component": "eventExtractor",
+      "endpoint": "responses",
+      "model": "gpt-6-luna",
+      "imageCount": 1,
+      "durationMs": 1536,
+      "inputTokens": 936,
+      "outputTokens": 83,
+      "totalTokens": 1019,
+      "cachedInputTokens": 0
+    }
+  ],
+  "skips": [
+    {
+      "stage": "stage3",
+      "reason": "Luna canary requires source review",
+      "detail": "stage3_no_items"
+    }
+  ],
+  "stages": {
+    "source": "live",
+    "stage1Validation": {
+      "imageAnalysis": [
+        {
+          "imageIndex": 0,
+          "description": "Promotional graphic from Port Charlottetown showing two cruise ship photographs stacked vertically. Large overlay text reads 'Two Ship Day' and 'OCTOBER 8'. On the top photo (white ship) a blue banner reads 'PEARL MIST' with '7:00AM - 11:00PM' shown. On the bottom photo (dark-hulled ship) a dark banner reads 'MEIN SCHIFF 1' with '7:00AM - 5:00PM' shown. The Port Charlottetown logo appears in the top-left corner. The image combines photographic visuals of the ships with clear, large event text and times.",
+          "relevanceToPost": "Directly lists two ship visit events with specific times and date (October 8). This image provides the primary event information complementary to the post text.",
+          "imageComplexity": {
+            "hasCalendarGrid": false,
+            "hasDenseText": false,
+            "hasMultipleEventListings": true,
+            "isPromotionalPhoto": true,
+            "textDensityScore": 0.35,
+            "recommendsTiling": false,
+            "recommendationReason": "Image is a photographic promotional poster with a few large, easily readable overlay text blocks (two ship names and times). No calendar grid or dense small text present, so calendar-tiling OCR is unnecessary."
+          }
+        }
+      ],
+      "hasValidContent": true,
+      "confidence": 0.95,
+      "validationDecision": "VALIDATION_PASSED",
+      "reason": "The post contains extractable event information: both the post text and the image describe a 'Two Ship Day' on October 8 and the image explicitly lists two ship visit entries with times (Pearl Mist: 7:00 AM - 11:00 PM; Mein Schiff 1: 7:00 AM - 5:00 PM). This meets the criteria for valid events/schedule extraction. The image is a promotional poster with clear, large text and does not require calendar tiling to read the entries."
+    },
+    "stage1Pilot": {
+      "eligible": true,
+      "selected": false,
+      "percent": 50,
+      "model": "gpt-5-mini"
+    }
+  }
+}

@@ -29,6 +29,7 @@ import {
   ParseStageArtifactsSnapshot,
 } from '../parsing/types.js';
 import { parsePostData, prepareManagedDisplayImageUrls } from '../parsing/postParser.js';
+import { boundStageArtifactSnapshot } from '../parsing/stageArtifactBudget.js';
 import * as gptService from '../services/gptService.js';
 import * as firestoreService from '../services/firestoreService.js';
 import { logger } from '../utils/logger.js';
@@ -2253,7 +2254,7 @@ function sanitizeStageArtifactsSnapshot(
     return items.slice(0, maxItems);
   };
 
-  return {
+  return boundStageArtifactSnapshot({
     source: snapshot.source,
     contentType: snapshot.contentType,
     imageFrameManifest: snapshot.imageFrameManifest?.slice(0, 64),
@@ -2263,7 +2264,7 @@ function sanitizeStageArtifactsSnapshot(
     stage1Validation: snapshot.stage1Validation,
     stage1Pilot: snapshot.stage1Pilot,
     stage4Items: truncateItems(snapshot.stage4Items) as ParseStageArtifactsSnapshot['stage4Items'],
-  };
+  });
 }
 
 function deriveAggregatorNameForUnknownQueue(row: RawRowData): string | undefined {
@@ -3034,7 +3035,7 @@ export async function processRow(
     // Parse content using GPT pipeline
     const enableSnapshots = process.env.ENABLE_PARSE_SNAPSHOTS !== 'false';
     const enableOcrDebug = process.env.ENABLE_OCR_DEBUG !== 'false';
-    const enableStageArtifacts = process.env.ENABLE_PARSE_SNAPSHOT_STAGE_ARTIFACTS === 'true';
+    const enableStageArtifacts = process.env.ENABLE_PARSE_SNAPSHOT_STAGE_ARTIFACTS !== 'false';
     const snapshotStages: ParseSnapshotStage[] = [];
     const snapshotHandler = enableSnapshots
       ? (stage: ParseSnapshotStage) => {

@@ -1,6 +1,17 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
+test('between-and range is one swim window while independently listed session times remain separate', () => {
+  const window = parseScheduleTextForRegression('October 9, 2026\nFriday Fun swim - $4.50 per person between 12:00 pm and 4:00 pm',
+    '2026-10-08', 'Pool', 'schedule');
+  assert.equal(window.length, 1);
+  assert.equal(window[0].startTime, '12:00');
+  assert.equal(window[0].endTime, '16:00');
+  const sessions = parseScheduleTextForRegression('October 9, 2026\nAqua class: 12:00 pm and 4:00 pm',
+    '2026-10-08', 'Pool', 'schedule');
+  assert.equal(sessions.length, 2);
+});
+
 import {
   parseScheduleTextForRegression,
   shouldPreferAnchoredScheduleTextParserForRegression,

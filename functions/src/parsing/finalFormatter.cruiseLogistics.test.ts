@@ -87,3 +87,11 @@ test('keeps public cruise-themed events that are not ship-call logistics', () =>
 
   assert.deepEqual(filtered.map((event) => event.name), ['Cruise Night Fundraiser']);
 });
+
+test('a two-ship welcome notice is logistics even when the model calls it a Port Visit', () => {
+  const ships = [buildEvent({ name: 'Pearl Mist Port Visit', description: 'Pearl Mist visits the port.' }),
+    buildEvent({ name: 'Mein Schiff 1 Port Visit', description: 'Mein Schiff 1 visits the port.' })];
+  const concert = buildEvent({ name: 'Port Welcome Concert', description: 'Public live music concert on the waterfront.' });
+  assert.deepEqual(filterCruiseShipLogisticsEvents([...ships, concert],
+    'Today we welcome Pearl Mist and Mein Schiff 1 for a two-ship day at Port Charlottetown! Welcome guests and crew.'), [concert]);
+});

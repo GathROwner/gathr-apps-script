@@ -91,6 +91,7 @@ export interface GptUsageRecord {
 
 export interface ParseStageArtifactsSnapshot {
   source: 'live' | 'replay';
+  artifactTruncation?: { originalBytes: number; maxBytes: number };
   contentType?: ContentType;
   stage1Validation?: ValidationResult;
   stage2Classification?: ClassificationResult;

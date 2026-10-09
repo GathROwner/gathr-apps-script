@@ -1,0 +1,130 @@
+{
+  "cleanup": {
+    "deletedTotal": 11,
+    "deletedReappeared": [],
+    "createdTotal": 0,
+    "createdMissing": []
+  },
+  "powerskate": {
+    "deletedTotal": 2,
+    "deletedReappeared": [],
+    "createdTotal": 20,
+    "createdMissing": []
+  },
+  "hunter": {
+    "deletedTotal": 0,
+    "deletedReappeared": [],
+    "createdTotal": 2,
+    "createdMissing": []
+  },
+  "trailside": {
+    "deletedTotal": 0,
+    "deletedReappeared": [],
+    "createdTotal": 1,
+    "createdMissing": [
+      "venues/slug_trailsidemusichall/events/trailside-fucked-up-club-rat-2026-10-08"
+    ]
+  },
+  "powerSkatingInventory": [
+    {
+      "path": "venues/LglliE42SPFssmoU01su/events/powerskate-u13-u15-2026-10-18",
+      "date": "2026-10-18",
+      "pattern": "none"
+    },
+    {
+      "path": "venues/LglliE42SPFssmoU01su/events/powerskate-u13-u15-2026-10-25",
+      "date": "2026-10-25",
+      "pattern": "none"
+    },
+    {
+      "path": "venues/LglliE42SPFssmoU01su/events/powerskate-u13-u15-2026-11-01",
+      "date": "2026-11-01",
+      "pattern": "none"
+    },
+    {
+      "path": "venues/LglliE42SPFssmoU01su/events/powerskate-u13-u15-2026-11-15",
+      "date": "2026-11-15",
+      "pattern": "none"
+    },
+    {
+      "path": "venues/LglliE42SPFssmoU01su/events/powerskate-u13-u15-2026-11-22",
+      "date": "2026-11-22",
+      "pattern": "none"
+    },
+    {
+      "path": "venues/LglliE42SPFssmoU01su/events/powerskate-u13-u15-2026-11-29",
+      "date": "2026-11-29",
+      "pattern": "none"
+    },
+    {
+      "path": "venues/LglliE42SPFssmoU01su/events/powerskate-u13-u15-2026-12-06",
+      "date": "2026-12-06",
+      "pattern": "none"
+    },
+    {
+      "path": "venues/LglliE42SPFssmoU01su/events/powerskate-u13-u15-2026-12-13",
+      "date": "2026-12-13",
+      "pattern": "none"
+    },
+    {
+      "path": "venues/LglliE42SPFssmoU01su/events/powerskate-u13-u15-2026-12-20",
+      "date": "2026-12-20",
+      "pattern": "none"
+    },
+    {
+      "path": "venues/LglliE42SPFssmoU01su/events/powerskate-u13-u15-2027-01-03",
+      "date": "2027-01-03",
+      "pattern": "none"
+    },
+    {
+      "path": "venues/LglliE42SPFssmoU01su/events/powerskate-u9-u11-2026-10-17",
+      "date": "2026-10-17",
+      "pattern": "none"
+    },
+    {
+      "path": "venues/LglliE42SPFssmoU01su/events/powerskate-u9-u11-2026-10-24",
+      "date": "2026-10-24",
+      "pattern": "none"
+    },
+    {
+      "path": "venues/LglliE42SPFssmoU01su/events/powerskate-u9-u11-2026-10-31",
+      "date": "2026-10-31",
+      "pattern": "none"
+    },
+    {
+      "path": "venues/LglliE42SPFssmoU01su/events/powerskate-u9-u11-2026-11-14",
+      "date": "2026-11-14",
+      "pattern": "none"
+    },
+    {
+      "path": "venues/LglliE42SPFssmoU01su/events/powerskate-u9-u11-2026-11-21",
+      "date": "2026-11-21",
+      "pattern": "none"
+    },
+    {
+      "path": "venues/LglliE42SPFssmoU01su/events/powerskate-u9-u11-2026-11-28",
+      "date": "2026-11-28",
+      "pattern": "none"
+    },
+    {
+      "path": "venues/LglliE42SPFssmoU01su/events/powerskate-u9-u11-2026-12-05",
+      "date": "2026-12-05",
+      "pattern": "none"
+    },
+    {
+      "path": "venues/LglliE42SPFssmoU01su/events/powerskate-u9-u11-2026-12-12",
+      "date": "2026-12-12",
+      "pattern": "none"
+    },
+    {
+      "path": "venues/LglliE42SPFssmoU01su/events/powerskate-u9-u11-2026-12-19",
+      "date": "2026-12-19",
+      "pattern": "none"
+    },
+    {
+      "path": "venues/LglliE42SPFssmoU01su/events/powerskate-u9-u11-2027-01-02",
+      "date": "2027-01-02",
+      "pattern": "none"
+    }
+  ]
+}

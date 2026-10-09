@@ -1,0 +1,258 @@
+{
+  "row": 335,
+  "postId": "1549619793637990",
+  "elapsedMs": 85869,
+  "events": [
+    {
+      "isEvent": "No",
+      "isFoodSpecial": "Yes",
+      "category": "Food Special",
+      "name": "Day-old bread offer",
+      "description": "First-time offer: Day-old bread for $1.49 per loaf, perfect for stuffing and holiday meals. Offer subject to availability.",
+      "establishment": "Mary's Bake Shoppe",
+      "address": "",
+      "startDate": "2026-10-09",
+      "endDate": "2026-10-09",
+      "startTime": "09:00",
+      "endTime": "17:00",
+      "ticketPrice": "",
+      "ticketLink": "",
+      "relevantImageIndex": 0,
+      "venue": "Mary's Bake Shoppe",
+      "additionalLocation": "Mary's Bake Shoppe",
+      "isRecurring": "No",
+      "recurringPattern": "none",
+      "_categoryOriginal": "Food Special",
+      "_categoryHintOriginal": "",
+      "_categorySource": "model_final",
+      "_categoryNormalizationReason": "kept allowed model category \"Food Special\"",
+      "_sourceType": "special",
+      "timeFlags": {
+        "start": {
+          "source": "semantic",
+          "evidence": "Start from post time 09:00"
+        },
+        "end": {
+          "toClose": false,
+          "source": "none",
+          "evidence": ""
+        }
+      },
+      "timeResolution": {
+        "hoursUsed": false,
+        "reason": "no_place_match",
+        "startFromPostTime": true
+      },
+      "icon": "",
+      "image": "",
+      "cleanedFacebookUrl": "",
+      "sharedPostThumbnail": "",
+      "id": "1549619793637990",
+      "latitude": "",
+      "longitude": "",
+      "city": "",
+      "streetAddress": "",
+      "organizedBy": "",
+      "usersResponded": "",
+      "utcStartDate": "",
+      "ticketsBuyUrl": "",
+      "relevantImageUrl": "",
+      "mediaUrls": [],
+      "imageProvenance": {
+        "version": 1,
+        "primarySource": "no_image",
+        "isFallback": false,
+        "selectionReason": "no_usable_event_image_provided",
+        "updatedBy": "parser"
+      }
+    }
+  ],
+  "usage": [
+    {
+      "stage": "stage1",
+      "component": "contentValidator",
+      "endpoint": "responses",
+      "model": "gpt-6-luna",
+      "imageCount": 1,
+      "durationMs": 4894,
+      "inputTokens": 3773,
+      "outputTokens": 537,
+      "totalTokens": 4310,
+      "cachedInputTokens": 3770,
+      "responseId": "resp_0294226eb92b56d4006ac91b10088887d29c436a39fe8a718d",
+      "responseStatus": "completed",
+      "requestedMaxOutputTokens": 6000,
+      "reasoningTokens": 258,
+      "visibleOutputChars": 1155
+    },
+    {
+      "stage": "stage2",
+      "component": "contentClassifier",
+      "endpoint": "responses",
+      "model": "gpt-5-mini",
+      "imageCount": 1,
+      "durationMs": 5752,
+      "inputTokens": 1244,
+      "outputTokens": 707,
+      "totalTokens": 1951,
+      "cachedInputTokens": 1152
+    },
+    {
+      "stage": "stage3",
+      "component": "eventExtractor",
+      "endpoint": "responses",
+      "model": "gpt-6-luna",
+      "imageCount": 1,
+      "durationMs": 8615,
+      "inputTokens": 1937,
+      "outputTokens": 858,
+      "totalTokens": 2795,
+      "cachedInputTokens": 1934
+    },
+    {
+      "stage": "stage4",
+      "component": "secondaryValidator",
+      "endpoint": "responses",
+      "model": "gpt-5-nano",
+      "durationMs": 7466,
+      "inputTokens": 2188,
+      "outputTokens": 754,
+      "totalTokens": 2942,
+      "cachedInputTokens": 0,
+      "fileId": "1NpfngSPGDDOm9Fb5DcYseMuCe4BdKjGq",
+      "rowIndex": 335,
+      "postId": "1549619793637990",
+      "batchItemCount": 1,
+      "responseId": "resp_0713529df7beb5b4006ac91b22ffdc87d2946920c7fbde7e23",
+      "responseStatus": "completed",
+      "incompleteReason": "",
+      "requestedMaxOutputTokens": 32000,
+      "reasoningTokens": 320,
+      "visibleOutputChars": 1608
+    },
+    {
+      "stage": "stage5",
+      "component": "finalFormatter",
+      "endpoint": "responses",
+      "model": "gpt-5-nano",
+      "durationMs": 47785,
+      "inputTokens": 2152,
+      "outputTokens": 4725,
+      "totalTokens": 6877,
+      "cachedInputTokens": 0,
+      "fileId": "1NpfngSPGDDOm9Fb5DcYseMuCe4BdKjGq",
+      "rowIndex": 335,
+      "postId": "1549619793637990",
+      "responseId": "resp_047da92a612e6b1d006ac91b2ae34887d28e8a9abf386c89ab",
+      "responseStatus": "completed",
+      "incompleteReason": "",
+      "requestedMaxOutputTokens": 32000,
+      "reasoningTokens": 4288,
+      "visibleOutputChars": 1560,
+      "parsedItemCount": 2,
+      "parseError": false,
+      "batchOffset": 0,
+      "batchItemCount": 1
+    }
+  ],
+  "skips": [],
+  "stages": {
+    "source": "live",
+    "stage1Validation": {
+      "imageAnalysis": [
+        {
+          "imageIndex": 0,
+          "description": "A Thanksgiving order poster for Mary’s Bake Shoppe listing baked goods and prices, Friday and Saturday pickup hours, and a first-time offer of day-old bread for $1.49 per loaf.",
+          "relevanceToPost": "The poster explicitly advertises a discounted food offer on day-old bread. The other baked goods are listed as regular products, and the pickup hours are not a separate event.",
+          "imageComplexity": {
+            "hasCalendarGrid": false,
+            "hasDenseText": true,
+            "hasMultipleEventListings": false,
+            "isPromotionalPhoto": false,
+            "textDensityScore": 0.74,
+            "recommendsTiling": false,
+            "recommendationReason": "The poster has several text blocks, but no calendar grid or dense small text requiring tiling."
+          }
+        }
+      ],
+      "hasValidContent": true,
+      "confidence": 0.98,
+      "validationDecision": "VALIDATION_PASSED",
+      "reason": "The image explicitly labels day-old bread at $1.49 per loaf as a first-time offer, which qualifies as a food promotion. The ordinary baked-goods listings and pickup hours do not independently qualify."
+    },
+    "stage1Pilot": {
+      "eligible": true,
+      "selected": true,
+      "percent": 50,
+      "model": "gpt-6-luna"
+    },
+    "contentType": "FOOD_SPECIAL",
+    "imageFrameManifest": [
+      {
+        "frameIndex": 0,
+        "sourceGalleryIndex": 0,
+        "kind": "whole"
+      }
+    ],
+    "stage3Items": [
+      {
+        "name": "Day-old bread offer",
+        "description": "First-time offer: Day-old bread for $1.49 per loaf, perfect for stuffing and holiday meals. Offer subject to availability.",
+        "date": "2026-10-09",
+        "startTime": "",
+        "endTime": "",
+        "timeFlags": {
+          "start": {
+            "source": "none",
+            "evidence": ""
+          },
+          "end": {
+            "toClose": false,
+            "source": "none",
+            "evidence": ""
+          }
+        },
+        "venue": "Mary's Bake Shoppe",
+        "pricing": {
+          "price": "$1.49/loaf"
+        },
+        "relevantImageIndex": 0,
+        "recurringPattern": "none",
+        "extractionReason": "\"FIRST-TIME SPECIAL! Day-old bread for just $1.49/loaf*\"",
+        "_sourceType": "special",
+        "_pipelineIndex": 1,
+        "_pipelineTotalStage3": 1
+      }
+    ],
+    "stage4Items": [
+      {
+        "name": "Day-old bread offer",
+        "description": "First-time offer: Day-old bread for $1.49 per loaf, perfect for stuffing and holiday meals. Offer subject to availability.",
+        "date": "2026-10-09",
+        "startTime": "",
+        "endTime": "",
+        "timeFlags": {
+          "start": {
+            "source": "none",
+            "evidence": ""
+          },
+          "end": {
+            "toClose": false,
+            "source": "none",
+            "evidence": ""
+          }
+        },
+        "venue": "Mary's Bake Shoppe",
+        "pricing": {
+          "price": "$1.49/loaf"
+        },
+        "relevantImageIndex": 0,
+        "recurringPattern": "none",
+        "extractionReason": "\"FIRST-TIME SPECIAL! Day-old bread for just $1.49/loaf*\"",
+        "_sourceType": "special",
+        "_pipelineIndex": 1,
+        "_pipelineTotalStage3": 1
+      }
+    ]
+  }
+}

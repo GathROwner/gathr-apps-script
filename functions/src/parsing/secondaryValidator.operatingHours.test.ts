@@ -80,3 +80,13 @@ test('keeps season opening announcements that merely mention hours', () => {
     false
   );
 });
+
+test('public studio tours remain activities even when access uses weekend opening hours', () => {
+  assert.equal(isOperatingHoursOnlyItemForRegression(item({
+    name: 'Robert McMillan Pottery Open Studio and Gallery Visit',
+    description: 'Visit the gallery and take a tour of the studio floor. Open Saturday and Sunday 10-5pm.',
+  })), false);
+  assert.equal(isOperatingHoursOnlyItemForRegression(item({
+    name: 'Gallery Store Hours', description: 'Shop open Saturday and Sunday 10-5pm.',
+  })), true);
+});

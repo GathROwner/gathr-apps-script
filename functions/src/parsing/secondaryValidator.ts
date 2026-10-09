@@ -9,6 +9,7 @@
  */
 
 import OpenAI from 'openai';
+import { isSourcePublicPoolWindow } from './sourceOccurrenceGuards.js';
 import {
   ExtractedItem,
   ValidatedItem,
@@ -205,8 +206,10 @@ function isOperatingHoursOnlyItem(item: ExtractedItem | undefined): boolean {
 
   const normalized = text.toLowerCase();
 
+  if (/\btours?\s+(?:of|on)\s+(?:the\s+)?(?:studio|gallery)\b/i.test(text)) return false;
+
   if (
-    /\b(happy\s*hour|specials?|deals?|discount|sale|bogo|free\s+with|live\s+music|trivia|karaoke|open\s*mic|concert|comedy|class|workshop|program|drop[-\s]?in|swim|pool|public\s+skate|movie|screening|show|party|festival|fundraiser|open\s+house)\b/i.test(
+    /\b(happy\s*hour|specials?|deals?|discount|sale|bogo|free\s+with|live\s+music|trivia|karaoke|open\s*mic|concert|comedy|class|workshop|program|drop[-\s]?in|swim|pool|public\s+skate|movie|screening|show|party|festival|fundraiser|open\s+house|(?:studio|gallery|guided|public)\s+tours?)\b/i.test(
       text
     )
   ) {
@@ -605,7 +608,10 @@ export async function performSecondaryValidation(
     if (validationResult.validatedItems) {
       validationResult.validatedItems.forEach((validatedItem, index) => {
         let decision = validatedItem.decision;
-        const item = preserveValidatedItemSourceType(validatedItem.item, rawData[index]);
+        const sourcePoolWindow = isSourcePublicPoolWindow(rawData[index]);
+        const item = sourcePoolWindow ? { ...rawData[index] } :
+          preserveValidatedItemSourceType(validatedItem.item, rawData[index]);
+        if (sourcePoolWindow) decision = 'KEPT';
         validatedItem.item = item;
         const reason = validatedItem.reason;
 
@@ -808,6 +814,11 @@ REMOVE items that are:
 ✗ Ordinary menu items without an advertised special or deal
 ✗ Items from event extractor that aren't real events (e.g., forced interpretation of food as "celebration")
 ✗ Month-long featured menu items without an advertised deal
+
+Public recreation access is an activity: KEEP explicitly dated lane-swim,
+leisure/toddler/all-pool, waterslide and public/bookable ice windows. These
+are not ordinary store/business hours. Retain each separate source window.
+Pool closures and private/staff-only schedules remain excluded.
 
 EXCEPTION RULE (APPLY BEFORE REJECTING SPECIALS):
 - For _sourceType="special", KEEP a named daily special or explicitly advertised deal even when no numeric price/discount is printed. Keep only that special, not the post's other menu items. Do not treat a month-long featured menu item as a deal merely because it is featured.

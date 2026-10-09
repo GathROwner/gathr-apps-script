@@ -1,0 +1,577 @@
+{
+  "row": 274,
+  "postId": "1667779975261824",
+  "elapsedMs": 109489,
+  "events": [
+    {
+      "isEvent": "Yes",
+      "isFoodSpecial": "No",
+      "category": "Gatherings & Parties",
+      "name": "Robert McMillan Pottery Studio Tour",
+      "description": "Saturday: Visit the studio and gallery, take a tour of the studio floor, and see where and how Robert McMillan makes and applies his glazes. Visitors can also use the photo screen for a family or friends fall photo. Open Saturday 10-5pm.",
+      "establishment": "Robert McMillan Pottery",
+      "address": "17 Broadway Road, Hope River, PEI",
+      "startDate": "2026-10-10",
+      "endDate": "2026-10-10",
+      "startTime": "10:00",
+      "endTime": "17:00",
+      "ticketPrice": "",
+      "ticketLink": "",
+      "relevantImageIndex": 0,
+      "venue": "",
+      "additionalLocation": "",
+      "isRecurring": "No",
+      "recurringPattern": "none",
+      "_categoryOriginal": "Gatherings & Parties",
+      "_categoryHintOriginal": "",
+      "_categorySource": "model_final",
+      "_categoryNormalizationReason": "kept weak model category \"Gatherings & Parties\" after no stronger hint/keyword evidence",
+      "_sourceType": "event",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "10-5pm"
+        },
+        "end": {
+          "source": "explicit",
+          "toClose": false,
+          "evidence": "10-5pm"
+        }
+      },
+      "spatial": {
+        "kind": "single_location",
+        "locations": [
+          {
+            "label": "Robert McMillan Pottery",
+            "address": "17 Broadway Road, Hope River, PEI",
+            "role": "location",
+            "certainty": "confirmed",
+            "sourceText": "stop in this weekend to 17 Broadway Road, Hope River, PEI"
+          }
+        ],
+        "confirmedStreets": [
+          "Broadway Road"
+        ],
+        "ordered": false,
+        "evidenceNotes": "The post gives the pottery's address as 17 Broadway Road, Hope River, PEI."
+      },
+      "timeResolution": {
+        "hoursUsed": false
+      },
+      "icon": "",
+      "image": "",
+      "cleanedFacebookUrl": "",
+      "sharedPostThumbnail": "",
+      "id": "1667779975261824",
+      "latitude": "",
+      "longitude": "",
+      "city": "",
+      "streetAddress": "",
+      "organizedBy": "",
+      "usersResponded": "",
+      "utcStartDate": "",
+      "ticketsBuyUrl": "",
+      "relevantImageUrl": "",
+      "mediaUrls": [],
+      "imageProvenance": {
+        "version": 1,
+        "primarySource": "no_image",
+        "isFallback": false,
+        "selectionReason": "no_usable_event_image_provided",
+        "updatedBy": "parser"
+      }
+    },
+    {
+      "isEvent": "Yes",
+      "isFoodSpecial": "No",
+      "category": "Gatherings & Parties",
+      "name": "Robert McMillan Pottery Studio Tour",
+      "description": "Sunday: Visit the studio and gallery, take a tour of the studio floor, and see where and how Robert McMillan makes and applies his glazes. Visitors can also use the photo screen for a family or friends fall photo. Open Sunday 10-5pm.",
+      "establishment": "Robert McMillan Pottery",
+      "address": "17 Broadway Road, Hope River, PEI",
+      "startDate": "2026-10-11",
+      "endDate": "2026-10-11",
+      "startTime": "10:00",
+      "endTime": "17:00",
+      "ticketPrice": "",
+      "ticketLink": "",
+      "relevantImageIndex": 0,
+      "venue": "",
+      "additionalLocation": "",
+      "isRecurring": "No",
+      "recurringPattern": "none",
+      "_categoryOriginal": "Gatherings & Parties",
+      "_categoryHintOriginal": "",
+      "_categorySource": "model_final",
+      "_categoryNormalizationReason": "kept weak model category \"Gatherings & Parties\" after no stronger hint/keyword evidence",
+      "_sourceType": "event",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "10-5pm"
+        },
+        "end": {
+          "source": "explicit",
+          "toClose": false,
+          "evidence": "10-5pm"
+        }
+      },
+      "spatial": {
+        "kind": "single_location",
+        "locations": [
+          {
+            "label": "Robert McMillan Pottery",
+            "address": "17 Broadway Road, Hope River, PEI",
+            "role": "location",
+            "certainty": "confirmed",
+            "sourceText": "stop in this weekend to 17 Broadway Road, Hope River, PEI"
+          }
+        ],
+        "confirmedStreets": [
+          "Broadway Road"
+        ],
+        "ordered": false,
+        "evidenceNotes": "The post gives the pottery's address as 17 Broadway Road, Hope River, PEI."
+      },
+      "timeResolution": {
+        "hoursUsed": false
+      },
+      "icon": "",
+      "image": "",
+      "cleanedFacebookUrl": "",
+      "sharedPostThumbnail": "",
+      "id": "1667779975261824",
+      "latitude": "",
+      "longitude": "",
+      "city": "",
+      "streetAddress": "",
+      "organizedBy": "",
+      "usersResponded": "",
+      "utcStartDate": "",
+      "ticketsBuyUrl": "",
+      "relevantImageUrl": "",
+      "mediaUrls": [],
+      "imageProvenance": {
+        "version": 1,
+        "primarySource": "no_image",
+        "isFallback": false,
+        "selectionReason": "no_usable_event_image_provided",
+        "updatedBy": "parser"
+      }
+    }
+  ],
+  "usage": [
+    {
+      "stage": "stage1",
+      "component": "contentValidator",
+      "endpoint": "responses",
+      "model": "gpt-5-mini",
+      "imageCount": 5,
+      "durationMs": 12451,
+      "inputTokens": 3855,
+      "outputTokens": 2000,
+      "totalTokens": 5855,
+      "cachedInputTokens": 3584,
+      "responseId": "resp_0a8afb417868079c006ac91bc8bfdc87d2bdef1c7abe9b2685",
+      "responseStatus": "incomplete",
+      "incompleteReason": "max_output_tokens",
+      "requestedMaxOutputTokens": 2000,
+      "reasoningTokens": 832,
+      "visibleOutputChars": 4865
+    },
+    {
+      "stage": "stage1",
+      "component": "contentValidator",
+      "endpoint": "responses",
+      "model": "gpt-5-mini",
+      "imageCount": 5,
+      "durationMs": 11114,
+      "inputTokens": 3855,
+      "outputTokens": 1577,
+      "totalTokens": 5432,
+      "cachedInputTokens": 3584,
+      "responseId": "resp_0b46c96ba8be85eb006ac91bd4fd2c87d29ac9af96692a5c2a",
+      "responseStatus": "completed",
+      "requestedMaxOutputTokens": 4000,
+      "reasoningTokens": 576,
+      "visibleOutputChars": 4429
+    },
+    {
+      "stage": "stage2",
+      "component": "contentClassifier",
+      "endpoint": "responses",
+      "model": "gpt-5-mini",
+      "imageCount": 5,
+      "durationMs": 5550,
+      "inputTokens": 3184,
+      "outputTokens": 865,
+      "totalTokens": 4049,
+      "cachedInputTokens": 2944
+    },
+    {
+      "stage": "stage3",
+      "component": "eventExtractor",
+      "endpoint": "responses",
+      "model": "gpt-6-luna",
+      "imageCount": 5,
+      "durationMs": 19000,
+      "inputTokens": 4857,
+      "outputTokens": 2291,
+      "totalTokens": 7148,
+      "cachedInputTokens": 0
+    },
+    {
+      "stage": "stage3",
+      "component": "eventExtractor",
+      "endpoint": "responses",
+      "model": "gpt-6-luna",
+      "imageCount": 5,
+      "durationMs": 2531,
+      "inputTokens": 3878,
+      "outputTokens": 108,
+      "totalTokens": 3986,
+      "cachedInputTokens": 3875
+    },
+    {
+      "stage": "stage4",
+      "component": "secondaryValidator",
+      "endpoint": "responses",
+      "model": "gpt-5-nano",
+      "durationMs": 18506,
+      "inputTokens": 2759,
+      "outputTokens": 1364,
+      "totalTokens": 4123,
+      "cachedInputTokens": 0,
+      "fileId": "1NpfngSPGDDOm9Fb5DcYseMuCe4BdKjGq",
+      "rowIndex": 274,
+      "postId": "1667779975261824",
+      "batchItemCount": 2,
+      "responseId": "resp_0929962e248f6285006ac91bfb1b4887d2a19c8da0c6a839c3",
+      "responseStatus": "completed",
+      "incompleteReason": "",
+      "requestedMaxOutputTokens": 32000,
+      "reasoningTokens": 256,
+      "visibleOutputChars": 4470
+    },
+    {
+      "stage": "stage5",
+      "component": "finalFormatter",
+      "endpoint": "responses",
+      "model": "gpt-5-nano",
+      "durationMs": 40231,
+      "inputTokens": 2735,
+      "outputTokens": 4226,
+      "totalTokens": 6961,
+      "cachedInputTokens": 0,
+      "fileId": "1NpfngSPGDDOm9Fb5DcYseMuCe4BdKjGq",
+      "rowIndex": 274,
+      "postId": "1667779975261824",
+      "responseId": "resp_0ecad7be629a9aa6006ac91c0da00487d2a35346b9c5ce18a2",
+      "responseStatus": "completed",
+      "incompleteReason": "",
+      "requestedMaxOutputTokens": 32000,
+      "reasoningTokens": 3520,
+      "visibleOutputChars": 2634,
+      "parsedItemCount": 2,
+      "parseError": false,
+      "batchOffset": 0,
+      "batchItemCount": 2
+    }
+  ],
+  "skips": [],
+  "stages": {
+    "source": "live",
+    "stage1Validation": {
+      "imageAnalysis": [
+        {
+          "imageIndex": 0,
+          "description": "Close selfie of two smiling people (thumbs up) inside a studio/garage space. No visible printed text or signage in the photo; mainly faces and interior structural elements.",
+          "relevanceToPost": "Portrait-style photo of the potter and partner — promotional/people-focused; does not contain any extractable event or special information.",
+          "imageComplexity": {
+            "hasCalendarGrid": false,
+            "hasDenseText": false,
+            "hasMultipleEventListings": false,
+            "isPromotionalPhoto": true,
+            "textDensityScore": 0.05,
+            "recommendsTiling": false,
+            "recommendationReason": "Photo is mostly people and studio background with no small printed text or schedule; tiling not needed."
+          }
+        },
+        {
+          "imageIndex": 1,
+          "description": "Two electric kilns in a studio; two decorated mugs resting on a kiln lid. No signage or printed schedule visible.",
+          "relevanceToPost": "Studio equipment image supports the post's pottery content but contains no event times or specials.",
+          "imageComplexity": {
+            "hasCalendarGrid": false,
+            "hasDenseText": false,
+            "hasMultipleEventListings": false,
+            "isPromotionalPhoto": true,
+            "textDensityScore": 0.05,
+            "recommendsTiling": false,
+            "recommendationReason": "Image is photographic with minimal/no text; no need for OCR tiling."
+          }
+        },
+        {
+          "imageIndex": 2,
+          "description": "Interior studio shot showing a table, pottery wheel, containers of slip/glaze and a window with an outdoor fall landscape. No visible printed text or schedule.",
+          "relevanceToPost": "Atmospheric studio photo illustrating the workspace; does not present extractable event or special details.",
+          "imageComplexity": {
+            "hasCalendarGrid": false,
+            "hasDenseText": false,
+            "hasMultipleEventListings": false,
+            "isPromotionalPhoto": true,
+            "textDensityScore": 0.05,
+            "recommendsTiling": false,
+            "recommendationReason": "Mostly photographic; no dense overlay text or schedule requiring tiling."
+          }
+        },
+        {
+          "imageIndex": 3,
+          "description": "A person (man) working at a studio bench, shaping or finishing a clay piece. Shelving and studio supplies visible in background; no printed schedules or posters visible.",
+          "relevanceToPost": "Process/work photo demonstrating pottery activity; contains no explicit event or deal information.",
+          "imageComplexity": {
+            "hasCalendarGrid": false,
+            "hasDenseText": false,
+            "hasMultipleEventListings": false,
+            "isPromotionalPhoto": true,
+            "textDensityScore": 0.05,
+            "recommendsTiling": false,
+            "recommendationReason": "Image is a photographic action shot without small text; tiling unnecessary."
+          }
+        },
+        {
+          "imageIndex": 4,
+          "description": "Studio shelving with bisque-fired pottery pieces, tools, small tiles and display items on a table in foreground. No visible printed calendar or promotional text in the image.",
+          "relevanceToPost": "Product/gallery display photo supporting the gallery promotion in the caption; no extractable events/specials visible on the image itself.",
+          "imageComplexity": {
+            "hasCalendarGrid": false,
+            "hasDenseText": false,
+            "hasMultipleEventListings": false,
+            "isPromotionalPhoto": true,
+            "textDensityScore": 0.08,
+            "recommendsTiling": false,
+            "recommendationReason": "Image shows product displays and studio supplies; contains minimal text and no schedule layout."
+          }
+        }
+      ],
+      "hasValidContent": true,
+      "confidence": 0.92,
+      "validationDecision": "VALIDATION_PASSED",
+      "reason": "The post contains promotional studio/gallery content and business hours (Open Saturday and Sunday 10–5pm; open by appointment Wed–Fri) plus invitations to visit and tours, but does not advertise a specific event with date/time beyond regular hours nor any explicit food/drink special or deal. References to a kiln 'opening' (DraGON) are informal and lack a confirmed public time/date or event details. None of the attached images contain printable schedules or specials. Per the extraction rules, business hours and general invitations alone are not extractable as events/specials, so the post fails validation for extractable events or specials. | Text calendar/roundup detected (override PASS)"
+    },
+    "stage1Pilot": {
+      "eligible": true,
+      "selected": false,
+      "percent": 50,
+      "model": "gpt-5-mini"
+    },
+    "contentType": "MIXED_EVENTS_AND_SPECIALS",
+    "imageFrameManifest": [
+      {
+        "frameIndex": 0,
+        "sourceGalleryIndex": 0,
+        "kind": "whole"
+      },
+      {
+        "frameIndex": 1,
+        "sourceGalleryIndex": 1,
+        "kind": "whole"
+      },
+      {
+        "frameIndex": 2,
+        "sourceGalleryIndex": 2,
+        "kind": "whole"
+      },
+      {
+        "frameIndex": 3,
+        "sourceGalleryIndex": 3,
+        "kind": "whole"
+      },
+      {
+        "frameIndex": 4,
+        "sourceGalleryIndex": 4,
+        "kind": "whole"
+      }
+    ],
+    "stage3Items": [
+      {
+        "name": "Robert McMillan Pottery Studio Tour",
+        "description": "Saturday: Visit the studio and gallery, take a tour of the studio floor, and see where and how Robert McMillan makes and applies his glazes. Visitors can also use the photo screen for a family or friends fall photo. Open Saturday 10-5pm.",
+        "date": "2026-10-10",
+        "startTime": "10:00",
+        "endTime": "17:00",
+        "venue": "",
+        "ticketLink": "",
+        "price": "",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none",
+        "extractionReason": "The post invites visitors to take a studio tour and advertises Saturday access from 10 to 5.",
+        "timeFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "10-5pm"
+          },
+          "end": {
+            "source": "explicit",
+            "toClose": false,
+            "evidence": "10-5pm"
+          }
+        },
+        "spatial": {
+          "kind": "single_location",
+          "locations": [
+            {
+              "label": "Robert McMillan Pottery",
+              "address": "17 Broadway Road, Hope River, PEI",
+              "role": "location",
+              "certainty": "confirmed",
+              "sourceText": "stop in this weekend to 17 Broadway Road, Hope River, PEI"
+            }
+          ],
+          "confirmedStreets": [
+            "Broadway Road"
+          ],
+          "ordered": false,
+          "evidenceNotes": "The post gives the pottery's address as 17 Broadway Road, Hope River, PEI."
+        },
+        "_sourceType": "event",
+        "_pipelineIndex": 1,
+        "_pipelineTotalStage3": 2
+      },
+      {
+        "name": "Robert McMillan Pottery Studio Tour",
+        "description": "Sunday: Visit the studio and gallery, take a tour of the studio floor, and see where and how Robert McMillan makes and applies his glazes. Visitors can also use the photo screen for a family or friends fall photo. Open Sunday 10-5pm.",
+        "date": "2026-10-11",
+        "startTime": "10:00",
+        "endTime": "17:00",
+        "venue": "",
+        "ticketLink": "",
+        "price": "",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none",
+        "extractionReason": "The post invites visitors to take a studio tour and advertises Sunday access from 10 to 5.",
+        "timeFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "10-5pm"
+          },
+          "end": {
+            "source": "explicit",
+            "toClose": false,
+            "evidence": "10-5pm"
+          }
+        },
+        "spatial": {
+          "kind": "single_location",
+          "locations": [
+            {
+              "label": "Robert McMillan Pottery",
+              "address": "17 Broadway Road, Hope River, PEI",
+              "role": "location",
+              "certainty": "confirmed",
+              "sourceText": "stop in this weekend to 17 Broadway Road, Hope River, PEI"
+            }
+          ],
+          "confirmedStreets": [
+            "Broadway Road"
+          ],
+          "ordered": false,
+          "evidenceNotes": "The post gives the pottery's address as 17 Broadway Road, Hope River, PEI."
+        },
+        "_sourceType": "event",
+        "_pipelineIndex": 2,
+        "_pipelineTotalStage3": 2
+      }
+    ],
+    "stage4Items": [
+      {
+        "name": "Robert McMillan Pottery Studio Tour",
+        "description": "Saturday: Visit the studio and gallery, take a tour of the studio floor, and see where and how Robert McMillan makes and applies his glazes. Visitors can also use the photo screen for a family or friends fall photo. Open Saturday 10-5pm.",
+        "date": "2026-10-10",
+        "startTime": "10:00",
+        "endTime": "17:00",
+        "venue": "",
+        "ticketLink": "",
+        "price": "",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none",
+        "extractionReason": "The post invites visitors to take a studio tour and advertises Saturday access from 10 to 5.",
+        "timeFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "10-5pm"
+          },
+          "end": {
+            "source": "explicit",
+            "toClose": false,
+            "evidence": "10-5pm"
+          }
+        },
+        "spatial": {
+          "kind": "single_location",
+          "locations": [
+            {
+              "label": "Robert McMillan Pottery",
+              "address": "17 Broadway Road, Hope River, PEI",
+              "role": "location",
+              "certainty": "confirmed",
+              "sourceText": "stop in this weekend to 17 Broadway Road, Hope River, PEI"
+            }
+          ],
+          "confirmedStreets": [
+            "Broadway Road"
+          ],
+          "ordered": false,
+          "evidenceNotes": "The post gives the pottery's address as 17 Broadway Road, Hope River, PEI."
+        },
+        "_sourceType": "event",
+        "_pipelineIndex": 1,
+        "_pipelineTotalStage3": 2
+      },
+      {
+        "name": "Robert McMillan Pottery Studio Tour",
+        "description": "Sunday: Visit the studio and gallery, take a tour of the studio floor, and see where and how Robert McMillan makes and applies his glazes. Visitors can also use the photo screen for a family or friends fall photo. Open Sunday 10-5pm.",
+        "date": "2026-10-11",
+        "startTime": "10:00",
+        "endTime": "17:00",
+        "venue": "",
+        "ticketLink": "",
+        "price": "",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none",
+        "extractionReason": "The post invites visitors to take a studio tour and advertises Sunday access from 10 to 5.",
+        "timeFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "10-5pm"
+          },
+          "end": {
+            "source": "explicit",
+            "toClose": false,
+            "evidence": "10-5pm"
+          }
+        },
+        "spatial": {
+          "kind": "single_location",
+          "locations": [
+            {
+              "label": "Robert McMillan Pottery",
+              "address": "17 Broadway Road, Hope River, PEI",
+              "role": "location",
+              "certainty": "confirmed",
+              "sourceText": "stop in this weekend to 17 Broadway Road, Hope River, PEI"
+            }
+          ],
+          "confirmedStreets": [
+            "Broadway Road"
+          ],
+          "ordered": false,
+          "evidenceNotes": "The post gives the pottery's address as 17 Broadway Road, Hope River, PEI."
+        },
+        "_sourceType": "event",
+        "_pipelineIndex": 2,
+        "_pipelineTotalStage3": 2
+      }
+    ]
+  }
+}

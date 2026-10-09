@@ -5,6 +5,16 @@ import { rehydrateFormattedEventMetadata } from './finalFormatter.js';
 import { enforceDateTimeCompleteness } from './postParser.js';
 import { preserveValidatedItemSourceType } from './secondaryValidator.js';
 
+test('shared between-and evidence preserves the separate swim start and end clocks', () => {
+  const event = buildFormattedEvent({ name: 'Friday Fun swim', category: 'Sports',
+    startDate: '2026-10-09', endDate: '2026-10-09', startTime: '12:00', endTime: '16:00',
+    timeFlags: { start: { source: 'explicit', evidence: 'between 12:00 pm and 4:00 pm' },
+      end: { source: 'explicit', toClose: false, evidence: 'between 12:00 pm and 4:00 pm' } } });
+  const result = enforceDateTimeCompleteness([event], '2026-10-08T22:00:00Z', 'America/Halifax');
+  assert.equal(result[0].startTime, '12:00');
+  assert.equal(result[0].endTime, '16:00');
+});
+
 function buildFormattedEvent(
   overrides: Partial<TimeResolvedEvent> = {}
 ): TimeResolvedEvent {

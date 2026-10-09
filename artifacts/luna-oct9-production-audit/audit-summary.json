@@ -1,0 +1,118 @@
+{
+  "selectedStage3Posts": 69,
+  "reviewedSnapshots": 164,
+  "stage1Selected": 85,
+  "checkpointWrites": 403,
+  "checkpointRegressions": [],
+  "rowStartCount": 385,
+  "repeatedRowStarts": [],
+  "resumeRequests": 19,
+  "createdLogCount": 59,
+  "updatedLogCount": 26,
+  "rowCreatedSum": 59,
+  "rowUpdatedSum": 25,
+  "stage3SelectedNoCall": [],
+  "Stage 4 Responses diagnostics": {
+    "calls": 75,
+    "medianSeconds": 10.906,
+    "maxSeconds": 64.198,
+    "reasoningTokens": 25920,
+    "outputTokens": 99362,
+    "incomplete": 0
+  },
+  "Stage 5 Responses diagnostics": {
+    "calls": 60,
+    "medianSeconds": 42.9595,
+    "maxSeconds": 129.037,
+    "reasoningTokens": 244288,
+    "outputTokens": 285371,
+    "incomplete": 0
+  },
+  "priorPlanFiles": {
+    "hunter-plan-2026-10-08T19-02-54-882Z.json": {
+      "rootKeys": [
+        "project",
+        "venueId",
+        "sourceRoot",
+        "sourceFile",
+        "templatePath",
+        "templateUpdateTime",
+        "templateDataHash",
+        "sameSourceIds",
+        "conflicts",
+        "creates",
+        "backupPath"
+      ]
+    },
+    "hunter-plan-2026-10-08T19-05-04-027Z.json": {
+      "rootKeys": [
+        "project",
+        "venueId",
+        "sourceRoot",
+        "sourceFile",
+        "templatePath",
+        "templateUpdateTime",
+        "templateDataHash",
+        "sameSourceIds",
+        "conflicts",
+        "creates",
+        "backupPath"
+      ]
+    },
+    "live-cleanup-plan-2026-10-08T18-57-36-933Z.json": {
+      "rootKeys": [
+        "createdAt",
+        "project",
+        "backupPath",
+        "targets",
+        "siblings"
+      ]
+    },
+    "powerskate-plan-2026-10-08T19-00-50-553Z.json": {
+      "rootKeys": [
+        "project",
+        "sourceRoot",
+        "venueId",
+        "sourceFile",
+        "deletes",
+        "creates",
+        "sourceSiblings",
+        "backupPath"
+      ]
+    },
+    "trailside-plan-2026-10-08T19-04-15-986Z.json": {
+      "rootKeys": [
+        "project",
+        "sourceRoot",
+        "venueId",
+        "sourceDate",
+        "sourceImage",
+        "sourceImageStatus",
+        "templatePath",
+        "templateUpdateTime",
+        "templateHash",
+        "sameSourceIds",
+        "sameDate",
+        "create",
+        "backupPath"
+      ]
+    },
+    "trailside-plan-2026-10-08T19-05-03-974Z.json": {
+      "rootKeys": [
+        "project",
+        "sourceRoot",
+        "venueId",
+        "sourceDate",
+        "sourceImage",
+        "sourceImageStatus",
+        "templatePath",
+        "templateUpdateTime",
+        "templateHash",
+        "sameSourceIds",
+        "sameDate",
+        "create",
+        "backupPath"
+      ]
+    }
+  }
+}

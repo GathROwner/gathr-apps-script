@@ -2706,7 +2706,7 @@ function stripOcrTextFromCombined(text: string): string {
   return String(text || '').slice(0, idx).trim();
 }
 
-function parseScheduleText(
+export function parseScheduleText(
   combinedText: string,
   postedLocalDate: string,
   userName: string,
@@ -2838,6 +2838,12 @@ function parseDateHeader(line: string, postedLocalDate: string): string | null {
     return null;
   }
 
+  const isoDate = line.match(/\b20\d{2}-\d{2}-\d{2}\b/);
+  if (isoDate) {
+    const parsed = DateTime.fromISO(isoDate[0]);
+    return parsed.isValid ? parsed.toISODate() : null;
+  }
+
   const monthMap: Record<string, number> = {
     jan: 1,
     january: 1,
@@ -2961,6 +2967,14 @@ function extractLineTimesWithEvidence(
   const looseRangeRe =
     /\b(\d{1,2}(?::\d{2})?)\s*[-\u2013\u2014]\s*(\d{1,2}(?::\d{2})?)\s*(am|pm)\b/gi;
 
+  // "between 12 pm and 4 pm" describes one access window, not two sessions.
+  scrubbed = scrubbed.replace(/\bbetween\s+(\d{1,2}(?::\d{2})?)\s*(am|pm)\s+and\s+(\d{1,2}(?::\d{2})?)\s*(am|pm)\b/gi,
+    (match, start, startMer, end, endMer) => {
+      const resolved = resolveTimeRangeTokens(start, startMer, end, endMer);
+      if (resolved) ranges.push({ ...resolved, evidence: match.trim() });
+      return ' ';
+    });
+
   scrubbed = scrubbed.replace(rangeRe, (match, start, startMer, end, endMer) => {
     const resolved = resolveTimeRangeTokens(start, startMer, end, endMer);
     if (resolved) {
@@ -3007,6 +3021,7 @@ function extractScheduleNameVenue(
   const timeTokenRe = /\b\d{1,2}(?::\d{2})?\s*(?:am|pm)\b/gi;
 
   let cleaned = line
+    .replace(/\bbetween\s+\d{1,2}(?::\d{2})?\s*(?:am|pm)\s+and\s+\d{1,2}(?::\d{2})?\s*(?:am|pm)\b/gi, ' ')
     .replace(timeRangeRe, ' ')
     .replace(timeTokenRe, ' ')
     .replace(/\bevents?\b/i, ' ')
@@ -3723,6 +3738,8 @@ Image Preprocessing
 - If the poster shows separate weekday tiles/lines (e.g., Thursday / Friday / Saturday), treat EACH tile/line as its own region. Read the time from WITHIN the same region as the act for that day.
 
 DATE RESOLUTION RULES (MANDATORY — EXACT ALGORITHM):
+- Never use the post date as a fallback for an undated activity. Resolve a printed date, today/tonight, an explicitly advertised current availability period, or a relative weekday/weekend; otherwise leave date empty and explain the missing anchor.
+- A Weekend Market advertised on a weekday belongs to the coming Saturday/Sunday, not the posting weekday. Create each offered day separately, obey explicit closures, and do not infer indefinite recurrence.
 - Timezone: use ${tz}. Convert ${timestamp} to the posted LOCAL date = ${postedLocalDate} and weekday = ${postedLocalPretty.split(' ')[1]}.
 - For each weekday term printed on the poster (e.g., "Thursday", "Friday", "Saturday"):
   1) Compute the calendar date for the **next occurrence ON OR AFTER** the posted local date in ${tz}.
@@ -3751,11 +3768,14 @@ EXTRACT ONLY:
 ✓ Workshops, classes
 ✓ Sports events, parties
 ✓ Any entertainment activity
+✓ Advertised public recreation access: lane swim, leisure/toddler pools, all-pools swim windows, waterslides, public/bookable ice and attraction visits. These are activities, not ordinary business opening hours. Preserve every separate printed window, including limited-lane details. Do not convert pool closures, private lessons, or staff schedules into public access.
+✓ When a source explicitly invites visitors to an offered studio/gallery tour or attraction experience during named access days and hours, use that access window for the offered activity. Plain retail/store hours without an advertised visitor activity still do not qualify. Do not infer a workshop time from unrelated shop hours.
 
 IGNORE COMPLETELY:
 ✗ Food specials, happy hours, food menus
 ✗ Drink deals, wing nights
 ✗ Any cost savings on food/drinks
+✗ Administrative registration price-change/deadline notices as standalone events. Extract the actual dated activities instead when the source supplies their schedule. A separately timed attendee kit-pickup or in-person registration session remains eligible.
 
 For each EVENT found, extract:
 - name: Event name
@@ -3825,7 +3845,7 @@ CONTENT:
 - Text: "${combinedText}"
 
 EXTRACT ALL QUALIFYING SPECIALS:
-- A printed price or discount qualifies.
+- A printed discount, named special, or explicitly advertised food/drink deal qualifies. A price alone on an ordinary stock, restock, product or menu list does not make every item a special. In a mixed post, extract only the named offer; other priced products do not inherit its eligibility.
 - An explicitly advertised daily special or deal also qualifies without a printed price. Extract only the named special or deal, not other menu items in the post.
 - A month-long featured menu item alone, such as a pizza of the month, does not qualify unless the source separately advertises it as a deal.
 
@@ -4202,16 +4222,18 @@ CONTENT:
 - Posted at (UTC ISO): ${timestamp}
 - Reference timezone: ${tz}
 - Posted at (local): ${postedLocalPretty}
-- Default date if none is explicit: ${postedLocalDate}
+- Reference local date for resolving relative dates: ${postedLocalDate}
 - Original classification: ${contentType}
 - Text: "${combinedText}"
 ${calendarRules}
 
 RULES:
 - Use image text (OCR) when available; otherwise rely on the text.
-- If a date is not explicit, use ${postedLocalDate}.
+- Use explicit dates or unambiguous relative dates such as today/tonight or the coming advertised weekday/weekend. Never assign the reference date to an undated activity; leave date empty. A currently advertised food deal can use the post date as its offer-window start.
 - If a time is not explicit, leave startTime/endTime as empty strings.
-- Do NOT return an empty list if you see any hint of events, schedules, classes, lineups, or specials.
+- Return only source-grounded public activities and advertised food deals. An empty list is correct for ordinary stock, closures, administrative deadlines, or ship arrival/departure logistics without an advertised public activity.
+- An explicit invitation to take a studio/gallery tour during named visitor days and hours is an activity; use those advertised access windows. Plain store hours and workshop times absent from the source remain excluded or unresolved.
+- Match each named entry to its OWN printed time range. Re-read the first number for each block; never copy the adjacent entry's start time. Public pool/swim access windows qualify as activities, while pool closures and staff/private schedules do not.
 
 Return JSON in this exact structure:
 {

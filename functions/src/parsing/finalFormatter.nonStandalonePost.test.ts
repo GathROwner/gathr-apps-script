@@ -55,6 +55,25 @@ test('a Monday closure does not erase an explicit weekend dinner special', () =>
     'Closed Monday for Thanksgiving. Regular hours resume Tuesday.'), []);
 });
 
+test('mixed bakery closure keeps the named first-time bread offer, not the ordinary pie prices', () => {
+  const bread = listing('Day-old bread', 'First-time special, $1.49/loaf.');
+  const pie = listing('Pumpkin Pie', 'Pumpkin pie $12.');
+  assert.deepEqual(filterUnsupportedClosureFoodBleed([pie, bread],
+    'THANKSGIVING!\nFIRST-TIME SPECIAL! Day-old bread for just $1.49/loaf\nFriday 9 AM–5 PM\nClosed Sunday & Monday!'), [bread]);
+  assert.deepEqual(filterUnsupportedClosureFoodBleed([pie, bread],
+    'Closed Sunday and Monday. Regular bakery prices: day-old bread $1.49, pumpkin pie $12.'), []);
+  const namedOffer = listing('Day-old Bread First-Time Offer — Saturday', bread.description);
+  assert.deepEqual(filterUnsupportedClosureFoodBleed([pie, namedOffer],
+    'FIRST-TIME SPECIAL! Day-old bread for just $1.49/loaf\nPumpkin pie $12\nClosed Sunday and Monday.'), [namedOffer]);
+});
+
+test('registration price-change deadline is excluded but race and attendee pickup remain', () => {
+  const deadline = listing('Registration Price Change Alert', 'Registration prices are changing at this deadline. Register before then.', 'Sports');
+  const pickup = listing('Race Kit Pickup', 'Register in person and pick up your kit from 6–8 pm.', 'Sports');
+  const race = listing('10K Run', 'Race starts at 9 am; registration prices change Friday.', 'Sports');
+  assert.deepEqual(filterNonStandalonePostListings([deadline, pickup, race], 'Register today and save!'), [pickup, race]);
+});
+
 test('October 8 source notices and ordinary food inventory do not become listings', () => {
   const source = `Wednesday\nGrab ‘n Go Fresh Fridge;\n> Carrot + Ginger Soup $11\nSoup of the Day\nHam + Split Pea\nAll Day Special\nBeef Dip Melt $20`;
   const records = [

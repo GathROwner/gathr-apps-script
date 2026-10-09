@@ -1,0 +1,581 @@
+{
+  "row": 287,
+  "postId": "1140431992044087",
+  "elapsedMs": 106252,
+  "events": [
+    {
+      "isEvent": "Yes",
+      "isFoodSpecial": "No",
+      "category": "Gatherings & Parties",
+      "name": "Weekend Market",
+      "description": "Weekend Local Vendor Market. No admission required. Open 10-4PM.",
+      "establishment": "Island Hill Farm",
+      "address": "",
+      "startDate": "2026-10-10",
+      "endDate": "2026-10-10",
+      "startTime": "10:00",
+      "endTime": "16:00",
+      "ticketPrice": "No admission required",
+      "ticketLink": "",
+      "relevantImageIndex": 0,
+      "venue": "Island Hill Farm",
+      "additionalLocation": "Island Hill Farm",
+      "isRecurring": "No",
+      "recurringPattern": "none",
+      "_categoryOriginal": "Gatherings & Parties",
+      "_categoryHintOriginal": "",
+      "_categorySource": "model_final",
+      "_categoryNormalizationReason": "kept weak model category \"Gatherings & Parties\" after no stronger hint/keyword evidence",
+      "_sourceType": "event",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "OPEN 10-4PM"
+        },
+        "end": {
+          "source": "explicit",
+          "toClose": false,
+          "evidence": "OPEN 10-4PM"
+        }
+      },
+      "spatial": {
+        "kind": "single_location",
+        "locations": [
+          {
+            "label": "Island Hill Farm",
+            "address": "",
+            "role": "location",
+            "certainty": "confirmed",
+            "sourceText": "ISLAND HILL FARM"
+          }
+        ],
+        "confirmedStreets": [],
+        "ordered": false,
+        "evidenceNotes": "Island Hill Farm is named on the poster."
+      },
+      "timeResolution": {
+        "hoursUsed": false
+      },
+      "icon": "",
+      "image": "",
+      "cleanedFacebookUrl": "",
+      "sharedPostThumbnail": "",
+      "id": "1140431992044087",
+      "latitude": "",
+      "longitude": "",
+      "city": "",
+      "streetAddress": "",
+      "organizedBy": "",
+      "usersResponded": "",
+      "utcStartDate": "",
+      "ticketsBuyUrl": "",
+      "relevantImageUrl": "",
+      "mediaUrls": [],
+      "imageProvenance": {
+        "version": 1,
+        "primarySource": "no_image",
+        "isFallback": false,
+        "selectionReason": "no_usable_event_image_provided",
+        "updatedBy": "parser"
+      }
+    },
+    {
+      "isEvent": "Yes",
+      "isFoodSpecial": "No",
+      "category": "Gatherings & Parties",
+      "name": "Weekend Market",
+      "description": "Weekend Local Vendor Market. No admission required. Open 10-4PM.",
+      "establishment": "Island Hill Farm",
+      "address": "",
+      "startDate": "2026-10-11",
+      "endDate": "2026-10-11",
+      "startTime": "10:00",
+      "endTime": "16:00",
+      "ticketPrice": "No admission required",
+      "ticketLink": "",
+      "relevantImageIndex": 0,
+      "venue": "Island Hill Farm",
+      "additionalLocation": "Island Hill Farm",
+      "isRecurring": "No",
+      "recurringPattern": "none",
+      "_categoryOriginal": "Gatherings & Parties",
+      "_categoryHintOriginal": "",
+      "_categorySource": "model_final",
+      "_categoryNormalizationReason": "kept weak model category \"Gatherings & Parties\" after no stronger hint/keyword evidence",
+      "_sourceType": "event",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "OPEN 10-4PM"
+        },
+        "end": {
+          "source": "explicit",
+          "toClose": false,
+          "evidence": "OPEN 10-4PM"
+        }
+      },
+      "spatial": {
+        "kind": "single_location",
+        "locations": [
+          {
+            "label": "Island Hill Farm",
+            "address": "",
+            "role": "location",
+            "certainty": "confirmed",
+            "sourceText": "ISLAND HILL FARM"
+          }
+        ],
+        "confirmedStreets": [],
+        "ordered": false,
+        "evidenceNotes": "Island Hill Farm is named on the poster."
+      },
+      "timeResolution": {
+        "hoursUsed": false
+      },
+      "icon": "",
+      "image": "",
+      "cleanedFacebookUrl": "",
+      "sharedPostThumbnail": "",
+      "id": "1140431992044087",
+      "latitude": "",
+      "longitude": "",
+      "city": "",
+      "streetAddress": "",
+      "organizedBy": "",
+      "usersResponded": "",
+      "utcStartDate": "",
+      "ticketsBuyUrl": "",
+      "relevantImageUrl": "",
+      "mediaUrls": [],
+      "imageProvenance": {
+        "version": 1,
+        "primarySource": "no_image",
+        "isFallback": false,
+        "selectionReason": "no_usable_event_image_provided",
+        "updatedBy": "parser"
+      }
+    }
+  ],
+  "usage": [
+    {
+      "stage": "stage1",
+      "component": "contentValidator",
+      "endpoint": "responses",
+      "model": "gpt-6-luna",
+      "imageCount": 1,
+      "durationMs": 5390,
+      "inputTokens": 3786,
+      "outputTokens": 576,
+      "totalTokens": 4362,
+      "cachedInputTokens": 0,
+      "responseId": "resp_0d7b92084365efcd006ac91970699487d2a033ac4ce8bf9434",
+      "responseStatus": "completed",
+      "requestedMaxOutputTokens": 6000,
+      "reasoningTokens": 260,
+      "visibleOutputChars": 1368
+    },
+    {
+      "stage": "stage2",
+      "component": "contentClassifier",
+      "endpoint": "responses",
+      "model": "gpt-5-mini",
+      "imageCount": 1,
+      "durationMs": 5935,
+      "inputTokens": 1257,
+      "outputTokens": 963,
+      "totalTokens": 2220,
+      "cachedInputTokens": 0
+    },
+    {
+      "stage": "stage3",
+      "component": "eventExtractor",
+      "endpoint": "responses",
+      "model": "gpt-6-luna",
+      "imageCount": 1,
+      "durationMs": 24778,
+      "inputTokens": 2872,
+      "outputTokens": 3263,
+      "totalTokens": 6135,
+      "cachedInputTokens": 0
+    },
+    {
+      "stage": "stage3",
+      "component": "eventExtractor",
+      "endpoint": "responses",
+      "model": "gpt-6-luna",
+      "imageCount": 1,
+      "durationMs": 2355,
+      "inputTokens": 1898,
+      "outputTokens": 131,
+      "totalTokens": 2029,
+      "cachedInputTokens": 0
+    },
+    {
+      "stage": "stage4",
+      "component": "secondaryValidator",
+      "endpoint": "responses",
+      "model": "gpt-5-nano",
+      "durationMs": 24920,
+      "inputTokens": 3426,
+      "outputTokens": 2331,
+      "totalTokens": 5757,
+      "cachedInputTokens": 0,
+      "fileId": "1NpfngSPGDDOm9Fb5DcYseMuCe4BdKjGq",
+      "rowIndex": 287,
+      "postId": "1140431992044087",
+      "batchItemCount": 5,
+      "responseId": "resp_0e27fa11aab63e83006ac91996e0c487d2b740d3a93dc4759c",
+      "responseStatus": "completed",
+      "incompleteReason": "",
+      "requestedMaxOutputTokens": 32000,
+      "reasoningTokens": 384,
+      "visibleOutputChars": 8139
+    },
+    {
+      "stage": "stage5",
+      "component": "finalFormatter",
+      "endpoint": "responses",
+      "model": "gpt-5-nano",
+      "durationMs": 42811,
+      "inputTokens": 2596,
+      "outputTokens": 4236,
+      "totalTokens": 6832,
+      "cachedInputTokens": 0,
+      "fileId": "1NpfngSPGDDOm9Fb5DcYseMuCe4BdKjGq",
+      "rowIndex": 287,
+      "postId": "1140431992044087",
+      "responseId": "resp_0b27d04a3dd8db55006ac919afd24487d2aa39a84ab5b68e79",
+      "responseStatus": "completed",
+      "incompleteReason": "",
+      "requestedMaxOutputTokens": 32000,
+      "reasoningTokens": 3520,
+      "visibleOutputChars": 2691,
+      "parsedItemCount": 2,
+      "parseError": false,
+      "batchOffset": 0,
+      "batchItemCount": 2
+    }
+  ],
+  "skips": [],
+  "stages": {
+    "source": "live",
+    "stage1Validation": {
+      "imageAnalysis": [
+        {
+          "imageIndex": 0,
+          "description": "Promotional graphic for Island Hill Farm, with an aerial farm photo above text advertising a fibre workshop with Farmer Flory, a $16 admission sale, and a weekend market open 10–4 with no admission required. A callout says Flory’s Cafe is open on weekends.",
+          "relevanceToPost": "The image explicitly advertises discounted farm admission and a fibre workshop, both qualifying offers or activities. It also announces weekend visitor access to the market and cafe.",
+          "imageComplexity": {
+            "hasCalendarGrid": false,
+            "hasDenseText": false,
+            "hasMultipleEventListings": false,
+            "isPromotionalPhoto": false,
+            "textDensityScore": 0.38,
+            "recommendsTiling": false,
+            "recommendationReason": "The text is arranged in a few large, legible promotional panels; there is no calendar grid or dense small text."
+          }
+        }
+      ],
+      "hasValidContent": true,
+      "confidence": 0.99,
+      "validationDecision": "VALIDATION_PASSED",
+      "reason": "The post advertises farm admission on sale for $16 per person and invites visitors to see the animals, attend the weekend market, and join fibre, baking, and sketching classes. The image independently confirms an admission sale and a fibre workshop. These are qualifying public admission and activity offers."
+    },
+    "stage1Pilot": {
+      "eligible": true,
+      "selected": true,
+      "percent": 50,
+      "model": "gpt-6-luna"
+    },
+    "contentType": "MIXED_EVENTS_AND_SPECIALS",
+    "imageFrameManifest": [
+      {
+        "frameIndex": 0,
+        "sourceGalleryIndex": 0,
+        "kind": "whole"
+      }
+    ],
+    "stage3Items": [
+      {
+        "name": "Weekend Market",
+        "description": "Weekend Local Vendor Market. No admission required. Open 10-4PM.",
+        "date": "2026-10-10",
+        "startTime": "10:00",
+        "endTime": "16:00",
+        "venue": "Island Hill Farm",
+        "ticketLink": "",
+        "price": "No admission required",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none",
+        "extractionReason": "The poster advertises a Weekend Market with explicit hours. As the post was published Thursday, the weekend market is assigned to the coming Saturday.",
+        "timeFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "OPEN 10-4PM"
+          },
+          "end": {
+            "source": "explicit",
+            "toClose": false,
+            "evidence": "OPEN 10-4PM"
+          }
+        },
+        "spatial": {
+          "kind": "single_location",
+          "locations": [
+            {
+              "label": "Island Hill Farm",
+              "address": "",
+              "role": "location",
+              "certainty": "confirmed",
+              "sourceText": "ISLAND HILL FARM"
+            }
+          ],
+          "confirmedStreets": [],
+          "ordered": false,
+          "evidenceNotes": "Island Hill Farm is named on the poster."
+        },
+        "_sourceType": "event",
+        "_pipelineIndex": 1,
+        "_pipelineTotalStage3": 5
+      },
+      {
+        "name": "Weekend Market",
+        "description": "Weekend Local Vendor Market. No admission required. Open 10-4PM.",
+        "date": "2026-10-11",
+        "startTime": "10:00",
+        "endTime": "16:00",
+        "venue": "Island Hill Farm",
+        "ticketLink": "",
+        "price": "No admission required",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none",
+        "extractionReason": "The poster advertises a Weekend Market with explicit hours. The Sunday offering is extracted separately from Saturday.",
+        "timeFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "OPEN 10-4PM"
+          },
+          "end": {
+            "source": "explicit",
+            "toClose": false,
+            "evidence": "OPEN 10-4PM"
+          }
+        },
+        "spatial": {
+          "kind": "single_location",
+          "locations": [
+            {
+              "label": "Island Hill Farm",
+              "address": "",
+              "role": "location",
+              "certainty": "confirmed",
+              "sourceText": "ISLAND HILL FARM"
+            }
+          ],
+          "confirmedStreets": [],
+          "ordered": false,
+          "evidenceNotes": "Island Hill Farm is named on the poster."
+        },
+        "_sourceType": "event",
+        "_pipelineIndex": 2,
+        "_pipelineTotalStage3": 5
+      },
+      {
+        "name": "Fibre Workshop with Farmer Flory",
+        "description": "Join a fibre workshop with Farmer Flory. No date or time is specified for the workshop.",
+        "date": "",
+        "startTime": "unknown",
+        "endTime": "",
+        "venue": "Island Hill Farm",
+        "ticketLink": "",
+        "price": "",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none",
+        "extractionReason": "The poster explicitly advertises a fibre workshop, but the weekend market dates and hours are not stated as applying to the workshop, so its date and time cannot be resolved.",
+        "timeFlags": {
+          "start": {
+            "source": "none",
+            "evidence": ""
+          },
+          "end": {
+            "source": "none",
+            "toClose": false,
+            "evidence": ""
+          }
+        },
+        "spatial": {
+          "kind": "single_location",
+          "locations": [
+            {
+              "label": "Island Hill Farm",
+              "address": "",
+              "role": "location",
+              "certainty": "confirmed",
+              "sourceText": "ISLAND HILL FARM"
+            }
+          ],
+          "confirmedStreets": [],
+          "ordered": false,
+          "evidenceNotes": "Island Hill Farm is named on the poster."
+        },
+        "_sourceType": "event",
+        "_pipelineIndex": 3,
+        "_pipelineTotalStage3": 5
+      },
+      {
+        "name": "Baking Class",
+        "description": "Baking class mentioned in the post. No date or time is specified.",
+        "date": "",
+        "startTime": "unknown",
+        "endTime": "",
+        "venue": "",
+        "ticketLink": "",
+        "price": "",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none",
+        "extractionReason": "The post explicitly mentions baking classes, but provides no schedule or specific venue for them.",
+        "timeFlags": {
+          "start": {
+            "source": "none",
+            "evidence": ""
+          },
+          "end": {
+            "source": "none",
+            "toClose": false,
+            "evidence": ""
+          }
+        },
+        "spatial": {
+          "kind": "unknown",
+          "locations": [],
+          "confirmedStreets": [],
+          "ordered": false,
+          "evidenceNotes": "No specific location for this class is stated."
+        },
+        "_sourceType": "event",
+        "_pipelineIndex": 4,
+        "_pipelineTotalStage3": 5
+      },
+      {
+        "name": "Sketching Class",
+        "description": "Sketching class mentioned in the post. No date or time is specified.",
+        "date": "",
+        "startTime": "unknown",
+        "endTime": "",
+        "venue": "",
+        "ticketLink": "",
+        "price": "",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none",
+        "extractionReason": "The post explicitly mentions sketching classes, but provides no schedule or specific venue for them.",
+        "timeFlags": {
+          "start": {
+            "source": "none",
+            "evidence": ""
+          },
+          "end": {
+            "source": "none",
+            "toClose": false,
+            "evidence": ""
+          }
+        },
+        "spatial": {
+          "kind": "unknown",
+          "locations": [],
+          "confirmedStreets": [],
+          "ordered": false,
+          "evidenceNotes": "No specific location for this class is stated."
+        },
+        "_sourceType": "event",
+        "_pipelineIndex": 5,
+        "_pipelineTotalStage3": 5
+      }
+    ],
+    "stage4Items": [
+      {
+        "name": "Weekend Market",
+        "description": "Weekend Local Vendor Market. No admission required. Open 10-4PM.",
+        "date": "2026-10-10",
+        "startTime": "10:00",
+        "endTime": "16:00",
+        "venue": "Island Hill Farm",
+        "ticketLink": "",
+        "price": "No admission required",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none",
+        "extractionReason": "The poster advertises a Weekend Market with explicit hours. As the post was published Thursday, the weekend market is assigned to the coming Saturday.",
+        "timeFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "OPEN 10-4PM"
+          },
+          "end": {
+            "source": "explicit",
+            "toClose": false,
+            "evidence": "OPEN 10-4PM"
+          }
+        },
+        "spatial": {
+          "kind": "single_location",
+          "locations": [
+            {
+              "label": "Island Hill Farm",
+              "address": "",
+              "role": "location",
+              "certainty": "confirmed",
+              "sourceText": "ISLAND HILL FARM"
+            }
+          ],
+          "confirmedStreets": [],
+          "ordered": false,
+          "evidenceNotes": "Island Hill Farm is named on the poster."
+        },
+        "_sourceType": "event",
+        "_pipelineIndex": 1,
+        "_pipelineTotalStage3": 5
+      },
+      {
+        "name": "Weekend Market",
+        "description": "Weekend Local Vendor Market. No admission required. Open 10-4PM.",
+        "date": "2026-10-11",
+        "startTime": "10:00",
+        "endTime": "16:00",
+        "venue": "Island Hill Farm",
+        "ticketLink": "",
+        "price": "No admission required",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none",
+        "extractionReason": "The poster advertises a Weekend Market with explicit hours. The Sunday offering is extracted separately from Saturday.",
+        "timeFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "OPEN 10-4PM"
+          },
+          "end": {
+            "source": "explicit",
+            "toClose": false,
+            "evidence": "OPEN 10-4PM"
+          }
+        },
+        "spatial": {
+          "kind": "single_location",
+          "locations": [
+            {
+              "label": "Island Hill Farm",
+              "address": "",
+              "role": "location",
+              "certainty": "confirmed",
+              "sourceText": "ISLAND HILL FARM"
+            }
+          ],
+          "confirmedStreets": [],
+          "ordered": false,
+          "evidenceNotes": "Island Hill Farm is named on the poster."
+        },
+        "_sourceType": "event",
+        "_pipelineIndex": 2,
+        "_pipelineTotalStage3": 5
+      }
+    ]
+  }
+}

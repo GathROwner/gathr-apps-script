@@ -2583,6 +2583,19 @@ export function filterUnsupportedClosureFoodBleed(
 
   const filtered = events.filter((event) => {
     if (!FOOD_CATEGORIES.includes(event.category)) return true;
+    // A closure elsewhere in a mixed post must not erase its named offer.
+    // Match the item to the source offer clause; the other priced menu items
+    // in the same post do not inherit that exception.
+    const name = normalizeWorkshopSupportText(event.name)
+      .replace(/\bfirst\s*time\b|\b(?:offer|special|deal|sale|monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/g, ' ')
+      .replace(/\s+/g, ' ').trim();
+    const offerClause = String(combinedText || '').split(/\r?\n|[!;]+/).some((clause, index, clauses) => {
+      const preceding = index > 0 ? clauses[index - 1] : '';
+      const normalized = normalizeWorkshopSupportText(clause);
+      return name.length > 2 && normalized.includes(name) &&
+        /\b(?:special|deal|discount|sale|half price|bogo)\b|\d+\s*%\s*off/i.test(`${preceding} ${clause}`);
+    });
+    if (offerClause) return true;
 
     logger.debug(`Dropped unsupported food-special bleed item from closure-only post "${event.name}"`, {
       category: event.category,
@@ -2704,6 +2717,7 @@ function hasPassengerCountCue(text: string): boolean {
 
 function hasCruiseScheduleCue(text: string): boolean {
   return (
+    /\b(?:two|three|four|\d+)[ -]ship day\b/.test(text) ||
     /\bcruise arrivals?\b/.test(text) ||
     /\bcruise departures?\b/.test(text) ||
     /\bcruise schedule\b/.test(text) ||
@@ -2835,7 +2849,8 @@ function isCruiseShipLogisticsEvent(event: FormattedEvent, combinedText: string)
     );
   const eventHasLogistics =
     hasCruiseArrivalDepartureCue(eventText) ||
-    hasPassengerCountCue(eventText);
+    hasPassengerCountCue(eventText) ||
+    (sourceHasLogistics && /\bport visit\b/.test(normalizeCruiseLogisticsText(event.name)));
 
   if (!sourceHasLogistics && !eventHasLogistics) return false;
 
@@ -5908,7 +5923,11 @@ export function filterNonStandalonePostListings(
     const publicActivity = /\b(?:workshop|class|u pick|pick your own|tour|festival|market day|tasting|demonstration|public meeting|meet and greet)\b/.test(name);
     const itemOffer = /\b(?:daily|all day|weekly|today'?s?)\s+special\b|\b(?:special|deal|discount|sale|happy hour)\b|\d+\s*%\s*off/.test(`${name} ${detail}`);
     let reason = '';
-    if (/\ball\s+pools?\s+closed\b|\bpool\s+closure\b/.test(name) &&
+    if (/\bregistration\b/.test(name) &&
+        /\b(?:price change|deadline|prices? (?:change|changing|increase|rise)|closes?)\b/.test(`${name} ${detail}`) &&
+        !/\b(?:workshop|class|clinic|kit pickup|race kit|in person registration)\b/.test(name)) {
+      reason = 'registration_administrative_deadline';
+    } else if (/\ball\s+pools?\s+closed\b|\bpool\s+closure\b/.test(name) &&
         !/\b(?:register|book|sign up|open to the public)\b/.test(detail)) {
       reason = 'pool_closure_notice';
     } else if (special && /\bgrab\s*'?\s*(?:n|and)\s*go\s+fresh\s+fridge\b/.test(detail) &&

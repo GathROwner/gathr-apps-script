@@ -1,0 +1,180 @@
+[
+  {
+    "row": 335,
+    "elapsedMs": 85869,
+    "events": [
+      {
+        "name": "Day-old bread offer",
+        "startDate": "2026-10-09",
+        "startTime": "09:00",
+        "endTime": "17:00",
+        "isRecurring": "No"
+      }
+    ],
+    "skip": []
+  },
+  {
+    "row": 198,
+    "elapsedMs": 192460,
+    "events": [
+      {
+        "name": "Friday Fun swim",
+        "startDate": "2026-10-09",
+        "startTime": "12:00",
+        "endTime": "16:00",
+        "isRecurring": "No"
+      },
+      {
+        "name": "Sunrise Fitness",
+        "startDate": "2026-10-09",
+        "startTime": "07:00",
+        "endTime": "09:00",
+        "isRecurring": "No"
+      },
+      {
+        "name": "Cardio Craze",
+        "startDate": "2026-10-09",
+        "startTime": "08:45",
+        "endTime": "10:45",
+        "isRecurring": "No"
+      },
+      {
+        "name": "UFIT Aqua",
+        "startDate": "2026-10-09",
+        "startTime": "11:45",
+        "endTime": "13:45",
+        "isRecurring": "No"
+      },
+      {
+        "name": "Aqua Zumba",
+        "startDate": "2026-10-09",
+        "startTime": "17:45",
+        "endTime": "19:45",
+        "isRecurring": "No"
+      },
+      {
+        "name": "Lane swim",
+        "startDate": "2026-10-09",
+        "startTime": "05:30",
+        "endTime": "07:00",
+        "isRecurring": "No"
+      },
+      {
+        "name": "Lane swim",
+        "startDate": "2026-10-09",
+        "startTime": "07:00",
+        "endTime": "16:00",
+        "isRecurring": "No"
+      },
+      {
+        "name": "Lane swim",
+        "startDate": "2026-10-09",
+        "startTime": "16:00",
+        "endTime": "19:30",
+        "isRecurring": "No"
+      },
+      {
+        "name": "Leisure pool open",
+        "startDate": "2026-10-09",
+        "startTime": "05:30",
+        "endTime": "16:00",
+        "isRecurring": "No"
+      },
+      {
+        "name": "Leisure pool open",
+        "startDate": "2026-10-09",
+        "startTime": "17:30",
+        "endTime": "21:00",
+        "isRecurring": "No"
+      },
+      {
+        "name": "Toddler Pool open",
+        "startDate": "2026-10-09",
+        "startTime": "05:30",
+        "endTime": "21:00",
+        "isRecurring": "No"
+      },
+      {
+        "name": "All pools open",
+        "startDate": "2026-10-09",
+        "startTime": "12:30",
+        "endTime": "16:00",
+        "isRecurring": "No"
+      },
+      {
+        "name": "Waterslide open",
+        "startDate": "2026-10-09",
+        "startTime": "18:30",
+        "endTime": "19:30",
+        "isRecurring": "No"
+      }
+    ],
+    "skip": []
+  },
+  {
+    "row": 287,
+    "elapsedMs": 106252,
+    "events": [
+      {
+        "name": "Weekend Market",
+        "startDate": "2026-10-10",
+        "startTime": "10:00",
+        "endTime": "16:00",
+        "isRecurring": "No"
+      },
+      {
+        "name": "Weekend Market",
+        "startDate": "2026-10-11",
+        "startTime": "10:00",
+        "endTime": "16:00",
+        "isRecurring": "No"
+      }
+    ],
+    "skip": []
+  },
+  {
+    "row": 51,
+    "elapsedMs": 125418,
+    "events": [],
+    "skip": [
+      {
+        "stage": "stage5",
+        "reason": "Luna canary requires source review",
+        "detail": "stage5_no_items"
+      }
+    ]
+  },
+  {
+    "row": 175,
+    "elapsedMs": 16563,
+    "events": [],
+    "skip": [
+      {
+        "stage": "stage3",
+        "reason": "Luna canary requires source review",
+        "detail": "stage3_no_items"
+      }
+    ]
+  },
+  {
+    "row": 274,
+    "elapsedMs": 109489,
+    "events": [
+      {
+        "name": "Robert McMillan Pottery Studio Tour",
+        "startDate": "2026-10-10",
+        "startTime": "10:00",
+        "endTime": "17:00",
+        "isRecurring": "No"
+      },
+      {
+        "name": "Robert McMillan Pottery Studio Tour",
+        "startDate": "2026-10-11",
+        "startTime": "10:00",
+        "endTime": "17:00",
+        "isRecurring": "No"
+      }
+    ],
+    "skip": []
+  }
+]
