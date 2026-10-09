@@ -40,7 +40,11 @@ const tasks=input.flatMap((source,index)=>arms.map((arm,j)=>({source,arm:arms[(j
 let cursor=0;
 await Promise.all(Array.from({length:4},async()=>{while(cursor<tasks.length){const {source,arm}=tasks[cursor++];const target=path.join(output,source.caseId+'-'+arm.id+'.json');try{await fs.access(target);continue;}catch{}
  const context={arm,requests:[]};await local.run(context,async()=>{const started=Date.now(),usage=[];try{
-   const images=await Promise.all(source.imageFiles.map(async p=>'data:image/jpeg;base64,'+(await fs.readFile(p)).toString('base64')));
+   const images=await Promise.all(source.imageFiles.map(async p=>{
+     const bytes=await fs.readFile(p);
+     const mime=bytes.subarray(0,4).toString()==='RIFF'&&bytes.subarray(8,12).toString()==='WEBP'?'image/webp':bytes[0]===0x89?'image/png':'image/jpeg';
+     return `data:${mime};base64,${bytes.toString('base64')}`;
+   }));
    const classification=await classifyContent(source.caption,images,source.venue,{utcStartDate:source.utcStartDate},{stage2ModelOverride:arm.model,stage2ReasoningEffort:arm.effort,stage2LunaNegativeRecheck:arm.negativeRecheck,gptUsageHandler:u=>usage.push(u)});
    const routing=resolveStage2ScoreRouting(source.caption,classification,source.validation);
    const record={caseId:source.caseId,row:source.row,postId:source.postId,source:source.source,arm:arm.id,model:arm.model,imageCount:images.length,classification,routing,resolvedContentType:routing.shouldUseRoutedContentType?routing.routedContentType:classification.contentType,passesConfidenceGate:classification.confidence>=0.6,fallback:/\| GPT error:/.test(classification.classificationReason),usage,requests:context.requests,elapsedMs:Date.now()-started};

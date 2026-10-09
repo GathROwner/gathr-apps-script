@@ -151,6 +151,14 @@ export async function classifyContent(
       error
     );
     const fallback = inferClassificationFromText(combinedText);
+    // The opt-in Luna candidate must not turn malformed/incomplete responses
+    // or transport failures into an accepted heuristic result. Preserve the
+    // legacy Mini fallback unless this candidate is explicitly enabled.
+    if (cfg.stage2LunaNegativeRecheck &&
+        (cfg.stage2ModelOverride || resolveStageModel(cfg.gptModelFast, 'STAGE2_MODEL_OVERRIDE')) === 'gpt-6-luna') {
+      fallback.confidence = 0;
+      fallback.classificationReason += ' | Luna Stage 2 response unavailable; source requires retry/review.';
+    }
     logger.warn('Stage 2 fallback classification applied', {
       error: errorMessage,
       contentType: fallback.contentType,
@@ -306,7 +314,35 @@ function normalizeJsonText(text: string): string {
 }
 
 function stripJsonComments(text: string): string {
-  return text.replace(/\/\/.*$/gm, '').replace(/\/\*[\s\S]*?\*\//g, '');
+  let result = '', inString = false, escaped = false;
+  for (let index = 0; index < text.length; index++) {
+    const char = text[index], next = text[index + 1];
+    if (inString) {
+      result += char;
+      if (escaped) escaped = false;
+      else if (char === '\\') escaped = true;
+      else if (char === '"') inString = false;
+      continue;
+    }
+    if (char === '"') { inString = true; result += char; continue; }
+    if (char === '/' && next === '/') {
+      index += 2;
+      while (index < text.length && text[index] !== '\n') index++;
+      if (index < text.length) result += '\n';
+      continue;
+    }
+    if (char === '/' && next === '*') {
+      index += 2;
+      while (index < text.length && !(text[index] === '*' && text[index + 1] === '/')) {
+        if (text[index] === '\n') result += '\n';
+        index++;
+      }
+      index++;
+      continue;
+    }
+    result += char;
+  }
+  return result;
 }
 
 function quoteUnquotedKeys(jsonStr: string): string {
@@ -491,6 +527,9 @@ async function callGPTWithSchema(
   };
 
   const parseJsonResponse = (text: string): ClassificationResult => {
+    // Parse valid JSON before any recovery; URLs and comment-like text inside
+    // JSON strings are data, not comments.
+    try { return JSON.parse(text) as ClassificationResult; } catch {}
     const jsonStr = normalizeJsonText(text);
     try {
       return JSON.parse(jsonStr) as ClassificationResult;
@@ -614,7 +653,8 @@ async function callGPTWithSchema(
         input: [{ role: 'user', content }],
         max_output_tokens: model.startsWith('gpt-6') ? 6000 : 1500,
         ...(model.startsWith('gpt-6') ? { reasoning: { effort: (config.stage2ReasoningEffort || 'none') as any } } : {}),
-      });
+      }, model === 'gpt-6-luna' && config.stage2LunaNegativeRecheck
+        ? { timeout: 45_000, maxRetries: 1 } : undefined);
       const durationMs = Date.now() - callStart;
       logger.info('Timing', {
         step: 'gpt_call',
@@ -641,7 +681,21 @@ async function callGPTWithSchema(
         tokens: usage.totalTokens,
       });
 
-      return parseJsonResponse(messageContent || '');
+      const parsed = parseJsonResponse(messageContent || '');
+      if (model === 'gpt-6-luna' && config.stage2LunaNegativeRecheck) {
+        const analysis = parsed?.contentAnalysis;
+        if (response.status !== 'completed' ||
+            !['EVENT', 'FOOD_SPECIAL', 'MIXED_EVENTS_AND_SPECIALS', 'CALENDAR', 'SCHEDULE'].includes(parsed?.contentType) ||
+            !Number.isFinite(parsed?.confidence) || parsed.confidence < 0 || parsed.confidence > 1 ||
+            !Number.isInteger(parsed?.estimatedItemCount) || parsed.estimatedItemCount < 0 ||
+            typeof parsed?.classificationReason !== 'string' ||
+            !analysis || typeof analysis.hasEvents !== 'boolean' ||
+            typeof analysis.hasFoodSpecials !== 'boolean' || typeof analysis.hasMultipleItems !== 'boolean' ||
+            typeof analysis.organizationStyle !== 'string') {
+          throw new Error('Incomplete or invalid Luna Stage 2 classification');
+        }
+      }
+      return parsed;
     }
 
     const content: OpenAI.Chat.Completions.ChatCompletionContentPart[] = [
@@ -723,7 +777,8 @@ async function callGPTWithSchema(
   try {
     return await runOnce(imageUrls);
   } catch (error) {
-    if (imageUrls && imageUrls.length > 0) {
+    if (imageUrls && imageUrls.length > 0 &&
+        !(model === 'gpt-6-luna' && config.stage2LunaNegativeRecheck)) {
       logger.warn('GPT call failed with images; retrying without images', {
         error: error instanceof Error ? error.message : String(error),
       });

@@ -1,0 +1,68 @@
+[
+  {
+    "function": "processDataset",
+    "state": "ACTIVE",
+    "revision": "processdataset-00461-xey",
+    "allTrafficOnLatest": true,
+    "hash": "53c15f4a10bd3f5e04b1057023e23302803ba0bc",
+    "env": {
+      "LUNA_CANARY_ENABLED": "true",
+      "LUNA_CANARY_EXCLUDED_POST_IDS": "",
+      "LUNA_CANARY_LEGACY_FALLBACK_ENABLED": "false",
+      "LUNA_CANARY_SAMPLE_PERCENT": "100",
+      "LUNA_CANARY_STAGE3_ONLY": "true",
+      "LUNA_STAGE1_PILOT_ENABLED": "true",
+      "LUNA_STAGE1_PILOT_SAMPLE_PERCENT": "100",
+      "LUNA_TEXT_ONLY_ENABLED": "true",
+      "STAGE1_MODEL_OVERRIDE": "gpt-5-mini",
+      "STAGE2_MODEL_OVERRIDE": "gpt-5-mini",
+      "STAGE3_MODEL_OVERRIDE": "gpt-5.2",
+      "STAGE4_MODEL_OVERRIDE": "gpt-5-nano",
+      "STAGE5_MODEL_OVERRIDE": "gpt-5-nano"
+    }
+  },
+  {
+    "function": "processDatasetResume",
+    "state": "ACTIVE",
+    "revision": "processdatasetresume-00425-nav",
+    "allTrafficOnLatest": true,
+    "hash": "53c15f4a10bd3f5e04b1057023e23302803ba0bc",
+    "env": {
+      "LUNA_CANARY_ENABLED": "true",
+      "LUNA_CANARY_EXCLUDED_POST_IDS": "",
+      "LUNA_CANARY_LEGACY_FALLBACK_ENABLED": "false",
+      "LUNA_CANARY_SAMPLE_PERCENT": "100",
+      "LUNA_CANARY_STAGE3_ONLY": "true",
+      "LUNA_STAGE1_PILOT_ENABLED": "true",
+      "LUNA_STAGE1_PILOT_SAMPLE_PERCENT": "100",
+      "LUNA_TEXT_ONLY_ENABLED": "true",
+      "STAGE1_MODEL_OVERRIDE": "gpt-5-mini",
+      "STAGE2_MODEL_OVERRIDE": "gpt-5-mini",
+      "STAGE3_MODEL_OVERRIDE": "gpt-5.2",
+      "STAGE4_MODEL_OVERRIDE": "gpt-5-nano",
+      "STAGE5_MODEL_OVERRIDE": "gpt-5-nano"
+    }
+  },
+  {
+    "function": "processDatasetSelectedRows",
+    "state": "ACTIVE",
+    "revision": "processdatasetselectedrows-00417-gaq",
+    "allTrafficOnLatest": true,
+    "hash": "53c15f4a10bd3f5e04b1057023e23302803ba0bc",
+    "env": {
+      "LUNA_CANARY_ENABLED": "true",
+      "LUNA_CANARY_EXCLUDED_POST_IDS": "",
+      "LUNA_CANARY_LEGACY_FALLBACK_ENABLED": "false",
+      "LUNA_CANARY_SAMPLE_PERCENT": "100",
+      "LUNA_CANARY_STAGE3_ONLY": "true",
+      "LUNA_STAGE1_PILOT_ENABLED": "true",
+      "LUNA_STAGE1_PILOT_SAMPLE_PERCENT": "100",
+      "LUNA_TEXT_ONLY_ENABLED": "true",
+      "STAGE1_MODEL_OVERRIDE": "gpt-5-mini",
+      "STAGE2_MODEL_OVERRIDE": "gpt-5-mini",
+      "STAGE3_MODEL_OVERRIDE": "gpt-5.2",
+      "STAGE4_MODEL_OVERRIDE": "gpt-5-nano",
+      "STAGE5_MODEL_OVERRIDE": "gpt-5-nano"
+    }
+  }
+]

@@ -37,6 +37,7 @@ import {
 } from './types.js';
 import { detectCalendarSignals, validateContent } from './contentValidator.js';
 import { selectStage1LunaPilot } from './stage1Pilot.js';
+import { selectStage2LunaPilot } from './stage2Pilot.js';
 import { isCaptionOnlySource, isLunaStage3InputReady } from './lunaTextRouting.js';
 import { resolveStage2ScoreRouting, selectLunaDenseFrameIndices } from './stage2Routing.js';
 import type { Stage2ScoreRoutingDecision } from './stage2Routing.js';
@@ -1270,10 +1271,28 @@ async function parsePostDataCore(
         appliedModel: stage2AppliedModel,
       });
     }
-    const stage2Config =
+    let stage2Config =
       stage2AppliedModel === cfg.gptModelFast
         ? cfg
         : ({ ...cfg, gptModelFast: stage2AppliedModel } as ParsingConfig);
+    const stage2SourceReady = sourceIsTextOnly || (allImageUrls.length > 0 &&
+      ocrImageUrls.length === allImageUrls.length &&
+      (mediaUrls || []).length <= MAX_SOURCE_GALLERY_IMAGES);
+    const stage2Pilot = selectStage2LunaPilot(
+      cfg.diagnosticContext?.fileId || '', postId, stage2SourceReady,
+      cfg.stage2ModelOverride ? false : undefined);
+    if (stage2Pilot.selected) {
+      stage2Config = { ...stage2Config, stage2ModelOverride: 'gpt-6-luna',
+        stage2ReasoningEffort: 'none', stage2LunaNegativeRecheck: true };
+    }
+    if (stage2Pilot.eligible) {
+      const allocation = { ...stage2Pilot,
+        model: stage2Pilot.selected ? 'gpt-6-luna'
+          : stage2Config.stage2ModelOverride || resolveStageModel(stage2Config.gptModelFast, 'STAGE2_MODEL_OVERRIDE'),
+        inputKind: sourceIsTextOnly ? 'text_only' as const : 'image' as const };
+      logger.info('Luna Stage 2 pilot allocation', { ...cfg.diagnosticContext, postId, ...allocation });
+      await emitStageArtifacts(cfg, { stage2Pilot: allocation });
+    }
     let classification = await classifyContent(
       combinedText,
       ocrImageUrls,

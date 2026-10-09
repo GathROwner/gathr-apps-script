@@ -44,13 +44,17 @@ for (const caption of [
 // Exercise the real classifier normalization and request construction with a
 // deterministic API response. A dummy key and blocked transport prevent spend.
 let nextClassification;
+let responseStatus = 'completed';
+let transportError = false;
 const requests = [];
 globalThis.fetch = async (_url, options) => {
   const request = JSON.parse(options.body);
   requests.push(request);
+  if (transportError) return new Response(JSON.stringify({error:{message:'Image unavailable',type:'invalid_request_error'}}), {status:typeof transportError === 'number' ? transportError : 400,headers:{'content-type':'application/json'}});
+  const item = Array.isArray(nextClassification) ? nextClassification.shift() : nextClassification;
   return new Response(JSON.stringify({
-    id: 'resp_stage2_test', object: 'response', status: 'completed',
-    output: [{ type: 'message', role: 'assistant', content: [{ type: 'output_text', text: JSON.stringify(Array.isArray(nextClassification) ? nextClassification.shift() : nextClassification) }] }],
+    id: 'resp_stage2_test', object: 'response', status: responseStatus,
+    output: [{ type: 'message', role: 'assistant', content: [{ type: 'output_text', text: typeof item === 'string' ? item : JSON.stringify(item) }] }],
     usage: { input_tokens: 10, output_tokens: 10, total_tokens: 20 },
   }), { status: 200, headers: { 'content-type': 'application/json' } });
 };
@@ -139,4 +143,54 @@ test('Stage 2 effort config reaches GPT-6; Mini retains existing default', async
   assert.equal(requests.at(-1).model, 'gpt-5-mini');
   assert.equal(requests.at(-1).reasoning, undefined);
   assert.equal(requests.at(-1).max_output_tokens, 1500);
+});
+
+test('valid and fenced JSON preserve URLs and comment-like string data', async () => {
+  const classificationReason = 'Tickets https://example.com/buy?q=1 // literal; /* literal */ "quoted"';
+  for (const payload of [base({classificationReason}), '```json\n// real comment\n'+JSON.stringify(base({classificationReason}))+'\n```']) {
+    const result = await run('Public concert', payload, {}, {stage2LunaNegativeRecheck:true});
+    assert.equal(result.classificationReason, classificationReason);
+    assert.equal(result.confidence,.9);
+  }
+});
+
+test('candidate holds malformed schemas and incomplete responses without heuristic acceptance', async () => {
+  for (const payload of [{}, null, base({confidence:1.5}), base({estimatedItemCount:-2}), base({contentType:'UNKNOWN'}), base({contentAnalysis:{hasEvents:'yes'}}), '']) {
+    const before = requests.length;
+    const result = await run('Wing night tonight 6pm', payload, {}, {stage2LunaNegativeRecheck:true});
+    assert.equal(result.confidence,0);
+    assert.equal(requests.length-before,1);
+    assert.match(result.classificationReason,/requires retry\/review/);
+  }
+  responseStatus = 'incomplete';
+  try {
+    const result = await run('Wing night tonight 6pm',base(),{}, {stage2LunaNegativeRecheck:true});
+    assert.equal(result.confidence,0);
+  } finally { responseStatus = 'completed'; }
+});
+
+test('invalid high review retains first hold and image failure cannot become caption-only', async () => {
+  const negative = base({confidence:.3,contentAnalysis:{...base().contentAnalysis,hasEvents:false}});
+  const held = await run('Generic promotion',[negative,{}],{}, {stage2LunaNegativeRecheck:true});
+  assert.equal(held.confidence,0);
+  assert.match(held.classificationReason,/no activities/);
+  transportError=true;
+  try {
+    const before=requests.length;
+    const result=await classifyContent('Wing night 6pm',['https://example.test/expired.jpg'],'Test',{},
+      {stage2ModelOverride:'gpt-6-luna',stage2LunaNegativeRecheck:true});
+    assert.equal(result.confidence,0);
+    assert.equal(requests.length-before,1);
+    assert.equal(requests.at(-1).input[0].content.filter(x=>x.type==='input_image').length,1);
+  } finally { transportError=false; }
+});
+
+test('candidate transient transport failures have only one SDK retry', async () => {
+  transportError=503;
+  try {
+    const before=requests.length;
+    const held=await run('Wing night at 6pm',base(),{}, {stage2LunaNegativeRecheck:true});
+    assert.equal(requests.length-before,2);
+    assert.equal(held.confidence,0);
+  } finally {transportError=false;}
 });

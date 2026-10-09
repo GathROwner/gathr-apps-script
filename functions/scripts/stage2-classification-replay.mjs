@@ -28,7 +28,12 @@ for (const file of await fs.readdir(responseDir)) {
   const source = sources.find(x => x.caseId === record.caseId);
   if (!source || record.error || record.fallback || record.requests.length < 1 || record.requests.length > 2 || record.requests.some(x=>x.status !== 'completed')) throw new Error('Unusable captured result: ' + file);
   captured = record.requests.at(-1).outputText;
-  const classification = await classifyContent(source.caption, [], source.venue, { utcStartDate: source.utcStartDate }, { stage2ModelOverride: record.model });
+  const classification = await classifyContent(source.caption, [], source.venue, { utcStartDate: source.utcStartDate }, {
+    stage2ModelOverride: record.model,
+    // Replay the captured final decision once, including candidate schema
+    // checks, without initiating another negative-result review.
+    stage2ReasoningEffort: 'high', stage2LunaNegativeRecheck: record.arm === 'luna-negative-review',
+  });
   if (/\| GPT error:/.test(classification.classificationReason)) throw new Error('Raw-response parse failed: ' + file);
   const routing = resolveStage2ScoreRouting(source.caption, classification, source.validation);
   const resolvedContentType = routing.shouldUseRoutedContentType ? routing.routedContentType : classification.contentType;

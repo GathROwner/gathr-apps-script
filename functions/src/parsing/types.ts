@@ -108,6 +108,7 @@ export interface ParseStageArtifactsSnapshot {
   stage3Items?: ExtractedItem[];
   stage3HeldItems?: ExtractedItem[];
   stage1Pilot?: { eligible: boolean; selected: boolean; percent: number; model: string; inputKind?: 'text_only' | 'image' };
+  stage2Pilot?: { eligible: boolean; selected: boolean; percent: number; model: string; inputKind: 'text_only' | 'image' };
   stage3InputKind?: 'text_only' | 'image';
   stage4Items?: ExtractedItem[];
   stage37TicketUrl?: string;

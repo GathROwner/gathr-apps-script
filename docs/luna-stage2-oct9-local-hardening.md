@@ -51,3 +51,7 @@ Two additional downstream replays used the final review-candidate classification
 Retain this as a local candidate and collect tomorrow's already approved Stage 1/3 production results. Before a Stage 2 production pilot, cover the exact production preprocessed images and first-four/full-gallery refresh flow, plus a real structured Facebook Event source. The tests here used captured original color images; production's enlarged grayscale inputs have different token costs. No live writer, persisted gallery provenance, or live deduplication behavior was certified by these no-write tests.
 
 Evidence: [summary](../artifacts/luna-stage2-oct9-hardening/summary.json), [classification ledger](../artifacts/luna-stage2-oct9-hardening/classification-ledger.json), `functions/scripts/stage2-model-audit.mjs`, `functions/scripts/stage2-classification-replay.mjs`, and `functions/scripts/stage2-safeguards.test.mjs`. Private source captures and raw request results remain under `C:\Users\craig\.codex\luna-stage2-20261009`; credentials are excluded.
+
+## Subsequent readiness testing
+
+[Stage 2 release readiness](luna-stage2-oct9-release-readiness.md) adds production-preprocessed images, 119 paired cases, 30 complete no-write pipeline replays, formal Facebook metadata, strict response/error handling and a default-off stable allocation switch. Its production-preprocessed cost estimate is the current planning estimate. It also records clinic eligibility variation and sparse calendar date errors in the unchanged Stage 1/3 baseline. Production remains unchanged.
