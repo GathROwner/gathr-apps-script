@@ -67,10 +67,13 @@ export interface Stage1ValidationEvaluationRun {
   incompleteReason?: string;
 }
 
+export type Stage1LocalGatePolicy = 'production' | 'evidence-backed-links' | 'source-offer-guards' | 'source-offer-guards-v2' | 'source-menu-guards';
+
 export interface Stage1ValidationEvaluationOptions {
-  promptVariant: 'production' | 'compact' | 'compact-v2' | 'compact-v3' | 'compact-v4' | 'compact-v5';
+  promptVariant: 'production' | 'compact' | 'compact-v2' | 'compact-v3' | 'compact-v4' | 'compact-v5' | 'compact-v6' | 'compact-v7' | 'compact-v8' | 'compact-v9' | 'compact-v10';
   structuredOutput: boolean;
   reasoningEffort?: 'none' | 'low' | 'high';
+  localGatePolicy?: Stage1LocalGatePolicy;
   client?: any;
   onBeforeRequest?: (plan: Stage1RequestPlan) => string | undefined;
   onAttempt?: (attempt: Stage1RequestAttempt) => void;
@@ -82,6 +85,24 @@ interface Stage1CallOptions {
   client?: any;
   onBeforeRequest?: (plan: Stage1RequestPlan) => string | undefined;
   onAttempt?: (attempt: Stage1RequestAttempt) => void;
+}
+
+/** One evaluation prompt resolver shared by transport and offline request fingerprints. */
+export function createStage1EvaluationPrompt(
+  combinedText: string, imageCount: number, userName: string, timestamp: string,
+  promptVariant: Stage1ValidationEvaluationOptions['promptVariant']
+): string {
+  if (promptVariant === 'compact-v10') return createCompactV10ValidationPrompt(combinedText, imageCount, userName, timestamp);
+  if (promptVariant === 'compact-v9') return createCompactV9ValidationPrompt(combinedText, imageCount, userName, timestamp);
+  if (promptVariant === 'compact-v8') return createCompactV8ValidationPrompt(combinedText, imageCount, userName, timestamp);
+  if (promptVariant === 'compact-v7') return createCompactV7ValidationPrompt(combinedText, imageCount, userName, timestamp);
+  if (promptVariant === 'compact-v6') return createCompactV6ValidationPrompt(combinedText, imageCount, userName, timestamp);
+  if (promptVariant === 'compact-v5') return createCompactV5ValidationPrompt(combinedText, imageCount > 0, userName, timestamp);
+  if (promptVariant === 'compact-v4') return createCompactV4ValidationPrompt(combinedText, imageCount > 0, userName, timestamp);
+  if (promptVariant === 'compact-v3') return createCompactV3ValidationPrompt(combinedText, imageCount > 0, userName, timestamp);
+  if (promptVariant === 'compact-v2') return createCompactV2ValidationPrompt(combinedText, imageCount > 0, userName, timestamp);
+  if (promptVariant === 'compact') return createCompactValidationPrompt(combinedText, imageCount > 0, userName, timestamp);
+  return createValidationPrompt(combinedText, imageCount > 0, userName, timestamp);
 }
 
 function isStage1EvaluationBudgetStop(error: unknown): boolean {
@@ -207,18 +228,7 @@ export async function validateContentForStage1Evaluation(
 ): Promise<Stage1ValidationEvaluationRun> {
   const cfg = { ...DEFAULT_PARSING_CONFIG, ...config, stage1ModelOverride: model };
   const attempts: Stage1RequestAttempt[] = [];
-  const prompt =
-    options.promptVariant === 'compact-v5'
-      ? createCompactV5ValidationPrompt(combinedText, imageUrls.length > 0, userName, timestamp)
-      : options.promptVariant === 'compact-v4'
-      ? createCompactV4ValidationPrompt(combinedText, imageUrls.length > 0, userName, timestamp)
-      : options.promptVariant === 'compact-v3'
-      ? createCompactV3ValidationPrompt(combinedText, imageUrls.length > 0, userName, timestamp)
-      : options.promptVariant === 'compact-v2'
-      ? createCompactV2ValidationPrompt(combinedText, imageUrls.length > 0, userName, timestamp)
-      : options.promptVariant === 'compact'
-      ? createCompactValidationPrompt(combinedText, imageUrls.length > 0, userName, timestamp)
-      : createValidationPrompt(combinedText, imageUrls.length > 0, userName, timestamp);
+  const prompt = createStage1EvaluationPrompt(combinedText, imageUrls.length, userName, timestamp, options.promptVariant);
   const schema = createValidationSchema();
 
   try {
@@ -238,7 +248,7 @@ export async function validateContentForStage1Evaluation(
     );
     const normalized = normalizeValidationResponse(response, combinedText, imageUrls.length > 0);
     const preGateResult = JSON.parse(JSON.stringify(normalized)) as ValidationResult;
-    applyStage1LocalDecisionGates(normalized, combinedText, imageUrls.length > 0);
+    applyStage1LocalDecisionGates(normalized, combinedText, imageUrls.length > 0, options.localGatePolicy);
 
     const noImageFallbackUsed = attempts.some(
       (attempt) => attempt.requestKind === 'no_image_fallback'
@@ -526,6 +536,97 @@ POST DETAILS:
 - Has images: ${hasImages}`;
 }
 
+/** Evaluation-only clarifications; keep the frozen v5 and live prompt unchanged. */
+export function createCompactV6ValidationPrompt(
+  combinedText: string,
+  imageCount: number,
+  userName: string,
+  timestamp: string
+): string {
+  if (!Number.isInteger(imageCount) || imageCount < 0) {
+    throw new Error('Stage 1 attachment count must be a nonnegative integer');
+  }
+  const clarifications = `SOURCE SCOPE AND LAYOUT CLARIFICATIONS (apply before deciding):
+- A price alone, including a starting price or price sign on ordinary produce, does not establish a food special or deal. A shop being open for shopping is not public farm/attraction admission. Distinguish a farm market selling stock from an advertised farm visit, tour, admission, or hands-on activity. Preserve explicit grocery food deals and daily/date-specific food features even if unpriced.
+- Do not accept ordinary non-food merchandise discounts as food/drink deals. Only the food/drink portion qualifies unless an independent public activity is advertised.
+- Awards nominations, application/filing windows, and administrative participation are not an advertised public awards ceremony or gathering. A competition finalist/result recap does not announce an activity people can attend or join. A separately advertised upcoming competition, ceremony, or gathering can qualify.
+- Temporary closures, maintenance, and a return to ordinary opening hours alone do not announce a public session. Preserve actual scheduled public recreation sessions, bookable ice/pool/fitness access, and attraction visitor/admission periods; do not infer these from a closure/reopening notice.
+- Ordinary transport/taxi service hours and fares are not a recreational activity, tour, public event, or food/drink special. Do not transform transport availability into daily event listings.
+- If all advertised dates are clearly already past relative to Posted at, with no current/upcoming activity or qualifying special, reject the expired announcement. Do not move recently past yearless dates into next year merely to make the post current. Leave genuinely unresolved schedule details to later stages.
+- hasCalendarGrid includes a schedule DATE TABLE with dates or sessions arranged in rows/columns, even if it is not a seven-column month calendar and its text is legible. A price/product table alone is not a calendar.
+- hasMultipleEventListings is true when the image lists two or more dated sessions/occurrences, including different dates or age groups of the SAME named program. Do not collapse many printed dates into a single listing simply because they share one program title. Describe the actual date table; do not invent recurrence.
+- ATTACHED IMAGE COUNT: ${imageCount}. Return exactly ${imageCount} imageAnalysis entries, with indices ${imageCount ? `0 through ${imageCount - 1}` : 'none (empty array)'}. Caption/OCR photo-description lines are not attachments. Never create an entry for an unattached image or omit an attached image.
+
+`;
+  return createCompactV5ValidationPrompt(combinedText, imageCount > 0, userName, timestamp)
+    .replace('POST DETAILS:\n', clarifications + 'POST DETAILS:\n');
+}
+
+/** Evaluation-only refinement. Frozen earlier prompts and live validation stay unchanged. */
+export function createCompactV7ValidationPrompt(
+  combinedText: string,
+  imageCount: number,
+  userName: string,
+  timestamp: string
+): string {
+  const refinements = `ADDITIONAL SOURCE BOUNDARIES:
+- Food/drink offers mean food and drink for PEOPLE. Pet food, animal feed, pet supplies, and general pet-store discounts are retail merchandise, not qualifying food specials, whether online or in-store.
+- Evaluate attached images independently of a retrospective caption. An image explicitly advertising human-food STUDENT DEALS, a special, or a discount is qualifying evidence even when surrounding images are ordinary meal photos. Do not dismiss an explicit advertised deal as an ordinary price list. A restriction or terms notice for an advertised deal does not cancel the deal.
+- Ordinary car-dealership invitations to test-drive a product are sales demonstrations, not public recreation activities or visitor attractions. A separately announced organized public gathering or event can qualify.
+
+`;
+  return createCompactV6ValidationPrompt(combinedText, imageCount, userName, timestamp)
+    .replace(
+      '- If all advertised dates are clearly already past relative to Posted at, with no current/upcoming activity or qualifying special, reject the expired announcement. Do not move recently past yearless dates into next year merely to make the post current. Leave genuinely unresolved schedule details to later stages.',
+      '- Reject clearly expired announcements using explicitly dated source evidence and Posted at. Do not move recently past yearless dates into next year merely to make them current. A FUTURE month/day with no year remains eligible even if its printed weekday conflicts with the current-year calendar: do not infer a prior year solely from a weekday/date mismatch. Missing or conflicting year/weekday details belong to later date validation; they do not invalidate an otherwise concrete public activity at Stage 1.'
+    )
+    .replace('POST DETAILS:\n', refinements + 'POST DETAILS:\n');
+}
+
+/** Evaluation-only source-scope refinements from independently reviewed misses. */
+export function createCompactV8ValidationPrompt(
+  combinedText: string, imageCount: number, userName: string, timestamp: string
+): string {
+  const refinements = `ACTIVITY AND FOOD BOUNDARIES (apply these to mixed captions and each image):
+- A qualifying public activity does NOT need a formal event title, fixed session date, or class timetable at Stage 1. Retain an explicit invitation to participate on site in crafting, gallery/workshop activities, knitting, or a public game/play space, even when ongoing. Retain explicitly bookable leisure/wellness experiences such as sauna, head-spa, relaxation/massage or group sessions. Later stages resolve availability or hold missing dates; do not reject an explicitly offered activity merely because it is ongoing. Ordinary stores offering only browsing/shopping, and mere photos of people doing things, remain excluded.
+- An in-person FOOD PURCHASE promotion with an advertised bonus, prize-entry opportunity, free item, or discount is a food promotional offer. For example, trying/buying a named burger for a chance to win concert tickets qualifies for the FOOD PROMOTION. This does not turn an online like/share/comment prize draw into an event or authorize inventing a separate ticket-draw gathering.
+- Month-long MENU FEATURES are not deals merely because available for a limited month: pizza/burger of the month or Pizza of the Moment without a discount, bonus, or other concrete offer is ordinary rotating menu availability. A board or list of TODAY'S AVAILABLE FLAVOURS is also availability, not a daily special by itself. Preserve genuinely advertised daily/date-specific food specials/features, including unpriced ones, and explicit food deals; do not treat every item currently available as a feature.
+
+`;
+  return createCompactV7ValidationPrompt(combinedText, imageCount, userName, timestamp)
+    .replace('POST DETAILS:\n', refinements + 'POST DETAILS:\n');
+}
+
+/** Evaluation-only clarification of concrete daily meals and non-participatory awareness posts. */
+export function createCompactV9ValidationPrompt(
+  combinedText: string, imageCount: number, userName: string, timestamp: string
+): string {
+  const refinements = `CONCRETE OFFER CHECKS:
+- A specifically advertised prepared MEAL OF THE DAY, offered today for people to come and purchase/eat/take away, is a date-specific food feature. It need not literally use the words "special", "feature", or "discount" and may be unpriced. Read equivalent bilingual invitations. Distinguish that concrete daily meal offer from a general rotating-menu description, a retail restock, or a board listing ordinary available flavours.
+- Awareness months/days, commemorative labels, and requests to comment about a cause do not themselves advertise an activity people can attend, book, or participate in on site. Require an independently advertised public activity or qualifying food offer; a named observance and month alone are insufficient.
+- A generic booking link, "group booking available", and unrelated wellness/service hashtags do not transform a routine customer manicure photo, finished-service recap, or product promotion into a public leisure activity. Retain an actually advertised bookable leisure experience or group activity, such as sauna access, a workshop or relaxation session, when grounded in the caption or image; do not infer an activity solely from tags.
+
+`;
+  return createCompactV8ValidationPrompt(combinedText, imageCount, userName, timestamp)
+    .replace('POST DETAILS:\n', refinements + 'POST DETAILS:\n');
+}
+
+/** Evaluation-only clarification of implicit public access and non-event participation. */
+export function createCompactV10ValidationPrompt(
+  combinedText: string, imageCount: number, userName: string, timestamp: string
+): string {
+  const refinements = `PUBLIC ACCESS VERSUS INCIDENTAL REFERENCES:
+- A current-tense offer of family/group visitor experiences at an orchard, U-pick, attraction or recreation facility qualifies even when most of the caption recounts its history. Read the entire caption for the current offer. Public access need not use the literal words "come", "book" or "open today". Preserve separately offered ongoing activities within a retrospective story.
+- When a public arcade/game venue promotes use of its real games or play space, a playful first-person narrative about the value of playing can be its promotional invitation. Retain that ongoing leisure offering even without a schedule or literal booking instruction. Distinguish a venue promoting its own public leisure facilities from a private person's past outing or a mere product/customer-service photo. Do not require every public-access promotion to be a formal event announcement.
+- A named performance in a photo credit, commemorative quotation or social engagement question alone is not a current performance announcement. Require current access/participation/attendance evidence, an actual upcoming poster, or another independently qualifying offer; the name and year alone do not establish one.
+- Paying remotely by e-transfer for a prize draw does not establish a public gathering or leisure activity. A draw deadline/time alone is insufficient. Preserve a separately advertised in-person social gathering or a qualifying food-purchase promotion, but do not invent one from a remote-entry raffle.
+- Requests to contact politicians, submit/support paperwork, or sign advocacy letters remain administrative campaigns even if a booth is available for signatures. A separately advertised public meeting, rally, community gathering or recreational activity can qualify; a signature collection alone does not.
+
+`;
+  return createCompactV9ValidationPrompt(combinedText, imageCount, userName, timestamp)
+    .replace('POST DETAILS:\n', refinements + 'POST DETAILS:\n');
+}
+
 /**
  * Create the validation schema for GPT function calling
  */
@@ -765,7 +866,8 @@ function inferValidContentFromText(text: string, hasImages = false): {
 
 function detectLinkedCalendarSignals(
   text: string,
-  hasImages: boolean
+  hasImages: boolean,
+  requireProgramLanguage = false
 ): { hasLinkedCalendar: boolean; reason: string } {
   const t = String(text || '');
   const hasEventsLink =
@@ -776,7 +878,7 @@ function detectLinkedCalendarSignals(
     /\b(this week|weekly|month calendar|upcoming|programs?|schedule|what'?s on|full list|at the library)\b/i.test(
       t
     );
-  const hasLinkedCalendar = hasEventsLink && (hasProgramLanguage || hasImages);
+  const hasLinkedCalendar = hasEventsLink && (hasProgramLanguage || (!requireProgramLanguage && hasImages));
   return {
     hasLinkedCalendar,
     reason: hasLinkedCalendar
@@ -866,8 +968,22 @@ export function normalizeValidationResponse(
 export function applyStage1LocalDecisionGates(
   normalized: ValidationResult,
   combinedText: string,
-  hasImages: boolean
+  hasImages: boolean,
+  evaluationPolicy: Stage1LocalGatePolicy = 'production'
 ): void {
+  const offerGuards = evaluationPolicy === 'source-offer-guards' || evaluationPolicy === 'source-offer-guards-v2';
+  if (offerGuards && normalized.hasValidContent && isPhotoOnlyPastRecap(combinedText, normalized, evaluationPolicy === 'source-offer-guards-v2')) {
+    normalized.hasValidContent = false;
+    normalized.validationDecision = 'VALIDATION_FAILED';
+    normalized.reason += ' | Past-only photo recap without current invitation or independent schedule (evaluation guard)';
+    return;
+  }
+  if ((offerGuards || evaluationPolicy === 'source-menu-guards') && normalized.hasValidContent && isBareMenuHeadingWithoutOffer(combinedText, normalized)) {
+    normalized.hasValidContent = false;
+    normalized.validationDecision = 'VALIDATION_FAILED';
+    normalized.reason += ' | Bare dated menu heading without independent activity or special evidence (evaluation guard)';
+    return;
+  }
   const textSignals = detectCalendarSignals(combinedText);
   logger.debug('Calendar signals detected', textSignals);
 
@@ -885,7 +1001,7 @@ export function applyStage1LocalDecisionGates(
     logger.info('Validation overridden to PASS due to strong text calendar signals');
   }
 
-  const linkedCalendarSignals = detectLinkedCalendarSignals(combinedText, hasImages);
+  const linkedCalendarSignals = detectLinkedCalendarSignals(combinedText, hasImages, evaluationPolicy !== 'production');
   if (
     (!normalized.hasValidContent || normalized.validationDecision === 'VALIDATION_FAILED') &&
     linkedCalendarSignals.hasLinkedCalendar
@@ -898,6 +1014,36 @@ export function applyStage1LocalDecisionGates(
       (previousReason ? previousReason + ' | ' : '') + linkedCalendarSignals.reason;
     logger.info('Validation overridden to PASS due to linked calendar/program signals');
   }
+}
+
+/** Narrow source-based evaluation guard; never applied on the default production path. */
+function isBareMenuHeadingWithoutOffer(text: string, result: ValidationResult): boolean {
+  const caption = String(text || '').split(/\bOCR TEXT\s*:/i)[0]
+    .replace(/#[\p{L}\p{N}_]+/gu, '').trim();
+  const date = '(?:(?:Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)\\s*)?(?:(?:January|February|March|April|May|June|July|August|September|October|November|December)\\.?\\s*\\d{1,2}(?:st|nd|rd|th)?(?:[, .]+\\d{4})?|\\d{1,2}[/.\\-]\\d{1,2}(?:[/.\\-]\\d{2,4})?)';
+  if (!new RegExp(`^(?:today['’]s\\s+menu|menu\\s+du\\s+jour)[!:.\\s-]*(?:${date})?[!:.\\s-]*$`, 'i').test(caption)) return false;
+  const images = result.imageAnalysis || [];
+  if (!images.length || images.some(i => i.imageComplexity?.hasCalendarGrid || i.imageComplexity?.hasMultipleEventListings)) return false;
+  const evidence = images.map(i => `${i.description} ${i.relevanceToPost}`).join(' ');
+  const independentOffer = /\b(specials?|discounts?|deals?|sav(?:e|ings?)|free|bonus|gift|concert|live music|trivia|fundraiser|workshop|public session|admission|tickets?|buffet|meal of the day|plat du jour)\b/i;
+  return /\bmenu\b/i.test(evidence) && !independentOffer.test(`${text} ${evidence}`);
+}
+
+/** Preserve dated/ongoing offers in mixed recaps; reject only explicit past-only photo reports. */
+function isPhotoOnlyPastRecap(text: string, result: ValidationResult, preserveCurrentOffers = false): boolean {
+  const caption = String(text || '').split(/\bOCR TEXT\s*:/i)[0];
+  if (!/\b(came out|joined us|attended|we loved|last night|yesterday)\b/i.test(caption)) return false;
+  if (/\b(join us|come (?:see|join|visit|out|by|to)|book|register|registration|upcoming|tomorrow|next (?:week|month|session)|tickets? (?:available|on sale))\b/i.test(caption)) return false;
+  // V2 retains the model's eligibility decision for present-tense or current-time offers in a mixed recap.
+  // This does not turn the phrase into an acceptance override for a model-rejected retail post.
+  if (preserveCurrentOffers && /\b(?:we (?:offer|provide|welcome)|our (?:[a-z]+ ){0,5}(?:offers|provides|welcomes)|(?:activities|sessions|classes|tours|visits|u[- ]?pick|games|sauna|pool|ice time) (?:are|is) (?:available|offered))\b/i.test(caption)) return false;
+  if (preserveCurrentOffers && /\b(today|tonight|currently|ongoing|every day|this (?:week|weekend|season))\b/i.test(caption)) return false;
+  const images = result.imageAnalysis || [];
+  if (!images.length || images.some(i => !i.imageComplexity?.isPromotionalPhoto || i.imageComplexity?.hasDenseText ||
+      i.imageComplexity?.hasCalendarGrid || i.imageComplexity?.hasMultipleEventListings || i.imageComplexity.textDensityScore > 0.2)) return false;
+  const evidence = images.map(i => `${i.description} ${i.relevanceToPost}`).join(' ');
+  const schedule = /\b(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\.?\s+\d{1,2}\b|\b\d{1,2}(?::\d{2})?\s*(?:am|pm)\b|\b(?:specials?|discount|deal|free|upcoming|admission|book|register)\b/i;
+  return !schedule.test(`${caption} ${evidence}`);
 }
 
 /**

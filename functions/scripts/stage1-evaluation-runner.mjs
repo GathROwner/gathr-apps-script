@@ -4,12 +4,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import OpenAI from 'openai';
 import {
-  createCompactValidationPrompt,
-  createCompactV5ValidationPrompt,
-  createCompactV4ValidationPrompt,
-  createCompactV3ValidationPrompt,
-  createCompactV2ValidationPrompt,
-  createValidationPrompt,
+  createStage1EvaluationPrompt,
   createValidationSchema,
   validateContentForStage1Evaluation,
 } from '../lib/parsing/contentValidator.js';
@@ -148,26 +143,15 @@ The runner reads only OPENAI_API_KEY from the environment, does not load .env fi
 and has no Firebase, Firestore, Storage, venue-write, or release capability.`);
 }
 
-function effectivePromptText(caseData, variant) {
-  const hasImages = caseData.images.length > 0;
-  const prompt = variant.promptVariant === 'compact'
-    ? createCompactValidationPrompt(caseData.caption, hasImages, caseData.venue, caseData.postedAt)
-    : variant.promptVariant === 'compact-v5'
-      ? createCompactV5ValidationPrompt(caseData.caption, hasImages, caseData.venue, caseData.postedAt)
-      : variant.promptVariant === 'compact-v4'
-      ? createCompactV4ValidationPrompt(caseData.caption, hasImages, caseData.venue, caseData.postedAt)
-      : variant.promptVariant === 'compact-v3'
-      ? createCompactV3ValidationPrompt(caseData.caption, hasImages, caseData.venue, caseData.postedAt)
-      : variant.promptVariant === 'compact-v2'
-      ? createCompactV2ValidationPrompt(caseData.caption, hasImages, caseData.venue, caseData.postedAt)
-    : createValidationPrompt(caseData.caption, hasImages, caseData.venue, caseData.postedAt);
+function effectivePromptText(caseData, variant, attachedImageCount = caseData.images.length) {
+  const prompt = createStage1EvaluationPrompt(caseData.caption, attachedImageCount, caseData.venue, caseData.postedAt, variant.promptVariant);
   return variant.structuredOutput
     ? prompt
     : `${prompt}\n\nReturn ONLY valid JSON that matches this schema:\n${JSON.stringify(createValidationSchema()[0].parameters, null, 2)}`;
 }
 
-function effectivePromptSha256(caseData, variant) {
-  return createHash('sha256').update(effectivePromptText(caseData, variant)).digest('hex');
+function effectivePromptSha256(caseData, variant, attachedImageCount = caseData.images.length) {
+  return createHash('sha256').update(effectivePromptText(caseData, variant, attachedImageCount)).digest('hex');
 }
 
 function resolveOutputPath(output) {
@@ -236,7 +220,7 @@ function buildPlan(manifest, cases, variants, imageSet, maxEstimatedUsd, concurr
     selectedImageCount += images.length;
     const promptSha256ByVariant = {};
     for (const variant of variants) {
-      const promptText = effectivePromptText(caseData, variant);
+      const promptText = effectivePromptText(caseData, variant, images.length);
       promptSha256ByVariant[variant.id] = createHash('sha256').update(promptText).digest('hex');
       const maxOutputTokens = variant.model === 'gpt-6-luna' ? 6000 : 2000;
       estimatedInitialSpendUsd += estimateRequestCostUsd({
@@ -387,7 +371,7 @@ async function main() {
   async function runPair({ caseData, variant, resumeKey }) {
     const selectedImages = selectImagesForCase(caseData, options.imageSet);
     const imageUrls = readImagesAsDataUrls(selectedImages, sourceRoot);
-    const effectivePromptHash = effectivePromptSha256(caseData, variant);
+    const effectivePromptHash = effectivePromptSha256(caseData, variant, selectedImages.length);
     const requestedReasoningEffort = requestedReasoningEffortForVariant(variant);
     const requestAttempts = [];
     const eventIdByReservation = new Map();
@@ -401,6 +385,7 @@ async function main() {
         promptVariant: variant.promptVariant,
         structuredOutput: variant.structuredOutput,
         reasoningEffort: variant.reasoningEffort,
+        localGatePolicy: variant.localGatePolicy,
         client: openai,
         onBeforeRequest: (requestPlan) => {
           const reservationId = budget.reserve(requestPlan);
@@ -471,6 +456,7 @@ async function main() {
       variantId: variant.id,
       model: variant.model,
       promptVariant: variant.promptVariant,
+      localGatePolicy: variant.localGatePolicy || 'production',
       requestedReasoningEffort,
       effectivePromptSha256: effectivePromptHash,
       compiledContentValidatorSha256,
@@ -494,7 +480,7 @@ async function main() {
       },
       stage1DecisionAudit: {
         modelNormalizedDecision: run.preGateResult?.validationDecision || null,
-        productionNormalizedDecision: run.result?.validationDecision || null,
+        recordedPolicyNormalizedDecision: run.result?.validationDecision || null,
         localGateChangedDecision: run.preGateResult && run.result
           ? run.preGateResult.validationDecision !== run.result.validationDecision
           : null,

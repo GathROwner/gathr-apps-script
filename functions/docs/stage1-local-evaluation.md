@@ -4,7 +4,7 @@ The coordinator completed paid local and hosted screens. See [October 8 results]
 
 This harness compares Stage 1 decisions and per-image descriptions on a frozen Oct. 8, 2026 source set. It does not process posts through later stages, read or write Firebase, mutate venues, or change release routing.
 
-The original production prompt, schema, normalization, local calendar overrides, output limits, and image-error/no-image fallback remain the baseline. `compact-v2` through `compact-v5` are separate policy candidates added for evaluation; each prompt remains frozen after its run. They return the same response schema using the normal JSON response path. A failed image request can use the existing caption-only fallback, but that pair is marked inconclusive and is not scored as an image pass.
+The original production prompt, schema, normalization, local calendar overrides, output limits, and image-error/no-image fallback remain the baseline. `compact-v2` through `compact-v10` are separate policy candidates added for evaluation; each prompt remains frozen after its run. They return the same response schema using the normal JSON response path. A failed image request can use the existing caption-only fallback, but that pair is marked inconclusive and is not scored as an image pass. The original 12-case fixture is a regression screen; the four-day cohort and source reviews are documented separately below.
 
 ## Frozen source set
 
@@ -109,7 +109,29 @@ The usage record includes reasoning tokens separately; they are already part of 
 
 ## Local tests
 
-`npm run test:stage1-evaluation` builds the functions TypeScript and runs 32 mocked/offline checks. They cover production request-shape parity, v2–v5 prompt selection and policy fixtures, frozen v3–v5 prompt snapshots, exact prompt/module hash provenance, the unchanged GPT-6 default and low/high-effort evaluation arms, five-image 400-rejection handling, production normalization and local gates, hash/path/gallery validation, per-image semantic association, dense-layout flags, image-error/truncation/no-image fallback visibility, spend-stop behavior, JSONL resume and usage estimates, and the client’s retry/timeout settings. The fake transport is local; tests make no network calls. `node --test lib/parsing/stage2Routing.test.js` runs the three production-route parity tests.
+`npm run test:stage1-evaluation` builds the functions TypeScript and runs 40 mocked/offline checks. They cover production request-shape parity, v2–v10 prompt selection and policy fixtures, frozen v3–v5 prompt snapshots, actual transport/preflight fingerprint equality for initial and full galleries, the unchanged GPT-6 default and low/high-effort evaluation arms, five-image 400-rejection handling, production normalization and local gates, hash/path/gallery validation, per-image semantic association, dense-layout flags, image-error/truncation/no-image fallback visibility, spend-stop behavior, JSONL resume and usage estimates, the client’s retry/timeout settings, and offline local-gate replay. The fake transport is local; tests make no network calls. `node --test lib/parsing/stage2Routing.test.js` runs the three production-route parity tests.
+
+## Four-day candidate and local-gate experiment
+
+The final evaluation arm is `luna-compact-v10-high-menu-guard`: compact V10 prompt, Luna high, existing image detail and output budget, plus the evaluation-only `source-menu-guards` policy. Production continues using its original prompt and gates. This policy requires public program language before an `/events/` URL can rescue a model rejection; an image plus a raffle ticket URL alone cannot force acceptance. It also rejects bare dated menu headings when neither the caption nor per-image analysis provides independent offer/schedule evidence. The final policy does not impose a photo-recap rejection because independent review exposed valid mixed-activity counterexamples to that rule. The original V10 high and intermediate mixed-offers arms remain frozen for reproducible replay. Strong text calendars and accepted mixed food/activity posts retain their existing handling. These guards partly consume model-produced image descriptions and layout flags; they are not an independent OCR ground-truth verifier.
+
+Run a frozen cohort explicitly, with the paid-call cap:
+
+```powershell
+node scripts/stage1-evaluation-runner.mjs --execute --manifest C:\path\manifest-labelled.json --variants luna-compact-v10-high-menu-guard --image-set initial --concurrency 3 --max-estimated-usd 5 --output C:\path\cohort-v10-mixed.jsonl
+```
+
+The manifest and output paths must differ and the output must be outside the source-media root. Use `--image-set full` for the separate gallery completeness audit. Caption-only fallback after a failed image request is inconclusive; it is not a successful visual result.
+
+For a no-call counterfactual on saved model responses:
+
+```powershell
+node scripts/stage1-local-gate-audit.mjs C:\path\manifest-labelled.json C:\path\cohort-v8-high.jsonl C:\path\gate-audit.json source-menu-guards
+```
+
+This writes a separate sidecar containing input hashes, replayed decisions and skipped records. It validates that the legacy-gate reconstruction matches the saved result before applying the candidate gate. Original model outputs, billing records and source labels are preserved. The `parsed` field on an attempt is a boolean success indicator; the audit parses `visibleOutput` and fails closed on unavailable JSON.
+
+See `stage1-oct5-8-comprehensive-evaluation.md` for cohort exclusions, source adjudications, cost limits and the rollout recommendation. Prior V6/V7 runner prompt fingerprints were reconstructed in an external sidecar after a metadata resolver omission was discovered; raw responses and actual model calls were not changed. V8 onward uses the shared prompt resolver and tested attachment count. Reused holdout cases are confirmation tests after their first evaluation, not additional blind validation.
 
 ## Minimal Cloud Run module bundle
 

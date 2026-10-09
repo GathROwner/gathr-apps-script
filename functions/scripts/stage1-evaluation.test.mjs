@@ -10,6 +10,10 @@ import {
   applyStage1LocalDecisionGates,
   createCompactValidationPrompt,
   createCompactV5ValidationPrompt,
+  createCompactV6ValidationPrompt,
+  createCompactV7ValidationPrompt,
+  createCompactV8ValidationPrompt,
+  createStage1EvaluationPrompt,
   createCompactV4ValidationPrompt,
   createCompactV3ValidationPrompt,
   createCompactV2ValidationPrompt,
@@ -48,6 +52,139 @@ import {
 const functionsRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const fixtureRoot = path.join(functionsRoot, 'test', 'fixtures', 'stage1-oct8');
 const manifestPath = path.join(fixtureRoot, 'manifest.json');
+
+test('evaluation link guard rejects image-only events-URL rescue while preserving public program rescue', () => {
+  const rejection = {imageAnalysis: [], hasValidContent: false, confidence: 0.96,
+    validationDecision: 'VALIDATION_FAILED', reason: 'Online raffle, no public activity.'};
+  const raffle = 'Congratulations to our winner! Next draw November 2. Buy tickets https://www.canadahelps.org/charity/events/prize-draw/';
+  const legacy = structuredClone(rejection);
+  applyStage1LocalDecisionGates(legacy, raffle, true);
+  assert.equal(legacy.hasValidContent, true, 'legacy production remains unchanged');
+  const candidate = structuredClone(rejection);
+  applyStage1LocalDecisionGates(candidate, raffle, true, 'evidence-backed-links');
+  assert.equal(candidate.hasValidContent, false);
+  assert.equal(candidate.reason, rejection.reason);
+  const library = structuredClone(rejection);
+  applyStage1LocalDecisionGates(library, 'This week at the library: full list https://example.org/events/', true, 'evidence-backed-links');
+  assert.equal(library.hasValidContent, true);
+  const accepted = {...rejection, hasValidContent: true, validationDecision: 'VALIDATION_PASSED'};
+  applyStage1LocalDecisionGates(accepted, raffle + ' Tonight buy dinner and get a bonus entry.', true, 'evidence-backed-links');
+  assert.equal(accepted.hasValidContent, true, 'valid mixed food promotions retain the model acceptance');
+});
+
+test('offline link audit replays visible JSON and never treats parsed boolean as a model decision', () => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'stage1-gate-audit-'));
+  try {
+    const caption = 'Winner! Draw November 2. https://example.org/events/raffle/';
+    const rejected = {imageAnalysis: [], hasValidContent: false, confidence: 0.97,
+      validationDecision: 'VALIDATION_FAILED', reason: 'Raffle only'};
+    const legacy = structuredClone(rejected);
+    applyStage1LocalDecisionGates(legacy, caption, true);
+    const manifest = path.join(directory, 'manifest.json'), input = path.join(directory, 'results.jsonl'), output = path.join(directory, 'audit.json');
+    fs.writeFileSync(manifest, JSON.stringify({cases: [{caseId: 'raffle', caption, sourceTruth: {expectedDecision: 'reject'}}]}));
+    fs.writeFileSync(input, JSON.stringify({recordType: 'case_result', caseId: 'raffle', status: 'completed', hasImages: true,
+      finalNormalizedResult: legacy, requestAttempts: [{parsed: true, visibleOutput: JSON.stringify(rejected)}]}) + '\n');
+    const run = spawnSync(process.execPath, ['scripts/stage1-local-gate-audit.mjs', manifest, input, output], {cwd: functionsRoot, encoding: 'utf8'});
+    assert.equal(run.status, 0, run.stderr);
+    const audit = JSON.parse(fs.readFileSync(output, 'utf8'));
+    assert.equal(audit.paidCalls, 0);
+    assert.equal(audit.cases[0].candidateDecision, 'reject');
+    assert.equal(audit.changed.length, 1);
+    assert.equal(audit.resultsSha256.length, 64);
+  } finally { fs.rmSync(directory, {recursive: true, force: true}); }
+});
+
+test('evaluation offer guard blocks bare dated menus while retaining image specials and named daily meals', () => {
+  const accepted = {hasValidContent: true, validationDecision: 'VALIDATION_PASSED', confidence: 0.85, reason: 'Dated menu',
+    imageAnalysis: [{imageIndex: 0, description: 'Printed menu with dishes and regular prices', relevanceToPost: 'Menu for today',
+      imageComplexity: {hasCalendarGrid: false, hasMultipleEventListings: false}}]};
+  const caption = 'Today’s Menu! October. 4th!\n#nsc #peifood\nOCR TEXT:\nMay be an image of text';
+  const legacy = structuredClone(accepted);
+  applyStage1LocalDecisionGates(legacy, caption, true);
+  assert.equal(legacy.hasValidContent, true);
+  const candidate = structuredClone(accepted);
+  applyStage1LocalDecisionGates(candidate, caption, true, 'source-offer-guards');
+  assert.equal(candidate.hasValidContent, false);
+  const imageSpecial = structuredClone(accepted);
+  imageSpecial.imageAnalysis[0].description = 'Menu showing the advertised daily special';
+  applyStage1LocalDecisionGates(imageSpecial, caption, true, 'source-offer-guards');
+  assert.equal(imageSpecial.hasValidContent, true);
+  const meal = structuredClone(accepted);
+  applyStage1LocalDecisionGates(meal, 'Available Today: Butter Chicken. Come for takeaway at our address.', true, 'source-offer-guards');
+  assert.equal(meal.hasValidContent, true);
+  const ocrSpecial = structuredClone(accepted);
+  applyStage1LocalDecisionGates(ocrSpecial, caption + '\nDaily special $10', true, 'source-offer-guards');
+  assert.equal(ocrSpecial.hasValidContent, true);
+});
+
+test('evaluation photo recap guard preserves independent future schedules and current invitations', () => {
+  const base = {hasValidContent: true, validationDecision: 'VALIDATION_PASSED', confidence: 0.87, reason: 'Named festival',
+    imageAnalysis: [{imageIndex: 0, description: 'Fall Fest 2026 above dancers performing', relevanceToPost: 'Performance photo',
+      imageComplexity: {isPromotionalPhoto: true, textDensityScore: 0.08, hasDenseText: false, hasCalendarGrid: false, hasMultipleEventListings: false}}]};
+  const caption = 'We loved performing. Thank you to everyone who came out! Here is to more memories.';
+  const rejected = structuredClone(base);
+  applyStage1LocalDecisionGates(rejected, caption, true, 'source-offer-guards');
+  assert.equal(rejected.hasValidContent, false);
+  const upcoming = structuredClone(base);
+  upcoming.imageAnalysis[0].description = 'Poster advertises the next performance on October 10 at 7pm';
+  applyStage1LocalDecisionGates(upcoming, caption, true, 'source-offer-guards');
+  assert.equal(upcoming.hasValidContent, true);
+  const current = structuredClone(base);
+  applyStage1LocalDecisionGates(current, caption + ' Come visit our ongoing dance activity.', true, 'source-offer-guards');
+  assert.equal(current.hasValidContent, true);
+  const legacy = structuredClone(base);
+  applyStage1LocalDecisionGates(legacy, caption, true);
+  assert.equal(legacy.hasValidContent, true);
+});
+
+test('versioned recap guard preserves present-tense offers without requiring a booking verb', () => {
+  const base = {hasValidContent: true, validationDecision: 'VALIDATION_PASSED', confidence: 0.9, reason: 'Current offered activity',
+    imageAnalysis: [{imageIndex: 0, description: 'People enjoying the visitor facility', relevanceToPost: 'Family visitor experience',
+      imageComplexity: {isPromotionalPhoto: true, textDensityScore: 0, hasDenseText: false, hasCalendarGrid: false, hasMultipleEventListings: false}}]};
+  const mixed = [
+    'Thanks to everyone who joined us yesterday! Our orchard offers U-pick experiences for families and groups throughout the season.',
+    'We loved last night. Our public arcade offers pinball and board games for families every day.',
+    'Thank you to everyone who came out! We offer visitor tours and crafting activities.',
+    'Thank you to everyone who attended. Classes are available for families throughout the season.',
+    'We loved last night. Serving butter chicken for takeaway today.',
+    'Thanks to everyone who joined us yesterday. Turkey dinner is on tonight.',
+  ];
+  for (const caption of mixed) {
+    const frozen = structuredClone(base);
+    applyStage1LocalDecisionGates(frozen, caption, true, 'source-offer-guards');
+    assert.equal(frozen.hasValidContent, false, 'frozen guard remains replayable');
+    const candidate = structuredClone(base);
+    applyStage1LocalDecisionGates(candidate, caption, true, 'source-offer-guards-v2');
+    assert.equal(candidate.hasValidContent, true, caption);
+  }
+  const past = structuredClone(base);
+  applyStage1LocalDecisionGates(past, 'We loved last night. Our orchard offered a private tour to our guests.', true, 'source-offer-guards-v2');
+  assert.equal(past.hasValidContent, false, 'past-tense activity alone remains a recap');
+  const rejected = {...structuredClone(base), hasValidContent: false, validationDecision: 'VALIDATION_FAILED', reason: 'Ordinary store products'};
+  applyStage1LocalDecisionGates(rejected, 'Thanks to everyone who came out. We offer retail products.', true, 'source-offer-guards-v2');
+  assert.equal(rejected.hasValidContent, false, 'current-offer phrase does not rescue a model rejection');
+});
+
+test('menu-only final guard never guesses that a model-accepted mixed visitor offer is past-only', () => {
+  const base = {hasValidContent: true, validationDecision: 'VALIDATION_PASSED', confidence: 0.9, reason: 'Current offered activity',
+    imageAnalysis: [{imageIndex: 0, description: 'People enjoying the orchard', relevanceToPost: 'Visitor photo',
+      imageComplexity: {isPromotionalPhoto: true, textDensityScore: 0, hasDenseText: false, hasCalendarGrid: false, hasMultipleEventListings: false}}]};
+  const text = 'Thanks to everyone who joined us yesterday. Families can enjoy U-pick and hayrides at the orchard.';
+  const previous = structuredClone(base);
+  applyStage1LocalDecisionGates(previous, text, true, 'source-offer-guards-v2');
+  assert.equal(previous.hasValidContent, false, 'reviewer counterexample reproduces the overly restrictive guard');
+  const candidate = structuredClone(base);
+  applyStage1LocalDecisionGates(candidate, text, true, 'source-menu-guards');
+  assert.equal(candidate.hasValidContent, true);
+  const menu = structuredClone(base);
+  menu.imageAnalysis[0].description = 'Ordinary menu with regular prices';
+  menu.imageAnalysis[0].relevanceToPost = 'Current menu board';
+  applyStage1LocalDecisionGates(menu, 'Today’s Menu October 4th', true, 'source-menu-guards');
+  assert.equal(menu.hasValidContent, false, 'independent narrow menu protection remains');
+  const rejected = {...structuredClone(base),hasValidContent:false,validationDecision:'VALIDATION_FAILED'};
+  applyStage1LocalDecisionGates(rejected, text, true, 'source-menu-guards');
+  assert.equal(rejected.hasValidContent, false, 'the final guard never manufactures acceptance from this phrase');
+});
 
 function validationResult(imageCount, decision = true) {
   return {
@@ -106,6 +243,25 @@ function fakeClient(sequence) {
 function getInputText(request) {
   return request.input[0].content.find((part) => part.type === 'input_text').text;
 }
+
+test('evaluation v7 preserves attachment bounds and clarifies scope without changing frozen v6 or production', async () => {
+  const caption = 'A concrete public event with an uncertain year.';
+  const v6 = createCompactV6ValidationPrompt(caption, 3, 'Source', '2026-10-06');
+  const v7 = createCompactV7ValidationPrompt(caption, 3, 'Source', '2026-10-06');
+  assert.match(v7, /Return exactly 3 imageAnalysis entries, with indices 0 through 2/);
+  assert.match(v7, /do not infer a prior year solely from a weekday\/date mismatch/);
+  assert.match(v7, /food and drink for PEOPLE/);
+  assert.match(v7, /STUDENT DEALS/);
+  assert.match(v7, /sales demonstrations/);
+  assert.doesNotMatch(v6, /ADDITIONAL SOURCE BOUNDARIES/);
+  assert.throws(() => createCompactV7ValidationPrompt(caption, -1, 'Source', '2026-10-06'));
+  const { client, calls } = fakeClient([apiResponse(validationResult(3))]);
+  await validateContentForStage1Evaluation(caption, Array(3).fill('data:image/jpeg;base64,Zm9v'), 'Source', '2026-10-06', 'gpt-6-luna', {promptVariant: 'compact-v7', reasoningEffort: 'high', structuredOutput: false, client});
+  assert.equal(calls.length, 1);
+  assert.match(getInputText(calls[0]), /ADDITIONAL SOURCE BOUNDARIES/);
+  assert.equal(calls[0].reasoning.effort, 'high');
+  assert.equal(calls[0].input[0].content.filter(p => p.type === 'input_image').length, 3);
+});
 
 test('current GPT-5 mini arm keeps the production prompt, schema hint, and Responses request shape', async () => {
   const caption = 'No named event details in this caption.';
@@ -492,6 +648,34 @@ test('offline v5 preflight records exact per-case prompt and compiled validator 
   assert.deepEqual(plan.cases[0].requestedReasoningEffortByVariant, plan.requestedReasoningEffortByVariant);
   assert.equal(plan.compiledContentValidatorSha256, expectedValidatorHash);
   assert.match(plan.compiledContentValidatorSha256, /^[a-f0-9]{64}$/);
+});
+
+test('v6-v8 preflight fingerprints match the actual transport prompt for initial and full galleries', async () => {
+  const { manifest } = loadAndValidateManifest(manifestPath);
+  const original = manifest.cases.find(c => c.images.length > 4);
+  const runnerPath = path.join(functionsRoot, 'scripts', 'stage1-evaluation-runner.mjs');
+  for (const imageSet of ['initial', 'full']) {
+    const selectedImages = selectImagesForCase(original, imageSet);
+    const variants = ['luna-compact-v6-high', 'luna-compact-v7-high', 'luna-compact-v8-high', 'luna-compact-v9-high', 'luna-compact-v10-high'];
+    const preflight = spawnSync(process.execPath, [runnerPath, '--manifest', manifestPath, '--case-ids', original.caseId, '--variants', variants.join(','), '--image-set', imageSet, '--output', '-'], {cwd: functionsRoot, encoding: 'utf8', timeout: 30000});
+    assert.equal(preflight.status, 0, preflight.stderr);
+    const plan = JSON.parse(preflight.stderr);
+    for (const variantId of variants) {
+      const variant = selectVariants([variantId])[0];
+      const { client, calls } = fakeClient([apiResponse(validationResult(selectedImages.length))]);
+      await validateContentForStage1Evaluation(original.caption, selectedImages.map(() => 'data:image/jpeg;base64,Zm9v'), original.venue, original.postedAt, variant.model, {...variant, client});
+      const actualText = getInputText(calls[0]);
+      const hash = createHash('sha256').update(actualText).digest('hex');
+      assert.equal(plan.cases[0].effectivePromptSha256ByVariant[variantId], hash);
+      assert.match(actualText, new RegExp(`Return exactly ${selectedImages.length} imageAnalysis entries`));
+      assert.ok(actualText.startsWith(createStage1EvaluationPrompt(original.caption, selectedImages.length, original.venue, original.postedAt, variant.promptVariant)));
+    }
+  }
+  const v8 = createCompactV8ValidationPrompt('A source caption', 0, 'Source', '2026-10-06');
+  assert.match(v8, /FOOD PURCHASE promotion/);
+  assert.match(v8, /does NOT need a formal event title/);
+  assert.match(v8, /Month-long MENU FEATURES/);
+  assert.match(v8, /Return exactly 0 imageAnalysis entries/);
 });
 
 test('compact-v3 sends a full five-image request and keeps a 400 no-image fallback inconclusive', async () => {
