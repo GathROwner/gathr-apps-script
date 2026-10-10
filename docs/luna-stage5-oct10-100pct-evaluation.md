@@ -94,3 +94,7 @@ cannot fail.
 Evidence: `artifacts/luna-oct10-production-audit/stage5-100pct-*.json`.
 Raw responses, frozen cases, network-blocking harness, playback and full test
 output are retained privately at `C:\Users\craig\.codex\luna-oct10-audit`.
+
+Subsequent decision: Craig approved 100% Stage 5. Deployment and current
+readback are recorded in `luna-stage5-oct10-100pct-release.md`; the evaluation's
+50% state above describes its completion time, not the subsequent release.

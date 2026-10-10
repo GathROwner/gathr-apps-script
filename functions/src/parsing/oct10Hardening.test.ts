@@ -62,9 +62,12 @@ test('Stage 5 allocation is off by default and stable across retries, with its o
   assert.equal(selectStage5LunaPilot('dataset', 'post', true, false, 50).selected, false);
   assert.equal(selectStage5LunaPilot('dataset', 'post', false, true, 100).selected, false);
   assert.equal(selectStage5LunaPilot('', 'post', true, true, 100).selected, false);
-  for (let index = 0; index < 100; index++) assert.deepEqual(
-    selectStage5LunaPilot('dataset', String(index), true, true, 50),
-    selectStage5LunaPilot('dataset', String(index), true, true, 50));
+  for (let index = 0; index < 100; index++) {
+    assert.deepEqual(
+      selectStage5LunaPilot('dataset', String(index), true, true, 50),
+      selectStage5LunaPilot('dataset', String(index), true, true, 50));
+    assert.equal(selectStage5LunaPilot('dataset', String(index), true, true, 100).selected, true);
+  }
 });
 
 test('public swimming access stays Sports without recategorizing parties, lessons or billiards', () => {

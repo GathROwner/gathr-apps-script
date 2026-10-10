@@ -2135,7 +2135,7 @@ async function parsePostDataCore(
     logger.info('=== STAGE 5: FINAL FORMATTING ===');
     const stage5Start = Date.now();
     const stage5Pilot = selectStage5LunaPilot(cfg.diagnosticContext?.fileId || '',
-      postId, stage2SourceReady && validatedData.length > 0,
+      postId, validatedData.length > 0,
       cfg.stage5ModelOverride ? false : undefined);
     const stage5Config = stage5Pilot.selected
       ? { ...cfg, stage5ModelOverride: 'gpt-6-luna', stage5ReasoningEffortOverride: 'none',

@@ -28,3 +28,19 @@ test('a selected Luna pilot uses none even while unselected Nano keeps the mediu
     {stage5ModelOverride:'gpt-5-nano',stage5BatchSize:9});
   assert.equal(request.reasoning.effort,'medium');
 });
+
+test('the 100 percent default uses Luna none without a per-post model override',async()=>{
+  const priorModel=process.env.STAGE5_MODEL_OVERRIDE;
+  const priorEffort=process.env.STAGE5_RESPONSES_REASONING_EFFORT;
+  process.env.STAGE5_MODEL_OVERRIDE='gpt-6-luna';
+  process.env.STAGE5_RESPONSES_REASONING_EFFORT='none';
+  try {
+    await performFinalFormatting([{name:'Test concert',date:'2026-10-17',startTime:'20:00',type:'event'}],
+      'Test venue','','2026-10-09T12:00:00Z',{stage5BatchSize:9});
+    assert.equal(request.model,'gpt-6-luna');
+    assert.equal(request.reasoning.effort,'none');
+  } finally {
+    if(priorModel===undefined)delete process.env.STAGE5_MODEL_OVERRIDE;else process.env.STAGE5_MODEL_OVERRIDE=priorModel;
+    if(priorEffort===undefined)delete process.env.STAGE5_RESPONSES_REASONING_EFFORT;else process.env.STAGE5_RESPONSES_REASONING_EFFORT=priorEffort;
+  }
+});
