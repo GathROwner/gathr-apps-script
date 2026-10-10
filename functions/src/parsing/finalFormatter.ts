@@ -1402,6 +1402,16 @@ function detectExplicitFoodSpecialCategory(
 ): Category | null {
   if (isCinemaAdmissionListing(event, originalItem)) return null;
   if (isOrganizedCommunityMeal(event)) return null;
+  // Preserve the identity of an aligned, validated drink offer even when its
+  // description mentions the entertainment alongside which it is served.
+  // A cocktail workshop/competition or trivia listing itself remains an event.
+  const sourceName = String(originalItem?.name || '').toLowerCase();
+  const sourceDetail = `${sourceName} ${originalItem?.description || ''}`.toLowerCase();
+  if (originalItem?._sourceType === 'special' &&
+      /\bcocktails?\b/.test(sourceDetail) &&
+      !/\b(?:trivia|quiz|workshop|class|tasting|festival|showdown|competition|contest|concert|performance|party)\b/.test(sourceName)) {
+    return 'Drink Special';
+  }
   const text = `${event.name || ''} ${event.description || ''} ${String((originalItem as any)?.extractionReason || '')}`
     .toLowerCase()
     .trim();
@@ -2207,7 +2217,8 @@ function applyCategoryCorrections(
     /\b(trivia|triva)\b/.test(textToCheck) ||
     /\bquiz\b/.test(textToCheck) ||
     /\bname\s+that\s+tune\b/.test(textToCheck);
-  if (hasTriviaCue && event.category !== 'Trivia Night') {
+  if (hasTriviaCue && event.category !== 'Trivia Night' &&
+      !(originalItem?._sourceType === 'special' && forcedFoodCategory)) {
     logger.debug(`Category safeguard: "${event.name}" -> Trivia Night (trivia cue)`);
     event.category = 'Trivia Night';
   }

@@ -14,8 +14,20 @@ export function detectStage2FoodSpecialSignals(text: string): { hasAny: boolean 
   const pricedFood = new RegExp('\\$\\s*\\d+(?:\\.\\d{1,2})?\\s*(?:for\\s+)?' + foodWords + '\\b|\\b' + foodWords + '\\s*(?:for|only|just|:)?\\s*\\$\\s*\\d');
   const clauses = value.split(/[\n!?;]|\.(?=\s|$)/);
   const hasAny = clauses.some((clause) => {
+    // One admission including food and entertainment is an activity, not
+    // positive evidence of a separately available meal/drink offer.
+    if (/\b(?:tickets?|admission|package)\b.{0,48}\b(?:includes?|covers?)\b/.test(clause) &&
+        /\b(?:concert|show|performance|live\s+music|workshop|tasting)\b/.test(clause)) return false;
     // A printed ordinary stock/menu price is not itself an advertised deal.
-    if (/\b(?:restocked?|back\s+in\s+stock|regular\s+price|usual\s+(?:menu\s+)?price|(?:monthly|featured)\s+menu|all\s+month|month[ -]long)\b/.test(clause) && !offer.test(clause)) return false;
+    if (/\b(?:restocked?|back\s+in\s+stock|usual\s+(?:menu\s+)?price|(?:monthly|featured)\s+menu|all\s+month|month[ -]long)\b/.test(clause) && !offer.test(clause)) return false;
+    // Limited serving offers can be advertised at the regular price. Require
+    // an actual serving statement and a local date, not a distant music date.
+    const datedServingOffer = /\b(?:breakfast|brunch|lunch|dinner|meal)\b.{0,40}\b(?:served|serving|available)\b.{0,40}\b(?:today|tonight|(?:this\s+)?(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday)|(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:tember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\s+\d{1,2})\b/.test(clause);
+    const datedDrinkFeature = /\b(?:today|tonight|this\s+(?:evening|afternoon|weekend|monday|tuesday|wednesday|thursday|friday|saturday|sunday))\b/.test(clause) &&
+      /\b(?:feature[ds]?\s+(?:\w+\s+){0,2}(?:cocktails?|drinks?|beer|wine)|(?:cocktails?|drinks?|beer|wine)\s+(?:\w+\s+){0,2}feature[ds]?)\b/.test(clause);
+    if ((datedServingOffer || datedDrinkFeature) &&
+        !/\b(?:regular\s+menu|usual\s+menu|lodging|accommodations?|room\s+rates?|overnight\s+stay|fundraiser|fundraising|community\s+(?:meal|dinner)|registration|workshop|class)\b/.test(clause)) return true;
+    if (/\bregular\s+price\b/.test(clause) && !offer.test(clause)) return false;
     if (pricedFood.test(clause)) return true;
     return [...clause.matchAll(food)].some((foodMatch) => {
       // Bound context so a distant shopping/service offer does not attach to food.

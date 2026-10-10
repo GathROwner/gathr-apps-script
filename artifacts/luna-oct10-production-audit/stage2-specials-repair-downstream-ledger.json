@@ -1,0 +1,2681 @@
+[
+  {
+    "round": "stage2-specials-repair-downstream",
+    "row": 13,
+    "postId": "1775682611227393",
+    "stage3": [
+      {
+        "name": "Thanksgiving Dinner",
+        "date": "2026-10-11",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "special",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      },
+      {
+        "name": "Thanksgiving Dinner",
+        "date": "2026-10-12",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "special",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      }
+    ],
+    "stage4": [
+      {
+        "name": "Thanksgiving Dinner",
+        "date": "2026-10-11",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "special",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      },
+      {
+        "name": "Thanksgiving Dinner",
+        "date": "2026-10-12",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "special",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      }
+    ],
+    "formattedBeforeHours": [
+      {
+        "name": "Thanksgiving Dinner",
+        "date": "2026-10-11",
+        "endDate": "2026-10-11",
+        "startTime": "",
+        "endTime": "",
+        "category": "Food Special",
+        "isFoodSpecial": "Yes",
+        "isEvent": "No",
+        "sourceType": "special",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      },
+      {
+        "name": "Thanksgiving Dinner",
+        "date": "2026-10-12",
+        "endDate": "2026-10-12",
+        "startTime": "",
+        "endTime": "",
+        "category": "Food Special",
+        "isFoodSpecial": "Yes",
+        "isEvent": "No",
+        "sourceType": "special",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      }
+    ],
+    "final": [
+      {
+        "name": "Thanksgiving Dinner",
+        "date": "2026-10-11",
+        "endDate": "2026-10-11",
+        "startTime": "08:00",
+        "endTime": "21:00",
+        "category": "Food Special",
+        "isFoodSpecial": "Yes",
+        "isEvent": "No",
+        "sourceType": "special",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      },
+      {
+        "name": "Thanksgiving Dinner",
+        "date": "2026-10-12",
+        "endDate": "2026-10-12",
+        "startTime": "11:00",
+        "endTime": "21:00",
+        "category": "Food Special",
+        "isFoodSpecial": "Yes",
+        "isEvent": "No",
+        "sourceType": "special",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      }
+    ],
+    "skips": [],
+    "usage": [
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 1,
+        "durationMs": 11428,
+        "inputTokens": 5264,
+        "outputTokens": 954,
+        "totalTokens": 6218,
+        "cachedInputTokens": 0
+      },
+      {
+        "stage": "stage4",
+        "component": "secondaryValidator",
+        "endpoint": "responses",
+        "model": "gpt-5-nano",
+        "durationMs": 5095,
+        "inputTokens": 2399,
+        "outputTokens": 1085,
+        "totalTokens": 3484,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 13,
+        "postId": "1775682611227393",
+        "batchItemCount": 2,
+        "responseId": "resp_0f4836dc322cc09c006aca7877ed4487d2b5fdfa8d83d8cb78",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 320,
+        "visibleOutputChars": 2994
+      },
+      {
+        "stage": "stage5",
+        "component": "finalFormatter",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "durationMs": 5126,
+        "inputTokens": 2378,
+        "outputTokens": 539,
+        "totalTokens": 2917,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 13,
+        "postId": "1775682611227393",
+        "responseId": "resp_00411f3b9165cef6006aca787d0c4887d2810b7bac687b3a75",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 0,
+        "visibleOutputChars": 2401,
+        "parsedItemCount": 2,
+        "parseError": false,
+        "batchOffset": 0,
+        "batchItemCount": 2
+      }
+    ],
+    "noLiveWrites": true
+  },
+  {
+    "round": "stage2-specials-repair-downstream",
+    "row": 266,
+    "postId": "122316333740189551",
+    "stage3": [
+      {
+        "name": "Friday Roast Beef Dinner",
+        "date": "2026-10-09",
+        "startTime": "15:00",
+        "endTime": "18:00",
+        "sourceType": "special",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      }
+    ],
+    "stage4": [
+      {
+        "name": "Friday Roast Beef Dinner",
+        "date": "2026-10-09",
+        "startTime": "15:00",
+        "endTime": "18:00",
+        "sourceType": "special",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      }
+    ],
+    "formattedBeforeHours": [
+      {
+        "name": "Friday Roast Beef Dinner",
+        "date": "2026-10-09",
+        "endDate": "2026-10-09",
+        "startTime": "15:00",
+        "endTime": "18:00",
+        "category": "Food Special",
+        "isFoodSpecial": "Yes",
+        "isEvent": "No",
+        "sourceType": "special",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      }
+    ],
+    "final": [
+      {
+        "name": "Friday Roast Beef Dinner",
+        "date": "2026-10-09",
+        "endDate": "2026-10-09",
+        "startTime": "15:00",
+        "endTime": "18:00",
+        "category": "Food Special",
+        "isFoodSpecial": "Yes",
+        "isEvent": "No",
+        "sourceType": "special",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      }
+    ],
+    "skips": [],
+    "usage": [
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 0,
+        "durationMs": 7987,
+        "inputTokens": 1466,
+        "outputTokens": 792,
+        "totalTokens": 2258,
+        "cachedInputTokens": 0
+      },
+      {
+        "stage": "stage4",
+        "component": "secondaryValidator",
+        "endpoint": "responses",
+        "model": "gpt-5-nano",
+        "durationMs": 3717,
+        "inputTokens": 2204,
+        "outputTokens": 723,
+        "totalTokens": 2927,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 266,
+        "postId": "122316333740189551",
+        "batchItemCount": 1,
+        "responseId": "resp_0be9a699f1f1fe6d006aca78a1c83887d2ae79e008fd5e4831",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 256,
+        "visibleOutputChars": 1742
+      },
+      {
+        "stage": "stage5",
+        "component": "finalFormatter",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "durationMs": 3936,
+        "inputTokens": 2165,
+        "outputTokens": 315,
+        "totalTokens": 2480,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 266,
+        "postId": "122316333740189551",
+        "responseId": "resp_010745154bd23ece006aca78a582bc87d2b0fb8e6c9681d138",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 0,
+        "visibleOutputChars": 1306,
+        "parsedItemCount": 1,
+        "parseError": false,
+        "batchOffset": 0,
+        "batchItemCount": 1
+      }
+    ],
+    "noLiveWrites": true
+  },
+  {
+    "round": "stage2-specials-repair-downstream",
+    "row": 348,
+    "postId": "1549619793637990",
+    "stage3": [
+      {
+        "name": "Day-old Bread First-Time Offer",
+        "date": "2026-10-09",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "special",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      }
+    ],
+    "stage4": [
+      {
+        "name": "Day-old Bread First-Time Offer",
+        "date": "2026-10-09",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "special",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      }
+    ],
+    "formattedBeforeHours": [
+      {
+        "name": "Day-old Bread First-Time Offer",
+        "date": "2026-10-09",
+        "endDate": "2026-10-09",
+        "startTime": "",
+        "endTime": "",
+        "category": "Food Special",
+        "isFoodSpecial": "Yes",
+        "isEvent": "No",
+        "sourceType": "special",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      }
+    ],
+    "final": [
+      {
+        "name": "Day-old Bread First-Time Offer",
+        "date": "2026-10-09",
+        "endDate": "2026-10-09",
+        "startTime": "09:00",
+        "endTime": "17:00",
+        "category": "Food Special",
+        "isFoodSpecial": "Yes",
+        "isEvent": "No",
+        "sourceType": "special",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      }
+    ],
+    "skips": [],
+    "usage": [
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 1,
+        "durationMs": 10401,
+        "inputTokens": 5333,
+        "outputTokens": 970,
+        "totalTokens": 6303,
+        "cachedInputTokens": 0
+      },
+      {
+        "stage": "stage4",
+        "component": "secondaryValidator",
+        "endpoint": "responses",
+        "model": "gpt-5-nano",
+        "durationMs": 3727,
+        "inputTokens": 2192,
+        "outputTokens": 674,
+        "totalTokens": 2866,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 348,
+        "postId": "1549619793637990",
+        "batchItemCount": 1,
+        "responseId": "resp_04c52d2e7520cc10006aca78a97fac87d28f779bd92a1dd262",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 256,
+        "visibleOutputChars": 1605
+      },
+      {
+        "stage": "stage5",
+        "component": "finalFormatter",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "durationMs": 3073,
+        "inputTokens": 2156,
+        "outputTokens": 292,
+        "totalTokens": 2448,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 348,
+        "postId": "1549619793637990",
+        "responseId": "resp_0f746b408ff0f63a006aca78ad39bc87d294368f0782886bea",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 0,
+        "visibleOutputChars": 1284,
+        "parsedItemCount": 1,
+        "parseError": false,
+        "batchOffset": 0,
+        "batchItemCount": 1
+      }
+    ],
+    "noLiveWrites": true
+  },
+  {
+    "round": "stage2-specials-repair-downstream",
+    "row": 35,
+    "postId": "1737936975008400",
+    "stage3": [
+      {
+        "name": "Kelley Mooney Music",
+        "date": "2026-10-09",
+        "startTime": "20:00",
+        "endTime": "23:00",
+        "sourceType": "event",
+        "relevantImageIndex": 1,
+        "recurringPattern": "none"
+      },
+      {
+        "name": "Marc Coughlin",
+        "date": "2026-10-10",
+        "startTime": "20:00",
+        "endTime": "23:00",
+        "sourceType": "event",
+        "relevantImageIndex": 2,
+        "recurringPattern": "none"
+      },
+      {
+        "name": "Irish Music Session",
+        "date": "2026-10-11",
+        "startTime": "14:00",
+        "endTime": "16:00",
+        "sourceType": "event",
+        "relevantImageIndex": 3,
+        "recurringPattern": "none"
+      },
+      {
+        "name": "Two-course Turkey Dinner",
+        "date": "2026-10-11",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "special",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      }
+    ],
+    "stage4": [
+      {
+        "name": "Kelley Mooney Music",
+        "date": "2026-10-09",
+        "startTime": "20:00",
+        "endTime": "23:00",
+        "sourceType": "event",
+        "relevantImageIndex": 1,
+        "recurringPattern": "none"
+      },
+      {
+        "name": "Marc Coughlin",
+        "date": "2026-10-10",
+        "startTime": "20:00",
+        "endTime": "23:00",
+        "sourceType": "event",
+        "relevantImageIndex": 2,
+        "recurringPattern": "none"
+      },
+      {
+        "name": "Irish Music Session",
+        "date": "2026-10-11",
+        "startTime": "14:00",
+        "endTime": "16:00",
+        "sourceType": "event",
+        "relevantImageIndex": 3,
+        "recurringPattern": "none"
+      },
+      {
+        "name": "Two-course Turkey Dinner",
+        "date": "2026-10-11",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "special",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      }
+    ],
+    "formattedBeforeHours": [
+      {
+        "name": "Kelley Mooney Music",
+        "date": "2026-10-09",
+        "endDate": "2026-10-09",
+        "startTime": "20:00",
+        "endTime": "23:00",
+        "category": "Live Music",
+        "isFoodSpecial": "No",
+        "isEvent": "Yes",
+        "sourceType": "event",
+        "relevantImageIndex": 1,
+        "recurringPattern": "none"
+      },
+      {
+        "name": "Marc Coughlin",
+        "date": "2026-10-10",
+        "endDate": "2026-10-10",
+        "startTime": "20:00",
+        "endTime": "23:00",
+        "category": "Live Music",
+        "isFoodSpecial": "No",
+        "isEvent": "Yes",
+        "sourceType": "event",
+        "relevantImageIndex": 2,
+        "recurringPattern": "none"
+      },
+      {
+        "name": "Irish Music Session",
+        "date": "2026-10-11",
+        "endDate": "2026-10-11",
+        "startTime": "14:00",
+        "endTime": "16:00",
+        "category": "Live Music",
+        "isFoodSpecial": "No",
+        "isEvent": "Yes",
+        "sourceType": "event",
+        "relevantImageIndex": 3,
+        "recurringPattern": "none"
+      },
+      {
+        "name": "Two-course Turkey Dinner",
+        "date": "2026-10-11",
+        "endDate": "2026-10-11",
+        "startTime": "",
+        "endTime": "",
+        "category": "Food Special",
+        "isFoodSpecial": "Yes",
+        "isEvent": "No",
+        "sourceType": "special",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      }
+    ],
+    "final": [
+      {
+        "name": "Kelley Mooney Music",
+        "date": "2026-10-09",
+        "endDate": "2026-10-09",
+        "startTime": "20:00",
+        "endTime": "23:00",
+        "category": "Live Music",
+        "isFoodSpecial": "No",
+        "isEvent": "Yes",
+        "sourceType": "event",
+        "relevantImageIndex": 1,
+        "recurringPattern": "none"
+      },
+      {
+        "name": "Marc Coughlin",
+        "date": "2026-10-10",
+        "endDate": "2026-10-10",
+        "startTime": "20:00",
+        "endTime": "23:00",
+        "category": "Live Music",
+        "isFoodSpecial": "No",
+        "isEvent": "Yes",
+        "sourceType": "event",
+        "relevantImageIndex": 2,
+        "recurringPattern": "none"
+      },
+      {
+        "name": "Irish Music Session",
+        "date": "2026-10-11",
+        "endDate": "2026-10-11",
+        "startTime": "14:00",
+        "endTime": "16:00",
+        "category": "Live Music",
+        "isFoodSpecial": "No",
+        "isEvent": "Yes",
+        "sourceType": "event",
+        "relevantImageIndex": 3,
+        "recurringPattern": "none"
+      },
+      {
+        "name": "Two-course Turkey Dinner",
+        "date": "2026-10-11",
+        "endDate": "2026-10-11",
+        "startTime": "11:00",
+        "endTime": "21:00",
+        "category": "Food Special",
+        "isFoodSpecial": "Yes",
+        "isEvent": "No",
+        "sourceType": "special",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      }
+    ],
+    "skips": [],
+    "usage": [
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 4,
+        "durationMs": 15314,
+        "inputTokens": 17011,
+        "outputTokens": 1362,
+        "totalTokens": 18373,
+        "cachedInputTokens": 0
+      },
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 4,
+        "durationMs": 9877,
+        "inputTokens": 16032,
+        "outputTokens": 790,
+        "totalTokens": 16822,
+        "cachedInputTokens": 0
+      },
+      {
+        "stage": "stage4",
+        "component": "secondaryValidator",
+        "endpoint": "responses",
+        "model": "gpt-5-nano",
+        "durationMs": 11499,
+        "inputTokens": 3015,
+        "outputTokens": 2032,
+        "totalTokens": 5047,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 35,
+        "postId": "1737936975008400",
+        "batchItemCount": 4,
+        "responseId": "resp_0de567818511f6f8006aca788593c087d281be719c73168bfa",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 640,
+        "visibleOutputChars": 5498
+      },
+      {
+        "stage": "stage5",
+        "component": "finalFormatter",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "durationMs": 8657,
+        "inputTokens": 3012,
+        "outputTokens": 1020,
+        "totalTokens": 4032,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 35,
+        "postId": "1737936975008400",
+        "responseId": "resp_0e41f2050f7d4f0f006aca789122c087d2a3de0d1c07c2e298",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 0,
+        "visibleOutputChars": 4376,
+        "parsedItemCount": 4,
+        "parseError": false,
+        "batchOffset": 0,
+        "batchItemCount": 4
+      }
+    ],
+    "noLiveWrites": true
+  },
+  {
+    "round": "stage2-specials-repair-downstream",
+    "row": 38,
+    "postId": "1722025253265600",
+    "stage3": [
+      {
+        "name": "Harvest Special",
+        "date": "2026-10-09",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "special",
+        "relevantImageIndex": 3,
+        "recurringPattern": "none"
+      }
+    ],
+    "stage4": [
+      {
+        "name": "Harvest Special",
+        "date": "2026-10-09",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "special",
+        "relevantImageIndex": 3,
+        "recurringPattern": "none"
+      }
+    ],
+    "formattedBeforeHours": [
+      {
+        "name": "Harvest Special",
+        "date": "2026-10-09",
+        "endDate": "",
+        "startTime": "",
+        "endTime": "",
+        "category": "Food Special",
+        "isFoodSpecial": "Yes",
+        "isEvent": "No",
+        "sourceType": "special",
+        "relevantImageIndex": 3,
+        "recurringPattern": "none"
+      }
+    ],
+    "final": [
+      {
+        "name": "Harvest Special",
+        "date": "2026-10-09",
+        "endDate": "2026-10-09",
+        "startTime": "10:00",
+        "endTime": "21:00",
+        "category": "Food Special",
+        "isFoodSpecial": "Yes",
+        "isEvent": "No",
+        "sourceType": "special",
+        "relevantImageIndex": 3,
+        "recurringPattern": "none"
+      }
+    ],
+    "skips": [],
+    "usage": [
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 5,
+        "durationMs": 7771,
+        "inputTokens": 16517,
+        "outputTokens": 582,
+        "totalTokens": 17099,
+        "cachedInputTokens": 0
+      },
+      {
+        "stage": "stage4",
+        "component": "secondaryValidator",
+        "endpoint": "responses",
+        "model": "gpt-5-nano",
+        "durationMs": 3531,
+        "inputTokens": 2142,
+        "outputTokens": 685,
+        "totalTokens": 2827,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 38,
+        "postId": "1722025253265600",
+        "batchItemCount": 1,
+        "responseId": "resp_0a189daf61e148b1006aca7889ff8c87d2b9e12cc13a3f3ea7",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 320,
+        "visibleOutputChars": 1394
+      },
+      {
+        "stage": "stage5",
+        "component": "finalFormatter",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "durationMs": 3502,
+        "inputTokens": 2118,
+        "outputTokens": 315,
+        "totalTokens": 2433,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 38,
+        "postId": "1722025253265600",
+        "responseId": "resp_0e965b097f01dc93006aca788d895c87d2b52f22b9d966d65f",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 0,
+        "visibleOutputChars": 1216,
+        "parsedItemCount": 1,
+        "parseError": false,
+        "batchOffset": 0,
+        "batchItemCount": 1
+      }
+    ],
+    "noLiveWrites": true
+  },
+  {
+    "round": "stage2-specials-repair-downstream",
+    "row": 53,
+    "postId": "1128140023071506",
+    "stage3": [
+      {
+        "name": "Trivia Fridays with Kirk Mackinnon",
+        "date": "2026-10-09",
+        "startTime": "19:00",
+        "endTime": "",
+        "sourceType": "event",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      },
+      {
+        "name": "Warren Grove Sour Smash",
+        "date": "2026-10-09",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "special",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      }
+    ],
+    "stage4": [
+      {
+        "name": "Trivia Fridays with Kirk Mackinnon",
+        "date": "2026-10-09",
+        "startTime": "19:00",
+        "endTime": "",
+        "sourceType": "event",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      },
+      {
+        "name": "Warren Grove Sour Smash",
+        "date": "2026-10-09",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "special",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      }
+    ],
+    "formattedBeforeHours": [
+      {
+        "name": "Trivia Fridays with Kirk Mackinnon",
+        "date": "2026-10-09",
+        "endDate": "",
+        "startTime": "19:00",
+        "endTime": "",
+        "category": "Trivia Night",
+        "isFoodSpecial": "No",
+        "isEvent": "Yes",
+        "sourceType": "event",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      },
+      {
+        "name": "Warren Grove Sour Smash",
+        "date": "2026-10-09",
+        "endDate": "",
+        "startTime": "",
+        "endTime": "",
+        "category": "Drink Special",
+        "isFoodSpecial": "Yes",
+        "isEvent": "No",
+        "sourceType": "special",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      }
+    ],
+    "final": [
+      {
+        "name": "Trivia Fridays with Kirk Mackinnon",
+        "date": "2026-10-09",
+        "endDate": "2026-10-09",
+        "startTime": "19:00",
+        "endTime": "22:00",
+        "category": "Trivia Night",
+        "isFoodSpecial": "No",
+        "isEvent": "Yes",
+        "sourceType": "event",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      },
+      {
+        "name": "Warren Grove Sour Smash",
+        "date": "2026-10-09",
+        "endDate": "2026-10-09",
+        "startTime": "11:00",
+        "endTime": "23:00",
+        "category": "Drink Special",
+        "isFoodSpecial": "Yes",
+        "isEvent": "No",
+        "sourceType": "special",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      }
+    ],
+    "skips": [],
+    "usage": [
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 1,
+        "durationMs": 8582,
+        "inputTokens": 6218,
+        "outputTokens": 706,
+        "totalTokens": 6924,
+        "cachedInputTokens": 0
+      },
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 1,
+        "durationMs": 10098,
+        "inputTokens": 5239,
+        "outputTokens": 773,
+        "totalTokens": 6012,
+        "cachedInputTokens": 0
+      },
+      {
+        "stage": "stage4",
+        "component": "secondaryValidator",
+        "endpoint": "responses",
+        "model": "gpt-5-nano",
+        "durationMs": 6818,
+        "inputTokens": 2511,
+        "outputTokens": 1433,
+        "totalTokens": 3944,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 53,
+        "postId": "1128140023071506",
+        "batchItemCount": 2,
+        "responseId": "resp_0e0a38854dfef65a006aca787f376c87d2844033ee2b5286f2",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 640,
+        "visibleOutputChars": 3296
+      },
+      {
+        "stage": "stage5",
+        "component": "finalFormatter",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "durationMs": 5293,
+        "inputTokens": 2489,
+        "outputTokens": 681,
+        "totalTokens": 3170,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 53,
+        "postId": "1128140023071506",
+        "responseId": "resp_028f027f8bf78e1f006aca7885fbf487d28f80b3a3d1a3c0c5",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 0,
+        "visibleOutputChars": 2779,
+        "parsedItemCount": 2,
+        "parseError": false,
+        "batchOffset": 0,
+        "batchItemCount": 2
+      }
+    ],
+    "noLiveWrites": true
+  },
+  {
+    "round": "stage2-specials-repair-downstream",
+    "row": 77,
+    "postId": "1876827866914224",
+    "stage3": [
+      {
+        "name": "Roast Turkey Dinner",
+        "date": "2026-10-11",
+        "startTime": "11:00",
+        "endTime": "19:00",
+        "sourceType": "special",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      }
+    ],
+    "stage4": [
+      {
+        "name": "Roast Turkey Dinner",
+        "date": "2026-10-11",
+        "startTime": "11:00",
+        "endTime": "19:00",
+        "sourceType": "special",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      }
+    ],
+    "formattedBeforeHours": [
+      {
+        "name": "Roast Turkey Dinner",
+        "date": "2026-10-11",
+        "endDate": "2026-10-11",
+        "startTime": "11:00",
+        "endTime": "19:00",
+        "category": "Food Special",
+        "isFoodSpecial": "Yes",
+        "isEvent": "No",
+        "sourceType": "special",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      }
+    ],
+    "final": [
+      {
+        "name": "Roast Turkey Dinner",
+        "date": "2026-10-11",
+        "endDate": "2026-10-11",
+        "startTime": "11:00",
+        "endTime": "19:00",
+        "category": "Food Special",
+        "isFoodSpecial": "Yes",
+        "isEvent": "No",
+        "sourceType": "special",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      }
+    ],
+    "skips": [],
+    "usage": [
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 1,
+        "durationMs": 12143,
+        "inputTokens": 5758,
+        "outputTokens": 1061,
+        "totalTokens": 6819,
+        "cachedInputTokens": 0
+      },
+      {
+        "stage": "stage4",
+        "component": "secondaryValidator",
+        "endpoint": "responses",
+        "model": "gpt-5-nano",
+        "durationMs": 4213,
+        "inputTokens": 2206,
+        "outputTokens": 844,
+        "totalTokens": 3050,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 77,
+        "postId": "1876827866914224",
+        "batchItemCount": 1,
+        "responseId": "resp_0c9a8033953e4641006aca7897794087d2a63ad8ff24e8d8f0",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 320,
+        "visibleOutputChars": 1863
+      },
+      {
+        "stage": "stage5",
+        "component": "finalFormatter",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "durationMs": 3336,
+        "inputTokens": 2173,
+        "outputTokens": 321,
+        "totalTokens": 2494,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 77,
+        "postId": "1876827866914224",
+        "responseId": "resp_05f97c0af88eaf5f006aca789bb59887d2aca021011463aa0d",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 0,
+        "visibleOutputChars": 1282,
+        "parsedItemCount": 1,
+        "parseError": false,
+        "batchOffset": 0,
+        "batchItemCount": 1
+      }
+    ],
+    "noLiveWrites": true
+  },
+  {
+    "round": "stage2-specials-repair-downstream",
+    "row": 89,
+    "postId": "1678509800951428",
+    "stage3": [
+      {
+        "name": "Apple Spice Cake + Orchard Toddy",
+        "date": "2026-10-09",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "special",
+        "recurringPattern": "none"
+      }
+    ],
+    "stage4": [
+      {
+        "name": "Apple Spice Cake + Orchard Toddy",
+        "date": "2026-10-09",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "special",
+        "recurringPattern": "none"
+      }
+    ],
+    "formattedBeforeHours": [
+      {
+        "name": "Apple Spice Cake + Orchard Toddy",
+        "date": "2026-10-09",
+        "endDate": "2026-10-09",
+        "startTime": "",
+        "endTime": "",
+        "category": "Food Special",
+        "isFoodSpecial": "Yes",
+        "isEvent": "No",
+        "sourceType": "special",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      }
+    ],
+    "final": [
+      {
+        "name": "Apple Spice Cake + Orchard Toddy",
+        "date": "2026-10-09",
+        "endDate": "2026-10-09",
+        "startTime": "11:30",
+        "endTime": "21:00",
+        "category": "Food Special",
+        "isFoodSpecial": "Yes",
+        "isEvent": "No",
+        "sourceType": "special",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      }
+    ],
+    "skips": [],
+    "usage": [
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 1,
+        "durationMs": 2686,
+        "inputTokens": 5516,
+        "outputTokens": 132,
+        "totalTokens": 5648,
+        "cachedInputTokens": 0
+      },
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 1,
+        "durationMs": 9135,
+        "inputTokens": 3720,
+        "outputTokens": 754,
+        "totalTokens": 4474,
+        "cachedInputTokens": 0
+      },
+      {
+        "stage": "stage4",
+        "component": "secondaryValidator",
+        "endpoint": "responses",
+        "model": "gpt-5-nano",
+        "durationMs": 4856,
+        "inputTokens": 2242,
+        "outputTokens": 813,
+        "totalTokens": 3055,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 89,
+        "postId": "1678509800951428",
+        "batchItemCount": 1,
+        "responseId": "resp_0d217405084dd533006aca789cf22087d29b1dac3bd1146ffd",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 320,
+        "visibleOutputChars": 1967
+      },
+      {
+        "stage": "stage5",
+        "component": "finalFormatter",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "durationMs": 3841,
+        "inputTokens": 2212,
+        "outputTokens": 349,
+        "totalTokens": 2561,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 89,
+        "postId": "1678509800951428",
+        "responseId": "resp_06df69e85371410b006aca78a1c5e087d2b445d34581234348",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 0,
+        "visibleOutputChars": 1583,
+        "parsedItemCount": 1,
+        "parseError": false,
+        "batchOffset": 0,
+        "batchItemCount": 1
+      }
+    ],
+    "noLiveWrites": true
+  },
+  {
+    "round": "stage2-specials-repair-downstream-repeat",
+    "row": 35,
+    "postId": "1737936975008400",
+    "stage3": [
+      {
+        "name": "Kelley Mooney Music",
+        "date": "2026-10-09",
+        "startTime": "20:00",
+        "endTime": "23:00",
+        "sourceType": "event",
+        "relevantImageIndex": 1,
+        "recurringPattern": "none"
+      },
+      {
+        "name": "Marc Coughlin",
+        "date": "2026-10-10",
+        "startTime": "20:00",
+        "endTime": "23:00",
+        "sourceType": "event",
+        "relevantImageIndex": 2,
+        "recurringPattern": "none"
+      },
+      {
+        "name": "Irish Music Session",
+        "date": "2026-10-11",
+        "startTime": "14:00",
+        "endTime": "16:00",
+        "sourceType": "event",
+        "relevantImageIndex": 3,
+        "recurringPattern": "none"
+      },
+      {
+        "name": "Two-course Turkey Dinner",
+        "date": "2026-10-11",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "special",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      }
+    ],
+    "stage4": [
+      {
+        "name": "Kelley Mooney Music",
+        "date": "2026-10-09",
+        "startTime": "20:00",
+        "endTime": "23:00",
+        "sourceType": "event",
+        "relevantImageIndex": 1,
+        "recurringPattern": "none"
+      },
+      {
+        "name": "Marc Coughlin",
+        "date": "2026-10-10",
+        "startTime": "20:00",
+        "endTime": "23:00",
+        "sourceType": "event",
+        "relevantImageIndex": 2,
+        "recurringPattern": "none"
+      },
+      {
+        "name": "Irish Music Session",
+        "date": "2026-10-11",
+        "startTime": "14:00",
+        "endTime": "16:00",
+        "sourceType": "event",
+        "relevantImageIndex": 3,
+        "recurringPattern": "none"
+      },
+      {
+        "name": "Two-course Turkey Dinner",
+        "date": "2026-10-11",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "special",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      }
+    ],
+    "formattedBeforeHours": [
+      {
+        "name": "Kelley Mooney Music",
+        "date": "2026-10-09",
+        "endDate": "2026-10-09",
+        "startTime": "20:00",
+        "endTime": "23:00",
+        "category": "Live Music",
+        "isFoodSpecial": "No",
+        "isEvent": "Yes",
+        "sourceType": "event",
+        "relevantImageIndex": 1,
+        "recurringPattern": "none"
+      },
+      {
+        "name": "Marc Coughlin",
+        "date": "2026-10-10",
+        "endDate": "2026-10-10",
+        "startTime": "20:00",
+        "endTime": "23:00",
+        "category": "Live Music",
+        "isFoodSpecial": "No",
+        "isEvent": "Yes",
+        "sourceType": "event",
+        "relevantImageIndex": 2,
+        "recurringPattern": "none"
+      },
+      {
+        "name": "Irish Music Session",
+        "date": "2026-10-11",
+        "endDate": "2026-10-11",
+        "startTime": "14:00",
+        "endTime": "16:00",
+        "category": "Live Music",
+        "isFoodSpecial": "No",
+        "isEvent": "Yes",
+        "sourceType": "event",
+        "relevantImageIndex": 3,
+        "recurringPattern": "none"
+      },
+      {
+        "name": "Two-course Turkey Dinner",
+        "date": "2026-10-11",
+        "endDate": "2026-10-11",
+        "startTime": "",
+        "endTime": "",
+        "category": "Food Special",
+        "isFoodSpecial": "Yes",
+        "isEvent": "No",
+        "sourceType": "special",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      }
+    ],
+    "final": [
+      {
+        "name": "Kelley Mooney Music",
+        "date": "2026-10-09",
+        "endDate": "2026-10-09",
+        "startTime": "20:00",
+        "endTime": "23:00",
+        "category": "Live Music",
+        "isFoodSpecial": "No",
+        "isEvent": "Yes",
+        "sourceType": "event",
+        "relevantImageIndex": 1,
+        "recurringPattern": "none"
+      },
+      {
+        "name": "Marc Coughlin",
+        "date": "2026-10-10",
+        "endDate": "2026-10-10",
+        "startTime": "20:00",
+        "endTime": "23:00",
+        "category": "Live Music",
+        "isFoodSpecial": "No",
+        "isEvent": "Yes",
+        "sourceType": "event",
+        "relevantImageIndex": 2,
+        "recurringPattern": "none"
+      },
+      {
+        "name": "Irish Music Session",
+        "date": "2026-10-11",
+        "endDate": "2026-10-11",
+        "startTime": "14:00",
+        "endTime": "16:00",
+        "category": "Live Music",
+        "isFoodSpecial": "No",
+        "isEvent": "Yes",
+        "sourceType": "event",
+        "relevantImageIndex": 3,
+        "recurringPattern": "none"
+      },
+      {
+        "name": "Two-course Turkey Dinner",
+        "date": "2026-10-11",
+        "endDate": "2026-10-11",
+        "startTime": "11:00",
+        "endTime": "21:00",
+        "category": "Food Special",
+        "isFoodSpecial": "Yes",
+        "isEvent": "No",
+        "sourceType": "special",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      }
+    ],
+    "skips": [],
+    "usage": [
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 4,
+        "durationMs": 14024,
+        "inputTokens": 17011,
+        "outputTokens": 1288,
+        "totalTokens": 18299,
+        "cachedInputTokens": 17008
+      },
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 4,
+        "durationMs": 11149,
+        "inputTokens": 16032,
+        "outputTokens": 938,
+        "totalTokens": 16970,
+        "cachedInputTokens": 16029
+      },
+      {
+        "stage": "stage4",
+        "component": "secondaryValidator",
+        "endpoint": "responses",
+        "model": "gpt-5-nano",
+        "durationMs": 11211,
+        "inputTokens": 2989,
+        "outputTokens": 2328,
+        "totalTokens": 5317,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 35,
+        "postId": "1737936975008400",
+        "batchItemCount": 4,
+        "responseId": "resp_0cdf4f86076a0a4b006aca78c687dc87d29859f79fa689d248",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 896,
+        "visibleOutputChars": 5752
+      },
+      {
+        "stage": "stage5",
+        "component": "finalFormatter",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "durationMs": 9472,
+        "inputTokens": 2986,
+        "outputTokens": 1339,
+        "totalTokens": 4325,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 35,
+        "postId": "1737936975008400",
+        "responseId": "resp_06a5e7b6bf3ef21f006aca78d1c07087d283442d67323d6547",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 0,
+        "visibleOutputChars": 5284,
+        "parsedItemCount": 4,
+        "parseError": false,
+        "batchOffset": 0,
+        "batchItemCount": 4
+      }
+    ],
+    "noLiveWrites": true
+  },
+  {
+    "round": "stage2-specials-repair-downstream-repeat",
+    "row": 53,
+    "postId": "1128140023071506",
+    "stage3": [
+      {
+        "name": "Trivia Fridays with host KIRK MACKINNON",
+        "date": "2026-10-09",
+        "startTime": "19:00",
+        "endTime": "",
+        "sourceType": "event",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      },
+      {
+        "name": "Warren Grove Sour Smash",
+        "date": "2026-10-09",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "special",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      }
+    ],
+    "stage4": [
+      {
+        "name": "Trivia Fridays with host KIRK MACKINNON",
+        "date": "2026-10-09",
+        "startTime": "19:00",
+        "endTime": "",
+        "sourceType": "event",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      },
+      {
+        "name": "Warren Grove Sour Smash",
+        "date": "2026-10-09",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "special",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      }
+    ],
+    "formattedBeforeHours": [
+      {
+        "name": "Trivia Fridays with host KIRK MACKINNON",
+        "date": "2026-10-09",
+        "endDate": "",
+        "startTime": "19:00",
+        "endTime": "",
+        "category": "Trivia Night",
+        "isFoodSpecial": "No",
+        "isEvent": "Yes",
+        "sourceType": "event",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      },
+      {
+        "name": "Warren Grove Sour Smash",
+        "date": "2026-10-09",
+        "endDate": "",
+        "startTime": "",
+        "endTime": "",
+        "category": "Drink Special",
+        "isFoodSpecial": "Yes",
+        "isEvent": "No",
+        "sourceType": "special",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      }
+    ],
+    "final": [
+      {
+        "name": "Trivia Fridays with host KIRK MACKINNON",
+        "date": "2026-10-09",
+        "endDate": "2026-10-09",
+        "startTime": "19:00",
+        "endTime": "22:00",
+        "category": "Trivia Night",
+        "isFoodSpecial": "No",
+        "isEvent": "Yes",
+        "sourceType": "event",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      },
+      {
+        "name": "Warren Grove Sour Smash",
+        "date": "2026-10-09",
+        "endDate": "2026-10-09",
+        "startTime": "11:00",
+        "endTime": "23:00",
+        "category": "Drink Special",
+        "isFoodSpecial": "Yes",
+        "isEvent": "No",
+        "sourceType": "special",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      }
+    ],
+    "skips": [],
+    "usage": [
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 1,
+        "durationMs": 7354,
+        "inputTokens": 6218,
+        "outputTokens": 839,
+        "totalTokens": 7057,
+        "cachedInputTokens": 6215
+      },
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 1,
+        "durationMs": 12438,
+        "inputTokens": 5239,
+        "outputTokens": 1034,
+        "totalTokens": 6273,
+        "cachedInputTokens": 5236
+      },
+      {
+        "stage": "stage4",
+        "component": "secondaryValidator",
+        "endpoint": "responses",
+        "model": "gpt-5-nano",
+        "durationMs": 8256,
+        "inputTokens": 2535,
+        "outputTokens": 1330,
+        "totalTokens": 3865,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 53,
+        "postId": "1128140023071506",
+        "batchItemCount": 2,
+        "responseId": "resp_03cde351e50f12a3006aca78c1477887d29b242ae2597a6799",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 448,
+        "visibleOutputChars": 3435
+      },
+      {
+        "stage": "stage5",
+        "component": "finalFormatter",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "durationMs": 4808,
+        "inputTokens": 2513,
+        "outputTokens": 496,
+        "totalTokens": 3009,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 53,
+        "postId": "1128140023071506",
+        "responseId": "resp_0d41f76c9342019c006aca78c98dc887d2808f46bf6fc97bd9",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 0,
+        "visibleOutputChars": 2192,
+        "parsedItemCount": 2,
+        "parseError": false,
+        "batchOffset": 0,
+        "batchItemCount": 2
+      }
+    ],
+    "noLiveWrites": true
+  },
+  {
+    "round": "stage2-specials-repair-v2-downstream",
+    "row": 136,
+    "postId": "1695058012622304",
+    "stage3": [
+      {
+        "name": "Thanksgiving Surf & Turf Dinner",
+        "date": "2026-10-11",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "special",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      },
+      {
+        "name": "Thanksgiving Turkey Dinner Without Lobster",
+        "date": "2026-10-11",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "special",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      }
+    ],
+    "stage4": [
+      {
+        "name": "Thanksgiving Surf & Turf Dinner",
+        "date": "2026-10-11",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "special",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      },
+      {
+        "name": "Thanksgiving Turkey Dinner Without Lobster",
+        "date": "2026-10-11",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "special",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      }
+    ],
+    "formattedBeforeHours": [
+      {
+        "name": "Thanksgiving Surf & Turf Dinner",
+        "date": "2026-10-11",
+        "endDate": "2026-10-12",
+        "startTime": "",
+        "endTime": "",
+        "category": "Food Special",
+        "isFoodSpecial": "Yes",
+        "isEvent": "No",
+        "sourceType": "special",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      },
+      {
+        "name": "Thanksgiving Turkey Dinner Without Lobster",
+        "date": "2026-10-11",
+        "endDate": "2026-10-12",
+        "startTime": "",
+        "endTime": "",
+        "category": "Food Special",
+        "isFoodSpecial": "Yes",
+        "isEvent": "No",
+        "sourceType": "special",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      }
+    ],
+    "final": [],
+    "skips": [],
+    "usage": [
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 1,
+        "durationMs": 16665,
+        "inputTokens": 5333,
+        "outputTokens": 1558,
+        "totalTokens": 6891,
+        "cachedInputTokens": 0
+      },
+      {
+        "stage": "stage4",
+        "component": "secondaryValidator",
+        "endpoint": "responses",
+        "model": "gpt-5-nano",
+        "durationMs": 4887,
+        "inputTokens": 2339,
+        "outputTokens": 1069,
+        "totalTokens": 3408,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 136,
+        "postId": "1695058012622304",
+        "batchItemCount": 2,
+        "responseId": "resp_008c5bb78433fcd5006aca79b58e6087d29be6ad2a04290f34",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 384,
+        "visibleOutputChars": 2401
+      },
+      {
+        "stage": "stage5",
+        "component": "finalFormatter",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "durationMs": 5382,
+        "inputTokens": 2315,
+        "outputTokens": 589,
+        "totalTokens": 2904,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 136,
+        "postId": "1695058012622304",
+        "responseId": "resp_0320f0275c8bd777006aca79ba77f087d2a428ae181a44005f",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 0,
+        "visibleOutputChars": 2440,
+        "parsedItemCount": 2,
+        "parseError": false,
+        "batchOffset": 0,
+        "batchItemCount": 2
+      }
+    ],
+    "noLiveWrites": true
+  },
+  {
+    "round": "stage2-specials-repair-v2-downstream",
+    "row": 224,
+    "postId": "1756220149559131",
+    "stage3": [
+      {
+        "name": "Yoga",
+        "date": "2026-10-11",
+        "startTime": "unknown",
+        "endTime": "",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      },
+      {
+        "name": "Bootcamp",
+        "date": "2026-10-12",
+        "startTime": "09:00",
+        "endTime": "",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      }
+    ],
+    "stage4": [
+      {
+        "name": "Bootcamp",
+        "date": "2026-10-12",
+        "startTime": "09:00",
+        "endTime": "",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      }
+    ],
+    "formattedBeforeHours": [
+      {
+        "name": "Bootcamp",
+        "date": "2026-10-12",
+        "endDate": "2026-10-12",
+        "startTime": "09:00",
+        "endTime": "",
+        "category": "Workshops & Classes",
+        "isFoodSpecial": "No",
+        "isEvent": "Yes",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      }
+    ],
+    "final": [
+      {
+        "name": "Bootcamp",
+        "date": "2026-10-12",
+        "endDate": "2026-10-12",
+        "startTime": "09:00",
+        "endTime": "21:00",
+        "category": "Workshops & Classes",
+        "isFoodSpecial": "No",
+        "isEvent": "Yes",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      }
+    ],
+    "skips": [],
+    "usage": [
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 1,
+        "durationMs": 10091,
+        "inputTokens": 5450,
+        "outputTokens": 1086,
+        "totalTokens": 6536,
+        "cachedInputTokens": 0
+      },
+      {
+        "stage": "stage4",
+        "component": "secondaryValidator",
+        "endpoint": "responses",
+        "model": "gpt-5-nano",
+        "durationMs": 6212,
+        "inputTokens": 2568,
+        "outputTokens": 1287,
+        "totalTokens": 3855,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 224,
+        "postId": "1756220149559131",
+        "batchItemCount": 2,
+        "responseId": "resp_01b53dff7874b32b006aca79bc0c8087d28540af04d6372333",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 384,
+        "visibleOutputChars": 3604
+      },
+      {
+        "stage": "stage5",
+        "component": "finalFormatter",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "durationMs": 3168,
+        "inputTokens": 2232,
+        "outputTokens": 276,
+        "totalTokens": 2508,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 224,
+        "postId": "1756220149559131",
+        "responseId": "resp_0350878a536c4bfb006aca79c24fbc87d2900df0f85d785aa1",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 0,
+        "visibleOutputChars": 1178,
+        "parsedItemCount": 1,
+        "parseError": false,
+        "batchOffset": 0,
+        "batchItemCount": 1
+      }
+    ],
+    "noLiveWrites": true
+  },
+  {
+    "round": "stage2-specials-repair-v2-downstream",
+    "row": 291,
+    "postId": "1564603389034516",
+    "stage3": [
+      {
+        "name": "Beginner Step by Step Painting Classes – Adults, Evening",
+        "date": "2026-10-14",
+        "startTime": "18:00",
+        "endTime": "20:00",
+        "sourceType": "schedule",
+        "relevantImageIndex": 0,
+        "recurringPattern": "weekly_wednesday"
+      },
+      {
+        "name": "Beginner Step by Step Painting Classes – Adults, Morning",
+        "date": "2026-10-15",
+        "startTime": "10:00",
+        "endTime": "12:00",
+        "sourceType": "schedule",
+        "relevantImageIndex": 0,
+        "recurringPattern": "weekly_thursday"
+      },
+      {
+        "name": "Beginner Youth Step by Step Painting Classes",
+        "date": "2026-11-09",
+        "startTime": "16:30",
+        "endTime": "18:00",
+        "sourceType": "schedule",
+        "relevantImageIndex": 1,
+        "recurringPattern": "weekly_monday"
+      }
+    ],
+    "stage4": [
+      {
+        "name": "Beginner Step by Step Painting Classes – Adults, Evening",
+        "date": "2026-10-14",
+        "startTime": "18:00",
+        "endTime": "20:00",
+        "sourceType": "schedule",
+        "relevantImageIndex": 0,
+        "recurringPattern": "weekly_wednesday"
+      },
+      {
+        "name": "Beginner Step by Step Painting Classes – Adults, Morning",
+        "date": "2026-10-15",
+        "startTime": "10:00",
+        "endTime": "12:00",
+        "sourceType": "schedule",
+        "relevantImageIndex": 0,
+        "recurringPattern": "weekly_thursday"
+      },
+      {
+        "name": "Beginner Youth Step by Step Painting Classes",
+        "date": "2026-11-09",
+        "startTime": "16:30",
+        "endTime": "18:00",
+        "sourceType": "schedule",
+        "relevantImageIndex": 1,
+        "recurringPattern": "weekly_monday"
+      }
+    ],
+    "formattedBeforeHours": [
+      {
+        "name": "Beginner Step by Step Painting Classes – Adults, Evening",
+        "date": "2026-10-14",
+        "endDate": "2026-10-14",
+        "startTime": "18:00",
+        "endTime": "20:00",
+        "category": "Workshops & Classes",
+        "isFoodSpecial": "No",
+        "isEvent": "Yes",
+        "sourceType": "schedule",
+        "relevantImageIndex": 0,
+        "recurringPattern": "weekly_wednesday"
+      },
+      {
+        "name": "Beginner Step by Step Painting Classes – Adults, Morning",
+        "date": "2026-10-15",
+        "endDate": "2026-10-15",
+        "startTime": "10:00",
+        "endTime": "12:00",
+        "category": "Workshops & Classes",
+        "isFoodSpecial": "No",
+        "isEvent": "Yes",
+        "sourceType": "schedule",
+        "relevantImageIndex": 0,
+        "recurringPattern": "weekly_thursday"
+      },
+      {
+        "name": "Beginner Youth Step by Step Painting Classes",
+        "date": "2026-11-09",
+        "endDate": "2026-11-09",
+        "startTime": "16:30",
+        "endTime": "18:00",
+        "category": "Workshops & Classes",
+        "isFoodSpecial": "No",
+        "isEvent": "Yes",
+        "sourceType": "schedule",
+        "relevantImageIndex": 1,
+        "recurringPattern": "weekly_monday"
+      }
+    ],
+    "final": [
+      {
+        "name": "Beginner Step by Step Painting Classes – Adults, Evening",
+        "date": "2026-10-14",
+        "endDate": "2026-10-14",
+        "startTime": "18:00",
+        "endTime": "20:00",
+        "category": "Workshops & Classes",
+        "isFoodSpecial": "No",
+        "isEvent": "Yes",
+        "sourceType": "schedule",
+        "relevantImageIndex": 0,
+        "recurringPattern": "weekly_wednesday"
+      },
+      {
+        "name": "Beginner Step by Step Painting Classes – Adults, Morning",
+        "date": "2026-10-15",
+        "endDate": "2026-10-15",
+        "startTime": "10:00",
+        "endTime": "12:00",
+        "category": "Workshops & Classes",
+        "isFoodSpecial": "No",
+        "isEvent": "Yes",
+        "sourceType": "schedule",
+        "relevantImageIndex": 0,
+        "recurringPattern": "weekly_thursday"
+      },
+      {
+        "name": "Beginner Youth Step by Step Painting Classes",
+        "date": "2026-11-09",
+        "endDate": "2026-11-09",
+        "startTime": "16:30",
+        "endTime": "18:00",
+        "category": "Workshops & Classes",
+        "isFoodSpecial": "No",
+        "isEvent": "Yes",
+        "sourceType": "schedule",
+        "relevantImageIndex": 1,
+        "recurringPattern": "weekly_monday"
+      }
+    ],
+    "skips": [],
+    "usage": [
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 2,
+        "durationMs": 14466,
+        "inputTokens": 7663,
+        "outputTokens": 1894,
+        "totalTokens": 9557,
+        "cachedInputTokens": 0
+      },
+      {
+        "stage": "stage4",
+        "component": "secondaryValidator",
+        "endpoint": "responses",
+        "model": "gpt-5-nano",
+        "durationMs": 7022,
+        "inputTokens": 2862,
+        "outputTokens": 1493,
+        "totalTokens": 4355,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 291,
+        "postId": "1564603389034516",
+        "batchItemCount": 3,
+        "responseId": "resp_07447f33439c6bec006aca79ce795c87d28974fa8a9b8cd291",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 256,
+        "visibleOutputChars": 4952
+      },
+      {
+        "stage": "stage5",
+        "component": "finalFormatter",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "durationMs": 7693,
+        "inputTokens": 2847,
+        "outputTokens": 1003,
+        "totalTokens": 3850,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 291,
+        "postId": "1564603389034516",
+        "responseId": "resp_0f5dcae40f6d04d3006aca79d5622487d2b76a838efd4ee60a",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 0,
+        "visibleOutputChars": 4472,
+        "parsedItemCount": 3,
+        "parseError": false,
+        "batchOffset": 0,
+        "batchItemCount": 3
+      }
+    ],
+    "noLiveWrites": true
+  },
+  {
+    "round": "stage2-specials-repair-v2-downstream",
+    "row": 35,
+    "postId": "1737936975008400",
+    "stage3": [
+      {
+        "name": "Kelley Mooney Music",
+        "date": "2026-10-09",
+        "startTime": "20:00",
+        "endTime": "23:00",
+        "sourceType": "event",
+        "relevantImageIndex": 1,
+        "recurringPattern": "none"
+      },
+      {
+        "name": "Marc Coughlin",
+        "date": "2026-10-10",
+        "startTime": "20:00",
+        "endTime": "23:00",
+        "sourceType": "event",
+        "relevantImageIndex": 2,
+        "recurringPattern": "none"
+      },
+      {
+        "name": "Irish Music Session",
+        "date": "2026-10-11",
+        "startTime": "14:00",
+        "endTime": "16:00",
+        "sourceType": "event",
+        "relevantImageIndex": 3,
+        "recurringPattern": "none"
+      },
+      {
+        "name": "Two course Turkey Dinner",
+        "date": "2026-10-11",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "special",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      }
+    ],
+    "stage4": [
+      {
+        "name": "Kelley Mooney Music",
+        "date": "2026-10-09",
+        "startTime": "20:00",
+        "endTime": "23:00",
+        "sourceType": "event",
+        "relevantImageIndex": 1,
+        "recurringPattern": "none"
+      },
+      {
+        "name": "Marc Coughlin",
+        "date": "2026-10-10",
+        "startTime": "20:00",
+        "endTime": "23:00",
+        "sourceType": "event",
+        "relevantImageIndex": 2,
+        "recurringPattern": "none"
+      },
+      {
+        "name": "Irish Music Session",
+        "date": "2026-10-11",
+        "startTime": "14:00",
+        "endTime": "16:00",
+        "sourceType": "event",
+        "relevantImageIndex": 3,
+        "recurringPattern": "none"
+      },
+      {
+        "name": "Two course Turkey Dinner",
+        "date": "2026-10-11",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "special",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      }
+    ],
+    "formattedBeforeHours": [
+      {
+        "name": "Kelley Mooney Music",
+        "date": "2026-10-09",
+        "endDate": "2026-10-09",
+        "startTime": "20:00",
+        "endTime": "23:00",
+        "category": "Live Music",
+        "isFoodSpecial": "No",
+        "isEvent": "Yes",
+        "sourceType": "event",
+        "relevantImageIndex": 1,
+        "recurringPattern": "none"
+      },
+      {
+        "name": "Marc Coughlin",
+        "date": "2026-10-10",
+        "endDate": "2026-10-10",
+        "startTime": "20:00",
+        "endTime": "23:00",
+        "category": "Live Music",
+        "isFoodSpecial": "No",
+        "isEvent": "Yes",
+        "sourceType": "event",
+        "relevantImageIndex": 2,
+        "recurringPattern": "none"
+      },
+      {
+        "name": "Irish Music Session",
+        "date": "2026-10-11",
+        "endDate": "2026-10-11",
+        "startTime": "14:00",
+        "endTime": "16:00",
+        "category": "Live Music",
+        "isFoodSpecial": "No",
+        "isEvent": "Yes",
+        "sourceType": "event",
+        "relevantImageIndex": 3,
+        "recurringPattern": "none"
+      },
+      {
+        "name": "Two course Turkey Dinner",
+        "date": "2026-10-11",
+        "endDate": "2026-10-11",
+        "startTime": "",
+        "endTime": "",
+        "category": "Food Special",
+        "isFoodSpecial": "Yes",
+        "isEvent": "No",
+        "sourceType": "special",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      }
+    ],
+    "final": [
+      {
+        "name": "Kelley Mooney Music",
+        "date": "2026-10-09",
+        "endDate": "2026-10-09",
+        "startTime": "20:00",
+        "endTime": "23:00",
+        "category": "Live Music",
+        "isFoodSpecial": "No",
+        "isEvent": "Yes",
+        "sourceType": "event",
+        "relevantImageIndex": 1,
+        "recurringPattern": "none"
+      },
+      {
+        "name": "Marc Coughlin",
+        "date": "2026-10-10",
+        "endDate": "2026-10-10",
+        "startTime": "20:00",
+        "endTime": "23:00",
+        "category": "Live Music",
+        "isFoodSpecial": "No",
+        "isEvent": "Yes",
+        "sourceType": "event",
+        "relevantImageIndex": 2,
+        "recurringPattern": "none"
+      },
+      {
+        "name": "Irish Music Session",
+        "date": "2026-10-11",
+        "endDate": "2026-10-11",
+        "startTime": "14:00",
+        "endTime": "16:00",
+        "category": "Live Music",
+        "isFoodSpecial": "No",
+        "isEvent": "Yes",
+        "sourceType": "event",
+        "relevantImageIndex": 3,
+        "recurringPattern": "none"
+      },
+      {
+        "name": "Two course Turkey Dinner",
+        "date": "2026-10-11",
+        "endDate": "2026-10-11",
+        "startTime": "11:00",
+        "endTime": "21:00",
+        "category": "Food Special",
+        "isFoodSpecial": "Yes",
+        "isEvent": "No",
+        "sourceType": "special",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      }
+    ],
+    "skips": [],
+    "usage": [
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 4,
+        "durationMs": 15475,
+        "inputTokens": 17011,
+        "outputTokens": 1439,
+        "totalTokens": 18450,
+        "cachedInputTokens": 17008
+      },
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 4,
+        "durationMs": 10879,
+        "inputTokens": 16032,
+        "outputTokens": 968,
+        "totalTokens": 17000,
+        "cachedInputTokens": 16029
+      },
+      {
+        "stage": "stage4",
+        "component": "secondaryValidator",
+        "endpoint": "responses",
+        "model": "gpt-5-nano",
+        "durationMs": 13068,
+        "inputTokens": 2993,
+        "outputTokens": 2159,
+        "totalTokens": 5152,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 35,
+        "postId": "1737936975008400",
+        "batchItemCount": 4,
+        "responseId": "resp_07a4bc2e5f31df17006aca79ab56ec87d2a97c641777e3f02a",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 704,
+        "visibleOutputChars": 5662
+      },
+      {
+        "stage": "stage5",
+        "component": "finalFormatter",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "durationMs": 8527,
+        "inputTokens": 2990,
+        "outputTokens": 994,
+        "totalTokens": 3984,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 35,
+        "postId": "1737936975008400",
+        "responseId": "resp_0e1bd25449036060006aca79b86e8887d29335b94b77ff33f8",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 0,
+        "visibleOutputChars": 4284,
+        "parsedItemCount": 4,
+        "parseError": false,
+        "batchOffset": 0,
+        "batchItemCount": 4
+      }
+    ],
+    "noLiveWrites": true
+  },
+  {
+    "round": "stage2-specials-repair-v2-downstream",
+    "row": 53,
+    "postId": "1128140023071506",
+    "stage3": [
+      {
+        "name": "Trivia Fridays with Host Kirk Mackinnon",
+        "date": "2026-10-09",
+        "startTime": "19:00",
+        "endTime": "",
+        "sourceType": "event",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      },
+      {
+        "name": "Warren Grove Sour Smash",
+        "date": "2026-10-09",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "special",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      }
+    ],
+    "stage4": [
+      {
+        "name": "Trivia Fridays with Host Kirk Mackinnon",
+        "date": "2026-10-09",
+        "startTime": "19:00",
+        "endTime": "",
+        "sourceType": "event",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      },
+      {
+        "name": "Warren Grove Sour Smash",
+        "date": "2026-10-09",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "special",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      }
+    ],
+    "formattedBeforeHours": [
+      {
+        "name": "Trivia Fridays with Host Kirk Mackinnon",
+        "date": "2026-10-09",
+        "endDate": "2026-10-09",
+        "startTime": "19:00",
+        "endTime": "",
+        "category": "Trivia Night",
+        "isFoodSpecial": "No",
+        "isEvent": "Yes",
+        "sourceType": "event",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      },
+      {
+        "name": "Warren Grove Sour Smash",
+        "date": "2026-10-09",
+        "endDate": "",
+        "startTime": "",
+        "endTime": "",
+        "category": "Drink Special",
+        "isFoodSpecial": "Yes",
+        "isEvent": "No",
+        "sourceType": "special",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      }
+    ],
+    "final": [
+      {
+        "name": "Trivia Fridays with Host Kirk Mackinnon",
+        "date": "2026-10-09",
+        "endDate": "2026-10-09",
+        "startTime": "19:00",
+        "endTime": "22:00",
+        "category": "Trivia Night",
+        "isFoodSpecial": "No",
+        "isEvent": "Yes",
+        "sourceType": "event",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      },
+      {
+        "name": "Warren Grove Sour Smash",
+        "date": "2026-10-09",
+        "endDate": "2026-10-09",
+        "startTime": "11:00",
+        "endTime": "23:00",
+        "category": "Drink Special",
+        "isFoodSpecial": "Yes",
+        "isEvent": "No",
+        "sourceType": "special",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      }
+    ],
+    "skips": [],
+    "usage": [
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 1,
+        "durationMs": 9824,
+        "inputTokens": 6218,
+        "outputTokens": 1070,
+        "totalTokens": 7288,
+        "cachedInputTokens": 6215
+      },
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 1,
+        "durationMs": 10991,
+        "inputTokens": 5239,
+        "outputTokens": 937,
+        "totalTokens": 6176,
+        "cachedInputTokens": 5236
+      },
+      {
+        "stage": "stage4",
+        "component": "secondaryValidator",
+        "endpoint": "responses",
+        "model": "gpt-5-nano",
+        "durationMs": 7087,
+        "inputTokens": 2515,
+        "outputTokens": 1263,
+        "totalTokens": 3778,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 53,
+        "postId": "1128140023071506",
+        "batchItemCount": 2,
+        "responseId": "resp_0f6c09d410a5e065006aca79a59ff087d2b58174012e51693b",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 448,
+        "visibleOutputChars": 3386
+      },
+      {
+        "stage": "stage5",
+        "component": "finalFormatter",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "durationMs": 5213,
+        "inputTokens": 2494,
+        "outputTokens": 529,
+        "totalTokens": 3023,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 53,
+        "postId": "1128140023071506",
+        "responseId": "resp_0896a374640e5efa006aca79acb10887d2a15948b0e8322779",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 0,
+        "visibleOutputChars": 2431,
+        "parsedItemCount": 2,
+        "parseError": false,
+        "batchOffset": 0,
+        "batchItemCount": 2
+      }
+    ],
+    "noLiveWrites": true
+  },
+  {
+    "round": "stage2-specials-repair-v2-downstream",
+    "row": 97,
+    "postId": "1412776634375461",
+    "stage3": [
+      {
+        "name": "Jonny Ray & Louise Arsenault — Three-Course Italian Dinner",
+        "date": "2026-11-14",
+        "startTime": "18:00",
+        "endTime": "21:00",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      }
+    ],
+    "stage4": [
+      {
+        "name": "Jonny Ray & Louise Arsenault — Three-Course Italian Dinner",
+        "date": "2026-11-14",
+        "startTime": "18:00",
+        "endTime": "21:00",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      }
+    ],
+    "formattedBeforeHours": [
+      {
+        "name": "Jonny Ray & Louise Arsenault — Three-Course Italian Dinner",
+        "date": "2026-11-14",
+        "endDate": "2026-11-14",
+        "startTime": "18:00",
+        "endTime": "21:00",
+        "category": "Live Music",
+        "isFoodSpecial": "No",
+        "isEvent": "Yes",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      }
+    ],
+    "final": [
+      {
+        "name": "Jonny Ray & Louise Arsenault — Three-Course Italian Dinner",
+        "date": "2026-11-14",
+        "endDate": "2026-11-14",
+        "startTime": "18:00",
+        "endTime": "21:00",
+        "category": "Live Music",
+        "isFoodSpecial": "No",
+        "isEvent": "Yes",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none"
+      }
+    ],
+    "skips": [],
+    "usage": [
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 1,
+        "durationMs": 11543,
+        "inputTokens": 8068,
+        "outputTokens": 1112,
+        "totalTokens": 9180,
+        "cachedInputTokens": 0
+      },
+      {
+        "stage": "stage4",
+        "component": "secondaryValidator",
+        "endpoint": "responses",
+        "model": "gpt-5-nano",
+        "durationMs": 4227,
+        "inputTokens": 2335,
+        "outputTokens": 862,
+        "totalTokens": 3197,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 97,
+        "postId": "1412776634375461",
+        "batchItemCount": 1,
+        "responseId": "resp_092580738772e46a006aca799c921c87d2ac9e0badd79e346e",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 256,
+        "visibleOutputChars": 2324
+      },
+      {
+        "stage": "stage5",
+        "component": "finalFormatter",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "durationMs": 3997,
+        "inputTokens": 2299,
+        "outputTokens": 388,
+        "totalTokens": 2687,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 97,
+        "postId": "1412776634375461",
+        "responseId": "resp_07dd20aebaf7c658006aca79a0d16c87d2a8c837921724b032",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 0,
+        "visibleOutputChars": 1617,
+        "parsedItemCount": 1,
+        "parseError": false,
+        "batchOffset": 0,
+        "batchItemCount": 1
+      }
+    ],
+    "noLiveWrites": true
+  }
+]

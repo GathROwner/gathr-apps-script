@@ -210,10 +210,13 @@ CLASSIFICATION CATEGORIES:
 2. FOOD_SPECIAL - Advertised food/drink specials or deals only
    Examples: "Happy hour 5-7pm half price apps", "$0.50 wings tonight", "Today's lunch special"
    A named daily special or explicit deal qualifies without a printed price. An ordinary month-long featured menu item does not.
+   A specifically advertised dated meal (for example, a turkey dinner served this Sunday) or a named daily/evening food or cocktail feature also qualifies at its advertised regular price. A discount, the literal word "special", and a printed serving start are not required here. Do not confuse these limited serving offers with ordinary menus, stock arrivals, or undated product teasers.
+   This applies to a food/drink offer available separately from an activity. A ticketed dinner-and-show package, workshop refreshments, or a tasting with one admission is one EVENT; included food is not an additional FOOD_SPECIAL. Do not split one ticket into an event and a duplicate meal listing.
    Food/drink context is required: Main Street, a special gift/guest, retail discounts, admission fees, service prices, and lodging offers are not food specials. Ordinary stock arrivals are not deals.
 
 3. MIXED_EVENTS_AND_SPECIALS - Both events AND specials together
    Examples: "Live music 8pm plus happy hour 5-7pm"
+   Check food/drink offers independently of entertainment. A short music lineup plus a dated turkey dinner, or trivia plus tonight's featured cocktail, belongs here; retain both presence flags and count both kinds of item. Do not choose EVENT or SCHEDULE just because entertainment is the most prominent part.
 
 4. CALENDAR - Date-organized content with many events
    Examples: Monthly calendars, weekly schedules by date
@@ -469,7 +472,12 @@ function normalizeClassificationResponse(
     contentAnalysis.hasFoodSpecials = true;
   }
 
-  if (contentType === 'EVENT' && contentAnalysis.hasFoodSpecials) {
+  // A small performance lineup must not hide its concurrent meal/drink offer
+  // behind the schedule-only extractor. Keep dense calendar/schedule routes.
+  const estimatedItemCount = Number(response.estimatedItemCount ?? fallback.estimatedItemCount);
+  const smallSchedule = contentType === 'SCHEDULE' &&
+    estimatedItemCount > 0 && estimatedItemCount <= 5;
+  if ((contentType === 'EVENT' || smallSchedule) && contentAnalysis.hasFoodSpecials) {
     contentType = contentAnalysis.hasEvents ? 'MIXED_EVENTS_AND_SPECIALS' : 'FOOD_SPECIAL';
     // Model flags alone must not promote a low-confidence unrelated offer.
     if (foodSignals.hasAny) confidence = Math.max(confidence, 0.78);

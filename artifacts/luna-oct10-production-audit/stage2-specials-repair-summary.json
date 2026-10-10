@@ -1,0 +1,248 @@
+{
+  "evaluations": 90,
+  "rows": 86,
+  "uniquePosts": 85,
+  "calls": 98,
+  "incomplete": 0,
+  "fallbacks": 0,
+  "errors": [],
+  "holds": [
+    195
+  ],
+  "gateChanges": [],
+  "changes": [
+    {
+      "row": 35,
+      "postId": "1737936975008400",
+      "before": "SCHEDULE",
+      "after": "MIXED_EVENTS_AND_SPECIALS",
+      "foodBefore": false,
+      "foodAfter": true,
+      "reason": "The post lists three public music activities: Kelley Mooney on Friday, Marc Coughlin on Saturday, and an Irish music session on Sunday. It also advertises a specifically dated Sunday turkey dinner for $24.95 plus tax, so both events and a food offer are present."
+    },
+    {
+      "row": 53,
+      "postId": "1128140023071506",
+      "before": "EVENT",
+      "after": "MIXED_EVENTS_AND_SPECIALS",
+      "foodBefore": false,
+      "foodAfter": true,
+      "reason": "The post invites guests to book a table for trivia this evening, and the image specifies Trivia Fridays with host Kirk Mackinnon starting at 7 PM. It also advertises the Deep Roots Distillery featured trivia cocktail, “Warren Grove Sour Smash,” as a separate drink feature. These are one activity and one cocktail special, so the content is mixed."
+    },
+    {
+      "row": 136,
+      "postId": "1695058012622304",
+      "before": "MIXED_EVENTS_AND_SPECIALS",
+      "after": "FOOD_SPECIAL",
+      "foodBefore": true,
+      "foodAfter": true,
+      "reason": "The post advertises a Thanksgiving dinner served October 11 and 12, with surf-and-turf and turkey-only options at stated prices. This is a dated meal offer, so it qualifies as a food special. The giveaway is a promotion to win the same meal, not a separate public activity; there are no events listed."
+    },
+    {
+      "row": 291,
+      "postId": "1564603389034516",
+      "before": "EVENT",
+      "after": "SCHEDULE",
+      "foodBefore": false,
+      "foodAfter": false,
+      "reason": "The post advertises several bookable beginner painting classes: adult morning and evening sessions, plus a youth session. The image gives date ranges and recurring weekdays and times, so the activities are organized as a schedule. Weekly painting subjects are lesson topics within the classes, not separate events. No food or drink offers are advertised."
+    }
+  ],
+  "modelMs": 335442,
+  "costUsd": 0.08452870999999998,
+  "reviews": 8,
+  "controls": [
+    {
+      "caseId": "control-menu",
+      "caption": "October featured menu: $15 burgers all month. Our usual menu price.",
+      "expected": {
+        "hasEvents": false,
+        "hasFoodSpecials": false
+      },
+      "classification": {
+        "contentAnalysis": {
+          "hasEvents": false,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": false,
+          "organizationStyle": "unstructured"
+        },
+        "contentType": "EVENT",
+        "confidence": 0,
+        "classificationReason": "The post advertises a month-long featured burger menu at the usual price. An ordinary month-long menu feature is not a food special under the criteria, and no public or bookable activity is advertised. None of the categories fits well, so EVENT is used as a low-confidence fallback. | Safeguard: no activities or food/drink specials identified.",
+        "estimatedItemCount": 0
+      },
+      "passesConfidenceGate": false
+    },
+    {
+      "caseId": "control-restock",
+      "caption": "Soup restocked today, $8 per tub. Ready to take home.",
+      "expected": {
+        "hasEvents": false,
+        "hasFoodSpecials": false
+      },
+      "classification": {
+        "contentAnalysis": {
+          "hasEvents": false,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": false,
+          "organizationStyle": "unstructured"
+        },
+        "contentType": "FOOD_SPECIAL",
+        "confidence": 0,
+        "classificationReason": "The post announces soup restocked at $8 per tub, but an ordinary stock arrival is not a food special or deal, and no activity is advertised. FOOD_SPECIAL is the closest available category, though neither presence flag is true. | Safeguard: no activities or food/drink specials identified.",
+        "estimatedItemCount": 0
+      },
+      "passesConfidenceGate": false
+    },
+    {
+      "caseId": "control-monthly-cocktail",
+      "caption": "October featured menu: our cocktail feature all month is the Orchard Sour, regular price $12.",
+      "expected": {
+        "hasEvents": false,
+        "hasFoodSpecials": false
+      },
+      "classification": {
+        "contentAnalysis": {
+          "hasEvents": false,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": false,
+          "organizationStyle": "unstructured"
+        },
+        "contentType": "FOOD_SPECIAL",
+        "confidence": 0,
+        "classificationReason": "The post advertises one cocktail as a month-long featured menu item at its regular price. It is not an activity, and an ordinary month-long featured menu item does not qualify as a food or drink special under the criteria. Since the available categories have no option for neither, FOOD_SPECIAL is the closest fit, with low confidence; no qualifying items are counted. | Safeguard: no activities or food/drink specials identified.",
+        "estimatedItemCount": 0
+      },
+      "passesConfidenceGate": false
+    },
+    {
+      "caseId": "control-ordinary-menu-with-music",
+      "caption": "Live music tonight at 8 PM. Our regular menu includes turkey dinner.",
+      "expected": {
+        "hasEvents": true,
+        "hasFoodSpecials": false
+      },
+      "classification": {
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": false,
+          "organizationStyle": "unstructured"
+        },
+        "contentType": "EVENT",
+        "confidence": 0.98,
+        "classificationReason": "The post advertises one public activity: live music tonight at 8 PM. Turkey dinner is mentioned only as part of the regular menu, not as a dated meal offer or special.",
+        "estimatedItemCount": 1
+      },
+      "passesConfidenceGate": true
+    },
+    {
+      "caseId": "control-cocktail-workshop",
+      "caption": "Cocktail workshop this evening at 7 PM. Learn mixology; book a seat for $25.",
+      "expected": {
+        "hasEvents": true,
+        "hasFoodSpecials": false
+      },
+      "classification": {
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": false,
+          "organizationStyle": "Unstructured; one workshop is advertised for this evening at 7 PM."
+        },
+        "contentType": "EVENT",
+        "confidence": 0.99,
+        "classificationReason": "The post advertises one bookable cocktail mixology workshop this evening at 7 PM, with a $25 seat price. The price is for the activity, not a separate food or drink special.",
+        "estimatedItemCount": 1
+      },
+      "passesConfidenceGate": true
+    },
+    {
+      "caseId": "control-special-guest",
+      "caption": "Special guest performing tonight at 8 PM. Dinner with a special guest.",
+      "expected": {
+        "hasEvents": true,
+        "hasFoodSpecials": false
+      },
+      "classification": {
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": false,
+          "organizationStyle": "unstructured"
+        },
+        "contentType": "EVENT",
+        "confidence": 0.94,
+        "classificationReason": "The text advertises a special guest performing tonight at 8 PM, which is one public entertainment activity. “Dinner with a special guest” describes the same guest appearance, not a separately advertised food or drink offer.",
+        "estimatedItemCount": 1
+      },
+      "passesConfidenceGate": true
+    },
+    {
+      "caseId": "control-public-tour",
+      "caption": "Studio tours Saturday and Sunday 10-5. Find a special gift.",
+      "expected": {
+        "hasEvents": true,
+        "hasFoodSpecials": false
+      },
+      "classification": {
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": false,
+          "organizationStyle": "date/time-organized"
+        },
+        "contentType": "EVENT",
+        "confidence": 0.98,
+        "classificationReason": "The venue advertises studio tours on Saturday and Sunday from 10–5, which qualifies as a public activity. “Find a special gift” is a generic shopping prompt, not a food or drink special. The two days describe the tour's availability, not separate activities.",
+        "estimatedItemCount": 1
+      },
+      "passesConfidenceGate": true
+    },
+    {
+      "caseId": "control-dated-unpriced-meal",
+      "caption": "Music tonight at 8 PM. Roast turkey dinner served this Sunday while quantities last; call to reserve.",
+      "expected": {
+        "hasEvents": true,
+        "hasFoodSpecials": true
+      },
+      "classification": {
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": true,
+          "hasMultipleItems": true,
+          "organizationStyle": "Unstructured, with one event tonight and one dated food offer this Sunday"
+        },
+        "contentType": "MIXED_EVENTS_AND_SPECIALS",
+        "confidence": 0.99,
+        "classificationReason": "The post advertises live music tonight at 8 PM, a public entertainment activity, and a separately available roast turkey dinner served this Sunday while quantities last. The dated meal offer qualifies as a food special. These are two distinct items.",
+        "estimatedItemCount": 2
+      },
+      "passesConfidenceGate": true
+    },
+    {
+      "caseId": "control-bundled-dinner-show",
+      "caption": "Italian Dinner and Live Music, Saturday November 14, 6-9 PM. One $40 ticket includes three-course dinner and music by Jonny Ray and Louise Arsenault. Get your tickets.",
+      "expected": {
+        "hasEvents": true,
+        "hasFoodSpecials": false
+      },
+      "classification": {
+        "contentAnalysis": {
+          "hasEvents": true,
+          "hasFoodSpecials": false,
+          "hasMultipleItems": false,
+          "organizationStyle": "By date and time"
+        },
+        "contentType": "EVENT",
+        "confidence": 0.99,
+        "classificationReason": "This advertises one ticketed Italian dinner-and-live-music event on Saturday, November 14, from 6–9 PM. The three-course dinner is included in the event ticket, so it is not a separate food special.",
+        "estimatedItemCount": 1
+      },
+      "passesConfidenceGate": true
+    }
+  ],
+  "downstreamRuns": 16,
+  "rawEvidenceDirectory": "C:/Users/craig/.codex/luna-oct10-audit/",
+  "noLiveEventWrites": true
+}

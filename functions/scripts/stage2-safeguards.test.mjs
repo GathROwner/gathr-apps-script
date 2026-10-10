@@ -16,6 +16,11 @@ for (const caption of [
   'Burgers $15, our usual menu price.',
   'October featured menu: $15 burgers all month.',
   'Dinner with a special guest.',
+  'Music Sunday. Our ordinary menu includes turkey dinner.',
+  'Turkey dinner served Sunday from our regular menu.',
+  'Cocktail feature all month on our October featured menu.',
+  'Tonight: cocktail workshop and competition.',
+  'Italian dinner served Sunday, one ticket includes dinner and live music.',
   'Coffee and a special gift for visitors.',
   'Clothing clearance 50% off.',
 ]) {
@@ -35,6 +40,9 @@ for (const caption of [
   'Live music at 8; cocktails half price.',
   'Special guest performing at 8. Dinner special tonight.',
   'Coffee in the morning, burgers half price tonight.',
+  'Two course Turkey Dinner served on Sunday Oct 11th while quantities last.',
+  'Turkey dinner served this Sunday at regular price.',
+  'The feature Trivia cocktail this evening is Warren Grove Sour Smash.',
 ]) {
   test('retains advertised food/drink offers: ' + caption, () => {
     assert.equal(detectStage2FoodSpecialSignals(caption).hasAny, true);
@@ -87,6 +95,23 @@ test('unpriced special is preserved and mixed event remains extractable', async 
 test('image-derived food flag survives without caption food cues', async () => {
   const result = await run('See the poster', base({ contentAnalysis: { ...base().contentAnalysis, hasFoodSpecials: true } }));
   assert.equal(result.contentType, 'MIXED_EVENTS_AND_SPECIALS');
+});
+test('short music schedule retains its separately advertised dated meal', async () => {
+  const result = await run('Fri: music 8-11. Sat: band 8-11. Two course Turkey Dinner served on Sunday Oct 11th.',
+    base({contentType:'SCHEDULE', estimatedItemCount:3}));
+  assert.equal(result.contentType, 'MIXED_EVENTS_AND_SPECIALS');
+  assert.equal(result.contentAnalysis.hasFoodSpecials, true);
+});
+test('evening cocktail feature survives alongside trivia without a discount', async () => {
+  const result = await run('Trivia this evening! The feature Trivia cocktail this evening is Warren Grove Sour Smash.');
+  assert.equal(result.contentType, 'MIXED_EVENTS_AND_SPECIALS');
+  assert.equal(result.contentAnalysis.hasFoodSpecials, true);
+});
+test('dense calendar and schedule routes retain their full inventory route', async () => {
+  for (const contentType of ['CALENDAR','SCHEDULE']) {
+    const result = await run('Dinner special tonight.', base({contentType, estimatedItemCount:20}));
+    assert.equal(result.contentType, contentType);
+  }
 });
 test('unrelated low-confidence model food flag is not boosted above gate', async () => {
   const result = await run('Room rate $250', base({ confidence: .3, contentAnalysis: { ...base().contentAnalysis, hasEvents: false, hasFoodSpecials: true } }));

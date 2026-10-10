@@ -7,7 +7,7 @@ import {
   applyRecurrenceNormalizationForRegression,
   filterRetailMerchandisePromotions,
 } from './finalFormatter.js';
-import { CalendarItem, FormattedEvent } from './types.js';
+import { CalendarItem, ExtractedSpecial, FormattedEvent } from './types.js';
 
 function formatted(overrides: Partial<FormattedEvent> = {}): FormattedEvent {
   return {
@@ -46,6 +46,26 @@ function extracted(overrides: Partial<CalendarItem> = {}): CalendarItem {
     ...overrides,
   };
 }
+
+test('validated cocktail stays a drink special when its description mentions trivia', () => {
+  const result = applyCategoryCorrectionsForRegression(formatted({
+    name: 'Warren Grove Sour Smash', category: 'Trivia Night',
+    description: 'Featured trivia cocktail this evening.',
+  }), {name:'Warren Grove Sour Smash', _sourceType:'special',
+    description:'The featured cocktail for this evening’s trivia.'} as ExtractedSpecial);
+  assert.equal(result.category, 'Drink Special');
+  assert.equal(result.isFoodSpecial, 'Yes');
+  assert.equal(result.isEvent, 'No');
+});
+
+test('cocktail context does not convert trivia, workshops or competitions into drink specials', () => {
+  for (const [name, category] of [['Trivia Night','Trivia Night'],['Cocktail Workshop','Workshops & Classes'],['Cocktail Competition','Gatherings & Parties']] as const) {
+    const result = applyCategoryCorrectionsForRegression(formatted({name, category,
+      description:'Enjoy the featured cocktail at this evening’s activity.'}),
+      extracted({name, description:'Cocktail activity this evening.'}));
+    assert.equal(result.category, category);
+  }
+});
 
 test('Beer Garden venue wording does not turn a named performer into a food special', () => {
   for (const name of ['Adam & The Foes', 'Jon & Liam', 'Kim Albert Trio']) {

@@ -199,3 +199,11 @@ starts but gets different inferred ends. Albert & Crown row 98 shows different
 recent-past evidence holds and Wee Point row 341 shows Nano Stage 4 variation.
 Do not count these as proved Stage 2 rejection regressions or source-backed
 end times. No live event records were changed by this evaluation.
+
+The follow-up repair and full 90-evaluation regression are recorded in
+`docs/luna-stage2-oct10-specials-repair.md`. Old Triangle's dated dinner and
+Local Pub's evening cocktail now survive repeated downstream checks with
+correct special identities. Included food in a ticketed dinner concert remains
+one event. No new whole-post rejection appears; ordinary menu/restock controls
+remain excluded. This repair keeps Stage 2 at 50% and preserves Stage 5 at 100%.
+Live record corrections and any Stage 2 percentage increase remain separate.
