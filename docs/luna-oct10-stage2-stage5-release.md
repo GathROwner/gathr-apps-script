@@ -52,3 +52,39 @@ calls, negative reviews, holds, counts, fields, final writes and cost before
 any expansion. Keep the October 11 audit schedule; do not re-audit October 10.
 
 Deployment readback will be appended after the three functions finish updating.
+
+## Verified production release
+
+Parser commit: `49892e6` on `codex/luna-parser-live-merge`.
+Deployment completed October 10 after the completed regular parse. Fresh
+preflight at 15:20 UTC found no active processing locks, no checkpoint, and
+matching completed lock, processed marker and final batch state.
+
+Both narrow dry run and real deployment succeeded for exactly the three
+parser functions in `gathr-migrated` / `gathr-functions`. The first dry run's
+local 10-second discovery timeout was resolved by setting only the CLI's
+`FUNCTIONS_DISCOVERY_TIMEOUT=60`; production runtime limits were not changed.
+Firebase reports the existing outdated firebase-functions SDK warning; SDK
+upgrades remain deferred as agreed.
+
+Live readback independently confirms all three functions ACTIVE, latest
+revision traffic enabled, and common source hash:
+`82460dd101d04389e3588f4faeccb9f48466c2c4`.
+
+| Function | Serving revision |
+|---|---|
+| processDataset | processdataset-00462-mos |
+| processDatasetResume | processdatasetresume-00426-ler |
+| processDatasetSelectedRows | processdatasetselectedrows-00418-cuy |
+
+All three readbacks confirm Stage 1/3 at 100%, Stage 2/5 pilots at 50%,
+text-only enabled, no exclusions, legacy fallback false, and unchanged
+Stage 4 Nano low. Static Stage 5 Nano medium remains the unselected default;
+selected calls explicitly override the model and effort to Luna none.
+Sanitized readback: `artifacts/luna-oct10-production-audit/release-readback.json`.
+
+The existing audit heartbeat now runs only October 11, starting at 11 a.m.
+Halifax. It excludes the completed October 10 audit and must pause after
+October 11's audit/decision (or report the outstanding work and pause at
+that day's final check). Live event corrections have not been applied by
+this deployment.
