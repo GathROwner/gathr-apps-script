@@ -174,3 +174,28 @@ Pending exact live review: Suspiria food category, Samuel's undated teaser, and
 PEI Brewing's borrowed Souris ticket/time evidence. Code prevention does not
 delete or retroactively correct these records. Stage 2 and Stage 5 are separate
 50% pilots; release evidence belongs in `docs/luna-oct10-stage2-stage5-release.md`.
+
+### October 10 full Stage 2 shadow evaluation and Stage 5 expansion
+
+The later approved Stage 5 expansion is recorded in
+`docs/luna-stage5-oct10-100pct-release.md`: Stage 5 is now Luna none at 100%.
+Stage 2 remains 50%. Its subsequent full-cohort dry-run evaluation is recorded
+in `docs/luna-stage2-oct10-100pct-evaluation.md` (90 evaluations, 86 rows,
+85 unique post IDs, with matched fresh Mini controls).
+
+No new whole-post confidence rejection was found. However, Old Triangle row 35
+(`1737936975008400`) loses its October 11 advertised turkey dinner after a
+schedule classification tags it as an event and Stage 4 requires a start.
+Local Pub row 53 (`1128140023071506`) loses the evening's named cocktail beside
+trivia. Preserve dated meal offers and advertised daily/evening drink features
+without requiring discounts, while retaining ordinary menu/inventory exclusions.
+Verify final special identity as well as routing: the control cocktail was
+misformatted as an event downstream. These findings are open, not deployed fixes.
+
+Shared follow-ups from the paired replays: North Rustico Lions row 308
+(`1545949704227161`) retains October 9 but misses October 10's pub-grub offer
+in both arms; Founders row 139 (`1718627620272751`) keeps the printed game
+starts but gets different inferred ends. Albert & Crown row 98 shows different
+recent-past evidence holds and Wee Point row 341 shows Nano Stage 4 variation.
+Do not count these as proved Stage 2 rejection regressions or source-backed
+end times. No live event records were changed by this evaluation.

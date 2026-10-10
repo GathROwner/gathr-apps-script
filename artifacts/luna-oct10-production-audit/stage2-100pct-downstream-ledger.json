@@ -1,0 +1,5085 @@
+[
+  {
+    "row": 13,
+    "postId": "1775682611227393",
+    "sourceUrl": "https://www.facebook.com/1775682611227393",
+    "arm": "luna-negative-review",
+    "elapsedMs": 25467,
+    "stage3": [
+      {
+        "name": "Thanksgiving Dinner at Coach’s",
+        "date": "2026-10-11",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "special",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Thanksgiving Dinner at Coach’s",
+        "date": "2026-10-12",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "special",
+        "relevantImageIndex": 0
+      }
+    ],
+    "stage3Held": [],
+    "stage4": [
+      {
+        "name": "Thanksgiving Dinner at Coach’s",
+        "date": "2026-10-11",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "special",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Thanksgiving Dinner at Coach’s",
+        "date": "2026-10-12",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "special",
+        "relevantImageIndex": 0
+      }
+    ],
+    "finalDryRun": [],
+    "skips": [],
+    "usage": [
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 1,
+        "durationMs": 11589,
+        "inputTokens": 5264,
+        "outputTokens": 1080,
+        "totalTokens": 6344,
+        "cachedInputTokens": 0
+      },
+      {
+        "stage": "stage4",
+        "component": "secondaryValidator",
+        "endpoint": "responses",
+        "model": "gpt-5-nano",
+        "durationMs": 8190,
+        "inputTokens": 2419,
+        "outputTokens": 1224,
+        "totalTokens": 3643,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 13,
+        "postId": "1775682611227393",
+        "batchItemCount": 2,
+        "responseId": "resp_0b96f1ca9455b105006aca6e5bca0487d2b9b464b72b4d762c",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 448,
+        "visibleOutputChars": 3136
+      },
+      {
+        "stage": "stage5",
+        "component": "finalFormatter",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "durationMs": 5434,
+        "inputTokens": 2398,
+        "outputTokens": 585,
+        "totalTokens": 2983,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 13,
+        "postId": "1775682611227393",
+        "responseId": "resp_0241e228fe82cff0006aca6e63fb3887d28eaf1bca05401ab1",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 0,
+        "visibleOutputChars": 2600,
+        "parsedItemCount": 2,
+        "parseError": false,
+        "batchOffset": 0,
+        "batchItemCount": 2
+      }
+    ],
+    "noLiveWrites": true,
+    "websiteEnrichment": false,
+    "venueHoursSource": "frozen October 10 venue snapshot"
+  },
+  {
+    "row": 13,
+    "postId": "1775682611227393",
+    "sourceUrl": "https://www.facebook.com/1775682611227393",
+    "arm": "mini-current",
+    "elapsedMs": 26371,
+    "stage3": [
+      {
+        "name": "Thanksgiving Dinner",
+        "date": "2026-10-11",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "special",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Thanksgiving Dinner",
+        "date": "2026-10-12",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "special",
+        "relevantImageIndex": 0
+      }
+    ],
+    "stage3Held": [],
+    "stage4": [
+      {
+        "name": "Thanksgiving Dinner",
+        "date": "2026-10-11",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "special",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Thanksgiving Dinner",
+        "date": "2026-10-12",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "special",
+        "relevantImageIndex": 0
+      }
+    ],
+    "finalDryRun": [],
+    "skips": [],
+    "usage": [
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 1,
+        "durationMs": 2925,
+        "inputTokens": 6243,
+        "outputTokens": 103,
+        "totalTokens": 6346,
+        "cachedInputTokens": 0
+      },
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 1,
+        "durationMs": 11824,
+        "inputTokens": 5264,
+        "outputTokens": 1204,
+        "totalTokens": 6468,
+        "cachedInputTokens": 5261
+      },
+      {
+        "stage": "stage4",
+        "component": "secondaryValidator",
+        "endpoint": "responses",
+        "model": "gpt-5-nano",
+        "durationMs": 5520,
+        "inputTokens": 2391,
+        "outputTokens": 1135,
+        "totalTokens": 3526,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 13,
+        "postId": "1775682611227393",
+        "batchItemCount": 2,
+        "responseId": "resp_049f3443a9ca541a006aca6e5ed1f887d29de49894f72ede34",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 384,
+        "visibleOutputChars": 2845
+      },
+      {
+        "stage": "stage5",
+        "component": "finalFormatter",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "durationMs": 6009,
+        "inputTokens": 2370,
+        "outputTokens": 607,
+        "totalTokens": 2977,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 13,
+        "postId": "1775682611227393",
+        "responseId": "resp_054c89c87fd76f36006aca6e6461c887d283dc64854fa0b487",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 0,
+        "visibleOutputChars": 2669,
+        "parsedItemCount": 2,
+        "parseError": false,
+        "batchOffset": 0,
+        "batchItemCount": 2
+      }
+    ],
+    "noLiveWrites": true,
+    "websiteEnrichment": false,
+    "venueHoursSource": "frozen October 10 venue snapshot"
+  },
+  {
+    "row": 139,
+    "postId": "1718627620272751",
+    "sourceUrl": "https://www.facebook.com/1718627620272751",
+    "arm": "luna-negative-review",
+    "elapsedMs": 20357,
+    "stage3": [
+      {
+        "name": "Bruins vs. Flyers",
+        "date": "2026-10-10",
+        "startTime": "14:00",
+        "endTime": "",
+        "sourceType": "schedule",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Oilers vs. Sharks",
+        "date": "2026-10-10",
+        "startTime": "17:00",
+        "endTime": "",
+        "sourceType": "schedule",
+        "relevantImageIndex": 1
+      }
+    ],
+    "stage3Held": [],
+    "stage4": [
+      {
+        "name": "Bruins vs. Flyers",
+        "date": "2026-10-10",
+        "startTime": "14:00",
+        "endTime": "",
+        "sourceType": "schedule",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Oilers vs. Sharks",
+        "date": "2026-10-10",
+        "startTime": "17:00",
+        "endTime": "",
+        "sourceType": "schedule",
+        "relevantImageIndex": 1
+      }
+    ],
+    "formattedBeforeHours": [
+      {
+        "name": "Bruins vs. Flyers",
+        "date": "2026-10-10",
+        "startTime": "14:00",
+        "endTime": "",
+        "sourceType": "schedule",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Oilers vs. Sharks",
+        "date": "2026-10-10",
+        "startTime": "17:00",
+        "endTime": "",
+        "sourceType": "schedule",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": 1
+      }
+    ],
+    "finalDryRun": [
+      {
+        "name": "Bruins vs. Flyers",
+        "date": "2026-10-10",
+        "startTime": "14:00",
+        "endTime": "16:00",
+        "sourceType": "schedule",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Oilers vs. Sharks",
+        "date": "2026-10-10",
+        "startTime": "17:00",
+        "endTime": "19:00",
+        "sourceType": "schedule",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": 1
+      }
+    ],
+    "skips": [],
+    "usage": [
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 2,
+        "durationMs": 7770,
+        "inputTokens": 9207,
+        "outputTokens": 759,
+        "totalTokens": 9966,
+        "cachedInputTokens": 0
+      },
+      {
+        "stage": "stage4",
+        "component": "secondaryValidator",
+        "endpoint": "responses",
+        "model": "gpt-5-nano",
+        "durationMs": 6819,
+        "inputTokens": 2419,
+        "outputTokens": 1087,
+        "totalTokens": 3506,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 139,
+        "postId": "1718627620272751",
+        "batchItemCount": 2,
+        "responseId": "resp_0cc6ee64b75a26ef006aca6f3e0f2487d2ad4339b5cfb88d49",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 320,
+        "visibleOutputChars": 2853
+      },
+      {
+        "stage": "stage5",
+        "component": "finalFormatter",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "durationMs": 5715,
+        "inputTokens": 2401,
+        "outputTokens": 539,
+        "totalTokens": 2940,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 139,
+        "postId": "1718627620272751",
+        "responseId": "resp_0a349573fe9548f1006aca6f44c10887d2bc192485fb09dc06",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 0,
+        "visibleOutputChars": 2309,
+        "parsedItemCount": 2,
+        "parseError": false,
+        "batchOffset": 0,
+        "batchItemCount": 2
+      }
+    ],
+    "noLiveWrites": true,
+    "websiteEnrichment": false,
+    "venueHoursSource": "frozen October 10 venue snapshot"
+  },
+  {
+    "row": 139,
+    "postId": "1718627620272751",
+    "sourceUrl": "https://www.facebook.com/1718627620272751",
+    "arm": "mini-current",
+    "elapsedMs": 27206,
+    "stage3": [
+      {
+        "name": "NHL Game Night: Bruins vs. Flyers",
+        "date": "2026-10-10",
+        "startTime": "14:00",
+        "endTime": "",
+        "sourceType": "",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "NHL Game Night: Oilers vs. Sharks",
+        "date": "2026-10-10",
+        "startTime": "17:00",
+        "endTime": "",
+        "sourceType": "",
+        "relevantImageIndex": 1
+      }
+    ],
+    "stage3Held": [],
+    "stage4": [
+      {
+        "name": "NHL Game Night: Bruins vs. Flyers",
+        "date": "2026-10-10",
+        "startTime": "14:00",
+        "endTime": "",
+        "sourceType": "",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "NHL Game Night: Oilers vs. Sharks",
+        "date": "2026-10-10",
+        "startTime": "17:00",
+        "endTime": "",
+        "sourceType": "",
+        "relevantImageIndex": 1
+      }
+    ],
+    "formattedBeforeHours": [
+      {
+        "name": "NHL Game Night: Bruins vs. Flyers",
+        "date": "2026-10-10",
+        "startTime": "14:00",
+        "endTime": "",
+        "sourceType": "",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "NHL Game Night: Oilers vs. Sharks",
+        "date": "2026-10-10",
+        "startTime": "17:00",
+        "endTime": "",
+        "sourceType": "",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": 1
+      }
+    ],
+    "finalDryRun": [
+      {
+        "name": "NHL Game Night: Bruins vs. Flyers",
+        "date": "2026-10-10",
+        "startTime": "14:00",
+        "endTime": "23:00",
+        "sourceType": "",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "NHL Game Night: Oilers vs. Sharks",
+        "date": "2026-10-10",
+        "startTime": "17:00",
+        "endTime": "23:00",
+        "sourceType": "",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": 1
+      }
+    ],
+    "skips": [],
+    "usage": [
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 2,
+        "durationMs": 15387,
+        "inputTokens": 10015,
+        "outputTokens": 1332,
+        "totalTokens": 11347,
+        "cachedInputTokens": 0
+      },
+      {
+        "stage": "stage4",
+        "component": "secondaryValidator",
+        "endpoint": "responses",
+        "model": "gpt-5-nano",
+        "durationMs": 6698,
+        "inputTokens": 2673,
+        "outputTokens": 1260,
+        "totalTokens": 3933,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 139,
+        "postId": "1718627620272751",
+        "batchItemCount": 2,
+        "responseId": "resp_0d8cdae53cf169ef006aca6f2a5e5c87d2bc5d9311a8da4bb0",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 192,
+        "visibleOutputChars": 4262
+      },
+      {
+        "stage": "stage5",
+        "component": "finalFormatter",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "durationMs": 4983,
+        "inputTokens": 2655,
+        "outputTokens": 547,
+        "totalTokens": 3202,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 139,
+        "postId": "1718627620272751",
+        "responseId": "resp_066ee41faa3abf81006aca6f311edc87d28acf68e06d7cfb6a",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 0,
+        "visibleOutputChars": 2309,
+        "parsedItemCount": 2,
+        "parseError": false,
+        "batchOffset": 0,
+        "batchItemCount": 2
+      }
+    ],
+    "noLiveWrites": true,
+    "websiteEnrichment": false,
+    "venueHoursSource": "frozen October 10 venue snapshot"
+  },
+  {
+    "row": 166,
+    "postId": "1527912486023336",
+    "sourceUrl": "https://www.facebook.com/1527912486023336",
+    "arm": "luna-negative-review",
+    "elapsedMs": 48799,
+    "stage3": [
+      {
+        "name": "All pools closed for swimming lessons",
+        "date": "2026-10-10",
+        "startTime": "09:00",
+        "endTime": "14:00",
+        "sourceType": "schedule",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "All pools closed for private booking",
+        "date": "2026-10-10",
+        "startTime": "18:00",
+        "endTime": "19:00",
+        "sourceType": "schedule",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "All pools closed for swimming lessons",
+        "date": "2026-10-11",
+        "startTime": "14:00",
+        "endTime": "19:00",
+        "sourceType": "schedule",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "All pools open",
+        "date": "2026-10-10",
+        "startTime": "14:00",
+        "endTime": "18:00",
+        "sourceType": "schedule",
+        "relevantImageIndex": -1
+      },
+      {
+        "name": "Lane swim",
+        "date": "2026-10-10",
+        "startTime": "14:00",
+        "endTime": "18:00",
+        "sourceType": "schedule",
+        "relevantImageIndex": -1
+      },
+      {
+        "name": "Waterslide open",
+        "date": "2026-10-10",
+        "startTime": "14:00",
+        "endTime": "18:00",
+        "sourceType": "schedule",
+        "relevantImageIndex": -1
+      },
+      {
+        "name": "All pools open",
+        "date": "2026-10-11",
+        "startTime": "09:00",
+        "endTime": "14:00",
+        "sourceType": "schedule",
+        "relevantImageIndex": -1
+      },
+      {
+        "name": "Lane swim",
+        "date": "2026-10-11",
+        "startTime": "09:00",
+        "endTime": "14:00",
+        "sourceType": "schedule",
+        "relevantImageIndex": -1
+      },
+      {
+        "name": "Waterslide open",
+        "date": "2026-10-11",
+        "startTime": "09:00",
+        "endTime": "14:00",
+        "sourceType": "schedule",
+        "relevantImageIndex": -1
+      }
+    ],
+    "stage3Held": [],
+    "stage4": [
+      {
+        "name": "All pools open",
+        "date": "2026-10-10",
+        "startTime": "14:00",
+        "endTime": "18:00",
+        "sourceType": "schedule",
+        "relevantImageIndex": -1
+      },
+      {
+        "name": "Lane swim",
+        "date": "2026-10-10",
+        "startTime": "14:00",
+        "endTime": "18:00",
+        "sourceType": "schedule",
+        "relevantImageIndex": -1
+      },
+      {
+        "name": "Waterslide open",
+        "date": "2026-10-10",
+        "startTime": "14:00",
+        "endTime": "18:00",
+        "sourceType": "schedule",
+        "relevantImageIndex": -1
+      },
+      {
+        "name": "All pools open",
+        "date": "2026-10-11",
+        "startTime": "09:00",
+        "endTime": "14:00",
+        "sourceType": "schedule",
+        "relevantImageIndex": -1
+      },
+      {
+        "name": "Lane swim",
+        "date": "2026-10-11",
+        "startTime": "09:00",
+        "endTime": "14:00",
+        "sourceType": "schedule",
+        "relevantImageIndex": -1
+      },
+      {
+        "name": "Waterslide open",
+        "date": "2026-10-11",
+        "startTime": "09:00",
+        "endTime": "14:00",
+        "sourceType": "schedule",
+        "relevantImageIndex": -1
+      }
+    ],
+    "formattedBeforeHours": [
+      {
+        "name": "All pools open",
+        "date": "2026-10-10",
+        "startTime": "14:00",
+        "endTime": "18:00",
+        "sourceType": "schedule",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": -1
+      },
+      {
+        "name": "Lane swim",
+        "date": "2026-10-10",
+        "startTime": "14:00",
+        "endTime": "18:00",
+        "sourceType": "schedule",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": -1
+      },
+      {
+        "name": "Waterslide open",
+        "date": "2026-10-10",
+        "startTime": "14:00",
+        "endTime": "18:00",
+        "sourceType": "schedule",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": -1
+      },
+      {
+        "name": "All pools open",
+        "date": "2026-10-11",
+        "startTime": "09:00",
+        "endTime": "14:00",
+        "sourceType": "schedule",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": -1
+      },
+      {
+        "name": "Lane swim",
+        "date": "2026-10-11",
+        "startTime": "09:00",
+        "endTime": "14:00",
+        "sourceType": "schedule",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": -1
+      },
+      {
+        "name": "Waterslide open",
+        "date": "2026-10-11",
+        "startTime": "09:00",
+        "endTime": "14:00",
+        "sourceType": "schedule",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": -1
+      }
+    ],
+    "finalDryRun": [
+      {
+        "name": "All pools open",
+        "date": "2026-10-10",
+        "startTime": "14:00",
+        "endTime": "18:00",
+        "sourceType": "schedule",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": -1
+      },
+      {
+        "name": "Lane swim",
+        "date": "2026-10-10",
+        "startTime": "14:00",
+        "endTime": "18:00",
+        "sourceType": "schedule",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": -1
+      },
+      {
+        "name": "Waterslide open",
+        "date": "2026-10-10",
+        "startTime": "14:00",
+        "endTime": "18:00",
+        "sourceType": "schedule",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": -1
+      },
+      {
+        "name": "All pools open",
+        "date": "2026-10-11",
+        "startTime": "09:00",
+        "endTime": "14:00",
+        "sourceType": "schedule",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": -1
+      },
+      {
+        "name": "Lane swim",
+        "date": "2026-10-11",
+        "startTime": "09:00",
+        "endTime": "14:00",
+        "sourceType": "schedule",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": -1
+      },
+      {
+        "name": "Waterslide open",
+        "date": "2026-10-11",
+        "startTime": "09:00",
+        "endTime": "14:00",
+        "sourceType": "schedule",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": -1
+      }
+    ],
+    "skips": [],
+    "usage": [
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 1,
+        "durationMs": 22957,
+        "inputTokens": 5353,
+        "outputTokens": 2724,
+        "totalTokens": 8077,
+        "cachedInputTokens": 0
+      },
+      {
+        "stage": "stage4",
+        "component": "secondaryValidator",
+        "endpoint": "responses",
+        "model": "gpt-5-nano",
+        "durationMs": 14362,
+        "inputTokens": 3977,
+        "outputTokens": 3475,
+        "totalTokens": 7452,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 166,
+        "postId": "1527912486023336",
+        "batchItemCount": 9,
+        "responseId": "resp_010d40a978e8d5fb006aca6f949ad487d2aae8c63e40d679eb",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 768,
+        "visibleOutputChars": 10171
+      },
+      {
+        "stage": "stage5",
+        "component": "finalFormatter",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "durationMs": 11449,
+        "inputTokens": 3304,
+        "outputTokens": 1451,
+        "totalTokens": 4755,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 166,
+        "postId": "1527912486023336",
+        "responseId": "resp_06ec78e5b9ebd0a0006aca6fa2eb7487d29cff9cb1a6b6d48d",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 0,
+        "visibleOutputChars": 6172,
+        "parsedItemCount": 6,
+        "parseError": false,
+        "batchOffset": 0,
+        "batchItemCount": 6
+      }
+    ],
+    "noLiveWrites": true,
+    "websiteEnrichment": false,
+    "venueHoursSource": "frozen October 10 venue snapshot"
+  },
+  {
+    "row": 166,
+    "postId": "1527912486023336",
+    "sourceUrl": "https://www.facebook.com/1527912486023336",
+    "arm": "mini-current",
+    "elapsedMs": 59979,
+    "stage3": [
+      {
+        "name": "All pools CLOSED for swimming Lessons",
+        "date": "2026-10-10",
+        "startTime": "9:00 AM",
+        "endTime": "2:00 PM",
+        "sourceType": "calendar",
+        "relevantImageIndex": -1
+      },
+      {
+        "name": "All pools CLOSED for private booking",
+        "date": "2026-10-10",
+        "startTime": "6:00 PM",
+        "endTime": "7:00 PM",
+        "sourceType": "calendar",
+        "relevantImageIndex": -1
+      },
+      {
+        "name": "All pools CLOSED for swimming Lessons",
+        "date": "2026-10-11",
+        "startTime": "2:00 PM",
+        "endTime": "7:00 PM",
+        "sourceType": "calendar",
+        "relevantImageIndex": -1
+      },
+      {
+        "name": "All pools open",
+        "date": "2026-10-10",
+        "startTime": "14:00",
+        "endTime": "18:00",
+        "sourceType": "schedule",
+        "relevantImageIndex": -1
+      },
+      {
+        "name": "Lane swim",
+        "date": "2026-10-10",
+        "startTime": "14:00",
+        "endTime": "18:00",
+        "sourceType": "schedule",
+        "relevantImageIndex": -1
+      },
+      {
+        "name": "Waterslide open",
+        "date": "2026-10-10",
+        "startTime": "14:00",
+        "endTime": "18:00",
+        "sourceType": "schedule",
+        "relevantImageIndex": -1
+      },
+      {
+        "name": "All pools open",
+        "date": "2026-10-11",
+        "startTime": "09:00",
+        "endTime": "14:00",
+        "sourceType": "schedule",
+        "relevantImageIndex": -1
+      },
+      {
+        "name": "Lane swim",
+        "date": "2026-10-11",
+        "startTime": "09:00",
+        "endTime": "14:00",
+        "sourceType": "schedule",
+        "relevantImageIndex": -1
+      },
+      {
+        "name": "Waterslide open",
+        "date": "2026-10-11",
+        "startTime": "09:00",
+        "endTime": "14:00",
+        "sourceType": "schedule",
+        "relevantImageIndex": -1
+      }
+    ],
+    "stage3Held": [],
+    "stage4": [
+      {
+        "name": "All pools CLOSED for swimming Lessons",
+        "date": "2026-10-10",
+        "startTime": "9:00 AM",
+        "endTime": "2:00 PM",
+        "sourceType": "calendar",
+        "relevantImageIndex": -1
+      },
+      {
+        "name": "All pools CLOSED for private booking",
+        "date": "2026-10-10",
+        "startTime": "6:00 PM",
+        "endTime": "7:00 PM",
+        "sourceType": "calendar",
+        "relevantImageIndex": -1
+      },
+      {
+        "name": "All pools CLOSED for swimming Lessons",
+        "date": "2026-10-11",
+        "startTime": "2:00 PM",
+        "endTime": "7:00 PM",
+        "sourceType": "calendar",
+        "relevantImageIndex": -1
+      },
+      {
+        "name": "All pools open",
+        "date": "2026-10-10",
+        "startTime": "14:00",
+        "endTime": "18:00",
+        "sourceType": "schedule",
+        "relevantImageIndex": -1
+      },
+      {
+        "name": "Lane swim",
+        "date": "2026-10-10",
+        "startTime": "14:00",
+        "endTime": "18:00",
+        "sourceType": "schedule",
+        "relevantImageIndex": -1
+      },
+      {
+        "name": "Waterslide open",
+        "date": "2026-10-10",
+        "startTime": "14:00",
+        "endTime": "18:00",
+        "sourceType": "schedule",
+        "relevantImageIndex": -1
+      },
+      {
+        "name": "All pools open",
+        "date": "2026-10-11",
+        "startTime": "09:00",
+        "endTime": "14:00",
+        "sourceType": "schedule",
+        "relevantImageIndex": -1
+      },
+      {
+        "name": "Lane swim",
+        "date": "2026-10-11",
+        "startTime": "09:00",
+        "endTime": "14:00",
+        "sourceType": "schedule",
+        "relevantImageIndex": -1
+      },
+      {
+        "name": "Waterslide open",
+        "date": "2026-10-11",
+        "startTime": "09:00",
+        "endTime": "14:00",
+        "sourceType": "schedule",
+        "relevantImageIndex": -1
+      }
+    ],
+    "formattedBeforeHours": [
+      {
+        "name": "All pools open",
+        "date": "2026-10-10",
+        "startTime": "14:00",
+        "endTime": "18:00",
+        "sourceType": "schedule",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": -1
+      },
+      {
+        "name": "Lane swim",
+        "date": "2026-10-10",
+        "startTime": "14:00",
+        "endTime": "18:00",
+        "sourceType": "schedule",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": -1
+      },
+      {
+        "name": "Waterslide open",
+        "date": "2026-10-10",
+        "startTime": "14:00",
+        "endTime": "18:00",
+        "sourceType": "schedule",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": -1
+      },
+      {
+        "name": "All pools open",
+        "date": "2026-10-11",
+        "startTime": "09:00",
+        "endTime": "14:00",
+        "sourceType": "schedule",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": -1
+      },
+      {
+        "name": "Lane swim",
+        "date": "2026-10-11",
+        "startTime": "09:00",
+        "endTime": "14:00",
+        "sourceType": "schedule",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": -1
+      },
+      {
+        "name": "Waterslide open",
+        "date": "2026-10-11",
+        "startTime": "09:00",
+        "endTime": "14:00",
+        "sourceType": "schedule",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": -1
+      }
+    ],
+    "finalDryRun": [
+      {
+        "name": "All pools open",
+        "date": "2026-10-10",
+        "startTime": "14:00",
+        "endTime": "18:00",
+        "sourceType": "schedule",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": -1
+      },
+      {
+        "name": "Lane swim",
+        "date": "2026-10-10",
+        "startTime": "14:00",
+        "endTime": "18:00",
+        "sourceType": "schedule",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": -1
+      },
+      {
+        "name": "Waterslide open",
+        "date": "2026-10-10",
+        "startTime": "14:00",
+        "endTime": "18:00",
+        "sourceType": "schedule",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": -1
+      },
+      {
+        "name": "All pools open",
+        "date": "2026-10-11",
+        "startTime": "09:00",
+        "endTime": "14:00",
+        "sourceType": "schedule",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": -1
+      },
+      {
+        "name": "Lane swim",
+        "date": "2026-10-11",
+        "startTime": "09:00",
+        "endTime": "14:00",
+        "sourceType": "schedule",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": -1
+      },
+      {
+        "name": "Waterslide open",
+        "date": "2026-10-11",
+        "startTime": "09:00",
+        "endTime": "14:00",
+        "sourceType": "schedule",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": -1
+      }
+    ],
+    "skips": [],
+    "usage": [
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 1,
+        "durationMs": 24453,
+        "inputTokens": 5425,
+        "outputTokens": 2603,
+        "totalTokens": 8028,
+        "cachedInputTokens": 0
+      },
+      {
+        "stage": "ocr_debug",
+        "component": "ocrDebugText",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 1,
+        "durationMs": 2741,
+        "inputTokens": 3712,
+        "outputTokens": 95,
+        "totalTokens": 3807,
+        "cachedInputTokens": 0
+      },
+      {
+        "stage": "stage4",
+        "component": "secondaryValidator",
+        "endpoint": "responses",
+        "model": "gpt-5-nano",
+        "durationMs": 17777,
+        "inputTokens": 3929,
+        "outputTokens": 3347,
+        "totalTokens": 7276,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 166,
+        "postId": "1527912486023336",
+        "batchItemCount": 9,
+        "responseId": "resp_014d7f40d4744f95006aca6f65bc1487d283a093c8a010ff09",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 640,
+        "visibleOutputChars": 10334
+      },
+      {
+        "stage": "stage5",
+        "component": "finalFormatter",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "durationMs": 14934,
+        "inputTokens": 3992,
+        "outputTokens": 2034,
+        "totalTokens": 6026,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 166,
+        "postId": "1527912486023336",
+        "responseId": "resp_084eeb39c430dd4a006aca6f7782f887d2827883cbbdb980fe",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 0,
+        "visibleOutputChars": 8969,
+        "parsedItemCount": 9,
+        "parseError": false,
+        "batchOffset": 0,
+        "batchItemCount": 9
+      }
+    ],
+    "noLiveWrites": true,
+    "websiteEnrichment": false,
+    "venueHoursSource": "frozen October 10 venue snapshot"
+  },
+  {
+    "row": 266,
+    "postId": "122316333740189551",
+    "sourceUrl": "https://www.facebook.com/122316333740189551",
+    "arm": "luna-negative-review",
+    "elapsedMs": 18276,
+    "stage3": [
+      {
+        "name": "Friday Roast Beef Dinner",
+        "date": "2026-10-09",
+        "startTime": "15:00",
+        "endTime": "18:00",
+        "sourceType": "special",
+        "relevantImageIndex": 0
+      }
+    ],
+    "stage3Held": [],
+    "stage4": [
+      {
+        "name": "Friday Roast Beef Dinner",
+        "date": "2026-10-09",
+        "startTime": "15:00",
+        "endTime": "18:00",
+        "sourceType": "special",
+        "relevantImageIndex": 0
+      }
+    ],
+    "formattedBeforeHours": [
+      {
+        "name": "Friday Roast Beef Dinner",
+        "date": "2026-10-09",
+        "startTime": "15:00",
+        "endTime": "18:00",
+        "sourceType": "special",
+        "isFoodSpecial": "Yes",
+        "relevantImageIndex": 0
+      }
+    ],
+    "finalDryRun": [
+      {
+        "name": "Friday Roast Beef Dinner",
+        "date": "2026-10-09",
+        "startTime": "15:00",
+        "endTime": "18:00",
+        "sourceType": "special",
+        "isFoodSpecial": "Yes",
+        "relevantImageIndex": 0
+      }
+    ],
+    "skips": [],
+    "usage": [
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 0,
+        "durationMs": 9715,
+        "inputTokens": 1466,
+        "outputTokens": 964,
+        "totalTokens": 2430,
+        "cachedInputTokens": 1463
+      },
+      {
+        "stage": "stage4",
+        "component": "secondaryValidator",
+        "endpoint": "responses",
+        "model": "gpt-5-nano",
+        "durationMs": 4853,
+        "inputTokens": 2227,
+        "outputTokens": 767,
+        "totalTokens": 2994,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 266,
+        "postId": "122316333740189551",
+        "batchItemCount": 1,
+        "responseId": "resp_042d943350995b00006aca6f903aec87d2b6fccf42a673c828",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 256,
+        "visibleOutputChars": 1693
+      },
+      {
+        "stage": "stage5",
+        "component": "finalFormatter",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "durationMs": 3691,
+        "inputTokens": 2188,
+        "outputTokens": 317,
+        "totalTokens": 2505,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 266,
+        "postId": "122316333740189551",
+        "responseId": "resp_0d5270857c252fee006aca6f95168487d291c9bc5442e57cd8",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 0,
+        "visibleOutputChars": 1287,
+        "parsedItemCount": 1,
+        "parseError": false,
+        "batchOffset": 0,
+        "batchItemCount": 1
+      }
+    ],
+    "noLiveWrites": true,
+    "websiteEnrichment": false,
+    "venueHoursSource": "frozen October 10 venue snapshot"
+  },
+  {
+    "row": 266,
+    "postId": "122316333740189551",
+    "sourceUrl": "https://www.facebook.com/122316333740189551",
+    "arm": "mini-current",
+    "elapsedMs": 17597,
+    "stage3": [
+      {
+        "name": "Friday Dinner - Roast Beef Dinner",
+        "date": "2026-10-09",
+        "startTime": "15:00",
+        "endTime": "18:00",
+        "sourceType": "special",
+        "relevantImageIndex": 0
+      }
+    ],
+    "stage3Held": [],
+    "stage4": [
+      {
+        "name": "Friday Dinner - Roast Beef Dinner",
+        "date": "2026-10-09",
+        "startTime": "15:00",
+        "endTime": "18:00",
+        "sourceType": "special",
+        "relevantImageIndex": 0
+      }
+    ],
+    "formattedBeforeHours": [
+      {
+        "name": "Friday Dinner - Roast Beef Dinner",
+        "date": "2026-10-09",
+        "startTime": "15:00",
+        "endTime": "18:00",
+        "sourceType": "special",
+        "isFoodSpecial": "Yes",
+        "relevantImageIndex": 0
+      }
+    ],
+    "finalDryRun": [
+      {
+        "name": "Friday Dinner - Roast Beef Dinner",
+        "date": "2026-10-09",
+        "startTime": "15:00",
+        "endTime": "18:00",
+        "sourceType": "special",
+        "isFoodSpecial": "Yes",
+        "relevantImageIndex": 0
+      }
+    ],
+    "skips": [],
+    "usage": [
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 0,
+        "durationMs": 1994,
+        "inputTokens": 2610,
+        "outputTokens": 85,
+        "totalTokens": 2695,
+        "cachedInputTokens": 0
+      },
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 0,
+        "durationMs": 7510,
+        "inputTokens": 1466,
+        "outputTokens": 708,
+        "totalTokens": 2174,
+        "cachedInputTokens": 0
+      },
+      {
+        "stage": "stage4",
+        "component": "secondaryValidator",
+        "endpoint": "responses",
+        "model": "gpt-5-nano",
+        "durationMs": 4455,
+        "inputTokens": 2241,
+        "outputTokens": 720,
+        "totalTokens": 2961,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 266,
+        "postId": "122316333740189551",
+        "batchItemCount": 1,
+        "responseId": "resp_09c6a6613ee197ae006aca6f8b977487d2a30c3914ba21eed9",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 192,
+        "visibleOutputChars": 1806
+      },
+      {
+        "stage": "stage5",
+        "component": "finalFormatter",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "durationMs": 3620,
+        "inputTokens": 2202,
+        "outputTokens": 321,
+        "totalTokens": 2523,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 266,
+        "postId": "122316333740189551",
+        "responseId": "resp_033e2e4bc7299e92006aca6f900eb487d2ab4540059a326129",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 0,
+        "visibleOutputChars": 1347,
+        "parsedItemCount": 1,
+        "parseError": false,
+        "batchOffset": 0,
+        "batchItemCount": 1
+      }
+    ],
+    "noLiveWrites": true,
+    "websiteEnrichment": false,
+    "venueHoursSource": "frozen October 10 venue snapshot"
+  },
+  {
+    "row": 308,
+    "postId": "1545949704227161",
+    "sourceUrl": "https://www.facebook.com/1545949704227161",
+    "arm": "luna-negative-review",
+    "elapsedMs": 20133,
+    "stage3": [
+      {
+        "name": "6oz BBQ ‘Rib’ Pub Grub Special",
+        "date": "2026-10-09",
+        "startTime": "17:00",
+        "endTime": "21:00",
+        "sourceType": "special",
+        "relevantImageIndex": 0
+      }
+    ],
+    "stage3Held": [],
+    "stage4": [
+      {
+        "name": "6oz BBQ ‘Rib’ Pub Grub Special",
+        "date": "2026-10-09",
+        "startTime": "17:00",
+        "endTime": "21:00",
+        "sourceType": "special",
+        "relevantImageIndex": 0
+      }
+    ],
+    "formattedBeforeHours": [
+      {
+        "name": "6oz BBQ ‘Rib’ Pub Grub Special",
+        "date": "2026-10-09",
+        "startTime": "17:00",
+        "endTime": "21:00",
+        "sourceType": "special",
+        "isFoodSpecial": "Yes",
+        "relevantImageIndex": 0
+      }
+    ],
+    "finalDryRun": [
+      {
+        "name": "6oz BBQ ‘Rib’ Pub Grub Special",
+        "date": "2026-10-09",
+        "startTime": "17:00",
+        "endTime": "21:00",
+        "sourceType": "special",
+        "isFoodSpecial": "Yes",
+        "relevantImageIndex": 0
+      }
+    ],
+    "skips": [],
+    "usage": [
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 2,
+        "durationMs": 11874,
+        "inputTokens": 9501,
+        "outputTokens": 1033,
+        "totalTokens": 10534,
+        "cachedInputTokens": 9498
+      },
+      {
+        "stage": "stage4",
+        "component": "secondaryValidator",
+        "endpoint": "responses",
+        "model": "gpt-5-nano",
+        "durationMs": 4402,
+        "inputTokens": 2240,
+        "outputTokens": 715,
+        "totalTokens": 2955,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 308,
+        "postId": "1545949704227161",
+        "batchItemCount": 1,
+        "responseId": "resp_05d0e0cd83d9854e006aca6fa4ade487d2990f6c168f6fe874",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 192,
+        "visibleOutputChars": 1776
+      },
+      {
+        "stage": "stage5",
+        "component": "finalFormatter",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "durationMs": 3830,
+        "inputTokens": 2207,
+        "outputTokens": 362,
+        "totalTokens": 2569,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 308,
+        "postId": "1545949704227161",
+        "responseId": "resp_04e5e7b2aee2c106006aca6fa91a8487d2999080f991c09122",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 0,
+        "visibleOutputChars": 1411,
+        "parsedItemCount": 1,
+        "parseError": false,
+        "batchOffset": 0,
+        "batchItemCount": 1
+      }
+    ],
+    "noLiveWrites": true,
+    "websiteEnrichment": false,
+    "venueHoursSource": "frozen October 10 venue snapshot"
+  },
+  {
+    "row": 308,
+    "postId": "1545949704227161",
+    "sourceUrl": "https://www.facebook.com/1545949704227161",
+    "arm": "mini-current",
+    "elapsedMs": 21098,
+    "stage3": [
+      {
+        "name": "6oz BBQ Rib",
+        "date": "2026-10-09",
+        "startTime": "17:00",
+        "endTime": "21:00",
+        "sourceType": "special",
+        "relevantImageIndex": 0
+      }
+    ],
+    "stage3Held": [],
+    "stage4": [
+      {
+        "name": "6oz BBQ Rib",
+        "date": "2026-10-09",
+        "startTime": "17:00",
+        "endTime": "21:00",
+        "sourceType": "special",
+        "relevantImageIndex": 0
+      }
+    ],
+    "formattedBeforeHours": [
+      {
+        "name": "6oz BBQ Rib",
+        "date": "2026-10-09",
+        "startTime": "17:00",
+        "endTime": "21:00",
+        "sourceType": "special",
+        "isFoodSpecial": "Yes",
+        "relevantImageIndex": 0
+      }
+    ],
+    "finalDryRun": [
+      {
+        "name": "6oz BBQ Rib",
+        "date": "2026-10-09",
+        "startTime": "17:00",
+        "endTime": "21:00",
+        "sourceType": "special",
+        "isFoodSpecial": "Yes",
+        "relevantImageIndex": 0
+      }
+    ],
+    "skips": [],
+    "usage": [
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 2,
+        "durationMs": 3146,
+        "inputTokens": 10480,
+        "outputTokens": 100,
+        "totalTokens": 10580,
+        "cachedInputTokens": 0
+      },
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 2,
+        "durationMs": 9022,
+        "inputTokens": 9501,
+        "outputTokens": 786,
+        "totalTokens": 10287,
+        "cachedInputTokens": 0
+      },
+      {
+        "stage": "stage4",
+        "component": "secondaryValidator",
+        "endpoint": "responses",
+        "model": "gpt-5-nano",
+        "durationMs": 5272,
+        "inputTokens": 2230,
+        "outputTokens": 862,
+        "totalTokens": 3092,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 308,
+        "postId": "1545949704227161",
+        "batchItemCount": 1,
+        "responseId": "resp_04aeffac587fa93b006aca6f9fe11887d2a48d02ae3f085034",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 384,
+        "visibleOutputChars": 1684
+      },
+      {
+        "stage": "stage5",
+        "component": "finalFormatter",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "durationMs": 3605,
+        "inputTokens": 2197,
+        "outputTokens": 315,
+        "totalTokens": 2512,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 308,
+        "postId": "1545949704227161",
+        "responseId": "resp_052bde95103d30e8006aca6fa52bfc87d296a2943530189cd6",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 0,
+        "visibleOutputChars": 1259,
+        "parsedItemCount": 1,
+        "parseError": false,
+        "batchOffset": 0,
+        "batchItemCount": 1
+      }
+    ],
+    "noLiveWrites": true,
+    "websiteEnrichment": false,
+    "venueHoursSource": "frozen October 10 venue snapshot"
+  },
+  {
+    "row": 312,
+    "postId": "1996068324945685",
+    "sourceUrl": "https://www.facebook.com/1996068324945685",
+    "arm": "luna-negative-review",
+    "elapsedMs": 26029,
+    "stage3": [
+      {
+        "name": "Prince Edward Island Cinnamon Roll Circuit",
+        "date": "2026-10-09",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "event"
+      }
+    ],
+    "stage3Held": [
+      {
+        "name": "Cinnalove and special rolls",
+        "description": "Samuel's Coffee House says Cinnalove will return later this month and that special rolls will be available; details are forthcoming.",
+        "date": "2026-10-09",
+        "startTime": "",
+        "endTime": "",
+        "venue": "Samuel's Coffee House",
+        "pricing": "",
+        "price": "",
+        "discount": "",
+        "additionalLocation": "",
+        "recurringPattern": "none",
+        "extractionReason": "A forthcoming return of Cinnalove and special rolls is advertised, but only the vague timeframe “later this month” is given.",
+        "timeFlags": {
+          "start": {
+            "source": "none",
+            "evidence": ""
+          },
+          "end": {
+            "source": "none",
+            "toClose": false,
+            "evidence": ""
+          }
+        },
+        "_sourceType": "special"
+      }
+    ],
+    "stage4": [],
+    "finalDryRun": [],
+    "skips": [
+      {
+        "stage": "stage3",
+        "reason": "Activity has no source-grounded date; post-date fallback held",
+        "detail": "Cinnalove and special rolls"
+      }
+    ],
+    "usage": [
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 2,
+        "durationMs": 3719,
+        "inputTokens": 10536,
+        "outputTokens": 174,
+        "totalTokens": 10710,
+        "cachedInputTokens": 10533
+      },
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 2,
+        "durationMs": 17488,
+        "inputTokens": 8742,
+        "outputTokens": 1560,
+        "totalTokens": 10302,
+        "cachedInputTokens": 0
+      },
+      {
+        "stage": "stage4",
+        "component": "secondaryValidator",
+        "endpoint": "responses",
+        "model": "gpt-5-nano",
+        "durationMs": 4812,
+        "inputTokens": 2189,
+        "outputTokens": 765,
+        "totalTokens": 2954,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 312,
+        "postId": "1996068324945685",
+        "batchItemCount": 1,
+        "responseId": "resp_0d4c3e76d425460a006aca6fc22bf487d2af0ef839d19417a3",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 256,
+        "visibleOutputChars": 1956
+      }
+    ],
+    "noLiveWrites": true,
+    "websiteEnrichment": false,
+    "venueHoursSource": "frozen October 10 venue snapshot"
+  },
+  {
+    "row": 312,
+    "postId": "1996068324945685",
+    "sourceUrl": "https://www.facebook.com/1996068324945685",
+    "arm": "mini-current",
+    "elapsedMs": 21035,
+    "stage3": [],
+    "stage3Held": [
+      {
+        "name": "Cinnalove and special rolls",
+        "description": "Samuel's Coffee House says Cinnalove is returning and additional special rolls will be offered later in October; the exact availability dates are not specified.",
+        "date": "2026-10-09",
+        "startTime": "",
+        "endTime": "",
+        "venue": "Samuel's Coffee House",
+        "pricing": "",
+        "price": "",
+        "discount": "",
+        "additionalLocation": "",
+        "recurringPattern": "none",
+        "extractionReason": "The post explicitly advertises the return of Cinnalove and other special rolls later this month.",
+        "timeFlags": {
+          "start": {
+            "source": "none",
+            "evidence": "No start time is stated."
+          },
+          "end": {
+            "source": "none",
+            "toClose": false,
+            "evidence": "No end time is stated."
+          }
+        },
+        "_sourceType": "special"
+      }
+    ],
+    "stage4": [],
+    "finalDryRun": [],
+    "skips": [
+      {
+        "stage": "stage3",
+        "reason": "Activity has no source-grounded date; post-date fallback held",
+        "detail": "Cinnalove and special rolls"
+      }
+    ],
+    "usage": [
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 2,
+        "durationMs": 3995,
+        "inputTokens": 10536,
+        "outputTokens": 202,
+        "totalTokens": 10738,
+        "cachedInputTokens": 0
+      },
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 2,
+        "durationMs": 6629,
+        "inputTokens": 9557,
+        "outputTokens": 552,
+        "totalTokens": 10109,
+        "cachedInputTokens": 0
+      },
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 2,
+        "durationMs": 10397,
+        "inputTokens": 8747,
+        "outputTokens": 1083,
+        "totalTokens": 9830,
+        "cachedInputTokens": 0
+      }
+    ],
+    "noLiveWrites": true,
+    "websiteEnrichment": false,
+    "venueHoursSource": "frozen October 10 venue snapshot"
+  },
+  {
+    "row": 32,
+    "postId": "1558823136285218",
+    "sourceUrl": "https://www.facebook.com/1558823136285218",
+    "arm": "luna-negative-review",
+    "elapsedMs": 49958,
+    "stage3": [
+      {
+        "name": "Prince Edward Island Marathon",
+        "date": "2026-10-16",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "calendar",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "10K RUN",
+        "date": "2026-10-17",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "calendar",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "10K WALK",
+        "date": "2026-10-17",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "calendar",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "5K RUN",
+        "date": "2026-10-17",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "calendar",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "5K WALK",
+        "date": "2026-10-17",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "calendar",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "2K WHEELCHAIR",
+        "date": "2026-10-17",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "calendar",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "KIDS FOX TROT",
+        "date": "2026-10-17",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "calendar",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "FULL MARATHON",
+        "date": "2026-10-18",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "calendar",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "TEAM RELAY",
+        "date": "2026-10-18",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "calendar",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "HALF MARATHON RUN",
+        "date": "2026-10-18",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "calendar",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "HALF MARATHON WALK",
+        "date": "2026-10-18",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "calendar",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "15K RUN",
+        "date": "2026-10-18",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "calendar",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "15K WALK",
+        "date": "2026-10-18",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "calendar",
+        "relevantImageIndex": 0
+      }
+    ],
+    "stage3Held": [],
+    "stage4": [],
+    "finalDryRun": [],
+    "skips": [
+      {
+        "stage": "stage4",
+        "reason": "Luna canary requires source review",
+        "detail": "stage4_no_items"
+      }
+    ],
+    "usage": [
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 1,
+        "durationMs": 31928,
+        "inputTokens": 5529,
+        "outputTokens": 4226,
+        "totalTokens": 9755,
+        "cachedInputTokens": 5526
+      },
+      {
+        "stage": "stage4",
+        "component": "secondaryValidator",
+        "endpoint": "responses",
+        "model": "gpt-5-nano",
+        "durationMs": 18015,
+        "inputTokens": 4392,
+        "outputTokens": 3847,
+        "totalTokens": 8239,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 32,
+        "postId": "1558823136285218",
+        "batchItemCount": 13,
+        "responseId": "resp_0c5aee0a0ad7825c006aca6e89714087d284308b5935af906e",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 512,
+        "visibleOutputChars": 13342
+      }
+    ],
+    "noLiveWrites": true,
+    "websiteEnrichment": false,
+    "venueHoursSource": "frozen October 10 venue snapshot"
+  },
+  {
+    "row": 32,
+    "postId": "1558823136285218",
+    "sourceUrl": "https://www.facebook.com/1558823136285218",
+    "arm": "mini-current",
+    "elapsedMs": 51956,
+    "stage3": [
+      {
+        "name": "PRINCE EDWARD ISLAND MARATHON",
+        "date": "2026-10-16",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "calendar",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "10K RUN",
+        "date": "2026-10-17",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "calendar",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "10K WALK",
+        "date": "2026-10-17",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "calendar",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "5K RUN",
+        "date": "2026-10-17",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "calendar",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "5K WALK",
+        "date": "2026-10-17",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "calendar",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "2K WHEELCHAIR",
+        "date": "2026-10-17",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "calendar",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "KIDS FOX TROT",
+        "date": "2026-10-17",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "calendar",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "FULL MARATHON",
+        "date": "2026-10-18",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "calendar",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "TEAM RELAY",
+        "date": "2026-10-18",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "calendar",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "HALF MARATHON RUN",
+        "date": "2026-10-18",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "calendar",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "HALF MARATHON WALK",
+        "date": "2026-10-18",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "calendar",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "15K RUN",
+        "date": "2026-10-18",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "calendar",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "15K WALK",
+        "date": "2026-10-18",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "calendar",
+        "relevantImageIndex": 0
+      }
+    ],
+    "stage3Held": [],
+    "stage4": [],
+    "finalDryRun": [],
+    "skips": [
+      {
+        "stage": "stage4",
+        "reason": "Luna canary requires source review",
+        "detail": "stage4_no_items"
+      }
+    ],
+    "usage": [
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 1,
+        "durationMs": 33280,
+        "inputTokens": 5529,
+        "outputTokens": 4456,
+        "totalTokens": 9985,
+        "cachedInputTokens": 0
+      },
+      {
+        "stage": "stage4",
+        "component": "secondaryValidator",
+        "endpoint": "responses",
+        "model": "gpt-5-nano",
+        "durationMs": 18471,
+        "inputTokens": 4422,
+        "outputTokens": 4075,
+        "totalTokens": 8497,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 32,
+        "postId": "1558823136285218",
+        "batchItemCount": 13,
+        "responseId": "resp_053313494ea3303b006aca6e717cf487d2a657930caa6cc7d8",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 512,
+        "visibleOutputChars": 14529
+      }
+    ],
+    "noLiveWrites": true,
+    "websiteEnrichment": false,
+    "venueHoursSource": "frozen October 10 venue snapshot"
+  },
+  {
+    "row": 341,
+    "postId": "122304895820019252",
+    "sourceUrl": "https://www.facebook.com/122304895820019252",
+    "arm": "luna-negative-review",
+    "elapsedMs": 17672,
+    "stage3": [
+      {
+        "name": "Fall menu and local specials launch",
+        "date": "2026-10-11",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "special"
+      }
+    ],
+    "stage3Held": [],
+    "stage4": [
+      {
+        "name": "Fall menu and local specials launch",
+        "date": "2026-10-11",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "special"
+      }
+    ],
+    "formattedBeforeHours": [
+      {
+        "name": "Fall menu and local specials launch",
+        "date": "2026-10-11",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "special",
+        "isFoodSpecial": "Yes",
+        "relevantImageIndex": 0
+      }
+    ],
+    "finalDryRun": [
+      {
+        "name": "Fall menu and local specials launch",
+        "date": "2026-10-11",
+        "startTime": "07:00",
+        "endTime": "21:00",
+        "sourceType": "special",
+        "isFoodSpecial": "Yes",
+        "relevantImageIndex": 0
+      }
+    ],
+    "skips": [],
+    "usage": [
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 1,
+        "durationMs": 3843,
+        "inputTokens": 5225,
+        "outputTokens": 236,
+        "totalTokens": 5461,
+        "cachedInputTokens": 5222
+      },
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 1,
+        "durationMs": 4565,
+        "inputTokens": 4412,
+        "outputTokens": 336,
+        "totalTokens": 4748,
+        "cachedInputTokens": 0
+      },
+      {
+        "stage": "stage4",
+        "component": "secondaryValidator",
+        "endpoint": "responses",
+        "model": "gpt-5-nano",
+        "durationMs": 5253,
+        "inputTokens": 2182,
+        "outputTokens": 862,
+        "totalTokens": 3044,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 341,
+        "postId": "122304895820019252",
+        "batchItemCount": 1,
+        "responseId": "resp_06250a3eea9ddc0f006aca6fc648f087d2b5f7945869d99f8d",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 384,
+        "visibleOutputChars": 1845
+      },
+      {
+        "stage": "stage5",
+        "component": "finalFormatter",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "durationMs": 3984,
+        "inputTokens": 2143,
+        "outputTokens": 308,
+        "totalTokens": 2451,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 341,
+        "postId": "122304895820019252",
+        "responseId": "resp_09851794e64aeae4006aca6fcb8a4887d2b588ca58a079e693",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 0,
+        "visibleOutputChars": 1327,
+        "parsedItemCount": 1,
+        "parseError": false,
+        "batchOffset": 0,
+        "batchItemCount": 1
+      }
+    ],
+    "noLiveWrites": true,
+    "websiteEnrichment": false,
+    "venueHoursSource": "frozen October 10 venue snapshot"
+  },
+  {
+    "row": 341,
+    "postId": "122304895820019252",
+    "sourceUrl": "https://www.facebook.com/122304895820019252",
+    "arm": "mini-current",
+    "elapsedMs": 18844,
+    "stage3": [
+      {
+        "name": "Fall menu and local specials launch",
+        "date": "2026-10-11",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "special"
+      }
+    ],
+    "stage3Held": [],
+    "stage4": [],
+    "finalDryRun": [],
+    "skips": [
+      {
+        "stage": "stage4",
+        "reason": "Luna canary requires source review",
+        "detail": "stage4_no_items"
+      }
+    ],
+    "usage": [
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 1,
+        "durationMs": 2565,
+        "inputTokens": 6204,
+        "outputTokens": 124,
+        "totalTokens": 6328,
+        "cachedInputTokens": 0
+      },
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 1,
+        "durationMs": 3876,
+        "inputTokens": 5225,
+        "outputTokens": 159,
+        "totalTokens": 5384,
+        "cachedInputTokens": 0
+      },
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 1,
+        "durationMs": 6522,
+        "inputTokens": 4416,
+        "outputTokens": 340,
+        "totalTokens": 4756,
+        "cachedInputTokens": 0
+      },
+      {
+        "stage": "stage4",
+        "component": "secondaryValidator",
+        "endpoint": "responses",
+        "model": "gpt-5-nano",
+        "durationMs": 5871,
+        "inputTokens": 2179,
+        "outputTokens": 973,
+        "totalTokens": 3152,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 341,
+        "postId": "122304895820019252",
+        "batchItemCount": 1,
+        "responseId": "resp_0a020a5773db0ceb006aca6fbb5f4887d28e067fe8f429171c",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 448,
+        "visibleOutputChars": 2065
+      }
+    ],
+    "noLiveWrites": true,
+    "websiteEnrichment": false,
+    "venueHoursSource": "frozen October 10 venue snapshot"
+  },
+  {
+    "row": 348,
+    "postId": "1549619793637990",
+    "sourceUrl": "https://www.facebook.com/1549619793637990",
+    "arm": "luna-negative-review",
+    "elapsedMs": 18469,
+    "stage3": [
+      {
+        "name": "Day-old Bread First-Time Offer",
+        "date": "2026-10-09",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "special",
+        "relevantImageIndex": 0
+      }
+    ],
+    "stage3Held": [],
+    "stage4": [
+      {
+        "name": "Day-old Bread First-Time Offer",
+        "date": "2026-10-09",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "special",
+        "relevantImageIndex": 0
+      }
+    ],
+    "formattedBeforeHours": [
+      {
+        "name": "Day-old Bread First-Time Offer",
+        "date": "2026-10-09",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "special",
+        "isFoodSpecial": "Yes",
+        "relevantImageIndex": 0
+      }
+    ],
+    "finalDryRun": [
+      {
+        "name": "Day-old Bread First-Time Offer",
+        "date": "2026-10-09",
+        "startTime": "09:00",
+        "endTime": "17:00",
+        "sourceType": "special",
+        "isFoodSpecial": "Yes",
+        "relevantImageIndex": 0
+      }
+    ],
+    "skips": [],
+    "usage": [
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 1,
+        "durationMs": 10920,
+        "inputTokens": 5333,
+        "outputTokens": 1062,
+        "totalTokens": 6395,
+        "cachedInputTokens": 5330
+      },
+      {
+        "stage": "stage4",
+        "component": "secondaryValidator",
+        "endpoint": "responses",
+        "model": "gpt-5-nano",
+        "durationMs": 4349,
+        "inputTokens": 2181,
+        "outputTokens": 673,
+        "totalTokens": 2854,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 348,
+        "postId": "1549619793637990",
+        "batchItemCount": 1,
+        "responseId": "resp_0a65827739b2ea75006aca6fd1eb0887d28ac66f946eba6372",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 192,
+        "visibleOutputChars": 1725
+      },
+      {
+        "stage": "stage5",
+        "component": "finalFormatter",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "durationMs": 3171,
+        "inputTokens": 2145,
+        "outputTokens": 292,
+        "totalTokens": 2437,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 348,
+        "postId": "1549619793637990",
+        "responseId": "resp_0fff493e651b601d006aca6fd6455887d29f0611cc994688f7",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 0,
+        "visibleOutputChars": 1260,
+        "parsedItemCount": 1,
+        "parseError": false,
+        "batchOffset": 0,
+        "batchItemCount": 1
+      }
+    ],
+    "noLiveWrites": true,
+    "websiteEnrichment": false,
+    "venueHoursSource": "frozen October 10 venue snapshot"
+  },
+  {
+    "row": 348,
+    "postId": "1549619793637990",
+    "sourceUrl": "https://www.facebook.com/1549619793637990",
+    "arm": "mini-current",
+    "elapsedMs": 19042,
+    "stage3": [
+      {
+        "name": "First-Time Day-Old Bread Offer",
+        "date": "2026-10-09",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "special",
+        "relevantImageIndex": 0
+      }
+    ],
+    "stage3Held": [],
+    "stage4": [
+      {
+        "name": "First-Time Day-Old Bread Offer",
+        "date": "2026-10-09",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "special",
+        "relevantImageIndex": 0
+      }
+    ],
+    "formattedBeforeHours": [
+      {
+        "name": "First-Time Day-Old Bread Offer",
+        "date": "2026-10-09",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "special",
+        "isFoodSpecial": "Yes",
+        "relevantImageIndex": 0
+      }
+    ],
+    "finalDryRun": [
+      {
+        "name": "First-Time Day-Old Bread Offer",
+        "date": "2026-10-09",
+        "startTime": "09:00",
+        "endTime": "17:00",
+        "sourceType": "special",
+        "isFoodSpecial": "Yes",
+        "relevantImageIndex": 0
+      }
+    ],
+    "skips": [],
+    "usage": [
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 1,
+        "durationMs": 2927,
+        "inputTokens": 6312,
+        "outputTokens": 131,
+        "totalTokens": 6443,
+        "cachedInputTokens": 0
+      },
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 1,
+        "durationMs": 8287,
+        "inputTokens": 5333,
+        "outputTokens": 850,
+        "totalTokens": 6183,
+        "cachedInputTokens": 0
+      },
+      {
+        "stage": "stage4",
+        "component": "secondaryValidator",
+        "endpoint": "responses",
+        "model": "gpt-5-nano",
+        "durationMs": 4315,
+        "inputTokens": 2183,
+        "outputTokens": 726,
+        "totalTokens": 2909,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 348,
+        "postId": "1549619793637990",
+        "batchItemCount": 1,
+        "responseId": "resp_005653730e1c35bc006aca6fcc7a7087d2a0dded852800615b",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 256,
+        "visibleOutputChars": 1623
+      },
+      {
+        "stage": "stage5",
+        "component": "finalFormatter",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "durationMs": 3467,
+        "inputTokens": 2147,
+        "outputTokens": 292,
+        "totalTokens": 2439,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 348,
+        "postId": "1549619793637990",
+        "responseId": "resp_075680933ad51c3f006aca6fd0d05887d2b5467ef7b2289d6b",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 0,
+        "visibleOutputChars": 1259,
+        "parsedItemCount": 1,
+        "parseError": false,
+        "batchOffset": 0,
+        "batchItemCount": 1
+      }
+    ],
+    "noLiveWrites": true,
+    "websiteEnrichment": false,
+    "venueHoursSource": "frozen October 10 venue snapshot"
+  },
+  {
+    "row": 35,
+    "postId": "1737936975008400",
+    "sourceUrl": "https://www.facebook.com/1737936975008400",
+    "arm": "luna-negative-review",
+    "elapsedMs": 30649,
+    "stage3": [
+      {
+        "name": "Kelley Mooney Music",
+        "date": "2026-10-09",
+        "startTime": "20:00",
+        "endTime": "23:00",
+        "sourceType": "schedule",
+        "relevantImageIndex": 1
+      },
+      {
+        "name": "Marc Coughlin",
+        "date": "2026-10-10",
+        "startTime": "20:00",
+        "endTime": "23:00",
+        "sourceType": "schedule",
+        "relevantImageIndex": 2
+      },
+      {
+        "name": "Irish Music Session",
+        "date": "2026-10-11",
+        "startTime": "14:00",
+        "endTime": "16:00",
+        "sourceType": "schedule",
+        "relevantImageIndex": 3
+      },
+      {
+        "name": "Two course Turkey Dinner",
+        "date": "2026-10-11",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "schedule",
+        "relevantImageIndex": 0
+      }
+    ],
+    "stage3Held": [],
+    "stage4": [
+      {
+        "name": "Kelley Mooney Music",
+        "date": "2026-10-09",
+        "startTime": "20:00",
+        "endTime": "23:00",
+        "sourceType": "schedule",
+        "relevantImageIndex": 1
+      },
+      {
+        "name": "Marc Coughlin",
+        "date": "2026-10-10",
+        "startTime": "20:00",
+        "endTime": "23:00",
+        "sourceType": "schedule",
+        "relevantImageIndex": 2
+      },
+      {
+        "name": "Irish Music Session",
+        "date": "2026-10-11",
+        "startTime": "14:00",
+        "endTime": "16:00",
+        "sourceType": "schedule",
+        "relevantImageIndex": 3
+      }
+    ],
+    "finalDryRun": [
+      {
+        "name": "Kelley Mooney Music",
+        "date": "2026-10-09",
+        "startTime": "20:00",
+        "endTime": "23:00",
+        "sourceType": "schedule",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": 1
+      },
+      {
+        "name": "Marc Coughlin",
+        "date": "2026-10-10",
+        "startTime": "20:00",
+        "endTime": "23:00",
+        "sourceType": "schedule",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": 2
+      },
+      {
+        "name": "Irish Music Session",
+        "date": "2026-10-11",
+        "startTime": "14:00",
+        "endTime": "16:00",
+        "sourceType": "schedule",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": 3
+      }
+    ],
+    "skips": [],
+    "usage": [
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 4,
+        "durationMs": 14487,
+        "inputTokens": 16203,
+        "outputTokens": 1582,
+        "totalTokens": 17785,
+        "cachedInputTokens": 0
+      },
+      {
+        "stage": "stage4",
+        "component": "secondaryValidator",
+        "endpoint": "responses",
+        "model": "gpt-5-nano",
+        "durationMs": 9477,
+        "inputTokens": 2847,
+        "outputTokens": 1791,
+        "totalTokens": 4638,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 35,
+        "postId": "1737936975008400",
+        "batchItemCount": 4,
+        "responseId": "resp_0d46c31cfba6617f006aca6e92772087d2ac1d6a40bea28fef",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 448,
+        "visibleOutputChars": 5146
+      },
+      {
+        "stage": "stage5",
+        "component": "finalFormatter",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "durationMs": 6621,
+        "inputTokens": 2591,
+        "outputTokens": 768,
+        "totalTokens": 3359,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 35,
+        "postId": "1737936975008400",
+        "responseId": "resp_0383c063c4372c42006aca6e9bfe9887d2810518dee1757e11",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 0,
+        "visibleOutputChars": 3350,
+        "parsedItemCount": 3,
+        "parseError": false,
+        "batchOffset": 0,
+        "batchItemCount": 3
+      }
+    ],
+    "noLiveWrites": true,
+    "websiteEnrichment": false,
+    "venueHoursSource": "frozen October 10 venue snapshot"
+  },
+  {
+    "row": 35,
+    "postId": "1737936975008400",
+    "sourceUrl": "https://www.facebook.com/1737936975008400",
+    "arm": "mini-current",
+    "elapsedMs": 43048,
+    "stage3": [
+      {
+        "name": "Kelley Mooney Music",
+        "date": "2026-10-09",
+        "startTime": "20:00",
+        "endTime": "23:00",
+        "sourceType": "event",
+        "relevantImageIndex": 1
+      },
+      {
+        "name": "Marc Coughlin",
+        "date": "2026-10-10",
+        "startTime": "20:00",
+        "endTime": "23:00",
+        "sourceType": "event",
+        "relevantImageIndex": 2
+      },
+      {
+        "name": "Irish Music Session",
+        "date": "2026-10-11",
+        "startTime": "14:00",
+        "endTime": "16:00",
+        "sourceType": "event",
+        "relevantImageIndex": 3
+      },
+      {
+        "name": "Two-course Turkey Dinner",
+        "date": "2026-10-11",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "special",
+        "relevantImageIndex": 0
+      }
+    ],
+    "stage3Held": [],
+    "stage4": [
+      {
+        "name": "Kelley Mooney Music",
+        "date": "2026-10-09",
+        "startTime": "20:00",
+        "endTime": "23:00",
+        "sourceType": "event",
+        "relevantImageIndex": 1
+      },
+      {
+        "name": "Marc Coughlin",
+        "date": "2026-10-10",
+        "startTime": "20:00",
+        "endTime": "23:00",
+        "sourceType": "event",
+        "relevantImageIndex": 2
+      },
+      {
+        "name": "Irish Music Session",
+        "date": "2026-10-11",
+        "startTime": "14:00",
+        "endTime": "16:00",
+        "sourceType": "event",
+        "relevantImageIndex": 3
+      },
+      {
+        "name": "Two-course Turkey Dinner",
+        "date": "2026-10-11",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "special",
+        "relevantImageIndex": 0
+      }
+    ],
+    "finalDryRun": [
+      {
+        "name": "Kelley Mooney Music",
+        "date": "2026-10-09",
+        "startTime": "20:00",
+        "endTime": "23:00",
+        "sourceType": "event",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": 1
+      },
+      {
+        "name": "Marc Coughlin",
+        "date": "2026-10-10",
+        "startTime": "20:00",
+        "endTime": "23:00",
+        "sourceType": "event",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": 2
+      },
+      {
+        "name": "Irish Music Session",
+        "date": "2026-10-11",
+        "startTime": "14:00",
+        "endTime": "16:00",
+        "sourceType": "event",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": 3
+      }
+    ],
+    "skips": [],
+    "usage": [
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 4,
+        "durationMs": 12962,
+        "inputTokens": 17011,
+        "outputTokens": 1290,
+        "totalTokens": 18301,
+        "cachedInputTokens": 0
+      },
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 4,
+        "durationMs": 10752,
+        "inputTokens": 16032,
+        "outputTokens": 920,
+        "totalTokens": 16952,
+        "cachedInputTokens": 0
+      },
+      {
+        "stage": "stage4",
+        "component": "secondaryValidator",
+        "endpoint": "responses",
+        "model": "gpt-5-nano",
+        "durationMs": 8976,
+        "inputTokens": 2984,
+        "outputTokens": 1872,
+        "totalTokens": 4856,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 35,
+        "postId": "1737936975008400",
+        "batchItemCount": 4,
+        "responseId": "resp_06b835cb839c9b6a006aca6e8221ec87d297c2f54aa585d38e",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 448,
+        "visibleOutputChars": 5584
+      },
+      {
+        "stage": "stage5",
+        "component": "finalFormatter",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "durationMs": 10284,
+        "inputTokens": 2981,
+        "outputTokens": 1360,
+        "totalTokens": 4341,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 35,
+        "postId": "1737936975008400",
+        "responseId": "resp_0d2fe60bd1bec249006aca6e8b1e5887d28b63e27b8b393662",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 0,
+        "visibleOutputChars": 5224,
+        "parsedItemCount": 4,
+        "parseError": false,
+        "batchOffset": 0,
+        "batchItemCount": 4
+      }
+    ],
+    "noLiveWrites": true,
+    "websiteEnrichment": false,
+    "venueHoursSource": "frozen October 10 venue snapshot"
+  },
+  {
+    "row": 38,
+    "postId": "1722025253265600",
+    "sourceUrl": "https://www.facebook.com/1722025253265600",
+    "arm": "luna-negative-review",
+    "elapsedMs": 13744,
+    "stage3": [
+      {
+        "name": "Harvest special",
+        "date": "2026-10-09",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "special",
+        "relevantImageIndex": 3
+      }
+    ],
+    "stage3Held": [],
+    "stage4": [
+      {
+        "name": "Harvest special",
+        "date": "2026-10-09",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "special",
+        "relevantImageIndex": 3
+      }
+    ],
+    "finalDryRun": [
+      {
+        "name": "Harvest special",
+        "date": "2026-10-09",
+        "startTime": "11:31",
+        "endTime": "21:00",
+        "sourceType": "special",
+        "isFoodSpecial": "Yes",
+        "relevantImageIndex": 3
+      }
+    ],
+    "skips": [],
+    "usage": [
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 5,
+        "durationMs": 7519,
+        "inputTokens": 16517,
+        "outputTokens": 612,
+        "totalTokens": 17129,
+        "cachedInputTokens": 16514
+      },
+      {
+        "stage": "stage4",
+        "component": "secondaryValidator",
+        "endpoint": "responses",
+        "model": "gpt-5-nano",
+        "durationMs": 3289,
+        "inputTokens": 2141,
+        "outputTokens": 555,
+        "totalTokens": 2696,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 38,
+        "postId": "1722025253265600",
+        "batchItemCount": 1,
+        "responseId": "resp_031db963b2b216e6006aca6ea2febc87d28acae6d374e407c4",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 192,
+        "visibleOutputChars": 1333
+      },
+      {
+        "stage": "stage5",
+        "component": "finalFormatter",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "durationMs": 2885,
+        "inputTokens": 2117,
+        "outputTokens": 245,
+        "totalTokens": 2362,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 38,
+        "postId": "1722025253265600",
+        "responseId": "resp_0ad5f17479ecb714006aca6ea6539887d2bae4efa6f1e185aa",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 0,
+        "visibleOutputChars": 1039,
+        "parsedItemCount": 1,
+        "parseError": false,
+        "batchOffset": 0,
+        "batchItemCount": 1
+      }
+    ],
+    "noLiveWrites": true,
+    "websiteEnrichment": false,
+    "venueHoursSource": "frozen October 10 venue snapshot"
+  },
+  {
+    "row": 38,
+    "postId": "1722025253265600",
+    "sourceUrl": "https://www.facebook.com/1722025253265600",
+    "arm": "mini-current",
+    "elapsedMs": 20564,
+    "stage3": [
+      {
+        "name": "Harvest special",
+        "date": "2026-10-09",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "special",
+        "relevantImageIndex": 3
+      }
+    ],
+    "stage3Held": [],
+    "stage4": [
+      {
+        "name": "Harvest special",
+        "date": "2026-10-09",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "special",
+        "relevantImageIndex": 3
+      }
+    ],
+    "finalDryRun": [
+      {
+        "name": "Harvest special",
+        "date": "2026-10-09",
+        "startTime": "11:31",
+        "endTime": "21:00",
+        "sourceType": "special",
+        "isFoodSpecial": "Yes",
+        "relevantImageIndex": 3
+      }
+    ],
+    "skips": [],
+    "usage": [
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 5,
+        "durationMs": 4403,
+        "inputTokens": 17496,
+        "outputTokens": 167,
+        "totalTokens": 17663,
+        "cachedInputTokens": 0
+      },
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 5,
+        "durationMs": 7792,
+        "inputTokens": 16517,
+        "outputTokens": 601,
+        "totalTokens": 17118,
+        "cachedInputTokens": 0
+      },
+      {
+        "stage": "stage4",
+        "component": "secondaryValidator",
+        "endpoint": "responses",
+        "model": "gpt-5-nano",
+        "durationMs": 5429,
+        "inputTokens": 2148,
+        "outputTokens": 696,
+        "totalTokens": 2844,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 38,
+        "postId": "1722025253265600",
+        "batchItemCount": 1,
+        "responseId": "resp_0fb374067f4fb91e006aca6ea1a5f887d2b04a7bfbe0d7b79a",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 320,
+        "visibleOutputChars": 1423
+      },
+      {
+        "stage": "stage5",
+        "component": "finalFormatter",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "durationMs": 2900,
+        "inputTokens": 2124,
+        "outputTokens": 247,
+        "totalTokens": 2371,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 38,
+        "postId": "1722025253265600",
+        "responseId": "resp_020d26f7c2fed240006aca6ea718e487d2920b85c4f9a715f8",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 0,
+        "visibleOutputChars": 1078,
+        "parsedItemCount": 1,
+        "parseError": false,
+        "batchOffset": 0,
+        "batchItemCount": 1
+      }
+    ],
+    "noLiveWrites": true,
+    "websiteEnrichment": false,
+    "venueHoursSource": "frozen October 10 venue snapshot"
+  },
+  {
+    "row": 53,
+    "postId": "1128140023071506",
+    "sourceUrl": "https://www.facebook.com/1128140023071506",
+    "arm": "luna-negative-review",
+    "elapsedMs": 16197,
+    "stage3": [
+      {
+        "name": "Trivia Fridays with Host Kirk Mackinnon",
+        "date": "2026-10-09",
+        "startTime": "19:00",
+        "endTime": "",
+        "sourceType": "",
+        "relevantImageIndex": 0
+      }
+    ],
+    "stage3Held": [],
+    "stage4": [
+      {
+        "name": "Trivia Fridays with Host Kirk Mackinnon",
+        "date": "2026-10-09",
+        "startTime": "19:00",
+        "endTime": "",
+        "sourceType": "",
+        "relevantImageIndex": 0
+      }
+    ],
+    "finalDryRun": [
+      {
+        "name": "Trivia Fridays with Host Kirk Mackinnon",
+        "date": "2026-10-09",
+        "startTime": "19:00",
+        "endTime": "22:00",
+        "sourceType": "",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": 0
+      }
+    ],
+    "skips": [],
+    "usage": [
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 1,
+        "durationMs": 8274,
+        "inputTokens": 6218,
+        "outputTokens": 1014,
+        "totalTokens": 7232,
+        "cachedInputTokens": 6215
+      },
+      {
+        "stage": "stage4",
+        "component": "secondaryValidator",
+        "endpoint": "responses",
+        "model": "gpt-5-nano",
+        "durationMs": 4546,
+        "inputTokens": 2316,
+        "outputTokens": 790,
+        "totalTokens": 3106,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 53,
+        "postId": "1128140023071506",
+        "batchItemCount": 1,
+        "responseId": "resp_0443fd98f6a9a45c006aca6eb1802487d2ae9c6096e1b0b16d",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 192,
+        "visibleOutputChars": 2212
+      },
+      {
+        "stage": "stage5",
+        "component": "finalFormatter",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "durationMs": 3356,
+        "inputTokens": 2286,
+        "outputTokens": 287,
+        "totalTokens": 2573,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 53,
+        "postId": "1128140023071506",
+        "responseId": "resp_032e5eb9f311f159006aca6eb63ae487d2ae2df773cbc0108d",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 0,
+        "visibleOutputChars": 1262,
+        "parsedItemCount": 1,
+        "parseError": false,
+        "batchOffset": 0,
+        "batchItemCount": 1
+      }
+    ],
+    "noLiveWrites": true,
+    "websiteEnrichment": false,
+    "venueHoursSource": "frozen October 10 venue snapshot"
+  },
+  {
+    "row": 53,
+    "postId": "1128140023071506",
+    "sourceUrl": "https://www.facebook.com/1128140023071506",
+    "arm": "mini-current",
+    "elapsedMs": 26271,
+    "stage3": [
+      {
+        "name": "Trivia Fridays with host Kirk Mackinnon",
+        "date": "2026-10-09",
+        "startTime": "19:00",
+        "endTime": "",
+        "sourceType": "event",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Warren Grove Sour Smash",
+        "date": "2026-10-09",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "special",
+        "relevantImageIndex": 0
+      }
+    ],
+    "stage3Held": [],
+    "stage4": [
+      {
+        "name": "Trivia Fridays with host Kirk Mackinnon",
+        "date": "2026-10-09",
+        "startTime": "19:00",
+        "endTime": "",
+        "sourceType": "event",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Warren Grove Sour Smash",
+        "date": "2026-10-09",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "special",
+        "relevantImageIndex": 0
+      }
+    ],
+    "finalDryRun": [
+      {
+        "name": "Trivia Fridays with host Kirk Mackinnon",
+        "date": "2026-10-09",
+        "startTime": "19:00",
+        "endTime": "22:00",
+        "sourceType": "event",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Warren Grove Sour Smash",
+        "date": "2026-10-09",
+        "startTime": "11:30",
+        "endTime": "22:00",
+        "sourceType": "special",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": 0
+      }
+    ],
+    "skips": [],
+    "usage": [
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 1,
+        "durationMs": 6493,
+        "inputTokens": 6218,
+        "outputTokens": 711,
+        "totalTokens": 6929,
+        "cachedInputTokens": 0
+      },
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 1,
+        "durationMs": 8125,
+        "inputTokens": 5239,
+        "outputTokens": 669,
+        "totalTokens": 5908,
+        "cachedInputTokens": 0
+      },
+      {
+        "stage": "stage4",
+        "component": "secondaryValidator",
+        "endpoint": "responses",
+        "model": "gpt-5-nano",
+        "durationMs": 6840,
+        "inputTokens": 2521,
+        "outputTokens": 1294,
+        "totalTokens": 3815,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 53,
+        "postId": "1128140023071506",
+        "batchItemCount": 2,
+        "responseId": "resp_00fa3dbe4632c779006aca6eb1493887d2b20ed8095d0665f3",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 448,
+        "visibleOutputChars": 3384
+      },
+      {
+        "stage": "stage5",
+        "component": "finalFormatter",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "durationMs": 4777,
+        "inputTokens": 2499,
+        "outputTokens": 507,
+        "totalTokens": 3006,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 53,
+        "postId": "1128140023071506",
+        "responseId": "resp_0038e939cce5fb62006aca6eb81fd887d2ab937c32a6c6ab65",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 0,
+        "visibleOutputChars": 2318,
+        "parsedItemCount": 2,
+        "parseError": false,
+        "batchOffset": 0,
+        "batchItemCount": 2
+      }
+    ],
+    "noLiveWrites": true,
+    "websiteEnrichment": false,
+    "venueHoursSource": "frozen October 10 venue snapshot"
+  },
+  {
+    "row": 74,
+    "postId": "1721127946684446",
+    "sourceUrl": "https://www.facebook.com/1721127946684446",
+    "arm": "luna-negative-review",
+    "elapsedMs": 25478,
+    "stage3": [
+      {
+        "name": "Chefs’ Harvest",
+        "date": "2026-10-09",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "event"
+      },
+      {
+        "name": "Chefs’ Harvest Culinary Retreat seasonal offer",
+        "date": "2026-10-09",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "special"
+      }
+    ],
+    "stage3Held": [],
+    "stage4": [
+      {
+        "name": "Chefs’ Harvest Culinary Retreat seasonal offer",
+        "date": "2026-10-09",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "special"
+      }
+    ],
+    "finalDryRun": [
+      {
+        "name": "Chefs’ Harvest Culinary Retreat seasonal offer",
+        "date": "2026-10-09",
+        "startTime": "14:00",
+        "endTime": "21:00",
+        "sourceType": "special",
+        "isFoodSpecial": "Yes",
+        "relevantImageIndex": 0
+      }
+    ],
+    "skips": [],
+    "usage": [
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 3,
+        "durationMs": 5036,
+        "inputTokens": 14614,
+        "outputTokens": 352,
+        "totalTokens": 14966,
+        "cachedInputTokens": 14611
+      },
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 3,
+        "durationMs": 9719,
+        "inputTokens": 12819,
+        "outputTokens": 916,
+        "totalTokens": 13735,
+        "cachedInputTokens": 0
+      },
+      {
+        "stage": "stage4",
+        "component": "secondaryValidator",
+        "endpoint": "responses",
+        "model": "gpt-5-nano",
+        "durationMs": 6047,
+        "inputTokens": 2440,
+        "outputTokens": 1223,
+        "totalTokens": 3663,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 74,
+        "postId": "1721127946684446",
+        "batchItemCount": 2,
+        "responseId": "resp_0b95ed5e875d6f77006aca6ec832e487d28526552268fe4439",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 448,
+        "visibleOutputChars": 3289
+      },
+      {
+        "stage": "stage5",
+        "component": "finalFormatter",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "durationMs": 4611,
+        "inputTokens": 2185,
+        "outputTokens": 450,
+        "totalTokens": 2635,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 74,
+        "postId": "1721127946684446",
+        "responseId": "resp_07ef3753ed62fff7006aca6ece449087d28eb3445e893cbb8d",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 0,
+        "visibleOutputChars": 1844,
+        "parsedItemCount": 1,
+        "parseError": false,
+        "batchOffset": 0,
+        "batchItemCount": 1
+      }
+    ],
+    "noLiveWrites": true,
+    "websiteEnrichment": false,
+    "venueHoursSource": "frozen October 10 venue snapshot"
+  },
+  {
+    "row": 74,
+    "postId": "1721127946684446",
+    "sourceUrl": "https://www.facebook.com/1721127946684446",
+    "arm": "mini-current",
+    "elapsedMs": 27867,
+    "stage3": [
+      {
+        "name": "Chefs’ Harvest Culinary Retreat package",
+        "date": "2026-10-09",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "special",
+        "relevantImageIndex": 0
+      }
+    ],
+    "stage3Held": [],
+    "stage4": [
+      {
+        "name": "Chefs’ Harvest Culinary Retreat package",
+        "date": "2026-10-09",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "special",
+        "relevantImageIndex": 0
+      }
+    ],
+    "finalDryRun": [
+      {
+        "name": "Chefs’ Harvest Culinary Retreat package",
+        "date": "2026-10-09",
+        "startTime": "14:00",
+        "endTime": "21:00",
+        "sourceType": "special",
+        "isFoodSpecial": "Yes",
+        "relevantImageIndex": 0
+      }
+    ],
+    "skips": [],
+    "usage": [
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 3,
+        "durationMs": 5078,
+        "inputTokens": 14614,
+        "outputTokens": 349,
+        "totalTokens": 14963,
+        "cachedInputTokens": 0
+      },
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 3,
+        "durationMs": 14388,
+        "inputTokens": 13635,
+        "outputTokens": 1315,
+        "totalTokens": 14950,
+        "cachedInputTokens": 0
+      },
+      {
+        "stage": "stage4",
+        "component": "secondaryValidator",
+        "endpoint": "responses",
+        "model": "gpt-5-nano",
+        "durationMs": 4921,
+        "inputTokens": 2188,
+        "outputTokens": 940,
+        "totalTokens": 3128,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 74,
+        "postId": "1721127946684446",
+        "batchItemCount": 1,
+        "responseId": "resp_0397ad513c62b7fa006aca6ebd807c87d286a85877a9b85f91",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 448,
+        "visibleOutputChars": 1826
+      },
+      {
+        "stage": "stage5",
+        "component": "finalFormatter",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "durationMs": 3447,
+        "inputTokens": 2155,
+        "outputTokens": 275,
+        "totalTokens": 2430,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 74,
+        "postId": "1721127946684446",
+        "responseId": "resp_0c998f45f88b086e006aca6ec274a087d2aa0bcae0e3c24a52",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 0,
+        "visibleOutputChars": 1290,
+        "parsedItemCount": 1,
+        "parseError": false,
+        "batchOffset": 0,
+        "batchItemCount": 1
+      }
+    ],
+    "noLiveWrites": true,
+    "websiteEnrichment": false,
+    "venueHoursSource": "frozen October 10 venue snapshot"
+  },
+  {
+    "row": 77,
+    "postId": "1876827866914224",
+    "sourceUrl": "https://www.facebook.com/1876827866914224",
+    "arm": "luna-negative-review",
+    "elapsedMs": 15585,
+    "stage3": [
+      {
+        "name": "Roast Turkey Dinner",
+        "date": "2026-10-11",
+        "startTime": "11:00",
+        "endTime": "19:00",
+        "sourceType": "special",
+        "relevantImageIndex": 0
+      }
+    ],
+    "stage3Held": [],
+    "stage4": [
+      {
+        "name": "Roast Turkey Dinner",
+        "date": "2026-10-11",
+        "startTime": "11:00",
+        "endTime": "19:00",
+        "sourceType": "special",
+        "relevantImageIndex": 0
+      }
+    ],
+    "finalDryRun": [
+      {
+        "name": "Roast Turkey Dinner",
+        "date": "2026-10-11",
+        "startTime": "11:00",
+        "endTime": "19:00",
+        "sourceType": "special",
+        "isFoodSpecial": "Yes",
+        "relevantImageIndex": 0
+      }
+    ],
+    "skips": [],
+    "usage": [
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 1,
+        "durationMs": 8477,
+        "inputTokens": 5758,
+        "outputTokens": 790,
+        "totalTokens": 6548,
+        "cachedInputTokens": 5755
+      },
+      {
+        "stage": "stage4",
+        "component": "secondaryValidator",
+        "endpoint": "responses",
+        "model": "gpt-5-nano",
+        "durationMs": 3888,
+        "inputTokens": 2195,
+        "outputTokens": 882,
+        "totalTokens": 3077,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 77,
+        "postId": "1876827866914224",
+        "batchItemCount": 1,
+        "responseId": "resp_06426c82503e6f08006aca6ece65e887d2a4da4ae646bc1a24",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 384,
+        "visibleOutputChars": 1691
+      },
+      {
+        "stage": "stage5",
+        "component": "finalFormatter",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "durationMs": 3204,
+        "inputTokens": 2162,
+        "outputTokens": 286,
+        "totalTokens": 2448,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 77,
+        "postId": "1876827866914224",
+        "responseId": "resp_09db3612fa3fcb78006aca6ed24ee087d2ad2bc447c07be95f",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 0,
+        "visibleOutputChars": 1176,
+        "parsedItemCount": 1,
+        "parseError": false,
+        "batchOffset": 0,
+        "batchItemCount": 1
+      }
+    ],
+    "noLiveWrites": true,
+    "websiteEnrichment": false,
+    "venueHoursSource": "frozen October 10 venue snapshot"
+  },
+  {
+    "row": 77,
+    "postId": "1876827866914224",
+    "sourceUrl": "https://www.facebook.com/1876827866914224",
+    "arm": "mini-current",
+    "elapsedMs": 25416,
+    "stage3": [
+      {
+        "name": "Roast Turkey Dinner",
+        "date": "2026-10-11",
+        "startTime": "11:00",
+        "endTime": "19:00",
+        "sourceType": "special",
+        "relevantImageIndex": 0
+      }
+    ],
+    "stage3Held": [],
+    "stage4": [
+      {
+        "name": "Roast Turkey Dinner",
+        "date": "2026-10-11",
+        "startTime": "11:00",
+        "endTime": "19:00",
+        "sourceType": "special",
+        "relevantImageIndex": 0
+      }
+    ],
+    "finalDryRun": [
+      {
+        "name": "Roast Turkey Dinner",
+        "date": "2026-10-11",
+        "startTime": "11:00",
+        "endTime": "19:00",
+        "sourceType": "special",
+        "isFoodSpecial": "Yes",
+        "relevantImageIndex": 0
+      }
+    ],
+    "skips": [],
+    "usage": [
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 1,
+        "durationMs": 2427,
+        "inputTokens": 6737,
+        "outputTokens": 101,
+        "totalTokens": 6838,
+        "cachedInputTokens": 0
+      },
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 1,
+        "durationMs": 14998,
+        "inputTokens": 5758,
+        "outputTokens": 1525,
+        "totalTokens": 7283,
+        "cachedInputTokens": 0
+      },
+      {
+        "stage": "stage4",
+        "component": "secondaryValidator",
+        "endpoint": "responses",
+        "model": "gpt-5-nano",
+        "durationMs": 4671,
+        "inputTokens": 2210,
+        "outputTokens": 745,
+        "totalTokens": 2955,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 77,
+        "postId": "1876827866914224",
+        "batchItemCount": 1,
+        "responseId": "resp_08fd95382e4f2db5006aca6ece598887d2883fa035f3839e6b",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 256,
+        "visibleOutputChars": 1634
+      },
+      {
+        "stage": "stage5",
+        "component": "finalFormatter",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "durationMs": 3301,
+        "inputTokens": 2177,
+        "outputTokens": 315,
+        "totalTokens": 2492,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 77,
+        "postId": "1876827866914224",
+        "responseId": "resp_046f44e2c671e670006aca6ed307ac87d292b868f54748959c",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 0,
+        "visibleOutputChars": 1271,
+        "parsedItemCount": 1,
+        "parseError": false,
+        "batchOffset": 0,
+        "batchItemCount": 1
+      }
+    ],
+    "noLiveWrites": true,
+    "websiteEnrichment": false,
+    "venueHoursSource": "frozen October 10 venue snapshot"
+  },
+  {
+    "row": 89,
+    "postId": "1678509800951428",
+    "sourceUrl": "https://www.facebook.com/1678509800951428",
+    "arm": "luna-negative-review",
+    "elapsedMs": 17931,
+    "stage3": [
+      {
+        "name": "Apple Spice Cake + Orchard Toddy pairing",
+        "date": "2026-10-09",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "special"
+      }
+    ],
+    "stage3Held": [],
+    "stage4": [
+      {
+        "name": "Apple Spice Cake + Orchard Toddy pairing",
+        "date": "2026-10-09",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "special"
+      }
+    ],
+    "finalDryRun": [
+      {
+        "name": "Apple Spice Cake + Orchard Toddy pairing",
+        "date": "2026-10-09",
+        "startTime": "10:00",
+        "endTime": "21:00",
+        "sourceType": "special",
+        "isFoodSpecial": "Yes",
+        "relevantImageIndex": 0
+      }
+    ],
+    "skips": [],
+    "usage": [
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 1,
+        "durationMs": 3541,
+        "inputTokens": 5516,
+        "outputTokens": 190,
+        "totalTokens": 5706,
+        "cachedInputTokens": 5513
+      },
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 1,
+        "durationMs": 6419,
+        "inputTokens": 3720,
+        "outputTokens": 605,
+        "totalTokens": 4325,
+        "cachedInputTokens": 0
+      },
+      {
+        "stage": "stage4",
+        "component": "secondaryValidator",
+        "endpoint": "responses",
+        "model": "gpt-5-nano",
+        "durationMs": 4539,
+        "inputTokens": 2251,
+        "outputTokens": 874,
+        "totalTokens": 3125,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 89,
+        "postId": "1678509800951428",
+        "batchItemCount": 1,
+        "responseId": "resp_0d243d764e27cbb1006aca6edf8a9087d2b189f7f9a606d123",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 320,
+        "visibleOutputChars": 2185
+      },
+      {
+        "stage": "stage5",
+        "component": "finalFormatter",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "durationMs": 3395,
+        "inputTokens": 2221,
+        "outputTokens": 337,
+        "totalTokens": 2558,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 89,
+        "postId": "1678509800951428",
+        "responseId": "resp_0b3465e59f7d882d006aca6ee4119c87d2a6094413b13486ef",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 0,
+        "visibleOutputChars": 1506,
+        "parsedItemCount": 1,
+        "parseError": false,
+        "batchOffset": 0,
+        "batchItemCount": 1
+      }
+    ],
+    "noLiveWrites": true,
+    "websiteEnrichment": false,
+    "venueHoursSource": "frozen October 10 venue snapshot"
+  },
+  {
+    "row": 89,
+    "postId": "1678509800951428",
+    "sourceUrl": "https://www.facebook.com/1678509800951428",
+    "arm": "mini-current",
+    "elapsedMs": 23206,
+    "stage3": [
+      {
+        "name": "Apple Spice Cake + Orchard Toddy Pairing",
+        "date": "2026-10-09",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "special",
+        "relevantImageIndex": 0
+      }
+    ],
+    "stage3Held": [],
+    "stage4": [
+      {
+        "name": "Apple Spice Cake + Orchard Toddy Pairing",
+        "date": "2026-10-09",
+        "startTime": "",
+        "endTime": "",
+        "sourceType": "special",
+        "relevantImageIndex": 0
+      }
+    ],
+    "finalDryRun": [
+      {
+        "name": "Apple Spice Cake + Orchard Toddy Pairing",
+        "date": "2026-10-09",
+        "startTime": "10:00",
+        "endTime": "21:00",
+        "sourceType": "special",
+        "isFoodSpecial": "Yes",
+        "relevantImageIndex": 0
+      }
+    ],
+    "skips": [],
+    "usage": [
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 1,
+        "durationMs": 3330,
+        "inputTokens": 5516,
+        "outputTokens": 181,
+        "totalTokens": 5697,
+        "cachedInputTokens": 0
+      },
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 1,
+        "durationMs": 11630,
+        "inputTokens": 4537,
+        "outputTokens": 1088,
+        "totalTokens": 5625,
+        "cachedInputTokens": 0
+      },
+      {
+        "stage": "stage4",
+        "component": "secondaryValidator",
+        "endpoint": "responses",
+        "model": "gpt-5-nano",
+        "durationMs": 4353,
+        "inputTokens": 2233,
+        "outputTokens": 753,
+        "totalTokens": 2986,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 89,
+        "postId": "1678509800951428",
+        "batchItemCount": 1,
+        "responseId": "resp_00bb1fbe3d84c428006aca6ee1e87487d2bc3c21409cffaa46",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 256,
+        "visibleOutputChars": 1838
+      },
+      {
+        "stage": "stage5",
+        "component": "finalFormatter",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "durationMs": 3867,
+        "inputTokens": 2203,
+        "outputTokens": 336,
+        "totalTokens": 2539,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 89,
+        "postId": "1678509800951428",
+        "responseId": "resp_052e63981c0df722006aca6ee6469087d29770b9a9af9c3d04",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 0,
+        "visibleOutputChars": 1569,
+        "parsedItemCount": 1,
+        "parseError": false,
+        "batchOffset": 0,
+        "batchItemCount": 1
+      }
+    ],
+    "noLiveWrites": true,
+    "websiteEnrichment": false,
+    "venueHoursSource": "frozen October 10 venue snapshot"
+  },
+  {
+    "row": 98,
+    "postId": "1412650934388031",
+    "sourceUrl": "https://www.facebook.com/1412650934388031",
+    "arm": "luna-negative-review",
+    "elapsedMs": 102980,
+    "stage3": [
+      {
+        "name": "Floyd Gaudet",
+        "date": "2026-10-09",
+        "startTime": "6:00 PM",
+        "endTime": "9:00 PM",
+        "sourceType": "calendar",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Nick Hoben",
+        "date": "2026-10-10",
+        "startTime": "7:00 PM",
+        "endTime": "10:00 PM",
+        "sourceType": "calendar",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Joey Doucette",
+        "date": "2026-10-15",
+        "startTime": "8:00 PM",
+        "endTime": "11:00 PM",
+        "sourceType": "calendar",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Alyssa Harper & Dakota Strongman",
+        "date": "2026-10-16",
+        "startTime": "6:00 PM",
+        "endTime": "9:00 PM",
+        "sourceType": "calendar",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Greenmount",
+        "date": "2026-10-22",
+        "startTime": "6:00 PM",
+        "endTime": "9:00 PM",
+        "sourceType": "calendar",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Rick Sparkes",
+        "date": "2026-10-23",
+        "startTime": "6:00 PM",
+        "endTime": "9:00 PM",
+        "sourceType": "calendar",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Joey Doucette",
+        "date": "2026-10-29",
+        "startTime": "8:00 PM",
+        "endTime": "11:00 PM",
+        "sourceType": "calendar",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Blair Gaudet",
+        "date": "2026-10-30",
+        "startTime": "6:00 PM",
+        "endTime": "9:00 PM",
+        "sourceType": "calendar",
+        "relevantImageIndex": 0
+      }
+    ],
+    "stage3Held": [
+      {
+        "name": "Alyssa Harper & Cory Gallant",
+        "type": "event",
+        "date": "2026-10-01",
+        "startTime": "8:00 PM",
+        "endTime": "11:00 PM",
+        "venue": "",
+        "price": "$10",
+        "description": "$10 cover.",
+        "extractionReason": "The October 1 Thursday cell lists this live music event from 8–11 PM and shows a $10 cover.",
+        "relevantImageIndex": 0,
+        "spatial": {
+          "kind": "single_location",
+          "locations": [
+            "Albert & Crown Pub"
+          ],
+          "confirmedStreets": [],
+          "ordered": false,
+          "evidenceNotes": "The poster header identifies Albert & Crown Pub; no street address is shown."
+        },
+        "_sourceType": "calendar"
+      },
+      {
+        "name": "Fisherkings",
+        "type": "event",
+        "date": "2026-10-03",
+        "startTime": "7:00 PM",
+        "endTime": "10:00 PM",
+        "venue": "",
+        "price": "$10",
+        "description": "$10 cover.",
+        "extractionReason": "The October 3 Saturday cell lists Fisherkings from 7–10 PM and shows a $10 cover.",
+        "relevantImageIndex": 0,
+        "spatial": {
+          "kind": "single_location",
+          "locations": [
+            "Albert & Crown Pub"
+          ],
+          "confirmedStreets": [],
+          "ordered": false,
+          "evidenceNotes": "The poster header identifies Albert & Crown Pub; no street address is shown."
+        },
+        "_sourceType": "calendar"
+      },
+      {
+        "name": "Joey Doucette",
+        "type": "event",
+        "date": "2026-10-08",
+        "startTime": "8:00 PM",
+        "endTime": "11:00 PM",
+        "venue": "",
+        "price": "$5",
+        "description": "$5 cover.",
+        "extractionReason": "The shared Thursday listing marked 08/15/29 applies to October 8 and lists Joey Doucette from 8–11 PM with a $5 cover.",
+        "relevantImageIndex": 0,
+        "spatial": {
+          "kind": "single_location",
+          "locations": [
+            "Albert & Crown Pub"
+          ],
+          "confirmedStreets": [],
+          "ordered": false,
+          "evidenceNotes": "The poster header identifies Albert & Crown Pub; no street address is shown."
+        },
+        "_sourceType": "calendar"
+      }
+    ],
+    "stage4": [
+      {
+        "name": "Floyd Gaudet",
+        "date": "2026-10-09",
+        "startTime": "6:00 PM",
+        "endTime": "9:00 PM",
+        "sourceType": "calendar",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Nick Hoben",
+        "date": "2026-10-10",
+        "startTime": "7:00 PM",
+        "endTime": "10:00 PM",
+        "sourceType": "calendar",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Joey Doucette",
+        "date": "2026-10-15",
+        "startTime": "8:00 PM",
+        "endTime": "11:00 PM",
+        "sourceType": "calendar",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Alyssa Harper & Dakota Strongman",
+        "date": "2026-10-16",
+        "startTime": "6:00 PM",
+        "endTime": "9:00 PM",
+        "sourceType": "calendar",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Greenmount",
+        "date": "2026-10-22",
+        "startTime": "6:00 PM",
+        "endTime": "9:00 PM",
+        "sourceType": "calendar",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Rick Sparkes",
+        "date": "2026-10-23",
+        "startTime": "6:00 PM",
+        "endTime": "9:00 PM",
+        "sourceType": "calendar",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Joey Doucette",
+        "date": "2026-10-29",
+        "startTime": "8:00 PM",
+        "endTime": "11:00 PM",
+        "sourceType": "calendar",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Blair Gaudet",
+        "date": "2026-10-30",
+        "startTime": "6:00 PM",
+        "endTime": "9:00 PM",
+        "sourceType": "calendar",
+        "relevantImageIndex": 0
+      }
+    ],
+    "formattedBeforeHours": [
+      {
+        "name": "Floyd Gaudet",
+        "date": "2026-10-09",
+        "startTime": "18:00",
+        "endTime": "21:00",
+        "sourceType": "calendar",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Nick Hoben",
+        "date": "2026-10-10",
+        "startTime": "19:00",
+        "endTime": "22:00",
+        "sourceType": "calendar",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Joey Doucette",
+        "date": "2026-10-15",
+        "startTime": "20:00",
+        "endTime": "23:00",
+        "sourceType": "calendar",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Alyssa Harper & Dakota Strongman",
+        "date": "2026-10-16",
+        "startTime": "18:00",
+        "endTime": "21:00",
+        "sourceType": "calendar",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Greenmount",
+        "date": "2026-10-22",
+        "startTime": "18:00",
+        "endTime": "21:00",
+        "sourceType": "calendar",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Rick Sparkes",
+        "date": "2026-10-23",
+        "startTime": "18:00",
+        "endTime": "21:00",
+        "sourceType": "calendar",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Joey Doucette",
+        "date": "2026-10-29",
+        "startTime": "20:00",
+        "endTime": "23:00",
+        "sourceType": "calendar",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Blair Gaudet",
+        "date": "2026-10-30",
+        "startTime": "18:00",
+        "endTime": "21:00",
+        "sourceType": "calendar",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": 0
+      }
+    ],
+    "finalDryRun": [
+      {
+        "name": "Floyd Gaudet",
+        "date": "2026-10-09",
+        "startTime": "18:00",
+        "endTime": "21:00",
+        "sourceType": "calendar",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Nick Hoben",
+        "date": "2026-10-10",
+        "startTime": "19:00",
+        "endTime": "22:00",
+        "sourceType": "calendar",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Joey Doucette",
+        "date": "2026-10-15",
+        "startTime": "20:00",
+        "endTime": "23:00",
+        "sourceType": "calendar",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Alyssa Harper & Dakota Strongman",
+        "date": "2026-10-16",
+        "startTime": "18:00",
+        "endTime": "21:00",
+        "sourceType": "calendar",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Greenmount",
+        "date": "2026-10-22",
+        "startTime": "18:00",
+        "endTime": "21:00",
+        "sourceType": "calendar",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Rick Sparkes",
+        "date": "2026-10-23",
+        "startTime": "18:00",
+        "endTime": "21:00",
+        "sourceType": "calendar",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Joey Doucette",
+        "date": "2026-10-29",
+        "startTime": "20:00",
+        "endTime": "23:00",
+        "sourceType": "calendar",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Blair Gaudet",
+        "date": "2026-10-30",
+        "startTime": "18:00",
+        "endTime": "21:00",
+        "sourceType": "calendar",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": 0
+      }
+    ],
+    "skips": [
+      {
+        "stage": "stage3",
+        "reason": "Yearless source date shortly before post date needs review before writing",
+        "detail": "Held 3 source item(s); attempt=primary"
+      }
+    ],
+    "usage": [
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 1,
+        "durationMs": 29402,
+        "inputTokens": 5478,
+        "outputTokens": 3723,
+        "totalTokens": 9201,
+        "cachedInputTokens": 0
+      },
+      {
+        "stage": "ocr_debug",
+        "component": "ocrDebugText",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 1,
+        "durationMs": 11589,
+        "inputTokens": 3892,
+        "outputTokens": 1085,
+        "totalTokens": 4977,
+        "cachedInputTokens": 3889
+      },
+      {
+        "stage": "stage3",
+        "component": "calendarInventoryAudit",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 1,
+        "durationMs": 29451,
+        "inputTokens": 3942,
+        "outputTokens": 3230,
+        "totalTokens": 7172,
+        "cachedInputTokens": 3939
+      },
+      {
+        "stage": "stage4",
+        "component": "secondaryValidator",
+        "endpoint": "responses",
+        "model": "gpt-5-nano",
+        "durationMs": 16912,
+        "inputTokens": 3708,
+        "outputTokens": 2662,
+        "totalTokens": 6370,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 98,
+        "postId": "1412650934388031",
+        "batchItemCount": 8,
+        "responseId": "resp_07a210315bb788d9006aca6f6196f487d2b4462082b8a8ec4c",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 256,
+        "visibleOutputChars": 9259
+      },
+      {
+        "stage": "stage5",
+        "component": "finalFormatter",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "durationMs": 15574,
+        "inputTokens": 3807,
+        "outputTokens": 1891,
+        "totalTokens": 5698,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 98,
+        "postId": "1412650934388031",
+        "responseId": "resp_038ddcc99e5843fb006aca6f727d1c87d290ab3805ed2a1020",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 0,
+        "visibleOutputChars": 8235,
+        "parsedItemCount": 8,
+        "parseError": false,
+        "batchOffset": 0,
+        "batchItemCount": 8
+      }
+    ],
+    "noLiveWrites": true,
+    "websiteEnrichment": false,
+    "venueHoursSource": "frozen October 10 venue snapshot"
+  },
+  {
+    "row": 98,
+    "postId": "1412650934388031",
+    "sourceUrl": "https://www.facebook.com/1412650934388031",
+    "arm": "mini-current",
+    "elapsedMs": 98470,
+    "stage3": [
+      {
+        "name": "Alyssa Harper & Cory Gallant",
+        "date": "2026-10-01",
+        "startTime": "8:00 PM",
+        "endTime": "11:00 PM",
+        "sourceType": "calendar",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Fisherkings",
+        "date": "2026-10-03",
+        "startTime": "7:00 PM",
+        "endTime": "10:00 PM",
+        "sourceType": "calendar",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Floyd Gaudet",
+        "date": "2026-10-09",
+        "startTime": "6:00 PM",
+        "endTime": "9:00 PM",
+        "sourceType": "calendar",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Nick Hoben",
+        "date": "2026-10-10",
+        "startTime": "7:00 PM",
+        "endTime": "10:00 PM",
+        "sourceType": "calendar",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Joey Doucette",
+        "date": "2026-10-15",
+        "startTime": "8:00 PM",
+        "endTime": "11:00 PM",
+        "sourceType": "calendar",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Alyssa Harper & Dakota Strongman",
+        "date": "2026-10-16",
+        "startTime": "6:00 PM",
+        "endTime": "9:00 PM",
+        "sourceType": "calendar",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Greenmount",
+        "date": "2026-10-22",
+        "startTime": "6:00 PM",
+        "endTime": "9:00 PM",
+        "sourceType": "calendar",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Rick Sparkes",
+        "date": "2026-10-23",
+        "startTime": "6:00 PM",
+        "endTime": "9:00 PM",
+        "sourceType": "calendar",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Joey Doucette",
+        "date": "2026-10-29",
+        "startTime": "8:00 PM",
+        "endTime": "11:00 PM",
+        "sourceType": "calendar",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Blair Gaudet",
+        "date": "2026-10-30",
+        "startTime": "6:00 PM",
+        "endTime": "9:00 PM",
+        "sourceType": "calendar",
+        "relevantImageIndex": 0
+      }
+    ],
+    "stage3Held": [
+      {
+        "name": "Joey Doucette",
+        "type": "event",
+        "date": "2026-10-08",
+        "startTime": "8:00 PM",
+        "endTime": "11:00 PM",
+        "venue": "Albert & Crown Pub",
+        "price": "$5",
+        "description": "Live music; $5 cover. The calendar groups October 8, 15, and 29 in this listing.",
+        "extractionReason": "The calendar shows the grouped dates 08/15/29 beside THUR and Joey Doucette, 8–11 PM, with a $5 cover; October 8, 2026 is a Thursday.",
+        "relevantImageIndex": 0,
+        "spatial": {
+          "kind": "single_location",
+          "locations": [
+            "Albert & Crown Pub"
+          ],
+          "confirmedStreets": [],
+          "ordered": false,
+          "evidenceNotes": "The poster identifies Albert & Crown Pub as the host venue."
+        },
+        "_sourceType": "calendar"
+      }
+    ],
+    "stage4": [
+      {
+        "name": "Alyssa Harper & Cory Gallant",
+        "date": "2026-10-01",
+        "startTime": "8:00 PM",
+        "endTime": "11:00 PM",
+        "sourceType": "calendar",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Fisherkings",
+        "date": "2026-10-03",
+        "startTime": "7:00 PM",
+        "endTime": "10:00 PM",
+        "sourceType": "calendar",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Floyd Gaudet",
+        "date": "2026-10-09",
+        "startTime": "6:00 PM",
+        "endTime": "9:00 PM",
+        "sourceType": "calendar",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Nick Hoben",
+        "date": "2026-10-10",
+        "startTime": "7:00 PM",
+        "endTime": "10:00 PM",
+        "sourceType": "calendar",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Joey Doucette",
+        "date": "2026-10-15",
+        "startTime": "8:00 PM",
+        "endTime": "11:00 PM",
+        "sourceType": "calendar",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Alyssa Harper & Dakota Strongman",
+        "date": "2026-10-16",
+        "startTime": "6:00 PM",
+        "endTime": "9:00 PM",
+        "sourceType": "calendar",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Greenmount",
+        "date": "2026-10-22",
+        "startTime": "6:00 PM",
+        "endTime": "9:00 PM",
+        "sourceType": "calendar",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Rick Sparkes",
+        "date": "2026-10-23",
+        "startTime": "6:00 PM",
+        "endTime": "9:00 PM",
+        "sourceType": "calendar",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Joey Doucette",
+        "date": "2026-10-29",
+        "startTime": "8:00 PM",
+        "endTime": "11:00 PM",
+        "sourceType": "calendar",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Blair Gaudet",
+        "date": "2026-10-30",
+        "startTime": "6:00 PM",
+        "endTime": "9:00 PM",
+        "sourceType": "calendar",
+        "relevantImageIndex": 0
+      }
+    ],
+    "formattedBeforeHours": [
+      {
+        "name": "Alyssa Harper & Cory Gallant",
+        "date": "2026-10-01",
+        "startTime": "20:00",
+        "endTime": "23:00",
+        "sourceType": "calendar",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Fisherkings",
+        "date": "2026-10-03",
+        "startTime": "19:00",
+        "endTime": "22:00",
+        "sourceType": "calendar",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Floyd Gaudet",
+        "date": "2026-10-09",
+        "startTime": "18:00",
+        "endTime": "21:00",
+        "sourceType": "calendar",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Nick Hoben",
+        "date": "2026-10-10",
+        "startTime": "19:00",
+        "endTime": "22:00",
+        "sourceType": "calendar",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Joey Doucette",
+        "date": "2026-10-15",
+        "startTime": "20:00",
+        "endTime": "23:00",
+        "sourceType": "calendar",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Alyssa Harper & Dakota Strongman",
+        "date": "2026-10-16",
+        "startTime": "18:00",
+        "endTime": "21:00",
+        "sourceType": "calendar",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Greenmount",
+        "date": "2026-10-22",
+        "startTime": "18:00",
+        "endTime": "21:00",
+        "sourceType": "calendar",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Rick Sparkes",
+        "date": "2026-10-23",
+        "startTime": "18:00",
+        "endTime": "21:00",
+        "sourceType": "calendar",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Joey Doucette",
+        "date": "2026-10-29",
+        "startTime": "20:00",
+        "endTime": "23:00",
+        "sourceType": "calendar",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Blair Gaudet",
+        "date": "2026-10-30",
+        "startTime": "18:00",
+        "endTime": "21:00",
+        "sourceType": "calendar",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": 0
+      }
+    ],
+    "finalDryRun": [
+      {
+        "name": "Alyssa Harper & Cory Gallant",
+        "date": "2026-10-01",
+        "startTime": "20:00",
+        "endTime": "23:00",
+        "sourceType": "calendar",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Fisherkings",
+        "date": "2026-10-03",
+        "startTime": "19:00",
+        "endTime": "22:00",
+        "sourceType": "calendar",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Floyd Gaudet",
+        "date": "2026-10-09",
+        "startTime": "18:00",
+        "endTime": "21:00",
+        "sourceType": "calendar",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Nick Hoben",
+        "date": "2026-10-10",
+        "startTime": "19:00",
+        "endTime": "22:00",
+        "sourceType": "calendar",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Joey Doucette",
+        "date": "2026-10-15",
+        "startTime": "20:00",
+        "endTime": "23:00",
+        "sourceType": "calendar",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Alyssa Harper & Dakota Strongman",
+        "date": "2026-10-16",
+        "startTime": "18:00",
+        "endTime": "21:00",
+        "sourceType": "calendar",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Greenmount",
+        "date": "2026-10-22",
+        "startTime": "18:00",
+        "endTime": "21:00",
+        "sourceType": "calendar",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Rick Sparkes",
+        "date": "2026-10-23",
+        "startTime": "18:00",
+        "endTime": "21:00",
+        "sourceType": "calendar",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Joey Doucette",
+        "date": "2026-10-29",
+        "startTime": "20:00",
+        "endTime": "23:00",
+        "sourceType": "calendar",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": 0
+      },
+      {
+        "name": "Blair Gaudet",
+        "date": "2026-10-30",
+        "startTime": "18:00",
+        "endTime": "21:00",
+        "sourceType": "calendar",
+        "isFoodSpecial": "No",
+        "relevantImageIndex": 0
+      }
+    ],
+    "skips": [
+      {
+        "stage": "stage3",
+        "reason": "Yearless source date shortly before post date needs review before writing",
+        "detail": "Held 1 source item(s); attempt=primary"
+      }
+    ],
+    "usage": [
+      {
+        "stage": "stage3",
+        "component": "eventExtractor",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 1,
+        "durationMs": 25983,
+        "inputTokens": 5478,
+        "outputTokens": 3423,
+        "totalTokens": 8901,
+        "cachedInputTokens": 5475
+      },
+      {
+        "stage": "ocr_debug",
+        "component": "ocrDebugText",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 1,
+        "durationMs": 10808,
+        "inputTokens": 3892,
+        "outputTokens": 1072,
+        "totalTokens": 4964,
+        "cachedInputTokens": 0
+      },
+      {
+        "stage": "stage3",
+        "component": "calendarInventoryAudit",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 1,
+        "durationMs": 21206,
+        "inputTokens": 3942,
+        "outputTokens": 2283,
+        "totalTokens": 6225,
+        "cachedInputTokens": 0
+      },
+      {
+        "stage": "stage4",
+        "component": "secondaryValidator",
+        "endpoint": "responses",
+        "model": "gpt-5-nano",
+        "durationMs": 20653,
+        "inputTokens": 4238,
+        "outputTokens": 3726,
+        "totalTokens": 7964,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 98,
+        "postId": "1412650934388031",
+        "batchItemCount": 10,
+        "responseId": "resp_085d5f7523888fde006aca6f551cf087d28229b2cfb3f57c93",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 576,
+        "visibleOutputChars": 12299
+      },
+      {
+        "stage": "stage5",
+        "component": "finalFormatter",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "durationMs": 3498,
+        "inputTokens": 2151,
+        "outputTokens": 270,
+        "totalTokens": 2421,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 98,
+        "postId": "1412650934388031",
+        "responseId": "resp_0f3d7efebde48338006aca6f69f36c87d29a76b6f539375e6e",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 0,
+        "visibleOutputChars": 1087,
+        "parsedItemCount": 1,
+        "parseError": false,
+        "batchOffset": 9,
+        "batchItemCount": 1
+      },
+      {
+        "stage": "stage5",
+        "component": "finalFormatter",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "durationMs": 19723,
+        "inputTokens": 4138,
+        "outputTokens": 2913,
+        "totalTokens": 7051,
+        "cachedInputTokens": 0,
+        "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+        "runId": "stage2-full-shadow",
+        "rowIndex": 98,
+        "postId": "1412650934388031",
+        "responseId": "resp_0ba5086538d68829006aca6f69c9f487d2949bc14bc1058bd9",
+        "responseStatus": "completed",
+        "incompleteReason": "",
+        "requestedMaxOutputTokens": 32000,
+        "reasoningTokens": 0,
+        "visibleOutputChars": 11347,
+        "parsedItemCount": 9,
+        "parseError": false,
+        "batchOffset": 0,
+        "batchItemCount": 9
+      }
+    ],
+    "noLiveWrites": true,
+    "websiteEnrichment": false,
+    "venueHoursSource": "frozen October 10 venue snapshot"
+  }
+]
