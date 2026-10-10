@@ -1791,6 +1791,12 @@ function inferCategoryFromContent(
     return 'Workshops & Classes';
   }
 
+  // Public aquatic access is a sports activity. Match the activity title so
+  // pool parties, swimming lessons and billiards retain their own categories.
+  if (/^(?:all\s+pools?\s+open|(?:lane|public|family|leisure|recreational|open)\s+swim(?:ming)?|waterslide\s+open)\b/i.test(String(event.name || '').trim())) {
+    return 'Sports';
+  }
+
   // Sports (including skating/rink cues)
   if (
     /\bsport(s)?\b/.test(text) ||

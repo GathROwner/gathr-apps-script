@@ -66,3 +66,16 @@ test('Stage 5 allocation is off by default and stable across retries, with its o
     selectStage5LunaPilot('dataset', String(index), true, true, 50),
     selectStage5LunaPilot('dataset', String(index), true, true, 50));
 });
+
+test('public swimming access stays Sports without recategorizing parties, lessons or billiards', () => {
+  for (const name of ['All pools open', 'Lane swim', 'Waterslide open', 'Family Swim']) {
+    const source = { ...item(name), venue: 'Bell Aliant Centre' };
+    const formatted = applyCategoryCorrectionsForRegression({ ...event(name), category: 'Gatherings & Parties' }, source);
+    assert.equal(formatted.category, 'Sports');
+    assert.equal(formatted.isFoodSpecial, 'No');
+  }
+  for (const [name, category] of [['Pool party', 'Gatherings & Parties'], ['Swimming lessons', 'Workshops & Classes'], ['Billiards social', 'Gatherings & Parties']] as const) {
+    const formatted = applyCategoryCorrectionsForRegression({ ...event(name), category }, item(name));
+    assert.equal(formatted.category, category);
+  }
+});

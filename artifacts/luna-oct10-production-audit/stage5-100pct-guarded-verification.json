@@ -1,0 +1,600 @@
+{
+  "checkedAt": "2026-10-10T15:42:41.261Z",
+  "noLiveWrites": true,
+  "repeat": 2,
+  "coverage": {
+    "productionStage5Posts": 69,
+    "replayedPosts": 69,
+    "inputItems": 221,
+    "missingRows": [],
+    "unneededRows": []
+  },
+  "preserved": 221,
+  "errors": [],
+  "differences": [
+    {
+      "row": 348,
+      "name": "First-Time Day-Old Bread Offer",
+      "field": "price",
+      "source": "$1.49",
+      "output": "$1.49 per loaf"
+    }
+  ],
+  "unexpectedOccurrences": [],
+  "occurrenceMultiplicityDifferences": [],
+  "rawProblems": [],
+  "models": [
+    "gpt-6-luna none"
+  ],
+  "calls": 0,
+  "outputObjects": 204,
+  "reasoningTokens": 0,
+  "usd": 0,
+  "sumPostWallMs": 10635,
+  "posts": [
+    {
+      "row": 13,
+      "inputs": 2,
+      "outputs": 2,
+      "wallMs": 164,
+      "calls": 1,
+      "usd": 0.0004781
+    },
+    {
+      "row": 31,
+      "inputs": 40,
+      "outputs": 40,
+      "wallMs": 690,
+      "calls": 5,
+      "usd": 0.006785299999999999
+    },
+    {
+      "row": 32,
+      "inputs": 13,
+      "outputs": 13,
+      "wallMs": 562,
+      "calls": 2,
+      "usd": 0.0021171
+    },
+    {
+      "row": 35,
+      "inputs": 4,
+      "outputs": 4,
+      "wallMs": 96,
+      "calls": 1,
+      "usd": 0.0008037000000000001
+    },
+    {
+      "row": 37,
+      "inputs": 9,
+      "outputs": 9,
+      "wallMs": 145,
+      "calls": 1,
+      "usd": 0.0016688
+    },
+    {
+      "row": 38,
+      "inputs": 1,
+      "outputs": 1,
+      "wallMs": 82,
+      "calls": 1,
+      "usd": 0.00032460000000000003
+    },
+    {
+      "row": 39,
+      "inputs": 4,
+      "outputs": 2,
+      "wallMs": 117,
+      "calls": 1,
+      "usd": 0.0009396000000000001
+    },
+    {
+      "row": 42,
+      "inputs": 1,
+      "outputs": 1,
+      "wallMs": 86,
+      "calls": 1,
+      "usd": 0.000365
+    },
+    {
+      "row": 44,
+      "inputs": 1,
+      "outputs": 1,
+      "wallMs": 92,
+      "calls": 1,
+      "usd": 0.0004136
+    },
+    {
+      "row": 52,
+      "inputs": 2,
+      "outputs": 2,
+      "wallMs": 96,
+      "calls": 1,
+      "usd": 0.0005261
+    },
+    {
+      "row": 53,
+      "inputs": 2,
+      "outputs": 2,
+      "wallMs": 116,
+      "calls": 1,
+      "usd": 0.0005055
+    },
+    {
+      "row": 74,
+      "inputs": 1,
+      "outputs": 1,
+      "wallMs": 89,
+      "calls": 1,
+      "usd": 0.0003618
+    },
+    {
+      "row": 77,
+      "inputs": 1,
+      "outputs": 1,
+      "wallMs": 88,
+      "calls": 1,
+      "usd": 0.0003629
+    },
+    {
+      "row": 78,
+      "inputs": 1,
+      "outputs": 1,
+      "wallMs": 95,
+      "calls": 1,
+      "usd": 0.0003655
+    },
+    {
+      "row": 80,
+      "inputs": 2,
+      "outputs": 2,
+      "wallMs": 112,
+      "calls": 1,
+      "usd": 0.0005305
+    },
+    {
+      "row": 81,
+      "inputs": 1,
+      "outputs": 1,
+      "wallMs": 97,
+      "calls": 1,
+      "usd": 0.0004155
+    },
+    {
+      "row": 89,
+      "inputs": 1,
+      "outputs": 1,
+      "wallMs": 90,
+      "calls": 1,
+      "usd": 0.00041010000000000005
+    },
+    {
+      "row": 90,
+      "inputs": 4,
+      "outputs": 4,
+      "wallMs": 100,
+      "calls": 1,
+      "usd": 0.0007509000000000001
+    },
+    {
+      "row": 97,
+      "inputs": 2,
+      "outputs": 2,
+      "wallMs": 103,
+      "calls": 1,
+      "usd": 0.0005991
+    },
+    {
+      "row": 98,
+      "inputs": 10,
+      "outputs": 10,
+      "wallMs": 583,
+      "calls": 2,
+      "usd": 0.0020477
+    },
+    {
+      "row": 103,
+      "inputs": 1,
+      "outputs": 1,
+      "wallMs": 70,
+      "calls": 1,
+      "usd": 0.00037739999999999996
+    },
+    {
+      "row": 105,
+      "inputs": 1,
+      "outputs": 1,
+      "wallMs": 83,
+      "calls": 1,
+      "usd": 0.00036960000000000004
+    },
+    {
+      "row": 111,
+      "inputs": 2,
+      "outputs": 2,
+      "wallMs": 85,
+      "calls": 1,
+      "usd": 0.0005495
+    },
+    {
+      "row": 118,
+      "inputs": 3,
+      "outputs": 3,
+      "wallMs": 103,
+      "calls": 1,
+      "usd": 0.0007139000000000001
+    },
+    {
+      "row": 129,
+      "inputs": 1,
+      "outputs": 1,
+      "wallMs": 56,
+      "calls": 1,
+      "usd": 0.00043010000000000005
+    },
+    {
+      "row": 133,
+      "inputs": 2,
+      "outputs": 2,
+      "wallMs": 170,
+      "calls": 1,
+      "usd": 0.0006912
+    },
+    {
+      "row": 136,
+      "inputs": 2,
+      "outputs": 2,
+      "wallMs": 151,
+      "calls": 1,
+      "usd": 0.0005239
+    },
+    {
+      "row": 139,
+      "inputs": 2,
+      "outputs": 2,
+      "wallMs": 125,
+      "calls": 1,
+      "usd": 0.0005254000000000001
+    },
+    {
+      "row": 140,
+      "inputs": 1,
+      "outputs": 1,
+      "wallMs": 109,
+      "calls": 1,
+      "usd": 0.00039920000000000005
+    },
+    {
+      "row": 141,
+      "inputs": 1,
+      "outputs": 1,
+      "wallMs": 104,
+      "calls": 1,
+      "usd": 0.0003563
+    },
+    {
+      "row": 160,
+      "inputs": 1,
+      "outputs": 1,
+      "wallMs": 97,
+      "calls": 1,
+      "usd": 0.00036420000000000007
+    },
+    {
+      "row": 166,
+      "inputs": 6,
+      "outputs": 6,
+      "wallMs": 117,
+      "calls": 1,
+      "usd": 0.0010529
+    },
+    {
+      "row": 176,
+      "inputs": 1,
+      "outputs": 1,
+      "wallMs": 97,
+      "calls": 1,
+      "usd": 0.0003695
+    },
+    {
+      "row": 180,
+      "inputs": 11,
+      "outputs": 11,
+      "wallMs": 698,
+      "calls": 2,
+      "usd": 0.0024682000000000003
+    },
+    {
+      "row": 202,
+      "inputs": 1,
+      "outputs": 1,
+      "wallMs": 95,
+      "calls": 1,
+      "usd": 0.0004324
+    },
+    {
+      "row": 207,
+      "inputs": 27,
+      "outputs": 27,
+      "wallMs": 722,
+      "calls": 3,
+      "usd": 0.0050034
+    },
+    {
+      "row": 208,
+      "inputs": 1,
+      "outputs": 1,
+      "wallMs": 99,
+      "calls": 1,
+      "usd": 0.0003735
+    },
+    {
+      "row": 209,
+      "inputs": 1,
+      "outputs": 1,
+      "wallMs": 97,
+      "calls": 1,
+      "usd": 0.0003976
+    },
+    {
+      "row": 222,
+      "inputs": 1,
+      "outputs": 1,
+      "wallMs": 132,
+      "calls": 1,
+      "usd": 0.00040639999999999996
+    },
+    {
+      "row": 223,
+      "inputs": 1,
+      "outputs": 1,
+      "wallMs": 109,
+      "calls": 1,
+      "usd": 0.0003867
+    },
+    {
+      "row": 224,
+      "inputs": 2,
+      "outputs": 2,
+      "wallMs": 115,
+      "calls": 1,
+      "usd": 0.0004953000000000001
+    },
+    {
+      "row": 236,
+      "inputs": 1,
+      "outputs": 1,
+      "wallMs": 94,
+      "calls": 1,
+      "usd": 0.0003998
+    },
+    {
+      "row": 237,
+      "inputs": 1,
+      "outputs": 1,
+      "wallMs": 102,
+      "calls": 1,
+      "usd": 0.0004088
+    },
+    {
+      "row": 238,
+      "inputs": 1,
+      "outputs": 1,
+      "wallMs": 92,
+      "calls": 1,
+      "usd": 0.0003763
+    },
+    {
+      "row": 241,
+      "inputs": 1,
+      "outputs": 1,
+      "wallMs": 119,
+      "calls": 1,
+      "usd": 0.0004131
+    },
+    {
+      "row": 242,
+      "inputs": 1,
+      "outputs": 1,
+      "wallMs": 118,
+      "calls": 1,
+      "usd": 0.00040070000000000004
+    },
+    {
+      "row": 246,
+      "inputs": 1,
+      "outputs": 1,
+      "wallMs": 164,
+      "calls": 1,
+      "usd": 0.00042320000000000004
+    },
+    {
+      "row": 258,
+      "inputs": 1,
+      "outputs": 1,
+      "wallMs": 152,
+      "calls": 1,
+      "usd": 0.00038570000000000005
+    },
+    {
+      "row": 260,
+      "inputs": 1,
+      "outputs": 1,
+      "wallMs": 149,
+      "calls": 1,
+      "usd": 0.00037410000000000004
+    },
+    {
+      "row": 264,
+      "inputs": 1,
+      "outputs": 1,
+      "wallMs": 140,
+      "calls": 1,
+      "usd": 0.0004157
+    },
+    {
+      "row": 265,
+      "inputs": 1,
+      "outputs": 1,
+      "wallMs": 91,
+      "calls": 1,
+      "usd": 0.0003875
+    },
+    {
+      "row": 266,
+      "inputs": 1,
+      "outputs": 1,
+      "wallMs": 113,
+      "calls": 1,
+      "usd": 0.00036820000000000006
+    },
+    {
+      "row": 278,
+      "inputs": 1,
+      "outputs": 1,
+      "wallMs": 103,
+      "calls": 1,
+      "usd": 0.00043870000000000004
+    },
+    {
+      "row": 280,
+      "inputs": 1,
+      "outputs": 1,
+      "wallMs": 106,
+      "calls": 1,
+      "usd": 0.0003719
+    },
+    {
+      "row": 291,
+      "inputs": 18,
+      "outputs": 3,
+      "wallMs": 166,
+      "calls": 2,
+      "usd": 0.0050121
+    },
+    {
+      "row": 294,
+      "inputs": 1,
+      "outputs": 1,
+      "wallMs": 103,
+      "calls": 1,
+      "usd": 0.00045270000000000005
+    },
+    {
+      "row": 299,
+      "inputs": 1,
+      "outputs": 1,
+      "wallMs": 111,
+      "calls": 1,
+      "usd": 0.0003865
+    },
+    {
+      "row": 303,
+      "inputs": 1,
+      "outputs": 1,
+      "wallMs": 92,
+      "calls": 1,
+      "usd": 0.0003951
+    },
+    {
+      "row": 305,
+      "inputs": 1,
+      "outputs": 1,
+      "wallMs": 154,
+      "calls": 1,
+      "usd": 0.00041289999999999995
+    },
+    {
+      "row": 308,
+      "inputs": 1,
+      "outputs": 1,
+      "wallMs": 150,
+      "calls": 1,
+      "usd": 0.000378
+    },
+    {
+      "row": 312,
+      "inputs": 1,
+      "outputs": 1,
+      "wallMs": 161,
+      "calls": 1,
+      "usd": 0.0003633
+    },
+    {
+      "row": 313,
+      "inputs": 1,
+      "outputs": 1,
+      "wallMs": 150,
+      "calls": 1,
+      "usd": 0.0004214
+    },
+    {
+      "row": 315,
+      "inputs": 1,
+      "outputs": 1,
+      "wallMs": 110,
+      "calls": 1,
+      "usd": 0.0004135
+    },
+    {
+      "row": 336,
+      "inputs": 2,
+      "outputs": 2,
+      "wallMs": 153,
+      "calls": 1,
+      "usd": 0.000717
+    },
+    {
+      "row": 341,
+      "inputs": 1,
+      "outputs": 1,
+      "wallMs": 100,
+      "calls": 1,
+      "usd": 0.0003571
+    },
+    {
+      "row": 345,
+      "inputs": 1,
+      "outputs": 1,
+      "wallMs": 92,
+      "calls": 1,
+      "usd": 0.000387
+    },
+    {
+      "row": 348,
+      "inputs": 1,
+      "outputs": 1,
+      "wallMs": 147,
+      "calls": 1,
+      "usd": 0.00039520000000000007
+    },
+    {
+      "row": 355,
+      "inputs": 2,
+      "outputs": 2,
+      "wallMs": 169,
+      "calls": 1,
+      "usd": 0.0005437
+    },
+    {
+      "row": 359,
+      "inputs": 4,
+      "outputs": 4,
+      "wallMs": 197,
+      "calls": 1,
+      "usd": 0.0008992999999999999
+    }
+  ],
+  "productionTimingSteps": [
+    "stage5_6_datetime",
+    "stage5_5_hours",
+    "stage5_format"
+  ],
+  "productionStage5TimingCount": 69,
+  "productionStage5WallMs": 2055632,
+  "productionStage5Usd": 0.18446635000000008,
+  "productionVsReplay": null,
+  "measurementKind": "Local playback of saved raw responses; no API calls",
+  "copiedResponseUsageUsd": 0.05415649999999999,
+  "recordedResponseCount": 79
+}
