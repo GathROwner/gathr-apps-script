@@ -112,3 +112,37 @@ does not itself increase the percentage or repair older live records.
 - Private raw classifier responses, images, downstream stage objects, tests and
   deployment logs: `C:\Users\craig\.codex\luna-oct10-audit\stage2-specials-repair-*`.
   The original pre-repair evidence remains available separately.
+
+## Verified deployment
+
+Released parser commit `e29b4e2` from the existing release worktree. A second
+preflight at 17:47:11 UTC again found no active parser locks or checkpoint and
+the regular dataset completed. Dry run and deployment both exited successfully:
+
+```powershell
+$env:FUNCTIONS_DISCOVERY_TIMEOUT='60'
+firebase deploy --only 'functions:gathr-functions:processDataset,functions:gathr-functions:processDatasetResume,functions:gathr-functions:processDatasetSelectedRows' --project gathr-migrated --non-interactive --dry-run
+firebase deploy --only 'functions:gathr-functions:processDataset,functions:gathr-functions:processDatasetResume,functions:gathr-functions:processDatasetSelectedRows' --project gathr-migrated --non-interactive
+```
+
+Independent post-deploy function readback confirms all three ACTIVE, all traffic
+on latest revisions, common source hash
+`614baaa2c6dced1d865f06a4b59d4874ba500dd3`:
+
+| Function | Serving revision |
+|---|---|
+| processDataset | processdataset-00464-deb |
+| processDatasetResume | processdatasetresume-00428-riv |
+| processDatasetSelectedRows | processdatasetselectedrows-00420-mop |
+
+Verified model configuration remains Stage 1/3 Luna high at 100% eligible posts,
+Stage 2 Luna at 50% and Mini otherwise, Stage 4 Nano low, Stage 5 Luna none at
+100%, text-only enabled, no excluded source IDs and no legacy fallback. The
+existing October 11 heartbeat now includes this release and the mixed-offer/
+bundled-admission checks. Its schedule is unchanged: no checks before 11 a.m.
+Halifax and pause after the October 11 audit/decision.
+
+Sanitized readback and final preflight are saved beside the test artifacts as
+`stage2-specials-repair-release-readback.json` and
+`stage2-specials-repair-preflight.json`. The outdated SDK warning did not block
+deployment. No unrelated dirty files were committed or reverted.

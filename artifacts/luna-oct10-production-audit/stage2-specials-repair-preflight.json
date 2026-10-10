@@ -1,0 +1,88 @@
+{
+  "checkedAt": "2026-10-10T17:47:11.311Z",
+  "processing_locks": {
+    "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+    "runId": "cbce0e1a-1b7f-496c-8694-8045aac55edf",
+    "startedAt": {
+      "_seconds": 1791635961,
+      "_nanoseconds": 571000000
+    },
+    "source": "processDatasetResume",
+    "workerId": "707aad8b-a708-42a2-9db8-ece79ffaf15f",
+    "lastHeartbeat": {
+      "_seconds": 1791642558,
+      "_nanoseconds": 417000000
+    },
+    "expiresAt": {
+      "_seconds": 1791642558,
+      "_nanoseconds": 417000000
+    },
+    "status": "completed"
+  },
+  "checkpoints": null,
+  "processed_datasets": {
+    "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+    "fileName": "APIFY Dataset.xlsx",
+    "stats": {
+      "processedCount": 61,
+      "skippedCount": 108,
+      "invalidCount": 213,
+      "duplicateCount": 1,
+      "errorCount": 0,
+      "newEventsCreated": 90,
+      "existingEventsUpdated": 50,
+      "newStandardEventsCreated": 67,
+      "existingStandardEventsUpdated": 47,
+      "newFoodSpecialsCreated": 23,
+      "existingFoodSpecialsUpdated": 3,
+      "parseSnapshotWrites": 169,
+      "unknownVenueCount": 30,
+      "lunaStage3EligibleCount": 85,
+      "lunaStage1EligibleCount": 169,
+      "lunaStage1SelectedCount": 169,
+      "lunaStage3SelectedCount": 85
+    },
+    "processedAt": {
+      "_seconds": 1791642558,
+      "_nanoseconds": 291000000
+    }
+  },
+  "batch_states": {
+    "fileId": "1a8FFxUSkseWH6poV4-Htdhv4BRUSNlZl",
+    "fileName": "APIFY Dataset.xlsx",
+    "runId": "cbce0e1a-1b7f-496c-8694-8045aac55edf",
+    "totalRows": 382,
+    "processedRows": 352,
+    "currentRowIndex": 382,
+    "batchNumber": 1,
+    "status": "completed",
+    "startedAt": {
+      "_seconds": 1791642384,
+      "_nanoseconds": 533000000
+    },
+    "stats": {
+      "processedCount": 61,
+      "skippedCount": 108,
+      "invalidCount": 213,
+      "duplicateCount": 1,
+      "errorCount": 0,
+      "newEventsCreated": 90,
+      "existingEventsUpdated": 50,
+      "newStandardEventsCreated": 67,
+      "existingStandardEventsUpdated": 47,
+      "newFoodSpecialsCreated": 23,
+      "existingFoodSpecialsUpdated": 3,
+      "parseSnapshotWrites": 169,
+      "unknownVenueCount": 30,
+      "lunaStage3EligibleCount": 85,
+      "lunaStage1EligibleCount": 169,
+      "lunaStage1SelectedCount": 169,
+      "lunaStage3SelectedCount": 85
+    },
+    "lastUpdatedAt": {
+      "_seconds": 1791642558,
+      "_nanoseconds": 261000000
+    }
+  },
+  "activeLocks": []
+}
