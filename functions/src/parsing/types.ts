@@ -109,6 +109,7 @@ export interface ParseStageArtifactsSnapshot {
   stage3HeldItems?: ExtractedItem[];
   stage1Pilot?: { eligible: boolean; selected: boolean; percent: number; model: string; inputKind?: 'text_only' | 'image' };
   stage2Pilot?: { eligible: boolean; selected: boolean; percent: number; model: string; inputKind: 'text_only' | 'image' };
+  stage5Pilot?: { eligible: boolean; selected: boolean; percent: number; model: string; reasoningEffort: string };
   stage3InputKind?: 'text_only' | 'image';
   stage4Items?: ExtractedItem[];
   stage37TicketUrl?: string;
@@ -227,6 +228,7 @@ export interface ParsingConfig {
   };
   stage4ModelOverride?: string;
   stage5ModelOverride?: string;
+  stage5ReasoningEffortOverride?: 'none' | 'minimal' | 'low' | 'medium' | 'high';
   /** Validate large inventories in bounded batches without changing the model. */
   stage4BatchSize?: number;
   stage4BatchConcurrency?: number;

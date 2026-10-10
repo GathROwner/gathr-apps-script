@@ -430,7 +430,15 @@ export function classifySpatialEvent(
     ...extractPrefixedLocations(corpus),
     ...extractInlineLabeledLocations(corpus),
     ...extractInlineRoleLocations(location),
-    ...extractDatedCityLocations(corpus),
+    ...extractDatedCityLocations(corpus).filter(entry => {
+      // "October 24 at Souris Show Hall" names a venue and its city once.
+      // The city inferred from that sentence is not a second tour stop.
+      const singleVenue = normalizedModelKind === 'single_location' && modelLocations.length === 1
+        ? normalizeKey(modelLocations[0].label) : '';
+      const city = normalizeKey(entry.label);
+      return !(singleVenue && normalizeKey(location) === singleVenue &&
+        singleVenue.startsWith(city + ' '));
+    }),
   ];
   const locations = dedupeLocations([...modelLocations, ...textLocations]);
   const confirmedStreets = uniqueStrings([

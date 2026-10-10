@@ -78,6 +78,16 @@ test('keeps an image-rich single-event poster as EVENT when calendar-grid eviden
   assert.equal(routing.routingReason, 'keep_model');
 });
 
+test('a one-item caption estimate cannot suppress independently observed multi-listing calendar evidence', () => {
+  const routing = resolveStage2ScoreRouting('Souris Show Hall on October 24.',
+    buildClassification({ estimatedItemCount: 1, contentAnalysis: {
+      hasEvents: true, hasFoodSpecials: false, hasMultipleItems: false, organizationStyle: 'unstructured',
+    } }), buildValidation({ textDensityScore: 0.4 }));
+  assert.equal(routing.routedContentType, 'CALENDAR');
+  assert.equal(routing.forceContentTypeOverride, true);
+  assert.equal(routing.signals.estimatedItemCount, 1);
+});
+
 test('route comparison reuses the production resolver and exact whole-frame dense predicate', () => {
   const combinedText = 'The weekly schedule is posted here.';
   const environment = {

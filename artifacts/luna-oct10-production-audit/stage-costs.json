@@ -1,0 +1,44 @@
+{
+  "stage1": {
+    "calls": 173,
+    "inputTokens": 1444620,
+    "outputTokens": 108854,
+    "cachedInputTokens": 0,
+    "costUsd": 0.198889
+  },
+  "stage2": {
+    "calls": 90,
+    "inputTokens": 583649,
+    "outputTokens": 53075,
+    "cachedInputTokens": 55040,
+    "costUsd": 0.23967825
+  },
+  "stage3": {
+    "calls": 111,
+    "inputTokens": 986547,
+    "outputTokens": 156033,
+    "cachedInputTokens": 0,
+    "costUsd": 0.1766712
+  },
+  "stage4": {
+    "calls": 86,
+    "inputTokens": 239956,
+    "outputTokens": 130852,
+    "cachedInputTokens": 0,
+    "costUsd": 0.06433860000000001
+  },
+  "stage5": {
+    "calls": 81,
+    "inputTokens": 223111,
+    "outputTokens": 433277,
+    "cachedInputTokens": 0,
+    "costUsd": 0.18446635
+  },
+  "ocr_debug": {
+    "calls": 1,
+    "inputTokens": 3892,
+    "outputTokens": 1623,
+    "cachedInputTokens": 0,
+    "costUsd": 0.0012007
+  }
+}

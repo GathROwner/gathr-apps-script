@@ -58,6 +58,26 @@ function jsonResponse(value: unknown): Response {
   });
 }
 
+test('a tour stop cannot borrow the same show time from another explicitly dated stop', async () => {
+  const page = 'https://sourisshowhall.example/events/two-pianos';
+  const restoreFetch = installFetchMap({
+    [page]: htmlResponse(`<html><head><title>Two Pianos</title></head><body>
+      <h1>Two Pianos</h1><p>Two Pianos October 24, 2026 at 7:30 pm.</p>
+    </body></html>`),
+  });
+  try {
+    const result = await enrichEventsFromVenueWebsite([
+      buildEventItem({ name: 'Two Pianos', date: '2026-10-24', venue: 'Souris Show Hall' }),
+      buildEventItem({ name: 'Two Pianos', date: '2026-10-30', venue: 'PEI Brewing Company' }),
+    ], `Details at ${page}`, '', '2026-10-10T12:00:00Z',
+    { name: 'Souris Show Hall', website: page } as EstablishmentInfo,
+    { ...DEFAULT_PARSING_CONFIG, lunaCalendarLiteralSourcePrompt: true });
+    assert.equal(result.items[0].startTime, '19:30');
+    assert.equal(result.items[1].startTime, '');
+    assert.equal(result.summary.appliedCount, 1);
+  } finally { restoreFetch(); }
+});
+
 test('a bookstore sub-event cannot lend its time to the campus fall open house', () => {
   assert.equal(websiteCandidateTitleMatchesEventForRegression(
     'Fall Open House', 'Bookstore Open House'), false);

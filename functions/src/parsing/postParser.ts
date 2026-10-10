@@ -38,6 +38,7 @@ import {
 import { detectCalendarSignals, validateContent } from './contentValidator.js';
 import { selectStage1LunaPilot } from './stage1Pilot.js';
 import { selectStage2LunaPilot } from './stage2Pilot.js';
+import { selectStage5LunaPilot } from './stage5Pilot.js';
 import { isCaptionOnlySource, isLunaStage3InputReady } from './lunaTextRouting.js';
 import { resolveStage2ScoreRouting, selectLunaDenseFrameIndices } from './stage2Routing.js';
 import type { Stage2ScoreRoutingDecision } from './stage2Routing.js';
@@ -2133,12 +2134,28 @@ async function parsePostDataCore(
     // ========================================
     logger.info('=== STAGE 5: FINAL FORMATTING ===');
     const stage5Start = Date.now();
+    const stage5Pilot = selectStage5LunaPilot(cfg.diagnosticContext?.fileId || '',
+      postId, stage2SourceReady && validatedData.length > 0,
+      cfg.stage5ModelOverride ? false : undefined);
+    const stage5Config = stage5Pilot.selected
+      ? { ...cfg, stage5ModelOverride: 'gpt-6-luna', stage5ReasoningEffortOverride: 'none',
+          stage5BatchSize: 9, stage5BatchConcurrency: 2 }
+      : cfg;
+    if (stage5Pilot.eligible) {
+      const allocation = { ...stage5Pilot,
+        model: stage5Pilot.selected ? 'gpt-6-luna'
+          : resolveStageModel(cfg.gptModelFast, 'STAGE5_MODEL_OVERRIDE'),
+        reasoningEffort: stage5Pilot.selected ? 'none'
+          : process.env.STAGE5_RESPONSES_REASONING_EFFORT || '' };
+      logger.info('Luna Stage 5 pilot allocation', { ...cfg.diagnosticContext, postId, ...allocation });
+      await emitStageArtifacts(cfg, { stage5Pilot: allocation });
+    }
     const formattedEventsRaw = await performFinalFormatting(
       validatedData,
       userName,
       partialAddress,
       timestamp,
-      cfg,
+      stage5Config,
       input.combinedText
     );
     let formattedEvents = bandRules.length > 0 && formattedEventsRaw

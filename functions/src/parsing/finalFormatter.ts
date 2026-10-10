@@ -289,7 +289,7 @@ Never return arrays of values for an item; each must be a JSON object.`;
   try {
     const batchSize = Number(cfg.stage5BatchSize || 0);
     let response: FormattingResult;
-    if (batchSize >= 2 && batchSize <= 12 && expectedCount > batchSize) {
+    if (batchSize >= 2 && batchSize <= 12 && expectedCount > 0) {
       const formattedEvents = await formatStage5BatchesWithRecovery(
         validatedData, batchSize, async (items, offset) => {
           logger.info('Stage 5 formatting batch', {
@@ -1103,8 +1103,8 @@ function buildFormattedEventPlaceholder(
     endDate: item.date || '',
     startTime: item.startTime || '',
     endTime: item.endTime || '',
-    ticketPrice: '',
-    ticketLink: '',
+    ticketPrice: String(item.price || (item as any).pricing || ''),
+    ticketLink: String((item as any).ticketLink || ''),
     relevantImageIndex: Number((item as Record<string, unknown>).relevantImageIndex) || 0,
     venue,
     additionalLocation: venue,
@@ -1400,6 +1400,7 @@ function detectExplicitFoodSpecialCategory(
   event: FormattedEvent,
   originalItem?: ExtractedItem
 ): Category | null {
+  if (isCinemaAdmissionListing(event, originalItem)) return null;
   if (isOrganizedCommunityMeal(event)) return null;
   const text = `${event.name || ''} ${event.description || ''} ${String((originalItem as any)?.extractionReason || '')}`
     .toLowerCase()
@@ -1547,6 +1548,12 @@ function hasCinemaSignals(text: string): boolean {
   return /\b(movie|film|cinema|screening|documentary|showtime|feature|premiere)\b/.test(text);
 }
 
+function isCinemaAdmissionListing(event: FormattedEvent, originalItem?: ExtractedItem): boolean {
+  return /\bcinema\b/.test(buildVenueHintText(event, originalItem)) &&
+    /\b(?:tickets?|admission|matinee|screening)\b/.test(buildCategoryInferenceText(event, originalItem)) &&
+    !/\b(?:popcorn|snacks?|drinks?|coffee|soda|combo|pizza|burger|wings?)\b/i.test(event.name || '');
+}
+
 function hasStrongNonCinemaSignals(text: string): boolean {
   return /\b(trivia|quiz|comedy|comedian|stand-?up|improv|karaoke|open\s*mic|workshop|class|lesson|seminar|dj|nightlife|live\s+music|concert|band)\b/.test(
     text
@@ -1582,7 +1589,7 @@ function applyCinemaVenueHardening(
 
   if (
     isCinemaVenue &&
-    (hasCinemaCue ||
+    (isCinemaAdmissionListing(event, originalItem) || hasCinemaCue ||
       hasCinemaHint ||
       (!hasNonCinemaCue && !hasNonCinemaHint && !performerLikeTitle)) &&
     event.category !== 'Cinema'
@@ -2009,13 +2016,21 @@ export async function formatStage5BatchesWithRecovery(
   const concurrency = Number.isInteger(configuredConcurrency)
     ? Math.max(1, Math.min(3, configuredConcurrency)) : 1;
   const formatExactBatch = async (items: ExtractedItem[], offset: number): Promise<FormattedEvent[] | null> => {
-    const response = normalizeFormattingResponse(await formatBatch(items, offset), items, items.length);
-    if (response.formattedEvents.length !== items.length) {
+    const rawResponse = await formatBatch(items, offset);
+    const rawEvents = rawResponse?.formattedEvents;
+    if (!Array.isArray(rawEvents) || rawEvents.length !== items.length) {
       logger.warn('Stage 5 canary batch count mismatch', {
-        offset, expected: items.length, actual: response.formattedEvents.length,
+        offset, expected: items.length, actual: Array.isArray(rawEvents) ? rawEvents.length : 0,
       });
       return null;
     }
+    const sourceIndices = rawEvents.map(parseSourceItemIndex);
+    if (sourceIndices.some(index => index === null || index >= items.length) ||
+        new Set(sourceIndices).size !== items.length) {
+      logger.warn('Stage 5 batch missing or duplicate source identities', { offset, batchCount: items.length });
+      return null;
+    }
+    const response = normalizeFormattingResponse(rawResponse, items, items.length);
     const aligned = alignFormattedEventsToValidatedData(response.formattedEvents, items);
     if (getStage5SourceIdentityIssues(aligned).length > 0) {
       logger.warn('Stage 5 canary batch source identity mismatch', { offset, batchCount: items.length });
@@ -2687,7 +2702,10 @@ export function filterRetailMerchandisePromotions(
     const hasSaleCue =
       /\b(price|priced|sale|on\s+sale|now\s+only|in\s+stock|shop\s+now)\b/.test(text) ||
       /\$\s*\d+(?:\.\d{2})?|\d+\s*%\s*off/i.test(rawText);
-    if (!hasRetailProductCue || !hasSaleCue || hasPublicEventCue(text)) {
+    const isPublicSaleSession = /\b(?:craft\s*(?:&|and)?\s*(?:yard\s+)?sale|yard\s+sale|garage\s+sale|flea\s+market)\b/i.test(rawText) &&
+      /^\d{4}-\d{2}-\d{2}$/.test(String(event.startDate || '')) &&
+      /^\d{2}:\d{2}$/.test(String(event.startTime || ''));
+    if (!hasRetailProductCue || !hasSaleCue || hasPublicEventCue(text) || isPublicSaleSession) {
       return true;
     }
 
@@ -6273,7 +6291,7 @@ async function callGPTWithSchema(
     return null;
   };
   const stage5ReasoningEffort = parseReasoningEffort(
-    String(process.env.STAGE5_RESPONSES_REASONING_EFFORT || '')
+    String(config.stage5ReasoningEffortOverride ?? process.env.STAGE5_RESPONSES_REASONING_EFFORT ?? '')
   );
 
   const extractResponsesText = (response: any): string => {

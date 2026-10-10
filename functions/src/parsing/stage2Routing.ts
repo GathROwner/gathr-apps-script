@@ -123,6 +123,11 @@ function shouldForceEventRowToCalendar(
     hasCalendarGrid;
   if (!hasScheduleLikeSupport) return false;
 
+  // Stage 2 can focus on the caption's local show and estimate one item even
+  // when Stage 1 independently saw a grid with multiple dated listings.
+  // Preserve the calendar extraction prompt for that strongly supported case.
+  if (hasCalendarGrid && recommendsTiling && hasMultipleEventListings) return true;
+
   const requiredItemCount = Math.max(thresholds.tiledMinItems, 8);
   if (estimatedItemCount < requiredItemCount) return false;
 

@@ -1872,11 +1872,24 @@ export function resolvePostDerivedCityLevelEventLocation(params: {
     rowEstablishment,
   ].filter(Boolean).join('\n');
 
+  const modelSpatial = (item.spatial || item.spatialEvidence || null) as any;
+  const sourceLocations = Array.isArray(modelSpatial?.locations) ? modelSpatial.locations : [];
+  const sourceLocation = sourceLocations.length === 1
+    ? String(typeof sourceLocations[0] === 'string' ? sourceLocations[0] : sourceLocations[0]?.label || '') : '';
+  const observedLocation = observedCandidates[0]?.value || '';
+  const normalizePlace = (value: string) => value.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+  const occurrenceHasOnePlace = modelSpatial?.kind === 'single_location' &&
+    Boolean(normalizePlace(observedLocation)) &&
+    (normalizePlace(sourceLocation) === normalizePlace(observedLocation) ||
+      normalizePlace(sourceLocation).startsWith(normalizePlace(observedLocation) + ' ')) &&
+    !/\b(?:parade|procession|march|marathon|race|walkathon|bike ride|cycling ride)\b/i.test(eventName);
   const spatialEvidence = classifySpatialEvent({
     name: eventName,
     description,
     location: observedCandidates[0]?.value || '',
-    combinedText: contextText,
+    // Once a tour has been split into source-grounded single-venue items,
+    // the whole post's other stops must not turn each child back into an area.
+    combinedText: occurrenceHasOnePlace ? `${eventName}\n${description}\n${observedLocation}` : contextText,
     modelSpatialEvidence: (item.spatial || item.spatialEvidence || null) as any,
   });
   if (

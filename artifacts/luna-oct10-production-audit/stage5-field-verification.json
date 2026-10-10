@@ -1,0 +1,12 @@
+{
+  "checkedSuppliedOccurrences": 221,
+  "changes": [
+    {
+      "case": "row-348",
+      "item": "First-Time Day-Old Bread Offer",
+      "field": "price",
+      "source": "$1.49",
+      "final": "$1.49 per loaf"
+    }
+  ]
+}

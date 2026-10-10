@@ -20,6 +20,19 @@ function row(overrides: Partial<RawRowData> = {}): RawRowData {
   } as RawRowData;
 }
 
+test('one already-split tour stop resolves its venue without inheriting other caption cities', () => {
+  const details = resolvePostDerivedCityLevelEventLocation({
+    item: {
+      name: 'Two Pianos', description: 'October 24 performance at Souris Show Hall.',
+      establishment: 'Souris Show Hall', venue: 'Souris Show Hall',
+      spatial: { kind: 'single_location', locations: [{ label: 'Souris Show Hall', certainty: 'confirmed' }] },
+    } as ParserProcessedEvent,
+    row: row({ text: 'October 23 - Fredericton\nOctober 24 - Souris Show Hall\nOctober 30 - Charlottetown' }),
+    establishment: 'Souris Show Hall',
+  });
+  assert.equal(details, null);
+});
+
 test('full parser route is queued as route evidence instead of venue-matched', async () => {
   let matcherCalls = 0;
   const sourceRow = row({

@@ -18,3 +18,13 @@ for(const [model,effort,expected] of [
   assert.equal(request.model,model);assert.equal(request.reasoning?.effort,expected);
   assert.equal(request.max_output_tokens,32000);assert.equal(request.text.format.strict,true);
 });
+test('a selected Luna pilot uses none even while unselected Nano keeps the medium environment',async()=>{
+  process.env.STAGE5_RESPONSES_REASONING_EFFORT='medium';
+  const items=[{name:'Test concert',date:'2026-10-17',startTime:'20:00',type:'event'}];
+  await performFinalFormatting(items,'Test venue','','2026-10-09T12:00:00Z',
+    {stage5ModelOverride:'gpt-6-luna',stage5ReasoningEffortOverride:'none',stage5BatchSize:9});
+  assert.equal(request.reasoning.effort,'none');
+  await performFinalFormatting(items,'Test venue','','2026-10-09T12:00:00Z',
+    {stage5ModelOverride:'gpt-5-nano',stage5BatchSize:9});
+  assert.equal(request.reasoning.effort,'medium');
+});

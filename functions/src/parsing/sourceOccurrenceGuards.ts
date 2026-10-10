@@ -40,9 +40,13 @@ export function reconcilePublicPoolWindows(
 
 /** A model's own admission of an unanchored post-date fallback is not date evidence. */
 export function hasUnsupportedPostDateFallback(item: ExtractedItem, postedLocalDate: string): boolean {
-  if (item._sourceType === 'special' || ('type' in item && item.type === 'special')) return false;
   if (item.date !== postedLocalDate) return false;
   const evidence = `${item.extractionReason || ''} ${item.description || ''}`;
+  // A teaser with no availability date cannot inherit today's date merely
+  // because it mentions a special. Scope this to this item's own evidence.
+  if (/\b(?:later this (?:month|week)|coming soon|exact (?:availability )?date.{0,25}not specified)\b/i.test(evidence) &&
+      /\b(?:upcoming|will|coming|later|not specified)\b/i.test(evidence)) return true;
+  if (item._sourceType === 'special' || ('type' in item && item.type === 'special')) return false;
   return /\bpost(?:ed|ing)? date\b.{0,55}\b(?:fallback|used|use)\b|\b(?:used|using)\b.{0,35}\bpost(?:ed|ing)? date\b.{0,40}\bfallback\b/i.test(evidence);
 }
 

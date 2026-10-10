@@ -1,0 +1,152 @@
+[
+  {
+    "id": "row-117",
+    "expected": true,
+    "status": "completed",
+    "result": {
+      "imageAnalysis": [
+        {
+          "imageIndex": 0,
+          "description": "A Seaside Pharmacy Rxtra Care Clinics flyer says a pharmacist is available for walk-in minor-ailment assessments and questions, with flu and COVID shots also available. It says “Walk-ins Welcome” and “TODAY,” with printed hours of 9:00 PM–4:00 PM, and shows a bandage photo.",
+          "relevanceToPost": "Advertises a public walk-in care clinic and vaccinations for today, matching the post’s announcement of a same-day clinic. The image’s printed hours differ from the caption’s hours, but the public clinic session is explicit.",
+          "imageComplexity": {
+            "hasCalendarGrid": false,
+            "hasDenseText": false,
+            "hasMultipleEventListings": false,
+            "isPromotionalPhoto": false,
+            "textDensityScore": 0.35,
+            "recommendsTiling": false,
+            "recommendationReason": "The flyer has a single, legible clinic announcement and no calendar grid or dense small text."
+          }
+        }
+      ],
+      "hasValidContent": true,
+      "confidence": 0.99,
+      "validationDecision": "VALIDATION_PASSED",
+      "reason": "The post and attached flyer explicitly announce a public walk-in pharmacist clinic for today, with a stated session window and vaccination availability. A dated public walk-in clinic qualifies; the differing hours shown in the caption and image do not negate the announcement."
+    },
+    "elapsedMs": 6100
+  },
+  {
+    "id": "row-274",
+    "expected": true,
+    "status": "completed",
+    "result": {
+      "imageAnalysis": [
+        {
+          "imageIndex": 0,
+          "description": "A vendor sits behind a counter with a piece of meat and a refrigerated case of packaged meat below. A green sign reads “Springwater Farm Lamb.”",
+          "relevanceToPost": "Shows a food vendor and products at the market, but does not itself announce an event or offer.",
+          "imageComplexity": {
+            "hasCalendarGrid": false,
+            "hasDenseText": false,
+            "hasMultipleEventListings": false,
+            "isPromotionalPhoto": true,
+            "textDensityScore": 0.08,
+            "recommendsTiling": false,
+            "recommendationReason": "A promotional vendor photo with only a short, legible sign."
+          }
+        },
+        {
+          "imageIndex": 1,
+          "description": "Two vendors stand behind a display of flowers and produce. A handwritten board with product names and prices is visible behind them.",
+          "relevanceToPost": "Depicts market vendors and goods; the image does not independently announce a market session or a qualifying food deal.",
+          "imageComplexity": {
+            "hasCalendarGrid": false,
+            "hasDenseText": false,
+            "hasMultipleEventListings": false,
+            "isPromotionalPhoto": true,
+            "textDensityScore": 0.18,
+            "recommendsTiling": false,
+            "recommendationReason": "The image has a small handwritten product-and-price board, not dense event text."
+          }
+        },
+        {
+          "imageIndex": 2,
+          "description": "A close-up of garlic bulbs in a basket beside a sign reading “Porcelain garlic $1/oz.”",
+          "relevanceToPost": "Shows market produce and a price sign; a price alone does not establish a food deal or event.",
+          "imageComplexity": {
+            "hasCalendarGrid": false,
+            "hasDenseText": false,
+            "hasMultipleEventListings": false,
+            "isPromotionalPhoto": true,
+            "textDensityScore": 0.06,
+            "recommendsTiling": false,
+            "recommendationReason": "Only a short product-and-price sign is visible."
+          }
+        },
+        {
+          "imageIndex": 3,
+          "description": "A vendor holds a round handmade object behind a display of pottery, with flowers and other market items in the foreground.",
+          "relevanceToPost": "Shows artisan goods consistent with the market setting, but does not itself announce an event or offer.",
+          "imageComplexity": {
+            "hasCalendarGrid": false,
+            "hasDenseText": false,
+            "hasMultipleEventListings": false,
+            "isPromotionalPhoto": true,
+            "textDensityScore": 0.04,
+            "recommendsTiling": false,
+            "recommendationReason": "The image is primarily a vendor and product photo with little visible text."
+          }
+        }
+      ],
+      "hasValidContent": true,
+      "confidence": 0.94,
+      "validationDecision": "VALIDATION_PASSED",
+      "reason": "The post explicitly invites the public to the farmers’ market during Thanksgiving weekend and gives a current Saturday visiting window of 9 a.m. to 2 p.m. at a stated address. This is an advertised public market session, which qualifies; the ordinary product displays and prices in the images are not needed to establish validity."
+    },
+    "elapsedMs": 11786
+  },
+  {
+    "id": "routine-appointments",
+    "expected": false,
+    "status": "completed",
+    "result": {
+      "imageAnalysis": [],
+      "hasValidContent": false,
+      "confidence": 0.99,
+      "validationDecision": "VALIDATION_FAILED",
+      "reason": "The post only advertises routine individual prescription consultations available by appointment every weekday. It does not announce a public clinic session, event, visitor activity, or qualifying food/drink offer."
+    },
+    "elapsedMs": 2315
+  },
+  {
+    "id": "ordinary-store-hours",
+    "expected": false,
+    "status": "completed",
+    "result": {
+      "imageAnalysis": [],
+      "hasValidContent": false,
+      "confidence": 0.99,
+      "validationDecision": "VALIDATION_FAILED",
+      "reason": "The post announces ordinary grocery-store hours and says shelves are stocked with apples and milk. Retail hours and ordinary product availability are excluded, and no food special, deal, public activity, or visitor-access offer is announced."
+    },
+    "elapsedMs": 2208
+  },
+  {
+    "id": "ordinary-stock",
+    "expected": false,
+    "status": "completed",
+    "result": {
+      "imageAnalysis": [],
+      "hasValidContent": false,
+      "confidence": 0.99,
+      "validationDecision": "VALIDATION_FAILED",
+      "reason": "The post only announces new clothing and Christmas decorations in a shop and invites people to browse ordinary retail stock. It does not announce a qualifying public event, activity, visitor-access offer, or food/drink special."
+    },
+    "elapsedMs": 2217
+  },
+  {
+    "id": "daily-food-special",
+    "expected": true,
+    "status": "completed",
+    "result": {
+      "imageAnalysis": [],
+      "hasValidContent": true,
+      "confidence": 0.99,
+      "validationDecision": "VALIDATION_PASSED",
+      "reason": "The post explicitly advertises a turkey dinner special available today, October 10, from 11:30 a.m. to 8 p.m. This is a date-specific food special, so it qualifies."
+    },
+    "elapsedMs": 1922
+  }
+]

@@ -144,3 +144,33 @@ The four false October 9 live records have a fresh guarded deletion manifest
 and complete backup under `artifacts/luna-oct9-production-audit`; exact
 approval is pending. Parser prevention alone does not delete them. Stage 1
 remains a 50% pilot and eligible-image Stage 3 remains 100% Luna high.
+
+## October 10 follow-up
+
+See `docs/luna-oct10-production-audit.md` for source IDs and persisted-write
+distinctions. Today's 382-row regular run completed with no repeated row starts
+or observed fencing regression. Stage 1 missed a dated walk-in clinic and a
+public farmers' market session; the compact image/caption prompt is hardened
+and the original sources pass fresh Luna high checks while routine store and
+appointment controls still fail. A code merchandise filter dropped Milton's
+scheduled craft/yard sale; the scoped sale exception retains it.
+
+Website enrichment must not lend a tour's dated time/ticket link to other dates.
+Already-split single-venue tour children must not inherit the caption's other
+cities, and an inferred city inside the venue name is not a second stop. These
+boundaries have regression coverage. Cinema admission discounts stay cinema,
+and undated future-special teasers cannot default to the source-post date.
+
+Open: Tivoli's Stage 3 extraction omits Oct 20 Evil Dead 2 and Oct 22 Dracula vs
+Frankenstein and conflates Oct 21's title; the correct three live keepers already
+exist. Two 8,000-token calendar inventory calls are incomplete and unhelpful.
+The legacy event writer retains an older Oct 10 Minions 17:00 start despite
+today's 15:00 extraction; other Minions duplicates predate this run. Keep broad
+dedup work deferred as Craig requested. Row 32's website-derived 11:00–06:00
+race range is untrusted; that source writes no events. Source weekday/date and
+printed `2:00am` ambiguities must not be silently repaired by guesses.
+
+Pending exact live review: Suspiria food category, Samuel's undated teaser, and
+PEI Brewing's borrowed Souris ticket/time evidence. Code prevention does not
+delete or retroactively correct these records. Stage 2 and Stage 5 are separate
+50% pilots; release evidence belongs in `docs/luna-oct10-stage2-stage5-release.md`.

@@ -1,0 +1,2702 @@
+[
+  {
+    "caseId": "row-111",
+    "row": 111,
+    "postId": "1728906582577297",
+    "source": "oct10-original-gallery",
+    "arm": "luna-negative-review",
+    "model": "gpt-6-luna",
+    "imageCount": 5,
+    "classification": {
+      "contentAnalysis": {
+        "hasEvents": true,
+        "hasFoodSpecials": true,
+        "hasMultipleItems": true,
+        "organizationStyle": "Unstructured"
+      },
+      "contentType": "MIXED_EVENTS_AND_SPECIALS",
+      "confidence": 0.88,
+      "classificationReason": "The post invites people to visit Darren while he is broadcasting live at Kays until 1pm, making this a public activity. The images also show advertised food deals, including a weekly chicken deal and a hot price on potato chips. These are retail food discounts, not just ordinary product displays. There is one activity and multiple food deals, so the content is mixed rather than a calendar or schedule.",
+      "estimatedItemCount": 3
+    },
+    "routing": {
+      "enabled": false,
+      "shadowEnabled": true,
+      "forceContentTypeOverride": false,
+      "shouldUseRoutedContentType": false,
+      "originalContentType": "MIXED_EVENTS_AND_SPECIALS",
+      "routedContentType": "MIXED_EVENTS_AND_SPECIALS",
+      "routingReason": "keep_model",
+      "calendarScore": -8,
+      "scheduleScore": 1,
+      "scoreDelta": -9,
+      "isAmbiguous": false,
+      "ocrMode": "basic",
+      "shouldUseCalendarTiles": false,
+      "legacyShouldUseCalendarTiles": false,
+      "signals": {
+        "hasCalendarGrid": false,
+        "recommendsTiling": false,
+        "hasDenseText": false,
+        "maxTextDensityScore": 0.24,
+        "allPromotionalPhoto": true,
+        "organizationStyle": "unstructured",
+        "weekdayCount": 0,
+        "timeLines": 1,
+        "hasTextCalendarSignal": false,
+        "hasLinkedCalendarSignal": false,
+        "estimatedItemCount": 3,
+        "hasEvents": true,
+        "hasFoodSpecials": true,
+        "hasMultipleItems": true,
+        "hasMultipleEventListings": false,
+        "hasComplexitySignals": true,
+        "recommendsTilingCount": 0
+      },
+      "thresholds": {
+        "calendarScoreMin": 8,
+        "calendarMarginMin": 2,
+        "scheduleScoreMin": 7,
+        "scheduleMarginMin": 2,
+        "smallPostMaxItems": 5,
+        "tiledCalendarScoreMin": 10,
+        "tiledMinItems": 8,
+        "scheduleBlockIfGrid": true,
+        "ambiguousRoute": "CALENDAR_BASIC"
+      }
+    },
+    "resolvedContentType": "MIXED_EVENTS_AND_SPECIALS",
+    "passesConfidenceGate": true,
+    "fallback": false,
+    "usage": [
+      {
+        "stage": "stage2",
+        "component": "contentClassifier",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 5,
+        "durationMs": 2308,
+        "inputTokens": 2407,
+        "outputTokens": 165,
+        "totalTokens": 2572,
+        "cachedInputTokens": 0
+      }
+    ],
+    "elapsedMs": 2328,
+    "requests": [
+      {
+        "model": "gpt-6-luna",
+        "effort": "none",
+        "maxOutputTokens": 6000,
+        "imageCount": 5,
+        "promptSha256": "1c7d9746d9b80a91e442d79787e68216a9aa8df256ae0c19d322fbe70bf06f5c",
+        "durationMs": 2305,
+        "httpStatus": 200,
+        "status": "completed",
+        "incompleteDetails": null,
+        "usage": {
+          "input_tokens": 2407,
+          "input_tokens_details": {
+            "cache_write_tokens": 2404,
+            "cached_tokens": 0
+          },
+          "output_tokens": 165,
+          "output_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "total_tokens": 2572
+        },
+        "error": null
+      }
+    ]
+  },
+  {
+    "caseId": "row-111",
+    "row": 111,
+    "postId": "1728906582577297",
+    "source": "oct10-original-gallery",
+    "arm": "mini-current",
+    "model": "gpt-5-mini",
+    "imageCount": 5,
+    "classification": {
+      "contentAnalysis": {
+        "hasEvents": true,
+        "hasFoodSpecials": true,
+        "hasMultipleItems": true,
+        "organizationStyle": "unstructured"
+      },
+      "contentType": "MIXED_EVENTS_AND_SPECIALS",
+      "confidence": 0.88,
+      "classificationReason": "The post announces a time-limited live broadcast ('I'm broadcasting live... I'm here until 1pm') which is a public event, and the photos/OCR show in-store price signs and 'This week's deals' (chicken price, bulk chip pack with 'HOT PRICE'), indicating food specials. The content is a single unstructured promotional post combining an event and retail food deals.",
+      "estimatedItemCount": 3
+    },
+    "routing": {
+      "enabled": false,
+      "shadowEnabled": true,
+      "forceContentTypeOverride": false,
+      "shouldUseRoutedContentType": false,
+      "originalContentType": "MIXED_EVENTS_AND_SPECIALS",
+      "routedContentType": "MIXED_EVENTS_AND_SPECIALS",
+      "routingReason": "keep_model",
+      "calendarScore": -8,
+      "scheduleScore": 1,
+      "scoreDelta": -9,
+      "isAmbiguous": false,
+      "ocrMode": "basic",
+      "shouldUseCalendarTiles": false,
+      "legacyShouldUseCalendarTiles": false,
+      "signals": {
+        "hasCalendarGrid": false,
+        "recommendsTiling": false,
+        "hasDenseText": false,
+        "maxTextDensityScore": 0.24,
+        "allPromotionalPhoto": true,
+        "organizationStyle": "unstructured",
+        "weekdayCount": 0,
+        "timeLines": 1,
+        "hasTextCalendarSignal": false,
+        "hasLinkedCalendarSignal": false,
+        "estimatedItemCount": 3,
+        "hasEvents": true,
+        "hasFoodSpecials": true,
+        "hasMultipleItems": true,
+        "hasMultipleEventListings": false,
+        "hasComplexitySignals": true,
+        "recommendsTilingCount": 0
+      },
+      "thresholds": {
+        "calendarScoreMin": 8,
+        "calendarMarginMin": 2,
+        "scheduleScoreMin": 7,
+        "scheduleMarginMin": 2,
+        "smallPostMaxItems": 5,
+        "tiledCalendarScoreMin": 10,
+        "tiledMinItems": 8,
+        "scheduleBlockIfGrid": true,
+        "ambiguousRoute": "CALENDAR_BASIC"
+      }
+    },
+    "resolvedContentType": "MIXED_EVENTS_AND_SPECIALS",
+    "passesConfidenceGate": true,
+    "fallback": false,
+    "usage": [
+      {
+        "stage": "stage2",
+        "component": "contentClassifier",
+        "endpoint": "responses",
+        "model": "gpt-5-mini",
+        "imageCount": 5,
+        "durationMs": 5502,
+        "inputTokens": 2407,
+        "outputTokens": 745,
+        "totalTokens": 3152,
+        "cachedInputTokens": 0
+      }
+    ],
+    "elapsedMs": 5511,
+    "requests": [
+      {
+        "model": "gpt-5-mini",
+        "effort": "model_default",
+        "maxOutputTokens": 1500,
+        "imageCount": 5,
+        "promptSha256": "1c7d9746d9b80a91e442d79787e68216a9aa8df256ae0c19d322fbe70bf06f5c",
+        "durationMs": 5499,
+        "httpStatus": 200,
+        "status": "completed",
+        "incompleteDetails": null,
+        "usage": {
+          "input_tokens": 2407,
+          "input_tokens_details": {
+            "cache_write_tokens": 0,
+            "cached_tokens": 0
+          },
+          "output_tokens": 745,
+          "output_tokens_details": {
+            "reasoning_tokens": 576
+          },
+          "total_tokens": 3152
+        },
+        "error": null
+      }
+    ]
+  },
+  {
+    "caseId": "row-117",
+    "row": 117,
+    "postId": "1793693025774013",
+    "source": "oct10-original-gallery",
+    "arm": "luna-negative-review",
+    "model": "gpt-6-luna",
+    "imageCount": 1,
+    "classification": {
+      "contentAnalysis": {
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "hasMultipleItems": false,
+        "organizationStyle": "Unstructured, with one walk-in clinic advertised for today from 9 AM to 4 PM"
+      },
+      "contentType": "EVENT",
+      "confidence": 0.99,
+      "classificationReason": "The post advertises one public walk-in pharmacist clinic today from 9 AM to 4 PM, including minor-ailment assessments and pharmacy services. Vaccinations are offered as part of the clinic, not as separate scheduled activities. No food or drink specials are advertised.",
+      "estimatedItemCount": 1
+    },
+    "routing": {
+      "enabled": false,
+      "shadowEnabled": true,
+      "forceContentTypeOverride": false,
+      "shouldUseRoutedContentType": false,
+      "originalContentType": "EVENT",
+      "routedContentType": "EVENT",
+      "routingReason": "keep_model",
+      "calendarScore": -4,
+      "scheduleScore": -1,
+      "scoreDelta": -3,
+      "isAmbiguous": false,
+      "ocrMode": "basic",
+      "shouldUseCalendarTiles": false,
+      "legacyShouldUseCalendarTiles": false,
+      "signals": {
+        "hasCalendarGrid": false,
+        "recommendsTiling": false,
+        "hasDenseText": false,
+        "maxTextDensityScore": 0.42,
+        "allPromotionalPhoto": false,
+        "organizationStyle": "unstructured, with one walk-in clinic advertised for today from 9 am to 4 pm",
+        "weekdayCount": 0,
+        "timeLines": 2,
+        "hasTextCalendarSignal": false,
+        "hasLinkedCalendarSignal": false,
+        "estimatedItemCount": 1,
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "hasMultipleItems": false,
+        "hasMultipleEventListings": false,
+        "hasComplexitySignals": true,
+        "recommendsTilingCount": 0
+      },
+      "thresholds": {
+        "calendarScoreMin": 8,
+        "calendarMarginMin": 2,
+        "scheduleScoreMin": 7,
+        "scheduleMarginMin": 2,
+        "smallPostMaxItems": 5,
+        "tiledCalendarScoreMin": 10,
+        "tiledMinItems": 8,
+        "scheduleBlockIfGrid": true,
+        "ambiguousRoute": "CALENDAR_BASIC"
+      }
+    },
+    "resolvedContentType": "EVENT",
+    "passesConfidenceGate": true,
+    "fallback": false,
+    "usage": [
+      {
+        "stage": "stage2",
+        "component": "contentClassifier",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 1,
+        "durationMs": 1933,
+        "inputTokens": 1594,
+        "outputTokens": 150,
+        "totalTokens": 1744,
+        "cachedInputTokens": 0
+      }
+    ],
+    "elapsedMs": 1936,
+    "requests": [
+      {
+        "model": "gpt-6-luna",
+        "effort": "none",
+        "maxOutputTokens": 6000,
+        "imageCount": 1,
+        "promptSha256": "be214b12e8f68817380d4f24b5e82ae2cacc2b4426c0c18eacfb6586c50046da",
+        "durationMs": 1931,
+        "httpStatus": 200,
+        "status": "completed",
+        "incompleteDetails": null,
+        "usage": {
+          "input_tokens": 1594,
+          "input_tokens_details": {
+            "cache_write_tokens": 1591,
+            "cached_tokens": 0
+          },
+          "output_tokens": 150,
+          "output_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "total_tokens": 1744
+        },
+        "error": null
+      }
+    ]
+  },
+  {
+    "caseId": "row-117",
+    "row": 117,
+    "postId": "1793693025774013",
+    "source": "oct10-original-gallery",
+    "arm": "mini-current",
+    "model": "gpt-5-mini",
+    "imageCount": 1,
+    "classification": {
+      "contentAnalysis": {
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "hasMultipleItems": false,
+        "organizationStyle": "time"
+      },
+      "contentType": "EVENT",
+      "confidence": 0.95,
+      "classificationReason": "The content advertises a single public health activity: a walk-in pharmacy clinic today with specified hours (9 AM–4 PM) offering assessments and vaccines. No food or drink specials are mentioned and only one time-slot/event is listed.",
+      "estimatedItemCount": 1
+    },
+    "routing": {
+      "enabled": false,
+      "shadowEnabled": true,
+      "forceContentTypeOverride": false,
+      "shouldUseRoutedContentType": false,
+      "originalContentType": "EVENT",
+      "routedContentType": "EVENT",
+      "routingReason": "keep_model",
+      "calendarScore": -4,
+      "scheduleScore": 3,
+      "scoreDelta": -7,
+      "isAmbiguous": false,
+      "ocrMode": "basic",
+      "shouldUseCalendarTiles": false,
+      "legacyShouldUseCalendarTiles": false,
+      "signals": {
+        "hasCalendarGrid": false,
+        "recommendsTiling": false,
+        "hasDenseText": false,
+        "maxTextDensityScore": 0.42,
+        "allPromotionalPhoto": false,
+        "organizationStyle": "time",
+        "weekdayCount": 0,
+        "timeLines": 2,
+        "hasTextCalendarSignal": false,
+        "hasLinkedCalendarSignal": false,
+        "estimatedItemCount": 1,
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "hasMultipleItems": false,
+        "hasMultipleEventListings": false,
+        "hasComplexitySignals": true,
+        "recommendsTilingCount": 0
+      },
+      "thresholds": {
+        "calendarScoreMin": 8,
+        "calendarMarginMin": 2,
+        "scheduleScoreMin": 7,
+        "scheduleMarginMin": 2,
+        "smallPostMaxItems": 5,
+        "tiledCalendarScoreMin": 10,
+        "tiledMinItems": 8,
+        "scheduleBlockIfGrid": true,
+        "ambiguousRoute": "CALENDAR_BASIC"
+      }
+    },
+    "resolvedContentType": "EVENT",
+    "passesConfidenceGate": true,
+    "fallback": false,
+    "usage": [
+      {
+        "stage": "stage2",
+        "component": "contentClassifier",
+        "endpoint": "responses",
+        "model": "gpt-5-mini",
+        "imageCount": 1,
+        "durationMs": 3339,
+        "inputTokens": 1594,
+        "outputTokens": 439,
+        "totalTokens": 2033,
+        "cachedInputTokens": 0
+      }
+    ],
+    "elapsedMs": 3354,
+    "requests": [
+      {
+        "model": "gpt-5-mini",
+        "effort": "model_default",
+        "maxOutputTokens": 1500,
+        "imageCount": 1,
+        "promptSha256": "be214b12e8f68817380d4f24b5e82ae2cacc2b4426c0c18eacfb6586c50046da",
+        "durationMs": 3336,
+        "httpStatus": 200,
+        "status": "completed",
+        "incompleteDetails": null,
+        "usage": {
+          "input_tokens": 1594,
+          "input_tokens_details": {
+            "cache_write_tokens": 0,
+            "cached_tokens": 0
+          },
+          "output_tokens": 439,
+          "output_tokens_details": {
+            "reasoning_tokens": 256
+          },
+          "total_tokens": 2033
+        },
+        "error": null
+      }
+    ]
+  },
+  {
+    "caseId": "row-13",
+    "row": 13,
+    "postId": "1775682611227393",
+    "source": "oct10-original-gallery",
+    "arm": "luna-negative-review",
+    "model": "gpt-6-luna",
+    "imageCount": 1,
+    "classification": {
+      "contentAnalysis": {
+        "hasEvents": false,
+        "hasFoodSpecials": true,
+        "hasMultipleItems": false,
+        "organizationStyle": "unstructured"
+      },
+      "contentType": "FOOD_SPECIAL",
+      "confidence": 0.94,
+      "classificationReason": "The post advertises a Thanksgiving turkey dinner with sides and dessert for $22 per person, available Sunday and Monday for dine-in or takeout. This is a priced food offer, not a separate public activity or a multi-event schedule.",
+      "estimatedItemCount": 1
+    },
+    "routing": {
+      "enabled": false,
+      "shadowEnabled": true,
+      "forceContentTypeOverride": false,
+      "shouldUseRoutedContentType": false,
+      "originalContentType": "FOOD_SPECIAL",
+      "routedContentType": "FOOD_SPECIAL",
+      "routingReason": "keep_model",
+      "calendarScore": -8,
+      "scheduleScore": 1,
+      "scoreDelta": -9,
+      "isAmbiguous": false,
+      "ocrMode": "basic",
+      "shouldUseCalendarTiles": false,
+      "legacyShouldUseCalendarTiles": false,
+      "signals": {
+        "hasCalendarGrid": false,
+        "recommendsTiling": false,
+        "hasDenseText": false,
+        "maxTextDensityScore": 0.12,
+        "allPromotionalPhoto": true,
+        "organizationStyle": "unstructured",
+        "weekdayCount": 1,
+        "timeLines": 0,
+        "hasTextCalendarSignal": false,
+        "hasLinkedCalendarSignal": false,
+        "estimatedItemCount": 1,
+        "hasEvents": false,
+        "hasFoodSpecials": true,
+        "hasMultipleItems": false,
+        "hasMultipleEventListings": false,
+        "hasComplexitySignals": true,
+        "recommendsTilingCount": 0
+      },
+      "thresholds": {
+        "calendarScoreMin": 8,
+        "calendarMarginMin": 2,
+        "scheduleScoreMin": 7,
+        "scheduleMarginMin": 2,
+        "smallPostMaxItems": 5,
+        "tiledCalendarScoreMin": 10,
+        "tiledMinItems": 8,
+        "scheduleBlockIfGrid": true,
+        "ambiguousRoute": "CALENDAR_BASIC"
+      }
+    },
+    "resolvedContentType": "FOOD_SPECIAL",
+    "passesConfidenceGate": true,
+    "fallback": false,
+    "usage": [
+      {
+        "stage": "stage2",
+        "component": "contentClassifier",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 1,
+        "durationMs": 1918,
+        "inputTokens": 1533,
+        "outputTokens": 128,
+        "totalTokens": 1661,
+        "cachedInputTokens": 0
+      }
+    ],
+    "elapsedMs": 2327,
+    "requests": [
+      {
+        "model": "gpt-6-luna",
+        "effort": "none",
+        "maxOutputTokens": 6000,
+        "imageCount": 1,
+        "promptSha256": "d33a3a928e2b40f295a61bc3597b1e0e44171b46eb4b974d9deab3e3b804da59",
+        "durationMs": 1915,
+        "httpStatus": 200,
+        "status": "completed",
+        "incompleteDetails": null,
+        "usage": {
+          "input_tokens": 1533,
+          "input_tokens_details": {
+            "cache_write_tokens": 1530,
+            "cached_tokens": 0
+          },
+          "output_tokens": 128,
+          "output_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "total_tokens": 1661
+        },
+        "error": null
+      }
+    ]
+  },
+  {
+    "caseId": "row-13",
+    "row": 13,
+    "postId": "1775682611227393",
+    "source": "oct10-original-gallery",
+    "arm": "mini-current",
+    "model": "gpt-5-mini",
+    "imageCount": 1,
+    "classification": {
+      "contentAnalysis": {
+        "hasEvents": true,
+        "hasFoodSpecials": true,
+        "hasMultipleItems": false,
+        "organizationStyle": "by date (specific days stated: Sunday & Monday)"
+      },
+      "contentType": "MIXED_EVENTS_AND_SPECIALS",
+      "confidence": 0.9,
+      "classificationReason": "The post advertises a Thanksgiving dinner occurring on specific days (Sunday & Monday) which is an event/invitation to attend, and it also includes a priced food offer ($22 per person), so it contains both an event and a food/drink special. No multiple distinct events or a full calendar are listed.",
+      "estimatedItemCount": 1
+    },
+    "routing": {
+      "enabled": false,
+      "shadowEnabled": true,
+      "forceContentTypeOverride": false,
+      "shouldUseRoutedContentType": false,
+      "originalContentType": "MIXED_EVENTS_AND_SPECIALS",
+      "routedContentType": "MIXED_EVENTS_AND_SPECIALS",
+      "routingReason": "keep_model",
+      "calendarScore": -5,
+      "scheduleScore": 0,
+      "scoreDelta": -5,
+      "isAmbiguous": false,
+      "ocrMode": "basic",
+      "shouldUseCalendarTiles": false,
+      "legacyShouldUseCalendarTiles": false,
+      "signals": {
+        "hasCalendarGrid": false,
+        "recommendsTiling": false,
+        "hasDenseText": false,
+        "maxTextDensityScore": 0.12,
+        "allPromotionalPhoto": true,
+        "organizationStyle": "by date (specific days stated: sunday & monday)",
+        "weekdayCount": 1,
+        "timeLines": 0,
+        "hasTextCalendarSignal": false,
+        "hasLinkedCalendarSignal": false,
+        "estimatedItemCount": 1,
+        "hasEvents": true,
+        "hasFoodSpecials": true,
+        "hasMultipleItems": false,
+        "hasMultipleEventListings": false,
+        "hasComplexitySignals": true,
+        "recommendsTilingCount": 0
+      },
+      "thresholds": {
+        "calendarScoreMin": 8,
+        "calendarMarginMin": 2,
+        "scheduleScoreMin": 7,
+        "scheduleMarginMin": 2,
+        "smallPostMaxItems": 5,
+        "tiledCalendarScoreMin": 10,
+        "tiledMinItems": 8,
+        "scheduleBlockIfGrid": true,
+        "ambiguousRoute": "CALENDAR_BASIC"
+      }
+    },
+    "resolvedContentType": "MIXED_EVENTS_AND_SPECIALS",
+    "passesConfidenceGate": true,
+    "fallback": false,
+    "usage": [
+      {
+        "stage": "stage2",
+        "component": "contentClassifier",
+        "endpoint": "responses",
+        "model": "gpt-5-mini",
+        "imageCount": 1,
+        "durationMs": 4950,
+        "inputTokens": 1533,
+        "outputTokens": 545,
+        "totalTokens": 2078,
+        "cachedInputTokens": 0
+      }
+    ],
+    "elapsedMs": 4990,
+    "requests": [
+      {
+        "model": "gpt-5-mini",
+        "effort": "model_default",
+        "maxOutputTokens": 1500,
+        "imageCount": 1,
+        "promptSha256": "d33a3a928e2b40f295a61bc3597b1e0e44171b46eb4b974d9deab3e3b804da59",
+        "durationMs": 4942,
+        "httpStatus": 200,
+        "status": "completed",
+        "incompleteDetails": null,
+        "usage": {
+          "input_tokens": 1533,
+          "input_tokens_details": {
+            "cache_write_tokens": 0,
+            "cached_tokens": 0
+          },
+          "output_tokens": 545,
+          "output_tokens_details": {
+            "reasoning_tokens": 384
+          },
+          "total_tokens": 2078
+        },
+        "error": null
+      }
+    ]
+  },
+  {
+    "caseId": "row-180",
+    "row": 180,
+    "postId": "1740954254704708",
+    "source": "oct10-original-gallery",
+    "arm": "luna-negative-review",
+    "model": "gpt-6-luna",
+    "imageCount": 1,
+    "classification": {
+      "contentAnalysis": {
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "hasMultipleItems": false,
+        "organizationStyle": "Unstructured; one upcoming performance is promoted, with a tour itinerary visible in the image"
+      },
+      "contentType": "EVENT",
+      "confidence": 0.96,
+      "classificationReason": "The post promotes one bookable live music performance, “Two Pianos, No Rodeo,” at Souris Show Hall on October 24. The image lists dates and venues for a broader tour, but this post advertises a single local activity rather than a multi-event calendar or schedule. No food or drink specials are mentioned.",
+      "estimatedItemCount": 1
+    },
+    "routing": {
+      "enabled": false,
+      "shadowEnabled": true,
+      "forceContentTypeOverride": false,
+      "shouldUseRoutedContentType": false,
+      "originalContentType": "EVENT",
+      "routedContentType": "EVENT",
+      "routingReason": "keep_model",
+      "calendarScore": 5,
+      "scheduleScore": -8,
+      "scoreDelta": 13,
+      "isAmbiguous": false,
+      "ocrMode": "basic",
+      "shouldUseCalendarTiles": false,
+      "legacyShouldUseCalendarTiles": false,
+      "signals": {
+        "hasCalendarGrid": true,
+        "recommendsTiling": true,
+        "hasDenseText": true,
+        "maxTextDensityScore": 0.4,
+        "allPromotionalPhoto": false,
+        "organizationStyle": "unstructured; one upcoming performance is promoted, with a tour itinerary visible in the image",
+        "weekdayCount": 0,
+        "timeLines": 0,
+        "hasTextCalendarSignal": false,
+        "hasLinkedCalendarSignal": false,
+        "estimatedItemCount": 1,
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "hasMultipleItems": false,
+        "hasMultipleEventListings": true,
+        "hasComplexitySignals": true,
+        "recommendsTilingCount": 1
+      },
+      "thresholds": {
+        "calendarScoreMin": 8,
+        "calendarMarginMin": 2,
+        "scheduleScoreMin": 7,
+        "scheduleMarginMin": 2,
+        "smallPostMaxItems": 5,
+        "tiledCalendarScoreMin": 10,
+        "tiledMinItems": 8,
+        "scheduleBlockIfGrid": true,
+        "ambiguousRoute": "CALENDAR_BASIC"
+      }
+    },
+    "resolvedContentType": "EVENT",
+    "passesConfidenceGate": true,
+    "fallback": false,
+    "usage": [
+      {
+        "stage": "stage2",
+        "component": "contentClassifier",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 1,
+        "durationMs": 4165,
+        "inputTokens": 1592,
+        "outputTokens": 134,
+        "totalTokens": 1726,
+        "cachedInputTokens": 0
+      }
+    ],
+    "elapsedMs": 4168,
+    "requests": [
+      {
+        "model": "gpt-6-luna",
+        "effort": "none",
+        "maxOutputTokens": 6000,
+        "imageCount": 1,
+        "promptSha256": "c9db9df5b4b3fbb9e756f151e9c54b463a12fab7b72cb38ae12b76f875f2cbf8",
+        "durationMs": 4162,
+        "httpStatus": 200,
+        "status": "completed",
+        "incompleteDetails": null,
+        "usage": {
+          "input_tokens": 1592,
+          "input_tokens_details": {
+            "cache_write_tokens": 1589,
+            "cached_tokens": 0
+          },
+          "output_tokens": 134,
+          "output_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "total_tokens": 1726
+        },
+        "error": null
+      }
+    ]
+  },
+  {
+    "caseId": "row-180",
+    "row": 180,
+    "postId": "1740954254704708",
+    "source": "oct10-original-gallery",
+    "arm": "mini-current",
+    "model": "gpt-5-mini",
+    "imageCount": 1,
+    "classification": {
+      "contentAnalysis": {
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "hasMultipleItems": true,
+        "organizationStyle": "by date"
+      },
+      "contentType": "EVENT",
+      "confidence": 0.92,
+      "classificationReason": "The post advertises a specific performance ('Two Pianos, No Rodeo') with a ticket link and explicitly mentions a performance date (October 24 at Souris Show Hall). The poster image lists a series of dated tour stops (multiple dates/venues), so this is an event/tour listing organized by date.",
+      "estimatedItemCount": 10
+    },
+    "routing": {
+      "enabled": false,
+      "shadowEnabled": true,
+      "forceContentTypeOverride": true,
+      "shouldUseRoutedContentType": true,
+      "originalContentType": "EVENT",
+      "routedContentType": "CALENDAR",
+      "routingReason": "image_calendar_guard",
+      "calendarScore": 14,
+      "scheduleScore": -8,
+      "scoreDelta": 22,
+      "isAmbiguous": false,
+      "ocrMode": "tiled",
+      "shouldUseCalendarTiles": true,
+      "legacyShouldUseCalendarTiles": false,
+      "signals": {
+        "hasCalendarGrid": true,
+        "recommendsTiling": true,
+        "hasDenseText": true,
+        "maxTextDensityScore": 0.4,
+        "allPromotionalPhoto": false,
+        "organizationStyle": "by date",
+        "weekdayCount": 0,
+        "timeLines": 0,
+        "hasTextCalendarSignal": false,
+        "hasLinkedCalendarSignal": false,
+        "estimatedItemCount": 10,
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "hasMultipleItems": true,
+        "hasMultipleEventListings": true,
+        "hasComplexitySignals": true,
+        "recommendsTilingCount": 1
+      },
+      "thresholds": {
+        "calendarScoreMin": 8,
+        "calendarMarginMin": 2,
+        "scheduleScoreMin": 7,
+        "scheduleMarginMin": 2,
+        "smallPostMaxItems": 5,
+        "tiledCalendarScoreMin": 10,
+        "tiledMinItems": 8,
+        "scheduleBlockIfGrid": true,
+        "ambiguousRoute": "CALENDAR_BASIC"
+      }
+    },
+    "resolvedContentType": "CALENDAR",
+    "passesConfidenceGate": true,
+    "fallback": false,
+    "usage": [
+      {
+        "stage": "stage2",
+        "component": "contentClassifier",
+        "endpoint": "responses",
+        "model": "gpt-5-mini",
+        "imageCount": 1,
+        "durationMs": 6269,
+        "inputTokens": 1592,
+        "outputTokens": 916,
+        "totalTokens": 2508,
+        "cachedInputTokens": 0
+      }
+    ],
+    "elapsedMs": 6272,
+    "requests": [
+      {
+        "model": "gpt-5-mini",
+        "effort": "model_default",
+        "maxOutputTokens": 1500,
+        "imageCount": 1,
+        "promptSha256": "c9db9df5b4b3fbb9e756f151e9c54b463a12fab7b72cb38ae12b76f875f2cbf8",
+        "durationMs": 6268,
+        "httpStatus": 200,
+        "status": "completed",
+        "incompleteDetails": null,
+        "usage": {
+          "input_tokens": 1592,
+          "input_tokens_details": {
+            "cache_write_tokens": 0,
+            "cached_tokens": 0
+          },
+          "output_tokens": 916,
+          "output_tokens_details": {
+            "reasoning_tokens": 768
+          },
+          "total_tokens": 2508
+        },
+        "error": null
+      }
+    ]
+  },
+  {
+    "caseId": "row-195",
+    "row": 195,
+    "postId": "1429165629399107",
+    "source": "oct10-original-gallery",
+    "arm": "luna-negative-review",
+    "model": "gpt-6-luna",
+    "imageCount": 1,
+    "classification": {
+      "contentAnalysis": {
+        "hasEvents": false,
+        "hasFoodSpecials": false,
+        "hasMultipleItems": false,
+        "organizationStyle": "unstructured"
+      },
+      "contentType": "EVENT",
+      "confidence": 0,
+      "classificationReason": "The post promotes the library’s cookbook collection and play areas, but does not advertise a specific public or bookable activity, date, or time. No food or drink special is mentioned. EVENT is the closest available category, though there are no qualifying events to extract. | Safeguard: no activities or food/drink specials identified.",
+      "estimatedItemCount": 0
+    },
+    "routing": {
+      "enabled": false,
+      "shadowEnabled": true,
+      "forceContentTypeOverride": false,
+      "shouldUseRoutedContentType": false,
+      "originalContentType": "EVENT",
+      "routedContentType": "EVENT",
+      "routingReason": "keep_model",
+      "calendarScore": -4,
+      "scheduleScore": 2,
+      "scoreDelta": -6,
+      "isAmbiguous": false,
+      "ocrMode": "basic",
+      "shouldUseCalendarTiles": false,
+      "legacyShouldUseCalendarTiles": false,
+      "signals": {
+        "hasCalendarGrid": false,
+        "recommendsTiling": false,
+        "hasDenseText": false,
+        "maxTextDensityScore": 0.08,
+        "allPromotionalPhoto": true,
+        "organizationStyle": "unstructured",
+        "weekdayCount": 0,
+        "timeLines": 0,
+        "hasTextCalendarSignal": false,
+        "hasLinkedCalendarSignal": false,
+        "estimatedItemCount": 0,
+        "hasEvents": false,
+        "hasFoodSpecials": false,
+        "hasMultipleItems": false,
+        "hasMultipleEventListings": false,
+        "hasComplexitySignals": true,
+        "recommendsTilingCount": 0
+      },
+      "thresholds": {
+        "calendarScoreMin": 8,
+        "calendarMarginMin": 2,
+        "scheduleScoreMin": 7,
+        "scheduleMarginMin": 2,
+        "smallPostMaxItems": 5,
+        "tiledCalendarScoreMin": 10,
+        "tiledMinItems": 8,
+        "scheduleBlockIfGrid": true,
+        "ambiguousRoute": "CALENDAR_BASIC"
+      }
+    },
+    "resolvedContentType": "EVENT",
+    "passesConfidenceGate": false,
+    "fallback": false,
+    "usage": [
+      {
+        "stage": "stage2",
+        "component": "contentClassifier",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 1,
+        "durationMs": 3046,
+        "inputTokens": 1511,
+        "outputTokens": 133,
+        "totalTokens": 1644,
+        "cachedInputTokens": 0
+      },
+      {
+        "stage": "stage2",
+        "component": "contentClassifier",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 1,
+        "durationMs": 5689,
+        "inputTokens": 1511,
+        "outputTokens": 518,
+        "totalTokens": 2029,
+        "cachedInputTokens": 0
+      }
+    ],
+    "elapsedMs": 8739,
+    "requests": [
+      {
+        "model": "gpt-6-luna",
+        "effort": "none",
+        "maxOutputTokens": 6000,
+        "imageCount": 1,
+        "promptSha256": "0c29aa8b26394828090a7906b6018db8c3beb601ba861b2d20d4c67f720956a0",
+        "durationMs": 3045,
+        "httpStatus": 200,
+        "status": "completed",
+        "incompleteDetails": null,
+        "usage": {
+          "input_tokens": 1511,
+          "input_tokens_details": {
+            "cache_write_tokens": 1508,
+            "cached_tokens": 0
+          },
+          "output_tokens": 133,
+          "output_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "total_tokens": 1644
+        },
+        "error": null
+      },
+      {
+        "model": "gpt-6-luna",
+        "effort": "high",
+        "maxOutputTokens": 6000,
+        "imageCount": 1,
+        "promptSha256": "0c29aa8b26394828090a7906b6018db8c3beb601ba861b2d20d4c67f720956a0",
+        "durationMs": 5688,
+        "httpStatus": 200,
+        "status": "completed",
+        "incompleteDetails": null,
+        "usage": {
+          "input_tokens": 1511,
+          "input_tokens_details": {
+            "cache_write_tokens": 1508,
+            "cached_tokens": 0
+          },
+          "output_tokens": 518,
+          "output_tokens_details": {
+            "reasoning_tokens": 384
+          },
+          "total_tokens": 2029
+        },
+        "error": null
+      }
+    ]
+  },
+  {
+    "caseId": "row-195",
+    "row": 195,
+    "postId": "1429165629399107",
+    "source": "oct10-original-gallery",
+    "arm": "mini-current",
+    "model": "gpt-5-mini",
+    "imageCount": 1,
+    "classification": {
+      "contentAnalysis": {
+        "hasEvents": false,
+        "hasFoodSpecials": false,
+        "hasMultipleItems": false,
+        "organizationStyle": "unstructured"
+      },
+      "contentType": "EVENT",
+      "confidence": 0,
+      "classificationReason": "The post is a promotional/library social post about cookbooks and play areas (no dates, times, registration, or food/drink deals). It does not advertise any specific public/bookable activity or special; therefore both event and food flags are false. Because the schema requires one of the provided categories, I selected EVENT with low confidence to indicate absence of a clear event. | Safeguard: no activities or food/drink specials identified.",
+      "estimatedItemCount": 0
+    },
+    "routing": {
+      "enabled": false,
+      "shadowEnabled": true,
+      "forceContentTypeOverride": false,
+      "shouldUseRoutedContentType": false,
+      "originalContentType": "EVENT",
+      "routedContentType": "EVENT",
+      "routingReason": "keep_model",
+      "calendarScore": -4,
+      "scheduleScore": 2,
+      "scoreDelta": -6,
+      "isAmbiguous": false,
+      "ocrMode": "basic",
+      "shouldUseCalendarTiles": false,
+      "legacyShouldUseCalendarTiles": false,
+      "signals": {
+        "hasCalendarGrid": false,
+        "recommendsTiling": false,
+        "hasDenseText": false,
+        "maxTextDensityScore": 0.08,
+        "allPromotionalPhoto": true,
+        "organizationStyle": "unstructured",
+        "weekdayCount": 0,
+        "timeLines": 0,
+        "hasTextCalendarSignal": false,
+        "hasLinkedCalendarSignal": false,
+        "estimatedItemCount": 0,
+        "hasEvents": false,
+        "hasFoodSpecials": false,
+        "hasMultipleItems": false,
+        "hasMultipleEventListings": false,
+        "hasComplexitySignals": true,
+        "recommendsTilingCount": 0
+      },
+      "thresholds": {
+        "calendarScoreMin": 8,
+        "calendarMarginMin": 2,
+        "scheduleScoreMin": 7,
+        "scheduleMarginMin": 2,
+        "smallPostMaxItems": 5,
+        "tiledCalendarScoreMin": 10,
+        "tiledMinItems": 8,
+        "scheduleBlockIfGrid": true,
+        "ambiguousRoute": "CALENDAR_BASIC"
+      }
+    },
+    "resolvedContentType": "EVENT",
+    "passesConfidenceGate": false,
+    "fallback": false,
+    "usage": [
+      {
+        "stage": "stage2",
+        "component": "contentClassifier",
+        "endpoint": "responses",
+        "model": "gpt-5-mini",
+        "imageCount": 1,
+        "durationMs": 4333,
+        "inputTokens": 1511,
+        "outputTokens": 612,
+        "totalTokens": 2123,
+        "cachedInputTokens": 0
+      }
+    ],
+    "elapsedMs": 4347,
+    "requests": [
+      {
+        "model": "gpt-5-mini",
+        "effort": "model_default",
+        "maxOutputTokens": 1500,
+        "imageCount": 1,
+        "promptSha256": "0c29aa8b26394828090a7906b6018db8c3beb601ba861b2d20d4c67f720956a0",
+        "durationMs": 4330,
+        "httpStatus": 200,
+        "status": "completed",
+        "incompleteDetails": null,
+        "usage": {
+          "input_tokens": 1511,
+          "input_tokens_details": {
+            "cache_write_tokens": 0,
+            "cached_tokens": 0
+          },
+          "output_tokens": 612,
+          "output_tokens_details": {
+            "reasoning_tokens": 448
+          },
+          "total_tokens": 2123
+        },
+        "error": null
+      }
+    ]
+  },
+  {
+    "caseId": "row-207",
+    "row": 207,
+    "postId": "122232018920578108",
+    "source": "oct10-original-gallery",
+    "arm": "luna-negative-review",
+    "model": "gpt-6-luna",
+    "imageCount": 3,
+    "classification": {
+      "contentAnalysis": {
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "hasMultipleItems": true,
+        "organizationStyle": "date-organized"
+      },
+      "contentType": "CALENDAR",
+      "confidence": 0.99,
+      "classificationReason": "The post promotes the cinema’s October 2026 Halloween lineup, and the attached poster lists many film screenings and double features organized by date and showtime. This is a date-organized inventory of multiple events, so CALENDAR is the best fit. No food or drink specials are advertised.",
+      "estimatedItemCount": 20
+    },
+    "routing": {
+      "enabled": false,
+      "shadowEnabled": true,
+      "forceContentTypeOverride": false,
+      "shouldUseRoutedContentType": false,
+      "originalContentType": "CALENDAR",
+      "routedContentType": "CALENDAR",
+      "routingReason": "calendar_score",
+      "calendarScore": 14,
+      "scheduleScore": -6,
+      "scoreDelta": 20,
+      "isAmbiguous": false,
+      "ocrMode": "tiled",
+      "shouldUseCalendarTiles": true,
+      "legacyShouldUseCalendarTiles": true,
+      "signals": {
+        "hasCalendarGrid": true,
+        "recommendsTiling": true,
+        "hasDenseText": true,
+        "maxTextDensityScore": 0.9,
+        "allPromotionalPhoto": false,
+        "organizationStyle": "date-organized",
+        "weekdayCount": 0,
+        "timeLines": 1,
+        "hasTextCalendarSignal": false,
+        "hasLinkedCalendarSignal": false,
+        "estimatedItemCount": 20,
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "hasMultipleItems": true,
+        "hasMultipleEventListings": true,
+        "hasComplexitySignals": true,
+        "recommendsTilingCount": 3
+      },
+      "thresholds": {
+        "calendarScoreMin": 8,
+        "calendarMarginMin": 2,
+        "scheduleScoreMin": 7,
+        "scheduleMarginMin": 2,
+        "smallPostMaxItems": 5,
+        "tiledCalendarScoreMin": 10,
+        "tiledMinItems": 8,
+        "scheduleBlockIfGrid": true,
+        "ambiguousRoute": "CALENDAR_BASIC"
+      }
+    },
+    "resolvedContentType": "CALENDAR",
+    "passesConfidenceGate": true,
+    "fallback": false,
+    "usage": [
+      {
+        "stage": "stage2",
+        "component": "contentClassifier",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 3,
+        "durationMs": 2603,
+        "inputTokens": 2558,
+        "outputTokens": 139,
+        "totalTokens": 2697,
+        "cachedInputTokens": 0
+      }
+    ],
+    "elapsedMs": 2608,
+    "requests": [
+      {
+        "model": "gpt-6-luna",
+        "effort": "none",
+        "maxOutputTokens": 6000,
+        "imageCount": 3,
+        "promptSha256": "aa7472a200c0e13be35b6d0daec1ae9c32a80756e5c7a9b1fa99f760dd203c21",
+        "durationMs": 2594,
+        "httpStatus": 200,
+        "status": "completed",
+        "incompleteDetails": null,
+        "usage": {
+          "input_tokens": 2558,
+          "input_tokens_details": {
+            "cache_write_tokens": 2555,
+            "cached_tokens": 0
+          },
+          "output_tokens": 139,
+          "output_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "total_tokens": 2697
+        },
+        "error": null
+      }
+    ]
+  },
+  {
+    "caseId": "row-207",
+    "row": 207,
+    "postId": "122232018920578108",
+    "source": "oct10-original-gallery",
+    "arm": "mini-current",
+    "model": "gpt-5-mini",
+    "imageCount": 3,
+    "classification": {
+      "contentAnalysis": {
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "hasMultipleItems": true,
+        "organizationStyle": "date-organized"
+      },
+      "contentType": "CALENDAR",
+      "confidence": 0.9,
+      "classificationReason": "The post advertises the Tivoli Cinema's annual Halloween lineup and the attached images show a month-long poster with many film showings listed by specific October dates and times (including a horror marathon on the 31st). This is a date-organized schedule of multiple public events, so it matches a calendar-style listing.",
+      "estimatedItemCount": 20
+    },
+    "routing": {
+      "enabled": false,
+      "shadowEnabled": true,
+      "forceContentTypeOverride": false,
+      "shouldUseRoutedContentType": false,
+      "originalContentType": "CALENDAR",
+      "routedContentType": "CALENDAR",
+      "routingReason": "calendar_score",
+      "calendarScore": 14,
+      "scheduleScore": -6,
+      "scoreDelta": 20,
+      "isAmbiguous": false,
+      "ocrMode": "tiled",
+      "shouldUseCalendarTiles": true,
+      "legacyShouldUseCalendarTiles": true,
+      "signals": {
+        "hasCalendarGrid": true,
+        "recommendsTiling": true,
+        "hasDenseText": true,
+        "maxTextDensityScore": 0.9,
+        "allPromotionalPhoto": false,
+        "organizationStyle": "date-organized",
+        "weekdayCount": 0,
+        "timeLines": 1,
+        "hasTextCalendarSignal": false,
+        "hasLinkedCalendarSignal": false,
+        "estimatedItemCount": 20,
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "hasMultipleItems": true,
+        "hasMultipleEventListings": true,
+        "hasComplexitySignals": true,
+        "recommendsTilingCount": 3
+      },
+      "thresholds": {
+        "calendarScoreMin": 8,
+        "calendarMarginMin": 2,
+        "scheduleScoreMin": 7,
+        "scheduleMarginMin": 2,
+        "smallPostMaxItems": 5,
+        "tiledCalendarScoreMin": 10,
+        "tiledMinItems": 8,
+        "scheduleBlockIfGrid": true,
+        "ambiguousRoute": "CALENDAR_BASIC"
+      }
+    },
+    "resolvedContentType": "CALENDAR",
+    "passesConfidenceGate": true,
+    "fallback": false,
+    "usage": [
+      {
+        "stage": "stage2",
+        "component": "contentClassifier",
+        "endpoint": "responses",
+        "model": "gpt-5-mini",
+        "imageCount": 3,
+        "durationMs": 4274,
+        "inputTokens": 2558,
+        "outputTokens": 556,
+        "totalTokens": 3114,
+        "cachedInputTokens": 0
+      }
+    ],
+    "elapsedMs": 4298,
+    "requests": [
+      {
+        "model": "gpt-5-mini",
+        "effort": "model_default",
+        "maxOutputTokens": 1500,
+        "imageCount": 3,
+        "promptSha256": "aa7472a200c0e13be35b6d0daec1ae9c32a80756e5c7a9b1fa99f760dd203c21",
+        "durationMs": 4266,
+        "httpStatus": 200,
+        "status": "completed",
+        "incompleteDetails": null,
+        "usage": {
+          "input_tokens": 2558,
+          "input_tokens_details": {
+            "cache_write_tokens": 0,
+            "cached_tokens": 0
+          },
+          "output_tokens": 556,
+          "output_tokens_details": {
+            "reasoning_tokens": 384
+          },
+          "total_tokens": 3114
+        },
+        "error": null
+      }
+    ]
+  },
+  {
+    "caseId": "row-224",
+    "row": 224,
+    "postId": "1756220149559131",
+    "source": "oct10-original-gallery",
+    "arm": "luna-negative-review",
+    "model": "gpt-6-luna",
+    "imageCount": 1,
+    "classification": {
+      "contentAnalysis": {
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "hasMultipleItems": true,
+        "organizationStyle": "Unstructured; two dated fitness class offerings are listed"
+      },
+      "contentType": "EVENT",
+      "confidence": 0.97,
+      "classificationReason": "The post advertises two bookable fitness classes: Yoga on Sunday, October 11, and a Bootcamp on Thanksgiving Monday at 9 a.m., with a booking link. These are public activity invitations, not food specials. Although multiple classes are mentioned, this is a small set of offerings rather than a date-organized calendar or time-organized schedule.",
+      "estimatedItemCount": 2
+    },
+    "routing": {
+      "enabled": false,
+      "shadowEnabled": true,
+      "forceContentTypeOverride": false,
+      "shouldUseRoutedContentType": false,
+      "originalContentType": "EVENT",
+      "routedContentType": "EVENT",
+      "routingReason": "keep_model",
+      "calendarScore": -4,
+      "scheduleScore": -1,
+      "scoreDelta": -3,
+      "isAmbiguous": false,
+      "ocrMode": "basic",
+      "shouldUseCalendarTiles": false,
+      "legacyShouldUseCalendarTiles": false,
+      "signals": {
+        "hasCalendarGrid": false,
+        "recommendsTiling": false,
+        "hasDenseText": false,
+        "maxTextDensityScore": 0.12,
+        "allPromotionalPhoto": false,
+        "organizationStyle": "unstructured; two dated fitness class offerings are listed",
+        "weekdayCount": 2,
+        "timeLines": 1,
+        "hasTextCalendarSignal": false,
+        "hasLinkedCalendarSignal": false,
+        "estimatedItemCount": 2,
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "hasMultipleItems": true,
+        "hasMultipleEventListings": false,
+        "hasComplexitySignals": true,
+        "recommendsTilingCount": 0
+      },
+      "thresholds": {
+        "calendarScoreMin": 8,
+        "calendarMarginMin": 2,
+        "scheduleScoreMin": 7,
+        "scheduleMarginMin": 2,
+        "smallPostMaxItems": 5,
+        "tiledCalendarScoreMin": 10,
+        "tiledMinItems": 8,
+        "scheduleBlockIfGrid": true,
+        "ambiguousRoute": "CALENDAR_BASIC"
+      }
+    },
+    "resolvedContentType": "EVENT",
+    "passesConfidenceGate": true,
+    "fallback": false,
+    "usage": [
+      {
+        "stage": "stage2",
+        "component": "contentClassifier",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 1,
+        "durationMs": 1990,
+        "inputTokens": 1485,
+        "outputTokens": 159,
+        "totalTokens": 1644,
+        "cachedInputTokens": 0
+      }
+    ],
+    "elapsedMs": 2001,
+    "requests": [
+      {
+        "model": "gpt-6-luna",
+        "effort": "none",
+        "maxOutputTokens": 6000,
+        "imageCount": 1,
+        "promptSha256": "12f641501fd3aeb5a25a632e652f07e7512046dbabd30cd8644beb094782e11c",
+        "durationMs": 1989,
+        "httpStatus": 200,
+        "status": "completed",
+        "incompleteDetails": null,
+        "usage": {
+          "input_tokens": 1485,
+          "input_tokens_details": {
+            "cache_write_tokens": 1482,
+            "cached_tokens": 0
+          },
+          "output_tokens": 159,
+          "output_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "total_tokens": 1644
+        },
+        "error": null
+      }
+    ]
+  },
+  {
+    "caseId": "row-224",
+    "row": 224,
+    "postId": "1756220149559131",
+    "source": "oct10-original-gallery",
+    "arm": "mini-current",
+    "model": "gpt-5-mini",
+    "imageCount": 1,
+    "classification": {
+      "contentAnalysis": {
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "hasMultipleItems": true,
+        "organizationStyle": "date-organized (mentions specific dates/times inline but presented as an unstructured announcement)"
+      },
+      "contentType": "EVENT",
+      "confidence": 0.9,
+      "classificationReason": "This is an announcement for fitness class sign-ups that lists specific bookable activities: Yoga on Sunday, Oct 11 and a Bootcamp on Thanksgiving Monday at 9am. It therefore advertises public/bookable events (classes) rather than food specials or a full calendar/schedule.",
+      "estimatedItemCount": 2
+    },
+    "routing": {
+      "enabled": false,
+      "shadowEnabled": true,
+      "forceContentTypeOverride": false,
+      "shouldUseRoutedContentType": false,
+      "originalContentType": "EVENT",
+      "routedContentType": "EVENT",
+      "routingReason": "keep_model",
+      "calendarScore": -4,
+      "scheduleScore": 3,
+      "scoreDelta": -7,
+      "isAmbiguous": false,
+      "ocrMode": "basic",
+      "shouldUseCalendarTiles": false,
+      "legacyShouldUseCalendarTiles": false,
+      "signals": {
+        "hasCalendarGrid": false,
+        "recommendsTiling": false,
+        "hasDenseText": false,
+        "maxTextDensityScore": 0.12,
+        "allPromotionalPhoto": false,
+        "organizationStyle": "date-organized (mentions specific dates/times inline but presented as an unstructured announcement)",
+        "weekdayCount": 2,
+        "timeLines": 1,
+        "hasTextCalendarSignal": false,
+        "hasLinkedCalendarSignal": false,
+        "estimatedItemCount": 2,
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "hasMultipleItems": true,
+        "hasMultipleEventListings": false,
+        "hasComplexitySignals": true,
+        "recommendsTilingCount": 0
+      },
+      "thresholds": {
+        "calendarScoreMin": 8,
+        "calendarMarginMin": 2,
+        "scheduleScoreMin": 7,
+        "scheduleMarginMin": 2,
+        "smallPostMaxItems": 5,
+        "tiledCalendarScoreMin": 10,
+        "tiledMinItems": 8,
+        "scheduleBlockIfGrid": true,
+        "ambiguousRoute": "CALENDAR_BASIC"
+      }
+    },
+    "resolvedContentType": "EVENT",
+    "passesConfidenceGate": true,
+    "fallback": false,
+    "usage": [
+      {
+        "stage": "stage2",
+        "component": "contentClassifier",
+        "endpoint": "responses",
+        "model": "gpt-5-mini",
+        "imageCount": 1,
+        "durationMs": 4144,
+        "inputTokens": 1485,
+        "outputTokens": 511,
+        "totalTokens": 1996,
+        "cachedInputTokens": 0
+      }
+    ],
+    "elapsedMs": 4151,
+    "requests": [
+      {
+        "model": "gpt-5-mini",
+        "effort": "model_default",
+        "maxOutputTokens": 1500,
+        "imageCount": 1,
+        "promptSha256": "12f641501fd3aeb5a25a632e652f07e7512046dbabd30cd8644beb094782e11c",
+        "durationMs": 4144,
+        "httpStatus": 200,
+        "status": "completed",
+        "incompleteDetails": null,
+        "usage": {
+          "input_tokens": 1485,
+          "input_tokens_details": {
+            "cache_write_tokens": 0,
+            "cached_tokens": 0
+          },
+          "output_tokens": 511,
+          "output_tokens_details": {
+            "reasoning_tokens": 320
+          },
+          "total_tokens": 1996
+        },
+        "error": null
+      }
+    ]
+  },
+  {
+    "caseId": "row-274",
+    "row": 274,
+    "postId": "1770064988462507",
+    "source": "oct10-original-gallery",
+    "arm": "luna-negative-review",
+    "model": "gpt-6-luna",
+    "imageCount": 4,
+    "classification": {
+      "contentAnalysis": {
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "hasMultipleItems": false,
+        "organizationStyle": "unstructured"
+      },
+      "contentType": "EVENT",
+      "confidence": 0.91,
+      "classificationReason": "The post invites the public to visit the farmers' market today, Saturday, and gives its hours (9 to 2) and location. This is a single public visit with advertised hours, so it qualifies as an event. The local products and artisan gifts are promotional content, not advertised food or drink deals.",
+      "estimatedItemCount": 1
+    },
+    "routing": {
+      "enabled": false,
+      "shadowEnabled": true,
+      "forceContentTypeOverride": false,
+      "shouldUseRoutedContentType": false,
+      "originalContentType": "EVENT",
+      "routedContentType": "EVENT",
+      "routingReason": "keep_model",
+      "calendarScore": -8,
+      "scheduleScore": 1,
+      "scoreDelta": -9,
+      "isAmbiguous": false,
+      "ocrMode": "basic",
+      "shouldUseCalendarTiles": false,
+      "legacyShouldUseCalendarTiles": false,
+      "signals": {
+        "hasCalendarGrid": false,
+        "recommendsTiling": false,
+        "hasDenseText": false,
+        "maxTextDensityScore": 0.2,
+        "allPromotionalPhoto": true,
+        "organizationStyle": "unstructured",
+        "weekdayCount": 1,
+        "timeLines": 0,
+        "hasTextCalendarSignal": false,
+        "hasLinkedCalendarSignal": false,
+        "estimatedItemCount": 1,
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "hasMultipleItems": false,
+        "hasMultipleEventListings": false,
+        "hasComplexitySignals": true,
+        "recommendsTilingCount": 0
+      },
+      "thresholds": {
+        "calendarScoreMin": 8,
+        "calendarMarginMin": 2,
+        "scheduleScoreMin": 7,
+        "scheduleMarginMin": 2,
+        "smallPostMaxItems": 5,
+        "tiledCalendarScoreMin": 10,
+        "tiledMinItems": 8,
+        "scheduleBlockIfGrid": true,
+        "ambiguousRoute": "CALENDAR_BASIC"
+      }
+    },
+    "resolvedContentType": "EVENT",
+    "passesConfidenceGate": true,
+    "fallback": false,
+    "usage": [
+      {
+        "stage": "stage2",
+        "component": "contentClassifier",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 4,
+        "durationMs": 2929,
+        "inputTokens": 2492,
+        "outputTokens": 141,
+        "totalTokens": 2633,
+        "cachedInputTokens": 0
+      }
+    ],
+    "elapsedMs": 2934,
+    "requests": [
+      {
+        "model": "gpt-6-luna",
+        "effort": "none",
+        "maxOutputTokens": 6000,
+        "imageCount": 4,
+        "promptSha256": "b478c7e21d990fb951c34ed153d74f0f011e453aa9c2851db37b81bb4c46304c",
+        "durationMs": 2926,
+        "httpStatus": 200,
+        "status": "completed",
+        "incompleteDetails": null,
+        "usage": {
+          "input_tokens": 2492,
+          "input_tokens_details": {
+            "cache_write_tokens": 2489,
+            "cached_tokens": 0
+          },
+          "output_tokens": 141,
+          "output_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "total_tokens": 2633
+        },
+        "error": null
+      }
+    ]
+  },
+  {
+    "caseId": "row-274",
+    "row": 274,
+    "postId": "1770064988462507",
+    "source": "oct10-original-gallery",
+    "arm": "mini-current",
+    "model": "gpt-5-mini",
+    "imageCount": 4,
+    "classification": {
+      "contentAnalysis": {
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "hasMultipleItems": false,
+        "organizationStyle": "date/time (single advertised open hours)"
+      },
+      "contentType": "EVENT",
+      "confidence": 0.95,
+      "classificationReason": "The post advertises the farmers' market being open today (Saturday) from 9 to 2 at a specific location — a single public activity with advertised hours. No food/drink deals or multiple distinct events are listed; images support a market setting.",
+      "estimatedItemCount": 1
+    },
+    "routing": {
+      "enabled": false,
+      "shadowEnabled": true,
+      "forceContentTypeOverride": false,
+      "shouldUseRoutedContentType": false,
+      "originalContentType": "EVENT",
+      "routedContentType": "EVENT",
+      "routingReason": "keep_model",
+      "calendarScore": -8,
+      "scheduleScore": 5,
+      "scoreDelta": -13,
+      "isAmbiguous": false,
+      "ocrMode": "basic",
+      "shouldUseCalendarTiles": false,
+      "legacyShouldUseCalendarTiles": false,
+      "signals": {
+        "hasCalendarGrid": false,
+        "recommendsTiling": false,
+        "hasDenseText": false,
+        "maxTextDensityScore": 0.2,
+        "allPromotionalPhoto": true,
+        "organizationStyle": "date/time (single advertised open hours)",
+        "weekdayCount": 1,
+        "timeLines": 0,
+        "hasTextCalendarSignal": false,
+        "hasLinkedCalendarSignal": false,
+        "estimatedItemCount": 1,
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "hasMultipleItems": false,
+        "hasMultipleEventListings": false,
+        "hasComplexitySignals": true,
+        "recommendsTilingCount": 0
+      },
+      "thresholds": {
+        "calendarScoreMin": 8,
+        "calendarMarginMin": 2,
+        "scheduleScoreMin": 7,
+        "scheduleMarginMin": 2,
+        "smallPostMaxItems": 5,
+        "tiledCalendarScoreMin": 10,
+        "tiledMinItems": 8,
+        "scheduleBlockIfGrid": true,
+        "ambiguousRoute": "CALENDAR_BASIC"
+      }
+    },
+    "resolvedContentType": "EVENT",
+    "passesConfidenceGate": true,
+    "fallback": false,
+    "usage": [
+      {
+        "stage": "stage2",
+        "component": "contentClassifier",
+        "endpoint": "responses",
+        "model": "gpt-5-mini",
+        "imageCount": 4,
+        "durationMs": 4774,
+        "inputTokens": 2492,
+        "outputTokens": 578,
+        "totalTokens": 3070,
+        "cachedInputTokens": 0
+      }
+    ],
+    "elapsedMs": 4786,
+    "requests": [
+      {
+        "model": "gpt-5-mini",
+        "effort": "model_default",
+        "maxOutputTokens": 1500,
+        "imageCount": 4,
+        "promptSha256": "b478c7e21d990fb951c34ed153d74f0f011e453aa9c2851db37b81bb4c46304c",
+        "durationMs": 4771,
+        "httpStatus": 200,
+        "status": "completed",
+        "incompleteDetails": null,
+        "usage": {
+          "input_tokens": 2492,
+          "input_tokens_details": {
+            "cache_write_tokens": 0,
+            "cached_tokens": 0
+          },
+          "output_tokens": 578,
+          "output_tokens_details": {
+            "reasoning_tokens": 384
+          },
+          "total_tokens": 3070
+        },
+        "error": null
+      }
+    ]
+  },
+  {
+    "caseId": "row-31",
+    "row": 31,
+    "postId": "1559590459541819",
+    "source": "oct10-original-gallery",
+    "arm": "luna-negative-review",
+    "model": "gpt-6-luna",
+    "imageCount": 1,
+    "classification": {
+      "contentAnalysis": {
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "hasMultipleItems": true,
+        "organizationStyle": "By date, with events listed by time"
+      },
+      "contentType": "CALENDAR",
+      "confidence": 0.99,
+      "classificationReason": "The post lists many public activities across Saturday, October 10 and Sunday, October 11, with dates and times. It is a date-organized weekend calendar, not an advertisement for food or drink specials.",
+      "estimatedItemCount": 43
+    },
+    "routing": {
+      "enabled": false,
+      "shadowEnabled": true,
+      "forceContentTypeOverride": false,
+      "shouldUseRoutedContentType": false,
+      "originalContentType": "CALENDAR",
+      "routedContentType": "SCHEDULE",
+      "routingReason": "schedule_score",
+      "calendarScore": 7,
+      "scheduleScore": 10,
+      "scoreDelta": -3,
+      "isAmbiguous": false,
+      "ocrMode": "basic",
+      "shouldUseCalendarTiles": false,
+      "legacyShouldUseCalendarTiles": false,
+      "signals": {
+        "hasCalendarGrid": false,
+        "recommendsTiling": false,
+        "hasDenseText": false,
+        "maxTextDensityScore": 0.18,
+        "allPromotionalPhoto": true,
+        "organizationStyle": "by date, with events listed by time",
+        "weekdayCount": 3,
+        "timeLines": 41,
+        "hasTextCalendarSignal": true,
+        "hasLinkedCalendarSignal": true,
+        "estimatedItemCount": 43,
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "hasMultipleItems": true,
+        "hasMultipleEventListings": false,
+        "hasComplexitySignals": true,
+        "recommendsTilingCount": 0
+      },
+      "thresholds": {
+        "calendarScoreMin": 8,
+        "calendarMarginMin": 2,
+        "scheduleScoreMin": 7,
+        "scheduleMarginMin": 2,
+        "smallPostMaxItems": 5,
+        "tiledCalendarScoreMin": 10,
+        "tiledMinItems": 8,
+        "scheduleBlockIfGrid": true,
+        "ambiguousRoute": "CALENDAR_BASIC"
+      }
+    },
+    "resolvedContentType": "CALENDAR",
+    "passesConfidenceGate": true,
+    "fallback": false,
+    "usage": [
+      {
+        "stage": "stage2",
+        "component": "contentClassifier",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 1,
+        "durationMs": 2320,
+        "inputTokens": 2178,
+        "outputTokens": 128,
+        "totalTokens": 2306,
+        "cachedInputTokens": 0
+      }
+    ],
+    "elapsedMs": 2723,
+    "requests": [
+      {
+        "model": "gpt-6-luna",
+        "effort": "none",
+        "maxOutputTokens": 6000,
+        "imageCount": 1,
+        "promptSha256": "b56c08725559890667080ad88130a8d4b86facf3469c742e279e93b210a360c8",
+        "durationMs": 2317,
+        "httpStatus": 200,
+        "status": "completed",
+        "incompleteDetails": null,
+        "usage": {
+          "input_tokens": 2178,
+          "input_tokens_details": {
+            "cache_write_tokens": 2175,
+            "cached_tokens": 0
+          },
+          "output_tokens": 128,
+          "output_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "total_tokens": 2306
+        },
+        "error": null
+      }
+    ]
+  },
+  {
+    "caseId": "row-31",
+    "row": 31,
+    "postId": "1559590459541819",
+    "source": "oct10-original-gallery",
+    "arm": "mini-current",
+    "model": "gpt-5-mini",
+    "imageCount": 1,
+    "classification": {
+      "contentAnalysis": {
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "hasMultipleItems": true,
+        "organizationStyle": "by date and time"
+      },
+      "contentType": "CALENDAR",
+      "confidence": 0.95,
+      "classificationReason": "The post lists a multi-day, time-stamped lineup of many public activities for Saturday Oct 10 and Sunday Oct 11 (tours, concerts, classes, cinema showings, Fringe events, etc.) and includes a link to a daily library schedule — this matches a date-organized calendar of events rather than a single event or food special.",
+      "estimatedItemCount": 41
+    },
+    "routing": {
+      "enabled": false,
+      "shadowEnabled": true,
+      "forceContentTypeOverride": false,
+      "shouldUseRoutedContentType": false,
+      "originalContentType": "CALENDAR",
+      "routedContentType": "SCHEDULE",
+      "routingReason": "schedule_score",
+      "calendarScore": 7,
+      "scheduleScore": 10,
+      "scoreDelta": -3,
+      "isAmbiguous": false,
+      "ocrMode": "basic",
+      "shouldUseCalendarTiles": false,
+      "legacyShouldUseCalendarTiles": false,
+      "signals": {
+        "hasCalendarGrid": false,
+        "recommendsTiling": false,
+        "hasDenseText": false,
+        "maxTextDensityScore": 0.18,
+        "allPromotionalPhoto": true,
+        "organizationStyle": "by date and time",
+        "weekdayCount": 3,
+        "timeLines": 41,
+        "hasTextCalendarSignal": true,
+        "hasLinkedCalendarSignal": true,
+        "estimatedItemCount": 41,
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "hasMultipleItems": true,
+        "hasMultipleEventListings": false,
+        "hasComplexitySignals": true,
+        "recommendsTilingCount": 0
+      },
+      "thresholds": {
+        "calendarScoreMin": 8,
+        "calendarMarginMin": 2,
+        "scheduleScoreMin": 7,
+        "scheduleMarginMin": 2,
+        "smallPostMaxItems": 5,
+        "tiledCalendarScoreMin": 10,
+        "tiledMinItems": 8,
+        "scheduleBlockIfGrid": true,
+        "ambiguousRoute": "CALENDAR_BASIC"
+      }
+    },
+    "resolvedContentType": "CALENDAR",
+    "passesConfidenceGate": true,
+    "fallback": false,
+    "usage": [
+      {
+        "stage": "stage2",
+        "component": "contentClassifier",
+        "endpoint": "responses",
+        "model": "gpt-5-mini",
+        "imageCount": 1,
+        "durationMs": 10398,
+        "inputTokens": 2178,
+        "outputTokens": 1468,
+        "totalTokens": 3646,
+        "cachedInputTokens": 0
+      }
+    ],
+    "elapsedMs": 10806,
+    "requests": [
+      {
+        "model": "gpt-5-mini",
+        "effort": "model_default",
+        "maxOutputTokens": 1500,
+        "imageCount": 1,
+        "promptSha256": "b56c08725559890667080ad88130a8d4b86facf3469c742e279e93b210a360c8",
+        "durationMs": 10380,
+        "httpStatus": 200,
+        "status": "completed",
+        "incompleteDetails": null,
+        "usage": {
+          "input_tokens": 2178,
+          "input_tokens_details": {
+            "cache_write_tokens": 0,
+            "cached_tokens": 0
+          },
+          "output_tokens": 1468,
+          "output_tokens_details": {
+            "reasoning_tokens": 1280
+          },
+          "total_tokens": 3646
+        },
+        "error": null
+      }
+    ]
+  },
+  {
+    "caseId": "row-312",
+    "row": 312,
+    "postId": "1996068324945685",
+    "source": "oct10-original-gallery",
+    "arm": "luna-negative-review",
+    "model": "gpt-6-luna",
+    "imageCount": 2,
+    "classification": {
+      "contentAnalysis": {
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "hasMultipleItems": false,
+        "organizationStyle": "unstructured"
+      },
+      "contentType": "EVENT",
+      "confidence": 0.83,
+      "classificationReason": "The post promotes the organized Prince Edward Island Cinnamon Roll Circuit and encourages people to follow its map and visit participating locations as a food trail. The circuit is a public activity, not an advertised food deal. The mention of bringing back Cinnalove and upcoming special rolls is a future product announcement, not an explicit discount or deal. There is one activity and no date-organized list.",
+      "estimatedItemCount": 1
+    },
+    "routing": {
+      "enabled": false,
+      "shadowEnabled": true,
+      "forceContentTypeOverride": false,
+      "shouldUseRoutedContentType": false,
+      "originalContentType": "EVENT",
+      "routedContentType": "EVENT",
+      "routingReason": "keep_model",
+      "calendarScore": -8,
+      "scheduleScore": 1,
+      "scoreDelta": -9,
+      "isAmbiguous": false,
+      "ocrMode": "basic",
+      "shouldUseCalendarTiles": false,
+      "legacyShouldUseCalendarTiles": false,
+      "signals": {
+        "hasCalendarGrid": false,
+        "recommendsTiling": false,
+        "hasDenseText": false,
+        "maxTextDensityScore": 0,
+        "allPromotionalPhoto": true,
+        "organizationStyle": "unstructured",
+        "weekdayCount": 0,
+        "timeLines": 0,
+        "hasTextCalendarSignal": false,
+        "hasLinkedCalendarSignal": false,
+        "estimatedItemCount": 1,
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "hasMultipleItems": false,
+        "hasMultipleEventListings": false,
+        "hasComplexitySignals": true,
+        "recommendsTilingCount": 0
+      },
+      "thresholds": {
+        "calendarScoreMin": 8,
+        "calendarMarginMin": 2,
+        "scheduleScoreMin": 7,
+        "scheduleMarginMin": 2,
+        "smallPostMaxItems": 5,
+        "tiledCalendarScoreMin": 10,
+        "tiledMinItems": 8,
+        "scheduleBlockIfGrid": true,
+        "ambiguousRoute": "CALENDAR_BASIC"
+      }
+    },
+    "resolvedContentType": "EVENT",
+    "passesConfidenceGate": true,
+    "fallback": false,
+    "usage": [
+      {
+        "stage": "stage2",
+        "component": "contentClassifier",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 2,
+        "durationMs": 2210,
+        "inputTokens": 1822,
+        "outputTokens": 156,
+        "totalTokens": 1978,
+        "cachedInputTokens": 0
+      }
+    ],
+    "elapsedMs": 2215,
+    "requests": [
+      {
+        "model": "gpt-6-luna",
+        "effort": "none",
+        "maxOutputTokens": 6000,
+        "imageCount": 2,
+        "promptSha256": "565d13f722b469d7c73ac4c509176d4a621ea286bfe92762320fc8c446ad69d0",
+        "durationMs": 2209,
+        "httpStatus": 200,
+        "status": "completed",
+        "incompleteDetails": null,
+        "usage": {
+          "input_tokens": 1822,
+          "input_tokens_details": {
+            "cache_write_tokens": 1819,
+            "cached_tokens": 0
+          },
+          "output_tokens": 156,
+          "output_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "total_tokens": 1978
+        },
+        "error": null
+      }
+    ]
+  },
+  {
+    "caseId": "row-312",
+    "row": 312,
+    "postId": "1996068324945685",
+    "source": "oct10-original-gallery",
+    "arm": "mini-current",
+    "model": "gpt-5-mini",
+    "imageCount": 2,
+    "classification": {
+      "contentAnalysis": {
+        "hasEvents": true,
+        "hasFoodSpecials": true,
+        "hasMultipleItems": true,
+        "organizationStyle": "unstructured"
+      },
+      "contentType": "MIXED_EVENTS_AND_SPECIALS",
+      "confidence": 0.9,
+      "classificationReason": "The post promotes participation in the Prince Edward Island Cinnamon Roll Circuit (an organized food trail/activity — counted as an event) and also announces the return of a named item (Cinnalove) and special rolls later this month (food specials). Content is promotional and not organized by specific dates/times, so it is not a calendar or schedule.",
+      "estimatedItemCount": 2
+    },
+    "routing": {
+      "enabled": false,
+      "shadowEnabled": true,
+      "forceContentTypeOverride": false,
+      "shouldUseRoutedContentType": false,
+      "originalContentType": "MIXED_EVENTS_AND_SPECIALS",
+      "routedContentType": "MIXED_EVENTS_AND_SPECIALS",
+      "routingReason": "keep_model",
+      "calendarScore": -8,
+      "scheduleScore": 1,
+      "scoreDelta": -9,
+      "isAmbiguous": false,
+      "ocrMode": "basic",
+      "shouldUseCalendarTiles": false,
+      "legacyShouldUseCalendarTiles": false,
+      "signals": {
+        "hasCalendarGrid": false,
+        "recommendsTiling": false,
+        "hasDenseText": false,
+        "maxTextDensityScore": 0,
+        "allPromotionalPhoto": true,
+        "organizationStyle": "unstructured",
+        "weekdayCount": 0,
+        "timeLines": 0,
+        "hasTextCalendarSignal": false,
+        "hasLinkedCalendarSignal": false,
+        "estimatedItemCount": 2,
+        "hasEvents": true,
+        "hasFoodSpecials": true,
+        "hasMultipleItems": true,
+        "hasMultipleEventListings": false,
+        "hasComplexitySignals": true,
+        "recommendsTilingCount": 0
+      },
+      "thresholds": {
+        "calendarScoreMin": 8,
+        "calendarMarginMin": 2,
+        "scheduleScoreMin": 7,
+        "scheduleMarginMin": 2,
+        "smallPostMaxItems": 5,
+        "tiledCalendarScoreMin": 10,
+        "tiledMinItems": 8,
+        "scheduleBlockIfGrid": true,
+        "ambiguousRoute": "CALENDAR_BASIC"
+      }
+    },
+    "resolvedContentType": "MIXED_EVENTS_AND_SPECIALS",
+    "passesConfidenceGate": true,
+    "fallback": false,
+    "usage": [
+      {
+        "stage": "stage2",
+        "component": "contentClassifier",
+        "endpoint": "responses",
+        "model": "gpt-5-mini",
+        "imageCount": 2,
+        "durationMs": 3778,
+        "inputTokens": 1822,
+        "outputTokens": 587,
+        "totalTokens": 2409,
+        "cachedInputTokens": 0
+      }
+    ],
+    "elapsedMs": 3783,
+    "requests": [
+      {
+        "model": "gpt-5-mini",
+        "effort": "model_default",
+        "maxOutputTokens": 1500,
+        "imageCount": 2,
+        "promptSha256": "565d13f722b469d7c73ac4c509176d4a621ea286bfe92762320fc8c446ad69d0",
+        "durationMs": 3776,
+        "httpStatus": 200,
+        "status": "completed",
+        "incompleteDetails": null,
+        "usage": {
+          "input_tokens": 1822,
+          "input_tokens_details": {
+            "cache_write_tokens": 0,
+            "cached_tokens": 0
+          },
+          "output_tokens": 587,
+          "output_tokens_details": {
+            "reasoning_tokens": 384
+          },
+          "total_tokens": 2409
+        },
+        "error": null
+      }
+    ]
+  },
+  {
+    "caseId": "row-313",
+    "row": 313,
+    "postId": "1925415225579146",
+    "source": "oct10-original-gallery",
+    "arm": "luna-negative-review",
+    "model": "gpt-6-luna",
+    "imageCount": 1,
+    "classification": {
+      "contentAnalysis": {
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "hasMultipleItems": false,
+        "organizationStyle": "Unstructured; one event advertised with a date and hours"
+      },
+      "contentType": "EVENT",
+      "confidence": 0.98,
+      "classificationReason": "The post advertises a single public craft and yard sale at Milton Hall on Saturday, Oct. 10, from 9 a.m. to 2 p.m. The listed vendors and merchandise are details of that one activity, not separate events or food specials.",
+      "estimatedItemCount": 1
+    },
+    "routing": {
+      "enabled": false,
+      "shadowEnabled": true,
+      "forceContentTypeOverride": false,
+      "shouldUseRoutedContentType": false,
+      "originalContentType": "EVENT",
+      "routedContentType": "EVENT",
+      "routingReason": "keep_model",
+      "calendarScore": -3,
+      "scheduleScore": -1,
+      "scoreDelta": -2,
+      "isAmbiguous": false,
+      "ocrMode": "basic",
+      "shouldUseCalendarTiles": false,
+      "legacyShouldUseCalendarTiles": false,
+      "signals": {
+        "hasCalendarGrid": false,
+        "recommendsTiling": false,
+        "hasDenseText": false,
+        "maxTextDensityScore": 0.78,
+        "allPromotionalPhoto": false,
+        "organizationStyle": "unstructured; one event advertised with a date and hours",
+        "weekdayCount": 1,
+        "timeLines": 0,
+        "hasTextCalendarSignal": false,
+        "hasLinkedCalendarSignal": false,
+        "estimatedItemCount": 1,
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "hasMultipleItems": false,
+        "hasMultipleEventListings": false,
+        "hasComplexitySignals": true,
+        "recommendsTilingCount": 0
+      },
+      "thresholds": {
+        "calendarScoreMin": 8,
+        "calendarMarginMin": 2,
+        "scheduleScoreMin": 7,
+        "scheduleMarginMin": 2,
+        "smallPostMaxItems": 5,
+        "tiledCalendarScoreMin": 10,
+        "tiledMinItems": 8,
+        "scheduleBlockIfGrid": true,
+        "ambiguousRoute": "CALENDAR_BASIC"
+      }
+    },
+    "resolvedContentType": "EVENT",
+    "passesConfidenceGate": true,
+    "fallback": false,
+    "usage": [
+      {
+        "stage": "stage2",
+        "component": "contentClassifier",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 1,
+        "durationMs": 2081,
+        "inputTokens": 1716,
+        "outputTokens": 115,
+        "totalTokens": 1831,
+        "cachedInputTokens": 0
+      }
+    ],
+    "elapsedMs": 2094,
+    "requests": [
+      {
+        "model": "gpt-6-luna",
+        "effort": "none",
+        "maxOutputTokens": 6000,
+        "imageCount": 1,
+        "promptSha256": "d1b01ee2ec49ed8c544bcacb0b320f0f39cc4546307fd1fec314c3dca3562c4e",
+        "durationMs": 2079,
+        "httpStatus": 200,
+        "status": "completed",
+        "incompleteDetails": null,
+        "usage": {
+          "input_tokens": 1716,
+          "input_tokens_details": {
+            "cache_write_tokens": 1713,
+            "cached_tokens": 0
+          },
+          "output_tokens": 115,
+          "output_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "total_tokens": 1831
+        },
+        "error": null
+      }
+    ]
+  },
+  {
+    "caseId": "row-313",
+    "row": 313,
+    "postId": "1925415225579146",
+    "source": "oct10-original-gallery",
+    "arm": "mini-current",
+    "model": "gpt-5-mini",
+    "imageCount": 1,
+    "classification": {
+      "contentAnalysis": {
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "hasMultipleItems": false,
+        "organizationStyle": "by date"
+      },
+      "contentType": "EVENT",
+      "confidence": 0.95,
+      "classificationReason": "The content advertises a single scheduled public activity: a craft & yard sale with a specific date and time (Saturday, Oct. 10 from 9am-2pm). It lists items for sale but does not advertise any food/drink deals, and only one event is specified.",
+      "estimatedItemCount": 1
+    },
+    "routing": {
+      "enabled": false,
+      "shadowEnabled": true,
+      "forceContentTypeOverride": false,
+      "shouldUseRoutedContentType": false,
+      "originalContentType": "EVENT",
+      "routedContentType": "EVENT",
+      "routingReason": "keep_model",
+      "calendarScore": 0,
+      "scheduleScore": -2,
+      "scoreDelta": 2,
+      "isAmbiguous": false,
+      "ocrMode": "basic",
+      "shouldUseCalendarTiles": false,
+      "legacyShouldUseCalendarTiles": false,
+      "signals": {
+        "hasCalendarGrid": false,
+        "recommendsTiling": false,
+        "hasDenseText": false,
+        "maxTextDensityScore": 0.78,
+        "allPromotionalPhoto": false,
+        "organizationStyle": "by date",
+        "weekdayCount": 1,
+        "timeLines": 0,
+        "hasTextCalendarSignal": false,
+        "hasLinkedCalendarSignal": false,
+        "estimatedItemCount": 1,
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "hasMultipleItems": false,
+        "hasMultipleEventListings": false,
+        "hasComplexitySignals": true,
+        "recommendsTilingCount": 0
+      },
+      "thresholds": {
+        "calendarScoreMin": 8,
+        "calendarMarginMin": 2,
+        "scheduleScoreMin": 7,
+        "scheduleMarginMin": 2,
+        "smallPostMaxItems": 5,
+        "tiledCalendarScoreMin": 10,
+        "tiledMinItems": 8,
+        "scheduleBlockIfGrid": true,
+        "ambiguousRoute": "CALENDAR_BASIC"
+      }
+    },
+    "resolvedContentType": "EVENT",
+    "passesConfidenceGate": true,
+    "fallback": false,
+    "usage": [
+      {
+        "stage": "stage2",
+        "component": "contentClassifier",
+        "endpoint": "responses",
+        "model": "gpt-5-mini",
+        "imageCount": 1,
+        "durationMs": 3600,
+        "inputTokens": 1716,
+        "outputTokens": 360,
+        "totalTokens": 2076,
+        "cachedInputTokens": 0
+      }
+    ],
+    "elapsedMs": 3603,
+    "requests": [
+      {
+        "model": "gpt-5-mini",
+        "effort": "model_default",
+        "maxOutputTokens": 1500,
+        "imageCount": 1,
+        "promptSha256": "d1b01ee2ec49ed8c544bcacb0b320f0f39cc4546307fd1fec314c3dca3562c4e",
+        "durationMs": 3599,
+        "httpStatus": 200,
+        "status": "completed",
+        "incompleteDetails": null,
+        "usage": {
+          "input_tokens": 1716,
+          "input_tokens_details": {
+            "cache_write_tokens": 0,
+            "cached_tokens": 0
+          },
+          "output_tokens": 360,
+          "output_tokens_details": {
+            "reasoning_tokens": 192
+          },
+          "total_tokens": 2076
+        },
+        "error": null
+      }
+    ]
+  },
+  {
+    "caseId": "row-97",
+    "row": 97,
+    "postId": "1412776634375461",
+    "source": "oct10-original-gallery",
+    "arm": "luna-negative-review",
+    "model": "gpt-6-luna",
+    "imageCount": 1,
+    "classification": {
+      "contentAnalysis": {
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "hasMultipleItems": false,
+        "organizationStyle": "Unstructured; one dated, timed event with dinner details"
+      },
+      "contentType": "EVENT",
+      "confidence": 0.99,
+      "classificationReason": "The poster advertises one ticketed event on Saturday, November 14, 2026, from 6–9 PM, featuring live performers and a three-course Italian dinner. The $40 ticket is an admission price, not a food special or deal.",
+      "estimatedItemCount": 1
+    },
+    "routing": {
+      "enabled": false,
+      "shadowEnabled": true,
+      "forceContentTypeOverride": false,
+      "shouldUseRoutedContentType": false,
+      "originalContentType": "EVENT",
+      "routedContentType": "EVENT",
+      "routingReason": "keep_model",
+      "calendarScore": -4,
+      "scheduleScore": 3,
+      "scoreDelta": -7,
+      "isAmbiguous": false,
+      "ocrMode": "basic",
+      "shouldUseCalendarTiles": false,
+      "legacyShouldUseCalendarTiles": false,
+      "signals": {
+        "hasCalendarGrid": false,
+        "recommendsTiling": false,
+        "hasDenseText": false,
+        "maxTextDensityScore": 0.48,
+        "allPromotionalPhoto": false,
+        "organizationStyle": "unstructured; one dated, timed event with dinner details",
+        "weekdayCount": 0,
+        "timeLines": 0,
+        "hasTextCalendarSignal": false,
+        "hasLinkedCalendarSignal": false,
+        "estimatedItemCount": 1,
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "hasMultipleItems": false,
+        "hasMultipleEventListings": false,
+        "hasComplexitySignals": true,
+        "recommendsTilingCount": 0
+      },
+      "thresholds": {
+        "calendarScoreMin": 8,
+        "calendarMarginMin": 2,
+        "scheduleScoreMin": 7,
+        "scheduleMarginMin": 2,
+        "smallPostMaxItems": 5,
+        "tiledCalendarScoreMin": 10,
+        "tiledMinItems": 8,
+        "scheduleBlockIfGrid": true,
+        "ambiguousRoute": "CALENDAR_BASIC"
+      }
+    },
+    "resolvedContentType": "EVENT",
+    "passesConfidenceGate": true,
+    "fallback": false,
+    "usage": [
+      {
+        "stage": "stage2",
+        "component": "contentClassifier",
+        "endpoint": "responses",
+        "model": "gpt-6-luna",
+        "imageCount": 1,
+        "durationMs": 2948,
+        "inputTokens": 1692,
+        "outputTokens": 140,
+        "totalTokens": 1832,
+        "cachedInputTokens": 0
+      }
+    ],
+    "elapsedMs": 2954,
+    "requests": [
+      {
+        "model": "gpt-6-luna",
+        "effort": "none",
+        "maxOutputTokens": 6000,
+        "imageCount": 1,
+        "promptSha256": "1c21933f0cab32fe07cabaa17e0e577f9d9b1b27c39ee4c37b98bfc83aacac1e",
+        "durationMs": 2946,
+        "httpStatus": 200,
+        "status": "completed",
+        "incompleteDetails": null,
+        "usage": {
+          "input_tokens": 1692,
+          "input_tokens_details": {
+            "cache_write_tokens": 1689,
+            "cached_tokens": 0
+          },
+          "output_tokens": 140,
+          "output_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "total_tokens": 1832
+        },
+        "error": null
+      }
+    ]
+  },
+  {
+    "caseId": "row-97",
+    "row": 97,
+    "postId": "1412776634375461",
+    "source": "oct10-original-gallery",
+    "arm": "mini-current",
+    "model": "gpt-5-mini",
+    "imageCount": 1,
+    "classification": {
+      "contentAnalysis": {
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "hasMultipleItems": false,
+        "organizationStyle": "by date"
+      },
+      "contentType": "EVENT",
+      "confidence": 0.9,
+      "classificationReason": "The post advertises a specific, bookable event: a three-course Italian dinner with named performers (Jonny Ray & Louise Arsenault) scheduled for Saturday, November 14, 2026, 6–9 PM and tickets ($40) available. This is a single dated event rather than a generic food deal or multi-item schedule.",
+      "estimatedItemCount": 1
+    },
+    "routing": {
+      "enabled": false,
+      "shadowEnabled": true,
+      "forceContentTypeOverride": false,
+      "shouldUseRoutedContentType": false,
+      "originalContentType": "EVENT",
+      "routedContentType": "EVENT",
+      "routingReason": "keep_model",
+      "calendarScore": -1,
+      "scheduleScore": -2,
+      "scoreDelta": 1,
+      "isAmbiguous": false,
+      "ocrMode": "basic",
+      "shouldUseCalendarTiles": false,
+      "legacyShouldUseCalendarTiles": false,
+      "signals": {
+        "hasCalendarGrid": false,
+        "recommendsTiling": false,
+        "hasDenseText": false,
+        "maxTextDensityScore": 0.48,
+        "allPromotionalPhoto": false,
+        "organizationStyle": "by date",
+        "weekdayCount": 0,
+        "timeLines": 0,
+        "hasTextCalendarSignal": false,
+        "hasLinkedCalendarSignal": false,
+        "estimatedItemCount": 1,
+        "hasEvents": true,
+        "hasFoodSpecials": false,
+        "hasMultipleItems": false,
+        "hasMultipleEventListings": false,
+        "hasComplexitySignals": true,
+        "recommendsTilingCount": 0
+      },
+      "thresholds": {
+        "calendarScoreMin": 8,
+        "calendarMarginMin": 2,
+        "scheduleScoreMin": 7,
+        "scheduleMarginMin": 2,
+        "smallPostMaxItems": 5,
+        "tiledCalendarScoreMin": 10,
+        "tiledMinItems": 8,
+        "scheduleBlockIfGrid": true,
+        "ambiguousRoute": "CALENDAR_BASIC"
+      }
+    },
+    "resolvedContentType": "EVENT",
+    "passesConfidenceGate": true,
+    "fallback": false,
+    "usage": [
+      {
+        "stage": "stage2",
+        "component": "contentClassifier",
+        "endpoint": "responses",
+        "model": "gpt-5-mini",
+        "imageCount": 1,
+        "durationMs": 4615,
+        "inputTokens": 1692,
+        "outputTokens": 607,
+        "totalTokens": 2299,
+        "cachedInputTokens": 0
+      }
+    ],
+    "elapsedMs": 4634,
+    "requests": [
+      {
+        "model": "gpt-5-mini",
+        "effort": "model_default",
+        "maxOutputTokens": 1500,
+        "imageCount": 1,
+        "promptSha256": "1c21933f0cab32fe07cabaa17e0e577f9d9b1b27c39ee4c37b98bfc83aacac1e",
+        "durationMs": 4600,
+        "httpStatus": 200,
+        "status": "completed",
+        "incompleteDetails": null,
+        "usage": {
+          "input_tokens": 1692,
+          "input_tokens_details": {
+            "cache_write_tokens": 0,
+            "cached_tokens": 0
+          },
+          "output_tokens": 607,
+          "output_tokens_details": {
+            "reasoning_tokens": 448
+          },
+          "total_tokens": 2299
+        },
+        "error": null
+      }
+    ]
+  }
+]

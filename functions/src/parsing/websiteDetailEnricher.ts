@@ -1244,6 +1244,9 @@ function findBestCandidateForItem(
   let bestScore = 0;
 
   for (const candidate of candidates) {
+    // A shared tour title does not make another date the same occurrence.
+    if (itemDate && candidate.date && itemDate !== candidate.date &&
+        !candidate.namedSeriesDates?.includes(itemDate)) continue;
     // A multi-day page often contains the first performance's clock time.
     // That time cannot be assigned to each day of the surrounding festival.
     if (itemDate && candidate.dateRangeStart && candidate.dateRangeEnd &&
