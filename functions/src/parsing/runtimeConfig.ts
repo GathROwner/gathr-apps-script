@@ -1,5 +1,6 @@
 import { GptUsageRecord, ParsingConfig } from './types.js';
 import { logger } from '../utils/logger.js';
+import { optionalTokenCount } from './cacheAccounting.js';
 
 export type ImageDetailLevel = 'low' | 'high' | 'auto';
 
@@ -37,6 +38,7 @@ export function extractTokenUsage(usage: any): {
   outputTokens: number;
   totalTokens: number;
   cachedInputTokens: number;
+  cacheWriteTokens?: number;
 } {
   const inputTokens = Number(
     usage?.input_tokens ??
@@ -58,11 +60,15 @@ export function extractTokenUsage(usage: any): {
     0
   ) || 0;
 
+  const cacheWriteTokens = optionalTokenCount(
+    usage?.input_tokens_details?.cache_write_tokens ?? usage?.prompt_tokens_details?.cache_write_tokens
+  );
   return {
     inputTokens,
     outputTokens,
     totalTokens,
     cachedInputTokens,
+    ...(cacheWriteTokens === undefined ? {} : { cacheWriteTokens }),
   };
 }
 

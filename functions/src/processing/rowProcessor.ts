@@ -1,3 +1,4 @@
+import { CacheWriteMetrics, createCacheWriteMetrics, addCacheWriteUsage } from '../parsing/cacheAccounting.js';
 /**
  * Row Processor
  * Handles individual row processing including GPT parsing and event creation
@@ -8239,15 +8240,20 @@ function summarizeGptUsageRecords(
     outputTokens: number;
     totalTokens: number;
     cachedInputTokens: number;
-    byStage: Record<string, { calls: number; inputTokens: number; outputTokens: number; totalTokens: number; cachedInputTokens: number }>;
-    byComponent: Record<string, { calls: number; inputTokens: number; outputTokens: number; totalTokens: number; cachedInputTokens: number }>;
-    byModel: Record<string, { calls: number; inputTokens: number; outputTokens: number; totalTokens: number; cachedInputTokens: number }>;
+    cacheWriteTokens: number;
+    cacheWriteKnownCalls: number;
+    cacheWriteUnknownCalls: number;
+    cacheWriteUnknownInputTokens: number;
+    byStage: Record<string, { calls: number; inputTokens: number; outputTokens: number; totalTokens: number; cachedInputTokens: number } & CacheWriteMetrics>;
+    byComponent: Record<string, { calls: number; inputTokens: number; outputTokens: number; totalTokens: number; cachedInputTokens: number } & CacheWriteMetrics>;
+    byModel: Record<string, { calls: number; inputTokens: number; outputTokens: number; totalTokens: number; cachedInputTokens: number } & CacheWriteMetrics>;
   } = {
     totalCalls: 0,
     inputTokens: 0,
     outputTokens: 0,
     totalTokens: 0,
     cachedInputTokens: 0,
+    ...createCacheWriteMetrics(),
     byStage: {},
     byComponent: {},
     byModel: {},
@@ -8267,33 +8273,37 @@ function summarizeGptUsageRecords(
     summary.outputTokens += outputTokens;
     summary.totalTokens += totalTokens;
     summary.cachedInputTokens += cachedInputTokens;
+    addCacheWriteUsage(summary, record);
 
     if (!summary.byStage[stage]) {
-      summary.byStage[stage] = { calls: 0, inputTokens: 0, outputTokens: 0, totalTokens: 0, cachedInputTokens: 0 };
+      summary.byStage[stage] = { calls: 0, inputTokens: 0, outputTokens: 0, totalTokens: 0, cachedInputTokens: 0, ...createCacheWriteMetrics() };
     }
     summary.byStage[stage].calls += 1;
     summary.byStage[stage].inputTokens += inputTokens;
     summary.byStage[stage].outputTokens += outputTokens;
     summary.byStage[stage].totalTokens += totalTokens;
     summary.byStage[stage].cachedInputTokens += cachedInputTokens;
+    addCacheWriteUsage(summary.byStage[stage], record);
 
     if (!summary.byComponent[component]) {
-      summary.byComponent[component] = { calls: 0, inputTokens: 0, outputTokens: 0, totalTokens: 0, cachedInputTokens: 0 };
+      summary.byComponent[component] = { calls: 0, inputTokens: 0, outputTokens: 0, totalTokens: 0, cachedInputTokens: 0, ...createCacheWriteMetrics() };
     }
     summary.byComponent[component].calls += 1;
     summary.byComponent[component].inputTokens += inputTokens;
     summary.byComponent[component].outputTokens += outputTokens;
     summary.byComponent[component].totalTokens += totalTokens;
     summary.byComponent[component].cachedInputTokens += cachedInputTokens;
+    addCacheWriteUsage(summary.byComponent[component], record);
 
     if (!summary.byModel[model]) {
-      summary.byModel[model] = { calls: 0, inputTokens: 0, outputTokens: 0, totalTokens: 0, cachedInputTokens: 0 };
+      summary.byModel[model] = { calls: 0, inputTokens: 0, outputTokens: 0, totalTokens: 0, cachedInputTokens: 0, ...createCacheWriteMetrics() };
     }
     summary.byModel[model].calls += 1;
     summary.byModel[model].inputTokens += inputTokens;
     summary.byModel[model].outputTokens += outputTokens;
     summary.byModel[model].totalTokens += totalTokens;
     summary.byModel[model].cachedInputTokens += cachedInputTokens;
+    addCacheWriteUsage(summary.byModel[model], record);
   }
 
   return summary;

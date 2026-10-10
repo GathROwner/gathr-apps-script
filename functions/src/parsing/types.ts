@@ -78,6 +78,7 @@ export interface GptUsageRecord {
   outputTokens?: number;
   totalTokens?: number;
   cachedInputTokens?: number;
+  cacheWriteTokens?: number;
   responseId?: string;
   responseStatus?: string;
   incompleteReason?: string;

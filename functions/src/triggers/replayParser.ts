@@ -1,3 +1,4 @@
+import { CacheWriteMetrics, createCacheWriteMetrics, addCacheWriteUsage } from '../parsing/cacheAccounting.js';
 import { onRequest } from 'firebase-functions/v2/https';
 import {
   GptUsageRecord,
@@ -53,7 +54,7 @@ function mergeStageArtifactsSnapshot(
 }
 
 function summarizeGptUsageRecords(records: GptUsageRecord[]): Record<string, unknown> {
-  type UsageBucket = {
+  type UsageBucket = CacheWriteMetrics & {
     calls: number;
     inputTokens: number;
     outputTokens: number;
@@ -66,6 +67,7 @@ function summarizeGptUsageRecords(records: GptUsageRecord[]): Record<string, unk
     outputTokens: 0,
     totalTokens: 0,
     cachedInputTokens: 0,
+    ...createCacheWriteMetrics(),
   });
   const summary = {
     totalCalls: 0,
@@ -73,6 +75,7 @@ function summarizeGptUsageRecords(records: GptUsageRecord[]): Record<string, unk
     totalOutputTokens: 0,
     totalTokens: 0,
     totalCachedInputTokens: 0,
+    ...createCacheWriteMetrics(),
     byModel: {} as Record<string, UsageBucket>,
     byStage: {} as Record<string, UsageBucket>,
     byComponent: {} as Record<string, UsageBucket>,
@@ -92,6 +95,7 @@ function summarizeGptUsageRecords(records: GptUsageRecord[]): Record<string, unk
     summary.totalOutputTokens += outputTokens;
     summary.totalTokens += totalTokens;
     summary.totalCachedInputTokens += cachedInputTokens;
+    addCacheWriteUsage(summary, record);
 
     const stage = asString(record.stage) || 'unknown';
     const component = asString(record.component) || 'unknown';
@@ -106,6 +110,7 @@ function summarizeGptUsageRecords(records: GptUsageRecord[]): Record<string, unk
     byModel.outputTokens += outputTokens;
     byModel.totalTokens += totalTokens;
     byModel.cachedInputTokens += cachedInputTokens;
+    addCacheWriteUsage(byModel, record);
 
     const byStage = summary.byStage[stage];
     byStage.calls += 1;
@@ -113,6 +118,7 @@ function summarizeGptUsageRecords(records: GptUsageRecord[]): Record<string, unk
     byStage.outputTokens += outputTokens;
     byStage.totalTokens += totalTokens;
     byStage.cachedInputTokens += cachedInputTokens;
+    addCacheWriteUsage(byStage, record);
 
     const byComponent = summary.byComponent[component];
     byComponent.calls += 1;
@@ -120,6 +126,7 @@ function summarizeGptUsageRecords(records: GptUsageRecord[]): Record<string, unk
     byComponent.outputTokens += outputTokens;
     byComponent.totalTokens += totalTokens;
     byComponent.cachedInputTokens += cachedInputTokens;
+    addCacheWriteUsage(byComponent, record);
   }
 
   return summary;

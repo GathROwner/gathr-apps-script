@@ -1,3 +1,4 @@
+import { CacheWriteMetrics, createCacheWriteMetrics, addCacheWriteSummary, readTokenPricing, estimateTokenCost } from '../parsing/cacheAccounting.js';
 import { onRequest } from 'firebase-functions/v2/https';
 import { onSchedule } from 'firebase-functions/v2/scheduler';
 import * as admin from 'firebase-admin';
@@ -19,7 +20,7 @@ const DEFAULT_LOOKBACK_HOURS = 24;
 const DEFAULT_SCAN_LIMIT = 5000;
 const PAGE_SIZE = 400;
 
-type MetricBucket = {
+type MetricBucket = CacheWriteMetrics & {
   calls: number;
   inputTokens: number;
   outputTokens: number;
@@ -27,7 +28,7 @@ type MetricBucket = {
   cachedInputTokens: number;
 };
 
-type ReportAggregation = {
+type ReportAggregation = CacheWriteMetrics & {
   scanStartIso: string;
   scanEndIso: string;
   lookbackHours: number;
@@ -50,6 +51,9 @@ type CostBucket = {
   model: string;
   estimatedCostUsd: number;
   coverage: 'priced' | 'missing_pricing';
+  estimatedCostUsdUpperBound?: number;
+  cacheWriteCoverage?: 'complete' | 'partial' | 'unknown';
+  pricing?: ReturnType<typeof readTokenPricing>;
 };
 
 function parseBooleanEnv(name: string, defaultValue: boolean): boolean {
@@ -72,6 +76,7 @@ function getMetricBucket(map: Record<string, MetricBucket>, key: string): Metric
       outputTokens: 0,
       totalTokens: 0,
       cachedInputTokens: 0,
+      ...createCacheWriteMetrics(),
     };
   }
   return map[key];
@@ -86,6 +91,7 @@ function addToBucket(
   target.outputTokens += Number(source.outputTokens || 0);
   target.totalTokens += Number(source.totalTokens || 0);
   target.cachedInputTokens += Number(source.cachedInputTokens || 0);
+  addCacheWriteSummary(target, source);
 }
 
 function asRecord(value: unknown): Record<string, unknown> | null {
@@ -117,39 +123,11 @@ function extractEventCountFromSnapshot(snapshot: Record<string, unknown>): numbe
   return 0;
 }
 
-function toModelEnvPrefix(model: string): string {
-  return model
-    .toUpperCase()
-    .replace(/[^A-Z0-9]+/g, '_')
-    .replace(/^_+|_+$/g, '');
-}
-
-function readModelPricing(model: string): {
-  inputPerM: number;
-  outputPerM: number;
-  cachedInputPerM: number;
-} | null {
-  const prefix = toModelEnvPrefix(model);
-  const inputRaw = Number(process.env[`PRICE_${prefix}_INPUT_PER_M`]);
-  const outputRaw = Number(process.env[`PRICE_${prefix}_OUTPUT_PER_M`]);
-  const cachedRaw = Number(process.env[`PRICE_${prefix}_CACHED_INPUT_PER_M`]);
-
-  const hasInput = Number.isFinite(inputRaw) && inputRaw >= 0;
-  const hasOutput = Number.isFinite(outputRaw) && outputRaw >= 0;
-  if (!hasInput || !hasOutput) return null;
-
-  return {
-    inputPerM: inputRaw,
-    outputPerM: outputRaw,
-    cachedInputPerM: Number.isFinite(cachedRaw) && cachedRaw >= 0 ? cachedRaw : inputRaw,
-  };
-}
-
 function estimateModelCost(
   model: string,
   bucket: MetricBucket
 ): CostBucket {
-  const pricing = readModelPricing(model);
+  const pricing = readTokenPricing(model);
   if (!pricing) {
     return {
       model,
@@ -158,18 +136,10 @@ function estimateModelCost(
     };
   }
 
-  const cachedInput = Math.max(0, Math.min(bucket.cachedInputTokens, bucket.inputTokens));
-  const uncachedInput = Math.max(0, bucket.inputTokens - cachedInput);
-  const output = Math.max(0, bucket.outputTokens);
-
-  const estimatedCostUsd =
-    (uncachedInput / 1_000_000) * pricing.inputPerM +
-    (cachedInput / 1_000_000) * pricing.cachedInputPerM +
-    (output / 1_000_000) * pricing.outputPerM;
-
   return {
     model,
-    estimatedCostUsd,
+    ...estimateTokenCost(bucket, pricing),
+    pricing,
     coverage: 'priced',
   };
 }
@@ -220,6 +190,7 @@ async function buildPipelineCostReport(
     outputTokens: 0,
     totalTokens: 0,
     cachedInputTokens: 0,
+    ...createCacheWriteMetrics(),
     byStage: {},
     byComponent: {},
     byModel: {},
@@ -261,6 +232,7 @@ async function buildPipelineCostReport(
       aggregate.outputTokens += Number(usageSummary.outputTokens || 0);
       aggregate.totalTokens += Number(usageSummary.totalTokens || 0);
       aggregate.cachedInputTokens += Number(usageSummary.cachedInputTokens || 0);
+      addCacheWriteSummary(aggregate, usageSummary);
 
       const byStage = asRecord(usageSummary.byStage) || {};
       for (const [key, value] of Object.entries(byStage)) {
@@ -289,6 +261,7 @@ async function buildPipelineCostReport(
 
   const perModelCost: CostBucket[] = [];
   let estimatedCostUsd = 0;
+  let estimatedCostUsdUpperBound = 0;
   let pricedModelCalls = 0;
   let unpricedModelCalls = 0;
 
@@ -297,6 +270,7 @@ async function buildPipelineCostReport(
     perModelCost.push(cost);
     if (cost.coverage === 'priced') {
       estimatedCostUsd += cost.estimatedCostUsd;
+      estimatedCostUsdUpperBound += cost.estimatedCostUsdUpperBound ?? cost.estimatedCostUsd;
       pricedModelCalls += bucket.calls;
     } else {
       unpricedModelCalls += bucket.calls;
@@ -327,12 +301,18 @@ async function buildPipelineCostReport(
       outputTokens: aggregate.outputTokens,
       totalTokens: aggregate.totalTokens,
       cachedInputTokens: aggregate.cachedInputTokens,
+      cacheWriteTokens: aggregate.cacheWriteTokens,
+      cacheWriteKnownCalls: aggregate.cacheWriteKnownCalls,
+      cacheWriteUnknownCalls: aggregate.cacheWriteUnknownCalls,
+      cacheWriteUnknownInputTokens: aggregate.cacheWriteUnknownInputTokens,
       byStage: aggregate.byStage,
       byComponent: aggregate.byComponent,
       byModel: aggregate.byModel,
     },
     estimatedCost: {
       usd: estimatedCostUsd,
+      usdUpperBound: estimatedCostUsdUpperBound,
+      cacheWriteAccountingVersion: 1,
       pricedModelCalls,
       unpricedModelCalls,
       perModel: perModelCost,
