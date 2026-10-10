@@ -51,4 +51,45 @@ audit and rollout decision are recorded. It must not repeat October 10.
 
 ## Deployment evidence
 
-To be appended after verified release.
+Released from parser commit `0733972`, including the aquatic category safeguard
+from `51927bb`. Build passed, all 584 compiled backend tests passed, and all
+eight model/effort checks passed, including the global Luna-none default without
+a per-post override.
+
+A second fresh preflight at 15:56:44 UTC confirmed the October 10 dataset's
+completed lock, processed marker and final batch, no checkpoint, and no active
+parser locks. No live event records were changed by this release.
+
+Both the narrow dry run and actual deployment completed successfully for project
+`gathr-migrated`, codebase `gathr-functions`, from this worktree's `functions`
+directory:
+
+```powershell
+$env:FUNCTIONS_DISCOVERY_TIMEOUT='60'
+firebase deploy --only 'functions:gathr-functions:processDataset,functions:gathr-functions:processDatasetResume,functions:gathr-functions:processDatasetSelectedRows' --project gathr-migrated --non-interactive --dry-run
+firebase deploy --only 'functions:gathr-functions:processDataset,functions:gathr-functions:processDatasetResume,functions:gathr-functions:processDatasetSelectedRows' --project gathr-migrated --non-interactive
+```
+
+Independent Google Cloud function readback verified:
+
+| Function | Serving revision | State | All traffic on latest |
+|---|---|---|---|
+| processDataset | processdataset-00463-loy | ACTIVE | true |
+| processDatasetResume | processdatasetresume-00427-lah | ACTIVE | true |
+| processDatasetSelectedRows | processdatasetselectedrows-00419-jat | ACTIVE | true |
+
+All three share source hash
+`957b8bb84d3c2dd0237729e271666d39dc1dc1f4` and the intended model settings:
+Stage 5 enabled at 100%, default `gpt-6-luna` / `none`; Stage 2 remains 50%;
+Stage 1 and eligible Stage 3 remain 100% Luna; Stage 4 remains Nano low;
+text-only handling remains enabled, legacy fallback disabled, and excluded
+post IDs empty. Sanitized readback and the no-active-parse preflight are saved
+in `artifacts/luna-oct10-production-audit/`.
+
+The CLI warned that `firebase-functions` is outdated. Updating dependencies
+remains deferred as agreed; it did not block either deployment command.
+
+Updated the existing October 11 heartbeat to audit the full Stage 5 rollout,
+actual model/effort usage, completeness, timing and cost. Its first check remains
+11 a.m. Halifax on October 11, with no additional October 10 checks, and it must
+pause after the October 11 audit and decision are recorded.
