@@ -23,6 +23,7 @@ import {
   resolveStageModel,
 } from './runtimeConfig.js';
 import { logger } from '../utils/logger.js';
+import { stage1CachedTextBlocks } from './stage1PromptCache.js';
 
 // Initialize OpenAI client lazily
 let openaiClient: OpenAI | null = null;
@@ -1251,7 +1252,11 @@ async function callGPTWithSchema(
       const promptWithSchema = options.structuredOutput
         ? prompt
         : `${prompt}\n\nReturn ONLY valid JSON that matches this schema:\n${schemaHint}`;
-      const content = [
+      const cachedText = model === 'gpt-6-luna' && !options.structuredOutput &&
+        (config.stage1LunaPilot || options.promptVariant === 'compact-v10')
+        ? stage1CachedTextBlocks(promptWithSchema)
+        : null;
+      const content = cachedText || [
         { type: 'input_text', text: promptWithSchema },
       ] as Array<{ type: string; text?: string; image_url?: string; detail?: string }>;
 
@@ -1274,6 +1279,7 @@ async function callGPTWithSchema(
         response = await client.responses.create({
           model,
           input: [{ role: 'user', content }],
+          ...(cachedText ? { prompt_cache_options: { mode: 'explicit', ttl: '30m' } } : {}),
           max_output_tokens: maxOutputTokens,
           ...(model.startsWith('gpt-6')
             ? { reasoning: { effort: requestedReasoningEffort as 'none' | 'low' | 'high' } }

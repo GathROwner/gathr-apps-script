@@ -3,6 +3,7 @@ import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import OpenAI from 'openai';
+import { stage1CachedTextBlocks } from '../lib/parsing/stage1PromptCache.js';
 import {
   createStage1EvaluationPrompt,
   createValidationSchema,
@@ -145,9 +146,12 @@ and has no Firebase, Firestore, Storage, venue-write, or release capability.`);
 
 function effectivePromptText(caseData, variant, attachedImageCount = caseData.images.length) {
   const prompt = createStage1EvaluationPrompt(caseData.caption, attachedImageCount, caseData.venue, caseData.postedAt, variant.promptVariant);
-  return variant.structuredOutput
+  const text = variant.structuredOutput
     ? prompt
     : `${prompt}\n\nReturn ONLY valid JSON that matches this schema:\n${JSON.stringify(createValidationSchema()[0].parameters, null, 2)}`;
+  return variant.model === 'gpt-6-luna' && variant.promptVariant === 'compact-v10' && !variant.structuredOutput
+    ? stage1CachedTextBlocks(text).map(block=>block.text).join('\n')
+    : text;
 }
 
 function effectivePromptSha256(caseData, variant, attachedImageCount = caseData.images.length) {

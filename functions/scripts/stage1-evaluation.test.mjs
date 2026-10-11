@@ -241,7 +241,7 @@ function fakeClient(sequence) {
 }
 
 function getInputText(request) {
-  return request.input[0].content.find((part) => part.type === 'input_text').text;
+  return request.input[0].content.filter((part) => part.type === 'input_text').map(part=>part.text).join('\n');
 }
 
 test('evaluation v7 preserves attachment bounds and clarifies scope without changing frozen v6 or production', async () => {
@@ -668,7 +668,11 @@ test('v6-v8 preflight fingerprints match the actual transport prompt for initial
       const hash = createHash('sha256').update(actualText).digest('hex');
       assert.equal(plan.cases[0].effectivePromptSha256ByVariant[variantId], hash);
       assert.match(actualText, new RegExp(`Return exactly ${selectedImages.length} imageAnalysis entries`));
-      assert.ok(actualText.startsWith(createStage1EvaluationPrompt(original.caption, selectedImages.length, original.venue, original.postedAt, variant.promptVariant)));
+      if (variant.promptVariant === 'compact-v10') {
+        assert.deepEqual(calls[0].prompt_cache_options, {mode:'explicit',ttl:'30m'});
+        assert.equal(calls[0].input[0].content.filter(part=>part.type==='input_text').length,2);
+        assert(actualText.includes(original.caption));
+      } else assert.ok(actualText.startsWith(createStage1EvaluationPrompt(original.caption, selectedImages.length, original.venue, original.postedAt, variant.promptVariant)));
     }
   }
   const v8 = createCompactV8ValidationPrompt('A source caption', 0, 'Source', '2026-10-06');
