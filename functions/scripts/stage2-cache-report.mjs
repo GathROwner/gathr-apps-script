@@ -9,6 +9,7 @@ const downstream=lines(root+'/downstream-api/results.jsonl');
 const armSummary=(rs)=>{
  const calls=rs.flatMap(r=>r.calls);
  assert(rs.every(r=>!r.error));assert(calls.every(c=>c.httpStatus===200&&c.status==='completed'&&!c.incomplete));
+ assert(rs.every(r=>!/(?:GPT error:|response unavailable)/i.test(r.output.classification.classificationReason)),'Classification fallback needs review');
  return {posts:rs.length,calls:calls.length,usd:calls.reduce((n,c)=>n+c.usd,0),seconds:calls.reduce((n,c)=>n+c.ms,0)/1000,
  inputTokens:calls.reduce((n,c)=>n+c.usage.input_tokens,0),cachedReadTokens:calls.reduce((n,c)=>n+(c.usage.input_tokens_details?.cached_tokens||0),0),
  cacheWriteTokens:calls.reduce((n,c)=>n+c.usage.input_tokens_details.cache_write_tokens,0),outputTokens:calls.reduce((n,c)=>n+c.usage.output_tokens,0),

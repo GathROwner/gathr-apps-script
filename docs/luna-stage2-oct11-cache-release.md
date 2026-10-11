@@ -14,6 +14,8 @@ The real runtime cached builder matched an independent reconstruction of the ear
 
 Both fresh arms agreed on **55/55 pass-versus-hold decisions**. Only Harvest Fest and Founders hockey changed effective extraction route in the broader test. There were **124 actual classification API calls**, zero errors, incomplete responses or classification fallback results. The existing high review explains calls exceeding 110.
 
+Five sources had different estimated item counts (48, 64, 120, 234, 332); none was routed CALENDAR. Inspection of `postParser.ts` confirmed the count is passed to calendar inventory auditing only on the CALENDAR branch. It is otherwise telemetry here, not a limit that truncates extraction. No calendar count changed in this paired cohort.
+
 | Measurement | Original layout | Cached layout |
 | --- | ---: | ---: |
 | Posts | 55 | 55 |
