@@ -23,6 +23,7 @@ import {
 } from './runtimeConfig.js';
 import { logger } from '../utils/logger.js';
 import { detectStage2FoodSpecialSignals } from './stage2FoodSignals.js';
+import { stage2CachedTextBlocks } from './stage2PromptCache.js';
 
 // Initialize OpenAI client lazily
 let openaiClient: OpenAI | null = null;
@@ -172,7 +173,7 @@ export async function classifyContent(
 /**
  * Create the classification prompt - exact port from postParser.js
  */
-function createClassificationPrompt(
+export function createClassificationPrompt(
   combinedText: string,
   hasImages: boolean,
   userName: string,
@@ -238,7 +239,7 @@ Analyze and classify into exactly ONE category.`;
 /**
  * Create the classification schema for GPT function calling
  */
-function createClassificationSchema(): GPTFunctionSchema[] {
+export function createClassificationSchema(): GPTFunctionSchema[] {
   return [
     {
       name: 'classifyContent',
@@ -641,7 +642,8 @@ async function callGPTWithSchema(
     if (usesResponses(model)) {
       const schemaHint = JSON.stringify(schema[0]?.parameters || {}, null, 2);
       const promptWithSchema = `${prompt}\n\nReturn ONLY valid JSON that matches this schema:\n${schemaHint}`;
-      const content: any[] = [
+      const cached = model === 'gpt-6-luna' ? stage2CachedTextBlocks(promptWithSchema) : null;
+      const content: any[] = cached || [
         { type: 'input_text', text: promptWithSchema },
       ];
 
@@ -659,6 +661,7 @@ async function callGPTWithSchema(
       const response = await client.responses.create({
         model,
         input: [{ role: 'user', content }],
+        ...(cached ? { prompt_cache_options: { mode: 'explicit', ttl: '30m' } } : {}),
         max_output_tokens: model.startsWith('gpt-6') ? 6000 : 1500,
         ...(model.startsWith('gpt-6') ? { reasoning: { effort: (config.stage2ReasoningEffort || 'none') as any } } : {}),
       }, model === 'gpt-6-luna' && config.stage2LunaNegativeRecheck

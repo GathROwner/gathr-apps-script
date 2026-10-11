@@ -157,7 +157,9 @@ test('formal Facebook event retains metadata and confidence floor', async () => 
   const result = await run('Artist biography and ticket information', base({ confidence: .4 }), { utcStartDate: '2026-10-17T22:00:00Z' });
   assert.equal(result.contentType, 'EVENT');
   assert.equal(result.confidence, .8);
-  assert.match(requests.at(-1).input[0].content[0].text, /2026-10-17/);
+  const blocks = requests.at(-1).input[0].content.filter(part => part.type === 'input_text');
+  assert.match(blocks.map(part => part.text).join('\n'), /2026-10-17/);
+  assert.match(blocks[1].text, /FACEBOOK EVENT DATA[\s\S]*2026-10-17/);
 });
 test('Stage 2 effort config reaches GPT-6; Mini retains existing default', async () => {
   await run('Public skate tonight');
