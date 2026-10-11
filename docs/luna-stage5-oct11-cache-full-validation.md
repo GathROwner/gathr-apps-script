@@ -4,6 +4,8 @@
 
 The cache layout has passed full-cohort inventory and raw-response checks and demonstrates a useful input-cost saving. **Hold its production release pending a small date/category hardening pass and focused retest.** This is a formatting-prompt cache experiment; production already uses Luna none in Stage 5. No runtime source, deployment, traffic, queue, media or live event document was changed by this validation.
 
+**Subsequent approved release:** Craig approved the safeguards and deployment. The focused controls and full saved-response replay passed; source commit `6c8b430` is now independently verified ACTIVE on all three parsers at source hash `3a97d4348ad1907befbedd9adf45878f577ad426`. See [the release record](luna-stage5-oct11-cache-release.md). This supersedes the original hold above without changing the experiment evidence below.
+
 The accepted runtime baseline remains Stage 1 caching commit `1fceb8d`, recorded by `ad15419`, serving source hash `c6f04a6761d3129fc2b0399f3a77d84ad9a9afd7` at the preceding release verification. This validation did not refresh live configuration and does not assert a new live readback.
 
 ## Test scope and method
