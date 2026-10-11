@@ -1,6 +1,6 @@
 # October 11 exact live data repair plan
 
-**Pending Craig's exact approval. No live mutations have been applied.**
+**Approved by Craig and applied October 11 at 15:24:23 UTC: seven updates, one create, zero deletes.**
 
 The dry run and complete native-typed backups are in `functions/artifacts/luna-oct11-integrity-repair/live-repair-plan.json`. The saved plan is applied only with `functions/scripts/oct11-integrity-live-repair.cjs --apply <saved-plan>`. Changed update times or fingerprints stop the entire transaction.
 
@@ -38,3 +38,9 @@ The Community Cup source prints start times but no ends. Existing U11/U13 calend
 4. Check app detail responses and the paginated event feed for corrected dates, categories, recurrence, ticket metadata and the U9 slot. Confirm unchanged buffet/brunch/market controls. Report any API inconsistency explicitly.
 
 The pre-existing author duplicate and NHL title-typo duplicate stay in the previously deferred broad deduplication work; this plan does not delete them.
+
+## Completed verification
+
+The approved saved plan passed fresh document fingerprint and native update-time guards, a second U9 slot check, and an atomic transaction. Eight of eight Firestore postconditions passed. Backup: `functions/artifacts/luna-oct11-integrity-repair/preapply-backup-1791732262600.json`; result: `live-repair-applied.json` in that directory.
+
+At 15:28:55 UTC all seven public event detail endpoints matched the repair fields, and the app feed was checked across ten pages / 996 returned events. All seven published families were present; each camp has its own clock. Detail metadata confirms three Tuesday occurrences through October 27 and four original Baba Monday occurrences through October 26. The feed materializes only upcoming occurrences in its current window, so the later dates are verified through bounded parent metadata rather than claimed as already returned feed instances. The food drive remains `needs_review` with all spatial holds intact and is absent from the feed. Buffet, Sunday brunch and Sunday market controls retain their exact pre-repair update times and remain in the feed. Ticket metadata was preserved. Evidence: `live-repair-api-verified.json`.

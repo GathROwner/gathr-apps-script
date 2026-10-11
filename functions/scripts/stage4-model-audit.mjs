@@ -5,7 +5,7 @@ import {createHash} from 'node:crypto';
 import {createRequire} from 'node:module';
 if (!process.env.OPENAI_API_KEY || !process.env.AUDIT_INPUT || !process.env.AUDIT_OUTPUT) throw Error('Require key, frozen input and output paths');
 const [caseId,arm,repeat='1']=process.argv.slice(2);
-const arms={'nano-low':{model:'gpt-5-nano',effort:'low'},'luna-none':{model:'gpt-6-luna',effort:'none'},'luna-low':{model:'gpt-6-luna',effort:'low'},'luna-medium':{model:'gpt-6-luna',effort:'medium'}};
+const arms={'nano-low':{model:'gpt-5-nano',effort:'low'},'nano-minimal':{model:'gpt-5-nano',effort:'minimal'},'luna-none':{model:'gpt-6-luna',effort:'none'},'luna-low':{model:'gpt-6-luna',effort:'low'},'luna-medium':{model:'gpt-6-luna',effort:'medium'}};
 if(!arms[arm])throw Error('Unknown comparison arm');
 const source=JSON.parse(await fs.readFile(process.env.AUDIT_INPUT,'utf8')).find(r=>r.caseId===caseId);
 if(!source)throw Error('Unknown source case');
