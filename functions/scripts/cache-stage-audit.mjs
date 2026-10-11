@@ -8,25 +8,29 @@ import {AsyncLocalStorage} from 'node:async_hooks';
 const stage=Number(process.argv[2]);assert([2,3,4,5].includes(stage));
 const execute=process.argv.includes('--execute');
 const repeat=process.argv.includes('--repeat');
+const fullStage5=process.argv.includes('--full-stage5');
+assert(!fullStage5||stage===5,'Full formatting cohort applies only to Stage 5');
 const audit='C:/Users/craig/.codex/worktrees/luna-pilot-release/gathr-apps-script/artifacts/luna-oct11-production-audit';
-const out=path.resolve('artifacts/luna-stage'+stage+'-cache-oct11-'+(execute?(repeat?'repeat':'paired'):'offline-v2'));
+const out=path.resolve('artifacts/luna-stage'+stage+'-cache-oct11-'+(fullStage5?(execute?'full':'full-offline'):execute?(repeat?'repeat':'paired'):'offline-v2'));
 fs.mkdirSync(out,{recursive:true});
 assert(!fs.existsSync(out+'/results.jsonl'),'No automatic paid replay');
 const read=p=>JSON.parse(fs.readFileSync(p));
 const ledger=read(audit+'/ledger.json'),snapshots=read(audit+'/snapshots.json'),images=read(audit+'/image-manifest.json');
 const repair=read('src/processing/__fixtures__/oct11-integrity-repair.json');
-const selected=repeat?(stage===2?[64,65,66,120]:stage===3?[37,292,332]:stage===4?[20,32,37,64,65,66,120,127,234,277,279,292,313,315,332]:[20,234,332]):stage===2?[20,32,37,64,65,66,120,127,157,234,235,277,278,279,292,313,315,332]:
+const selected=fullStage5?ledger.filter(s=>snapshots.find(x=>x.rowIndex===s.row)?.stages?.find(x=>x.stage==='format')?.output?.stageArtifacts?.stage4Items?.length).map(s=>s.row):repeat?(stage===2?[64,65,66,120]:stage===3?[37,292,332]:stage===4?[20,32,37,64,65,66,120,127,234,277,279,292,313,315,332]:[20,234,332]):stage===2?[20,32,37,64,65,66,120,127,157,234,235,277,278,279,292,313,315,332]:
   stage===3?[20,32,37,64,65,66,120,234,277,292,313,332]:[20,32,37,64,65,66,120,127,234,277,279,292,313,315,332];
 const cases=selected.map(row=>{
   const s=ledger.find(s=>s.row===row);assert(s);
   const artifacts=snapshots.find(x=>x.rowIndex===row)?.stages?.find(x=>x.stage==='format')?.output?.stageArtifacts;
   const gallery=images.filter(i=>i.row===row).sort((a,b)=>a.index-b.index);
-  assert.equal(gallery.length,s.media.length);assert(gallery.every(i=>i.status==='ok'&&fs.existsSync(i.path)));
+  if(!fullStage5){assert.equal(gallery.length,s.media.length);assert(gallery.every(i=>i.status==='ok'&&fs.existsSync(i.path)));}
   const fixed=repair.rows.find(x=>x.row===row);
   return {row,postId:s.id,venue:s.venue,caption:s.caption,timestamp:s.timestamp,type:artifacts?.contentType||'EVENT',stage1:s.stage1,
-    sourceStage3:fixed?.stage3||artifacts?.stage3Items||[],sourceStage4:artifacts?.stage4Items||[],
-    images:gallery.map(i=>({index:i.index,path:i.path,sha:createHash('sha256').update(fs.readFileSync(i.path)).digest('hex')}))};
+    sourceStage3:fixed?.stage3||artifacts?.stage3Items||[],sourceStage4:artifacts?.stage4Items||[],originalMediaCount:s.media.length,
+    productionEvents:snapshots.find(x=>x.rowIndex===row)?.stages?.find(x=>x.stage==='format')?.output?.events,
+    images:gallery.filter(i=>i.status==='ok'&&fs.existsSync(i.path)).map(i=>({index:i.index,path:i.path,sha:createHash('sha256').update(fs.readFileSync(i.path)).digest('hex')}))};
 });
+assert.equal(new Set(cases.map(c=>c.postId)).size,cases.length,'Duplicate sources require explicit selection');
 fs.writeFileSync(out+'/cohort.json',JSON.stringify(cases,null,2));
 const sha=s=>createHash('sha256').update(typeof s==='string'?s:JSON.stringify(s)).digest('hex');
 function layout(body,c){
@@ -81,12 +85,15 @@ globalThis.fetch=async(url,options={})=>{
   else assert.equal(body.reasoning?.effort,stage===3?'high':stage===4?'low':'none');
   if(!execute){ctx.requests.push({original,change});const result=stage===2?{contentType:'EVENT',confidence:.95,estimatedItemCount:1,classificationReason:'Activity',contentAnalysis:{hasEvents:true,hasFoodSpecials:false,hasMultipleItems:false,organizationStyle:'unstructured'}}:stage===3?{extractedEvents:ctx.source.sourceStage3,extractedSpecials:ctx.source.sourceStage3,extractedItems:ctx.source.sourceStage3,extractionSummary:{totalFound:ctx.source.sourceStage3.length}}:stage===4?{validatedItems:ctx.source.sourceStage3.map(item=>({item,decision:'KEPT',reason:'Source activity',corrections:{}}))}:{formattedEvents:ctx.source.sourceStage4.map((item,i)=>({...item,sourceItemIndex:i,startDate:item.date,isEvent:'Yes',isFoodSpecial:'No',category:'Gatherings & Parties'}))};return new Response(JSON.stringify({id:'offline',status:'completed',output:[{type:'message',role:'assistant',content:[{type:'output_text',text:JSON.stringify(result)}]}]}),{status:200,headers:{'content-type':'application/json'}});}
   assert(++totalCalls<=160&&ctx.requests.length<12,'Call cap');assert(totalUsd+.035<=2,'USD 2 per-stage spend cap');
+  const requestNumber=totalCalls;
+  let batchItems;
+  if(stage===5){const text=original.input[0].content[0].text;const from=text.indexOf('ITEMS TO FORMAT:\n')+'ITEMS TO FORMAT:\n'.length;const to=text.indexOf('CRITICAL CATEGORIZATION INSTRUCTION:',from);batchItems=JSON.parse(text.slice(from,to));assert(Array.isArray(batchItems));}
   const started=Date.now(),headers=new Headers(options.headers);headers.delete('content-length');
   const response=await nativeFetch(url,{...options,headers,body:JSON.stringify(body),signal:AbortSignal.any([...(options.signal?[options.signal]:[]),AbortSignal.timeout(300000)])});
   const raw=await response.clone().json();
   const u=raw.usage,d=u?.input_tokens_details;let usd=null;
   if(u){const read=d?.cached_tokens||0,write=body.model==='gpt-5-nano'?0:d?.cache_write_tokens;assert(Number.isFinite(write));assert(read+write<=u.input_tokens);usd=body.model==='gpt-5-nano'?((u.input_tokens-read)*.05+read*.005+u.output_tokens*.4)/1e6:((u.input_tokens-read-write)*.1+read*.01+write*.125+u.output_tokens*.5)/1e6;totalUsd+=usd;}
-  const record={number:totalCalls,originalHash:sha(original),candidateHash:sha(change.body),prefix:change.prefix,prefixChars:change.prefixChars,applied:ctx.arm==='candidate'&&change.applied,
+  const record={number:requestNumber,batchItems,originalHash:sha(original),candidateHash:sha(change.body),prefix:change.prefix,prefixChars:change.prefixChars,applied:ctx.arm==='candidate'&&change.applied,
     model:body.model,effort:body.reasoning.effort,maxOutputTokens:body.max_output_tokens,imageHashes:original.input[0].content.filter(x=>x.type==='input_image').map(x=>sha(x.image_url)),
     ms:Date.now()-started,httpStatus:response.status,status:raw.status,incomplete:raw.incomplete_details,usage:u,usd,raw};
   ctx.requests.push(record);
@@ -123,5 +130,5 @@ for(const source of cases){
   })));
   summary.push(pair);console.log(JSON.stringify({stage,row:source.row,arms:pair.map(p=>({arm:p.arm,count:Array.isArray(p.output)?p.output.length:undefined,route:p.output?.route,error:p.error,calls:p.requests.length,usd:p.requests.reduce((n,r)=>n+(r.usd||0),0)}))}));
 }
-fs.writeFileSync(out+'/summary.json',JSON.stringify({complete:true,execute,repeat,sourceCases:cases.length,pairedCases:summary.length,totalCalls,totalUsd},null,2));
+fs.writeFileSync(out+'/summary.json',JSON.stringify({complete:true,execute,repeat,fullStage5,sourceCases:cases.length,pairedCases:summary.length,totalCalls,totalUsd},null,2));
 console.log(JSON.stringify({stage,complete:true,pairedCases:summary.length,totalCalls,totalUsd}));
