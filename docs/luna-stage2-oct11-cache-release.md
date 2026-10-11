@@ -28,7 +28,7 @@ Five sources had different estimated item counts (48, 64, 120, 234, 332); none w
 | Output tokens, including reasoning | 12,248 | 10,169 |
 | Reasoning tokens | 3,521 | 2,180 |
 
-**50.4% lower estimated total cost**, but four fewer high reviews contributed. On the **51 source pairs with identical effort/call sequences**, cost was USD 0.019940425 versus 0.010844670: **45.6% lower**. This is still fresh stochastic output, not a claim that the entire difference is caused only by cache reads. The cache prefix incurred one measured cold write; no paid prewarming was used. Both arms ran concurrently per source with four task slots. Summed API time is not full-parse wall-clock time; the candidate was 17.5% slower in this comparison, so there is **no established speed gain**.
+**50.4% lower estimated total cost**, but four fewer high reviews contributed. On the **51 source pairs with identical effort/call sequences**, cost was USD 0.019940425 versus 0.010844670: **45.6% lower**. This is still fresh stochastic output, not a claim that the entire difference is caused only by cache reads. Two candidate calls incurred measured prefix writes of 1,233 tokens each (row 21 none, row 32 high); no paid prewarming was used. Both arms ran concurrently per source with four task slots. Summed API time is not full-parse wall-clock time; the candidate was 17.5% slower in this comparison, so there is **no established speed gain**.
 
 Usage-based estimates retain ordinary input, cached reads, writes and output as separate charges without charging write input twice, using the accepted accounting rates. They are not invoice reconciliation or a whole-run forecast.
 
@@ -57,4 +57,20 @@ The eight route executions produced 12 records in total, representing the same s
 
 ## Deployment
 
-Pending final preflight, narrow Firebase dry run, release and independent post-deploy readback. No historical live event records were changed by this work.
+Release source: `ef95df2`, including runtime change `4555ccf`. The final read-only preflight at **2026-10-11T17:42:30.177Z** found zero active processing locks, the completed October 11 marker and final batch, and no checkpoint. Dry run and actual deployment both succeeded using the established discovery timeout of 60 seconds:
+
+```powershell
+$env:FUNCTIONS_DISCOVERY_TIMEOUT='60'
+firebase deploy --only "functions:gathr-functions:processDataset,functions:gathr-functions:processDatasetResume,functions:gathr-functions:processDatasetSelectedRows" --project gathr-migrated --dry-run
+firebase deploy --only "functions:gathr-functions:processDataset,functions:gathr-functions:processDatasetResume,functions:gathr-functions:processDatasetSelectedRows" --project gathr-migrated
+```
+
+Only those three parser functions in codebase `gathr-functions`, project `gathr-migrated`, were updated. The existing outdated firebase-functions warning did not prevent release; dependencies were not upgraded. Independent post-deploy verification is recorded below. No historical live event records were changed by this work.
+
+At **2026-10-11T17:47:57.777Z**, independent Firebase Functions and Cloud Run readback confirmed all three ACTIVE, common source hash **`0678cc45a38a27c4ad4a04a7f947241106a41eb9`**, all traffic on their new revisions:
+
+- `processdataset-00470-rol`
+- `processdatasetresume-00434-keh`
+- `processdatasetselectedrows-00426-rul`
+
+Model/reasoning/allocation environment fields exactly match the fresh before record. Stage 1/3 remain Luna high, Stage 2 Luna none with high negative review, Stage 4 Nano low, Stage 5 Luna none. Stage 1 and Stage 5 cache changes are preserved. **Stages 1, 2 and 5 caching are now deployed; Stages 3 and 4 caching remain unchanged.** The next regular production parse must measure actual cache reads/writes, negative reviews, qualification and downstream inventory; replay savings are not a production guarantee. No new automation was started.

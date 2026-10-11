@@ -1,10 +1,14 @@
 # October 11 caching audits: Stages 2-5
 
+## Subsequent release status
+
+The initial experiments below are retained as historical evidence. Stage 5 subsequently passed full-cohort validation and was deployed: [Stage 5 release](luna-stage5-oct11-cache-release.md). Stage 2 then passed the broader 55-source paired classification test and all eight differing-route downstream controls and was deployed: [Stage 2 release](luna-stage2-oct11-cache-release.md). Stages 1, 2 and 5 now have their accepted cache layouts deployed. Stage 3 and Stage 4 candidates remain held; their initial findings below still apply.
+
 ## Decision and production state
 
 Craig approved the tested Stage 1 cache implementation and similar audits of the other four stages. Stage 1 is released at source commit `1fceb8d`; independent readback confirmed common serving hash `c6f04a6761d3129fc2b0399f3a77d84ad9a9afd7` and unchanged model, reasoning and allocation flags. See [Stage 1 release](luna-stage1-oct11-cache-release.md).
 
-**Only Stage 1 caching was deployed.** The four candidates below are local, API-only experiments. The first next candidate worth pursuing is Stage 5, with a full formatting-cohort quality check before release. Stage 2 needs routing stability checks; Stage 3 needs structured venue preservation; Stage 4 has no convincing total-cost advantage and failed two repeat validation contracts. None is recommended for immediate deployment from these results alone.
+**At the time of this initial audit, only Stage 1 caching was deployed.** The four candidates below were local, API-only experiments. Stage 5 needed a full formatting-cohort quality check; Stage 2 needed downstream routing checks; Stage 3 needed structured venue preservation; Stage 4 had no convincing total-cost advantage and failed two repeat validation contracts. The subsequent Stage 2 and Stage 5 releases above supersede their initial holds.
 
 ## Experiment design and limits
 
