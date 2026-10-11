@@ -5,6 +5,7 @@
       "codebase": "gathr-functions",
       "ignore": [
         "node_modules",
+        "artifacts",
         ".git",
         "firebase-debug.log",
         "firebase-debug.*.log",
