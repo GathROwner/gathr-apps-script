@@ -196,6 +196,8 @@ export interface EventData {
   recurringWeekInterval?: number;
   totalOccurrences?: number;
   recurrenceUntilDate?: string;
+  /** Source post that established the stored recurring lifecycle. */
+  recurrenceSourceUniqueId?: string;
   ageRestriction?: string;
   imageUrl?: string;
   icon?: string;

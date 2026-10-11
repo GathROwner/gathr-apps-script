@@ -1,4 +1,5 @@
 import { EventData } from '../types/index.js';
+import { hasConflictingDevelopmentSlot } from '../utils/eventSlotIdentity.js';
 import {
   calculateTimeDifferenceHours,
   normalizeVenueName,
@@ -759,6 +760,7 @@ export function isRecurringFamilyFallbackCompatible(
   existing: EventData,
   options?: RecurringFamilyFallbackOptions
 ): boolean {
+  if (hasConflictingDevelopmentSlot(incoming, existing)) return false;
   if (!hasCompatibleVenue(incoming, existing, options?.venueId)) {
     return false;
   }
@@ -899,6 +901,7 @@ export function isIncomingRecurringFamilyCompatibleWithExistingOccurrence(
   existing: EventData,
   options?: RecurringFamilyFallbackOptions
 ): boolean {
+  if (hasConflictingDevelopmentSlot(incoming, existing)) return false;
   if (!hasCompatibleVenue(incoming, existing, options?.venueId)) {
     return false;
   }

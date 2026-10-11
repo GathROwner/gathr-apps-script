@@ -1,0 +1,24 @@
+const fs = require('node:fs');
+const path = require('node:path');
+const assert = require('node:assert/strict');
+const root = path.resolve(__dirname,'../artifacts/luna-oct11-integrity-repair');
+const read = file => JSON.parse(fs.readFileSync(path.join(root,file),'utf8').replace(/^\uFEFF/,''));
+const names = ['processDataset','processDatasetResume','processDatasetSelectedRows'];
+const rows = names.map(name=>{
+  const before=read(`${name}-before.json`),after=read(`${name}-after.json`),run=read(`${name}-traffic-after.json`);
+  assert.equal(after.state,'ACTIVE',name);
+  assert.equal(after.serviceConfig.allTrafficOnLatestRevision,true,name);
+  assert.notEqual(after.serviceConfig.revision,before.serviceConfig.revision,name);
+  assert.notEqual(after.labels['firebase-functions-hash'],before.labels['firebase-functions-hash'],name);
+  const keys=Object.keys(before.serviceConfig.environmentVariables).filter(k=>/^(LUNA_|STAGE[1-5]_(MODEL_OVERRIDE|RESPONSES_REASONING_EFFORT))/.test(k));
+  for(const key of keys)assert.equal(after.serviceConfig.environmentVariables[key],before.serviceConfig.environmentVariables[key],`${name}:${key}`);
+  const traffic=run.status.traffic.filter(t=>Number(t.percent)>0);
+  assert.equal(traffic.length,1,name);
+  assert.equal(traffic[0].revisionName,after.serviceConfig.revision,name);
+  assert.equal(Number(traffic[0].percent),100,name);
+  return {name,state:after.state,revision:after.serviceConfig.revision,hash:after.labels['firebase-functions-hash'],trafficPercent:100,modelSettingsUnchanged:true};
+});
+assert.equal(new Set(rows.map(r=>r.hash)).size,1);
+const result={verifiedAt:new Date().toISOString(),projectId:'gathr-migrated',rows};
+fs.writeFileSync(path.join(root,'serving-verified.json'),JSON.stringify(result,null,2));
+console.log(JSON.stringify(result,null,2));

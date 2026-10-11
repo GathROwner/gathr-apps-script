@@ -226,7 +226,7 @@ const CATEGORY_ALIAS_MAP: Record<string, Category> = {
 const CATEGORY_ALIAS_RULES: Array<{ regex: RegExp; target: Category; note: string }> = [
   { regex: /\b(dj|nightlife|club|dance)\b/i, target: 'Live Music', note: 'dj/nightlife/club/dance' },
   { regex: /\b(open\s*mic|karaoke|jam)\b/i, target: 'Live Music', note: 'open mic/karaoke/jam' },
-  { regex: /\b(concert|band|acoustic|live)\b/i, target: 'Live Music', note: 'concert/band/acoustic/live' },
+  { regex: /\b(concert|band|acoustic|live\s+(?:music|entertainment|performance))\b/i, target: 'Live Music', note: 'concert/band/acoustic/live entertainment' },
   { regex: /\b(trivia|triva|quiz)\b/i, target: 'Trivia Night', note: 'trivia/quiz' },
   { regex: /\b(movie|film|cinema|screening)\b/i, target: 'Cinema', note: 'movie/film/cinema/screening' },
   { regex: /\b(comedy|stand\s*-?\s*up|improv)\b/i, target: 'Comedy', note: 'comedy/stand up/improv' },
@@ -1400,6 +1400,7 @@ function detectExplicitFoodSpecialCategory(
   event: FormattedEvent,
   originalItem?: ExtractedItem
 ): Category | null {
+  if (isNonMealCommunityActivity(event, originalItem)) return null;
   if (isCinemaAdmissionListing(event, originalItem)) return null;
   if (isOrganizedCommunityMeal(event)) return null;
   // Preserve the identity of an aligned, validated drink offer even when its
@@ -1925,6 +1926,11 @@ function applyFinalCategoryNormalizationGuardrail(
     return event;
   };
 
+  if (isNonMealCommunityActivity(event, originalItem)) {
+    stats.keywordInference += 1;
+    return setCategory('Gatherings & Parties', 'keyword_inference', 'civic, literary or donation activity');
+  }
+
   if (/\b(?:vendors?|farmers?|craft)\s+market\b/i.test(String(event.name || ''))) {
     stats.keywordInference += 1;
     return setCategory('Gatherings & Parties', 'keyword_inference', 'market title');
@@ -1948,7 +1954,7 @@ function applyFinalCategoryNormalizationGuardrail(
   }
 
   // Priority 2: Alias-map model final category into canonical basket.
-  if (finalCategoryRaw) {
+  if (finalCategoryRaw && !allowedFinal) {
     noteUnknownCategoryLabel(stats, finalCategoryRaw);
     const aliasedFinal = tryAliasToAllowedCategory(finalCategoryRaw);
     if (aliasedFinal.category) {
@@ -1973,7 +1979,7 @@ function applyFinalCategoryNormalizationGuardrail(
   }
 
   // Priority 4: Alias-map Stage 3 categoryHint if needed.
-  if (categoryHintRaw) {
+  if (categoryHintRaw && !allowedHint) {
     noteUnknownCategoryLabel(stats, categoryHintRaw);
     const aliasedHint = tryAliasToAllowedCategory(categoryHintRaw);
     if (aliasedHint.category && (!weakModelFinal || isStrongUpgradeOverWeakFinal(aliasedHint.category))) {
@@ -2145,10 +2151,27 @@ export function applyFestivalParentCategoryForRegression(event: FormattedEvent):
     : { ...event };
 }
 
+/** Food collected for donation is not food sold; a live broadcast is not live music. */
+export function isNonMealCommunityActivity(event: FormattedEvent, originalItem?: ExtractedItem): boolean {
+  const title = `${event.name || ''} ${originalItem?.name || ''}`;
+  const text = `${title} ${event.description || ''} ${originalItem?.description || ''}`;
+  const civic = /\b(?:council\s+meeting|(?:town|city|municipal)\s+council|public\s+(?:hearing|consultation))\b/i.test(title);
+  const literary = (/\b(?:author\s+(?:talk|conversation|reading|visit|event)|book\s+(?:signing|reading|launch)|poetry\s+reading)\b/i.test(text) ||
+      (/\bauthor\b/i.test(text) && /\b(?:in\s+conversation|reading|book\s+launch)\b/i.test(text))) &&
+    !/\b(?:concert|live\s+music|musical\s+performance)\b/i.test(title);
+  const foodDrive = /\b(?:food\s+drive|food\s+bank\s+(?:collection|drive)|donation\s+(?:drive|drop[- ]?off|collection))\b/i.test(title) &&
+    !/\b(?:dinner|breakfast|brunch|lunch|buffet|supper)\b/i.test(title);
+  return civic || literary || foodDrive;
+}
+
 function applyCategoryCorrections(
   event: FormattedEvent,
   originalItem: ExtractedItem | undefined
 ): FormattedEvent {
+  if (isNonMealCommunityActivity(event, originalItem)) {
+    event.category = 'Gatherings & Parties';
+    return event;
+  }
   const rawCategory = String(event.category || '').trim();
   if (/\b(?:vendors?|farmers?|craft)\s+market\b/i.test(String(event.name || ''))) {
     event.category = 'Gatherings & Parties';
@@ -2628,6 +2651,17 @@ export function filterUnsupportedClosureFoodBleed(
         /\b(?:special|deal|discount|sale|half price|bogo)\b|\d+\s*%\s*off/i.test(`${preceding} ${clause}`);
     });
     if (offerClause) return true;
+
+    // A separately advertised, timed meal survives a closure on another day.
+    // Ordinary dishes and prices mentioned in a closure post do not qualify.
+    const mealTokens = name.split(' ').filter(token => /^(?:turkey|dinner|buffet|brunch|breakfast|supper|lunch)$/.test(token));
+    const timedMeal = mealTokens.length >= 2 && String(combinedText || '').split(/\r?\n|[!;]+/).some(clause => {
+      const normalized = normalizeWorkshopSupportText(clause);
+      return !/\b(?:closed|closure)\b/.test(normalized) &&
+        mealTokens.every(token => new RegExp(`\\b${token}\\b`).test(normalized)) &&
+        /\b\d{1,2}(?::\d{2})?\s*(?:am|pm)\b/i.test(clause);
+    });
+    if (timedMeal) return true;
 
     logger.debug(`Dropped unsupported food-special bleed item from closure-only post "${event.name}"`, {
       category: event.category,

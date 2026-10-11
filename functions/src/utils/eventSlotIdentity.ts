@@ -4,7 +4,25 @@ type SlotEvent = {
   startTime?: string;
   endTime?: string;
   timeFlags?: unknown;
+  description?: string;
 };
+
+/** Age-group development sessions are distinct slots, even under a generic calendar title. */
+export function hasConflictingDevelopmentSlot(left: SlotEvent, right: SlotEvent): boolean {
+  const text = `${title(left)} ${title(right)}`;
+  if (!/\b(?:community\s+(?:cup\b.{0,40})?development|(?:hockey|skating|ringette)\s+(?:development|training)|powerskating|u\s*[- ]?\d{1,2}\s+development)\b/i.test(text)) return false;
+  const groups = (event: SlotEvent) => [...title(event).matchAll(/\bu\s*[- ]?\s*(\d{1,2})\b/gi)].map(m => Number(m[1]));
+  const a = groups(left), b = groups(right);
+  if (a.length === 1 && b.length === 1 && a[0] !== b[0]) return true;
+  const knownClock = (event: SlotEvent) => {
+    const value = String(event.startTime || '');
+    const flag = timeFlag(event, 'start').source;
+    return /^\d{2}:\d{2}$/.test(value) && value !== '00:00' &&
+      !['implied', 'semantic', 'none'].includes(flag) ? value : '';
+  };
+  const startA = knownClock(left), startB = knownClock(right);
+  return Boolean(startA && startB && startA !== startB);
+}
 
 function title(event: SlotEvent): string {
   return String(event.eventName || event.name || '');

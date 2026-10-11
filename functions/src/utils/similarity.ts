@@ -7,6 +7,7 @@ import {
   hasConflictingExplicitSlotOrdinals,
   hasConflictingLabeledSlotTimeEvidence,
 } from './eventSlotIdentity.js';
+import { hasConflictingDevelopmentSlot } from './eventSlotIdentity.js';
 
 /**
  * Calculate Levenshtein distance between two strings
@@ -614,6 +615,7 @@ export function isDuplicateEntry(
     establishmentSimilarityThreshold?: number;
   }
 ): boolean {
+  if (hasConflictingDevelopmentSlot(newData, existingData)) return false;
   if (hasConflictingExplicitSlotOrdinals(newData, existingData)) return false;
   if (hasConflictingLabeledSlotTimeEvidence(newData, existingData)) return false;
   const {

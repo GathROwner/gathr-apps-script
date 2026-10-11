@@ -1,6 +1,6 @@
 # GathR parser-quality weakness registry
 
-Last updated: 2026-10-05 (Atlantic)
+Last updated: 2026-10-11 (Atlantic)
 
 This is a cumulative evidence register, not a list of venue IDs to decode. A technical ID is always paired with the venue or event name. Future audits should add a new observation to an existing pattern when the failure mechanism is the same; only create a new pattern when it is materially different.
 
@@ -207,3 +207,16 @@ correct special identities. Included food in a ticketed dinner concert remains
 one event. No new whole-post rejection appears; ordinary menu/restock controls
 remain excluded. This repair keeps Stage 2 at 50% and preserves Stage 5 at 100%.
 Live record corrections and any Stage 2 percentage increase remain separate.
+
+## October 11 targeted integrity repairs
+
+See `docs/luna-oct11-integrity-repair.md` for captured-source evidence, tests and release status.
+
+- Community Cup row 234: the three-hour fuzzy time tolerance collapsed U9/U11/U13 development sessions onto one generic calendar record. Protect known clocks and age groups in all selectors and at the merge boundary.
+- Baba's row 20: a third-party one-off occurrence erased a bounded weekly lifecycle. Preserve recurrence across source owners and retain the source that established a newly promoted series. Same-source corrections remain possible.
+- Emily St John Mandel row 277: a new category default overwrote a legacy end and left end before start. Distinguish explicit evidence from `none` flags and update overnight date/clock together.
+- Stratford council and food drive rows 313/315: live-stream wording and donated-food inventory caused semantic category errors. Civic/literary/donation activity identity takes precedence over unrelated food/music keywords. Category matching was already case-insensitive.
+- Tipsy row 120 and Island Hill row 332: mixed closure notices and opening-hours text erased separately advertised meals/markets. Require item-specific offer/activity evidence; retain ordinary hours/closure-only negative controls.
+- Local Pub row 66: Saturday and Sunday recurrence shared a placeholder date and were treated as duplicates. Align corroborated weekly sibling anchors and preserve weekday identity.
+
+Existing data changes remain separately approval-gated. No model allocation, Stage 4 effort experiment, broad deduplication or prompt-cache optimization is part of these repairs.

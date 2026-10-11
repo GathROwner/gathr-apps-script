@@ -1,4 +1,5 @@
 import { CacheWriteMetrics, createCacheWriteMetrics, addCacheWriteUsage } from '../parsing/cacheAccounting.js';
+import { hasConflictingDevelopmentSlot } from '../utils/eventSlotIdentity.js';
 /**
  * Row Processor
  * Handles individual row processing including GPT parsing and event creation
@@ -5610,6 +5611,11 @@ function buildDuplicateEventUpdates(
   const changedFields: string[] = [];
   let descriptionImproved = false;
   let timeImproved = false;
+  // Defense in depth: never enrich a different development slot, even if a caller
+  // bypassed one of the duplicate selectors.
+  if (hasConflictingDevelopmentSlot(existing, incoming)) {
+    return { updates, changedFields, descriptionImproved, timeImproved };
+  }
   const unsafeCrossSourceDateMerge = isUnsafeCrossSourceDateDuplicateMerge(existing, incoming);
 
   const setField = <K extends keyof EventData>(
@@ -5734,6 +5740,12 @@ function buildDuplicateEventUpdates(
   }
   if (recurringMerge.isRecurring !== undefined) {
     setField('isRecurring', recurringMerge.isRecurring);
+  }
+  if (recurringMerge.recurringPattern === 'none') {
+    if (existing.recurrenceSourceUniqueId) setField('recurrenceSourceUniqueId', '');
+  } else if (isRecurringLikeEvent(incoming) && hasDuplicateMergeRecurringLifecycleSignal(incoming)) {
+    const recurrenceSource = getEventDuplicateMergeSourceRoot(incoming);
+    if (recurrenceSource) setField('recurrenceSourceUniqueId', recurrenceSource);
   }
   if (
     recurringMerge.forceIsRecurring &&
@@ -5878,6 +5890,19 @@ function buildDuplicateEventUpdates(
   );
   if (shouldReplaceTimeField(existing.endTime, preferredIncomingEndTime, existing, incoming, 'end')) {
     setField('endTime', preferredIncomingEndTime as EventData['endTime']);
+    // An overnight end is one value (date + clock), not two independent hints.
+    // Keep the existing occurrence anchor when merging a recurring child.
+    const startDate = asTrimmedString(updates.startDate || existing.startDate);
+    const startTime = toComparableTime(String(updates.startTime || existing.startTime || ''));
+    const endTime = toComparableTime(String(preferredIncomingEndTime || ''));
+    if (/^\d{4}-\d{2}-\d{2}$/.test(startDate) && startTime && endTime) {
+      const end = new Date(`${startDate}T00:00:00Z`);
+      if (endTime < startTime) end.setUTCDate(end.getUTCDate() + 1);
+      // Explicit multi-day spans are handled by the date merge above.
+      if (!updates.endDate || String(updates.endDate) <= startDate) {
+        setField('endDate', end.toISOString().slice(0, 10));
+      }
+    }
     timeImproved = true;
   }
 
@@ -6550,7 +6575,11 @@ function selectRecurringLifecycleMerge(
     incomingRecurringState === 'no' &&
     !incomingHasPattern &&
     !incomingHasCustomSchedule &&
-    !unsafeCrossSourceDateMerge
+    !unsafeCrossSourceDateMerge &&
+    (!(getDuplicateMergeSourceRoot(existing.recurrenceSourceUniqueId) || getEventDuplicateMergeSourceRoot(existing)) ||
+      !getEventDuplicateMergeSourceRoot(incoming) ||
+      (getDuplicateMergeSourceRoot(existing.recurrenceSourceUniqueId) || getEventDuplicateMergeSourceRoot(existing)) === getEventDuplicateMergeSourceRoot(incoming) ||
+      shouldPromoteAuthoritativeCurrentFamilyShape(existing, incoming))
   ) {
     const shouldClearRecurring =
       existingHasPattern ||
@@ -7795,6 +7824,7 @@ function isInferredExistingTime(event: EventData, side: 'start' | 'end'): boolea
 function isExplicitIncomingTime(event: EventData, side: 'start' | 'end'): boolean {
   const source = getTimeFlagSource(event.timeFlags, side);
   if (source === 'explicit') return true;
+  if (source === 'implied' || source === 'semantic' || source === 'none') return false;
 
   const resolution = asRecord(event.timeResolution);
   if (!resolution) return true;
@@ -7832,11 +7862,15 @@ function shouldPreferIncomingInferredEndTime(
 
   const incomingRank = getEndTimeInferenceRank(incomingEvent);
   const existingRank = getEndTimeInferenceRank(existingEvent);
+  if (existingRank === 0) return false; // Legacy end with unknown derivation is not weaker evidence.
   if (incomingRank > existingRank) {
     return true;
   }
 
-  if (incomingRank === existingRank && incomingRank > 0) {
+  // Equal-strength defaults are not new evidence. Repeated category guesses
+  // must not move an established end time each time a post is seen.
+  if (incomingRank === existingRank && incomingRank > 0 &&
+      toComparableTime(existingEvent.startTime || '') !== toComparableTime(incomingEvent.startTime || '')) {
     const existingStartEvidence = getEvidenceComparableTime(existingEvent, 'start', {
       counterpartEvent: incomingEvent,
       allowDescriptionFallback: true,

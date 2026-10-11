@@ -1,0 +1,3441 @@
+{
+  "dataset": "1w9joG-FJhXFTLKes7T4836iykHoPMZYU",
+  "rows": [
+    {
+      "row": 20,
+      "id": "1560580752776123",
+      "caption": "What’s happening today in Downtown Charlottetown? \n\nThanksgiving Downtown: https://www.downtowncharlottetown.com/programs/thanksgiving\n\nSunday October 11, 2026 events:\n12:00 pm - Founders Food Hall & Market: Mark & Spencer Phillips\n1:00 pm - Olde Dublin Pub: Cole Brioux\n2:00 pm - Old Trianlge: Irish Music Sessions \n2:00 pm - Black Culture Society: Island Fringe Festival - An American (not) in Paris\n2:15 pm - The Arts Guild: Island Fringe Festival  Passing the Cold in Montreal\n3:15 pm - The Arts Guild: Island Fringe Festival: Men Love Horsies The Musical \n7:00 pm - City Cinema: Ha - Chan, Shake Your Booty \n6:00 pm - Olde Dublin Pub: Pierre and Patrick \n8:00 pm - Trailside Music Hall: Nick Doneff’s 9th Annual Tribute to a John Prine Weekend\n8:00 pm - The Arts Guild: Island Fringe Festival Awards and Closing Party \n9:00 pm - Hunter’s Ale House: Name That Tune\n\nMonday October 12, 2026 events:   \n12:00 pm - Founders Food Hall & Market: Lunch Sounds Better Live with Carter MacLellan\n7:00 pm - City Cinema: Ha - Chan, Shake Your Booty \n7:00 pm - PEERS Aliance: PEI Group Meditation \n7:00 pm - Olde Dublin Pub: Robbie Doherty \n7:15 pm - Tivoli Cinema: Jennifer’s Body \n8:30 pm - Baba’s Lounge: Rat Tales Comedy Night\n10:00 pm - Hunter’s Ale House: Open Mic\n10:00 pm - Baba’s Lounge: Karaoke\n\n Daily Charlottetown Library Learning Centre Schedule: https://peilibrary.libcal.com/calendar/charlottetownlibrary\n\nOCR TEXT:\nMay be an image of text",
+      "venue": "Downtown Charlottetown Inc.",
+      "timestamp": "2026-10-11T11:00:32.000Z",
+      "stage3": [
+        {
+          "name": "Rat Tales Comedy Night",
+          "type": "event",
+          "date": "2026-10-12",
+          "startTime": "20:30",
+          "endTime": "",
+          "venue": "Baba’s Lounge",
+          "price": "",
+          "description": "Baba’s Lounge: Rat Tales Comedy Night",
+          "extractionReason": "schedule_text_fallback",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "8:30 pm"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceType": "schedule",
+          "_pipelineIndex": 17,
+          "_pipelineTotalStage3": 19
+        },
+        {
+          "name": "Karaoke",
+          "type": "event",
+          "date": "2026-10-12",
+          "startTime": "22:00",
+          "endTime": "",
+          "venue": "Baba’s Lounge",
+          "price": "",
+          "description": "Baba’s Lounge: Karaoke",
+          "extractionReason": "schedule_text_fallback",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "10:00 pm"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceType": "schedule",
+          "_pipelineIndex": 19,
+          "_pipelineTotalStage3": 19
+        }
+      ],
+      "stage4": [
+        {
+          "name": "Rat Tales Comedy Night",
+          "type": "event",
+          "date": "2026-10-12",
+          "startTime": "20:30",
+          "endTime": "",
+          "venue": "Baba’s Lounge",
+          "price": "",
+          "description": "Baba’s Lounge: Rat Tales Comedy Night",
+          "extractionReason": "schedule_text_fallback",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "8:30 pm"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceType": "schedule",
+          "_pipelineIndex": 17,
+          "_pipelineTotalStage3": 19,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Karaoke",
+          "type": "event",
+          "date": "2026-10-12",
+          "startTime": "22:00",
+          "endTime": "",
+          "venue": "Baba’s Lounge",
+          "price": "",
+          "description": "Baba’s Lounge: Karaoke",
+          "extractionReason": "schedule_text_fallback",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "10:00 pm"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceType": "schedule",
+          "_pipelineIndex": 19,
+          "_pipelineTotalStage3": 19,
+          "recurringPattern": "none"
+        }
+      ],
+      "events": [
+        {
+          "id": "1560580752776123",
+          "name": "Rat Tales Comedy Night",
+          "category": "Comedy",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "establishment": "Baba’s Lounge",
+          "additionalLocation": "Baba’s Lounge",
+          "locationScope": "",
+          "locationLabel": "",
+          "locationCity": "",
+          "locationProvince": "",
+          "locationPrecision": "",
+          "locationReviewStatus": "",
+          "startDate": "2026-10-12",
+          "startTime": "20:30",
+          "endDate": "2026-10-12",
+          "endTime": "22:30",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "recurringDaysOfWeek": [],
+          "recurringWeekdaySequence": [],
+          "recurringWeekInterval": null,
+          "totalOccurrences": null,
+          "recurrenceUntilDate": "",
+          "ticketLink": "",
+          "ticketsBuyUrl": "",
+          "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791722380832-vz8bdh.webp",
+          "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791722380832-vz8bdh.webp",
+          "sharedPostThumbnail": "",
+          "imageProvenance": {
+            "version": 1,
+            "primarySource": "post_media",
+            "primaryField": "relevantImageUrl",
+            "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791722380832-vz8bdh.webp",
+            "isFallback": false,
+            "sourceFields": [
+              "relevantImageUrl",
+              "mediaUrls",
+              "icon"
+            ],
+            "media": [
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791722380832-vz8bdh.webp",
+                "source": "post_media",
+                "field": "relevantImageUrl",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791722380832-vz8bdh.webp",
+                "source": "post_media",
+                "field": "mediaUrls",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1791722381166-wg36bs.webp",
+                "source": "profile_image",
+                "field": "icon",
+                "isPrimary": false,
+                "isFallback": false
+              }
+            ],
+            "selectionReason": "model_selected_analysis_frame_source",
+            "updatedBy": "parser"
+          },
+          "timeResolution": {
+            "hoursUsed": true,
+            "endFromHours": "duration_default"
+          },
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "8:30 pm"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceType": "schedule",
+          "description": "Baba’s Lounge: Rat Tales Comedy Night"
+        },
+        {
+          "id": "1560580752776123",
+          "name": "Karaoke",
+          "category": "Karaoke",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "establishment": "Baba’s Lounge",
+          "additionalLocation": "Baba’s Lounge",
+          "locationScope": "",
+          "locationLabel": "",
+          "locationCity": "",
+          "locationProvince": "",
+          "locationPrecision": "",
+          "locationReviewStatus": "",
+          "startDate": "2026-10-12",
+          "startTime": "22:00",
+          "endDate": "2026-10-13",
+          "endTime": "00:00",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "recurringDaysOfWeek": [],
+          "recurringWeekdaySequence": [],
+          "recurringWeekInterval": null,
+          "totalOccurrences": null,
+          "recurrenceUntilDate": "",
+          "ticketLink": "",
+          "ticketsBuyUrl": "",
+          "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791722380832-vz8bdh.webp",
+          "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791722380832-vz8bdh.webp",
+          "sharedPostThumbnail": "",
+          "imageProvenance": {
+            "version": 1,
+            "primarySource": "post_media",
+            "primaryField": "relevantImageUrl",
+            "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791722380832-vz8bdh.webp",
+            "isFallback": false,
+            "sourceFields": [
+              "relevantImageUrl",
+              "mediaUrls",
+              "icon"
+            ],
+            "media": [
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791722380832-vz8bdh.webp",
+                "source": "post_media",
+                "field": "relevantImageUrl",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791722380832-vz8bdh.webp",
+                "source": "post_media",
+                "field": "mediaUrls",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1791722381166-wg36bs.webp",
+                "source": "profile_image",
+                "field": "icon",
+                "isPrimary": false,
+                "isFallback": false
+              }
+            ],
+            "selectionReason": "model_selected_analysis_frame_source",
+            "updatedBy": "parser"
+          },
+          "timeResolution": {
+            "hoursUsed": true,
+            "endFromHours": "duration_default"
+          },
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "10:00 pm"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceType": "schedule",
+          "description": "Baba’s Lounge: Karaoke"
+        }
+      ]
+    },
+    {
+      "row": 66,
+      "id": "1128907866328055",
+      "caption": "Long weekends and brunch go together like steak and eggs \n\nJoin us at the local, we're serving brunch 10am-2pm Saturday and Sunday ☕️\n\nOCR TEXT:\nMay be an image of text",
+      "venue": "The Local Pub and Oyster Bar",
+      "timestamp": "2026-10-10T12:00:08.000Z",
+      "stage3": [
+        {
+          "name": "Weekend Brunch",
+          "description": "Brunch served every Saturday.",
+          "date": "2026-10-10",
+          "startTime": "10:00",
+          "endTime": "14:00",
+          "venue": "The Local Pub and Oyster Bar",
+          "pricing": "",
+          "price": "",
+          "discount": "",
+          "additionalLocation": "",
+          "recurringPattern": "weekly_saturday",
+          "extractionReason": "The post advertises recurring public brunch service on Saturdays.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Brunch 10am-2pm; image says 10 AM - 2 PM."
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "Brunch 10am-2pm; image says 10 AM - 2 PM."
+            }
+          },
+          "_sourceType": "special",
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 2
+        },
+        {
+          "name": "Weekend Brunch",
+          "description": "Brunch served every Sunday.",
+          "date": "2026-10-10",
+          "startTime": "10:00",
+          "endTime": "14:00",
+          "venue": "The Local Pub and Oyster Bar",
+          "pricing": "",
+          "price": "",
+          "discount": "",
+          "additionalLocation": "",
+          "recurringPattern": "weekly_sunday",
+          "extractionReason": "The post advertises recurring public brunch service on Sundays.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Brunch 10am-2pm; image says 10 AM - 2 PM."
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "Brunch 10am-2pm; image says 10 AM - 2 PM."
+            }
+          },
+          "_sourceType": "special",
+          "_pipelineIndex": 2,
+          "_pipelineTotalStage3": 2
+        }
+      ],
+      "stage4": [
+        {
+          "name": "Weekend Brunch",
+          "description": "Brunch served every Saturday.",
+          "date": "2026-10-10",
+          "startTime": "10:00",
+          "endTime": "14:00",
+          "venue": "The Local Pub and Oyster Bar",
+          "pricing": "",
+          "price": "",
+          "discount": "",
+          "additionalLocation": "",
+          "recurringPattern": "weekly_saturday",
+          "extractionReason": "The post advertises recurring public brunch service on Saturdays.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Brunch 10am-2pm; image says 10 AM - 2 PM."
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "Brunch 10am-2pm; image says 10 AM - 2 PM."
+            }
+          },
+          "_sourceType": "special",
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 2
+        }
+      ],
+      "events": [
+        {
+          "id": "1128907866328055",
+          "name": "Weekend Brunch",
+          "category": "Food Special",
+          "isEvent": "No",
+          "isFoodSpecial": "Yes",
+          "establishment": "The Local Pub and Oyster Bar",
+          "additionalLocation": "The Local Pub and Oyster Bar",
+          "locationScope": "",
+          "locationLabel": "",
+          "locationCity": "",
+          "locationProvince": "",
+          "locationPrecision": "",
+          "locationReviewStatus": "",
+          "startDate": "2026-10-10",
+          "startTime": "10:00",
+          "endDate": "2026-10-10",
+          "endTime": "14:00",
+          "isRecurring": "Yes",
+          "recurringPattern": "weekly_saturday",
+          "recurringDaysOfWeek": [],
+          "recurringWeekdaySequence": [],
+          "recurringWeekInterval": null,
+          "totalOccurrences": null,
+          "recurrenceUntilDate": "",
+          "ticketLink": "",
+          "ticketsBuyUrl": "",
+          "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791723003275-uphorl.webp",
+          "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791723003275-uphorl.webp",
+          "sharedPostThumbnail": "",
+          "imageProvenance": {
+            "version": 1,
+            "primarySource": "post_media",
+            "primaryField": "relevantImageUrl",
+            "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791723003275-uphorl.webp",
+            "isFallback": false,
+            "sourceFields": [
+              "relevantImageUrl",
+              "mediaUrls",
+              "icon"
+            ],
+            "media": [
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791723003275-uphorl.webp",
+                "source": "post_media",
+                "field": "relevantImageUrl",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791723003275-uphorl.webp",
+                "source": "post_media",
+                "field": "mediaUrls",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1791723003594-t2v2wz.webp",
+                "source": "profile_image",
+                "field": "icon",
+                "isPrimary": false,
+                "isFallback": false
+              }
+            ],
+            "selectionReason": "model_selected_analysis_frame_source",
+            "updatedBy": "parser"
+          },
+          "timeResolution": {
+            "hoursUsed": false
+          },
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Brunch 10am-2pm; image says 10 AM - 2 PM."
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "Brunch 10am-2pm; image says 10 AM - 2 PM."
+            }
+          },
+          "_sourceType": "special",
+          "description": "Brunch served every Saturday."
+        }
+      ]
+    },
+    {
+      "row": 120,
+      "id": "1135515799005452",
+      "caption": "Sunday\nOpen 12pm till 8pm\n\nThanksgiving prep is in full effect this am and the smells in the restaurant are incredible!\n\nPreorder Dinner pickup is 2pm this afternoon\n\nGrab n Go is getting stocked up with fresh baked pizzas, more bbq chicken dip and desserts! We will have whole pumpkin pies along with slices also available. \n\nTurkey Dinner Dine In Buffet Starts at 4:30pm till it’s gone or 6:30pm \n\nHappy Thanksgiving to Everyone. We are Incredibly Grateful to be a part of this wonderful community. Much to be Thankful for ❤️ \n\nWe will be Closed Monday to Spend Time w Family \n\n******\n\n120 Main Street, Souris\n 902.743.2003\n\nOCR TEXT:\nMay be an image of pasta and shepherd's pie\nMay be an image of apple\nNo photo description available.\nMay be an image of oatmeal cookies and cookies\nNo photo description available.",
+      "venue": "Tipsy Farmers",
+      "timestamp": "2026-10-11T11:29:11.000Z",
+      "stage3": [
+        {
+          "name": "Turkey Dinner Dine In Buffet",
+          "description": "Turkey Dinner Dine In Buffet Starts at 4:30pm till it’s gone or 6:30pm.",
+          "date": "2026-10-11",
+          "startTime": "16:30",
+          "endTime": "18:30",
+          "venue": "Tipsy Farmers",
+          "pricing": "",
+          "price": "",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "The post advertises a named Thanksgiving food offering: “Turkey Dinner Dine In Buffet Starts at 4:30pm till it’s gone or 6:30pm”.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "4:30pm"
+            },
+            "end": {
+              "source": "explicit",
+              "evidence": "6:30pm",
+              "toClose": false
+            }
+          },
+          "_sourceType": "special",
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 1
+        }
+      ],
+      "stage4": [
+        {
+          "name": "Turkey Dinner Dine In Buffet",
+          "description": "Turkey Dinner Dine In Buffet Starts at 4:30pm till it’s gone or 6:30pm.",
+          "date": "2026-10-11",
+          "startTime": "16:30",
+          "endTime": "18:30",
+          "venue": "Tipsy Farmers",
+          "pricing": "",
+          "price": "",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "The post advertises a named Thanksgiving food offering: “Turkey Dinner Dine In Buffet Starts at 4:30pm till it’s gone or 6:30pm”.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "4:30pm"
+            },
+            "end": {
+              "source": "explicit",
+              "evidence": "6:30pm",
+              "toClose": false
+            }
+          },
+          "_sourceType": "special",
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 1
+        }
+      ],
+      "events": []
+    },
+    {
+      "row": 234,
+      "id": "1668733748047343",
+      "caption": "Souris Community Cup is happy to announce 2026 fall development camps.\n\nThese camps are for players within common community cup parameters-\nEssentially Souris players, either registered with Souris minor hockey or initially with Souris but now with KCK. \nFemale players from Souris also playing in other associations qualify as well as any student at Ecole Belle Cloche.\n\nCamp details are as follows \n\nAll days are Tuesdays \nOctober 13th with Community Cup organizers.\nOctober 20th with Campbell Hockey development\nOctober 27th with Craig Jenkins\n\n420 - u9 players\n530 - u11 players\n640 - u13 players\n\nThis development camp is hosted by Souris Community Cup and can be offered to players free of charge on the generosity of sponsors Souris Credit Union, Colville Bay Oyster co, South Lake Shellfish Co, Red Beard Shellfish co and East Cape Oyster co.\n\nDonations will be received on site to use for further programs.\n\nSee you in the ice!",
+      "venue": "Eastern Kings Sportsplex",
+      "timestamp": "2026-10-10T16:42:21.000Z",
+      "stage3": [
+        {
+          "name": "Souris Community Cup U9 Development Camp",
+          "day": "Tuesday",
+          "date": "2026-10-13",
+          "recurringPattern": "none",
+          "startTime": "16:20",
+          "endTime": "",
+          "venue": "",
+          "price": "Free",
+          "description": "For U9 players. October 13 camp with Community Cup organizers. Eligible players are within the stated Souris Community Cup parameters. Donations will be received on site for further programs; hosted by Souris Community Cup and supported by sponsors.",
+          "extractionReason": "The schedule lists a U9 players session at 420 on October 13.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "420"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 9
+        },
+        {
+          "name": "Souris Community Cup U11 Development Camp",
+          "day": "Tuesday",
+          "date": "2026-10-13",
+          "recurringPattern": "none",
+          "startTime": "17:30",
+          "endTime": "",
+          "venue": "",
+          "price": "Free",
+          "description": "For U11 players. October 13 camp with Community Cup organizers. Eligible players are within the stated Souris Community Cup parameters. Donations will be received on site for further programs; hosted by Souris Community Cup and supported by sponsors.",
+          "extractionReason": "The schedule lists a U11 players session at 530 on October 13.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "530"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_pipelineIndex": 2,
+          "_pipelineTotalStage3": 9
+        },
+        {
+          "name": "Souris Community Cup U13 Development Camp",
+          "day": "Tuesday",
+          "date": "2026-10-13",
+          "recurringPattern": "none",
+          "startTime": "18:40",
+          "endTime": "",
+          "venue": "",
+          "price": "Free",
+          "description": "For U13 players. October 13 camp with Community Cup organizers. Eligible players are within the stated Souris Community Cup parameters. Donations will be received on site for further programs; hosted by Souris Community Cup and supported by sponsors.",
+          "extractionReason": "The schedule lists a U13 players session at 640 on October 13.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "640"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_pipelineIndex": 3,
+          "_pipelineTotalStage3": 9
+        },
+        {
+          "name": "Souris Community Cup U9 Development Camp",
+          "day": "Tuesday",
+          "date": "2026-10-20",
+          "recurringPattern": "none",
+          "startTime": "16:20",
+          "endTime": "",
+          "venue": "",
+          "price": "Free",
+          "description": "For U9 players. October 20 camp with Campbell Hockey development. Eligible players are within the stated Souris Community Cup parameters. Donations will be received on site for further programs; hosted by Souris Community Cup and supported by sponsors.",
+          "extractionReason": "The schedule lists an October 20 camp and a U9 players session at 420.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "420"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_pipelineIndex": 4,
+          "_pipelineTotalStage3": 9
+        },
+        {
+          "name": "Souris Community Cup U11 Development Camp",
+          "day": "Tuesday",
+          "date": "2026-10-20",
+          "recurringPattern": "none",
+          "startTime": "17:30",
+          "endTime": "",
+          "venue": "",
+          "price": "Free",
+          "description": "For U11 players. October 20 camp with Campbell Hockey development. Eligible players are within the stated Souris Community Cup parameters. Donations will be received on site for further programs; hosted by Souris Community Cup and supported by sponsors.",
+          "extractionReason": "The schedule lists an October 20 camp and a U11 players session at 530.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "530"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_pipelineIndex": 5,
+          "_pipelineTotalStage3": 9
+        },
+        {
+          "name": "Souris Community Cup U13 Development Camp",
+          "day": "Tuesday",
+          "date": "2026-10-20",
+          "recurringPattern": "none",
+          "startTime": "18:40",
+          "endTime": "",
+          "venue": "",
+          "price": "Free",
+          "description": "For U13 players. October 20 camp with Campbell Hockey development. Eligible players are within the stated Souris Community Cup parameters. Donations will be received on site for further programs; hosted by Souris Community Cup and supported by sponsors.",
+          "extractionReason": "The schedule lists an October 20 camp and a U13 players session at 640.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "640"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_pipelineIndex": 6,
+          "_pipelineTotalStage3": 9
+        },
+        {
+          "name": "Souris Community Cup U9 Development Camp",
+          "day": "Tuesday",
+          "date": "2026-10-27",
+          "recurringPattern": "none",
+          "startTime": "16:20",
+          "endTime": "",
+          "venue": "",
+          "price": "Free",
+          "description": "For U9 players. October 27 camp with Craig Jenkins. Eligible players are within the stated Souris Community Cup parameters. Donations will be received on site for further programs; hosted by Souris Community Cup and supported by sponsors.",
+          "extractionReason": "The schedule lists an October 27 camp and a U9 players session at 420.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "420"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_pipelineIndex": 7,
+          "_pipelineTotalStage3": 9
+        },
+        {
+          "name": "Souris Community Cup U11 Development Camp",
+          "day": "Tuesday",
+          "date": "2026-10-27",
+          "recurringPattern": "none",
+          "startTime": "17:30",
+          "endTime": "",
+          "venue": "",
+          "price": "Free",
+          "description": "For U11 players. October 27 camp with Craig Jenkins. Eligible players are within the stated Souris Community Cup parameters. Donations will be received on site for further programs; hosted by Souris Community Cup and supported by sponsors.",
+          "extractionReason": "The schedule lists an October 27 camp and a U11 players session at 530.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "530"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_pipelineIndex": 8,
+          "_pipelineTotalStage3": 9
+        },
+        {
+          "name": "Souris Community Cup U13 Development Camp",
+          "day": "Tuesday",
+          "date": "2026-10-27",
+          "recurringPattern": "none",
+          "startTime": "18:40",
+          "endTime": "",
+          "venue": "",
+          "price": "Free",
+          "description": "For U13 players. October 27 camp with Craig Jenkins. Eligible players are within the stated Souris Community Cup parameters. Donations will be received on site for further programs; hosted by Souris Community Cup and supported by sponsors.",
+          "extractionReason": "The schedule lists an October 27 camp and a U13 players session at 640.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "640"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_pipelineIndex": 9,
+          "_pipelineTotalStage3": 9
+        }
+      ],
+      "stage4": [
+        {
+          "name": "Souris Community Cup U9 Development Camp",
+          "day": "Tuesday",
+          "date": "2026-10-13",
+          "recurringPattern": "none",
+          "startTime": "16:20",
+          "endTime": "",
+          "venue": "",
+          "price": "Free",
+          "description": "For U9 players. October 13 camp with Community Cup organizers. Eligible players are within the stated Souris Community Cup parameters. Donations will be received on site for further programs; hosted by Souris Community Cup and supported by sponsors.",
+          "extractionReason": "The schedule lists a U9 players session at 420 on October 13.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "420"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 9
+        },
+        {
+          "name": "Souris Community Cup U11 Development Camp",
+          "day": "Tuesday",
+          "date": "2026-10-13",
+          "recurringPattern": "none",
+          "startTime": "17:30",
+          "endTime": "",
+          "venue": "",
+          "price": "Free",
+          "description": "For U11 players. October 13 camp with Community Cup organizers. Eligible players are within the stated Souris Community Cup parameters. Donations will be received on site for further programs; hosted by Souris Community Cup and supported by sponsors.",
+          "extractionReason": "The schedule lists a U11 players session at 530 on October 13.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "530"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_pipelineIndex": 2,
+          "_pipelineTotalStage3": 9
+        },
+        {
+          "name": "Souris Community Cup U13 Development Camp",
+          "day": "Tuesday",
+          "date": "2026-10-13",
+          "recurringPattern": "none",
+          "startTime": "18:40",
+          "endTime": "",
+          "venue": "",
+          "price": "Free",
+          "description": "For U13 players. October 13 camp with Community Cup organizers. Eligible players are within the stated Souris Community Cup parameters. Donations will be received on site for further programs; hosted by Souris Community Cup and supported by sponsors.",
+          "extractionReason": "The schedule lists a U13 players session at 640 on October 13.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "640"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_pipelineIndex": 3,
+          "_pipelineTotalStage3": 9
+        },
+        {
+          "name": "Souris Community Cup U9 Development Camp",
+          "day": "Tuesday",
+          "date": "2026-10-20",
+          "recurringPattern": "none",
+          "startTime": "16:20",
+          "endTime": "",
+          "venue": "",
+          "price": "Free",
+          "description": "For U9 players. October 20 camp with Campbell Hockey development. Eligible players are within the stated Souris Community Cup parameters. Donations will be received on site for further programs; hosted by Souris Community Cup and supported by sponsors.",
+          "extractionReason": "The schedule lists an October 20 camp and a U9 players session at 420.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "420"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_pipelineIndex": 4,
+          "_pipelineTotalStage3": 9
+        },
+        {
+          "name": "Souris Community Cup U11 Development Camp",
+          "day": "Tuesday",
+          "date": "2026-10-20",
+          "recurringPattern": "none",
+          "startTime": "17:30",
+          "endTime": "",
+          "venue": "",
+          "price": "Free",
+          "description": "For U11 players. October 20 camp with Campbell Hockey development. Eligible players are within the stated Souris Community Cup parameters. Donations will be received on site for further programs; hosted by Souris Community Cup and supported by sponsors.",
+          "extractionReason": "The schedule lists an October 20 camp and a U11 players session at 530.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "530"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_pipelineIndex": 5,
+          "_pipelineTotalStage3": 9
+        },
+        {
+          "name": "Souris Community Cup U13 Development Camp",
+          "day": "Tuesday",
+          "date": "2026-10-20",
+          "recurringPattern": "none",
+          "startTime": "18:40",
+          "endTime": "",
+          "venue": "",
+          "price": "Free",
+          "description": "For U13 players. October 20 camp with Campbell Hockey development. Eligible players are within the stated Souris Community Cup parameters. Donations will be received on site for further programs; hosted by Souris Community Cup and supported by sponsors.",
+          "extractionReason": "The schedule lists an October 20 camp and a U13 players session at 640.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "640"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_pipelineIndex": 6,
+          "_pipelineTotalStage3": 9
+        },
+        {
+          "name": "Souris Community Cup U9 Development Camp",
+          "day": "Tuesday",
+          "date": "2026-10-27",
+          "recurringPattern": "none",
+          "startTime": "16:20",
+          "endTime": "",
+          "venue": "",
+          "price": "Free",
+          "description": "For U9 players. October 27 camp with Craig Jenkins. Eligible players are within the stated Souris Community Cup parameters. Donations will be received on site for further programs; hosted by Souris Community Cup and supported by sponsors.",
+          "extractionReason": "The schedule lists an October 27 camp and a U9 players session at 420.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "420"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_pipelineIndex": 7,
+          "_pipelineTotalStage3": 9
+        },
+        {
+          "name": "Souris Community Cup U11 Development Camp",
+          "day": "Tuesday",
+          "date": "2026-10-27",
+          "recurringPattern": "none",
+          "startTime": "17:30",
+          "endTime": "",
+          "venue": "",
+          "price": "Free",
+          "description": "For U11 players. October 27 camp with Craig Jenkins. Eligible players are within the stated Souris Community Cup parameters. Donations will be received on site for further programs; hosted by Souris Community Cup and supported by sponsors.",
+          "extractionReason": "The schedule lists an October 27 camp and a U11 players session at 530.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "530"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_pipelineIndex": 8,
+          "_pipelineTotalStage3": 9
+        },
+        {
+          "name": "Souris Community Cup U13 Development Camp",
+          "day": "Tuesday",
+          "date": "2026-10-27",
+          "recurringPattern": "none",
+          "startTime": "18:40",
+          "endTime": "",
+          "venue": "",
+          "price": "Free",
+          "description": "For U13 players. October 27 camp with Craig Jenkins. Eligible players are within the stated Souris Community Cup parameters. Donations will be received on site for further programs; hosted by Souris Community Cup and supported by sponsors.",
+          "extractionReason": "The schedule lists an October 27 camp and a U13 players session at 640.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "640"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_pipelineIndex": 9,
+          "_pipelineTotalStage3": 9
+        }
+      ],
+      "events": [
+        {
+          "id": "1668733748047343",
+          "name": "Souris Community Cup U9 Development Camp",
+          "category": "Workshops & Classes",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "establishment": "Eastern Kings Sportsplex",
+          "additionalLocation": "",
+          "locationScope": "",
+          "locationLabel": "",
+          "locationCity": "",
+          "locationProvince": "",
+          "locationPrecision": "",
+          "locationReviewStatus": "",
+          "startDate": "2026-10-13",
+          "startTime": "16:20",
+          "endDate": "2026-10-13",
+          "endTime": "18:20",
+          "isRecurring": true,
+          "recurringPattern": "weekly_tuesday",
+          "recurringDaysOfWeek": [],
+          "recurringWeekdaySequence": [],
+          "recurringWeekInterval": null,
+          "totalOccurrences": 3,
+          "recurrenceUntilDate": "2026-10-27",
+          "ticketLink": "",
+          "ticketsBuyUrl": "",
+          "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790084298598-9owval.webp",
+          "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790084298598-9owval.webp",
+          "sharedPostThumbnail": "",
+          "imageProvenance": {
+            "version": 1,
+            "primarySource": "venue_media_fallback",
+            "primaryField": "relevantImageUrl",
+            "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790084298598-9owval.webp",
+            "isFallback": true,
+            "sourceFields": [
+              "relevantImageUrl",
+              "mediaUrls",
+              "icon"
+            ],
+            "media": [
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790084298598-9owval.webp",
+                "source": "venue_media_fallback",
+                "field": "relevantImageUrl",
+                "isPrimary": true,
+                "isFallback": true
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790084298598-9owval.webp",
+                "source": "venue_media_fallback",
+                "field": "mediaUrls",
+                "isPrimary": true,
+                "isFallback": true
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790258140440-g8fzps.webp",
+                "source": "venue_media_fallback",
+                "field": "mediaUrls",
+                "isPrimary": false,
+                "isFallback": true
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1789999450515-6rdrol.webp",
+                "source": "venue_media_fallback",
+                "field": "mediaUrls",
+                "isPrimary": false,
+                "isFallback": true
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791118276987-u92dvs.webp",
+                "source": "venue_media_fallback",
+                "field": "mediaUrls",
+                "isPrimary": false,
+                "isFallback": true
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1791724235575-3uz3wb.webp",
+                "source": "profile_image",
+                "field": "icon",
+                "isPrimary": false,
+                "isFallback": false
+              }
+            ],
+            "selectionReason": "recovered_managed_media_from_existing_venue_events",
+            "updatedBy": "row_processor_full5stage"
+          },
+          "timeResolution": {
+            "hoursUsed": true,
+            "endFromHours": "duration_default"
+          },
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "420"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceType": "schedule",
+          "description": "For U9 players. October 13 camp with Community Cup organizers. Eligible players are within the stated Souris Community Cup parameters. Donations will be received on site for further programs; hosted by Souris Community Cup and supported by "
+        },
+        {
+          "id": "1668733748047343",
+          "name": "Souris Community Cup U11 Development Camp",
+          "category": "Workshops & Classes",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "establishment": "Eastern Kings Sportsplex",
+          "additionalLocation": "",
+          "locationScope": "",
+          "locationLabel": "",
+          "locationCity": "",
+          "locationProvince": "",
+          "locationPrecision": "",
+          "locationReviewStatus": "",
+          "startDate": "2026-10-13",
+          "startTime": "17:30",
+          "endDate": "2026-10-13",
+          "endTime": "19:30",
+          "isRecurring": true,
+          "recurringPattern": "weekly_tuesday",
+          "recurringDaysOfWeek": [],
+          "recurringWeekdaySequence": [],
+          "recurringWeekInterval": null,
+          "totalOccurrences": 3,
+          "recurrenceUntilDate": "2026-10-27",
+          "ticketLink": "",
+          "ticketsBuyUrl": "",
+          "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790084298598-9owval.webp",
+          "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790084298598-9owval.webp",
+          "sharedPostThumbnail": "",
+          "imageProvenance": {
+            "version": 1,
+            "primarySource": "venue_media_fallback",
+            "primaryField": "relevantImageUrl",
+            "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790084298598-9owval.webp",
+            "isFallback": true,
+            "sourceFields": [
+              "relevantImageUrl",
+              "mediaUrls",
+              "icon"
+            ],
+            "media": [
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790084298598-9owval.webp",
+                "source": "venue_media_fallback",
+                "field": "relevantImageUrl",
+                "isPrimary": true,
+                "isFallback": true
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790084298598-9owval.webp",
+                "source": "venue_media_fallback",
+                "field": "mediaUrls",
+                "isPrimary": true,
+                "isFallback": true
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790258140440-g8fzps.webp",
+                "source": "venue_media_fallback",
+                "field": "mediaUrls",
+                "isPrimary": false,
+                "isFallback": true
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1789999450515-6rdrol.webp",
+                "source": "venue_media_fallback",
+                "field": "mediaUrls",
+                "isPrimary": false,
+                "isFallback": true
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791118276987-u92dvs.webp",
+                "source": "venue_media_fallback",
+                "field": "mediaUrls",
+                "isPrimary": false,
+                "isFallback": true
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1791724235575-3uz3wb.webp",
+                "source": "profile_image",
+                "field": "icon",
+                "isPrimary": false,
+                "isFallback": false
+              }
+            ],
+            "selectionReason": "recovered_managed_media_from_existing_venue_events",
+            "updatedBy": "row_processor_full5stage"
+          },
+          "timeResolution": {
+            "hoursUsed": true,
+            "endFromHours": "duration_default"
+          },
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "530"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceType": "schedule",
+          "description": "For U11 players. October 13 camp with Community Cup organizers. Eligible players are within the stated Souris Community Cup parameters. Donations will be received on site for further programs; hosted by Souris Community Cup and supported by"
+        },
+        {
+          "id": "1668733748047343",
+          "name": "Souris Community Cup U13 Development Camp",
+          "category": "Workshops & Classes",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "establishment": "Eastern Kings Sportsplex",
+          "additionalLocation": "",
+          "locationScope": "",
+          "locationLabel": "",
+          "locationCity": "",
+          "locationProvince": "",
+          "locationPrecision": "",
+          "locationReviewStatus": "",
+          "startDate": "2026-10-13",
+          "startTime": "18:40",
+          "endDate": "2026-10-13",
+          "endTime": "20:40",
+          "isRecurring": true,
+          "recurringPattern": "weekly_tuesday",
+          "recurringDaysOfWeek": [],
+          "recurringWeekdaySequence": [],
+          "recurringWeekInterval": null,
+          "totalOccurrences": 3,
+          "recurrenceUntilDate": "2026-10-27",
+          "ticketLink": "",
+          "ticketsBuyUrl": "",
+          "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790084298598-9owval.webp",
+          "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790084298598-9owval.webp",
+          "sharedPostThumbnail": "",
+          "imageProvenance": {
+            "version": 1,
+            "primarySource": "venue_media_fallback",
+            "primaryField": "relevantImageUrl",
+            "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790084298598-9owval.webp",
+            "isFallback": true,
+            "sourceFields": [
+              "relevantImageUrl",
+              "mediaUrls",
+              "icon"
+            ],
+            "media": [
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790084298598-9owval.webp",
+                "source": "venue_media_fallback",
+                "field": "relevantImageUrl",
+                "isPrimary": true,
+                "isFallback": true
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790084298598-9owval.webp",
+                "source": "venue_media_fallback",
+                "field": "mediaUrls",
+                "isPrimary": true,
+                "isFallback": true
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790258140440-g8fzps.webp",
+                "source": "venue_media_fallback",
+                "field": "mediaUrls",
+                "isPrimary": false,
+                "isFallback": true
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1789999450515-6rdrol.webp",
+                "source": "venue_media_fallback",
+                "field": "mediaUrls",
+                "isPrimary": false,
+                "isFallback": true
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791118276987-u92dvs.webp",
+                "source": "venue_media_fallback",
+                "field": "mediaUrls",
+                "isPrimary": false,
+                "isFallback": true
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1791724235575-3uz3wb.webp",
+                "source": "profile_image",
+                "field": "icon",
+                "isPrimary": false,
+                "isFallback": false
+              }
+            ],
+            "selectionReason": "recovered_managed_media_from_existing_venue_events",
+            "updatedBy": "row_processor_full5stage"
+          },
+          "timeResolution": {
+            "hoursUsed": true,
+            "endFromHours": "duration_default"
+          },
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "640"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceType": "schedule",
+          "description": "For U13 players. October 13 camp with Community Cup organizers. Eligible players are within the stated Souris Community Cup parameters. Donations will be received on site for further programs; hosted by Souris Community Cup and supported by"
+        }
+      ]
+    },
+    {
+      "row": 277,
+      "id": "1686896163030398",
+      "caption": "Maggie, one of our booksellers, can’t wait for An Evening with Emily St John Mandel…check out her video to find out why.  Emily is going to be in conversation with Island author Caitlyn Paxson. Its going to be a wonderful evening – do you have your tickets yet?\n\nDate: Thursday, October 22nd\nTime: 7 pm\nLocation: Florence Simmons Performance Hall\nTickets: Admission only - $20, Admission with book - $45. \nGet your tickets: https://bookmarkreads.ca/events/5711520261022\n \n#EmilyStJohnMandel #ExitParty #ReadingWritingAndWonder #DowntownCharlottetown #IndieBookstore\nHarperCollins Canada @followers",
+      "venue": "bookmarkcharlottetown",
+      "timestamp": "2026-10-10T20:24:18.000Z",
+      "stage3": [
+        {
+          "name": "An Evening with Emily St John Mandel",
+          "description": "Emily St John Mandel will be in conversation with Island author Caitlyn Paxson. Thursday, October 22nd at 7 pm. Admission only - $20; admission with book - $45.",
+          "date": "2026-10-22",
+          "startTime": "19:00",
+          "endTime": "",
+          "venue": "Florence Simmons Performance Hall",
+          "ticketLink": "https://bookmarkreads.ca/events/5711520261022",
+          "price": "Admission only - $20; admission with book - $45",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "This is an advertised author conversation and evening event with an explicit date, start time, venue, ticket prices, and ticket link.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "7 pm"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              {
+                "label": "Florence Simmons Performance Hall",
+                "address": "",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "Location: Florence Simmons Performance Hall"
+              }
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The caption names one event location."
+          },
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 1
+        }
+      ],
+      "stage4": [
+        {
+          "name": "An Evening with Emily St John Mandel",
+          "description": "Emily St John Mandel will be in conversation with Island author Caitlyn Paxson. Thursday, October 22nd at 7 pm. Admission only - $20; admission with book - $45.",
+          "date": "2026-10-22",
+          "startTime": "19:00",
+          "endTime": "",
+          "venue": "Florence Simmons Performance Hall",
+          "ticketLink": "https://bookmarkreads.ca/events/5711520261022",
+          "price": "Admission only - $20; admission with book - $45",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "This is an advertised author conversation and evening event with an explicit date, start time, venue, ticket prices, and ticket link.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "7 pm"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              {
+                "label": "Florence Simmons Performance Hall",
+                "address": "",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "Location: Florence Simmons Performance Hall"
+              }
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The caption names one event location."
+          },
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 1
+        }
+      ],
+      "events": [
+        {
+          "id": "1686896163030398",
+          "name": "An Evening with Emily St John Mandel",
+          "category": "Live Music",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "establishment": "Florence Simmons Performance Hall",
+          "additionalLocation": "Florence Simmons Performance Hall",
+          "locationScope": "",
+          "locationLabel": "",
+          "locationCity": "",
+          "locationProvince": "",
+          "locationPrecision": "",
+          "locationReviewStatus": "",
+          "startDate": "2026-10-22",
+          "startTime": "19:00",
+          "endDate": "2026-10-23",
+          "endTime": "01:00",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "recurringDaysOfWeek": [],
+          "recurringWeekdaySequence": [],
+          "recurringWeekInterval": null,
+          "totalOccurrences": null,
+          "recurrenceUntilDate": "",
+          "ticketLink": "https://bookmarkreads.ca/events/5711520261022",
+          "ticketsBuyUrl": "https://bookmarkreads.ca/events/5711520261022",
+          "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791724489792-598fal.webp",
+          "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791724489792-598fal.webp",
+          "sharedPostThumbnail": "",
+          "imageProvenance": {
+            "version": 1,
+            "primarySource": "post_media",
+            "primaryField": "relevantImageUrl",
+            "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791724489792-598fal.webp",
+            "isFallback": false,
+            "sourceFields": [
+              "relevantImageUrl",
+              "mediaUrls",
+              "icon"
+            ],
+            "media": [
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791724489792-598fal.webp",
+                "source": "post_media",
+                "field": "relevantImageUrl",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791724489792-598fal.webp",
+                "source": "post_media",
+                "field": "mediaUrls",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1791724490132-zb0ow2.webp",
+                "source": "profile_image",
+                "field": "icon",
+                "isPrimary": false,
+                "isFallback": false
+              }
+            ],
+            "selectionReason": "model_selected_analysis_frame_source",
+            "updatedBy": "parser"
+          },
+          "timeResolution": {
+            "hoursUsed": false,
+            "reason": "no_place_match",
+            "endFromHours": "category_default"
+          },
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "7 pm"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceType": null,
+          "description": "Emily St John Mandel will be in conversation with Island author Caitlyn Paxson. Thursday, October 22nd at 7 pm. Admission only - $20; admission with book - $45."
+        }
+      ]
+    },
+    {
+      "row": 313,
+      "id": "1565517958943059",
+      "caption": "The regular meeting of Stratford Town Council takes place on Wednesday, October 14 at 4:30pm. You can attend in person or view through the live stream or recording. \n\n#StratfordPEI\n\nOCR TEXT:\nMay be an image of text",
+      "venue": "Town of Stratford PEI",
+      "timestamp": "2026-10-10T19:25:23.000Z",
+      "stage3": [
+        {
+          "name": "Stratford Town Council Meeting",
+          "description": "The public may attend in person or watch the live stream; a recording will be available following the meeting. In-person attendance is for observational purposes only.",
+          "date": "2026-10-14",
+          "startTime": "16:30",
+          "endTime": "",
+          "venue": "",
+          "price": "",
+          "recurringPattern": "none",
+          "extractionReason": "A dated public council meeting is explicitly advertised with an in-person attendance option.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "The meeting is advertised for 4:30pm."
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": "No end time is stated."
+            }
+          },
+          "_sourceType": "event",
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 1
+        }
+      ],
+      "stage4": [
+        {
+          "name": "Stratford Town Council Meeting",
+          "description": "The public may attend in person or watch the live stream; a recording will be available following the meeting. In-person attendance is for observational purposes only.",
+          "date": "2026-10-14",
+          "startTime": "16:30",
+          "endTime": "",
+          "venue": "",
+          "price": "",
+          "recurringPattern": "none",
+          "extractionReason": "A dated public council meeting is explicitly advertised with an in-person attendance option.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "The meeting is advertised for 4:30pm."
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": "No end time is stated."
+            }
+          },
+          "_sourceType": "event",
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 1
+        }
+      ],
+      "events": [
+        {
+          "id": "1565517958943059",
+          "name": "Stratford Town Council Meeting",
+          "category": "Live Music",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "establishment": "Town of Stratford PEI",
+          "additionalLocation": "",
+          "locationScope": "",
+          "locationLabel": "",
+          "locationCity": "",
+          "locationProvince": "",
+          "locationPrecision": "",
+          "locationReviewStatus": "",
+          "startDate": "2026-10-14",
+          "startTime": "16:30",
+          "endDate": "2026-10-15",
+          "endTime": "01:00",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "recurringDaysOfWeek": [],
+          "recurringWeekdaySequence": [],
+          "recurringWeekInterval": null,
+          "totalOccurrences": null,
+          "recurrenceUntilDate": "",
+          "ticketLink": "",
+          "ticketsBuyUrl": "",
+          "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791724926121-siiwyk.webp",
+          "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791724926121-siiwyk.webp",
+          "sharedPostThumbnail": "",
+          "imageProvenance": {
+            "version": 1,
+            "primarySource": "post_media",
+            "primaryField": "relevantImageUrl",
+            "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791724926121-siiwyk.webp",
+            "isFallback": false,
+            "sourceFields": [
+              "relevantImageUrl",
+              "mediaUrls",
+              "icon"
+            ],
+            "media": [
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791724926121-siiwyk.webp",
+                "source": "post_media",
+                "field": "relevantImageUrl",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791724926121-siiwyk.webp",
+                "source": "post_media",
+                "field": "mediaUrls",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1791724926416-jr6f7a.webp",
+                "source": "profile_image",
+                "field": "icon",
+                "isPrimary": false,
+                "isFallback": false
+              }
+            ],
+            "selectionReason": "model_selected_analysis_frame_source",
+            "updatedBy": "parser"
+          },
+          "timeResolution": {
+            "hoursUsed": false,
+            "reason": "no_place_match",
+            "endFromHours": "category_default"
+          },
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "The meeting is advertised for 4:30pm."
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": "No end time is stated."
+            }
+          },
+          "_sourceType": "event",
+          "description": "The public may attend in person or watch the live stream; a recording will be available following the meeting. In-person attendance is for observational purposes only."
+        }
+      ]
+    },
+    {
+      "row": 315,
+      "id": "1565233575638164",
+      "caption": "While you're out picking up Thanksgiving dinner supplies today, please consider getting an extra item or two for next weekends Annual Food Drive on Saturday, October 17! Every item collected will help someone out, no donation is too small to be meaningful. \n\nFrom 9am - 2pm, volunteers will be collecting non-perishable food items and monetary donations at drive-thru locations throughout Stratford. \n\nIf you would like to volunteer or for more information, please contact Elaine at (902) 569-4769 or email holyfamilypastoralunit@bellaliant.com.\n\n#StratfordPEI\n\nOCR TEXT:\nMay be an image of text\nMay be an image of car and text",
+      "venue": "Town of Stratford PEI",
+      "timestamp": "2026-10-10T13:15:22.000Z",
+      "stage3": [
+        {
+          "name": "STRATFORD & AREA FOOD DRIVE DRIVE-THRU",
+          "description": "In conjunction with the Big Fall Food Drive. Volunteers will collect non-perishable food items and monetary donations at drive-thru locations throughout Stratford. Locations: Our Lady of the Assumption Church, Stratford Town Hall, Sobeys Stratford, and Mike & Andreea's No Frills. Apartment building residents can leave donations in collection boxes at their main entryways during the week of October 12; boxes will be picked up the morning of October 17. Organized by Our Lady of the Assumption Parish. The poster lists tea and coffee, family-sized drinks, cereal, flaked canned meat, chunky or canned soup, canned beans, pasta and pasta sauce, crackers and cookies, juice boxes, canned vegetables, peanut butter, condiments, personal hygiene products, gluten-free products, and baby formula/diapers as needed items. For more information, call 902-569-4769. The caption also invites volunteers to contact Elaine at (902) 569-4769 or holyfamilypastoralunit@bellaliant.com.",
+          "date": "2026-10-17",
+          "startTime": "09:00",
+          "endTime": "14:00",
+          "venue": "",
+          "ticketLink": "",
+          "price": "",
+          "relevantImageIndex": 1,
+          "recurringPattern": "none",
+          "extractionReason": "An explicitly dated, timed, organized public drive-through food collection is an advertised community activity, rather than a food or drink special.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "9:00 AM - 2:00 PM"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "9:00 AM - 2:00 PM"
+            }
+          },
+          "spatial": {
+            "kind": "multi_location",
+            "locations": [
+              {
+                "label": "Our Lady of the Assumption Church",
+                "address": "",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "Our Lady of the Assumption Church"
+              },
+              {
+                "label": "Stratford Town Hall",
+                "address": "",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "Stratford Town Hall"
+              },
+              {
+                "label": "Sobeys Stratford",
+                "address": "",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "Sobeys Stratford"
+              },
+              {
+                "label": "Mike & Andreea's No Frills",
+                "address": "",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "Mike & Andreea's No Frills"
+              }
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The poster lists four drive-thru collection locations; it provides no street addresses or route order."
+          },
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 1
+        }
+      ],
+      "stage4": [
+        {
+          "name": "STRATFORD & AREA FOOD DRIVE DRIVE-THRU",
+          "description": "In conjunction with the Big Fall Food Drive. Volunteers will collect non-perishable food items and monetary donations at drive-thru locations throughout Stratford. Locations: Our Lady of the Assumption Church, Stratford Town Hall, Sobeys Stratford, and Mike & Andreea's No Frills. Apartment building residents can leave donations in collection boxes at their main entryways during the week of October 12; boxes will be picked up the morning of October 17. Organized by Our Lady of the Assumption Parish. The poster lists tea and coffee, family-sized drinks, cereal, flaked canned meat, chunky or canned soup, canned beans, pasta and pasta sauce, crackers and cookies, juice boxes, canned vegetables, peanut butter, condiments, personal hygiene products, gluten-free products, and baby formula/diapers as needed items. For more information, call 902-569-4769. The caption also invites volunteers to contact Elaine at (902) 569-4769 or holyfamilypastoralunit@bellaliant.com.",
+          "date": "2026-10-17",
+          "startTime": "09:00",
+          "endTime": "14:00",
+          "venue": "",
+          "ticketLink": "",
+          "price": "",
+          "relevantImageIndex": 1,
+          "recurringPattern": "none",
+          "extractionReason": "An explicitly dated, timed, organized public drive-through food collection is an advertised community activity, rather than a food or drink special.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "9:00 AM - 2:00 PM"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "9:00 AM - 2:00 PM"
+            }
+          },
+          "spatial": {
+            "kind": "multi_location",
+            "locations": [
+              {
+                "label": "Our Lady of the Assumption Church",
+                "address": "",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "Our Lady of the Assumption Church"
+              },
+              {
+                "label": "Stratford Town Hall",
+                "address": "",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "Stratford Town Hall"
+              },
+              {
+                "label": "Sobeys Stratford",
+                "address": "",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "Sobeys Stratford"
+              },
+              {
+                "label": "Mike & Andreea's No Frills",
+                "address": "",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "Mike & Andreea's No Frills"
+              }
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The poster lists four drive-thru collection locations; it provides no street addresses or route order."
+          },
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 1
+        }
+      ],
+      "events": [
+        {
+          "id": "1565233575638164",
+          "name": "STRATFORD & AREA FOOD DRIVE DRIVE-THRU",
+          "category": "Food Special",
+          "isEvent": "No",
+          "isFoodSpecial": "Yes",
+          "establishment": "Town of Stratford PEI",
+          "additionalLocation": "",
+          "locationScope": "",
+          "locationLabel": "",
+          "locationCity": "",
+          "locationProvince": "",
+          "locationPrecision": "",
+          "locationReviewStatus": "",
+          "startDate": "2026-10-17",
+          "startTime": "09:00",
+          "endDate": "2026-10-17",
+          "endTime": "14:00",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "recurringDaysOfWeek": [],
+          "recurringWeekdaySequence": [],
+          "recurringWeekInterval": null,
+          "totalOccurrences": null,
+          "recurrenceUntilDate": "",
+          "ticketLink": "",
+          "ticketsBuyUrl": "",
+          "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791724958746-wahew8.webp",
+          "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791724958952-rnejzd.webp",
+          "sharedPostThumbnail": "",
+          "imageProvenance": {
+            "version": 1,
+            "primarySource": "post_media",
+            "primaryField": "relevantImageUrl",
+            "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791724958952-rnejzd.webp",
+            "isFallback": false,
+            "sourceFields": [
+              "relevantImageUrl",
+              "mediaUrls",
+              "icon"
+            ],
+            "media": [
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791724958952-rnejzd.webp",
+                "source": "post_media",
+                "field": "relevantImageUrl",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791724958746-wahew8.webp",
+                "source": "post_media",
+                "field": "mediaUrls",
+                "isPrimary": false,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791724958952-rnejzd.webp",
+                "source": "post_media",
+                "field": "mediaUrls",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1791724959129-7hlj3f.webp",
+                "source": "profile_image",
+                "field": "icon",
+                "isPrimary": false,
+                "isFallback": false
+              }
+            ],
+            "selectionReason": "model_selected_analysis_frame_source",
+            "updatedBy": "parser"
+          },
+          "timeResolution": {
+            "hoursUsed": false
+          },
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "9:00 AM - 2:00 PM"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "9:00 AM - 2:00 PM"
+            }
+          },
+          "_sourceType": null,
+          "description": "A community drive-through food and monetary donation collection in conjunction with the Big Fall Food Drive. Collection locations are Our Lady of the Assumption Church, Stratford Town Hall, Sobeys Stratford, and Mike & Andreea's No Frills. "
+        }
+      ]
+    },
+    {
+      "row": 332,
+      "id": "1142007165219903",
+      "caption": "We’re OPEN all weekend from 10 AM–4 PM, and our farm admission is currently on sale! Bring the family, visit your favourite farm friends, and enjoy a little fall fun at the cutest place on Earth. \n\nOur Weekend Local Vendor Market is open, too! Come browse, shop local, and support our amazing vendors. No farm admission is required to visit the market!\n\nOpen Saturday & Sunday, 10 AM–4 PM \nClosed Monday for Thanksgiving Day.\n\nFrom all of us at Island Hill Farm, we wish you a happy Thanksgiving filled with family, friends, and plenty of things to be thankful for!\n\nOCR TEXT:\nMay be an image of text",
+      "venue": "Island Hill Farm Inc",
+      "timestamp": "2026-10-10T11:16:53.000Z",
+      "stage3": [
+        {
+          "name": "Island Hill Farm Visit",
+          "description": "Saturday — We’re OPEN all weekend from 10 AM–4 PM, and our farm admission is currently on sale! Bring the family, visit your favourite farm friends, and enjoy a little fall fun at the cutest place on Earth.",
+          "date": "2026-10-10",
+          "startTime": "10:00",
+          "endTime": "16:00",
+          "venue": "",
+          "ticketLink": "",
+          "price": "",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "The post invites visitors to visit the farm and its animals during an explicitly advertised Saturday access window.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "10 AM–4 PM"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "10 AM–4 PM"
+            }
+          },
+          "spatial": {
+            "kind": "unknown",
+            "locations": [],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The farm is referenced, but no specific location or address is provided."
+          },
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 4
+        },
+        {
+          "name": "Island Hill Farm Visit",
+          "description": "Sunday — We’re OPEN all weekend from 10 AM–4 PM, and our farm admission is currently on sale! Bring the family, visit your favourite farm friends, and enjoy a little fall fun at the cutest place on Earth.",
+          "date": "2026-10-11",
+          "startTime": "10:00",
+          "endTime": "16:00",
+          "venue": "",
+          "ticketLink": "",
+          "price": "",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "The post invites visitors to visit the farm and its animals during an explicitly advertised Sunday access window.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "10 AM–4 PM"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "10 AM–4 PM"
+            }
+          },
+          "spatial": {
+            "kind": "unknown",
+            "locations": [],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The farm is referenced, but no specific location or address is provided."
+          },
+          "_pipelineIndex": 2,
+          "_pipelineTotalStage3": 4
+        },
+        {
+          "name": "Weekend Local Vendor Market",
+          "description": "Saturday — Our Weekend Local Vendor Market is open, too! Come browse, shop local, and support our amazing vendors. No farm admission is required to visit the market! Open Saturday & Sunday, 10 AM–4 PM.",
+          "date": "2026-10-10",
+          "startTime": "10:00",
+          "endTime": "16:00",
+          "venue": "",
+          "ticketLink": "",
+          "price": "",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "The post advertises a public vendor market with explicit Saturday hours and invites visitors to browse and shop.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "10 AM–4 PM"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "10 AM–4 PM"
+            }
+          },
+          "spatial": {
+            "kind": "unknown",
+            "locations": [],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The market is advertised, but no specific location or address is provided."
+          },
+          "_pipelineIndex": 3,
+          "_pipelineTotalStage3": 4
+        },
+        {
+          "name": "Weekend Local Vendor Market",
+          "description": "Sunday — Our Weekend Local Vendor Market is open, too! Come browse, shop local, and support our amazing vendors. No farm admission is required to visit the market! Open Saturday & Sunday, 10 AM–4 PM.",
+          "date": "2026-10-11",
+          "startTime": "10:00",
+          "endTime": "16:00",
+          "venue": "",
+          "ticketLink": "",
+          "price": "",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "The post advertises a public vendor market with explicit Sunday hours and invites visitors to browse and shop.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "10 AM–4 PM"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "10 AM–4 PM"
+            }
+          },
+          "spatial": {
+            "kind": "unknown",
+            "locations": [],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The market is advertised, but no specific location or address is provided."
+          },
+          "_pipelineIndex": 4,
+          "_pipelineTotalStage3": 4
+        }
+      ],
+      "stage4": [
+        {
+          "name": "Island Hill Farm Visit",
+          "description": "Saturday — We’re OPEN all weekend from 10 AM–4 PM, and our farm admission is currently on sale! Bring the family, visit your favourite farm friends, and enjoy a little fall fun at the cutest place on Earth.",
+          "date": "2026-10-10",
+          "startTime": "10:00",
+          "endTime": "16:00",
+          "venue": "",
+          "ticketLink": "",
+          "price": "",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "The post invites visitors to visit the farm and its animals during an explicitly advertised Saturday access window.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "10 AM–4 PM"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "10 AM–4 PM"
+            }
+          },
+          "spatial": {
+            "kind": "unknown",
+            "locations": [],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The farm is referenced, but no specific location or address is provided."
+          },
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 4
+        },
+        {
+          "name": "Island Hill Farm Visit",
+          "description": "Sunday — We’re OPEN all weekend from 10 AM–4 PM, and our farm admission is currently on sale! Bring the family, visit your favourite farm friends, and enjoy a little fall fun at the cutest place on Earth.",
+          "date": "2026-10-11",
+          "startTime": "10:00",
+          "endTime": "16:00",
+          "venue": "",
+          "ticketLink": "",
+          "price": "",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "The post invites visitors to visit the farm and its animals during an explicitly advertised Sunday access window.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "10 AM–4 PM"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "10 AM–4 PM"
+            }
+          },
+          "spatial": {
+            "kind": "unknown",
+            "locations": [],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The farm is referenced, but no specific location or address is provided."
+          },
+          "_pipelineIndex": 2,
+          "_pipelineTotalStage3": 4
+        }
+      ],
+      "events": [
+        {
+          "id": "1142007165219903",
+          "name": "Island Hill Farm Visit",
+          "category": "Gatherings & Parties",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "establishment": "Island Hill Farm Inc",
+          "additionalLocation": "",
+          "locationScope": "",
+          "locationLabel": "",
+          "locationCity": "",
+          "locationProvince": "",
+          "locationPrecision": "",
+          "locationReviewStatus": "",
+          "startDate": "2026-10-10",
+          "startTime": "10:00",
+          "endDate": "2026-10-10",
+          "endTime": "16:00",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "recurringDaysOfWeek": [],
+          "recurringWeekdaySequence": [],
+          "recurringWeekInterval": null,
+          "totalOccurrences": null,
+          "recurrenceUntilDate": "",
+          "ticketLink": "",
+          "ticketsBuyUrl": "",
+          "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791725145666-azlcz8.webp",
+          "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791725145666-azlcz8.webp",
+          "sharedPostThumbnail": "",
+          "imageProvenance": {
+            "version": 1,
+            "primarySource": "post_media",
+            "primaryField": "relevantImageUrl",
+            "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791725145666-azlcz8.webp",
+            "isFallback": false,
+            "sourceFields": [
+              "relevantImageUrl",
+              "mediaUrls",
+              "icon"
+            ],
+            "media": [
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791725145666-azlcz8.webp",
+                "source": "post_media",
+                "field": "relevantImageUrl",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791725145666-azlcz8.webp",
+                "source": "post_media",
+                "field": "mediaUrls",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1791725146003-tci3d6.webp",
+                "source": "profile_image",
+                "field": "icon",
+                "isPrimary": false,
+                "isFallback": false
+              }
+            ],
+            "selectionReason": "model_selected_analysis_frame_source",
+            "updatedBy": "parser"
+          },
+          "timeResolution": {
+            "hoursUsed": false
+          },
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "10 AM–4 PM"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "10 AM–4 PM"
+            }
+          },
+          "_sourceType": null,
+          "description": "Saturday — We’re OPEN all weekend from 10 AM–4 PM, and our farm admission is currently on sale! Bring the family, visit your favourite farm friends, and enjoy a little fall fun at the cutest place on Earth."
+        },
+        {
+          "id": "1142007165219903",
+          "name": "Island Hill Farm Visit",
+          "category": "Gatherings & Parties",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "establishment": "Island Hill Farm Inc",
+          "additionalLocation": "",
+          "locationScope": "",
+          "locationLabel": "",
+          "locationCity": "",
+          "locationProvince": "",
+          "locationPrecision": "",
+          "locationReviewStatus": "",
+          "startDate": "2026-10-11",
+          "startTime": "10:00",
+          "endDate": "2026-10-11",
+          "endTime": "16:00",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "recurringDaysOfWeek": [],
+          "recurringWeekdaySequence": [],
+          "recurringWeekInterval": null,
+          "totalOccurrences": null,
+          "recurrenceUntilDate": "",
+          "ticketLink": "",
+          "ticketsBuyUrl": "",
+          "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791725145666-azlcz8.webp",
+          "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791725145666-azlcz8.webp",
+          "sharedPostThumbnail": "",
+          "imageProvenance": {
+            "version": 1,
+            "primarySource": "post_media",
+            "primaryField": "relevantImageUrl",
+            "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791725145666-azlcz8.webp",
+            "isFallback": false,
+            "sourceFields": [
+              "relevantImageUrl",
+              "mediaUrls",
+              "icon"
+            ],
+            "media": [
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791725145666-azlcz8.webp",
+                "source": "post_media",
+                "field": "relevantImageUrl",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791725145666-azlcz8.webp",
+                "source": "post_media",
+                "field": "mediaUrls",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1791725146003-tci3d6.webp",
+                "source": "profile_image",
+                "field": "icon",
+                "isPrimary": false,
+                "isFallback": false
+              }
+            ],
+            "selectionReason": "model_selected_analysis_frame_source",
+            "updatedBy": "parser"
+          },
+          "timeResolution": {
+            "hoursUsed": false
+          },
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "10 AM–4 PM"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "10 AM–4 PM"
+            }
+          },
+          "_sourceType": null,
+          "description": "Sunday — We’re OPEN all weekend from 10 AM–4 PM, and our farm admission is currently on sale! Bring the family, visit your favourite farm friends, and enjoy a little fall fun at the cutest place on Earth."
+        }
+      ]
+    }
+  ],
+  "audits": [
+    {
+      "path": "venues/slug_florencesimmonsperformancehall/events/SEWO0qtndzRF6gyqMjbB",
+      "before": {
+        "uniqueId": "1593322932387722_78983f97d3f13d20",
+        "eventName": "Emily St. John Mandel — Exit Party Book Launch (Charlottetown)",
+        "name": "Emily St. John Mandel — Exit Party Book Launch (Charlottetown)",
+        "establishment": "Florence Simmons Performance Hall",
+        "venueId": "slug_florencesimmonsperformancehall",
+        "startDate": "2026-10-22",
+        "startTime": "19:00",
+        "endDate": "2026-10-22",
+        "endTime": "21:00",
+        "description": "Author event with bestselling author Emily St. John Mandel for the launch of her new book \"Exit Party\".",
+        "category": "Workshops & Classes",
+        "eventType": "gatherings_parties",
+        "facebookUrl": "https://www.facebook.com/bookmarkcharlottetown/",
+        "cleanedFacebookUrl": "https://www.facebook.com/bookmarkcharlottetown/",
+        "ticketPrice": "Book with admission ($45) or admission only ($20)",
+        "price": "Book with admission ($45) or admission only ($20)",
+        "mediaUrls": [
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1782398842787-v2q82y.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1789479649486-bfvkrn.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1789479649752-mxaq4u.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1789479650053-v3i11k.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1789828798434-x294rv.webp"
+        ],
+        "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1789828798434-x294rv.webp",
+        "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1789828798434-x294rv.webp",
+        "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1789828798434-x294rv.webp",
+        "likes": 21,
+        "shares": 3,
+        "comments": 1,
+        "topReactionsCount": 3,
+        "locationScope": "venue",
+        "locationLabel": "Florence Simmons Performance Hall",
+        "locationPrecision": "exact",
+        "address": "Holland College, 140 Weymouth Street, Charlottetown, PE C1A 4Z1, Canada",
+        "latitude": 46.23909227,
+        "longitude": -63.12198689,
+        "timeFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "STARTS AT 07:00 PM"
+          },
+          "end": {
+            "source": "none",
+            "toClose": false
+          }
+        },
+        "sourceTimestamp": "2026-09-18T13:28:23.000Z",
+        "imageProvenance": {
+          "version": 1,
+          "primarySource": "post_media",
+          "primaryField": "relevantImageUrl",
+          "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1789828798434-x294rv.webp",
+          "isFallback": false,
+          "sourceFields": [
+            "relevantImageUrl",
+            "image",
+            "imageUrl",
+            "mediaUrls"
+          ],
+          "media": [
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1789828798434-x294rv.webp",
+              "source": "post_media",
+              "field": "relevantImageUrl",
+              "isPrimary": true,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1789828798434-x294rv.webp",
+              "source": "post_media",
+              "field": "image",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1789828798434-x294rv.webp",
+              "source": "post_media",
+              "field": "imageUrl",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1782398842787-v2q82y.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1789479649486-bfvkrn.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1789479649752-mxaq4u.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1789479650053-v3i11k.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1789828798434-x294rv.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": true
+            }
+          ],
+          "selectionReason": "model_selected_original_image_index; duplicate_merge_image_update",
+          "updatedBy": "duplicate_merge",
+          "setAt": "2026-09-19T14:40:24.283Z"
+        },
+        "mediaUrlCount": 5,
+        "primaryMediaUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1782398842787-v2q82y.webp"
+      },
+      "incoming": {
+        "uniqueId": "1686896163030398_addafdac3e83a079",
+        "eventName": "An Evening with Emily St John Mandel",
+        "name": "An Evening with Emily St John Mandel",
+        "establishment": "Florence Simmons Performance Hall",
+        "venueId": "slug_florencesimmonsperformancehall",
+        "startDate": "2026-10-22",
+        "startTime": "19:00",
+        "endDate": "2026-10-23",
+        "endTime": "01:00",
+        "description": "Emily St John Mandel will be in conversation with Island author Caitlyn Paxson. Thursday, October 22nd at 7 pm. Admission only - $20; admission with book - $45.",
+        "category": "Live Music",
+        "eventType": "live_music",
+        "facebookUrl": "https://www.facebook.com/bookmarkcharlottetown/",
+        "cleanedFacebookUrl": "https://www.facebook.com/bookmarkcharlottetown/",
+        "ticketsBuyUrl": "https://bookmarkreads.ca/events/5711520261022",
+        "ticketLink": "https://bookmarkreads.ca/events/5711520261022",
+        "ticketPrice": "Admission only - $20; admission with book - $45",
+        "price": "Admission only - $20; admission with book - $45",
+        "mediaUrls": [
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791724489792-598fal.webp"
+        ],
+        "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791724489792-598fal.webp",
+        "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791724489792-598fal.webp",
+        "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791724489792-598fal.webp",
+        "likes": 4,
+        "shares": 0,
+        "topReactionsCount": 2,
+        "locationScope": "venue",
+        "locationLabel": "Florence Simmons Performance Hall",
+        "locationPrecision": "exact",
+        "address": "Holland College, 140 Weymouth Street, Charlottetown, PE C1A 4Z1, Canada",
+        "latitude": 46.23909227,
+        "longitude": -63.12198689,
+        "timeFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "7 pm"
+          },
+          "end": {
+            "source": "none",
+            "toClose": false
+          }
+        },
+        "sourceTimestamp": "2026-10-10T20:24:18.000Z",
+        "imageProvenance": {
+          "version": 1,
+          "primarySource": "post_media",
+          "primaryField": "relevantImageUrl",
+          "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791724489792-598fal.webp",
+          "isFallback": false,
+          "sourceFields": [
+            "relevantImageUrl",
+            "mediaUrls",
+            "icon"
+          ],
+          "media": [
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791724489792-598fal.webp",
+              "source": "post_media",
+              "field": "relevantImageUrl",
+              "isPrimary": true,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791724489792-598fal.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": true,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1791724490132-zb0ow2.webp",
+              "source": "profile_image",
+              "field": "icon",
+              "isPrimary": false,
+              "isFallback": false
+            }
+          ],
+          "selectionReason": "model_selected_analysis_frame_source",
+          "updatedBy": "parser"
+        },
+        "mediaUrlCount": 1,
+        "primaryMediaUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791724489792-598fal.webp"
+      },
+      "after": {
+        "uniqueId": "1593322932387722_78983f97d3f13d20",
+        "eventName": "Emily St. John Mandel — Exit Party Book Launch (Charlottetown)",
+        "name": "Emily St. John Mandel — Exit Party Book Launch (Charlottetown)",
+        "establishment": "Florence Simmons Performance Hall",
+        "venueId": "slug_florencesimmonsperformancehall",
+        "startDate": "2026-10-22",
+        "startTime": "19:00",
+        "endDate": "2026-10-22",
+        "endTime": "01:00",
+        "description": "Emily St John Mandel will be in conversation with Island author Caitlyn Paxson. Thursday, October 22nd at 7 pm. Admission only - $20; admission with book - $45.",
+        "category": "Workshops & Classes",
+        "eventType": "gatherings_parties",
+        "facebookUrl": "https://www.facebook.com/bookmarkcharlottetown/",
+        "cleanedFacebookUrl": "https://www.facebook.com/bookmarkcharlottetown/",
+        "ticketsBuyUrl": "https://bookmarkreads.ca/events/5711520261022",
+        "ticketLink": "https://bookmarkreads.ca/events/5711520261022",
+        "ticketPrice": "Book with admission ($45) or admission only ($20)",
+        "price": "Book with admission ($45) or admission only ($20)",
+        "mediaUrls": [
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1782398842787-v2q82y.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1789479649486-bfvkrn.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1789479649752-mxaq4u.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1789479650053-v3i11k.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1789828798434-x294rv.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791724489792-598fal.webp"
+        ],
+        "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791724489792-598fal.webp",
+        "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791724489792-598fal.webp",
+        "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791724489792-598fal.webp",
+        "likes": 21,
+        "shares": 3,
+        "comments": 1,
+        "topReactionsCount": 3,
+        "locationScope": "venue",
+        "locationLabel": "Florence Simmons Performance Hall",
+        "locationPrecision": "exact",
+        "address": "Holland College, 140 Weymouth Street, Charlottetown, PE C1A 4Z1, Canada",
+        "latitude": 46.23909227,
+        "longitude": -63.12198689,
+        "timeFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "7 pm"
+          },
+          "end": {
+            "source": "none",
+            "toClose": false
+          }
+        },
+        "sourceTimestamp": "2026-10-10T20:24:18.000Z",
+        "imageProvenance": {
+          "version": 1,
+          "primarySource": "post_media",
+          "primaryField": "relevantImageUrl",
+          "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791724489792-598fal.webp",
+          "isFallback": false,
+          "sourceFields": [
+            "relevantImageUrl",
+            "mediaUrls",
+            "icon"
+          ],
+          "media": [
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791724489792-598fal.webp",
+              "source": "post_media",
+              "field": "relevantImageUrl",
+              "isPrimary": true,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1782398842787-v2q82y.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1789479649486-bfvkrn.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1789479649752-mxaq4u.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1789479650053-v3i11k.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1789828798434-x294rv.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791724489792-598fal.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": true,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1778939374846-4sv7pn.webp",
+              "source": "profile_image",
+              "field": "icon",
+              "isPrimary": false,
+              "isFallback": false
+            }
+          ],
+          "selectionReason": "model_selected_analysis_frame_source; duplicate_merge_image_update",
+          "updatedBy": "duplicate_merge"
+        },
+        "mediaUrlCount": 6,
+        "primaryMediaUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1782398842787-v2q82y.webp"
+      }
+    },
+    {
+      "path": "venues/slug_easternkingssportsplex/events/0HKcUnxA1jou0pFpLmzI",
+      "before": {
+        "uniqueId": "1664749465112438_de72c90d2a421611",
+        "eventName": "Community Development",
+        "name": "Community Development",
+        "establishment": "Eastern Kings Sportsplex",
+        "venueId": "slug_easternkingssportsplex",
+        "startDate": "2026-10-13",
+        "startTime": "18:40",
+        "endDate": "2026-10-13",
+        "endTime": "19:40",
+        "category": "Sports",
+        "eventType": "sports",
+        "facebookUrl": "https://www.facebook.com/EasternKingsSportsplex/",
+        "cleanedFacebookUrl": "https://www.facebook.com/EasternKingsSportsplex/",
+        "mediaUrls": [
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791324249271-wzf942.webp"
+        ],
+        "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791324249271-wzf942.webp",
+        "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791324249271-wzf942.webp",
+        "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791324249271-wzf942.webp",
+        "likes": 1,
+        "shares": 1,
+        "topReactionsCount": 1,
+        "locationScope": "venue",
+        "locationLabel": "Eastern Kings Sportsplex",
+        "locationPrecision": "exact",
+        "address": "203 Main Street, Souris, PE C0A 2B0, Canada",
+        "latitude": 46.3537994,
+        "longitude": -62.2373921,
+        "recurringPattern": "none",
+        "isRecurring": "No",
+        "sourceTimestamp": "2026-10-06T12:11:49.000Z",
+        "imageProvenance": {
+          "version": 1,
+          "primarySource": "post_media",
+          "primaryField": "relevantImageUrl",
+          "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791324249271-wzf942.webp",
+          "isFallback": false,
+          "sourceFields": [
+            "relevantImageUrl",
+            "image",
+            "imageUrl",
+            "icon",
+            "mediaUrls"
+          ],
+          "media": [
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791324249271-wzf942.webp",
+              "source": "post_media",
+              "field": "relevantImageUrl",
+              "isPrimary": true,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791324249271-wzf942.webp",
+              "source": "post_media",
+              "field": "image",
+              "isPrimary": false,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791324249271-wzf942.webp",
+              "source": "post_media",
+              "field": "imageUrl",
+              "isPrimary": false,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1770392718068.webp",
+              "source": "profile_image",
+              "field": "icon",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791324249271-wzf942.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": false
+            }
+          ],
+          "selectionReason": "model_selected_original_image_index",
+          "updatedBy": "parser",
+          "setAt": "2026-10-06T22:09:42.762Z"
+        },
+        "mediaUrlCount": 1,
+        "primaryMediaUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791324249271-wzf942.webp"
+      },
+      "incoming": {
+        "uniqueId": "1668733748047343_f5744ae630e05140",
+        "eventName": "Souris Community Cup U9 Development Camp",
+        "name": "Souris Community Cup U9 Development Camp",
+        "establishment": "Eastern Kings Sportsplex",
+        "venueId": "slug_easternkingssportsplex",
+        "startDate": "2026-10-13",
+        "startTime": "16:20",
+        "endDate": "2026-10-13",
+        "endTime": "18:20",
+        "description": "For U9 players. October 13 camp with Community Cup organizers. Eligible players are within the stated Souris Community Cup parameters. Donations will be received on site for further programs; hosted by Souris Community Cup and supported by sponsors.",
+        "category": "Workshops & Classes",
+        "eventType": "workshops_classes",
+        "facebookUrl": "https://www.facebook.com/EasternKingsSportsplex/",
+        "cleanedFacebookUrl": "https://www.facebook.com/EasternKingsSportsplex/",
+        "ticketPrice": "Free",
+        "price": "Free",
+        "mediaUrls": [
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790084298598-9owval.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790258140440-g8fzps.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1789999450515-6rdrol.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791118276987-u92dvs.webp"
+        ],
+        "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790084298598-9owval.webp",
+        "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790084298598-9owval.webp",
+        "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790084298598-9owval.webp",
+        "likes": 0,
+        "shares": 0,
+        "topReactionsCount": 0,
+        "locationScope": "venue",
+        "locationLabel": "Eastern Kings Sportsplex",
+        "locationPrecision": "exact",
+        "address": "203 Main Street, Souris, PE C0A 2B0, Canada",
+        "latitude": 46.3537994,
+        "longitude": -62.2373921,
+        "totalOccurrences": 3,
+        "recurrenceUntilDate": "2026-10-27",
+        "recurringPattern": "weekly_tuesday",
+        "isRecurring": true,
+        "sourceTimestamp": "2026-10-10T16:42:21.000Z",
+        "imageProvenance": {
+          "version": 1,
+          "primarySource": "venue_media_fallback",
+          "primaryField": "relevantImageUrl",
+          "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790084298598-9owval.webp",
+          "isFallback": true,
+          "sourceFields": [
+            "relevantImageUrl",
+            "mediaUrls",
+            "icon"
+          ],
+          "media": [
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790084298598-9owval.webp",
+              "source": "venue_media_fallback",
+              "field": "relevantImageUrl",
+              "isPrimary": true,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790084298598-9owval.webp",
+              "source": "venue_media_fallback",
+              "field": "mediaUrls",
+              "isPrimary": true,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790258140440-g8fzps.webp",
+              "source": "venue_media_fallback",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1789999450515-6rdrol.webp",
+              "source": "venue_media_fallback",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791118276987-u92dvs.webp",
+              "source": "venue_media_fallback",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1791724235575-3uz3wb.webp",
+              "source": "profile_image",
+              "field": "icon",
+              "isPrimary": false,
+              "isFallback": false
+            }
+          ],
+          "selectionReason": "recovered_managed_media_from_existing_venue_events",
+          "updatedBy": "row_processor_full5stage"
+        },
+        "mediaUrlCount": 4,
+        "primaryMediaUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790084298598-9owval.webp"
+      },
+      "after": {
+        "uniqueId": "1664749465112438_de72c90d2a421611",
+        "eventName": "Community Development",
+        "name": "Community Development",
+        "establishment": "Eastern Kings Sportsplex",
+        "venueId": "slug_easternkingssportsplex",
+        "startDate": "2026-10-13",
+        "startTime": "18:40",
+        "endDate": "2026-10-13",
+        "endTime": "19:40",
+        "description": "For U9 players. October 13 camp with Community Cup organizers. Eligible players are within the stated Souris Community Cup parameters. Donations will be received on site for further programs; hosted by Souris Community Cup and supported by sponsors.",
+        "category": "Sports",
+        "eventType": "sports",
+        "facebookUrl": "https://www.facebook.com/EasternKingsSportsplex/",
+        "cleanedFacebookUrl": "https://www.facebook.com/EasternKingsSportsplex/",
+        "ticketPrice": "Free",
+        "price": "Free",
+        "mediaUrls": [
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791324249271-wzf942.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790084298598-9owval.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790258140440-g8fzps.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1789999450515-6rdrol.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791118276987-u92dvs.webp"
+        ],
+        "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790084298598-9owval.webp",
+        "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790084298598-9owval.webp",
+        "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790084298598-9owval.webp",
+        "likes": 1,
+        "shares": 1,
+        "topReactionsCount": 1,
+        "locationScope": "venue",
+        "locationLabel": "Eastern Kings Sportsplex",
+        "locationPrecision": "exact",
+        "address": "203 Main Street, Souris, PE C0A 2B0, Canada",
+        "latitude": 46.3537994,
+        "longitude": -62.2373921,
+        "totalOccurrences": 3,
+        "recurrenceUntilDate": "2026-10-27",
+        "recurringPattern": "weekly_tuesday",
+        "isRecurring": true,
+        "sourceTimestamp": "2026-10-10T16:42:21.000Z",
+        "imageProvenance": {
+          "version": 1,
+          "primarySource": "venue_media_fallback",
+          "primaryField": "relevantImageUrl",
+          "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790084298598-9owval.webp",
+          "isFallback": true,
+          "sourceFields": [
+            "relevantImageUrl",
+            "mediaUrls",
+            "icon"
+          ],
+          "media": [
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790084298598-9owval.webp",
+              "source": "venue_media_fallback",
+              "field": "relevantImageUrl",
+              "isPrimary": true,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791324249271-wzf942.webp",
+              "source": "venue_media_fallback",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790084298598-9owval.webp",
+              "source": "venue_media_fallback",
+              "field": "mediaUrls",
+              "isPrimary": true,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1790258140440-g8fzps.webp",
+              "source": "venue_media_fallback",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1789999450515-6rdrol.webp",
+              "source": "venue_media_fallback",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791118276987-u92dvs.webp",
+              "source": "venue_media_fallback",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1770392718068.webp",
+              "source": "profile_image",
+              "field": "icon",
+              "isPrimary": false,
+              "isFallback": false
+            }
+          ],
+          "selectionReason": "recovered_managed_media_from_existing_venue_events; duplicate_merge_image_update",
+          "updatedBy": "duplicate_merge"
+        },
+        "mediaUrlCount": 5,
+        "primaryMediaUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791324249271-wzf942.webp"
+      }
+    },
+    {
+      "path": "venues/fb_100057766283684/events/3C9dqyOoaejurl8zjx3x",
+      "before": {
+        "uniqueId": "1667441038524756_5251d44ba278c84e",
+        "eventName": "Karaoke",
+        "name": "Karaoke",
+        "establishment": "Baba's Lounge | Charlottetown PE",
+        "venueId": "fb_100057766283684",
+        "startDate": "2026-10-05",
+        "startTime": "22:00",
+        "endDate": "2026-10-06",
+        "endTime": "00:00",
+        "description": "Listed in the same date cell as Rat Tales Comedy Night.",
+        "category": "Live Music",
+        "eventType": "live_music",
+        "facebookUrl": "https://www.facebook.com/babasloungepei",
+        "cleanedFacebookUrl": "https://www.facebook.com/babasloungepei",
+        "mediaUrls": [
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791314515807-vhxz0z.webp"
+        ],
+        "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791314515807-vhxz0z.webp",
+        "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791314515807-vhxz0z.webp",
+        "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791314515807-vhxz0z.webp",
+        "likes": 1,
+        "shares": 3,
+        "topReactionsCount": 1,
+        "locationScope": "venue",
+        "locationLabel": "Baba's Lounge | Charlottetown PE",
+        "locationPrecision": "exact",
+        "address": "181 Great George St, Charlottetown, PE C1A 4L1, Canada",
+        "latitude": 46.2338053,
+        "longitude": -63.1267123,
+        "recurringPattern": "weekly_monday",
+        "totalOccurrences": 4,
+        "recurrenceUntilDate": "2026-10-26",
+        "isRecurring": true,
+        "sourceTimestamp": "2026-10-05T18:47:25.000Z",
+        "imageProvenance": {
+          "version": 1,
+          "primarySource": "post_media",
+          "primaryField": "relevantImageUrl",
+          "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791314515807-vhxz0z.webp",
+          "isFallback": false,
+          "sourceFields": [
+            "relevantImageUrl",
+            "image",
+            "imageUrl",
+            "mediaUrls"
+          ],
+          "media": [
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791314515807-vhxz0z.webp",
+              "source": "post_media",
+              "field": "relevantImageUrl",
+              "isPrimary": true,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791314515807-vhxz0z.webp",
+              "source": "post_media",
+              "field": "image",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791314515807-vhxz0z.webp",
+              "source": "post_media",
+              "field": "imageUrl",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791314515807-vhxz0z.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": true
+            }
+          ],
+          "selectionReason": "model_selected_original_image_index; duplicate_merge_image_update",
+          "updatedBy": "duplicate_merge",
+          "setAt": "2026-10-06T19:27:43.116Z"
+        },
+        "mediaUrlCount": 1,
+        "primaryMediaUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791314515807-vhxz0z.webp"
+      },
+      "incoming": {
+        "uniqueId": "1560580752776123_4b55d8b5e578aaa3",
+        "eventName": "Karaoke",
+        "name": "Karaoke",
+        "establishment": "Baba's Lounge | Charlottetown PE",
+        "venueId": "fb_100057766283684",
+        "startDate": "2026-10-12",
+        "startTime": "22:00",
+        "endDate": "2026-10-13",
+        "endTime": "00:00",
+        "description": "Baba’s Lounge: Karaoke",
+        "category": "Karaoke",
+        "eventType": "karaoke",
+        "facebookUrl": "https://www.facebook.com/DowntownCharlottetownInc",
+        "cleanedFacebookUrl": "https://www.facebook.com/DowntownCharlottetownInc",
+        "mediaUrls": [
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791722380832-vz8bdh.webp"
+        ],
+        "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791722380832-vz8bdh.webp",
+        "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791722380832-vz8bdh.webp",
+        "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791722380832-vz8bdh.webp",
+        "likes": 0,
+        "shares": 0,
+        "topReactionsCount": 0,
+        "locationScope": "venue",
+        "locationLabel": "Baba's Lounge | Charlottetown PE",
+        "locationPrecision": "exact",
+        "address": "181 Great George St, Charlottetown, PE C1A 4L1, Canada",
+        "latitude": 46.2338053,
+        "longitude": -63.1267123,
+        "recurringPattern": "none",
+        "isRecurring": "No",
+        "sourceTimestamp": "2026-10-11T11:00:32.000Z",
+        "imageProvenance": {
+          "version": 1,
+          "primarySource": "post_media",
+          "primaryField": "relevantImageUrl",
+          "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791722380832-vz8bdh.webp",
+          "isFallback": false,
+          "sourceFields": [
+            "relevantImageUrl",
+            "mediaUrls",
+            "icon"
+          ],
+          "media": [
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791722380832-vz8bdh.webp",
+              "source": "post_media",
+              "field": "relevantImageUrl",
+              "isPrimary": true,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791722380832-vz8bdh.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": true,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1791722381166-wg36bs.webp",
+              "source": "profile_image",
+              "field": "icon",
+              "isPrimary": false,
+              "isFallback": false
+            }
+          ],
+          "selectionReason": "model_selected_analysis_frame_source",
+          "updatedBy": "parser"
+        },
+        "mediaUrlCount": 1,
+        "primaryMediaUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791722380832-vz8bdh.webp"
+      },
+      "after": {
+        "uniqueId": "1667441038524756_5251d44ba278c84e",
+        "eventName": "Karaoke",
+        "name": "Karaoke",
+        "establishment": "Baba's Lounge | Charlottetown PE",
+        "venueId": "fb_100057766283684",
+        "startDate": "2026-10-05",
+        "startTime": "22:00",
+        "endDate": "2026-10-06",
+        "endTime": "00:00",
+        "description": "Listed in the same date cell as Rat Tales Comedy Night.",
+        "category": "Live Music",
+        "eventType": "live_music",
+        "facebookUrl": "https://www.facebook.com/babasloungepei",
+        "cleanedFacebookUrl": "https://www.facebook.com/babasloungepei",
+        "mediaUrls": [
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791314515807-vhxz0z.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791722380832-vz8bdh.webp"
+        ],
+        "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791722380832-vz8bdh.webp",
+        "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791722380832-vz8bdh.webp",
+        "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791722380832-vz8bdh.webp",
+        "likes": 1,
+        "shares": 3,
+        "topReactionsCount": 1,
+        "locationScope": "venue",
+        "locationLabel": "Baba's Lounge | Charlottetown PE",
+        "locationPrecision": "exact",
+        "address": "181 Great George St, Charlottetown, PE C1A 4L1, Canada",
+        "latitude": 46.2338053,
+        "longitude": -63.1267123,
+        "recurringPattern": "none",
+        "recurringDaysOfWeek": [],
+        "recurringWeekdaySequence": [],
+        "recurringWeekInterval": 1,
+        "totalOccurrences": 0,
+        "isRecurring": false,
+        "sourceTimestamp": "2026-10-11T11:00:32.000Z",
+        "imageProvenance": {
+          "version": 1,
+          "primarySource": "post_media",
+          "primaryField": "relevantImageUrl",
+          "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791722380832-vz8bdh.webp",
+          "isFallback": false,
+          "sourceFields": [
+            "relevantImageUrl",
+            "mediaUrls",
+            "icon"
+          ],
+          "media": [
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791722380832-vz8bdh.webp",
+              "source": "post_media",
+              "field": "relevantImageUrl",
+              "isPrimary": true,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791314515807-vhxz0z.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791722380832-vz8bdh.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": true,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1770832250396.webp",
+              "source": "profile_image",
+              "field": "icon",
+              "isPrimary": false,
+              "isFallback": false
+            }
+          ],
+          "selectionReason": "model_selected_analysis_frame_source; duplicate_merge_image_update",
+          "updatedBy": "duplicate_merge"
+        },
+        "mediaUrlCount": 2,
+        "primaryMediaUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791314515807-vhxz0z.webp"
+      }
+    },
+    {
+      "path": "venues/fb_100057766283684/events/O4FDKN8GUqCUld1ZhO8p",
+      "before": {
+        "uniqueId": "1667441038524756_7f7dfb7e62ef833f",
+        "eventName": "Rat Tales Comedy Night",
+        "name": "Rat Tales Comedy Night",
+        "establishment": "Baba's Lounge | Charlottetown PE",
+        "venueId": "fb_100057766283684",
+        "startDate": "2026-10-05",
+        "startTime": "20:30",
+        "endDate": "2026-10-05",
+        "endTime": "22:30",
+        "category": "Comedy",
+        "eventType": "comedy",
+        "facebookUrl": "https://www.facebook.com/babasloungepei",
+        "cleanedFacebookUrl": "https://www.facebook.com/babasloungepei",
+        "mediaUrls": [
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791314515807-vhxz0z.webp"
+        ],
+        "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791314515807-vhxz0z.webp",
+        "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791314515807-vhxz0z.webp",
+        "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791314515807-vhxz0z.webp",
+        "likes": 1,
+        "shares": 3,
+        "topReactionsCount": 1,
+        "locationScope": "venue",
+        "locationLabel": "Baba's Lounge | Charlottetown PE",
+        "locationPrecision": "exact",
+        "address": "181 Great George St, Charlottetown, PE C1A 4L1, Canada",
+        "latitude": 46.2338053,
+        "longitude": -63.1267123,
+        "recurringPattern": "weekly_monday",
+        "totalOccurrences": 4,
+        "recurrenceUntilDate": "2026-10-26",
+        "isRecurring": true,
+        "sourceTimestamp": "2026-10-05T18:47:25.000Z",
+        "imageProvenance": {
+          "version": 1,
+          "primarySource": "post_media",
+          "primaryField": "relevantImageUrl",
+          "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791314515807-vhxz0z.webp",
+          "isFallback": false,
+          "sourceFields": [
+            "relevantImageUrl",
+            "image",
+            "imageUrl",
+            "mediaUrls"
+          ],
+          "media": [
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791314515807-vhxz0z.webp",
+              "source": "post_media",
+              "field": "relevantImageUrl",
+              "isPrimary": true,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791314515807-vhxz0z.webp",
+              "source": "post_media",
+              "field": "image",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791314515807-vhxz0z.webp",
+              "source": "post_media",
+              "field": "imageUrl",
+              "isPrimary": false,
+              "isFallback": true
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791314515807-vhxz0z.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": true
+            }
+          ],
+          "selectionReason": "model_selected_original_image_index; duplicate_merge_image_update",
+          "updatedBy": "duplicate_merge",
+          "setAt": "2026-10-06T19:27:42.542Z"
+        },
+        "mediaUrlCount": 1,
+        "primaryMediaUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791314515807-vhxz0z.webp"
+      },
+      "incoming": {
+        "uniqueId": "1560580752776123_ce38100209708508",
+        "eventName": "Rat Tales Comedy Night",
+        "name": "Rat Tales Comedy Night",
+        "establishment": "Baba's Lounge | Charlottetown PE",
+        "venueId": "fb_100057766283684",
+        "startDate": "2026-10-12",
+        "startTime": "20:30",
+        "endDate": "2026-10-12",
+        "endTime": "22:30",
+        "description": "Baba’s Lounge: Rat Tales Comedy Night",
+        "category": "Comedy",
+        "eventType": "comedy",
+        "facebookUrl": "https://www.facebook.com/DowntownCharlottetownInc",
+        "cleanedFacebookUrl": "https://www.facebook.com/DowntownCharlottetownInc",
+        "mediaUrls": [
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791722380832-vz8bdh.webp"
+        ],
+        "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791722380832-vz8bdh.webp",
+        "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791722380832-vz8bdh.webp",
+        "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791722380832-vz8bdh.webp",
+        "likes": 0,
+        "shares": 0,
+        "topReactionsCount": 0,
+        "locationScope": "venue",
+        "locationLabel": "Baba's Lounge | Charlottetown PE",
+        "locationPrecision": "exact",
+        "address": "181 Great George St, Charlottetown, PE C1A 4L1, Canada",
+        "latitude": 46.2338053,
+        "longitude": -63.1267123,
+        "recurringPattern": "none",
+        "isRecurring": "No",
+        "sourceTimestamp": "2026-10-11T11:00:32.000Z",
+        "imageProvenance": {
+          "version": 1,
+          "primarySource": "post_media",
+          "primaryField": "relevantImageUrl",
+          "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791722380832-vz8bdh.webp",
+          "isFallback": false,
+          "sourceFields": [
+            "relevantImageUrl",
+            "mediaUrls",
+            "icon"
+          ],
+          "media": [
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791722380832-vz8bdh.webp",
+              "source": "post_media",
+              "field": "relevantImageUrl",
+              "isPrimary": true,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791722380832-vz8bdh.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": true,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1791722381166-wg36bs.webp",
+              "source": "profile_image",
+              "field": "icon",
+              "isPrimary": false,
+              "isFallback": false
+            }
+          ],
+          "selectionReason": "model_selected_analysis_frame_source",
+          "updatedBy": "parser"
+        },
+        "mediaUrlCount": 1,
+        "primaryMediaUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791722380832-vz8bdh.webp"
+      },
+      "after": {
+        "uniqueId": "1667441038524756_7f7dfb7e62ef833f",
+        "eventName": "Rat Tales Comedy Night",
+        "name": "Rat Tales Comedy Night",
+        "establishment": "Baba's Lounge | Charlottetown PE",
+        "venueId": "fb_100057766283684",
+        "startDate": "2026-10-05",
+        "startTime": "20:30",
+        "endDate": "2026-10-05",
+        "endTime": "22:30",
+        "description": "Baba’s Lounge: Rat Tales Comedy Night",
+        "category": "Comedy",
+        "eventType": "comedy",
+        "facebookUrl": "https://www.facebook.com/babasloungepei",
+        "cleanedFacebookUrl": "https://www.facebook.com/babasloungepei",
+        "mediaUrls": [
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791314515807-vhxz0z.webp",
+          "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791722380832-vz8bdh.webp"
+        ],
+        "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791722380832-vz8bdh.webp",
+        "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791722380832-vz8bdh.webp",
+        "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791722380832-vz8bdh.webp",
+        "likes": 1,
+        "shares": 3,
+        "topReactionsCount": 1,
+        "locationScope": "venue",
+        "locationLabel": "Baba's Lounge | Charlottetown PE",
+        "locationPrecision": "exact",
+        "address": "181 Great George St, Charlottetown, PE C1A 4L1, Canada",
+        "latitude": 46.2338053,
+        "longitude": -63.1267123,
+        "recurringPattern": "none",
+        "recurringDaysOfWeek": [],
+        "recurringWeekdaySequence": [],
+        "recurringWeekInterval": 1,
+        "totalOccurrences": 0,
+        "isRecurring": false,
+        "sourceTimestamp": "2026-10-11T11:00:32.000Z",
+        "imageProvenance": {
+          "version": 1,
+          "primarySource": "post_media",
+          "primaryField": "relevantImageUrl",
+          "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791722380832-vz8bdh.webp",
+          "isFallback": false,
+          "sourceFields": [
+            "relevantImageUrl",
+            "mediaUrls",
+            "icon"
+          ],
+          "media": [
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791722380832-vz8bdh.webp",
+              "source": "post_media",
+              "field": "relevantImageUrl",
+              "isPrimary": true,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791314515807-vhxz0z.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791722380832-vz8bdh.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": true,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1770832250396.webp",
+              "source": "profile_image",
+              "field": "icon",
+              "isPrimary": false,
+              "isFallback": false
+            }
+          ],
+          "selectionReason": "model_selected_analysis_frame_source; duplicate_merge_image_update",
+          "updatedBy": "duplicate_merge"
+        },
+        "mediaUrlCount": 2,
+        "primaryMediaUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791314515807-vhxz0z.webp"
+      }
+    }
+  ]
+}

@@ -207,6 +207,9 @@ function isOperatingHoursOnlyItem(item: ExtractedItem | undefined): boolean {
   const normalized = text.toLowerCase();
 
   if (/\btours?\s+(?:of|on)\s+(?:the\s+)?(?:studio|gallery)\b/i.test(text)) return false;
+  if (/\b(?:(?:local\s+)?vendors?|farmers?|craft|flea)\s+market\b/i.test(name) &&
+      /^\d{4}-\d{2}-\d{2}$/.test(String(item.date || '')) &&
+      /^\d{1,2}:\d{2}$/.test(String(item.startTime || ''))) return false;
 
   if (
     /\b(happy\s*hour|specials?|deals?|discount|sale|bogo|free\s+with|live\s+music|trivia|karaoke|open\s*mic|concert|comedy|class|workshop|program|drop[-\s]?in|swim|pool|public\s+skate|movie|screening|show|party|festival|fundraiser|open\s+house|(?:studio|gallery|guided|public)\s+tours?)\b/i.test(
@@ -477,6 +480,38 @@ function hasMeaningfulTimeFlags(value: unknown): boolean {
 /**
  * Stage 4: Secondary validation of extracted items
  */
+/** Correct a shared placeholder anchor only when distinct, explicitly weekly siblings corroborate it. */
+export function alignWeeklySiblingAnchors(items: ExtractedItem[]): ExtractedItem[] {
+  const weekdays = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+  return items.map(item => {
+    const day = String(item.recurringPattern || '').match(/^weekly_(sunday|monday|tuesday|wednesday|thursday|friday|saturday)$/)?.[1];
+    if (!day || !/^\d{4}-\d{2}-\d{2}$/.test(String(item.date || ''))) return item;
+    const anchor = new Date(`${item.date}T00:00:00Z`);
+    if (!Number.isFinite(anchor.getTime()) || weekdays[anchor.getUTCDay()] === day) return item;
+    const detail = String(item.description || '');
+    if (!new RegExp(`\\b(?:every|each)\\s+${day}\\b`, 'i').test(detail) ||
+        /\b(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:tember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\s+\d{1,2}\b/i.test(detail)) return item;
+    const sibling = items.some(other => other !== item && other.name === item.name &&
+      other.date === item.date && other.venue === item.venue && other.startTime === item.startTime &&
+      other.recurringPattern === `weekly_${weekdays[anchor.getUTCDay()]}`);
+    if (!sibling) return item;
+    const delta = (weekdays.indexOf(day) - anchor.getUTCDay() + 7) % 7;
+    anchor.setUTCDate(anchor.getUTCDate() + delta);
+    logger.info('Stage 4 aligned distinct weekly sibling anchor', {
+      name: item.name, from: item.date, to: anchor.toISOString().slice(0, 10), pattern: item.recurringPattern,
+    });
+    return { ...item, date: anchor.toISOString().slice(0, 10) };
+  });
+}
+
+export function isDistinctWeeklySiblingDuplicateRejection(item: ExtractedItem, items: ExtractedItem[], reason: string): boolean {
+  if (!/\bduplicat(?:e|es|ed|ion)\b/i.test(String(reason || '')) ||
+      !/^weekly_(?:sunday|monday|tuesday|wednesday|thursday|friday|saturday)$/.test(String(item.recurringPattern || ''))) return false;
+  return items.some(other => other !== item && other.name === item.name && other.venue === item.venue &&
+    other.startTime === item.startTime && other.date !== item.date &&
+    /^weekly_/.test(String(other.recurringPattern || '')) && other.recurringPattern !== item.recurringPattern);
+}
+
 export async function performSecondaryValidation(
   rawData: ExtractedItem[],
   userName: string,
@@ -485,6 +520,7 @@ export async function performSecondaryValidation(
   skipBatching = false
 ): Promise<ExtractedItem[]> {
   const cfg = { ...DEFAULT_PARSING_CONFIG, ...config };
+  rawData = alignWeeklySiblingAnchors(rawData);
 
   // Capture the original Stage 3 count before any GPT processing
   const originalStage3Count = rawData.length;
@@ -614,6 +650,12 @@ export async function performSecondaryValidation(
         if (sourcePoolWindow) decision = 'KEPT';
         validatedItem.item = item;
         const reason = validatedItem.reason;
+
+        if (decision === 'REJECTED' && isDistinctWeeklySiblingDuplicateRejection(rawData[index], rawData, reason)) {
+          decision = 'KEPT';
+          Object.assign(item, rawData[index]);
+          logger.info('Stage 4 preserved distinct weekly sibling', { name: item.name, date: item.date });
+        }
 
         // Preserve pipeline metadata
         item._pipelineTotalStage3 = originalStage3Count;
@@ -881,7 +923,8 @@ reject it merely because that printed time seems implausible or mistyped. Copy t
 printed time unchanged; do not silently correct it. Other validation rules still apply.
 
 DUPLICATE DETECTION RULES:
-- Same event name + SAME date + SAME time + same venue = likely duplicate (reject one)
+- Same event name + SAME date + SAME time + same venue + SAME recurrence weekdays = likely duplicate (reject one)
+- Separate Saturday and Sunday weekly sessions are distinct occurrences. Keep both; do not merge their weekly patterns or copy one sibling's date onto the other.
 - The same show on DIFFERENT dates is multiple valid performances. KEEP every explicitly printed date, even when the name, venue, and clock time are identical.
 - Same venue + DIFFERENT times = separate events (keep both)
 - Multiple sessions/workshops at same venue are common and valid
