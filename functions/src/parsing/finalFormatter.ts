@@ -32,6 +32,7 @@ import {
 import { logger } from '../utils/logger.js';
 import { levenshteinDistance } from '../utils/similarity.js';
 import { DateTime } from 'luxon';
+import { stage5CachedTextBlocks } from './stage5PromptCache.js';
 
 // Initialize OpenAI client lazily
 let openaiClient: OpenAI | null = null;
@@ -303,7 +304,7 @@ Never return arrays of values for an item; each must be a JSON object.`;
             createFormattingPrompt(items, userName, partialAddress, timestamp,
               Boolean(cfg.stage5MinimalOutputProbe));
           return callGPTWithSchema(chunkPrompt, 'formatEvents', schema, cfg,
-            { offset, itemCount: items.length });
+            { offset, itemCount: items.length, userName });
         }, Number(cfg.stage5BatchConcurrency || 1)
       );
       if (!formattedEvents) return [];
@@ -313,7 +314,7 @@ Never return arrays of values for an item; each must be a JSON object.`;
         createFormattingPrompt(validatedData, userName, partialAddress, timestamp,
           Boolean(cfg.stage5MinimalOutputProbe));
       response = await callGPTWithSchema(prompt, 'formatEvents', schema, cfg,
-        { offset: 0, itemCount: expectedCount });
+        { offset: 0, itemCount: expectedCount, userName });
     }
 
     // Validate and normalize response
@@ -719,7 +720,7 @@ function trimToLastCompleteJson(text: string): string | null {
 /**
  * Create the formatting prompt - exact port from postParser.js
  */
-function createFormattingPrompt(
+export function createFormattingPrompt(
   items: ExtractedItem[],
   userName: string,
   partialAddress: string,
@@ -1217,6 +1218,21 @@ export function preserveValidatedOccurrence(
     const key = field === 'start' ? 'startTime' : 'endTime';
     const time = normalizeUnambiguousSourceStartTime(String(originalItem[key] || ''));
     if (time) restored[key] = time;
+  }
+  // Explicit clocks describe a single occurrence even when the model supplies
+  // its starting date as the closing date. Do not shorten genuine multi-day spans.
+  if (originalItem.timeFlags?.start?.source === 'explicit' &&
+      originalItem.timeFlags?.end?.source === 'explicit') {
+    const start = normalizeUnambiguousSourceStartTime(String(originalItem.startTime || ''));
+    const end = normalizeUnambiguousSourceStartTime(String(originalItem.endTime || ''));
+    const sourceEndDate = String((originalItem as any).endDate || '').trim();
+    if (start && end && end < start &&
+        (!restored.endDate || restored.endDate <= date) &&
+        !(parseIsoDate(sourceEndDate) && sourceEndDate > date)) {
+      const next = parseIsoDate(date)!;
+      next.setUTCDate(next.getUTCDate() + 1);
+      restored.endDate = toIsoDateUtc(next);
+    }
   }
   return restored;
 }
@@ -1928,7 +1944,7 @@ function applyFinalCategoryNormalizationGuardrail(
 
   if (isNonMealCommunityActivity(event, originalItem)) {
     stats.keywordInference += 1;
-    return setCategory('Gatherings & Parties', 'keyword_inference', 'civic, literary or donation activity');
+    return setCategory('Gatherings & Parties', 'keyword_inference', 'community, public care or produce-judging activity');
   }
 
   if (/\b(?:vendors?|farmers?|craft)\s+market\b/i.test(String(event.name || ''))) {
@@ -2161,7 +2177,12 @@ export function isNonMealCommunityActivity(event: FormattedEvent, originalItem?:
     !/\b(?:concert|live\s+music|musical\s+performance)\b/i.test(title);
   const foodDrive = /\b(?:food\s+drive|food\s+bank\s+(?:collection|drive)|donation\s+(?:drive|drop[- ]?off|collection))\b/i.test(title) &&
     !/\b(?:dinner|breakfast|brunch|lunch|buffet|supper)\b/i.test(title);
-  return civic || literary || foodDrive;
+  const careClinic = /\bclinic\b/i.test(title) &&
+    /\b(?:pharmacy|pharmacists?|medical|vaccinations?|vaccines?|minor\s+ailment|blood\s+pressure|health\s+(?:care|screening)|care\s+clinic)\b/i.test(text) &&
+    !/\b(?:workshop|lesson|course|training|learn\s+to|coaching|skills?\s+clinic|hockey|basketball|soccer|tennis|baseball|volleyball|football|golf|swimming|skating|athletic|sports?)\b/i.test(title);
+  const produceJudging = /\b(?:pumpkins?|squash|gourds?|vegetables?|produce)\b/i.test(title) &&
+    /\b(?:weigh[- ]?off|(?:growing|produce|vegetable)\s+(?:contest|judging))\b/i.test(title);
+  return civic || literary || foodDrive || careClinic || produceJudging;
 }
 
 function applyCategoryCorrections(
@@ -6309,7 +6330,7 @@ async function callGPTWithSchema(
   functionName: string,
   schema: GPTFunctionSchema[],
   config: ParsingConfig,
-  batch: { offset: number; itemCount: number }
+  batch: { offset: number; itemCount: number; userName: string }
 ): Promise<FormattingResult> {
   const client = getOpenAIClient();
   const explicitModelOverride = String(config.stage5ModelOverride || '').trim();
@@ -6374,9 +6395,12 @@ async function callGPTWithSchema(
   try {
     if (usesResponses(model)) {
       const callStart = Date.now();
+      const cachedText = model === 'gpt-6-luna'
+        ? stage5CachedTextBlocks(prompt, batch.userName) : null;
       const response = await client.responses.create({
         model,
-        input: [{ role: 'user', content: [{ type: 'input_text', text: prompt }] }],
+        input: [{ role: 'user', content: cachedText || [{ type: 'input_text', text: prompt }] }],
+        ...(cachedText ? { prompt_cache_options: { mode: 'explicit', ttl: '30m' } } : {}),
         text: { format: {
           type: 'json_schema', name: functionName, strict: true,
           schema: schema[0].parameters,

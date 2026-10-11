@@ -1,0 +1,520 @@
+[
+  {
+    "row": 48,
+    "postId": "1794918985651417",
+    "source": {
+      "name": "Rxtra Care Clinic",
+      "description": "Walk-in pharmacy care, including minor ailment assessments and prescribing, flu and COVID vaccinations, medication reviews, blood pressure checks, and other pharmacy services. Two pharmacists are available, with one dedicated to walk-in care.",
+      "date": "2026-10-12",
+      "startTime": "09:00",
+      "endTime": "16:00",
+      "venue": "Seaside Pharmacy & Medical",
+      "price": "",
+      "recurringPattern": "none",
+      "extractionReason": "An explicitly advertised public walk-in care clinic runs all day on Thanksgiving Monday; the pharmacy states its hours that day are 9 AM to 4 PM.",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "Open Thanksgiving Monday 9 AM–4 PM; Rxtra Care Clinic running ALL DAY."
+        },
+        "end": {
+          "source": "explicit",
+          "toClose": false,
+          "evidence": "Open Thanksgiving Monday 9 AM–4 PM; the clinic is advertised as running all day."
+        }
+      },
+      "_sourceType": "event",
+      "_pipelineIndex": 1,
+      "_pipelineTotalStage3": 1
+    },
+    "baseline": {
+      "isEvent": "Yes",
+      "isFoodSpecial": "No",
+      "category": "Gatherings & Parties",
+      "name": "Rxtra Care Clinic",
+      "description": "Walk-in pharmacy care, including minor ailment assessments and prescribing, flu and COVID vaccinations, medication reviews, blood pressure checks, and other pharmacy services. Two pharmacists are available, with one dedicated to walk-in care.",
+      "establishment": "Seaside Pharmacy & Medical",
+      "address": "",
+      "startDate": "2026-10-12",
+      "endDate": "2026-10-12",
+      "startTime": "09:00",
+      "endTime": "16:00",
+      "ticketPrice": "",
+      "ticketLink": "",
+      "relevantImageIndex": 0,
+      "venue": "Seaside Pharmacy & Medical",
+      "additionalLocation": "Seaside Pharmacy & Medical",
+      "isRecurring": "No",
+      "recurringPattern": "none",
+      "_categoryOriginal": "Gatherings & Parties",
+      "_categoryHintOriginal": "",
+      "_categorySource": "model_final",
+      "_categoryNormalizationReason": "kept weak model category \"Gatherings & Parties\" after no stronger hint/keyword evidence",
+      "_sourceType": "event",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "Open Thanksgiving Monday 9 AM–4 PM; Rxtra Care Clinic running ALL DAY."
+        },
+        "end": {
+          "source": "explicit",
+          "toClose": false,
+          "evidence": "Open Thanksgiving Monday 9 AM–4 PM; the clinic is advertised as running all day."
+        }
+      }
+    },
+    "candidate": {
+      "isEvent": "Yes",
+      "isFoodSpecial": "No",
+      "category": "Workshops & Classes",
+      "name": "Rxtra Care Clinic",
+      "description": "Walk-in pharmacy care, including minor ailment assessments and prescribing, flu and COVID vaccinations, medication reviews, blood pressure checks, and other pharmacy services. Two pharmacists are available, with one dedicated to walk-in care.",
+      "establishment": "Seaside Pharmacy & Medical",
+      "address": "",
+      "startDate": "2026-10-12",
+      "endDate": "2026-10-12",
+      "startTime": "09:00",
+      "endTime": "16:00",
+      "ticketPrice": "",
+      "ticketLink": "",
+      "relevantImageIndex": -1,
+      "venue": "Seaside Pharmacy & Medical",
+      "additionalLocation": "Seaside Pharmacy & Medical",
+      "isRecurring": "No",
+      "recurringPattern": "none",
+      "_categoryOriginal": "Workshops & Classes",
+      "_categoryHintOriginal": "",
+      "_categorySource": "model_final",
+      "_categoryNormalizationReason": "kept allowed model category \"Workshops & Classes\"",
+      "_sourceType": "event",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "Open Thanksgiving Monday 9 AM–4 PM; Rxtra Care Clinic running ALL DAY."
+        },
+        "end": {
+          "source": "explicit",
+          "toClose": false,
+          "evidence": "Open Thanksgiving Monday 9 AM–4 PM; the clinic is advertised as running all day."
+        }
+      }
+    }
+  },
+  {
+    "row": 212,
+    "postId": "1103064525641429",
+    "source": {
+      "name": "✮jada✮",
+      "description": "✮jada✮ is spinning hip-hop, RNB, & Afro beats tonight. 10-2am | $5 cover",
+      "date": "2026-10-10",
+      "startTime": "22:00",
+      "endTime": "02:00",
+      "venue": "",
+      "ticketLink": "",
+      "price": "$5 cover",
+      "relevantImageIndex": 0,
+      "recurringPattern": "none",
+      "extractionReason": "A DJ set featuring ✮jada✮ is an advertised entertainment event. “Tonight” anchors it to the post's local date.",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "10-2am"
+        },
+        "end": {
+          "source": "explicit",
+          "toClose": false,
+          "evidence": "10-2am"
+        }
+      },
+      "spatial": {
+        "kind": "unknown",
+        "locations": [],
+        "confirmedStreets": [],
+        "ordered": false,
+        "evidenceNotes": "No event location is explicitly stated; the poster account name alone does not establish a venue."
+      },
+      "_pipelineIndex": 1,
+      "_pipelineTotalStage3": 1
+    },
+    "baseline": {
+      "isEvent": "Yes",
+      "isFoodSpecial": "No",
+      "category": "Live Music",
+      "name": "✮jada✮",
+      "description": "✮jada✮ is spinning hip-hop, RNB, & Afro beats tonight. 10-2am | $5 cover",
+      "establishment": "PonyBoat Social Club",
+      "address": "",
+      "startDate": "2026-10-10",
+      "endDate": "2026-10-11",
+      "startTime": "22:00",
+      "endTime": "02:00",
+      "ticketPrice": "$5 cover",
+      "ticketLink": "",
+      "relevantImageIndex": 0,
+      "venue": "PonyBoat Social Club",
+      "additionalLocation": "",
+      "isRecurring": "No",
+      "recurringPattern": "none",
+      "_categoryOriginal": "Live Music",
+      "_categoryHintOriginal": "",
+      "_categorySource": "model_final",
+      "_categoryNormalizationReason": "kept allowed model category \"Live Music\"",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "10-2am"
+        },
+        "end": {
+          "source": "explicit",
+          "toClose": false,
+          "evidence": "10-2am"
+        }
+      },
+      "spatial": {
+        "kind": "unknown",
+        "locations": [],
+        "confirmedStreets": [],
+        "ordered": false,
+        "evidenceNotes": "No event location is explicitly stated; the poster account name alone does not establish a venue."
+      }
+    },
+    "candidate": {
+      "isEvent": "Yes",
+      "isFoodSpecial": "No",
+      "category": "Live Music",
+      "name": "✮jada✮",
+      "description": "✮jada✮ is spinning hip-hop, RNB, & Afro beats tonight. 10-2am | $5 cover",
+      "establishment": "PonyBoat Social Club",
+      "address": "",
+      "startDate": "2026-10-10",
+      "endDate": "",
+      "startTime": "22:00",
+      "endTime": "02:00",
+      "ticketPrice": "$5 cover",
+      "ticketLink": "",
+      "relevantImageIndex": 0,
+      "venue": "",
+      "additionalLocation": "",
+      "isRecurring": "No",
+      "recurringPattern": "none",
+      "_categoryOriginal": "Live Music",
+      "_categoryHintOriginal": "",
+      "_categorySource": "model_final",
+      "_categoryNormalizationReason": "kept allowed model category \"Live Music\"",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "10-2am"
+        },
+        "end": {
+          "source": "explicit",
+          "toClose": false,
+          "evidence": "10-2am"
+        }
+      },
+      "spatial": {
+        "kind": "unknown",
+        "locations": [],
+        "confirmedStreets": [],
+        "ordered": false,
+        "evidenceNotes": "No event location is explicitly stated; the poster account name alone does not establish a venue."
+      }
+    }
+  },
+  {
+    "row": 229,
+    "postId": "122204911406910683",
+    "source": {
+      "name": "International Coming Out Day",
+      "description": "Come to BE YOU tonight! 8pm—2am to celebrate the Big Day, tomorrow. You will find plenty of love, friendship, and support, if you decide that tomorrow is YOUR day. At 10:30pm we will take a short break from the singing and dancing, to listen to people’s own coming out stories. Be Brave. Come to BE YOU to BE YOU. 19+.",
+      "date": "2026-10-10",
+      "startTime": "20:00",
+      "endTime": "02:00",
+      "venue": "BE YOU",
+      "ticketLink": "",
+      "price": "",
+      "relevantImageIndex": 0,
+      "recurringPattern": "none",
+      "extractionReason": "The poster invites attendees to an entertainment celebration tonight, with singing, dancing, and coming-out stories. The post was published on October 10, and the poster says the celebration is tonight to mark the day tomorrow, October 11.",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "8pm"
+        },
+        "end": {
+          "source": "explicit",
+          "toClose": false,
+          "evidence": "2am"
+        }
+      },
+      "spatial": {
+        "kind": "single_location",
+        "locations": [
+          {
+            "label": "119 Grafton St, Charlottetown",
+            "address": "119 Grafton St, Charlottetown",
+            "role": "location",
+            "certainty": "confirmed",
+            "sourceText": "119 Grafton St, Charlottetown"
+          }
+        ],
+        "confirmedStreets": [],
+        "ordered": false,
+        "evidenceNotes": "The poster lists 119 Grafton St, Charlottetown as the event location."
+      },
+      "_pipelineIndex": 1,
+      "_pipelineTotalStage3": 1
+    },
+    "baseline": {
+      "isEvent": "Yes",
+      "isFoodSpecial": "No",
+      "category": "Gatherings & Parties",
+      "name": "International Coming Out Day",
+      "description": "Come to BE YOU tonight! 8pm—2am to celebrate the Big Day, tomorrow. You will find plenty of love, friendship, and support, if you decide that tomorrow is YOUR day. At 10:30pm we will take a short break from the singing and dancing, to listen to people’s own coming out stories. Be Brave. Come to BE YOU to BE YOU. 19+.",
+      "establishment": "BE YOU",
+      "address": "119 Grafton St, Charlottetown",
+      "startDate": "2026-10-10",
+      "endDate": "2026-10-10",
+      "startTime": "20:00",
+      "endTime": "02:00",
+      "ticketPrice": "",
+      "ticketLink": "",
+      "relevantImageIndex": 0,
+      "venue": "BE YOU",
+      "additionalLocation": "BE YOU",
+      "isRecurring": "No",
+      "recurringPattern": "none",
+      "_categoryOriginal": "Gatherings & Parties",
+      "_categoryHintOriginal": "",
+      "_categorySource": "model_final",
+      "_categoryNormalizationReason": "kept weak model category \"Gatherings & Parties\" after no stronger hint/keyword evidence",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "8pm"
+        },
+        "end": {
+          "source": "explicit",
+          "toClose": false,
+          "evidence": "2am"
+        }
+      },
+      "spatial": {
+        "kind": "single_location",
+        "locations": [
+          {
+            "label": "119 Grafton St, Charlottetown",
+            "address": "119 Grafton St, Charlottetown",
+            "role": "location",
+            "certainty": "confirmed",
+            "sourceText": "119 Grafton St, Charlottetown"
+          }
+        ],
+        "confirmedStreets": [],
+        "ordered": false,
+        "evidenceNotes": "The poster lists 119 Grafton St, Charlottetown as the event location."
+      }
+    },
+    "candidate": {
+      "isEvent": "Yes",
+      "isFoodSpecial": "No",
+      "category": "Gatherings & Parties",
+      "name": "International Coming Out Day",
+      "description": "Come to BE YOU tonight to celebrate the Big Day, tomorrow. Enjoy love, friendship, and support, with singing, dancing, and personal coming-out stories at 10:30pm. 19+.",
+      "establishment": "BE YOU",
+      "address": "119 Grafton St, Charlottetown",
+      "startDate": "2026-10-10",
+      "endDate": "2026-10-10",
+      "startTime": "20:00",
+      "endTime": "02:00",
+      "ticketPrice": "",
+      "ticketLink": "",
+      "relevantImageIndex": 0,
+      "venue": "BE YOU",
+      "additionalLocation": "BE YOU",
+      "isRecurring": "No",
+      "recurringPattern": "none",
+      "_categoryOriginal": "Gatherings & Parties",
+      "_categoryHintOriginal": "",
+      "_categorySource": "model_final",
+      "_categoryNormalizationReason": "kept weak model category \"Gatherings & Parties\" after no stronger hint/keyword evidence",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "8pm"
+        },
+        "end": {
+          "source": "explicit",
+          "toClose": false,
+          "evidence": "2am"
+        }
+      },
+      "spatial": {
+        "kind": "single_location",
+        "locations": [
+          {
+            "label": "119 Grafton St, Charlottetown",
+            "address": "119 Grafton St, Charlottetown",
+            "role": "location",
+            "certainty": "confirmed",
+            "sourceText": "119 Grafton St, Charlottetown"
+          }
+        ],
+        "confirmedStreets": [],
+        "ordered": false,
+        "evidenceNotes": "The poster lists 119 Grafton St, Charlottetown as the event location."
+      }
+    }
+  },
+  {
+    "row": 285,
+    "postId": "1702205888580891",
+    "source": {
+      "name": "33rd Annual PEI Giant Pumpkin & Squash Weigh-Off",
+      "description": "TODAY’S THE DAY! A family-friendly day featuring giant pumpkins, produce, activities, and fall fun. Entries for the weigh-off must arrive between 9:00 AM and 10:30 AM; the weigh-off starts at noon. Categories include Giant Pumpkin, Giant Squash, Field Pumpkin, Long Gourd, Marrow, Giant Tomato, Bushel Gourd, and Watermelon. Around 1:30 PM, a 1,000 lb pumpkin filled with candy will be lifted by crane and dropped. Activities include free wagon rides, free kids’ activities, Field-of-Fun, and a paid corn maze. Free public admission; rain or shine.",
+      "date": "2026-10-10",
+      "startTime": "12:00",
+      "endTime": "",
+      "venue": "",
+      "ticketLink": "",
+      "price": "Free public admission; $20 per category to register an entry",
+      "relevantImageIndex": 0,
+      "recurringPattern": "none",
+      "extractionReason": "The annual weigh-off is an advertised public entertainment event, with an explicit date anchor in “TODAY’S THE DAY!” and a stated weigh-off start time. Its on-site activities are included in this single event rather than split into separate events.",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "weigh-off starting at noon"
+        },
+        "end": {
+          "source": "none",
+          "toClose": false,
+          "evidence": ""
+        }
+      },
+      "spatial": {
+        "kind": "single_location",
+        "locations": [
+          {
+            "label": "Kool Breeze Farms",
+            "address": "231 Read Drive, Summerside, PEI",
+            "role": "location",
+            "certainty": "confirmed",
+            "sourceText": "Kool Breeze Farms – 231 Read Drive, Summerside, PEI"
+          }
+        ],
+        "confirmedStreets": [
+          "Read Drive"
+        ],
+        "ordered": false,
+        "evidenceNotes": "The post names Kool Breeze Farms and provides its street address as the event location."
+      },
+      "_pipelineIndex": 1,
+      "_pipelineTotalStage3": 1
+    },
+    "baseline": {
+      "isEvent": "Yes",
+      "isFoodSpecial": "No",
+      "category": "Gatherings & Parties",
+      "name": "33rd Annual PEI Giant Pumpkin & Squash Weigh-Off",
+      "description": "A family-friendly public event featuring giant pumpkins, produce, activities, and fall fun. Entries for the weigh-off must arrive between 09:00 and 10:30; the weigh-off starts at noon. Categories include Giant Pumpkin, Giant Squash, Field Pumpkin, Long Gourd, Marrow, Giant Tomato, Bushel Gourd, and Watermelon. Around 13:30, a 1,000 lb pumpkin filled with candy will be lifted by crane and dropped. Activities include free wagon rides, free kids’ activities, Field-of-Fun, and a paid corn maze. Free public admission; rain or shine.",
+      "establishment": "Kool Breeze Farms",
+      "address": "231 Read Drive, Summerside, PEI",
+      "startDate": "2026-10-10",
+      "endDate": "",
+      "startTime": "12:00",
+      "endTime": "",
+      "ticketPrice": "Free public admission; $20 per category to register an entry",
+      "ticketLink": "",
+      "relevantImageIndex": 0,
+      "venue": "",
+      "additionalLocation": "",
+      "isRecurring": "No",
+      "recurringPattern": "none",
+      "_categoryOriginal": "Gatherings & Parties",
+      "_categoryHintOriginal": "",
+      "_categorySource": "model_final",
+      "_categoryNormalizationReason": "kept weak model category \"Gatherings & Parties\" after no stronger hint/keyword evidence",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "weigh-off starting at noon"
+        },
+        "end": {
+          "source": "none",
+          "toClose": false,
+          "evidence": ""
+        }
+      },
+      "spatial": {
+        "kind": "single_location",
+        "locations": [
+          {
+            "label": "Kool Breeze Farms",
+            "address": "231 Read Drive, Summerside, PEI",
+            "role": "location",
+            "certainty": "confirmed",
+            "sourceText": "Kool Breeze Farms – 231 Read Drive, Summerside, PEI"
+          }
+        ],
+        "confirmedStreets": [
+          "Read Drive"
+        ],
+        "ordered": false,
+        "evidenceNotes": "The post names Kool Breeze Farms and provides its street address as the event location."
+      }
+    },
+    "candidate": {
+      "isEvent": "Yes",
+      "isFoodSpecial": "No",
+      "category": "Sports",
+      "name": "33rd Annual PEI Giant Pumpkin & Squash Weigh-Off",
+      "description": "A family-friendly day featuring giant pumpkins, produce, activities, and fall fun. Entries for the weigh-off must arrive between 9:00 AM and 10:30 AM; the weigh-off starts at noon. Categories include Giant Pumpkin, Giant Squash, Field Pumpkin, Long Gourd, Marrow, Giant Tomato, Bushel Gourd, and Watermelon. Around 1:30 PM, a 1,000 lb pumpkin filled with candy will be lifted by crane and dropped. Activities include free wagon rides, free kids’ activities, Field-of-Fun, and a paid corn maze. Free public admission; rain or shine.",
+      "establishment": "Kool Breeze Farms",
+      "address": "231 Read Drive, Summerside, PEI",
+      "startDate": "2026-10-10",
+      "endDate": "",
+      "startTime": "12:00",
+      "endTime": "",
+      "ticketPrice": "Free public admission; $20 per category to register an entry",
+      "ticketLink": "",
+      "relevantImageIndex": 0,
+      "venue": "",
+      "additionalLocation": "",
+      "isRecurring": "No",
+      "recurringPattern": "none",
+      "_categoryOriginal": "Sports",
+      "_categoryHintOriginal": "",
+      "_categorySource": "model_final",
+      "_categoryNormalizationReason": "kept allowed model category \"Sports\"",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "weigh-off starting at noon"
+        },
+        "end": {
+          "source": "none",
+          "toClose": false,
+          "evidence": ""
+        }
+      },
+      "spatial": {
+        "kind": "single_location",
+        "locations": [
+          {
+            "label": "Kool Breeze Farms",
+            "address": "231 Read Drive, Summerside, PEI",
+            "role": "location",
+            "certainty": "confirmed",
+            "sourceText": "Kool Breeze Farms – 231 Read Drive, Summerside, PEI"
+          }
+        ],
+        "confirmedStreets": [
+          "Read Drive"
+        ],
+        "ordered": false,
+        "evidenceNotes": "The post names Kool Breeze Farms and provides its street address as the event location."
+      }
+    }
+  }
+]
