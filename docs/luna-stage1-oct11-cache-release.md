@@ -18,4 +18,12 @@ Fresh function/traffic readback proved all three functions ACTIVE at the prior c
 
 ## Deployment
 
-Pending narrow dry-run deployment, actual deployment and independent post-deploy readback. Stages 2-5 caching experiments are separate, not included in this runtime release.
+Released source commit: `1fceb8d`. The narrow Firebase dry run and actual deployment both succeeded for `functions:gathr-functions:processDataset`, `functions:gathr-functions:processDatasetResume`, and `functions:gathr-functions:processDatasetSelectedRows`, explicitly targeting `gathr-migrated`. Fresh preflight at 2026-10-11T16:15:35.166Z confirmed no active parser lock before deployment.
+
+Independent post-deploy function and Cloud Run readback verified all three ACTIVE at common source hash `c6f04a6761d3129fc2b0399f3a77d84ad9a9afd7`, with 100% traffic on their latest revisions:
+
+- `processdataset-00468-yiz`
+- `processdatasetresume-00432-xep`
+- `processdatasetselectedrows-00424-yul`
+
+The readback compared parser model, reasoning and allocation environment fields with the saved pre-deploy baseline and found no changes. Standard outdated firebase-functions SDK warnings did not prevent deployment; dependency upgrades remain deferred. Evidence: `serving-before.json`, `serving-after.json`, `dryrun.log`, and `deploy.log` under `functions/artifacts/luna-stage1-cache-release/`. Stages 2-5 caching experiments are separate and are not included in this runtime release. Their completed 195-call audit and recommendations are recorded in [the other-stages cache audit](luna-oct11-other-stages-cache-audit.md).
