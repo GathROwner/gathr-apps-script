@@ -50,4 +50,21 @@ Application uses fresh native update-time and full-document fingerprint guards, 
 
 ## Release
 
-Pending final tests, commit, narrow Firebase dry run/deployment, and independent serving readback. Fresh preflight at 14:57 UTC found no active processing locks, the processed marker present, completed final batch and no checkpoint. Recheck immediately before deployment.
+Deployed parser repair `4b8b00c`, with packaging exclusion `49193d1`, from this isolated release branch. Local `artifacts/` is excluded from function uploads. The narrow final dry run and actual deployment succeeded in project `gathr-migrated`, codebase `gathr-functions`, using:
+
+```powershell
+firebase deploy --only "functions:gathr-functions:processDataset,functions:gathr-functions:processDatasetResume,functions:gathr-functions:processDatasetSelectedRows" --project gathr-migrated --dry-run --non-interactive
+firebase deploy --only "functions:gathr-functions:processDataset,functions:gathr-functions:processDatasetResume,functions:gathr-functions:processDatasetSelectedRows" --project gathr-migrated --non-interactive
+```
+
+Fresh preflight at 15:11 UTC found no active processing locks, the processed marker present, completed final batch and no checkpoint. Independent function and Cloud Run readback at 15:15:31 UTC verified:
+
+| Function | Serving revision | State | Traffic |
+| --- | --- | --- | ---: |
+| processDataset | processdataset-00467-noz | ACTIVE | 100% |
+| processDatasetResume | processdatasetresume-00431-mas | ACTIVE | 100% |
+| processDatasetSelectedRows | processdatasetselectedrows-00423-daj | ACTIVE | 100% |
+
+Common serving source hash: `551a5ee79e21b5d374c455c220417ad046659b00`. Every Luna allocation, model and reasoning key matched the pre-release readback. Build, 604 backend tests, 72 request checks and seven actual downstream API replays passed. The existing outdated `firebase-functions` warning remains; no dependency upgrade was included.
+
+The October 11 audit heartbeat is confirmed PAUSED. Existing live record corrections remain pending exact approval of `docs/luna-oct11-live-repair-plan.md`; no live event mutations were applied during this release. Use this release branch as the accepted baseline for further parser work; the coordinator checkout still contains a deferred Stage 4 experiment that is not serving.

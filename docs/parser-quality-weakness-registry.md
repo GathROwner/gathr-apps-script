@@ -220,3 +220,5 @@ See `docs/luna-oct11-integrity-repair.md` for captured-source evidence, tests an
 - Local Pub row 66: Saturday and Sunday recurrence shared a placeholder date and were treated as duplicates. Align corroborated weekly sibling anchors and preserve weekday identity.
 
 Existing data changes remain separately approval-gated. No model allocation, Stage 4 effort experiment, broad deduplication or prompt-cache optimization is part of these repairs.
+
+Deployed October 11 from repair commits 4b8b00c/49193d1: all three parsers ACTIVE on common source hash 551a5ee79e21b5d374c455c220417ad046659b00, latest traffic 100%, model settings unchanged. Full backend 604/604, request checks 72/72, seven actual downstream API dry runs passed. Exact live data plan still pending approval.
