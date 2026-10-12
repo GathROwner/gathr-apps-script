@@ -1,6 +1,6 @@
 # GathR parser-quality weakness registry
 
-Last updated: 2026-10-11 (Atlantic)
+Last updated: 2026-10-12 (Atlantic)
 
 This is a cumulative evidence register, not a list of venue IDs to decode. A technical ID is always paired with the venue or event name. Future audits should add a new observation to an existing pattern when the failure mechanism is the same; only create a new pattern when it is materially different.
 
@@ -230,3 +230,36 @@ The full 43-post comparison is recorded in `docs/luna-stage5-oct11-cache-full-va
 The cached read also misclassifies Seaside's public care clinic as a workshop and Kool Breeze's produce weigh-off as Sports. Preserve these activities and correct their categories with semantic safeguards, retaining sports-clinic and education controls. Craig approved the fixes and caching deployment. Source commit `6c8b430` passes 615 backend tests, eight request checks, the complete saved-response replay and six fresh paired API controls. Final release status and independent serving readback belong in `docs/luna-stage5-oct11-cache-release.md`. No historical live event correction was inferred or applied from these isolated formatting replays.
 
 Deployed and independently verified October 11 at 17:12:22 UTC: all three parsers ACTIVE with 100% latest traffic, common source hash `3a97d4348ad1907befbedd9adf45878f577ad426`, and unchanged model/effort/allocation flags. Stage 5 caching and the source-grounded safeguards are live. Next regular-run cache cost/latency remains to be measured; the experiment did not establish a speed improvement.
+
+## October 12 compact-validation and cache production follow-up
+
+See `luna-oct12-production-audit.md`, `luna-oct12-integrity-repair.md` and
+`luna-oct12-live-repair-plan.md`. The complete 345-row run used Luna in the
+approved four stages and Nano low compact Stage 4, with no stalled/replayed
+row, malformed response or contract hold. Estimated cost fell 38.15% against
+the different October 11 cohort; this is not a controlled whole-run comparison.
+
+- Extend PQ-005/PQ-025: Chambers' missing lunch clock inherited the dinner
+  opening period, and an untimed Boston offer inherited whole-day hours.
+  Retain meal/activity-offer constraints through formatting and every start
+  fallback. Actual printed/trusted clocks still work. Current official Chambers
+  lunch service is 11:00–13:30; use that evidence only in the reviewed live plan.
+- Extend PQ-039/PQ-041: actual Milton extraction explicitly says the 1:30–3:30
+  meridiem is not printed, but the old phrase guard missed it. Hold that source
+  ambiguity before normalization; do not convert it to 01:30 or guess 13:30.
+- Semantic category controls: Coats for Kids' `main level` looked like a food
+  main, and volunteer setup inherited incidental turkey-dinner words. Preserve
+  their activity identity and genuine course meals/drink specials.
+- A same-publisher book-launch correction was merged into an old `Lunch`
+  Food Special keeper. Permit only a corroborated same-date/time/venue literary
+  identity correction, protecting different publishers and recurring families.
+- Offer scope: regular brunch beside $5 drinks does not make brunch cost $5;
+  ordinary limited-time product availability is not a deal. Dated public
+  recreation access survives adjacent office-closure text.
+- Open film-date precision: a blind model verification also misread tiny
+  October 18 digits as October 16. The experiment is not released; do not call
+  the three prepared manual date corrections proof of automated prevention.
+
+Existing records remain unchanged until the exact backed-up live plan is
+approved. Coats' inferred venue hours, Milton's unresolved AM/PM and row 85's
+film/Q&A overlap remain explicit evidence limits.

@@ -54,6 +54,7 @@ import { performFinalFormatting } from './finalFormatter.js';
 import { reconcileCaptionOnlyWeeklyEvents } from './captionOnlyWeekly.js';
 import { reconcileRaceSchedule } from './raceScheduleReconciler.js';
 import { resolveTimesWithOperatingHours } from './venueResolver.js';
+import {constrainSourceTimes, blocksStartTimeFallback} from './sourceTimeConstraints.js';
 import { shouldHoldUndatedStandingSchedule, shouldRetrySeasonalLeagueWithLegacy,
   isSelectedLunaCanaryPost, isSampledLunaCanaryPost,
   canRetryLunaCanaryWithLegacy, canaryGeneratedCleanupUrls,
@@ -701,6 +702,7 @@ async function replayPostDataFromArtifactsCore(
     return [];
   }
 
+  rawExtractedData = constrainSourceTimes(rawExtractedData, combinedText);
   rawExtractedData.forEach((item, idx) => {
     item._pipelineIndex = item._pipelineIndex || idx + 1;
     item._pipelineTotalStage3 = item._pipelineTotalStage3 || rawExtractedData.length;
@@ -743,6 +745,7 @@ async function replayPostDataFromArtifactsCore(
   }
 
   const compactReplayHold = getCompactStage4Hold(validatedData);
+  validatedData = constrainSourceTimes(validatedData, combinedText);
   if (compactReplayHold) {
     await emitStageArtifacts(cfg, { source: 'replay', stage4ValidationHold: compactReplayHold, stage4Items: [] });
     await reportSkipReason({ stage: 'stage4', reason: `Compact validation held: ${compactReplayHold.reason}` });
@@ -1907,7 +1910,7 @@ async function parsePostDataCore(
         stage3Items = partition.kept;
       }
       return {
-        items: stage3Items,
+        items: constrainSourceTimes(stage3Items, combinedText),
         ticketUrl,
       };
     };
@@ -3102,6 +3105,7 @@ export function applySpecialTimeFallbacks(
       const hasStartClock = ev.startTime && String(ev.startTime).trim() !== '';
 
       if (
+        !blocksStartTimeFallback(ev) &&
         (isSpecial || (isEventLikely && hasTodayCue && !(ev as any)._stage4NeedsTimeEnrichment)) &&
         !hasStartClock &&
         !hasExplicitStart &&
@@ -3350,7 +3354,7 @@ export function enforceDateTimeCompleteness(
 
     // A post-time fallback is only defensible for a same-day offer. Reusing the
     // publication time on a later calendar date invents an event start time.
-    if (!ev.startTime && postedHHMM && ev.startDate === postedDate &&
+    if (!blocksStartTimeFallback(ev) && !ev.startTime && postedHHMM && ev.startDate === postedDate &&
         (isSpecial || (!(ev as any)._stage4NeedsTimeEnrichment && (hasTodayCue || isSemanticStart)))) {
       ev.startTime = postedHHMM;
       ev.timeFlags = ev.timeFlags || {

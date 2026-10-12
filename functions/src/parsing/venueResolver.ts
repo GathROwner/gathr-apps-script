@@ -18,6 +18,7 @@ import {
   DayHours,
 } from './types.js';
 import { logger } from '../utils/logger.js';
+import {blocksStartTimeFallback} from './sourceTimeConstraints.js';
 import { convertToOperatingHours, findVenue, getHoursForDay, getPlaceDetails } from '../services/placesService.js';
 import { findVenueByName, updateVenueOperatingHours } from '../services/firestoreService.js';
 
@@ -148,6 +149,10 @@ async function resolveEventTimes(
 
   // Check if we need to resolve times
   const needsStartTime = !event.startTime || event.startTime.trim() === '';
+  if (needsStartTime && blocksStartTimeFallback(event)) {
+    resolved.timeResolution.reason = event._sourceTimeConstraint!.reason;
+    return resolved;
+  }
   const approximateLinkedPageEnd = hasApproximateLinkedPageEnd(event);
   const needsEndTime = (!event.endTime || event.endTime.trim() === '') && !approximateLinkedPageEnd;
   const toClose = event.timeFlags?.end?.toClose === true && !approximateLinkedPageEnd;
@@ -345,6 +350,7 @@ export function applyFallbackTimes(
   postedHHMM: string,
   postedDate: string
 ): TimeResolvedEvent {
+  if (!resolved.startTime && blocksStartTimeFallback(event)) return resolved;
   const isSpecial =
     event.isFoodSpecial === 'Yes' ||
     /special/i.test(String(event.category || ''));

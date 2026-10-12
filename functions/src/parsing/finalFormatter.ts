@@ -9,6 +9,7 @@
  */
 
 import OpenAI from 'openai';
+import {hasUnresolvedSourceMeridiem as hasUnresolvedEarlyMeridiem} from './sourceTimeConstraints.js';
 import {
   ExtractedItem,
   FormattedEvent,
@@ -1243,6 +1244,16 @@ export function rehydrateFormattedEventMetadata(
 ): FormattedEvent {
   const nextEvent = { ...event } as FormattedEvent;
   let changed = false;
+  if (originalItem?._sourceTimeConstraint) {
+    changed = true;
+    nextEvent._sourceTimeConstraint = {...originalItem._sourceTimeConstraint};
+    if (!String(originalItem.startTime || '').trim()) {
+      nextEvent.startTime = '';
+      nextEvent.timeFlags = cloneFormattedTimeFlags(originalItem.timeFlags) || {
+        start: {source: 'none', evidence: ''}, end: {source: 'none', toClose: false, evidence: ''},
+      };
+    }
+  }
 
   // Compact Stage 4 may retain a genuine dated activity pending time evidence.
   // Formatting must not turn that deliberate unknown into an invented clock.
@@ -1439,7 +1450,9 @@ function detectExplicitFoodSpecialCategory(
   const sourceName = String(originalItem?.name || '').toLowerCase();
   const sourceDetail = `${sourceName} ${originalItem?.description || ''}`.toLowerCase();
   if (originalItem?._sourceType === 'special' &&
-      /\bcocktails?\b/.test(sourceDetail) &&
+      (/\bcocktails?\b/.test(sourceDetail) ||
+        (/\b(?:mimosas?|bloody\s+caesars?)\b/.test(sourceName) &&
+          !/\b(?:brunch|breakfast|lunch|dinner|buffet|meal|salad)\b/.test(sourceName))) &&
       !/\b(?:trivia|quiz|workshop|class|tasting|festival|showdown|competition|contest|concert|performance|party)\b/.test(sourceName)) {
     return 'Drink Special';
   }
@@ -1463,9 +1476,10 @@ function detectExplicitFoodSpecialCategory(
   // Venue names such as "Beer Garden" are location evidence, not an offer.
   // Remove that phrase before looking for standalone beer/menu cues so a
   // schedule row like "Beer Garden: Adam & The Foes" stays an event.
-  const foodOfferText = text.replace(/\bbeer\s+garden\b/g, ' ');
+  const foodOfferText = text.replace(/\bbeer\s+garden\b/g, ' ')
+    .replace(/\bmain\s+(?:level|floor|street|entrance|lobby)\b/g, ' ');
   const hasNamedFoodCue =
-    /\b(brunch|breakfast|lunch|dinner|menu|appetizer|mains?|dessert|prix fixe|set menu|deal|cocktail|cocktails|beer|wine|wines|mimosa|mimosas|burger|burgers|pizza|pizzas|taco|tacos|wing|wings)\b/.test(
+    /\b(brunch|breakfast|lunch|dinner|menu|appetizer|mains|main course|main dish|dessert|prix fixe|set menu|deal|cocktail|cocktails|beer|wine|wines|mimosa|mimosas|burger|burgers|pizza|pizzas|taco|tacos|wing|wings)\b/.test(
       foodOfferText
     );
   const hasPriceNearFoodCue = hasPrice && hasNamedFoodCue;
@@ -1533,7 +1547,8 @@ function detectExplicitWorkshopCategory(
     /\b(?:\d+|one|two|three|four|five)\s*-?\s*course\b/.test(text) &&
     /\b(menu|meal|dinner|lunch|appetizer|appetiser|entree|dessert|prix\s*fixe|special)\b/.test(text) &&
     (/\$\s*\d+/.test(text) || /\bspecial\b/.test(text) || /\b(appetizer|appetiser|entree|dessert)\b/.test(text));
-  const hasCourseTrainingSignal = /\bcourse(s)?\b/.test(text) && !courseMeansMealOffer;
+  const hasCourseTrainingSignal = /\bcourse(s)?\b/.test(text) && !courseMeansMealOffer &&
+    !/\bmain\s+course\s+(?:special|meal|menu)\b/.test(text);
   const hasWorkshopSignal =
     workshopIndicators.some((re) => re.test(text)) || hasCourseTrainingSignal;
   if (!hasWorkshopSignal) return null;
@@ -2164,16 +2179,7 @@ export function normalizeUnambiguousSourceStartTime(raw: string): string {
   return '';
 }
 
-export function hasUnresolvedEarlyMeridiem(item?: ExtractedItem): boolean {
-  if (!item) return false;
-  const printedTime = String(item.startTime || '').trim();
-  const evidence = `${printedTime} ${String((item as any).extractionReason || '')}`;
-  if (!/meridiem\s+unspecified|AM\s*\/\s*PM\s+unspecified|does\s+not\s+specify\s+AM\s+or\s+PM/i.test(evidence)) {
-    return false;
-  }
-  const hour = printedTime.match(/^([1-8])(?:\s*h\s*\d{2}|:\d{2})/i);
-  return Boolean(hour);
-}
+export {hasUnresolvedSourceMeridiem as hasUnresolvedEarlyMeridiem} from './sourceTimeConstraints.js';
 
 export function applyFestivalParentCategoryForRegression(event: FormattedEvent): FormattedEvent {
   return isGeneralFestivalParent(event)
@@ -2196,7 +2202,12 @@ export function isNonMealCommunityActivity(event: FormattedEvent, originalItem?:
     !/\b(?:workshop|lesson|course|training|learn\s+to|coaching|skills?\s+clinic|hockey|basketball|soccer|tennis|baseball|volleyball|football|golf|swimming|skating|athletic|sports?)\b/i.test(title);
   const produceJudging = /\b(?:pumpkins?|squash|gourds?|vegetables?|produce)\b/i.test(title) &&
     /\b(?:weigh[- ]?off|(?:growing|produce|vegetable)\s+(?:contest|judging))\b/i.test(title);
-  return civic || literary || foodDrive || careClinic || produceJudging;
+  const clothingDrive = /\b(?:coats?\s+for\s+kids|clothing\s+(?:drive|donations?|collection)|outerwear\s+(?:drive|donations?|collection))\b/i.test(text) &&
+    !/\b(?:dinner|breakfast|brunch|lunch|buffet|supper)\b/i.test(title);
+  const volunteerWork = /\bvolunteers?\b/i.test(title) &&
+    /\b(?:move|moving|chairs?|tables?|clean[- ]?up|set[- ]?up|prepare|preparation)\b/i.test(text) &&
+    !/\b(?:dinner|breakfast|brunch|lunch|buffet|supper|meal)\b/i.test(title);
+  return civic || literary || foodDrive || careClinic || produceJudging || clothingDrive || volunteerWork;
 }
 
 function applyCategoryCorrections(

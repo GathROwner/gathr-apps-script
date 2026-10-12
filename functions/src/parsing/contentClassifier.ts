@@ -204,6 +204,7 @@ CLASSIFICATION CATEGORIES:
    Includes entertainment, recreation, open swim/skate or bookable ice time, classes, clinics, workshops, studio tours, and public visits with advertised dates or hours.
    Examples: "Live music tonight 8pm", "Walk-in clinic today 9-4", "Studio tours Saturday and Sunday 10-5"
    A useful activity does not have to be entertainment, ticketed, or free. Do not mark hasEvents=false merely because it is a clinic, tour, or bookable activity.
+   A dated Rec Centre/Recreation Centre public opening window is recreational access even when its only title is Holiday Hours. Classify that access as EVENT; a nearby Town Offices closure does not negate it. Ordinary shop/office hours and a recreation closure with no access window remain excluded.
    Invitations to register for a sport/class or book an activity also qualify when their dates are only on a linked page. Missing dates are for extraction/validation to resolve, not a reason to deny the activity here. A generic downloadable guide or shopping advertisement is not itself an activity invitation.
    Organized, date-limited food trails, tastings, and festivals are public activities even without discounts. Do not confuse them with an ordinary featured menu. Mark hasEvents=true for the organized activity; mark hasFoodSpecials=true only when food/drink specials are also advertised.
    NOTE: If FACEBOOK EVENT DATA is present above, this is likely an EVENT even if the text is promotional/biographical.

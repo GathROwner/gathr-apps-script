@@ -5770,6 +5770,29 @@ function buildDuplicateEventUpdates(
   );
   const existingIsFoodSpecialCategory = isFoodSpecialCategory(existingCategoryForMerge);
   const incomingIsFoodSpecialCategory = isFoodSpecialCategory(incomingCategoryForMerge);
+  // A repeat announcement can correct an old OCR identity without repainting
+  // a different occurrence or a recurring family. Require the same publisher,
+  // venue, date, clock and at least two shared distinctive title words.
+  const oldTitle = asTrimmedString(existing.eventName || existing.name);
+  const newTitle = asTrimmedString(incoming.eventName || incoming.name);
+  const words = (s: string): string[] => s.toLowerCase().match(/[a-z]{3,}/g) || [];
+  const genericWords = new Set(['with','and','the','lunch','dinner','book','launch','signing','reading']);
+  const sharedTitleWords = new Set(words(newTitle).filter(w => !genericWords.has(w) && words(oldTitle).includes(w)));
+  const samePublisher = getEventSourceUrls(existing).some(url => getEventSourceUrls(incoming).includes(url));
+  const literaryKeeperCorrection = existingIsFoodSpecialCategory && incomingCategoryForMerge === 'Gatherings & Parties' &&
+    /\bbook\s+(?:launch|signing|reading)\b/i.test(newTitle) && sharedTitleWords.size >= 2 &&
+    samePublisher && Boolean(existing.venueId) && existing.venueId === incoming.venueId &&
+    Boolean(normalizeIsoDateValue(existing.startDate)) &&
+    normalizeIsoDateValue(existing.startDate) === normalizeIsoDateValue(incoming.startDate) &&
+    Boolean(toComparableTime(String(existing.startTime || ''))) &&
+    toComparableTime(String(existing.startTime || '')) === toComparableTime(String(incoming.startTime || '')) &&
+    !isRecurringLikeEvent(existing) && !isRecurringLikeEvent(incoming) &&
+    Date.parse(String(incoming.sourceTimestamp || '')) >= Date.parse(String(existing.sourceTimestamp || ''));
+  if (literaryKeeperCorrection) {
+    setField('eventName', incoming.eventName);
+    setField('name', incoming.name);
+    setField('category', incomingCategoryForMerge as EventData['category']);
+  }
   const incomingLooksLikeStrongEventCategory =
     Boolean(incomingCategoryForMerge) &&
     !incomingIsFoodSpecialCategory &&

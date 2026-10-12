@@ -3853,6 +3853,8 @@ EXTRACT ALL QUALIFYING SPECIALS:
 - A printed discount, named special, or explicitly advertised food/drink deal qualifies. A price alone on an ordinary stock, restock, product or menu list does not make every item a special. In a mixed post, extract only the named offer; other priced products do not inherit its eligibility.
 - An explicitly advertised daily special or deal also qualifies without a printed price. Extract only the named special or deal, not other menu items in the post.
 - A month-long featured menu item alone, such as a pizza of the month, does not qualify unless the source separately advertises it as a deal.
+- Bind each offer's name, price and serving window to that offer. A regular brunch menu plus $5 mimosas/Caesars yields the drink special, not a $5 brunch. Meal prices do not inherit the drink discount. Preserve printed meal-period words (lunch, brunch, dinner) in each relevant description even when no clock is shown.
+- If specials are inside a dated activity block (for example, Trivia Tuesday at 8 PM), retain that block's date/start in the special and quote the linking evidence. Do not assign whole-day venue hours or a time from a different block. Leave unprinted end clocks blank.
 
 TIME & EVIDENCE RULES (FOR SPECIALS — SAME AS EVENTS):
 - Read times ONLY from the text or image regions relevant to the special. Do not infer.
