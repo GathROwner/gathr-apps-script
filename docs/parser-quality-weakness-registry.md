@@ -279,3 +279,10 @@ Fresh prewrite backup/result/API evidence is linked from
 `luna-oct12-live-repair-plan.md`. This resolves the listed live records;
 automated tiny-film-date precision, Milton's unprinted AM/PM, Coats' inherited
 hours and the separate Q&A conflict remain explicit open observations.
+
+Subsequent Milton review: `luna-oct12-milton-hold-review.md` revises the AM/PM
+decision. The original chronological Wednesday cell and the hall's explicit
+afternoon public calendar justify lifting that hold. Prefer the newer October
+11 flyer's 13:30–15:30 for October 14; the August-updated calendar and October 1
+notice say 13:00–15:00, so retain the 30-minute source discrepancy. No live
+restoration or guard deployment was included in this read-only review.
