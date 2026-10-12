@@ -263,3 +263,10 @@ the different October 11 cohort; this is not a controlled whole-run comparison.
 Existing records remain unchanged until the exact backed-up live plan is
 approved. Coats' inferred venue hours, Milton's unresolved AM/PM and row 85's
 film/Q&A overlap remain explicit evidence limits.
+
+October 12 prevention release `e3a6a82` passed 625/625 backend tests and 33/33
+focused tests. Independently verified at 16:23:12 UTC: all three parsers ACTIVE,
+100% latest traffic, identical unchanged model/environment maps, common source
+hash `f67316274c8329b66bd307152e012f7d20d1bc02`. Exact revisions and commands are
+recorded in `luna-oct12-integrity-repair.md`. No historical record repair has
+been applied by this code deployment.

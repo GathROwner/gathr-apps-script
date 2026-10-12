@@ -82,6 +82,30 @@ this release will hold a fresh unsupported extraction rather than invent it.
 
 ## Release evidence
 
-Pending final build, tests, narrow deploy dry run, deployment and independent
-live source-hash/traffic/environment readback. Do not treat this section as a
-deployment confirmation until those results are appended.
+- Reproducible parser commit: `e3a6a82266a50b84b57c1bd2a82ccd22ba27b52b`.
+- Preflight at 16:15:38 UTC: zero active parser locks, October 12 processed
+  marker present, final batch completed and checkpoint absent. All three
+  serving functions matched the recorded pre-repair hash and latest traffic.
+- Both exact commands passed from this checkout's `functions/` directory:
+
+  ```powershell
+  firebase deploy --only "functions:gathr-functions:processDataset,functions:gathr-functions:processDatasetResume,functions:gathr-functions:processDatasetSelectedRows" --project gathr-migrated --dry-run
+  firebase deploy --only "functions:gathr-functions:processDataset,functions:gathr-functions:processDatasetResume,functions:gathr-functions:processDatasetSelectedRows" --project gathr-migrated
+  ```
+
+- Independent readback completed at 16:23:12 UTC. All three functions are ACTIVE
+  on common source hash `f67316274c8329b66bd307152e012f7d20d1bc02`, with exactly
+  100% traffic on their latest revisions:
+  - `processDataset`: `processdataset-00472-ziq`
+  - `processDatasetResume`: `processdatasetresume-00436-yeb`
+  - `processDatasetSelectedRows`: `processdatasetselectedrows-00428-wiv`
+- The complete captured Luna/stage environment maps match the before-release
+  maps exactly. Model/effort/percentage/cache settings are unchanged. Post-release
+  Firestore proof also has zero active locks, the processed marker, completed
+  batch and no checkpoint. This is release verification, not proof of a future
+  full production parse or repaired historical event documents.
+- Non-blocking CLI warning: installed `firebase-functions` is behind the latest
+  version. No dependency change was mixed into this repair.
+- Local evidence: `preflight-before.json`, `serving-before.json`,
+  `deploy-dry-run.txt`, `deploy.txt`, `preflight-after.json` and `serving-after.json`
+  in the repair artifact directory.
