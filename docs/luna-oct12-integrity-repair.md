@@ -73,9 +73,11 @@ observation, not approval to merge or delete either source's listing.
 
 ## Existing records
 
-No historical record mutation is implied by deployment. The exact plan and
-full backup are prepared separately in `luna-oct12-live-repair-plan.md`.
-Coats' existing venue-derived hours remain unconfirmed even after the proposed
+Deployment itself did not mutate historical records. Craig subsequently
+approved the exact backed-up plan in `luna-oct12-live-repair-plan.md`; its
+11 updates and 3 deletions passed all 14 Firestore postconditions and all
+14 public API/feed checks on October 12 at 16:29 UTC.
+Coats' existing venue-derived hours remain unconfirmed even after the approved
 category correction. Milton's actual AM/PM remains unconfirmed. The three
 other untimed meal offers exposed by the cohort check need serving-time evidence;
 this release will hold a fresh unsupported extraction rather than invent it.

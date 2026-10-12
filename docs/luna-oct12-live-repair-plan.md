@@ -1,6 +1,7 @@
-# October 12 exact live repair plan — awaiting approval
+# October 12 exact live repair plan — applied and verified
 
-No mutation has been applied. Guarded script:
+Craig approved this exact plan with “I approve” after the parser safeguards
+were deployed and independently verified. Guarded script:
 `firebase/repair-luna-oct12-integrity.mjs` (no arguments = dry run).
 
 Final dry run completed October 12 at 16:08 UTC after verifying no active parser.
@@ -63,3 +64,36 @@ detail/field checks and checks deleted IDs against that paginated feed.
 Do not broaden this plan to the disputed film cards, Q&A keeper, other untimed
 dinners, inherited historical category issues, Olde Dublin's profile 404 or
 general deduplication. Those remain explicitly separate observations.
+
+## Approved apply and verification
+
+Applied on October 12 using the exact 16:08:40 plan above. The script confirmed
+no active parser and unchanged target hashes, precise update timestamps,
+source siblings and related occurrences, then executed exactly **11 updates
+and 3 deletions** in one guarded atomic batch. All 14 Firestore postconditions
+passed. No media or venue documents were changed.
+
+- Fresh complete prewrite backup:
+  `functions/artifacts/luna-oct12-repair/live-backup-2026-10-12T16-28-44-613Z.json`
+- Apply result:
+  `functions/artifacts/luna-oct12-repair/live-result-2026-10-12T16-28-44-613Z.json`
+- Apply console log:
+  `functions/artifacts/luna-oct12-repair/apply-approved.txt`
+- Public API verification at 16:29:14 UTC:
+  `functions/artifacts/luna-oct12-repair/api-after.json`
+
+Public verification passed 14/14: all updates return 200 with the requested
+title/description/category/date/time/type fields; all three deletions return
+404 and are absent from the complete upcoming feed. The feed was fully
+paginated across 10 pages, containing 980 distinct IDs. Future updated records
+remain in the feed. This count is a whole-feed snapshot, not an assumption
+that three deletions must reduce the upcoming count by three; two removed
+records were already expired.
+
+No standalone expired-event feed probe was present in this checkout or the
+main parser repository. The target-specific check above explicitly queried
+each removed detail and the complete `includeExpired=false` feed.
+
+Milton remains withheld pending AM/PM confirmation. Coats' inherited hours
+and the separate film/Q&A conflict remain unresolved as described above;
+the unreliable automated film experiment was not deployed.

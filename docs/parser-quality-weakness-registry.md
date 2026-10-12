@@ -261,7 +261,7 @@ the different October 11 cohort; this is not a controlled whole-run comparison.
   the three prepared manual date corrections proof of automated prevention.
 
 Existing records remain unchanged until the exact backed-up live plan is
-approved. Coats' inferred venue hours, Milton's unresolved AM/PM and row 85's
+approved (completed below). Coats' inferred venue hours, Milton's unresolved AM/PM and row 85's
 film/Q&A overlap remain explicit evidence limits.
 
 October 12 prevention release `e3a6a82` passed 625/625 backend tests and 33/33
@@ -270,3 +270,12 @@ focused tests. Independently verified at 16:23:12 UTC: all three parsers ACTIVE,
 hash `f67316274c8329b66bd307152e012f7d20d1bc02`. Exact revisions and commands are
 recorded in `luna-oct12-integrity-repair.md`. No historical record repair has
 been applied by this code deployment.
+
+Craig subsequently approved the exact 14-record plan. On October 12 the guarded
+atomic repair applied 11 updates and 3 deletions, preserving media and venues.
+All 14 Firestore postconditions and all 14 public API checks passed; deleted
+IDs return 404 and are absent from the fully paginated 980-ID upcoming feed.
+Fresh prewrite backup/result/API evidence is linked from
+`luna-oct12-live-repair-plan.md`. This resolves the listed live records;
+automated tiny-film-date precision, Milton's unprinted AM/PM, Coats' inherited
+hours and the separate Q&A conflict remain explicit open observations.
