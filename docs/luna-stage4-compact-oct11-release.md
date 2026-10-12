@@ -121,7 +121,10 @@ call returned malformed JSON after 107.141 seconds and 18,878 output tokens,
 despite completed status and zero reasoning tokens. Existing bounded recovery
 split it into five/four items and preserved all nine. This is an observed Stage
 5 latency/output-format outlier, not Stage 4 speed evidence or a reason to raise
-the output cap. A single focused repeat is retained separately.
+the output cap. The focused fresh repeat preserved all nine occurrences in one
+call: 13.862 seconds, 2,151 output tokens, zero reasoning tokens, estimated USD
+0.00135952, with no retry or error. It is retained separately under
+`functions/artifacts/stage4-compact-oct11/toby-release-repeat/downstream`.
 
 ## Deployment commands and gates
 
@@ -138,6 +141,36 @@ Firebase's predeploy runs the standard `npm run build` again. The separate read-
 Firestore preflight and independent Functions/Cloud Run readback must pass; the
 post-readback requires every prior parser setting unchanged except the compact
 flag, all three ACTIVE on one hash, and 100% traffic on their latest revisions.
+
+### Completed production release
+
+Runtime commit: `27a3d08e259d8c08bf7509b9956d65af7775fae1`.
+The exact narrow dry run and deployment above both succeeded. Firebase's
+standard TypeScript predeploy build passed. The final preflight at
+`2026-10-12T01:32:45.731Z` found no active locks, the October 11 processed
+marker, completed final batch and no checkpoint.
+
+Independent Firebase Functions and Cloud Run readback at
+`2026-10-12T01:36:44.636Z` verified:
+
+| Function | Serving revision | State / traffic |
+|---|---|---|
+| processDataset | processdataset-00471-rin | ACTIVE / 100% latest |
+| processDatasetResume | processdatasetresume-00435-boz | ACTIVE / 100% latest |
+| processDatasetSelectedRows | processdatasetselectedrows-00427-niw | ACTIVE / 100% latest |
+
+All three serve source hash `208dd07dac4181c01dda572270ffe20f3401ed3a`.
+The readback asserted that every prior parser model/allocation/effort setting
+is unchanged except addition of `STAGE4_COMPACT_VALIDATION_ENABLED=true`.
+Stage 4 remains Nano low; accepted Stage 1/2/5 cache layouts are included.
+No other functions or historical event records were changed. Local deployment
+evidence is in `functions/artifacts/stage4-compact-release/deploy.log` and
+`serving-after.json`.
+
+Firebase warned that the existing `firebase-functions` dependency is outdated.
+No dependency upgrade was bundled into this release. Tomorrow's regular parse
+will provide actual cumulative runtime and cost evidence; replay savings are
+not a guarantee of a particular whole-run completion time.
 
 ## Rollback
 
