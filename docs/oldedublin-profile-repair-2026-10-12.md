@@ -69,8 +69,30 @@ commit `e1d1a02264962c88d2d73e944307ba4c82b580fb` in its own isolated worktree:
 It categorically rejects profilepictures and checks canonical venue references
 before deleting a post image, fails closed on reference-check errors, pins the
 storage generation, and logs cleanup outcomes. Backend commit `13c8d52` contains
-the guard and 14 passing backend utility tests. See the separate deployment
-evidence for the actual serving revision before treating it as deployed.
+the guard and 14 passing backend utility tests. The clean-worktree release script
+deployed only `gathr-backend` in `gathr-migrated/northamerica-northeast1`.
+Cloud Build `cf7a07a6-3fd4-422d-bb75-a163a3f845b7` succeeded; image digest:
+`sha256:e436793e8285d993fc8ca80a4c53e37602dbfe979a482c3096227fa5d5f08beb`.
+Independent Cloud Run readback confirmed revision `gathr-backend-00084-66r`
+at 100% traffic. API `/api/release` independently returned the exact full commit,
+sourceClean=true and that revision. Environment variables, resource limits,
+runtime identity, volume mounts and ports were unchanged. Prior revision
+`gathr-backend-00083-pnh` remains the rollback target.
+
+At 17:59 UTC a nonexistent `profilepictures/protection-contract-no-object-20261012.webp`
+cleanup request returned 403/protected_image. A nonexistent post-image control
+returned 200/Image already absent, proving the Firestore reference check and
+storage path were usable. These probes cannot delete an existing production
+asset. Olde Dublin's venue reference remained correct and its repaired image
+returned 200. Cloud Run logs independently recorded image_cleanup_blocked from
+the new revision. Artifacts: `backend-protection-after.json`,
+`backend-service-after.json`, `backend-config-verification.json`, and
+`backend-protection-logs.json`.
+
+Cloud Build reported existing dependency deprecations and 86 audit findings
+(6 low, 26 moderate, 47 high, 7 critical). No dependency upgrades or automated
+audit fixes were introduced in this focused repair. The local lockfile stayed
+unchanged. No parser deployment, model/prompt change, replay, or client OTA.
 
 The legacy backend in project `gathr-backend` still exists. Its retained last
 30 days show no upload-image or delete-image HTTP requests. It was not replaced
