@@ -4,6 +4,8 @@
 
 **Hold. Do not deploy the cache-only layout.** The complete frozen cohort saved 7.15% overall with essentially unchanged aggregate API time, but decisions and preserved fields were not equivalent. A targeted repeat was more expensive and slower and triggered two validation fallbacks. There is no reliable combined quality, speed and cost case for this change.
 
+Craig accepted this decision on October 11 and directed that Stage 4 cache optimization not proceed. He asked to record and explain the smaller-validation-response suggestion. That proposal is deferred, not approved for implementation or deployment; see [the compact-response proposal](stage4-compact-validation-response-proposal.md).
+
 Production Stage 4 remains GPT-5 Nano low. No parser runtime file, model allocation, live record, queue or traffic was changed by this audit. Stage 3 caching remains held; accepted Stage 1, 2 and 5 caching work is preserved.
 
 ## Baseline and scope
