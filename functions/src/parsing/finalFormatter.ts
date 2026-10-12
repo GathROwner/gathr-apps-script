@@ -1244,6 +1244,20 @@ export function rehydrateFormattedEventMetadata(
   const nextEvent = { ...event } as FormattedEvent;
   let changed = false;
 
+  // Compact Stage 4 may retain a genuine dated activity pending time evidence.
+  // Formatting must not turn that deliberate unknown into an invented clock.
+  // The subsequent time resolver/completeness gate still owns enrichment.
+  if ((originalItem as Record<string, unknown> | undefined)?._stage4NeedsTimeEnrichment === true &&
+      !normalizeUnambiguousSourceStartTime(String(originalItem?.startTime || ''))) {
+    (nextEvent as unknown as Record<string, unknown>)._stage4NeedsTimeEnrichment = true;
+    nextEvent.startTime = '';
+    if (!normalizeUnambiguousSourceStartTime(String(originalItem?.endTime || ''))) nextEvent.endTime = '';
+    nextEvent.timeFlags = cloneFormattedTimeFlags(originalItem?.timeFlags) || {
+      start: { source: 'none', evidence: '' }, end: { source: 'none', toClose: false, evidence: '' },
+    };
+    changed = true;
+  }
+
   // A calendar/schedule cell with its own printed month/day and clock time is
   // one dated slot. Stage 5 can mistake another weekday in the caption (such
   // as a registration deadline) for recurrence and move every slot onto that

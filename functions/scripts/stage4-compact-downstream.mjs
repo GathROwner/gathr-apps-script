@@ -22,7 +22,8 @@ fs.mkdirSync(dir);
 const read=p=>JSON.parse(fs.readFileSync(p,'utf8'));
 const records=fs.readFileSync(input+'/results.jsonl','utf8').trim().split('\n').map(JSON.parse);
 const cohort=read(input+'/cohort.json');
-const ids=['oct10-291','oct11-20','oct11-37','oct11-64','oct11-127','oct11-234','oct11-294','oct11-332'];
+const ids=process.argv.find(x=>x.startsWith('--cases='))?.slice(8).split(',')||
+ ['oct10-291','oct11-20','oct11-37','oct11-64','oct11-127','oct11-234','oct11-294','oct11-332'];
 const selected=ids.map(id=>({source:cohort.find(c=>c.caseId===id),validation:records.find(r=>r.caseId===id&&r.arm==='compact')}));
 assert(selected.every(c=>c.source&&c.validation?.output?.length&&!c.validation.metadata._compactValidationHold));
 Object.assign(process.env,read('artifacts/luna-stage2-cache-release/serving-after.json').rows[0].env,{DRY_RUN:'true'});

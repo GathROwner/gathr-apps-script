@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {createRequire} from 'node:module';
-import {bindCompactStage4Sources, compactStage4Enabled, compactStage4Prompt, parseCompactStage4Response, getCompactStage4Hold, removeExactCompactDuplicates} from '../lib/parsing/compactStage4.js';
+import {bindCompactStage4Sources, compactStage4Enabled, compactStage4Prompt, compactStage4FormatForSources, isProductFlavourLineupOnly, parseCompactStage4Response, getCompactStage4Hold, removeExactCompactDuplicates} from '../lib/parsing/compactStage4.js';
 
 process.env.OPENAI_API_KEY='offline-stage4-tests-not-a-key';
 process.env.STAGE4_RESPONSES_REASONING_EFFORT='low';
@@ -184,4 +184,101 @@ test('replay consumer records a hold and never reaches Stage 5 or alternate mode
   assert.equal(result.length,0);assert.equal(requests.length,2);assert(requests.every(r=>r.model==='gpt-5-nano'));
   assert(artifacts.some(a=>a.stage4ValidationHold?.reason==='malformed_json'));
   assert(skips.some(s=>s.stage==='stage4'&&s.reason.includes('Compact validation held')));
+});
+
+test('compact policy retains dated activities pending time without changing source evidence',async()=>{
+  const source=item(4,{name:'Corn Maze',startTime:'unknown',endTime:'unknown',description:'Public family activity on October 17.'});
+  const before=structuredClone(source);
+  const result=await run([source],body=>{
+    const prompt=body.input[0].content[0].text;
+    const rules=prompt.slice(prompt.lastIndexOf('\nVALIDATION RULES:\n'));
+    assert(!rules.includes('- startTime (required)'));
+    assert(rules.includes('Missing startTime alone is not grounds to reject'));
+    assert(rules.includes('ordinary appointments'));
+    return {text:text(inputItems(body).map(i=>decision(i,{reason:'Dated public activity; time needs enrichment.'})))};
+  });
+  assert.deepEqual(source,before);
+  assert.deepEqual(result[0],{...before,_pipelineTotalStage3:1,_stage4NeedsTimeEnrichment:true});
+});
+
+test('pending-time activity cannot gain invented formatting clocks and remains subject to completeness',async()=>{
+  const {rehydrateFormattedEventMetadata}=await import('../lib/parsing/finalFormatter.js');
+  const {enforceDateTimeCompleteness}=await import('../lib/parsing/postParser.js');
+  const source=item(4,{name:'Corn Maze',startTime:'unknown',endTime:'unknown',_stage4NeedsTimeEnrichment:true});
+  const formatted={name:source.name,startDate:source.date,endDate:source.date,startTime:'09:00',endTime:'17:00',
+    isEvent:'Yes',isFoodSpecial:'No',category:'Gatherings & Parties',description:'Public family activity',
+    timeResolution:{},timeFlags:{start:{source:'explicit',evidence:'invented'},end:{source:'explicit',evidence:'invented',toClose:false}}};
+  const restored=rehydrateFormattedEventMetadata(formatted,source);
+  assert.equal(restored.startTime,'');assert.equal(restored.endTime,'');assert.equal(restored.timeFlags.start.source,'none');
+  assert.equal(enforceDateTimeCompleteness([restored],'2026-10-10T12:00:00Z','America/Halifax').length,0);
+  const timed=rehydrateFormattedEventMetadata(formatted,item(4));assert.equal(timed.startTime,'09:00');
+});
+
+test('compact unknown-time policy never reverses a rejection for inventory, closures or missing dates',async()=>{
+  for(const extra of [{name:'Pumpkins in stock'}, {name:'Pool closure'}, {name:'Corn Maze',date:''}]){
+    const result=await run([item(1,{...extra,startTime:'unknown'})],body=>({text:text(inputItems(body).map(i=>decision(i,{decision:'REJECTED',reason:'Not a valid dated public activity.'})))}));
+    assert.equal(result.length,0);
+  }
+});
+
+test('identity schema restricts copied values and a retry supplies the original bindings',async()=>{
+  const source=item(9,{venue:''});const format=compactStage4FormatForSources([source]);
+  const props=format.schema.properties.decisions.items.properties;
+  assert.deepEqual(props.sourceItemIndex.enum,[9]);assert.deepEqual(props.sourceIdentity.properties.venue.enum,['']);
+  const result=await run([source],(body,n)=>({text:text([decision(inputItems(body)[0],n===1?{sourceIdentity:{name:source.name,date:source.date,startTime:source.startTime,venue:'Invented venue'}}:{})])}));
+  assert.equal(result.length,1);assert.equal(requests.length,2);
+  assert(requests[1].input[0].content[0].text.includes('RETRY CONTRACT REPAIR:'));
+  assert(requests[1].input[0].content[0].text.endsWith(JSON.stringify([{sourceItemIndex:9,sourceIdentity:{name:source.name,date:source.date,startTime:source.startTime,venue:''}}])));
+});
+
+test('product flavour line-ups stay inventory while public tasting/judging remains eligible',async()=>{
+  const stock=item(1,{name:'Customer Flavour Competition',description:'Four new competitors have entered the lineup.'});
+  assert(isProductFlavourLineupOnly(stock));
+  for(const description of ['Four new competitors; public judging at noon.', 'Four new flavours; come taste and vote.'])
+    assert(!isProductFlavourLineupOnly({...stock,description}));
+  assert(!isProductFlavourLineupOnly(item(1,{name:'Community pie competition',description:'Public baking contest.'})));
+  const result=await run([stock],body=>({text:text(inputItems(body).map(i=>decision(i)))}));assert.equal(result.length,0);
+});
+
+test('a contest submission cutoff cannot become its event start; real dated sessions survive',async()=>{
+  const {isSubmissionDeadlineOnly}=await import('../lib/parsing/compactStage4.js');
+  const cutoff=item(1,{name:'Scary Story Writing Contest',startTime:'unknown',description:'Submission DEADline: 11:59 pm Thursday, October 15.'});
+  assert(isSubmissionDeadlineOnly(cutoff));
+  assert(!isSubmissionDeadlineOnly(item(2,{name:'Writing workshop',description:'Public class at 4pm. Registration deadline is Wednesday.'})));
+  const result=await run([cutoff],body=>({text:text(inputItems(body).map(i=>decision(i)))}));assert.equal(result.length,0);
+});
+
+test('annual single-date activities are one-offs while affirmative daily series remain unchanged',async()=>{
+  const {isAnnualSingleDateWithoutSeries}=await import('../lib/parsing/compactStage4.js');
+  const annual=item(1,{name:'33rd Annual Pumpkin Weigh-Off',recurringPattern:'daily'});
+  assert(isAnnualSingleDateWithoutSeries(annual));
+  for(const extra of [{description:'Annual festival open daily.'},{totalOccurrences:3},{endDate:'2026-10-19'},{date:''}])
+    assert(!isAnnualSingleDateWithoutSeries({...annual,...extra}));
+  const result=await run([annual],body=>({text:text(inputItems(body).map(i=>decision(i)))}));assert.equal(result[0].recurringPattern,'none');
+});
+
+test('real events with registration details remain eligible; closures and ordinary menu launches do not',async()=>{
+  const {isSubmissionDeadlineOnly,isPublicRecreationClosure,isOrdinaryMenuLaunch}=await import('../lib/parsing/compactStage4.js');
+  assert(!isSubmissionDeadlineOnly(item(1,{name:'TEAM RELAY',description:'Register your team; registration deadline is October 14.'})));
+  assert(isPublicRecreationClosure(item(1,{name:'All pools closed for swimming lessons'})));
+  assert(!isPublicRecreationClosure(item(1,{name:'Lane swim',description:'Pool closes later at 5pm.'})));
+  assert(isOrdinaryMenuLaunch(item(1,{name:'Fall Menu and Local Specials',description:'Fall menu and local specials launch this Sunday.'})));
+  assert(!isOrdinaryMenuLaunch(item(1,{name:'Fall Menu',description:'New menu launches alongside a daily $10 lunch special.'})));
+  assert(!isOrdinaryMenuLaunch(item(1,{name:'New Menu Launch Party',description:'Public tasting with live music.'})));
+  const result=await run([item(1,{name:'All pools closed'}),item(2,{name:'Fall Menu',description:'Our fall menu launches Sunday.'})],body=>({text:text(inputItems(body).map(i=>decision(i)))}));
+  assert.equal(result.length,0);
+});
+
+test('untimed compact events cannot acquire publication time through either downstream fallback',async()=>{
+  const {rehydrateFormattedEventMetadata}=await import('../lib/parsing/finalFormatter.js');
+  const {applySpecialTimeFallbacks,enforceDateTimeCompleteness}=await import('../lib/parsing/postParser.js');
+  const source=item(1,{date:'2026-10-10',startTime:'unknown',endTime:'unknown',_stage4NeedsTimeEnrichment:true});
+  const event=rehydrateFormattedEventMetadata({name:'Tonight concert',startDate:source.date,endDate:source.date,
+    startTime:'',endTime:'',isEvent:'Yes',isFoodSpecial:'No',category:'Live Music',description:'Join us tonight',timeResolution:{}},source);
+  assert.equal(event._stage4NeedsTimeEnrichment,true);
+  const checked=applySpecialTimeFallbacks([event],'2026-10-10T12:00:00Z','America/Halifax');
+  assert.equal(checked[0].startTime,'');
+  assert.equal(enforceDateTimeCompleteness(checked,'2026-10-10T12:00:00Z','America/Halifax').length,0);
+  const resolved={...event,startTime:'19:30',endTime:'21:30',timeFlags:{start:{source:'explicit',evidence:'Linked venue page: 7:30pm'},end:{source:'explicit',evidence:'9:30pm',toClose:false}}};
+  assert.equal(enforceDateTimeCompleteness([resolved],'2026-10-10T12:00:00Z','America/Halifax').length,1);
 });

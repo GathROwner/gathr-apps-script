@@ -3102,7 +3102,7 @@ export function applySpecialTimeFallbacks(
       const hasStartClock = ev.startTime && String(ev.startTime).trim() !== '';
 
       if (
-        (isSpecial || (isEventLikely && hasTodayCue)) &&
+        (isSpecial || (isEventLikely && hasTodayCue && !(ev as any)._stage4NeedsTimeEnrichment)) &&
         !hasStartClock &&
         !hasExplicitStart &&
         postedHHMM &&
@@ -3351,7 +3351,7 @@ export function enforceDateTimeCompleteness(
     // A post-time fallback is only defensible for a same-day offer. Reusing the
     // publication time on a later calendar date invents an event start time.
     if (!ev.startTime && postedHHMM && ev.startDate === postedDate &&
-        (isSpecial || hasTodayCue || isSemanticStart)) {
+        (isSpecial || (!(ev as any)._stage4NeedsTimeEnrichment && (hasTodayCue || isSemanticStart)))) {
       ev.startTime = postedHHMM;
       ev.timeFlags = ev.timeFlags || {
         start: { source: 'none', evidence: '' },

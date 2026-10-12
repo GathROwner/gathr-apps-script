@@ -25,7 +25,10 @@ import {
 } from './runtimeConfig.js';
 import { logger } from '../utils/logger.js';
 import { bindCompactStage4Sources, compactStage4Enabled, compactStage4Prompt,
-  compactStage4ResponseFormat, parseCompactStage4Response, heldCompactStage4,
+  compactStage4FormatForSources, compactStage4RetryPrompt,
+  isProductFlavourLineupOnly, isSubmissionDeadlineOnly, isAnnualSingleDateWithoutSeries,
+  isPublicRecreationClosure, isOrdinaryMenuLaunch,
+  parseCompactStage4Response, heldCompactStage4,
   getCompactStage4Hold, removeExactCompactDuplicates, CompactStage4Error } from './compactStage4.js';
 
 // Initialize OpenAI client lazily
@@ -600,7 +603,9 @@ export async function performSecondaryValidation(
       let failure = 'invalid_response';
       for (let attempt = 1; attempt <= 2; attempt++) {
         try {
-          const response = await callGPT(compactStage4Prompt(prompt), cfg, rawData.length, true);
+          const basePrompt = compactStage4Prompt(prompt);
+          const requestPrompt = attempt === 1 ? basePrompt : compactStage4RetryPrompt(basePrompt, rawData, failure);
+          const response = await callGPT(requestPrompt, cfg, rawData.length, true, rawData);
           validationResult = parseCompactStage4Response(response, rawData);
           break;
         } catch (error) {
@@ -767,6 +772,19 @@ export async function performSecondaryValidation(
           operatingHoursOnlyRejectCount++;
         }
 
+        if (compact && decision === 'KEPT' && isProductFlavourLineupOnly(item)) {
+          decision = 'REJECTED';
+          logger.info('Stage 4 excluded product-flavour lineup without public participation', { name: item.name });
+        }
+        if (compact && decision === 'KEPT' && isSubmissionDeadlineOnly(item)) {
+          decision = 'REJECTED';
+          logger.info('Stage 4 excluded submission deadline without an activity session', { name: item.name });
+        }
+        if (compact && decision === 'KEPT' && (isPublicRecreationClosure(item) || isOrdinaryMenuLaunch(item))) {
+          decision = 'REJECTED';
+          logger.info('Stage 4 excluded recreation closure or ordinary menu launch', { name: item.name });
+        }
+
         logger.debug(`Item ${index + 1}: "${item.name}"`, {
           decision,
           reason: reason?.substring(0, 100),
@@ -803,6 +821,15 @@ export async function performSecondaryValidation(
         }
 
         if (decision === 'KEPT') {
+          if (compact && isAnnualSingleDateWithoutSeries(item)) {
+            item.recurringPattern = 'none';
+            recurringCorrectionsCount++;
+            logger.info('Stage 4 preserved annual single-date activity as one-off', { name: item.name, date: item.date });
+          }
+          if (compact && /^\d{4}-\d{2}-\d{2}$/.test(String(item.date || '')) &&
+              !hasNonEmptyValue(item.startTime)) {
+            item._stage4NeedsTimeEnrichment = true;
+          }
           keptItems.push(item);
         } else {
           rejectedItems.push({ item, reason });
@@ -819,6 +846,7 @@ export async function performSecondaryValidation(
       }
     }
     logger.info(`Stage 4 Result: ${keptItems.length} kept, ${rejectedItems.length} rejected`, {
+      pendingTimeEnrichment: keptItems.filter(item => item._stage4NeedsTimeEnrichment).length,
       recurringCorrections: recurringCorrectionsCount,
       happyHourNoPriceOverrides: happyHourNoPriceOverrideCount,
       calendarDealAllDayOverrides: calendarDealAllDayOverrideCount,
@@ -1321,7 +1349,7 @@ function isQuoteEscaped(str: string, index: number): boolean {
 /**
  * Call GPT for validation
  */
-async function callGPT(prompt: string, config: ParsingConfig, batchItemCount: number, compact = false): Promise<string> {
+async function callGPT(prompt: string, config: ParsingConfig, batchItemCount: number, compact = false, compactSources: ExtractedItem[] = []): Promise<string> {
   const client = getOpenAIClient();
   const explicitModelOverride = String(config.stage4ModelOverride || '').trim();
   const model = explicitModelOverride || resolveStageModel(config.gptModelFast, 'STAGE4_MODEL_OVERRIDE');
@@ -1372,7 +1400,7 @@ async function callGPT(prompt: string, config: ParsingConfig, batchItemCount: nu
         input: [{ role: 'user', content: [{ type: 'input_text', text: prompt }] }],
         max_output_tokens: stage4ResponsesMaxTokens,
         ...(stage4ReasoningEffort ? { reasoning: { effort: stage4ReasoningEffort } } : {}),
-        ...(compact ? { text: { format: compactStage4ResponseFormat } } : {}),
+        ...(compact ? { text: { format: compactStage4FormatForSources(compactSources) } } : {}),
       }, compact ? { maxRetries: 0, timeout: 90000 } : undefined);
       const durationMs = Date.now() - callStart;
       logger.info('Timing', {

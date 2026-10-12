@@ -1,5 +1,9 @@
 # Compact Stage 4 responses — October 11, 2026
 
+Historical experiment record. Craig subsequently approved fixing the blockers
+and deploying after validation. The subsequent fixes, final measurements and
+release status are recorded in [the release record](luna-stage4-compact-oct11-release.md).
+
 ## Decision
 
 **Implemented locally, tested, and held disabled. Do not deploy or enable yet.**
