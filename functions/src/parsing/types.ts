@@ -7,7 +7,7 @@ import type { ModelSpatialEvidence, SpatialEventClassification } from './spatial
 import type { CalendarInventoryAdditionDecision, CalendarInventoryListing,
   CalendarInventoryReconciliation } from './calendarInventoryReconciliation.js';
 import type { Stage2ScoreRoutingDecision } from './stage2Routing.js';
-import type { SourceTimeConstraint } from './sourceTimeConstraints.js';
+import type { SourceTimeConstraint, SourceMeridiemResolution } from './sourceTimeConstraints.js';
 
 // ===================
 // Venue/Hours Types (also in main types, duplicated here for module independence)
@@ -383,6 +383,7 @@ export type RecurringPattern =
 
 export interface RecurrenceScheduleFields {
   _sourceTimeConstraint?: SourceTimeConstraint;
+  _sourceMeridiemResolution?: SourceMeridiemResolution;
   recurringDaysOfWeek?: RecurringWeekday[];
   recurringWeekdaySequence?: RecurringWeekday[];
   recurringWeekInterval?: number;

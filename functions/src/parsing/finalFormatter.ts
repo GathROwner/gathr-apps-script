@@ -1244,6 +1244,18 @@ export function rehydrateFormattedEventMetadata(
 ): FormattedEvent {
   const nextEvent = { ...event } as FormattedEvent;
   let changed = false;
+  const meridiem = originalItem?._sourceMeridiemResolution;
+  if (meridiem && meridiem.date === originalItem?.date &&
+      meridiem.startTime === originalItem.startTime && meridiem.endTime === originalItem.endTime) {
+    nextEvent._sourceMeridiemResolution = {...meridiem};
+    nextEvent.startDate = meridiem.date;
+    nextEvent.endDate = meridiem.date;
+    nextEvent.startTime = meridiem.startTime;
+    nextEvent.endTime = meridiem.endTime;
+    nextEvent.timeFlags = cloneFormattedTimeFlags(originalItem.timeFlags);
+    if (nextEvent._sourceTimeConstraint?.reason === 'unresolved_meridiem') delete nextEvent._sourceTimeConstraint;
+    changed = true;
+  }
   if (originalItem?._sourceTimeConstraint) {
     changed = true;
     nextEvent._sourceTimeConstraint = {...originalItem._sourceTimeConstraint};

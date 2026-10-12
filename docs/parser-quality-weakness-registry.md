@@ -286,3 +286,13 @@ afternoon public calendar justify lifting that hold. Prefer the newer October
 11 flyer's 13:30–15:30 for October 14; the August-updated calendar and October 1
 notice say 13:00–15:00, so retain the 30-minute source discrepancy. No live
 restoration or guard deployment was included in this read-only review.
+
+Craig approved the Milton follow-up. The original October 14 knitting record
+`pgViRsWspKTtSODqvrN6` was restored at 13:30–15:30 with implied time evidence;
+fresh Firestore checks and public detail/feed verification passed (exactly one
+occurrence). A narrow chronological same-day/image anchor guard resolves this
+range while retaining genuinely ambiguous holds. Build, 30 focused tests,
+631 backend tests, captured-cohort playback and an actual three-item Stage 4/5
+API replay passed. See `luna-oct12-milton-hold-review.md` for the older-calendar
+30-minute discrepancy, backup and restoration evidence, and
+`luna-oct12-milton-context-release.md` for deployment readback.
