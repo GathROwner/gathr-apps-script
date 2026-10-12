@@ -24,6 +24,9 @@ import {
   resolveStageModel,
 } from './runtimeConfig.js';
 import { logger } from '../utils/logger.js';
+import { bindCompactStage4Sources, compactStage4Enabled, compactStage4Prompt,
+  compactStage4ResponseFormat, parseCompactStage4Response, heldCompactStage4,
+  getCompactStage4Hold, removeExactCompactDuplicates, CompactStage4Error } from './compactStage4.js';
 
 // Initialize OpenAI client lazily
 let openaiClient: OpenAI | null = null;
@@ -520,7 +523,13 @@ export async function performSecondaryValidation(
   skipBatching = false
 ): Promise<ExtractedItem[]> {
   const cfg = { ...DEFAULT_PARSING_CONFIG, ...config };
+  const compact = compactStage4Enabled(cfg);
   rawData = alignWeeklySiblingAnchors(rawData);
+  if (compact) {
+    try { rawData = bindCompactStage4Sources(rawData); }
+    catch { return heldCompactStage4('invalid_input_source_identity', 0); }
+    if (!rawData.length) return [];
+  }
 
   // Capture the original Stage 3 count before any GPT processing
   const originalStage3Count = rawData.length;
@@ -551,6 +560,8 @@ export async function performSecondaryValidation(
         (chunk) => performSecondaryValidation(chunk, userName, timestamp, config, true)
       ));
       for (const [groupIndex, result] of results.entries()) {
+        const compactHold = getCompactStage4Hold(result);
+        if (compactHold) return heldCompactStage4(`chunk_${start + groupIndex + 1}:${compactHold.reason}`, compactHold.attempts);
         const index = start + groupIndex;
         for (const item of result) {
           item._pipelineTotalStage3 = originalStage3Count;
@@ -563,6 +574,10 @@ export async function performSecondaryValidation(
           fallbackReasons.push(`chunk_${index + 1}:${(result as any)._validationFallbackReason}`);
         }
       }
+    }
+    if (compact) {
+      const unique = removeExactCompactDuplicates(kept);
+      kept.splice(0, kept.length, ...unique);
     }
     Object.assign(kept, aggregate);
     if (fallbackReasons.length) (kept as any)._validationFallbackReason = fallbackReasons.join(',');
@@ -580,14 +595,31 @@ export async function performSecondaryValidation(
   const prompt = createValidationPrompt(rawData, userName, timestamp, currentYear);
 
   try {
-    const response = await callGPT(prompt, cfg, rawData.length);
-    const validationResult = parseSecondaryValidationResponse(response);
+    let validationResult: SecondaryValidationResult;
+    if (compact) {
+      let failure = 'invalid_response';
+      for (let attempt = 1; attempt <= 2; attempt++) {
+        try {
+          const response = await callGPT(compactStage4Prompt(prompt), cfg, rawData.length, true);
+          validationResult = parseCompactStage4Response(response, rawData);
+          break;
+        } catch (error) {
+          failure = error instanceof CompactStage4Error ? error.code : 'api_error';
+          logger.warn('Stage 4 compact validation attempt failed', { ...cfg.diagnosticContext, attempt, reason: failure });
+          if (attempt === 2) return heldCompactStage4(failure, attempt);
+        }
+      }
+    } else {
+      const response = await callGPT(prompt, cfg, rawData.length);
+      validationResult = parseSecondaryValidationResponse(response);
+    }
     const responseCountMismatch = !validationResult._parseError &&
       validationResult.validatedItems.length !== originalStage3Count;
     const responseIdentityCorrupted = !validationResult._parseError &&
       !responseCountMismatch &&
       hasMissingValidatedSourceIdentity(rawData, validationResult.validatedItems);
     if (validationResult._parseError || responseCountMismatch || responseIdentityCorrupted) {
+      if (compact) return heldCompactStage4('postprocessing_identity_check_failed', 0);
       logger.warn('Stage 4: Falling back to raw data due to invalid validation response', {
         parseError: Boolean(validationResult._parseError),
         expectedCount: originalStage3Count,
@@ -665,7 +697,7 @@ export async function performSecondaryValidation(
 
         // Contradiction detection: GPT sometimes sets decision="REJECTED" but the reasoning
         // clearly states the item should be kept
-        if (decision === 'REJECTED' && reason) {
+        if (!compact && decision === 'REJECTED' && reason) {
           const reasonLower = String(reason).toLowerCase();
           const keptIndicators = [
             'should be kept',
@@ -778,6 +810,14 @@ export async function performSecondaryValidation(
       });
     }
 
+    if (compact) {
+      const unique = removeExactCompactDuplicates(keptItems);
+      if (unique.length !== keptItems.length) {
+        const dropped = keptItems.filter(item => !unique.includes(item));
+        rejectedItems.push(...dropped.map(item => ({item, reason: 'Exact duplicate of an identical timed one-off in this source batch.'})));
+        keptItems.splice(0, keptItems.length, ...unique);
+      }
+    }
     logger.info(`Stage 4 Result: ${keptItems.length} kept, ${rejectedItems.length} rejected`, {
       recurringCorrections: recurringCorrectionsCount,
       happyHourNoPriceOverrides: happyHourNoPriceOverrideCount,
@@ -799,6 +839,7 @@ export async function performSecondaryValidation(
     return keptItems;
   } catch (error) {
     logger.error('Stage 4 validation error', error);
+    if (compact) return heldCompactStage4('validation_processing_error', 0);
     logger.warn('Returning original data due to validation error');
     const deterministicFallback = applyDeterministicStage4Rejects(
       rawData.map(item => ({ ...item })),
@@ -1280,7 +1321,7 @@ function isQuoteEscaped(str: string, index: number): boolean {
 /**
  * Call GPT for validation
  */
-async function callGPT(prompt: string, config: ParsingConfig, batchItemCount: number): Promise<string> {
+async function callGPT(prompt: string, config: ParsingConfig, batchItemCount: number, compact = false): Promise<string> {
   const client = getOpenAIClient();
   const explicitModelOverride = String(config.stage4ModelOverride || '').trim();
   const model = explicitModelOverride || resolveStageModel(config.gptModelFast, 'STAGE4_MODEL_OVERRIDE');
@@ -1331,7 +1372,8 @@ async function callGPT(prompt: string, config: ParsingConfig, batchItemCount: nu
         input: [{ role: 'user', content: [{ type: 'input_text', text: prompt }] }],
         max_output_tokens: stage4ResponsesMaxTokens,
         ...(stage4ReasoningEffort ? { reasoning: { effort: stage4ReasoningEffort } } : {}),
-      });
+        ...(compact ? { text: { format: compactStage4ResponseFormat } } : {}),
+      }, compact ? { maxRetries: 0, timeout: 90000 } : undefined);
       const durationMs = Date.now() - callStart;
       logger.info('Timing', {
         step: 'gpt_call',
@@ -1351,6 +1393,7 @@ async function callGPT(prompt: string, config: ParsingConfig, batchItemCount: nu
         requestedMaxOutputTokens: stage4ResponsesMaxTokens,
         reasoningTokens: Number(response.usage?.output_tokens_details?.reasoning_tokens || 0),
         visibleOutputChars: messageContent.length,
+        ...(compact ? { stage4ValidationFormat: 'compact_v1' } : {}),
       };
       logger.info('Stage 4 Responses diagnostics', { model, durationMs, ...usage, ...diagnostics });
       await emitGptUsage(config, {
@@ -1368,9 +1411,11 @@ async function callGPT(prompt: string, config: ParsingConfig, batchItemCount: nu
         tokens: usage.totalTokens,
       });
 
+      if (compact && response.status !== 'completed') throw new CompactStage4Error(`response_${response.status || 'unknown'}`);
       return messageContent || '';
     }
 
+    if (compact) throw new CompactStage4Error('unsupported_model_endpoint');
     const callStart = Date.now();
     const response = await client.chat.completions.create({
       model,

@@ -49,6 +49,7 @@ import { enrichEventsFromTicketLinks } from './ticketLinkEnricher.js';
 import { enrichEventsFromCalendarLinks } from './calendarLinkEnricher.js';
 import { enrichEventsFromVenueWebsite } from './websiteDetailEnricher.js';
 import { performSecondaryValidation } from './secondaryValidator.js';
+import { getCompactStage4Hold } from './compactStage4.js';
 import { performFinalFormatting } from './finalFormatter.js';
 import { reconcileCaptionOnlyWeeklyEvents } from './captionOnlyWeekly.js';
 import { reconcileRaceSchedule } from './raceScheduleReconciler.js';
@@ -741,6 +742,12 @@ async function replayPostDataFromArtifactsCore(
     });
   }
 
+  const compactReplayHold = getCompactStage4Hold(validatedData);
+  if (compactReplayHold) {
+    await emitStageArtifacts(cfg, { source: 'replay', stage4ValidationHold: compactReplayHold, stage4Items: [] });
+    await reportSkipReason({ stage: 'stage4', reason: `Compact validation held: ${compactReplayHold.reason}` });
+    return [];
+  }
   if (!validatedData || validatedData.length === 0) {
     await reportSkipReason({
       stage: 'stage4',
@@ -2050,6 +2057,13 @@ async function parsePostDataCore(
       validatedCount: validatedData?.length || 0,
     });
 
+    const compactHold = getCompactStage4Hold(validatedData);
+    if (compactHold) {
+      await emitStageArtifacts(cfg, { source: 'live', stage4ValidationHold: compactHold, stage4Items: [] });
+      await reportSkipReason({ stage: 'stage4', reason: `Compact validation held: ${compactHold.reason}` });
+      return [];
+    }
+
     if ((!validatedData || validatedData.length === 0) && stage3CanFallback && !fallbackAttempted && !sourceDateHoldEncountered) {
       fallbackAttempted = true;
       logger.warn('Stage 3 fallback retry triggered (Stage 4 validation failed)', {
@@ -2084,6 +2098,12 @@ async function parsePostDataCore(
       }
     }
 
+    const compactRetryHold = getCompactStage4Hold(validatedData);
+    if (compactRetryHold) {
+      await emitStageArtifacts(cfg, { source: 'live', stage4ValidationHold: compactRetryHold, stage4Items: [] });
+      await reportSkipReason({ stage: 'stage4', reason: `Compact validation held: ${compactRetryHold.reason}` });
+      return [];
+    }
     if (!validatedData || validatedData.length === 0) {
       if (lunaCanarySelected) return retryCanaryWithLegacy('stage4_no_items');
       logger.info('No items passed secondary validation');

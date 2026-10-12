@@ -113,6 +113,7 @@ export interface ParseStageArtifactsSnapshot {
   stage5Pilot?: { eligible: boolean; selected: boolean; percent: number; model: string; reasoningEffort: string };
   stage3InputKind?: 'text_only' | 'image';
   stage4Items?: ExtractedItem[];
+  stage4ValidationHold?: { format: 'compact_v1'; reason: string; attempts: number };
   stage37TicketUrl?: string;
 }
 
@@ -228,6 +229,8 @@ export interface ParsingConfig {
     handler?: (snapshot: CalendarInventoryAuditSnapshot) => void | Promise<void>;
   };
   stage4ModelOverride?: string;
+  /** Disabled by default: strict identity-bound validation without copying source records. */
+  stage4CompactValidation?: boolean;
   stage5ModelOverride?: string;
   stage5ReasoningEffortOverride?: 'none' | 'minimal' | 'low' | 'medium' | 'high';
   /** Validate large inventories in bounded batches without changing the model. */

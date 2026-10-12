@@ -2,6 +2,12 @@
 
 Recorded at Craig's request on October 11, 2026. **Proposal only: no implementation, API tests or deployment authorized by the request to record and explain it.** Stage 4 cache optimization will not proceed.
 
+**Later authorization:** Craig subsequently said “Okay give it a shot.” The
+disabled implementation and completed no-write evaluation are recorded in
+[the compact-response experiment](luna-stage4-compact-response-oct11-evaluation.md).
+It remains disabled; deployment is not recommended until the untimed-activity
+policy conflict is resolved. The original proposal below is retained as history.
+
 ## Idea in plain language
 
 Stage 3 has already produced an event record containing its title, date, times, venue, description, prices, links and source-image metadata. Today Stage 4 receives that record, decides whether it should pass, and writes the entire record back again alongside its decision and explanations.

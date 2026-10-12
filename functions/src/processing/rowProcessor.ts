@@ -2226,7 +2226,7 @@ async function buildStructuredFacebookEventScraperEvents(
   return [event];
 }
 
-function mergeStageArtifactsSnapshot(
+export function mergeStageArtifactsSnapshot(
   base: ParseStageArtifactsSnapshot | undefined,
   incoming: ParseStageArtifactsSnapshot
 ): ParseStageArtifactsSnapshot {
@@ -2252,12 +2252,14 @@ function mergeStageArtifactsSnapshot(
     stage1Validation: incoming.stage1Validation || base?.stage1Validation,
     stage1Pilot: incoming.stage1Pilot || base?.stage1Pilot,
     stage3InputKind: incoming.stage3InputKind || base?.stage3InputKind,
+    ...((incoming.stage4ValidationHold || base?.stage4ValidationHold) ?
+      {stage4ValidationHold: incoming.stage4ValidationHold || base?.stage4ValidationHold} : {}),
     stage4Items,
     stage37TicketUrl,
   };
 }
 
-function sanitizeStageArtifactsSnapshot(
+export function sanitizeStageArtifactsSnapshot(
   snapshot: ParseStageArtifactsSnapshot | undefined
 ): ParseStageArtifactsSnapshot | undefined {
   if (!snapshot) return undefined;
@@ -2280,6 +2282,7 @@ function sanitizeStageArtifactsSnapshot(
     stage1Validation: snapshot.stage1Validation,
     stage1Pilot: snapshot.stage1Pilot,
     stage3InputKind: snapshot.stage3InputKind,
+    ...(snapshot.stage4ValidationHold ? {stage4ValidationHold: snapshot.stage4ValidationHold} : {}),
     stage4Items: truncateItems(snapshot.stage4Items) as ParseStageArtifactsSnapshot['stage4Items'],
   });
 }
