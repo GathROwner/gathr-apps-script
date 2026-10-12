@@ -296,3 +296,9 @@ range while retaining genuinely ambiguous holds. Build, 30 focused tests,
 API replay passed. See `luna-oct12-milton-hold-review.md` for the older-calendar
 30-minute discrepancy, backup and restoration evidence, and
 `luna-oct12-milton-context-release.md` for deployment readback.
+
+Milton context guard `18e6aa2` is deployed and independently verified ACTIVE on
+all three parsers, common hash `539278f36f5a501c465f2fe1489f6eda34e8f617`,
+latest traffic 100% and unchanged model settings. The corroborated Milton
+meridiem observation is resolved; isolated ambiguity and the explicit source
+calendar discrepancy remain handled as described above.
