@@ -75,7 +75,7 @@ not all future instances: October 21/28 Zumba and Monday-Friday walking are
 verified through returned parent configuration, not claimed as individually
 returned future occurrences.
 
-### Additional Zumba sibling: separate proposal, NOT applied
+### Additional Zumba sibling: separately approved and APPLIED
 
 The final feed check found a second older parent that the reviewed batch missed:
 `venues/nvQTJXSbDsSfJTCxDKCH/events/0niGreSHiC7mgtbxUksA`, title **ZUMBA**,
@@ -83,8 +83,8 @@ source ID `1922694639184538_1c89602b9be3537c`. It starts October 7 at
 17:30-19:30 with four weekly Wednesday occurrences and currently generates an
 additional October 14 listing ending 19:30. This predated the repair and was
 preserved unchanged as an untargeted sibling. The batch's intended overall
-no-duplicate Zumba outcome therefore remains incomplete despite all 19 approved
-document changes passing.
+no-duplicate Zumba outcome initially remained incomplete despite all 19 approved
+document changes passing. The separately approved follow-up below resolved it.
 
 Propose updating **only** `totalOccurrences: 1` and
 `recurrenceUntilDate: "2026-10-07"` on that older parent. This retains its
@@ -97,10 +97,23 @@ Exact machine plan:
 `functions/artifacts/luna-oct13-repair/zumba-sibling-plan-2026-10-13T16-04-48-479Z.json`.
 Full backup:
 `functions/artifacts/luna-oct13-repair/zumba-sibling-backup-2026-10-13T16-04-48-479Z.json`.
-Requires exact approval for this one additional target; it is outside the 19.
-Apply with `--apply --plan=<exact plan>` only after approval, then verify target,
-both keeper documents and API feed: exactly one October 14 17:30-18:30 Zumba;
-no upcoming instance from the ended parent; correct October 21/28 parent retained.
+Craig explicitly approved this additional target ("I approve your request").
+A fresh read-only dry run at 21:24 UTC found the target/update time and both
+keepers identical to the reviewed plan; no active parser was present. Applied
+the two approved fields at approximately 2026-10-13T21:24:30Z with a guarded
+atomic update. All other target fields and both complete keeper documents were
+verified unchanged.
+
+Fresh backup: `functions/artifacts/luna-oct13-repair/zumba-sibling-backup-2026-10-13T21-24-28-372Z.json`.
+Result: `functions/artifacts/luna-oct13-repair/zumba-sibling-result-2026-10-13T21-24-28-372Z.json`.
+Public API verification: `functions/artifacts/luna-oct13-repair/zumba-sibling-api-verification.json`,
+checked 2026-10-13T21:24:52.570Z. All three details returned 200; the historical
+October 7 record remains, with no upcoming feed occurrence. Full feed pagination
+(963 occurrences, 10 pages) confirms exactly one October 14 Zumba at 17:30-18:30,
+$7, and the October 21 parent at 17:30-19:30 retains two occurrences ending
+October 28. The feed returns the next recurrence; October 28 is verified through
+the unchanged parent configuration, not claimed as a separately returned instance.
+No venue/media changes or parser deployment were needed.
 
 ## Original execution instructions
 

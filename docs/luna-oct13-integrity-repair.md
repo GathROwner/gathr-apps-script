@@ -9,7 +9,7 @@ checkpoint logic, backend/map code and venue resolution are unchanged.
 Historical data is a separate exact plan in `luna-oct13-live-repair-plan.md`;
 its 19 mutations received exact approval and were applied and API-verified on
 October 13. An additional older Zumba sibling found during final verification
-has a separate backed-up proposal awaiting approval; see the live plan.
+received separate approval and was repaired at 21:24 UTC; see the live plan.
 
 Working baseline: `codex/luna-oct11-integrity-repair` in
 `C:\Users\craig\.codex\worktrees\luna-accounting-release\gathr-apps-script`,
@@ -152,8 +152,11 @@ Live repair applied at approximately 16:01 UTC: 11 updates, six deletes and two
 creates, all 19 verified in Firestore and the public API. All 42 untargeted
 backed-up sibling records were preserved. Evidence and the newly discovered
 older Zumba recurrence overlap are recorded in `luna-oct13-live-repair-plan.md`.
-That overlap means the full Zumba no-duplicate outcome is not yet complete;
-the proposed one-parent recurrence end is outside the approved 19 paths.
+That overlap was outside the original 19 paths. Craig subsequently approved
+ending the older parent after October 7. The guarded update was applied and
+API-verified at 21:24 UTC: exactly one October 14 one-hour Zumba remains, with
+the correct October 21/28 parent unchanged. Historical October 7 and media were
+preserved. No code deployment accompanied this live data correction.
 
 Dunes' stale queued dinner payload must be reviewed by the specialized location
 queue task before finalization. This release does not mutate that queue or create
