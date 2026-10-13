@@ -332,7 +332,7 @@ const targets = [
       "absent": true
     },
     "payload": {
-      "uniqueId": "1562661692568029_09e48f5dc04e063c",
+      "uniqueId": "1562661692568029_35988049984b69c4",
       "establishment": "Blank Canvas Art Supplies",
       "locationScope": "venue",
       "locationLabel": "Blank Canvas Art Supplies",
@@ -346,7 +346,9 @@ const targets = [
       "startTime": "18:30",
       "endTime": "20:30",
       "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791895965814-5yhzrp.webp",
-      "mediaUrls": [],
+      "mediaUrls": [
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791895965814-5yhzrp.webp"
+      ],
       "imageProvenance": {
         "version": 1,
         "primarySource": "post_media",
@@ -396,7 +398,7 @@ const targets = [
       "rawAddress": "125 Great George Street, Charlottetown, PE C1A 4K7, Canada",
       "normalizedAddress": "125 Great George Street, Charlottetown, PE C1A 4K7, Canada",
       "addressSource": "google_places",
-      "addressUpdatedAt": "2026-10-13T15:24:35.652Z",
+      "addressUpdatedAt": "2026-10-13T15:55:18.094Z",
       "isRecurring": "No",
       "recurringPattern": "none",
       "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1769527843636.webp",
@@ -449,8 +451,11 @@ const targets = [
       "endDate": "2026-10-14",
       "startTime": "17:30",
       "endTime": "18:30",
+      "price": "$7.00",
       "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791897192057-101zor.webp",
-      "mediaUrls": [],
+      "mediaUrls": [
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791897192057-101zor.webp"
+      ],
       "imageProvenance": {
         "version": 1,
         "primarySource": "post_media",
@@ -500,7 +505,8 @@ const targets = [
       "rawAddress": "7 New Glasgow Rd #224, North Milton, PE C1E 0X5, Canada",
       "normalizedAddress": "7 New Glasgow Rd #224, North Milton, PE C1E 0X5, Canada",
       "addressSource": "venue",
-      "addressUpdatedAt": "2026-10-13T15:24:35.760Z",
+      "addressUpdatedAt": "2026-10-13T15:55:18.189Z",
+      "ticketPrice": "$7.00",
       "isRecurring": "No",
       "recurringPattern": "none",
       "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1784559647004-pi5bsy.webp",
@@ -523,6 +529,7 @@ const targets = [
           "evidence": "Source duration: 1 hour; 17:30 + 60 minutes = 18:30"
         }
       },
+      "sourceOccurrenceCount": 1,
       "familyFriendlyScore": 15,
       "familyFriendlyLevel": "unlikely",
       "familyFriendlyReasons": [

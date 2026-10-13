@@ -364,3 +364,11 @@ The historical 19-path repair batch is backed up and awaiting exact approval.
 Dunes' stale queue payload requires the location task's review; parser deployment
 does not retroactively fix it. Deferred avatars and broad deduplication remain
 separate. Actual serving revisions/hash are recorded in the release document.
+
+October 13 source commit `2098f4d` is independently verified deployed on all
+three parsers, common hash `58380c92610b48f9d4058be4c79988d3c0ace273`,
+latest traffic 100% and unchanged model/effort/allocation maps. No active parser
+or checkpoint was present. The live cleanup remains separately pending approval.
+Read-only real Firestore selector controls additionally proved the correct
+Screamplay/Evil Dead keepers, held the alternate-ID Back in Black date, and
+allowed the new watercolour cycle. Film prompt experiment remains excluded.

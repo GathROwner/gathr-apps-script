@@ -7,9 +7,9 @@ Status: **prepared and backed up; NOT applied.** Craig accepted the audit's code
 **19 paths: 11 updates, 6 deletions, 2 creates**, one guarded atomic Firestore batch.
 No venue or media deletions. Current source siblings and related occurrences are backed up; update-time, complete target-data and sibling guards abort on drift. Creates require absent paths, no exact source-ID record and no equivalent dated activity.
 
-Backup: `C:\Users\craig\.codex\worktrees\luna-accounting-release\gathr-apps-script\functions\artifacts\luna-oct13-repair\live-backup-2026-10-13T15-26-38-531Z.json`
+Backup: `C:\Users\craig\.codex\worktrees\luna-accounting-release\gathr-apps-script\functions\artifacts\luna-oct13-repair\live-backup-2026-10-13T15-55-19-263Z.json`
 
-Exact machine plan: `C:\Users\craig\.codex\worktrees\luna-accounting-release\gathr-apps-script\functions\artifacts\luna-oct13-repair\live-plan-2026-10-13T15-26-38-531Z.json`
+Exact machine plan: `C:\Users\craig\.codex\worktrees\luna-accounting-release\gathr-apps-script\functions\artifacts\luna-oct13-repair\live-plan-2026-10-13T15-55-19-263Z.json`
 
 | Action | Event / current date | Exact path | Intended change |
 |---|---|---|---|
@@ -32,6 +32,14 @@ Exact machine plan: `C:\Users\craig\.codex\worktrees\luna-accounting-release\gat
 | update | Zumba Adult Fitness Class / 2026-10-07 17:30 | `venues/nvQTJXSbDsSfJTCxDKCH/events/0gGOviSZCv9OE2KhpL3Z` | Separate source-confirmed Oct14 one-hour class; retain original17:30-19:30 for Oct21/28 only |
 | create | Beginner WaterColour Course (Session 1) / 2026-10-13 18:30 | `venues/name_6387om/events/oct13_repair_watercolour_20261013` | Add only confirmed Oct13 watercolour Session1 at18:30; retain marked inferred20:30 end; do not invent later sessions |
 | create | ZUMBA® adult fitness class with Natalia / 2026-10-14 17:30 | `venues/nvQTJXSbDsSfJTCxDKCH/events/oct13_repair_zumba_20261014` | Add only printed Oct14 Zumba17:30-18:30, one-off |
+
+Write-preview validation preserved original source venue aliases in the create
+payload signatures and retained their managed media. Watercolour keeps the exact
+source occurrence ID captured by today's writer; Zumba's corrected one-hour end
+derives its new occurrence ID through the normal writer. The two create payloads
+retain source pricing, including the printed $7 Zumba fee. Counts/paths and
+intended activities are unchanged. Latest dry-run/backup paths above supersede
+earlier drafts.
 
 ## Evidence and boundaries
 

@@ -98,9 +98,43 @@ stage3-film-replay.json, lautre-footer.png, serving-before.json, live-dry-run.js
 and exact timestamped backups/plan. No credentials or model request secrets are
 written to the evidence; public source images/response data remain ignored locally.
 
+## Live-data read-only duplicate controls
+
+The real writer payload preview and Firestore duplicate selector were run without
+write calls for four captured sources. Back in Black on the wrong October 18
+was held against its October 14 source peer; the new October 13 watercolour
+course was eligible to create instead of merging into the exhausted series;
+Screamplay matched its correct 21:10 keeper; Evil Dead II matched the existing
+19:15 Evil Dead 2 keeper, preserving the Roman/Arabic title variant. See
+`live-dedupe-dry-run.json`. This is read-only selector evidence, not live repair.
+
 ## Release
 
-Source commit, dry run, serving readback: PENDING_RELEASE.
+Source commit: `2098f4d`. Narrow dry run and actual deployment passed.
+Independent readback at 2026-10-13T15:51:52.361Z verified all three functions ACTIVE,
+100% traffic on latest revisions and common source hash
+`58380c92610b48f9d4058be4c79988d3c0ace273`. Every captured model/effort/allocation environment
+variable matched the before-release readback exactly. Post-deploy preflight
+again found no active parser, completed October 13 marker/batch and no checkpoint.
+
+| Function | Serving revision |
+|---|---|
+| processDataset | `processdataset-00474-yuc` |
+| processDatasetResume | `processdatasetresume-00438-jiv` |
+| processDatasetSelectedRows | `processdatasetselectedrows-00430-dav` |
+
+Commands from functions/:
+
+```powershell
+firebase deploy --only "functions:gathr-functions:processDataset,functions:gathr-functions:processDatasetResume,functions:gathr-functions:processDatasetSelectedRows" --project gathr-migrated --dry-run
+firebase deploy --only "functions:gathr-functions:processDataset,functions:gathr-functions:processDatasetResume,functions:gathr-functions:processDatasetSelectedRows" --project gathr-migrated
+node artifacts/luna-oct13-repair/release-gates.cjs after
+```
+
+Existing Firebase warning: firebase-functions dependency is outdated; no SDK
+upgrade was included. The package ignored local artifacts; only the three
+qualified parser targets were deployed. See deploy-dry-run.txt, deploy.txt,
+serving-after.json and preflight-after.json.
 
 Narrow targets only: processDataset, processDatasetResume,
 processDatasetSelectedRows; project gathr-migrated, codebase gathr-functions.
