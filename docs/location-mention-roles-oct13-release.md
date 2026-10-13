@@ -62,7 +62,9 @@ would not find it. This release preserves that keeper rather than migrating it.
   sourceUrls and lastSeenAt can change; approved location, clocks, title, ticket,
   scope and media are preserved. Ordinary child merges also retain source
   identities and supporting context. Internal document-path metadata is not
-  written into event documents.
+  written into event documents. Source links emit a structured log and the
+  normal event-update audit with the actual top-level keeper path. Retry touches
+  with unchanged source arrays do not count as enrichment updates.
 
 ## Validation and release evidence
 

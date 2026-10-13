@@ -5505,12 +5505,21 @@ async function updateDuplicateEventIfNeeded(
 }> {
   const venueId = venue.id;
   if(existingEvent._canonicalDocumentPath){
-    await firestoreService.linkApprovedVenueOccurrenceSource(existingEvent,{
+    const linked=await firestoreService.linkApprovedVenueOccurrenceSource(existingEvent,{
       ...incomingEvent,
       sourceUniqueIds:[...(incomingEvent.sourceUniqueIds||[]),String(auditContext?.row.uniqueId||'')].filter(Boolean),
       sourceUrls:[...(incomingEvent.sourceUrls||[]),String(auditContext?.row.topLevelUrl||auditContext?.row.facebookUrl||'')].filter(Boolean),
     });
-    return {updated:true,mergedEvent:existingEvent,changedFields:['sourceUniqueIds','sourceUrls']};
+    logger.info('Linked source to approved venue occurrence',{rowIndex,venueId,eventId:existingEvent.id,eventPath:existingEvent._canonicalDocumentPath,changedFields:linked.changedFields});
+    if(linked.changedFields.length && existingEvent.id){
+      try{
+        const state=auditContext?.batchManager.getState();
+        await firestoreService.recordEventUpdateAudit({fileId:state?.fileId,fileName:state?.fileName,runId:state?.runId,batchNumber:state?.batchNumber,
+          rowIndex,parserMode,venueId,venueName:venue.name,eventId:existingEvent.id,eventPath:existingEvent._canonicalDocumentPath,
+          changedFields:linked.changedFields,beforeEvent:linked.before,incomingEvent,afterEvent:linked.after,updatePayload:linked.updates,row:auditContext?.row});
+      }catch(error){logger.error('Failed approved venue source-link audit',error,{rowIndex,eventPath:existingEvent._canonicalDocumentPath});}
+    }
+    return {updated:linked.changedFields.length>0,mergedEvent:{...linked.after,id:existingEvent.id,_canonicalDocumentPath:existingEvent._canonicalDocumentPath},changedFields:linked.changedFields};
   }
   const mergeOutcome = buildDuplicateEventUpdates(existingEvent, incomingEvent, {
     existingSourceScore: computeCategorySourceConfidence(existingEvent, venue),

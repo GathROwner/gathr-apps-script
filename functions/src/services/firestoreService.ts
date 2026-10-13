@@ -5585,14 +5585,17 @@ export async function createEvent(
 /**
  * Update an existing event
  */
-export async function linkApprovedVenueOccurrenceSource(existing:EventData,incoming:EventData):Promise<void> {
+export async function linkApprovedVenueOccurrenceSource(existing:EventData,incoming:EventData):Promise<{before:EventData;after:EventData;updates:Partial<EventData>;changedFields:string[]}> {
   const documentPath=existing._canonicalDocumentPath||'';
   if(!/^events\/[^/]+$/.test(documentPath))throw new Error('Invalid approved occurrence reference');
-  await db.runTransaction(async transaction=>{
+  return db.runTransaction(async transaction=>{
     const ref=db.doc(documentPath),snap=await transaction.get(ref);
     const current=snap.data() as EventData|undefined;
     if(!current || !isApprovedVenueOccurrenceMatch(incoming,current))throw new Error('Approved occurrence changed before source link');
-    transaction.update(ref,{...approvedVenueOccurrenceSourcePatch(current,incoming),lastSeenAt:admin.firestore.FieldValue.serverTimestamp()});
+    const updates=approvedVenueOccurrenceSourcePatch(current,incoming);
+    const changedFields=(['sourceUniqueIds','sourceUrls'] as const).filter(field=>JSON.stringify(current[field]||[])!==JSON.stringify(updates[field]));
+    transaction.update(ref,{...updates,lastSeenAt:admin.firestore.FieldValue.serverTimestamp()});
+    return {before:current,after:{...current,...updates},updates,changedFields};
   });
 }
 
@@ -5632,6 +5635,8 @@ export async function updateEvent(
 }
 
 interface EventUpdateAuditInput {
+  /** Only an approved top-level keeper may override the usual venue child path. */
+  eventPath?: string;
   fileId?: string;
   fileName?: string;
   runId?: string;
@@ -5655,6 +5660,7 @@ interface EventUpdateAuditInput {
  * Persist a compact audit record for duplicate-event enrichment updates.
  */
 export async function recordEventUpdateAudit(input: EventUpdateAuditInput): Promise<string | undefined> {
+  if(input.eventPath && input.eventPath!==`${COLLECTIONS.EVENTS}/${input.eventId}`)throw new Error('Invalid top-level event audit path');
   const changedFields = input.changedFields
     .map((field) => String(field || '').trim())
     .filter(Boolean);
@@ -5696,7 +5702,7 @@ export async function recordEventUpdateAudit(input: EventUpdateAuditInput): Prom
     venueId: input.venueId,
     venueName: input.venueName,
     eventId: input.eventId,
-    eventPath: `${COLLECTIONS.VENUES}/${input.venueId}/${COLLECTIONS.EVENTS}/${input.eventId}`,
+    eventPath: input.eventPath || `${COLLECTIONS.VENUES}/${input.venueId}/${COLLECTIONS.EVENTS}/${input.eventId}`,
     eventName,
     originalPostUrl,
     facebookUrl: originalPostUrl,
