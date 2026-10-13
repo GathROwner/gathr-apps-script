@@ -303,3 +303,41 @@ all three parsers, common hash `539278f36f5a501c465f2fe1489f6eda34e8f617`,
 latest traffic 100% and unchanged model settings. The corroborated Milton
 meridiem observation is resolved; isolated ambiguity and the explicit source
 calendar discrepancy remain handled as described above.
+
+
+## October 13 completed-run observations (open; no repair release)
+
+See [the full October 13 audit](luna-oct13-production-audit.md) for source-to-write
+traces, complete evidence and qualified conclusions. Runtime, model allocation,
+compact validation, resume fencing and managed-avatar protection passed. Keep
+the current allocation; no code or live-data change was made by this audit.
+
+- Time constraints: Dunes has startTime unknown plus a dinner event without the
+  special tag, bypassing both assumptions in constrainSourceTimes. Sparse dinner
+  dates are also consolidated into unsupported daily retail-hour service. It is
+  held by the unknown-venue queue; correct payload before finalization. Explicit
+  Milton Zumba one-hour duration is lost to a two-hour default and old keeper.
+- Merge identity: Tivoli context film names contaminate the primary title, then
+  distinct 19:15/21:10 screenings merge incorrectly. Correct Evil Dead records
+  already exist from another source: do not create duplicates. A new Blank Canvas
+  Oct 13 course session merges into an exhausted September three-session series
+  and has no upcoming feed occurrence. Narrow protections precede broad cleanup.
+- Film precision: small cards still produce wrong dates and an invented Tivoli
+  venue. Corrected physical IDs survive, but alternate IDs can bypass guards.
+  Current official festival/ticket evidence conflicts with some posted cards;
+  A Long Winter ticket is internally inconsistent. Resolve source conflict before
+  mutation; the blind verification experiment remains unreleased.
+- Semantic categories: cinema venue prior overwrites a correct Live Music violin
+  recital; leisure/toddler pool windows remain Gatherings instead of Sports.
+  Weekday walking-track access is reduced to one Monday with wrong category.
+- Source fidelity: three Trailside date-specific ticket URLs become a generic
+  website; doors clocks become start clocks without verified showtime. Cropped
+  Milton images publish placeholder activity titles; an explicitly private rental
+  is published from Cavendish calendar. Preserve available-to-rent public slots.
+- No confirmed wrongful Stage 1 rejection among the reviewed sources; one original
+  rejection image unavailable. Missing-time offers/tours remain separate downstream
+  enrichment observations, not content-scope exclusions.
+- Olde Dublin repaired avatar and all 246 previously healthy pictures survived;
+  backend blocked 16 protected-image cleanup attempts. Caller-side queueing of
+  durable avatars remains cleanup work. Fifteen old missing pictures and four
+  prepared but unapproved repairs are not resolved by this result.
