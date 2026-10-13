@@ -1,6 +1,6 @@
 # October 13 exact live integrity repair plan
 
-Status: **prepared and backed up; NOT applied.** Craig accepted the audit's code-repair recommendations. The event-integrity skill requires exact live-target approval for this separate data batch.
+Status: **19 approved mutations APPLIED and verified.** Craig explicitly approved this exact repair batch on October 13. Applied at approximately 16:01 UTC after a fresh dry run found identical targets, source siblings and related occurrences. No active parser was present.
 
 ## Scope
 
@@ -54,7 +54,55 @@ earlier drafts.
 - Dunes' bad queued dinner payload is NOT in this event batch. Its venue resolution belongs to the location-queue task. A source-evidence handoff is prepared; do not finalize the stale payload as-is.
 - Already expired private rental is not included in this cleanup. Existing avatar plans remain separate and unapplied.
 
-## Apply and verify (after exact approval)
+## Applied result and verification
+
+One atomic Firestore batch completed: **11 updates, 6 deletes, 2 creates**.
+Fresh prewrite backup: `functions/artifacts/luna-oct13-repair/live-backup-2026-10-13T16-00-56-317Z.json`.
+Result: `functions/artifacts/luna-oct13-repair/live-result-2026-10-13T16-00-56-317Z.json`.
+Verification: `functions/artifacts/luna-oct13-repair/live-api-verification.json`,
+checked 2026-10-13T16:04:00.054Z. All 19 Firestore postconditions passed;
+all 13 retained/new detail endpoints returned 200 and appeared in the upcoming
+feed; all six deleted details returned 404 and were absent. The entire feed
+contained 1,009 occurrences over 11 pages. All 42 backed-up, untargeted source
+and related sibling documents were unchanged, including correct cinema keepers.
+Updates changed only the approved fields. Managed media and venues were untouched.
+
+Confirmed corrected October 14 Zumba 17:30-18:30/$7, watercolour October 13
+18:30-20:30 (end explicitly inferred), weekday walking/Sports configuration,
+recital/pool categories, film dates and four Trailside 20:00 starts with exact
+per-date ticketLink/ticketsBuyUrl metadata. The feed returns the next recurrence,
+not all future instances: October 21/28 Zumba and Monday-Friday walking are
+verified through returned parent configuration, not claimed as individually
+returned future occurrences.
+
+### Additional Zumba sibling: separate proposal, NOT applied
+
+The final feed check found a second older parent that the reviewed batch missed:
+`venues/nvQTJXSbDsSfJTCxDKCH/events/0niGreSHiC7mgtbxUksA`, title **ZUMBA**,
+source ID `1922694639184538_1c89602b9be3537c`. It starts October 7 at
+17:30-19:30 with four weekly Wednesday occurrences and currently generates an
+additional October 14 listing ending 19:30. This predated the repair and was
+preserved unchanged as an untargeted sibling. The batch's intended overall
+no-duplicate Zumba outcome therefore remains incomplete despite all 19 approved
+document changes passing.
+
+Propose updating **only** `totalOccurrences: 1` and
+`recurrenceUntilDate: "2026-10-07"` on that older parent. This retains its
+historical October 7 record/media, removes its future generated duplicates and
+leaves the new October 14 one-hour class plus the corrected October 21/28 parent.
+No event, venue or media deletion is proposed.
+
+Guarded dry run: `firebase/repair-luna-oct13-zumba-sibling.mjs` (default read-only).
+Exact machine plan:
+`functions/artifacts/luna-oct13-repair/zumba-sibling-plan-2026-10-13T16-04-48-479Z.json`.
+Full backup:
+`functions/artifacts/luna-oct13-repair/zumba-sibling-backup-2026-10-13T16-04-48-479Z.json`.
+Requires exact approval for this one additional target; it is outside the 19.
+Apply with `--apply --plan=<exact plan>` only after approval, then verify target,
+both keeper documents and API feed: exactly one October 14 17:30-18:30 Zumba;
+no upcoming instance from the ended parent; correct October 21/28 parent retained.
+
+## Original execution instructions
 
 From the repository root, set GATHR_SERVICE_ACCOUNT_PATH to the existing credential without copying it. Run `node firebase/repair-luna-oct13-integrity.mjs --apply --plan=<exact machine plan above>`. The helper creates a fresh backup and refuses an active parser, target/source drift or duplicate create.
 

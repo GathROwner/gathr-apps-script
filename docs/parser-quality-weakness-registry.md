@@ -360,7 +360,14 @@ multiplicity and other source owners. No model allocations or cache experiments
 changed. The unverified film prompt experiment was removed; tiny-card date/venue
 precision and contradictory primary sources remain open observations.
 
-The historical 19-path repair batch is backed up and awaiting exact approval.
+The historical 19-path repair batch received exact approval and was applied on
+October 13 at approximately 16:01 UTC. All 19 Firestore/API postconditions passed,
+with 42 untargeted source/related sibling documents unchanged. Final feed review
+found an additional older Milton Zumba recurring parent outside that batch:
+`0niGreSHiC7mgtbxUksA` still generates October14 17:30-19:30 beside the corrected
+17:30-18:30 one-off. Its exact backed-up proposal ends that redundant series at
+October7 while preserving the corrected October14/21/28 records; it remains
+unapplied pending separate approval. See the live plan for path, guards and evidence.
 Dunes' stale queue payload requires the location task's review; parser deployment
 does not retroactively fix it. Deferred avatars and broad deduplication remain
 separate. Actual serving revisions/hash are recorded in the release document.
@@ -368,7 +375,8 @@ separate. Actual serving revisions/hash are recorded in the release document.
 October 13 source commit `2098f4d` is independently verified deployed on all
 three parsers, common hash `58380c92610b48f9d4058be4c79988d3c0ace273`,
 latest traffic 100% and unchanged model/effort/allocation maps. No active parser
-or checkpoint was present. The live cleanup remains separately pending approval.
+or checkpoint was present. The 19 approved live repairs are now complete; the
+additional Zumba sibling proposal remains separately pending approval.
 Read-only real Firestore selector controls additionally proved the correct
 Screamplay/Evil Dead keepers, held the alternate-ID Back in Black date, and
 allowed the new watercolour cycle. Film prompt experiment remains excluded.
