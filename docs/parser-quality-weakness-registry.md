@@ -407,3 +407,12 @@ outside the target case. No new paid model calls or live data mutations were
 used. Serving release evidence is in
 [location role repair](location-mention-roles-oct13-release.md). This does not
 resolve arbitrary unknown venue relationships or authorize broad deduplication.
+
+October13 location-role source commit `8d118a7` is now deployed and independently
+verified ACTIVE on the three parser functions, common source hash
+`9c8f58ea905d9f85501c2d3f6676a7ab890777fa`,100% latest traffic and unchanged
+model/effort/allocation values. Final658 backend and53 focused checks passed;
+both captured writer previews/read-only selectors chose the existing root
+keeper, and46-post/143-item playback had zero unrelated changes. The current
+live API event remained correct and unchanged. Observe actual source links and
+absence of regenerated area reviews/duplicates on the next regular full run.

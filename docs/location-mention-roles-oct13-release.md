@@ -105,3 +105,45 @@ Rollback source baseline: parser source commit `2098f4d`, serving revisions
 processdataset-00474-yuc, processdatasetresume-00438-jiv,
 processdatasetselectedrows-00430-dav. Rollback does not undo any source-provenance
 links written by a subsequent regular parser run.
+
+## Verified deployment
+
+Source commits `f2ece08` and `8d118a7`; final source commit `8d118a7`.
+Both qualified dry run and actual deploy passed. Fresh predeploy check at
+2026-10-13T23:07:21.824Z again proved no active parser, completed October13
+marker/batch and no checkpoint. Independent post-deploy readback verified all
+three functions ACTIVE, common hash **`9c8f58ea905d9f85501c2d3f6676a7ab890777fa`**,
+100% latest revision traffic and exact equality of all captured model, effort
+and allocation environment values with the before-release baseline.
+
+| Function | Serving revision |
+|---|---|
+| processDataset | `processdataset-00475-zec` |
+| processDatasetResume | `processdatasetresume-00439-quv` |
+| processDatasetSelectedRows | `processdatasetselectedrows-00431-cib` |
+
+The final suite passed658/658; focused spatial/location checks passed53/53.
+The final saved46-post/143-item playback found zero additional changes. Both
+real preview/selector runs matched the existing approved root event without
+writing it. The live public detail endpoint was rechecked at23:11:01.595Z:
+200, same keeper ID, Red Shores venue, December5 20:00, ticket event28202 and
+Eastlink box-office context intact. Post-deploy preflight again found no active
+parser, completed October13 marker/batch and no checkpoint. Actual next-run
+extraction and source-link writes remain to be observed; replay is not claimed
+as production execution of those future writes.
+
+Commands from functions/:
+
+```powershell
+firebase deploy --only "functions:gathr-functions:processDataset,functions:gathr-functions:processDatasetResume,functions:gathr-functions:processDatasetSelectedRows" --project gathr-migrated --dry-run
+firebase deploy --only "functions:gathr-functions:processDataset,functions:gathr-functions:processDatasetResume,functions:gathr-functions:processDatasetSelectedRows" --project gathr-migrated
+node artifacts/location-mention-roles-release-2026-10-13/release-gates.cjs after
+```
+
+Evidence: full-tests.txt, focused-tests.txt, replay.json, serving-before.json,
+serving-after.json, predeploy-preflight.json, preflight-after.json,
+deploy-dry-run.txt, deploy.txt and event-api-after.json in the evidence directory.
+Existing Firebase warning about an outdated firebase-functions SDK remains; no
+SDK upgrade was included. The package ignored local artifacts (5.22MB uploaded).
+No other functions, model allocations, cache experiments, backend/UI/map files,
+venue records or current event documents were changed by this release.
