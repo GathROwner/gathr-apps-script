@@ -10,6 +10,7 @@
 
 import OpenAI from 'openai';
 import {hasUnresolvedSourceMeridiem as hasUnresolvedEarlyMeridiem} from './sourceTimeConstraints.js';
+import {sourceItemHoldReason} from './sourceItemEvidence.js';
 import {
   ExtractedItem,
   FormattedEvent,
@@ -378,6 +379,10 @@ Never return arrays of values for an item; each must be a JSON object.`;
 
     // Process each formatted event
     const sourceReadyFormattedEvents = validFormattedEvents.filter(({ originalItem }) => {
+      if (sourceItemHoldReason(originalItem)) {
+        logger.warn('Holding unpublished activity identity', {name:originalItem.name, reason:sourceItemHoldReason(originalItem)});
+        return false;
+      }
       if (!hasUnresolvedEarlyMeridiem(originalItem)) return true;
       logger.warn('Holding calendar event with unresolved AM/PM in printed time', {
         name: originalItem.name,
@@ -1244,6 +1249,29 @@ export function rehydrateFormattedEventMetadata(
 ): FormattedEvent {
   const nextEvent = { ...event } as FormattedEvent;
   let changed = false;
+  if (Number.isInteger(originalItem?._sourceOccurrenceCount) && originalItem!._sourceOccurrenceCount! > 0) {
+    nextEvent._sourceOccurrenceCount = originalItem!._sourceOccurrenceCount;
+    changed = true;
+  }
+  if (originalItem?._sourceTitleResolution === originalItem?.name && originalItem?._sourceTitleResolution) {
+    nextEvent.name = originalItem.name;
+    nextEvent._sourceTitleResolution = originalItem.name;
+    changed = true;
+  }
+  const duration = originalItem?._sourceDurationResolution;
+  if (duration && duration.date === originalItem?.date &&
+      duration.endTime === originalItem.endTime && duration.startTime === normalizeUnambiguousSourceStartTime(originalItem.startTime)) {
+    nextEvent._sourceDurationResolution = {...duration};
+    nextEvent.startTime = duration.startTime;
+    nextEvent.endTime = duration.endTime;
+    nextEvent.endDate = duration.date;
+    if (duration.endTime < duration.startTime) {
+      const date = parseIsoDate(duration.date);
+      if (date) { date.setUTCDate(date.getUTCDate() + 1); nextEvent.endDate = toIsoDateUtc(date); }
+    }
+    nextEvent.timeFlags = cloneFormattedTimeFlags(originalItem.timeFlags);
+    changed = true;
+  }
   const meridiem = originalItem?._sourceMeridiemResolution;
   if (meridiem && meridiem.date === originalItem?.date &&
       meridiem.startTime === originalItem.startTime && meridiem.endTime === originalItem.endTime) {
@@ -1371,7 +1399,7 @@ export function rehydrateFormattedEventMetadata(
   const originalTicketLink = String(
     (originalItem as Record<string, unknown> | undefined)?.ticketLink || ''
   ).trim();
-  if (!existingTicketLink && originalTicketLink) {
+  if (originalTicketLink && existingTicketLink !== originalTicketLink) {
     nextEvent.ticketLink = originalTicketLink;
     changed = true;
   }
@@ -1623,7 +1651,7 @@ function isCinemaAdmissionListing(event: FormattedEvent, originalItem?: Extracte
 }
 
 function hasStrongNonCinemaSignals(text: string): boolean {
-  return /\b(trivia|quiz|comedy|comedian|stand-?up|improv|karaoke|open\s*mic|workshop|class|lesson|seminar|dj|nightlife|live\s+music|concert|band)\b/.test(
+  return /\b(trivia|quiz|comedy|comedian|stand-?up|improv|karaoke|open\s*mic|workshop|class|lesson|seminar|dj|nightlife|live\s+music|concert|band|recital|violinist|pianist|orchestra|orchestral)\b/.test(
     text
   );
 }
@@ -1824,6 +1852,7 @@ function inferCategoryFromContent(
     /\bmusic\s+and\s+movement\b/.test(text) ||
     /\blive\s+at\b/.test(text) ||
     /\bconcert\b/.test(text) ||
+    /\b(?:violinist|pianist|orchestra|orchestral)\b.{0,80}\b(?:recital|tour|performance)\b|\brecital\b/.test(text) ||
     /\bperform(?:ing)?\s+live\b/.test(text) ||
     /\bopen\s*mic\b/.test(text) ||
     /\bkaraoke\b/.test(text) ||
@@ -1861,7 +1890,8 @@ function inferCategoryFromContent(
 
   // Public aquatic access is a sports activity. Match the activity title so
   // pool parties, swimming lessons and billiards retain their own categories.
-  if (/^(?:all\s+pools?\s+open|(?:lane|public|family|leisure|recreational|open)\s+swim(?:ming)?|waterslide\s+open)\b/i.test(String(event.name || '').trim())) {
+  if (/^(?:all\s+pools?\s+open|(?:leisure\s+(?:and|&)\s+toddler|toddler|leisure)\s+pools?\s+open|walking\s+track|(?:lane|public|family|leisure|recreational|open)\s+swim(?:ming)?|waterslide\s+open)\b/i.test(String(event.name || '').trim()) &&
+      !/\b(?:party|lessons?|classes?|workshop)\b/i.test(event.name)) {
     return 'Sports';
   }
 

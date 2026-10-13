@@ -1,3 +1,4 @@
+import {hasConflictingOccurrenceIdentity,findConflictingSourceCinemaDate} from '../utils/occurrenceMergeGuard.js';
 /**
  * Firestore Service
  * CRUD operations for venues, events, and processing state
@@ -4092,6 +4093,18 @@ export async function checkDuplicate(
   currentRunEntries: EventData[] = []
 ): Promise<{ isDuplicate: boolean; existingEvent?: EventData }> {
   const normalizedUniqueId = String(event.uniqueId || '').trim();
+  if (event.category === 'Cinema' && event.sourceOccurrenceCount === 1 && normalizedUniqueId) {
+    const root = normalizedUniqueId.split('_')[0];
+    const peers = await db.collection(COLLECTIONS.VENUES).doc(venueId).collection(COLLECTIONS.EVENTS)
+      .where('uniqueId','>=',root+'_').where('uniqueId','<',root+'_\uf8ff').limit(64).get();
+    const conflict = findConflictingSourceCinemaDate(event, peers.docs.map(doc=>({id:doc.id,...doc.data(),venueId})),venueId);
+    if (conflict) {
+      logger.warn('Held same-source cinema date conflict across generated IDs', {
+        venueId, sourceRoot:root, name:event.eventName || event.name,
+        incomingDate:event.startDate, existingDate:conflict.startDate});
+      return {isDuplicate:true};
+    }
+  }
 
   if (normalizedUniqueId) {
     const exactCurrentRunMatches = currentRunEntries.filter((existing) => {

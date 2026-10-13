@@ -1,3 +1,5 @@
+import {hasConflictingOccurrenceIdentity} from '../utils/occurrenceMergeGuard.js';
+import {hasProvenSourceDurationEnd} from '../parsing/sourceTimeConstraints.js';
 import { CacheWriteMetrics, createCacheWriteMetrics, addCacheWriteUsage } from '../parsing/cacheAccounting.js';
 import { hasConflictingDevelopmentSlot } from '../utils/eventSlotIdentity.js';
 /**
@@ -4841,6 +4843,8 @@ async function processFullParserEvent(
     utcStartDate: String(item.utcStartDate || '').trim() || undefined,
     ticketProvider: String(item.ticketProvider || '').trim() || undefined,
   } as EventData & { _sourceType?: string };
+  if (Number.isInteger(item._sourceOccurrenceCount) && item._sourceOccurrenceCount! > 0)
+    eventData.sourceOccurrenceCount = item._sourceOccurrenceCount;
 
   enforceCategoryTypeConsistency(eventData);
   Object.assign(eventData, scoreFamilyFriendly({
@@ -5616,7 +5620,7 @@ function buildDuplicateEventUpdates(
   let timeImproved = false;
   // Defense in depth: never enrich a different development slot, even if a caller
   // bypassed one of the duplicate selectors.
-  if (hasConflictingDevelopmentSlot(existing, incoming)) {
+  if (hasConflictingDevelopmentSlot(existing, incoming) || hasConflictingOccurrenceIdentity(existing, incoming)) {
     return { updates, changedFields, descriptionImproved, timeImproved };
   }
   const unsafeCrossSourceDateMerge = isUnsafeCrossSourceDateDuplicateMerge(existing, incoming);
@@ -5672,6 +5676,17 @@ function buildDuplicateEventUpdates(
     }
     if (!isMeaningfulValue(existing[field]) && isMeaningfulValue(incoming[field])) {
       setField(field, incoming[field]);
+    }
+  }
+  // A source-supplied event URL improves a generic homepage for the same dated occurrence.
+  const homepage = (value: unknown): boolean => {
+    try { const url = new URL(String(value || '')); return /^https?:$/.test(url.protocol) && url.pathname === '/' && !url.search; }
+    catch { return false; }
+  };
+  if (existing.startDate === incoming.startDate) {
+    for (const field of ['ticketLink','ticketsBuyUrl'] as const) {
+      const value = String(incoming[field] || '');
+      if (homepage(existing[field]) && /^https?:\/\//i.test(value) && !homepage(value)) setField(field, incoming[field]);
     }
   }
 
@@ -7833,6 +7848,8 @@ function selectPreferredIncomingTimeMergeValue(
 }
 
 function isInferredExistingTime(event: EventData, side: 'start' | 'end'): boolean {
+  if (side === 'start' && /\bdoors?\b/i.test(String((event.timeFlags as any)?.start?.evidence || '')) &&
+      !/\b(?:show(?:time)?|performance)\b/i.test(String((event.timeFlags as any)?.start?.evidence || ''))) return true;
   const source = getTimeFlagSource(event.timeFlags, side);
   if (source === 'implied' || source === 'semantic' || source === 'none') return true;
 
@@ -7848,6 +7865,9 @@ function isInferredExistingTime(event: EventData, side: 'start' | 'end'): boolea
 }
 
 function isExplicitIncomingTime(event: EventData, side: 'start' | 'end'): boolean {
+  if (side === 'start' && /\bdoors?\b/i.test(String((event.timeFlags as any)?.start?.evidence || '')) &&
+      !/\b(?:show(?:time)?|performance)\b/i.test(String((event.timeFlags as any)?.start?.evidence || ''))) return false;
+  if (side === 'end' && hasProvenSourceDurationEnd(event)) return true;
   const source = getTimeFlagSource(event.timeFlags, side);
   if (source === 'explicit') return true;
   if (source === 'implied' || source === 'semantic' || source === 'none') return false;
@@ -7921,6 +7941,9 @@ function shouldReplaceTimeField(
   incomingEvent: EventData,
   side: 'start' | 'end'
 ): boolean {
+  // One dated duration does not establish the length of an entire older weekly family.
+  if (side === 'end' && hasProvenSourceDurationEnd(incomingEvent) &&
+      isRecurringLikeEvent(existingEvent) && !isRecurringLikeEvent(incomingEvent)) return false;
   const existing = asTrimmedString(existingValue);
   const incoming = asTrimmedString(incomingValue);
   if (!incoming) return false;

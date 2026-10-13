@@ -1,0 +1,4137 @@
+{
+  "rows": [
+    {
+      "row": 55,
+      "id": "1705425784715943",
+      "venue": "The Sands at Darnley, PEI",
+      "caption": "Islander appreciation sale is happening Saturday, October 10 to Sunday, October 18! \n.\nEverything is on sale!\n.\nBring your shopping bags! \n.\nBring your friends, family and neighbours! \n.\nHave lunch in the cafe, relax in the gardens and pick up some gorgeous Christmas gifts  \n.\nHope to see you all! Open daily 9am - 6pm\n\nOooooh….",
+      "timestamp": "2026-10-12T20:59:28.000Z",
+      "stage3": [
+        {
+          "name": "Harvest Feast",
+          "description": "Dinner service featuring Harvest Feast. RSVP please 902 672 2586. The advertised series dates are Oct 2 & 3, 9 & 10, 16 & 17.",
+          "date": "2026-10-03",
+          "startTime": "unknown",
+          "endTime": "",
+          "venue": "The Dunes",
+          "ticketLink": "",
+          "price": "",
+          "relevantImageIndex": 0,
+          "recurringPattern": "daily",
+          "extractionReason": "A named dinner service with RSVP and explicit advertised dates; extracted as an attendee-facing dining event.",
+          "timeFlags": {
+            "start": {
+              "source": "none",
+              "evidence": ""
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              {
+                "label": "The Dunes",
+                "address": "",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "The Dunes studio gallery café & gardens"
+              }
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The poster identifies The Dunes as the venue; no address is shown."
+          },
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 4
+        },
+        {
+          "name": "Harvest Feast",
+          "description": "Dinner service featuring Harvest Feast. RSVP please 902 672 2586. The advertised series dates are Oct 2 & 3, 9 & 10, 16 & 17.",
+          "date": "2026-10-09",
+          "startTime": "unknown",
+          "endTime": "",
+          "venue": "The Dunes",
+          "ticketLink": "",
+          "price": "",
+          "relevantImageIndex": 0,
+          "recurringPattern": "daily",
+          "extractionReason": "A named dinner service with RSVP and explicit advertised dates; extracted as an attendee-facing dining event.",
+          "timeFlags": {
+            "start": {
+              "source": "none",
+              "evidence": ""
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              {
+                "label": "The Dunes",
+                "address": "",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "The Dunes studio gallery café & gardens"
+              }
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The poster identifies The Dunes as the venue; no address is shown."
+          },
+          "_pipelineIndex": 2,
+          "_pipelineTotalStage3": 4
+        },
+        {
+          "name": "Harvest Feast",
+          "description": "Dinner service featuring Harvest Feast. RSVP please 902 672 2586. The advertised series dates are Oct 2 & 3, 9 & 10, 16 & 17.",
+          "date": "2026-10-16",
+          "startTime": "unknown",
+          "endTime": "",
+          "venue": "The Dunes",
+          "ticketLink": "",
+          "price": "",
+          "relevantImageIndex": 0,
+          "recurringPattern": "daily",
+          "extractionReason": "A named dinner service with RSVP and explicit advertised dates; extracted as an attendee-facing dining event.",
+          "timeFlags": {
+            "start": {
+              "source": "none",
+              "evidence": ""
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              {
+                "label": "The Dunes",
+                "address": "",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "The Dunes studio gallery café & gardens"
+              }
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The poster identifies The Dunes as the venue; no address is shown."
+          },
+          "_pipelineIndex": 3,
+          "_pipelineTotalStage3": 4
+        },
+        {
+          "name": "Harvest Feast",
+          "description": "Dinner service featuring Harvest Feast. RSVP please 902 672 2586. The advertised series dates are Oct 2 & 3, 9 & 10, 16 & 17.",
+          "date": "2026-10-17",
+          "startTime": "unknown",
+          "endTime": "",
+          "venue": "The Dunes",
+          "ticketLink": "",
+          "price": "",
+          "relevantImageIndex": 0,
+          "recurringPattern": "daily",
+          "extractionReason": "A named dinner service with RSVP and explicit advertised dates; extracted as an attendee-facing dining event.",
+          "timeFlags": {
+            "start": {
+              "source": "none",
+              "evidence": ""
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              {
+                "label": "The Dunes",
+                "address": "",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "The Dunes studio gallery café & gardens"
+              }
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The poster identifies The Dunes as the venue; no address is shown."
+          },
+          "_pipelineIndex": 4,
+          "_pipelineTotalStage3": 4
+        }
+      ],
+      "events": [
+        {
+          "id": "1705425784715943",
+          "name": "Harvest Feast",
+          "category": "Food Special",
+          "isEvent": "No",
+          "isFoodSpecial": "Yes",
+          "establishment": "The Dunes",
+          "additionalLocation": "The Dunes",
+          "locationScope": "",
+          "locationLabel": "",
+          "locationCity": "",
+          "locationProvince": "",
+          "locationPrecision": "",
+          "locationReviewStatus": "",
+          "startDate": "2026-10-03",
+          "startTime": "09:00",
+          "endDate": "2026-10-03",
+          "endTime": "21:00",
+          "isRecurring": "Yes",
+          "recurringPattern": "daily",
+          "recurringDaysOfWeek": [],
+          "recurringWeekdaySequence": [],
+          "recurringWeekInterval": null,
+          "totalOccurrences": 4,
+          "recurrenceUntilDate": "",
+          "ticketLink": "",
+          "ticketsBuyUrl": "",
+          "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791895592467-m7x60l.webp",
+          "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791895592467-m7x60l.webp",
+          "sharedPostThumbnail": "",
+          "imageProvenance": {
+            "version": 1,
+            "primarySource": "post_media",
+            "primaryField": "relevantImageUrl",
+            "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791895592467-m7x60l.webp",
+            "isFallback": false,
+            "sourceFields": [
+              "relevantImageUrl",
+              "mediaUrls",
+              "icon"
+            ],
+            "media": [
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791895592467-m7x60l.webp",
+                "source": "post_media",
+                "field": "relevantImageUrl",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791895592467-m7x60l.webp",
+                "source": "post_media",
+                "field": "mediaUrls",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1791895592858-rsq2e0.webp",
+                "source": "profile_image",
+                "field": "icon",
+                "isPrimary": false,
+                "isFallback": false
+              }
+            ],
+            "selectionReason": "model_selected_analysis_frame_source",
+            "updatedBy": "parser"
+          },
+          "timeResolution": {
+            "hoursUsed": true,
+            "startFromHours": true,
+            "endFromHours": "category_default"
+          },
+          "timeFlags": {
+            "start": {
+              "source": "semantic",
+              "evidence": "Start from venue hours (opens 09:00)"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceType": null,
+          "description": "Dinner service featuring Harvest Feast. RSVP please 902 672 2586. The advertised series dates are Oct 2 & 3, 9 & 10, 16 & 17."
+        }
+      ]
+    },
+    {
+      "row": 136,
+      "id": "1562661692568029",
+      "venue": "Downtown Charlottetown Inc.",
+      "caption": "What’s happening today in Downtown Charlottetown? \n\nTuesday, October 13, 2026 events:\n11:00 pm - Confederation Centre Box Office: Historic Great George Tour\n12:00 pm - Founders Food Hall & Market: Lunch Sounds Better Live with Chris Burke \n2:00 pm - Confederation Centre Box Office: Historic Great George Tour\n6:30 pm - Blank Canvas: Beginner WaterColour Course (Session 1)\n6:30 pm - Dali Cafe: Cocktials and Crafts with Blank Canvas \n6:30 pm - DownStreet Dance Studio: Beginner Belly Dance\n7:00 pm - City Cinema: AI Tuck My Blues Away\n7:00 pm - Olde Dublin Pub: Carter McLellan and Step Dancer Mylah Campbell\n7:30 pm - Downstreet Dance: Lindy Hop & Charleston Practice \n7:30 pm - The Arts Guild: Where it’s Too Deep To See A, Staged Reading \n7:30 pm - Sobey Family Theatre: Violinist James Ernes: 50th Birthday Recital Tour\n8:00 pm - Babas Lounge: Rachel McDonald Vinyl Night \n\nWednesday, October 14, 2026 events:\n11:00 pm - Confederation Centre Box Office: Historic Great George Tour\n12:00 pm - Founders Food Hall and Market: Lunch Sounds Better Live with Dan Payntrr\n12:00 pm - Olde Dublin Pub: Robbie Doherty\n1:30 pm - Blank Canvas: Water Colour Workshop Lighthouse \n2:00 pm - Confederation Centre Box Office: Historic Great George Tour\n6:00 pm - Side Door Dance  Studio: Adult Contemporary Dance\n7:00 pm - City Cinema: Anchor Fest Opening Night Film, Back in Black\n7:00 pm - Olde Dublin Pub: Richie and Trevor  \n7:00 pm - Marc’s Lounge: Wicked Wednesdays screening Coraline\n⁉️8:00 pm - HopYard: Trivia with Hank\n8:00 pm - Be You: Karaoke\n9:00 pm - Baba’s Lounge: Open Mic with Ivan Stewart \n\nDaily Charlottetown Library Learning Centre Schedule: https://peilibrary.libcal.com/calendar/charlottetownlibrary\n\nOCR TEXT:\nMay be an image of text",
+      "timestamp": "2026-10-13T11:43:25.000Z",
+      "stage3": [
+        {
+          "name": "Beginner WaterColour Course (Session 1)",
+          "type": "event",
+          "date": "2026-10-13",
+          "startTime": "18:30",
+          "endTime": "",
+          "venue": "Blank Canvas",
+          "price": "",
+          "description": "Blank Canvas: Beginner WaterColour Course (Session 1)",
+          "extractionReason": "schedule_text_fallback",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "6:30 pm"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceType": "schedule",
+          "_pipelineIndex": 4,
+          "_pipelineTotalStage3": 24
+        },
+        {
+          "name": "Violinist James Ernes: 50th Birthday Recital Tour",
+          "type": "event",
+          "date": "2026-10-13",
+          "startTime": "19:30",
+          "endTime": "",
+          "venue": "Sobey Family Theatre",
+          "price": "",
+          "description": "Sobey Family Theatre: Violinist James Ernes: 50th Birthday Recital Tour",
+          "extractionReason": "schedule_text_fallback",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "7:30 pm"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceType": "schedule",
+          "_pipelineIndex": 11,
+          "_pipelineTotalStage3": 24
+        }
+      ],
+      "events": [
+        {
+          "id": "1562661692568029",
+          "name": "Beginner WaterColour Course (Session 1)",
+          "category": "Workshops & Classes",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "establishment": "Blank Canvas",
+          "additionalLocation": "Blank Canvas",
+          "locationScope": "",
+          "locationLabel": "",
+          "locationCity": "",
+          "locationProvince": "",
+          "locationPrecision": "",
+          "locationReviewStatus": "",
+          "startDate": "2026-10-13",
+          "startTime": "18:30",
+          "endDate": "2026-10-13",
+          "endTime": "20:30",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "recurringDaysOfWeek": [],
+          "recurringWeekdaySequence": [],
+          "recurringWeekInterval": null,
+          "totalOccurrences": null,
+          "recurrenceUntilDate": "",
+          "ticketLink": "",
+          "ticketsBuyUrl": "",
+          "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791895965814-5yhzrp.webp",
+          "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791895965814-5yhzrp.webp",
+          "sharedPostThumbnail": "",
+          "imageProvenance": {
+            "version": 1,
+            "primarySource": "post_media",
+            "primaryField": "relevantImageUrl",
+            "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791895965814-5yhzrp.webp",
+            "isFallback": false,
+            "sourceFields": [
+              "relevantImageUrl",
+              "mediaUrls",
+              "icon"
+            ],
+            "media": [
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791895965814-5yhzrp.webp",
+                "source": "post_media",
+                "field": "relevantImageUrl",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791895965814-5yhzrp.webp",
+                "source": "post_media",
+                "field": "mediaUrls",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1791895966238-n8oj28.webp",
+                "source": "profile_image",
+                "field": "icon",
+                "isPrimary": false,
+                "isFallback": false
+              }
+            ],
+            "selectionReason": "model_selected_analysis_frame_source",
+            "updatedBy": "parser"
+          },
+          "timeResolution": {
+            "hoursUsed": true,
+            "endFromHours": "duration_default"
+          },
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "6:30 pm"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceType": "schedule",
+          "description": "Blank Canvas: Beginner WaterColour Course (Session 1)"
+        },
+        {
+          "id": "1562661692568029",
+          "name": "Violinist James Ernes: 50th Birthday Recital Tour",
+          "category": "Cinema",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "establishment": "Sobey Family Theatre",
+          "additionalLocation": "Sobey Family Theatre",
+          "locationScope": "",
+          "locationLabel": "",
+          "locationCity": "",
+          "locationProvince": "",
+          "locationPrecision": "",
+          "locationReviewStatus": "",
+          "startDate": "2026-10-13",
+          "startTime": "19:30",
+          "endDate": "2026-10-13",
+          "endTime": "21:30",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "recurringDaysOfWeek": [],
+          "recurringWeekdaySequence": [],
+          "recurringWeekInterval": null,
+          "totalOccurrences": null,
+          "recurrenceUntilDate": "",
+          "ticketLink": "",
+          "ticketsBuyUrl": "",
+          "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791895965814-5yhzrp.webp",
+          "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791895965814-5yhzrp.webp",
+          "sharedPostThumbnail": "",
+          "imageProvenance": {
+            "version": 1,
+            "primarySource": "post_media",
+            "primaryField": "relevantImageUrl",
+            "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791895965814-5yhzrp.webp",
+            "isFallback": false,
+            "sourceFields": [
+              "relevantImageUrl",
+              "mediaUrls",
+              "icon"
+            ],
+            "media": [
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791895965814-5yhzrp.webp",
+                "source": "post_media",
+                "field": "relevantImageUrl",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791895965814-5yhzrp.webp",
+                "source": "post_media",
+                "field": "mediaUrls",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1791895966238-n8oj28.webp",
+                "source": "profile_image",
+                "field": "icon",
+                "isPrimary": false,
+                "isFallback": false
+              }
+            ],
+            "selectionReason": "model_selected_analysis_frame_source",
+            "updatedBy": "parser"
+          },
+          "timeResolution": {
+            "hoursUsed": true,
+            "endFromHours": "duration_default"
+          },
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "7:30 pm"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceType": "schedule",
+          "description": "Sobey Family Theatre: Violinist James Ernes: 50th Birthday Recital Tour"
+        }
+      ]
+    },
+    {
+      "row": 143,
+      "id": "122232429122578108",
+      "venue": "The Tivoli Cinema",
+      "caption": "Back from the grave! Muscle Distribution presents a 4K restoration of the long hidden horror comedy satire gem Screamplay! ️  Screening back to back with Evil Dead II on Monday, Oct 19th and Tuesday, Oct 20th at 9:10PM  Tickets available online now!\n\nOCR TEXT:\nMay be an image of text",
+      "timestamp": "2026-10-12T17:19:09.000Z",
+      "stage3": [
+        {
+          "name": "Screamplay! and Evil Dead II",
+          "description": "Monday, Oct 19th: Screening back to back with Evil Dead II. Muscle Distribution presents a 4K restoration of the long hidden horror comedy satire gem Screamplay!",
+          "date": "2026-10-19",
+          "startTime": "21:10",
+          "endTime": "",
+          "venue": "",
+          "ticketLink": "",
+          "price": "",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "A dated, timed double-feature film screening is an entertainment event.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "9:10PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              {
+                "label": "The Tivoli Cinema",
+                "address": "",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "THE TIVOLI CINEMA"
+              }
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The poster identifies The Tivoli Cinema."
+          },
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 2
+        },
+        {
+          "name": "Screamplay! and Evil Dead II",
+          "description": "Tuesday, Oct 20th: Screening back to back with Evil Dead II. Muscle Distribution presents a 4K restoration of the long hidden horror comedy satire gem Screamplay!",
+          "date": "2026-10-20",
+          "startTime": "21:10",
+          "endTime": "",
+          "venue": "",
+          "ticketLink": "",
+          "price": "",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "A dated, timed double-feature film screening is an entertainment event.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "9:10PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              {
+                "label": "The Tivoli Cinema",
+                "address": "",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "THE TIVOLI CINEMA"
+              }
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The poster identifies The Tivoli Cinema."
+          },
+          "_pipelineIndex": 2,
+          "_pipelineTotalStage3": 2
+        }
+      ],
+      "events": [
+        {
+          "id": "122232429122578108",
+          "name": "Screamplay! and Evil Dead II",
+          "category": "Cinema",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "establishment": "The Tivoli Cinema",
+          "additionalLocation": "",
+          "locationScope": "",
+          "locationLabel": "",
+          "locationCity": "",
+          "locationProvince": "",
+          "locationPrecision": "",
+          "locationReviewStatus": "",
+          "startDate": "2026-10-19",
+          "startTime": "21:10",
+          "endDate": "2026-10-19",
+          "endTime": "23:00",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "recurringDaysOfWeek": [],
+          "recurringWeekdaySequence": [],
+          "recurringWeekInterval": null,
+          "totalOccurrences": null,
+          "recurrenceUntilDate": "",
+          "ticketLink": "",
+          "ticketsBuyUrl": "",
+          "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896120804-d0k1fx.webp",
+          "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896120804-d0k1fx.webp",
+          "sharedPostThumbnail": "",
+          "imageProvenance": {
+            "version": 1,
+            "primarySource": "post_media",
+            "primaryField": "relevantImageUrl",
+            "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896120804-d0k1fx.webp",
+            "isFallback": false,
+            "sourceFields": [
+              "relevantImageUrl",
+              "mediaUrls",
+              "icon"
+            ],
+            "media": [
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896120804-d0k1fx.webp",
+                "source": "post_media",
+                "field": "relevantImageUrl",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896120804-d0k1fx.webp",
+                "source": "post_media",
+                "field": "mediaUrls",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1791896121097-72c059.webp",
+                "source": "profile_image",
+                "field": "icon",
+                "isPrimary": false,
+                "isFallback": false
+              }
+            ],
+            "selectionReason": "model_selected_analysis_frame_source",
+            "updatedBy": "parser"
+          },
+          "timeResolution": {
+            "hoursUsed": true,
+            "endFromHours": "category_default"
+          },
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "9:10PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceType": null,
+          "description": "Monday, Oct 19th: Screening back to back with Evil Dead II. Muscle Distribution presents a 4K restoration of the long hidden horror comedy satire gem Screamplay!"
+        },
+        {
+          "id": "122232429122578108",
+          "name": "Screamplay! and Evil Dead II",
+          "category": "Cinema",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "establishment": "The Tivoli Cinema",
+          "additionalLocation": "",
+          "locationScope": "",
+          "locationLabel": "",
+          "locationCity": "",
+          "locationProvince": "",
+          "locationPrecision": "",
+          "locationReviewStatus": "",
+          "startDate": "2026-10-20",
+          "startTime": "21:10",
+          "endDate": "2026-10-20",
+          "endTime": "23:00",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "recurringDaysOfWeek": [],
+          "recurringWeekdaySequence": [],
+          "recurringWeekInterval": null,
+          "totalOccurrences": null,
+          "recurrenceUntilDate": "",
+          "ticketLink": "",
+          "ticketsBuyUrl": "",
+          "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896120804-d0k1fx.webp",
+          "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896120804-d0k1fx.webp",
+          "sharedPostThumbnail": "",
+          "imageProvenance": {
+            "version": 1,
+            "primarySource": "post_media",
+            "primaryField": "relevantImageUrl",
+            "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896120804-d0k1fx.webp",
+            "isFallback": false,
+            "sourceFields": [
+              "relevantImageUrl",
+              "mediaUrls",
+              "icon"
+            ],
+            "media": [
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896120804-d0k1fx.webp",
+                "source": "post_media",
+                "field": "relevantImageUrl",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896120804-d0k1fx.webp",
+                "source": "post_media",
+                "field": "mediaUrls",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1791896121097-72c059.webp",
+                "source": "profile_image",
+                "field": "icon",
+                "isPrimary": false,
+                "isFallback": false
+              }
+            ],
+            "selectionReason": "model_selected_analysis_frame_source",
+            "updatedBy": "parser"
+          },
+          "timeResolution": {
+            "hoursUsed": true,
+            "endFromHours": "category_default"
+          },
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "9:10PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceType": null,
+          "description": "Tuesday, Oct 20th: Screening back to back with Evil Dead II. Muscle Distribution presents a 4K restoration of the long hidden horror comedy satire gem Screamplay!"
+        }
+      ]
+    },
+    {
+      "row": 144,
+      "id": "122232428936578108",
+      "venue": "The Tivoli Cinema",
+      "caption": "Next week! Bruce Campbell is Ash in Sam Raimi’s Evil Dead II   ⛓️ Screening on Monday, Oct 19th and Tuesday, Oct 20th at 7:15PM  Tickets available online now!\n\nOCR TEXT:\nMay be an image of text",
+      "timestamp": "2026-10-12T17:15:56.000Z",
+      "stage3": [
+        {
+          "name": "TERROR AT THE TIVOLI: EVIL DEAD II",
+          "description": "Monday- Bruce Campbell is Ash in Sam Raimi’s Evil Dead II. Screening on Monday, Oct 19th at 7:15PM. Tickets available online now!",
+          "date": "2026-10-19",
+          "startTime": "19:15",
+          "endTime": "",
+          "venue": "",
+          "ticketLink": "",
+          "price": "",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "A film screening is an entertainment event. The poster advertises a screening on Monday, Oct 19th at the shared time 7:15PM.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "7:15PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              {
+                "label": "The Tivoli",
+                "address": "",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "TERROR AT THE TIVOLI"
+              }
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The poster identifies the event as taking place at The Tivoli; no address is provided."
+          },
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 2
+        },
+        {
+          "name": "TERROR AT THE TIVOLI: EVIL DEAD II",
+          "description": "Tuesday- Bruce Campbell is Ash in Sam Raimi’s Evil Dead II. Screening on Tuesday, Oct 20th at 7:15PM. Tickets available online now!",
+          "date": "2026-10-20",
+          "startTime": "19:15",
+          "endTime": "",
+          "venue": "",
+          "ticketLink": "",
+          "price": "",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "A film screening is an entertainment event. The poster advertises a screening on Tuesday, Oct 20th at the shared time 7:15PM.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "7:15PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              {
+                "label": "The Tivoli",
+                "address": "",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "TERROR AT THE TIVOLI"
+              }
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The poster identifies the event as taking place at The Tivoli; no address is provided."
+          },
+          "_pipelineIndex": 2,
+          "_pipelineTotalStage3": 2
+        }
+      ],
+      "events": [
+        {
+          "id": "122232428936578108",
+          "name": "TERROR AT THE TIVOLI: EVIL DEAD II",
+          "category": "Cinema",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "establishment": "The Tivoli Cinema",
+          "additionalLocation": "",
+          "locationScope": "",
+          "locationLabel": "",
+          "locationCity": "",
+          "locationProvince": "",
+          "locationPrecision": "",
+          "locationReviewStatus": "",
+          "startDate": "2026-10-19",
+          "startTime": "19:15",
+          "endDate": "2026-10-19",
+          "endTime": "23:00",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "recurringDaysOfWeek": [],
+          "recurringWeekdaySequence": [],
+          "recurringWeekInterval": null,
+          "totalOccurrences": null,
+          "recurrenceUntilDate": "",
+          "ticketLink": "",
+          "ticketsBuyUrl": "",
+          "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896155494-apm6sv.webp",
+          "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896155494-apm6sv.webp",
+          "sharedPostThumbnail": "",
+          "imageProvenance": {
+            "version": 1,
+            "primarySource": "post_media",
+            "primaryField": "relevantImageUrl",
+            "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896155494-apm6sv.webp",
+            "isFallback": false,
+            "sourceFields": [
+              "relevantImageUrl",
+              "mediaUrls",
+              "icon"
+            ],
+            "media": [
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896155494-apm6sv.webp",
+                "source": "post_media",
+                "field": "relevantImageUrl",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896155494-apm6sv.webp",
+                "source": "post_media",
+                "field": "mediaUrls",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1791896155794-ua5k1v.webp",
+                "source": "profile_image",
+                "field": "icon",
+                "isPrimary": false,
+                "isFallback": false
+              }
+            ],
+            "selectionReason": "model_selected_analysis_frame_source",
+            "updatedBy": "parser"
+          },
+          "timeResolution": {
+            "hoursUsed": true,
+            "endFromHours": "category_default"
+          },
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "7:15PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceType": null,
+          "description": "Monday- Bruce Campbell is Ash in Sam Raimi’s Evil Dead II. Screening on Monday, Oct 19th at 7:15PM. Tickets available online now!"
+        },
+        {
+          "id": "122232428936578108",
+          "name": "TERROR AT THE TIVOLI: EVIL DEAD II",
+          "category": "Cinema",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "establishment": "The Tivoli Cinema",
+          "additionalLocation": "",
+          "locationScope": "",
+          "locationLabel": "",
+          "locationCity": "",
+          "locationProvince": "",
+          "locationPrecision": "",
+          "locationReviewStatus": "",
+          "startDate": "2026-10-20",
+          "startTime": "19:15",
+          "endDate": "2026-10-20",
+          "endTime": "23:00",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "recurringDaysOfWeek": [],
+          "recurringWeekdaySequence": [],
+          "recurringWeekInterval": null,
+          "totalOccurrences": null,
+          "recurrenceUntilDate": "",
+          "ticketLink": "",
+          "ticketsBuyUrl": "",
+          "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896155494-apm6sv.webp",
+          "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896155494-apm6sv.webp",
+          "sharedPostThumbnail": "",
+          "imageProvenance": {
+            "version": 1,
+            "primarySource": "post_media",
+            "primaryField": "relevantImageUrl",
+            "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896155494-apm6sv.webp",
+            "isFallback": false,
+            "sourceFields": [
+              "relevantImageUrl",
+              "mediaUrls",
+              "icon"
+            ],
+            "media": [
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896155494-apm6sv.webp",
+                "source": "post_media",
+                "field": "relevantImageUrl",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896155494-apm6sv.webp",
+                "source": "post_media",
+                "field": "mediaUrls",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1791896155794-ua5k1v.webp",
+                "source": "profile_image",
+                "field": "icon",
+                "isPrimary": false,
+                "isFallback": false
+              }
+            ],
+            "selectionReason": "model_selected_analysis_frame_source",
+            "updatedBy": "parser"
+          },
+          "timeResolution": {
+            "hoursUsed": true,
+            "endFromHours": "category_default"
+          },
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "7:15PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceType": null,
+          "description": "Tuesday- Bruce Campbell is Ash in Sam Raimi’s Evil Dead II. Screening on Tuesday, Oct 20th at 7:15PM. Tickets available online now!"
+        }
+      ]
+    },
+    {
+      "row": 161,
+      "id": "1556588789820786",
+      "venue": "Trailside Music Hall",
+      "caption": "Jake Vaadeland & The Sturgeon River Boys live at the Trailside in Charlottetown November 4th!!!\n\nTickets and more show info available at www.trailside.ca or Back Alley Music.\n\nhttps://locarius.io/events/4908/jake-vaadeland-the-sturgeon-river-boys-november-4th-25-advance-30-day-of-show-doors-630-pm",
+      "timestamp": "2026-10-12T17:05:06.000Z",
+      "stage3": [
+        {
+          "name": "Jake Vaadeland and the Sturgeon River Boys",
+          "description": "Jake Vaadeland & The Sturgeon River Boys live at the Trailside in Charlottetown November 4th. Tickets and more show info available at www.trailside.ca or Back Alley Music.",
+          "date": "2026-11-04",
+          "startTime": "18:30",
+          "endTime": "",
+          "venue": "",
+          "ticketLink": "https://locarius.io/events/4908/jake-vaadeland-the-sturgeon-river-boys-november-4th-25-advance-30-day-of-show-doors-630-pm",
+          "price": "25 advance; 30 day-of-show",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "Advertised live music performance with a named act and a specific date.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "doors-630-pm"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              {
+                "label": "the Trailside in Charlottetown",
+                "address": "",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "live at the Trailside in Charlottetown"
+              }
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The post places the show at the Trailside in Charlottetown."
+          },
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 1
+        }
+      ],
+      "events": [
+        {
+          "id": "1556588789820786",
+          "name": "Jake Vaadeland and the Sturgeon River Boys",
+          "category": "Live Music",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "establishment": "Trailside Music Hall",
+          "additionalLocation": "",
+          "locationScope": "",
+          "locationLabel": "",
+          "locationCity": "",
+          "locationProvince": "",
+          "locationPrecision": "",
+          "locationReviewStatus": "",
+          "startDate": "2026-11-04",
+          "startTime": "18:30",
+          "endDate": "2026-11-05",
+          "endTime": "01:00",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "recurringDaysOfWeek": [],
+          "recurringWeekdaySequence": [],
+          "recurringWeekInterval": null,
+          "totalOccurrences": null,
+          "recurrenceUntilDate": "",
+          "ticketLink": "https://locarius.io/events/4908/jake-vaadeland-the-sturgeon-river-boys-november-4th-25-advance-30-day-of-show-doors-630-pm",
+          "ticketsBuyUrl": "https://locarius.io/events/4908/jake-vaadeland-the-sturgeon-river-boys-november-4th-25-advance-30-day-of-show-doors-630-pm",
+          "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896280689-lwtrmx.webp",
+          "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896280689-lwtrmx.webp",
+          "sharedPostThumbnail": "",
+          "imageProvenance": {
+            "version": 1,
+            "primarySource": "post_media",
+            "primaryField": "relevantImageUrl",
+            "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896280689-lwtrmx.webp",
+            "isFallback": false,
+            "sourceFields": [
+              "relevantImageUrl",
+              "mediaUrls",
+              "icon"
+            ],
+            "media": [
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896280689-lwtrmx.webp",
+                "source": "post_media",
+                "field": "relevantImageUrl",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896280689-lwtrmx.webp",
+                "source": "post_media",
+                "field": "mediaUrls",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1791896280994-r2o2vx.webp",
+                "source": "profile_image",
+                "field": "icon",
+                "isPrimary": false,
+                "isFallback": false
+              }
+            ],
+            "selectionReason": "model_selected_analysis_frame_source",
+            "updatedBy": "parser"
+          },
+          "timeResolution": {
+            "hoursUsed": true,
+            "endFromHours": "category_default"
+          },
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "doors-630-pm"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceType": null,
+          "description": "Jake Vaadeland & The Sturgeon River Boys live at the Trailside in Charlottetown November 4th. Tickets and more show info available at www.trailside.ca or Back Alley Music."
+        }
+      ]
+    },
+    {
+      "row": 162,
+      "id": "1556546393158359",
+      "venue": "Trailside Music Hall",
+      "caption": "The Charlottetown Jazz Ensemble live at the Trailside in Charlottetown November 1st!!! Doors 6:30 PM with Showtime 7 PM\n\nTickets and more show info available at www.trailside.ca or Back Alley Music.\n\nhttps://locarius.io/events/5149/the-charlottetown-jazz-ensemble-november-1st-25-general-15-student-w-id-doors-630-pm-with-showtime-7-pm",
+      "timestamp": "2026-10-12T16:14:24.000Z",
+      "stage3": [
+        {
+          "name": "The Charlottetown Jazz Ensemble",
+          "description": "Live at the Trailside in Charlottetown. Doors 6:30 PM with Showtime 7 PM. Tickets and more show info available at www.trailside.ca or Back Alley Music.",
+          "date": "2026-11-01",
+          "startTime": "19:00",
+          "endTime": "",
+          "venue": "",
+          "ticketLink": "https://locarius.io/events/5149/the-charlottetown-jazz-ensemble-november-1st-25-general-15-student-w-id-doors-630-pm-with-showtime-7-pm",
+          "price": "",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "A live music performance is explicitly advertised with a date and showtime.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Showtime 7 PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              {
+                "label": "the Trailside in Charlottetown",
+                "address": "",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "live at the Trailside in Charlottetown"
+              }
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The source names the Trailside in Charlottetown but provides no street address."
+          },
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 1
+        }
+      ],
+      "events": [
+        {
+          "id": "1556546393158359",
+          "name": "The Charlottetown Jazz Ensemble",
+          "category": "Live Music",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "establishment": "Trailside Music Hall",
+          "additionalLocation": "",
+          "locationScope": "",
+          "locationLabel": "",
+          "locationCity": "",
+          "locationProvince": "",
+          "locationPrecision": "",
+          "locationReviewStatus": "",
+          "startDate": "2026-11-01",
+          "startTime": "19:00",
+          "endDate": "2026-11-02",
+          "endTime": "01:00",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "recurringDaysOfWeek": [],
+          "recurringWeekdaySequence": [],
+          "recurringWeekInterval": null,
+          "totalOccurrences": null,
+          "recurrenceUntilDate": "",
+          "ticketLink": "https://locarius.io/events/5149/the-charlottetown-jazz-ensemble-november-1st-25-general-15-student-w-id-doors-630-pm-with-showtime-7-pm",
+          "ticketsBuyUrl": "https://locarius.io/events/5149/the-charlottetown-jazz-ensemble-november-1st-25-general-15-student-w-id-doors-630-pm-with-showtime-7-pm",
+          "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896316229-tzhgeq.webp",
+          "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896316229-tzhgeq.webp",
+          "sharedPostThumbnail": "",
+          "imageProvenance": {
+            "version": 1,
+            "primarySource": "post_media",
+            "primaryField": "relevantImageUrl",
+            "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896316229-tzhgeq.webp",
+            "isFallback": false,
+            "sourceFields": [
+              "relevantImageUrl",
+              "mediaUrls",
+              "icon"
+            ],
+            "media": [
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896316229-tzhgeq.webp",
+                "source": "post_media",
+                "field": "relevantImageUrl",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896316229-tzhgeq.webp",
+                "source": "post_media",
+                "field": "mediaUrls",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1791896316458-kxmqhs.webp",
+                "source": "profile_image",
+                "field": "icon",
+                "isPrimary": false,
+                "isFallback": false
+              }
+            ],
+            "selectionReason": "model_selected_analysis_frame_source",
+            "updatedBy": "parser"
+          },
+          "timeResolution": {
+            "hoursUsed": true,
+            "endFromHours": "category_default"
+          },
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Showtime 7 PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceType": null,
+          "description": "Live at the Trailside in Charlottetown. Doors 6:30 PM with Showtime 7 PM. Tickets and more show info available at www.trailside.ca or Back Alley Music."
+        }
+      ]
+    },
+    {
+      "row": 163,
+      "id": "1556527319826933",
+      "venue": "Trailside Music Hall",
+      "caption": "Life in the Fast Lane: A Night of the Eagles live at the Trailside in Charlottetown October 29th, 30th & 31st!!!\n\nTickets and more show info available at www.trailside.ca or Back Alley Music.\n\nhttps://locarius.io/events/3328/life-in-the-fast-lane-a-night-of-the-eagles-oct-29th-55-doors-630-pm (29th) / \n\nhttps://locarius.io/events/3329/life-in-the-fast-lane-a-night-of-the-eagles-oct-30th-55-doors-630-pm (30th) / \n\nhttps://locarius.io/events/3330/life-in-the-fast-lane-a-night-of-the-eagles-oct-31st-55-doors-630-pm (31st)\n\nOCR TEXT:\nMay be an image of text",
+      "timestamp": "2026-10-12T15:51:41.000Z",
+      "stage3": [
+        {
+          "name": "Life in the Fast Lane: A Night of the Eagles",
+          "day": "Thursday",
+          "date": "2026-10-29",
+          "recurringPattern": "none",
+          "startTime": "18:30",
+          "endTime": "",
+          "venue": "Trailside Music Hall",
+          "price": "$55",
+          "description": "Doors at 6:30 PM. Tickets and show information are available at trailside.ca or Back Alley Music.",
+          "extractionReason": "A separate event link identifies the October 29 performance; its URL specifies $55 admission and doors at 6:30 PM.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "doors-630-pm"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 3
+        },
+        {
+          "name": "Life in the Fast Lane: A Night of the Eagles",
+          "day": "Friday",
+          "date": "2026-10-30",
+          "recurringPattern": "none",
+          "startTime": "18:30",
+          "endTime": "",
+          "venue": "Trailside Music Hall",
+          "price": "$55",
+          "description": "Doors at 6:30 PM. Tickets and show information are available at trailside.ca or Back Alley Music.",
+          "extractionReason": "A separate event link identifies the October 30 performance; its URL specifies $55 admission and doors at 6:30 PM.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "doors-630-pm"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_pipelineIndex": 2,
+          "_pipelineTotalStage3": 3
+        },
+        {
+          "name": "Life in the Fast Lane: A Night of the Eagles",
+          "day": "Saturday",
+          "date": "2026-10-31",
+          "recurringPattern": "none",
+          "startTime": "18:30",
+          "endTime": "",
+          "venue": "Trailside Music Hall",
+          "price": "$55",
+          "description": "Doors at 6:30 PM. Tickets and show information are available at trailside.ca or Back Alley Music.",
+          "extractionReason": "A separate event link identifies the October 31 performance; its URL specifies $55 admission and doors at 6:30 PM.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "doors-630-pm"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_pipelineIndex": 3,
+          "_pipelineTotalStage3": 3
+        }
+      ],
+      "events": [
+        {
+          "id": "1556527319826933",
+          "name": "Life in the Fast Lane: A Night of the Eagles",
+          "category": "Live Music",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "establishment": "Trailside Music Hall",
+          "additionalLocation": "",
+          "locationScope": "",
+          "locationLabel": "",
+          "locationCity": "",
+          "locationProvince": "",
+          "locationPrecision": "",
+          "locationReviewStatus": "",
+          "startDate": "2026-10-29",
+          "startTime": "18:30",
+          "endDate": "2026-10-29",
+          "endTime": "20:30",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "recurringDaysOfWeek": [],
+          "recurringWeekdaySequence": [],
+          "recurringWeekInterval": null,
+          "totalOccurrences": null,
+          "recurrenceUntilDate": "",
+          "ticketLink": "https://trailside.ca",
+          "ticketsBuyUrl": "https://trailside.ca",
+          "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896346791-ehg4yc.webp",
+          "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896346791-ehg4yc.webp",
+          "sharedPostThumbnail": "",
+          "imageProvenance": {
+            "version": 1,
+            "primarySource": "post_media",
+            "primaryField": "relevantImageUrl",
+            "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896346791-ehg4yc.webp",
+            "isFallback": false,
+            "sourceFields": [
+              "relevantImageUrl",
+              "mediaUrls",
+              "icon"
+            ],
+            "media": [
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896346791-ehg4yc.webp",
+                "source": "post_media",
+                "field": "relevantImageUrl",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896346791-ehg4yc.webp",
+                "source": "post_media",
+                "field": "mediaUrls",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1791896347018-izweog.webp",
+                "source": "profile_image",
+                "field": "icon",
+                "isPrimary": false,
+                "isFallback": false
+              }
+            ],
+            "selectionReason": "model_selected_analysis_frame_source",
+            "updatedBy": "parser"
+          },
+          "timeResolution": {
+            "hoursUsed": true,
+            "endFromHours": "duration_default"
+          },
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "doors-630-pm"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceType": "schedule",
+          "description": "Doors at 6:30 PM. Tickets and show information are available at trailside.ca or Back Alley Music."
+        },
+        {
+          "id": "1556527319826933",
+          "name": "Life in the Fast Lane: A Night of the Eagles",
+          "category": "Live Music",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "establishment": "Trailside Music Hall",
+          "additionalLocation": "",
+          "locationScope": "",
+          "locationLabel": "",
+          "locationCity": "",
+          "locationProvince": "",
+          "locationPrecision": "",
+          "locationReviewStatus": "",
+          "startDate": "2026-10-30",
+          "startTime": "18:30",
+          "endDate": "2026-10-30",
+          "endTime": "20:30",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "recurringDaysOfWeek": [],
+          "recurringWeekdaySequence": [],
+          "recurringWeekInterval": null,
+          "totalOccurrences": null,
+          "recurrenceUntilDate": "",
+          "ticketLink": "https://trailside.ca",
+          "ticketsBuyUrl": "https://trailside.ca",
+          "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896346791-ehg4yc.webp",
+          "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896346791-ehg4yc.webp",
+          "sharedPostThumbnail": "",
+          "imageProvenance": {
+            "version": 1,
+            "primarySource": "post_media",
+            "primaryField": "relevantImageUrl",
+            "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896346791-ehg4yc.webp",
+            "isFallback": false,
+            "sourceFields": [
+              "relevantImageUrl",
+              "mediaUrls",
+              "icon"
+            ],
+            "media": [
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896346791-ehg4yc.webp",
+                "source": "post_media",
+                "field": "relevantImageUrl",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896346791-ehg4yc.webp",
+                "source": "post_media",
+                "field": "mediaUrls",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1791896347018-izweog.webp",
+                "source": "profile_image",
+                "field": "icon",
+                "isPrimary": false,
+                "isFallback": false
+              }
+            ],
+            "selectionReason": "model_selected_analysis_frame_source",
+            "updatedBy": "parser"
+          },
+          "timeResolution": {
+            "hoursUsed": true,
+            "endFromHours": "duration_default"
+          },
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "doors-630-pm"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceType": "schedule",
+          "description": "Doors at 6:30 PM. Tickets and show information are available at trailside.ca or Back Alley Music."
+        },
+        {
+          "id": "1556527319826933",
+          "name": "Life in the Fast Lane: A Night of the Eagles",
+          "category": "Live Music",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "establishment": "Trailside Music Hall",
+          "additionalLocation": "",
+          "locationScope": "",
+          "locationLabel": "",
+          "locationCity": "",
+          "locationProvince": "",
+          "locationPrecision": "",
+          "locationReviewStatus": "",
+          "startDate": "2026-10-31",
+          "startTime": "18:30",
+          "endDate": "2026-10-31",
+          "endTime": "20:30",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "recurringDaysOfWeek": [],
+          "recurringWeekdaySequence": [],
+          "recurringWeekInterval": null,
+          "totalOccurrences": null,
+          "recurrenceUntilDate": "",
+          "ticketLink": "https://trailside.ca",
+          "ticketsBuyUrl": "https://trailside.ca",
+          "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896346791-ehg4yc.webp",
+          "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896346791-ehg4yc.webp",
+          "sharedPostThumbnail": "",
+          "imageProvenance": {
+            "version": 1,
+            "primarySource": "post_media",
+            "primaryField": "relevantImageUrl",
+            "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896346791-ehg4yc.webp",
+            "isFallback": false,
+            "sourceFields": [
+              "relevantImageUrl",
+              "mediaUrls",
+              "icon"
+            ],
+            "media": [
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896346791-ehg4yc.webp",
+                "source": "post_media",
+                "field": "relevantImageUrl",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896346791-ehg4yc.webp",
+                "source": "post_media",
+                "field": "mediaUrls",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1791896347018-izweog.webp",
+                "source": "profile_image",
+                "field": "icon",
+                "isPrimary": false,
+                "isFallback": false
+              }
+            ],
+            "selectionReason": "model_selected_analysis_frame_source",
+            "updatedBy": "parser"
+          },
+          "timeResolution": {
+            "hoursUsed": true,
+            "endFromHours": "duration_default"
+          },
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "doors-630-pm"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceType": "schedule",
+          "description": "Doors at 6:30 PM. Tickets and show information are available at trailside.ca or Back Alley Music."
+        }
+      ]
+    },
+    {
+      "row": 175,
+      "id": "1530908285723756",
+      "venue": "Bell Aliant Centre",
+      "caption": "Tuesday October 13th at the BAC!\nPublic Skate on MacLauchlan Arena B - 11:15am - 12:45 pm *Helmets are MANDATORY for all skaters!*\nAll pools CLOSED for Swimming Lessons - 4:00 pm - 8:00 pm\nLane Swim open - 5:30 am - 7:15 am*1 lane only*, 7:15 am - 4:00 pm, 8:00 pm - 9:00 pm\nLeisure and Toddler pools open - 5:30 am - 4:00 pm, 8:00 pm - 9:00 pm\nAll pools open - 10:45 am - 4:00 pm, 8:00 pm - 9:00 pm\nAquafit\nAqua Arthritis - 8:45 am\nHydro Cycle - 10:00 am\n\nOCR TEXT:\nMay be an image of swimming and text",
+      "timestamp": "2026-10-12T13:00:38.000Z",
+      "stage3": [
+        {
+          "name": "Public Skate",
+          "day": "Tuesday",
+          "date": "2026-10-13",
+          "recurringPattern": "none",
+          "startTime": "11:15",
+          "endTime": "12:45",
+          "venue": "",
+          "price": "",
+          "description": "On MacLauchlan Arena B. Helmets are mandatory for all skaters.",
+          "extractionReason": "Listed as a scheduled public skate with an explicit time range.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "11:15am - 12:45 pm"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "11:15am - 12:45 pm"
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 11
+        },
+        {
+          "name": "Swimming Lessons (all pools closed)",
+          "day": "Tuesday",
+          "date": "2026-10-13",
+          "recurringPattern": "none",
+          "startTime": "16:00",
+          "endTime": "20:00",
+          "venue": "",
+          "price": "",
+          "description": "All pools are closed during swimming lessons.",
+          "extractionReason": "The schedule lists swimming lessons and an explicit time range during which all pools are closed.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "4:00 pm - 8:00 pm"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "4:00 pm - 8:00 pm"
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_pipelineIndex": 2,
+          "_pipelineTotalStage3": 11
+        },
+        {
+          "name": "Leisure and Toddler Pools Open",
+          "day": "Tuesday",
+          "date": "2026-10-13",
+          "recurringPattern": "none",
+          "startTime": "05:30",
+          "endTime": "16:00",
+          "venue": "",
+          "price": "",
+          "description": "Leisure and toddler pools open.",
+          "extractionReason": "Listed as a pool availability period with an explicit time range.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "5:30 am - 4:00 pm"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "5:30 am - 4:00 pm"
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_pipelineIndex": 3,
+          "_pipelineTotalStage3": 11
+        },
+        {
+          "name": "Leisure and Toddler Pools Open",
+          "day": "Tuesday",
+          "date": "2026-10-13",
+          "recurringPattern": "none",
+          "startTime": "20:00",
+          "endTime": "21:00",
+          "venue": "",
+          "price": "",
+          "description": "Leisure and toddler pools open.",
+          "extractionReason": "Listed as a separate pool availability period with an explicit time range.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "8:00 pm - 9:00 pm"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "8:00 pm - 9:00 pm"
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_pipelineIndex": 4,
+          "_pipelineTotalStage3": 11
+        },
+        {
+          "name": "Aqua Arthritis",
+          "day": "Tuesday",
+          "date": "2026-10-13",
+          "recurringPattern": "none",
+          "startTime": "08:45",
+          "endTime": "",
+          "venue": "",
+          "price": "",
+          "description": "Aquafit class.",
+          "extractionReason": "Named Aquafit activity listed with a start time.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "8:45 am"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_pipelineIndex": 5,
+          "_pipelineTotalStage3": 11
+        },
+        {
+          "name": "Hydro Cycle",
+          "day": "Tuesday",
+          "date": "2026-10-13",
+          "recurringPattern": "none",
+          "startTime": "10:00",
+          "endTime": "",
+          "venue": "",
+          "price": "",
+          "description": "Aquafit class.",
+          "extractionReason": "Named Aquafit activity listed with a start time.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "10:00 am"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_pipelineIndex": 6,
+          "_pipelineTotalStage3": 11
+        },
+        {
+          "name": "Lane Swim",
+          "type": "event",
+          "date": "2026-10-13",
+          "startTime": "05:30",
+          "endTime": "07:15",
+          "venue": "Bell Aliant Centre",
+          "price": "",
+          "description": "Lane Swim open - 5:30 am - 7:15 am*1 lane only*, 7:15 am - 4:00 pm, 8:00 pm - 9:00 pm",
+          "extractionReason": "schedule_text_public_access",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "5:30 am - 7:15 am"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "5:30 am - 7:15 am"
+            }
+          },
+          "_sourceType": "schedule",
+          "relevantImageIndex": -1,
+          "recurringPattern": "none",
+          "_pipelineIndex": 7,
+          "_pipelineTotalStage3": 11
+        },
+        {
+          "name": "Lane Swim",
+          "type": "event",
+          "date": "2026-10-13",
+          "startTime": "07:15",
+          "endTime": "16:00",
+          "venue": "Bell Aliant Centre",
+          "price": "",
+          "description": "Lane Swim open - 5:30 am - 7:15 am*1 lane only*, 7:15 am - 4:00 pm, 8:00 pm - 9:00 pm",
+          "extractionReason": "schedule_text_public_access",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "7:15 am - 4:00 pm"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "7:15 am - 4:00 pm"
+            }
+          },
+          "_sourceType": "schedule",
+          "relevantImageIndex": -1,
+          "recurringPattern": "none",
+          "_pipelineIndex": 8,
+          "_pipelineTotalStage3": 11
+        },
+        {
+          "name": "Lane Swim",
+          "type": "event",
+          "date": "2026-10-13",
+          "startTime": "20:00",
+          "endTime": "21:00",
+          "venue": "Bell Aliant Centre",
+          "price": "",
+          "description": "Lane Swim open - 5:30 am - 7:15 am*1 lane only*, 7:15 am - 4:00 pm, 8:00 pm - 9:00 pm",
+          "extractionReason": "schedule_text_public_access",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "8:00 pm - 9:00 pm"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "8:00 pm - 9:00 pm"
+            }
+          },
+          "_sourceType": "schedule",
+          "relevantImageIndex": -1,
+          "recurringPattern": "none",
+          "_pipelineIndex": 9,
+          "_pipelineTotalStage3": 11
+        },
+        {
+          "name": "All pools open",
+          "type": "event",
+          "date": "2026-10-13",
+          "startTime": "10:45",
+          "endTime": "16:00",
+          "venue": "Bell Aliant Centre",
+          "price": "",
+          "description": "All pools open - 10:45 am - 4:00 pm, 8:00 pm - 9:00 pm",
+          "extractionReason": "schedule_text_public_access",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "10:45 am - 4:00 pm"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "10:45 am - 4:00 pm"
+            }
+          },
+          "_sourceType": "schedule",
+          "relevantImageIndex": -1,
+          "recurringPattern": "none",
+          "_pipelineIndex": 10,
+          "_pipelineTotalStage3": 11
+        },
+        {
+          "name": "All pools open",
+          "type": "event",
+          "date": "2026-10-13",
+          "startTime": "20:00",
+          "endTime": "21:00",
+          "venue": "Bell Aliant Centre",
+          "price": "",
+          "description": "All pools open - 10:45 am - 4:00 pm, 8:00 pm - 9:00 pm",
+          "extractionReason": "schedule_text_public_access",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "8:00 pm - 9:00 pm"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "8:00 pm - 9:00 pm"
+            }
+          },
+          "_sourceType": "schedule",
+          "relevantImageIndex": -1,
+          "recurringPattern": "none",
+          "_pipelineIndex": 11,
+          "_pipelineTotalStage3": 11
+        }
+      ],
+      "events": [
+        {
+          "id": "1530908285723756",
+          "name": "Public Skate",
+          "category": "Sports",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "establishment": "Bell Aliant Centre",
+          "additionalLocation": "",
+          "locationScope": "",
+          "locationLabel": "",
+          "locationCity": "",
+          "locationProvince": "",
+          "locationPrecision": "",
+          "locationReviewStatus": "",
+          "startDate": "2026-10-13",
+          "startTime": "11:15",
+          "endDate": "2026-10-13",
+          "endTime": "12:45",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "recurringDaysOfWeek": [],
+          "recurringWeekdaySequence": [],
+          "recurringWeekInterval": null,
+          "totalOccurrences": null,
+          "recurrenceUntilDate": "",
+          "ticketLink": "",
+          "ticketsBuyUrl": "",
+          "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896483142-whu1pj.webp",
+          "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896483142-whu1pj.webp",
+          "sharedPostThumbnail": "",
+          "imageProvenance": {
+            "version": 1,
+            "primarySource": "post_media",
+            "primaryField": "relevantImageUrl",
+            "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896483142-whu1pj.webp",
+            "isFallback": false,
+            "sourceFields": [
+              "relevantImageUrl",
+              "mediaUrls",
+              "icon"
+            ],
+            "media": [
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896483142-whu1pj.webp",
+                "source": "post_media",
+                "field": "relevantImageUrl",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896483142-whu1pj.webp",
+                "source": "post_media",
+                "field": "mediaUrls",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1791896483501-hu8w76.webp",
+                "source": "profile_image",
+                "field": "icon",
+                "isPrimary": false,
+                "isFallback": false
+              }
+            ],
+            "selectionReason": "model_selected_analysis_frame_source",
+            "updatedBy": "parser"
+          },
+          "timeResolution": {
+            "hoursUsed": false
+          },
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "11:15am - 12:45 pm"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "11:15am - 12:45 pm"
+            }
+          },
+          "_sourceType": "schedule",
+          "description": "On MacLauchlan Arena B. Helmets are mandatory for all skaters."
+        },
+        {
+          "id": "1530908285723756",
+          "name": "Leisure and Toddler Pools Open",
+          "category": "Gatherings & Parties",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "establishment": "Bell Aliant Centre",
+          "additionalLocation": "",
+          "locationScope": "",
+          "locationLabel": "",
+          "locationCity": "",
+          "locationProvince": "",
+          "locationPrecision": "",
+          "locationReviewStatus": "",
+          "startDate": "2026-10-13",
+          "startTime": "05:30",
+          "endDate": "2026-10-13",
+          "endTime": "16:00",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "recurringDaysOfWeek": [],
+          "recurringWeekdaySequence": [],
+          "recurringWeekInterval": null,
+          "totalOccurrences": null,
+          "recurrenceUntilDate": "",
+          "ticketLink": "",
+          "ticketsBuyUrl": "",
+          "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896483142-whu1pj.webp",
+          "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896483142-whu1pj.webp",
+          "sharedPostThumbnail": "",
+          "imageProvenance": {
+            "version": 1,
+            "primarySource": "post_media",
+            "primaryField": "relevantImageUrl",
+            "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896483142-whu1pj.webp",
+            "isFallback": false,
+            "sourceFields": [
+              "relevantImageUrl",
+              "mediaUrls",
+              "icon"
+            ],
+            "media": [
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896483142-whu1pj.webp",
+                "source": "post_media",
+                "field": "relevantImageUrl",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896483142-whu1pj.webp",
+                "source": "post_media",
+                "field": "mediaUrls",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1791896483501-hu8w76.webp",
+                "source": "profile_image",
+                "field": "icon",
+                "isPrimary": false,
+                "isFallback": false
+              }
+            ],
+            "selectionReason": "model_selected_analysis_frame_source",
+            "updatedBy": "parser"
+          },
+          "timeResolution": {
+            "hoursUsed": false
+          },
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "5:30 am - 4:00 pm"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "5:30 am - 4:00 pm"
+            }
+          },
+          "_sourceType": "schedule",
+          "description": "Leisure and toddler pools open."
+        },
+        {
+          "id": "1530908285723756",
+          "name": "Leisure and Toddler Pools Open",
+          "category": "Gatherings & Parties",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "establishment": "Bell Aliant Centre",
+          "additionalLocation": "",
+          "locationScope": "",
+          "locationLabel": "",
+          "locationCity": "",
+          "locationProvince": "",
+          "locationPrecision": "",
+          "locationReviewStatus": "",
+          "startDate": "2026-10-13",
+          "startTime": "20:00",
+          "endDate": "2026-10-13",
+          "endTime": "21:00",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "recurringDaysOfWeek": [],
+          "recurringWeekdaySequence": [],
+          "recurringWeekInterval": null,
+          "totalOccurrences": null,
+          "recurrenceUntilDate": "",
+          "ticketLink": "",
+          "ticketsBuyUrl": "",
+          "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896483142-whu1pj.webp",
+          "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896483142-whu1pj.webp",
+          "sharedPostThumbnail": "",
+          "imageProvenance": {
+            "version": 1,
+            "primarySource": "post_media",
+            "primaryField": "relevantImageUrl",
+            "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896483142-whu1pj.webp",
+            "isFallback": false,
+            "sourceFields": [
+              "relevantImageUrl",
+              "mediaUrls",
+              "icon"
+            ],
+            "media": [
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896483142-whu1pj.webp",
+                "source": "post_media",
+                "field": "relevantImageUrl",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896483142-whu1pj.webp",
+                "source": "post_media",
+                "field": "mediaUrls",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1791896483501-hu8w76.webp",
+                "source": "profile_image",
+                "field": "icon",
+                "isPrimary": false,
+                "isFallback": false
+              }
+            ],
+            "selectionReason": "model_selected_analysis_frame_source",
+            "updatedBy": "parser"
+          },
+          "timeResolution": {
+            "hoursUsed": false
+          },
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "8:00 pm - 9:00 pm"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "8:00 pm - 9:00 pm"
+            }
+          },
+          "_sourceType": "schedule",
+          "description": "Leisure and toddler pools open."
+        },
+        {
+          "id": "1530908285723756",
+          "name": "Aqua Arthritis",
+          "category": "Workshops & Classes",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "establishment": "Bell Aliant Centre",
+          "additionalLocation": "",
+          "locationScope": "",
+          "locationLabel": "",
+          "locationCity": "",
+          "locationProvince": "",
+          "locationPrecision": "",
+          "locationReviewStatus": "",
+          "startDate": "2026-10-13",
+          "startTime": "08:45",
+          "endDate": "2026-10-13",
+          "endTime": "10:45",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "recurringDaysOfWeek": [],
+          "recurringWeekdaySequence": [],
+          "recurringWeekInterval": null,
+          "totalOccurrences": null,
+          "recurrenceUntilDate": "",
+          "ticketLink": "",
+          "ticketsBuyUrl": "",
+          "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896483142-whu1pj.webp",
+          "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896483142-whu1pj.webp",
+          "sharedPostThumbnail": "",
+          "imageProvenance": {
+            "version": 1,
+            "primarySource": "post_media",
+            "primaryField": "relevantImageUrl",
+            "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896483142-whu1pj.webp",
+            "isFallback": false,
+            "sourceFields": [
+              "relevantImageUrl",
+              "mediaUrls",
+              "icon"
+            ],
+            "media": [
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896483142-whu1pj.webp",
+                "source": "post_media",
+                "field": "relevantImageUrl",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896483142-whu1pj.webp",
+                "source": "post_media",
+                "field": "mediaUrls",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1791896483501-hu8w76.webp",
+                "source": "profile_image",
+                "field": "icon",
+                "isPrimary": false,
+                "isFallback": false
+              }
+            ],
+            "selectionReason": "model_selected_analysis_frame_source",
+            "updatedBy": "parser"
+          },
+          "timeResolution": {
+            "hoursUsed": false,
+            "reason": "no_place_match",
+            "endFromHours": "duration_default"
+          },
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "8:45 am"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceType": "schedule",
+          "description": "Aquafit class."
+        },
+        {
+          "id": "1530908285723756",
+          "name": "Hydro Cycle",
+          "category": "Workshops & Classes",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "establishment": "Bell Aliant Centre",
+          "additionalLocation": "",
+          "locationScope": "",
+          "locationLabel": "",
+          "locationCity": "",
+          "locationProvince": "",
+          "locationPrecision": "",
+          "locationReviewStatus": "",
+          "startDate": "2026-10-13",
+          "startTime": "10:00",
+          "endDate": "2026-10-13",
+          "endTime": "12:00",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "recurringDaysOfWeek": [],
+          "recurringWeekdaySequence": [],
+          "recurringWeekInterval": null,
+          "totalOccurrences": null,
+          "recurrenceUntilDate": "",
+          "ticketLink": "",
+          "ticketsBuyUrl": "",
+          "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896483142-whu1pj.webp",
+          "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896483142-whu1pj.webp",
+          "sharedPostThumbnail": "",
+          "imageProvenance": {
+            "version": 1,
+            "primarySource": "post_media",
+            "primaryField": "relevantImageUrl",
+            "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896483142-whu1pj.webp",
+            "isFallback": false,
+            "sourceFields": [
+              "relevantImageUrl",
+              "mediaUrls",
+              "icon"
+            ],
+            "media": [
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896483142-whu1pj.webp",
+                "source": "post_media",
+                "field": "relevantImageUrl",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896483142-whu1pj.webp",
+                "source": "post_media",
+                "field": "mediaUrls",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1791896483501-hu8w76.webp",
+                "source": "profile_image",
+                "field": "icon",
+                "isPrimary": false,
+                "isFallback": false
+              }
+            ],
+            "selectionReason": "model_selected_analysis_frame_source",
+            "updatedBy": "parser"
+          },
+          "timeResolution": {
+            "hoursUsed": false,
+            "reason": "no_place_match",
+            "endFromHours": "duration_default"
+          },
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "10:00 am"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceType": "schedule",
+          "description": "Aquafit class."
+        },
+        {
+          "id": "1530908285723756",
+          "name": "Lane Swim",
+          "category": "Sports",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "establishment": "Bell Aliant Centre",
+          "additionalLocation": "Bell Aliant Centre",
+          "locationScope": "",
+          "locationLabel": "",
+          "locationCity": "",
+          "locationProvince": "",
+          "locationPrecision": "",
+          "locationReviewStatus": "",
+          "startDate": "2026-10-13",
+          "startTime": "05:30",
+          "endDate": "2026-10-13",
+          "endTime": "07:15",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "recurringDaysOfWeek": [],
+          "recurringWeekdaySequence": [],
+          "recurringWeekInterval": null,
+          "totalOccurrences": null,
+          "recurrenceUntilDate": "",
+          "ticketLink": "",
+          "ticketsBuyUrl": "",
+          "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896483142-whu1pj.webp",
+          "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896483142-whu1pj.webp",
+          "sharedPostThumbnail": "",
+          "imageProvenance": {
+            "version": 1,
+            "primarySource": "post_media",
+            "primaryField": "relevantImageUrl",
+            "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896483142-whu1pj.webp",
+            "isFallback": true,
+            "sourceFields": [
+              "relevantImageUrl",
+              "mediaUrls",
+              "icon"
+            ],
+            "media": [
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896483142-whu1pj.webp",
+                "source": "post_media",
+                "field": "relevantImageUrl",
+                "isPrimary": true,
+                "isFallback": true
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896483142-whu1pj.webp",
+                "source": "post_media",
+                "field": "mediaUrls",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1791896483501-hu8w76.webp",
+                "source": "profile_image",
+                "field": "icon",
+                "isPrimary": false,
+                "isFallback": false
+              }
+            ],
+            "selectionReason": "caption_only_post_media_context",
+            "updatedBy": "parser"
+          },
+          "timeResolution": {
+            "hoursUsed": false
+          },
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "5:30 am - 7:15 am"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "5:30 am - 7:15 am"
+            }
+          },
+          "_sourceType": "schedule",
+          "description": "Lane Swim open - 5:30 am - 7:15 am*1 lane only*, 7:15 am - 4:00 pm, 8:00 pm - 9:00 pm"
+        },
+        {
+          "id": "1530908285723756",
+          "name": "Lane Swim",
+          "category": "Sports",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "establishment": "Bell Aliant Centre",
+          "additionalLocation": "Bell Aliant Centre",
+          "locationScope": "",
+          "locationLabel": "",
+          "locationCity": "",
+          "locationProvince": "",
+          "locationPrecision": "",
+          "locationReviewStatus": "",
+          "startDate": "2026-10-13",
+          "startTime": "07:15",
+          "endDate": "2026-10-13",
+          "endTime": "16:00",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "recurringDaysOfWeek": [],
+          "recurringWeekdaySequence": [],
+          "recurringWeekInterval": null,
+          "totalOccurrences": null,
+          "recurrenceUntilDate": "",
+          "ticketLink": "",
+          "ticketsBuyUrl": "",
+          "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896483142-whu1pj.webp",
+          "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896483142-whu1pj.webp",
+          "sharedPostThumbnail": "",
+          "imageProvenance": {
+            "version": 1,
+            "primarySource": "post_media",
+            "primaryField": "relevantImageUrl",
+            "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896483142-whu1pj.webp",
+            "isFallback": true,
+            "sourceFields": [
+              "relevantImageUrl",
+              "mediaUrls",
+              "icon"
+            ],
+            "media": [
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896483142-whu1pj.webp",
+                "source": "post_media",
+                "field": "relevantImageUrl",
+                "isPrimary": true,
+                "isFallback": true
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896483142-whu1pj.webp",
+                "source": "post_media",
+                "field": "mediaUrls",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1791896483501-hu8w76.webp",
+                "source": "profile_image",
+                "field": "icon",
+                "isPrimary": false,
+                "isFallback": false
+              }
+            ],
+            "selectionReason": "caption_only_post_media_context",
+            "updatedBy": "parser"
+          },
+          "timeResolution": {
+            "hoursUsed": false
+          },
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "7:15 am - 4:00 pm"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "7:15 am - 4:00 pm"
+            }
+          },
+          "_sourceType": "schedule",
+          "description": "Lane Swim open - 5:30 am - 7:15 am*1 lane only*, 7:15 am - 4:00 pm, 8:00 pm - 9:00 pm"
+        },
+        {
+          "id": "1530908285723756",
+          "name": "Lane Swim",
+          "category": "Sports",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "establishment": "Bell Aliant Centre",
+          "additionalLocation": "Bell Aliant Centre",
+          "locationScope": "",
+          "locationLabel": "",
+          "locationCity": "",
+          "locationProvince": "",
+          "locationPrecision": "",
+          "locationReviewStatus": "",
+          "startDate": "2026-10-13",
+          "startTime": "20:00",
+          "endDate": "2026-10-13",
+          "endTime": "21:00",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "recurringDaysOfWeek": [],
+          "recurringWeekdaySequence": [],
+          "recurringWeekInterval": null,
+          "totalOccurrences": null,
+          "recurrenceUntilDate": "",
+          "ticketLink": "",
+          "ticketsBuyUrl": "",
+          "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896483142-whu1pj.webp",
+          "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896483142-whu1pj.webp",
+          "sharedPostThumbnail": "",
+          "imageProvenance": {
+            "version": 1,
+            "primarySource": "post_media",
+            "primaryField": "relevantImageUrl",
+            "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896483142-whu1pj.webp",
+            "isFallback": true,
+            "sourceFields": [
+              "relevantImageUrl",
+              "mediaUrls",
+              "icon"
+            ],
+            "media": [
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896483142-whu1pj.webp",
+                "source": "post_media",
+                "field": "relevantImageUrl",
+                "isPrimary": true,
+                "isFallback": true
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896483142-whu1pj.webp",
+                "source": "post_media",
+                "field": "mediaUrls",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1791896483501-hu8w76.webp",
+                "source": "profile_image",
+                "field": "icon",
+                "isPrimary": false,
+                "isFallback": false
+              }
+            ],
+            "selectionReason": "caption_only_post_media_context",
+            "updatedBy": "parser"
+          },
+          "timeResolution": {
+            "hoursUsed": false
+          },
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "8:00 pm - 9:00 pm"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "8:00 pm - 9:00 pm"
+            }
+          },
+          "_sourceType": "schedule",
+          "description": "Lane Swim open - 5:30 am - 7:15 am*1 lane only*, 7:15 am - 4:00 pm, 8:00 pm - 9:00 pm"
+        },
+        {
+          "id": "1530908285723756",
+          "name": "All pools open",
+          "category": "Sports",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "establishment": "Bell Aliant Centre",
+          "additionalLocation": "Bell Aliant Centre",
+          "locationScope": "",
+          "locationLabel": "",
+          "locationCity": "",
+          "locationProvince": "",
+          "locationPrecision": "",
+          "locationReviewStatus": "",
+          "startDate": "2026-10-13",
+          "startTime": "10:45",
+          "endDate": "2026-10-13",
+          "endTime": "16:00",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "recurringDaysOfWeek": [],
+          "recurringWeekdaySequence": [],
+          "recurringWeekInterval": null,
+          "totalOccurrences": null,
+          "recurrenceUntilDate": "",
+          "ticketLink": "",
+          "ticketsBuyUrl": "",
+          "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896483142-whu1pj.webp",
+          "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896483142-whu1pj.webp",
+          "sharedPostThumbnail": "",
+          "imageProvenance": {
+            "version": 1,
+            "primarySource": "post_media",
+            "primaryField": "relevantImageUrl",
+            "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896483142-whu1pj.webp",
+            "isFallback": true,
+            "sourceFields": [
+              "relevantImageUrl",
+              "mediaUrls",
+              "icon"
+            ],
+            "media": [
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896483142-whu1pj.webp",
+                "source": "post_media",
+                "field": "relevantImageUrl",
+                "isPrimary": true,
+                "isFallback": true
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896483142-whu1pj.webp",
+                "source": "post_media",
+                "field": "mediaUrls",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1791896483501-hu8w76.webp",
+                "source": "profile_image",
+                "field": "icon",
+                "isPrimary": false,
+                "isFallback": false
+              }
+            ],
+            "selectionReason": "caption_only_post_media_context",
+            "updatedBy": "parser"
+          },
+          "timeResolution": {
+            "hoursUsed": false
+          },
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "10:45 am - 4:00 pm"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "10:45 am - 4:00 pm"
+            }
+          },
+          "_sourceType": "schedule",
+          "description": "All pools open - 10:45 am - 4:00 pm, 8:00 pm - 9:00 pm"
+        },
+        {
+          "id": "1530908285723756",
+          "name": "All pools open",
+          "category": "Sports",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "establishment": "Bell Aliant Centre",
+          "additionalLocation": "Bell Aliant Centre",
+          "locationScope": "",
+          "locationLabel": "",
+          "locationCity": "",
+          "locationProvince": "",
+          "locationPrecision": "",
+          "locationReviewStatus": "",
+          "startDate": "2026-10-13",
+          "startTime": "20:00",
+          "endDate": "2026-10-13",
+          "endTime": "21:00",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "recurringDaysOfWeek": [],
+          "recurringWeekdaySequence": [],
+          "recurringWeekInterval": null,
+          "totalOccurrences": null,
+          "recurrenceUntilDate": "",
+          "ticketLink": "",
+          "ticketsBuyUrl": "",
+          "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896483142-whu1pj.webp",
+          "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896483142-whu1pj.webp",
+          "sharedPostThumbnail": "",
+          "imageProvenance": {
+            "version": 1,
+            "primarySource": "post_media",
+            "primaryField": "relevantImageUrl",
+            "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896483142-whu1pj.webp",
+            "isFallback": true,
+            "sourceFields": [
+              "relevantImageUrl",
+              "mediaUrls",
+              "icon"
+            ],
+            "media": [
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896483142-whu1pj.webp",
+                "source": "post_media",
+                "field": "relevantImageUrl",
+                "isPrimary": true,
+                "isFallback": true
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896483142-whu1pj.webp",
+                "source": "post_media",
+                "field": "mediaUrls",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1791896483501-hu8w76.webp",
+                "source": "profile_image",
+                "field": "icon",
+                "isPrimary": false,
+                "isFallback": false
+              }
+            ],
+            "selectionReason": "caption_only_post_media_context",
+            "updatedBy": "parser"
+          },
+          "timeResolution": {
+            "hoursUsed": false
+          },
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "8:00 pm - 9:00 pm"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "8:00 pm - 9:00 pm"
+            }
+          },
+          "_sourceType": "schedule",
+          "description": "All pools open - 10:45 am - 4:00 pm, 8:00 pm - 9:00 pm"
+        }
+      ]
+    },
+    {
+      "row": 224,
+      "id": "2230951430970178",
+      "venue": "Milton Community Hall",
+      "caption": "",
+      "timestamp": "2026-10-12T21:39:12.000Z",
+      "stage3": [
+        {
+          "name": "ZUMBA® adult fitness class with Natalia",
+          "description": "A chance to burn off some of the Thanksgiving dinner & snacks! Next Class: 5:30 pm ~ Wednesday ~ 1 hour ~ October 14th. Come join us. Start anytime. Go at your own pace. $7.00 drop in fee each class.",
+          "date": "2026-10-14",
+          "startTime": "17:30",
+          "endTime": "",
+          "venue": "",
+          "ticketLink": "",
+          "price": "$7.00",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "An advertised adult fitness class is an entertainment/activity event with an explicit date, start time, duration, venue, and drop-in fee.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "5:30 pm"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              {
+                "label": "MILTON COMMUNITY HALL",
+                "address": "7A New Glasgow Rd-Rte 224, Milton, PE",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "MILTON COMMUNITY HALL 7A New Glasgow Rd-Rte 224, Milton, PE"
+              }
+            ],
+            "confirmedStreets": [
+              "New Glasgow Rd",
+              "Rte 224"
+            ],
+            "ordered": false,
+            "evidenceNotes": "The poster explicitly gives Milton Community Hall and its address."
+          },
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 1
+        }
+      ],
+      "events": [
+        {
+          "id": "2230951430970178",
+          "name": "ZUMBA® adult fitness class with Natalia",
+          "category": "Workshops & Classes",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "establishment": "Milton Community Hall",
+          "additionalLocation": "",
+          "locationScope": "",
+          "locationLabel": "",
+          "locationCity": "",
+          "locationProvince": "",
+          "locationPrecision": "",
+          "locationReviewStatus": "",
+          "startDate": "2026-10-14",
+          "startTime": "17:30",
+          "endDate": "2026-10-14",
+          "endTime": "19:30",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "recurringDaysOfWeek": [],
+          "recurringWeekdaySequence": [],
+          "recurringWeekInterval": null,
+          "totalOccurrences": null,
+          "recurrenceUntilDate": "",
+          "ticketLink": "",
+          "ticketsBuyUrl": "",
+          "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791897192057-101zor.webp",
+          "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791897192057-101zor.webp",
+          "sharedPostThumbnail": "",
+          "imageProvenance": {
+            "version": 1,
+            "primarySource": "post_media",
+            "primaryField": "relevantImageUrl",
+            "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791897192057-101zor.webp",
+            "isFallback": false,
+            "sourceFields": [
+              "relevantImageUrl",
+              "mediaUrls",
+              "icon"
+            ],
+            "media": [
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791897192057-101zor.webp",
+                "source": "post_media",
+                "field": "relevantImageUrl",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791897192057-101zor.webp",
+                "source": "post_media",
+                "field": "mediaUrls",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1791897192346-ku80no.webp",
+                "source": "profile_image",
+                "field": "icon",
+                "isPrimary": false,
+                "isFallback": false
+              }
+            ],
+            "selectionReason": "model_selected_analysis_frame_source",
+            "updatedBy": "parser"
+          },
+          "timeResolution": {
+            "hoursUsed": true,
+            "endFromHours": "duration_default"
+          },
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "5:30 pm"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceType": null,
+          "description": "A chance to burn off some of the Thanksgiving dinner & snacks! Next Class: 5:30 pm ~ Wednesday ~ 1 hour ~ October 14th. Come join us. Start anytime. Go at your own pace. $7.00 drop in fee each class."
+        }
+      ]
+    },
+    {
+      "row": 225,
+      "id": "2610539662812967",
+      "venue": "Milton Community Hall",
+      "caption": "",
+      "timestamp": "2026-10-12T21:29:00.000Z",
+      "stage3": [
+        {
+          "name": "Milton Community Hall event (title not visible)",
+          "description": "Friday- RSVP to miltoncommunityhall@gmail.com or 902-566-3154. Adults -$15; 12 & under -$8.",
+          "date": "2026-11-13",
+          "startTime": "19:00",
+          "endTime": "",
+          "venue": "",
+          "ticketLink": "",
+          "price": "Adults $15; 12 & under $8",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "The poster advertises an admission-priced event at Milton Community Hall with a specific date and start time. The event title is not visible in the supplied image.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Friday, Nov. 13 at 7 p.m."
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              {
+                "label": "Milton Community Hall",
+                "address": "",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "Milton Community Hall"
+              }
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "Milton Community Hall is identified on the poster."
+          },
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 2
+        },
+        {
+          "name": "Milton Community Hall event (title not visible)",
+          "description": "Saturday- RSVP to miltoncommunityhall@gmail.com or 902-566-3154. Adults -$15; 12 & under -$8.",
+          "date": "2026-11-14",
+          "startTime": "14:00",
+          "endTime": "",
+          "venue": "",
+          "ticketLink": "",
+          "price": "Adults $15; 12 & under $8",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "The poster advertises an admission-priced event at Milton Community Hall with a specific date and start time. The event title is not visible in the supplied image.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Saturday, Nov. 14 at 2 p.m."
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              {
+                "label": "Milton Community Hall",
+                "address": "",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "Milton Community Hall"
+              }
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "Milton Community Hall is identified on the poster."
+          },
+          "_pipelineIndex": 2,
+          "_pipelineTotalStage3": 2
+        }
+      ],
+      "events": [
+        {
+          "id": "2610539662812967",
+          "name": "Milton Community Hall event (title not visible)",
+          "category": "Gatherings & Parties",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "establishment": "Milton Community Hall",
+          "additionalLocation": "",
+          "locationScope": "",
+          "locationLabel": "",
+          "locationCity": "",
+          "locationProvince": "",
+          "locationPrecision": "",
+          "locationReviewStatus": "",
+          "startDate": "2026-11-13",
+          "startTime": "19:00",
+          "endDate": "2026-11-13",
+          "endTime": "23:00",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "recurringDaysOfWeek": [],
+          "recurringWeekdaySequence": [],
+          "recurringWeekInterval": null,
+          "totalOccurrences": null,
+          "recurrenceUntilDate": "",
+          "ticketLink": "",
+          "ticketsBuyUrl": "",
+          "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791897242339-970srl.webp",
+          "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791897242339-970srl.webp",
+          "sharedPostThumbnail": "",
+          "imageProvenance": {
+            "version": 1,
+            "primarySource": "post_media",
+            "primaryField": "relevantImageUrl",
+            "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791897242339-970srl.webp",
+            "isFallback": false,
+            "sourceFields": [
+              "relevantImageUrl",
+              "mediaUrls",
+              "icon"
+            ],
+            "media": [
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791897242339-970srl.webp",
+                "source": "post_media",
+                "field": "relevantImageUrl",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791897242339-970srl.webp",
+                "source": "post_media",
+                "field": "mediaUrls",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1791897242613-xbnnxp.webp",
+                "source": "profile_image",
+                "field": "icon",
+                "isPrimary": false,
+                "isFallback": false
+              }
+            ],
+            "selectionReason": "model_selected_analysis_frame_source",
+            "updatedBy": "parser"
+          },
+          "timeResolution": {
+            "hoursUsed": true,
+            "endFromHours": "category_default"
+          },
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Friday, Nov. 13 at 7 p.m."
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceType": null,
+          "description": "Friday- RSVP to miltoncommunityhall@gmail.com or 902-566-3154. Adults -$15; 12 & under -$8."
+        },
+        {
+          "id": "2610539662812967",
+          "name": "Milton Community Hall event (title not visible)",
+          "category": "Gatherings & Parties",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "establishment": "Milton Community Hall",
+          "additionalLocation": "",
+          "locationScope": "",
+          "locationLabel": "",
+          "locationCity": "",
+          "locationProvince": "",
+          "locationPrecision": "",
+          "locationReviewStatus": "",
+          "startDate": "2026-11-14",
+          "startTime": "14:00",
+          "endDate": "2026-11-14",
+          "endTime": "23:00",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "recurringDaysOfWeek": [],
+          "recurringWeekdaySequence": [],
+          "recurringWeekInterval": null,
+          "totalOccurrences": null,
+          "recurrenceUntilDate": "",
+          "ticketLink": "",
+          "ticketsBuyUrl": "",
+          "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791897242339-970srl.webp",
+          "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791897242339-970srl.webp",
+          "sharedPostThumbnail": "",
+          "imageProvenance": {
+            "version": 1,
+            "primarySource": "post_media",
+            "primaryField": "relevantImageUrl",
+            "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791897242339-970srl.webp",
+            "isFallback": false,
+            "sourceFields": [
+              "relevantImageUrl",
+              "mediaUrls",
+              "icon"
+            ],
+            "media": [
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791897242339-970srl.webp",
+                "source": "post_media",
+                "field": "relevantImageUrl",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791897242339-970srl.webp",
+                "source": "post_media",
+                "field": "mediaUrls",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1791897242613-xbnnxp.webp",
+                "source": "profile_image",
+                "field": "icon",
+                "isPrimary": false,
+                "isFallback": false
+              }
+            ],
+            "selectionReason": "model_selected_analysis_frame_source",
+            "updatedBy": "parser"
+          },
+          "timeResolution": {
+            "hoursUsed": false,
+            "reason": "no_hours",
+            "endFromHours": "category_default"
+          },
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Saturday, Nov. 14 at 2 p.m."
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceType": null,
+          "description": "Saturday- RSVP to miltoncommunityhall@gmail.com or 902-566-3154. Adults -$15; 12 & under -$8."
+        }
+      ]
+    },
+    {
+      "row": 294,
+      "id": "1728807169249160",
+      "venue": "Cavendish Farms Community Events Centre",
+      "caption": "OCR TEXT:\nMay be an image of text",
+      "timestamp": "2026-10-12T17:06:47.000Z",
+      "stage3": [
+        {
+          "name": "Available to Rent",
+          "type": "event",
+          "date": "2026-10-12",
+          "startTime": "5:30 PM",
+          "endTime": "6:30 PM",
+          "venue": "",
+          "price": "",
+          "description": "Rental availability slot listed in the calendar.",
+          "extractionReason": "The Monday, Oct 12 cell explicitly lists an Available to Rent time slot.",
+          "relevantImageIndex": 0,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Cavendish Farms Community Event Centre, Tyne Valley, PEI"
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The calendar identifies the centre in Tyne Valley, PEI; no street or other location is shown."
+          },
+          "_sourceType": "calendar",
+          "_pipelineIndex": 3,
+          "_pipelineTotalStage3": 32
+        },
+        {
+          "name": "Private Rental Ebbem Ouble",
+          "type": "event",
+          "date": "2026-10-12",
+          "startTime": "8:30 PM",
+          "endTime": "9:30 PM",
+          "venue": "",
+          "price": "",
+          "description": "Private rental. The group text appears to read “Ebbem Ouble”; those characters are unclear in the image.",
+          "extractionReason": "The Monday, Oct 12 cell lists a Private Rental at this time. The accompanying group text is difficult to read and has not been silently corrected.",
+          "relevantImageIndex": 0,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Cavendish Farms Community Event Centre, Tyne Valley, PEI"
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The calendar identifies the centre in Tyne Valley, PEI; no street or other location is shown."
+          },
+          "_sourceType": "calendar",
+          "_pipelineIndex": 5,
+          "_pipelineTotalStage3": 32
+        },
+        {
+          "name": "Available to Rent",
+          "type": "event",
+          "date": "2026-10-12",
+          "startTime": "9:45 PM",
+          "endTime": "10:45 PM",
+          "venue": "",
+          "price": "",
+          "description": "Rental availability slot listed in the calendar.",
+          "extractionReason": "The Monday, Oct 12 cell explicitly lists an Available to Rent time slot.",
+          "relevantImageIndex": 0,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Cavendish Farms Community Event Centre, Tyne Valley, PEI"
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The calendar identifies the centre in Tyne Valley, PEI; no street or other location is shown."
+          },
+          "_sourceType": "calendar",
+          "_pipelineIndex": 6,
+          "_pipelineTotalStage3": 32
+        },
+        {
+          "name": "Family/Public Skate Free Adult/Youth Skate",
+          "type": "event",
+          "date": "2026-10-14",
+          "startTime": "10:30 AM",
+          "endTime": "11:30 AM",
+          "venue": "",
+          "price": "Free",
+          "description": "Activity: Family/Public Skate. The listing describes it as a Free Adult/Youth Skate.",
+          "extractionReason": "Listed in the Wednesday, Oct 14 calendar cell with this time; the cell explicitly says Free Adult/Youth Skate.",
+          "relevantImageIndex": 0,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Cavendish Farms Community Event Centre, Tyne Valley, PEI"
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The calendar identifies the centre in Tyne Valley, PEI; no street or other location is shown."
+          },
+          "_sourceType": "calendar",
+          "_pipelineIndex": 14,
+          "_pipelineTotalStage3": 32
+        }
+      ],
+      "events": [
+        {
+          "id": "1728807169249160",
+          "name": "Available to Rent",
+          "category": "Gatherings & Parties",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "establishment": "Cavendish Farms Community Events Centre",
+          "additionalLocation": "",
+          "locationScope": "",
+          "locationLabel": "",
+          "locationCity": "",
+          "locationProvince": "",
+          "locationPrecision": "",
+          "locationReviewStatus": "",
+          "startDate": "2026-10-12",
+          "startTime": "17:30",
+          "endDate": "2026-10-12",
+          "endTime": "18:30",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "recurringDaysOfWeek": [],
+          "recurringWeekdaySequence": [],
+          "recurringWeekInterval": null,
+          "totalOccurrences": null,
+          "recurrenceUntilDate": "",
+          "ticketLink": "",
+          "ticketsBuyUrl": "",
+          "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791897863942-txwkx5.webp",
+          "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791897863942-txwkx5.webp",
+          "sharedPostThumbnail": "",
+          "imageProvenance": {
+            "version": 1,
+            "primarySource": "post_media",
+            "primaryField": "relevantImageUrl",
+            "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791897863942-txwkx5.webp",
+            "isFallback": false,
+            "sourceFields": [
+              "relevantImageUrl",
+              "mediaUrls",
+              "icon"
+            ],
+            "media": [
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791897863942-txwkx5.webp",
+                "source": "post_media",
+                "field": "relevantImageUrl",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791897863942-txwkx5.webp",
+                "source": "post_media",
+                "field": "mediaUrls",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1791897864319-i0jc0y.webp",
+                "source": "profile_image",
+                "field": "icon",
+                "isPrimary": false,
+                "isFallback": false
+              }
+            ],
+            "selectionReason": "model_selected_analysis_frame_source",
+            "updatedBy": "parser"
+          },
+          "timeResolution": {
+            "hoursUsed": false
+          },
+          "timeFlags": null,
+          "_sourceType": "calendar",
+          "description": "Rental availability slot listed in the calendar."
+        },
+        {
+          "id": "1728807169249160",
+          "name": "Private Rental Ebbem Ouble",
+          "category": "Gatherings & Parties",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "establishment": "Cavendish Farms Community Events Centre",
+          "additionalLocation": "",
+          "locationScope": "",
+          "locationLabel": "",
+          "locationCity": "",
+          "locationProvince": "",
+          "locationPrecision": "",
+          "locationReviewStatus": "",
+          "startDate": "2026-10-12",
+          "startTime": "20:30",
+          "endDate": "2026-10-12",
+          "endTime": "21:30",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "recurringDaysOfWeek": [],
+          "recurringWeekdaySequence": [],
+          "recurringWeekInterval": null,
+          "totalOccurrences": null,
+          "recurrenceUntilDate": "",
+          "ticketLink": "",
+          "ticketsBuyUrl": "",
+          "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791897863942-txwkx5.webp",
+          "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791897863942-txwkx5.webp",
+          "sharedPostThumbnail": "",
+          "imageProvenance": {
+            "version": 1,
+            "primarySource": "post_media",
+            "primaryField": "relevantImageUrl",
+            "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791897863942-txwkx5.webp",
+            "isFallback": false,
+            "sourceFields": [
+              "relevantImageUrl",
+              "mediaUrls",
+              "icon"
+            ],
+            "media": [
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791897863942-txwkx5.webp",
+                "source": "post_media",
+                "field": "relevantImageUrl",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791897863942-txwkx5.webp",
+                "source": "post_media",
+                "field": "mediaUrls",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1791897864319-i0jc0y.webp",
+                "source": "profile_image",
+                "field": "icon",
+                "isPrimary": false,
+                "isFallback": false
+              }
+            ],
+            "selectionReason": "model_selected_analysis_frame_source",
+            "updatedBy": "parser"
+          },
+          "timeResolution": {
+            "hoursUsed": false
+          },
+          "timeFlags": null,
+          "_sourceType": "calendar",
+          "description": "Private rental. The group text appears to read “Ebbem Ouble”; those characters are unclear in the image."
+        },
+        {
+          "id": "1728807169249160",
+          "name": "Available to Rent",
+          "category": "Gatherings & Parties",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "establishment": "Cavendish Farms Community Events Centre",
+          "additionalLocation": "",
+          "locationScope": "",
+          "locationLabel": "",
+          "locationCity": "",
+          "locationProvince": "",
+          "locationPrecision": "",
+          "locationReviewStatus": "",
+          "startDate": "2026-10-12",
+          "startTime": "21:45",
+          "endDate": "2026-10-12",
+          "endTime": "22:45",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "recurringDaysOfWeek": [],
+          "recurringWeekdaySequence": [],
+          "recurringWeekInterval": null,
+          "totalOccurrences": null,
+          "recurrenceUntilDate": "",
+          "ticketLink": "",
+          "ticketsBuyUrl": "",
+          "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791897863942-txwkx5.webp",
+          "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791897863942-txwkx5.webp",
+          "sharedPostThumbnail": "",
+          "imageProvenance": {
+            "version": 1,
+            "primarySource": "post_media",
+            "primaryField": "relevantImageUrl",
+            "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791897863942-txwkx5.webp",
+            "isFallback": false,
+            "sourceFields": [
+              "relevantImageUrl",
+              "mediaUrls",
+              "icon"
+            ],
+            "media": [
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791897863942-txwkx5.webp",
+                "source": "post_media",
+                "field": "relevantImageUrl",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791897863942-txwkx5.webp",
+                "source": "post_media",
+                "field": "mediaUrls",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1791897864319-i0jc0y.webp",
+                "source": "profile_image",
+                "field": "icon",
+                "isPrimary": false,
+                "isFallback": false
+              }
+            ],
+            "selectionReason": "model_selected_analysis_frame_source",
+            "updatedBy": "parser"
+          },
+          "timeResolution": {
+            "hoursUsed": false
+          },
+          "timeFlags": null,
+          "_sourceType": "calendar",
+          "description": "Rental availability slot listed in the calendar."
+        },
+        {
+          "id": "1728807169249160",
+          "name": "Family/Public Skate Free Adult/Youth Skate",
+          "category": "Sports",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "establishment": "Cavendish Farms Community Events Centre",
+          "additionalLocation": "",
+          "locationScope": "",
+          "locationLabel": "",
+          "locationCity": "",
+          "locationProvince": "",
+          "locationPrecision": "",
+          "locationReviewStatus": "",
+          "startDate": "2026-10-14",
+          "startTime": "10:30",
+          "endDate": "2026-10-14",
+          "endTime": "11:30",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "recurringDaysOfWeek": [],
+          "recurringWeekdaySequence": [],
+          "recurringWeekInterval": null,
+          "totalOccurrences": null,
+          "recurrenceUntilDate": "",
+          "ticketLink": "",
+          "ticketsBuyUrl": "",
+          "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791897863942-txwkx5.webp",
+          "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791897863942-txwkx5.webp",
+          "sharedPostThumbnail": "",
+          "imageProvenance": {
+            "version": 1,
+            "primarySource": "post_media",
+            "primaryField": "relevantImageUrl",
+            "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791897863942-txwkx5.webp",
+            "isFallback": false,
+            "sourceFields": [
+              "relevantImageUrl",
+              "mediaUrls",
+              "icon"
+            ],
+            "media": [
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791897863942-txwkx5.webp",
+                "source": "post_media",
+                "field": "relevantImageUrl",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791897863942-txwkx5.webp",
+                "source": "post_media",
+                "field": "mediaUrls",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1791897864319-i0jc0y.webp",
+                "source": "profile_image",
+                "field": "icon",
+                "isPrimary": false,
+                "isFallback": false
+              }
+            ],
+            "selectionReason": "model_selected_analysis_frame_source",
+            "updatedBy": "parser"
+          },
+          "timeResolution": {
+            "hoursUsed": false
+          },
+          "timeFlags": null,
+          "_sourceType": "calendar",
+          "description": "Activity: Family/Public Skate. The listing describes it as a Free Adult/Youth Skate."
+        }
+      ]
+    },
+    {
+      "row": 330,
+      "id": "1670545314532853",
+      "venue": "Eastern Kings Sportsplex",
+      "caption": "OCR TEXT:\nMay be an image of text",
+      "timestamp": "2026-10-12T14:26:37.000Z",
+      "stage3": [
+        {
+          "name": "Walking Track",
+          "description": "Walking Track will reopen for the season starting Monday, October 19th. Track hours: Monday to Friday, 8:00 AM–3:00 PM.",
+          "date": "2026-10-19",
+          "startTime": "08:00",
+          "endTime": "15:00",
+          "venue": "",
+          "ticketLink": "",
+          "price": "",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "Advertised public recreation access: the walking track reopens for the season with printed weekday hours.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "8:00 AM"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "3:00 PM"
+            }
+          },
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              {
+                "label": "Eastern Kings Sportsplex",
+                "address": "",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "EASTERN KINGS SPORTSPLEX"
+              }
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The poster identifies Eastern Kings Sportsplex."
+          },
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 1
+        }
+      ],
+      "events": [
+        {
+          "id": "1670545314532853",
+          "name": "Walking Track",
+          "category": "Gatherings & Parties",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "establishment": "Eastern Kings Sportsplex",
+          "additionalLocation": "",
+          "locationScope": "",
+          "locationLabel": "",
+          "locationCity": "",
+          "locationProvince": "",
+          "locationPrecision": "",
+          "locationReviewStatus": "",
+          "startDate": "2026-10-19",
+          "startTime": "08:00",
+          "endDate": "2026-10-19",
+          "endTime": "15:00",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "recurringDaysOfWeek": [],
+          "recurringWeekdaySequence": [],
+          "recurringWeekInterval": null,
+          "totalOccurrences": null,
+          "recurrenceUntilDate": "",
+          "ticketLink": "",
+          "ticketsBuyUrl": "",
+          "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791898424634-87i6qm.webp",
+          "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791898424634-87i6qm.webp",
+          "sharedPostThumbnail": "",
+          "imageProvenance": {
+            "version": 1,
+            "primarySource": "post_media",
+            "primaryField": "relevantImageUrl",
+            "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791898424634-87i6qm.webp",
+            "isFallback": false,
+            "sourceFields": [
+              "relevantImageUrl",
+              "mediaUrls",
+              "icon"
+            ],
+            "media": [
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791898424634-87i6qm.webp",
+                "source": "post_media",
+                "field": "relevantImageUrl",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791898424634-87i6qm.webp",
+                "source": "post_media",
+                "field": "mediaUrls",
+                "isPrimary": true,
+                "isFallback": false
+              },
+              {
+                "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1791898424843-8kizbz.webp",
+                "source": "profile_image",
+                "field": "icon",
+                "isPrimary": false,
+                "isFallback": false
+              }
+            ],
+            "selectionReason": "model_selected_analysis_frame_source",
+            "updatedBy": "parser"
+          },
+          "timeResolution": {
+            "hoursUsed": false
+          },
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "8:00 AM"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "3:00 PM"
+            }
+          },
+          "_sourceType": null,
+          "description": "Walking Track will reopen for the season starting Monday, October 19th. Track hours: Monday to Friday, 8:00 AM–3:00 PM."
+        }
+      ]
+    }
+  ],
+  "keepers": [
+    {
+      "path": "venues/name_6387om/events/dUp4A9jObgs6DwbXrPOA",
+      "id": "dUp4A9jObgs6DwbXrPOA",
+      "updateTime": "2026-10-13T12:53:39.631Z",
+      "uniqueId": "1012144811847923_25e02cbb7664df6d",
+      "establishment": "Blank Canvas Art Supplies",
+      "locationScope": "venue",
+      "locationLabel": "Blank Canvas Art Supplies",
+      "locationPrecision": "exact",
+      "locationReviewStatus": "not_needed",
+      "eventType": "workshops_classes",
+      "eventName": "G Beginner Watercolour Course w/ Dave (Session 1 of 3)",
+      "startDate": "2026-09-22",
+      "endDate": "2026-09-22",
+      "startTime": "18:30",
+      "endTime": "20:30",
+      "facebookUrl": "https://www.facebook.com/p/Blank-Canvas-Art-Supplies-100091572402204/",
+      "topReactionsCount": 1,
+      "venueId": "name_6387om",
+      "category": "Workshops & Classes",
+      "isEvent": "Yes",
+      "isFoodSpecial": "No",
+      "name": "G Beginner Watercolour Course w/ Dave (Session 1 of 3)",
+      "address": "125 Great George Street, Charlottetown, PE C1A 4K7, Canada",
+      "rawAddress": "125 Great George Street, Charlottetown, PE C1A 4K7, Canada",
+      "normalizedAddress": "125 Great George Street, Charlottetown, PE C1A 4K7, Canada",
+      "addressSource": "google_places",
+      "addressNormalizationIssues": [],
+      "externalLinks": [],
+      "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1769527843636.webp",
+      "cleanedFacebookUrl": "https://www.facebook.com/p/Blank-Canvas-Art-Supplies-100091572402204/",
+      "latitude": 46.235623499999996,
+      "longitude": -63.1272816,
+      "timeResolution": {
+        "hoursUsed": false
+      },
+      "_sourceType": "calendar",
+      "familyFriendlyScore": 15,
+      "familyFriendlyLevel": "unlikely",
+      "familyFriendlyReasons": [
+        "insufficient_family_evidence"
+      ],
+      "familyFriendlyScoringVersion": "family-friendly-v4",
+      "addressUpdatedAt": "2026-08-30T13:47:53.824Z",
+      "createdAt": "2026-08-30T13:47:53.824Z",
+      "recurringPattern": "weekly_tuesday",
+      "ticketPrice": "$110",
+      "description": "Learn to Create! For 3 classes. Dates listed: Sept 22, 29, Oct. 6.",
+      "isRecurring": true,
+      "shares": 2,
+      "price": "$110",
+      "likes": 5,
+      "totalOccurrences": 3,
+      "recurrenceUntilDate": "2026-10-27",
+      "lastSeenAt": "2026-10-13T12:53:39.620Z",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791895965814-5yhzrp.webp",
+      "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791895965814-5yhzrp.webp",
+      "sourceTimestamp": "2026-10-13T11:43:25.000Z",
+      "imageProvenance": {
+        "version": 1,
+        "primarySource": "post_media",
+        "primaryField": "relevantImageUrl",
+        "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791895965814-5yhzrp.webp",
+        "isFallback": false,
+        "sourceFields": [
+          "relevantImageUrl",
+          "image",
+          "imageUrl",
+          "mediaUrls"
+        ],
+        "media": [
+          {
+            "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791895965814-5yhzrp.webp",
+            "source": "post_media",
+            "field": "relevantImageUrl",
+            "isPrimary": true,
+            "isFallback": false
+          },
+          {
+            "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791895965814-5yhzrp.webp",
+            "source": "post_media",
+            "field": "image",
+            "isPrimary": false,
+            "isFallback": true
+          },
+          {
+            "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791895965814-5yhzrp.webp",
+            "source": "post_media",
+            "field": "imageUrl",
+            "isPrimary": false,
+            "isFallback": true
+          },
+          {
+            "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1788097539809-vfvmus.webp",
+            "source": "post_media",
+            "field": "mediaUrls",
+            "isPrimary": false,
+            "isFallback": true
+          },
+          {
+            "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1788961244663-1hrxjg.webp",
+            "source": "post_media",
+            "field": "mediaUrls",
+            "isPrimary": false,
+            "isFallback": true
+          },
+          {
+            "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791207251608-ytkr0l.webp",
+            "source": "post_media",
+            "field": "mediaUrls",
+            "isPrimary": false,
+            "isFallback": true
+          },
+          {
+            "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791207251900-etjzyj.webp",
+            "source": "post_media",
+            "field": "mediaUrls",
+            "isPrimary": false,
+            "isFallback": true
+          },
+          {
+            "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791207252142-yresi7.webp",
+            "source": "post_media",
+            "field": "mediaUrls",
+            "isPrimary": false,
+            "isFallback": true
+          },
+          {
+            "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791207252412-0j9m33.webp",
+            "source": "post_media",
+            "field": "mediaUrls",
+            "isPrimary": false,
+            "isFallback": true
+          },
+          {
+            "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791895965814-5yhzrp.webp",
+            "source": "post_media",
+            "field": "mediaUrls",
+            "isPrimary": false,
+            "isFallback": true
+          }
+        ],
+        "selectionReason": "model_selected_analysis_frame_source; duplicate_merge_image_update",
+        "updatedBy": "duplicate_merge",
+        "setAt": "2026-10-13T12:53:39.620Z"
+      },
+      "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791895965814-5yhzrp.webp",
+      "mediaUrls": [
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1788097539809-vfvmus.webp",
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1788961244663-1hrxjg.webp",
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791207251608-ytkr0l.webp",
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791207251900-etjzyj.webp",
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791207252142-yresi7.webp",
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791207252412-0j9m33.webp",
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791895965814-5yhzrp.webp"
+      ],
+      "updatedAt": "2026-10-13T12:53:39.620Z"
+    },
+    {
+      "path": "venues/nvQTJXSbDsSfJTCxDKCH/events/0gGOviSZCv9OE2KhpL3Z",
+      "id": "0gGOviSZCv9OE2KhpL3Z",
+      "updateTime": "2026-10-13T13:13:36.462Z",
+      "uniqueId": "1920077486112920_cc801cff1ebe3b18",
+      "establishment": "Milton Community Hall",
+      "locationScope": "venue",
+      "locationLabel": "Milton Community Hall",
+      "locationPrecision": "exact",
+      "locationReviewStatus": "not_needed",
+      "eventType": "workshops_classes",
+      "eventName": "Zumba Adult Fitness Class",
+      "description": "Zumba Adult fitness class. Wednesdays at 5:30 pm ~ October 7th, 14th, 21st, 28th ~ Milton Community Hall. Come join us, If you are not already attending this latin inspired fun dance workout. No experience required.",
+      "startDate": "2026-10-07",
+      "endDate": "2026-10-07",
+      "startTime": "17:30",
+      "endTime": "19:30",
+      "price": "$7.00 drop in fee each class.",
+      "facebookUrl": "http://www.facebook.com/pages/Milton-Community-Hall/380730012010498",
+      "likes": 2,
+      "shares": 2,
+      "topReactionsCount": 1,
+      "venueId": "nvQTJXSbDsSfJTCxDKCH",
+      "category": "Workshops & Classes",
+      "isEvent": "Yes",
+      "isFoodSpecial": "No",
+      "name": "Zumba Adult Fitness Class",
+      "address": "7 New Glasgow Rd #224, North Milton, PE C1E 0X5, Canada",
+      "rawAddress": "7 New Glasgow Rd #224, North Milton, PE C1E 0X5, Canada",
+      "normalizedAddress": "7 New Glasgow Rd #224, North Milton, PE C1E 0X5, Canada",
+      "addressSource": "venue",
+      "addressNormalizationIssues": [],
+      "ticketPrice": "$7.00 drop in fee each class.",
+      "externalLinks": [],
+      "isRecurring": "Yes",
+      "recurringPattern": "weekly_wednesday",
+      "totalOccurrences": 4,
+      "recurrenceUntilDate": "2026-10-28",
+      "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1784559647004-pi5bsy.webp",
+      "cleanedFacebookUrl": "http://www.facebook.com/pages/Milton-Community-Hall/380730012010498",
+      "latitude": 46.3233642,
+      "longitude": -63.215244199999994,
+      "timeResolution": {
+        "hoursUsed": true,
+        "endFromHours": "duration_default"
+      },
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "Wednesdays at 5:30 pm"
+        },
+        "end": {
+          "source": "none",
+          "toClose": false,
+          "evidence": ""
+        }
+      },
+      "familyFriendlyScore": 15,
+      "familyFriendlyLevel": "unlikely",
+      "familyFriendlyReasons": [
+        "insufficient_family_evidence"
+      ],
+      "familyFriendlyScoringVersion": "family-friendly-v4",
+      "addressUpdatedAt": "2026-10-05T14:12:25.700Z",
+      "createdAt": "2026-10-05T14:12:25.700Z",
+      "lastSeenAt": "2026-10-13T13:13:36.453Z",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791897192057-101zor.webp",
+      "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791897192057-101zor.webp",
+      "sourceTimestamp": "2026-10-12T21:39:12.000Z",
+      "imageProvenance": {
+        "version": 1,
+        "primarySource": "post_media",
+        "primaryField": "relevantImageUrl",
+        "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791897192057-101zor.webp",
+        "isFallback": false,
+        "sourceFields": [
+          "relevantImageUrl",
+          "image",
+          "imageUrl",
+          "mediaUrls"
+        ],
+        "media": [
+          {
+            "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791897192057-101zor.webp",
+            "source": "post_media",
+            "field": "relevantImageUrl",
+            "isPrimary": true,
+            "isFallback": false
+          },
+          {
+            "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791897192057-101zor.webp",
+            "source": "post_media",
+            "field": "image",
+            "isPrimary": false,
+            "isFallback": true
+          },
+          {
+            "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791897192057-101zor.webp",
+            "source": "post_media",
+            "field": "imageUrl",
+            "isPrimary": false,
+            "isFallback": true
+          },
+          {
+            "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791209486060-9xsxtm.webp",
+            "source": "post_media",
+            "field": "mediaUrls",
+            "isPrimary": false,
+            "isFallback": true
+          },
+          {
+            "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791897192057-101zor.webp",
+            "source": "post_media",
+            "field": "mediaUrls",
+            "isPrimary": false,
+            "isFallback": true
+          }
+        ],
+        "selectionReason": "model_selected_analysis_frame_source; duplicate_merge_image_update",
+        "updatedBy": "duplicate_merge",
+        "setAt": "2026-10-13T13:13:36.453Z"
+      },
+      "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791897192057-101zor.webp",
+      "mediaUrls": [
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791209486060-9xsxtm.webp",
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791897192057-101zor.webp"
+      ],
+      "updatedAt": "2026-10-13T13:13:36.453Z"
+    },
+    {
+      "path": "venues/slug_thetivolicinema/events/B0lJFx0bZMZBWrSWu95U",
+      "id": "B0lJFx0bZMZBWrSWu95U",
+      "updateTime": "2026-10-13T12:56:26.605Z",
+      "uniqueId": "122232429122578108_6c1a853b07993622",
+      "establishment": "The Tivoli Cinema",
+      "locationScope": "venue",
+      "locationLabel": "The Tivoli Cinema",
+      "locationPrecision": "exact",
+      "locationReviewStatus": "not_needed",
+      "eventType": "cinema",
+      "eventName": "Screamplay! and Evil Dead II",
+      "description": "Monday, Oct 19th: Screening back to back with Evil Dead II. Muscle Distribution presents a 4K restoration of the long hidden horror comedy satire gem Screamplay!",
+      "startDate": "2026-10-19",
+      "endDate": "2026-10-19",
+      "startTime": "21:10",
+      "endTime": "23:00",
+      "imageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896120804-d0k1fx.webp",
+      "facebookUrl": "https://www.facebook.com/thetivolicinema",
+      "sourceTimestamp": "2026-10-12T17:19:09.000Z",
+      "shares": 1,
+      "topReactionsCount": 1,
+      "venueId": "slug_thetivolicinema",
+      "category": "Cinema",
+      "isEvent": "Yes",
+      "isFoodSpecial": "No",
+      "name": "Screamplay! and Evil Dead II",
+      "address": "155 Kent St, Charlottetown, PE C1A 4K9, Canada",
+      "rawAddress": "155 Kent St, Charlottetown, PE C1A 4K9, Canada",
+      "normalizedAddress": "155 Kent St, Charlottetown, PE C1A 4K9, Canada",
+      "addressSource": "venue",
+      "addressNormalizationIssues": [],
+      "externalLinks": [],
+      "isRecurring": "No",
+      "recurringPattern": "none",
+      "icon": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1789048981828-j5ua9s.webp",
+      "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896120804-d0k1fx.webp",
+      "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896120804-d0k1fx.webp",
+      "cleanedFacebookUrl": "https://www.facebook.com/thetivolicinema",
+      "latitude": 46.2367313,
+      "longitude": -63.127546800000005,
+      "timeResolution": {
+        "hoursUsed": true,
+        "endFromHours": "category_default"
+      },
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "9:10PM"
+        },
+        "end": {
+          "source": "none",
+          "toClose": false,
+          "evidence": ""
+        }
+      },
+      "familyFriendlyLevel": "unlikely",
+      "familyFriendlyScoringVersion": "family-friendly-v4",
+      "addressUpdatedAt": "2026-10-13T12:55:43.576Z",
+      "createdAt": "2026-10-13T12:55:43.576Z",
+      "lastSeenAt": "2026-10-13T12:56:26.594Z",
+      "familyFriendlyScore": 15,
+      "imageProvenance": {
+        "version": 1,
+        "primarySource": "post_media",
+        "primaryField": "mediaUrls",
+        "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896120804-d0k1fx.webp",
+        "isFallback": false,
+        "sourceFields": [
+          "mediaUrls"
+        ],
+        "media": [
+          {
+            "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896120804-d0k1fx.webp",
+            "source": "post_media",
+            "field": "mediaUrls",
+            "isPrimary": true,
+            "isFallback": false
+          },
+          {
+            "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896155494-apm6sv.webp",
+            "source": "post_media",
+            "field": "mediaUrls",
+            "isPrimary": false,
+            "isFallback": true
+          }
+        ],
+        "selectionReason": "model_selected_analysis_frame_source; duplicate_merge_image_update",
+        "updatedBy": "duplicate_merge",
+        "setAt": "2026-10-13T12:56:26.594Z"
+      },
+      "mediaUrls": [
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896120804-d0k1fx.webp",
+        "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791896155494-apm6sv.webp"
+      ],
+      "familyFriendlyReasons": [
+        "insufficient_family_evidence"
+      ],
+      "likes": 4,
+      "updatedAt": "2026-10-13T12:56:26.594Z"
+    }
+  ]
+}

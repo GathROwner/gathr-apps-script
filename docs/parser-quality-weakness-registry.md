@@ -341,3 +341,26 @@ the current allocation; no code or live-data change was made by this audit.
   backend blocked 16 protected-image cleanup attempts. Caller-side queueing of
   durable avatars remains cleanup work. Fifteen old missing pictures and four
   prepared but unapproved repairs are not resolved by this result.
+
+
+## October 13 prevention release (validated; deployment readback follows)
+
+See [repair evidence](luna-oct13-integrity-repair.md) and the separate
+[exact live plan](luna-oct13-live-repair-plan.md). Build, 643 backend tests,
+24 focused tests, 46-post/143-item captured playback and six actual Stage 4/5
+API calls passed. Four bounded source-linked Locarius lookups verified 20:00
+performance clocks using event-date DST offsets; door times remain distinct.
+
+Repairs cover placeholder-clock/dining-scope holds, explicit class durations,
+recital and recreation categories, weekday access/weekly_custom enum consistency,
+primary cinema titles/different clocks, bounded class-cycle identity, per-date
+ticket URLs and private/placeholder activity holds. Same-source single-occurrence
+cinema date protection spans generated-ID changes while preserving source
+multiplicity and other source owners. No model allocations or cache experiments
+changed. The unverified film prompt experiment was removed; tiny-card date/venue
+precision and contradictory primary sources remain open observations.
+
+The historical 19-path repair batch is backed up and awaiting exact approval.
+Dunes' stale queue payload requires the location task's review; parser deployment
+does not retroactively fix it. Deferred avatars and broad deduplication remain
+separate. Actual serving revisions/hash are recorded in the release document.

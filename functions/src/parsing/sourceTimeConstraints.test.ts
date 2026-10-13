@@ -69,7 +69,7 @@ test('complete October 12 captured cohort changes only the corroborated Milton r
   for (const row of fixture.rows) {
     const resolved = constrainSourceTimes(row.stage3 as any, row.caption);
     resolved.forEach((item, i) => {
-      if (item.startTime !== row.stage3[i].startTime || item.endTime !== row.stage3[i].endTime)
+      if ((item.startTime || '') !== (row.stage3[i].startTime || '') || (item.endTime || '') !== (row.stage3[i].endTime || ''))
         changed.push(`${row.row}:${item.name}`);
     });
   }

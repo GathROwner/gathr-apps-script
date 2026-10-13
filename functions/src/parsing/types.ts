@@ -7,7 +7,7 @@ import type { ModelSpatialEvidence, SpatialEventClassification } from './spatial
 import type { CalendarInventoryAdditionDecision, CalendarInventoryListing,
   CalendarInventoryReconciliation } from './calendarInventoryReconciliation.js';
 import type { Stage2ScoreRoutingDecision } from './stage2Routing.js';
-import type { SourceTimeConstraint, SourceMeridiemResolution } from './sourceTimeConstraints.js';
+import type { SourceTimeConstraint, SourceMeridiemResolution, SourceDurationResolution } from './sourceTimeConstraints.js';
 
 // ===================
 // Venue/Hours Types (also in main types, duplicated here for module independence)
@@ -382,8 +382,12 @@ export type RecurringPattern =
 // NOTE: Monthly recurrence is used in legacy Apps Script and should be added in a dedicated recurrence pass.
 
 export interface RecurrenceScheduleFields {
+  ticketLink?: string;
   _sourceTimeConstraint?: SourceTimeConstraint;
   _sourceMeridiemResolution?: SourceMeridiemResolution;
+  _sourceDurationResolution?: SourceDurationResolution;
+  _sourceTitleResolution?: string;
+  _sourceOccurrenceCount?: number;
   recurringDaysOfWeek?: RecurringWeekday[];
   recurringWeekdaySequence?: RecurringWeekday[];
   recurringWeekInterval?: number;

@@ -56,6 +56,7 @@ function getOpenAIClient(): OpenAI {
 const VALID_RECURRING_PATTERNS: RecurringPattern[] = [
   'none',
   'daily',
+  'weekly_custom',
   'weekly_monday',
   'weekly_tuesday',
   'weekly_wednesday',

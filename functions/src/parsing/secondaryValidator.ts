@@ -49,6 +49,7 @@ function getOpenAIClient(): OpenAI {
 const VALID_RECURRING_PATTERNS: RecurringPattern[] = [
   'none',
   'daily',
+  'weekly_custom',
   'weekly_monday',
   'weekly_tuesday',
   'weekly_wednesday',
@@ -1023,7 +1024,8 @@ IMPORTANT: Generic promotional language ("Come try our new greek menu", "Check o
 
 RECURRING ENUM REQUIREMENT:
 - recurringPattern MUST be one of:
-  "none", "daily", "weekly_monday", "weekly_tuesday", "weekly_wednesday", "weekly_thursday", "weekly_friday", "weekly_saturday", "weekly_sunday"
+  "none", "daily", "weekly_custom", "weekly_monday", "weekly_tuesday", "weekly_wednesday", "weekly_thursday", "weekly_friday", "weekly_saturday", "weekly_sunday"
+- weekly_custom is valid with recurringDaysOfWeek. Preserve an explicit weekday set such as Monday-Friday; do not reduce it to only Monday or expand it to weekends.
 - Never return plain "weekly". If text says "every Sunday", use "weekly_sunday" (and similarly for other days).
 
 Common holidays to check:

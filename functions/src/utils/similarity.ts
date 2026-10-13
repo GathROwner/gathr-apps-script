@@ -1,3 +1,4 @@
+import {hasConflictingOccurrenceIdentity} from './occurrenceMergeGuard.js';
 /**
  * String Similarity Utilities
  * Ported from utilities.js and migration/venue-matcher.js
@@ -557,6 +558,7 @@ export function isHighConfidenceSameOccurrenceDuplicate(
     name?: string;
   }
 ): boolean {
+  if (hasConflictingOccurrenceIdentity(newData, existingData)) return false;
   if (hasConflictingExplicitSlotOrdinals(newData, existingData)) return false;
   if (hasConflictingLabeledSlotTimeEvidence(newData, existingData)) return false;
   if (newData.startDate !== existingData.startDate) return false;
@@ -615,7 +617,7 @@ export function isDuplicateEntry(
     establishmentSimilarityThreshold?: number;
   }
 ): boolean {
-  if (hasConflictingDevelopmentSlot(newData, existingData)) return false;
+  if (hasConflictingDevelopmentSlot(newData, existingData) || hasConflictingOccurrenceIdentity(newData, existingData)) return false;
   if (hasConflictingExplicitSlotOrdinals(newData, existingData)) return false;
   if (hasConflictingLabeledSlotTimeEvidence(newData, existingData)) return false;
   const {

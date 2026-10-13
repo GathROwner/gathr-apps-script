@@ -156,6 +156,7 @@ export interface EventImageProvenance {
 }
 
 export interface EventData {
+  sourceOccurrenceCount?: number;
   id?: string;
   uniqueId: string;
   establishment: string;

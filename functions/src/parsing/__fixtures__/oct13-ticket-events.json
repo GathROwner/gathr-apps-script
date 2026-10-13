@@ -1,0 +1,78 @@
+[
+  {
+    "url": "https://locarius.io/events/3328/life-in-the-fast-lane-a-night-of-the-eagles-oct-29th-55-doors-630-pm",
+    "event": {
+      "@context": "https://schema.org",
+      "@type": "Event",
+      "name": "Life in the Fast Lane: A Night of the Eagles - Oct 29th - $55 - Doors 6:30 PM",
+      "image": "https://img.locarius.io/1820/78b7b897-5bc6-4b5c-a5b4-a9f66541beb5/original.jpg",
+      "description": "<p><span style=\"font-size: 12pt;\"><strong><u>LIFE IN THE FAST LANE: A Night of the Eagles</u></strong></span></p><p><span style=\"font-size: 12pt;\">From the laid-back grooves of Take It Easy to the soulful grandeur of Desperado — often called the “Ave Maria of 1970s rock” — this unforgettable night of music celebrates the timeless legacy of the greatest country-rock band of all time: The Eagles.</span></p><p><span style=\"font-size: 12pt;\">With heartfelt performances, brilliant melodies, and irresistibly catchy grooves, this show honors the songs that continue to captivate audiences around the world. There’s a reason their music still resonates today, and this night will remind you why.</span></p><p><span style=\"font-size: 12pt;\">This show has sold out every time we present it. So don’t miss out!</span></p><p><br></p><p><span style=\"font-size: 12pt;\">Starring: Alyssa Harper, Brad Milligan, Carrie MacLellan, and Craig Fair</span></p>",
+      "startDate": "Thu Oct 29 2026 23:00:56 GMT+0000 (Coordinated Universal Time)",
+      "endDate": "Fri Oct 30 2026 01:30:56 GMT+0000 (Coordinated Universal Time)",
+      "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
+      "eventStatus": "https://schema.org/EventScheduled",
+      "location": {
+        "@type": "Place",
+        "name": "Trailside Music Hall",
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "155 Kent St.",
+          "addressLocality": "Charlottetown",
+          "postalCode": "C1A 5Y6",
+          "addressRegion": "PE",
+          "addressCountry": "CA"
+        }
+      },
+      "offers": {
+        "@type": "Offer",
+        "url": "https://locarius.io/events/3328/life-in-the-fast-lane-a-night-of-the-eagles-oct-29th-55-doors-630-pm",
+        "price": 6785,
+        "priceCurrency": "CAD",
+        "availability": "https://schema.org/InStock"
+      },
+      "organizer": {
+        "@type": "Organization",
+        "name": "Trailside Music Hall",
+        "url": "https://locarius.io/org/31/trailside-music-hall"
+      }
+    }
+  },
+  {
+    "url": "https://locarius.io/events/4908/jake-vaadeland-the-sturgeon-river-boys-november-4th-25-advance-30-day-of-show-doors-630-pm",
+    "event": {
+      "@context": "https://schema.org",
+      "@type": "Event",
+      "name": "Jake Vaadeland & The Sturgeon River Boys - November 4th - $25 Advance - $30 Day Of Show - Doors 6:30 PM",
+      "image": "https://img.locarius.io/1820/56deac1e-b7b5-4de1-b699-5d3514aeae03/original.jpg",
+      "description": "<p><span style=\"font-size: 14.6667px;\">22-year-old Jake Vaadeland from Cut Knife, Saskatchewan, has had an impressive year. He earned his first JUNO Award win, his first Canadian Country Music Award win and made history as the youngest artist to achieve ‘Road Gold’ Certification by selling 25,000 tickets in 12 months across Canada. Performing and recording with his band’ The Sturgeon River Boys’, he has released a new record ‘One More Dollar to Go’ and embarked on a global tour, performing in the U.K., Spain, Denmark, the U.S., Germany, the Netherlands, and throughout Canada, solidifying his status as a rising star in the music industry. Recent collaborations include joining platinum selling Canadian country artist Tebey for the release of their single ‘Wake Me Up’ (The Bluegrass Rendition), a cross Canada tour with country supergroup Hunter Brothers, and a U.S. tour with The Dead South.&nbsp;</span></p>",
+      "startDate": "Thu Nov 05 2026 00:00:10 GMT+0000 (Coordinated Universal Time)",
+      "endDate": "Thu Nov 05 2026 02:00:10 GMT+0000 (Coordinated Universal Time)",
+      "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
+      "eventStatus": "https://schema.org/EventScheduled",
+      "location": {
+        "@type": "Place",
+        "name": "Trailside music hall",
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "155 Kent St.",
+          "addressLocality": "Charlottetown",
+          "postalCode": "C1A 5Y6",
+          "addressRegion": "PE",
+          "addressCountry": "CA"
+        }
+      },
+      "offers": {
+        "@type": "Offer",
+        "url": "https://locarius.io/events/4908/jake-vaadeland-the-sturgeon-river-boys-november-4th-25-advance-30-day-of-show-doors-630-pm",
+        "price": 3215,
+        "priceCurrency": "CAD",
+        "availability": "https://schema.org/InStock"
+      },
+      "organizer": {
+        "@type": "Organization",
+        "name": "Trailside Music Hall",
+        "url": "https://locarius.io/org/31/trailside-music-hall"
+      }
+    }
+  }
+]

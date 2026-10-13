@@ -3,7 +3,7 @@ import {isDeepStrictEqual} from 'node:util';
 
 export const COMPACT_STAGE4_FORMAT = 'compact_v1';
 type ValidationSource = ExtractedItem & { _pipelineIndex?: number; recurringPattern?: string };
-const patterns = ['none', 'daily', 'weekly_monday', 'weekly_tuesday', 'weekly_wednesday',
+const patterns = ['none', 'daily', 'weekly_custom', 'weekly_monday', 'weekly_tuesday', 'weekly_wednesday',
   'weekly_thursday', 'weekly_friday', 'weekly_saturday', 'weekly_sunday'];
 
 export function compactStage4Enabled(config: Partial<ParsingConfig>): boolean {

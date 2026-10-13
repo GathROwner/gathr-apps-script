@@ -1,3 +1,4 @@
+import {hasConflictingOccurrenceIdentity} from '../utils/occurrenceMergeGuard.js';
 import { EventData } from '../types/index.js';
 import { hasConflictingDevelopmentSlot } from '../utils/eventSlotIdentity.js';
 import {
@@ -425,7 +426,7 @@ export function getExactUniqueIdCompatibilityDiagnostics(
   const sameContentType = hasCompatibleContentType(incoming, existing);
   const titleCompatible = hasCompatibleTitle(incoming, existing);
   const dateOrWeekdayCompatible = hasCompatibleDateOrWeekdayIntent(incoming, existing);
-  const timeWindowCompatible = !hasConflictingDevelopmentSlot(incoming, existing) && hasCompatibleTimeWindow(
+  const timeWindowCompatible = !hasConflictingOccurrenceIdentity(incoming, existing) && !hasConflictingDevelopmentSlot(incoming, existing) && hasCompatibleTimeWindow(
     incoming,
     existing,
     options?.timeToleranceHours ?? 3
@@ -455,7 +456,7 @@ export function isExactUniqueIdDuplicateCompatible(
   existing: EventData,
   options?: CompatibilityOptions
 ): boolean {
-  if (hasConflictingDevelopmentSlot(incoming, existing)) return false;
+  if (hasConflictingDevelopmentSlot(incoming, existing) || hasConflictingOccurrenceIdentity(incoming, existing)) return false;
   if (!hasCompatibleVenue(incoming, existing, options?.venueId)) {
     return false;
   }

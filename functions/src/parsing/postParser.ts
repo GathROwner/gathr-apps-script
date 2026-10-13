@@ -55,6 +55,8 @@ import { reconcileCaptionOnlyWeeklyEvents } from './captionOnlyWeekly.js';
 import { reconcileRaceSchedule } from './raceScheduleReconciler.js';
 import { resolveTimesWithOperatingHours } from './venueResolver.js';
 import {constrainSourceTimes, blocksStartTimeFallback} from './sourceTimeConstraints.js';
+import {sourceItemHoldReason} from './sourceItemEvidence.js';
+import {enrichLinkedPerformanceStarts} from './linkedPerformanceTime.js';
 import { shouldHoldUndatedStandingSchedule, shouldRetrySeasonalLeagueWithLegacy,
   isSelectedLunaCanaryPost, isSampledLunaCanaryPost,
   canRetryLunaCanaryWithLegacy, canaryGeneratedCleanupUrls,
@@ -702,7 +704,7 @@ async function replayPostDataFromArtifactsCore(
     return [];
   }
 
-  rawExtractedData = constrainSourceTimes(rawExtractedData, combinedText);
+  rawExtractedData = constrainSourceTimes(rawExtractedData, combinedText).filter(item => !sourceItemHoldReason(item));
   rawExtractedData.forEach((item, idx) => {
     item._pipelineIndex = item._pipelineIndex || idx + 1;
     item._pipelineTotalStage3 = item._pipelineTotalStage3 || rawExtractedData.length;
@@ -745,7 +747,7 @@ async function replayPostDataFromArtifactsCore(
   }
 
   const compactReplayHold = getCompactStage4Hold(validatedData);
-  validatedData = constrainSourceTimes(validatedData, combinedText);
+  validatedData = constrainSourceTimes(validatedData, combinedText).filter(item => !sourceItemHoldReason(item));
   if (compactReplayHold) {
     await emitStageArtifacts(cfg, { source: 'replay', stage4ValidationHold: compactReplayHold, stage4Items: [] });
     await reportSkipReason({ stage: 'stage4', reason: `Compact validation held: ${compactReplayHold.reason}` });
@@ -1803,6 +1805,9 @@ async function parsePostDataCore(
 
       logger.info('=== STAGE 3.7: TICKET LINK ENRICHMENT ===');
       const stage37Start = Date.now();
+      stage3Items = constrainSourceTimes(stage3Items, combinedText);
+      if (stage3Cfg.ticketLinkEnrichment?.enabled !== false)
+        stage3Items = await enrichLinkedPerformanceStarts(stage3Items, combinedText, cfg.timezone);
       const ticketUrls = extractedData?.ticketsBuyUrl ? [extractedData.ticketsBuyUrl] : [];
       const enrichmentResult = await enrichEventsFromTicketLinks(
         stage3Items,
@@ -1909,8 +1914,16 @@ async function parsePostDataCore(
         }
         stage3Items = partition.kept;
       }
+      const identityHeld = stage3Items.filter(item => sourceItemHoldReason(item));
+      if (identityHeld.length) {
+        sourceDateHoldEncountered = true;
+        await emitStageArtifacts(cfg, {source:'live', stage3HeldItems:deepCloneJson(identityHeld)});
+        await reportSkipReason({stage:'stage3',reason:'Private slot or unreadable activity identity held',
+          detail:identityHeld.map(item => `${item.name}: ${sourceItemHoldReason(item)}`).join('; ')});
+        logger.warn('Source activity identity held', {postId, count:identityHeld.length});
+      }
       return {
-        items: constrainSourceTimes(stage3Items, combinedText),
+        items: constrainSourceTimes(stage3Items.filter(item => !sourceItemHoldReason(item)), combinedText),
         ticketUrl,
       };
     };
