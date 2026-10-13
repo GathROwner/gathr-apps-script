@@ -156,6 +156,13 @@ export interface EventImageProvenance {
 }
 
 export interface EventData {
+  /** Internal reference for an approved top-level keeper; never persisted. */
+  _canonicalDocumentPath?: string;
+  locationMentionResolution?: import('../parsing/locationMentionRoles.js').LocationMentionResolution;
+  complexContext?: string;
+  ticketingLocation?: string;
+  sourceUniqueIds?: string[];
+  sourceUrls?: string[];
   sourceOccurrenceCount?: number;
   id?: string;
   uniqueId: string;

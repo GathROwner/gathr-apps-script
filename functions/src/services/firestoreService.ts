@@ -1,4 +1,6 @@
 import {hasConflictingOccurrenceIdentity,findConflictingSourceCinemaDate} from '../utils/occurrenceMergeGuard.js';
+import {KNOWN_LOCATION_RELATIONSHIPS} from '../parsing/locationMentionRoles.js';
+import {isApprovedVenueOccurrenceMatch,approvedVenueOccurrenceSourcePatch,ticketOccurrenceKey} from './approvedVenueOccurrence.js';
 /**
  * Firestore Service
  * CRUD operations for venues, events, and processing state
@@ -4092,6 +4094,18 @@ export async function checkDuplicate(
   venueId: string,
   currentRunEntries: EventData[] = []
 ): Promise<{ isDuplicate: boolean; existingEvent?: EventData }> {
+  // Manually resolved venue events may live at events/* rather than the venue
+  // child collection. Check the bounded known-facility cohort before creating
+  // a replacement. Never rewrite the approved location, clock or media here.
+  if(KNOWN_LOCATION_RELATIONSHIPS.some(x=>x.venueId===venueId) && ticketOccurrenceKey(event.ticketsBuyUrl||event.ticketLink)){
+    const snapshot=await db.collection(COLLECTIONS.EVENTS).where('venueId','==',venueId).where('startDate','==',event.startDate).limit(65).get();
+    const matches=snapshot.docs.map(doc=>({id:doc.id,...doc.data(),_canonicalDocumentPath:doc.ref.path} as EventData)).filter(candidate=>isApprovedVenueOccurrenceMatch(event,candidate));
+    if(snapshot.size===65 || matches.length>1){
+      logger.warn('Held ambiguous approved facility occurrence',{venueId,date:event.startDate,candidates:matches.length,boundedQueryOverflow:snapshot.size===65});
+      return {isDuplicate:true};
+    }
+    if(matches.length===1)return {isDuplicate:true,existingEvent:matches[0]};
+  }
   const normalizedUniqueId = String(event.uniqueId || '').trim();
   if (event.category === 'Cinema' && event.sourceOccurrenceCount === 1 && normalizedUniqueId) {
     const root = normalizedUniqueId.split('_')[0];
@@ -5571,6 +5585,17 @@ export async function createEvent(
 /**
  * Update an existing event
  */
+export async function linkApprovedVenueOccurrenceSource(existing:EventData,incoming:EventData):Promise<void> {
+  const documentPath=existing._canonicalDocumentPath||'';
+  if(!/^events\/[^/]+$/.test(documentPath))throw new Error('Invalid approved occurrence reference');
+  await db.runTransaction(async transaction=>{
+    const ref=db.doc(documentPath),snap=await transaction.get(ref);
+    const current=snap.data() as EventData|undefined;
+    if(!current || !isApprovedVenueOccurrenceMatch(incoming,current))throw new Error('Approved occurrence changed before source link');
+    transaction.update(ref,{...approvedVenueOccurrenceSourcePatch(current,incoming),lastSeenAt:admin.firestore.FieldValue.serverTimestamp()});
+  });
+}
+
 export async function updateEvent(
   venueId: string,
   eventId: string,

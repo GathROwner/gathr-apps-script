@@ -382,6 +382,7 @@ export type RecurringPattern =
 // NOTE: Monthly recurrence is used in legacy Apps Script and should be added in a dedicated recurrence pass.
 
 export interface RecurrenceScheduleFields {
+  _locationMentionResolution?: import('./locationMentionRoles.js').LocationMentionResolution;
   ticketLink?: string;
   _sourceTimeConstraint?: SourceTimeConstraint;
   _sourceMeridiemResolution?: SourceMeridiemResolution;

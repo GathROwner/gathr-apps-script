@@ -6,6 +6,8 @@
  * coordinates, a street order, or a connecting line.
  */
 
+import {resolveLocationMentionRoles} from './locationMentionRoles.js';
+
 export type SpatialEventKind =
   | 'single_location'
   | 'multi_location'
@@ -373,11 +375,17 @@ function modelKind(value: unknown): SpatialEventKind | null {
 }
 
 function looksLikeSeparateLocationOccurrences(text: string): boolean {
-  const lines = String(text || '').split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+  const lines = Array.from(new Map(String(text || '').split(/\r?\n/).map(line=>[normalizeKey(line),line.trim()] as const)).values()).filter(Boolean);
   const datedLocationLines = lines.filter((line) =>
-    DATE_TOKEN_PATTERN.test(line) && /\b(charlottetown|summerside|montague|cornwall|stratford|georgetown|souris|kensington)\b/i.test(line)
+    DATE_TOKEN_PATTERN.test(line) && /\b(charlottetown|summerside|montague|cornwall|stratford|georgetown|souris|kensington)\b/i.test(line) &&
+    !/\b(?:tickets? on sale|go on sale|box office|tickets? available)\b/i.test(line)
   );
-  return datedLocationLines.length >= 2;
+  const occurrences = new Set(datedLocationLines.map(line=>{
+    const date=normalizeKey(line.match(DATE_TOKEN_PATTERN)?.[0]||'');
+    const city=normalizeKey(line.match(/\b(charlottetown|summerside|montague|cornwall|stratford|georgetown|souris|kensington)\b/i)?.[0]||'');
+    return `${date}|${city}`;
+  }));
+  return occurrences.size >= 2;
 }
 
 function extractDatedCityLocations(text: string): SpatialLocationEvidence[] {
@@ -416,6 +424,12 @@ function chooseConfidence(params: {
 export function classifySpatialEvent(
   input: ClassifySpatialEventInput
 ): SpatialEventClassification {
+  const roles=resolveLocationMentionRoles(input);
+  if(roles){
+    return {version:1,kind:'single_location',representation:'venue',confidence:'high',ordered:false,
+      locations:[{label:roles.eventVenue,role:'location',certainty:'confirmed',sourceText:roles.mentions[0].sourceText}],
+      confirmedStreets:[],reviewReasons:[]};
+  }
   const name = cleanText(input.name, 300);
   const description = String(input.description || '');
   const location = cleanText(input.location, 300);
@@ -440,7 +454,14 @@ export function classifySpatialEvent(
         singleVenue.startsWith(city + ' '));
     }),
   ];
-  const locations = dedupeLocations([...modelLocations, ...textLocations]);
+  let locations = dedupeLocations([...modelLocations, ...textLocations]);
+  // A city attached to a named venue is context, not a second occurrence.
+  // Preserve city-only tour stops, different cities, and real route/multi-site evidence.
+  const cityKeys=new Set(locations.filter(x=>/^(charlottetown|summerside|montague|cornwall|stratford|georgetown|souris|kensington)$/i.test(x.label)).map(x=>normalizeKey(x.label)));
+  if(cityKeys.size===1 && locations.some(x=>!cityKeys.has(normalizeKey(x.label))) &&
+      !MULTI_LOCATION_PATTERN.test(corpus) && !ROUTE_EVENT_PATTERN.test(name)) {
+    locations=locations.filter(x=>!cityKeys.has(normalizeKey(x.label)));
+  }
   const confirmedStreets = uniqueStrings([
     ...(Array.isArray(model?.confirmedStreets) ? model.confirmedStreets : []),
     ...extractStreetSequence(corpus),

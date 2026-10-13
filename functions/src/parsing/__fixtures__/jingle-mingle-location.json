@@ -1,0 +1,245 @@
+{
+  "rows": [
+    {
+      "row": 131,
+      "sourceId": "1805887057841497",
+      "text": "Tickets on sale starting tomorrow October 9th \n\nJingle Mingle with Tip Er Back and Kim Albert & Faces is coming to the Eastlink Centre on Saturday, December 5.\n\nTickets are $25 + HST/fees and will be available at the  Eastlink Centre Charlottetown Box Office.\n\nhttps://purchase.eastlinkcentrepei.com/EventAvailability?EventId=28202\n\nMark your calendar and be ready to book! \n\n19+\n\nOCR TEXT:\nMay be an image of text",
+      "publisher": "Red Shores",
+      "item": {
+        "id": "1805887057841497",
+        "name": "Jingle & Mingle — KIM ALBERT & FACES with opening act TIP-ER-BACK",
+        "category": "Live Music",
+        "isEvent": "Yes",
+        "isFoodSpecial": "No",
+        "establishment": "Eastlink Centre",
+        "additionalLocation": "Eastlink Centre",
+        "locationScope": "",
+        "locationLabel": "",
+        "locationCity": "",
+        "locationProvince": "",
+        "locationPrecision": "",
+        "locationReviewStatus": "",
+        "startDate": "2026-12-05",
+        "startTime": "20:00",
+        "endDate": "2026-12-05",
+        "endTime": "22:00",
+        "isRecurring": "No",
+        "recurringPattern": "none",
+        "recurringDaysOfWeek": [],
+        "recurringWeekdaySequence": [],
+        "recurringWeekInterval": null,
+        "totalOccurrences": null,
+        "recurrenceUntilDate": "",
+        "ticketLink": "https://purchase.eastlinkcentrepei.com/EventAvailability?EventId=28202",
+        "ticketsBuyUrl": "https://purchase.eastlinkcentrepei.com/EventAvailability?EventId=28202",
+        "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791551447545-a3l0n8.webp",
+        "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791551447545-a3l0n8.webp",
+        "sharedPostThumbnail": "",
+        "imageProvenance": {
+          "version": 1,
+          "primarySource": "post_media",
+          "primaryField": "relevantImageUrl",
+          "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791551447545-a3l0n8.webp",
+          "isFallback": false,
+          "sourceFields": [
+            "relevantImageUrl",
+            "mediaUrls",
+            "icon"
+          ],
+          "media": [
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791551447545-a3l0n8.webp",
+              "source": "post_media",
+              "field": "relevantImageUrl",
+              "isPrimary": true,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791551447545-a3l0n8.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": true,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1791551447903-8lhkiv.webp",
+              "source": "profile_image",
+              "field": "icon",
+              "isPrimary": false,
+              "isFallback": false
+            }
+          ],
+          "selectionReason": "model_selected_analysis_frame_source",
+          "updatedBy": "parser"
+        },
+        "timeResolution": {
+          "hoursUsed": false,
+          "reason": "no_hours",
+          "endFromHours": "duration_default"
+        },
+        "timeFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "DANCE BEGINS 8:00PM"
+          },
+          "end": {
+            "source": "none",
+            "toClose": false,
+            "evidence": ""
+          }
+        },
+        "_sourceType": "event",
+        "description": "Saturday, December 5: Jingle Mingle with Tip Er Back and Kim Albert & Faces at the Eastlink Centre. Doors open 7:30PM; dance begins 8:00PM. 19+. Tickets are $25 + HST/fees and go on sale October 9 at the Eastlink Centre Charlottetown Box Office. The poster lists the location as Red Shores Charlottetown, while the caption says Eastlink Centre. | Observed b...",
+        "spatial": {
+          "version": 1,
+          "kind": "separate_occurrences",
+          "representation": "none",
+          "confidence": "high",
+          "ordered": false,
+          "locations": [
+            {
+              "label": "Eastlink Centre",
+              "role": "location",
+              "certainty": "confirmed",
+              "sourceText": "is coming to the Eastlink Centre"
+            },
+            {
+              "label": "Charlottetown",
+              "role": "location",
+              "certainty": "confirmed",
+              "sourceText": "Saturday, December 5: Jingle Mingle with Tip Er Back and Kim Albert & Faces at the Eastlink Centre. Doors open 7:30PM; dance begins 8:00PM. 19+. Tickets are $25 + HST/fees and go on sale October 9 at the Eastlink Centre Charlottetown Box Office. The poster lists the location as Red Shores Charlottet"
+            }
+          ],
+          "confirmedStreets": [],
+          "reviewReasons": [
+            "split_location_occurrences_before_publication"
+          ],
+          "evidenceNotes": "The caption names Eastlink Centre; the poster separately prints Red Shores Charlottetown."
+        }
+      }
+    },
+    {
+      "row": 177,
+      "sourceId": "1708626300787719",
+      "text": "Tickets on sale starting tomorrow October 9th \n\nJingle Mingle with Tip Er Back and Kim Albert & Faces is coming to the Eastlink Centre on Saturday, December 5.\n\nTickets are $25 + HST/fees and will be available at the  Eastlink Centre Charlottetown Box Office.\n\nhttps://purchase.eastlinkcentrepei.com/EventAvailability?EventId=28202\n\nMark your calendar and be ready to book! \n\n19+\n\nOCR TEXT:\nMay be an image of text\nMay be an image of text",
+      "publisher": "Eastlink Centre Charlottetown",
+      "item": {
+        "id": "1708626300787719",
+        "name": "Jingle & Mingle — Kim Albert & Faces with opening act TIP-ER-BACK",
+        "category": "Live Music",
+        "isEvent": "Yes",
+        "isFoodSpecial": "No",
+        "establishment": "Red Shores Charlottetown",
+        "additionalLocation": "Red Shores Charlottetown",
+        "locationScope": "",
+        "locationLabel": "",
+        "locationCity": "",
+        "locationProvince": "",
+        "locationPrecision": "",
+        "locationReviewStatus": "",
+        "startDate": "2026-12-05",
+        "startTime": "20:00",
+        "endDate": "2026-12-05",
+        "endTime": "22:00",
+        "isRecurring": "No",
+        "recurringPattern": "none",
+        "recurringDaysOfWeek": [],
+        "recurringWeekdaySequence": [],
+        "recurringWeekInterval": null,
+        "totalOccurrences": null,
+        "recurrenceUntilDate": "",
+        "ticketLink": "https://purchase.eastlinkcentrepei.com/EventAvailability?EventId=28202",
+        "ticketsBuyUrl": "https://purchase.eastlinkcentrepei.com/EventAvailability?EventId=28202",
+        "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791552216741-q92054.webp",
+        "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791552216741-q92054.webp",
+        "sharedPostThumbnail": "",
+        "imageProvenance": {
+          "version": 1,
+          "primarySource": "post_media",
+          "primaryField": "relevantImageUrl",
+          "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791552216741-q92054.webp",
+          "isFallback": false,
+          "sourceFields": [
+            "relevantImageUrl",
+            "mediaUrls",
+            "icon"
+          ],
+          "media": [
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791552216741-q92054.webp",
+              "source": "post_media",
+              "field": "relevantImageUrl",
+              "isPrimary": true,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1791552216741-q92054.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": true,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1791552217048-i39p4l.webp",
+              "source": "profile_image",
+              "field": "icon",
+              "isPrimary": false,
+              "isFallback": false
+            }
+          ],
+          "selectionReason": "model_selected_analysis_frame_source",
+          "updatedBy": "parser"
+        },
+        "timeResolution": {
+          "hoursUsed": true,
+          "endFromHours": "duration_default"
+        },
+        "timeFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "DANCE BEGINS 8:00PM"
+          },
+          "end": {
+            "source": "none",
+            "toClose": false,
+            "evidence": ""
+          }
+        },
+        "_sourceType": "event",
+        "description": "Saturday, December 5. Featuring KIM ALBERT & FACES, with opening act TIP-ER-BACK. Doors open 7:30PM; dance begins 8:00PM. 19+. Tickets are $25 + HST/fees and go on sale October 9, 2026. The poster lists Red Shores Charlottetown, while the caption says the event is coming to the Eastlink Centre Charlottetown. | Observed broad location: Red Shores Charlotte...",
+        "spatial": {
+          "version": 1,
+          "kind": "separate_occurrences",
+          "representation": "none",
+          "confidence": "high",
+          "ordered": false,
+          "locations": [
+            {
+              "label": "Red Shores Charlottetown",
+              "role": "location",
+              "certainty": "possible",
+              "sourceText": "RED SHORES CHARLOTTETOWN"
+            },
+            {
+              "label": "Eastlink Centre Charlottetown",
+              "role": "location",
+              "certainty": "possible",
+              "sourceText": "coming to the Eastlink Centre"
+            },
+            {
+              "label": "Charlottetown",
+              "role": "location",
+              "certainty": "confirmed",
+              "sourceText": "Saturday, December 5. Featuring KIM ALBERT & FACES, with opening act TIP-ER-BACK. Doors open 7:30PM; dance begins 8:00PM. 19+. Tickets are $25 + HST/fees and go on sale October 9, 2026. The poster lists Red Shores Charlottetown, while the caption says the event is coming to the Eastlink Centre Charl"
+            }
+          ],
+          "confirmedStreets": [],
+          "reviewReasons": [
+            "split_location_occurrences_before_publication"
+          ],
+          "evidenceNotes": "The poster identifies Red Shores Charlottetown, but the caption says the event is coming to the Eastlink Centre; the venue cannot be resolved from the supplied content."
+        }
+      }
+    }
+  ]
+}

@@ -1,4 +1,5 @@
 // @ts-nocheck
+import {applyLocationMentionResolution} from './locationMentionRoles.js';
 // TODO: Fix type errors introduced during Phase 6/7 updates
 /**
  * Post Parser - Main Orchestrator
@@ -704,7 +705,8 @@ async function replayPostDataFromArtifactsCore(
     return [];
   }
 
-  rawExtractedData = constrainSourceTimes(rawExtractedData, combinedText).filter(item => !sourceItemHoldReason(item));
+  rawExtractedData = constrainSourceTimes(rawExtractedData, combinedText).filter(item => !sourceItemHoldReason(item))
+    .map(item=>applyLocationMentionResolution(item,combinedText));
   rawExtractedData.forEach((item, idx) => {
     item._pipelineIndex = item._pipelineIndex || idx + 1;
     item._pipelineTotalStage3 = item._pipelineTotalStage3 || rawExtractedData.length;
@@ -2003,6 +2005,7 @@ async function parsePostDataCore(
 
     logger.info(`Extracted ${rawExtractedData.length} raw items`);
 
+    rawExtractedData=rawExtractedData.map(item=>applyLocationMentionResolution(item,input.combinedText));
     // Add pipeline indices to each item for tracking
     rawExtractedData.forEach((item, idx) => {
       item._pipelineIndex = idx + 1;

@@ -7,6 +7,7 @@ import { hasConflictingDevelopmentSlot } from '../utils/eventSlotIdentity.js';
  * Handles individual row processing including GPT parsing and event creation
  */
 
+import {applyLocationMentionResolution} from '../parsing/locationMentionRoles.js';
 import {
   RawRowData,
   EventData,
@@ -4245,7 +4246,12 @@ export async function resolveVenueForFullParserEventWithMatcherForRegression(par
   matcher: FullParserVenueMatcher;
   addressMatcher?: (address: string) => Promise<MatchInfo>;
 }): Promise<VenueData | null> {
-  const { item, rowVenue, row, establishment, rowIndex, matcher, addressMatcher } = params;
+  const { rowVenue, row, establishment, rowIndex, matcher, addressMatcher } = params;
+  const item=applyLocationMentionResolution(params.item,[row.text,row.sharedPostText].filter(Boolean).join('\n'));
+  if(item._locationMentionResolution?.venueId){
+    const resolved=await matcher(item._locationMentionResolution.eventVenue,undefined,inferFullParserVenueMatchContext(row,establishment));
+    return resolved.isMatch && resolved.matchedVenue?.id===item._locationMentionResolution.venueId ? resolved.matchedVenue : null;
+  }
   // Get the event's own establishment/venue names
   const itemEstablishment = String(item.establishment || '').trim();
   const itemVenue = String(item.venue || '').trim();
@@ -4514,6 +4520,7 @@ async function processFullParserEvent(
   duplicateEventId?: string;
   event?: EventData;
 }> {
+  item=applyLocationMentionResolution(item,[row.text,row.sharedPostText].filter(Boolean).join('\n'));
   const venue = await resolveVenueForFullParserEvent(
     item,
     rowVenue,
@@ -4845,6 +4852,13 @@ async function processFullParserEvent(
   } as EventData & { _sourceType?: string };
   if (Number.isInteger(item._sourceOccurrenceCount) && item._sourceOccurrenceCount! > 0)
     eventData.sourceOccurrenceCount = item._sourceOccurrenceCount;
+  if(item._locationMentionResolution){
+    eventData.locationMentionResolution=item._locationMentionResolution;
+    eventData.complexContext=item._locationMentionResolution.complexContext;
+    eventData.ticketingLocation=item._locationMentionResolution.ticketingLocation;
+    eventData.sourceUniqueIds=[String(row.uniqueId||'').trim()].filter(Boolean);
+    eventData.sourceUrls=[String(row.topLevelUrl||row.facebookUrl||'').trim()].filter(Boolean);
+  }
 
   enforceCategoryTypeConsistency(eventData);
   Object.assign(eventData, scoreFamilyFriendly({
@@ -5490,6 +5504,14 @@ async function updateDuplicateEventIfNeeded(
   changedFields: string[];
 }> {
   const venueId = venue.id;
+  if(existingEvent._canonicalDocumentPath){
+    await firestoreService.linkApprovedVenueOccurrenceSource(existingEvent,{
+      ...incomingEvent,
+      sourceUniqueIds:[...(incomingEvent.sourceUniqueIds||[]),String(auditContext?.row.uniqueId||'')].filter(Boolean),
+      sourceUrls:[...(incomingEvent.sourceUrls||[]),String(auditContext?.row.topLevelUrl||auditContext?.row.facebookUrl||'')].filter(Boolean),
+    });
+    return {updated:true,mergedEvent:existingEvent,changedFields:['sourceUniqueIds','sourceUrls']};
+  }
   const mergeOutcome = buildDuplicateEventUpdates(existingEvent, incomingEvent, {
     existingSourceScore: computeCategorySourceConfidence(existingEvent, venue),
     incomingSourceScore: computeCategorySourceConfidence(incomingEvent, venue),
@@ -5634,6 +5656,13 @@ function buildDuplicateEventUpdates(
     (updates[field] as EventData[K]) = value;
     changedFields.push(String(field));
   };
+  if(incoming.locationMentionResolution){
+    setField('sourceUniqueIds',Array.from(new Set([...(existing.sourceUniqueIds||[]),String(existing.uniqueId||'').split('_')[0],...(incoming.sourceUniqueIds||[])].filter(Boolean))));
+    setField('sourceUrls',Array.from(new Set([...(existing.sourceUrls||[]),...(incoming.sourceUrls||[])].filter(Boolean))));
+    for(const field of ['locationMentionResolution','complexContext','ticketingLocation'] as const){
+      if(!existing[field] && incoming[field])setField(field,incoming[field] as any);
+    }
+  }
 
   const fillWhenMissingFields: Array<keyof EventData> = [
     'eventName',

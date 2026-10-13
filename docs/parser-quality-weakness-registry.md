@@ -381,3 +381,29 @@ additional Zumba sibling repair is also approved, applied and API-verified.
 Read-only real Firestore selector controls additionally proved the correct
 Screamplay/Evil Dead keepers, held the alternate-ID Back in Black date, and
 allowed the new watercolour cycle. Film prompt experiment remains excluded.
+
+## October 13 venue, complex and ticket-office roles (PQ-012/PQ-017/PQ-SPATIAL)
+
+Jingle & Mingle, December5 20:00: Red Shores source1805887057841497 and Eastlink
+source1708626300787719 shared a poster explicitly naming Red Shores Charlottetown
+and directing purchases through Eastlink box office. Both were falsely routed
+as separate location occurrences. The classifier counted a city as another
+location and repeated dated prose as multiple occurrences. The location task
+already published one approved event at
+`events/location_8b000022923eb52b50d35935`; ordinary venue-child duplicate checks
+would miss that top-level keeper.
+
+The narrow prevention computes source-supported location roles, uses a verified
+shared-facility relationship without aliasing venue identities, preserves the
+decision through formatting and checks approved top-level keepers by canonical
+venue/date/exact start/title/event-specific ticket ID. A transaction may append
+source provenance only; it cannot overwrite approved event content. Unknown
+relations, relocations, sponsor logos, unrelated rooms/ticket IDs and genuine
+route/multi-location sources remain protected.
+
+Validated before release: build,658 backend tests, both real writer previews and
+read-only Firestore selectors, and46-post/143-item saved playback with no changes
+outside the target case. No new paid model calls or live data mutations were
+used. Serving release evidence is in
+[location role repair](location-mention-roles-oct13-release.md). This does not
+resolve arbitrary unknown venue relationships or authorize broad deduplication.

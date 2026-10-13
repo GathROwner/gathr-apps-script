@@ -394,6 +394,7 @@ export function preserveValidatedItemSourceType(
   if (!item) return item;
 
   const existingSourceType = String((item as any)?._sourceType || '').trim();
+  if (originalItem?._locationMentionResolution) item._locationMentionResolution=originalItem._locationMentionResolution;
   const originalSourceType = String((originalItem as any)?._sourceType || '').trim();
   const nextItem = { ...item } as ExtractedItem;
 

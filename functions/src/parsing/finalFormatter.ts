@@ -1249,6 +1249,15 @@ export function rehydrateFormattedEventMetadata(
 ): FormattedEvent {
   const nextEvent = { ...event } as FormattedEvent;
   let changed = false;
+  if (originalItem?._locationMentionResolution) {
+    const resolution=originalItem._locationMentionResolution;
+    nextEvent._locationMentionResolution=resolution;
+    nextEvent.establishment=resolution.eventVenue;
+    nextEvent.venue=resolution.eventVenue;
+    nextEvent.additionalLocation=resolution.eventVenue;
+    nextEvent.spatial={kind:'single_location',locations:[{label:resolution.eventVenue,role:'location',certainty:'confirmed',sourceText:resolution.mentions[0].sourceText}]};
+    changed=true;
+  }
   if (Number.isInteger(originalItem?._sourceOccurrenceCount) && originalItem!._sourceOccurrenceCount! > 0) {
     nextEvent._sourceOccurrenceCount = originalItem!._sourceOccurrenceCount;
     changed = true;
