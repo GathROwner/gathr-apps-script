@@ -95,11 +95,21 @@ node --test @venueGuardTests
 
 ## Release / data boundary
 
-Local implementation is complete. Deployment still needs approval and the
-normal narrow release preflight, including the latest serving-source readback
-and no active parse. The shared unknown resolver has its own serving baseline;
-reconcile with its owner before deploying its function targets, rather than
-releasing an older checkout over unrelated resolution fixes.
+Craig approved release. Parser commit `5c3a7a4` is deployed and independently
+verified ACTIVE on all three parser functions at source hash
+`1c4a2647dc62f0ccd3e38e09fa66c5568f7cce06`, 100% latest traffic and preserved
+model settings. Revisions: processdataset-00479-log,
+processdatasetresume-00443-dum, processdatasetselectedrows-00435-teq.
+
+The separate resolver release was assembled from its immutable serving archive,
+preserving its municipal-identity fixes and all user environment settings.
+Reproducible assembly tooling is commit `a39cac6`; 17 resolver tests passed.
+Scheduled resolver revision scheduledunknownvenueresolver-00240-yam is ACTIVE
+at hash `8bba926e50fce5f1bd5cfe3f4346b932e904937e`; HTTP resolver revision
+processunrecognizedvenues-00239-waw is ACTIVE at hash
+`e1d70db8fe92cbc601a2cceccddf719f1188ff6f`, both 100% latest traffic.
+Runtime-managed FUNCTION_SIGNATURE_TYPE=http was omitted by the CLI; HTTP is
+the framework default. Evidence is under the release artifact directory.
 
 No migration is required. Preserve the manually added APM aliases and all
 resolved/ignored queue statuses. No held items were published. Any recovery

@@ -28,6 +28,20 @@ function title(event: SlotEvent): string {
   return String(event.eventName || event.name || '');
 }
 
+/** Separately printed public-access slots are not a fuzzy three-hour duplicate. */
+export function hasConflictingBookableActivitySlot(left: SlotEvent, right: SlotEvent): boolean {
+  const activity = /\b(?:lane swim|public swim|open swim|waterslide|bookable ice|ice time|public skat(?:e|ing)|open skat(?:e|ing))\b/i;
+  const normalized = (event: SlotEvent) => title(event).toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+  if (!activity.test(title(left)) || !activity.test(title(right)) ||
+      (normalized(left) !== normalized(right) && !hasSharedTitleCore(left, right))) return false;
+  const known = (event: SlotEvent) => {
+    const value = clock(String(event.startTime || ''), '');
+    return value && incomingClockSupported(event, 'start') ? value : '';
+  };
+  const a = known(left), b = known(right);
+  return Boolean(a && b && a !== b);
+}
+
 export function explicitSlotOrdinal(event: SlotEvent): number | null {
   const match = title(event).match(/\b(?:time\s*slot|slot|group|session)\s*(?:#|no\.?\s*)?([1-9])\b(?!\s*:)/i);
   return match ? Number(match[1]) : null;

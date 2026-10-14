@@ -478,3 +478,20 @@ only the three source-confirmed Hamilton showcases gain new coverage holds.
 No paid model calls, production deploys, replays or live data changes occurred.
 See `docs/venue-resolution-oct14-local-hardening.md` for exact scope/evidence
 and the separate approval/release boundary.
+
+October14 venue guards are now live under parser hash
+`1c4a2647dc62f0ccd3e38e09fa66c5568f7cce06`; all three functions are ACTIVE at
+100% latest traffic with model settings preserved. The separate road-result
+resolver release preserves its own serving source baseline. See the venue
+hardening document for exact revisions and independent verification.
+
+## October14 resumed duplicate hardening
+
+Approved point-venue root events must participate in regular venue-child
+duplicate checks. Exact canonical venue/address/date/start and compatible
+one-off identity now select an approved keeper without overwriting its content;
+source conflicts/multiple keepers hold. Printed consecutive lane-swim slots
+are distinct occurrence identities, including under exact-source shortcuts.
+Build,718 backend tests, seven captured root/child comparisons and the actual
+lane-session control are recorded in `docs/duplicate-event-oct14-hardening.md`.
+Existing clusters require individual source review and exact approved cleanup.

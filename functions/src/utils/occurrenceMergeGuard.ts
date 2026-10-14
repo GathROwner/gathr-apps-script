@@ -1,3 +1,5 @@
+import { hasConflictingBookableActivitySlot } from './eventSlotIdentity.js';
+
 type Occurrence = {
   name?: string; eventName?: string; category?: string; establishment?: string;
   venue?: string; startDate?: string; startTime?: string; endTime?: string;
@@ -54,7 +56,7 @@ export function hasConflictingBoundedClassCycle(a: Occurrence, b: Occurrence): b
 }
 
 export function hasConflictingOccurrenceIdentity(a: Occurrence, b: Occurrence): boolean {
-  return hasConflictingCinemaClock(a,b) || hasConflictingBoundedClassCycle(a,b);
+  return hasConflictingCinemaClock(a,b) || hasConflictingBoundedClassCycle(a,b) || hasConflictingBookableActivitySlot(a,b);
 }
 
 export function findConflictingSourceCinemaDate(incoming: Occurrence, existing: Occurrence[], venueId: string): Occurrence | undefined {

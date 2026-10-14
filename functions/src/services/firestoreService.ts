@@ -1,7 +1,7 @@
 import {hasConflictingOccurrenceIdentity,findConflictingSourceCinemaDate} from '../utils/occurrenceMergeGuard.js';
 import {resolveAggregatorCinemaOccurrence} from './aggregatorCinemaOccurrence.js';
 import {KNOWN_LOCATION_RELATIONSHIPS} from '../parsing/locationMentionRoles.js';
-import {isApprovedVenueOccurrenceMatch,approvedVenueOccurrenceSourcePatch,ticketOccurrenceKey} from './approvedVenueOccurrence.js';
+import {isApprovedVenueOccurrenceMatch,approvedVenueOccurrenceSourcePatch,classifyApprovedVenueOccurrence} from './approvedVenueOccurrence.js';
 /**
  * Firestore Service
  * CRUD operations for venues, events, and processing state
@@ -4128,13 +4128,15 @@ export async function checkDuplicate(
     }
   }
   // Manually resolved venue events may live at events/* rather than the venue
-  // child collection. Check the bounded known-facility cohort before creating
-  // a replacement. Never rewrite the approved location, clock or media here.
-  if(KNOWN_LOCATION_RELATIONSHIPS.some(x=>x.venueId===venueId) && ticketOccurrenceKey(event.ticketsBuyUrl||event.ticketLink)){
+  // child collection. Check approved exact venue/date/clock one-offs before
+  // creating a replacement. Never rewrite approved location, clock or media.
+  if (venueId && /^\d{4}-\d{2}-\d{2}$/.test(event.startDate || '') && /^\d{2}:\d{2}$/.test(event.startTime || '')) {
     const snapshot=await db.collection(COLLECTIONS.EVENTS).where('venueId','==',venueId).where('startDate','==',event.startDate).limit(65).get();
-    const matches=snapshot.docs.map(doc=>({id:doc.id,...doc.data(),_canonicalDocumentPath:doc.ref.path} as EventData)).filter(candidate=>isApprovedVenueOccurrenceMatch(event,candidate));
-    if(snapshot.size===65 || matches.length>1){
-      logger.warn('Held ambiguous approved facility occurrence',{venueId,date:event.startDate,candidates:matches.length,boundedQueryOverflow:snapshot.size===65});
+    const candidates=snapshot.docs.map(doc=>({id:doc.id,...doc.data(),_canonicalDocumentPath:doc.ref.path} as EventData));
+    const matches=candidates.filter(candidate=>isApprovedVenueOccurrenceMatch(event,candidate));
+    const conflicts=candidates.filter(candidate=>classifyApprovedVenueOccurrence(event,candidate)==='conflict');
+    if(snapshot.size===65 || matches.length>1 || conflicts.length){
+      logger.warn('Held ambiguous approved venue occurrence',{venueId,date:event.startDate,candidates:matches.length,conflicts:conflicts.length,boundedQueryOverflow:snapshot.size===65});
       return {isDuplicate:true};
     }
     if(matches.length===1)return {isDuplicate:true,existingEvent:matches[0]};
