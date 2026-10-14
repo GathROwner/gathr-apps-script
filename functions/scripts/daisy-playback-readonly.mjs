@@ -8,7 +8,7 @@ const {parseXlsxFile}=await import('../lib/services/driveService.js');
 const {applySharedFoodOfferVenue,sharedFoodOfferOwner,sharedPostMetadata,sharedFoodOfferReviewContext}=await import('../lib/services/sharedFoodOfferVenue.js');
 const {buildUnrecognizedVenueSample}=await import('../lib/services/firestoreService.js');
 const {hydrateSampleTopLevelUrls}=await import('../lib/services/unknownVenueResolver.js');
-const {resolveVenueForFullParserEventWithMatcherForRegression}=await import('../lib/processing/rowProcessor.js');
+const {resolveVenueForFullParserEventWithMatcherForRegression,processFullParserEvent,createFullParserVenueLookupCache}=await import('../lib/processing/rowProcessor.js');
 const {findMatchingVenue}=await import('../lib/services/firestoreService.js');
 const out='artifacts/daisy-oct14',capture=JSON.parse(await fs.readFile(`${out}/capture.json`,'utf8'));
 const events=JSON.parse(await fs.readFile(`${out}/all-events.json`,'utf8'));
@@ -23,6 +23,9 @@ const playback=[];for(const item of source.events){
  const selected=await resolveVenueForFullParserEventWithMatcherForRegression({item,row,rowVenue:publisher,establishment:publisher.name,rowIndex:29,
   matcher:async(name,url,context)=>{const result=await findMatchingVenue(name,url,context);attempts.push({name,url,result});return result;}});
  assert.equal(selected,null);assert.equal(corrected.startTime,'');assert.equal(corrected.endTime,'');assert.equal(corrected.establishment,row.sharedPostAuthorName);
+ const blockedBatch={getState:()=>{throw new Error('Queue write forbidden');},assertWorkerActive:()=>{throw new Error('Write work forbidden');}};
+ await assert.rejects(()=>processFullParserEvent(item,row,29,0,publisher,publisher.name,blockedBatch,true,
+   createFullParserVenueLookupCache((name,url,context)=>findMatchingVenue(name,url,context))),/No venue resolved for dry write preview/);
  const review=buildUnrecognizedVenueSample({venueName:row.sharedPostAuthorName,source:'full5stage_event',fileId:'captured-source-only',rowIndex:29,
    ...sharedFoodOfferReviewContext(corrected,row,publisher)},'daisys dairy bar and grill');
  assert.equal(review.aggregatorAddress,undefined);assert.equal(review.aggregatorFacebookUrl,row.sharedPostAuthorUrl);assert.equal(review.topLevelUrl,row.sharedPostUrl);

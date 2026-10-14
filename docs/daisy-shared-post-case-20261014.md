@@ -135,3 +135,22 @@ versions, title/source/clocks/recurrence fingerprints, publisher version and no
 active parser. It refuses `--apply`; the coordinator owns review, exact approval,
 fresh guards/backup, atomic application and details/feed verification. Be You
 and all other pending plans remain separate.
+
+## Coordinator integration outcome
+
+The earlier local/prepared sections are historical investigation evidence.
+Craig approved integration/release on the accepted Be You baseline. Coordinator
+`dfb262f` imports this patch; `42f5330` adds original-source review separation
+and protects resolver hydration from restoring a sharing-page address. All761
+backend tests,55 focused checks, both19-test serving-baseline resolver suites
+and actual captured full-writer dry previews pass. The three parsers and two
+separately assembled resolver functions are verified ACTIVE/100% latest traffic;
+parser source hash is `05085d8b2f51df99d8c8e67e40146f1902afdf64`. No model/SDK/prompt
+settings changed and no older resolver/parser baseline was substituted.
+
+The location specialist independently supports the mislocation finding but
+holds Daisy/Decker identity migration and current offer recovery for first-party
+confirmation. Exact two-record deletion approval was requested against the
+fresh guarded plan; live data remains unchanged pending that approval. See
+`docs/daisy-shared-origin-oct14-release.md` for exact revisions, hashes, test
+artifacts, fresh backup/plan and current approval status.

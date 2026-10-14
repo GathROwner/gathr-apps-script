@@ -132,3 +132,53 @@ and `--project gathr-migrated`. Independently read all five ACTIVE revisions,
 100% latest traffic, expected common parser hash and preserved configuration.
 No model/prompt/SDK/map changes. The existing outdated Functions SDK warning
 is a separate deferred upgrade. Verified release/data outcomes follow below.
+
+## Verified serving release
+
+Runtime commit **`42f5330`**, including imported `dfb262f`, is deployed. Both
+parser and resolver narrow dry runs/deploys passed. There was no active parser.
+Final independent function descriptions and Cloud Run traffic readback,
+checked at22:50 UTC October14, verify:
+
+| Function | Latest serving revision | Traffic |
+|---|---|---|
+| processDataset | `processdataset-00482-qol` | ACTIVE /100% |
+| processDatasetResume | `processdatasetresume-00446-tip` | ACTIVE /100% |
+| processDatasetSelectedRows | `processdatasetselectedrows-00438-gaw` | ACTIVE /100% |
+| scheduledUnknownVenueResolver | `scheduledunknownvenueresolver-00241-zeh` | ACTIVE /100% |
+| processUnrecognizedVenues | `processunrecognizedvenues-00240-pir` | ACTIVE /100% |
+
+Common parser source hash **`05085d8b2f51df99d8c8e67e40146f1902afdf64`**.
+Scheduled resolver hash **`c4444a96e69c6a70fa2f45fd12381db7e4a8148a`**;
+HTTP resolver hash **`e9df136f0868f360f12cb394753fd576b7f00f1b`**. All parser
+environment values are unchanged; each resolver's57 user configuration keys
+are preserved, with platform-managed keys regenerated normally. Verification
+pins these exact new hashes to catch a later unexpected deployment.
+
+Final captured playback additionally executes both actual full-writer dry
+previews: each stops at the expected unresolved-original-venue hold before
+queue/write work. The review sample and mixed hydration tests demonstrate no
+publisher address restoration. No model API calls or paid re-extractions were
+needed. Full761 tests,55 focused tests and both19-test resolver assemblies
+passed before deployment. Earlier Be You prevention/data repairs are preserved.
+
+Evidence under `functions/artifacts/daisy-oct14/`:
+`build.txt`, `focused-tests.txt`, `full-tests.txt`, `final-playback-and-scan.txt`,
+`playback-and-scan.json`, `parser-deploy-dry-run.txt`, `parser-deploy.txt`,
+`resolver-scheduled/assembly.json`, `resolver-http/assembly.json`, each resolver's
+build/test/deploy logs, private before/after/traffic descriptions and
+`serving-verified.json`. Independent checker:
+`firebase/verify-daisy-release-readonly.mjs`.
+
+**Data outcome: pending exact deletion approval.** Both live PEI Foodies
+parents remain unchanged. The approved code release does not remove them.
+Guarded application and `firebase/verify-daisy-cleanup-api-readonly.mjs` are
+prepared; no apply or successful cleanup API result exists yet. Daisy's canonical
+venue and current offer recovery remain held, with Decker's untouched. No venue,
+event, queue record or media was manually mutated during this release.
+
+The existing October15 audit was updated to this accepted branch/runtime and
+both resolver hashes, keeping11 a.m. Halifax as its start and the existing end/
+pause conditions. It explicitly distinguishes the known pending Daisy cleanup
+from a fresh rollout defect and must inspect apply/API artifacts before assuming
+deletion happened. No new heartbeat was created.
