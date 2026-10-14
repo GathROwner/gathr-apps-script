@@ -71,6 +71,17 @@ in today's saved Stage3 cohort meets this whole-schedule condition. The linked
 original is being used for a separate guarded recovery, never as authorization
 to publish the frozen 21-item extraction.
 
+The full-resolution original recovered31 source occurrences in a fresh Luna
+high extraction. Actual Stage4 Nano low / Stage5 Luna none retained31. Thirteen
+public activities at existing Centre Belle-Alliance/library records have
+source-verified manual writer previews. Matching registration pages supplied
+eleven exact end times and ticket URLs; the other two retain printed/inferred
+time provenance. This is a reviewed recovery batch, not proof of automatic
+future linked-PDF ingestion. A newly exposed indoor costume-parade routing
+case is narrowly guarded; an actual street parade remains spatial. Final build
+and678 backend tests passed. Remaining museum, Ghostwalk and area-location
+questions are in [the prepared location handoff](luna-oct14-location-followups.md).
+
 The PEERS managed poster was recovered and visually checked: October 20,
 6–8 p.m. Its date remains correct despite the caption's October 21 typo.
 The Nadine source poster was recovered and visually checked. Harmony's poster

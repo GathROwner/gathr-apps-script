@@ -1883,6 +1883,16 @@ export function resolvePostDerivedCityLevelEventLocation(params: {
     ? String(typeof sourceLocations[0] === 'string' ? sourceLocations[0] : sourceLocations[0]?.label || '') : '';
   const observedLocation = observedCandidates[0]?.value || '';
   const normalizePlace = (value: string) => value.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+  // An explicitly indoor costume parade can be one venue activity. Its title
+  // must not make the source's city name a second place or an outdoor route.
+  if (/\bcostume\s+parade\b/i.test(eventName) &&
+      modelSpatial?.kind === 'single_location' && sourceLocations.length === 1 &&
+      normalizePlace(sourceLocation) === normalizePlace(observedLocation) &&
+      /\b(?:corridors?|hallways?)\b/i.test(description) &&
+      !/\b(?:streets?|roads?|outdoors?|route|course|start(?:s|ing)?\s+at|finish(?:es|ing)?\s+at)\b/i.test(description) &&
+      (!Array.isArray(modelSpatial.confirmedStreets) || modelSpatial.confirmedStreets.length === 0)) {
+    return null;
+  }
   const occurrenceHasOnePlace = modelSpatial?.kind === 'single_location' &&
     Boolean(normalizePlace(observedLocation)) &&
     (normalizePlace(sourceLocation) === normalizePlace(observedLocation) ||
