@@ -82,7 +82,10 @@ source priority. The official Souris show page confirms Two Pianos October24
 Exactly seven duplicate deletions and six retained-keeper provenance updates
 are separately dry-run verified and backed up; two empty SoulCave keeper image
 fields gain the original managed poster, with end remaining unknown. See
-`docs/duplicate-event-oct14-cleanup-plan.md`. No cleanup has been applied.
+`docs/duplicate-event-oct14-cleanup-plan.md`. The approved cleanup completed at
+23:29:17 UTC; independent Firestore/details/full-feed verification passed at
+23:29:58 UTC. Seven copies are absent, six keepers appear once, and all media
+remain available. Exact backups/results are recorded in the linked plan.
 
 The existing follow-up heartbeat is rescheduled for October15, starting11a.m.
 Halifax, quiet until a newly completed full dataset or substantive failure,

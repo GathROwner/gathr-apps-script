@@ -78,3 +78,26 @@ It pins the reviewed target-file hash, all13 target versions/content hashes
 and venue/date sibling hash. Apply requires this saved plan and aborts on drift.
 
 Older recurring families, stale Watercolour, Ann Cleeves venue disagreement, Back in Black and Ireland clock conflicts remain outside this batch. No automatic deletion of all34 audit pairs.
+
+## Completed approved cleanup
+
+Craig approved finishing the duplicate work in the coordinator on October14,
+turn `01a13cbe-d1e9-7f21-a0b6-9643d84aba18`. The fresh dry run matched the
+original reviewed13 target versions/content and related-sibling hash exactly.
+No active parser existed. At23:29:17 UTC, the guarded helper atomically deleted
+the seven listed copies and applied only the six listed keeper patches.
+
+- Immediate full backup: `functions/artifacts/dedup-oct14/cleanup-backup-2026-10-14T23-29-17-740Z.json`.
+- Apply result: `functions/artifacts/dedup-oct14/cleanup-result-2026-10-14T23-29-17-740Z.json`.
+- Independent verification: `functions/artifacts/dedup-oct14/cleanup-api-verified.json`.
+
+At23:29:58 UTC, all seven deleted details return404 and all six keeper details
+return200. Every keeper appears exactly once in the956-event active feed across
+10 fully paginated pages; no deleted parent or generated occurrence appears.
+Full document comparison verifies only the approved keeper patches/updatedAt
+changed. Five untargeted related siblings are unchanged. All21 referenced
+managed image URLs return200. No venue, media, or review queue was changed.
+
+The Be You and Daisy prevention/approved cleanups are also complete in their
+separate release records. Unresolved renamed-series/source-clock/venue conflicts
+remain explicitly held; this completion does not authorize speculative merging.
