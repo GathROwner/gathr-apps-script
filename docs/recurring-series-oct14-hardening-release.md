@@ -93,3 +93,74 @@ the full paginated app feed. No other cleanup plan is included.
 Release requires a fresh idle-parser preflight, narrow dry run/deploy of the three
 parser functions and independent ACTIVE/source-hash/revision/100%-traffic/env
 readback. Serving and cleanup results are appended after verification.
+
+## Verified release and approved repair
+
+Runtime commit **`e026d19`** was narrowly dry-run/deployed to `gathr-migrated`,
+codebase `gathr-functions`, with no active processing lock. Both commands used
+only `processDataset,processDatasetResume,processDatasetSelectedRows` qualified
+as `functions:gathr-functions:<name>`. No other function or SDK was deployed.
+The CLI's existing outdated `firebase-functions` warning remains a separate,
+deferred dependency upgrade.
+
+Exact release commands, from this checkout's `functions/`:
+
+```powershell
+firebase deploy --only 'functions:gathr-functions:processDataset,functions:gathr-functions:processDatasetResume,functions:gathr-functions:processDatasetSelectedRows' --project gathr-migrated --dry-run
+firebase deploy --only 'functions:gathr-functions:processDataset,functions:gathr-functions:processDatasetResume,functions:gathr-functions:processDatasetSelectedRows' --project gathr-migrated
+```
+
+Build/test commands:
+
+```powershell
+npm run build
+$tests = @(Get-ChildItem lib -Recurse -Filter '*.test.js' | ForEach-Object { $_.FullName })
+node --test @tests
+```
+
+Independent function and Cloud Run readback at **22:02:26 UTC October 14**:
+
+| Function | Serving revision | State / traffic |
+|---|---|---|
+| processDataset | `processdataset-00481-dax` | ACTIVE / 100% |
+| processDatasetResume | `processdatasetresume-00445-hes` | ACTIVE / 100% |
+| processDatasetSelectedRows | `processdatasetselectedrows-00437-waf` | ACTIVE / 100% |
+
+Common source hash **`b08f69995f660b68ec851b648fff969b1c15e2df`**.
+Every existing environment value is unchanged, including models, efforts and
+allocation. Evidence: `serving-verified.json`, private before/after descriptions
+and separate traffic readbacks in the local evidence directory. Independent
+checker: `functions/scripts/recurring-series-serving-readback.cjs`.
+
+The exact three-operation repair applied atomically at **22:02:34 UTC** after
+a fresh idle-parser/sibling/version check. All nine originals and venue data
+were backed up; seven children remain. Keeper content, schedule, poster and
+engagement fields are unchanged; six untargeted siblings are unchanged. No
+venue or media files were deleted.
+
+Evidence under `functions/artifacts/recurring-series-hardening-oct14/`:
+
+- Fresh reviewed plan: `beyou-plan-2026-10-14T22-02-18-224Z.json`.
+- Immediate prewrite backup: `beyou-backup-2026-10-14T22-02-34-367Z.json`.
+- Applied/verified result: `beyou-result-2026-10-14T22-02-34-367Z.json`.
+- Independent API/replay result: `beyou-api-and-replay-verification.json`.
+
+Verification at **22:02:45 UTC**: both deleted details return404, all three
+protected series details return200. The full active app feed contains988 events
+across10 pages, none from either deleted parent, and all three retained series.
+Actual read-only `checkDuplicate` calls for the deleted historical and aggregate
+sources both select `NJ5X8fPIVOy405M9sfFS`; the historical source uses explicit
+provenance-only corroboration. These are selector checks, not paid model replays
+or new writes. Both Wednesday cards intentionally remain until sing-along's
+identity is clarified; Friday remains intact.
+
+Both retained managed poster URLs independently return200 with `image/webp`.
+The existing audit automation was updated to this accepted baseline, retaining
+October15 checks beginning11 a.m. Halifax and its existing end/stop conditions.
+No additional heartbeat was created. The issue chat received the integration
+handoff; its unrelated Daisy changes remain isolated.
+
+The captured Brackley/Kensington differences remain review observations only.
+An unrelated active-feed observation, Broadway Babes at08:00, needs original
+source/time-provenance review before any correction; it was not touched by this
+duplicate repair. Other previously pending cleanup plans were not applied.

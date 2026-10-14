@@ -158,3 +158,23 @@ Open: whether the newer sing-along is the renamed/replacement Wednesday karaoke
 series, a distinct activity, or a temporary overlap. Retain Friday regardless;
 do not infer an end from the older poster. Further informal submissions can be
 added as new ledger cases in this chat.
+
+## Coordinator implementation and live result
+
+The preceding local/prepared sections describe the original investigation.
+Craig approved the coordinator's generalized recurring-series prevention and
+exact two-copy repair. Runtime `e026d19` supersedes the251-document bypass with
+a recurring-only paginated catalog, finite lifecycle protection and historical
+source replay handling. All747 backend tests pass; three parsers are verified
+ACTIVE on common hash `b08f69995f660b68ec851b648fff969b1c15e2df`,100% latest traffic,
+with every existing environment value preserved.
+
+The exact old karaoke and dated aggregate copies were deleted at22:02:34 UTC
+October14, and only the retained karaoke's proven source links were appended.
+Both deleted details return404 and all three protected series return200; the
+988-event active feed over10 pages contains no deleted parent/instance. Seven
+venue siblings remain, with all untargeted data and media preserved. Read-only
+selector checks route both deleted sources back to the retained keeper. Wednesday
+and Friday sing-along remain unchanged. See
+`docs/recurring-series-oct14-hardening-release.md` for revisions, exact backup,
+atomic result and independent API verification. Other pending plans remain gated.
