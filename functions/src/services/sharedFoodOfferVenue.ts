@@ -1,4 +1,4 @@
-import type {RawRowData, VenueData} from '../types/index.js';
+import type {RawRowData, VenueData, QueueUnrecognizedVenueInput} from '../types/index.js';
 import type {ProcessedEvent} from '../parsing/types.js';
 import {normalizeVenueName} from '../utils/similarity.js';
 
@@ -56,4 +56,14 @@ export function sharedPostMetadata(row: RawRowData): Record<string,unknown> {
     ...(row.sharedPostAuthorUrl?{sharedPostAuthorUrl:row.sharedPostAuthorUrl}:{}),
     ...(row.sharedPostUrl?{sharedPostUrl:row.sharedPostUrl}:{}),
     ...(row.sharedPostTimestamp?{sharedPostTimestamp:row.sharedPostTimestamp}:{})};
+}
+
+/** Keep original venue evidence and outer sharing provenance separate. */
+export function sharedFoodOfferReviewContext(item: ProcessedEvent, row: RawRowData, publisher?: VenueData | null): Partial<QueueUnrecognizedVenueInput> | undefined {
+  const owner=sharedFoodOfferOwner(item,row,publisher);if(!owner)return undefined;
+  return {sourceLocationRole:'shared_original_business',aggregatorName:owner,
+    aggregatorFacebookUrl:row.sharedPostAuthorUrl,aggregatorAddress:undefined,
+    topLevelUrl:row.sharedPostUrl || row.sharedPostAuthorUrl,sourceUniqueId:row.uniqueId,
+    sharingPageName:row.pageName || row.userName,sharingPageFacebookUrl:row.facebookUrl,
+    sharingPostUrl:row.topLevelUrl,originalPostTimestamp:row.sharedPostTimestamp};
 }

@@ -719,11 +719,16 @@ export function pickUnrecognizedVenueDocIdForSource(
   return String(activeRecord?.id || matchingRecords[0]?.id || '').trim();
 }
 
-function buildUnrecognizedVenueSample(
+export function buildUnrecognizedVenueSample(
   input: QueueUnrecognizedVenueInput,
   establishmentNormalized: string
 ): UnrecognizedVenueSampleEvent {
   return {
+    sourceLocationRole: input.sourceLocationRole,
+    sharingPageName: input.sharingPageName,
+    sharingPageFacebookUrl: input.sharingPageFacebookUrl,
+    sharingPostUrl: input.sharingPostUrl,
+    originalPostTimestamp: input.originalPostTimestamp,
     source: input.source,
     parserMode: input.parserMode,
     rowIndex: input.rowIndex,

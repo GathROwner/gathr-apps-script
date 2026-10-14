@@ -1,5 +1,5 @@
 import {hasConflictingOccurrenceIdentity} from '../utils/occurrenceMergeGuard.js';
-import {applySharedFoodOfferVenue, sharedFoodOfferOwner, sharedPostMetadata} from '../services/sharedFoodOfferVenue.js';
+import {applySharedFoodOfferVenue, sharedFoodOfferOwner, sharedPostMetadata, sharedFoodOfferReviewContext} from '../services/sharedFoodOfferVenue.js';
 import {isPlainKaraoke, isStandingKaraoke, coversStandingKaraokeOccurrence, selectStandingKaraokeOccurrence} from '../services/standingKaraokeOccurrence.js';
 import {isRecurringSeries, recurringSeriesLabelsCompatible} from '../utils/recurringSeriesLifecycle.js';
 import {hasProvenSourceDurationEnd} from '../parsing/sourceTimeConstraints.js';
@@ -2703,6 +2703,7 @@ async function queuePostDerivedCityLevelEventForReview(params: {
 }
 
 async function queueUnknownVenueForReview(params: {
+  sharedOriginalSource?: ReturnType<typeof sharedFoodOfferReviewContext>;
   venueName: string;
   source: 'row_establishment' | 'item_candidate' | 'full5stage_event';
   parserMode: 'legacy' | 'full5stage';
@@ -2742,6 +2743,7 @@ async function queueUnknownVenueForReview(params: {
       eventDate: params.eventDate,
       eventTime: params.eventTime,
       description: params.description,
+      ...params.sharedOriginalSource,
     });
 
     if (!result.queued) {
@@ -4719,6 +4721,7 @@ export async function processFullParserEvent(
     await queueUnknownVenueForReview({
       venueName: candidateVenueName,
       source: 'full5stage_event',
+      sharedOriginalSource: sharedFoodOfferReviewContext(item,row,rowVenue),
       parserMode: 'full5stage',
       row,
       rowIndex,

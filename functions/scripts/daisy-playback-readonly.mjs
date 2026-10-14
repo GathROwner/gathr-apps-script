@@ -5,7 +5,9 @@ const credential=JSON.parse(await fs.readFile(process.env.DAISY_CREDENTIAL_PATH,
 assert.equal(credential.project_id,'gathr-migrated');
 admin.initializeApp({credential:admin.credential.cert(credential),projectId:'gathr-migrated'});
 const {parseXlsxFile}=await import('../lib/services/driveService.js');
-const {applySharedFoodOfferVenue,sharedFoodOfferOwner,sharedPostMetadata}=await import('../lib/services/sharedFoodOfferVenue.js');
+const {applySharedFoodOfferVenue,sharedFoodOfferOwner,sharedPostMetadata,sharedFoodOfferReviewContext}=await import('../lib/services/sharedFoodOfferVenue.js');
+const {buildUnrecognizedVenueSample}=await import('../lib/services/firestoreService.js');
+const {hydrateSampleTopLevelUrls}=await import('../lib/services/unknownVenueResolver.js');
 const {resolveVenueForFullParserEventWithMatcherForRegression}=await import('../lib/processing/rowProcessor.js');
 const {findMatchingVenue}=await import('../lib/services/firestoreService.js');
 const out='artifacts/daisy-oct14',capture=JSON.parse(await fs.readFile(`${out}/capture.json`,'utf8'));
@@ -21,7 +23,13 @@ const playback=[];for(const item of source.events){
  const selected=await resolveVenueForFullParserEventWithMatcherForRegression({item,row,rowVenue:publisher,establishment:publisher.name,rowIndex:29,
   matcher:async(name,url,context)=>{const result=await findMatchingVenue(name,url,context);attempts.push({name,url,result});return result;}});
  assert.equal(selected,null);assert.equal(corrected.startTime,'');assert.equal(corrected.endTime,'');assert.equal(corrected.establishment,row.sharedPostAuthorName);
- playback.push({original:item,corrected,selected,attempts});
+ const review=buildUnrecognizedVenueSample({venueName:row.sharedPostAuthorName,source:'full5stage_event',fileId:'captured-source-only',rowIndex:29,
+   ...sharedFoodOfferReviewContext(corrected,row,publisher)},'daisys dairy bar and grill');
+ assert.equal(review.aggregatorAddress,undefined);assert.equal(review.aggregatorFacebookUrl,row.sharedPostAuthorUrl);assert.equal(review.topLevelUrl,row.sharedPostUrl);
+ const held={id:'read-only-fixture',establishment:row.sharedPostAuthorName,establishmentNormalized:'daisys dairy bar and grill',status:'manual_review',occurrences:1,sampleEvents:[review]};
+ const hydrated=await hydrateSampleTopLevelUrls(held,async()=>{throw new Error('Publisher read forbidden');},async()=>{throw new Error('Write forbidden');});
+ assert.equal(hydrated,held);
+ playback.push({original:item,corrected,selected,attempts,review});
 }
 const paired=[];for(const event of events){if(event.data.category!=='Food Special')continue;
  const sourceRow=parsed.rows.find(x=>x.uniqueId===String(event.data.uniqueId||'').split('_')[0]);if(!sourceRow)continue;

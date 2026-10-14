@@ -8,6 +8,7 @@ import * as sharedEventCandidateStore from './sharedEventCandidateStore.js';
 import { processPublicSharedEventCandidateById } from './sharedEventPublicPromotion.js';
 import { getVenueAliasCandidates } from './venueAliases.js';
 import { logger } from '../utils/logger.js';
+import {allowsPublisherAddressHydration} from './sourceLocationRole.js';
 import { namedVenueCandidateIsCompatible } from './venueIdentity.js';
 import {
   calculateEnhancedSimilarity,
@@ -4640,8 +4641,12 @@ function shouldRepairHydratedAggregatorAddress(sample: UnrecognizedVenueSampleEv
   return Boolean(textAddress && !hydrationAddressesMatch(aggregatorAddress, textAddress));
 }
 
-async function hydrateSampleTopLevelUrls(
-  record: UnrecognizedVenueRecord
+export async function hydrateSampleTopLevelUrls(
+  record: UnrecognizedVenueRecord,
+  downloadDataset: typeof driveService.downloadAndParseDataset = driveService.downloadAndParseDataset,
+  saveSamples: (id: string, samples: UnrecognizedVenueSampleEvent[]) => Promise<void> = async (id, samples) => {
+    await firestoreService.updateUnrecognizedVenue(id, {sampleEvents: samples});
+  }
 ): Promise<UnrecognizedVenueRecord> {
   const docId = String(record.id || '').trim();
   const samples = Array.isArray(record.sampleEvents)
@@ -4650,6 +4655,7 @@ async function hydrateSampleTopLevelUrls(
   if (!docId || !samples.length) return record;
 
   const needsBackfill = samples.some((sample) => {
+    if (!allowsPublisherAddressHydration(sample)) return false;
     const topLevelUrl = String(sample.topLevelUrl || '').trim();
     const aggregatorAddress = String(sample.aggregatorAddress || '').trim();
     const fileId = String(sample.fileId || '').trim();
@@ -4667,6 +4673,10 @@ async function hydrateSampleTopLevelUrls(
   const hydratedSamples: UnrecognizedVenueSampleEvent[] = [];
   for (const sample of samples) {
     const topLevelUrl = String(sample.topLevelUrl || '').trim();
+    if (!allowsPublisherAddressHydration(sample)) {
+      hydratedSamples.push(sample);
+      continue;
+    }
     const aggregatorAddress = String(sample.aggregatorAddress || '').trim();
     const textAggregatorAddress = deriveAggregatorAddressFromSampleTextForHydration(sample);
     const shouldRepairAggregatorAddress = shouldRepairHydratedAggregatorAddress(sample);
@@ -4684,7 +4694,7 @@ async function hydrateSampleTopLevelUrls(
 
     if (!rowCache.has(fileId)) {
       try {
-        const parsed = await driveService.downloadAndParseDataset(fileId);
+        const parsed = await downloadDataset(fileId);
         rowCache.set(fileId, parsed);
       } catch (error) {
         logger.warn('Unable to hydrate unknown venue sample topLevelUrl from Drive dataset', {
@@ -4732,9 +4742,7 @@ async function hydrateSampleTopLevelUrls(
 
   if (!changed) return record;
 
-  await firestoreService.updateUnrecognizedVenue(docId, {
-    sampleEvents: hydratedSamples,
-  });
+  await saveSamples(docId, hydratedSamples);
 
   logger.info('Hydrated missing sample metadata for unknown venue samples', {
     docId,

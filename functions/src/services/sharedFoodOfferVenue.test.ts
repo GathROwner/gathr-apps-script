@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import * as XLSX from 'xlsx';
 import {parseXlsxFile} from './driveService.js';
 import {mapApifyDatasetItemToDriveRow} from './apifyService.js';
-import {applySharedFoodOfferVenue, sharedFoodOfferOwner, sharedPostMetadata} from './sharedFoodOfferVenue.js';
+import {applySharedFoodOfferVenue, sharedFoodOfferOwner, sharedPostMetadata, sharedFoodOfferReviewContext} from './sharedFoodOfferVenue.js';
+import {buildUnrecognizedVenueSample} from './firestoreService.js';
 import {resolveVenueForFullParserEventWithMatcherForRegression} from '../processing/rowProcessor.js';
 import type {ProcessedEvent} from '../parsing/types.js';
 import type {RawRowData, VenueData} from '../types/index.js';
@@ -59,4 +60,14 @@ test('missing or fuzzy original-business matches hold instead of adopting the pu
     {isMatch:true,matchType:'exact' as const,similarity:1,matchedVenue:publisher}]){
     const result=await resolveVenueForFullParserEventWithMatcherForRegression({item,row,rowVenue:publisher,establishment:publisher.name,rowIndex:1,matcher:async()=>match});assert.equal(result,null);
   }
+});
+
+test('unknown-review payload keeps original source evidence separate from the sharing page and its address',()=>{
+  const context=sharedFoodOfferReviewContext(item,{...row,address:publisher.address,topLevelUrl:'https://www.facebook.com/FixtureFoodies/posts/999'},publisher)!;
+  const sample=buildUnrecognizedVenueSample({venueName:owner.name,source:'full5stage_event',fileId:'fixture-file',rowIndex:29,...context},'fixture dairy bar');
+  assert.equal(sample.aggregatorName,owner.name);assert.equal(sample.aggregatorFacebookUrl,owner.facebookUrl);
+  assert.equal(sample.aggregatorAddress,undefined);assert.equal(sample.topLevelUrl,row.sharedPostUrl);
+  assert.equal(sample.sharingPageFacebookUrl,publisher.facebookUrl);assert.equal(sample.sharingPostUrl,'https://www.facebook.com/FixtureFoodies/posts/999');
+  assert.equal(sample.sourceUniqueId,row.uniqueId);assert.equal(sample.fileId,'fixture-file');assert.equal(sample.rowIndex,29);
+  assert.equal(sample.sourceLocationRole,'shared_original_business');
 });

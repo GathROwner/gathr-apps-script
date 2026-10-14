@@ -657,6 +657,11 @@ export type UnrecognizedVenueStatus =
   | 'failed';
 
 export interface UnrecognizedVenueSampleEvent {
+  sourceLocationRole?: 'shared_original_business';
+  sharingPageName?: string;
+  sharingPageFacebookUrl?: string;
+  sharingPostUrl?: string;
+  originalPostTimestamp?: string;
   source: 'row_establishment' | 'item_candidate' | 'full5stage_event';
   parserMode?: 'legacy' | 'full5stage';
   rowIndex?: number;
@@ -716,6 +721,11 @@ export interface UnrecognizedVenueRecord {
 }
 
 export interface QueueUnrecognizedVenueInput {
+  sourceLocationRole?: 'shared_original_business';
+  sharingPageName?: string;
+  sharingPageFacebookUrl?: string;
+  sharingPostUrl?: string;
+  originalPostTimestamp?: string;
   venueName: string;
   source: 'row_establishment' | 'item_candidate' | 'full5stage_event';
   parserMode?: 'legacy' | 'full5stage';
