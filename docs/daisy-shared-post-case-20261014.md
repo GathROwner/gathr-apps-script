@@ -150,7 +150,9 @@ settings changed and no older resolver/parser baseline was substituted.
 
 The location specialist independently supports the mislocation finding but
 holds Daisy/Decker identity migration and current offer recovery for first-party
-confirmation. Exact two-record deletion approval was requested against the
-fresh guarded plan; live data remains unchanged pending that approval. See
+confirmation. Craig's direct exact two-record removal approval was verified;
+the guarded cleanup completed at23:13:50 UTC October14. Both details return404
+and the complete965-event/10-page feed has neither parent nor generated copies.
+All venues, media and queues remain untouched; Daisy recovery stays held. See
 `docs/daisy-shared-origin-oct14-release.md` for exact revisions, hashes, test
-artifacts, fresh backup/plan and current approval status.
+artifacts, immediate prewrite backup, apply result and API verification.

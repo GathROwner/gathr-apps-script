@@ -91,8 +91,9 @@ Local private archives/env/readbacks stay under `functions/artifacts/daisy-oct14
 
 ## Exact data plan
 
-The GathR event-integrity skill requires exact live deletion approval; the
-coordinator requested it after fresh read-only guards/backup. Pending targets:
+The GathR event-integrity skill requires exact live deletion approval. Craig's
+direct approval was verified in the investigation chat before the fresh guarded
+application. Approved targets:
 
 - Wednesday: `venues/slug_peifoodies/events/L6dOyFMhpOWTcZSdwPfh`.
 - Monday: `venues/slug_peifoodies/events/krhMcNCxV2s5sM7m26si`.
@@ -170,15 +171,35 @@ build/test/deploy logs, private before/after/traffic descriptions and
 `serving-verified.json`. Independent checker:
 `firebase/verify-daisy-release-readonly.mjs`.
 
-**Data outcome: pending exact deletion approval.** Both live PEI Foodies
-parents remain unchanged. The approved code release does not remove them.
-Guarded application and `firebase/verify-daisy-cleanup-api-readonly.mjs` are
-prepared; no apply or successful cleanup API result exists yet. Daisy's canonical
-venue and current offer recovery remain held, with Decker's untouched. No venue,
-event, queue record or media was manually mutated during this release.
+**Data outcome: exact approved cleanup complete.** Craig wrote “I approve their
+removal” in `GathR duplicate and merge investigations`, turn
+`01a13cb0-a991-7b42-9bc8-93a53c189948`; the coordinator read that direct human
+message and preceding two-record context before acting. Local approval evidence:
+`functions/artifacts/daisy-oct14/verified-removal-approval.json`.
+
+At23:13:50 UTC October14, the existing helper atomically deleted only the two
+reviewed PEI Foodies parents after fresh version/content/source-sibling/publisher
+guards and an idle-parser check. Immediate prewrite backup and apply result:
+
+- `firebase/artifacts/daisy-oct14/prewrite-backup-2026-10-14T23-13-50-697Z.json`
+- `firebase/artifacts/daisy-oct14/applied-2026-10-14T23-13-50-697Z.json`
+
+Independent verification at23:14 UTC: both details return404; neither parent nor
+any generated occurrence appears in the965-event active app feed across10 fully
+paginated pages. Publisher and Decker's venues remain. The publisher has zero
+remaining children (two before); its full document is unchanged. There were no
+untargeted sibling changes, venue writes, queue writes or media deletions. The
+original managed burger image independently still returns200. Verification:
+
+- `functions/artifacts/daisy-oct14/cleanup-api-verified.json`
+- `functions/artifacts/daisy-oct14/removal-media-preserved.json`
+
+Daisy's canonical venue/current-offer recovery remains held for the previously
+documented first-party identity/availability evidence. No replacement was created.
+No parser or resolver redeployment was needed for this data cleanup.
 
 The existing October15 audit was updated to this accepted branch/runtime and
 both resolver hashes, keeping11 a.m. Halifax as its start and the existing end/
-pause conditions. It explicitly distinguishes the known pending Daisy cleanup
-from a fresh rollout defect and must inspect apply/API artifacts before assuming
-deletion happened. No new heartbeat was created.
+pause conditions. Its completed-cleanup update requires both deleted parents and
+their generated occurrences to remain absent, while retaining the separate Daisy
+identity/recovery hold. No new heartbeat was created.

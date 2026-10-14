@@ -34,10 +34,12 @@ Original-author preservation, exact-original-business food-offer selection and
 source-separated unknown-review hydration are deployed in `42f5330`. All761
 backend tests,55 focused checks and both19-test serving-resolver suites pass;
 three parsers and both resolvers are ACTIVE/100% latest traffic. See
-[verified release and exact pending data plan](daisy-shared-origin-oct14-release.md).
-Daisy’s canonical venue/current offer remain held. The two-parent publisher
-cleanup awaits exact deletion approval; no live data correction was inferred
-from code deployment. Venue creation/recovery and Be You cleanup remain separate.
+[verified release and completed exact cleanup](daisy-shared-origin-oct14-release.md).
+Daisy’s canonical venue/current offer remain held. Craig approved the exact two
+publisher deletions; fresh guards/backup and atomic apply passed. Both details
+return404 and neither parent nor generated copies appears in the965-event,
+10-page app feed. All venues, queues and source media remain untouched. Venue
+creation/recovery and Be You cleanup remain separate.
 
 | Pattern | Status | Human-readable evidence | What the weakness means | Next evidence or action |
 |---|---|---|---|---|
