@@ -1,6 +1,11 @@
 # October 14 duplicate cleanup approval plan
 
-Prepared after inspecting original posters and the official Souris show page. No cleanup has been applied. Exactly seven duplicate documents would be deleted, six approved root keepers retained and linked to all known sources. Only the two empty SoulCave keeper images gain their original managed poster; both keep unknown finish times. Other keeper titles/clocks/venues/images remain unchanged. All media files remain.
+Prepared after inspecting original posters and the official Souris show page.
+**Status: approved cleanup completed and independently verified at23:29 UTC.**
+Exactly seven duplicate documents were deleted, six approved root keepers retained
+and linked to all known sources. Only the two empty SoulCave keeper images gained
+their original managed poster; both keep unknown finish times. Other keeper
+titles/clocks/venues/images remain unchanged. All media files remain.
 
 Official show source: [Two Pianos](https://www.sourisshowhall.com/shows/two-pianos,-no-rodeo). Source poster captures and exact planned field deltas are local under functions/artifacts/dedup-oct14/.
 
@@ -67,7 +72,11 @@ Delete only:
 
 ## Apply boundary
 
-Exact live approval is still required. Default-dry helper must reread all13 paths, validate source/date/start fingerprints, snapshot update times and related venue/date siblings, save full backup, abort on drift or active parse, then commit only the approved delta atomically. Verify all paths, every keeper and deleted ID through details and the paginated app feed.
+The approved application used a default-dry helper to reread all13 paths, validate
+source/date/start fingerprints, snapshot update times and related venue/date
+siblings, save full backup, abort on drift or active parse, then commit only the
+approved delta atomically. Every path and keeper/deleted ID was verified through
+Firestore, details and the paginated app feed. Historical preparation evidence:
 
 Helper `firebase/repair-oct14-confirmed-duplicates.mjs` has passed its fresh
 default dry run with zero writes. Exact machine plan:
