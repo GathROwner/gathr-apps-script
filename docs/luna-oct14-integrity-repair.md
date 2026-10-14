@@ -136,3 +136,15 @@ still required for the backed-up8 deletes,4 updates and14 creates in
 [the live repair plan](luna-oct14-live-repair-plan.md). Sending the prepared
 location handoff also needs Craig's authorization; it does not authorize
 additional venue/event mutations.
+
+## Approved live correction — October14 18:01 UTC
+
+Craig approved the exact26-path repair and read-only location handoff. The
+atomic8-delete/4-update/14-create batch applied successfully after all original
+target/sibling/update-time guards passed and a fresh full backup was saved.
+All26 Firestore conditions passed; all18 retained/new records passed API
+field and complete-feed checks,8 deletions were absent/404,6 poster URLs were
+healthy and35 untargeted source/related records were unchanged. The live plan
+contains exact backup/result/verification evidence. The location owner is
+investigating the remaining Ghostwalk/museum/Water Street cases without writes.
+No additional parser code, traffic, model settings or venue records changed.

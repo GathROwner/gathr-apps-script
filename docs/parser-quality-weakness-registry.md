@@ -448,3 +448,13 @@ recovery previews; other location/access/source conflicts remain visible in
 the prepared location handoff. The26-path live correction is backed up and
 dry-run verified but awaits exact approval; deployment alone did not change
 any of those live documents.
+
+Craig subsequently approved the exact26-path batch and location handoff.
+On October14 at18:01 UTC,8 false/duplicate records were deleted,4 records
+corrected and14 records added (Harmony's bounded4-show parent plus13 verified
+festival activities). All26 Firestore checks,18 API/feed field checks and6
+managed poster checks passed;8 deleted IDs were absent/404 and35 untargeted
+related records were unchanged. The3 remaining location cases were sent to
+the existing location-owner task for read-only investigation; no additional
+venue/event mutation is authorized. See the updated live plan for fresh backup,
+atomic result and full verification artifacts.

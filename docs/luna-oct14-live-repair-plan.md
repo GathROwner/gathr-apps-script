@@ -1,6 +1,6 @@
 # October 14 exact live event repair plan
 
-Status: **dry-run verified, backed up, awaiting Craig’s exact approval. No event record has been changed.**
+Status: **Craig approved this exact batch; all26 changes were applied and verified on October14 at18:01 UTC.**
 
 26 targets: **8 deletes,4 updates,14 creates**. Fourteen new records restore Harmony’s four printed November Wednesdays plus13 source-verified festival activities. All clocks below are Halifax local.
 
@@ -69,4 +69,27 @@ Re-read all26 paths, verify every approved field and deletion, compare untargete
 
 ## Separate location/source follow-up
 
-[Prepared handoff](luna-oct14-location-followups.md) covers the existing Ghostwalk under Harbourfront Theatre instead of MacNaught, the missing Acadian Museum venue for12 slots, Water Street area identity, the corn-maze conflicting clock, and resident-only access questions. Sending it to **Review GathR location queues** needs Craig’s authorization; it does not authorize additional live mutations.
+[Prepared handoff](luna-oct14-location-followups.md) covers the existing Ghostwalk under Harbourfront Theatre instead of MacNaught, the missing Acadian Museum venue for12 slots, Water Street area identity, the corn-maze conflicting clock, and resident-only access questions. Craig also approved sending it to **Review GathR location queues**. The read-only investigation was dispatched; this does not authorize additional live mutations.
+
+## Applied result
+
+The guarded atomic batch passed every approved fingerprint, complete-document
+hash, update-time and sibling guard before writing. Fresh prewrite backup:
+`functions/artifacts/luna-oct14-repair/live-backup-2026-10-14T18-01-00-776Z.json`.
+Result: `functions/artifacts/luna-oct14-repair/live-result-2026-10-14T18-01-00-776Z.json`.
+
+All26 Firestore postconditions passed. All8 deleted IDs returned404 and were
+absent from the complete upcoming feed. The18 retained/new API details and
+feed entries matched the approved categories, venue IDs, dates, clocks,
+recurrence, posters and ticket links. The feed was fully paginated across11
+pages;1032 entries were observed at verification. All6 distinct managed poster
+URLs returned200. All35 untargeted source/related sibling records were unchanged.
+Harmony retains exactly4 bounded Wednesdays, November4/11/18/25, with no
+open-ended recurrence. Nadine is one-off with its restored poster; PEERS and
+McKennitt have corrected activity categories; today's Tipsy soup ends20:00.
+The13 festival records use their verified existing venues and printed/matching
+registration clocks; no uncertain museum/area/corn-maze records were created.
+
+Evidence: `live-verification.json` and `live-api-contract-verification.json`
+under `functions/artifacts/luna-oct14-repair/`. No media or venue document was
+deleted or modified, and no parser deployment was needed for this data batch.

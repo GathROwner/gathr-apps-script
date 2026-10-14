@@ -1,7 +1,8 @@
 # October 14 location/source follow-up handoff
 
-Prepared for **Review GathR location queues**; sending requires Craig's approval.
-No venue or event mutations are authorized by this document. Use that task's
+Craig approved this handoff; it was sent to **Review GathR location queues**
+on October14 at approximately18:01 UTC. No further venue or event mutations
+are authorized by this document. Use that task's
 exact-target approval/backup gates for any live repair.
 
 Source post: Carrefour ISJ `1539985468169427`, row168. The verified source ID
