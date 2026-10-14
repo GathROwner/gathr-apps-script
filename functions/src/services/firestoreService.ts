@@ -1,5 +1,6 @@
 import {hasConflictingOccurrenceIdentity,findConflictingSourceCinemaDate} from '../utils/occurrenceMergeGuard.js';
 import {resolveAggregatorCinemaOccurrence} from './aggregatorCinemaOccurrence.js';
+import {isPlainKaraoke, selectStandingKaraokeOccurrence} from './standingKaraokeOccurrence.js';
 import {KNOWN_LOCATION_RELATIONSHIPS} from '../parsing/locationMentionRoles.js';
 import {isApprovedVenueOccurrenceMatch,approvedVenueOccurrenceSourcePatch,classifyApprovedVenueOccurrence} from './approvedVenueOccurrence.js';
 /**
@@ -4107,6 +4108,31 @@ export async function checkDuplicate(
   venueId: string,
   currentRunEntries: EventData[] = []
 ): Promise<{ isDuplicate: boolean; existingEvent?: EventData }> {
+  // Standing parents remain active after their base date leaves the ordinary
+  // 120-day lookup. Resolve the narrow unqualified karaoke identity before
+  // exact-source children can bypass it. Ambiguous families are held.
+  if (isPlainKaraoke(event)) {
+    const stored = await getVenueEvents(venueId, {limit:251});
+    const peers = [...stored, ...currentRunEntries.filter(candidate =>
+      candidate.venueId === venueId && !stored.some(saved => saved.id && saved.id === candidate.id))];
+    if (stored.length === 251) {
+      logger.warn('Held standing karaoke lookup overflow', {venueId, sourceUniqueId:event.uniqueId,
+        date:event.startDate, startTime:event.startTime, storedCandidates:stored.length, boundedQueryOverflow:true});
+      return {isDuplicate:true};
+    }
+    const decision = selectStandingKaraokeOccurrence({...event, venueId}, peers);
+    if (decision.kind === 'hold') {
+      logger.warn('Held ambiguous standing karaoke occurrence', {venueId, sourceUniqueId:event.uniqueId,
+        date:event.startDate, startTime:event.startTime, reason:decision.reason,
+        matchedParents:decision.matchedParents, storedCandidates:stored.length});
+      return {isDuplicate:true};
+    }
+    if (decision.kind === 'match') {
+      // A dated aggregate listing corroborates the series. It must not repaint
+      // the owner's poster or change the standing schedule/finish time.
+      return {isDuplicate:true, existingEvent:decision.existing};
+    }
+  }
   if(event.category==='Cinema' && /facebook\.com\/DowntownCharlottetownInc(?:[/?#]|$)/i.test(event.facebookUrl || '')){
     const [venue,peers]=await Promise.all([
       db.collection(COLLECTIONS.VENUES).doc(venueId).get(),

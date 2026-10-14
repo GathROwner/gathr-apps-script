@@ -1,0 +1,18 @@
+import fs from 'node:fs/promises';
+import admin from 'firebase-admin';
+const credential=JSON.parse(await fs.readFile(process.env.BE_YOU_CREDENTIAL_PATH,'utf8'));
+if(credential.project_id!=='gathr-migrated')throw new Error('Wrong project');
+admin.initializeApp({credential:admin.credential.cert(credential),projectId:'gathr-migrated'});
+const db=admin.firestore(),out='artifacts/be-you-oct14';
+const capture=JSON.parse(await fs.readFile(`${out}/capture.json`,'utf8'));
+const roots=[...new Set(capture.events.map(x=>x.data.uniqueId.split('_')[0]))];
+const pack=d=>({path:d.ref.path,updateTime:d.updateTime?.toDate().toISOString(),data:d.data()});
+const snapshots=(await Promise.all(roots.map(root=>db.collection('parse_snapshots').where('uniqueId','==',root).get()))).flatMap(s=>s.docs.map(pack));
+const audits=(await db.collection('event_update_audits').where('venueId','==','name_n2ivcu').get()).docs.map(pack);
+await fs.writeFile(`${out}/history.json`,JSON.stringify({capturedAt:new Date().toISOString(),roots,snapshots,audits},null,2));
+const base='https://gathr-backend-924732524090.northamerica-northeast1.run.app';
+const details=await Promise.all(capture.events.map(async x=>{const id=x.path.split('/').at(-1),r=await fetch(`${base}/api/v2/firestore/events/${id}`,{signal:AbortSignal.timeout(30000)});return {path:x.path,status:r.status,body:r.ok?await r.json():null};}));
+const feed=[];let cursor='',pages=0;
+do {const url=new URL(`${base}/api/v2/firestore/events`);url.searchParams.set('includeExpired','false');url.searchParams.set('limit','100');if(cursor)url.searchParams.set('startAfter',cursor);const r=await fetch(url,{signal:AbortSignal.timeout(30000)});if(!r.ok)throw new Error(`Feed ${r.status}`);const body=await r.json();feed.push(...(body.events||[]));cursor=body.nextPageToken||'';if(++pages>35)throw new Error('Incomplete pagination');}while(cursor);
+await fs.writeFile(`${out}/api.json`,JSON.stringify({capturedAt:new Date().toISOString(),details,pages,totalFeed:feed.length,events:feed.filter(x=>JSON.stringify(x).includes('name_n2ivcu')||/be you/i.test(x.venueName||''))},null,2));
+console.log(JSON.stringify({roots,snapshots:snapshots.length,audits:audits.length,details:details.map(x=>({path:x.path,status:x.status})),pages,totalFeed:feed.length}));

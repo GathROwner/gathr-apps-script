@@ -2,6 +2,16 @@
 
 Last updated: 2026-10-12 (Atlantic)
 
+October14 Be You case (PQ-047, with PQ-035 generic-activity overlap): see [source trace and local prevention](be-you-duplicate-case-20261014.md).
+The active May karaoke parent aged out of the120-day family query, while a
+plain “Karaoke” aggregate listing failed the two-word family anchor. Historical
+duplicate merges also accumulated unrelated galleries. A narrow plain-karaoke
+selector/defensive merge is locally validated (736 backend tests), not deployed.
+Three connected karaoke documents are source-confirmed at Be You; the newer
+Wednesday/Friday sing-along identity remains held separately. No other venue
+qualified in the same-mechanism scan of1,144 documents. Two exact proposed
+deletions/one provenance update have a backed-up read-only plan; no live change.
+
 This is a cumulative evidence register, not a list of venue IDs to decode. A technical ID is always paired with the venue or event name. Future audits should add a new observation to an existing pattern when the failure mechanism is the same; only create a new pattern when it is materially different.
 
 Status meanings:
@@ -16,6 +26,7 @@ Status meanings:
 
 | Pattern | Status | Human-readable evidence | What the weakness means | Next evidence or action |
 |---|---|---|---|---|
+| PQ-047 Active recurring parent ages out of duplicate lookup | Locally hardened for plain karaoke; not deployed; live copies remain | Be You's May27 Karaoke Night parent is126 days before the Sept30 source. The actual family predicate accepts it, but the120-day Firestore lookup excludes it. A generic Oct14 Karaoke listing creates another copy under the short-title gap related to PQ-035. | Parent base-date age is not recurrence expiry. Subsequent enrichment can also retain stale relative prose while accumulating unrelated source galleries. | Narrow plain-karaoke lookup tests actual occurrence membership, holds ambiguity and protects poster provenance. Build,736 backend checks, real source playback and live read-only selector pass. No other venue matched the same mechanism in1,144 docs. See [case ledger and exact pending plan](be-you-duplicate-case-20261014.md); source identity of the newer sing-along remains unresolved. |
 | PQ-001 Source address leaks into sibling venues | Confirmed live data; open code weakness | 22 current outputs. Twenty-one events at multiple venues retained the source-page address `1 Weymouth Street`. “Highland Storm: The Elements 2026 (Last Showing)” at The Scott MacAulay Performing Arts Centre — `venues/slug_thescottmacaulayperformingartscentre/events/u83QH3zA7ump64SiiUCx` — retained `286 Fitzroy Street`; the venue parent says `619 Water Street East`. | A source/page address can survive after the event resolves to a different canonical venue. The venue is right but the displayed address can be wrong. | Add a stage-resolution regression where a schedule item resolves to a canonical venue whose name is not already an alias. Repair live addresses only with a backup and parent-address recheck. Relevant code: `functions/src/processing/rowProcessor.ts`; tests: `rowProcessor.stageVenueResolution.test.ts`. |
 | PQ-002 Operating hours become events | Locally hardened; not deployed. Existing live document remains. | “Robert McMillan Pottery Gallery & Studio Open (Friday)” at Robert McMillan Pottery — `venues/FYlk4v0MPOrrIz1IJMg7/events/CLiWgvVbdGvLd6O8xPUC` — is a store/studio-hours listing (`Open 10-5pm Wed-Sun`), not a discrete event. | The parser can treat ordinary opening hours as a recurring event. | A narrow Studio Open hours filter and exact regression were added on 2026-08-14. Deployment and deletion of the existing live document are separately approval-gated. Relevant code/test: `functions/src/parsing/finalFormatter.ts`, `finalFormatter.operationalHours.test.ts`. |
 | PQ-003 Pool schedules and closures need activity-aware classification | Product policy clarified; re-audit needed | An older audit counted seven pool-open schedule blocks and two pool-closure notices as bad. On October 4 Craig clarified that bookable family activities and activities generally belong in GathR; available rink time is an event-like booking opportunity. | Public swim and bookable availability may be valid activities even when presented as a facility schedule. A closure notice alone is different. The old nine-row verdict cannot justify blanket deletion. | Re-review each source for a public activity or booking opportunity. Preserve valid swim/ice slots, and assess closures individually. Do not apply the old blanket rejection rule. |
