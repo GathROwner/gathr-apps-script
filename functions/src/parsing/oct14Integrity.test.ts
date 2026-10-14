@@ -2,6 +2,7 @@ import test from 'node:test';import assert from 'node:assert/strict';
 import fixture from './__fixtures__/oct14-integrity.json';
 import {applyCategoryCorrectionsForRegression,preserveValidatedOccurrence,formatStage5BatchesWithRecovery} from './finalFormatter.js';
 import {applyPrintedSpecialClosingLimit} from './postParser.js';
+import {sourceItemHoldReason,needsWholeScheduleIdentityReview} from './sourceItemEvidence.js';
 const row=(n:number):any=>fixture.rows.find(x=>x.row===n)!;
 const formatted=(item:any,category:string):any=>({name:item.name,description:item.description,establishment:item.venue,
   venue:item.venue,category,isEvent:'Yes',isFoodSpecial:'No',startDate:item.date,endDate:item.date,
@@ -55,4 +56,16 @@ test('API prompt rejection is terminal and never publishes earlier successful ba
     count++;if(offset===18)throw Object.assign(new Error('Prompt rejected'),{status:400,code:'invalid_prompt'});
     return {formattedEvents:batch.map((item,sourceItemIndex)=>({name:item.name,startDate:item.date,startTime:item.startTime,sourceItemIndex} as any)),formattingDecisions:[]};
   },2),/Prompt rejected/);assert.equal(count,3);
+});
+
+test('repeated explicitly unreadable festival identities hold the dense source before formatting',()=>{
+  assert(needsWholeScheduleIdentityReview(row(168).items));
+  assert.equal(sourceItemHoldReason(row(168).items[0]),'activity_identity_not_visible');
+  assert.equal(sourceItemHoldReason({name:'Essential Oils Workshop (title partly unclear; in French)'} as any),'activity_identity_not_visible');
+});
+test('healthy calendars and real titles containing Unknown remain eligible',()=>{
+  const items:any[]=Array.from({length:21},(_,i)=>({name:'Public activity '+i}));
+  assert(!needsWholeScheduleIdentityReview(items));
+  assert(!sourceItemHoldReason({name:'Into the Unknown - documentary screening'} as any));
+  assert(!needsWholeScheduleIdentityReview([{name:'[title unclear]'},...items] as any));
 });

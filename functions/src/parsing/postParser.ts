@@ -57,7 +57,7 @@ import { reconcileCaptionOnlyWeeklyEvents } from './captionOnlyWeekly.js';
 import { reconcileRaceSchedule } from './raceScheduleReconciler.js';
 import { resolveTimesWithOperatingHours } from './venueResolver.js';
 import {constrainSourceTimes, blocksStartTimeFallback} from './sourceTimeConstraints.js';
-import {sourceItemHoldReason} from './sourceItemEvidence.js';
+import {sourceItemHoldReason,needsWholeScheduleIdentityReview} from './sourceItemEvidence.js';
 import {enrichLinkedPerformanceStarts} from './linkedPerformanceTime.js';
 import { shouldHoldUndatedStandingSchedule, shouldRetrySeasonalLeagueWithLegacy,
   isSelectedLunaCanaryPost, isSampledLunaCanaryPost,
@@ -1954,16 +1954,17 @@ async function parsePostDataCore(
         }
         stage3Items = partition.kept;
       }
-      const identityHeld = stage3Items.filter(item => sourceItemHoldReason(item));
+      const holdWholeSchedule = isCalendarOrSchedule && needsWholeScheduleIdentityReview(stage3Items);
+      const identityHeld = holdWholeSchedule ? stage3Items : stage3Items.filter(item => sourceItemHoldReason(item));
       if (identityHeld.length) {
         sourceDateHoldEncountered = true;
         await emitStageArtifacts(cfg, {source:'live', stage3HeldItems:deepCloneJson(identityHeld)});
         await reportSkipReason({stage:'stage3',reason:'Private slot or unreadable activity identity held',
-          detail:identityHeld.map(item => `${item.name}: ${sourceItemHoldReason(item)}`).join('; ')});
+          detail:holdWholeSchedule ? 'Dense schedule contains repeated explicitly unreadable identities; all cells require a clearer source' : identityHeld.map(item => `${item.name}: ${sourceItemHoldReason(item)}`).join('; ')});
         logger.warn('Source activity identity held', {postId, count:identityHeld.length});
       }
       return {
-        items: constrainSourceTimes(stage3Items.filter(item => !sourceItemHoldReason(item)), combinedText),
+        items: holdWholeSchedule ? [] : constrainSourceTimes(stage3Items.filter(item => !sourceItemHoldReason(item)), combinedText),
         ticketUrl,
       };
     };

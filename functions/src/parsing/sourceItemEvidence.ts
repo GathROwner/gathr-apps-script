@@ -31,6 +31,8 @@ export function bindDatedTicketLink(item: ExtractedItem, caption: string): Extra
 
 export function sourceItemHoldReason(item: ExtractedItem): string | undefined {
   const title = String(item.name || '');
+  if (/\[[^\]]*\b(?:unclear|unreadable|unknown|illegible)\b[^\]]*\]|\btitle\s+(?:partly\s+)?(?:unclear|unreadable|illegible)\b/i.test(title))
+    return 'activity_identity_not_visible';
   if (/\b(?:title\s+(?:not\s+(?:visible|shown)|unknown|unreadable)|(?:unknown|unidentified)\s+event)\b/i.test(title))
     return 'activity_identity_not_visible';
   if (/\bprivate\s+(?:rental|booking|event|party)\b/i.test(`${title} ${item.description || ''}`) &&
@@ -38,6 +40,12 @@ export function sourceItemHoldReason(item: ExtractedItem): string | undefined {
         !/\b(?:not\s+available|already\s+booked|fully\s+booked|occupied)\b/i.test(`${title} ${item.description || ''}`)))
     return 'private_occupied_slot';
   return undefined;
+}
+
+/** Repeated explicit transcription gaps mean adjacent cell identities are not
+ * reliably verified either. Keep the whole dense schedule available for review. */
+export function needsWholeScheduleIdentityReview(items: ExtractedItem[]): boolean {
+  return items.length >= 5 && items.filter(item=>sourceItemHoldReason(item)==='activity_identity_not_visible').length >= 2;
 }
 
 /** Item-local proofs only; never borrow another gallery cell's date, clock or venue. */

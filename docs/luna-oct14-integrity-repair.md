@@ -61,6 +61,16 @@ Successful formatting is not proof that these 21 partially unreadable source
 identities are ready to publish. They remain held for source clarification.
 Increasing a token allowance does not repair missing pixels.
 
+Follow-up source comparison found the organizer's linked original 2026 program:
+`https://www.belle-alliance.ca/_files/ugd/b35d6e_752ed570d7a946c8af80537fffa039e7.pdf`.
+The small-image extraction had substantive identity/location errors, including
+Michel Robichaud being replaced by a murder mystery at another venue. Explicit
+bracketed unreadability/partly unclear titles now hold; a dense schedule with
+repeated identity gaps holds all of its cells before formatting. Only row168
+in today's saved Stage3 cohort meets this whole-schedule condition. The linked
+original is being used for a separate guarded recovery, never as authorization
+to publish the frozen 21-item extraction.
+
 The PEERS managed poster was recovered and visually checked: October 20,
 6–8 p.m. Its date remains correct despite the caption's October 21 typo.
 The Nadine source poster was recovered and visually checked. Harmony's poster
