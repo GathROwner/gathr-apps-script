@@ -68,7 +68,7 @@ const managed=/^(?:FUNCTION_|EVENTARC_|FIREBASE_|K_|GCLOUD_PROJECT$|GCP_PROJECT$
 const env=Object.entries(readback.serviceConfig.environmentVariables||{}).filter(([key])=>!managed.test(key));
 fs.writeFileSync(path.join(serving,'.env'),env.map(([key,value])=>`${key}=${JSON.stringify(String(value))}`).join('\n')+'\n');
 const configPath=path.join(serving,'firebase.json'),config=JSON.parse(fs.readFileSync(configPath,'utf8'));
-for(const f of config.functions)f.ignore=[...new Set([...(f.ignore||[]),'artifacts/**','tmp/**','sandbox/**','*.bak*'])];
+for(const f of config.functions)f.ignore=[...new Set([...(f.ignore||[]),'artifacts','tmp','sandbox','tmp_*','*.bak*','area-*.txt','area-publication-assembly.json'])];
 fs.writeFileSync(configPath,JSON.stringify(config,null,2)+'\n');
 if(!fs.existsSync(path.join(serving,'node_modules')))fs.symlinkSync(path.join(functionsRoot,'node_modules'),path.join(serving,'node_modules'),'junction');
 const manifest={assembledAt:new Date().toISOString(),baselineHash:readback.labels['firebase-functions-hash'],storageSource:readback.buildConfig.source.storageSource,archiveSha256:sha(fs.readFileSync(zip)),publisherBeforeSha256:sha(original),publisherAfterSha256:sha(fs.readFileSync(sourcePath)),functionsChanged:names,addedHelper:'reviewedCityLevelManual',configurationKeysPreserved:env.map(([key])=>key),privatePackagingExcluded:true};
