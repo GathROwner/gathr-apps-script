@@ -1,5 +1,6 @@
 import {hasConflictingOccurrenceIdentity} from '../utils/occurrenceMergeGuard.js';
 import {isPlainKaraoke, isStandingKaraoke, coversStandingKaraokeOccurrence, selectStandingKaraokeOccurrence} from '../services/standingKaraokeOccurrence.js';
+import {isRecurringSeries, recurringSeriesLabelsCompatible} from '../utils/recurringSeriesLifecycle.js';
 import {hasProvenSourceDurationEnd} from '../parsing/sourceTimeConstraints.js';
 import { CacheWriteMetrics, createCacheWriteMetrics, addCacheWriteUsage } from '../parsing/cacheAccounting.js';
 import { hasConflictingDevelopmentSlot } from '../utils/eventSlotIdentity.js';
@@ -5612,6 +5613,9 @@ async function updateDuplicateEventIfNeeded(
     venue,
   });
   const mergedEvent: EventData = { ...existingEvent, ...mergeOutcome.updates };
+  // This lookup decision applies to one incoming source, never subsequent
+  // items that see the keeper in the current-run cache.
+  delete (mergedEvent as EventData & {_sourceCorroborationOnly?: boolean})._sourceCorroborationOnly;
 
   if (mergeOutcome.changedFields.length === 0) {
     if (existingEvent.id) {
@@ -5739,12 +5743,27 @@ function buildDuplicateEventUpdates(
   if (hasConflictingDevelopmentSlot(existing, incoming) || hasConflictingOccurrenceIdentity(existing, incoming)) {
     return { updates, changedFields, descriptionImproved, timeImproved };
   }
+  const sourceCorroborationOnly = (existing as EventData & {_sourceCorroborationOnly?: boolean})._sourceCorroborationOnly;
   const standingKaraokeRefresh = Boolean(existing.venueId && incoming.venueId) && isStandingKaraoke(existing) && isPlainKaraoke(incoming);
-  if (standingKaraokeRefresh && (
+  if (standingKaraokeRefresh && !sourceCorroborationOnly && (
     !coversStandingKaraokeOccurrence(incoming, existing) ||
     selectStandingKaraokeOccurrence(incoming, [existing]).kind !== 'match'
   )) return {updates, changedFields, descriptionImproved, timeImproved};
-  if (standingKaraokeRefresh && (!incoming.recurringPattern || incoming.recurringPattern === 'none')) {
+  const matchingSeriesOccurrence = Boolean(existing.venueId && existing.venueId === incoming.venueId) &&
+    existing.startTime === incoming.startTime && firestoreService.recurringSeriesCoversOccurrence(existing, incoming.startDate || '');
+  const seriesRefresh = standingKaraokeRefresh || (Boolean(existing.venueId && existing.venueId === incoming.venueId) &&
+    existing.startTime === incoming.startTime && isRecurringSeries(existing) && isRecurringSeries(incoming));
+  const existingSeriesSource = getEventDuplicateMergeSourceRoot(existing);
+  const incomingSeriesSource = getEventDuplicateMergeSourceRoot(incoming);
+  const sameSeriesSource = Boolean(existing.uniqueId && existing.uniqueId === incoming.uniqueId) ||
+    (/^\d{8,}$/.test(existingSeriesSource) && existingSeriesSource === incomingSeriesSource);
+  const crossSourceSeriesRefresh = seriesRefresh && !sameSeriesSource;
+  if (seriesRefresh && !recurringSeriesLabelsCompatible(existing, incoming)) return {updates, changedFields, descriptionImproved, timeImproved};
+  const venueSourceUrl = categoryPromotionContext?.venue?.facebookUrl || '';
+  const isOwnerSource = (event: EventData) => Boolean(venueSourceUrl && event.facebookUrl && normalizeUrl(event.facebookUrl) === normalizeUrl(venueSourceUrl));
+  const externalCorroboration = matchingSeriesOccurrence && !isRecurringSeries(incoming) && isOwnerSource(existing) &&
+    Boolean(incoming.facebookUrl && !isOwnerSource(incoming));
+  if (sourceCorroborationOnly || (standingKaraokeRefresh && (!incoming.recurringPattern || incoming.recurringPattern === 'none')) || externalCorroboration) {
     // Corroboration remains inspectable in the ordinary update audit. It may
     // append source identity, never content, media, clocks or lifecycle.
     const roots = Array.from(new Set([...(existing.sourceUniqueIds || []),
@@ -5755,7 +5774,9 @@ function buildDuplicateEventUpdates(
     if (urls.length && valuesDiffer(existing.sourceUrls, urls)) {updates.sourceUrls=urls; changedFields.push('sourceUrls');}
     return {updates, changedFields, descriptionImproved, timeImproved};
   }
-  if (standingKaraokeRefresh && !sourceTimestampIsNotOlder(existing, incoming)) {
+  const existingSourceDate = coerceDate(existing.sourceTimestamp), incomingSourceDate = coerceDate(incoming.sourceTimestamp);
+  if ((standingKaraokeRefresh && !sourceTimestampIsNotOlder(existing, incoming)) ||
+      (seriesRefresh && existingSourceDate && incomingSourceDate && incomingSourceDate < existingSourceDate)) {
     return {updates, changedFields, descriptionImproved, timeImproved};
   }
   const unsafeCrossSourceDateMerge = isUnsafeCrossSourceDateDuplicateMerge(existing, incoming);
@@ -5770,8 +5791,8 @@ function buildDuplicateEventUpdates(
     changedFields.push(String(field));
   };
   const relativeCaption = /\b(?:today|tomorrow|tonight|yesterday)\b/i;
-  const venueSourceUrl = categoryPromotionContext?.venue?.facebookUrl || '';
-  if (standingKaraokeRefresh && isStandingKaraoke(incoming) && venueSourceUrl &&
+  if (seriesRefresh && isRecurringSeries(incoming) && venueSourceUrl &&
+    sourceTimestampIsNotOlder(existing, incoming) &&
     normalizeUrl(incoming.facebookUrl || '') === normalizeUrl(venueSourceUrl) &&
     relativeCaption.test(existing.description || '') && !relativeCaption.test(incoming.description || '')) {
     setField('description', incoming.description);
@@ -5821,7 +5842,7 @@ function buildDuplicateEventUpdates(
   ];
 
   for (const field of fillWhenMissingFields) {
-    if ((unsafeCrossSourceDateMerge || standingKaraokeRefresh) && field === 'sharedPostThumbnail') {
+    if ((unsafeCrossSourceDateMerge || seriesRefresh) && field === 'sharedPostThumbnail') {
       continue;
     }
     if (!isMeaningfulValue(existing[field]) && isMeaningfulValue(incoming[field])) {
@@ -6173,16 +6194,16 @@ function buildDuplicateEventUpdates(
   }
 
   const normalizedIncomingMediaUrls = normalizeUrlList(incoming.mediaUrls);
-  const facebookPage = (url: unknown): string => String(url || '').toLowerCase()
-    .replace(/^https?:\/\/(?:www\.)?facebook\.com\//,'').replace(/[/?#].*$/,'');
-  const ownerPage = facebookPage(categoryPromotionContext?.venue?.facebookUrl);
-  const attributedKaraokeImage = standingKaraokeRefresh && ownerPage && facebookPage(incoming.facebookUrl) === ownerPage && incoming.imageProvenance?.primarySource === 'post_media' &&
+  // Compare the complete owner URL: /p/ pages and profile.php IDs must not
+  // collapse into a shared "p" or "profile.php" publisher identity.
+  const ownerPage = normalizeUrl(venueSourceUrl);
+  const attributedSeriesImage = crossSourceSeriesRefresh && isOwnerSource(incoming) && incoming.imageProvenance?.primarySource === 'post_media' &&
     !incoming.imageProvenance?.isFallback && incoming.imageProvenance?.primaryUrl &&
     [incoming.relevantImageUrl, incoming.image, incoming.imageUrl].includes(incoming.imageProvenance.primaryUrl)
     ? incoming.imageProvenance.primaryUrl : '';
-  const protectExistingMedia = unsafeCrossSourceDateMerge || (standingKaraokeRefresh && (!hasNewerSourceTimestamp || !attributedKaraokeImage)) || Boolean(
-    ownerPage && facebookPage(existing.facebookUrl) === ownerPage &&
-    facebookPage(incoming.facebookUrl) === 'downtowncharlottetowninc' &&
+  const protectExistingMedia = unsafeCrossSourceDateMerge || (crossSourceSeriesRefresh && (!hasNewerSourceTimestamp || !attributedSeriesImage)) || Boolean(
+    ownerPage && isOwnerSource(existing) &&
+    normalizeUrl(incoming.facebookUrl || '') === 'facebook.com/downtowncharlottetowninc' &&
     /\/postimages\//.test(String(existing.relevantImageUrl || existing.image || existing.imageUrl || ''))
   );
   const incomingPreferredMediaUrl =
@@ -6190,15 +6211,15 @@ function buildDuplicateEventUpdates(
     normalizedIncomingMediaUrls[0] ||
     '';
   const canonicalIncomingImage =
-    standingKaraokeRefresh ? attributedKaraokeImage : asTrimmedString(incoming.image) || incomingPreferredMediaUrl;
+    crossSourceSeriesRefresh ? attributedSeriesImage : asTrimmedString(incoming.image) || incomingPreferredMediaUrl;
   const canonicalIncomingRelevantImage =
-    standingKaraokeRefresh ? attributedKaraokeImage : asTrimmedString(incoming.relevantImageUrl) ||
+    crossSourceSeriesRefresh ? attributedSeriesImage : asTrimmedString(incoming.relevantImageUrl) ||
     canonicalIncomingImage ||
     incomingPreferredMediaUrl;
   const mergedMediaUrls = protectExistingMedia
     ? normalizeUrlList(existing.mediaUrls)
-    : standingKaraokeRefresh
-      ? [attributedKaraokeImage]
+    : crossSourceSeriesRefresh
+      ? [attributedSeriesImage]
       : mergeDuplicateMediaUrls(existing, incoming);
   if (
     !protectExistingMedia &&

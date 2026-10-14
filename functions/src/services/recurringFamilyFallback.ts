@@ -1,6 +1,7 @@
 import {hasConflictingOccurrenceIdentity} from '../utils/occurrenceMergeGuard.js';
 import { EventData } from '../types/index.js';
 import { hasConflictingDevelopmentSlot } from '../utils/eventSlotIdentity.js';
+import {recurringSeriesLabelsCompatible} from '../utils/recurringSeriesLifecycle.js';
 import {
   calculateTimeDifferenceHours,
   normalizeVenueName,
@@ -721,6 +722,7 @@ export function getRecurringFamilyFallbackDiagnostics(
   const startTimePenalty = computeStartTimePenalty(incoming, existing);
   const compatible =
     !hasConflictingOccurrenceIdentity(incoming, existing) &&
+    recurringSeriesLabelsCompatible(incoming, existing) &&
     sameVenue &&
     existingRecurringLike &&
     !crossDateScheduleOccurrenceMergeBlocked &&
@@ -762,6 +764,7 @@ export function isRecurringFamilyFallbackCompatible(
   existing: EventData,
   options?: RecurringFamilyFallbackOptions
 ): boolean {
+  if (!recurringSeriesLabelsCompatible(incoming, existing)) return false;
   if (hasConflictingDevelopmentSlot(incoming, existing) || hasConflictingOccurrenceIdentity(incoming, existing)) return false;
   if (!hasCompatibleVenue(incoming, existing, options?.venueId)) {
     return false;

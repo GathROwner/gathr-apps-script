@@ -1,4 +1,5 @@
 import {EventData} from '../types/index.js';
+import {incompatibleRecurringSeriesLifecycle} from '../utils/recurringSeriesLifecycle.js';
 type KaraokeOccurrence = Partial<EventData>;
 
 const weekdays = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
@@ -19,6 +20,7 @@ export function isStandingKaraoke(event: KaraokeOccurrence): boolean {
 /** Uses the stored lifecycle, rather than parent age, to test an occurrence. */
 export function coversStandingKaraokeOccurrence(incoming: KaraokeOccurrence, existing: KaraokeOccurrence): boolean {
   if (!isPlainKaraoke(incoming) || !isStandingKaraoke(existing)) return false;
+  if (incompatibleRecurringSeriesLifecycle(incoming, existing)) return false;
   if (!existing.venueId || incoming.venueId !== existing.venueId) return false;
   if (!/^\d{4}-\d{2}-\d{2}$/.test(incoming.startDate || '') || !/^\d{4}-\d{2}-\d{2}$/.test(existing.startDate || '')) return false;
   if (!/^\d{2}:\d{2}$/.test(incoming.startTime || '') || incoming.startTime !== existing.startTime) return false;

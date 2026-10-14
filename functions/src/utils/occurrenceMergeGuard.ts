@@ -1,6 +1,7 @@
 import { hasConflictingBookableActivitySlot } from './eventSlotIdentity.js';
 import {hasConflictingStandingKaraokeOccurrence} from '../services/standingKaraokeOccurrence.js';
 import {EventData} from '../types/index.js';
+import {hasCrossSourceRecurringLifecycleConflict} from './recurringSeriesLifecycle.js';
 
 type Occurrence = {
   name?: string; eventName?: string; category?: string; establishment?: string;
@@ -59,6 +60,7 @@ export function hasConflictingBoundedClassCycle(a: Occurrence, b: Occurrence): b
 
 export function hasConflictingOccurrenceIdentity(a: Occurrence, b: Occurrence): boolean {
   return hasConflictingCinemaClock(a,b) || hasConflictingBoundedClassCycle(a,b) || hasConflictingBookableActivitySlot(a,b) ||
+    hasCrossSourceRecurringLifecycleConflict(a as Partial<EventData>, b as Partial<EventData>) ||
     hasConflictingStandingKaraokeOccurrence(a as Partial<EventData>, b as Partial<EventData>);
 }
 

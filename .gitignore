@@ -67,3 +67,4 @@ functions/**/*.bak_*
 # Be You investigation: full production captures and guarded repair backups
 functions/artifacts/be-you-oct14/
 firebase/artifacts/be-you-oct14/
+functions/artifacts/recurring-series-hardening-oct14/

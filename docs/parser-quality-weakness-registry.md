@@ -1,16 +1,18 @@
 # GathR parser-quality weakness registry
 
-Last updated: 2026-10-12 (Atlantic)
+Last updated: 2026-10-14 (Atlantic)
 
 October14 Be You case (PQ-047, with PQ-035 generic-activity overlap): see [source trace and local prevention](be-you-duplicate-case-20261014.md).
 The active May karaoke parent aged out of the120-day family query, while a
 plain “Karaoke” aggregate listing failed the two-word family anchor. Historical
 duplicate merges also accumulated unrelated galleries. A narrow plain-karaoke
-selector/defensive merge is locally validated (736 backend tests), not deployed.
+selector/defensive merge was extended to a shared active-series catalog, finite
+lifecycle protections and retired-source replay handling (747 backend tests).
 Three connected karaoke documents are source-confirmed at Be You; the newer
 Wednesday/Friday sing-along identity remains held separately. No other venue
 qualified in the same-mechanism scan of1,144 documents. Two exact proposed
-deletions/one provenance update have a backed-up read-only plan; no live change.
+deletions/one provenance update have an approved backed-up plan. See
+`recurring-series-oct14-hardening-release.md` for release and apply evidence.
 
 This is a cumulative evidence register, not a list of venue IDs to decode. A technical ID is always paired with the venue or event name. Future audits should add a new observation to an existing pattern when the failure mechanism is the same; only create a new pattern when it is materially different.
 

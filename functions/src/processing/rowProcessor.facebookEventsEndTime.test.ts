@@ -484,7 +484,9 @@ test('keeps structured Facebook Events managed media and canonical image fields 
       recurrenceUntilDate: '2026-06-03',
     }),
     incomingEvent: buildEvent({
-      uniqueId: '1552494199385215_1',
+      // Media refresh is a reprocess of the same structured source. A distinct
+      // source with a conflicting finite count is a separate lifecycle case.
+      uniqueId: '1552494202718548_1',
       image: newImage,
       imageUrl: newImage,
       relevantImageUrl: newImage,

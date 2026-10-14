@@ -1,6 +1,8 @@
 import {hasConflictingOccurrenceIdentity,findConflictingSourceCinemaDate} from '../utils/occurrenceMergeGuard.js';
 import {resolveAggregatorCinemaOccurrence} from './aggregatorCinemaOccurrence.js';
 import {isPlainKaraoke, selectStandingKaraokeOccurrence} from './standingKaraokeOccurrence.js';
+import {createRecurringSeriesCatalogCache, sourceLinkedHistoricalSeriesKeepers} from './recurringSeriesCatalog.js';
+import {isRecurringSeries} from '../utils/recurringSeriesLifecycle.js';
 import {KNOWN_LOCATION_RELATIONSHIPS} from '../parsing/locationMentionRoles.js';
 import {isApprovedVenueOccurrenceMatch,approvedVenueOccurrenceSourcePatch,classifyApprovedVenueOccurrence} from './approvedVenueOccurrence.js';
 /**
@@ -60,6 +62,7 @@ import {
 import {
   pickIncomingRecurringFamilyExistingOccurrenceMatch,
   pickRecurringFamilyFallbackMatch,
+  isRecurringFamilyFallbackCompatible,
 } from './recurringFamilyFallback.js';
 import {
   ParsedSharedEvent,
@@ -3741,6 +3744,45 @@ export async function getVenueEvents(
   })) as EventData[];
 }
 
+const recurringSeriesCatalog = createRecurringSeriesCatalogCache();
+async function getRecurringSeriesCatalog(venueId: string) {
+  return recurringSeriesCatalog.get(venueId, async cursor => {
+    // Dated one-offs never consume this bounded catalog. Expired series are
+    // paged through so a newer active parent cannot hide behind their history.
+    let query = db.collection(COLLECTIONS.VENUES).doc(venueId).collection(COLLECTIONS.EVENTS)
+      .where('recurringPattern', 'not-in', ['none', '', 'None'])
+      .orderBy('recurringPattern').orderBy(admin.firestore.FieldPath.documentId()).limit(101);
+    if (cursor) query = query.startAfter(...cursor as [string, string]);
+    const snapshot = await query.get();
+    const docs = snapshot.docs.slice(0, 100);
+    const last = docs[docs.length - 1];
+    return {events: docs.map(doc => ({id: doc.id, ...doc.data(), venueId: doc.get('venueId') || venueId} as EventData)),
+      nextCursor: snapshot.size > 100 && last ? [last.get('recurringPattern'), last.id] : undefined};
+  });
+}
+
+/** Reuse the persistence layer's existing recurrence semantics, not a second
+ * approximate scheduler. Occurrence-local endDate is not the series horizon. */
+export function recurringSeriesCoversOccurrence(event: Partial<EventData>, date: string): boolean {
+  const start = parseDateOnlyValue(event.startDate);
+  if (!start || !isIsoDateValue(date) || !isRecurringEventRecord(event as Record<string, unknown>)) return false;
+  const end = computeRecurringSeriesEndDate(event as Record<string, unknown>);
+  const rule = resolveRecurringRule(event as Record<string, unknown>);
+  const count = parsePositiveInteger(getLifecycleFieldValue(event as Record<string, unknown>, TOTAL_OCCURRENCE_FIELD_CANDIDATES));
+  const countEnd = count ? getNthRecurringOccurrenceDate(start, rule, count) : null;
+  return date >= start && (!end || date <= end) && (!countEnd || date <= countEnd) && isOccurrenceOnDate(start, rule, date);
+}
+
+async function getRecurringFamilyCandidates(venueId: string, startDate: string, endDate: string, anchorDate: string): Promise<EventData[]> {
+  const [recent, catalog] = await Promise.all([
+    getVenueEvents(venueId, {startDate, endDate, limit: 250}), getRecurringSeriesCatalog(venueId),
+  ]);
+  if (!catalog.complete) throw new Error('Incomplete recurring-series catalog prevents unsafe duplicate selection');
+  const byId = new Map(recent.map(event => [event.id, event]));
+  for (const event of catalog.events) if (recurringSeriesCoversOccurrence(event, anchorDate)) byId.set(event.id, event);
+  return [...byId.values()];
+}
+
 function extractMediaFallbackTokens(text: string): string[] {
   const normalized = normalizeVenueName(String(text || ''));
   if (!normalized) return [];
@@ -4087,11 +4129,7 @@ async function pickPreferredRecurringFamilyKeeperOverExactMatch(
     return undefined;
   }
 
-  const candidates = await getVenueEvents(venueId, {
-    startDate: fallbackWindowStart,
-    endDate: fallbackWindowEnd,
-    limit: 250,
-  });
+  const candidates = await getRecurringFamilyCandidates(venueId, fallbackWindowStart, fallbackWindowEnd, fallbackAnchorDate!);
 
   return pickRecurringFamilyFallbackMatch(
     incoming,
@@ -4108,18 +4146,26 @@ export async function checkDuplicate(
   venueId: string,
   currentRunEntries: EventData[] = []
 ): Promise<{ isDuplicate: boolean; existingEvent?: EventData }> {
-  // Standing parents remain active after their base date leaves the ordinary
-  // 120-day lookup. Resolve the narrow unqualified karaoke identity before
-  // exact-source children can bypass it. Ambiguous families are held.
-  if (isPlainKaraoke(event)) {
-    const stored = await getVenueEvents(venueId, {limit:251});
-    const peers = [...stored, ...currentRunEntries.filter(candidate =>
+  // The active recurring catalog is shared across activities. Base-date age
+  // cannot make a still-running program disappear from duplicate selection.
+  const catalog = /^\d{4}-\d{2}-\d{2}$/.test(event.startDate || '') ? await getRecurringSeriesCatalog(venueId) : {events:[],complete:true,scanned:0};
+  if (!catalog.complete) {
+    logger.warn('Held incomplete recurring-series lookup', {venueId, sourceUniqueId:event.uniqueId, date:event.startDate, scanned:catalog.scanned});
+    return {isDuplicate:true};
+  }
+  const linkedHistorical = sourceLinkedHistoricalSeriesKeepers({...event, venueId}, catalog.events);
+  if (linkedHistorical.length > 1) {
+    logger.warn('Held ambiguous linked historical recurring source', {venueId,sourceUniqueId:event.uniqueId,matchedParents:linkedHistorical.length});
+    return {isDuplicate:true};
+  }
+  if (linkedHistorical.length === 1) {
+    logger.info('Corroborated repaired recurring keeper from historical source', {venueId,sourceUniqueId:event.uniqueId,eventId:linkedHistorical[0].id});
+    return {isDuplicate:true,existingEvent:{...linkedHistorical[0],_sourceCorroborationOnly:true} as EventData};
+  }
+  const stored = catalog.events.filter(candidate => recurringSeriesCoversOccurrence(candidate, event.startDate || ''));
+  const peers = [...stored, ...currentRunEntries.filter(candidate =>
       candidate.venueId === venueId && !stored.some(saved => saved.id && saved.id === candidate.id))];
-    if (stored.length === 251) {
-      logger.warn('Held standing karaoke lookup overflow', {venueId, sourceUniqueId:event.uniqueId,
-        date:event.startDate, startTime:event.startTime, storedCandidates:stored.length, boundedQueryOverflow:true});
-      return {isDuplicate:true};
-    }
+  if (isPlainKaraoke(event)) {
     const decision = selectStandingKaraokeOccurrence({...event, venueId}, peers);
     if (decision.kind === 'hold') {
       logger.warn('Held ambiguous standing karaoke occurrence', {venueId, sourceUniqueId:event.uniqueId,
@@ -4133,6 +4179,15 @@ export async function checkDuplicate(
       return {isDuplicate:true, existingEvent:decision.existing};
     }
   }
+  const oldCutoff = addDaysToIsoDate(event.startDate || '', -120);
+  const oldMatches = oldCutoff ? peers.filter(candidate => candidate.startDate < oldCutoff &&
+    recurringSeriesCoversOccurrence(candidate, event.startDate || '') &&
+    isRecurringFamilyFallbackCompatible({...event, venueId}, candidate, {venueId, startTimeToleranceHours:0})) : [];
+  if (oldMatches.length > 1) {
+    logger.warn('Held ambiguous old active recurring series', {venueId,sourceUniqueId:event.uniqueId,date:event.startDate,matchedParents:oldMatches.length});
+    return {isDuplicate:true};
+  }
+  if (oldMatches.length === 1) return {isDuplicate:true,existingEvent:oldMatches[0]};
   if(event.category==='Cinema' && /facebook\.com\/DowntownCharlottetownInc(?:[/?#]|$)/i.test(event.facebookUrl || '')){
     const [venue,peers]=await Promise.all([
       db.collection(COLLECTIONS.VENUES).doc(venueId).get(),
@@ -4394,11 +4449,7 @@ export async function checkDuplicate(
   const fallbackWindowStart = fallbackAnchorDate ? addDaysToIsoDate(fallbackAnchorDate, -120) : null;
   const fallbackWindowEnd = fallbackAnchorDate ? addDaysToIsoDate(fallbackAnchorDate, 21) : null;
   if (fallbackWindowStart && fallbackWindowEnd) {
-    const recurringFallbackCandidates = await getVenueEvents(venueId, {
-      startDate: fallbackWindowStart,
-      endDate: fallbackWindowEnd,
-      limit: 250,
-    });
+    const recurringFallbackCandidates = await getRecurringFamilyCandidates(venueId, fallbackWindowStart, fallbackWindowEnd, fallbackAnchorDate!);
 
     const incomingRecurringExistingOccurrenceMatch =
       pickIncomingRecurringFamilyExistingOccurrenceMatch(event, recurringFallbackCandidates, {
@@ -5640,6 +5691,7 @@ export async function createEvent(
     .add(data);
 
   logger.debug('Created event', { venueId, eventId: docRef.id, eventType: event.eventType });
+  if (isRecurringSeries(event)) recurringSeriesCatalog.invalidate(venueId);
   return docRef.id;
 }
 
@@ -5693,6 +5745,7 @@ export async function updateEvent(
     .update(data);
 
   logger.debug('Updated event', { venueId, eventId });
+  recurringSeriesCatalog.invalidate(venueId);
 }
 
 interface EventUpdateAuditInput {
