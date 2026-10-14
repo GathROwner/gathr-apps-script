@@ -309,7 +309,8 @@ Never return arrays of values for an item; each must be a JSON object.`;
             { offset, itemCount: items.length, userName });
         }, Number(cfg.stage5BatchConcurrency || 1)
       );
-      if (!formattedEvents) return [];
+      if (!formattedEvents) throw Object.assign(new Error('Stage 5 source identity/count contract failed after bounded recovery'),
+        {code:'stage5_contract_failed'});
       response = { formattedEvents, formattingDecisions: [] };
     } else {
       const prompt = batchHeader + '\n\n' +
@@ -436,7 +437,7 @@ Never return arrays of values for an item; each must be a JSON object.`;
       event = normalizeCommunityMealEvent(event, originalItem);
 
       // Validate and correct isEvent/isFoodSpecial based on category
-      event = validateEventTypeFlags(event);
+      event = validateEventTypeFlags(event, originalItem);
 
       // Normalize recurrence pattern/flags/lifecycle fields after category/date corrections.
       if (ENABLE_RECURRENCE_LIFECYCLE_NORMALIZATION) {
@@ -529,6 +530,10 @@ Never return arrays of values for an item; each must be a JSON object.`;
     return collapsedProcessedEvents;
   } catch (error) {
     logger.error('Stage 5 formatting error', error);
+    const failure = error as {code?: string; status?: number; message?: string};
+    await cfg.skipReasonHandler?.({stage:'stage5',failure:true,reason:'Stage 5 formatting request failed',
+      detail:JSON.stringify({code:failure.code || 'formatting_error',status:failure.status || null,
+        message:String(failure.message || error).slice(0,500)})});
     return [];
   }
 }
@@ -1240,6 +1245,14 @@ export function preserveValidatedOccurrence(
       restored.endDate = toIsoDateUtc(next);
     }
   }
+  // Recurrence normalization may have correctly demoted a named guest show;
+  // copying the extractor's weekly series flag must not undo that decision.
+  if (analyzeBabasIslandJazzProgramInstance(restored,buildRecurrenceSourceText(restored,originalItem)).shouldForceOneOff) {
+    restored.isRecurring='No';restored.recurringPattern='none';
+    restored.totalOccurrences=undefined;restored.recurrenceUntilDate=undefined;
+    restored.recurringDaysOfWeek=undefined;restored.recurringWeekdaySequence=undefined;
+    restored.recurringWeekInterval=undefined;
+  }
   return restored;
 }
 
@@ -1514,7 +1527,7 @@ function detectExplicitFoodSpecialCategory(
   // Its name alone must not convert the race into a food special.
   const sportingEvent = /\b(race|marathon|triathlon|trot|relay|running|run)\b/.test(text);
   const explicitFoodOffer = /\b(food|drink)\s+special\b|\b(happy\s*hour|wing\s*night|two\s+can\s+dine)\b|\b(half[- ]priced?|prix fixe)\b|\b(?:pizza|burger|taco|wings?)\s*(?:for|only)?\s*\$\s*\d+|\$\s*\d+\s*(?:pizza|burger|taco|wings?)\b/.test(text);
-  const livePerformance = /\b(live|concert|music|band|performance|performer|singer|dj)\b/.test(text);
+  const livePerformance = /\b(live|concert|music|band|performance|performer|singer|dj|jazz|improvisation|recital)\b/.test(text);
   if ((sportingEvent || livePerformance) && !explicitFoodOffer) return null;
 
   if (/\bhappy\s*hour\b/.test(text)) return 'Happy Hour';
@@ -1691,6 +1704,12 @@ function applyCinemaVenueHardening(
   const hasCinemaHint = hasCinemaStage3Hint(originalItem);
   const hasNonCinemaHint = hasStrongNonCinemaStage3Hint(originalItem);
   const performerLikeTitle = looksPerformerLikeTitle(event.name || '');
+
+  // A named anniversary/album concert tour at a theatre is not a film.
+  if (!hasCinemaCue && /\b(?:anniversary|album|concert|musical)\s+tour\b/i.test(inferenceText)) {
+    event.category = 'Live Music';
+    return event;
+  }
 
   if (
     isCinemaVenue &&
@@ -2173,6 +2192,11 @@ export async function formatStage5BatchesWithRecovery(
         const first = await formatExactBatch(items.slice(0, midpoint), offset);
         const second = first && await formatExactBatch(items.slice(midpoint), offset + midpoint);
         batch = first && second ? [...first, ...second] : null;
+      } else if (!batch && items.length === 1) {
+        // A one-item malformed response cannot be split. Retry its unchanged
+        // source once; semantic/API rejections throw and are never bypassed.
+        logger.info('Stage 5 retrying malformed single-item batch', {offset});
+        batch = await formatExactBatch(items, offset);
       }
       return batch;
     }));
@@ -2258,7 +2282,9 @@ export function isNonMealCommunityActivity(event: FormattedEvent, originalItem?:
   const volunteerWork = /\bvolunteers?\b/i.test(title) &&
     /\b(?:move|moving|chairs?|tables?|clean[- ]?up|set[- ]?up|prepare|preparation)\b/i.test(text) &&
     !/\b(?:dinner|breakfast|brunch|lunch|buffet|supper|meal)\b/i.test(title);
-  return civic || literary || foodDrive || careClinic || produceJudging || clothingDrive || volunteerWork;
+  const peerSupport = /\bpeer[- ]support\b|\bsupport\s+(?:group|program|session|meeting)\b/i.test(text) &&
+    !/\b(?:dinner|breakfast|brunch|lunch|buffet|supper|meal)\b/i.test(title);
+  return civic || literary || foodDrive || careClinic || produceJudging || clothingDrive || volunteerWork || peerSupport;
 }
 
 function applyCategoryCorrections(
@@ -2503,9 +2529,9 @@ function handleEstablishmentMapping(event: FormattedEvent, userName: string): Fo
 /**
  * Validate and correct isEvent/isFoodSpecial based on category
  */
-function validateEventTypeFlags(event: FormattedEvent): FormattedEvent {
-  const forcedFoodCategory = detectExplicitFoodSpecialCategory(event);
-  const forcedWorkshopCategory = detectExplicitWorkshopCategory(event);
+function validateEventTypeFlags(event: FormattedEvent, originalItem?: ExtractedItem): FormattedEvent {
+  const forcedFoodCategory = detectExplicitFoodSpecialCategory(event, originalItem);
+  const forcedWorkshopCategory = detectExplicitWorkshopCategory(event, originalItem);
   if (
     forcedFoodCategory &&
     !forcedWorkshopCategory &&
@@ -2578,7 +2604,7 @@ export function applyCategoryCorrectionsForRegression(
   event: FormattedEvent,
   originalItem?: ExtractedItem
 ): FormattedEvent {
-  return validateEventTypeFlags(applyCategoryCorrections({ ...event }, originalItem));
+  return validateEventTypeFlags(applyCategoryCorrections({ ...event }, originalItem), originalItem);
 }
 
 /**
@@ -6408,6 +6434,7 @@ async function callGPTWithSchema(
   config: ParsingConfig,
   batch: { offset: number; itemCount: number; userName: string }
 ): Promise<FormattingResult> {
+  const requestStartedAt = Date.now();
   const client = getOpenAIClient();
   const explicitModelOverride = String(config.stage5ModelOverride || '').trim();
   const model = explicitModelOverride || resolveStageModel(config.gptModelFast, 'STAGE5_MODEL_OVERRIDE');
@@ -6519,6 +6546,11 @@ async function callGPTWithSchema(
         ...diagnostics,
       });
 
+      if (response.status !== 'completed') {
+        throw Object.assign(new Error(`Stage 5 incomplete response: ${response.status} (${response.incomplete_details?.reason || 'unknown'})`),
+          {code:'stage5_incomplete_response'});
+      }
+
       logger.debug('GPT formatting response received (responses)', {
         model,
         tokens: usage.totalTokens,
@@ -6576,6 +6608,14 @@ async function callGPTWithSchema(
 
     throw new Error('No valid response from GPT');
   } catch (error) {
+    const failure = error as {code?: string;status?: number;request_id?: string;message?: string};
+    logger.error('Stage 5 request failure diagnostics', {
+      ...config.diagnosticContext,model,batchOffset:batch.offset,batchItemCount:batch.itemCount,
+      durationMs:Date.now()-requestStartedAt,status:failure.status || null,
+      code:failure.code || 'request_error',requestId:failure.request_id || '',
+      message:String(failure.message || error).slice(0,500),
+      usageAvailable:failure.code === 'stage5_incomplete_response',
+    });
     logger.error('GPT call failed', error);
     throw error;
   }

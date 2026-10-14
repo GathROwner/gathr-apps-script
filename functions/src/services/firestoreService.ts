@@ -1,4 +1,5 @@
 import {hasConflictingOccurrenceIdentity,findConflictingSourceCinemaDate} from '../utils/occurrenceMergeGuard.js';
+import {resolveAggregatorCinemaOccurrence} from './aggregatorCinemaOccurrence.js';
 import {KNOWN_LOCATION_RELATIONSHIPS} from '../parsing/locationMentionRoles.js';
 import {isApprovedVenueOccurrenceMatch,approvedVenueOccurrenceSourcePatch,ticketOccurrenceKey} from './approvedVenueOccurrence.js';
 /**
@@ -4094,6 +4095,26 @@ export async function checkDuplicate(
   venueId: string,
   currentRunEntries: EventData[] = []
 ): Promise<{ isDuplicate: boolean; existingEvent?: EventData }> {
+  if(event.category==='Cinema' && /facebook\.com\/DowntownCharlottetownInc(?:[/?#]|$)/i.test(event.facebookUrl || '')){
+    const [venue,peers]=await Promise.all([
+      db.collection(COLLECTIONS.VENUES).doc(venueId).get(),
+      db.collection(COLLECTIONS.VENUES).doc(venueId).collection(COLLECTIONS.EVENTS)
+        .where('startDate','==',event.startDate).limit(65).get(),
+    ]);
+    if(peers.size===65)return {isDuplicate:true};
+    const decision=resolveAggregatorCinemaOccurrence(event,peers.docs.map(doc=>({id:doc.id,...doc.data()})),venue.data()?.facebookUrl || '');
+    if(decision.kind==='hold'){
+      logger.warn('Held aggregator cinema source conflict',{venueId,name:event.eventName||event.name,date:event.startDate,time:event.startTime});
+      return {isDuplicate:true};
+    }
+    if(decision.kind==='match'){
+      // Keep the venue's own title, source and media authoritative. A generic
+      // duplicate merge would replace those with the aggregator's wording.
+      logger.info('Skipped aggregator copy of first-party cinema occurrence',{
+        venueId,existingEventId:decision.existing?.id,name:event.eventName||event.name});
+      return {isDuplicate:true};
+    }
+  }
   // Manually resolved venue events may live at events/* rather than the venue
   // child collection. Check the bounded known-facility cohort before creating
   // a replacement. Never rewrite the approved location, clock or media here.

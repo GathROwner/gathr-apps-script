@@ -1028,7 +1028,7 @@ export async function auditCalendarInventory(
       }, {
         stage: 'stage3', component: 'calendarInventoryAudit',
         modelEnvVar: 'STAGE3_MODEL_OVERRIDE', imageDetailEnvVar: 'STAGE3_IMAGE_DETAIL',
-        maxOutputTokens: 8000, allowTextRetry: false, requireCompleteResponse: true,
+        maxOutputTokens: 16000, allowTextRetry: false, requireCompleteResponse: true,
       });
       if (!reading.trim()) throw new Error('Calendar inventory response was empty');
       const parsed = parseJSONResponse(reading);

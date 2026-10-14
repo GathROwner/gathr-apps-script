@@ -3148,7 +3148,8 @@ export async function processRow(
           postId: String(row.uniqueId || ''),
         },
         skipReasonHandler: (skipReason: ParseSkipReason) => {
-          parserSkipReason = skipReason;
+          // Subsequent generic canary holds must not hide an API failure.
+          if (!parserSkipReason?.failure || skipReason.failure) parserSkipReason = skipReason;
         },
         gptUsageHandler: (usage: GptUsageRecord) => {
           gptUsageRecords.push(usage);
@@ -3223,9 +3224,10 @@ export async function processRow(
         const gptUsageSummary = summarizeGptUsageRecords(gptUsageRecords);
         const skipReason = parserSkipReason?.reason || 'No events extracted';
         const skipDetail = parserSkipReason?.detail || '';
-        result.skipped = true;
+        result.skipped = !parserSkipReason?.failure;
         result.error = skipDetail ? `${skipReason}: ${skipDetail}` : skipReason;
-        batchManager.markRowSkipped(rowIndex, skipReason);
+        if (parserSkipReason?.failure) batchManager.markRowError(rowIndex,result.error);
+        else batchManager.markRowSkipped(rowIndex, skipReason);
 
         if (enableSnapshots || parserSkipReason?.reason === 'Luna canary requires source review') {
           const state = batchManager.getState();
@@ -3258,7 +3260,7 @@ export async function processRow(
             stages: [
               {
                 stage: 'format',
-                success: true,
+                success: !parserSkipReason?.failure,
                 output: {
                   parserMode: 'full5stage',
                 dryRun: isDryRun,
@@ -6061,6 +6063,14 @@ function buildDuplicateEventUpdates(
   }
 
   const normalizedIncomingMediaUrls = normalizeUrlList(incoming.mediaUrls);
+  const facebookPage = (url: unknown): string => String(url || '').toLowerCase()
+    .replace(/^https?:\/\/(?:www\.)?facebook\.com\//,'').replace(/[/?#].*$/,'');
+  const ownerPage = facebookPage(categoryPromotionContext?.venue?.facebookUrl);
+  const protectExistingMedia = unsafeCrossSourceDateMerge || Boolean(
+    ownerPage && facebookPage(existing.facebookUrl) === ownerPage &&
+    facebookPage(incoming.facebookUrl) === 'downtowncharlottetowninc' &&
+    /\/postimages\//.test(String(existing.relevantImageUrl || existing.image || existing.imageUrl || ''))
+  );
   const incomingPreferredMediaUrl =
     normalizedIncomingMediaUrls.find((url) => isStorageManagedUrl(url)) ||
     normalizedIncomingMediaUrls[0] ||
@@ -6071,11 +6081,11 @@ function buildDuplicateEventUpdates(
     asTrimmedString(incoming.relevantImageUrl) ||
     canonicalIncomingImage ||
     incomingPreferredMediaUrl;
-  const mergedMediaUrls = unsafeCrossSourceDateMerge
+  const mergedMediaUrls = protectExistingMedia
     ? normalizeUrlList(existing.mediaUrls)
     : mergeDuplicateMediaUrls(existing, incoming);
   if (
-    !unsafeCrossSourceDateMerge &&
+    !protectExistingMedia &&
     mergedMediaUrls.length > 0 &&
     valuesDiffer(existing.mediaUrls, mergedMediaUrls)
   ) {
@@ -6083,7 +6093,7 @@ function buildDuplicateEventUpdates(
   }
 
   const promoteImages =
-    !unsafeCrossSourceDateMerge &&
+    !protectExistingMedia &&
     (
       descriptionImproved ||
       timeImproved ||
@@ -6097,7 +6107,7 @@ function buildDuplicateEventUpdates(
     );
 
   if (
-    !unsafeCrossSourceDateMerge &&
+    !protectExistingMedia &&
     shouldReplaceImageUrl(
       existing.relevantImageUrl,
       canonicalIncomingRelevantImage,
@@ -6108,20 +6118,20 @@ function buildDuplicateEventUpdates(
   }
 
   if (
-    !unsafeCrossSourceDateMerge &&
+    !protectExistingMedia &&
     shouldReplaceImageUrl(existing.image, canonicalIncomingImage, promoteImages)
   ) {
     setField('image', canonicalIncomingImage);
   }
 
   if (
-    !unsafeCrossSourceDateMerge &&
+    !protectExistingMedia &&
     shouldReplaceImageUrl(existing.imageUrl, canonicalIncomingImage, promoteImages)
   ) {
     setField('imageUrl', canonicalIncomingImage);
   }
 
-  if (!unsafeCrossSourceDateMerge && shouldReplaceIconUrl(existing.icon, incoming.icon)) {
+  if (!protectExistingMedia && shouldReplaceIconUrl(existing.icon, incoming.icon)) {
     setField('icon', incoming.icon);
   }
 
@@ -6129,7 +6139,7 @@ function buildDuplicateEventUpdates(
     ['mediaUrls', 'image', 'imageUrl', 'relevantImageUrl', 'icon', 'sharedPostThumbnail'].includes(field)
   );
   const shouldBackfillImageProvenance = !existing.imageProvenance && Boolean(incoming.imageProvenance);
-  if (!unsafeCrossSourceDateMerge && (imageFieldChanged || shouldBackfillImageProvenance)) {
+  if (!protectExistingMedia && (imageFieldChanged || shouldBackfillImageProvenance)) {
     setField('imageProvenance', buildDuplicateMergeImageProvenance(existing, incoming, updates));
   }
 

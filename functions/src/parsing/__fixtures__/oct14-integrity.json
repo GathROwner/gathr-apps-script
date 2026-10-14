@@ -1,0 +1,2714 @@
+{
+  "rows": [
+    {
+      "row": 23,
+      "venue": "Baba's Lounge",
+      "postId": "1674880781114115",
+      "caption": "Making her Island Jazz debut, this Thursday singer Nadine Haddad takes the stage joined by Coby Nabuurs on piano, Isaac Williams on bass, and Joe Bezanson on drums.  Formed in the summer of 2026, the quartet is a new addition to PEI's jazz scene, performing a mix of jazz standards, swing, bossa nova, and contemporary favourites. \n\nA classically trained vocalist with a background in musical theatre and jazz, Nadine brings her love of storytelling and diverse musical influences to the stage. Drawing inspiration from artists such as Ella Fitzgerald, Julie London, Chet Baker, Olivia Dean and Laufey, the quartet explores everything from swinging classics and soulful ballads to modern favourites with a jazz influence. With plenty of room for improvisation and musical spontaneity, the group puts its own spin on familiar tunes while celebrating the jazz traditions that inspire them.\n\nTwo sets starting a little after 8pm. $10 minimum at the door. Island Jazz at Baba's Lounge every Thursday night all year round.",
+      "timestamp": "2026-10-13T02:46:50.000Z",
+      "items": [
+        {
+          "name": "Nadine Haddad Quartet",
+          "description": "Making her Island Jazz debut, singer Nadine Haddad takes the stage joined by Coby Nabuurs on piano, Isaac Williams on bass, and Joe Bezanson on drums. Formed in the summer of 2026, the quartet is a new addition to PEI's jazz scene, performing a mix of jazz standards, swing, bossa nova, and contemporary favourites. A classically trained vocalist with a background in musical theatre and jazz, Nadine brings her love of storytelling and diverse musical influences to the stage. Drawing inspiration from artists such as Ella Fitzgerald, Julie London, Chet Baker, Olivia Dean and Laufey, the quartet explores everything from swinging classics and soulful ballads to modern favourites with a jazz influence. With plenty of room for improvisation and musical spontaneity, the group puts its own spin on familiar tunes while celebrating the jazz traditions that inspire them. Two sets starting a little after 8pm. Island Jazz at Baba's Lounge every Thursday night all year round.",
+          "date": "2026-10-15",
+          "startTime": "20:00",
+          "endTime": "",
+          "venue": "",
+          "ticketLink": "",
+          "price": "$10 minimum at the door",
+          "relevantImageIndex": 1,
+          "recurringPattern": "weekly_thursday",
+          "extractionReason": "Live music event advertised for Thursday, with a named quartet, performers, and a start time. The poster gives the date October 15, 2026, and the caption explicitly says Island Jazz is held every Thursday.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "8 PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              {
+                "label": "Baba's Lounge",
+                "address": "",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "Island Jazz at Baba's Lounge"
+              }
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "Baba's Lounge is explicitly named as the event venue."
+          },
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 1
+        }
+      ]
+    },
+    {
+      "row": 133,
+      "venue": "Albert & Crown Pub",
+      "postId": "1416632207323237",
+      "caption": "TUESDAY OCTOBER 13TH\n\n⏰HOURS:\n11:30am to 7:00pm\n\nSPECIALS:\n- Cheeseburger & fries $15\n- Soup & Sandwich combo $15\n- Beef soup & roll $8\n\nLIVE MUSIC:\n Thursday October 15 ~ Joey Doucette ~ 8-11pm\n Friday October 16 ~ Alyssa Harper & Dakota Strongman ~ 6-9pm\n\n‼️Please note Saturday October 17th we will be CLOSED at 7pm for a private function‼️\n\nTickets are selling fast  for our November 14th event with Jonny and Louise Arsenault! Must pay in advance to secure your seat!\n\nPlease call us at 902-853-0000 or message our Facebook page to reserve seats for music events\n\nThanks for supporting local!\n\nOCR TEXT:\nMay be an image of text\nMay be an image of text",
+      "timestamp": "2026-10-13T14:58:04.000Z",
+      "items": [
+        {
+          "name": "Live Music: Alyssa Harper & Cory Gallant",
+          "description": "01 THUR — Live music with Alyssa Harper & Cory Gallant, 8-11 PM; $10 COVER.",
+          "date": "2026-10-01",
+          "startTime": "20:00",
+          "endTime": "23:00",
+          "venue": "",
+          "ticketLink": "",
+          "price": "$10 cover",
+          "relevantImageIndex": 1,
+          "recurringPattern": "none",
+          "extractionReason": "The monthly schedule advertises a named live-music performance with a specific date and time.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "8-11 PM"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "8-11 PM"
+            }
+          },
+          "spatial": {
+            "kind": "unknown",
+            "locations": [],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "No event location or route is explicitly stated."
+          },
+          "_sourceType": "event",
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 14
+        },
+        {
+          "name": "Live Music: Fisherkings",
+          "description": "03 SAT — Live music with Fisherkings, 7-10 PM; $10 COVER.",
+          "date": "2026-10-03",
+          "startTime": "19:00",
+          "endTime": "22:00",
+          "venue": "",
+          "ticketLink": "",
+          "price": "$10 cover",
+          "relevantImageIndex": 1,
+          "recurringPattern": "none",
+          "extractionReason": "The monthly schedule advertises a named live-music performance with a specific date and time.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "7-10 PM"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "7-10 PM"
+            }
+          },
+          "spatial": {
+            "kind": "unknown",
+            "locations": [],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "No event location or route is explicitly stated."
+          },
+          "_sourceType": "event",
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 2,
+          "_pipelineTotalStage3": 14
+        },
+        {
+          "name": "Live Music: Floyd Gaudet",
+          "description": "09 FRI — Live music with Floyd Gaudet, 6-9PM; $5 COVER.",
+          "date": "2026-10-09",
+          "startTime": "18:00",
+          "endTime": "21:00",
+          "venue": "",
+          "ticketLink": "",
+          "price": "$5 cover",
+          "relevantImageIndex": 1,
+          "recurringPattern": "none",
+          "extractionReason": "The monthly schedule advertises a named live-music performance with a specific date and time.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "6-9PM"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "6-9PM"
+            }
+          },
+          "spatial": {
+            "kind": "unknown",
+            "locations": [],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "No event location or route is explicitly stated."
+          },
+          "_sourceType": "event",
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 3,
+          "_pipelineTotalStage3": 14
+        },
+        {
+          "name": "Live Music: Nick Hoben",
+          "description": "10 SAT — Live music with Nick Hoben, 7-10 PM; $5 COVER.",
+          "date": "2026-10-10",
+          "startTime": "19:00",
+          "endTime": "22:00",
+          "venue": "",
+          "ticketLink": "",
+          "price": "$5 cover",
+          "relevantImageIndex": 1,
+          "recurringPattern": "none",
+          "extractionReason": "The monthly schedule advertises a named live-music performance with a specific date and time.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "7-10 PM"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "7-10 PM"
+            }
+          },
+          "spatial": {
+            "kind": "unknown",
+            "locations": [],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "No event location or route is explicitly stated."
+          },
+          "_sourceType": "event",
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 4,
+          "_pipelineTotalStage3": 14
+        },
+        {
+          "name": "Live Music: Joey Doucette",
+          "description": "Thursday October 15 — Joey Doucette performs live, 8-11pm. The monthly schedule also lists this as one of three dates in its shared Joey Doucette block; $5 COVER.",
+          "date": "2026-10-15",
+          "startTime": "20:00",
+          "endTime": "23:00",
+          "venue": "",
+          "ticketLink": "",
+          "price": "$5 cover",
+          "relevantImageIndex": 1,
+          "recurringPattern": "none",
+          "extractionReason": "Live music is explicitly advertised for October 15 in the caption and monthly schedule; the overlapping listings are consolidated into one event.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "8-11pm"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "8-11pm"
+            }
+          },
+          "spatial": {
+            "kind": "unknown",
+            "locations": [],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "No event location or route is explicitly stated."
+          },
+          "_sourceType": "event",
+          "_sourceOccurrenceCount": 3,
+          "_pipelineIndex": 5,
+          "_pipelineTotalStage3": 14
+        },
+        {
+          "name": "Live Music: Alyssa Harper & Dakota Strongman",
+          "description": "Friday October 16 — Alyssa Harper & Dakota Strongman perform live, 6-9pm; $10 COVER.",
+          "date": "2026-10-16",
+          "startTime": "18:00",
+          "endTime": "21:00",
+          "venue": "",
+          "ticketLink": "",
+          "price": "$10 cover",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "Live music is explicitly advertised for October 16 in the caption and poster; the matching schedule listing is consolidated into one event.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "6-9pm"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "6-9pm"
+            }
+          },
+          "spatial": {
+            "kind": "unknown",
+            "locations": [],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "No event location or route is explicitly stated."
+          },
+          "_sourceType": "event",
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 6,
+          "_pipelineTotalStage3": 14
+        },
+        {
+          "name": "Live Music: Greenmount",
+          "description": "22 THUR — Live music with Greenmount, 6-9PM; $10 COVER.",
+          "date": "2026-10-22",
+          "startTime": "18:00",
+          "endTime": "21:00",
+          "venue": "",
+          "ticketLink": "",
+          "price": "$10 cover",
+          "relevantImageIndex": 1,
+          "recurringPattern": "none",
+          "extractionReason": "The monthly schedule advertises a named live-music performance with a specific date and time.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "6-9PM"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "6-9PM"
+            }
+          },
+          "spatial": {
+            "kind": "unknown",
+            "locations": [],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "No event location or route is explicitly stated."
+          },
+          "_sourceType": "event",
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 7,
+          "_pipelineTotalStage3": 14
+        },
+        {
+          "name": "Live Music: Rick Sparkes",
+          "description": "23 FRI — Live music with Rick Sparkes, 6-9 PM; $10 COVER.",
+          "date": "2026-10-23",
+          "startTime": "18:00",
+          "endTime": "21:00",
+          "venue": "",
+          "ticketLink": "",
+          "price": "$10 cover",
+          "relevantImageIndex": 1,
+          "recurringPattern": "none",
+          "extractionReason": "The monthly schedule advertises a named live-music performance with a specific date and time.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "6-9 PM"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "6-9 PM"
+            }
+          },
+          "spatial": {
+            "kind": "unknown",
+            "locations": [],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "No event location or route is explicitly stated."
+          },
+          "_sourceType": "event",
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 8,
+          "_pipelineTotalStage3": 14
+        },
+        {
+          "name": "Live Music: Joey Doucette",
+          "description": "08/15 /29 THUR — Live music with Joey Doucette, 8-11 PM; $5 COVER. This is the October 29 date from the shared multi-date schedule block.",
+          "date": "2026-10-29",
+          "startTime": "20:00",
+          "endTime": "23:00",
+          "venue": "",
+          "ticketLink": "",
+          "price": "$5 cover",
+          "relevantImageIndex": 1,
+          "recurringPattern": "none",
+          "extractionReason": "The schedule lists October 29 as one of three explicit dates for this live-music performance.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "8-11 PM"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "8-11 PM"
+            }
+          },
+          "spatial": {
+            "kind": "unknown",
+            "locations": [],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "No event location or route is explicitly stated."
+          },
+          "_sourceType": "event",
+          "_sourceOccurrenceCount": 3,
+          "_pipelineIndex": 9,
+          "_pipelineTotalStage3": 14
+        },
+        {
+          "name": "Live Music: Blair Gaudet",
+          "description": "30 FRI — Live music with Blair Gaudet, 6-9 PM; $5 COVER.",
+          "date": "2026-10-30",
+          "startTime": "18:00",
+          "endTime": "21:00",
+          "venue": "",
+          "ticketLink": "",
+          "price": "$5 cover",
+          "relevantImageIndex": 1,
+          "recurringPattern": "none",
+          "extractionReason": "The monthly schedule advertises a named live-music performance with a specific date and time.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "6-9 PM"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "6-9 PM"
+            }
+          },
+          "spatial": {
+            "kind": "unknown",
+            "locations": [],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "No event location or route is explicitly stated."
+          },
+          "_sourceType": "event",
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 10,
+          "_pipelineTotalStage3": 14
+        },
+        {
+          "name": "Jonny and Louise Arsenault",
+          "description": "November 14th event featuring Jonny and Louise Arsenault. Tickets are selling fast; payment must be made in advance to secure a seat. No performance time is stated.",
+          "date": "2026-11-14",
+          "startTime": "",
+          "endTime": "",
+          "venue": "",
+          "ticketLink": "",
+          "price": "",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "The caption advertises a named entertainment event on November 14th, though it does not provide a start time.",
+          "timeFlags": {
+            "start": {
+              "source": "none",
+              "evidence": ""
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "spatial": {
+            "kind": "unknown",
+            "locations": [],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "No event location or route is explicitly stated."
+          },
+          "_sourceType": "event",
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 11,
+          "_pipelineTotalStage3": 14,
+          "_stage4NeedsTimeEnrichment": true
+        },
+        {
+          "name": "Cheeseburger & fries",
+          "description": "Cheeseburger & fries $15",
+          "date": "2026-10-13",
+          "startTime": "",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "none",
+              "evidence": ""
+            },
+            "end": {
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "venue": "Albert & Crown Pub",
+          "pricing": {
+            "price": "$15"
+          },
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "“Cheeseburger & fries $15”",
+          "_sourceType": "special",
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 12,
+          "_pipelineTotalStage3": 14,
+          "_stage4NeedsTimeEnrichment": true
+        },
+        {
+          "name": "Soup & Sandwich combo",
+          "description": "Soup & Sandwich combo $15",
+          "date": "2026-10-13",
+          "startTime": "",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "none",
+              "evidence": ""
+            },
+            "end": {
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "venue": "Albert & Crown Pub",
+          "pricing": {
+            "price": "$15"
+          },
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "“Soup & Sandwich combo $15”",
+          "_sourceType": "special",
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 13,
+          "_pipelineTotalStage3": 14,
+          "_stage4NeedsTimeEnrichment": true
+        },
+        {
+          "name": "Beef soup & roll",
+          "description": "Beef soup & roll $8",
+          "date": "2026-10-13",
+          "startTime": "",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "none",
+              "evidence": ""
+            },
+            "end": {
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "venue": "Albert & Crown Pub",
+          "pricing": {
+            "price": "$8"
+          },
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "“Beef soup & roll $8”",
+          "_sourceType": "special",
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 14,
+          "_pipelineTotalStage3": 14,
+          "_stage4NeedsTimeEnrichment": true
+        }
+      ]
+    },
+    {
+      "row": 135,
+      "venue": "Downtown Charlottetown Inc.",
+      "postId": "1563713265796205",
+      "caption": "What’s happening today in Downtown Charlottetown? \n\n⚓️October 14-18 - ANCHOR Fest: https://www.anchorfest.ca\n\nWednesday, October 14, 2026 events:\n11:00 pm - Confederation Centre Box Office: Historic Great George Tour\n12:00 pm - Founders Food Hall and Market: Lunch Sounds Better Live with Dan Payntrr\n12:00 pm - Olde Dublin Pub: Robbie Doherty\n1:30 pm - Blank Canvas: Water Colour Workshop Lighthouse \n2:00 pm - Confederation Centre Box Office: Historic Great George Tour\n6:00 pm - Side Door Dance  Studio: Adult Contemporary Dance\n⚓️7:00 pm - City Cinema: Anchor Fest Opening Night Film, Back in Black\n7:00 pm - Olde Dublin Pub: Richie and Trevor  \n7:00 pm - Marc’s Lounge: Wicked Wednesdays screening Coraline\n⁉️8:00 pm - HopYard: Trivia with Hank\n8:00 pm - Be You: Karaoke\n9:00 pm - Baba’s Lounge: Open Mic with Ivan Stewart \n\nThursday, October 15, 2026 events:\n⚓️9:00 am - The Arts Guild: ANCHOR Fest Conference & Panel Discussion \n11:00 am - Confederation Centre Box Office: Historic Great George Tour\n1:30 pm - Blank Canvas: Watercolour Workshop Lighthouse w/ Dave\n2:00 am - Confederation Centre Box Office: Historic Great George Tour\n️4:00 pm - Confederation Centre of the Arts: Arts Mixer\n6:00 pm - Gahan House: Oracle Readings\n7:00 pm - City Cinema: A Long Winter\n7:00 pm - Old Triangle: Trad Music Sessions \n7:30 pm - Sobey Family Theatre: Lorena McKennitt, The Mask and the Mirror 30th Anniversary Tour\n7:30 pm - DownStreet Dance: Burlesque\n8:00 pm - Olde Dublin Pub: Vintage 2.0  \n⚓️8:00 pm - Trailside Music Hall: ANCHOR Fest Captains of Everything + Nick Doneff\n8:00 pm - Baba’s Lounge: Island Jazz Sextet ft. Nadine Haddad\n⁉️9:00 pm - Hunter’s Ale House: Darcy’s Entertainment Trivia\n⚓️9:00 pm - The Arts Guild: ANCHOR Fest Comedy Album Trial Run with Britt Campbell \n⚓️9:00 pm - Tivoli Cinema: ANCHOR Fest Jim Queen\n11:00 pm - Hunter’s Ale House: Oliver Carter \n\n Daily Charlottetown Library Learning Centre Schedule: https://peilibrary.libcal.com/calendar/charlottetownlibrary\n\nOCR TEXT:\nMay be an image of text",
+      "timestamp": "2026-10-14T12:01:09.000Z",
+      "items": [
+        {
+          "name": "Historic Great George Tour",
+          "type": "event",
+          "date": "2026-10-14",
+          "startTime": "23:00",
+          "endTime": "",
+          "venue": "Confederation Centre Box Office",
+          "price": "",
+          "description": "Confederation Centre Box Office: Historic Great George Tour",
+          "extractionReason": "schedule_text_fallback",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "11:00 pm"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceType": "schedule",
+          "_sourceOccurrenceCount": 4,
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 29,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Lunch Sounds Better Live with Dan Payntrr",
+          "type": "event",
+          "date": "2026-10-14",
+          "startTime": "12:00",
+          "endTime": "",
+          "venue": "Founders Food Hall and Market",
+          "price": "",
+          "description": "Founders Food Hall and Market: Lunch Sounds Better Live with Dan Payntrr",
+          "extractionReason": "schedule_text_fallback",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "12:00 pm"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceType": "schedule",
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 2,
+          "_pipelineTotalStage3": 29,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Robbie Doherty",
+          "type": "event",
+          "date": "2026-10-14",
+          "startTime": "12:00",
+          "endTime": "",
+          "venue": "Olde Dublin Pub",
+          "price": "",
+          "description": "Olde Dublin Pub: Robbie Doherty",
+          "extractionReason": "schedule_text_fallback",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "12:00 pm"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceType": "schedule",
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 3,
+          "_pipelineTotalStage3": 29,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Water Colour Workshop Lighthouse",
+          "type": "event",
+          "date": "2026-10-14",
+          "startTime": "13:30",
+          "endTime": "",
+          "venue": "Blank Canvas",
+          "price": "",
+          "description": "Blank Canvas: Water Colour Workshop Lighthouse",
+          "extractionReason": "schedule_text_fallback",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "1:30 pm"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceType": "schedule",
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 4,
+          "_pipelineTotalStage3": 29,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Historic Great George Tour",
+          "type": "event",
+          "date": "2026-10-14",
+          "startTime": "14:00",
+          "endTime": "",
+          "venue": "Confederation Centre Box Office",
+          "price": "",
+          "description": "Confederation Centre Box Office: Historic Great George Tour",
+          "extractionReason": "schedule_text_fallback",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "2:00 pm"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceType": "schedule",
+          "_sourceOccurrenceCount": 4,
+          "_pipelineIndex": 5,
+          "_pipelineTotalStage3": 29,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Adult Contemporary Dance",
+          "type": "event",
+          "date": "2026-10-14",
+          "startTime": "18:00",
+          "endTime": "",
+          "venue": "Side Door Dance Studio",
+          "price": "",
+          "description": "Side Door Dance Studio: Adult Contemporary Dance",
+          "extractionReason": "schedule_text_fallback",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "6:00 pm"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceType": "schedule",
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 6,
+          "_pipelineTotalStage3": 29,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Anchor Fest Opening Night Film, Back in Black",
+          "type": "event",
+          "date": "2026-10-14",
+          "startTime": "19:00",
+          "endTime": "",
+          "venue": "City Cinema",
+          "price": "",
+          "description": "⚓️ - City Cinema: Anchor Fest Opening Night Film, Back in Black",
+          "extractionReason": "schedule_text_fallback",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "7:00 pm"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceType": "schedule",
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 7,
+          "_pipelineTotalStage3": 29,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Richie and Trevor",
+          "type": "event",
+          "date": "2026-10-14",
+          "startTime": "19:00",
+          "endTime": "",
+          "venue": "Olde Dublin Pub",
+          "price": "",
+          "description": "Olde Dublin Pub: Richie and Trevor",
+          "extractionReason": "schedule_text_fallback",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "7:00 pm"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceType": "schedule",
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 8,
+          "_pipelineTotalStage3": 29,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Wicked Wednesdays screening Coraline",
+          "type": "event",
+          "date": "2026-10-14",
+          "startTime": "19:00",
+          "endTime": "",
+          "venue": "Marc’s Lounge",
+          "price": "",
+          "description": "Marc’s Lounge: Wicked Wednesdays screening Coraline",
+          "extractionReason": "schedule_text_fallback",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "7:00 pm"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceType": "schedule",
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 9,
+          "_pipelineTotalStage3": 29,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Trivia with Hank",
+          "type": "event",
+          "date": "2026-10-14",
+          "startTime": "20:00",
+          "endTime": "",
+          "venue": "HopYard",
+          "price": "",
+          "description": "⁉️ - HopYard: Trivia with Hank",
+          "extractionReason": "schedule_text_fallback",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "8:00 pm"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceType": "schedule",
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 10,
+          "_pipelineTotalStage3": 29,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Karaoke",
+          "type": "event",
+          "date": "2026-10-14",
+          "startTime": "20:00",
+          "endTime": "",
+          "venue": "Be You",
+          "price": "",
+          "description": "Be You: Karaoke",
+          "extractionReason": "schedule_text_fallback",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "8:00 pm"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceType": "schedule",
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 11,
+          "_pipelineTotalStage3": 29,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Open Mic with Ivan Stewart",
+          "type": "event",
+          "date": "2026-10-14",
+          "startTime": "21:00",
+          "endTime": "",
+          "venue": "Baba’s Lounge",
+          "price": "",
+          "description": "Baba’s Lounge: Open Mic with Ivan Stewart",
+          "extractionReason": "schedule_text_fallback",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "9:00 pm"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceType": "schedule",
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 12,
+          "_pipelineTotalStage3": 29,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "ANCHOR Fest Conference & Panel Discussion",
+          "type": "event",
+          "date": "2026-10-15",
+          "startTime": "09:00",
+          "endTime": "",
+          "venue": "The Arts Guild",
+          "price": "",
+          "description": "⚓️ - The Arts Guild: ANCHOR Fest Conference & Panel Discussion",
+          "extractionReason": "schedule_text_fallback",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "9:00 am"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceType": "schedule",
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 13,
+          "_pipelineTotalStage3": 29,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Historic Great George Tour",
+          "type": "event",
+          "date": "2026-10-15",
+          "startTime": "11:00",
+          "endTime": "",
+          "venue": "Confederation Centre Box Office",
+          "price": "",
+          "description": "Confederation Centre Box Office: Historic Great George Tour",
+          "extractionReason": "schedule_text_fallback",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "11:00 am"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceType": "schedule",
+          "_sourceOccurrenceCount": 4,
+          "_pipelineIndex": 14,
+          "_pipelineTotalStage3": 29,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Watercolour Workshop Lighthouse w/ Dave",
+          "type": "event",
+          "date": "2026-10-15",
+          "startTime": "13:30",
+          "endTime": "",
+          "venue": "Blank Canvas",
+          "price": "",
+          "description": "Blank Canvas: Watercolour Workshop Lighthouse w/ Dave",
+          "extractionReason": "schedule_text_fallback",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "1:30 pm"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceType": "schedule",
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 15,
+          "_pipelineTotalStage3": 29,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Historic Great George Tour",
+          "type": "event",
+          "date": "2026-10-15",
+          "startTime": "02:00",
+          "endTime": "",
+          "venue": "Confederation Centre Box Office",
+          "price": "",
+          "description": "Confederation Centre Box Office: Historic Great George Tour",
+          "extractionReason": "schedule_text_fallback",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "2:00 am"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceType": "schedule",
+          "_sourceOccurrenceCount": 4,
+          "_pipelineIndex": 16,
+          "_pipelineTotalStage3": 29,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Arts Mixer",
+          "type": "event",
+          "date": "2026-10-15",
+          "startTime": "16:00",
+          "endTime": "",
+          "venue": "Confederation Centre of the Arts",
+          "price": "",
+          "description": "️ - Confederation Centre of the Arts: Arts Mixer",
+          "extractionReason": "schedule_text_fallback",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "4:00 pm"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceType": "schedule",
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 17,
+          "_pipelineTotalStage3": 29,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Oracle Readings",
+          "type": "event",
+          "date": "2026-10-15",
+          "startTime": "18:00",
+          "endTime": "",
+          "venue": "Gahan House",
+          "price": "",
+          "description": "Gahan House: Oracle Readings",
+          "extractionReason": "schedule_text_fallback",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "6:00 pm"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceType": "schedule",
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 18,
+          "_pipelineTotalStage3": 29,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "A Long Winter",
+          "type": "event",
+          "date": "2026-10-15",
+          "startTime": "19:00",
+          "endTime": "",
+          "venue": "City Cinema",
+          "price": "",
+          "description": "City Cinema: A Long Winter",
+          "extractionReason": "schedule_text_fallback",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "7:00 pm"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceType": "schedule",
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 19,
+          "_pipelineTotalStage3": 29,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Trad Music Sessions",
+          "type": "event",
+          "date": "2026-10-15",
+          "startTime": "19:00",
+          "endTime": "",
+          "venue": "Old Triangle",
+          "price": "",
+          "description": "Old Triangle: Trad Music Sessions",
+          "extractionReason": "schedule_text_fallback",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "7:00 pm"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceType": "schedule",
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 20,
+          "_pipelineTotalStage3": 29,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Lorena McKennitt, The Mask and the Mirror 30th Anniversary Tour",
+          "type": "event",
+          "date": "2026-10-15",
+          "startTime": "19:30",
+          "endTime": "",
+          "venue": "Sobey Family Theatre",
+          "price": "",
+          "description": "Sobey Family Theatre: Lorena McKennitt, The Mask and the Mirror 30th Anniversary Tour",
+          "extractionReason": "schedule_text_fallback",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "7:30 pm"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceType": "schedule",
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 21,
+          "_pipelineTotalStage3": 29,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Burlesque",
+          "type": "event",
+          "date": "2026-10-15",
+          "startTime": "19:30",
+          "endTime": "",
+          "venue": "DownStreet Dance",
+          "price": "",
+          "description": "DownStreet Dance: Burlesque",
+          "extractionReason": "schedule_text_fallback",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "7:30 pm"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceType": "schedule",
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 22,
+          "_pipelineTotalStage3": 29,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Vintage 2.0",
+          "type": "event",
+          "date": "2026-10-15",
+          "startTime": "20:00",
+          "endTime": "",
+          "venue": "Olde Dublin Pub",
+          "price": "",
+          "description": "Olde Dublin Pub: Vintage 2.0",
+          "extractionReason": "schedule_text_fallback",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "8:00 pm"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceType": "schedule",
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 23,
+          "_pipelineTotalStage3": 29,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "ANCHOR Fest Captains of Everything + Nick Doneff",
+          "type": "event",
+          "date": "2026-10-15",
+          "startTime": "20:00",
+          "endTime": "",
+          "venue": "Trailside Music Hall",
+          "price": "",
+          "description": "⚓️ - Trailside Music Hall: ANCHOR Fest Captains of Everything + Nick Doneff",
+          "extractionReason": "schedule_text_fallback",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "8:00 pm"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceType": "schedule",
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 24,
+          "_pipelineTotalStage3": 29,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Island Jazz Sextet ft. Nadine Haddad",
+          "type": "event",
+          "date": "2026-10-15",
+          "startTime": "20:00",
+          "endTime": "",
+          "venue": "Baba’s Lounge",
+          "price": "",
+          "description": "Baba’s Lounge: Island Jazz Sextet ft. Nadine Haddad",
+          "extractionReason": "schedule_text_fallback",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "8:00 pm"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceType": "schedule",
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 25,
+          "_pipelineTotalStage3": 29,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Darcy’s Entertainment Trivia",
+          "type": "event",
+          "date": "2026-10-15",
+          "startTime": "21:00",
+          "endTime": "",
+          "venue": "Hunter’s Ale House",
+          "price": "",
+          "description": "⁉️ - Hunter’s Ale House: Darcy’s Entertainment Trivia",
+          "extractionReason": "schedule_text_fallback",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "9:00 pm"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceType": "schedule",
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 26,
+          "_pipelineTotalStage3": 29,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "ANCHOR Fest Comedy Album Trial Run with Britt Campbell",
+          "type": "event",
+          "date": "2026-10-15",
+          "startTime": "21:00",
+          "endTime": "",
+          "venue": "The Arts Guild",
+          "price": "",
+          "description": "⚓️ - The Arts Guild: ANCHOR Fest Comedy Album Trial Run with Britt Campbell",
+          "extractionReason": "schedule_text_fallback",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "9:00 pm"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceType": "schedule",
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 27,
+          "_pipelineTotalStage3": 29,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "ANCHOR Fest Jim Queen",
+          "type": "event",
+          "date": "2026-10-15",
+          "startTime": "21:00",
+          "endTime": "",
+          "venue": "Tivoli Cinema",
+          "price": "",
+          "description": "⚓️ - Tivoli Cinema: ANCHOR Fest Jim Queen",
+          "extractionReason": "schedule_text_fallback",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "9:00 pm"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceType": "schedule",
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 28,
+          "_pipelineTotalStage3": 29,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Oliver Carter",
+          "type": "event",
+          "date": "2026-10-15",
+          "startTime": "23:00",
+          "endTime": "",
+          "venue": "Hunter’s Ale House",
+          "price": "",
+          "description": "Hunter’s Ale House: Oliver Carter",
+          "extractionReason": "schedule_text_fallback",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "11:00 pm"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceType": "schedule",
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 29,
+          "_pipelineTotalStage3": 29,
+          "recurringPattern": "none"
+        }
+      ]
+    },
+    {
+      "row": 168,
+      "venue": "Carrefour ISJ",
+      "postId": "1539985468169427",
+      "caption": "(English Message Below)\n\nVoici la programmation de la 20e édition du Festival de la citrouille de Summerside qui a lieu du 15 au 31 octobre prochain.  Il y a quelque chose pour tout les groupes d'âges et pour tout les goûts !   \n\nPour vous inscrire aux activités, visitez le https://www.belle-alliance.ca/festival-de-la-citrouille\n\n*****\n\nHere's the schedule for the 20th annual Summerside Pumpkin Festival, which takes place from October 15 to 31.  There's something for everyone!\n\nTo register for the activities, visit https://www.belle-alliance.ca/festival-de-la-citrouille\n\nOCR TEXT:\nMay be an illustration of video games and text\nMay be an illustration of video games and text\nMay be an image of video games and text\nMay be an image of video games and text",
+      "timestamp": "2026-10-13T23:20:09.000Z",
+      "items": [
+        {
+          "name": "Walk through the Real [farm name unclear] Farm Corn Maze",
+          "type": "event",
+          "date": "2026-10-15",
+          "startTime": "",
+          "endTime": "",
+          "venue": "[Farm name unclear] Farm Corn Maze",
+          "price": "",
+          "description": "Listed for October 15–31. The farm name in the printed title is not clearly legible.",
+          "extractionReason": "A dated October 15 to 31 activity is printed at the top of the schedule. The exact farm name is unclear in the image.",
+          "relevantImageIndex": 1,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "[Farm name unclear] Farm Corn Maze"
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "A farm corn maze is named; no street address is legible."
+          },
+          "_sourceType": "calendar",
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 21,
+          "recurringPattern": "none",
+          "_stage4NeedsTimeEnrichment": true
+        },
+        {
+          "name": "Ghosts of Summerside Haunted Tour (title partly unclear; in French)",
+          "type": "event",
+          "date": "2026-10-15",
+          "startTime": "6:30 p.m.",
+          "endTime": "",
+          "venue": "Carrefour Belle-Alliance",
+          "price": "",
+          "description": "The description mentions a guided tour and musical entertainment. Some words in the printed event title and details are not legible enough to transcribe confidently.",
+          "extractionReason": "The October 15 cell lists a 6:30 p.m. event with a guided-tour description; the title is partly unreadable.",
+          "relevantImageIndex": 1,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Carrefour Belle-Alliance"
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The schedule gives Carrefour Belle-Alliance as the location."
+          },
+          "_sourceType": "calendar",
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 2,
+          "_pipelineTotalStage3": 21,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Murder Mystery Night (in French)",
+          "type": "event",
+          "date": "2026-10-16",
+          "startTime": "6 p.m.",
+          "endTime": "",
+          "venue": "Carrefour Belle-Alliance",
+          "price": "",
+          "description": "The poster describes a murder-mystery evening and gives registration information.",
+          "extractionReason": "A separately dated Friday, October 16 listing gives a 6 p.m. start and the event title.",
+          "relevantImageIndex": 1,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Carrefour Belle-Alliance"
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "Carrefour Belle-Alliance is printed as the location."
+          },
+          "_sourceType": "calendar",
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 3,
+          "_pipelineTotalStage3": 21,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Murder Mystery (in French)",
+          "type": "event",
+          "date": "2026-10-17",
+          "startTime": "5 p.m.",
+          "endTime": "",
+          "venue": "Credit Union Place",
+          "price": "",
+          "description": "A separate Saturday performance; the poster lists an admission charge, but the full price details are not clear enough to transcribe confidently.",
+          "extractionReason": "The October 17 cell has its own 5 p.m. listing and names Credit Union Place, distinct from the October 16 event.",
+          "relevantImageIndex": 1,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Credit Union Place"
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "Credit Union Place is explicitly named."
+          },
+          "_sourceType": "calendar",
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 4,
+          "_pipelineTotalStage3": 21,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Wood Painting Workshop (in French)",
+          "type": "event",
+          "date": "2026-10-19",
+          "startTime": "6:30 p.m.",
+          "endTime": "",
+          "venue": "Carrefour Belle-Alliance",
+          "price": "$25",
+          "description": "Workshop; the poster provides registration information.",
+          "extractionReason": "The Monday, October 19 cell lists a 6:30 p.m. workshop and a $25 cost.",
+          "relevantImageIndex": 1,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Carrefour Belle-Alliance"
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "Carrefour Belle-Alliance is printed as the location."
+          },
+          "_sourceType": "calendar",
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 5,
+          "_pipelineTotalStage3": 21,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Charcuterie Board (in French)",
+          "type": "event",
+          "date": "2026-10-20",
+          "startTime": "6:30 p.m.",
+          "endTime": "",
+          "venue": "Carrefour Belle-Alliance",
+          "price": "$25",
+          "description": "The poster describes a charcuterie-board activity and gives registration details.",
+          "extractionReason": "The Tuesday, October 20 cell lists a 6:30 p.m. Charcuterie Board activity.",
+          "relevantImageIndex": 1,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Carrefour Belle-Alliance"
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "Carrefour Belle-Alliance is printed as the location."
+          },
+          "_sourceType": "calendar",
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 6,
+          "_pipelineTotalStage3": 21,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Music at Summerside Museum",
+          "type": "event",
+          "date": "2026-10-21",
+          "startTime": "1 p.m.",
+          "endTime": "",
+          "venue": "Summerside Museum",
+          "price": "",
+          "description": "The listing includes performer names, but they are too blurred to transcribe reliably.",
+          "extractionReason": "The Wednesday, October 21 cell separately lists a 1 p.m. music session at the museum.",
+          "relevantImageIndex": 1,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Summerside Museum"
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The museum is named in the listing."
+          },
+          "_sourceType": "calendar",
+          "_sourceOccurrenceCount": 2,
+          "_pipelineIndex": 7,
+          "_pipelineTotalStage3": 21,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Music at Summerside Museum",
+          "type": "event",
+          "date": "2026-10-21",
+          "startTime": "3 p.m.",
+          "endTime": "",
+          "venue": "Summerside Museum",
+          "price": "",
+          "description": "A separately timed session in the same cell. The performer names are too blurred to transcribe reliably.",
+          "extractionReason": "The Wednesday, October 21 cell prints a second music session at 3 p.m.; it is a distinct time slot.",
+          "relevantImageIndex": 1,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Summerside Museum"
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The museum is named in the listing."
+          },
+          "_sourceType": "calendar",
+          "_sourceOccurrenceCount": 2,
+          "_pipelineIndex": 8,
+          "_pipelineTotalStage3": 21,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Essential Oils Workshop (title partly unclear; in French)",
+          "type": "event",
+          "date": "2026-10-21",
+          "startTime": "6:30 p.m.",
+          "endTime": "",
+          "venue": "Carrefour Belle-Alliance",
+          "price": "$10",
+          "description": "Workshop with registration information. The word after “Essential” in the printed title is slightly blurred.",
+          "extractionReason": "The October 21 cell contains a separately timed 6:30 p.m. workshop with a $10 cost.",
+          "relevantImageIndex": 1,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Carrefour Belle-Alliance"
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "Carrefour Belle-Alliance is printed as the location."
+          },
+          "_sourceType": "calendar",
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 9,
+          "_pipelineTotalStage3": 21,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Night at the Acadian Museum (in French)",
+          "type": "event",
+          "date": "2026-10-22",
+          "startTime": "6 p.m.",
+          "endTime": "",
+          "venue": "Acadian Museum of PEI, Miscouche",
+          "price": "",
+          "description": "The poster describes an evening at the museum. Admission details are printed but not fully legible.",
+          "extractionReason": "The Thursday, October 22 listing gives a 6 p.m. start and names the Acadian Museum.",
+          "relevantImageIndex": 1,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Acadian Museum of PEI, Miscouche"
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The museum and Miscouche are named."
+          },
+          "_sourceType": "calendar",
+          "_sourceOccurrenceCount": 2,
+          "_pipelineIndex": 10,
+          "_pipelineTotalStage3": 21,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Night at the Acadian Museum (in French)",
+          "type": "event",
+          "date": "2026-10-23",
+          "startTime": "6 p.m.",
+          "endTime": "",
+          "venue": "Acadian Museum of PEI, Miscouche",
+          "price": "",
+          "description": "The same advertised museum event is also listed for Friday, October 23. Admission details are printed but not fully legible.",
+          "extractionReason": "The poster explicitly gives Thursday and Friday, October 22 and 23, as separate dates for the event.",
+          "relevantImageIndex": 1,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Acadian Museum of PEI, Miscouche"
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The museum and Miscouche are named."
+          },
+          "_sourceType": "calendar",
+          "_sourceOccurrenceCount": 2,
+          "_pipelineIndex": 11,
+          "_pipelineTotalStage3": 21,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Bal de la Citrouille (title partly unclear; in French)",
+          "type": "event",
+          "date": "2026-10-24",
+          "startTime": "6:30 p.m.",
+          "endTime": "",
+          "venue": "Carrefour Belle-Alliance",
+          "price": "",
+          "description": "The description advertises a live performance featuring an Acadian band; the band name is not legible enough to reproduce reliably.",
+          "extractionReason": "The Saturday, October 24 cell lists a 6:30 p.m. performance. The event title is somewhat blurred.",
+          "relevantImageIndex": 1,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Carrefour Belle-Alliance"
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "Carrefour Belle-Alliance is printed as the location."
+          },
+          "_sourceType": "calendar",
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 12,
+          "_pipelineTotalStage3": 21,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Pumpkin Carving and Decorating",
+          "type": "event",
+          "date": "2026-10-26",
+          "startTime": "",
+          "endTime": "",
+          "venue": "Carrefour Belle-Alliance",
+          "price": "",
+          "description": "An activity for children and their families. No start time is clearly printed with this listing.",
+          "extractionReason": "The Monday, October 26 cell contains a pumpkin-carving activity in addition to a separately timed stained-glass workshop.",
+          "relevantImageIndex": 1,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Carrefour Belle-Alliance"
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "Carrefour Belle-Alliance is printed as the location."
+          },
+          "_sourceType": "calendar",
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 13,
+          "_pipelineTotalStage3": 21,
+          "recurringPattern": "none",
+          "_stage4NeedsTimeEnrichment": true
+        },
+        {
+          "name": "Stained Glass Workshop (in French)",
+          "type": "event",
+          "date": "2026-10-26",
+          "startTime": "6:30 p.m.",
+          "endTime": "",
+          "venue": "Carrefour Belle-Alliance",
+          "price": "$30",
+          "description": "The poster says payment is required to reserve a spot and gives registration information.",
+          "extractionReason": "A 6:30 p.m. stained-glass workshop with a $30 cost is separately listed in the October 26 cell.",
+          "relevantImageIndex": 1,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Carrefour Belle-Alliance"
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "Carrefour Belle-Alliance is printed as the location."
+          },
+          "_sourceType": "calendar",
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 14,
+          "_pipelineTotalStage3": 21,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Cooking Workshop & Tasting with Chef Robert (in French)",
+          "type": "event",
+          "date": "2026-10-27",
+          "startTime": "6:30 p.m.",
+          "endTime": "",
+          "venue": "Carrefour Belle-Alliance",
+          "price": "$15 per person",
+          "description": "The chef's surname, if included in the printed text, is not clear enough to transcribe.",
+          "extractionReason": "The Tuesday, October 27 cell lists a 6:30 p.m. cooking workshop and tasting, with a $15-per-person price.",
+          "relevantImageIndex": 1,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Carrefour Belle-Alliance"
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "Carrefour Belle-Alliance is printed as the location."
+          },
+          "_sourceType": "calendar",
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 15,
+          "_pipelineTotalStage3": 21,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Little Pumpkin [activity title unclear] (in French)",
+          "type": "event",
+          "date": "2026-10-28",
+          "startTime": "5 p.m.",
+          "endTime": "",
+          "venue": "Carrefour Belle-Alliance",
+          "price": "",
+          "description": "The remaining words in the activity title and some details are too blurred to transcribe confidently.",
+          "extractionReason": "The Wednesday, October 28 cell lists a 5 p.m. activity; the title is only partly legible.",
+          "relevantImageIndex": 1,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Carrefour Belle-Alliance"
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "Carrefour Belle-Alliance is printed as the location."
+          },
+          "_sourceType": "calendar",
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 16,
+          "_pipelineTotalStage3": 21,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Stained Glass Workshop (Part II; in French)",
+          "type": "event",
+          "date": "2026-10-29",
+          "startTime": "6:30 p.m.",
+          "endTime": "",
+          "venue": "Carrefour Belle-Alliance",
+          "price": "$30",
+          "description": "The poster identifies this as Part II and provides registration information.",
+          "extractionReason": "The Thursday, October 29 cell explicitly lists Part II of a stained-glass workshop at 6:30 p.m.",
+          "relevantImageIndex": 1,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Carrefour Belle-Alliance"
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "Carrefour Belle-Alliance is printed as the location."
+          },
+          "_sourceType": "calendar",
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 17,
+          "_pipelineTotalStage3": 21,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Halloween Costume Parade",
+          "type": "event",
+          "date": "2026-10-30",
+          "startTime": "",
+          "endTime": "",
+          "venue": "",
+          "price": "",
+          "description": "The poster invites children and adults to take part. No time or venue for this listing is clearly visible.",
+          "extractionReason": "A separately named Halloween Costume Parade appears under Friday, October 30.",
+          "relevantImageIndex": 1,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "No location is legible for this listing."
+          },
+          "_sourceType": "calendar",
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 18,
+          "_pipelineTotalStage3": 21,
+          "recurringPattern": "none",
+          "_stage4NeedsTimeEnrichment": true
+        },
+        {
+          "name": "Anniversary Gala",
+          "type": "event",
+          "date": "2026-10-30",
+          "startTime": "6:30 p.m.",
+          "endTime": "",
+          "venue": "Carrefour Belle-Alliance",
+          "price": "$50 per person",
+          "description": "A celebration of the festival's 20th anniversary. The poster includes additional gala details.",
+          "extractionReason": "A separate dark-background listing beneath the October 30 heading advertises the Anniversary Gala at 6:30 p.m.",
+          "relevantImageIndex": 1,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Carrefour Belle-Alliance"
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "Carrefour Belle-Alliance is printed as the location."
+          },
+          "_sourceType": "calendar",
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 19,
+          "_pipelineTotalStage3": 21,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Breakfast - [rest of title unclear] (in French)",
+          "type": "event",
+          "date": "2026-10-31",
+          "startTime": "10 a.m.",
+          "endTime": "",
+          "venue": "Summerside Library",
+          "price": "",
+          "description": "The breakfast title after the word “Breakfast” is too blurred to transcribe reliably.",
+          "extractionReason": "The Saturday, October 31 cell lists a 10 a.m. breakfast and names Summerside Library.",
+          "relevantImageIndex": 1,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Summerside Library"
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "Summerside Library is named as the location."
+          },
+          "_sourceType": "calendar",
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 20,
+          "_pipelineTotalStage3": 21,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Halloween on Water Street",
+          "type": "event",
+          "date": "2026-10-31",
+          "startTime": "12 p.m.",
+          "endTime": "4 p.m.",
+          "venue": "Water Street, Summerside",
+          "price": "",
+          "description": "The poster advertises a Halloween event on Water Street with activities and local businesses.",
+          "extractionReason": "The October 31 cell gives a 12–4 p.m. time range and names Halloween on Water Street.",
+          "relevantImageIndex": 1,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Water Street, Summerside"
+            ],
+            "confirmedStreets": [
+              "Water Street"
+            ],
+            "ordered": false,
+            "evidenceNotes": "Water Street is explicitly named; no ordered route is shown."
+          },
+          "_sourceType": "calendar",
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 21,
+          "_pipelineTotalStage3": 21,
+          "recurringPattern": "none"
+        }
+      ]
+    },
+    {
+      "row": 185,
+      "venue": "Tipsy Farmers",
+      "postId": "1138481235375575",
+      "caption": "Wednesday\nOpen till 8pm\n\nOutlet Restocks;\n> Elliott's General Store\n> Campbell's Towing & Service Station\n> Rice's Service Station Ltd.\n\nGrab n Go Fresh Fridge;\n> Pasta + Meat Sauce $12\n> Bacon Mac ‘n Cheese $15\n> Classic Mac ‘n Cheese $11\n> Jumbo Lasagna Slice $18\n> Roast Sweet Potato Soup $11\n> Butternut Squash + Maple Soup $11\n> Carrot + Ginger Soup $11\n\nRestocking;\n> Nutella Gelato\n> Maple Walnut Ice Cream\n\nSoup of the Day $12\nHomemade French Onion + Garlic Bread\n\nAll Day Feature\n> Sweet + Sour Meatballs w Chunks of Pineapple over Steamed Rice $17\n> Festive Flatbread - Larkin’s Roast Turkey, Stuffing, Brie + Parmesan w Cranberry Salsa Base $15\n\n*****\n\n120 Main Street, Souris\n 902.743.2003\n\nOCR TEXT:\nMay be an image of ossobuco\nMay be an image of fondue\nMay be an image of food and text",
+      "timestamp": "2026-10-14T12:32:40.000Z",
+      "items": [
+        {
+          "name": "Soup of the Day",
+          "description": "Soup of the Day: Homemade French Onion with Garlic Bread — $12.",
+          "date": "2026-10-14",
+          "startTime": "",
+          "endTime": "",
+          "venue": "Tipsy Farmers",
+          "pricing": "$12",
+          "price": "$12",
+          "timeFlags": {
+            "start": {
+              "source": "none",
+              "evidence": ""
+            },
+            "end": {
+              "toClose": false
+            }
+          },
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "“Soup of the Day $12” identifies a named daily special and gives its price.",
+          "_sourceType": "special",
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 3,
+          "_stage4NeedsTimeEnrichment": true
+        },
+        {
+          "name": "Sweet + Sour Meatballs",
+          "description": "All Day Feature: Sweet + Sour Meatballs with chunks of pineapple over steamed rice — $17.",
+          "date": "2026-10-14",
+          "startTime": "",
+          "endTime": "",
+          "venue": "Tipsy Farmers",
+          "pricing": "$17",
+          "price": "$17",
+          "timeFlags": {
+            "start": {
+              "source": "semantic",
+              "evidence": "All Day"
+            },
+            "end": {
+              "toClose": true
+            }
+          },
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "“All Day Feature” identifies this as a food special, and the listing gives its price: “Sweet + Sour Meatballs w Chunks of Pineapple over Steamed Rice $17”.",
+          "_sourceType": "special",
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 2,
+          "_pipelineTotalStage3": 3,
+          "_stage4NeedsTimeEnrichment": true
+        },
+        {
+          "name": "Festive Flatbread",
+          "description": "All Day Feature: Festive Flatbread with Larkin’s Roast Turkey, stuffing, Brie and Parmesan, with cranberry salsa base — $15.",
+          "date": "2026-10-14",
+          "startTime": "",
+          "endTime": "",
+          "venue": "Tipsy Farmers",
+          "pricing": "$15",
+          "price": "$15",
+          "timeFlags": {
+            "start": {
+              "source": "semantic",
+              "evidence": "All Day"
+            },
+            "end": {
+              "toClose": true
+            }
+          },
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "“All Day Feature” identifies this as a food special, and the listing gives its price: “Festive Flatbread - Larkin’s Roast Turkey, Stuffing, Brie + Parmesan w Cranberry Salsa Base $15”.",
+          "_sourceType": "special",
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 3,
+          "_pipelineTotalStage3": 3,
+          "_stage4NeedsTimeEnrichment": true
+        }
+      ]
+    },
+    {
+      "row": 187,
+      "venue": "Tipsy Farmers",
+      "postId": "1137634678793564",
+      "caption": "Tuesday\nOpen till 8pm\n\nSoup of the Day\nHomemade French Onion w Garlic Bread $12\n\nAll Day Feature - Festive Flatbread \nCranberry Salsa Base, Larkin’s Turkey, Herb + Cranberry Stuffing, Brie + Parmesan $15\n\nPizza Night\nStarts at 4pm\n\n• Classic Pepperoni $18\n• Hawaiian BBQ Chicken - Chunks of BBQ Chicken, Ham, Pineapple, Jalapeños + Nacho Cheese $22\n• Works - Pepperoni, Bacon, Ground Beef, Peppers, Red Onions + Mozza $24\n• Italian Stallion - Assorted Cured Italian Meats w Mozza + Parm $20\n\nPizzas are hand stretch to 12” and cut into 8 slices\n\nDeals\n\n• Any Pizza + Not Your Mama’s Garlic Fingers + 2 Pops $35 add a Pizza + $15\n\n• Any Pizza + Not Your Mama’s Garlic Fingers + 1lb Wings + 2 Pops $45 add a Pizza + $15\n\n*****\n\n120 Main Street, Souris\n 902.743.2003\n\nOCR TEXT:\nMay be an image of pizza",
+      "timestamp": "2026-10-13T14:44:32.000Z",
+      "items": [
+        {
+          "name": "Soup of the Day",
+          "description": "Tuesday — Homemade French Onion soup with garlic bread, $12.",
+          "date": "2026-10-13",
+          "startTime": "",
+          "endTime": "",
+          "venue": "Tipsy Farmers",
+          "pricing": "$12",
+          "price": "$12",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "“Soup of the Day” is a named special, priced at “$12.”",
+          "timeFlags": {
+            "start": {
+              "source": "none",
+              "evidence": ""
+            },
+            "end": {
+              "toClose": false
+            }
+          },
+          "_sourceType": "special",
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 8,
+          "_stage4NeedsTimeEnrichment": true
+        },
+        {
+          "name": "Festive Flatbread",
+          "description": "Tuesday — All Day Feature: cranberry salsa base, Larkin’s turkey, herb + cranberry stuffing, Brie + Parmesan, $15.",
+          "date": "2026-10-13",
+          "startTime": "",
+          "endTime": "",
+          "venue": "Tipsy Farmers",
+          "pricing": "$15",
+          "price": "$15",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "“All Day Feature - Festive Flatbread” is an explicitly advertised feature, priced at “$15.”",
+          "timeFlags": {
+            "start": {
+              "source": "semantic",
+              "evidence": "All Day"
+            },
+            "end": {
+              "toClose": true
+            }
+          },
+          "_sourceType": "special",
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 2,
+          "_pipelineTotalStage3": 8,
+          "_stage4NeedsTimeEnrichment": true
+        },
+        {
+          "name": "Classic Pepperoni",
+          "description": "Tuesday — Pizza Night: Classic Pepperoni, $18. Pizzas are hand stretch to 12” and cut into 8 slices.",
+          "date": "2026-10-13",
+          "startTime": "16:00",
+          "endTime": "",
+          "venue": "Tipsy Farmers",
+          "pricing": "$18",
+          "price": "$18",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "Listed under “Pizza Night” with a price of “$18”; the block says “Starts at 4pm.”",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "4pm"
+            },
+            "end": {
+              "toClose": false
+            }
+          },
+          "_sourceType": "special",
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 3,
+          "_pipelineTotalStage3": 8
+        },
+        {
+          "name": "Hawaiian BBQ Chicken",
+          "description": "Tuesday — Pizza Night: Hawaiian BBQ Chicken with chunks of BBQ chicken, ham, pineapple, jalapeños + nacho cheese, $22. Pizzas are hand stretch to 12” and cut into 8 slices.",
+          "date": "2026-10-13",
+          "startTime": "16:00",
+          "endTime": "",
+          "venue": "Tipsy Farmers",
+          "pricing": "$22",
+          "price": "$22",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "Listed under “Pizza Night” with a price of “$22”; the block says “Starts at 4pm.”",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "4pm"
+            },
+            "end": {
+              "toClose": false
+            }
+          },
+          "_sourceType": "special",
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 4,
+          "_pipelineTotalStage3": 8
+        },
+        {
+          "name": "Works",
+          "description": "Tuesday — Pizza Night: Works with pepperoni, bacon, ground beef, peppers, red onions + mozza, $24. Pizzas are hand stretch to 12” and cut into 8 slices.",
+          "date": "2026-10-13",
+          "startTime": "16:00",
+          "endTime": "",
+          "venue": "Tipsy Farmers",
+          "pricing": "$24",
+          "price": "$24",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "Listed under “Pizza Night” with a price of “$24”; the block says “Starts at 4pm.”",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "4pm"
+            },
+            "end": {
+              "toClose": false
+            }
+          },
+          "_sourceType": "special",
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 5,
+          "_pipelineTotalStage3": 8
+        },
+        {
+          "name": "Italian Stallion",
+          "description": "Tuesday — Pizza Night: Italian Stallion with assorted cured Italian meats, mozza + Parm, $20. Pizzas are hand stretch to 12” and cut into 8 slices.",
+          "date": "2026-10-13",
+          "startTime": "16:00",
+          "endTime": "",
+          "venue": "Tipsy Farmers",
+          "pricing": "$20",
+          "price": "$20",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "Listed under “Pizza Night” with a price of “$20”; the block says “Starts at 4pm.”",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "4pm"
+            },
+            "end": {
+              "toClose": false
+            }
+          },
+          "_sourceType": "special",
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 6,
+          "_pipelineTotalStage3": 8
+        },
+        {
+          "name": "Pizza + Garlic Fingers + 2 Pops Deal",
+          "description": "Tuesday — Deal: Any pizza + Not Your Mama’s Garlic Fingers + 2 pops for $35; add a pizza for +$15.",
+          "date": "2026-10-13",
+          "startTime": "",
+          "endTime": "",
+          "venue": "Tipsy Farmers",
+          "pricing": "$35; add a pizza +$15",
+          "price": "$35",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "The post explicitly labels this a “Deal” and advertises “Any Pizza + Not Your Mama’s Garlic Fingers + 2 Pops $35 add a Pizza + $15.”",
+          "timeFlags": {
+            "start": {
+              "source": "none",
+              "evidence": ""
+            },
+            "end": {
+              "toClose": false
+            }
+          },
+          "_sourceType": "special",
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 7,
+          "_pipelineTotalStage3": 8,
+          "_stage4NeedsTimeEnrichment": true
+        },
+        {
+          "name": "Pizza + Garlic Fingers + Wings + 2 Pops Deal",
+          "description": "Tuesday — Deal: Any pizza + Not Your Mama’s Garlic Fingers + 1lb wings + 2 pops for $45; add a pizza for +$15.",
+          "date": "2026-10-13",
+          "startTime": "",
+          "endTime": "",
+          "venue": "Tipsy Farmers",
+          "pricing": "$45; add a pizza +$15",
+          "price": "$45",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "The post explicitly labels this a “Deal” and advertises “Any Pizza + Not Your Mama’s Garlic Fingers + 1lb Wings + 2 Pops $45 add a Pizza + $15.”",
+          "timeFlags": {
+            "start": {
+              "source": "none",
+              "evidence": ""
+            },
+            "end": {
+              "toClose": false
+            }
+          },
+          "_sourceType": "special",
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 8,
+          "_pipelineTotalStage3": 8,
+          "_stage4NeedsTimeEnrichment": true
+        }
+      ]
+    },
+    {
+      "row": 219,
+      "venue": "Confederation Centre of the Arts",
+      "postId": "1511614257670611",
+      "caption": "Raine Maida and Chantal Kreviazuk are bringing their I'M GOING TO BREAK YOUR HEART tour to the Sobey Family Theatre! \n\n➡️ https://confederationcentre.com/event/raine-and-chantal/\n November 4, 8 p.m.\n\nWith a combined 30 nominations, 8 Juno awards and a Grammy, Raine Maida (Our Lady Peace) and Chantal Kreviazuk have spent three decades shaping the sound of contemporary music both separately and together. Their partnership extends well past music. They have received multiple humanitarian awards for their work with Warchild and Mental Health and are Order of Canada recipients.\n\nAs one of Canada’s most influential couples, Maida and Kreviazuk are stepping into a bold new chapter which includes a forthcoming double memoir due out August 5th, a new album together and an exciting fall tour. Their show defies usual concert experiences. Extraordinary musical performances alongside unscripted moments between songs that only a couple who have truly lived and created together could offer. It’s a night that moves you, surprises you and stays with you long after the lights come up.",
+      "timestamp": "2026-10-13T21:00:32.000Z",
+      "items": [
+        {
+          "name": "Raine Maida and Chantal Kreviazuk — I'M GOING TO BREAK YOUR HEART",
+          "description": "Raine Maida (Our Lady Peace) and Chantal Kreviazuk bring their I'M GOING TO BREAK YOUR HEART tour to the Sobey Family Theatre. With a combined 30 nominations, 8 Juno awards and a Grammy, they have spent three decades shaping contemporary music separately and together. Their partnership extends beyond music, including humanitarian work with Warchild and Mental Health, multiple humanitarian awards, and Order of Canada honours. Their show combines musical performances with unscripted moments between songs.",
+          "date": "2026-11-04",
+          "startTime": "20:00",
+          "endTime": "",
+          "venue": "Sobey Family Theatre",
+          "ticketLink": "https://confederationcentre.com/event/raine-and-chantal/",
+          "price": "",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "A dated live music tour performance is explicitly advertised for November 4 at 8 p.m.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "8 p.m."
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              {
+                "label": "Sobey Family Theatre",
+                "address": "",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "bringing their I'M GOING TO BREAK YOUR HEART tour to the Sobey Family Theatre"
+              }
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The source explicitly names the Sobey Family Theatre; no street address is provided."
+          },
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 1
+        }
+      ]
+    },
+    {
+      "row": 262,
+      "venue": "ANNE of Green Gables Chocolates",
+      "postId": "1914264066517111",
+      "caption": "",
+      "timestamp": "2026-10-13T14:55:33.000Z",
+      "items": [
+        {
+          "name": "Barktoberfest",
+          "description": "SUNDAY, October 25, 12 - 2pm. A FUN-draiser for PEI Humane Society and Gibson's Legacy. 15 Milky Way, Charlottetown.",
+          "date": "2026-10-25",
+          "startTime": "12:00",
+          "endTime": "14:00",
+          "venue": "",
+          "ticketLink": "",
+          "price": "",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "An advertised public fundraiser and entertainment activity with a printed date, time, and location.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "12 - 2pm"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "12 - 2pm"
+            }
+          },
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              {
+                "label": "15 Milky Way, Charlottetown",
+                "address": "15 Milky Way, Charlottetown",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "15 Milky Way, Charlottetown"
+              }
+            ],
+            "confirmedStreets": [
+              "Milky Way"
+            ],
+            "ordered": false,
+            "evidenceNotes": "The poster lists one event location: 15 Milky Way, Charlottetown."
+          },
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 1
+        }
+      ]
+    },
+    {
+      "row": 268,
+      "venue": "APM Centre",
+      "postId": "1744646754332812",
+      "caption": "*Male U9 - U18* Rec Conditioning Session sign up.\nBe sure to review noted dates as there has been some adjustments to the schedule.\n\nFee is $20 per player per session.\n\nMust be signed up to attend for us to allow for numbers.\n\n",
+      "timestamp": "2026-10-13T13:27:54.000Z",
+      "items": [
+        {
+          "name": "Male U9 A/Rec Conditioning Session",
+          "day": "Friday",
+          "date": "2026-10-16",
+          "recurringPattern": "none",
+          "startTime": "09:20",
+          "endTime": "",
+          "venue": "",
+          "price": "$20 per player per session",
+          "description": "Sign-up required to attend. U9 sign-up deadline: October 8th.",
+          "extractionReason": "A dated session with a visible time is listed under U9 in the conditioning schedule.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "October 16th- 9:20"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_sourceOccurrenceCount": 2,
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 6
+        },
+        {
+          "name": "Male U9 A/Rec Conditioning Session",
+          "day": "Friday",
+          "date": "2026-10-23",
+          "recurringPattern": "none",
+          "startTime": "09:00",
+          "endTime": "",
+          "venue": "",
+          "price": "$20 per player per session",
+          "description": "Sign-up required to attend. U9 sign-up deadline: October 8th.",
+          "extractionReason": "A dated session with a visible time is listed under U9 in the conditioning schedule.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "October 23th- 9:00"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_sourceOccurrenceCount": 2,
+          "_pipelineIndex": 2,
+          "_pipelineTotalStage3": 6
+        },
+        {
+          "name": "Male U11 A/Rec Conditioning Session",
+          "day": "Saturday",
+          "date": "2026-10-17",
+          "recurringPattern": "none",
+          "startTime": "11:40",
+          "endTime": "",
+          "venue": "",
+          "price": "$20 per player per session",
+          "description": "Sign-up required to attend. U11 sign-up deadline: October 9th.",
+          "extractionReason": "A dated session with a visible time is listed under U11 in the conditioning schedule.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "October 17th- 11:40"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_sourceOccurrenceCount": 2,
+          "_pipelineIndex": 3,
+          "_pipelineTotalStage3": 6
+        },
+        {
+          "name": "Male U11 A/Rec Conditioning Session",
+          "day": "Saturday",
+          "date": "2026-10-24",
+          "recurringPattern": "none",
+          "startTime": "04:00",
+          "endTime": "",
+          "venue": "",
+          "price": "$20 per player per session",
+          "description": "Sign-up required to attend. U11 sign-up deadline: October 9th.",
+          "extractionReason": "A dated session with a visible time is listed under U11 in the conditioning schedule.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "October 24th- 4:00"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_sourceOccurrenceCount": 2,
+          "_pipelineIndex": 4,
+          "_pipelineTotalStage3": 6
+        },
+        {
+          "name": "Male U13 A/Rec Conditioning Session",
+          "day": "Friday",
+          "date": "2026-10-16",
+          "recurringPattern": "none",
+          "startTime": "05:40",
+          "endTime": "",
+          "venue": "",
+          "price": "$20 per player per session",
+          "description": "Sign-up required to attend. U13 sign-up deadline: October 8th.",
+          "extractionReason": "A dated session with a visible time is listed under U13 in the conditioning schedule.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "October 16th- 5:40"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_sourceOccurrenceCount": 2,
+          "_pipelineIndex": 5,
+          "_pipelineTotalStage3": 6
+        },
+        {
+          "name": "Male U13 A/Rec Conditioning Session",
+          "day": "Friday",
+          "date": "2026-10-23",
+          "recurringPattern": "none",
+          "startTime": "05:10",
+          "endTime": "",
+          "venue": "",
+          "price": "$20 per player per session",
+          "description": "Sign-up required to attend. U13 sign-up deadline: October 8th.",
+          "extractionReason": "A dated session with a visible time is listed under U13 in the conditioning schedule.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "October 23th- 5:10"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_sourceOccurrenceCount": 2,
+          "_pipelineIndex": 6,
+          "_pipelineTotalStage3": 6
+        }
+      ]
+    },
+    {
+      "row": 274,
+      "venue": "Harmony House PEI",
+      "postId": "1738309221631333",
+      "caption": "More great music in The Lounge this fall!\n\nJazz…..ish Wednesdays in November with \nCarlie Howell!\n\nEach week the multi-talented Carlie Howell and a surprise guest or two will offer up an eclectic night of jazz and whatever else comes out of their creativity and improv  \n\nChallenge! Each week, the first person to come up to the mic and clearly say “Jazz-ish” 4x fast, gets a $25 Harmony House gift card! \n\nOur delish pub menu will be back with HH burger, nachos, tacos, etc. and of course our signature braised beef dish \n\n….Or just get a drink or dessert and enjoy the music! \n\nPay what you can at the door to support our great artists!\n\nTo reserve a table call 902-964-2255 or email \nreservations@harmonyhousepei.com\n\nOCR TEXT:\nMay be an image of musical instrument and text",
+      "timestamp": "2026-10-13T22:10:33.000Z",
+      "items": [
+        {
+          "name": "Jazz-ish with Carlie Howell & Friends",
+          "day": "Wednesday",
+          "date": "2026-11-04",
+          "recurringPattern": "none",
+          "startTime": "19:00",
+          "endTime": "",
+          "venue": "The Lounge, Harmony House PEI",
+          "price": "Pay what you can at the door",
+          "description": "Carlie Howell and surprise guests offer an eclectic night of jazz, improvisation, and whatever else comes out of their creativity. The first person to clearly say “Jazz-ish” four times fast at the mic wins a $25 Harmony House gift card. Pub menu available.",
+          "extractionReason": "The poster lists Wednesdays, November 4–25, at 7:00 PM; this is the first Wednesday performance in that dated series.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "7:00 PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_sourceOccurrenceCount": 4,
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 4
+        },
+        {
+          "name": "Jazz-ish with Carlie Howell & Friends",
+          "day": "Wednesday",
+          "date": "2026-11-11",
+          "recurringPattern": "none",
+          "startTime": "19:00",
+          "endTime": "",
+          "venue": "The Lounge, Harmony House PEI",
+          "price": "Pay what you can at the door",
+          "description": "Carlie Howell and surprise guests offer an eclectic night of jazz, improvisation, and whatever else comes out of their creativity. The first person to clearly say “Jazz-ish” four times fast at the mic wins a $25 Harmony House gift card. Pub menu available.",
+          "extractionReason": "The poster lists Wednesdays, November 4–25, at 7:00 PM; this is a Wednesday performance in that dated series.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "7:00 PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_sourceOccurrenceCount": 4,
+          "_pipelineIndex": 2,
+          "_pipelineTotalStage3": 4
+        },
+        {
+          "name": "Jazz-ish with Carlie Howell & Friends",
+          "day": "Wednesday",
+          "date": "2026-11-18",
+          "recurringPattern": "none",
+          "startTime": "19:00",
+          "endTime": "",
+          "venue": "The Lounge, Harmony House PEI",
+          "price": "Pay what you can at the door",
+          "description": "Carlie Howell and surprise guests offer an eclectic night of jazz, improvisation, and whatever else comes out of their creativity. The first person to clearly say “Jazz-ish” four times fast at the mic wins a $25 Harmony House gift card. Pub menu available.",
+          "extractionReason": "The poster lists Wednesdays, November 4–25, at 7:00 PM; this is a Wednesday performance in that dated series.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "7:00 PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_sourceOccurrenceCount": 4,
+          "_pipelineIndex": 3,
+          "_pipelineTotalStage3": 4
+        },
+        {
+          "name": "Jazz-ish with Carlie Howell & Friends",
+          "day": "Wednesday",
+          "date": "2026-11-25",
+          "recurringPattern": "none",
+          "startTime": "19:00",
+          "endTime": "",
+          "venue": "The Lounge, Harmony House PEI",
+          "price": "Pay what you can at the door",
+          "description": "Carlie Howell and surprise guests offer an eclectic night of jazz, improvisation, and whatever else comes out of their creativity. The first person to clearly say “Jazz-ish” four times fast at the mic wins a $25 Harmony House gift card. Pub menu available.",
+          "extractionReason": "The poster lists Wednesdays, November 4–25, at 7:00 PM; this is the final Wednesday performance in that dated series.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "7:00 PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_sourceOccurrenceCount": 4,
+          "_pipelineIndex": 4,
+          "_pipelineTotalStage3": 4
+        }
+      ]
+    },
+    {
+      "row": 325,
+      "venue": "PEERS Alliance",
+      "postId": "1535288085304229",
+      "caption": "Parents & Caregivers of Gender-Creative Youth in Summerside! \n\nJoin us for \"Roots & Shoots Summerside,\" a FREE peer-support program designed for parents and caregivers of trans and gender-creative children and youth! Connect with others, share experiences, and find support in a welcoming environment.\n\n️ Date: Tuesday, Oct 21st, 2026 \n⏰ Time: 6:00 PM - 8:00 PM \n Location: 57 Central St\n Pizza and childcare are provided! \n\nWe can't wait to see you there.\n\nFor more information, visit peersalliance.ca\n\nOCR TEXT:\nMay be an image of text",
+      "timestamp": "2026-10-13T13:00:12.000Z",
+      "items": [
+        {
+          "name": "Roots & Shoots Summerside",
+          "description": "Free peer-support program for parents and caregivers of trans and gender-creative children and youth. Hybrid session; pizza and childcare are provided for in-person attendees. Sign up at peersalliance.ca. The poster lists Tuesday, Oct 20th, 2026; the accompanying caption instead says Tuesday, Oct 21st, 2026.",
+          "date": "2026-10-20",
+          "startTime": "18:00",
+          "endTime": "20:00",
+          "venue": "Summerside Rotary Library",
+          "ticketLink": "peersalliance.ca",
+          "price": "Free",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "A dated, timed peer-support program is an advertised activity. The poster's explicit date, Tuesday, Oct 20th, matches the 2026 calendar; the caption gives a conflicting date of Oct 21st.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "6:00 PM"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "8:00 PM"
+            }
+          },
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              {
+                "label": "Summerside Rotary Library",
+                "address": "57 Central St",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "SUMMERSIDE ROTARY LIBRARY; 57 Central St"
+              }
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The poster names Summerside Rotary Library; the caption gives the address 57 Central St. The event is described as hybrid, but no online location is provided."
+          },
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 1
+        }
+      ]
+    },
+    {
+      "row": 326,
+      "venue": "PEERS Alliance",
+      "postId": "1535287965304241",
+      "caption": "Tonight we're working on a collaborative piece for Red Ribbon Path and watching a documentary about AIDS on PEI.\n\nOCR TEXT:\nMay be an image of text",
+      "timestamp": "2026-10-13T13:00:06.000Z",
+      "items": [
+        {
+          "name": "Red Ribbon Path Collective Artwork",
+          "description": "Rainbow Youth Club, Charlottetown. All youth ages 12–18 welcome. Work on a collaborative piece for Red Ribbon Path and watch a documentary about AIDS on PEI.",
+          "date": "2026-10-13",
+          "startTime": "18:00",
+          "endTime": "20:00",
+          "venue": "250b Queen Street, Charlottetown",
+          "ticketLink": "",
+          "price": "",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "The poster advertises a dated collaborative artwork activity, and the caption adds a documentary viewing as part of the evening.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "6 - 8 PM"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "6 - 8 PM"
+            }
+          },
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              {
+                "label": "250b Queen Street, Charlottetown",
+                "address": "250b Queen Street, Charlottetown",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "250b Queen Street, Charlottetown"
+              }
+            ],
+            "confirmedStreets": [
+              "Queen Street"
+            ],
+            "ordered": false,
+            "evidenceNotes": "The poster explicitly gives the event address."
+          },
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 1
+        }
+      ]
+    }
+  ]
+}

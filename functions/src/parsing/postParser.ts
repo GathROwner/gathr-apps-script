@@ -46,6 +46,7 @@ import type { Stage2ScoreRoutingDecision } from './stage2Routing.js';
 export { resolveStage2ScoreRouting };
 import { classifyContent } from './contentClassifier.js';
 import { extractContentByType, extractOcrDebugText } from './eventExtractor.js';
+import { sharedScheduleSource, printedScheduleAnchors, checkPrintedScheduleItem } from './printedScheduleGuard.js';
 import { enrichEventsFromTicketLinks } from './ticketLinkEnricher.js';
 import { enrichEventsFromCalendarLinks } from './calendarLinkEnricher.js';
 import { enrichEventsFromVenueWebsite } from './websiteDetailEnricher.js';
@@ -1760,6 +1761,7 @@ async function parsePostDataCore(
       });
     }
 
+    const printedScheduleReads = new Map<number, Awaited<ReturnType<typeof extractOcrDebugText>>>();
     const runStage3Pipeline = async (
       stage3Model: string,
       attempt: 'primary' | 'fallback'
@@ -1804,6 +1806,42 @@ async function parsePostDataCore(
         model: stage3Model,
         attempt,
       });
+
+      // Small external shared thumbnails can contain old printed dates even
+      // when the caption is current. Read the embedded original independently;
+      // never let a model's invented future date become its own validation.
+      if (isCalendarOrSchedule && stage3Items.length >= 2) {
+        for (const [frameIndex, sourceUrl] of allImageUrls.entries()) {
+          const original = sharedScheduleSource(sourceUrl);
+          if (!original) continue;
+          let reading = printedScheduleReads.get(frameIndex);
+          if (!reading) {
+            reading = printedScheduleReads.size < 2
+              ? await extractOcrDebugText([original], stage3Cfg)
+              : {text:'',model:stage3Model,error:'printed_schedule_verification_budget_exceeded'};
+            printedScheduleReads.set(frameIndex, reading);
+          }
+          const year = DateTime.fromISO(timestamp, {zone:cfg.timezone}).year;
+          const anchors = printedScheduleAnchors(reading.text, year);
+          const held = stage3Items.filter(item => {
+            const index = Number(item.relevantImageIndex);
+            const itemSource = lunaAnalysisFrames?.[index]?.sourceUrl || allImageUrls[index];
+            return itemSource === sourceUrl && (reading!.error || checkPrintedScheduleItem(item, anchors));
+          });
+          if (held.length) {
+            sourceDateHoldEncountered = true;
+            stage3Items = stage3Items.filter(item => !held.includes(item));
+            await emitStageArtifacts(cfg,{source:'live',stage3HeldItems:deepCloneJson(held)});
+            logger.warn('Independent printed schedule source check held items', {
+              postId,frameIndex,heldCount:held.length,anchorCount:anchors.length,
+              issues:held.map(item=>({name:item.name,date:item.date,
+                reason:reading!.error || checkPrintedScheduleItem(item,anchors)})),
+            });
+            await reportSkipReason({stage:'stage3',reason:'Printed schedule dates or clocks require source review',
+              detail:held.map(item=>`${item.name}: ${checkPrintedScheduleItem(item,anchors)}`).join('; ')});
+          }
+        }
+      }
 
       logger.info('=== STAGE 3.7: TICKET LINK ENRICHMENT ===');
       const stage37Start = Date.now();
@@ -3461,6 +3499,8 @@ export function enforceDateTimeCompleteness(
       }
     }
 
+    applyPrintedSpecialClosingLimit(ev,combinedText,postedDate);
+
     // Normalize overnight endDate in one place (Stage 5.6 only).
     applyOvernightEndDate(ev, timezone);
 
@@ -3498,6 +3538,30 @@ export function enforceDateTimeCompleteness(
   });
 
   return kept;
+}
+
+export function applyPrintedSpecialClosingLimit(event: TimeResolvedEvent, text: string, postedDate: string): void {
+  if (event.isFoodSpecial !== 'Yes' || event.startDate !== postedDate ||
+      event.timeFlags?.end?.source === 'explicit') return;
+  const caption = String(text || '').split(/\n\s*OCR TEXT:/i)[0];
+  // Exclude special-hours exceptions on another named day/date. The short
+  // heading is for today's offer only; unrelated performance hours do not bind it.
+  const weekday = DateTime.fromISO(postedDate).toFormat('cccc').toLowerCase();
+  const daily = caption.split(/\n/).filter(line=> {
+    if (/\b(?:please note|private function)\b/i.test(line)) return false;
+    const days = line.match(/\b(?:Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)\b/gi) || [];
+    return days.every(day=>day.toLowerCase()===weekday);
+  }).join('\n');
+  const matches = [...daily.matchAll(/\b(?:open\s+(?:until|till|til)|close[ds]?\s+at)\s*(\d{1,2}(?::\d{2})?\s*[ap]\.?m\.?)|\b(?:hours\s*:\s*)?(\d{1,2}(?::\d{2})?\s*[ap]\.?m\.?)\s*(?:to|[-–—])\s*(\d{1,2}(?::\d{2})?\s*[ap]\.?m\.?)/gi)];
+  const candidates = matches.filter(m=>m[1] || /^hours\s*:/i.test(m[0]) || /hours\s*:\s*$/i.test(daily.slice(Math.max(0,m.index!-16),m.index!)))
+    .map(m=>normalizeTimeHHMM((m[1] || m[3]).replace(/\./g,''))).filter(Boolean);
+  const times=[...new Set(candidates)];
+  if(times.length!==1 || !event.startTime || !event.endTime ||
+      times[0] <= event.startTime || times[0] >= event.endTime) return;
+  event.endTime=times[0];event.timeResolution=event.timeResolution || {hoursUsed:false};
+  event.timeResolution.endFromHours='to_close';
+  event.timeFlags=event.timeFlags || {start:{source:'none',evidence:''},end:{source:'none',toClose:false,evidence:''}};
+  event.timeFlags.end={source:'explicit',toClose:true,evidence:`Printed same-day closing time ${times[0]}`};
 }
 
 function reconcileHalfDaySessionMeridiem(ev: TimeResolvedEvent, sourceText: string): void {

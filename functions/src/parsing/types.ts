@@ -58,6 +58,8 @@ export interface ParseSkipReason {
   stage: 'precheck' | 'stage1' | 'stage2' | 'stage3' | 'stage4' | 'stage5' | 'pipeline';
   reason: string;
   detail?: string;
+  /** A request/formatting failure is an error, not an ordinary content rejection. */
+  failure?: boolean;
 }
 
 export type GptUsageStage =

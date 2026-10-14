@@ -416,3 +416,22 @@ both captured writer previews/read-only selectors chose the existing root
 keeper, and46-post/143-item playback had zero unrelated changes. The current
 live API event remained correct and unchanged. Observe actual source links and
 absence of regenerated area reviews/duplicates on the next regular full run.
+
+## October 14 integrity hardening
+
+See [repair and validation](luna-oct14-integrity-repair.md) and
+[production audit](luna-oct14-production-audit.md). Shared-thumbnail date
+regression, incidental-food category coercion, concert/theatre category priors,
+recurrence restoration after a named guest was demoted, aggregator cinema
+conflicts and owner-poster replacement, and inferred special ends beyond
+printed closing hours now have targeted guards and healthy controls.
+
+Stage 5 request/contract failures are explicitly recorded as failed rows/stages;
+single-item malformed output gets one bounded recovery, while API rejections
+hold without partial publication. Inventory audit completion remains gated
+even with its 16k output allowance. The small Carrefour festival source is
+still insufficient to verify all titles/locations: completed model calls do not
+authorize publication of unclear identities. Existing correct duplicates and
+expired source events are not recreated. Build, 674 backend tests, 148-event
+captured comparison, nine fresh Stage 5 calls and independent image checks
+are recorded. Live event changes remain subject to the exact backed-up plan.
