@@ -151,7 +151,11 @@ export function mapApifyDatasetItemToDriveRow(item: Record<string, unknown>): Re
   const mediaUrls: string[] = [];
   const row: Record<string, unknown> = {
     Text: postText,
-    'Sharedpost Text': postText,
+    'Sharedpost Text': getNestedString(item,['sharedPost','text']) || postText,
+    'sharedPost/user/name': getNestedString(item,['sharedPost','pageName','name']) || getNestedString(item,['sharedPost','user','name']),
+    'sharedPost/user/profileUrl': getNestedString(item,['sharedPost','pageName','profileUrl']) || getNestedString(item,['sharedPost','user','profileUrl']),
+    'sharedPost/url': getNestedString(item,['sharedPost','url']),
+    'sharedPost/time': getNestedString(item,['sharedPost','time']),
     'User Name': pageName,
     Pagename: pageName,
     Time: timestamp,

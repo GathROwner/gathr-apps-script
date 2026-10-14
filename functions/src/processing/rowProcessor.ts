@@ -1,4 +1,5 @@
 import {hasConflictingOccurrenceIdentity} from '../utils/occurrenceMergeGuard.js';
+import {applySharedFoodOfferVenue, sharedFoodOfferOwner, sharedPostMetadata} from '../services/sharedFoodOfferVenue.js';
 import {isPlainKaraoke, isStandingKaraoke, coversStandingKaraokeOccurrence, selectStandingKaraokeOccurrence} from '../services/standingKaraokeOccurrence.js';
 import {isRecurringSeries, recurringSeriesLabelsCompatible} from '../utils/recurringSeriesLifecycle.js';
 import {hasProvenSourceDurationEnd} from '../parsing/sourceTimeConstraints.js';
@@ -3258,6 +3259,7 @@ export async function processRow(
             facebookUrl: row.facebookUrl,
             inputText: combinedText,
             rowMeta: {
+              ...sharedPostMetadata(row),
           pageName: row.pageName,
           userName: row.userName,
           facebookEventLocationName: row.facebookEventLocationName,
@@ -3400,6 +3402,7 @@ export async function processRow(
             facebookUrl: row.facebookUrl,
             inputText: combinedText,
           rowMeta: {
+            ...sharedPostMetadata(row),
             pageName: row.pageName,
             userName: row.userName,
             facebookEventLocationName: row.facebookEventLocationName,
@@ -3467,6 +3470,7 @@ export async function processRow(
           facebookUrl: row.facebookUrl,
           inputText: combinedText,
           rowMeta: {
+            ...sharedPostMetadata(row),
             pageName: row.pageName,
             userName: row.userName,
             timestamp: row.timestamp,
@@ -3500,6 +3504,7 @@ export async function processRow(
           facebookUrl: row.facebookUrl,
           inputText: combinedText,
           rowMeta: {
+            ...sharedPostMetadata(row),
             pageName: row.pageName,
             userName: row.userName,
             timestamp: row.timestamp,
@@ -3693,6 +3698,7 @@ export async function processRow(
         facebookUrl: row.facebookUrl,
         inputText: combinedText,
         rowMeta: {
+          ...sharedPostMetadata(row),
           pageName: row.pageName,
           userName: row.userName,
           timestamp: row.timestamp,
@@ -3723,6 +3729,7 @@ export async function processRow(
         facebookUrl: row.facebookUrl,
         inputText: [row.sharedPostText, row.text].filter(Boolean).join('\n\n'),
         rowMeta: {
+          ...sharedPostMetadata(row),
           pageName: row.pageName,
           userName: row.userName,
           timestamp: row.timestamp,
@@ -4266,7 +4273,15 @@ export async function resolveVenueForFullParserEventWithMatcherForRegression(par
   addressMatcher?: (address: string) => Promise<MatchInfo>;
 }): Promise<VenueData | null> {
   const { rowVenue, row, establishment, rowIndex, matcher, addressMatcher } = params;
-  const item=applyLocationMentionResolution(params.item,[row.text,row.sharedPostText].filter(Boolean).join('\n'));
+  const item=applyLocationMentionResolution(applySharedFoodOfferVenue(params.item,row,rowVenue),[row.text,row.sharedPostText].filter(Boolean).join('\n'));
+  const sharedOfferOwner=sharedFoodOfferOwner(item,row,rowVenue);
+  if(sharedOfferOwner){
+    const original=await matcher(sharedOfferOwner,row.sharedPostAuthorUrl,inferFullParserVenueMatchContext(row,sharedOfferOwner));
+    if(original.isMatch && original.matchType==='exact' && original.matchedVenue && original.matchedVenue.id!==rowVenue?.id)return original.matchedVenue;
+    logger.warn('Held shared food offer without exact original-business venue',{
+      rowIndex,sourceUniqueId:row.uniqueId,originalAuthor:sharedOfferOwner,publisherVenueId:rowVenue?.id});
+    return null;
+  }
   if(item._locationMentionResolution?.venueId){
     const resolved=await matcher(item._locationMentionResolution.eventVenue,undefined,inferFullParserVenueMatchContext(row,establishment));
     return resolved.isMatch && resolved.matchedVenue?.id===item._locationMentionResolution.venueId ? resolved.matchedVenue : null;
@@ -4586,7 +4601,7 @@ export async function processFullParserEvent(
   duplicateEventId?: string;
   event?: EventData;
 }> {
-  item=applyLocationMentionResolution(item,[row.text,row.sharedPostText].filter(Boolean).join('\n'));
+  item=applyLocationMentionResolution(applySharedFoodOfferVenue(item,row,rowVenue),[row.text,row.sharedPostText].filter(Boolean).join('\n'));
   const coverage = fullParserEventLocationCheck(item, row);
   if (coverage.decision === 'reject' || coverage.decision === 'hold') {
     logger.warn('Held full-parser occurrence before venue lookup or publication', {

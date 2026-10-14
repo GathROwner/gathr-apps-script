@@ -1,0 +1,18 @@
+import fs from 'node:fs/promises';
+import admin from 'firebase-admin';
+const credential=JSON.parse(await fs.readFile(process.env.DAISY_CREDENTIAL_PATH,'utf8'));
+if(credential.project_id!=='gathr-migrated')throw new Error('Wrong project');
+admin.initializeApp({credential:admin.credential.cert(credential),projectId:'gathr-migrated'});
+const db=admin.firestore(),out='artifacts/daisy-oct14';await fs.mkdir(out,{recursive:true});
+const pack=d=>({path:d.ref.path,updateTime:d.updateTime?.toDate().toISOString(),data:d.data()});
+const [venues,events,processed,locks]=await Promise.all([db.collection('venues').get(),db.collectionGroup('events').get(),db.collection('processed_datasets').get(),db.collection('processing_locks').get()]);
+const relevantVenues=venues.docs.filter(d=>/dais[yie]|pei foodies/i.test(JSON.stringify(d.data())));
+const venueIds=new Set(relevantVenues.map(d=>d.id));
+const relevantEvents=events.docs.filter(d=>venueIds.has(d.ref.parent.parent?.id)||venueIds.has(d.data().venueId)||/burger basket/i.test(d.data().eventName||d.data().name||''));
+const sources=[...new Set(relevantEvents.map(d=>String(d.data().uniqueId||'').split('_')[0]).filter(Boolean))];
+const snapshots=(await Promise.all(sources.map(s=>db.collection('parse_snapshots').where('uniqueId','==',s).get()))).flatMap(s=>s.docs.map(pack));
+const audits=(await Promise.all([...venueIds].map(id=>db.collection('event_update_audits').where('venueId','==',id).get()))).flatMap(s=>s.docs.map(pack));
+await fs.writeFile(`${out}/capture.json`,JSON.stringify({capturedAt:new Date().toISOString(),venues:relevantVenues.map(pack),events:relevantEvents.map(pack),snapshots,audits,processed:processed.docs.map(pack),locks:locks.docs.map(pack)},null,2));
+await fs.writeFile(`${out}/all-events.json`,JSON.stringify(events.docs.map(pack),null,2));
+await fs.writeFile(`${out}/all-venues.json`,JSON.stringify(venues.docs.map(pack),null,2));
+console.log(JSON.stringify({venues:relevantVenues.map(d=>({path:d.ref.path,name:d.data().name,address:d.data().address,facebookUrl:d.data().facebookUrl})),events:relevantEvents.map(d=>({path:d.ref.path,title:d.data().eventName,date:d.data().startDate,pattern:d.data().recurringPattern,source:d.data().uniqueId})),snapshots:snapshots.length,audits:audits.length,totalEvents:events.size}));

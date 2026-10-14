@@ -274,6 +274,11 @@ export interface RawRowData {
   uniqueId?: string;
   text: string;
   sharedPostText?: string;
+  /** Original publisher of a shared post; distinct from the sharing page. */
+  sharedPostAuthorName?: string;
+  sharedPostAuthorUrl?: string;
+  sharedPostUrl?: string;
+  sharedPostTimestamp?: string;
   ocrText?: string;
   mediaUrls: string[];
   userName: string;

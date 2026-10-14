@@ -26,6 +26,15 @@ Status meanings:
 
 ## Current parser and location-resolution patterns
 
+October14 PQ-012 observation: [Daisy’s shared-post venue loss](daisy-shared-post-case-20261014.md).
+The original XLSX included Daisy’s author/profile fields, but extraction dropped
+them while retaining its offer text. Two Monday/Wednesday Burger Basket parents
+were consequently published under PEI Foodies and inherited its11:00 opening.
+Local metadata preservation and an exact-original-business food-offer guard
+pass11 focused/747 backend checks; no deployment or live correction. Daisy’s
+canonical venue and current offer remain held. A backed-up exact two-parent
+deletion proposal is separate from venue creation/recovery and Be You cleanup.
+
 | Pattern | Status | Human-readable evidence | What the weakness means | Next evidence or action |
 |---|---|---|---|---|
 | PQ-047 Active recurring parent ages out of duplicate lookup | Shared prevention deployed; two confirmed Be You copies removed; next full run pending | Be You's May27 Karaoke Night parent is126 days before the Sept30 source. The actual family predicate accepts it, but the120-day Firestore lookup excludes it. A generic Oct14 Karaoke listing creates another copy under the short-title gap related to PQ-035. | Parent base-date age is not recurrence expiry. Subsequent enrichment can also retain stale relative prose while accumulating unrelated source galleries. Whole-series identity differs from coverage of one date. | Commit `e026d19` uses a recurring-only paginated catalog, finite lifecycle guards, first-party media protection and provenance-only historical replay. All747 backend tests pass. All three parsers are ACTIVE at hash `b08f69995f660b68ec851b648fff969b1c15e2df`,100% latest traffic. Exact two-copy deletion/keeper source-link applied with complete backup; five details and10-page app feed verify. No other venue matched the >120-day mechanism in1,144 captured docs. See [verified release and repair](recurring-series-oct14-hardening-release.md); Wednesday/Friday sing-along remain separate pending source clarification. |
