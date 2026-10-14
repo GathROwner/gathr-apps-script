@@ -62,3 +62,29 @@ with no active parser. Independently verify common hash, ACTIVE/latest traffic
 and unchanged user configuration. Revert this isolated prevention commit if
 runtime evidence exposes a false hold; no live-data rollback is required for
 the code-only release. The separately serving resolver retains its own release.
+
+## Completed release and subsequent source review
+
+Source commit `f2fcbad` passed the narrow dry run and deployed successfully.
+Independent readback verifies all three functions ACTIVE at common hash
+`4f54118bd8f92b0cbd2b0456e3172f345809dd26`, 100% latest traffic, with every
+previous environment value preserved. Revisions: processdataset-00480-cuw,
+processdatasetresume-00444-mak, processdatasetselectedrows-00436-ciy.
+
+Direct original-poster review confirms Barktoberfest noon–2, Mayoral Candidates
+19–21 and SoulCave October24/31 09:30 (no printed finishes). The first-party
+Arts Mixer poster explicitly prints October15 16–19 at Mavor's Lounge; the
+child's18:00 is flagged inferred, so this is now source-resolved for manual
+cleanup. The generic runtime guard still holds conflicts rather than guessing
+source priority. The official Souris show page confirms Two Pianos October24
+19:30 and its specific ticket identity; child23:00 is flagged category-default.
+
+Exactly seven duplicate deletions and six retained-keeper provenance updates
+are separately dry-run verified and backed up; two empty SoulCave keeper image
+fields gain the original managed poster, with end remaining unknown. See
+`docs/duplicate-event-oct14-cleanup-plan.md`. No cleanup has been applied.
+
+The existing follow-up heartbeat is rescheduled for October15, starting11a.m.
+Halifax, quiet until a newly completed full dataset or substantive failure,
+then pause after the audit. Old recurring/conflicting clusters remain outside
+this exact cleanup batch and require their own source/recurrence review.

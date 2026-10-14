@@ -495,3 +495,10 @@ are distinct occurrence identities, including under exact-source shortcuts.
 Build,718 backend tests, seven captured root/child comparisons and the actual
 lane-session control are recorded in `docs/duplicate-event-oct14-hardening.md`.
 Existing clusters require individual source review and exact approved cleanup.
+
+Duplicate prevention `f2fcbad` is independently verified live on all three
+parsers at common hash `4f54118bd8f92b0cbd2b0456e3172f345809dd26`, ACTIVE,
+100% latest traffic and all prior environment values preserved. Original
+posters subsequently resolved Arts Mixer's19:00 end versus the inferred18:00
+child. Seven exact duplicate deletions/six keeper-source updates now have a
+backed-up dry-run plan; no duplicate cleanup has been applied without approval.
