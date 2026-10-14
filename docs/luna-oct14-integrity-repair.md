@@ -106,3 +106,33 @@ history is retained; prevention fixes its mechanism for subsequent posts.
 Evidence: `functions/artifacts/luna-oct14-repair/` contains builds, focused/full
 tests, captured comparison, actual model requests/results, source pictures,
 writer preview and release gates. Generated production data stays local.
+
+## Final verified release — October14 15:39 UTC
+
+Parser code commits: `1c669f9`, `bf711ce`, `77b0a2a`. The separate default-dry
+26-path live plan/script is committed as `68c4a4c`; no event mutations have run.
+
+All three parsers independently read back ACTIVE, one common source hash
+`689f2a0913e2276f78b2166bdae226fd777f1a64`,100% latest Cloud Run traffic:
+
+| Function | Revision |
+|---|---|
+| processDataset | processdataset-00478-yur |
+| processDatasetResume | processdatasetresume-00442-mav |
+| processDatasetSelectedRows | processdatasetselectedrows-00434-cad |
+
+Model/effort/allocation/cache environment values match the accepted baseline
+through both intermediate releases. No active parser/checkpoint was present;
+the October14 marker, lock and final batch were completed. Narrow deploy dry
+runs and updates succeeded. One local function-discovery timeout was retried
+with `FUNCTIONS_DISCOVERY_TIMEOUT=60`; it was not a production row timeout.
+Firebase's existing outdated-functions-package warning remains deferred.
+
+The real read-only cinema selector held Jim Queen's conflicting21:00 source and
+skipped the Back in Black19:00 aggregator copy; both official keepers remained
+byte-for-byte unchanged. Final678 tests, actual model replays and manual
+source-verified writer previews are recorded above. Exact live approval is
+still required for the backed-up8 deletes,4 updates and14 creates in
+[the live repair plan](luna-oct14-live-repair-plan.md). Sending the prepared
+location handoff also needs Craig's authorization; it does not authorize
+additional venue/event mutations.

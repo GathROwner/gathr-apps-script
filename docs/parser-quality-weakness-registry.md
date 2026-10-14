@@ -435,3 +435,16 @@ authorize publication of unclear identities. Existing correct duplicates and
 expired source events are not recreated. Build, 674 backend tests, 148-event
 captured comparison, nine fresh Stage 5 calls and independent image checks
 are recorded. Live event changes remain subject to the exact backed-up plan.
+
+October14 final release `77b0a2a` (including `1c669f9` and `bf711ce`) is verified
+ACTIVE on all three parsers at common source hash
+`689f2a0913e2276f78b2166bdae226fd777f1a64`,100% latest traffic and unchanged
+model settings. Final678 tests pass. Repeated unreadable dense-schedule
+identities now hold the whole source; an explicitly indoor single-venue costume
+parade retains its venue while an actual street route remains spatial. The
+linked original festival program recovered31 occurrences through actual model
+stages. Thirteen public known-venue activities have separate source-verified
+recovery previews; other location/access/source conflicts remain visible in
+the prepared location handoff. The26-path live correction is backed up and
+dry-run verified but awaits exact approval; deployment alone did not change
+any of those live documents.
