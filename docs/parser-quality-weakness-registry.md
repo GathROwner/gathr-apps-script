@@ -458,3 +458,23 @@ related records were unchanged. The3 remaining location cases were sent to
 the existing location-owner task for read-only investigation; no additional
 venue/event mutation is authorized. See the updated live plan for fresh backup,
 atomic result and full verification artifacts.
+
+## October14 local venue-resolution prevention
+
+Craig approved local implementation/testing after the location-owner review.
+PQ-012/PQ-015/PQ-016 now have a corroborated parent/room guard that preserves
+APM's short identity and the complete boardroom label before expansion. Exact
+independent sub-venues and conflicting addresses retain their safeguards.
+PQ-036 now also checks the extracted occurrence's region before venue lookup,
+review intake or publication; a PEI artist origin cannot localize Hamilton
+showcases. PQ-017 retains Connolly Park as a genuine unresolved Souris place
+and rejects its road-only Google suggestion. No venue is invented.
+
+Local build,52 focused tests and706 complete backend tests passed. Captured
+writer previews resolve all17 APM items, preserving room labels and source
+clocks/media; the boardroom's23:00 end remains explicitly understood as an
+existing inferred fallback. Across360 captured October12–14 formatted items,
+only the three source-confirmed Hamilton showcases gain new coverage holds.
+No paid model calls, production deploys, replays or live data changes occurred.
+See `docs/venue-resolution-oct14-local-hardening.md` for exact scope/evidence
+and the separate approval/release boundary.

@@ -4,11 +4,51 @@ import assert from 'node:assert/strict';
 import { ProcessedEvent as ParserProcessedEvent } from '../parsing/types.js';
 import { MatchInfo, RawRowData, VenueData } from '../types/index.js';
 import { normalizeVenueName } from '../utils/similarity.js';
+import roomFixture from '../services/fixtures/venue-resolution.json';
 import {
   createFullParserVenueLookupCache,
   resolveVenueForFullParserEventWithMatcherForRegression,
   findCaptionRegistrationUrlForEventForRegression,
 } from './rowProcessor.js';
+
+for (const aliasesAdded of [false, true]) {
+  for (const candidate of roomFixture.rooms) {
+    test(`complete printed ${candidate} resolves with aliasesAdded=${aliasesAdded}`, async () => {
+      const venue = { ...roomFixture.parent,
+        aliases: aliasesAdded ? [...roomFixture.parent.aliases, ...roomFixture.rooms] : roomFixture.parent.aliases } as VenueData;
+      const row = { userName: venue.name, pageName: venue.name, facebookUrl: venue.facebookUrl, text: '' } as RawRowData;
+      const tried: string[] = [];
+      const resolved = await resolveVenueForFullParserEventWithMatcherForRegression({
+        item: { name: 'Fixture activity', establishment: candidate, venue: candidate } as ParserProcessedEvent,
+        row, rowVenue: venue, establishment: venue.name, rowIndex: 0,
+        matcher: async name => { tried.push(name); return { isMatch: false, matchType: 'none', similarity: 0 }; },
+      });
+      assert.equal(resolved?.id, venue.id);
+      assert(!tried.includes('APM Centre, Board'));
+    });
+  }
+}
+test('an exact independent sub-venue wins over its corroborated source parent', async () => {
+  const parent = roomFixture.parent as VenueData;
+  const independent = { id: 'fixture-independent', name: 'APM Rink' } as VenueData;
+  const row = { userName: parent.name, facebookUrl: parent.facebookUrl, text: '' } as RawRowData;
+  const resolved = await resolveVenueForFullParserEventWithMatcherForRegression({
+    item: { name: 'Fixture activity', establishment: 'APM Rink' } as ParserProcessedEvent,
+    row, rowVenue: parent, establishment: parent.name, rowIndex: 0,
+    matcher: async () => ({ isMatch: true, matchType: 'exact', similarity: 1, matchedVenue: independent }),
+  });
+  assert.equal(resolved?.id, independent.id);
+});
+test('a conflicting event address cannot fall back to the publishing parent venue', async () => {
+  const parent = roomFixture.parent as VenueData;
+  const row = { userName: parent.name, facebookUrl: parent.facebookUrl, text: '' } as RawRowData;
+  const resolved = await resolveVenueForFullParserEventWithMatcherForRegression({
+    item: { name: 'Fixture activity', establishment: 'APM Rink', address: '98 Other Street, Hamilton, ON' } as ParserProcessedEvent,
+    row, rowVenue: parent, establishment: parent.name, rowIndex: 0,
+    matcher: async () => ({ isMatch: false, matchType: 'none', similarity: 0 }),
+  });
+  assert.equal(resolved, null);
+});
 
 test('row-local venue cache reuses the same lookup while separating distinct candidates', async () => {
   const calls: string[] = [];

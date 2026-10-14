@@ -8,6 +8,7 @@ import * as sharedEventCandidateStore from './sharedEventCandidateStore.js';
 import { processPublicSharedEventCandidateById } from './sharedEventPublicPromotion.js';
 import { getVenueAliasCandidates } from './venueAliases.js';
 import { logger } from '../utils/logger.js';
+import { namedVenueCandidateIsCompatible } from './venueIdentity.js';
 import {
   calculateEnhancedSimilarity,
   extractFacebookSlug,
@@ -2696,6 +2697,13 @@ async function collectPlacesSuggestion(
       queryUsed: string,
       searchMode: 'restaurant' | 'broad'
     ): Promise<UnrecognizedVenueSuggestedMatch[]> => {
+      if (!namedVenueCandidateIsCompatible({ observedName: rawName, candidateTypes: place?.types || [] })) {
+        logger.info('Rejected geographic-only Places result for named venue', {
+          observedName: rawName, candidateName: place?.name,
+          candidateTypes: place?.types, cityHint, provinceHint,
+        });
+        return [];
+      }
       const details = place?.placeId ? await placesService.getPlaceDetails(place.placeId) : null;
       const address = details?.formattedAddress || place?.formattedAddress || '';
       const placesName = String(details?.name || place?.name || rawName).trim();
@@ -2725,7 +2733,7 @@ async function collectPlacesSuggestion(
 
       let suggestion: UnrecognizedVenueSuggestedMatch = {
         venueName: placesName,
-        confidence: Math.max(0.7, placesConfidence),
+        confidence: placesConfidence,
         matchType: 'places',
         address,
         facebookUrl: websiteFacebookUrl || undefined,

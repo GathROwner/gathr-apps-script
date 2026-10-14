@@ -1,0 +1,17 @@
+{
+  "note": "Sanitized mechanisms from the October 14 review. IDs, URLs and addresses below are synthetic; no live document dumps or credentials.",
+  "parent": {
+    "id": "fixture-centre", "name": "APM Centre",
+    "facebookUrl": "https://www.facebook.com/fixture-apm-centre",
+    "address": "35 Fixture Drive, Cornwall, PE",
+    "aliases": ["APM Centre"]
+  },
+  "rooms": ["APM Rink", "APM Centre, Board Room"],
+  "foreignOccurrences": [
+    {"name": "Fixture Spotlight Showcase", "venue": "Ballroom", "description": "Spotlight Showcase at Folk Canada 2026 in Hamilton, Ontario.", "relevantImageIndex": 0},
+    {"name": "Fixture Acoustic Showcase", "venue": "Room 902", "description": "Acoustic Showcase at Folk Canada 2026 in Hamilton, Ontario.", "relevantImageIndex": 0},
+    {"name": "Fixture Second Showcase", "venue": "Room 1013", "description": "Acoustic Showcase at Folk Canada 2026 in Hamilton, Ontario.", "relevantImageIndex": 0}
+  ],
+  "artistIdentificationImage": {"imageIndex": 1, "text": "New Glasgow | Prince Edward Island. Developing Artist Program."},
+  "park": {"observedName": "Connolly Park", "city": "Souris", "province": "PE", "candidateName": "Connolly Street", "candidateTypes": ["route"]}
+}

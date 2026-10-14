@@ -47,6 +47,7 @@ import {
   normalizeUrl,
 } from '../utils/similarity.js';
 import { getVenueAliasCandidates } from './venueAliases.js';
+import { checkEventLocationAgainstAllowedRegions } from './eventIngestJurisdictions.js';
 import { selectRecoverableManagedGallery } from './managedSourceGallery.js';
 import { pickCompatibleExactUniqueIdMatch } from './exactUniqueIdCompatibility.js';
 import {
@@ -2504,6 +2505,17 @@ export async function queueUnrecognizedVenue(
 
   if (!venueName || !establishmentNormalized) {
     return { queued: false, reason: 'empty_name' };
+  }
+
+  const coverage = checkEventLocationAgainstAllowedRegions({
+    locationLabels: [venueName], description: input.description,
+  });
+  if (coverage.decision === 'reject' || coverage.decision === 'hold') {
+    logger.info('Unknown venue queue suppressed by event coverage evidence', {
+      venueName, rowIndex: input.rowIndex, fileId: input.fileId,
+      reason: coverage.reason, provinceCodes: coverage.provinceCodes,
+    });
+    return { queued: false, reason: coverage.reason };
   }
 
   const nonVenueClassification = classifySuspectedNonVenueLabel(input);

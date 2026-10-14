@@ -49,7 +49,8 @@ import { createHash } from 'crypto';
 import { normalizeVenueName, normalizeUrl, extractFacebookSlug } from '../utils/similarity.js';
 import { getVenueAliasEntry } from '../services/venueAliases.js';
 import { KNOWN_PEI_CITY_NAMES, normalizePeiPlaceName } from '../services/peiLocations.js';
-import { checkEventCoordinatesAgainstAllowedRegions } from '../services/eventIngestJurisdictions.js';
+import { checkEventCoordinatesAgainstAllowedRegions, checkEventLocationAgainstAllowedRegions } from '../services/eventIngestJurisdictions.js';
+import { resolveSourceVenueSubLocation } from '../services/venueIdentity.js';
 import { BatchManager } from './batchManager.js';
 import {
   AddressSource,
@@ -3048,7 +3049,7 @@ export async function processRow(
         establishment,
         sourceScraperType: row.sourceScraperType,
       });
-    } else if (!venueMatch.isMatch) {
+    } else if (!venueMatch.isMatch && parserMode !== 'full5stage') {
       logger.debug('No venue match found for row-level establishment', {
         rowIndex,
         establishment,
@@ -3418,6 +3419,10 @@ export async function processRow(
                 dryRun: isDryRun,
                 eventCount: fullParserEvents.length,
                 events: summarizeFullParserEvents(fullParserEvents),
+                locationCoverageHolds: fullParserEvents.map((event, itemIndex) => ({
+                  itemIndex, eventName: event.name, relevantImageIndex: event.relevantImageIndex,
+                  ...fullParserEventLocationCheck(event, row),
+                })).filter(check => check.decision === 'reject' || check.decision === 'hold'),
                 ocrDebug: ocrDebugSnapshot,
                 gptUsageSummary,
                 stageArtifacts: persistedStageArtifacts,
@@ -4394,6 +4399,40 @@ export async function resolveVenueForFullParserEventWithMatcherForRegression(par
     return null;
   }
 
+  // Preserve the complete printed room label before expanding it. A publisher
+  // match alone cannot adopt an unrelated venue; require parent-name/alias
+  // support plus source-page or exact event-address identity.
+  if (rowVenue && !['city', 'area', 'route'].includes(String(item.locationScope || ''))) {
+    const printedNames = uniqueVenueCandidates([itemEstablishment, itemVenue]);
+    const decisions = printedNames.map(candidate => ({ candidate, ...resolveSourceVenueSubLocation({
+      candidate, row, venue: rowVenue, eventAddress: item.address,
+    }) }));
+    const canonical = (candidate: string) => normalizeVenueName(candidate) === normalizeVenueName(rowVenue.name);
+    if (decisions.some(decision => decision.supported) &&
+        decisions.every(decision => decision.supported || canonical(decision.candidate))) {
+      for (const decision of decisions) {
+        // An independently recorded sub-venue retains its identity.
+        const exact = await matcher(decision.candidate, undefined, venueMatchContext);
+        if (exact.isMatch && exact.matchType === 'exact' && exact.matchedVenue &&
+            exact.matchedVenue.id !== rowVenue.id) return exact.matchedVenue;
+      }
+      logger.info('Resolved corroborated source venue sub-location', {
+        rowIndex, itemName: item.name || '', venueId: rowVenue.id,
+        observedLocations: printedNames, evidence: decisions.map(decision => decision.reason),
+      });
+      return rowVenue;
+    }
+    if (decisions.some(decision => decision.reason === 'conflicting_event_address')) {
+      // An exact independent venue may legitimately have another address.
+      for (const candidate of printedNames) {
+        const exact = await matcher(candidate, undefined, venueMatchContext);
+        if (exact.isMatch && exact.matchType === 'exact' && exact.matchedVenue &&
+            exact.matchedVenue.id !== rowVenue.id) return exact.matchedVenue;
+      }
+      return null;
+    }
+  }
+
   // Check if the event specifies a different venue than the row-level establishment
   const itemHasDifferentVenue = itemSpecificVenueCandidates.length > 0;
 
@@ -4515,7 +4554,20 @@ export async function resolveVenueForFullParserEventWithMatcherForRegression(par
   return null;
 }
 
-async function processFullParserEvent(
+export function fullParserEventLocationCheck(item: ParserProcessedEvent, row: RawRowData) {
+  // Stage 5 may copy the publisher's address onto an item. It must not cancel
+  // the event's own region evidence (for example an Island artist in Ontario).
+  const address = normalizeVenueName(String(item.address || '')) === normalizeVenueName(String(row.address || ''))
+    ? undefined : item.address;
+  return checkEventLocationAgainstAllowedRegions({
+    province: item.locationProvince,
+    address,
+    locationLabels: [item.venue, item.establishment, item.locationLabel],
+    description: item.description,
+  });
+}
+
+export async function processFullParserEvent(
   item: ParserProcessedEvent,
   row: RawRowData,
   rowIndex: number,
@@ -4533,6 +4585,16 @@ async function processFullParserEvent(
   event?: EventData;
 }> {
   item=applyLocationMentionResolution(item,[row.text,row.sharedPostText].filter(Boolean).join('\n'));
+  const coverage = fullParserEventLocationCheck(item, row);
+  if (coverage.decision === 'reject' || coverage.decision === 'hold') {
+    logger.warn('Held full-parser occurrence before venue lookup or publication', {
+      rowIndex, sourceUniqueId: row.uniqueId, itemName: item.name || '',
+      decision: coverage.decision, reason: coverage.reason,
+      provinceCodes: coverage.provinceCodes, evidence: coverage.evidence,
+    });
+    if (previewOnly) throw new Error(`Event location held: ${coverage.reason}`);
+    return { created: false, updated: false, isDuplicate: false };
+  }
   const venue = await resolveVenueForFullParserEvent(
     item,
     rowVenue,
@@ -4542,6 +4604,16 @@ async function processFullParserEvent(
     lookupCache
   );
   if (!previewOnly) await batchManager.assertWorkerActive();
+
+  if (venue && checkEventCoordinatesAgainstAllowedRegions({
+    latitude: venue.latitude, longitude: venue.longitude,
+  }).decision === 'reject') {
+    logger.warn('Held extracted occurrence at venue outside configured ingest regions', {
+      rowIndex, sourceUniqueId: row.uniqueId, itemName: item.name || '', venueId: venue.id,
+    });
+    if (previewOnly) throw new Error('Event venue coordinates outside configured ingest regions');
+    return { created: false, updated: false, isDuplicate: false };
+  }
 
   if (!venue) {
     if (previewOnly) {

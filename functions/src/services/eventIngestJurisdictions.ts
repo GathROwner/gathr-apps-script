@@ -128,3 +128,73 @@ export function checkEventCoordinatesAgainstAllowedRegions(
     unknownRegionCodes,
   };
 }
+
+export interface EventLocationCheckInput {
+  province?: unknown;
+  address?: unknown;
+  locationLabels?: unknown[];
+  description?: unknown;
+}
+
+export interface EventLocationCheckResult {
+  decision: 'allow' | 'reject' | 'hold' | 'unknown';
+  reason: string;
+  provinceCodes: string[];
+  evidence: string[];
+}
+
+const PROVINCES: Readonly<Record<string, string>> = {
+  pe: 'PE', pei: 'PE', 'prince edward island': 'PE',
+  on: 'ON', ontario: 'ON', ns: 'NS', 'nova scotia': 'NS',
+  nb: 'NB', 'new brunswick': 'NB', nl: 'NL', 'newfoundland and labrador': 'NL',
+  qc: 'QC', quebec: 'QC', mb: 'MB', manitoba: 'MB', sk: 'SK', saskatchewan: 'SK',
+  ab: 'AB', alberta: 'AB', bc: 'BC', 'british columbia': 'BC',
+  yt: 'YT', yukon: 'YT', nt: 'NT', 'northwest territories': 'NT', nu: 'NU', nunavut: 'NU',
+};
+const PROVINCE_PATTERN = Object.keys(PROVINCES).sort((a, b) => b.length - a.length).join('|');
+const originContext = /\b(?:born|raised|grew up|hometown|originally|based|hails|travell?ing|visiting|artist from|performer from)\b/i;
+const supportingLocationContext = /\b(?:tickets?|box office|organizer|organised by|organized by|presented by|headquarters|sponsor|film follows|story follows|story is set|film is set|movie is set)\b/i;
+const eventLocationContext = /\b(?:showcase|concert|performance|event|festival|session|class|workshop|meeting|screening|race|tournament|takes? place|taking place|held|happening|join us|visit us|located|venue)\b/i;
+
+/** Event-local evidence only. Never pass an entire gallery or publisher biography. */
+export function checkEventLocationAgainstAllowedRegions(
+  input: EventLocationCheckInput,
+  rawAllowedRegionCodes = process.env.EVENT_INGEST_ALLOWED_REGIONS
+): EventLocationCheckResult {
+  const evidence: string[] = [];
+  const provinces = new Set<string>();
+  const add = (province: string, text: string): void => {
+    const code = PROVINCES[province.toLowerCase().trim()];
+    if (code) { provinces.add(code); evidence.push(text); }
+  };
+  add(String(input.province || ''), `province:${String(input.province || '')}`);
+  const suffix = new RegExp(`,\\s*(${PROVINCE_PATTERN})(?=\\b)(?:\\s+[A-Z]\\d[A-Z]\\s*\\d[A-Z]\\d)?(?:,?\\s*Canada)?\\s*$`, 'i');
+  for (const value of [input.address, ...(input.locationLabels || [])]) {
+    const text = String(value || '').trim();
+    const match = text.match(suffix);
+    if (match) add(match[1], text);
+  }
+  // The explicit "in City, Province" event statement covers image-derived
+  // room schedules without letting a bare province mention or artist origin
+  // decide coverage. Conflicting event statements hold the occurrence.
+  const description = String(input.description || '');
+  const location = new RegExp(`\\b(?:in|à)\\s+[\\p{L}][\\p{L}'’ -]{1,50},\\s*(${PROVINCE_PATTERN})\\b`, 'giu');
+  for (const match of description.matchAll(location)) {
+    const prefix = description.slice(Math.max(0, (match.index || 0) - 90), match.index)
+      .split(/[.!?;\n]/).pop() || '';
+    if (eventLocationContext.test(prefix) && !originContext.test(prefix) && !supportingLocationContext.test(prefix)) {
+      add(match[1], match[0]);
+    }
+  }
+  const provinceCodes = [...provinces];
+  const result = (decision: EventLocationCheckResult['decision'], reason: string): EventLocationCheckResult =>
+    ({ decision, reason, provinceCodes, evidence });
+  if (!provinceCodes.length) return result('unknown', 'no_explicit_event_region');
+  if (provinceCodes.length > 1) return result('hold', 'conflicting_event_regions');
+  const { allowedRegionCodes } = parseAllowedEventIngestRegionCodes(rawAllowedRegionCodes);
+  if (!allowedRegionCodes.length) return result('unknown', 'no_valid_configured_regions');
+  const region = provinceCodes[0] === 'PE' ? 'PEI' : provinceCodes[0];
+  return allowedRegionCodes.includes(region)
+    ? result('allow', 'explicit_event_region_allowed')
+    : result('reject', 'explicit_event_region_outside_coverage');
+}
