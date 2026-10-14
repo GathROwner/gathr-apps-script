@@ -175,6 +175,7 @@ export interface EventData {
   locationReviewStatus?: 'not_needed' | 'needs_review' | 'approved' | 'rejected';
   mapMode?: 'venue' | 'area' | 'route' | 'none';
   spatialEvidence?: SpatialEventClassification;
+  areaData?: import('../services/areaEventPublication.js').EventAreaData;
   cityLevelReviewId?: string;
   sourceScraperType?: ScraperType;
   additionalLocation?: string;
@@ -405,6 +406,11 @@ export interface CityLevelEventReviewRecord {
   autoPublishFieldSources?: CityLevelAutoPublishFieldSources;
   autoPublishReviewReasons?: string[];
   spatialEvidence?: SpatialEventClassification;
+  /** Resolved by explicit review, never synthesized by parser ingestion. */
+  areaData?: import('../services/areaEventPublication.js').EventAreaData;
+  areaEventLinks?: import('../services/areaEventPublication.js').AreaEventLinkEvidence[];
+  observedLocationName?: string;
+  description?: string;
   locationScope: 'city' | 'area' | 'province' | 'route';
   locationLabel: string;
   locationCity?: string;
@@ -480,6 +486,8 @@ export interface FinalizeCityLevelEventReviewInput {
     facebookUsersResponded?: string;
     ticketsBuyUrl?: string;
     externalLinks?: string[];
+    areaData?: import('../services/areaEventPublication.js').EventAreaData;
+    areaEventLinks?: import('../services/areaEventPublication.js').AreaEventLinkEvidence[];
   };
   notes?: string;
   resolvedBy?: string;

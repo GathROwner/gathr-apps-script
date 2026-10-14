@@ -1,4 +1,5 @@
 import {hasConflictingOccurrenceIdentity,findConflictingSourceCinemaDate} from '../utils/occurrenceMergeGuard.js';
+import {publicCityLevelDescription, requiresReviewedAreaPoints, validateEventAreaData, verifyAreaPublicationReferences} from './areaEventPublication.js';
 import {resolveAggregatorCinemaOccurrence} from './aggregatorCinemaOccurrence.js';
 import {isPlainKaraoke, selectStandingKaraokeOccurrence} from './standingKaraokeOccurrence.js';
 import {createRecurringSeriesCatalogCache, sourceLinkedHistoricalSeriesKeepers} from './recurringSeriesCatalog.js';
@@ -1502,7 +1503,8 @@ export async function queueCityLevelEventReview(
   ]);
   const imageUrl = asOptionalTrimmedString(input.imageUrl) || mediaUrls[0];
   const externalLinks = dedupeUrls(tokenizeMediaUrls(input.externalLinks));
-  const descriptionPreview = trimCityLevelEventPreview(input.description);
+  const description = publicCityLevelDescription(input.description);
+  const descriptionPreview = trimCityLevelEventPreview(description);
   const usersResponded = asOptionalTrimmedString(input.usersResponded);
   const usersGoing = asOptionalTrimmedString(input.usersGoing);
   const usersInterested = asOptionalTrimmedString(input.usersInterested);
@@ -1541,6 +1543,8 @@ export async function queueCityLevelEventReview(
         autoPublishFieldSources: input.autoPublishFieldSources,
         autoPublishReviewReasons,
         spatialEvidence: input.spatialEvidence,
+        observedLocationName: input.observedLocationName,
+        description,
         locationScope,
         locationLabel,
         locationCity: String(input.locationCity || '').trim() || undefined,
@@ -1643,6 +1647,8 @@ export async function queueCityLevelEventReview(
             : undefined
         ),
         spatialEvidence: input.spatialEvidence || existing.spatialEvidence,
+        observedLocationName: input.observedLocationName || existing.observedLocationName,
+        description: description || existing.description,
         locationScope: existing.locationScope || locationScope,
         locationLabel: String(existing.locationLabel || locationLabel).trim(),
         locationCity: String(existing.locationCity || input.locationCity || '').trim() || undefined,
@@ -1894,13 +1900,31 @@ async function buildPublishedCityLevelMediaFields(
   });
 }
 
+function reviewedCityLevelManual(
+  record: CityLevelEventReviewRecord,
+  manual: FinalizeCityLevelEventReviewInput['manual'] = {}
+): NonNullable<FinalizeCityLevelEventReviewInput['manual']> {
+  const saved = record.finalization?.action === 'approve_publish' &&
+    record.finalization?.manual && typeof record.finalization.manual === 'object'
+    ? record.finalization.manual as NonNullable<FinalizeCityLevelEventReviewInput['manual']> : {};
+  return {...saved, ...manual};
+}
+
 function buildPublishedCityLevelEventData(
   reviewId: string,
   record: CityLevelEventReviewRecord,
   manual: FinalizeCityLevelEventReviewInput['manual'] = {},
   mediaFields: Partial<EventData> = {}
 ): EventData & Record<string, unknown> {
+  manual = reviewedCityLevelManual(record, manual);
   const locationScope = normalizePublishedCityLevelScope(manual.locationScope || record.locationScope);
+  const areaData = manual.areaData || record.areaData;
+  if (areaData && (locationScope !== 'area' || record.spatialEvidence?.kind === 'route')) {
+    throw new Error('Reviewed areaData requires area scope and cannot replace a route');
+  }
+  if (requiresReviewedAreaPoints(record) && !areaData) {
+    throw new Error('Multi-location publication requires reviewed areaData points');
+  }
   const locationPrecision = normalizePublishedCityLevelPrecision(
     manual.locationPrecision || record.locationPrecision,
     locationScope
@@ -1917,9 +1941,10 @@ function buildPublishedCityLevelEventData(
     manual.eventDate || record.eventDate,
     'eventDate'
   );
-  const startTime = asOptionalTrimmedString(manual.eventTime || record.eventTime);
+  // Empty reviewed clocks mean unspecified; never restore a component's clock.
+  const startTime = manual.eventTime !== undefined ? manual.eventTime.trim() : asOptionalTrimmedString(record.eventTime);
   const endDate = asOptionalTrimmedString(manual.endDate || record.endDate) || startDate;
-  const description = asOptionalTrimmedString(manual.description || record.descriptionPreview);
+  const description = publicCityLevelDescription(manual.description ?? record.description ?? record.descriptionPreview);
   const locationCity = asOptionalTrimmedString(manual.locationCity || record.locationCity);
   // Centroid coordinates let the app place the event on the map; unresolved
   // places publish without coordinates (client keeps them list-only).
@@ -1947,9 +1972,10 @@ function buildPublishedCityLevelEventData(
     startDate,
     startTime,
     endDate,
-    endTime: asOptionalTrimmedString(manual.endTime || record.endTime),
+    endTime: manual.endTime !== undefined ? manual.endTime.trim() : asOptionalTrimmedString(record.endTime),
     ...mediaFields,
     venueId: null,
+    areaData: areaData ? validateEventAreaData(areaData) : undefined,
     latitude: centroid?.latitude,
     longitude: centroid?.longitude,
     locationScope,
@@ -1992,6 +2018,18 @@ async function writePublishedCityLevelEvent(
 ): Promise<admin.firestore.DocumentReference> {
   const eventId = asOptionalTrimmedString(record.publishedEventId) || reviewId;
   const eventRef = db.collection(COLLECTIONS.EVENTS).doc(eventId);
+  manual = reviewedCityLevelManual(record, manual);
+  const areaData = manual.areaData || record.areaData;
+  if (areaData) {
+    manual = {...manual, areaData: await verifyAreaPublicationReferences({
+      areaData, evidence: manual.areaEventLinks || record.areaEventLinks,
+      eventName: manual.eventName || record.eventName || '',
+      startDate: manual.eventDate || record.eventDate || '',
+      endDate: manual.endDate || record.endDate || manual.eventDate || record.eventDate || '',
+      refreshing: options.preserveCreatedAt,
+      read: async path => {const snapshot = await db.doc(path).get(); return snapshot.exists ? snapshot.data() : undefined;},
+    })};
+  }
   const mediaFields = await buildPublishedCityLevelMediaFields(manual, record);
   const rawEventData = buildPublishedCityLevelEventData(reviewId, record, manual, mediaFields);
   const sanitizedEventData = await sanitizeEventManagedImageReferencesForWrite(rawEventData, {
@@ -2015,7 +2053,9 @@ async function writePublishedCityLevelEvent(
     delete eventData.createdAt;
   }
 
-  await eventRef.set(eventData, { merge: true });
+  // Replace the complete public area map, rather than recursively retaining
+  // unknown/private keys from an older areaData object.
+  await eventRef.set(eventData, areaData ? {mergeFields: Object.keys(eventData)} : {merge: true});
   return eventRef;
 }
 
@@ -2097,7 +2137,8 @@ export async function finalizeCityLevelEventReview(
     };
   }
 
-  const eventRef = await writePublishedCityLevelEvent(reviewId, record, input.manual);
+  const approvedManual = reviewedCityLevelManual(record, input.manual);
+  const eventRef = await writePublishedCityLevelEvent(reviewId, record, approvedManual);
   await docRef.set(
     compactRecord({
       status: 'published',
@@ -2110,7 +2151,7 @@ export async function finalizeCityLevelEventReview(
       notes,
       finalization: {
         action,
-        manual: input.manual || {},
+        manual: approvedManual,
         publishedEventPath: eventRef.path,
       },
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),

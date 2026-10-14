@@ -447,6 +447,20 @@ absence of regenerated area reviews/duplicates on the next regular full run.
 
 ## October 14 integrity hardening
 
+### Reviewed multi-location publisher loss (PQ-SPATIAL/PQ-021)
+
+Anchor Fest exposed a missing publication step: a manually approved area
+umbrella retained a centroid but lost resolved points/component links, while
+generated review notes became public description text and component clocks
+misrepresented the multi-day programme. The narrow publisher contract now
+preserves reviewed unordered locations and explicitly source-bound existing
+child IDs, separates private audit evidence, holds unresolved multi-site
+publication and preserves reviewed unspecified clocks on refresh. Ordinary
+venue/city context and route review controls remain covered. See
+[backend contract and guarded preview](anchor-area-backend-oct14.md). The exact
+live repair and release remain coordinator-owned; this entry is not apply or
+deployment evidence.
+
 See [repair and validation](luna-oct14-integrity-repair.md) and
 [production audit](luna-oct14-production-audit.md). Shared-thumbnail date
 regression, incidental-food category coercion, concert/theatre category priors,

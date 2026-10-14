@@ -24,7 +24,9 @@ function validateAreaData(areaData) {
   }
 
   const ids = new Set();
-  for (const [index, location] of (areaData?.locations || []).entries()) {
+  const venues = new Set(), linkedIds = new Set();
+  for (const [index, location] of (Array.isArray(areaData?.locations) ? areaData.locations : []).entries()) {
+    if (!location || typeof location !== 'object') { errors.push(`location ${index} is invalid`); continue; }
     if (!location.id || !location.label) {
       errors.push(`location ${index} needs an id and label`);
     }
@@ -36,9 +38,23 @@ function validateAreaData(areaData) {
     if (!isCoordinate(location.coordinates)) {
       errors.push(`location ${index} coordinates are invalid`);
     }
+    if (location.venueId !== undefined) {
+      if (typeof location.venueId !== 'string' || !/^[A-Za-z0-9_-]+$/.test(location.venueId) || venues.has(location.venueId)) {
+        errors.push(`location ${index} venueId is invalid or duplicated`);
+      }
+      venues.add(location.venueId);
+    }
+    if (location.linkedEventIds !== undefined) {
+      if (!location.venueId || location.certainty !== 'confirmed' || !Array.isArray(location.linkedEventIds)) {
+        errors.push(`location ${index} linkedEventIds require a confirmed canonical venue`);
+      } else for (const id of location.linkedEventIds) {
+        if (typeof id !== 'string' || !/^[A-Za-z0-9_-]+$/.test(id) || linkedIds.has(id)) errors.push(`location ${index} linked event is invalid or duplicated`);
+        linkedIds.add(id);
+      }
+    }
   }
 
-  if (areaData?.segments || areaData?.route || areaData?.orderedLocations) {
+  if (areaData && ['segments','route','orderedLocations','ordered','geometry'].some(k => k in areaData)) {
     errors.push('areaData cannot imply an ordered route or connecting line');
   }
 

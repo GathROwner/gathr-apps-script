@@ -2614,17 +2614,6 @@ async function queuePostDerivedCityLevelEventForReview(params: {
     observedLocationName: params.location.observedLocationName,
   });
 
-  const descriptionParts = [
-    params.description,
-    params.location.observedLocationName &&
-      params.location.observedLocationName !== params.location.locationLabel
-      ? `Observed broad location: ${params.location.observedLocationName}`
-      : '',
-    params.location.autoPublishReviewReasons.length > 0
-      ? `Review reasons: ${params.location.autoPublishReviewReasons.join(', ')}`
-      : '',
-  ].filter(Boolean);
-
   try {
     const result = await firestoreService.queueCityLevelEventReview({
       uniqueId: params.row.uniqueId,
@@ -2639,7 +2628,8 @@ async function queuePostDerivedCityLevelEventForReview(params: {
       endTime: params.endTime,
       eventType: params.eventType,
       category: params.category,
-      description: descriptionParts.join(' | ') || undefined,
+      // Review reasons and observed locations have private structured fields.
+      description: params.description,
       imageUrl: params.imageUrl,
       mediaUrls: params.mediaUrls,
       ticketsBuyUrl: params.ticketsBuyUrl,

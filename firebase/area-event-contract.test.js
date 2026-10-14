@@ -70,3 +70,14 @@ test('rejects invalid or duplicate location records', () => {
     /coordinates are invalid.*duplicated.*certainty is invalid/
   );
 });
+
+test('canonical venue links are optional but must be unique and confirmed', () => {
+  const point = {id:'venue_one', label:'Venue One', certainty:'confirmed', venueId:'one', linkedEventIds:['child_fixture'], coordinates:{latitude:46.2,longitude:-63.1}};
+  const data={version:1,status:'verified',locations:[point]};
+  assert.equal(validateAreaData(data),data);
+  assert.throws(()=>validateAreaData({...data,locations:[{...point,certainty:'approximate'}]}),/confirmed canonical venue/);
+  assert.throws(()=>validateAreaData({...data,locations:[{...point,linkedEventIds:['child_fixture','child_fixture']}]}),/duplicated/);
+  assert.throws(()=>validateAreaData({...data,locations:[point,{...point,id:'alias'}]}),/venueId is invalid or duplicated/);
+  assert.throws(()=>validateAreaData({...data,locations:{}}),/needs at least/);
+  assert.throws(()=>validateAreaData({...data,locations:[null]}),/is invalid/);
+});
