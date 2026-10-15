@@ -30,7 +30,7 @@ const changes=[
 ];
 const key=JSON.parse(await fs.readFile(process.env.ANCHOR_CREDENTIAL_PATH,'utf8'));
 assert.equal(key.project_id,'gathr-migrated');admin.initializeApp({credential:admin.credential.cert(key),projectId:key.project_id});
-const db=admin.firestore(),plain=x=>JSON.parse(JSON.stringify(x));
+const db=admin.firestore(),plain=x=>x===undefined?undefined:JSON.parse(JSON.stringify(x));
 const hash=x=>createHash('sha256').update(JSON.stringify(x)).digest('hex');
 const wrap=d=>({path:d.ref.path,exists:d.exists,updateTime:d.updateTime?.toDate().toISOString(),version:d.updateTime?{seconds:d.updateTime.seconds,nanoseconds:d.updateTime.nanoseconds}:null,data:d.data()});
 try{

@@ -562,3 +562,53 @@ copy and dropped explicit time evidence; October 14 duplicate cleanup did not
 correct those fields. Exact two-record repair is backed up/default-dry and
 requires approval after the active parse. See
 `docs/arts-mixer-oct15-venue-repair.md`; no live change is claimed.
+
+Arts Mixer follow-up is now complete after the October15 full run: exactly the
+approved event/review fields were corrected, with source/ID/media unchanged;
+detail and the full1,038-event feed verify venue scope and explicit16–19 timing.
+The narrow classifier guard was released from an exact serving baseline at
+commit2dbd81c,785 tests passed, and all three parser functions are independently
+verified ACTIVE/100% at common hash608dca297a322ff2d5ced72337b5cd60dbedc9b9 with
+all71 user environment values/secret bindings preserved. See the repair
+document for backup, harmless reference refresh and independent verifier detail.
+
+## October15 completed-run observations
+
+The new372-row regular run completed in78m13s, with actual Luna in Stages1/2/3/5
+and Nano compact in Stage4. No checkpoint regression/repeated row/write target
+was observed;89 writes and95 managed image URLs are available. The existing
+profile-image scan has no new healthy-to-missing/blank regressions.
+
+Content is not a clean pass. Accumulate the audition08:00 versus evening and
+unsupported Chefs Harvest clocks under website/source-time evidence; retain
+first-party Pressure Points18:00 versus aggregator21:00 as a source conflict,
+not a model transcription error. Same-session Pints Trivia/General Trivia is a
+new narrow generic-title duplicate example. Ruby,Mill River and other valid
+date-only offers expose completeness holds after acceptance; explicit FiN
+Thursday tacos expose compact no-op semantics: both raw Nano responses say
+KEPT but put recurringPattern:none with no correction reason, triggering the
+protective contract hold. Do not remove that guard globally or infer clocks.
+
+Stage5's one-item karaoke response repeats97 objects and hits32,000 output
+tokens/207.272s with zero reasoning. Incomplete output was rejected, existing
+karaoke coverage survives and the dataset continues. Retained raw response
+permits a bounded recovery regression; raising the cap is not a solution.
+Milton's09:00-to-noon formatting error was contained by persistence.
+
+PQ-SPATIAL/PQ-021 observations include source-scope and online identity losses,
+plus safe automatic-festival shadow holds. Shadow inspected144 snapshots and
+253 date-window canonical records, attempted all7 candidate posts and produced
+zero eligible links,5 holds,2 pending matches and3 capture gaps. Automatic
+publication remains off; no public record was changed by the shadow test.
+
+The older17 APM activities were never materialized despite resolved queue
+status; this is unfinished prior recovery, not a new-run guard failure. The
+original APM/Hamilton/Connolly sources were absent today, so guard execution is
+not claimed. Unpriced food features remain valid; row90 is not a proven false
+listing merely because it lacks a price/discount. Original image availability
+and routine-service/retail policy boundaries are separately recorded.
+
+See `docs/luna-oct15-production-audit.md` and
+`docs/festival-linker-oct15-full-run-shadow.md` for full source ledgers, costs,
+actual call timing, completed Arts Mixer repair/release and the next repair
+sequence. Other live findings need exact reviewed approval before mutation.

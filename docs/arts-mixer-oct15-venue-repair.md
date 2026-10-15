@@ -26,7 +26,7 @@ confirm a legacy end; `utils/locationScope.ts` selects city-wide UI from scope.
 Restoring the flags/scope fits the current app without an OTA. This is static
 compatibility evidence, not a new device/rendered test.
 
-## Exact live correction — APPROVED, NOT APPLIED
+## Exact live correction — APPROVED AND VERIFIED
 
 1. `events/location_4a23fba2153afb4b591c2675`: change `locationScope` to `venue`,
    precision to `exact`, room to `additionalLocation: Mavor’s Lounge`; clean
@@ -85,3 +85,50 @@ The existing October 15 audit heartbeat was updated successfully with the exact
 approved helper/plan and narrow release gates. Its 11 a.m. Halifax start,
 schedule and end time are unchanged. It must complete this approved work after
 idle/completion checks, or report a concrete blocker, before pausing.
+
+## Completed after full parse, October 15
+
+The regular run finished at13:57:45 UTC with all372 rows, completed lock/marker/
+final batch and no checkpoint. No active parser remained before repair/deploy.
+
+The first saved-plan apply safely aborted before writing because the untouched
+venue reference had refreshed its Facebook image CDN hostname and updatedAt.
+Both target documents, source snapshot, occurrence siblings and every proposed
+mutation were identical to the approved plan. A field-by-field comparison also
+proved every other venue field and the underlying source-image path unchanged.
+The fresh dry run pinned that harmless reference refresh without broadening the
+approved actions; evidence is `fresh-plan-approval-continuity.json`.
+
+Exactly the two approved documents were changed after backup
+`functions/artifacts/arts-mixer-oct15/repair-backup-2026-10-15T14-05-55-882Z.json`.
+The transaction succeeded, then its local verifier failed serializing the
+intentionally absent old child. The serializer was corrected; no apply was
+repeated. Independent read-only verification checks the entire approved delta
+and all untouched backup references. API detail and the complete11-page,
+1,038-event feed show one venue-scoped mixer, explicit16–19 time provenance,
+clean description and unchanged media. Old child remains absent. Final evidence:
+`repair-applied-verified.json` and `repair-independent-verified.json` in that
+directory. No app code/OTA or map interaction was needed.
+
+The clean release checkout is
+`C:/Users/craig/.codex/worktrees/arts-mixer-release/gathr-apps-script`, branch
+`codex/arts-mixer-venue-release-20261015`, commit
+`2dbd81cf0ea6cfb702c3700211dc1ae972d925ae`. Its219 baseline source files match the
+immutable serving archive and commit e0f9255. Only the classifier guard and two
+regression files were added; all festival shadow additions were excluded.
+Build and785 full backend tests passed, followed by the exact three-function
+codebase-qualified dry run and deploy. Firebase reported its existing SDK-age
+warning; no SDK update was included.
+
+Independent function/Cloud Run readback verifies ACTIVE,100% latest traffic,
+all71 user environment values and secret bindings preserved:
+
+| Function | Revision | Common source hash |
+|---|---|---|
+| processDataset | processdataset-00485-koj | 608dca297a322ff2d5ced72337b5cd60dbedc9b9 |
+| processDatasetResume | processdatasetresume-00449-yej | 608dca297a322ff2d5ced72337b5cd60dbedc9b9 |
+| processDatasetSelectedRows | processdatasetselectedrows-00441-dok | 608dca297a322ff2d5ced72337b5cd60dbedc9b9 |
+
+Release logs and `serving-verified.json` are local in the release checkout's
+`functions/artifacts/arts-mixer-release/`. This release happened after the run;
+today's production quality measurements belong to the earlier544339 hash.
