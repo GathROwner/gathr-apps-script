@@ -22,3 +22,8 @@ test('online registration, hybrid attendance and virtual-reality activities pres
  for(const[name,caption]of [['Art class','Register online. Class held at Community Hall.'],['Webinar','Webinar held at Community Hall. Register online.'],['Webinar','Hybrid session: attend in person or via Zoom.'],['Virtual reality gaming','Join us at the arcade.']])
   assert.notEqual(fullParserEventLocationCheck({name} as any,{text:caption} as any).reason,'online_activity_requires_non_venue_publication');
 });
+test('an unrelated webinar in a mixed source calendar does not hold its physical activity',()=>{
+ const result=fullParserEventLocationCheck({name:'Family pottery class',venue:'Community Hall',description:'Saturday family class'} as any,
+  {text:'Monday: webinar via Zoom. Saturday: family pottery class.'} as any);
+ assert.notEqual(result.reason,'online_activity_requires_non_venue_publication');
+});

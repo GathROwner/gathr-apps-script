@@ -4568,10 +4568,11 @@ export async function resolveVenueForFullParserEventWithMatcherForRegression(par
 
 export function fullParserEventLocationCheck(item: ParserProcessedEvent, row: RawRowData) {
   const spatial=item.spatial || item.spatialEvidence;
-  const onlineText=[item.name,item.description,row.text].filter(Boolean).join('\n');
+  const itemText=[item.name,item.description].filter(Boolean).join('\n');
+  const onlineText=[itemText,row.text].filter(Boolean).join('\n');
   const platformLocation=/^(?:online(?: via)?\s+)?(?:zoom|microsoft\s+teams|youtube(?:\s+livestream)?)$/i
     .test(String(item.venue||item.establishment||'').trim());
-  const explicitOnline=platformLocation||/\b(?:webinar|online via|live on zoom|virtual\s+(?:recruiting|info|session|meeting|event)|live\s*stream\s*:)\b/i.test(onlineText)||
+  const explicitOnline=platformLocation||/\b(?:webinar|online via|live on zoom|virtual\s+(?:recruiting|info|session|meeting|event)|live\s*stream\s*:)\b/i.test(itemText)||
     (spatial?.kind==='online'&&/\b(?:online|virtual|Microsoft\s+Teams|Zoom|YouTube|livestream)\b/i.test(onlineText));
   const physicalOption=/\b(?:in[ -]person|hybrid|attend\s+in\s+person)\b/i.test(onlineText)||
     /\b(?:held|takes place|class|workshop|meet|join us|attend)\s+at\s+(?!\d|noon\b|midnight\b|zoom\b|microsoft\b|https?)\p{L}/iu.test(onlineText);
