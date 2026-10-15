@@ -139,3 +139,37 @@ and its matching backup. The proposed delta adds source ID `1564814712352727`
 only to `sourceUniqueIds` on Captains/Nick, Britt Campbell, October15 conference
 and L'Autre. No clock/title/media/manual-link changes and no public link writer
 are included. No live writes occurred; this proposal is not approval or apply.
+
+## Coordinated shadow reconciliation and remaining sequence
+
+The accepted festival shadow hardening `97187be` was independently inspected
+and integrated as `59d8ae2`; its tooling-import commit was excluded because the
+coordinator already had those files. Independent matcher/scope/public-reference/
+extractor tests passed 76/76. The integrated coordinator build passed and all
+856 compiled backend tests passed. This combined checkout contains unshipped
+shadow code; it is NOT the parser serving package. Production stays at `4ba56dd`.
+
+Cached seven-source playback now resolves both conference date scopes and
+L'Autre identity, reducing capture gaps from three to one. It correctly holds
+the known Pressure Points clock conflict before source-ownership checks.
+Current result: zero eligible, nine holds, zero missing-child pending outcomes,
+one capture gap. Four in-memory audit-backed provenance additions yield four
+eligible proposals; no such live additions or public links have been applied.
+The remaining source/clock/venue/ownership gaps and separate public writer are
+unfinished. See `docs/festival-shadow-oct15-hardening.md` for exact boundaries.
+
+| Concern | Prevention status | Live recovery / next gate |
+|---|---|---|
+| Website clocks and generic images | Serving | Exact auditions/Harvest correction prepared, not applied; requires compatible display and exact approval |
+| Pressure Points and Pints East copies | Serving | Two-record delete approval pending; fresh reread proves approved snapshot unchanged |
+| FiN compact recurrence placeholder | Serving; both saved responses pass | Controlled source recovery still needed; no live replay performed |
+| Ruby, Harvest later dates, Trailside, other date-only activities | Held evidence retained | Date-only publication OFF; source price and duplicate conflicts require reviewed recovery |
+| Source provenance / festival offsets, titles and authority | Provenance serving; matcher shadow only | Four exact source-array additions prepared, not applied; automatic writer still OFF |
+| Spatial scope and online-only office pins | Serving defensive guards | Existing A&W/bike-bus/online records require separate exact review; public online contract not implemented |
+| Book discussion category and displaced programme image | Serving | Existing Indigo category and L'Autre image correction need exact reviewed plans |
+| Earlier APM17 recovery | Prior venue guards retained | Not materialized; retain its exact-plan approval gate |
+| Andersons Creek identity, indefinite package horizon | Unresolved source/location evidence | Do not invent venues or booking end dates |
+
+No live document has been mutated by this follow-up turn. Preparation, deployed
+prevention and historical data recovery are tracked separately to avoid claiming
+that a future parser safeguard has corrected an existing listing.
