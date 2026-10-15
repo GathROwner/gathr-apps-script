@@ -2,6 +2,17 @@
 
 Prepared and dry-run verified. No live event/venue changes have been made.
 
+October15 APM-only refresh at16:59:58 UTC: all17 listed targets are still absent.
+Both managed original posters were retrieved200 and independently viewed:
+all16 printed hockey clocks (including U15 October23 17:10–18:20) agree, and
+the meeting says October15 18:00, Board Room, APM Centre, with no finish.
+Fresh plan/backup: `functions/artifacts/venue-resolution-oct14/apm-recovery/plan-2026-10-15T16-59-58-903Z.json`
+and matching `backup-2026-10-15T16-59-58-903Z.json`. Helper commit `b7c5b0e`
+pins both original source snapshots and rechecks source/venue siblings inside
+the create transaction. No active parser; no paid model calls or live writes.
+Exact APM17 approval is requested and pending. The Ghostwalk/museum plans
+below are separate; this APM refresh neither rechecks nor authorizes them.
+
 ## Scope
 
 1. Create exactly the 17 APM Centre events below from the original posters. Keep all 16 printed hockey sessions, including the 70-minute U15 session. The volunteer meeting keeps its explicit 18:00 start with unknown end; remove the unsupported 23:00 category default. Preserve source/media and room labels.
