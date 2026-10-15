@@ -48,7 +48,21 @@ evening with individually communicated appointments, not 08:00–01:00. Original
 poster was downloaded and independently viewed again. Date-only UI fix is
 published to iOS Preview only; production/Android/older-client compatibility
 and delivery need a concrete decision before unknown-time data publication.
-The existing frontend coordinator is inspecting exact target baselines read-only.
+The existing frontend coordinator's read-only review is complete. Fresh EAS
+readback reports iOS Preview `3d2f4f7`, Android Preview `8ce23bf`, iOS Production
+`b5d58df` and Android Production `25a157d`, all runtime 1.1.10. Independently
+inspected source confirms Android Preview lacks the exact date-only policy,
+and both Production trees lack `utils/eventTiming.ts` entirely. Current Preview
+source includes the policy recognition and calendar guard. Its focused rerun
+passed 29 tests in three suites, one existing opt-in skip; this is not device
+adoption. No additional frontend edits or releases occurred.
+
+The next delivery proposal is Android Preview validation, then minimal separate
+Production compatibility backports preserving each platform's accepted baseline.
+Neither a wholesale Preview-to-Production replacement nor a two-commit blind
+cherry-pick is acceptable. Older installed clients also lack capability-based
+delivery, so OTA publication alone cannot establish compatibility for everyone.
+This delivery decision must be addressed before unknown-time public mutations.
 Global date-only parser gate remains OFF. Do not substitute a guessed evening
 time or claim an uploaded OTA proves adoption.
 
