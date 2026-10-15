@@ -1,6 +1,7 @@
 # October 14 exact follow-up repair plan
 
-Prepared and dry-run verified. No live event/venue changes have been made.
+APM-only recovery is COMPLETE. Ghostwalk/museum entries below remain separate
+plans; this document does not claim they have been applied.
 
 October15 APM-only refresh at16:59:58 UTC: all17 listed targets are still absent.
 Both managed original posters were retrieved200 and independently viewed:
@@ -10,8 +11,31 @@ Fresh plan/backup: `functions/artifacts/venue-resolution-oct14/apm-recovery/plan
 and matching `backup-2026-10-15T16-59-58-903Z.json`. Helper commit `b7c5b0e`
 pins both original source snapshots and rechecks source/venue siblings inside
 the create transaction. No active parser; no paid model calls or live writes.
-Exact APM17 approval is requested and pending. The Ghostwalk/museum plans
-below are separate; this APM refresh neither rechecks nor authorizes them.
+Craig approved these exact17 targets with "Ok do it" after their reviewed
+plan and source checks were presented. The Ghostwalk/museum plans below are
+separate; this APM approval neither rechecks nor authorizes them.
+
+### October15 APM apply and verification
+
+Exactly17 creates committed in one guarded transaction at17:02 UTC; existing
+venue, aliases, source snapshots, images and other events were not modified.
+Applied result: `functions/artifacts/venue-resolution-oct14/apm-recovery/result-2026-10-15T17-01-51-833Z.json`.
+Fresh full prewrite backup: matching `backup-2026-10-15T17-01-51-833Z.json`.
+Original helper first rejected a Timestamp-object versus saved-JSON comparison
+before any writes. Commit `6da745c` compares the exact serialized representation;
+timestamp round-trip succeeds while nanosecond/reference-time drift still
+rejects. The same reviewed plan passed unchanged; no guard was bypassed.
+
+Independent read-only verifier `firebase/verify-apm-oct14-recovery.mjs` confirmed
+all17 exact payloads,12 untouched venue/source/sibling references,17 detail200s,
+each target once in the complete1,038-event/11-page app feed, zero duplicate
+source occurrences and both managed source images200. The meeting remains
+October15 18:00 with blank endTime; all16 hockey clocks agree with the poster.
+Result: `functions/artifacts/venue-resolution-oct14/apm-recovery/independent-verification-2026-10-15.json`,
+verified17:03:36 UTC. No parser deploy/replay/queue action or paid model call.
+The API feed uses `title`; the independent verifier was corrected to read that
+field before its final successful same-session check. No live data changed
+while correcting the verifier.
 
 ## Scope
 

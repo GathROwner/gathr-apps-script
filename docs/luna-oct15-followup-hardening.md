@@ -167,7 +167,7 @@ unfinished. See `docs/festival-shadow-oct15-hardening.md` for exact boundaries.
 | Source provenance / festival offsets, titles and authority | Provenance serving; matcher shadow only | Four exact source-array additions prepared, not applied; automatic writer still OFF |
 | Spatial scope and online-only office pins | Serving defensive guards | Existing A&W/bike-bus/online records require separate exact review; public online contract not implemented |
 | Book discussion category and displaced programme image | Serving | Existing Indigo category and L'Autre image correction need exact reviewed plans |
-| Earlier APM17 recovery | Prior venue guards retained | Not materialized; retain its exact-plan approval gate |
+| Earlier APM17 recovery | Prior venue guards retained | Exact approved17 creates complete October15; detail/full-feed/source/image checks passed |
 | Andersons Creek identity, indefinite package horizon | Unresolved source/location evidence | Do not invent venues or booking end dates |
 
 The initial prevention follow-up made no live document changes. The subsequent
@@ -214,3 +214,16 @@ No venue/media deletion, reparse, queue mutation or new deployment occurred.
 Independent artifact: `duplicate-independent-verification.json` in that same
 release-checkout artifact folder. Live data recovery for every other row remains
 separate; this result does not authorize additional deletions or writes.
+
+### Subsequent approved APM recovery complete
+
+Craig then approved the exact17 APM targets. One guarded transaction created
+all16 printed boys' evaluation sessions and the October15 18:00 volunteer
+meeting with unknown finish. Independent verifier checked17 exact Firestore
+payloads/details,12 untouched guarded references, each target once in the
+complete1,038-event/11-page feed, no duplicated exact source identities and
+both managed posters200. See `docs/oct14-followup-live-approval-plan.md` for
+the exact paths, original approved plan, fresh prewrite/result files and the
+helper serialization/verifier field corrections completed before final success.
+Only these17 creates were authorized/applied; FiN/date-only/spatial/media and
+festival provenance recovery remain separate pending work.

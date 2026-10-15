@@ -642,3 +642,12 @@ untargeted documents are unchanged; all four primary managed images remain200.
 Fresh prewrite backup, transaction drift/sibling guards and independent result
 are recorded in `docs/luna-oct15-followup-hardening.md`. Other pending recovery
 and source/time/venue decisions remain unapproved/unapplied.
+
+October15 subsequent exact APM recovery is COMPLETE after Craig's separate
+approval of all17 reviewed paths. All16 printed boys' evaluation sessions and
+the October15 18:00 start-only volunteer meeting now exist at the verified APM
+Centre. Independent verification passed17 payload/details,12 untouched guarded
+references,17 once-only app-feed entries, zero duplicate source occurrences,
+and two source posters200. U15 October23 17:10–18:20 remains70 minutes; meeting
+has no invented end. See `docs/oct14-followup-live-approval-plan.md` for complete
+backup/apply/independent evidence. FiN and other recoveries remain separate.
