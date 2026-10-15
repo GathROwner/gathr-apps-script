@@ -52,6 +52,17 @@ by this explicitly timed correction, and its old fingerprints now fail closed.
 
 ## 2. Auditions and honest unknown-time publication
 
+**COMPLETE as of October 15 20:23 UTC.** The preparatory narrative below is
+historical and superseded by Craig's exact approval and verified execution in
+`docs/auditions-oct15-release-and-repair-approval-plan.md`. API `6e9fe16` is live
+at `gathr-backend-00085-tts`, with preserved configuration. Both approved Preview
+platforms are published and independently read back; device adoption is not
+claimed. The exact audition is now October26/unknown clocks/original poster,
+and feed marker is260. Independent full-feed checks show default absent,
+capable once, 22 untargeted references unchanged and all three images200.
+Global parser date-only publication remains OFF; Production compatibility and
+broader enablement remain separate subsequent work.
+
 Auditions source/poster and the freshly read official page support October 26
 evening with individually communicated appointments, not 08:00–01:00. Original
 poster was downloaded and independently viewed again. Date-only UI fix is

@@ -682,3 +682,18 @@ active-feed occurrence across eleven pages, detail 200 and all six images 200.
 No date-only metadata, new events, media writes or parser deployment. The earlier
 unknown-time Harvest proposal is superseded; auditions remains a separate
 client-delivery issue. See `docs/oct15-sequential-repair-worklist.md`.
+
+October15 auditions compatibility repair is COMPLETE after exact scoped approval.
+API `6e9fe16`/`gathr-backend-00085-tts` gates only the new marked unknown-clock
+contract by explicit supported request, preserving ordinary/legacy delivery and
+all runtime configuration. iOS Preview `7473c3e` and Android Preview `4e44138`
+declare support and isolate persisted caches; the latter also ports reviewed
+unknown-time handling to its older accepted baseline. Published bundles match
+tested exports. Independent EAS readbacks passed; device adoption is unverified.
+The single audition `bqk2pKnr1HHZQvhaz6Qo` retains October26/evening without
+invented exact clocks and restores its original poster; marker259->260 was
+atomic. Exact delta, 22 unchanged references, full default/capable feeds
+(absent/once), detail404/200, three images200 and marker260 independently passed.
+No media deletion, new event, parser deploy or global date-only enablement.
+Evidence and rollback constraints are in
+`docs/auditions-oct15-release-and-repair-approval-plan.md`.

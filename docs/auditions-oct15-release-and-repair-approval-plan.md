@@ -1,7 +1,55 @@
 # Auditions: exact compatibility release and live repair decision
 
-Prepared and independently reviewed; **not applied or released**.
+Craig approved this exact scoped package on October 15. Execution is sequential.
+The API, both Preview releases and exact live data repair are COMPLETE and
+independently verified. Device adoption remains unverified.
 Harvest's earlier single-record correction is complete and separate.
+
+## Execution evidence (October 15)
+
+- Cloud Build `ccf56609-fe46-4f3f-9136-ab97e318c78a` succeeded for exact
+  `6e9fe169c9a67df8e85917d7be6a4b61925f4240`. Cloud Run revision
+  `gathr-backend-00085-tts` is Ready, with 100% latest traffic. Independent
+  `/api/release` confirms that clean source commit.
+- Before/after runtime, annotation and all fourteen environment-definition
+  fingerprints match. Ordinary active feed, detail and managed-image checks
+  passed. Read-only preflight found zero active parser locks, completed dataset,
+  completed final batch and no checkpoint.
+- Private evidence: `functions/artifacts/oct15-sequential-repairs/` files
+  `api-approved-deploy.txt`, `api-config-hashes-approved-before.json`,
+  `api-config-hashes-approved-after.json`, `api-release-approved-after.json`
+  and `api-approved-independent-smoke.json`.
+- iOS Preview is released from exact `7473c3e`, runtime `1.1.10`: group
+  `948ec492-513f-4a93-a3be-7980f3213ed4`, update
+  `01a14132-e6b0-7ab4-acbb-efdf2fab2977`. Parent independently queried EAS
+  view/list and confirmed newest iOS Preview, exact commit/platform/runtime.
+  Frontend export proof confirms byte-identical tested Hermes bundle, 2,495
+  modules and 112 EAS iOS assets, with no runtime fixtures. Preview channel
+  mapping is active. Device adoption is unverified; existing fingerprint
+  advisory remains. Evidence: `ios-preview-independent-*` in the private
+  coordinator artifacts and the iOS checkout's ignored release directory.
+- Android Preview is released from exact `4e44138`, runtime `1.1.10`: group
+  `be292299-63ce-4715-a19d-128f5bd530c8`, update
+  `01a14138-f9fa-74c4-b3d9-27f6081aa8d0`. Parent independently queried EAS
+  view/list and confirmed newest Android Preview and exact source/runtime.
+  Published Hermes is byte-identical to the tested export: 2,727 modules,
+  128 EAS Android assets, no runtime fixtures. Staging configuration and active
+  Preview mapping were preserved. Existing fingerprint advisory remains;
+  installed-device adoption is unverified. Both frontend checkouts remain clean
+  at their approved commits, and the frontend owner completed idle.
+- Fresh source/record/version/sibling and idle-parser checks matched the exact
+  reviewed plan. At 20:22 UTC one atomic transaction updated only the audition
+  and `runtime_metadata/event_feed` (259 -> 260). The original poster is primary,
+  both exact clocks are unknown, source date is October 26, and evening wording
+  remains. No media upload/delete or new event.
+- Apply evidence: `functions/artifacts/oct15-sequential-repairs/auditions/`
+  `prewrite-2026-10-15T20-22-20-646Z.json` and
+  `applied-2026-10-15T20-22-20-646Z.json`. Independent verifier passed at
+  20:23 UTC: exact delta, 22 unchanged references, unchanged sibling membership,
+  default detail404/feed absent, capable detail200/feed once, 1,007 default and
+  1,008 capable events across eleven pages each, identical unrelated public
+  responses, feed marker260 and all three existing managed images200. See
+  `independent-verification.json`. No parser deploy or global gate change.
 
 ## Proposed sequence, one step at a time
 
