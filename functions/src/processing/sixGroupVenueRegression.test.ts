@@ -12,3 +12,13 @@ test('online-only Recruiting sessions cannot acquire the publisher office',()=>{
  const result=fullParserEventLocationCheck(item,{text:'Virtual sessions October 19/26 at 8pm. Email for the join link.',address:'450 Office Street, Charlottetown, PE'} as any);
  assert.equal(result.decision,'hold');assert.equal(result.reason,'online_activity_requires_non_venue_publication');
 });
+test('a webinar with unknown spatial kind still cannot geocode Zoom as a venue',()=>{
+ for(const text of ['Sign up for the free webinar.','Join us at 8pm on Zoom.','Join us at noon for the webinar.']){
+  const result=fullParserEventLocationCheck({name:'Energy drinks webinar',venue:'Zoom',spatial:{kind:'unknown'}} as any,{text} as any);
+  assert.equal(result.decision,'hold');assert.equal(result.reason,'online_activity_requires_non_venue_publication');
+ }
+});
+test('online registration, hybrid attendance and virtual-reality activities preserve physical routing',()=>{
+ for(const[name,caption]of [['Art class','Register online. Class held at Community Hall.'],['Webinar','Webinar held at Community Hall. Register online.'],['Webinar','Hybrid session: attend in person or via Zoom.'],['Virtual reality gaming','Join us at the arcade.']])
+  assert.notEqual(fullParserEventLocationCheck({name} as any,{text:caption} as any).reason,'online_activity_requires_non_venue_publication');
+});
