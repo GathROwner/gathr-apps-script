@@ -2,7 +2,7 @@ import type {ExtractedItem, FormattedEvent} from './types.js';
 import {reconcileSourceItemEvidence} from './sourceItemEvidence.js';
 
 export interface SourceTimeConstraint {
-  reason: 'unresolved_meridiem' | 'meal_period_without_clock' | 'activity_offer_without_clock' | 'doors_without_showtime';
+  reason: 'unresolved_meridiem' | 'meal_period_without_clock' | 'activity_offer_without_clock' | 'doors_without_showtime' | 'dated_activity_without_clock';
   evidence: string;
 }
 
@@ -135,11 +135,14 @@ export function constrainSourceTimes(items: ExtractedItem[], caption: string): E
     if (hasUnresolvedSourceMeridiem(item)) return {...item,
       _sourceTimeConstraint: {reason: 'unresolved_meridiem', evidence: item.extractionReason || item.description || ''}};
     if (String(item.startTime || '').trim()) return item;
+    if (['route','multi_location','online'].includes(String(item.spatial?.kind || ''))) return {...item,
+      _sourceTimeConstraint:{reason:'dated_activity_without_clock',evidence:'Spatial activity has no advertised start clock; one venue or post timestamp cannot supply it'}};
     const detail = `${item.name} ${item.description || ''} ${item.extractionReason || ''}`;
     const diningService = /\b(?:dinner|supper|lunch|breakfast|brunch)\s+(?:service|special|served|offer|buffet)\b|\b(?:harvest\s+feast|prix\s*fixe)\b/i.test(detail) &&
       !/\b(?:concert|band|music|show|theatre|theater|fundrais(?:er|ing)|community\s+(?:meal|dinner))\b/i.test(item.name);
     const special = item._sourceType === 'special' || ('type' in item && item.type === 'special') || diningService;
-    if (!special) return item;
+    if (!special) return (item as any)._stage4NeedsTimeEnrichment === true ? {...item,
+      _sourceTimeConstraint:{reason:'dated_activity_without_clock',evidence:'Validated dated activity has no advertised start clock'}} : item;
     if (/\b(?:all\s*day|open\s*to\s*close)\b/i.test(`${detail} ${item.timeFlags?.start?.evidence || ''}`)) return item;
     const meal = detail.match(/\b(?:breakfast|brunch|lunch|dinner|supper)\b/i)?.[0] ||
       (items.every(x => x._sourceType === 'special') ? oneSharedMeal : '');

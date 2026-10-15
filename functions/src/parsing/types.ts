@@ -117,6 +117,7 @@ export interface ParseStageArtifactsSnapshot {
   stage3InputKind?: 'text_only' | 'image';
   stage4Items?: ExtractedItem[];
   stage4ValidationHold?: { format: 'compact_v1'; reason: string; attempts: number };
+  stage56HeldItems?: TimeResolvedEvent[];
   stage37TicketUrl?: string;
 }
 
@@ -555,6 +556,7 @@ export const ALLOWED_CATEGORIES: readonly Category[] = [
 ];
 
 export interface FormattedEvent extends RecurrenceScheduleFields {
+  timing?: unknown;
   isEvent: 'Yes' | 'No';
   isFoodSpecial: 'Yes' | 'No';
   category: Category;

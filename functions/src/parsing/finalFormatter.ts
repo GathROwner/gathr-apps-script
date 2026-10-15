@@ -1311,6 +1311,11 @@ export function rehydrateFormattedEventMetadata(
     nextEvent._sourceTimeConstraint = {...originalItem._sourceTimeConstraint};
     if (!String(originalItem.startTime || '').trim()) {
       nextEvent.startTime = '';
+      if (!normalizeUnambiguousSourceStartTime(String(originalItem.endTime || ''))) nextEvent.endTime = '';
+      if (!originalItem.recurringPattern || originalItem.recurringPattern === 'none') {
+        const sourceEnd = String((originalItem as any).endDate || '');
+        nextEvent.endDate = parseIsoDate(sourceEnd) ? sourceEnd : originalItem.date;
+      }
       nextEvent.timeFlags = cloneFormattedTimeFlags(originalItem.timeFlags) || {
         start: {source: 'none', evidence: ''}, end: {source: 'none', toClose: false, evidence: ''},
       };
@@ -1440,7 +1445,7 @@ export function rehydrateFormattedEventMetadata(
   // spatial evidence. Preserve the Stage-3 evidence verbatim so the routing
   // gate can make a deterministic, review-safe decision later.
   const originalSpatial = (originalItem as Record<string, unknown> | undefined)?.spatial;
-  if (!(event as Record<string, unknown>).spatial && originalSpatial && typeof originalSpatial === 'object') {
+  if (originalSpatial && typeof originalSpatial === 'object') {
     nextEvent.spatial = JSON.parse(JSON.stringify(originalSpatial));
     changed = true;
   }

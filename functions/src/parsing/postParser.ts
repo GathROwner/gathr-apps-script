@@ -57,6 +57,7 @@ import { reconcileCaptionOnlyWeeklyEvents } from './captionOnlyWeekly.js';
 import { reconcileRaceSchedule } from './raceScheduleReconciler.js';
 import { resolveTimesWithOperatingHours } from './venueResolver.js';
 import {constrainSourceTimes, blocksStartTimeFallback} from './sourceTimeConstraints.js';
+import {dateOnlyActivity} from './dateOnlyActivity.js';
 import {sourceItemHoldReason,needsWholeScheduleIdentityReview} from './sourceItemEvidence.js';
 import {enrichLinkedPerformanceStarts} from './linkedPerformanceTime.js';
 import { shouldHoldUndatedStandingSchedule, shouldRetrySeasonalLeagueWithLegacy,
@@ -831,8 +832,10 @@ async function replayPostDataFromArtifactsCore(
     timestamp,
     cfg.timezone,
     combinedText,
-    cfg.lunaCalendarLiteralSourcePrompt === true
+    cfg.lunaCalendarLiteralSourcePrompt === true,
+    process.env.PARSER_DATE_ONLY_PUBLICATION_ENABLED === 'true'
   );
+  await emitStageArtifacts(cfg,{source:'replay',stage56HeldItems:(finalizedEvents as any)._dateOnlyCandidates || []});
   logTiming('stage5_6_datetime_replay', stage56Start, {
     postId,
     finalizedCount: finalizedEvents?.length || 0,
@@ -2324,8 +2327,10 @@ async function parsePostDataCore(
       timestamp,
       cfg.timezone,
       input.combinedText,
-      cfg.lunaCalendarLiteralSourcePrompt === true
+      cfg.lunaCalendarLiteralSourcePrompt === true,
+      process.env.PARSER_DATE_ONLY_PUBLICATION_ENABLED === 'true'
     );
+    await emitStageArtifacts(cfg,{source:'live',stage56HeldItems:(finalizedEvents as any)._dateOnlyCandidates || []});
     logTiming('stage5_6_datetime', stage56Start, {
       postId,
       finalizedCount: finalizedEvents?.length || 0,
@@ -3192,7 +3197,8 @@ export function enforceDateTimeCompleteness(
   timestamp: string,
   timezone: string,
   combinedText = '',
-  reconcileHalfDaySessions = false
+  reconcileHalfDaySessions = false,
+  allowDateOnly = false
 ): TimeResolvedEvent[] {
   const posted = DateTime.fromISO(timestamp, { zone: timezone });
   const postedDate = posted.isValid ? posted.toFormat('yyyy-MM-dd') : '';
@@ -3210,6 +3216,7 @@ export function enforceDateTimeCompleteness(
 
   const kept: TimeResolvedEvent[] = [];
   const rejectedByReason: Record<string, number> = {};
+  const dateOnlyCandidates: TimeResolvedEvent[] = [];
 
   for (const [index, raw] of events.entries()) {
     const ev: TimeResolvedEvent = { ...raw };
@@ -3513,6 +3520,11 @@ export function enforceDateTimeCompleteness(
     ].filter(Boolean);
 
     if (missingFields.length > 0) {
+      const candidate=dateOnlyActivity(ev);
+      if(candidate){
+        if(allowDateOnly){kept.push(candidate);continue;}
+        dateOnlyCandidates.push(candidate);
+      }
       const reason = `missing_${missingFields.join('_')}`;
       rejectedByReason[reason] = (rejectedByReason[reason] || 0) + 1;
       logger.debug(
@@ -3531,6 +3543,7 @@ export function enforceDateTimeCompleteness(
     kept.push(ev);
   }
 
+  Object.defineProperty(kept,'_dateOnlyCandidates',{value:dateOnlyCandidates});
   logger.info('Stage 5.6 summary', {
     inputCount: events.length,
     keptCount: kept.length,

@@ -2272,6 +2272,7 @@ export function mergeStageArtifactsSnapshot(
     ...((incoming.stage4ValidationHold || base?.stage4ValidationHold) ?
       {stage4ValidationHold: incoming.stage4ValidationHold || base?.stage4ValidationHold} : {}),
     stage4Items,
+    stage56HeldItems: incoming.stage56HeldItems ?? base?.stage56HeldItems,
     stage37TicketUrl,
   };
 }
@@ -2301,6 +2302,7 @@ export function sanitizeStageArtifactsSnapshot(
     stage3InputKind: snapshot.stage3InputKind,
     ...(snapshot.stage4ValidationHold ? {stage4ValidationHold: snapshot.stage4ValidationHold} : {}),
     stage4Items: truncateItems(snapshot.stage4Items) as ParseStageArtifactsSnapshot['stage4Items'],
+    stage56HeldItems: truncateItems(snapshot.stage56HeldItems) as ParseStageArtifactsSnapshot['stage56HeldItems'],
   });
 }
 
@@ -4564,6 +4566,15 @@ export async function resolveVenueForFullParserEventWithMatcherForRegression(par
 }
 
 export function fullParserEventLocationCheck(item: ParserProcessedEvent, row: RawRowData) {
+  const spatial=item.spatial || item.spatialEvidence;
+  const onlineText=[item.name,item.description,row.text].filter(Boolean).join('\n');
+  if(spatial?.kind === 'online' && /\b(?:online|virtual|webinar|Microsoft\s+Teams|Zoom|YouTube|livestream)\b/i.test(onlineText) &&
+      !/\b(?:in[ -]person|hybrid|attend\s+(?:in\s+person|at))\b/i.test(onlineText)) {
+    // Online is valid content, but a publisher's office is not its event venue.
+    // Preserve the parsed source in its normal snapshot while publication waits
+    // for a supported non-venue contract; never send a platform to geocoding.
+    return {decision:'hold' as const,reason:'online_activity_requires_non_venue_publication',provinceCodes:[],evidence:['Validated online source']};
+  }
   // Stage 5 may copy the publisher's address onto an item. It must not cancel
   // the event's own region evidence (for example an Island artist in Ontario).
   const address = normalizeVenueName(String(item.address || '')) === normalizeVenueName(String(row.address || ''))
@@ -4938,6 +4949,7 @@ export async function processFullParserEvent(
     city: String(item.city || '').trim() || undefined,
     streetAddress: String(item.streetAddress || '').trim() || undefined,
     timeResolution: item.timeResolution,
+    timing: item.timing,
     timeFlags: item.timeFlags,
     _sourceType: (item as unknown as Record<string, unknown>)._sourceType || undefined,
     organizedBy: String(item.organizedBy || '').trim() || undefined,
