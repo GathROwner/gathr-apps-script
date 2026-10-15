@@ -2,6 +2,7 @@ import {hasConflictingOccurrenceIdentity,findConflictingSourceCinemaDate} from '
 import {publicCityLevelDescription, requiresReviewedAreaPoints, validateEventAreaData, verifyAreaPublicationReferences} from './areaEventPublication.js';
 import {resolveAreaDateRangeTiming} from './areaDateRangeTiming.js';
 import {resolveAggregatorCinemaOccurrence} from './aggregatorCinemaOccurrence.js';
+import {isGenericTrivia,resolveGenericTriviaOccurrence} from './genericTriviaOccurrence.js';
 import {isPlainKaraoke, selectStandingKaraokeOccurrence} from './standingKaraokeOccurrence.js';
 import {createRecurringSeriesCatalogCache, sourceLinkedHistoricalSeriesKeepers} from './recurringSeriesCatalog.js';
 import {isRecurringSeries} from '../utils/recurringSeriesLifecycle.js';
@@ -4262,9 +4263,9 @@ export async function checkDuplicate(
     if(decision.kind==='match'){
       // Keep the venue's own title, source and media authoritative. A generic
       // duplicate merge would replace those with the aggregator's wording.
-      logger.info('Skipped aggregator copy of first-party cinema occurrence',{
+      logger.info('Corroborated aggregator copy of first-party cinema occurrence',{
         venueId,existingEventId:decision.existing?.id,name:event.eventName||event.name});
-      return {isDuplicate:true};
+      return {isDuplicate:true,existingEvent:{...decision.existing,venueId,_sourceCorroborationOnly:true} as unknown as EventData};
     }
   }
   // Manually resolved venue events may live at events/* rather than the venue
@@ -4282,6 +4283,17 @@ export async function checkDuplicate(
     if(matches.length===1)return {isDuplicate:true,existingEvent:matches[0]};
   }
   const normalizedUniqueId = String(event.uniqueId || '').trim();
+  if(isGenericTrivia(event)) {
+    const [venue, sameDay]=await Promise.all([
+      db.collection(COLLECTIONS.VENUES).doc(venueId).get(),
+      db.collection(COLLECTIONS.VENUES).doc(venueId).collection(COLLECTIONS.EVENTS)
+        .where('startDate','==',event.startDate).limit(65).get(),
+    ]);
+    if(sameDay.size===65)return {isDuplicate:true};
+    const decision=resolveGenericTriviaOccurrence({...event,venueId},sameDay.docs.map(doc=>({id:doc.id,...doc.data(),venueId})),venue.get('facebookUrl') || '');
+    if(decision.kind==='hold')return {isDuplicate:true};
+    if(decision.kind==='match')return {isDuplicate:true,existingEvent:decision.existing as EventData};
+  }
   if (event.category === 'Cinema' && event.sourceOccurrenceCount === 1 && normalizedUniqueId) {
     const root = normalizedUniqueId.split('_')[0];
     const peers = await db.collection(COLLECTIONS.VENUES).doc(venueId).collection(COLLECTIONS.EVENTS)

@@ -4946,12 +4946,14 @@ export async function processFullParserEvent(
   } as EventData & { _sourceType?: string };
   if (Number.isInteger(item._sourceOccurrenceCount) && item._sourceOccurrenceCount! > 0)
     eventData.sourceOccurrenceCount = item._sourceOccurrenceCount;
+  // Bind provenance to the actual ingested source, independently of whether
+  // location-role resolution was needed. Never reconstruct it from event IDs.
+  eventData.sourceUniqueIds=[String(row.uniqueId||'').trim()].filter(Boolean);
+  eventData.sourceUrls=[String(row.topLevelUrl||row.facebookUrl||'').trim()].filter(Boolean);
   if(item._locationMentionResolution){
     eventData.locationMentionResolution=item._locationMentionResolution;
     eventData.complexContext=item._locationMentionResolution.complexContext;
     eventData.ticketingLocation=item._locationMentionResolution.ticketingLocation;
-    eventData.sourceUniqueIds=[String(row.uniqueId||'').trim()].filter(Boolean);
-    eventData.sourceUrls=[String(row.topLevelUrl||row.facebookUrl||'').trim()].filter(Boolean);
   }
 
   enforceCategoryTypeConsistency(eventData);
@@ -5061,11 +5063,12 @@ export async function previewFullParserEventWritePayload(
   rowIndex: number,
   itemIndex: number,
   rowVenue: VenueData,
-  establishment: string
+  establishment: string,
+  lookupCache?: ReturnType<typeof createFullParserVenueLookupCache>
 ): Promise<EventData> {
   const result = await processFullParserEvent(
     item, row, rowIndex, itemIndex, rowVenue, establishment,
-    {} as BatchManager, true
+    {} as BatchManager, true, lookupCache
   );
   if (!result.event) throw new Error('Dry write preview produced no event payload');
   return result.event;
@@ -5799,6 +5802,12 @@ function buildDuplicateEventUpdates(
     changedFields.push(String(field));
   };
   const relativeCaption = /\b(?:today|tomorrow|tonight|yesterday)\b/i;
+  const exactSourceOccurrence = matchingSeriesOccurrence || (existing.startDate === incoming.startDate &&
+    Boolean(existing.startTime) && existing.startTime === incoming.startTime);
+  if(exactSourceOccurrence && incoming.sourceUniqueIds?.length) setField('sourceUniqueIds',Array.from(new Set([
+    ...(existing.sourceUniqueIds||[]),...incoming.sourceUniqueIds].filter(Boolean))));
+  if(exactSourceOccurrence && incoming.sourceUrls?.length) setField('sourceUrls',Array.from(new Set([
+    ...(existing.sourceUrls||[]),...incoming.sourceUrls].filter(Boolean))));
   if (seriesRefresh && isRecurringSeries(incoming) && venueSourceUrl &&
     sourceTimestampIsNotOlder(existing, incoming) &&
     normalizeUrl(incoming.facebookUrl || '') === normalizeUrl(venueSourceUrl) &&
@@ -6210,7 +6219,7 @@ function buildDuplicateEventUpdates(
     [incoming.relevantImageUrl, incoming.image, incoming.imageUrl].includes(incoming.imageProvenance.primaryUrl)
     ? incoming.imageProvenance.primaryUrl : '';
   const protectExistingMedia = unsafeCrossSourceDateMerge || (crossSourceSeriesRefresh && (!hasNewerSourceTimestamp || !attributedSeriesImage)) || Boolean(
-    ownerPage && isOwnerSource(existing) &&
+    normalizeUrl(existing.facebookUrl || '') !== normalizeUrl(incoming.facebookUrl || '') &&
     normalizeUrl(incoming.facebookUrl || '') === 'facebook.com/downtowncharlottetowninc' &&
     /\/postimages\//.test(String(existing.relevantImageUrl || existing.image || existing.imageUrl || ''))
   );

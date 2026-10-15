@@ -14,3 +14,11 @@ test('first-party additional screenings, other dates and films remain independen
     {...film,facebookUrl:aggregator,name:'Captain Newfoundland'}])
     assert.equal(resolveAggregatorCinemaOccurrence(incoming,[film],owner).kind,'none');
 });
+
+test('Pressure Points programme prefix variation and three-hour conflict still hold',()=>{
+  const original={...film,name:'Shorts Program: Pressure Points',startDate:'2026-10-16',startTime:'18:00'};
+  const incoming={...original,name:'ANCHOR Fest Short Program, Pressure Points',facebookUrl:aggregator,startTime:'21:00'};
+  assert.equal(resolveAggregatorCinemaOccurrence(incoming,[original],owner).kind,'hold');
+  assert.equal(resolveAggregatorCinemaOccurrence({...incoming,startTime:'18:00'},[original],owner).kind,'match');
+  assert.equal(resolveAggregatorCinemaOccurrence({...incoming,facebookUrl:owner},[original],owner).kind,'none');
+});
