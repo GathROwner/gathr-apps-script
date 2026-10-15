@@ -651,3 +651,15 @@ references,17 once-only app-feed entries, zero duplicate source occurrences,
 and two source posters200. U15 October23 17:10–18:20 remains70 minutes; meeting
 has no invented end. See `docs/oct14-followup-live-approval-plan.md` for complete
 backup/apply/independent evidence. FiN and other recoveries remain separate.
+
+FiN follow-up exposed a source-time fallback defect after the compact recurrence
+fix: an untimed Chicken offer gained category-default21:00 despite verified
+20:00 venue closing. Exact serving release `2ce92a7` bounds only unconfirmed
+special category-default cutoffs by verified hours, preserving uncertainty,
+explicit clocks and other activity categories.20 focused and809 full release
+tests passed; all three parsers independently ACTIVE/100% at common hash
+`c8f778d960e9fd45d2efd5624d0b5b3b1411fb84`, with full configuration preserved.
+Fish$7/all-day poster plus current first-party2026 hours support a narrowly
+prepared weekly Fish recovery. Separate Chicken price/serving times remain
+unknown; context is retained without a separately timed card. Exact live
+recovery is approval-pending, not applied. See `docs/fin-tacos-oct15-recovery.md`.
