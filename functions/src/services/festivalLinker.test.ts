@@ -164,3 +164,44 @@ test('source identities remain opaque and edition-set ordering does not change f
   const b=await resolveFestivalMembership({...input(),umbrella:{...umbrella,sourceIds:[...umbrella.sourceIds].reverse(),organizerNames:[...umbrella.organizerNames].reverse()},sources:[e]});
   assert.equal(a.links.length,1);assert.deepEqual(a,b);
 });
+test('bound literal screenings headers may put the printed full edition year elsewhere in the card',async()=>{
+  for(const header of ['ANCHOR FEST SCREENINGS AT TIVOLI CINEMA\n2026','ANCHOR FEST — TIVOLI CINEMA SCREENINGS — 2026']) {
+    const e=programme();e.membershipText=header;e.festivalNameText='ANCHOR FEST';e.source.text=header+'\n'+e.scopeText;
+    assert.equal(await reason(e),'eligible');
+  }
+});
+test('bound programme typography can join festival name spacing and retain the literal alias in provenance',async()=>{
+  const e=programme();e.membershipText='ANCHORFEST SCREENINGS AT TIVOLI CINEMA\n2026';e.festivalNameText='ANCHORFEST';e.source.text=e.membershipText+'\n'+e.scopeText;
+  const result=await resolveFestivalMembership({...input(),sources:[e]});assert.equal(result.links.length,1);
+  assert.equal(result.links[0].evidence[0].festivalName,'ANCHORFEST');assert.equal(result.links[0].provenance[0].sourceText,e.source.text);
+});
+test('bound separate-line or name-adjacent short logo year may identify this exact edition',async()=>{
+  for(const header of ["ANCHOR FEST SCREENINGS AT TIVOLI CINEMA\n26","ANCHORFEST '26 SCREENINGS AT TIVOLI CINEMA"]) {
+    const e=programme();e.membershipText=header;e.festivalNameText=header.startsWith('ANCHORFEST')?'ANCHORFEST':'ANCHOR FEST';e.yearText='26';e.source.text=header+'\n'+e.scopeText;
+    assert.equal(await reason(e),'eligible');
+  }
+});
+test('short year cannot come from a day, minutes, runtime, address or a larger number',async()=>{
+  for(const suffix of ['October 26','26 October','7:26 pm','7 : 26 pm','26:00','26 minutes','126','2026-10-26','26 Kent Street','26 screenings']) {
+    const e=programme();e.membershipText='ANCHOR FEST SCREENINGS AT TIVOLI CINEMA\n'+suffix;e.festivalNameText='ANCHOR FEST';e.yearText='26';e.source.text=e.membershipText+'\n'+e.scopeText;
+    assert.notEqual(await reason(e),'eligible');
+  }
+  for(const suffix of ['26:00 SCREENINGS','26 October SCREENINGS','26 minutes SCREENINGS','26 Kent Street SCREENINGS']) {
+    const e=programme();e.membershipText='ANCHOR FEST '+suffix;e.festivalNameText='ANCHOR FEST';e.yearText='26';e.source.text=e.membershipText+'\n'+e.scopeText;
+    assert.notEqual(await reason(e),'eligible');
+  }
+});
+test('historical/conflicting year and past performer headings never borrow the edition',async()=>{
+  for(const header of ['ANCHOR FEST SCREENINGS AT TIVOLI CINEMA 2019','ANCHOR FEST SCREENINGS 2019\n26',
+    'ANCHOR FEST SCREENINGS 2026\n2019','Performer previously at ANCHOR FEST 2026 SCREENINGS']) {
+    const e=programme();e.membershipText=header;e.festivalNameText='ANCHOR FEST';e.yearText=header.endsWith('26')?'26':'2026';e.source.text=header+'\n'+e.scopeText;
+    assert.notEqual(await reason(e),'eligible');
+  }
+});
+test('short logo years require both edition-source and organizer binding; cross-source remains full-year strict',async()=>{
+  for(const change of [{id:'unbound_source'},{organizerId:'other_organizer'}]) {
+    const e=programme();e.membershipText='ANCHOR FEST SCREENINGS\n26';e.festivalNameText='ANCHOR FEST';e.yearText='26';e.source.text=e.membershipText+'\n'+e.scopeText;e.source={...e.source,...change};
+    assert.notEqual(await reason(e),'eligible');
+  }
+  const e=cross();changeText(e,'2026','26');e.yearText='26';assert.equal(await reason(e),'edition_conflict');
+});

@@ -73,23 +73,39 @@ function ticketIdentity(value: unknown): string {
   if(ticket)return `${url.hostname.toLowerCase()}/events/${ticket[1]}`;
   url.hash='';url.searchParams.sort();return url.toString().replace(/\/$/,'');
 }
+function printedProgrammeYear(e: FestivalSourceEvidence, edition: FestivalEdition): boolean {
+  if(e.yearText===String(edition.year))return new RegExp(`\\b${edition.year}\\b`).test(e.membershipText);
+  const short=String(edition.year%100).padStart(2,'0');
+  if(e.yearText!==short)return false;
+  // A short logo year must be a separate heading line, or adjacent to the
+  // festival name. A day, minute, runtime, address or digit substring is not it.
+  const ownLine=e.membershipText.split(/\r?\n/).some(line=>new RegExp(`^[\\s'’]*${short}\\s*$`).test(line));
+  const rest=e.membershipText.trimStart().slice(e.festivalNameText.length);
+  const adjacent=new RegExp(`^[\\s'’]+${short}(?=$|[\\s:—–])`).exec(rest);
+  const suffix=adjacent?rest.slice(adjacent[0].length).trimStart():'';
+  const notYear=/^(?:[:/.\-]\s*\d|(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?|min(?:ute)?s?|seconds?)\b|\w+\s+(?:street|st|road|rd|avenue|ave)\b)/i.test(suffix);
+  const besideName=Boolean(adjacent)&&!notYear;
+  return ownLine||besideName;
+}
 function membership(e: FestivalSourceEvidence, edition: FestivalEdition): FestivalLinkReason | undefined {
-  if (key(e.festivalNameText)!==key(edition.name) || e.yearText!==String(edition.year) ||
+  const programme=e.kind==='programme_row';
+  const sameName=programme?key(e.festivalNameText).replace(/ /g,'')===key(edition.name).replace(/ /g,''):key(e.festivalNameText)===key(edition.name);
+  if (!sameName || (programme?!printedProgrammeYear(e,edition):e.yearText!==String(edition.year)) ||
       !e.membershipText.includes(e.festivalNameText) || !e.membershipText.includes(e.yearText) ||
       (e.source.organizerId && e.source.organizerId!==edition.organizerId)) return 'edition_conflict';
-  const years=e.membershipText.match(/\b20\d{2}\b/g)||[];
+  const years=e.membershipText.match(/\b(?:19|20)\d{2}\b/g)||[];
   if(years.some(y=>y!==String(edition.year)))return 'edition_conflict';
   if(e.organizerText && (!e.membershipText.includes(e.organizerText)||!edition.organizerNames.some(n=>key(n)===key(e.organizerText))))return 'edition_conflict';
   if(e.kind==='programme_row') {
     if(!edition.sourceIds.includes(e.source.id) || e.source.organizerId!==edition.organizerId ||
-        !key(e.membershipText).startsWith(`${key(e.festivalNameText)} ${edition.year} `)||
-        !/\b(programme|program|lineup|schedule)\b/i.test(e.membershipText))return 'unbound_programme';
+        !key(e.membershipText).startsWith(`${key(e.festivalNameText)} `)||
+        !/\b(programme|program|lineup|schedule|screenings)\b/i.test(e.membershipText))return 'unbound_programme';
     const header=e.source.text.indexOf(e.membershipText),row=e.source.text.indexOf(e.scopeText);
     if(row<header)return 'unbound_programme';
     // A different section/edition header between the selected header and row
     // makes that association ambiguous. Do not borrow an earlier heading.
     const intervening=e.source.text.slice(header+e.membershipText.length,row);
-    if(intervening.split(/\r?\n/).some(line=>/\b(?:programme|program|lineup|schedule)\b/i.test(line)))return 'unbound_programme';
+    if(intervening.split(/\r?\n/).some(line=>/\b(?:programme|program|lineup|schedule|screenings)\b/i.test(line)))return 'unbound_programme';
     return undefined;
   }
   if(e.kind!=='festival_activity' || !e.scopeText.includes(e.membershipText))return 'membership_not_explicit';
@@ -181,9 +197,12 @@ export async function resolveFestivalMembership(input: {
     const point:EventAreaLocation={id:`venue_${venue.id}`,label:matchedName,venueId:venue.id,
       coordinates:{latitude:venue.latitude,longitude:venue.longitude},certainty:'confirmed',linkedEventIds:[id]};
     const evidence:AreaEventLinkEvidence={eventPath:candidate.path,eventName:data.eventName||data.name,venueId:venue.id,startDate:data.startDate,startTime:data.startTime,
-      festivalName:edition.name,sourceUrl:e.source.url,sourceText:`${e.membershipText}\n${e.scopeText}`,sourceEventText:e.eventText,
+      festivalName:e.festivalNameText,sourceUrl:e.source.url,sourceText:`${e.membershipText}\n${e.scopeText}`,sourceEventText:e.eventText,
       sourceDateText:e.dateText,sourceTimeText:e.timeText,sourceVenueText:e.venueText};
-    try {await verifyAreaPublicationReferences({areaData:{version:1,status:'partial',locations:[point]},evidence:[evidence],eventName:`${edition.name} ${edition.year}`,
+    // Membership above binds the literal typography alias to the canonical
+    // edition. Validate occurrence excerpts using that literal name, retaining
+    // original source words in the proof rather than manufacturing a heading.
+    try {await verifyAreaPublicationReferences({areaData:{version:1,status:'partial',locations:[point]},evidence:[evidence],eventName:`${e.festivalNameText} ${edition.year}`,
       startDate:edition.startDate,endDate:edition.endDate,read:async p=>p===candidate.path?{...data,isRecurringInstance:false}:p===`venues/${venue.id}`?venue:undefined});}
     catch {stop('source_occurrence_conflict');continue;}
     stop('eligible','eligible');
