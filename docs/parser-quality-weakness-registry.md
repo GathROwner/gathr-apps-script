@@ -550,3 +550,15 @@ parsers at common hash `4f54118bd8f92b0cbd2b0456e3172f345809dd26`, ACTIVE,
 posters subsequently resolved Arts Mixer's19:00 end versus the inferred18:00
 child. Seven exact duplicate deletions/six keeper-source updates now have a
 backed-up dry-run plan; no duplicate cleanup has been applied without approval.
+
+## October 15 Arts Mixer single-venue follow-up (prepared, not deployed/applied)
+
+PQ-SPATIAL/PQ-021: a discarded contextual city was counted again via the raw
+model location list, restoring false multi-location classification. A narrow
+local guard and source/routing regressions prevent this resurrection while
+preserving true multi-site/route and unresolved alias holds. October 13's
+manual venue-resolution helper also retained city scope and public diagnostic
+copy and dropped explicit time evidence; October 14 duplicate cleanup did not
+correct those fields. Exact two-record repair is backed up/default-dry and
+requires approval after the active parse. See
+`docs/arts-mixer-oct15-venue-repair.md`; no live change is claimed.

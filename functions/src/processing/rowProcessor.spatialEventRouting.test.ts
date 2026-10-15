@@ -20,6 +20,25 @@ function row(overrides: Partial<RawRowData> = {}): RawRowData {
   } as RawRowData;
 }
 
+test('one mixer at a festival partner venue reaches venue matching, not the area queue', async () => {
+  const item = {
+    name: 'Arts Mixer', description: 'A relaxed social in partnership with Anchor Fest.',
+    establishment: "Mavor’s Lounge, Confederation Centre of the Arts",
+    additionalLocation: "Mavor’s Lounge, Confederation Centre of the Arts",
+    spatial: {kind: 'multi_location', locations: [
+      {label: "Mavor's Lounge, Confederation Centre of the Arts"}, {label: 'Charlottetown'},
+    ]},
+  } as ParserProcessedEvent;
+  const sourceRow = row({text: "Join us at Mavor's Lounge, Confederation Centre of the Arts.\nThursday, October 15, 4-7 p.m.\nAnchor Fest is five days of activities spread across downtown Charlottetown October 14-18."});
+  assert.equal(resolvePostDerivedCityLevelEventLocation({item, row: sourceRow, establishment: 'Confederation Centre of the Arts'}), null);
+  let calls = 0;
+  await resolveVenueForFullParserEventWithMatcherForRegression({
+    item, row: sourceRow, rowVenue: null, establishment: 'Confederation Centre of the Arts', rowIndex: 1,
+    matcher: async () => {calls++; return {isMatch: false, matchType: 'none', confidence: 0} as any;},
+  });
+  assert.ok(calls > 0, 'The venue matcher must receive the single-venue occurrence');
+});
+
 test('one already-split tour stop resolves its venue without inheriting other caption cities', () => {
   const details = resolvePostDerivedCityLevelEventLocation({
     item: {

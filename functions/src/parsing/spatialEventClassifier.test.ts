@@ -2,6 +2,35 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { classifySpatialEvent } from './spatialEventClassifier.js';
 
+test('festival partnership city context cannot resurrect a discarded second location', () => {
+  const result = classifySpatialEvent({
+    name: 'Arts Mixer',
+    location: "Mavor's Lounge, Confederation Centre of the Arts",
+    description: 'A relaxed social in partnership with Anchor Fest.',
+    combinedText: "Join us at Mavor's Lounge, Confederation Centre of the Arts.\nThursday, October 15, 4-7 p.m.\nAnchor Fest is five days of activities spread across downtown Charlottetown October 14-18.",
+    modelSpatialEvidence: {
+      kind: 'multi_location',
+      locations: ["Mavor's Lounge, Confederation Centre of the Arts", 'Charlottetown'],
+    },
+  });
+  assert.equal(result.kind, 'single_location');
+  assert.equal(result.representation, 'venue');
+  assert.deepEqual(result.locations.map(x => x.label), ["Mavor's Lounge, Confederation Centre of the Arts"]);
+  assert.deepEqual(result.reviewReasons, []);
+});
+
+test('two real festival venues survive removal of their contextual city', () => {
+  const result = classifySpatialEvent({
+    name: 'Festival Opening',
+    modelSpatialEvidence: {
+      kind: 'multi_location',
+      locations: ['Confederation Centre of the Arts', 'The Guild', 'Charlottetown'],
+    },
+  });
+  assert.equal(result.kind, 'multi_location');
+  assert.deepEqual(result.locations.map(x => x.label), ['Confederation Centre of the Arts', 'The Guild']);
+});
+
 test('confirmed parade street sequence is a high-confidence route', () => {
   const result = classifySpatialEvent({
     name: 'Gold Cup Parade',

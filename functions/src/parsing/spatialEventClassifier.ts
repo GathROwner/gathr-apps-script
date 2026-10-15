@@ -458,9 +458,11 @@ export function classifySpatialEvent(
   // A city attached to a named venue is context, not a second occurrence.
   // Preserve city-only tour stops, different cities, and real route/multi-site evidence.
   const cityKeys=new Set(locations.filter(x=>/^(charlottetown|summerside|montague|cornwall|stratford|georgetown|souris|kensington)$/i.test(x.label)).map(x=>normalizeKey(x.label)));
+  let contextualCityRemoved = false;
   if(cityKeys.size===1 && locations.some(x=>!cityKeys.has(normalizeKey(x.label))) &&
       !MULTI_LOCATION_PATTERN.test(corpus) && !ROUTE_EVENT_PATTERN.test(name)) {
     locations=locations.filter(x=>!cityKeys.has(normalizeKey(x.label)));
+    contextualCityRemoved = true;
   }
   const confirmedStreets = uniqueStrings([
     ...(Array.isArray(model?.confirmedStreets) ? model.confirmedStreets : []),
@@ -506,7 +508,10 @@ export function classifySpatialEvent(
   const modelRouteIsSupported = normalizedModelKind === 'route' &&
     ((routeEvent && routeStructure) || hasRouteRoles || confirmedStreets.length > 0);
   const modelMultiLocationIsSupported = normalizedModelKind === 'multi_location' &&
-    (multiCue || hasExplicitMultiplePlaces || modelLocations.length >= 2);
+    // Use the reconciled locations. The original model list may still contain
+    // a city already discarded as context for one named venue; counting it
+    // again resurrects the false multi-location classification.
+    (multiCue || hasExplicitMultiplePlaces || (!contextualCityRemoved && modelLocations.length >= 2));
   const modelSeparateOccurrencesIsSupported =
     normalizedModelKind === 'separate_occurrences' && separateOccurrences;
 
