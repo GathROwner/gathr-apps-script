@@ -14,4 +14,5 @@ test('themes, other hosts, rooms, dates, clocks and publishers remain distinct',
     {facebookUrl:'https://www.facebook.com/aggregator'}])
     assert.equal(resolveGenericTriviaOccurrence({...incoming,...change},[keeper],owner).kind,'none',JSON.stringify(change));
   assert.equal(resolveGenericTriviaOccurrence(incoming,[keeper,{...keeper,id:'other'}],owner).kind,'hold');
+  assert.equal(resolveGenericTriviaOccurrence({...incoming,description:'Hosted by Alex Smith'},[{...keeper,description:'With staff host Alex Brown'}],owner).kind,'none');
 });

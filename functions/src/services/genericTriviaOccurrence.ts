@@ -4,7 +4,12 @@ type Trivia = {id?: string; venueId?: string | null; eventName?: string; name?: 
 const page=(url:unknown)=>String(url||'').toLowerCase().replace(/^https?:\/\/(?:www\.)?/,'').replace(/[?#].*$/,'').replace(/\/$/,'');
 export const isGenericTrivia = (event: Trivia): boolean => event.category === 'Trivia Night' &&
   /^(?:general\s+)?trivia(?:\s+night)?$/i.test(String(event.eventName||event.name||'').trim());
-const host=(event:Trivia)=>String(event.description||'').match(/\b(?:staff\s+host|hosted\s+by(?:\s+staff(?:\s+member)?)?|with\s+(?:staff\s+)?host)\s+([a-z]+(?:[-'][a-z]+)?)\b/i)?.[1]?.toLowerCase() || '';
+const host=(event:Trivia)=>{
+  const text=String(event.description||''),prefix=/\b(?:staff\s+host|hosted\s+by(?:\s+staff(?:\s+member)?)?|with\s+(?:staff\s+)?host)\s+/i.exec(text);
+  if(!prefix)return '';
+  // Preserve printed surnames. Alex Smith and Alex Brown are not one host.
+  return text.slice(prefix.index+prefix[0].length).match(/^([\p{L}'-]+(?:\s+[A-Z][\p{L}'-]+){0,2})(?=[\s,.!?;:]|$)/u)?.[1]?.toLowerCase() || '';
+};
 /** Exact same-session proof, not a title-similarity score. */
 export function resolveGenericTriviaOccurrence(incoming:Trivia, existing:Trivia[], venuePage:string):
   {kind:'none'|'match'|'hold';existing?:Trivia} {
