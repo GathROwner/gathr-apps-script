@@ -182,6 +182,16 @@ at21:01UTC:47 untouched references, both details200, full active feed once,
 eleven-image gallery unchanged, all12 images200 and marker262. See
 `docs/lautre-poster-oct15-repair-plan.md`. Next is A&W's province-wide offer scope.
 
+A&W read-only review confirms its October14 card is expired and absent from the
+complete active feed. No current offer horizon is printed; it remains held for
+source-supported ongoing dates/location coverage, without a historical mutation
+or invented new occurrence. Next active issue is the morning bike-bus source
+published as a10:17–23:00 school card. Actual offline source playback passes the
+existing route/time holds. Exact one-card removal plus marker262->263 is prepared
+and backed up in `docs/bikebus-oct15-false-pin-repair-plan.md`; original source,
+private route candidate, school, other events and all media remain preserved.
+No bike-bus cleanup is applied yet; exact live approval is required.
+
 1. Remaining exact category/media/spatial corrections and source-backed recovery
    of genuinely missing activities; retain ambiguous prices/identities.
 2. Finish date-only client delivery and bounded backend enablement validation.
