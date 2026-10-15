@@ -33,6 +33,15 @@ const text=ds=>JSON.stringify({decisions:ds});
 const inputItems=body=>JSON.parse(body.input[0].content[0].text.split('ITEMS TO VALIDATE:\n')[1].split('\n\nIMPORTANT CONTEXT:')[0]);
 const run=async(items,handler,options={})=>{requests=[];respond=handler;return performSecondaryValidation(items,'Test venue','2026-10-10T12:00:00Z',{...config,...options});};
 
+test('KEPT Thursday tacos with unexplained none placeholder preserve their source recurrence',async()=>{
+  const source=item(1,{name:'Thursday Fish Tacos',description:'Every Thursday at FiN Folk Food. Fish tacos $7 all day.',
+    startTime:'',recurringPattern:'weekly_thursday',_sourceType:'special'});
+  const out=await run([source],()=>({text:text([decision(source,{corrections:{recurringPattern:'none',correctionReason:''}})])}));
+  assert.equal(out.length,1);assert.equal(out[0].recurringPattern,'weekly_thursday');assert.equal(requests.length,1);
+  assert.throws(()=>parseCompactStage4Response(text([decision(source,{corrections:{recurringPattern:'none',correctionReason:'Make this one off'}})]),[source]),/unsupported_recurrence_correction/);
+  assert.throws(()=>parseCompactStage4Response(text([decision(source,{corrections:{recurringPattern:'weekly_friday',correctionReason:''}})]),[source]),/unsupported_recurrence_correction/);
+});
+
 test('switch defaults off, exact env true enables it, explicit false overrides env',()=>{
   assert.equal(compactStage4Enabled({}),false);
   process.env.STAGE4_COMPACT_VALIDATION_ENABLED='TRUE';assert.equal(compactStage4Enabled({}),false);

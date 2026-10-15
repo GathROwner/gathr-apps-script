@@ -219,6 +219,11 @@ export function parseCompactStage4Response(text: string, sources: ValidationSour
       typeof entry.corrections.correctionReason !== 'string' || entry.corrections.correctionReason.length > 600) {
       throw new CompactStage4Error('invalid_correction');
     }
+    // The strict schema always supplies this object. "none" with no explanation
+    // on a KEPT item is a no-change placeholder, never authority to erase the
+    // source's explicit weekly schedule. Explained changes still need evidence.
+    if (entry.decision === 'KEPT' && entry.corrections.recurringPattern === 'none' &&
+        !entry.corrections.correctionReason.trim()) entry.corrections.recurringPattern = null;
     if (!supportedRecurrence(byId.get(id)!, entry.corrections.recurringPattern as string | null)) throw new CompactStage4Error('unsupported_recurrence_correction');
     decisions.set(id, entry);
   }
