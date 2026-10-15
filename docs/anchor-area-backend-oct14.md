@@ -317,3 +317,41 @@ checks and all782 compiled backend tests (zero failures/skips). Its new plan
 passed both initial default-dry generation and explicit saved-plan revalidation
 against fresh live target/reference versions, with zero writes. Four original
 preview artifacts remained byte-for-byte unchanged by SHA256 verification.
+
+## Coordinated frontend release and independent acceptance
+
+The existing frontend adjudicator completed source commit `f679613`, based on
+the accepted `a43cb20` source. The clean iOS release was assembled from the
+exact live Preview baseline `61000417e27035c3884277b19ab2acb1c2c69f3f` plus only
+that feature, producing `9c653f0c9bbc8d1faa52655efb970ded46f4a6f1`. Coordinator
+checks independently confirmed live-baseline ancestry and equality of the
+tested application/configuration/dependency/asset trees with the release.
+
+The coordinator viewed seven durable native Android fixture screenshots:
+overview with existing ticket pill, unordered fixed-camera geometry, shared-pin
+venue chooser, Tivoli programme, canonical child lightbox, next linked activity,
+and return to the same programme. These are proposed-state shared JavaScript
+evidence, not proof that the pending Firestore repair is applied or an iPhone
+has adopted the update. The Lavapipe map frame verifies geometry and native
+marker routing, not marker color polish. No map pan, zoom or scroll was tested.
+Evidence hashes are retained in
+`functions/artifacts/anchor-festival-oct14/frontend-independent-review.json`.
+
+The clean release passed 27 suites with 258 tests; one pre-existing optional
+benchmark was skipped. TypeScript and auth/social/Mapbox preflights passed.
+Normal entry files were restored, and the inspected export contained 2,494
+modules, 2,450 sources and no fixture/test sources. The publisher confirmed
+byte-identical Hermes output between inspected and published exports.
+
+At 01:13:13 UTC October15 (October14 Halifax), iOS Preview published group
+`adcc56b3-74a2-4c9b-9e41-ada0a36a1342`, update
+`01a13d1e-d6fd-73d7-9c19-2c80b36d72fe`, runtime `1.1.10`, release commit
+`9c653f0c9bbc8d1faa52655efb970ded46f4a6f1`. Coordinator independently queried
+EAS group metadata and the Preview list, confirming exact platform/runtime/
+commit and newest iOS placement. Production and Android were not published.
+Compatible iPhone adoption remains unverified.
+
+The revised exact two-document live Anchor plan remains pending human approval;
+no live Anchor event/review fields have been changed. Publishing the frontend
+does not apply that data plan. The reviewed seven-copy duplicate cleanup is
+complete; unresolved source-conflicting duplicate families remain held.
