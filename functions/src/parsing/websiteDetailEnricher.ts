@@ -41,6 +41,9 @@ type WebsiteCandidate = {
   dateRangeStart?: string;
   dateRangeEnd?: string;
   startTime?: string;
+  // Only a ticket API instant agreeing with its printed local start and
+  // distinct from the single labelled doors clock can carry this role.
+  performanceStartEvidence?: string;
   endTime?: string;
   imageUrl?: string;
   sourceUrl: string;
@@ -518,12 +521,20 @@ function normalizeLocariusRecord(record: any, fallbackTimezone: string): Website
   const date = local?.isValid ? local.toFormat('yyyy-MM-dd') : '';
   const startTime = local?.isValid ? local.toFormat('HH:mm') : '';
   if (!date) return null;
+  const printedLocal = parseLocalEventDateTime(String(record?.start?.local || ''), zone);
+  const doors = [...String(record?.name || '').matchAll(/\bdoors?\s*(?:open\s*)?(?:at\s*)?(\d{1,2}(?::\d{2})?\s*[ap]\.?m\.?)/gi)];
+  const doorsTime = doors.length === 1 ? parse12hTime(doors[0][1]) : '';
+  const performanceStartEvidence = startUtc && printedLocal?.isValid &&
+    printedLocal.toFormat('yyyy-MM-dd') === date && printedLocal.toFormat('HH:mm') === startTime &&
+    doorsTime && /^\d{2}:\d{2}$/.test(doorsTime) && doorsTime !== startTime
+      ? `ticket API performance start ${date} ${startTime} ${zone}; separate doors ${doorsTime}` : undefined;
 
   return {
     title: cleanText(String(record?.name || '')),
     description: cleanText(String(record?.description?.text || record?.summary || '')),
     date,
     startTime,
+    performanceStartEvidence,
     imageUrl: normalizeCandidateUrl(String(record?.logo || '')) || '',
     sourceUrl: normalizeCandidateUrl(String(record?.url || '')) || '',
     source: 'locarius_api',
@@ -1022,8 +1033,11 @@ function applyWebsiteCandidates(
       };
       updated.timeFlags.start = {
         source: 'explicit',
-        evidence: `venue_website:${bestCandidate.sourceUrl}`,
+        evidence: `venue_website:${bestCandidate.sourceUrl}${bestCandidate.performanceStartEvidence ? ' | ' + bestCandidate.performanceStartEvidence : ''}`,
       };
+      if (bestCandidate.performanceStartEvidence && updated._sourceTimeConstraint?.reason === 'doors_without_showtime') {
+        delete updated._sourceTimeConstraint;
+      }
       if (bestCandidate.source === 'article_paragraph' &&
           !hasUsableFieldValue(bestCandidate.endTime) &&
           !hasUsableFieldValue(updated.endTime)) {
