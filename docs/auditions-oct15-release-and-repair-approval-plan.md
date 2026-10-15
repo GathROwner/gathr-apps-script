@@ -15,7 +15,7 @@ Harvest's earlier single-record correction is complete and separate.
    fingerprints are saved for independent comparison. Preserve upload/profile
    deletion guards. No Firebase parser deploy is in this plan.
 2. Publish **iOS Preview only**, runtime **1.1.10**, candidate
-   `1368b6a9956f5a832265cbe8d52c360add7fb04c`, descended from the current
+   `7473c3e17b607a3c82595ee0b71b60331144bf97`, descended from the current
    `3d2f4f7` iOS Preview release. Its two runtime changes declare supported
    requests and isolate persisted feed/detail caches. All current iOS UI remains.
 3. Publish **Android Preview only**, runtime **1.1.10**, candidate
@@ -96,6 +96,9 @@ are required. Apply also requires the exact approved API commit to be serving.
 - Both exports contain zero runtime fixture/test sources and match all eleven
   inspected source files. Temporary Android routes were restored byte-for-byte.
   Final documentation-only heads match the validated runtime trees exactly.
+- The frontend task completed idle with both candidates frozen. Its final iOS
+  `7473c3e` changes README spacing only after the inspected `1368b6a`; parent
+  independently confirmed its runtime still exactly matches validated `8df8c25`.
 - Parent independently inspected five real Android native shared-component
   screenshots: Today/Tomorrow, disclosure/calendar guard, auditions, bounded
   date range and healthy timed/overnight controls. This is synthetic component
