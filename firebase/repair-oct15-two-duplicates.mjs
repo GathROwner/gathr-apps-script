@@ -40,11 +40,13 @@ try{
   const approved=JSON.parse(await fs.readFile(path.resolve(planPath),'utf8'));assert.deepEqual(approved.actions,capture.actions);assert.equal(approved.snapshotHash,snapshotHash,'Reviewed document/source/sibling drift');
   const backup=path.join(out,`duplicate-prewrite-${now}.json`);await fs.writeFile(backup,JSON.stringify(capture,null,2));
   await idle();await db.runTransaction(async tx=>{const all=await tx.getAll(...capture.documents.map(x=>db.doc(x.path)));all.forEach((d,i)=>assert.deepEqual(wrap(d),capture.documents[i],'Transaction reference drift'));
+    const latest=await tx.get(db.collectionGroup('events').where('startDate','==','2026-10-16'));
+    assert.deepEqual(latest.docs.filter(d=>cases.some(c=>c.venue===d.get('venueId'))).map(d=>d.ref.path).sort(),siblings.map(d=>d.ref.path).sort(),'New same-day sibling during transaction');
     for(const c of cases)tx.delete(db.doc(eventPath(c,c.remove)));});
   const verification=await db.getAll(...cases.flatMap(c=>[db.doc(eventPath(c,c.remove)),db.doc(eventPath(c,c.keep))]));
   for(let i=0;i<cases.length;i++){assert(!verification[2*i].exists);assert.deepEqual(wrap(verification[2*i+1]),capture.documents.find(d=>d.path===eventPath(cases[i],cases[i].keep)));}
   const api='https://gathr-backend-924732524090.northamerica-northeast1.run.app/api/v2/firestore/events';
-  for(const c of cases){assert.equal((await fetch(api+'/'+c.remove)).status,404);assert.equal((await fetch(api+'/'+c.keep)).status,200);}
+  for(const c of cases){assert.equal((await fetch(api+'/'+c.remove,{signal:AbortSignal.timeout(30000)})).status,404);assert.equal((await fetch(api+'/'+c.keep,{signal:AbortSignal.timeout(30000)})).status,200);}
   let cursor='',pages=0,feedCount=0;const seen=new Set();
   do{const url=new URL(api);url.searchParams.set('includeExpired','false');url.searchParams.set('limit','100');if(cursor)url.searchParams.set('startAfter',cursor);
     const response=await fetch(url,{signal:AbortSignal.timeout(30000)});assert.equal(response.status,200);const page=await response.json();assert(Array.isArray(page.events));
