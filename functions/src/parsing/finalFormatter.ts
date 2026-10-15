@@ -1445,7 +1445,8 @@ export function rehydrateFormattedEventMetadata(
   // spatial evidence. Preserve the Stage-3 evidence verbatim so the routing
   // gate can make a deterministic, review-safe decision later.
   const originalSpatial = (originalItem as Record<string, unknown> | undefined)?.spatial;
-  if (originalSpatial && typeof originalSpatial === 'object') {
+  if (originalSpatial && typeof originalSpatial === 'object' &&
+      (!(event as Record<string, unknown>).spatial || parseIsoDate(String(originalItem?.date || '')))) {
     nextEvent.spatial = JSON.parse(JSON.stringify(originalSpatial));
     changed = true;
   }
