@@ -238,11 +238,22 @@ and year, and ten historical source snapshots are captured. The exact grouped
 plan is prepared in `docs/harvest-series-oct15-batch-plan.md`:three preserved
 keepers,nine missing dates,five retired copies,one venue replay policy and
 marker266. The reviewed poster also corrects the wrong November primary on
-October16/17. Candidate6c5c46f passes18 focused/832 full tests and no-network
-saved-source/current-identity/actual-service/future-merge playback. Exact live
-approval, deployment and apply/API verification remain pending. Three other
-venue activities and the themed-child website-clock enrichment limitation
-remain separate. No Harvest live records have changed during preparation.
+October16/17. Craig approved the exact grouped plan. Release6c5c46f passes18
+focused/832 full tests,no-network playback and qualified dry run; it is now
+ACTIVE/100% on all three parsers at common hash8a3e2aaeaf3c7d56648fc5ce15b5c709a6fbadaa
+with unchanged full configuration. The nineteen-document transaction and
+marker266 were independently verified22:49:56UTC:13 untouched references,
+12 canonical details200/5 deleted404,12 once in both complete active/history
+feeds,no retired generated copies and12 images200. Three other venue activities
+and the themed-child website-clock enrichment limitation remain separate.
+Fresh backup/apply/readback/feed evidence is in
+`firebase/artifacts/harvest-series-oct15/`. This batch is COMPLETE.
+
+**Scope accounting:** `docs/oct15-repair-scope-and-status.md` reconciles the
+original20 audit review groups:11 closed/covered/contained,6 still open for
+work and3 held evidence/policy limits. Three older Inn records need separate
+source review. The five larger backend workstreams below are a separate backlog,
+not additional newly discovered failures in the Harvest batch.
 
 1. Remaining exact category/media/spatial corrections and source-backed recovery
    of genuinely missing activities; retain ambiguous prices/identities.

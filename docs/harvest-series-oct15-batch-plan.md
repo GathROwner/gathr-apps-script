@@ -1,7 +1,9 @@
 # Harvest: one reviewed consolidation batch
 
-Status: prepared and tested; exact grouped live approval pending. No Harvest
-event, venue metadata, feed marker or serving parser was changed by preparation.
+Status: COMPLETE. Craig approved the exact grouped plan with “Approved. How
+much more is left?” The narrowly scoped release and nineteen-document
+transaction are applied and independently verified as of22:49:56 UTC October15.
+The proposal/validation detail below records the reviewed scope.
 
 ## Proposed result
 
@@ -154,4 +156,53 @@ fields and three other activities, twelve correct detail records, five404s,
 complete active/history feeds without retired generated occurrences, one card
 per advertised date, marker266 and all twelve retained images200. Active counts
 respect elapsed Halifax dates; expiry alone is not an omission. Live verification
-is **pending**, not implied by local playback or passing tests.
+was completed separately from local playback and passing tests; evidence below.
+
+## Approved execution and independent verification
+
+Fresh22:46 preflight: no active locks, completed dataset/final batch372,
+processed marker present and no checkpoint. The refreshed dry run's complete
+snapshot hash and changes matched the exact approved22:32 plan; all three
+serving configuration rows matched the original capture. No drift was bypassed.
+
+Release6c5c46f was deployed from the isolated clean release checkout with:
+
+```powershell
+firebase deploy --only 'functions:gathr-functions:processDataset,functions:gathr-functions:processDatasetResume,functions:gathr-functions:processDatasetSelectedRows' --project gathr-migrated --non-interactive
+```
+
+Build/predeploy and all three updates succeeded. Independent readback verifies
+ACTIVE,100% latest traffic and common hash
+`8a3e2aaeaf3c7d56648fc5ce15b5c709a6fbadaa`:
+
+- `processdataset-00490-yaj`
+- `processdatasetresume-00454-xex`
+- `processdatasetselectedrows-00446-fun`
+
+Complete function/runtime/environment/secret-binding fingerprints match the
+pre-deploy baseline. All Luna allocations, efforts, prompts/cache layouts,
+Stage4 compact behavior and disabled global date-only/festival gates remain
+preserved. The known outdated firebase-functions warning remains deferred.
+The accepted five-file guard was integrated into the coordinator ascbdb7e6;
+those five files have no Git diff against the exact release. Coordinator-only
+festival shadow code was never deployed.
+
+Fresh22:49 preflight again found no active parser. One atomic transaction
+corrected three keepers,created nine dated one-offs,deleted five copies,added
+the exact venue replay policy and advanced the marker265→266. No media writes.
+Full prewrite backup and applied result are local under
+`firebase/artifacts/harvest-series-oct15/`:
+
+- `prewrite-2026-10-15T22-49-18-011Z.json`
+- `applied-2026-10-15T22-49-18-011Z.json`
+- `serving-before-original.json`,fresh `serving-before.json`,`serving-after.json`
+- `independent-verification.json`
+
+Independent verification22:49:56 UTC passed the exact nineteen-document delta
+and thirteen untouched references. All twelve canonical details return200,
+all five deleted details404. Complete active feed985 events/10pages and history
+feed1,127 events/12pages each contain the twelve dated evenings once, with no
+retired parents or generated copies. All twelve retained source/profile images
+return200. Three separate legacy Inn activities and all source documents remain
+unchanged. Global duplicate freedom and future new-source behavior are not
+claimed. Remaining finite worklist: `docs/oct15-repair-scope-and-status.md`.

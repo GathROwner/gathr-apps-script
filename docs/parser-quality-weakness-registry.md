@@ -766,7 +766,7 @@ and marker265 passed independently at22:11UTC. Complete source/release/backup/
 apply/verification evidence: docs/oct15-reviewed-batch-approval-plan.md.
 Next-run model validation and Harvest programme consolidation remain separate.
 
-## October 15 Harvest consolidation (prepared; grouped approval pending)
+## October 15 Harvest consolidation (approved, deployed and verified)
 
 PQ-001/PQ-043/PQ-047 follow-up: ten saved sources and the first-party dated
 2026 itinerary confirm twelve Thu/Fri/Sat dining evenings,17:00–21:30,$305+
@@ -781,8 +781,15 @@ identities and their exact current-generator reconstructions without mutating
 a keeper or excluding other activities from those posts.18 focused/832 full
 compiled tests,actual-service/saved-source/stable-ID/future-merge playback and
 qualified three-parser dry run passed. All twelve retained images returned200.
-No Harvest live changes or parser deployment have occurred for this batch.
-Approval, release/readback, atomic apply and independent full-feed verification
-remain pending. Themed-child website-clock enrichment and three separate
+Craig approved the grouped plan. Release6c5c46f is ACTIVE/100%latest on all
+three parsers at common hash8a3e2aaeaf3c7d56648fc5ce15b5c709a6fbadaa; complete
+configuration fingerprints match the accepted baseline. Atomic19-document
+apply and marker266 passed independent verification22:49:56UTC:three keepers
+corrected,nine created,five copies deleted,exact replay policy,13 untouched
+references,12 details200/5 deleted404,12 canonical evenings once in complete
+active985/10page and history1127/12page feeds,no retired generated copies and
+12 source/profile images200. Fresh backup/apply/readback/verification artifacts
+are in `firebase/artifacts/harvest-series-oct15/`. Themed-child website-clock
+enrichment and three separate
 foraging/summer-tour records are explicit open work; do not claim this exact
 retirement fence prevents every future duplicate wording or new source.
