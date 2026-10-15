@@ -46,6 +46,34 @@ test('an unsuccessful smaller retry holds the entire post', async () => {
   assert.equal(result, null);
 });
 
+test('single karaoke output exhaustion gets one fresh bounded retry with intact source identity', async () => {
+  const source = [{...items[0],name:'Karaoke Night',startTime:'20:00'}];
+  const calls: boolean[]=[];
+  const result=await formatStage5BatchesWithRecovery(source,9,async (batch,offset,recovery)=>{
+    calls.push(recovery === true);
+    if(calls.length===1) throw Object.assign(new Error('incomplete'),{code:'stage5_incomplete_response',incompleteReason:'max_output_tokens'});
+    assert.equal(offset,0);assert.deepEqual(batch,source);return reply(batch);
+  });
+  assert.deepEqual(calls,[false,true]);assert.equal(result?.length,1);
+  assert.equal(result?.[0].name,'Karaoke Night');
+});
+
+test('repeated output exhaustion holds the entire post after two calls', async () => {
+  let calls=0;
+  const out=await formatStage5BatchesWithRecovery(items.slice(0,1),9,async()=>{
+    calls++;throw Object.assign(new Error('incomplete'),{code:'stage5_incomplete_response',incompleteReason:'max_output_tokens'});
+  });
+  assert.equal(calls,2);assert.equal(out,null);
+});
+
+test('content-filter incomplete response remains terminal without retry', async () => {
+  let calls=0;
+  await assert.rejects(formatStage5BatchesWithRecovery(items.slice(0,1),9,async()=>{
+    calls++;throw Object.assign(new Error('incomplete filtered'),{code:'stage5_incomplete_response',incompleteReason:'content_filter'});
+  }),/filtered/);
+  assert.equal(calls,1);
+});
+
 test('concurrent batches preserve source order when the later batch finishes first', async () => {
   let releaseFirst: (() => void) | undefined;
   const firstPending = new Promise<void>((resolve) => { releaseFirst = resolve; });

@@ -294,7 +294,7 @@ Never return arrays of values for an item; each must be a JSON object.`;
     let response: FormattingResult;
     if (batchSize >= 2 && batchSize <= 12 && expectedCount > 0) {
       const formattedEvents = await formatStage5BatchesWithRecovery(
-        validatedData, batchSize, async (items, offset) => {
+        validatedData, batchSize, async (items, offset, recovery) => {
           logger.info('Stage 5 formatting batch', {
             offset, batchCount: items.length, totalCount: expectedCount,
           });
@@ -306,7 +306,7 @@ Never return arrays of values for an item; each must be a JSON object.`;
             createFormattingPrompt(items, userName, partialAddress, timestamp,
               Boolean(cfg.stage5MinimalOutputProbe));
           return callGPTWithSchema(chunkPrompt, 'formatEvents', schema, cfg,
-            { offset, itemCount: items.length, userName });
+            { offset, itemCount: items.length, userName, recovery });
         }, Number(cfg.stage5BatchConcurrency || 1)
       );
       if (!formattedEvents) throw Object.assign(new Error('Stage 5 source identity/count contract failed after bounded recovery'),
@@ -2146,14 +2146,25 @@ function isGeneralFestivalParent(event: Pick<FormattedEvent, 'name' | 'descripti
 export async function formatStage5BatchesWithRecovery(
   validatedData: ExtractedItem[],
   batchSize: number,
-  formatBatch: (items: ExtractedItem[], offset: number) => Promise<FormattingResult>,
+  formatBatch: (items: ExtractedItem[], offset: number, recovery?: boolean) => Promise<FormattingResult>,
   configuredConcurrency = 1
 ): Promise<FormattedEvent[] | null> {
   const formattedEvents: FormattedEvent[] = [];
   const concurrency = Number.isInteger(configuredConcurrency)
     ? Math.max(1, Math.min(3, configuredConcurrency)) : 1;
-  const formatExactBatch = async (items: ExtractedItem[], offset: number): Promise<FormattedEvent[] | null> => {
-    const rawResponse = await formatBatch(items, offset);
+  const formatExactBatch = async (items: ExtractedItem[], offset: number, recovery = false): Promise<FormattedEvent[] | null> => {
+    let rawResponse: FormattingResult;
+    try { rawResponse = await formatBatch(items, offset, recovery); }
+    catch (error) {
+      const failure = error as {code?: string; incompleteReason?: string};
+      // Incomplete output is never parsed or partially published. It may use
+      // the same one-level split/one-single-item retry budget as malformed JSON.
+      // Refusals, prompt errors, transport failures and other incomplete reasons
+      // remain terminal; recovery never bypasses a safety/content decision.
+      if (failure.code !== 'stage5_incomplete_response' || failure.incompleteReason !== 'max_output_tokens') throw error;
+      logger.warn('Stage 5 output exhausted bounded response', {offset, itemCount:items.length, recovery});
+      return null;
+    }
     const rawEvents = rawResponse?.formattedEvents;
     if (!Array.isArray(rawEvents) || rawEvents.length !== items.length) {
       logger.warn('Stage 5 canary batch count mismatch', {
@@ -2189,14 +2200,14 @@ export async function formatStage5BatchesWithRecovery(
         logger.info('Stage 5 retrying failed batch as two smaller batches', {
           offset, originalCount: items.length, firstCount: midpoint,
         });
-        const first = await formatExactBatch(items.slice(0, midpoint), offset);
-        const second = first && await formatExactBatch(items.slice(midpoint), offset + midpoint);
+        const first = await formatExactBatch(items.slice(0, midpoint), offset, true);
+        const second = first && await formatExactBatch(items.slice(midpoint), offset + midpoint, true);
         batch = first && second ? [...first, ...second] : null;
       } else if (!batch && items.length === 1) {
         // A one-item malformed response cannot be split. Retry its unchanged
         // source once; semantic/API rejections throw and are never bypassed.
         logger.info('Stage 5 retrying malformed single-item batch', {offset});
-        batch = await formatExactBatch(items, offset);
+        batch = await formatExactBatch(items, offset, true);
       }
       return batch;
     }));
@@ -6432,7 +6443,7 @@ async function callGPTWithSchema(
   functionName: string,
   schema: GPTFunctionSchema[],
   config: ParsingConfig,
-  batch: { offset: number; itemCount: number; userName: string }
+  batch: { offset: number; itemCount: number; userName: string; recovery?: boolean }
 ): Promise<FormattingResult> {
   const requestStartedAt = Date.now();
   const client = getOpenAIClient();
@@ -6443,9 +6454,12 @@ async function callGPTWithSchema(
     String(process.env.STAGE5_RESPONSES_MAX_OUTPUT_TOKENS || '32000'),
     10
   );
-  const stage5ResponsesMaxTokens = Number.isFinite(rawStage5ResponsesMaxTokens)
+  const configuredStage5ResponsesMaxTokens = Number.isFinite(rawStage5ResponsesMaxTokens)
     ? Math.max(1024, rawStage5ResponsesMaxTokens)
     : 32000;
+  const stage5ResponsesMaxTokens = batch.recovery
+    ? Math.min(configuredStage5ResponsesMaxTokens, Math.max(8000, batch.itemCount * 8000))
+    : configuredStage5ResponsesMaxTokens;
   const rawStage5ChatMaxTokens = Number.parseInt(
     String(process.env.STAGE5_CHAT_MAX_TOKENS || '8000'),
     10
@@ -6534,6 +6548,7 @@ async function callGPTWithSchema(
         parseError: Boolean(parsedResponse._parseError),
         batchOffset: batch.offset,
         batchItemCount: batch.itemCount,
+        boundedRecovery: batch.recovery === true,
       };
       logger.info('Stage 5 Responses diagnostics', { model, durationMs, ...usage, ...diagnostics });
       await emitGptUsage(config, {
@@ -6548,7 +6563,7 @@ async function callGPTWithSchema(
 
       if (response.status !== 'completed') {
         throw Object.assign(new Error(`Stage 5 incomplete response: ${response.status} (${response.incomplete_details?.reason || 'unknown'})`),
-          {code:'stage5_incomplete_response'});
+          {code:'stage5_incomplete_response', incompleteReason:String(response.incomplete_details?.reason || '')});
       }
 
       logger.debug('GPT formatting response received (responses)', {
