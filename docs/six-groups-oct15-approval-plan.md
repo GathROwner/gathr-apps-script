@@ -139,14 +139,17 @@ local physical listings from the evidence currently available.
 | Source | Content decision | Publication decision |
 |---|---|---|
 |RCMP1565755542263418|Valid scheduled public recruiting presentations and live Q&A,Oct19/26 at20:00; caption explicitly says Microsoft Teams. This is more than the generic careers image alone.|Retain the extracted online sessions; no office map pin. Existing false physical parent remains an exact proposed deletion in this batch.|
-|SportPEI1559060616262193|Valid free educational webinar with presentation/live Q&A,Oct20; poster explicitly says Zoom and12:00PM AST.|Retain as online; no physical venue. Printed timezone needs clarification before a reliable local-clock public listing.|
+|SportPEI1559060616262193|Valid free educational webinar with presentation/live Q&A,Oct20; poster explicitly says Zoom and12:00PM AST. Craig subsequently excluded online courses at this time; this educational webinar is excluded from the current recovery scope.|Skip publication and remove from recovery follow-up. Retain original source for audit only; no timezone clarification or online delivery work is required for this source.|
 |Stratford1569782475183274|A real council-meeting livestream explicitly datedOct14,16:30; already past at theOct15 audit.|Archive/skip new publication; no invented future meeting or YouTube venue.|
 |PetSmart1561342776030307|A real national adoption campaign Oct19–25. Original national post/poster and refreshed national/store pages do not establish a specific local partner session.|Skip local publication from this source; retain the reviewed national source/decision. Lack of local participation evidence is the blocker, not missing clock times alone.|
 
-The first two are genuine online activities rather than false content. Their
-publication limitation is the current app/API's unsupported online identity.
-Do not train an early-stage content rejection rule to call all webinars invalid,
-or turn an unrelated webinar mention into rejection of a physical calendar item.
+The first two are genuine online activities. Craig's latest policy excludes
+online courses and the SportPEI educational webinar from current recovery.
+This does not establish a blanket exclusion of every online event type; RCMP
+recruiting information sessions retain their separate representation decision.
+Preserve in-person classes and physical calendar items when a source also
+mentions an online course. The internal source-retention entry in the proposed
+batch does not authorize further recovery work on the excluded webinar.
 The current exact live/media plan is unchanged by these review decisions;
 approval/apply and post-write verification remain separate.
 
