@@ -214,14 +214,20 @@ no second meal card and both images200. See
 Next grouped review has a fresh read-only capture of eight related source
 snapshots and fourteen candidate records. This is triage, not an approved
 mutation plan: `functions/artifacts/oct15-sequential-repairs/next-batch/readonly-capture.json`.
-The next exact five-event batch is now prepared in
+The next exact five-event batch is COMPLETE in
 `docs/oct15-reviewed-batch-approval-plan.md`: one November19 McFadyen show,
 four audit-proven source-array additions,feed264->265 and two narrow tested
 ticket-start/merge-evidence guards at release4c8d111. Build,38 focused and825
 full tests pass; saved-source/future-merge playback passes without paid calls.
-No deployment or live batch apply has occurred. Exact grouped approval remains
-required; the user's approval to prepare unspecified remaining work was not
-treated as approval of these newly reviewed paths.
+Craig approved the exact grouped plan. Release4c8d111 is independently ACTIVE
+on all three parsers at hashde8b283b5d93c7a569dc8bec95b4448fce196d73,
+100%latest traffic and identical full configuration fingerprints. The exact
+five-event repair and marker265 were applied atomically and independently
+verified22:11UTC:23 untouched references,correct details,one McFadyen listing
+in full active/history feeds,no duplicate and both retained images200.
+Fresh backup/apply/readback/verification artifacts are in
+`firebase/artifacts/oct15-reviewed-batch/`. Other pending batches need their
+own grouped exact review; do not re-request this completed approval.
 Keep online
 delivery, unclear store/mall ownership and indefinite package horizons held
 until their evidence/contracts are adequate. Do not ask per candidate.

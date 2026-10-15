@@ -1,6 +1,6 @@
 # October 15 reviewed batch: Trailside timing and four source links
 
-**Prepared; not applied or deployed. One approval covers this exact batch.**
+**COMPLETE. Craig approved the exact batch; release and repair verified October15,22:11UTC.**
 Craig requested short grouped approvals. This batch has one narrow parser
 release, one new public listing, four source-only updates and one feed marker.
 The event-integrity and deployment skills require approval of these concrete
@@ -130,3 +130,50 @@ do not merely add nine cards alongside old weekly copies. Uncertain Ruby
 offer clocks/old prices,Mill River horizon,online office pins and Blank Canvas
 identity remain separate evidence/compatibility work. No broad cleanup is
 approved by this batch.
+
+## Completed execution
+
+Craig approved the exact grouped plan. At22:06UTC the fresh preflight proved
+completed dataset/final batch372,no checkpoint and no active worker. Serving
+baseline15a93b64 was independently refreshed before deployment. The committed
+release4c8d111 was deployed from the isolated release functions directory:
+
+```powershell
+firebase deploy --only 'functions:gathr-functions:processDataset,functions:gathr-functions:processDatasetResume,functions:gathr-functions:processDatasetSelectedRows' --project gathr-migrated --non-interactive
+```
+
+All three functions are independently ACTIVE with100%latest traffic,common
+source hash `de8b283b5d93c7a569dc8bec95b4448fce196d73`:
+
+- `processdataset-00489-neb` (northamerica-northeast2)
+- `processdatasetresume-00453-vah` (northamerica-northeast1)
+- `processdatasetselectedrows-00445-ven` (northamerica-northeast1)
+
+Full function/runtime/environment/secret-binding fingerprints and model
+settings match the before capture. Date-only publication and automatic festival
+publication remain OFF. Existing firebase-functions SDK advisory was unchanged;
+no dependency upgrade occurred. Source guard files were also integrated into
+the coordinator as433fd25/e651969/a32a020 and verified byte-equivalent to the
+reviewed release. The coordinator's separate unshipped shadow modules remain
+excluded from this serving release.
+
+Fresh source/target/audit/venue/sibling/ticket/poster/marker guards passed.
+The five approved event changes and marker264->265 were applied atomically,
+with no deletion or media write. Exact fresh backup and result:
+
+- `firebase/artifacts/oct15-reviewed-batch/prewrite-2026-10-15T22-10-24-337Z.json`
+- `firebase/artifacts/oct15-reviewed-batch/applied-2026-10-15T22-10-24-337Z.json`
+- `firebase/artifacts/oct15-reviewed-batch/independent-verification.json`
+- `firebase/artifacts/oct15-reviewed-batch/serving-before.json`
+- `firebase/artifacts/oct15-reviewed-batch/serving-after.json`
+
+Independent verification at22:11:09UTC passed exact delta,23 untouched guarded
+references,exact sibling membership plus one new event,both new-show detail
+routes200,four unchanged existing details200,one new show in the complete
+983-event/10-page active feed and1123-event/12-page history feed,no duplicate,
+both ticket/profile images200 and API marker265. The show retains20:00,$25,
+its exact ticket URL and unknown finish. No paid extraction/replay was run.
+The next full parse remains the separate production-model validation.
+
+Harvest consolidation and the other held items above remain pending; this
+completed batch does not resolve or authorize their live changes.

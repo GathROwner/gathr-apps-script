@@ -745,3 +745,23 @@ backup and atomic marker264 are independently verified: exact delta,two
 untouched references,both details200,complete active/history feeds once and
 both images200. See docs/rodd-entertainment-oct15-release-and-repair-plan.md.
 Fresh paid extraction and next-full-run validation remain separate evidence.
+
+October15 ticket-performance and merge-evidence follow-up is COMPLETE.
+The website enricher had a verified20:00 API/local event start, but the ticket
+URL's separate doors18:30 wording caused downstream source reconciliation to
+discard it. Release4c8d111 preserves only independently agreeing valid API/local
+starts distinct from the single labelled doors clock; other source holds remain.
+Future-merge playback also exposed ISO2026-11-19 evidence being read as11–19
+clock range, changing20:00 to11:00. Numeric provenance URLs and ISO dates are
+now removed before printed clock-range parsing; corroborated real ranges still
+work.38 focused and825 full backend tests plus actual saved-source/stable-ID/
+future-merge playback pass. All three parsers are ACTIVE/100% with common hash
+de8b283b5d93c7a569dc8bec95b4448fce196d73 and unchanged complete configuration.
+The exact approved batch created the November19,20:00,$25 McFadyen show with
+unknown finish and verified ticket image/profile; four existing Anchor source
+arrays gained audit-proven source1564814712352727 only. Public festival links
+remain unchanged and automatic publication remains OFF. Exact delta,23 untouched
+references,details,full active/history feeds once,no duplicate,two images200
+and marker265 passed independently at22:11UTC. Complete source/release/backup/
+apply/verification evidence: docs/oct15-reviewed-batch-approval-plan.md.
+Next-run model validation and Harvest programme consolidation remain separate.
