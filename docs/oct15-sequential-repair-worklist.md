@@ -169,7 +169,10 @@ Craig confirmed the iPhone Preview update and corrected audition listing, then
 instructed continuation. Next exact issue: Indigo Thriller Book Club category.
 The live record and original poster were independently reviewed; category-only
 dry run/backups are ready. See `docs/indigo-category-oct15-repair-plan.md`.
-No Indigo mutation has occurred; exact live approval remains the next gate.
+Craig approved the exact Indigo correction. It was applied and independently
+verified at20:54UTC: one category/type correction, marker261,16 unchanged
+references, both detail routes200, full active/history feed once and both
+images200. Next is the separate L'Autre programme-poster restoration review.
 
 1. Remaining exact category/media/spatial corrections and source-backed recovery
    of genuinely missing activities; retain ambiguous prices/identities.

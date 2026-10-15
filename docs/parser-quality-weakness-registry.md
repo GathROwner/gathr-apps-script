@@ -697,3 +697,12 @@ atomic. Exact delta, 22 unchanged references, full default/capable feeds
 No media deletion, new event, parser deploy or global date-only enablement.
 Evidence and rollback constraints are in
 `docs/auditions-oct15-release-and-repair-approval-plan.md`.
+
+October15 Indigo live category correction is complete after exact approval.
+Thriller Book Club `venues/jY4hgzi01XJTh33vzH8j/events/vGzlY5BUkEthCbw9ZITj`
+now has Gatherings & Parties / gatherings_parties, preserving the source's
+October15 18:00–19:00, venue, original poster and all other event fields.
+Feed marker260->261 was atomic. Independent exact-delta/16-untouched-reference,
+default+capable detail, complete active/history feed once, sibling and two-image
+checks passed. The existing serving book-discussion/music controls both passed;
+no additional parser deployment. Evidence: `docs/indigo-category-oct15-repair-plan.md`.

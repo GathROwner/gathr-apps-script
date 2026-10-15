@@ -1,7 +1,21 @@
 # Indigo Thriller Book Club: exact category repair
 
 Prepared October15 after the user confirmed the corrected audition on iPhone.
-**Dry run only; not applied.** The prevention is already serving as part of
+**COMPLETE: exactly approved, applied and independently verified.**
+Craig approved the reviewed plan with “I approve”. At20:54UTC the transaction
+updated the category/internal type and feed marker260->261 only. Fresh prewrite
+backup and exact apply evidence are in the same directory:
+
+- `prewrite-2026-10-15T20-54-14-786Z.json`
+- `applied-2026-10-15T20-54-14-786Z.json`
+- `independent-verification.json`
+
+Independent verification passed exact delta,16 untouched references, unchanged
+sibling membership, both default/capable details200, one entry in the complete
+active feed(1,004 events/11 pages) and full history feed(1,123/12 pages), no copied
+session, both managed images200 and marker261. No deployment or media writes.
+
+The prevention is already serving as part of
 October15 hardening (`8a9a03b`, retained by subsequent parser releases). This
 plan requires no deployment, parser/model change or reparse.
 
