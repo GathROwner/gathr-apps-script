@@ -1,7 +1,18 @@
 # Bike-bus update: remove unsupported school/timing card, retain source
 
-**Prepared, default dry run only. No live cleanup applied.** This follows the
-completed L'Autre restoration and read-only A&W scope review.
+**COMPLETE: exactly approved, applied and independently verified.** Craig
+approved this plan with “I approve continue”. At21:10UTC October15 one guarded
+transaction deleted only the unsupported public card and advanced marker263.
+
+- Complete prewrite backup: `functions/artifacts/oct15-sequential-repairs/bikebus/prewrite-2026-10-15T21-10-10-840Z.json`.
+- Apply result: matching `applied-2026-10-15T21-10-10-840Z.json`.
+- Independent `independent-verification.json` at21:10:48UTC confirms exact delta,
+  three unchanged untargeted references, other sibling membership unchanged,
+  both detail routes404, no parent/generated copy in the complete992-event/
+  ten-page active feed, original source unchanged, retained route candidate,
+  both managed images200 and API marker263. No review, venue or media writes.
+
+This followed the completed L'Autre restoration and read-only A&W scope review.
 
 ## Source-grounded finding
 

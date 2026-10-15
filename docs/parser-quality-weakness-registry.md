@@ -717,3 +717,14 @@ passed. Existing five owner-media/provenance tests and actual saved overwrite
 replay pass without repainting the restored keeper. No new parser deployment,
 media mutation or event source-array backfill. See
 `docs/lautre-poster-oct15-repair-plan.md` for complete backup/result evidence.
+
+October15 exact bike-bus public-card cleanup is complete after explicit approval.
+`venues/i3qvfV2bLwzx5LhJM1IB/events/DpmCz0FWEAR5t8HqczPP` was the unsupported
+10:17–23:00 school card for a source-only morning pink-route update. Only that
+card was deleted, with marker263 atomically. Source remains unchanged and the
+honest unknown-clock/route candidate is retained privately, not newly queued or
+published. Actual saved-source playback retains route scope and geometry hold;
+three spatial controls pass. Independent exact-delta/three-untouched-reference,
+both-details404/full-feed-absence, sibling/source and two-image checks passed.
+No school, image or review-queue mutation. See
+`docs/bikebus-oct15-false-pin-repair-plan.md` for backup/apply/verification evidence.

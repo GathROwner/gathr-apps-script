@@ -190,7 +190,10 @@ published as a10:17–23:00 school card. Actual offline source playback passes t
 existing route/time holds. Exact one-card removal plus marker262->263 is prepared
 and backed up in `docs/bikebus-oct15-false-pin-repair-plan.md`; original source,
 private route candidate, school, other events and all media remain preserved.
-No bike-bus cleanup is applied yet; exact live approval is required.
+Craig approved that exact cleanup; it is COMPLETE at21:10UTC. Independent
+verification passed both details404, full active-feed absence, three untouched
+references including the source, other event unchanged, retained route candidate,
+both images200 and marker263. Next is Rodd Brudenell's dinner/music clock ownership.
 
 1. Remaining exact category/media/spatial corrections and source-backed recovery
    of genuinely missing activities; retain ambiguous prices/identities.
