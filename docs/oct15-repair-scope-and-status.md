@@ -21,31 +21,32 @@ snapshot, which intentionally retains what was wrong before repairs.
 |O15-02|Pressure Points conflicting copy|Exact copy removed; canonical preserved; source-conflict prevention serving|
 |O15-03|Pints East duplicate|Exact copy removed; keeper and exact-session prevention verified|
 |O15-04|Unpriced daily food feature|Closed as valid under Craig's policy; no deletion needed|
-|O15-05|Ruby's current specials|PREPARED: three missing specials, current eggroll one-off and two stale weekly lifecycle corrections; exact grouped approval pending|
-|O15-06|Mill River Stay & Play|PREPARED: Oct16–27 advertised booking window, unknown clocks and source-supported price/closing caveat; exact grouped approval pending|
+|O15-05|Ruby's current specials|COMPLETE23:38:44UTC: three missing specials recovered, current eggroll made one-off and two stale weekly lifecycles corrected; exact replay/price guards serving|
+|O15-06|Mill River Stay & Play|COMPLETE23:38:44UTC: Oct16–27 booking window, unknown clocks and source-supported price/closing caveat recovered and API/feed verified|
 |O15-07|FiN Thursday tacos|Compact placeholder/closing safeguards deployed; approved Fish-only recovery verified; Chicken retained as qualified context|
 |O15-08|McFadyen at Trailside|November19,20:00,$25 show recovered; ticket-role/merge-clock guards and API/feed verification complete|
 |O15-09|Harvest programme|COMPLETE22:49:56UTC: three keepers,nine creates,five retired copies,exact replay fence; release/readback/atomic apply/details/full active-history feed/media verification passed|
 |O15-10|Bike-bus false school event|Exact false pin removed; route/source candidate retained and protective guards serving|
 |O15-11|A&W all-PEI offer|HELD: original dated card expired; no invented ongoing offer or historical mutation|
-|O15-12|Online event routing|PREPARED: false RCMP office deletion, three retained online sources and physical-queue corrections; public online delivery remains a separate unsupported contract|
-|O15-13|Andersons Creek Bash|PREPARED: exact source ownership confirmed, main activity recovery and existing Club resolution; exact grouped approval pending|
-|O15-14|Labels/categories/venue specificity|Rodd/Indigo complete; Blank Canvas same-ID move to verified store and preventive classroom guard PREPARED; exact grouped approval pending|
+|O15-12|Online event routing|ADDRESSED23:38:44UTC: false RCMP office removed, physical queues corrected, sources retained; online course/webinar recovery excluded; public online representation remains separate|
+|O15-13|Andersons Creek Bash|COMPLETE23:38:44UTC: main activity recovered at exact existing Club, Course alias added and queue resolved; source-owner guard serving|
+|O15-14|Labels/categories/venue specificity|COMPLETE: Rodd/Indigo corrected earlier; Blank Canvas same-ID move to verified store and preventive classroom guard now live and verified|
 |O15-15|Displaced programme posters|Auditions and L'Autre restored; source-owned imagery protection serving|
 |O15-16|Milton formatter noon error|CONTAINED: correct09:00–12:00 live keeper preserved; no wrong published time to repair; retain regression/next-run observation|
 |O15-17|Karaoke generation loop|CONTAINED/HARDENED: existing activity covered; bounded retry deployed without partial publication; live recurrence of the failure still needs next-run validation|
-|O15-18|Other date-only/public access losses|PREPARED: partial Kensington area activity, exhibition date range and three verified Christmas shows; PetSmart local attendance explicitly held; exact grouped approval pending|
+|O15-18|Other date-only/public access losses|ADDRESSED23:38:44UTC: Kensington partial area activity, exhibition range and three Christmas shows recovered; PetSmart local participation unconfirmed, skip publication|
 |O15-19|Retail/service policy boundary|HELD policy observation, not an OCR failure or an authorized expansion of event eligibility|
 |O15-20|Seven unavailable original images|HELD evidence limitation; do not invent unseen content or claim complete visual verification|
 
-After independent Harvest verification: **eleven** groups are closed/covered/
-contained, **six** groups now have completed source review and a single prepared
-implementation/repair batch awaiting exact live approval, and **three** are held
-evidence or policy limits. See `docs/six-groups-oct15-approval-plan.md` for the
-28 guarded document changes and eight pinned original uploads. No part of that
-new batch is claimed live yet. Public online delivery and local PetSmart
-attendance remain named limitations within the reviewed six. No approved
-Harvest steps remain pending.
+After independent final-batch verification: **seventeen** groups are closed,
+addressed, covered or contained, and **three** retain their original evidence
+or policy holds. The six-group approved batch is complete: 28 exact document
+changes, eight original uploads, three parsers ACTIVE/100% at common source
+hash8073c2d8a8520e8362a71df53c76b718751fabfb, 104 unchanged references and
+14 event details/complete capable/default feeds/media verified. See
+`docs/six-groups-oct15-approval-plan.md` and its result artifacts. Online course
+recovery is excluded and unconfirmed local PetSmart participation is skipped.
+No approved Harvest or six-group repair steps remain pending.
 Counts include contained defects whose correct live data was
 preserved; they do not assert that every future model call or source is flawless.
 

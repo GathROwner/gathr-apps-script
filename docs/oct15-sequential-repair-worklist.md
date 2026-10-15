@@ -250,18 +250,16 @@ Fresh backup/apply/readback/feed evidence is in
 `firebase/artifacts/harvest-series-oct15/`. This batch is COMPLETE.
 
 **Scope accounting:** `docs/oct15-repair-scope-and-status.md` reconciles the
-original20 audit review groups:11 closed/covered/contained,6 still open for
-work and3 held evidence/policy limits. Three older Inn records need separate
+original20 audit review groups:17 closed/addressed/covered/contained and3 held
+evidence/policy limits. The final six-group batch is now complete. Three older Inn records need separate
 source review. The five larger backend workstreams below are a separate backlog,
 not additional newly discovered failures in the Harvest batch.
 
-1. Remaining exact category/media/spatial corrections and source-backed recovery
-   of genuinely missing activities; retain ambiguous prices/identities.
-2. Finish date-only client delivery and bounded backend enablement validation.
-3. Festival source/provenance shadow gates, then separately validated public writer.
-4. Fresh missing/blank venue-profile review with validated first-party recovery.
-5. The exact missing venueId/startDate/startTime collection-group index.
-6. Broader source-grounded duplicate clusters with exact cleanup approval.
+1. Finish date-only client delivery and bounded backend enablement validation.
+2. Festival source/provenance shadow gates, then separately validated public writer.
+3. Fresh missing/blank venue-profile review with validated first-party recovery.
+4. The exact missing venueId/startDate/startTime collection-group index.
+5. Broader source-grounded duplicate clusters with exact cleanup approval.
 
 Completed earlier: FiN Fish-only weekly recovery, APM seventeen-event recovery,
 two exact duplicate deletes, Arts Mixer correction and deployed parser guards.
@@ -270,13 +268,16 @@ any pending live correction or automatic festival writer already happened.
 
 ## Consolidated final six-group batch
 
-Craig requested all six remaining audit groups be handled together. Source
-review, narrow runtime prevention and one guarded repair helper are prepared
-in `docs/six-groups-oct15-approval-plan.md`. The frozen dry run contains 28
-document mutations and eight SHA-pinned original image uploads, with no live
-writes. Ruby, Mill River, Andersons Creek, Blank Canvas and the date-only
-activities have exact source-supported corrections. Online sources are retained
-without false physical pins; local PetSmart participation remains unconfirmed.
-This is one new grouped approval, not per-event requests or an expansion into
-the separate backend backlog. Do not mark applied before result/readback/API
-verification artifacts exist.
+Craig approved the combined exact batch. Runtime release ac0e59b is ACTIVE
+on all three parsers at common hash8073c2d8a8520e8362a71df53c76b718751fabfb,
+100% latest traffic and unchanged full configuration. All843 backend tests,
+23 focused checks, saved-source playback and qualified dry run passed.
+The28-document atomic transaction/eight original assets applied23:38:14UTC;
+independent exact-delta/details/full feeds/media verification passed23:38:44UTC.
+All104 guarded untargeted references were unchanged. Ruby, Mill River,
+Andersons Creek, Blank Canvas and the date-only activities are repaired.
+The false RCMP office is absent; online sources are retained without physical
+pins. Online educational recovery is excluded and unconfirmed local PetSmart
+publication is skipped. See `docs/six-groups-oct15-approval-plan.md` for complete
+release, fresh backup, apply and verification artifacts. This approved batch
+is COMPLETE and requires no additional approval or live operation.

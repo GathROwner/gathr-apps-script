@@ -1,9 +1,10 @@
 # Remaining six audit groups: one exact repair batch
 
-Status: implementation and default-dry repair prepared. No live mutation or
-new parser deployment in this batch. Craig requested all six groups be handled;
-the event-integrity skill still requires this exact new target/media plan to
-be reviewed before the live transaction. This replaces per-event approvals.
+Status: **COMPLETE, approved and independently verified October 15 at 23:38:44 UTC.**
+Craig approved this combined exact batch with “Okay do that” after reviewing
+the content decisions and excluding online courses. Runtime prevention is live;
+the guarded transaction and complete API/feed/media verification passed.
+The source-reviewed plan below is retained as the pre-apply decision record.
 
 ## Short decision
 
@@ -212,3 +213,65 @@ capable complete feeds/recurrence-absence/media verification. The seven marked
 date-only activities remain hidden from incapable older clients; Preview uses
 the already approved capability contract. Production client delivery/global
 automatic date-only publication remain separate. No OTA or map interaction.
+
+## Applied release and independent verification
+
+Craig approved the exact grouped plan, including the two deletes (one a
+same-ID venue move), eight original uploads and the 28-document atomic
+transaction. Online courses/educational webinars remain excluded from recovery;
+the retained internal source entry is audit evidence. PetSmart's unconfirmed
+local attendance was not published.
+
+Fresh preflight at 23:34:39 UTC reproduced the approved snapshot hash exactly:
+`ba2226c1f186d9c5c78334f93c9c76814097a24f03ace1aaaa27df3750edf928`.
+The parser was idle before release and at the atomic repair. No source, target,
+venue, sibling, feed marker or source-image drift was bypassed.
+
+Runtime candidate `ac0e59b360f04fc01ff7ed251f54d30421e3c66b` was deployed from
+`codex/six-audit-groups-20261015` in the isolated `arts-mixer-release` checkout,
+using the exact narrow command:
+
+```powershell
+firebase deploy --only 'functions:gathr-functions:processDataset,functions:gathr-functions:processDatasetResume,functions:gathr-functions:processDatasetSelectedRows' --project gathr-migrated --non-interactive
+```
+
+All three parsers independently read ACTIVE, 100% latest traffic at common
+source hash `8073c2d8a8520e8362a71df53c76b718751fabfb`:
+
+| Function | Serving revision |
+|---|---|
+| processDataset | processdataset-00491-yon |
+| processDatasetResume | processdatasetresume-00455-nen |
+| processDatasetSelectedRows | processdatasetselectedrows-00447-yan |
+
+All complete function/runtime/environment/secret-binding fingerprints match
+the previous serving baseline. Stage models, efforts, allocations, prompts and
+caches remain preserved; global automatic date-only/festival publication stays
+off. The separate coordinator festival-shadow additions were not deployed.
+Accepted runtime patches were integrated into the coordinator as
+`e109584`, `915e911` and `a330f34` for baseline continuity. The existing SDK
+warning is unchanged; no SDK or dependency upgrade was attempted.
+
+The exact transaction applied at 23:38:14 UTC. Artifacts under
+`firebase/artifacts/six-groups-oct15/`:
+
+- `prewrite-2026-10-15T23-38-00-778Z.json`: complete fresh prewrite backup.
+- `applied-2026-10-15T23-38-00-778Z.json`: exact 28-document result/eight assets.
+- `serving-before.json` and `serving-after.json`: independent release readback.
+- `independent-verification.json`: all checks passed at 23:38:44 UTC.
+- Deploy transcript: `functions/artifacts/six-groups-deploy.txt`.
+
+Independent verification confirmed the exact delta and 104 untouched references;
+14 public event details; RCMP false-office detail 404 and no generated copies;
+Blank Canvas same global ID 200 at the correct store with original path absent;
+two old Ruby weekly parents no longer materialize active occurrences; seven
+marked date-only contracts omitted from incapable default clients; all eight
+original assets hash-identical and all retained image/profile URLs 200; marker 267.
+Complete capable active feed 973 events/10 pages, history 1135/12 pages and
+default active feed 965/10 pages were checked without map interaction or an OTA.
+
+This completes the six reviewed audit groups' approved prevention and repair
+batch. Current online/PetSmart publication decisions are settled skips/holds.
+The original policy/source-unavailable holds, three older Inn source reviews
+and broader backend backlog remain separately recorded in
+`docs/oct15-repair-scope-and-status.md`.

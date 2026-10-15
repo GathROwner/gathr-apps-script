@@ -794,11 +794,11 @@ enrichment and three separate
 foraging/summer-tour records are explicit open work; do not claim this exact
 retirement fence prevents every future duplicate wording or new source.
 
-## October 15 final six audit groups (prepared; not live)
+## October 15 final six audit groups (approved, deployed and verified)
 
-Source review and exact proposed repairs are consolidated in
-`docs/six-groups-oct15-approval-plan.md`, with one frozen 28-document dry-run
-plan and eight original image uploads. Existing price/venue/online/recurrence
+Source review and exact approved repairs are consolidated in
+`docs/six-groups-oct15-approval-plan.md`, with one guarded 28-document atomic
+transaction and eight original image uploads. Existing price/venue/online/recurrence
 mechanisms gain narrow controls: contradictory numeric prices cannot overwrite
 known amounts merely by being longer; exact source-owner Golf Course/Club
 wording resolves the same business; a first-party store classroom retains
@@ -809,11 +809,26 @@ An unrelated webinar in a mixed calendar must not hold its physical items.
 Ruby's current one-off specials, Mill River's advertised booking window,
 Andersons Creek's main bash, Blank Canvas's existing class, Soft Internet
 Theory's exhibition range, three public Christmas shows and a partial
-Kensington activity have source-supported proposed deltas. Exact reviewed
+Kensington activity have source-supported verified corrections. Exact reviewed
 retirement policies protect the corrected old Ruby/exhibition representations.
-Public online delivery is still unsupported; preserve three internal source
-holds/archive and remove the false RCMP office pin only after exact approval.
+Public online delivery is still unsupported; three internal sources were
+retained and the exact false RCMP office pin removed after Craig's approval.
+Online courses and the educational webinar are excluded from recovery.
 PetSmart national dates do not prove local partner participation. No source
 ambiguity is converted to guessed attendance, venue or clock evidence.
 No model/prompt/cache/allocation change, paid replay, new venue, broad cleanup
 or automatic date-only/festival publication is part of this batch.
+
+Release ac0e59b passes23 focused/843 full backend tests, actual saved-source
+playback and qualified three-parser dry run. All three parsers independently
+read ACTIVE/100%latest at common hash8073c2d8a8520e8362a71df53c76b718751fabfb;
+complete source-baseline environment/runtime/secret fingerprints match.
+The exact28-document transaction applied23:38:14UTC with fresh full prewrite
+backup. Independent verification23:38:44UTC confirmed104 unchanged references,
+14 event details, false RCMP parent/generated absence, Blank Canvas same-ID
+move, old Ruby recurrence absence, seven date-only capability contracts,
+eight source-image hashes/retained image200 checks and marker267. Full capable
+active973/10page,history1135/12page and default active965/10page feeds passed.
+No public online/PetSmart listing, map interaction, OTA or broader cleanup
+was performed. This approved batch is complete; next-run validation and
+separate backend work remain separately scoped.
