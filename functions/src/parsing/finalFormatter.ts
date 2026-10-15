@@ -2368,6 +2368,14 @@ function applyCategoryCorrections(
 
   event = applyCinemaVenueHardening(event, originalItem);
 
+  // A novel title (for example "Thriller") is not a music genre cue when the
+  // activity itself is explicitly a book discussion.
+  if (/\bbook\s+club\b/i.test(event.name || '') &&
+      /\b(?:books?|reading|discussion|discuss)\b/i.test(event.description || '') &&
+      !/\b(?:concert|live\s+music|band|performance|dj)\b/i.test(event.name || '')) {
+    event.category = 'Gatherings & Parties';
+  }
+
   const textToCheck = `${event.name || ''} ${event.description || ''} ${'extractionReason' in (originalItem || {}) ? (originalItem as any).extractionReason || '' : ''}`.toLowerCase();
 
   // A shared-admission festival is the event; its stage acts and vendors are
