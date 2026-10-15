@@ -130,6 +130,26 @@ The webinar poster's literal12:00AST before the DST transition needs host
 clarification; noon Halifax is not silently assumed. No email/contact is sent.
 These are named holds,not claims that every valid online source is now visible.
 
+### Final content decisions after Craig's requested review
+
+Re-read all four original captions and independently inspected each ordered
+original image on October15. Decision: publish none of these four sources as
+local physical listings from the evidence currently available.
+
+| Source | Content decision | Publication decision |
+|---|---|---|
+|RCMP1565755542263418|Valid scheduled public recruiting presentations and live Q&A,Oct19/26 at20:00; caption explicitly says Microsoft Teams. This is more than the generic careers image alone.|Retain the extracted online sessions; no office map pin. Existing false physical parent remains an exact proposed deletion in this batch.|
+|SportPEI1559060616262193|Valid free educational webinar with presentation/live Q&A,Oct20; poster explicitly says Zoom and12:00PM AST.|Retain as online; no physical venue. Printed timezone needs clarification before a reliable local-clock public listing.|
+|Stratford1569782475183274|A real council-meeting livestream explicitly datedOct14,16:30; already past at theOct15 audit.|Archive/skip new publication; no invented future meeting or YouTube venue.|
+|PetSmart1561342776030307|A real national adoption campaign Oct19–25. Original national post/poster and refreshed national/store pages do not establish a specific local partner session.|Skip local publication from this source; retain the reviewed national source/decision. Lack of local participation evidence is the blocker, not missing clock times alone.|
+
+The first two are genuine online activities rather than false content. Their
+publication limitation is the current app/API's unsupported online identity.
+Do not train an early-stage content rejection rule to call all webinars invalid,
+or turn an unrelated webinar mention into rejection of a physical calendar item.
+The current exact live/media plan is unchanged by these review decisions;
+approval/apply and post-write verification remain separate.
+
 ## Implementation and gates
 
 Isolated release branch `codex/six-audit-groups-20261015` starts at serving
