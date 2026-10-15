@@ -161,7 +161,7 @@ unfinished. See `docs/festival-shadow-oct15-hardening.md` for exact boundaries.
 | Concern | Prevention status | Live recovery / next gate |
 |---|---|---|
 | Website clocks and generic images | Serving | Exact auditions/Harvest correction prepared, not applied; requires compatible display and exact approval |
-| Pressure Points and Pints East copies | Serving | Two-record delete approval pending; fresh reread proves approved snapshot unchanged |
+| Pressure Points and Pints East copies | Serving | Exact approved two-record deletion complete; independent Firestore/detail/full-feed/media verification passed |
 | FiN compact recurrence placeholder | Serving; both saved responses pass | Controlled source recovery still needed; no live replay performed |
 | Ruby, Harvest later dates, Trailside, other date-only activities | Held evidence retained | Date-only publication OFF; source price and duplicate conflicts require reviewed recovery |
 | Source provenance / festival offsets, titles and authority | Provenance serving; matcher shadow only | Four exact source-array additions prepared, not applied; automatic writer still OFF |
@@ -170,9 +170,9 @@ unfinished. See `docs/festival-shadow-oct15-hardening.md` for exact boundaries.
 | Earlier APM17 recovery | Prior venue guards retained | Not materialized; retain its exact-plan approval gate |
 | Andersons Creek identity, indefinite package horizon | Unresolved source/location evidence | Do not invent venues or booking end dates |
 
-No live document has been mutated by this follow-up turn. Preparation, deployed
-prevention and historical data recovery are tracked separately to avoid claiming
-that a future parser safeguard has corrected an existing listing.
+The initial prevention follow-up made no live document changes. The subsequent
+explicitly approved two-record cleanup is recorded below; other historical
+recovery plans remain unapplied.
 
 ## Client safeguard: iOS Preview published
 
@@ -191,3 +191,26 @@ match corrected source `f43affc` exactly and the published commit descends
 from accepted festival Preview `9c653f0`. Production/Android were not released.
 iPhone adoption is unverified. Keep global date-only publication OFF until
 the remaining consuming-client rollout/delivery decision is made.
+
+## October15 exact two-record cleanup applied
+
+Craig approved the concrete first cleanup batch with "Okay do it" after the
+two titles/keeper decisions and exact targets were presented. Fresh preflight
+at16:56:23 UTC found no active parser, completed marker/final batch372 and no
+checkpoint. Fresh dry-run snapshot hash matched the original reviewed plan
+`duplicate-plan-2026-10-15T15-32-48-951Z.json` exactly; no drift was bypassed.
+
+One transaction deleted only:
+- `venues/slug_thetivolicinema/events/VtmHIyg7T7V4Tb0sC3Fo` (October16 21:00 Pressure Points copy).
+- `venues/sJQHqeQVXehTHcFarwc6/events/Ez7t4IXyxsxjRisCtHnC` (October16 18:30 General Trivia copy).
+
+Prewrite backup: release checkout `firebase/artifacts/oct15-hardening/duplicate-prewrite-2026-10-15T16-56-38-929Z.json`.
+Apply result: matching `duplicate-applied-2026-10-15T16-56-38-929Z.json`, completed16:56:50 UTC.
+Both deleted details returned404; both keepers returned200. Independent verification
+at16:57:29 checked all guarded references: nine untouched records unchanged,
+both keepers present exactly once and both copies/generated IDs absent in the
+complete1,026-event/11-page feed. All four managed primary images still return200.
+No venue/media deletion, reparse, queue mutation or new deployment occurred.
+Independent artifact: `duplicate-independent-verification.json` in that same
+release-checkout artifact folder. Live data recovery for every other row remains
+separate; this result does not authorize additional deletions or writes.

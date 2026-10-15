@@ -632,3 +632,13 @@ hold before physical matching; this is not a public online-event implementation.
 No historical data repair or source-ID backfill is implied by this deployment.
 See `docs/luna-oct15-followup-hardening.md` for exact guarded live plans, test
 limitations, serving revisions and pending client/data approval boundaries.
+
+October15 exact Pressure Points21:00 and Pints East General Trivia copy cleanup
+is COMPLETE after Craig's concrete approval. Only `VtmHIyg7T7V4Tb0sC3Fo` and
+`Ez7t4IXyxsxjRisCtHnC` were deleted. Correct keepers `nepcYF8RIzLrzPKBXjWX`
+and `oXz81O57WSQ1D4nGMkn6` are unchanged and each appears once in the complete
+1,026-event/11-page feed; deleted details404 and keeper details200. Nine guarded
+untargeted documents are unchanged; all four primary managed images remain200.
+Fresh prewrite backup, transaction drift/sibling guards and independent result
+are recorded in `docs/luna-oct15-followup-hardening.md`. Other pending recovery
+and source/time/venue decisions remain unapproved/unapplied.
