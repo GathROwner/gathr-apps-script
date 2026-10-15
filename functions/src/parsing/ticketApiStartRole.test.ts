@@ -47,3 +47,11 @@ test('wrong date and performer cannot donate a performance start',async()=>{
     const item=await playback(label,changes);assert.equal(item.startTime,'');assert.equal(item._sourceTimeConstraint,undefined);
   }
 });
+test('invalid or missing UTC and invalid doors clocks cannot acquire performance proof',async()=>{
+  const cases:any[]=[{start:{timezone:'America/Halifax',utc:'invalid',local:'Thursday, November 19, 2026 at 08:00 PM'}},
+    {start:{timezone:'America/Halifax',local:'Thursday, November 19, 2026 at 08:00 PM'}},
+    {name:'Fixture Performer - Doors 0 PM'}, {name:'Fixture Performer - Doors 13:99 PM'}];
+  for(let i=0;i<cases.length;i++){
+    const item=await playback('invalid'+i,cases[i]);assert.equal(item.startTime,'');assert.equal(item._sourceTimeConstraint?.reason,'doors_without_showtime');
+  }
+});

@@ -512,7 +512,8 @@ async function fetchJson(url: string, timeoutMs: number): Promise<unknown> {
 function normalizeLocariusRecord(record: any, fallbackTimezone: string): WebsiteCandidate | null {
   const startUtc = String(record?.start?.utc || '').trim();
   const zone = String(record?.start?.timezone || fallbackTimezone || 'America/Halifax').trim();
-  let local = startUtc ? DateTime.fromISO(startUtc, { zone: 'utc' }).setZone(zone) : null;
+  const instant = startUtc ? DateTime.fromISO(startUtc, { zone: 'utc' }).setZone(zone) : null;
+  let local = instant;
   if (!local?.isValid) {
     const localRaw = String(record?.start?.local || '').trim();
     local = parseLocalEventDateTime(localRaw, zone);
@@ -524,9 +525,10 @@ function normalizeLocariusRecord(record: any, fallbackTimezone: string): Website
   const printedLocal = parseLocalEventDateTime(String(record?.start?.local || ''), zone);
   const doors = [...String(record?.name || '').matchAll(/\bdoors?\s*(?:open\s*)?(?:at\s*)?(\d{1,2}(?::\d{2})?\s*[ap]\.?m\.?)/gi)];
   const doorsTime = doors.length === 1 ? parse12hTime(doors[0][1]) : '';
-  const performanceStartEvidence = startUtc && printedLocal?.isValid &&
+  const doorsHour = Number(doors[0]?.[1].match(/^\d+/)?.[0]);
+  const performanceStartEvidence = instant?.isValid && printedLocal?.isValid &&
     printedLocal.toFormat('yyyy-MM-dd') === date && printedLocal.toFormat('HH:mm') === startTime &&
-    doorsTime && /^\d{2}:\d{2}$/.test(doorsTime) && doorsTime !== startTime
+    doorsHour >= 1 && doorsHour <= 12 && /^(?:[01]\d|2[0-3]):[0-5]\d$/.test(doorsTime) && doorsTime !== startTime
       ? `ticket API performance start ${date} ${startTime} ${zone}; separate doors ${doorsTime}` : undefined;
 
   return {
