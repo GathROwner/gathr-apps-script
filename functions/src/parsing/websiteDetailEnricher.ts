@@ -728,11 +728,44 @@ function discoverDetailPages(pageUrl: string, pageHtml: string, relevanceTokens:
   );
 }
 
+/** Remove site-wide navigation/hours before deriving an occurrence's date or clock. */
+export function eventDetailHtml(html: string): string {
+  const tokens = String(html || '').match(/<!--[\s\S]*?-->|<[^>]+>|[^<]+/g) || [];
+  const stack: Array<{tag: string; blocked: boolean}> = [];
+  const kept: string[] = [];
+  for (const token of tokens) {
+    const close = /^<\/([\w-]+)/.exec(token);
+    if (close) {
+      const index = stack.map(x => x.tag).lastIndexOf(close[1].toLowerCase());
+      if (index >= 0) {
+        const blocked = stack.some(x => x.blocked);
+        stack.splice(index);
+        if (!blocked) kept.push(token);
+      }
+      continue;
+    }
+    const open = /^<([\w-]+)\b/.exec(token);
+    if (open) {
+      const tag = open[1].toLowerCase();
+      const chrome = /^(?:header|footer|nav|aside|script|style|noscript|template)$/.test(tag) ||
+        /\b(?:id|class)\s*=\s*["'][^"']*(?:hoursofoperation|hours-of-operation|opening-hours-popup|site-footer|main-footer)[^"']*["']/i.test(token) ||
+        /\brole\s*=\s*["'](?:navigation|contentinfo)["']/i.test(token);
+      const blocked = chrome || stack.some(x => x.blocked);
+      if (!blocked) kept.push(token);
+      if (!/^(?:area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)$/.test(tag) && !/\/\s*>$/.test(token)) {
+        stack.push({tag, blocked});
+      }
+    } else if (!stack.some(x => x.blocked)) kept.push(token);
+  }
+  return kept.join('');
+}
+
 function parseDetailPageCandidate(
   detailUrl: string,
   html: string,
   yearHint: number
 ): WebsiteCandidate | null {
+  const occurrenceHtml = eventDetailHtml(html);
   const title =
     cleanText(
       extractFirst(html, /<meta[^>]+property=["']og:title["'][^>]+content=["']([^"']+)["']/i)
@@ -754,7 +787,7 @@ function parseDetailPageCandidate(
 
   const text = cleanText(
     decodeHtml(
-      String(html || '')
+      String(occurrenceHtml || '')
         .replace(/<script[\s\S]*?<\/script>/gi, ' ')
         .replace(/<style[\s\S]*?<\/style>/gi, ' ')
         .replace(/<\/?[^>]+>/g, ' ')
@@ -762,12 +795,12 @@ function parseDetailPageCandidate(
   );
   const dateInfo = extractDateInfoFromText(text, yearHint);
   const namedSeatings = dateInfo.date && !dateInfo.dateRangeStart
-    ? parseNamedSeatings(html)
+    ? parseNamedSeatings(occurrenceHtml)
     : [];
   // A page with separately named same-day sessions has no safe page-wide
   // start time. Keep those times attached to their labels for reconciliation.
   const timeInfo = namedSeatings.length >= 2 ? {} : extractTimeInfoFromText(text);
-  const namedSeries = extractNamedSeriesSchedule(html, title, yearHint);
+  const namedSeries = extractNamedSeriesSchedule(occurrenceHtml, title, yearHint);
 
   if (!title && !dateInfo.date && !dateInfo.dateRangeStart) {
     return null;

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { enrichEventsFromVenueWebsite, websiteCandidateTitleMatchesEventForRegression } from './websiteDetailEnricher.js';
+import { enrichEventsFromVenueWebsite, websiteCandidateTitleMatchesEventForRegression, eventDetailHtml } from './websiteDetailEnricher.js';
 import { DEFAULT_PARSING_CONFIG, EstablishmentInfo, ExtractedItem } from './types.js';
 
 function buildEventItem(overrides: Partial<ExtractedItem> = {}): ExtractedItem {
@@ -57,6 +57,38 @@ function jsonResponse(value: unknown): Response {
     headers: { 'content-type': 'application/json; charset=utf-8' },
   });
 }
+
+test('audition detail cannot borrow regular building, box-office or navigation clocks', async () => {
+  const site = 'https://auditions-oct15.example/';
+  const page = site + 'on-stage/submissions-auditions/';
+  const html = '<html><head><title>General Musical Theatre Auditions</title></head><body>' +
+    '<nav>Opening hours 8 a.m. - 6 p.m.</nav><main><h1>General Musical Theatre Auditions</h1>' +
+    '<p>Audition Details Date: Monday, October 26 (evening).</p>' +
+    '<p>Successful applicants will be notified where and when auditions take place.</p></main>' +
+    '<footer>Box Office 10 a.m. - 5 p.m.</footer>' +
+    '<div id="hoursofoperation"><div><p><strong>Regular Building Hours</strong>' +
+    'Monday, Friday, Saturday: 8 a.m. - 6 p.m.</p></div></div></body></html>';
+  assert(!eventDetailHtml(html).includes('8 a.m.'));
+  const restore = installFetchMap({[site]: htmlResponse(`<a href="${page}">General Musical Theatre Auditions</a>`),
+    [page]: htmlResponse(html)});
+  try {
+    const result = await enrichEventsFromVenueWebsite([buildEventItem({
+      name:'General Musical Theatre Auditions',date:'2026-10-26',startTime:''})],
+      `Auditions on the evening of October 26. Details ${page}`, '', '2026-10-15T12:00:00Z',
+      {name:'Test Centre',website:site} as EstablishmentInfo, DEFAULT_PARSING_CONFIG);
+    assert.equal(result.items[0].startTime,'');
+    assert.equal(result.items[0].endTime,'');
+  } finally {restore();}
+});
+
+test('event content clocks survive chrome removal and nested hours popups', () => {
+  const html='<main><p>Workshop October 26 at 7:30 pm.</p></main>' +
+    '<div id="hoursofoperation"><div><div>8 am - 6 pm</div></div></div><p>Tickets available online.</p>';
+  const event = eventDetailHtml(html);
+  assert(event.includes('7:30 pm'));
+  assert(event.includes('Tickets available online'));
+  assert(!event.includes('8 am'));
+});
 
 test('a tour stop cannot borrow the same show time from another explicitly dated stop', async () => {
   const page = 'https://sourisshowhall.example/events/two-pianos';
