@@ -222,6 +222,51 @@ range without inventing clocks or claiming continuous happening-now activity.
 The existing API expiry filter already honors the final date for blank clocks.
 Hold the live clock cleanup until that client behavior is verified.
 
+## Date-range compatibility release and independent playback
+
+Compatibility patch `1d7f25a` was independently reviewed and integrated as
+`6cb34a3`. Release source/assembly and older-client verifier are committed at
+`e0f9255338d4c326ff311e53eb14911bf9236012`. The final backend build and782 tests
+pass; coordinator focused checks pass42, and the separately assembled serving
+baselines build and pass39/41/41 focused tests. The live parser was idle.
+
+The coordinator executed the actual `a43cb20` timing module against the revised
+public specification, rather than a reimplementation. Before the festival,
+during October14/15, and through October18 at23:59 Halifax it remains discoverable;
+at October19 midnight it expires. Every case has `nowEligibility:none`. Neither
+the policy cutoff nor an invented start/end hour appears in visible timing text.
+Evidence: `functions/artifacts/anchor-festival-oct14/date-range-legacy-client-verified.json`.
+
+All narrow dry runs pass. One shared-promotion deployment's local discovery
+exceeded Firebase CLI's10-second initialization deadline before upload. The
+documented local-only `FUNCTIONS_DISCOVERY_TIMEOUT=60` retry succeeded; no runtime
+timeouts, models, allocations or environment values changed. Full independent
+function/Cloud Run readback at00:40:08 UTC October15 verifies:
+
+| Function | Current revision | Current source fingerprint |
+|---|---|---|
+| processDataset | processdataset-00484-cek | 544339ea554116d3e7880b151d9afaca775adb20 |
+| processDatasetResume | processdatasetresume-00448-rig | 544339ea554116d3e7880b151d9afaca775adb20 |
+| processDatasetSelectedRows | processdatasetselectedrows-00440-tar | 544339ea554116d3e7880b151d9afaca775adb20 |
+| finalizeCityLevelEventReviewTrigger | finalizecityleveleventreviewtrigger-00076-cik | bfcda29b176a26c1f4227277d9db40787cc998f7 |
+| processSharedEventPublicCandidates | processsharedeventpubliccandidates-00045-pen | 7cc255435fd9e2b374b85f5b8f64b98a06c51f5f |
+| scheduledSharedEventPublicCandidateProcessor | scheduledsharedeventpubliccandidateprocessor-00047-vew | c96915c42b24bf12ab5fe9168f50e2e87827866a |
+
+All six are ACTIVE,100% latest traffic, with unchanged user configuration. The
+two fresh shared-promotion source archives are byte-identical at SHA256
+`557D12DF5655826FAE3EDA16F87AECFB32C14A6DCA14F83D92612F12A42024F6`.
+Readbacks, before/after private descriptions, assembly/test/deploy logs and
+`date-range-serving-verified.json` are local under the same evidence directory.
+
+The revised exact two-document plan is still approval-gated:
+`C:/Users/craig/.codex/worktrees/anchor-festival-backend/gathr-apps-script/functions/tmp/anchor-backend-oct14/date-range-v2/plan-2026-10-15T00-20-07-511Z.json`.
+It adds the compatibility timing field to the prior public patch, and pins the
+advertised dates inside reviewed manual fields. The original plan is unchanged
+and is superseded for application. No live Anchor event/review fields have been
+changed. Frontend fixture QA/publication remains separate and requires rendered
+acceptance; older-client playback establishes timing compatibility, not a claim
+of complete visual/device verification.
+
 ## Date-only compatibility for older installed clients
 
 Read-only inspection of the accepted app at exact commit `a43cb20` confirms
