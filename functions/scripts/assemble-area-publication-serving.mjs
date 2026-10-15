@@ -47,16 +47,18 @@ const replacements=names.map(name=>{
 let patched=old;for(const r of replacements.sort((a,b)=>b.start-a.start))patched=patched.slice(0,r.start)+r.text+patched.slice(r.end);
 const helper=find(currentAst,'reviewedCityLevelManual');assert(helper);assert(!find(oldAst,'reviewedCityLevelManual'));
 patched=helper.getText(currentAst)+'\n\n'+patched;
-patched="import {publicCityLevelDescription, requiresReviewedAreaPoints, validateEventAreaData, verifyAreaPublicationReferences} from './areaEventPublication.js';\n"+patched;
+const helperImports=currentAst.statements.filter(n=>ts.isImportDeclaration(n)&&['./areaEventPublication.js','./areaDateRangeTiming.js'].includes(n.moduleSpecifier.text));
+assert.equal(helperImports.length,2,'Both reviewed helper imports are required');
+patched=helperImports.map(n=>n.getText(currentAst)).join('\n')+'\n'+patched;
 const typesPath=path.join(serving,'src/types/index.ts');let types=normal(fs.readFileSync(typesPath,'utf8'));
 const appendInterface=(name,fields)=>{const a=ast(types),n=a.statements.find(x=>ts.isInterfaceDeclaration(x)&&x.name.text===name);assert(n,'Missing interface '+name);fields=fields.filter(field=>{const present=n.members.some(m=>m.name?.getText(a)===field.split('?')[0]);if(present&&field.startsWith('spatialEvidence?'))return false;assert(!present,'Existing added field '+name+'.'+field);return true;});const index=n.getEnd()-1;types=types.slice(0,index)+fields.map(x=>'  '+x).join('\n')+'\n'+types.slice(index);};
-appendInterface('EventData',["areaData?: import('../services/areaEventPublication.js').EventAreaData;"]);
-appendInterface('CityLevelEventReviewRecord',["areaData?: import('../services/areaEventPublication.js').EventAreaData;","areaEventLinks?: import('../services/areaEventPublication.js').AreaEventLinkEvidence[];","observedLocationName?: string;","description?: string;","spatialEvidence?: {kind?: string};"]);
+appendInterface('EventData',["areaData?: import('../services/areaEventPublication.js').EventAreaData;","timing?: unknown;"]);
+appendInterface('CityLevelEventReviewRecord',["areaData?: import('../services/areaEventPublication.js').EventAreaData;","areaEventLinks?: import('../services/areaEventPublication.js').AreaEventLinkEvidence[];","observedLocationName?: string;","description?: string;","spatialEvidence?: {kind?: string};","timing?: unknown;"]);
 const typeAst=ast(types),finalize=typeAst.statements.find(n=>ts.isInterfaceDeclaration(n)&&n.name.text==='FinalizeCityLevelEventReviewInput');
 const manual=finalize?.members.find(n=>n.name?.getText(typeAst)==='manual');assert(manual&&ts.isTypeLiteralNode(manual.type));
-const insert=manual.type.getEnd()-1;types=types.slice(0,insert)+"    areaData?: import('../services/areaEventPublication.js').EventAreaData;\n    areaEventLinks?: import('../services/areaEventPublication.js').AreaEventLinkEvidence[];\n  "+types.slice(insert);
+const insert=manual.type.getEnd()-1;types=types.slice(0,insert)+"    areaData?: import('../services/areaEventPublication.js').EventAreaData;\n    areaEventLinks?: import('../services/areaEventPublication.js').AreaEventLinkEvidence[];\n    timing?: unknown;\n  "+types.slice(insert);
 fs.writeFileSync(sourcePath,patched);fs.writeFileSync(typesPath,types);
-for(const file of ['areaEventPublication.ts','areaEventPublication.test.ts']){
+for(const file of ['areaEventPublication.ts','areaEventPublication.test.ts','areaDateRangeTiming.ts','areaDateRangeTiming.test.ts']){
  let content=fs.readFileSync(path.join(functionsRoot,'src/services',file),'utf8');
  // The oldest finalizer's record type predates route reviews. Its negative
  // runtime fixture deliberately supplies an invalid route; do not widen the
@@ -68,7 +70,7 @@ const managed=/^(?:FUNCTION_|EVENTARC_|FIREBASE_|K_|GCLOUD_PROJECT$|GCP_PROJECT$
 const env=Object.entries(readback.serviceConfig.environmentVariables||{}).filter(([key])=>!managed.test(key));
 fs.writeFileSync(path.join(serving,'.env'),env.map(([key,value])=>`${key}=${JSON.stringify(String(value))}`).join('\n')+'\n');
 const configPath=path.join(serving,'firebase.json'),config=JSON.parse(fs.readFileSync(configPath,'utf8'));
-for(const f of config.functions)f.ignore=[...new Set([...(f.ignore||[]),'artifacts','tmp','sandbox','tmp_*','*.bak*','area-*.txt','area-publication-assembly.json'])];
+for(const f of config.functions)f.ignore=[...new Set([...(f.ignore||[]),'artifacts','tmp','sandbox','tmp_*','*.bak*','area-*.txt','date-range-*.txt','area-publication-assembly.json'])];
 fs.writeFileSync(configPath,JSON.stringify(config,null,2)+'\n');
 if(!fs.existsSync(path.join(serving,'node_modules')))fs.symlinkSync(path.join(functionsRoot,'node_modules'),path.join(serving,'node_modules'),'junction');
 const manifest={assembledAt:new Date().toISOString(),baselineHash:readback.labels['firebase-functions-hash'],storageSource:readback.buildConfig.source.storageSource,archiveSha256:sha(fs.readFileSync(zip)),publisherBeforeSha256:sha(original),publisherAfterSha256:sha(fs.readFileSync(sourcePath)),functionsChanged:names,addedHelper:'reviewedCityLevelManual',configurationKeysPreserved:env.map(([key])=>key),privatePackagingExcluded:true};

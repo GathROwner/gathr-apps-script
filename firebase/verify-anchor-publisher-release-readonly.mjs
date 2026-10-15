@@ -3,12 +3,14 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import assert from 'node:assert/strict';
 const dir=path.resolve(import.meta.dirname,'../functions/artifacts/anchor-festival-oct14');
+const suffix=process.argv.includes('--date-range')?'-date-range':'';
+const commit=process.argv.find(x=>x.startsWith('--commit='))?.slice(9)||'5f657d5';
 const read=async name=>JSON.parse((await fs.readFile(path.join(dir,name),'utf8')).replace(/^\uFEFF/,''));
 const managed=/^(?:FUNCTION_|EVENTARC_|FIREBASE_|K_|GCLOUD_PROJECT$|GCP_PROJECT$|CLOUD_RUNTIME_CONFIG$|PORT$)/;
 const names=['processDataset','processDatasetResume','processDatasetSelectedRows','finalizeCityLevelEventReviewTrigger','processSharedEventPublicCandidates','scheduledSharedEventPublicCandidateProcessor'];
 const rows=[];
 for(const name of names){
- const before=await read(name+'-before.json'),after=await read(name+'-after.json'),run=await read(name+'-traffic-after.json');
+ const before=await read(name+'-before'+suffix+'.json'),after=await read(name+'-after'+suffix+'.json'),run=await read(name+'-traffic-after'+suffix+'.json');
  assert.equal(after.state,'ACTIVE',name);assert.equal(after.serviceConfig.allTrafficOnLatestRevision,true,name);
  assert.notEqual(after.serviceConfig.revision,before.serviceConfig.revision,name);
  assert.notEqual(after.labels['firebase-functions-hash'],before.labels['firebase-functions-hash'],name);
@@ -24,8 +26,8 @@ for(const name of names){
 assert.equal(new Set(rows.slice(0,3).map(x=>x.hash)).size,1,'Parser package mismatch');
 // HTTP and scheduled deployments can carry distinct function fingerprints.
 // Their independently retrieved immutable source archives are the code proof.
-const promotionSources=await read('promotion-source-verified.json');
+const promotionSources=await read('promotion-source-verified'+suffix+'.json');
 assert.equal(promotionSources.identicalServingArchives,true);
-const report={checkedAt:new Date().toISOString(),sourceCommit:'5f657d5',project:'gathr-migrated',promotionSources,rows};
-await fs.writeFile(path.join(dir,'serving-verified.json'),JSON.stringify(report,null,2));
+const report={checkedAt:new Date().toISOString(),sourceCommit:commit,project:'gathr-migrated',promotionSources,rows};
+await fs.writeFile(path.join(dir,suffix?'date-range-serving-verified.json':'serving-verified.json'),JSON.stringify(report,null,2));
 console.log(JSON.stringify(report,null,2));
