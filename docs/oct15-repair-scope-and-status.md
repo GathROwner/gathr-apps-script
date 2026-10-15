@@ -80,7 +80,10 @@ parse and are not prerequisites for declaring an exact live repair complete:
    then implement and validate the separate public writer. Automatic publication
    is still OFF; four approved source-array corrections alone are not rollout.
 3. Missing/blank venue-profile review and validated first-party recovery.
-4. The documented venueId/startDate/startTime collection-group query index.
+4. COMPLETE23:57:48UTC: the venueId/startDate/startTime collection-group index
+   is READY; 15 venue pagination cases plus date-window/empty-venue checks pass,
+   normal feeds and all15 existing indexes preserved. See
+   `docs/venue-feed-index-oct15.md`.
 5. Broader source-grounded duplicate work beyond the approved clusters.
 
 Proposed finite next repair sequence: Ruby/Mill River and other date-only

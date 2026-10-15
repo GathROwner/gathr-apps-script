@@ -1,8 +1,8 @@
 # Venue-filtered event feed: missing index repair
 
-Status: exact additive index created; Firestore backfill and final API
-verification are pending. Craig approved the recommended index repair with
-“Ok do that”.
+Status: **COMPLETE.** The exact additive index is READY and independent public
+API verification passed October 15 at 23:57:48 UTC. Craig approved the
+recommended index repair with “Ok do that”.
 
 ## Verified cause and scope
 
@@ -43,10 +43,20 @@ event documents are unchanged by this schema-only repair.
 ## Verification and evidence
 
 Read-only probe: `firebase/verify-venue-feed-index-oct15-readonly.mjs`.
-After READY it will check five venues in default, capable and history modes,
-using two-item pagination; exact equality with each complete global-feed
-subset; a date-window request; an empty venue; full normal-feed equality and
-feed version 267. No paid models or map interactions are part of this test.
+After READY it checked five venues in default, capable and history modes,
+using two-item pagination. All 15 venue cases returned HTTP 200, with no cursor
+loops, duplicates or cross-venue leaks; each exactly matched its complete
+global-feed subset. The date-window and empty-venue requests also returned 200.
+Full normal-feed responses matched the saved pre-change baseline byte-for-byte
+after JSON serialization: 964 default and 972 capable events, 10 pages each.
+The complete capable history feed contained 1,135 events across 12 pages.
+Feed version remains 267. No paid models or map interactions occurred.
+
+Independent after inventory proves exactly one new READY index with the four
+required fields (including implicit `__name__`) and all 15 prior indexes
+unchanged. Both repository index files contain the additive definition; all
+previous definitions and field overrides are preserved. No event documents,
+API/parser releases, model settings or publishing gates were changed.
 
 Local evidence under `firebase/artifacts/venue-feed-index-oct15/`:
 
@@ -54,7 +64,8 @@ Local evidence under `firebase/artifacts/venue-feed-index-oct15/`:
 - `api-before.json`: original error and complete feed baselines.
 - `create-operation.txt`: accepted index creation receipt.
 - `index-status.json`: latest independent index state and fields.
-- `api-after.json`: final read-only verification, once successful.
+- `indexes-after.json`: complete after inventory, exactly one additive index.
+- `api-after.json`: successful final read-only verification at 23:57:48 UTC.
 
 An index-only rollback would remove this exact new index and restore the
 original query failure; it must not be substituted for unrelated index cleanup.

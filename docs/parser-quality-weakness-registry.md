@@ -832,3 +832,25 @@ active973/10page,history1135/12page and default active965/10page feeds passed.
 No public online/PetSmart listing, map interaction, OTA or broader cleanup
 was performed. This approved batch is complete; next-run validation and
 separate backend work remain separately scoped.
+
+## October 15 venue-filtered feed index repair (complete)
+
+The API collection-group query adds equality on `venueId` before ascending
+startDate/startTime/document-path order. Existing global date/time indexes
+cannot satisfy that query: the public endpoint returned HTTP500 with
+Firestore FAILED_PRECONDITION and an exact index-creation link. Craig approved
+the repair. Additive index CICAgOi39IkK is READY in gathr-migrated/(default),
+COLLECTION_GROUP events, ascending venueId/startDate/startTime/__name__.
+The definition is committed in both repository index manifests, preserving
+all prior definitions/field overrides. No broad index deploy/delete occurred.
+
+At23:57:48UTC, all15 venue cases (five venues, default/capable/history,
+two-item pagination) return200 and match the corresponding complete global
+subset. Date-window and empty-venue controls also pass. Both complete normal
+feeds match their pre-change baseline, with feed marker267 unchanged; all15
+prior live indexes are identical. No API/parser release or event-data repair
+was needed. Exact command, inventories, failing response, successful API
+evidence and coverage boundaries: `docs/venue-feed-index-oct15.md` and
+`firebase/artifacts/venue-feed-index-oct15/`. This closes the previously
+documented index failure; other optional query/filter combinations are not
+claimed universally covered by these specific controls.

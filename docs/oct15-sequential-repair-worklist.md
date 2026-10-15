@@ -258,7 +258,9 @@ not additional newly discovered failures in the Harvest batch.
 1. Finish date-only client delivery and bounded backend enablement validation.
 2. Festival source/provenance shadow gates, then separately validated public writer.
 3. Fresh missing/blank venue-profile review with validated first-party recovery.
-4. The exact missing venueId/startDate/startTime collection-group index.
+4. COMPLETE23:57:48UTC: exact venueId/startDate/startTime index READY; 17 live
+   API cases pass, complete normal feeds and15 existing indexes unchanged.
+   Evidence: `docs/venue-feed-index-oct15.md`.
 5. Broader source-grounded duplicate clusters with exact cleanup approval.
 
 Completed earlier: FiN Fish-only weekly recovery, APM seventeen-event recovery,
