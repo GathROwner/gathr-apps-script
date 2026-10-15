@@ -662,4 +662,12 @@ tests passed; all three parsers independently ACTIVE/100% at common hash
 Fish$7/all-day poster plus current first-party2026 hours support a narrowly
 prepared weekly Fish recovery. Separate Chicken price/serving times remain
 unknown; context is retained without a separately timed card. Exact live
-recovery is approval-pending, not applied. See `docs/fin-tacos-oct15-recovery.md`.
+recovery was explicitly approved and applied at19:04:25 UTC October15: one
+weekly Fish parent and one original poster upload. Independent verification
+confirms exact payload,10 untouched references/eight event siblings, one
+current occurrence and one correct October22 occurrence, with no October21
+occurrence. Chicken remains qualified description context without invented
+price or serving hours. See `docs/fin-tacos-oct15-recovery.md` for exact
+backup/apply/verification artifacts. Separate API observation: venueId-filtered
+collection-group feed query requires a missing composite index; complete
+date-filtered global feeds passed. No API/index changes were made.

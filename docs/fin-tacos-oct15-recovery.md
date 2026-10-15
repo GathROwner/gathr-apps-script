@@ -52,9 +52,9 @@ the isolated release checkout's `functions/artifacts/fin-tacos-release/` and
 `functions/artifacts/fin-tacos-{build,focused,full-tests}.txt`.
 The existing firebase-functions SDK warning remains; no SDK update was made.
 
-## Exact proposed live action — not yet applied
+## Exact approved live action — complete
 
-Create only:
+Craig approved this exact create and one original-poster upload. Created only:
 `venues/1MYRGigRnV8KbuEigjMg/events/oct15_fin_122305763552019252_dc008c031ae01b13`.
 
 - Title: **Thursday Fish Tacos**; Food Special; $7 each **for fish only**.
@@ -80,6 +80,31 @@ intent/result are persisted locally; an unknown upload outcome is not retried
 blindly. After creation verify exact payload/untouched references, original
 image200, detail and complete feed, plus the generated October22 occurrence.
 
+Applied at19:04:25 UTC October15 after fresh idle, unchanged source/venue/sibling
+and transactional checks. One event created; one managed poster uploaded. Full
+prewrite backup and result are saved under `functions/artifacts/fin-tacos-oct15/`:
+
+- `prewrite-2026-10-15T19-04-12-691Z.json`
+- `applied-2026-10-15T19-04-12-691Z.json`
+- `independent-verification-2026-10-15.json`
+
+Independent read-only verifier `firebase/verify-fin-fish-tacos-oct15-readonly.mjs`
+confirmed the exact created payload;10 unchanged references, including all eight
+venue event siblings; one exact-source/taco parent; zero active parser locks;
+detail200; and one current occurrence in the complete1,023-event/11-page active
+feed. A complete date-filtered October22 feed contains exactly one generated
+`oct15_fin_122305763552019252_dc008c031ae01b13_20261022` occurrence with07–20,
+fish-only$7, source links, poster and closing metadata preserved. The October21
+feed contains none. All four prior managed images return200. The uploaded WebP
+was downloaded and independently viewed: Thursday/Fish Tacos/$7 each/all-day
+poster is intact. No separate chicken parent was created.
+
+Separate observation: adding `venueId` to the collection-group feed query
+returns500/FAILED_PRECONDITION because its composite index is missing. The
+same recurrence projection was verified through fully paginated global
+date-filtered feeds instead. No API code or database indexes were changed;
+this existing query-path issue is recorded separately from the completed repair.
+
 ## Existing app compatibility and evidence limits
 
 The existing frontend coordinator tested actual current app and accepted older
@@ -97,8 +122,8 @@ The null-localDate v2 all-day alternative follows recurrence dates but expires
 at midnight, asks for calendar duration and has misleading pre-opening copy.
 Pinned v2 October15 dates incorrectly expire the generated October22 occurrence.
 Neither alternative is used. No frontend code/OTA/map/emulator change occurred.
-These are synthetic offline app checks, not device adoption or live backend
-recurrence proof. Backend recurrence projection is verified through the real
-API after any approved create. A separate Chicken parent remains held until
+These client checks are synthetic offline checks, not device adoption. Live
+backend recurrence projection is now independently verified through the real
+API as recorded above. A separate Chicken parent remains held until
 its serving availability is source-supported or the honest untimed recurrence
 publication/display contract is completed; its caption information is retained.

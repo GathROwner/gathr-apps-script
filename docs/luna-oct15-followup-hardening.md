@@ -163,7 +163,7 @@ unfinished. See `docs/festival-shadow-oct15-hardening.md` for exact boundaries.
 |---|---|---|
 | Website clocks and generic images | Serving | Exact auditions/Harvest correction prepared, not applied; requires compatible display and exact approval |
 | Pressure Points and Pints East copies | Serving | Exact approved two-record deletion complete; independent Firestore/detail/full-feed/media verification passed |
-| FiN compact recurrence placeholder | Serving; both saved responses pass; category cutoff bounded by verified closing | Fish-only exact recovery prepared; Chicken choice retained as qualified context, separate untimed parent held |
+| FiN compact recurrence placeholder | Serving; both saved responses pass; category cutoff bounded by verified closing | Approved Fish-only weekly recovery applied and API-verified; Chicken choice retained as qualified context, separate untimed parent held |
 | Ruby, Harvest later dates, Trailside, other date-only activities | Held evidence retained | Date-only publication OFF; source price and duplicate conflicts require reviewed recovery |
 | Source provenance / festival offsets, titles and authority | Provenance serving; matcher shadow only | Four exact source-array additions prepared, not applied; automatic writer still OFF |
 | Spatial scope and online-only office pins | Serving defensive guards | Existing A&W/bike-bus/online records require separate exact review; public online contract not implemented |
@@ -244,9 +244,15 @@ at100% latest traffic and common hash `c8f778d960e9fd45d2efd5624d0b5b3b1411fb84`
 settings match pre-deploy captures; global date-only publication remains OFF.
 
 FiN's actual poster says Fish Tacos$7 each, all day. Its current first-party
-Fall2026 contact section says7am–8pm. An exact Fish-only weekly recovery is
-prepared, using existing venue-hours/closing semantics and preserving Chicken
-as unpriced caption context without inventing separate serving times. No FiN
-event or poster upload has occurred; exact-target approval is requested.
+Fall2026 contact section says7am–8pm. Craig approved the exact Fish-only weekly
+recovery and one poster upload; applied at19:04:25 UTC October15. Existing
+venue-hours/closing semantics preserve Chicken as unpriced caption context
+without inventing separate serving times. Independent verification confirms
+exact payload,10 unchanged references/eight event siblings, one current listing
+in the complete1,023-event/11-page feed and one correctly shifted October22
+occurrence. Original uploaded poster independently viewed; four existing
+managed images remain200. A separate venueId-filtered API query has a missing
+composite index; date-filtered complete feeds verified recurrence without
+changing the API or indexes.
 See `docs/fin-tacos-oct15-recovery.md` for source proof, legacy/current app
 compatibility limits, exact create path, media plan and fresh backup.
