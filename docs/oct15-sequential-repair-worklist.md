@@ -1,8 +1,13 @@
-# October 15 remaining repairs: sequential execution
+# October 15 remaining repairs: reviewed batches
 
-Craig authorized working through the remaining list one issue at a time.
-Live document changes still use reviewed exact targets, fresh backups and
-approval; no broad sweep or unrelated release is implied. The coordinator owns
+Craig initially authorized working through the remaining list one issue at a time.
+His later instruction supersedes the one-approval-per-issue workflow: prepare
+related fixes together, present a short summary and one exact approval request
+per reviewed batch, then apply and verify each included change in order. Finish
+the already-approved Rodd package first. Ambiguous candidates stay held and do
+not delay the source-proven subset. This changes approval grouping, not the
+requirement for exact targets, fresh backups, drift guards and verification.
+No broad sweep or unrelated release is implied. The coordinator owns
 the backend checkout and all live data/release targets. The frontend coordinator
 has a read-only compatibility/delivery review for the first clock corrections.
 
@@ -195,13 +200,23 @@ verification passed both details404, full active-feed absence, three untouched
 references including the source, other event unchanged, retained route candidate,
 both images200 and marker263. Next is Rodd Brudenell's dinner/music clock ownership.
 
-Rodd source/poster and exact live card are reviewed. A narrow package-theme/
-entertainment-clock guard is prepared as isolated release731bafc; build,
-20 focused controls,816 full tests,72-post/184-item paired source playback,
-future merge playback and narrow deploy dry run pass. No deployment or live
-correction yet. Exact one-card retitle/context repair and marker263->264 are
-backed up; see `docs/rodd-entertainment-oct15-release-and-repair-plan.md` for
-the reviewed source, scope, release, approval/apply gates and verification.
+Rodd is COMPLETE after exact approval. Narrow release731bafc is serving on all
+three parsers at common hash15a93b64dc5ce4d892adfe5b52d3d46c0ff9ad06,
+ACTIVE/100% latest traffic with identical configuration fingerprints. The one
+card is now Vintage2.0 — Small Business Big Party, preserving the November28
+21:00–00:30 entertainment window,86.95+tax admission and source/gallery. Dinner
+is included without invented serving clocks. Atomic marker264 and fresh full
+prewrite backup are recorded. Independent21:34UTC checks passed exact delta,
+two untouched references, both details200, full active/history feeds once,
+no second meal card and both images200. See
+`docs/rodd-entertainment-oct15-release-and-repair-plan.md`.
+
+Next grouped review has a fresh read-only capture of eight related source
+snapshots and fourteen candidate records. This is triage, not an approved
+mutation plan: `functions/artifacts/oct15-sequential-repairs/next-batch/readonly-capture.json`.
+Prepare source-proven recoveries/corrections as one exact batch; keep online
+delivery, unclear store/mall ownership and indefinite package horizons held
+until their evidence/contracts are adequate. Do not ask per candidate.
 
 1. Remaining exact category/media/spatial corrections and source-backed recovery
    of genuinely missing activities; retain ambiguous prices/identities.

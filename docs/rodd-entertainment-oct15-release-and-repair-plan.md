@@ -134,3 +134,40 @@ use the separate serving baseline; do not automatically restore the misleading
 meal identity. Next full-run audit must inspect this source and genuinely
 independent meal/programme controls. Other recoveries and festival publication
 remain separate work.
+
+## Approved execution and independent verification
+
+Craig explicitly approved this exact release/repair. Completed October15
+21:34UTC. Release `731bafc6dbe6f0400245ced4ac5134600b808b52` was narrowly
+deployed from the isolated `arts-mixer-release` checkout after the fresh idle
+preflight. All three parsers are independently ACTIVE with100% latest traffic
+and common source hash `15a93b64dc5ce4d892adfe5b52d3d46c0ff9ad06`:
+
+- `processdataset-00488-vud`
+- `processdatasetresume-00452-pog`
+- `processdatasetselectedrows-00444-kaj`
+
+Full function/runtime/environment/secret-binding fingerprints and visible model
+settings match the before capture. Global date-only publication remains OFF;
+unshipped festival modules were excluded. Build,816 full tests,20 focused
+controls and source/merge playback evidence above remain the release gates.
+
+The exact event patch and feed marker263->264 were then applied atomically,
+with the reviewed plan, unchanged-source/sibling guards and fresh full backup:
+
+- `functions/artifacts/oct15-sequential-repairs/rodd-party/prewrite-2026-10-15T21-33-52-818Z.json`
+- `functions/artifacts/oct15-sequential-repairs/rodd-party/applied-2026-10-15T21-33-52-818Z.json`
+- `functions/artifacts/oct15-sequential-repairs/rodd-party/independent-verification.json`
+- `functions/artifacts/oct15-sequential-repairs/rodd-party/serving-after.json`
+
+Independent verification at21:34:20UTC passed exact delta, two untouched
+references, unchanged sibling membership, both detail routes200, one listing
+in the full989-event/10-page active feed and full1122-event/12-page history
+feed, no second included-meal card, both managed images200 and API marker264.
+Original November28 21:00–November29 00:30 entertainment clocks,86.95+tax
+admission, venue, source identity and gallery are preserved. Dinner serving
+time remains explicitly unknown. No media write or additional event occurred.
+
+Craig subsequently requested reviewed batches with short summaries and one
+approval per batch, replacing the one-approval-per-issue workflow. Remaining
+repairs will be grouped without weakening exact-target/source/drift checks.

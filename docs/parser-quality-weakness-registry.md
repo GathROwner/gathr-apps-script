@@ -728,3 +728,20 @@ three spatial controls pass. Independent exact-delta/three-untouched-reference,
 both-details404/full-feed-absence, sibling/source and two-image checks passed.
 No school, image or review-queue mutation. See
 `docs/bikebus-oct15-false-pin-repair-plan.md` for backup/apply/verification evidence.
+
+October15 Rodd Brudenell shared-admission entertainment repair is COMPLETE.
+Package inclusion bullets had entered auxiliary theme/date remapping, leaving
+the explicit21:00–00:30 band window on a generic Buffet dinner item. Narrow
+release731bafc excludes package-only theme candidates and source-binds the
+single matching named entertainment item; independent meal clocks, separate
+admission, recurring and conflicting controls stay protected.20 focused and
+816 full tests plus72-post/184-item offline paired and future-merge playback
+pass. All three parsers are ACTIVE/100% with common source hash
+15a93b64dc5ce4d892adfe5b52d3d46c0ff9ad06 and unchanged full configuration.
+The exact approved event u0UWyWPeqU5IKF0SiWvs now names Vintage2.0 — Small
+Business Big Party, keeping original clocks,dates,86.95+tax,venue,source/media.
+Included dinner has no invented serving time or second card. Fresh prewrite
+backup and atomic marker264 are independently verified: exact delta,two
+untouched references,both details200,complete active/history feeds once and
+both images200. See docs/rodd-entertainment-oct15-release-and-repair-plan.md.
+Fresh paid extraction and next-full-run validation remain separate evidence.
