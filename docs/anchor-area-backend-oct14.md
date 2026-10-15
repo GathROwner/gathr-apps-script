@@ -170,3 +170,54 @@ contract and spatial-auditor controls are included.
 No deployment, production write/replay, new venue or event, media deletion,
 emulator run, or map test was performed. This is a backend implementation and
 data-repair preview; the frontend interaction is not visually verified here.
+
+## Coordinator integration and verified backend release
+
+The preceding section records the issue chat's implementation boundary. The
+coordinator independently reviewed the final775-test log, contract, exact
+two-document repair plan and source holds, then integrated `cfeac89` as
+`327f9ac` on `codex/shared-offer-origin-20261014`. Runtime release assembly is
+reproducible at `5f657d5` with
+`functions/scripts/assemble-area-publication-serving.mjs`.
+
+The three non-parser endpoints were assembled from their independently read
+immutable serving archives, preserving their existing queue implementation and
+unrelated scope behavior. Only reviewed city-publisher function changes, the
+new pure helper and required types were added. Their original57 user environment
+keys are preserved; platform-managed fields regenerate normally. The oldest
+finalizer's negative route fixture uses an explicit invalid-input cast rather
+than widening its production scope type. Each assembly builds; focused suites
+pass32/34/34 respectively. The integrated parser build and35 focused tests pass.
+All narrow dry runs and deployments pass. The active-parser preflight found zero
+active runs. No stage model/prompt/allocation/SDK configuration changed.
+
+Independent function and Cloud Run traffic readback at00:06:16 UTC October15
+(October14 Halifax) verifies ACTIVE and100% latest traffic:
+
+| Function | Revision | Source fingerprint |
+|---|---|---|
+| processDataset | processdataset-00483-xus | 747c1de6660962eb494f0f224c6dfdba641583fe |
+| processDatasetResume | processdatasetresume-00447-koy | 747c1de6660962eb494f0f224c6dfdba641583fe |
+| processDatasetSelectedRows | processdatasetselectedrows-00439-def | 747c1de6660962eb494f0f224c6dfdba641583fe |
+| finalizeCityLevelEventReviewTrigger | finalizecityleveleventreviewtrigger-00075-fup | 53d50403e79202d8ad825ecffe40799659e5f139 |
+| processSharedEventPublicCandidates | processsharedeventpubliccandidates-00044-val | 7a7b86e81c3ca71d36f3ebeea4716b5b0dfea38e |
+| scheduledSharedEventPublicCandidateProcessor | scheduledsharedeventpubliccandidateprocessor-00046-quy | 720eea79e754432bf1c2c93235310e69493d4beb |
+
+The shared-promotion function fingerprints differ, as before this release. Both
+fresh immutable serving archives are byte-identical, SHA256
+`9C83C975A55371A97B63CCDB40845ABB4CF831462E904B9B807827ACE9C697A9`.
+This supplies code identity evidence without assuming HTTP and scheduled
+function metadata must have the same fingerprint. Private raw readbacks,
+archives, assembly manifests, build/test/deploy logs and `serving-verified.json`
+remain under `functions/artifacts/anchor-festival-oct14/`. Read-only verifier:
+`firebase/verify-anchor-publisher-release-readonly.mjs`.
+
+Live Anchor repair remains pending exact approval; deployment does not populate
+the existing event. The frontend chat is implementing the additive contract from
+accepted iOS Preview baseline `a43cb20`, with rendered emulator evidence required
+before publication. Coordinator review identified a compatibility risk: blank
+clocks on a date-only multi-day area overview enter the client's short unknown
+session cutoff. The frontend must retain discovery across the advertised date
+range without inventing clocks or claiming continuous happening-now activity.
+The existing API expiry filter already honors the final date for blank clocks.
+Hold the live clock cleanup until that client behavior is verified.
