@@ -176,9 +176,11 @@ images200. Next is the separate L'Autre programme-poster restoration review.
 
 L'Autre review is now complete: original owner poster/overwrite pixels and exact
 audit chain verified. Default-dry exact restoration and full backup are ready;
-five protection tests and actual offline overwrite replay pass. No live change
-yet. See `docs/lautre-poster-oct15-repair-plan.md` for the single-event image/
-provenance correction, retained eleven-image gallery and marker261->262.
+five protection tests and actual offline overwrite replay pass. Craig approved
+the exact plan; restoration is complete at21:00UTC and independently verified
+at21:01UTC:47 untouched references, both details200, full active feed once,
+eleven-image gallery unchanged, all12 images200 and marker262. See
+`docs/lautre-poster-oct15-repair-plan.md`. Next is A&W's province-wide offer scope.
 
 1. Remaining exact category/media/spatial corrections and source-backed recovery
    of genuinely missing activities; retain ambiguous prices/identities.

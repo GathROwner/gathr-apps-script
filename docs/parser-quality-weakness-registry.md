@@ -706,3 +706,14 @@ Feed marker260->261 was atomic. Independent exact-delta/16-untouched-reference,
 default+capable detail, complete active/history feed once, sibling and two-image
 checks passed. The existing serving book-discussion/music controls both passed;
 no additional parser deployment. Evidence: `docs/indigo-category-oct15-repair-plan.md`.
+
+October15 exact L'Autre poster restoration is complete after explicit approval.
+The original Tivoli October16 programme image is primary again on
+`venues/slug_thetivolicinema/events/dz35gb3dc50NwIl9kuUo`; source/audit and
+visually inspected pixels confirm the same title/date/20:00. The full11-image
+gallery remains unchanged. Independent exact-delta/47-untouched-reference,
+both-detail, full active feed once, sibling, all12-image and marker262 checks
+passed. Existing five owner-media/provenance tests and actual saved overwrite
+replay pass without repainting the restored keeper. No new parser deployment,
+media mutation or event source-array backfill. See
+`docs/lautre-poster-oct15-repair-plan.md` for complete backup/result evidence.

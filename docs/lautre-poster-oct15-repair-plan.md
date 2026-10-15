@@ -1,7 +1,18 @@
 # L'Autre: restore the venue's dated programme poster
 
-**Prepared, dry run only; no live restoration applied.** This is the next
-sequential issue after the verified Indigo category correction.
+**COMPLETE: approved, applied and independently verified.** Craig approved the
+exact reviewed restoration. Fresh source/audit/record/sibling/marker guards
+matched; one atomic transaction applied at21:00UTC on October15.
+
+- Full prewrite backup: `functions/artifacts/oct15-sequential-repairs/lautre/prewrite-2026-10-15T21-00-35-897Z.json`.
+- Result: matching `applied-2026-10-15T21-00-35-897Z.json`.
+- Read-only `independent-verification.json` passed at21:01UTC: exact delta,
+  47 untouched references, unchanged sibling membership, both detail routes200,
+  once in the complete993-event/10-page active feed, all11 gallery entries
+  unchanged, all12 managed images200, exact restored poster bytes and marker262.
+  No duplicate, media write/delete, source-array change or deployment.
+
+This followed the verified Indigo category correction.
 
 ## Confirmed cause and source
 
