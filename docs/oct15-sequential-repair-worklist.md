@@ -214,9 +214,23 @@ no second meal card and both images200. See
 Next grouped review has a fresh read-only capture of eight related source
 snapshots and fourteen candidate records. This is triage, not an approved
 mutation plan: `functions/artifacts/oct15-sequential-repairs/next-batch/readonly-capture.json`.
-Prepare source-proven recoveries/corrections as one exact batch; keep online
+The next exact five-event batch is now prepared in
+`docs/oct15-reviewed-batch-approval-plan.md`: one November19 McFadyen show,
+four audit-proven source-array additions,feed264->265 and two narrow tested
+ticket-start/merge-evidence guards at release4c8d111. Build,38 focused and825
+full tests pass; saved-source/future-merge playback passes without paid calls.
+No deployment or live batch apply has occurred. Exact grouped approval remains
+required; the user's approval to prepare unspecified remaining work was not
+treated as approval of these newly reviewed paths.
+Keep online
 delivery, unclear store/mall ownership and indefinite package horizons held
 until their evidence/contracts are adequate. Do not ask per candidate.
+
+Harvest source review found older generic/weekly/component cards overlapping
+the current printed twelve-date programme. Current website fixes the clock
+and year, and ten historical source snapshots are captured. Prepare one
+source-grounded programme consolidation rather than creating nine additional
+cards beside the old copies. The new batch does not change Harvest records.
 
 1. Remaining exact category/media/spatial corrections and source-backed recovery
    of genuinely missing activities; retain ambiguous prices/identities.
