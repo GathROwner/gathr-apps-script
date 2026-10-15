@@ -115,3 +115,33 @@ Artifacts: `functions/artifacts/festival-linker-oct15/oct15-registry.json` and
 `functions/artifacts/festival-linker-oct15/1YPf2cKvXfXl8L0HVL63VZ2zeTLEvWlit-shadow/`:
 completion,raw evidence/cache/report,coverage and usage summaries,paid-batch3
 report and `cache-replay-verified.json`.
+
+## Follow-up decision review requested by Craig
+
+Rechecked the saved October 15 captions, captured activity evidence, canonical
+records and exact matcher outcomes. This is adjudication of the completed run,
+not a new production parse or an additional paid model experiment.
+
+| Activity | Source/canonical comparison | Decision |
+|---|---|---|
+| Guild conference, October 15 and 16 | Two literal identical rows beneath different dated headings; both canonical occurrences exist | Current capture hold is overly conservative. Retain document offsets and governing heading per occurrence, then retest both dates independently. |
+| Trailside Captains + Nick; Guild Britt Campbell comedy | Exact named, dated, timed venue matches exist; both are already manually linked | Membership evidence is useful, but the new source-ownership contract is unsatisfied. Preserve existing links and fix durable provenance through the normal write/merge path; do not infer authorization from uniqueId prefixes. |
+| Jim Queen | Aggregator 21:00; saved first-party canonical 21:30 | Correct to withhold an automatic link to a different occurrence time. This is not a missing film. |
+| Pressure Points | Aggregator and new copy 21:00; saved first-party canonical 18:00 | Hold is necessary, but its current missing-ownership reason is not a sufficient conflict safeguard. A future provenance fix must still reject the conflicting copy. |
+| L'Autre (The Other) | Canonical exists at the same venue/date/20:00, but the activity title includes an extra ANCHOR Fest prefix | Pending exact match is not a missing live screening. Test a narrowly evidenced programme-prefix/alias rule; do not add a duplicate or use broad fuzzy matching. |
+| A Long Winter | Caption explicitly says ANCHOR Fest presents the film and has an exact ticket URL; source omits year/clock/venue; a same-day 19:00 canonical exists | Evidence supports membership, but current matcher cannot establish the full occurrence identity. Test exact ticket identity and separately verified canonical scheduling rather than borrowing clocks from unrelated text. |
+| Beer Garden | Venue identity still unverified/conflicting | Keep held until the location workflow verifies the venue. |
+| Other candidate posts | PetSmart/library sources do not explicitly establish Anchor membership; two cinema posts show branding without an activity; one capture is incomplete | No automatic links justified from these captures. Do not equate a source-capture gap with a confirmed missing festival event. |
+
+The Arts Mixer classifier correction separately passes venue routing while real
+multi-venue festivals remain unordered area points. This does not establish
+that the wider publication pipeline preserves every spatial classification:
+the October 15 all-PEI A&W offer, bike-bus route and online sessions still show
+downstream scope loss; the Kensington multi-site activity disappears without
+clocks. Those need separate publication-path hardening.
+
+Reran the two compiled spatial suites, festival matcher/job suites and source
+extractor suite: **99 passed, zero failed/skipped**. These controls do not turn
+the zero-link real-source shadow into a rollout pass. No fresh paid calls,
+public writes, production replays or deployments were performed in this review.
+Automatic linking remains unfinished and OFF.
