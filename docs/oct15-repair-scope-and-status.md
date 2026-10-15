@@ -72,8 +72,10 @@ are likewise complete. Do not re-request their approvals or reapply them.
 These five workstreams are not five additional confirmed failures from today's
 parse and are not prerequisites for declaring an exact live repair complete:
 
-1. Production-client compatibility and bounded enablement of date-only
-   publication; the global parser gate remains OFF.
+1. Date-only automatic publication remains OFF by Craig's agreed policy.
+   Scheduled events require verified start times; limited exhibition/package
+   exceptions need individual review before any automatic enablement.
+   Production-client compatibility remains separate; broad rollout is deferred.
 2. Automatic festival linking: finish source/ownership/context shadow gates,
    then implement and validate the separate public writer. Automatic publication
    is still OFF; four approved source-array corrections alone are not rollout.
