@@ -221,3 +221,54 @@ session cutoff. The frontend must retain discovery across the advertised date
 range without inventing clocks or claiming continuous happening-now activity.
 The existing API expiry filter already honors the final date for blank clocks.
 Hold the live clock cleanup until that client behavior is verified.
+
+## Date-only compatibility for older installed clients
+
+Read-only inspection of the accepted app at exact commit `a43cb20` confirms
+`types/events.ts` defines timing version2 and `utils/eventTiming.ts` uses
+`policyVersion: honest-end-times-v2`. Its API normalizer reads `metadata.timing`
+and its schedule eligibility reads a discovery cutoff independently from
+displayed/observed end times. Without that cutoff, blank-clock events use a
+short unknown-session window and can disappear during a multi-day festival.
+
+`areaDateRangeTiming.ts` produces the existing contract only for explicitly
+reviewed date-only multi-day area overviews. Both manual clock fields must be
+intentionally empty, ISO dates valid, and the final date later than the first.
+Ordinary city, venue, route, one-day, timed and unreviewed unknown sessions
+receive no generated contract. Advertised local dates are retained in unknown
+start/end points with null clocks and `scheduleKind: multi_day`. Timezone is
+`America/Halifax`. A low-confidence estimate contains only the discovery cutoff
+at23:59 on the advertised final local date, with method
+`reviewed_area_date_range_discovery_cutoff` and estimate version
+`area-date-range-discovery-v1`. That cutoff is internal policy; it is not an
+opening/closing hour. There is no display end, observed end, all-day or
+confirmed happening-now claim.
+
+Ownership requires this exact generated shape, including its dedicated method
+and estimate version. Authoritative rich version2 and unrelated timing are
+preserved. The publisher reads the existing public event timing, so it cannot
+silently lose an authoritative contract absent from an older review. Changed
+reviewed dates regenerate the owned cutoff. Re-approval into a timed event,
+single-day event, different scope or without date-only intent removes only this
+owned timing policy using a field-delete sentinel. A rich contract that retains
+an old marker but adds evidence/display timing is not treated as generated.
+
+The original reviewed specification, plan, backup and dry-run output remain
+immutable. A separate version2 specification and new full backup/plan are under
+`functions/tmp/anchor-backend-oct14/date-range-v2/`; original file hashes are
+recorded there. The new public delta adds `timing` to the prior four-field
+event patch. Review patch fields remain unchanged; its private approved manual
+additionally pins the original advertised `eventDate` and `endDate`, so parser
+refreshes preserve the reviewed range. The helper still updates exactly the
+same two documents, blocks pre-existing unreviewed timing, and performs no
+other document/media changes. Version1 previews retain their original behavior.
+
+Compatibility playback against `a43cb20` is coordinator-owned, as are release
+and approval/application of the new plan. The original plan's outstanding
+approval must not be interpreted as approval of this separate timing delta.
+
+The compatibility follow-up passed TypeScript build,42 focused publisher/timing
+checks and all782 compiled backend tests (zero failures/skips). Its new plan
+passed both initial default-dry generation and explicit saved-plan revalidation
+against fresh live target/reference versions, with zero writes. Four original
+preview artifacts remained byte-for-byte unchanged by SHA256 verification.

@@ -176,6 +176,7 @@ export interface EventData {
   mapMode?: 'venue' | 'area' | 'route' | 'none';
   spatialEvidence?: SpatialEventClassification;
   areaData?: import('../services/areaEventPublication.js').EventAreaData;
+  timing?: unknown;
   cityLevelReviewId?: string;
   sourceScraperType?: ScraperType;
   additionalLocation?: string;
@@ -409,6 +410,7 @@ export interface CityLevelEventReviewRecord {
   /** Resolved by explicit review, never synthesized by parser ingestion. */
   areaData?: import('../services/areaEventPublication.js').EventAreaData;
   areaEventLinks?: import('../services/areaEventPublication.js').AreaEventLinkEvidence[];
+  timing?: unknown;
   observedLocationName?: string;
   description?: string;
   locationScope: 'city' | 'area' | 'province' | 'route';
@@ -488,6 +490,7 @@ export interface FinalizeCityLevelEventReviewInput {
     externalLinks?: string[];
     areaData?: import('../services/areaEventPublication.js').EventAreaData;
     areaEventLinks?: import('../services/areaEventPublication.js').AreaEventLinkEvidence[];
+    timing?: unknown;
   };
   notes?: string;
   resolvedBy?: string;

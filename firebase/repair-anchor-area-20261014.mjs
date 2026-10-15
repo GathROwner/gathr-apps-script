@@ -7,6 +7,7 @@ import {createRequire} from 'node:module';
 const require=createRequire(new URL('../functions/package.json',import.meta.url));
 const admin=require('firebase-admin');
 const {validateEventAreaData,verifyAreaPublicationReferences}=require('../functions/lib/services/areaEventPublication.js');
+const {resolveAreaDateRangeTiming}=require('../functions/lib/services/areaDateRangeTiming.js');
 const args=process.argv.slice(2),apply=args.includes('--apply');
 assert(args.every(x=>x==='--apply'||x.startsWith('--spec=')||x.startsWith('--plan=')),'Unexpected option');
 const option=name=>args.find(x=>x.startsWith(`--${name}=`))?.slice(name.length+3);
@@ -16,7 +17,12 @@ const spec=JSON.parse(await fs.readFile(path.resolve(option('spec')),'utf8'));
 const eventPath='events/area_7ebb4bc0846d26c4470e6842';
 const reviewPath='city_level_event_reviews/cityevt_b6a99eb338c41a0c50bf39ce';
 assert.equal(spec.project,'gathr-migrated');assert.equal(spec.eventPath,eventPath);assert.equal(spec.reviewPath,reviewPath);
-assert.deepEqual(Object.keys(spec.eventPatch).sort(),['areaData','description','endTime','startTime']);
+assert([1,2].includes(spec.version),'Unsupported specification version');
+assert.deepEqual(Object.keys(spec.eventPatch).sort(),spec.version===2?['areaData','description','endTime','startTime','timing']:['areaData','description','endTime','startTime']);
+if(spec.version===2){
+ const derived=resolveAreaDateRangeTiming({locationScope:'area',startDate:'2026-10-14',endDate:'2026-10-18',startTime:'',endTime:'',reviewedDateOnly:true});
+ assert.equal(derived.action,'set');assert.deepEqual(spec.eventPatch.timing,derived.timing,'Only the generated date-range compatibility timing is allowed');
+}
 assert.equal(spec.eventPatch.startTime,'');assert.equal(spec.eventPatch.endTime,'');
 assert(spec.eventPatch.description && !/Observed broad location:|Review reasons:/i.test(spec.eventPatch.description));
 spec.eventPatch.areaData=validateEventAreaData(spec.eventPatch.areaData);
@@ -39,7 +45,9 @@ const guard=async(docs,related,locks)=>{
  assert.equal(e.cityLevelReviewId,reviewPath.split('/').at(-1));assert.equal(e.venueId,null);
  assert.equal(e.startDate,'2026-10-14');assert.equal(e.endDate,'2026-10-18');assert.equal(e.locationScope,'area');assert.equal(e.mapMode,'area');
  assert.equal(e.startTime,'19:00');assert.equal(e.endTime,'23:00');assert.equal(e.areaData,undefined);
+ if(spec.version===2)assert(e.timing==null,'Existing timing needs separate review; do not overwrite it');
  assert.equal(r.uniqueId,'1555098099991055');assert.equal(r.status,'published');assert.equal(r.publishedEventPath,eventPath);
+ if(spec.version===2){assert.equal(r.eventDate,e.startDate);assert.equal(r.endDate,e.endDate);assert(r.timing==null,'Existing reviewed timing needs separate review');}
  await verifyAreaPublicationReferences({areaData:spec.eventPatch.areaData,evidence:spec.areaEventLinks,eventName:e.eventName,startDate:e.startDate,endDate:e.endDate,read:async p=>byPath.get(p)});
  const linked=new Set(linkedPaths),venues=new Set(venuePaths.map(x=>x.split('/')[1]));
  const scope=related.docs.filter(d=>linked.has(d.ref.path)||venues.has(d.get('venueId'))||/anchor fest/i.test(d.get('eventName')||''));
@@ -51,13 +59,14 @@ try {
  const [docs,related,locks]=await Promise.all([db.getAll(...paths.map(p=>db.doc(p))),relatedQuery.get(),locksQuery.get()]);
  const scoped=await guard(docs,related,locks);
  const manual={eventTime:'',endTime:'',description:spec.eventPatch.description,locationScope:'area',areaData:spec.eventPatch.areaData,areaEventLinks:spec.areaEventLinks};
+ if(spec.version===2){manual.eventDate='2026-10-14';manual.endDate='2026-10-18';}
  const reviewPatch={areaData:spec.eventPatch.areaData,areaEventLinks:spec.areaEventLinks,description:spec.eventPatch.description,eventTime:'',endTime:'',finalization:{action:'approve_publish',manual,publishedEventPath:eventPath}};
  const beforeFields=(target,patch)=>Object.fromEntries(Object.keys(patch).map(k=>[k,docs.find(d=>d.ref.path===target).data()[k]??null]));
  const actions=[{path:eventPath,before:beforeFields(eventPath,spec.eventPatch),patch:spec.eventPatch},{path:reviewPath,before:beforeFields(reviewPath,reviewPatch),patch:reviewPatch}];
  const guards=docs.map(pack).map(d=>({path:d.path,updateTime:d.updateTime,contentHash:hash(d.data)}));
  const plan={version:1,project:spec.project,specHash:hash(spec),actions,guards,relatedHash:hash(scoped)};
  if(option('plan')){const reviewed=JSON.parse(await fs.readFile(path.resolve(option('plan')),'utf8'));assert.deepEqual(plan,reviewed,'Reviewed plan or live evidence drifted');}
- const out=path.resolve(import.meta.dirname,'../functions/tmp/anchor-backend-oct14'),stamp=new Date().toISOString().replace(/[:.]/g,'-');await fs.mkdir(out,{recursive:true});
+ const out=path.resolve(import.meta.dirname,'../functions/tmp/anchor-backend-oct14',spec.version===2?'date-range-v2':'.'),stamp=new Date().toISOString().replace(/[:.]/g,'-');await fs.mkdir(out,{recursive:true});
  const backupPath=path.join(out,`prewrite-backup-${stamp}.json`),planPath=path.join(out,`plan-${stamp}.json`);
  await fs.writeFile(backupPath,JSON.stringify({capturedAt:new Date().toISOString(),project:spec.project,documents:docs.map(pack),related:scoped,spec},null,2));
  await fs.writeFile(planPath,JSON.stringify(plan,null,2));

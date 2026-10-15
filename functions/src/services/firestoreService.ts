@@ -1,5 +1,6 @@
 import {hasConflictingOccurrenceIdentity,findConflictingSourceCinemaDate} from '../utils/occurrenceMergeGuard.js';
 import {publicCityLevelDescription, requiresReviewedAreaPoints, validateEventAreaData, verifyAreaPublicationReferences} from './areaEventPublication.js';
+import {resolveAreaDateRangeTiming} from './areaDateRangeTiming.js';
 import {resolveAggregatorCinemaOccurrence} from './aggregatorCinemaOccurrence.js';
 import {isPlainKaraoke, selectStandingKaraokeOccurrence} from './standingKaraokeOccurrence.js';
 import {createRecurringSeriesCatalogCache, sourceLinkedHistoricalSeriesKeepers} from './recurringSeriesCatalog.js';
@@ -1944,6 +1945,12 @@ function buildPublishedCityLevelEventData(
   // Empty reviewed clocks mean unspecified; never restore a component's clock.
   const startTime = manual.eventTime !== undefined ? manual.eventTime.trim() : asOptionalTrimmedString(record.eventTime);
   const endDate = asOptionalTrimmedString(manual.endDate || record.endDate) || startDate;
+  const endTime = manual.endTime !== undefined ? manual.endTime.trim() : asOptionalTrimmedString(record.endTime);
+  const existingTiming = manual.timing ?? record.timing;
+  const timingDecision = resolveAreaDateRangeTiming({
+    locationScope, startDate, endDate, startTime, endTime,
+    reviewedDateOnly: manual.eventTime === '' && manual.endTime === '', existingTiming,
+  });
   const description = publicCityLevelDescription(manual.description ?? record.description ?? record.descriptionPreview);
   const locationCity = asOptionalTrimmedString(manual.locationCity || record.locationCity);
   // Centroid coordinates let the app place the event on the map; unresolved
@@ -1972,7 +1979,9 @@ function buildPublishedCityLevelEventData(
     startDate,
     startTime,
     endDate,
-    endTime: manual.endTime !== undefined ? manual.endTime.trim() : asOptionalTrimmedString(record.endTime),
+    endTime,
+    timing: timingDecision.action === 'set' ? timingDecision.timing : timingDecision.action === 'clear'
+      ? admin.firestore.FieldValue.delete() : timingDecision.action === 'preserve' ? existingTiming : undefined,
     ...mediaFields,
     venueId: null,
     areaData: areaData ? validateEventAreaData(areaData) : undefined,
@@ -2018,6 +2027,10 @@ async function writePublishedCityLevelEvent(
 ): Promise<admin.firestore.DocumentReference> {
   const eventId = asOptionalTrimmedString(record.publishedEventId) || reviewId;
   const eventRef = db.collection(COLLECTIONS.EVENTS).doc(eventId);
+  const previous = await eventRef.get();
+  if (previous.exists && previous.get('timing') != null) {
+    record = {...record, timing: previous.get('timing')};
+  }
   manual = reviewedCityLevelManual(record, manual);
   const areaData = manual.areaData || record.areaData;
   if (areaData) {
