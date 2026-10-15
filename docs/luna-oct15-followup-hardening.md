@@ -1,0 +1,108 @@
+# October 15 post-parse hardening
+
+Craig approved working through the completed October 15 audit recommendations.
+Coordinator owns this parser release and exact data-repair approvals. The existing
+frontend coordinator owns its separate UI checkout; the existing investigation
+task owns festival shadow changes in its separate checkout. Neither may deploy
+these parser targets or mutate live events.
+
+## Release baseline and scope
+
+Worktree: `C:/Users/craig/.codex/worktrees/arts-mixer-release/gathr-apps-script`.
+Branch: `codex/oct15-postparse-hardening`, descended from the exact accepted
+Arts Mixer release `2dbd81c`. Fresh readback of all three parsers confirms ACTIVE
+on source hash `608dca297a322ff2d5ced72337b5cd60dbedc9b9` before this release.
+The October 15 dataset is complete372/372, marker present, checkpoint absent,
+no active parser lock. No festival shadow modules enter this release.
+
+## Implemented prevention, in separate commits
+
+- `e8f3b28`: strip site navigation, footer and labelled hours popups before
+  extracting detail-page dates/clocks. Audition content says evening; building
+  hours8–18 are unrelated. Actual article-header clocks remain supported.
+- `13f530f`: KEPT plus `none`/empty correction reason is a no-change placeholder;
+  retain source recurrence. Explained unsupported changes still hold. Both saved
+  FiN responses now preserve both weekly Thursday offers.
+- `6dcc964`: output-token exhaustion uses the existing bounded batch recovery,
+  with one fresh single-item retry and at most8,000 output tokens for that retry.
+  Incomplete output never publishes; prompt/content failures remain terminal.
+- `1c10477`, `d15c017`: protect exact first-party film occurrences from conflicting
+  aggregator times regardless of disagreement size; normalize only printed
+  Short/Shorts Programme prefixes. Generic Trivia requires exact venue/date/start,
+  compatible finish/room, same owner page and the same printed host. Different
+  surnames, themes, dates, rooms and clocks remain independent.
+- Exact ingested source IDs/URLs now persist on ordinary writes and compatible
+  occurrence merges. No historical source-ID backfill or event-ID prefix trust.
+  Aggregator corroboration cannot repaint existing managed programme posters.
+- `fb1dc47`: a selected original image cannot be replaced by a generic website
+  image hint merely because the page has an OpenGraph image.
+- `5bb7766`, `78ace41`, `de7d52d`: preserve dated source spatial evidence through
+  formatting; recognize explicit all-brand PEI locations and bike-bus route
+  structure. No invented streets/points. A validated online-only occurrence
+  holds before physical matching/geocoding; normal snapshots retain the source.
+  This prevents a false office pin/platform unknown-venue email, but does not
+  implement a public online-event experience.
+- `8a9a03b`: a source-grounded book discussion is not Live Music merely because
+  its novel/title says Thriller. Explicit music performances remain music.
+
+## Date-only activities: implemented, publication gated
+
+`dateOnlyActivity.ts` produces v2 unknown endpoints with explicit validated
+dates and a discovery-only23:59 cutoff. No claimed all-day/open/close/now period.
+Ambiguous meridiem, invalid dates, unvalidated content and recurring parents
+cannot enter this initial path. Missing future offer-end dates are not invented.
+
+`PARSER_DATE_ONLY_PUBLICATION_ENABLED` defaults OFF. While off, bounded
+`stage56HeldItems` preserves the otherwise dropped formatted candidates in the
+normal parse snapshot. A retained candidate is not a newly published listing.
+The frontend compatibility review found misleading Started/start-time disclosure
+and calendar-noon defaults; its matching UI fix requires rendered verification
+before this gate is enabled. No source-unavailable holds are relaxed.
+
+Offline saved-source playback preserves all16 supplied items from rows48,201,
+269,325 with explicit opt-in, and retains all16 as held candidates with the gate
+off. These counts are formatting inventory, not sixteen missing live activities:
+Ruby's eggroll already exists and cross-posts/older programmes need deduplication.
+The Mill River source proves a starting date, not an indefinite booking horizon.
+
+## Verification and evidence
+
+`functions/scripts/oct15-hardening-playback.mjs` denies real network access.
+It reuses both captured Taco responses and the original looping karaoke failure.
+The fresh karaoke success is simulated to verify recovery/identity/cap behavior;
+it does not prove live model recovery quality or API latency. No paid calls.
+
+Artifacts are private/untracked under `functions/artifacts/oct15-hardening/` and
+the corresponding `oct15-hardening-*.txt` files. Build/focused/full test evidence
+and independent ACTIVE/hash/traffic/env readback are required before reporting
+this release live. All five model/effort allocations, prompts and cache layouts
+are preserved; the only response-budget change is bounded Stage5 recovery.
+
+The historical standalone compact harness has one stale October11 disabled-path
+request-body expectation (the accepted weekly_custom instructions were added
+later). Its other35 tests passed. The compiled full backend suite is the serving
+release gate; do not silently call the historical body expectation passed.
+
+## Live correction boundary
+
+`firebase/repair-oct15-two-duplicates.mjs` defaults to dry run. Exact two deletions:
+
+| Delete | Preserve |
+|---|---|
+| `venues/slug_thetivolicinema/events/VtmHIyg7T7V4Tb0sC3Fo` — Pressure Points, October16 21:00 | `venues/slug_thetivolicinema/events/nepcYF8RIzLrzPKBXjWX` — source-supported18:00 |
+| `venues/sJQHqeQVXehTHcFarwc6/events/Ez7t4IXyxsxjRisCtHnC` — General Trivia, October16 18:30 | `venues/sJQHqeQVXehTHcFarwc6/events/oXz81O57WSQ1D4nGMkn6` — existing same-host session |
+
+Fresh dry run saved full targets, keepers, venues, source snapshots and same-day
+siblings in `firebase/artifacts/oct15-hardening/duplicate-backup-2026-10-15T15-32-48-951Z.json`.
+Plan: `duplicate-plan-2026-10-15T15-32-48-951Z.json`. Exact deletion approval was
+requested; no apply has occurred. Transactional version/source/sibling guards,
+fresh prewrite backup and full API-feed verification are mandatory. No media
+or venue deletion. Do not mistake prevention deployment for corrected live data.
+
+Remaining exact data plans include unsupported audition/Feast/bike-bus clocks,
+current offer recovery and category/media corrections. Source price$6 versus
+printed$6.50 requires source correction; these guards are not a general OCR-price
+accuracy fix. Online publication, indefinite availability, unresolved venue
+identities and the earlier17-item APM recovery retain their separate source and
+approval requirements. The festival shadow task must report real outcomes and
+remaining provenance/coverage gaps before any public writer is considered.
