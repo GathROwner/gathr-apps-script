@@ -174,6 +174,12 @@ verified at20:54UTC: one category/type correction, marker261,16 unchanged
 references, both detail routes200, full active/history feed once and both
 images200. Next is the separate L'Autre programme-poster restoration review.
 
+L'Autre review is now complete: original owner poster/overwrite pixels and exact
+audit chain verified. Default-dry exact restoration and full backup are ready;
+five protection tests and actual offline overwrite replay pass. No live change
+yet. See `docs/lautre-poster-oct15-repair-plan.md` for the single-event image/
+provenance correction, retained eleven-image gallery and marker261->262.
+
 1. Remaining exact category/media/spatial corrections and source-backed recovery
    of genuinely missing activities; retain ambiguous prices/identities.
 2. Finish date-only client delivery and bounded backend enablement validation.
