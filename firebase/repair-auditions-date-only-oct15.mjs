@@ -22,7 +22,8 @@ admin.initializeApp({credential:admin.credential.cert(key),projectId:key.project
 try{
  const [refs,all,locks,website,image]=await Promise.all([db.getAll(db.doc(target),db.doc(venue),db.doc(source),db.doc(feedMarker)),db.collectionGroup('events').get(),db.collection('processing_locks').get(),fetch(official,{signal:AbortSignal.timeout(20000)}),fetch(originalPoster,{signal:AbortSignal.timeout(20000)})]);
  idle(locks.docs);assert(refs.every(d=>d.exists));assert.equal(website.status,200);assert.equal(image.status,200);
- const html=await website.text(),text=html.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ');assert(/Monday, October 26\s*\(evening\)/i.test(text));
+ const html=await website.text(),text=html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,' ').replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi,' ').replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();assert(/Monday, October 26\s*\(evening\)/i.test(text));
+ const websiteTextSha256=createHash('sha256').update(text).digest('hex');
  const data=plain(refs[0].data());assert.equal(data.eventName,'GENERAL MUSICAL THEATRE AUDITIONS FOR PEI RESIDENTS');assert.equal(data.startDate,'2026-10-26');assert.equal(data.endDate,'2026-10-27');assert.equal(data.startTime,'08:00');assert.equal(data.endTime,'01:00');assert.equal(data.isRecurring,'No');assert(!data.timing);assert.equal(refs[2].get('uniqueId'),sourceId);assert(/evening of Monday, October 26/i.test(refs[2].get('inputText')));assert(String(data.uniqueId).startsWith(sourceId+'_'));
  assert.deepEqual(data.mediaUrls,[originalPoster]);assert(data.imageProvenance.media.some(m=>m.url===originalPoster&&m.source==='post_media'&&!m.isFallback));
  const candidate=dateOnlyActivity({...data,name:data.eventName,startTime:'',endTime:'',endDate:'2026-10-26',recurringPattern:'none',_sourceTimeConstraint:{reason:'dated_activity_without_clock',evidence:'October 26 evening; individual audition appointment times are communicated separately'}});assert(candidate);
@@ -31,7 +32,7 @@ try{
  const imageBytes=Buffer.from(await image.arrayBuffer()),imageSha=createHash('sha256').update(imageBytes).digest('hex');
  const oldFeedVersion=refs[3].get('version');assert(Number.isSafeInteger(oldFeedVersion)&&oldFeedVersion>=0,'Existing feed version required');
  const feedVersionChange={path:feedMarker,from:oldFeedVersion,to:oldFeedVersion+1,updatedAt:'server_timestamp'};
- const capture={target,patch,feedVersionChange,documents:refs.map(wrap),siblings:siblings(all.docs),evidence:{official,day:'2026-10-26',wording:'evening',poster:originalPoster,imageSha}};
+ const capture={target,patch,feedVersionChange,documents:refs.map(wrap),siblings:siblings(all.docs),evidence:{official,websiteTextSha256,day:'2026-10-26',wording:'evening',poster:originalPoster,imageSha}};
  const snapshotHash=hash(capture),stamp=new Date().toISOString().replace(/[:.]/g,'-');await fs.mkdir(out,{recursive:true});
  const backupPath=path.join(out,`${apply?'prewrite':'backup'}-${stamp}.json`);await fs.writeFile(backupPath,JSON.stringify(capture,null,2));await fs.writeFile(path.join(out,`official-${stamp}.html`),html);await fs.writeFile(path.join(out,'original-poster.webp'),imageBytes);
  if(!apply){const planPath=path.join(out,`plan-${stamp}.json`);await fs.writeFile(planPath,JSON.stringify({mode:'dry_run',snapshotHash,backupPath,target,patch,feedVersionChange,evidence:capture.evidence,requiredGate:'Exact approval, live capability-gated API commit and reviewed capable Preview release; global parser date-only gate stays OFF'},null,2));console.log(JSON.stringify({planPath,backupPath,target,from:'Oct26 08:00–Oct27 01:00',to:'Oct26 evening; exact times unknown',posterRestored:true,feedVersionChange,liveWrites:0}));}

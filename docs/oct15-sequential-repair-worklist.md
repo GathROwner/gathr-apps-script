@@ -137,8 +137,8 @@ clients can detect a changed feed. It preserves all other feed-marker fields.
 
 The initial source-only dry plan is superseded by the feed-marker-aware plan:
 
-- `functions/artifacts/oct15-sequential-repairs/auditions/plan-2026-10-15T19-35-07-615Z.json`
-- matching full `backup-2026-10-15T19-35-07-615Z.json`
+- `functions/artifacts/oct15-sequential-repairs/auditions/plan-2026-10-15T19-49-35-137Z.json`
+- matching full `backup-2026-10-15T19-49-35-137Z.json`
 
 Current guarded marker is 259; proposed version 260. Any drift aborts.
 Default-dry helper `firebase/repair-auditions-date-only-oct15.mjs` refuses apply
@@ -146,6 +146,11 @@ without exact reviewed plan and the expected approved delivery API commit live.
 Verifier checks exact event/marker delta, unchanged references/media, default
 404/feed exclusion, capable detail 200/full feed once, and refreshed API marker.
 No new upload, event, venue change, global parser enablement or invented clock.
+
+Final normalized official-page text is now fingerprinted too; a repeat fresh
+fetch matches. The older 19:35 marker plan is superseded by this stronger exact
+source-content plan. Full Preview/API/data release decision and completed
+validation are in `docs/auditions-oct15-release-and-repair-approval-plan.md`.
 
 ## Subsequent queue (start after the current issue is resolved or explicitly held)
 
