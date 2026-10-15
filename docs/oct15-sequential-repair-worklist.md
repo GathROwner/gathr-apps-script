@@ -195,6 +195,14 @@ verification passed both details404, full active-feed absence, three untouched
 references including the source, other event unchanged, retained route candidate,
 both images200 and marker263. Next is Rodd Brudenell's dinner/music clock ownership.
 
+Rodd source/poster and exact live card are reviewed. A narrow package-theme/
+entertainment-clock guard is prepared as isolated release731bafc; build,
+20 focused controls,816 full tests,72-post/184-item paired source playback,
+future merge playback and narrow deploy dry run pass. No deployment or live
+correction yet. Exact one-card retitle/context repair and marker263->264 are
+backed up; see `docs/rodd-entertainment-oct15-release-and-repair-plan.md` for
+the reviewed source, scope, release, approval/apply gates and verification.
+
 1. Remaining exact category/media/spatial corrections and source-backed recovery
    of genuinely missing activities; retain ambiguous prices/identities.
 2. Finish date-only client delivery and bounded backend enablement validation.
