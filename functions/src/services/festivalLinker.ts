@@ -7,11 +7,13 @@ import type {AreaEventLinkEvidence, EventAreaLocation} from './areaEventPublicat
 export interface FestivalEdition {
   id: string; name: string; year: number; startDate: string; endDate: string;
   organizerId: string; organizerNames: string[]; sourceIds: string[];
+  /** Registry-supplied verified participants, never inferred from coordinates. */
+  venueIds?: string[];
 }
 export interface FestivalSourceEvidence {
   id: string;
   source: {id: string; url: string; text: string; publisherId: string; organizerId?: string; revision?: string};
-  kind: 'programme_row' | 'festival_activity';
+  kind: 'programme_row' | 'festival_activity' | 'same_source_named_activity';
   /** One literal row/card, not the whole aggregated post. */
   scopeText: string;
   /** Optional contiguous caption structure; neither field is synthesized. */
@@ -28,7 +30,8 @@ export interface FestivalCanonicalVenue {id: string; label: string; aliases?: st
 export type FestivalLinkReason = 'eligible' | 'invalid_edition' | 'invalid_source' | 'conflicting_source_evidence' |
   'edition_conflict' | 'membership_not_explicit' | 'unbound_programme' | 'evidence_missing' | 'unknown_venue' |
   'missing_clock' | 'invalid_occurrence' | 'outside_edition' | 'ticket_identity_conflict' | 'ambiguous_canonical' |
-  'missing_child' | 'canonical_identity_conflict' | 'inactive_or_noncanonical_child' | 'source_occurrence_conflict';
+  'missing_child' | 'canonical_identity_conflict' | 'inactive_or_noncanonical_child' | 'source_occurrence_conflict' |
+  'edition_venue_unverified' | 'source_ownership_missing';
 export interface FestivalLinkOutcome {
   id: string; sourceId: string; evidenceFingerprint: string;
   status: 'eligible' | 'held' | 'unmatched'; reason: FestivalLinkReason; pending: boolean;
@@ -82,7 +85,12 @@ function printedProgrammeYear(e: FestivalSourceEvidence, edition: FestivalEditio
   if(e.yearText!==short)return false;
   // A short logo year must be a separate heading line, or adjacent to the
   // festival name. A day, minute, runtime, address or digit substring is not it.
-  const ownLine=e.membershipText.split(/\r?\n/).some(line=>new RegExp(`^[\\s'’]*${short}\\s*$`).test(line));
+  const lines=e.membershipText.split(/\r?\n/);
+  const dateOrUnit='(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?|min(?:ute)?s?|seconds?)';
+  const ownLine=lines.some((line,i)=>new RegExp(`^[\\s'’]*${short}\\s*$`).test(line)&&
+    !new RegExp(`\\b${dateOrUnit}\\s*$`,'i').test(lines[i-1]||'')&&
+    !new RegExp(`^\\s*${dateOrUnit}\\b`,'i').test(lines[i+1]||'')&&
+    !/^\s*\d+\s*$/.test(lines[i-1]||'')&&!/^\s*\d+\s*$/.test(lines[i+1]||''));
   const rest=e.membershipText.trimStart().slice(e.festivalNameText.length);
   const adjacent=new RegExp(`^[\\s'’]+${short}(?=$|[\\s:—–])`).exec(rest);
   const suffix=adjacent?rest.slice(adjacent[0].length).trimStart():'';
@@ -108,6 +116,18 @@ function scopedOccurrence(e: FestivalSourceEvidence): FestivalLinkReason | undef
   return undefined;
 }
 function membership(e: FestivalSourceEvidence, edition: FestivalEdition): FestivalLinkReason | undefined {
+  if(e.kind==='same_source_named_activity') {
+    if(key(e.festivalNameText)!==key(edition.name)||e.yearText!==String(edition.year)||
+        !e.dateHeaderText||!new RegExp(`\\b${edition.year}\\b`).test(e.dateHeaderText)||
+        (e.dateHeaderText.match(/\b(?:19|20)\d{2}\b/g)||[]).some(y=>y!==String(edition.year))||
+        e.source.organizerId&&e.source.organizerId!==edition.organizerId)return 'edition_conflict';
+    if(!e.activityRowText||e.membershipText!==e.eventText||!e.activityRowText.includes(e.membershipText)||
+        !e.membershipText.includes(e.festivalNameText)||!key(e.eventText).startsWith(`${key(edition.name)} `)||
+        !/[a-z]/.test(key(e.eventText).slice(key(edition.name).length).replace(/\b20\d{2}\b/g,'')))return 'membership_not_explicit';
+    if(e.organizerText&&(!e.source.text.includes(e.organizerText)||!edition.organizerNames.some(n=>key(n)===key(e.organizerText))))return 'edition_conflict';
+    if(!edition.venueIds?.includes(e.activity.venueId))return 'edition_venue_unverified';
+    return undefined;
+  }
   const programme=e.kind==='programme_row';
   const sameName=programme?key(e.festivalNameText).replace(/ /g,'')===key(edition.name).replace(/ /g,''):key(e.festivalNameText)===key(edition.name);
   if (!sameName || (programme?!printedProgrammeYear(e,edition):e.yearText!==String(edition.year)) ||
@@ -207,6 +227,7 @@ export async function resolveFestivalMembership(input: {
       stop(conflicting?'canonical_identity_conflict':'missing_child',conflicting?'held':'unmatched',!conflicting);continue;
     }
     const candidate=[...paths.values()][0],data=candidate.data,id=candidate.path.split('/').at(-1)!;
+    if(e.kind==='same_source_named_activity'&&(!Array.isArray(data.sourceUniqueIds)||!data.sourceUniqueIds.includes(e.source.id))){stop('source_ownership_missing');continue;}
     if(new Set(input.candidates.filter(c=>c.path.split('/').at(-1)===id).map(c=>c.path)).size>1){stop('ambiguous_canonical');continue;}
     if(!/^(?:events\/[A-Za-z0-9_-]+|venues\/[A-Za-z0-9_-]+\/events\/[A-Za-z0-9_-]+)$/.test(candidate.path)||
         (candidate.path.startsWith('venues/')&&candidate.path.split('/')[1]!==venue.id)||
@@ -235,7 +256,8 @@ export async function resolveFestivalMembership(input: {
   }
   const links=[...proposals.values()].sort((a,b)=>compare(a.eventPath,b.eventPath)).map(p=>{
     p.evidence.sort((a,b)=>compare(fingerprint(a),fingerprint(b)));p.provenance.sort((a,b)=>compare(a.evidenceFingerprint,b.evidenceFingerprint));
-    const editionIdentity={...edition,sourceIds:[...edition.sourceIds].sort(compare),organizerNames:[...edition.organizerNames].sort(compare)};
+    const editionIdentity={...edition,sourceIds:[...edition.sourceIds].sort(compare),organizerNames:[...edition.organizerNames].sort(compare),
+      ...(edition.venueIds?{venueIds:[...edition.venueIds].sort(compare)}:{})};
     return {...p,fingerprint:fingerprint({edition:editionIdentity,p})};
   });
   return freeze(canonical({version:1,umbrellaId:edition.id,outcomes,links})) as FestivalLinkResult;

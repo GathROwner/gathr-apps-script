@@ -22,6 +22,8 @@ const input=()=>({umbrella:edition(),sources:[programme()],candidates:[child()],
 const reason=async(e:FestivalSourceEvidence)=>(await resolveFestivalMembership({...input(),sources:[e]})).outcomes[0].reason;
 function changeText(e:FestivalSourceEvidence,from:string,to:string):void{
   e.scopeText=e.scopeText.replaceAll(from,to);e.membershipText=e.membershipText.replaceAll(from,to);e.source.text=e.source.text.replaceAll(from,to);
+  if(e.activityRowText)e.activityRowText=e.activityRowText.replaceAll(from,to);
+  if(e.dateHeaderText)e.dateHeaderText=e.dateHeaderText.replaceAll(from,to);
 }
 
 test('same-source programme header binds the complete scoped row to one canonical child',async()=>{
@@ -182,7 +184,7 @@ test('bound separate-line or name-adjacent short logo year may identify this exa
   }
 });
 test('short year cannot come from a day, minutes, runtime, address or a larger number',async()=>{
-  for(const suffix of ['October 26','26 October','7:26 pm','7 : 26 pm','26:00','26 minutes','126','2026-10-26','26 Kent Street','26 screenings']) {
+  for(const suffix of ['October 26','26 October','October\n26','26\nOctober','26\nminutes','10\n26','7:26 pm','7 : 26 pm','26:00','26 minutes','126','2026-10-26','26 Kent Street','26 screenings']) {
     const e=programme();e.membershipText='ANCHOR FEST SCREENINGS AT TIVOLI CINEMA\n'+suffix;e.festivalNameText='ANCHOR FEST';e.yearText='26';e.source.text=e.membershipText+'\n'+e.scopeText;
     assert.notEqual(await reason(e),'eligible');
   }
@@ -235,4 +237,49 @@ test('malformed, ranged, ambiguous or incomplete shared-date headers are held',a
   }
   const {e,c}=sharedDateCaption();e.dateHeaderText=undefined;
   assert.equal((await resolveFestivalMembership({...input(),sources:[e],candidates:[c]})).outcomes[0].reason,'evidence_missing');
+});
+function sameSourceNamed(){
+  const {e,c,thursday}=sharedDateCaption();const name='ANCHOR Fest Comedy Album Trial Run with Performer Fixture';
+  const row=`9:00 pm - Tivoli Cinema: ${name}`;
+  e.kind='same_source_named_activity';e.id='named_row';e.source.id='downtown_source';delete e.source.organizerId;
+  e.eventText=name;e.membershipText=name;e.activity={name,venueId:'tivoli_fixture',startDate:'2026-10-15',startTime:'21:00'};e.timeText='9:00 pm';
+  e.activityRowText=row;e.scopeText=thursday+'\n'+row;e.source.text='What is happening today?\n'+e.scopeText;
+  c.data={...c.data,eventName:name,startTime:'21:00',sourceUniqueIds:['downtown_source']};
+  const umbrella={...edition(),venueIds:['tivoli_fixture']};return {e,c,umbrella};
+}
+test('same-source festival-named activity uses literal dated heading, verified participant and exact canonical source ownership',async()=>{
+  const {e,c,umbrella}=sameSourceNamed();const result=await resolveFestivalMembership({...input(),umbrella,sources:[e],candidates:[c]});
+  assert.equal(result.links.length,1);assert.equal(result.links[0].provenance[0].sourceId,'downtown_source');
+  assert.equal(result.links[0].evidence[0].sourceDateText,'Thursday, October 15, 2026');assert.equal(result.outcomes[0].reason,'eligible');
+});
+test('same-source named path requires exact sourceUniqueIds, not a matching uniqueId prefix or publisher',async()=>{
+  for(const fields of [{sourceUniqueIds:[]},{sourceUniqueIds:['other_source']},{sourceUniqueIds:undefined,uniqueId:'downtown_source_hash'}]) {
+    const {e,c,umbrella}=sameSourceNamed();Object.assign(c.data,fields);const result=await resolveFestivalMembership({...input(),umbrella,sources:[e],candidates:[c]});
+    assert.equal(result.links.length,0);assert.equal(result.outcomes[0].reason,'source_ownership_missing');
+  }
+});
+test('same-source named path requires a verified participant, explicit full heading year and no organizer conflict',async()=>{
+  const {e,c,umbrella}=sameSourceNamed();
+  assert.equal((await resolveFestivalMembership({...input(),umbrella:{...umbrella,venueIds:[]},sources:[e],candidates:[c]})).outcomes[0].reason,'edition_venue_unverified');
+  for(const change of ['missing_year','wrong_year','organizer']) {
+    const {e,c,umbrella}=sameSourceNamed();
+    if(change==='organizer')e.source.organizerId='different_organizer';else {const year=change==='missing_year'?'':'2025';e.dateHeaderText=e.dateHeaderText!.replace('2026',year);e.dateText=e.dateText.replace('2026',year);e.scopeText=e.scopeText.replace('2026',year);e.source.text=e.source.text.replace('2026',year);}
+    assert.equal((await resolveFestivalMembership({...input(),umbrella,sources:[e],candidates:[c]})).outcomes[0].reason,'edition_conflict');
+  }
+});
+test('same-source incidental cast/bio branding, bare festival title and canonical ambiguity do not qualify',async()=>{
+  for(const name of ['Unholy Night with an ANCHOR Fest performer','Performer appeared at ANCHOR Fest','ANCHOR Fest 2026']) {
+    const {e,c,umbrella}=sameSourceNamed();changeText(e,e.eventText,name);e.eventText=name;e.activity.name=name;c.data.eventName=name;
+    const result=await resolveFestivalMembership({...input(),umbrella,sources:[e],candidates:[c]});assert.equal(result.links.length,0);
+  }
+  const {e,c,umbrella}=sameSourceNamed();const other={...c,path:'venues/tivoli_fixture/events/duplicate_named'};
+  assert.equal((await resolveFestivalMembership({...input(),umbrella,sources:[e],candidates:[c,other]})).outcomes[0].reason,'ambiguous_canonical');
+});
+test('same-source named path cannot borrow date/clock, retarget venue or relax the existing cross-source policy',async()=>{
+  for(const change of [{startTime:'20:00'},{venueId:'elsewhere'}]) {
+    const {e,c,umbrella}=sameSourceNamed();e.activity.eventPath=c.path;Object.assign(c.data,change);
+    assert.equal((await resolveFestivalMembership({...input(),umbrella,sources:[e],candidates:[c]})).links.length,0);
+  }
+  const {e,c,umbrella}=sameSourceNamed();e.kind='festival_activity';
+  assert.equal((await resolveFestivalMembership({...input(),umbrella,sources:[e],candidates:[c]})).links.length,0);
 });
