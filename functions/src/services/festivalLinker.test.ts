@@ -205,3 +205,34 @@ test('short logo years require both edition-source and organizer binding; cross-
   }
   const e=cross();changeText(e,'2026','26');e.yearText='26';assert.equal(await reason(e),'edition_conflict');
 });
+function sharedDateCaption(){
+  const e=programme();const wednesday='Wednesday, October 14, 2026 events:',thursday='Thursday, October 15, 2026 events:';
+  const first='6:00 pm - Tivoli Cinema: Another Film',row='7:00 pm - Tivoli Cinema: Unholy Night';
+  e.dateHeaderText=thursday;e.activityRowText=row;e.scopeText=thursday+'\n'+first+'\n'+row;e.dateText='Thursday, October 15, 2026';e.activity.startDate='2026-10-15';
+  e.source.text=e.membershipText+'\n'+wednesday+'\n5:00 pm - Tivoli Cinema: Wednesday Film\n'+e.scopeText;
+  const c=child();c.data.startDate='2026-10-15';c.data.endDate='2026-10-15';return {e,c,wednesday,thursday,row};
+}
+test('literal shared date heading governs multiple rows while occurrence quotes remain in the selected row',async()=>{
+  const {e,c}=sharedDateCaption();const result=await resolveFestivalMembership({...input(),sources:[e],candidates:[c]});
+  assert.equal(result.links.length,1);assert.equal(result.links[0].evidence[0].sourceDateText,'Thursday, October 15, 2026');
+  assert(e.source.text.includes(e.scopeText));assert(result.links[0].evidence[0].sourceText.includes(e.scopeText));
+});
+test('a Wednesday heading cannot govern a Thursday row across an intervening date header',async()=>{
+  const {e,c,wednesday,row}=sharedDateCaption();e.dateHeaderText=wednesday;e.dateText='Wednesday, October 14, 2026';
+  e.scopeText=e.source.text.slice(e.source.text.indexOf(wednesday),e.source.text.indexOf(row)+row.length);
+  const result=await resolveFestivalMembership({...input(),sources:[e],candidates:[c]});assert.equal(result.outcomes[0].reason,'source_occurrence_conflict');assert.equal(result.links.length,0);
+});
+test('shared date support cannot borrow another row clock or venue, or concatenate noncontiguous quotes',async()=>{
+  const {e,c,thursday,row}=sharedDateCaption();e.timeText='6:00 pm';e.activity.startTime='18:00';
+  assert.equal((await resolveFestivalMembership({...input(),sources:[e],candidates:[c]})).outcomes[0].reason,'evidence_missing');
+  e.timeText='7:00 pm';e.activity.startTime='19:00';e.scopeText=thursday+'\n'+row;
+  assert.equal((await resolveFestivalMembership({...input(),sources:[e],candidates:[c]})).outcomes[0].reason,'evidence_missing');
+});
+test('malformed, ranged, ambiguous or incomplete shared-date headers are held',async()=>{
+  for(const header of ['Dates to be announced','October 15–16, 2026 events:','October 15 and 16, 2026 events:','October 14, 2026 and October 15, 2026']) {
+    const {e,c,row}=sharedDateCaption();e.dateHeaderText=header;e.dateText=header;e.scopeText=header+'\n'+row;e.source.text=e.membershipText+'\n'+e.scopeText;
+    assert.equal((await resolveFestivalMembership({...input(),sources:[e],candidates:[c]})).outcomes[0].reason,'source_occurrence_conflict');
+  }
+  const {e,c}=sharedDateCaption();e.dateHeaderText=undefined;
+  assert.equal((await resolveFestivalMembership({...input(),sources:[e],candidates:[c]})).outcomes[0].reason,'evidence_missing');
+});

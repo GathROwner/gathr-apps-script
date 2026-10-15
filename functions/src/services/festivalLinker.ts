@@ -14,6 +14,9 @@ export interface FestivalSourceEvidence {
   kind: 'programme_row' | 'festival_activity';
   /** One literal row/card, not the whole aggregated post. */
   scopeText: string;
+  /** Optional contiguous caption structure; neither field is synthesized. */
+  activityRowText?: string;
+  dateHeaderText?: string;
   /** Literal programme heading or explicit current activity-membership statement. */
   membershipText: string;
   festivalNameText: string; yearText: string; organizerText?: string;
@@ -87,6 +90,23 @@ function printedProgrammeYear(e: FestivalSourceEvidence, edition: FestivalEditio
   const besideName=Boolean(adjacent)&&!notYear;
   return ownLine||besideName;
 }
+const CALENDAR_DATE=/\b(?:20\d{2}-\d{2}-\d{2}|(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\.?\s+\d{1,2}(?:,?\s+20\d{2})?)\b/gi;
+const WEEKDAY_HEADING=/^\s*(?:mon(?:day)?|tue(?:sday)?|wed(?:nesday)?|thu(?:rsday)?|fri(?:day)?|sat(?:urday)?|sun(?:day)?)\b/i;
+function scopedOccurrence(e: FestivalSourceEvidence): FestivalLinkReason | undefined {
+  if(e.activityRowText===undefined&&e.dateHeaderText===undefined) {
+    return [e.eventText,e.dateText,e.timeText,e.venueText].every(x=>nonempty(x)&&e.scopeText.includes(x))?undefined:'evidence_missing';
+  }
+  const row=e.activityRowText,header=e.dateHeaderText;
+  if(!nonempty(row)||!nonempty(header)||!e.scopeText.startsWith(header)||!e.scopeText.endsWith(row)||
+      !nonempty(e.dateText)||!header.includes(e.dateText)||![e.eventText,e.timeText,e.venueText].every(x=>nonempty(x)&&row.includes(x)))return 'evidence_missing';
+  const dates=header.match(CALENDAR_DATE)||[];
+  const withoutIso=header.replace(/\b20\d{2}-\d{2}-\d{2}\b/g,'');
+  if(dates.length!==1||!/^(?:\s*(?:mon(?:day)?|tue(?:sday)?|wed(?:nesday)?|thu(?:rsday)?|fri(?:day)?|sat(?:urday)?|sun(?:day)?)[,.]?\s+)?(?:20\d{2}-|jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)/i.test(header)||
+      /\b\d{1,2}\s*[-–/]\s*\d{1,2}\b|\b(?:and|to|through)\s+\d{1,2}\b/i.test(withoutIso))return 'source_occurrence_conflict';
+  const between=e.scopeText.slice(header.length,e.scopeText.length-row.length);
+  if((between.match(CALENDAR_DATE)||[]).length||between.split(/\r?\n/).some(line=>WEEKDAY_HEADING.test(line)))return 'source_occurrence_conflict';
+  return undefined;
+}
 function membership(e: FestivalSourceEvidence, edition: FestivalEdition): FestivalLinkReason | undefined {
   const programme=e.kind==='programme_row';
   const sameName=programme?key(e.festivalNameText).replace(/ /g,'')===key(edition.name).replace(/ /g,''):key(e.festivalNameText)===key(edition.name);
@@ -151,7 +171,7 @@ export async function resolveFestivalMembership(input: {
     if((revisions.get(fingerprint([e.source.id,e.id]))?.size||0)>1){stop('conflicting_source_evidence');continue;}
     if(!nonempty(e.scopeText)||!nonempty(e.membershipText)||!e.source.text.includes(e.scopeText)||!e.source.text.includes(e.membershipText)) {stop('evidence_missing');continue;}
     if(!nonempty(e.timeText)){stop('missing_clock');continue;}
-    if(![e.eventText,e.dateText,e.timeText,e.venueText].every(x=>nonempty(x)&&e.scopeText.includes(x))) {stop('evidence_missing');continue;}
+    const scopeConflict=scopedOccurrence(e);if(scopeConflict){stop(scopeConflict);continue;}
     const association=membership(e,edition);if(association){stop(association,association==='membership_not_explicit'?'unmatched':'held');continue;}
     if((ticketClaims.get(ticketIdentity(e.activity.ticketUrl))?.size||0)>1){stop('source_occurrence_conflict');continue;}
     if(!e.activity.startTime||!clock(e.activity.startTime)){stop('missing_clock');continue;}
