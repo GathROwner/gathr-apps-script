@@ -17,6 +17,7 @@ const planArg = args.find(x=>x.startsWith('--plan='));
 assert(args.every(x=>x==='--apply'||x.startsWith('--plan=')));
 assert.equal(Boolean(planArg), apply, 'Apply requires the exact approved --plan');
 const hash = x=>crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
+const plain = x=>JSON.parse(JSON.stringify(x));
 const previews = JSON.parse(await fs.readFile(path.join(root,'functions/artifacts/venue-resolution-oct14/apm-preview-payloads.json'),'utf8'));
 assert.equal(previews.length,17);
 const targets = previews.map(({row,event})=>{
@@ -73,7 +74,7 @@ try{
     console.log(JSON.stringify({mode:'dry-run',creates:17,planPath,backupPath,meetingEnd:'unknown',liveWrites:0}));
   } else {
     const approved=JSON.parse(await fs.readFile(path.resolve(planArg.slice(7)),'utf8'));
-    for(const field of ['project','targets','venue','relatedHash','sourceHash'])assert.deepEqual(plan[field],approved[field],`Approval drift: ${field}`);
+    for(const field of ['project','targets','venue','relatedHash','sourceHash'])assert.deepEqual(plain(plan[field]),approved[field],`Approval drift: ${field}`);
     await db.runTransaction(async tx=>{
       const locked=await tx.get(db.collection('processing_locks'));
       assert(!locked.docs.some(x=>!['completed','failed','cancelled'].includes(x.get('status'))),'Parser started before recovery');
