@@ -612,3 +612,23 @@ See `docs/luna-oct15-production-audit.md` and
 `docs/festival-linker-oct15-full-run-shadow.md` for full source ledgers, costs,
 actual call timing, completed Arts Mixer repair/release and the next repair
 sequence. Other live findings need exact reviewed approval before mutation.
+
+### October15 follow-up prevention released
+
+Exact isolated runtime commit `4ba56dd` is independently ACTIVE on all three
+parsers at common source hash `faaa9ed0ccd092a50cd50007fae2fb038d584aae`,
+100% latest traffic, with every prior environment/secret binding preserved.
+805 compiled backend tests and 20 focused checks passed. Website-wide hours
+and generic image hints cannot overwrite selected source evidence; empty KEPT
+compact placeholders retain source recurrence; max-output Stage5 failures
+receive bounded recovery with no partial publication. Narrow first-party
+cinema/generic-trivia duplicate guards and exact source provenance are included.
+Source-dated spatial scope and book-discussion category safeguards are included.
+
+Date-only candidates now remain in bounded snapshot evidence. Publication is
+still OFF until consuming clients support honest unknown clocks; an iOS Preview
+release alone is insufficient for global enablement. Online-only activities
+hold before physical matching; this is not a public online-event implementation.
+No historical data repair or source-ID backfill is implied by this deployment.
+See `docs/luna-oct15-followup-hardening.md` for exact guarded live plans, test
+limitations, serving revisions and pending client/data approval boundaries.
