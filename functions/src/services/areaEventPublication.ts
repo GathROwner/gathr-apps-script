@@ -63,14 +63,24 @@ function evidenceClock(value: string): string {
   return hour <= 23 && Number(clock[2] || 0) < 60 ? `${String(hour).padStart(2,'0')}:${clock[2] || '00'}` : '';
 }
 
-function sourceBindsOccurrence(proof: AreaEventLinkEvidence, point: EventAreaLocation): boolean {
+/** Only the evidenced Anchor prefix and short-programme spelling vary; no fuzzy titles. */
+export function festivalActivityTitleIdentity(value: unknown, festivalName: string): string {
+  let title=key(String(value||'').split(/\s+[—–]\s+/)[0]);
+  if(familyKey(festivalName)==='anchor fest') {
+    title=title.replace(/^anchor fest /,'').replace(/^shorts? program(?:me)? /,'short programme ');
+  }
+  return title;
+}
+
+function sourceBindsOccurrence(proof: AreaEventLinkEvidence, point: EventAreaLocation, allowFestivalTitleAliases=false): boolean {
   const source = key(proof.sourceText);
   // Film cards sometimes append the director/cast after an em dash. The
   // programme's activity heading remains the exact film identity before it.
   const activity = key(proof.eventName.split(/\s+[—–]\s+/)[0]);
   return [proof.sourceEventText, proof.sourceDateText, proof.sourceTimeText, proof.sourceVenueText]
     .every(excerpt => text(excerpt) && source.includes(key(excerpt))) &&
-    key(proof.sourceEventText) === activity &&
+    (key(proof.sourceEventText) === activity || allowFestivalTitleAliases&&
+      festivalActivityTitleIdentity(proof.sourceEventText,proof.festivalName)===festivalActivityTitleIdentity(proof.eventName,proof.festivalName)) &&
     // A reviewer may preserve a named sublocation/alias in the public point
     // label, but an unrelated place name in the source cannot bind this point.
     (` ${key(point.label).replace(/^the /, '')} `).includes(` ${key(proof.sourceVenueText).replace(/^the /, '')} `) &&
@@ -153,6 +163,8 @@ export async function verifyAreaPublicationReferences(input: {
   areaData: EventAreaData; evidence?: AreaEventLinkEvidence[];
   eventName: string; startDate: string; endDate: string;
   read: ReadAreaReference; refreshing?: boolean;
+  /** Shadow matcher opt-in only; existing public/manual writers remain exact-title strict. */
+  allowFestivalTitleAliases?: boolean;
 }): Promise<EventAreaData> {
   const area = validateEventAreaData(input.areaData);
   const proofs = input.evidence || [];
@@ -177,7 +189,7 @@ export async function verifyAreaPublicationReferences(input: {
           (proof.eventPath.startsWith('venues/') && proof.eventPath.split('/')[1] !== point.venueId) ||
           proof.venueId !== point.venueId || !url(proof.sourceUrl) ||
           !familyKey(proof.festivalName) || familyKey(proof.festivalName) !== familyKey(input.eventName) ||
-          !key(proof.sourceText).includes(familyKey(proof.festivalName)) || !sourceBindsOccurrence(proof, point)) {
+          !key(proof.sourceText).includes(familyKey(proof.festivalName)) || !sourceBindsOccurrence(proof, point,input.allowFestivalTitleAliases)) {
         throw new Error(`Missing source-bound festival membership: ${id}`);
       }
       const child = await input.read(proof.eventPath);

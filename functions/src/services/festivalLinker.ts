@@ -1,24 +1,30 @@
 /** Pure shadow proposals. No approval, persistence, discovery, geocoding or model calls. */
 import {createHash} from 'node:crypto';
 import {DateTime} from 'luxon';
-import {verifyAreaPublicationReferences} from './areaEventPublication.js';
+import {verifyAreaPublicationReferences,festivalActivityTitleIdentity} from './areaEventPublication.js';
 import type {AreaEventLinkEvidence, EventAreaLocation} from './areaEventPublication.js';
+import {validFestivalCaptionScope,festivalCaptionHeadingDate} from './festivalCaptionScope.js';
+import type {FestivalCaptionScope,FestivalEvidenceDocument} from './festivalCaptionScope.js';
 
 export interface FestivalEdition {
   id: string; name: string; year: number; startDate: string; endDate: string;
   organizerId: string; organizerNames: string[]; sourceIds: string[];
   /** Registry-supplied verified participants, never inferred from coordinates. */
   venueIds?: string[];
+  /** Exact previously reviewed official occurrences, supplied with the edition registry. */
+  occurrenceAuthorities?: readonly AreaEventLinkEvidence[];
 }
 export interface FestivalSourceEvidence {
   id: string;
-  source: {id: string; url: string; text: string; publisherId: string; organizerId?: string; revision?: string};
+  source: {id: string; url: string; text: string; publisherId: string; organizerId?: string; revision?: string;
+    documents?: readonly FestivalEvidenceDocument[]};
   kind: 'programme_row' | 'festival_activity' | 'same_source_named_activity';
   /** One literal row/card, not the whole aggregated post. */
   scopeText: string;
   /** Optional contiguous caption structure; neither field is synthesized. */
   activityRowText?: string;
   dateHeaderText?: string;
+  captionScope?: FestivalCaptionScope;
   /** Literal programme heading or explicit current activity-membership statement. */
   membershipText: string;
   festivalNameText: string; yearText: string; organizerText?: string;
@@ -31,7 +37,8 @@ export type FestivalLinkReason = 'eligible' | 'invalid_edition' | 'invalid_sourc
   'edition_conflict' | 'membership_not_explicit' | 'unbound_programme' | 'evidence_missing' | 'unknown_venue' |
   'missing_clock' | 'invalid_occurrence' | 'outside_edition' | 'ticket_identity_conflict' | 'ambiguous_canonical' |
   'missing_child' | 'canonical_identity_conflict' | 'inactive_or_noncanonical_child' | 'source_occurrence_conflict' |
-  'edition_venue_unverified' | 'source_ownership_missing';
+  'edition_venue_unverified' | 'source_ownership_missing' | 'authoritative_occurrence_conflict' |
+  'invalid_occurrence_authority' | 'canonical_occurrence_conflict';
 export interface FestivalLinkOutcome {
   id: string; sourceId: string; evidenceFingerprint: string;
   status: 'eligible' | 'held' | 'unmatched'; reason: FestivalLinkReason; pending: boolean;
@@ -41,7 +48,8 @@ export interface FestivalLinkProposal {
   eventPath: string; eventId: string; venueId: string; point: EventAreaLocation;
   evidence: AreaEventLinkEvidence[];
   provenance: {evidenceId: string; sourceId: string; sourceUrl: string; publisherId: string;
-    revision: string | null; sourceText: string; sourceFingerprint: string; evidenceFingerprint: string}[];
+    revision: string | null; sourceText: string; sourceFingerprint: string; evidenceFingerprint: string;
+    captionScope?: FestivalCaptionScope; sourceDocuments?: readonly FestivalEvidenceDocument[]}[];
   fingerprint: string;
 }
 export interface FestivalLinkResult {
@@ -107,6 +115,15 @@ function scopedOccurrence(e: FestivalSourceEvidence): FestivalLinkReason | undef
   const row=e.activityRowText,header=e.dateHeaderText;
   if(!nonempty(row)||!nonempty(header)||!e.scopeText.startsWith(header)||!e.scopeText.endsWith(row)||
       !nonempty(e.dateText)||!header.includes(e.dateText)||![e.eventText,e.timeText,e.venueText].every(x=>nonempty(x)&&row.includes(x)))return 'evidence_missing';
+  if(e.captionScope) {
+    const docs=e.source.documents;
+    if(!Array.isArray(docs)||docs.some(d=>!Number.isInteger(d.index)||d.index< -1||typeof d.text!=='string')||
+        new Set(docs.map(d=>d.index)).size!==docs.length||docs.map(d=>d.text).join('\n')!==e.source.text||
+        !validFestivalCaptionScope({scope:e.captionScope,documents:docs,scopeText:e.scopeText,rowText:row,headerText:header}))return 'source_occurrence_conflict';
+  } else {
+    const first=e.source.text.indexOf(row);
+    if(first<0||e.source.text.indexOf(row,first+row.length)>=0)return 'source_occurrence_conflict';
+  }
   const dates=header.match(CALENDAR_DATE)||[];
   const withoutIso=header.replace(/\b20\d{2}-\d{2}-\d{2}\b/g,'');
   if(dates.length!==1||!/^(?:\s*(?:mon(?:day)?|tue(?:sday)?|wed(?:nesday)?|thu(?:rsday)?|fri(?:day)?|sat(?:urday)?|sun(?:day)?)[,.]?\s+)?(?:20\d{2}-|jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)/i.test(header)||
@@ -170,8 +187,10 @@ export async function resolveFestivalMembership(input: {
   candidates: readonly FestivalCanonicalRecord[]; venues: readonly FestivalCanonicalVenue[];
 }): Promise<FestivalLinkResult> {
   const edition=input.umbrella;
+  const titleIdentity=(v:unknown)=>festivalActivityTitleIdentity(v,edition.name);
   const validEdition=opaqueId(edition.id)&&nonempty(edition.name)&&opaqueId(edition.organizerId)&&
     Array.isArray(edition.sourceIds)&&Array.isArray(edition.organizerNames)&&edition.organizerNames.length>0&&
+    (edition.occurrenceAuthorities===undefined||Array.isArray(edition.occurrenceAuthorities)&&edition.occurrenceAuthorities.length<=100&&edition.occurrenceAuthorities.every(p=>p&&nonempty(p.eventPath)))&&
     Number.isInteger(edition.year)&&validDate(edition.startDate)&&validDate(edition.endDate)&&edition.endDate>=edition.startDate&&
     Number(edition.startDate.slice(0,4))===edition.year&&Number(edition.endDate.slice(0,4))===edition.year;
   const rows=[...new Map(input.sources.map(e=>[fingerprint(e),e])).entries()].sort(([a],[b])=>compare(a,b));
@@ -181,6 +200,25 @@ export async function resolveFestivalMembership(input: {
   for(const [,e]of rows){const id=ticketIdentity(e.activity.ticketUrl);if(id&&nonempty(e.scopeText)&&nonempty(e.source.text)&&e.scopeText.includes(e.activity.ticketUrl!)&&e.source.text.includes(e.scopeText)){
     const set=ticketClaims.get(id)||new Set<string>();set.add(fingerprint({name:activityKey(e.activity.name),venue:e.activity.venueId,date:e.activity.startDate,time:e.activity.startTime}));ticketClaims.set(id,set);
   }}
+  const authorities=await Promise.all((Array.isArray(edition.occurrenceAuthorities)?edition.occurrenceAuthorities:[]).map(async proof=>{
+    let valid=false;
+    try {
+      const child=input.candidates.filter(c=>c.path===proof.eventPath);
+      const venue=input.venues.find(v=>v.id===proof.venueId);
+      if(!validEdition||!edition.sourceIds.includes(proof.sourceUrl)||!venue||!child.length||
+          child.some(c=>fingerprint(c.data)!==fingerprint(child[0].data))||trueFlag(child[0].data.isRecurring)||child[0].data.originalEventId||
+          trueFlag(child[0].data.isRecurringInstance)||child[0].data.recurringPattern&&!['none','no'].includes(String(child[0].data.recurringPattern).toLowerCase())||
+          ['deleted','isDeleted','cancelled','canceled','isCancelled','isCanceled','expired','isExpired'].some(k=>trueFlag(child[0].data[k]))||
+          ['cancelled','canceled','deleted','rejected','superseded','expired'].includes(String(child[0].data.status||'').toLowerCase()))throw Error('invalid authority reference');
+      const label=[venue.label,...(venue.aliases||[])].find(n=>venueKey(n)===venueKey(proof.sourceVenueText));
+      if(!label)throw Error('unverified authority venue');
+      const point:EventAreaLocation={id:`venue_${venue.id}`,label,venueId:venue.id,coordinates:{latitude:venue.latitude,longitude:venue.longitude},certainty:'confirmed',linkedEventIds:[proof.eventPath.split('/').at(-1)!]};
+      await verifyAreaPublicationReferences({areaData:{version:1,status:'partial',locations:[point]},evidence:[proof],eventName:`${edition.name} ${edition.year}`,
+        startDate:edition.startDate,endDate:edition.endDate,read:async p=>p===proof.eventPath?child[0].data:p===`venues/${venue.id}`?venue:undefined});
+      valid=true;
+    }catch{/* Invalid/missing authoritative references hold their related activity. */}
+    return {proof,valid};
+  }));
   const outcomes: FestivalLinkOutcome[]=[];const proposals=new Map<string,Omit<FestivalLinkProposal,'fingerprint'>>();
   for(const [hash,e]of rows) {
     const outcome:FestivalLinkOutcome={id:e.id,sourceId:e.source.id,evidenceFingerprint:hash,status:'held',reason:'invalid_source',pending:false,candidatePaths:[]};
@@ -193,6 +231,7 @@ export async function resolveFestivalMembership(input: {
     if(!nonempty(e.timeText)){stop('missing_clock');continue;}
     const scopeConflict=scopedOccurrence(e);if(scopeConflict){stop(scopeConflict);continue;}
     const association=membership(e,edition);if(association){stop(association,association==='membership_not_explicit'?'unmatched':'held');continue;}
+    if(e.dateHeaderText&&festivalCaptionHeadingDate(e.dateHeaderText,edition.year)!==e.activity.startDate){stop('source_occurrence_conflict');continue;}
     if((ticketClaims.get(ticketIdentity(e.activity.ticketUrl))?.size||0)>1){stop('source_occurrence_conflict');continue;}
     if(!e.activity.startTime||!clock(e.activity.startTime)){stop('missing_clock');continue;}
     if(!validDate(e.activity.startDate)||activityKey(e.activity.name)!==activityKey(e.eventText)){stop('invalid_occurrence');continue;}
@@ -207,8 +246,15 @@ export async function resolveFestivalMembership(input: {
     const venue=venues[0];const names=[venue.label,...(venue.aliases||[])];
     const matchedName=names.filter(n=>venueKey(n)===venueKey(e.venueText)).sort(compare)[0];
     if(!matchedName||!Number.isFinite(venue.latitude)||!Number.isFinite(venue.longitude)||Math.abs(venue.latitude)>90||Math.abs(venue.longitude)>180){stop('unknown_venue');continue;}
-    const base=input.candidates.filter(c=>activityKey(c.data.eventName||c.data.name)===activityKey(e.activity.name)&&c.data.venueId===venue.id&&
-      c.data.startDate===e.activity.startDate&&c.data.startTime===e.activity.startTime);
+    const family=input.candidates.filter(c=>titleIdentity(c.data.eventName||c.data.name)===titleIdentity(e.activity.name)&&c.data.venueId===venue.id&&c.data.startDate===e.activity.startDate);
+    const relatedAuthorities=authorities.filter(({proof})=>titleIdentity(proof.eventName)===titleIdentity(e.activity.name)&&proof.venueId===venue.id&&proof.startDate===e.activity.startDate||
+      family.some(c=>c.path===proof.eventPath));
+    // Authority is separate from ingestion ownership. Even a historical wrong
+    // copy with exact sourceUniqueIds cannot override the reviewed occurrence.
+    if(relatedAuthorities.some(x=>!x.valid)){stop('invalid_occurrence_authority');continue;}
+    if(relatedAuthorities.length&&!relatedAuthorities.some(x=>x.proof.startTime===e.activity.startTime)){stop('authoritative_occurrence_conflict');continue;}
+    if(!relatedAuthorities.length&&family.some(c=>c.data.startTime!==e.activity.startTime)&&family.some(c=>c.data.startTime===e.activity.startTime)){stop('canonical_occurrence_conflict');continue;}
+    const base=family.filter(c=>c.data.startTime===e.activity.startTime);
     let matches=base;
     if(e.activity.ticketUrl){
       const ticket=ticketIdentity(e.activity.ticketUrl);
@@ -222,7 +268,7 @@ export async function resolveFestivalMembership(input: {
     outcome.candidatePaths=[...paths.keys()].sort(compare);
     if(drift||paths.size>1){stop('ambiguous_canonical');continue;}
     if(paths.size===0){
-      const conflicting=input.candidates.some(c=>activityKey(c.data.eventName||c.data.name)===activityKey(e.activity.name)&&
+      const conflicting=input.candidates.some(c=>titleIdentity(c.data.eventName||c.data.name)===titleIdentity(e.activity.name)&&
         (e.activity.eventPath===c.path||c.data.venueId===venue.id&&c.data.startDate===e.activity.startDate));
       stop(conflicting?'canonical_identity_conflict':'missing_child',conflicting?'held':'unmatched',!conflicting);continue;
     }
@@ -244,12 +290,14 @@ export async function resolveFestivalMembership(input: {
     // edition. Validate occurrence excerpts using that literal name, retaining
     // original source words in the proof rather than manufacturing a heading.
     try {await verifyAreaPublicationReferences({areaData:{version:1,status:'partial',locations:[point]},evidence:[evidence],eventName:`${e.festivalNameText} ${edition.year}`,
+      allowFestivalTitleAliases:true,
       startDate:edition.startDate,endDate:edition.endDate,read:async p=>p===candidate.path?{...data,isRecurringInstance:false}:p===`venues/${venue.id}`?venue:undefined});}
     catch {stop('source_occurrence_conflict');continue;}
     stop('eligible','eligible');
     const proposal=proposals.get(candidate.path)||{eventPath:candidate.path,eventId:id,venueId:venue.id,point,evidence:[],provenance:[]};
     proposal.evidence.push(evidence);proposal.provenance.push({evidenceId:e.id,sourceId:e.source.id,sourceUrl:e.source.url,publisherId:e.source.publisherId,
-      revision:e.source.revision??null,sourceText:e.source.text,sourceFingerprint:fingerprint(e.source),evidenceFingerprint:hash});
+      revision:e.source.revision??null,sourceText:e.source.text,sourceFingerprint:fingerprint(e.source),evidenceFingerprint:hash,
+      ...(e.captionScope?{captionScope:{...e.captionScope}}:{}),...(e.source.documents?{sourceDocuments:e.source.documents.map(d=>({...d}))}:{})});
     // Alias selection must not depend on source order.
     if(compare(point.label,proposal.point.label)<0)proposal.point={...proposal.point,label:point.label};
     proposals.set(candidate.path,proposal);
@@ -258,6 +306,7 @@ export async function resolveFestivalMembership(input: {
     p.evidence.sort((a,b)=>compare(fingerprint(a),fingerprint(b)));p.provenance.sort((a,b)=>compare(a.evidenceFingerprint,b.evidenceFingerprint));
     const editionIdentity={...edition,sourceIds:[...edition.sourceIds].sort(compare),organizerNames:[...edition.organizerNames].sort(compare),
       ...(edition.venueIds?{venueIds:[...edition.venueIds].sort(compare)}:{})};
+    if(edition.occurrenceAuthorities)editionIdentity.occurrenceAuthorities=[...edition.occurrenceAuthorities].sort((a,b)=>compare(fingerprint(a),fingerprint(b)));
     return {...p,fingerprint:fingerprint({edition:editionIdentity,p})};
   });
   return freeze(canonical({version:1,umbrellaId:edition.id,outcomes,links})) as FestivalLinkResult;

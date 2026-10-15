@@ -13,3 +13,12 @@ test('incomplete API responses cannot yield membership evidence',async()=>{await
 test('shared caption date heading expands as an exact original substring',()=>{const text='Thursday, October 15, 2026 events:\n7:00 PM Cinema: Film One\nFriday, October 16, 2026 events:\n8:00 PM Cinema: Film Two';const item={scopeText:'8:00 PM Cinema: Film Two',dateText:'Friday, October 16, 2026',sourceIndices:[-1]};const expanded=expandCaptionDateScope(item,[{index:-1,text}]);assert.equal(expanded.dateHeaderText,'Friday, October 16, 2026 events:');assert(text.includes(expanded.scopeText));assert.equal(expanded.activityRowText,item.scopeText);});
 test('another day or a repeated identical row cannot supply governing date',()=>{const text='Thursday, October 15, 2026 events:\n7:00 PM Cinema: Film One\nFriday, October 16, 2026 events:\n8:00 PM Cinema: Film Two';const item={scopeText:'8:00 PM Cinema: Film Two',dateText:'Thursday, October 15, 2026',sourceIndices:[-1]};assert.equal(expandCaptionDateScope(item,[{index:-1,text}]).activityRowText,undefined);});
 test('whole-row event quotes narrow only to a literal printed activity name',()=>{const x=fixture();x.activities[0].name='Film One';x.activities[0].eventText=row;const captured=validateFestivalEvidenceCapture(x,input);assert.equal(captured.activities[0].eventText,'Film One');assert.equal(captured.activities[0].originalEventText,row);const y=fixture();y.activities[0].name='Invented film';y.activities[0].eventText=row;assert.equal(validateFestivalEvidenceCapture(y,input).activities[0].eventText,row);});
+
+test('identical conference rows under different dates retain their own literal offsets',()=>{
+ const row='9:00 am - Cinema: ANCHOR Fest Conference',h15='Thursday, October 15, 2026 events:',h16='Friday, October 16, 2026 events:';
+ const caption=`${h15}\n${row}\n${h16}\n${row}`;
+ const value={complete:true,limitations:[],documents:[{index:-1,text:caption}],activities:[h15,h16].map(h=>({kind:'festival_activity',sourceIndices:[-1],scopeText:row,membershipText:'ANCHOR Fest Conference',name:'ANCHOR Fest Conference',eventText:'ANCHOR Fest Conference',dateText:h.replace(' events:',''),timeText:'9:00 am',venueText:'Cinema'}))};
+ const result=validateFestivalEvidenceCapture(value,{caption,imageUrls:[]});
+ assert(result.activities.every(x=>x.captionScope&&!x.captureHoldReason));
+ assert(result.activities[0].captionScope.rowStart<result.activities[1].captionScope.rowStart);
+});

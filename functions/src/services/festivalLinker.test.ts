@@ -2,6 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {resolveFestivalMembership} from './festivalLinker.js';
 import type {FestivalEdition,FestivalSourceEvidence,FestivalCanonicalVenue,FestivalCanonicalRecord} from './festivalLinker.js';
+import {expandFestivalCaptionDateScope} from './festivalCaptionScope.js';
+import {verifyAreaPublicationReferences} from './areaEventPublication.js';
 
 const edition=():FestivalEdition=>({id:'festival_fixture',name:'ANCHOR Fest',year:2026,startDate:'2026-10-14',endDate:'2026-10-18',
   organizerId:'organizer_fixture',organizerNames:['AMPA'],sourceIds:['programme_source']});
@@ -282,4 +284,97 @@ test('same-source named path cannot borrow date/clock, retarget venue or relax t
   }
   const {e,c,umbrella}=sameSourceNamed();e.kind='festival_activity';
   assert.equal((await resolveFestivalMembership({...input(),umbrella,sources:[e],candidates:[c]})).links.length,0);
+});
+
+test('repeated dated conference occurrences match independently and reject swapped governing offsets',async()=>{
+  const {e,c,umbrella}=sameSourceNamed();
+  const name='ANCHOR Fest Conference & Panel Discussion',row=`9:00 am - Tivoli Cinema: ${name}`;
+  const h15='Thursday, October 15, 2026 events:',h16='Friday, October 16, 2026 events:';
+  const caption=`${h15}\n${row}\n${h16}\n${row}`,documents=[{index:-1,text:caption}];
+  const make=(date:string,header:string,id:string)=>{
+    const expanded=expandFestivalCaptionDateScope({scopeText:row,dateText:header.replace(' events:',''),sourceIndices:[-1]},documents);
+    return {...e,...expanded,id,eventText:name,membershipText:name,timeText:'9:00 am',activity:{...e.activity,name,startDate:date,startTime:'09:00'},source:{...e.source,text:caption,documents}};
+  };
+  const a=make('2026-10-15',h15,'conference15'),b=make('2026-10-16',h16,'conference16');
+  const first={...c,path:'venues/tivoli_fixture/events/conference15',data:{...c.data,eventName:name,startDate:'2026-10-15',endDate:'2026-10-15',startTime:'09:00'}};
+  const second={...first,path:'venues/tivoli_fixture/events/conference16',data:{...first.data,startDate:'2026-10-16',endDate:'2026-10-16'}};
+  const result=await resolveFestivalMembership({...input(),umbrella,sources:[a,b],candidates:[first,second]});
+  assert.equal(result.links.length,2);assert(result.outcomes.every(x=>x.reason==='eligible'));
+  const wrong={...b,captionScope:a.captionScope};
+  assert.equal((await resolveFestivalMembership({...input(),umbrella,sources:[wrong],candidates:[first,second]})).outcomes[0].reason,'source_occurrence_conflict');
+  const unpinned={...a,captionScope:undefined};
+  assert.equal((await resolveFestivalMembership({...input(),umbrella,sources:[unpinned],candidates:[first,second]})).outcomes[0].reason,'source_occurrence_conflict');
+  const wrongDate={...b,activity:{...b.activity,startDate:'2026-10-15'}};
+  assert.equal((await resolveFestivalMembership({...input(),umbrella,sources:[wrongDate],candidates:[first,second]})).links.length,0);
+});
+
+test('literal Anchor prefix and short-programme spellings identify the canonical title without fuzzy matching',async()=>{
+  for(const [literal,canonical] of [["ANCHOR Fest L’Autre (The Other)","L'Autre (The Other)"],['ANCHOR Fest Short Program, Pressure Points','Shorts Programme: Pressure Points']]) {
+    const {e,c,umbrella}=sameSourceNamed();changeText(e,e.eventText,literal);e.eventText=literal;e.membershipText=literal;e.activity.name=literal;c.data.eventName=canonical;
+    const result=await resolveFestivalMembership({...input(),umbrella,sources:[e],candidates:[c]});
+    assert.equal(result.outcomes[0].reason,'eligible');assert.equal(result.links[0].evidence[0].sourceEventText,literal);
+    assert.equal(result.links[0].evidence[0].eventName,canonical);
+    await assert.rejects(verifyAreaPublicationReferences({areaData:{version:1,status:'partial',locations:[result.links[0].point]},
+      evidence:result.links[0].evidence,eventName:'ANCHOR Fest 2026',startDate:umbrella.startDate,endDate:umbrella.endDate,
+      read:async path=>path===c.path?c.data:path==='venues/tivoli_fixture'?venue():undefined}),/source-bound festival/);
+    delete c.data.sourceUniqueIds;
+    assert.equal((await resolveFestivalMembership({...input(),umbrella,sources:[e],candidates:[c]})).outcomes[0].reason,'source_ownership_missing');
+  }
+  for(const canonical of ["L'Autre Encore (The Other)",'Pressure Points 2','Other Film','ANCHOR Festival Unholy Night']) {
+    const {e,c,umbrella}=sameSourceNamed();c.data.eventName=canonical;
+    assert.equal((await resolveFestivalMembership({...input(),umbrella,sources:[e],candidates:[c]})).links.length,0);
+  }
+});
+
+function pressureConflict(){
+  const {e,c,umbrella}=sameSourceNamed();const title='ANCHOR Fest Short Program, Pressure Points';
+  changeText(e,e.eventText,title);e.eventText=title;e.membershipText=title;e.activity.name=title;
+  const wrong={...c,path:'venues/tivoli_fixture/events/wrong_pressure',data:{...c.data,eventName:title}};
+  const right={...c,path:'venues/tivoli_fixture/events/official_pressure',data:{...c.data,eventName:'Shorts Program: Pressure Points',startTime:'18:00'}};
+  const proof={eventPath:right.path,eventName:right.data.eventName,venueId:'tivoli_fixture',startDate:'2026-10-15',startTime:'18:00',festivalName:'ANCHOR Fest',
+    sourceUrl:'https://festival.example/film',sourceText:'ANCHOR Fest\nShorts Program: Pressure Points\nOctober 15 | 6:00 pm | Tivoli Cinema',
+    sourceEventText:'Shorts Program: Pressure Points',sourceDateText:'October 15',sourceTimeText:'6:00 pm',sourceVenueText:'Tivoli Cinema'};
+  return{e,wrong,right,umbrella:{...umbrella,sourceIds:['https://festival.example/film'],occurrenceAuthorities:[proof]},proof};
+}
+
+test('reviewed authoritative occurrence rejects wrong Pressure Points before source ownership even when populated',async()=>{
+  const {e,wrong,right,umbrella}=pressureConflict();
+  for(const fields of [{sourceUniqueIds:['downtown_source']},{sourceUniqueIds:undefined,uniqueId:'downtown_source_hash'}]){
+    Object.assign(wrong.data,fields);
+    const result=await resolveFestivalMembership({...input(),umbrella,sources:[e],candidates:[wrong,right]});
+    assert.equal(result.outcomes[0].reason,'authoritative_occurrence_conflict');assert.equal(result.links.length,0);
+  }
+});
+test('missing authority falls back to conservative sibling clock conflict; invalid proof never grants authority',async()=>{
+  const {e,wrong,right,umbrella,proof}=pressureConflict();
+  assert.equal((await resolveFestivalMembership({...input(),umbrella:{...umbrella,occurrenceAuthorities:[]},sources:[e],candidates:[wrong,right]})).outcomes[0].reason,'canonical_occurrence_conflict');
+  for(const delta of [{sourceTimeText:'7:00 pm'},{sourceUrl:'https://unbound.example/film'},{startTime:'21:00'},{eventPath:'venues/tivoli_fixture/events/missing'}]){
+    const result=await resolveFestivalMembership({...input(),umbrella:{...umbrella,occurrenceAuthorities:[{...proof,...delta}]},sources:[e],candidates:[wrong,right]});
+    assert.equal(result.outcomes[0].reason,'invalid_occurrence_authority');assert.equal(result.links.length,0);
+  }
+});
+
+test('the authoritative18:00 showing stays eligible despite the historical21:00 copy; another verified showing can coexist',async()=>{
+  const {e,wrong,right,umbrella,proof}=pressureConflict();
+  changeText(e,'9:00 pm','6:00 pm');e.timeText='6:00 pm';e.activity.startTime='18:00';
+  const result=await resolveFestivalMembership({...input(),umbrella,sources:[e],candidates:[wrong,right]});
+  assert.equal(result.outcomes[0].reason,'eligible');assert.equal(result.links[0].eventPath,right.path);
+  const later=pressureConflict();
+  const laterProof={...proof,eventPath:later.wrong.path,eventName:later.wrong.data.eventName,startTime:'21:00',sourceEventText:later.wrong.data.eventName,
+    sourceTimeText:'9:00 pm',sourceText:`ANCHOR Fest\n${later.wrong.data.eventName}\nOctober 15 | 9:00 pm | Tivoli Cinema`};
+  assert.equal((await resolveFestivalMembership({...input(),umbrella:{...umbrella,occurrenceAuthorities:[proof,laterProof]},sources:[later.e],candidates:[later.wrong,later.right]})).outcomes[0].reason,'eligible');
+});
+test('Jim Queen21:00 remains a conflict against21:30 canonical, not a missing film after prefix identity',async()=>{
+  const {e,c,umbrella}=sameSourceNamed();const name='ANCHOR Fest Jim Queen';changeText(e,e.eventText,name);e.eventText=name;e.membershipText=name;e.activity.name=name;
+  c.data.eventName='Jim Queen';c.data.startTime='21:30';
+  const result=await resolveFestivalMembership({...input(),umbrella,sources:[e],candidates:[c]});
+  assert.equal(result.outcomes[0].reason,'canonical_identity_conflict');assert.equal(result.outcomes[0].pending,false);assert.equal(result.links.length,0);
+});
+
+test('a programme heading cannot hide its conflicting year or weekday behind a shorter date excerpt',async()=>{
+  for(const header of ['Thursday, October 15, 2025 events:','Friday, October 15, 2026 events:']) {
+    const {e,c}=sharedDateCaption();const old=e.dateHeaderText!;
+    e.dateHeaderText=header;e.dateText='October 15';e.scopeText=e.scopeText.replace(old,header);e.source.text=e.source.text.replace(old,header);
+    assert.equal((await resolveFestivalMembership({...input(),sources:[e],candidates:[c]})).outcomes[0].reason,'source_occurrence_conflict');
+  }
 });

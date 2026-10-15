@@ -25,6 +25,7 @@ try{
   editions.push({id:doc.id,name,year:Number(e.startDate.slice(0,4)),startDate:e.startDate,endDate:e.endDate,organizerId,organizerNames:[name],sourceIds:Object.keys(sourceBindings).sort(),sourceBindings,
    venueIds:[...new Set(e.areaData.locations.filter(x=>x.certainty==='confirmed'&&x.venueId).map(x=>x.venueId))].sort(),
    venueAliases:Object.fromEntries(e.areaData.locations.filter(x=>x.certainty==='confirmed'&&x.venueId).map(p=>[p.venueId,[...new Set([p.label,...(r.areaEventLinks||[]).filter(x=>x.venueId===p.venueId).map(x=>x.sourceVenueText)])].filter(Boolean).sort()])),
+   occurrenceAuthorities:(r.areaEventLinks||[]).filter(p=>Object.keys(sourceBindings).includes(p.sourceUrl)),
    authority:{kind:'reviewed_edition',reviewPath:review.ref.path,reviewRevision:review.updateTime.toDate().toISOString(),eventPath:doc.ref.path,eventRevision:doc.updateTime.toDate().toISOString()}});
  }
  const registry={version:1,capturedAt:new Date().toISOString(),asOf,editions:editions.sort((a,b)=>a.id.localeCompare(b.id)),held,mode:'shadow',eventWrites:0};

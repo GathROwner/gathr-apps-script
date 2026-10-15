@@ -1,5 +1,6 @@
 // Optional, bounded post-parse evidence extraction. No Firestore/event writes.
 import {createHash} from 'node:crypto';
+import {expandFestivalCaptionDateScope} from '../lib/services/festivalCaptionScope.js';
 const obj=properties=>({type:'object',properties,required:Object.keys(properties),additionalProperties:false});
 const str={type:'string'};
 const schema=obj({complete:{type:'boolean'},limitations:{type:'array',items:str},documents:{type:'array',items:obj({index:{type:'integer'},text:str})},activities:{type:'array',items:obj({
@@ -13,17 +14,10 @@ const hash=x=>createHash('sha256').update(JSON.stringify(x)).digest('hex');
 export const festivalEvidenceEditionIdentity=e=>({id:e.id,name:e.name,year:e.year,startDate:e.startDate,endDate:e.endDate});
 export const festivalEvidenceSourceFingerprint=({caption,imageUrls})=>hash({caption,imageUrls});
 export const festivalEvidenceEditionFingerprint=e=>hash(festivalEvidenceEditionIdentity(e));
-export const FESTIVAL_EVIDENCE_POLICY = hash({instructions:FESTIVAL_EVIDENCE_INSTRUCTIONS,schema,model:'gpt-6-luna',effort:'high',verification:true,validatorVersion:'caption-header-literal-title-v2',verifierVersion:'literal-source-verify-v3'});
+export const FESTIVAL_EVIDENCE_POLICY = hash({instructions:FESTIVAL_EVIDENCE_INSTRUCTIONS,schema,model:'gpt-6-luna',effort:'high',verification:true,validatorVersion:'caption-occurrence-offsets-v3',verifierVersion:'literal-source-verify-v3'});
 const outputText=r=>typeof r.output_text==='string'?r.output_text:(r.output||[]).flatMap(x=>x.content||[]).filter(x=>x.type==='output_text').map(x=>x.text).join('');
 export function expandCaptionDateScope(item,documents){
- if(!item.dateText||item.scopeText.includes(item.dateText))return item;
- const caption=documents.find(d=>d.index===-1);if(!caption||!item.sourceIndices.includes(-1))return item;
- const first=caption.text.indexOf(item.scopeText);if(first<0||caption.text.indexOf(item.scopeText,first+1)>=0)return item;
- const dateLine=/^(?:(?:Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday),?\s+)?(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2}(?:,?\s+20\d{2})?(?:\s+events:?)?\s*$/i;
- let offset=0,header;
- for(const line of caption.text.split('\n')){if(offset>first)break;if(dateLine.test(line.trim()))header={text:line,start:offset};offset+=line.length+1;}
- if(!header||!header.text.includes(item.dateText))return item;
- return{...item,activityRowText:item.scopeText,dateHeaderText:header.text,scopeText:caption.text.slice(header.start,first+item.scopeText.length)};
+ return expandFestivalCaptionDateScope(item,documents);
 }
 export function validateFestivalEvidenceCapture(value,{caption,imageUrls}){
  if(!value||value.complete!==true||!Array.isArray(value.documents)||!Array.isArray(value.activities)||!Array.isArray(value.limitations))throw Error('source_incomplete');

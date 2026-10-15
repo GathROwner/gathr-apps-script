@@ -78,9 +78,10 @@ try{
      const binding=edition.sourceBindings?.[s.uniqueId];
      const namedSourceActivity=Boolean(item.activityRowText&&item.dateHeaderText&&normalize(item.eventText).startsWith(normalize(edition.name))&&normalize(item.eventText).length>normalize(edition.name).length);
      evidence.push({id:'e_'+festivalShadowFingerprint({source:s.uniqueId,index,scope:item.scopeText}).slice(0,40),
-      source:{id:String(s.uniqueId),url:s.facebookUrl,text:result.sourceText,publisherId,revision:s.updateTime,...(binding?{organizerId:binding.organizerId}:{})},
+      source:{id:String(s.uniqueId),url:s.facebookUrl,text:result.sourceText,documents:result.documents,publisherId,revision:s.updateTime,...(binding?{organizerId:binding.organizerId}:{})},
       kind:namedSourceActivity?'same_source_named_activity':item.kind,scopeText:item.scopeText,membershipText:namedSourceActivity?item.eventText:item.membershipText,festivalNameText:item.festivalNameText,yearText:item.yearText,organizerText:item.organizerText,
       ...(item.activityRowText?{activityRowText:item.activityRowText,dateHeaderText:item.dateHeaderText}:{}),
+      ...(item.captionScope?{captionScope:item.captionScope}:{}),
       activity:{name:item.name,venueId:matches.length===1?matches[0].id:'',startDate:item.startDate,startTime:item.startTime,...(item.ticketUrl?{ticketUrl:item.ticketUrl}:{})},
       eventText:item.eventText,dateText:item.dateText,timeText:item.timeText,venueText:item.venueText});
     }
