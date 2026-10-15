@@ -82,7 +82,9 @@ rendered evidence. No overlapping checkout or release ownership is authorized.
 
 ### Compatibility delivery candidate and exact auditions plan
 
-An isolated API candidate is now committed at `a7552a0` in
+An isolated API candidate began at `a7552a0`; the reviewed pagination follow-up
+is `8ce4bf3`, and latest documentation-only commit is
+`6e9fe169c9a67df8e85917d7be6a4b61925f4240`, in
 `C:/Users/craig/.codex/worktrees/date-only-delivery-api/gathr-backend`, descended
 from independently verified serving commit `13c8d52` / revision
 `gathr-backend-00084-66r`. Explicit request query `dateOnlyActivities=v1` declares
@@ -92,7 +94,7 @@ contracts remain unchanged. All feed/detail/venue-with-events paths and bounded
 pagination are covered. Malformed marked records fail closed for both clients.
 This is compatibility handling, not source approval or authentication.
 
-All 54 backend checks passed. A read-only capture of all 1,133 stored events
+All 55 backend checks passed. A read-only capture of all 1,133 stored events
 projects identically through serving and candidate source; zero current records
 would be newly excluded. Actual proposed auditions payload is also verified
 offline: default excluded, v1 allowed, unknown clocks and original poster.
@@ -105,6 +107,25 @@ and Android shared-component screenshots. Production bundles remain unchanged.
 Neither candidate is authorized to publish yet. Compatible clients temporarily
 see marked activities that old clients cannot safely render; this delivery
 tradeoff must be part of the exact release decision.
+
+Independent review additionally required capability-specific persisted feed and
+detail cache generations. Otherwise rolling an OTA back could let an old bundle
+hydrate newly cached date-only records, bypassing the request-only guard. The
+frontend coordinator is adding separate keys in both candidates without wiping
+account/user storage. Clean platform-specific exports and fixture-free release
+trees are also required before requesting the release decision.
+
+The coordinator independently viewed Android native shared-component screenshots
+01–05: Today/Tomorrow labels, unknown badge/disclosure, calendar guard, October 26
+auditions, bounded offer date range and timed/overnight controls are readable and
+retain their expected semantics. These are synthetic component renders, not a
+full app feed/lightbox or iOS device adoption test.
+
+Fresh API serving configuration was captured as fingerprints only: all fourteen
+environment definitions and the full runtime spec are hashed, not copied or
+printed. The baseline remains `gathr-backend-00084-66r`; no inline credentials
+entered artifacts or either deploy checkout. Preserve these settings and the
+existing profile-image deletion guard during any approved API release.
 
 Next exact event target is only
 `venues/slug_confedcentre/events/bqk2pKnr1HHZQvhaz6Qo`: restore the original
