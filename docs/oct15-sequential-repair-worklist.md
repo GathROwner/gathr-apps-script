@@ -234,9 +234,15 @@ until their evidence/contracts are adequate. Do not ask per candidate.
 
 Harvest source review found older generic/weekly/component cards overlapping
 the current printed twelve-date programme. Current website fixes the clock
-and year, and ten historical source snapshots are captured. Prepare one
-source-grounded programme consolidation rather than creating nine additional
-cards beside the old copies. The new batch does not change Harvest records.
+and year, and ten historical source snapshots are captured. The exact grouped
+plan is prepared in `docs/harvest-series-oct15-batch-plan.md`:three preserved
+keepers,nine missing dates,five retired copies,one venue replay policy and
+marker266. The reviewed poster also corrects the wrong November primary on
+October16/17. Candidate6c5c46f passes18 focused/832 full tests and no-network
+saved-source/current-identity/actual-service/future-merge playback. Exact live
+approval, deployment and apply/API verification remain pending. Three other
+venue activities and the themed-child website-clock enrichment limitation
+remain separate. No Harvest live records have changed during preparation.
 
 1. Remaining exact category/media/spatial corrections and source-backed recovery
    of genuinely missing activities; retain ambiguous prices/identities.

@@ -765,3 +765,24 @@ references,details,full active/history feeds once,no duplicate,two images200
 and marker265 passed independently at22:11UTC. Complete source/release/backup/
 apply/verification evidence: docs/oct15-reviewed-batch-approval-plan.md.
 Next-run model validation and Harvest programme consolidation remain separate.
+
+## October 15 Harvest consolidation (prepared; grouped approval pending)
+
+PQ-001/PQ-043/PQ-047 follow-up: ten saved sources and the first-party dated
+2026 itinerary confirm twelve Thu/Fri/Sat dining evenings,17:00–21:30,$305+
+tax. Five generic/component/indefinite-Sunday parents overlap three dated
+keepers; nine later advertised dates are missing. October16/17 also inherited
+the November5–7 chef poster during an older merge. Exact grouped nineteen-doc
+plan and full backup: `docs/harvest-series-oct15-batch-plan.md`.
+
+Candidate6c5c46f adds a zero-query reviewed-identity retirement guard using
+the already loaded venue in both parser write paths. It blocks five legacy
+identities and their exact current-generator reconstructions without mutating
+a keeper or excluding other activities from those posts.18 focused/832 full
+compiled tests,actual-service/saved-source/stable-ID/future-merge playback and
+qualified three-parser dry run passed. All twelve retained images returned200.
+No Harvest live changes or parser deployment have occurred for this batch.
+Approval, release/readback, atomic apply and independent full-feed verification
+remain pending. Themed-child website-clock enrichment and three separate
+foraging/summer-tour records are explicit open work; do not claim this exact
+retirement fence prevents every future duplicate wording or new source.
