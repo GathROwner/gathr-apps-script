@@ -4998,7 +4998,8 @@ export async function processFullParserEvent(
   const duplicateCheck = await firestoreService.checkDuplicate(
     eventData,
     venue.id,
-    batchManager.getCurrentRunEntries()
+    batchManager.getCurrentRunEntries(),
+    venue
   );
   logTiming('dedupe_check', dedupeStart, {
     rowIndex,
@@ -5239,7 +5240,8 @@ async function processExtractedItem(
   const duplicateCheck = await firestoreService.checkDuplicate(
     eventData,
     venue.id,
-    batchManager.getCurrentRunEntries()
+    batchManager.getCurrentRunEntries(),
+    venue
   );
   logTiming('dedupe_check', dedupeStart, {
     rowIndex,

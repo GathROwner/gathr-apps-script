@@ -511,6 +511,7 @@ export interface FinalizeCityLevelEventReviewResult {
 
 export interface VenueData {
   id: string;
+  reviewedOccurrenceRetirements?: import('../services/reviewedOccurrenceRetirement.js').ReviewedOccurrenceRetirementPolicy;
   name: string;
   normalizedName: string;
   aliases?: string[];

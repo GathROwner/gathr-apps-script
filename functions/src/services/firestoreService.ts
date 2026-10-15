@@ -5,6 +5,7 @@ import {resolveAggregatorCinemaOccurrence} from './aggregatorCinemaOccurrence.js
 import {isGenericTrivia,resolveGenericTriviaOccurrence} from './genericTriviaOccurrence.js';
 import {isPlainKaraoke, selectStandingKaraokeOccurrence} from './standingKaraokeOccurrence.js';
 import {createRecurringSeriesCatalogCache, sourceLinkedHistoricalSeriesKeepers} from './recurringSeriesCatalog.js';
+import {classifyReviewedOccurrenceRetirement} from './reviewedOccurrenceRetirement.js';
 import {isRecurringSeries} from '../utils/recurringSeriesLifecycle.js';
 import {KNOWN_LOCATION_RELATIONSHIPS} from '../parsing/locationMentionRoles.js';
 import {isApprovedVenueOccurrenceMatch,approvedVenueOccurrenceSourcePatch,classifyApprovedVenueOccurrence} from './approvedVenueOccurrence.js';
@@ -4204,8 +4205,19 @@ async function pickPreferredRecurringFamilyKeeperOverExactMatch(
 export async function checkDuplicate(
   event: EventData,
   venueId: string,
-  currentRunEntries: EventData[] = []
+  currentRunEntries: EventData[] = [],
+  resolvedVenue?: VenueData
 ): Promise<{ isDuplicate: boolean; existingEvent?: EventData }> {
+  if(resolvedVenue){
+    const decision=classifyReviewedOccurrenceRetirement({...event,venueId},resolvedVenue);
+    if(decision.kind!=='none'){
+      logger.warn('Held reviewed retired occurrence identity',{venueId,uniqueId:event.uniqueId,reason:decision.kind,
+        ...(decision.kind==='retired'?{canonicalEventPath:decision.canonicalEventPath}:{})});
+      // Deliberately no mutable existingEvent: a historical false occurrence
+      // cannot backdate, retitle or repaint the reviewed canonical programme.
+      return{isDuplicate:true};
+    }
+  }
   // The active recurring catalog is shared across activities. Base-date age
   // cannot make a still-running program disappear from duplicate selection.
   const catalog = /^\d{4}-\d{2}-\d{2}$/.test(event.startDate || '') ? await getRecurringSeriesCatalog(venueId) : {events:[],complete:true,scanned:0};
