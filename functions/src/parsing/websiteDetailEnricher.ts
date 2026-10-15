@@ -1049,7 +1049,8 @@ function applyWebsiteCandidates(
       summary.updatedFields.links += 1;
       changed = true;
     }
-    if (!hasValue(updated._ticketImageUrl) && bestCandidate.imageUrl) {
+    if (!hasValue(updated._ticketImageUrl) && bestCandidate.imageUrl &&
+        !(Number.isInteger(item.relevantImageIndex) && item.relevantImageIndex! >= 0)) {
       updated._ticketImageUrl = bestCandidate.imageUrl;
       summary.updatedFields.images += 1;
       changed = true;
