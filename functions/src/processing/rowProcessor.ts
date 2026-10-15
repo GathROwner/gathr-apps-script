@@ -7753,7 +7753,12 @@ function extractComparableTimesFromEvidence(
   evidence: string,
   context?: { expectedStart?: string; expectedEnd?: string }
 ): string[] {
-  const normalized = evidence.trim().toLowerCase().replace(/[–—]/g, '-').replace(/\./g, '')
+  const normalized = evidence.trim().toLowerCase()
+    // Provenance URLs and ISO dates identify the source/occurrence. Their
+    // numeric fragments (e.g. 11-19) are not printed clock ranges.
+    .replace(/https?:\/\/[^\s|]+/g, ' ')
+    .replace(/\b\d{4}-\d{2}-\d{2}(?:t[^\s;|]+)?/g, ' ')
+    .replace(/[–—]/g, '-').replace(/\./g, '')
     // A label such as "Group 1 - 12:30pm" identifies a session; its ordinal is
     // not the first clock time in the following printed range.
     .replace(/\b(?:group|time\s*slot|slot|session)\s*#?\s*[1-9]\s*[-:]\s*(?=\d{1,2}(?::\d{2})?\s*(?:am|pm)?\b)/g, '');
