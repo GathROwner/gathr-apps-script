@@ -80,6 +80,52 @@ Preview candidate from its own current serving baseline, without publishing or
 touching Production/backend data. It must return a committed candidate and real
 rendered evidence. No overlapping checkout or release ownership is authorized.
 
+### Compatibility delivery candidate and exact auditions plan
+
+An isolated API candidate is now committed at `a7552a0` in
+`C:/Users/craig/.codex/worktrees/date-only-delivery-api/gathr-backend`, descended
+from independently verified serving commit `13c8d52` / revision
+`gathr-backend-00084-66r`. Explicit request query `dateOnlyActivities=v1` declares
+support; older clients receive none of this newly marked policy, while capable
+clients receive valid reviewed contracts. Ordinary timed/recurring/area/legacy
+contracts remain unchanged. All feed/detail/venue-with-events paths and bounded
+pagination are covered. Malformed marked records fail closed for both clients.
+This is compatibility handling, not source approval or authentication.
+
+All 54 backend checks passed. A read-only capture of all 1,133 stored events
+projects identically through serving and candidate source; zero current records
+would be newly excluded. Actual proposed auditions payload is also verified
+offline: default excluded, v1 allowed, unknown clocks and original poster.
+No API deployment or live data changes occurred. See the API checkout's
+`docs/date-only-delivery-2026-10-15.md` for release/rollback gates and limitations.
+
+The frontend coordinator is preparing the minimum Android Preview compatibility
+port and a separate iOS Preview capability-only candidate, with request tests
+and Android shared-component screenshots. Production bundles remain unchanged.
+Neither candidate is authorized to publish yet. Compatible clients temporarily
+see marked activities that old clients cannot safely render; this delivery
+tradeoff must be part of the exact release decision.
+
+Next exact event target is only
+`venues/slug_confedcentre/events/bqk2pKnr1HHZQvhaz6Qo`: restore the original
+poster, replace invented October 26 08:00–October 27 01:00 with October 26
+unknown-clock timing, preserve the existing source's “evening” wording and
+individually communicated appointments. The repair also increments only
+`runtime_metadata/event_feed.version` and its timestamp atomically so cached
+clients can detect a changed feed. It preserves all other feed-marker fields.
+
+The initial source-only dry plan is superseded by the feed-marker-aware plan:
+
+- `functions/artifacts/oct15-sequential-repairs/auditions/plan-2026-10-15T19-35-07-615Z.json`
+- matching full `backup-2026-10-15T19-35-07-615Z.json`
+
+Current guarded marker is 259; proposed version 260. Any drift aborts.
+Default-dry helper `firebase/repair-auditions-date-only-oct15.mjs` refuses apply
+without exact reviewed plan and the expected approved delivery API commit live.
+Verifier checks exact event/marker delta, unchanged references/media, default
+404/feed exclusion, capable detail 200/full feed once, and refreshed API marker.
+No new upload, event, venue change, global parser enablement or invented clock.
+
 ## Subsequent queue (start after the current issue is resolved or explicitly held)
 
 1. Remaining exact category/media/spatial corrections and source-backed recovery
