@@ -747,9 +747,9 @@ export function eventDetailHtml(html: string): string {
     const open = /^<([\w-]+)\b/.exec(token);
     if (open) {
       const tag = open[1].toLowerCase();
-      const chrome = /^(?:header|footer|nav|aside|script|style|noscript|template)$/.test(tag) ||
-        /\b(?:id|class)\s*=\s*["'][^"']*(?:hoursofoperation|hours-of-operation|opening-hours-popup|site-footer|main-footer)[^"']*["']/i.test(token) ||
-        /\brole\s*=\s*["'](?:navigation|contentinfo)["']/i.test(token);
+      const chrome = /^(?:footer|nav|script|style|noscript|template)$/.test(tag) ||
+        /\b(?:id|class)\s*=\s*["'][^"']*(?:hoursofoperation|hours-of-operation|opening-hours-popup|site-footer|main-footer|site-header|main-header)[^"']*["']/i.test(token) ||
+        /\brole\s*=\s*["'](?:banner|navigation|contentinfo)["']/i.test(token);
       const blocked = chrome || stack.some(x => x.blocked);
       if (!blocked) kept.push(token);
       if (!/^(?:area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)$/.test(tag) && !/\/\s*>$/.test(token)) {

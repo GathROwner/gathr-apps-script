@@ -62,7 +62,7 @@ export interface ClassifySpatialEventInput {
 }
 
 const ROUTE_EVENT_PATTERN =
-  /\b(parade|procession|march|fun\s*run|road\s*race|race\s*route|marathon|half\s*marathon|5k|10k|walkathon|charity\s+walk|bike\s+ride|cycling\s+ride|gran\s+fondo|motorcade|boat\s+parade|trail\s+run)\b/i;
+  /\b(parade|procession|march|fun\s*run|road\s*race|race\s*route|marathon|half\s*marathon|5k|10k|walkathon|charity\s+walk|bike[ -]?bus|bike\s+ride|cycling\s+ride|gran\s+fondo|motorcade|boat\s+parade|trail\s+run)\b/i;
 const ROUTE_STRUCTURE_PATTERN =
   /\b(route|course|street\s+sequence|start(?:s|ing)?\s+(?:at|near|from)|finish(?:es|ing)?\s+(?:at|near|on)|checkpoint|turnaround|proceed(?:s|ing)?\s+(?:along|via|down)|travels?\s+(?:along|via|down)|follows?\s+(?:the\s+)?(?:streets?|route)|along\s+[A-Z0-9])\b/i;
 const TRAFFIC_NOTICE_PATTERN =
@@ -474,7 +474,8 @@ export function classifySpatialEvent(
   const trafficNotice = TRAFFIC_NOTICE_PATTERN.test(corpus);
   const trafficNoticeHeadline = /\b(traffic|road|street)\s+(?:notice|advisory|closure|impact)\b/i.test(name);
   const nonEventTrafficNotice = trafficNotice && (trafficNoticeHeadline || !EVENT_OCCURRENCE_PATTERN.test(name));
-  const multiCue = MULTI_LOCATION_PATTERN.test(corpus);
+  const multiCue = MULTI_LOCATION_PATTERN.test(corpus) ||
+    /\ball\s+[^.!?\n]{0,60}\blocations?\s+(?:in\s+)?(?:PEI|Prince Edward Island)\b|\ball\s+[^.!?\n]{0,40}\bPEI\s+locations?\b/i.test(corpus);
   // A schedule with many dates at one named venue is normal calendar data,
   // not an area event. Only retain separate-occurrence routing when there are
   // at least two distinct extracted places to split.

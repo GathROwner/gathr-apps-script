@@ -88,6 +88,7 @@ test('event content clocks survive chrome removal and nested hours popups', () =
   assert(event.includes('7:30 pm'));
   assert(event.includes('Tickets available online'));
   assert(!event.includes('8 am'));
+  assert(eventDetailHtml('<article><header><h1>Workshop</h1><p>October 26 at 7:30 pm</p></header></article>').includes('7:30 pm'));
 });
 
 test('a tour stop cannot borrow the same show time from another explicitly dated stop', async () => {
