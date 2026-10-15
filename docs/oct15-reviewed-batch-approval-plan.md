@@ -92,8 +92,9 @@ currently serving Rodd release731bafc. Only websiteDetailEnricher.ts,
 rowProcessor.ts and their two focused regression files differ. Exact reviewed
 release commit is `4c8d1117dd37835124c67992f1ff84485fa06b44`.
 
-Validation: build passes,38 focused checks and825 full compiled backend tests
-pass. The original saved-source playback now retains20:00,unknown finish and
+Validation: build,38 focused checks,825 full compiled backend tests and the
+codebase-qualified three-parser deployment dry run all pass. The original
+saved-source playback now retains20:00,unknown finish and
 no obsolete doors hold. Production stored-unique-ID generation matches the
 planned new record; offline future cross-source title/merge playback preserves
 date,start,unknown finish,price,ticket URL and image. These are local/offline
