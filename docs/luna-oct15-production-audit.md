@@ -13,6 +13,11 @@ are complete, after this run. All other live findings below remain unchanged;
 their review does not authorize deletion, replays or blanket data correction.
 The October 15 heartbeat should pause after this audit and shadow report.
 
+The existing heartbeat is now PAUSED; automation-update success and saved
+status readback were verified. Its prompt records this dataset as audited,
+the completed Arts Mixer repair/release and the held festival-linking decision.
+No further checks are scheduled to execute unless Craig requests resumption.
+
 ## Completed full-run authority
 
 - Dataset `1YPf2cKvXfXl8L0HVL63VZ2zeTLEvWlit`, run
