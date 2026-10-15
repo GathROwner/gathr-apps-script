@@ -244,17 +244,34 @@ async function resolveEventTimes(
         event.category,
         event
       );
-      resolved.endTime = inferred.endTime;
+      resolved.endTime = inferred.source === 'category_default'
+        ? boundSpecialCategoryEnd(resolved.startTime || event.startTime || '', inferred.endTime, event.category, dayHours)
+        : inferred.endTime;
       resolved.timeResolution.endFromHours = inferred.source;
+      if (resolved.endTime !== inferred.endTime) resolved.timeResolution.reason = 'category_default_bounded_by_venue_close';
 
       logger.debug(`Resolved end time for "${event.name}"`, {
-        endTime: inferred.endTime,
+        endTime: resolved.endTime,
         source: inferred.source,
       });
     }
   }
 
   return resolved;
+}
+
+/** Bounds an unconfirmed special cutoff; never changes a source-printed clock. */
+export function boundSpecialCategoryEnd(startTime: string, inferredEnd: string, category: Category, hours: DayHours): string {
+  if (!SPECIAL_LIKE_CATEGORY_PATTERN.test(category) || hours.closed) return inferredEnd;
+  const open = hhmmToMinutes(hours.open), close = hhmmToMinutes(hours.close);
+  const start = hhmmToMinutes(startTime), end = hhmmToMinutes(inferredEnd);
+  if (open === null || close === null || start === null || end === null || open === close) return inferredEnd;
+  const closeScalar = close < open ? close + 1440 : close;
+  const startScalar = start < open ? start + 1440 : start;
+  if (startScalar < open || startScalar >= closeScalar) return inferredEnd;
+  let endScalar = end;
+  while (endScalar <= startScalar) endScalar += 1440;
+  return endScalar > closeScalar ? hours.close : inferredEnd;
 }
 
 async function getVenueOperatingHoursCached(

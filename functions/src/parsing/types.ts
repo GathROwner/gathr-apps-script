@@ -617,7 +617,7 @@ export interface TimeResolution {
   endFromHours?: 'to_close' | 'category_default' | 'duration_default';
   startFromFacebookEvent?: boolean;
   endFromFacebookEvent?: 'dateTimeSentence' | 'duration';
-  reason?: 'no_place_match' | 'no_hours' | 'no_date' | 'calendar_time_not_advertised' | SourceTimeConstraint['reason'];
+  reason?: 'no_place_match' | 'no_hours' | 'no_date' | 'calendar_time_not_advertised' | 'category_default_bounded_by_venue_close' | SourceTimeConstraint['reason'];
 }
 
 export interface TimeResolvedEvent extends FormattedEvent {
