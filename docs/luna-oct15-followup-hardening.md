@@ -101,8 +101,11 @@ live writes. Exact plan: `firebase/artifacts/oct15-hardening/time-plan-2026-10-1
 It contains only auditions `bqk2pKnr1HHZQvhaz6Qo` and Chefs' Harvest
 `L5dAjm7VnQOOCMMze25W`, with seven guarded target/source/sibling references.
 The auditions poster was independently retrieved and visually confirmed.
-These two corrections still require exact approval and compatible-client
-rollout; publishing an iOS Preview alone does not update older/other clients.
+That original two-target proposal is superseded for Harvest: fresh dedicated
+official programme evidence supports 17:00–21:30, now explicitly approved,
+applied and independently verified. Auditions' unknown-clock correction still
+requires compatible-client delivery. Publishing iOS Preview alone does not
+update older/other clients. See `docs/oct15-sequential-repair-worklist.md`.
 
 ## Exact live correction plans
 
@@ -161,7 +164,7 @@ unfinished. See `docs/festival-shadow-oct15-hardening.md` for exact boundaries.
 
 | Concern | Prevention status | Live recovery / next gate |
 |---|---|---|
-| Website clocks and generic images | Serving | Exact auditions/Harvest correction prepared, not applied; requires compatible display and exact approval |
+| Website clocks and generic images | Serving | Harvest corrected to official 17:00–21:30 and independently verified; auditions still needs exact correction and compatible unknown-time delivery |
 | Pressure Points and Pints East copies | Serving | Exact approved two-record deletion complete; independent Firestore/detail/full-feed/media verification passed |
 | FiN compact recurrence placeholder | Serving; both saved responses pass; category cutoff bounded by verified closing | Approved Fish-only weekly recovery applied and API-verified; Chicken choice retained as qualified context, separate untimed parent held |
 | Ruby, Harvest later dates, Trailside, other date-only activities | Held evidence retained | Date-only publication OFF; source price and duplicate conflicts require reviewed recovery |

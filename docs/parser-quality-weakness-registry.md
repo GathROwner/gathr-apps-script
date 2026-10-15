@@ -671,3 +671,14 @@ price or serving hours. See `docs/fin-tacos-oct15-recovery.md` for exact
 backup/apply/verification artifacts. Separate API observation: venueId-filtered
 collection-group feed query requires a missing composite index; complete
 date-filtered global feeds passed. No API/index changes were made.
+
+Subsequent Harvest source review found a dedicated first-party series itinerary
+explicitly supporting 17:00–21:30 for the named October 15–17 Nick of North
+programme; the current FAQ pins the series to 2026. Craig approved the exact
+single-record correction. At 19:21 UTC, only the existing October 15 event's
+clocks/time-evidence fields were corrected. Independent verification passed
+exact delta, twelve untouched references, unchanged sibling membership, one
+active-feed occurrence across eleven pages, detail 200 and all six images 200.
+No date-only metadata, new events, media writes or parser deployment. The earlier
+unknown-time Harvest proposal is superseded; auditions remains a separate
+client-delivery issue. See `docs/oct15-sequential-repair-worklist.md`.

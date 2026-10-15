@@ -35,11 +35,20 @@ Plan and full backup:
 - `functions/artifacts/oct15-sequential-repairs/harvest/plan-2026-10-15T19-17-33-669Z.json`
 - `functions/artifacts/oct15-sequential-repairs/harvest/backup-2026-10-15T19-17-33-669Z.json`
 
-Exact apply approval requested. No mutation yet. Before apply, recheck source,
-website facts, full sibling membership and idle parser in the transaction.
-After apply, verify exact delta/untouched references, event detail, complete
-active feed, duplicates and existing media availability. Do not use the older
-two-target unknown-clock plan for Harvest.
+Craig approved the exact request with “Okay continue”. One guarded transaction
+applied the correction at 19:21 UTC, after unchanged target/source/venue/sibling
+checks and fresh official evidence. Independent read-only verification at
+19:21:38 UTC passed exact delta, twelve untouched references, unchanged sibling
+membership, detail 200 and one entry in the complete 1,023-event/11-page active
+feed. All six existing managed images return 200; no duplicate session found.
+Backup/apply/independent artifacts are in the same directory:
+
+- `prewrite-2026-10-15T19-21-07-929Z.json`
+- `applied-2026-10-15T19-21-07-929Z.json`
+- `independent-verification.json`
+
+Do not use the older two-target unknown-clock plan for Harvest; it is superseded
+by this explicitly timed correction, and its old fingerprints now fail closed.
 
 ## 2. Auditions and honest unknown-time publication
 
@@ -66,7 +75,12 @@ This delivery decision must be addressed before unknown-time public mutations.
 Global date-only parser gate remains OFF. Do not substitute a guessed evening
 time or claim an uploaded OTA proves adoption.
 
-## Subsequent queue (start after the first approved change is verified)
+The frontend coordinator now owns preparation/testing of a minimal Android
+Preview candidate from its own current serving baseline, without publishing or
+touching Production/backend data. It must return a committed candidate and real
+rendered evidence. No overlapping checkout or release ownership is authorized.
+
+## Subsequent queue (start after the current issue is resolved or explicitly held)
 
 1. Remaining exact category/media/spatial corrections and source-backed recovery
    of genuinely missing activities; retain ambiguous prices/identities.
