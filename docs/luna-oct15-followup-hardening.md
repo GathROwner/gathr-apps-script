@@ -173,3 +173,21 @@ unfinished. See `docs/festival-shadow-oct15-hardening.md` for exact boundaries.
 No live document has been mutated by this follow-up turn. Preparation, deployed
 prevention and historical data recovery are tracked separately to avoid claiming
 that a future parser safeguard has corrected an existing listing.
+
+## Client safeguard: iOS Preview published
+
+The existing frontend coordinator corrected real saved `isRecurring: "No"`
+handling before publication. Independent coordinator rerun passed29 tests in
+three feed/detail/calendar suites (one existing opt-in benchmark skipped).
+The frontend release gate passed283 tests in31 suites, TypeScript/lint,
+auth/Social/Mapbox checks. Four genuine native shared-component screenshots
+were independently reviewed; they do not prove full iOS device adoption.
+
+Independent EAS list and view confirm latest iOS Preview, runtime1.1.10,
+group `1957e06c-b340-4601-b573-bc55e256cf20`, update
+`01a14050-6df8-7a58-8190-591bfa23002c`, release commit
+`3d2f4f729242b0a306a1917b053a6576a22deaed`. The five relevant runtime files
+match corrected source `f43affc` exactly and the published commit descends
+from accepted festival Preview `9c653f0`. Production/Android were not released.
+iPhone adoption is unverified. Keep global date-only publication OFF until
+the remaining consuming-client rollout/delivery decision is made.
