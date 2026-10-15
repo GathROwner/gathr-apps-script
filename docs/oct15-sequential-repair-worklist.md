@@ -165,6 +165,12 @@ validation are in `docs/auditions-oct15-release-and-repair-approval-plan.md`.
 
 ## Subsequent queue (start after the current issue is resolved or explicitly held)
 
+Craig confirmed the iPhone Preview update and corrected audition listing, then
+instructed continuation. Next exact issue: Indigo Thriller Book Club category.
+The live record and original poster were independently reviewed; category-only
+dry run/backups are ready. See `docs/indigo-category-oct15-repair-plan.md`.
+No Indigo mutation has occurred; exact live approval remains the next gate.
+
 1. Remaining exact category/media/spatial corrections and source-backed recovery
    of genuinely missing activities; retain ambiguous prices/identities.
 2. Finish date-only client delivery and bounded backend enablement validation.

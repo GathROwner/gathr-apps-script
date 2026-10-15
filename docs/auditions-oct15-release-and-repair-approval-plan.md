@@ -2,10 +2,17 @@
 
 Craig approved this exact scoped package on October 15. Execution is sequential.
 The API, both Preview releases and exact live data repair are COMPLETE and
-independently verified. Device adoption remains unverified.
+independently verified. Craig subsequently confirmed iPhone adoption and opened
+the corrected listing; Android adoption remains unverified.
 Harvest's earlier single-record correction is complete and separate.
 
 ## Execution evidence (October 15)
+
+- Craig's subsequent Profile screenshot shows Preview/runtime1.1.10/OTA
+  `01a14132`, matching the published iOS update. After checking the October26
+  audition, he replied “Ok, yes I see that. Continue.” This is direct user
+  confirmation of iPhone adoption and the corrected listing, separate from
+  the earlier synthetic Android component renders and EAS publication evidence.
 
 - Cloud Build `ccf56609-fe46-4f3f-9136-ab97e318c78a` succeeded for exact
   `6e9fe169c9a67df8e85917d7be6a4b61925f4240`. Cloud Run revision
