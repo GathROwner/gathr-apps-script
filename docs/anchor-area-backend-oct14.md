@@ -351,7 +351,48 @@ EAS group metadata and the Preview list, confirming exact platform/runtime/
 commit and newest iOS placement. Production and Android were not published.
 Compatible iPhone adoption remains unverified.
 
-The revised exact two-document live Anchor plan remains pending human approval;
-no live Anchor event/review fields have been changed. Publishing the frontend
-does not apply that data plan. The reviewed seven-copy duplicate cleanup is
-complete; unresolved source-conflicting duplicate families remain held.
+At frontend publication, the revised exact two-document live Anchor plan was
+still pending human approval. Publishing the frontend did not apply that data
+plan. The reviewed seven-copy duplicate cleanup is complete; unresolved
+source-conflicting duplicate families remain held.
+
+## Approved live repair completed
+
+Craig then approved the revised linked two-document plan with “Do it”. Fresh
+default-dry validation matched the exact approved plan and all target/reference
+versions/content hashes; the parser was idle. At01:24:12 UTC October15
+(October14 Halifax), the guarded transaction updated only:
+
+- `events/area_7ebb4bc0846d26c4470e6842`
+- `city_level_event_reviews/cityevt_b6a99eb338c41a0c50bf39ce`
+
+The public umbrella now contains eight verified unordered venue locations,
+seventeen explicit existing canonical child links, cleaned public description,
+unknown flat clocks and the reviewed October14–18 compatibility timing policy.
+Existing ticket URL is preserved. Private source evidence remains only in the
+review/manual finalization. No children or venues were created/deleted/changed,
+and no media were changed/deleted.
+
+Full prewrite backup and apply result are local in
+`C:/Users/craig/.codex/worktrees/anchor-festival-backend/gathr-apps-script/functions/tmp/anchor-backend-oct14/date-range-v2/`:
+
+- `prewrite-backup-2026-10-15T01-24-12-801Z.json`
+- `plan-2026-10-15T01-24-12-801Z.json` (identical approved plan)
+- `applied-2026-10-15T01-24-12-801Z.json`
+
+Independent verification at01:25:14 UTC reread both exact target field deltas,
+all25 reference documents and34 other related event documents unchanged, and
+confirmed parser idle. Public API detail exposes exact area/timing data and
+preserved ticket URL without private links/evidence. All17 canonical child
+details return200 with unchanged titles, venues and clocks. The complete active
+app feed contains894 events over9 pages, exactly one repaired umbrella and no
+duplicate active entries for a linked canonical child. Already ended children
+may correctly be absent from that active feed. Result evidence:
+`functions/artifacts/anchor-festival-oct14/live-repair-independent-verified.json`;
+read-only verifier: `firebase/verify-anchor-live-repair-readonly.mjs`.
+
+No further deployment or OTA was needed for this approved data repair. The
+already published iOS Preview is ready to consume it; compatible iPhone
+adoption/visual confirmation remains unverified. Original source conflicts and
+the excluded Beer Garden point remain held as documented, without speculative
+links or new events.

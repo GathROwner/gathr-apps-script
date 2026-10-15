@@ -457,9 +457,15 @@ preserves reviewed unordered locations and explicitly source-bound existing
 child IDs, separates private audit evidence, holds unresolved multi-site
 publication and preserves reviewed unspecified clocks on refresh. Ordinary
 venue/city context and route review controls remain covered. See
-[backend contract and guarded preview](anchor-area-backend-oct14.md). The exact
-live repair and release remain coordinator-owned; this entry is not apply or
-deployment evidence.
+[backend contract and verified repair](anchor-area-backend-oct14.md). The
+coordinator independently verified the narrow backend release and iOS Preview,
+then applied the approved exact two-document live repair at01:24:12 UTC
+October15 (October14 Halifax). Eight verified points and17 existing child links
+survive public detail/feed output without private evidence, fabricated clocks,
+new child records or modified venue/media documents. All25 references and34
+other related event documents remained unchanged; the active app feed contains
+one umbrella. Exact backup/apply/API verification artifacts are linked in that
+report. Compatible iPhone adoption remains unverified; source conflicts stay held.
 
 See [repair and validation](luna-oct14-integrity-repair.md) and
 [production audit](luna-oct14-production-audit.md). Shared-thumbnail date
