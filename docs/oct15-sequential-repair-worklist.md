@@ -267,3 +267,16 @@ Completed earlier: FiN Fish-only weekly recovery, APM seventeen-event recovery,
 two exact duplicate deletes, Arts Mixer correction and deployed parser guards.
 Tomorrow's new full run is a separate production validation, not evidence that
 any pending live correction or automatic festival writer already happened.
+
+## Consolidated final six-group batch
+
+Craig requested all six remaining audit groups be handled together. Source
+review, narrow runtime prevention and one guarded repair helper are prepared
+in `docs/six-groups-oct15-approval-plan.md`. The frozen dry run contains 28
+document mutations and eight SHA-pinned original image uploads, with no live
+writes. Ruby, Mill River, Andersons Creek, Blank Canvas and the date-only
+activities have exact source-supported corrections. Online sources are retained
+without false physical pins; local PetSmart participation remains unconfirmed.
+This is one new grouped approval, not per-event requests or an expansion into
+the separate backend backlog. Do not mark applied before result/readback/API
+verification artifacts exist.

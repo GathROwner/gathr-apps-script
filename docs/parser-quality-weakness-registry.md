@@ -793,3 +793,27 @@ are in `firebase/artifacts/harvest-series-oct15/`. Themed-child website-clock
 enrichment and three separate
 foraging/summer-tour records are explicit open work; do not claim this exact
 retirement fence prevents every future duplicate wording or new source.
+
+## October 15 final six audit groups (prepared; not live)
+
+Source review and exact proposed repairs are consolidated in
+`docs/six-groups-oct15-approval-plan.md`, with one frozen 28-document dry-run
+plan and eight original image uploads. Existing price/venue/online/recurrence
+mechanisms gain narrow controls: contradictory numeric prices cannot overwrite
+known amounts merely by being longer; exact source-owner Golf Course/Club
+wording resolves the same business; a first-party store classroom retains
+precedence over its verified containing mall; explicit platform/online items
+cannot acquire a publisher office even when spatial metadata is missing.
+An unrelated webinar in a mixed calendar must not hold its physical items.
+
+Ruby's current one-off specials, Mill River's advertised booking window,
+Andersons Creek's main bash, Blank Canvas's existing class, Soft Internet
+Theory's exhibition range, three public Christmas shows and a partial
+Kensington activity have source-supported proposed deltas. Exact reviewed
+retirement policies protect the corrected old Ruby/exhibition representations.
+Public online delivery is still unsupported; preserve three internal source
+holds/archive and remove the false RCMP office pin only after exact approval.
+PetSmart national dates do not prove local partner participation. No source
+ambiguity is converted to guessed attendance, venue or clock evidence.
+No model/prompt/cache/allocation change, paid replay, new venue, broad cleanup
+or automatic date-only/festival publication is part of this batch.
