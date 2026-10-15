@@ -83,8 +83,6 @@ request-body expectation (the accepted weekly_custom instructions were added
 later). Its other35 tests passed. The compiled full backend suite is the serving
 release gate; do not silently call the historical body expectation passed.
 
-## Live correction boundary
-
 ## Verified serving release
 
 Runtime commit `4ba56dd` was narrowly deployed after an idle-lock check,
@@ -129,3 +127,15 @@ accuracy fix. Online publication, indefinite availability, unresolved venue
 identities and the earlier17-item APM recovery retain their separate source and
 approval requirements. The festival shadow task must report real outcomes and
 remaining provenance/coverage gaps before any public writer is considered.
+
+## Audit-backed historical source associations
+
+`firebase/prepare-oct15-festival-provenance.mjs` has no apply operation.
+Fresh read-only preparation at 16:00:45 UTC verified four canonical paths and
+their exact update audits, original source snapshot, venues and same-day
+siblings (16 guarded references). Plan and full backup are in
+`firebase/artifacts/oct15-hardening/festival-provenance-plan-2026-10-15T16-00-45-395Z.json`
+and its matching backup. The proposed delta adds source ID `1564814712352727`
+only to `sourceUniqueIds` on Captains/Nick, Britt Campbell, October15 conference
+and L'Autre. No clock/title/media/manual-link changes and no public link writer
+are included. No live writes occurred; this proposal is not approval or apply.
