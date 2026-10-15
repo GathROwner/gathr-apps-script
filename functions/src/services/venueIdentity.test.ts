@@ -6,6 +6,13 @@ import type { RawRowData, VenueData } from '../types/index.js';
 
 const venue = fixture.parent as VenueData;
 const row = { facebookUrl: venue.facebookUrl } as RawRowData;
+test('golf Club/Course requires exact owner identity, identical distinctive name and compatible address',()=>{
+ const parent:any={id:'fixture-golf',name:'Example Creek Golf Club',facebookUrl:'https://www.facebook.com/fixture-golf',address:'12 Golf Road, Kensington, PE'};
+ const source:any={facebookUrl:parent.facebookUrl};
+ assert.equal(resolveSourceVenueSubLocation({candidate:'Example Creek Golf Course',row:source,venue:parent}).supported,true);
+ for(const patch of [{candidate:'Other Creek Golf Course'},{row:{facebookUrl:'https://www.facebook.com/unrelated'}},{eventAddress:'999 Other Street, Hamilton, ON'},{row:{...source,text:'Moved to a new venue'}}])
+  assert.equal(resolveSourceVenueSubLocation({candidate:'Example Creek Golf Course',row:source,venue:parent,...patch}).supported,false);
+});
 
 for (const candidate of fixture.rooms) {
   test(`source identity and parent anchor resolve ${candidate} without a new alias`, () => {

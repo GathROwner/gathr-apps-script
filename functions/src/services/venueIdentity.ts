@@ -39,7 +39,9 @@ export function resolveSourceVenueSubLocation(params: {
   eventAddress?: unknown;
 }): { supported: boolean; reason: string } {
   const { candidate, row, venue } = params;
-  if (!ROOM.test(candidate)) return { supported: false, reason: 'not_sub_location' };
+  const golfRoot=(value:string)=>normalizeVenueName(value).match(/^(.{3,}) golf (?:club|course)$/)?.[1]||'';
+  const golfVariant=Boolean(golfRoot(candidate)&&venueNames(venue).some(name=>golfRoot(name)===golfRoot(candidate)));
+  if (!ROOM.test(candidate)&&!golfVariant) return { supported: false, reason: 'not_sub_location' };
   if (/\b(?:moved|relocated|new venue|no longer|instead of)\b/i.test([row.text, row.sharedPostText].filter(Boolean).join('\n'))) {
     return { supported: false, reason: 'relocation_requires_verified_match' };
   }
@@ -52,6 +54,9 @@ export function resolveSourceVenueSubLocation(params: {
     address && parentAddress && address === parentAddress
   );
   if (!corroborated) return { supported: false, reason: 'no_parent_identity_evidence' };
+  // Club/course wording alone is insufficient. Require the exact owner page;
+  // independent exact venue matches still win in the caller.
+  if(golfVariant&&sourcePageIdentifiesVenue(row,venue))return{supported:true,reason:'verified_source_golf_name_variant'};
 
   const observed = normalizeVenueName(candidate);
   const names = venueNames(venue);

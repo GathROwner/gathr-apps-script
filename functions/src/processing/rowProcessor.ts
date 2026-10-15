@@ -11,6 +11,7 @@ import { hasConflictingDevelopmentSlot } from '../utils/eventSlotIdentity.js';
  */
 
 import {applyLocationMentionResolution} from '../parsing/locationMentionRoles.js';
+import {applyVerifiedSourceComplexVenue} from '../parsing/verifiedSourceComplex.js';
 import {
   RawRowData,
   EventData,
@@ -4267,7 +4268,7 @@ export async function resolveVenueForFullParserEventWithMatcherForRegression(par
   addressMatcher?: (address: string) => Promise<MatchInfo>;
 }): Promise<VenueData | null> {
   const { rowVenue, row, establishment, rowIndex, matcher, addressMatcher } = params;
-  const item=applyLocationMentionResolution(applySharedFoodOfferVenue(params.item,row,rowVenue),[row.text,row.sharedPostText].filter(Boolean).join('\n'));
+  const item=applyVerifiedSourceComplexVenue(applyLocationMentionResolution(applySharedFoodOfferVenue(params.item,row,rowVenue),[row.text,row.sharedPostText].filter(Boolean).join('\n')),row,rowVenue);
   const sharedOfferOwner=sharedFoodOfferOwner(item,row,rowVenue);
   if(sharedOfferOwner){
     const original=await matcher(sharedOfferOwner,row.sharedPostAuthorUrl,inferFullParserVenueMatchContext(row,sharedOfferOwner));
@@ -4604,7 +4605,7 @@ export async function processFullParserEvent(
   duplicateEventId?: string;
   event?: EventData;
 }> {
-  item=applyLocationMentionResolution(applySharedFoodOfferVenue(item,row,rowVenue),[row.text,row.sharedPostText].filter(Boolean).join('\n'));
+  item=applyVerifiedSourceComplexVenue(applyLocationMentionResolution(applySharedFoodOfferVenue(item,row,rowVenue),[row.text,row.sharedPostText].filter(Boolean).join('\n')),row,rowVenue);
   const coverage = fullParserEventLocationCheck(item, row);
   if (coverage.decision === 'reject' || coverage.decision === 'hold') {
     logger.warn('Held full-parser occurrence before venue lookup or publication', {
@@ -8208,6 +8209,12 @@ function shouldReplacePriceValue(
   const existingSoldOut = existing.toLowerCase().includes('sold out');
   const incomingSoldOut = incoming.toLowerCase().includes('sold out');
   if (incomingSoldOut && !existingSoldOut) return true;
+  // More words are not evidence for a changed price. Retain a known amount
+  // when a later transcription supplies a contradictory number; compatible
+  // tier/detail additions remain supported.
+  const amounts=(text:string)=>[...text.matchAll(/\$\s*(\d+(?:\.\d{1,2})?)/g)].map(m=>Number(m[1]));
+  const known=amounts(existing),proposed=amounts(incoming);
+  if(known.length&&proposed.length&&!known.every(n=>proposed.includes(n)))return false;
   return incoming.length > existing.length * 1.35;
 }
 
