@@ -85,6 +85,29 @@ release gate; do not silently call the historical body expectation passed.
 
 ## Live correction boundary
 
+## Verified serving release
+
+Runtime commit `4ba56dd` was narrowly deployed after an idle-lock check,
+build, 805 passing compiled backend tests, 20 focused checks, saved-source
+offline playback, and a codebase-qualified three-parser dry run.
+Independent readback at 2026-10-15T15:46:48Z confirms all three ACTIVE at
+source hash `faaa9ed0ccd092a50cd50007fae2fb038d584aae`, with 100% latest traffic:
+`processdataset-00486-fof`, `processdatasetresume-00450-zas`, and
+`processdatasetselectedrows-00442-fiz`. Full environment and secret bindings
+were compared with pre-deploy captures and preserved. Date-only publication
+remains OFF. Evidence: `functions/artifacts/oct15-hardening/serving-verified.json`.
+
+The later helper-only commit `a00f05c` is not an additional runtime deployment.
+Clock/poster preparation and its default-dry apply verifier passed with zero
+live writes. Exact plan: `firebase/artifacts/oct15-hardening/time-plan-2026-10-15T15-50-42-195Z.json`.
+It contains only auditions `bqk2pKnr1HHZQvhaz6Qo` and Chefs' Harvest
+`L5dAjm7VnQOOCMMze25W`, with seven guarded target/source/sibling references.
+The auditions poster was independently retrieved and visually confirmed.
+These two corrections still require exact approval and compatible-client
+rollout; publishing an iOS Preview alone does not update older/other clients.
+
+## Exact live correction plans
+
 `firebase/repair-oct15-two-duplicates.mjs` defaults to dry run. Exact two deletions:
 
 | Delete | Preserve |
