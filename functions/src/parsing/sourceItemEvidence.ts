@@ -1,6 +1,48 @@
-import type {ExtractedItem} from './types.js';
+import type {ExtractedEvent, ExtractedItem} from './types.js';
 
 const months = ['january','february','march','april','may','june','july','august','september','october','november','december'];
+
+function explicitClock(value: string): string | undefined {
+  const m = value.trim().match(/^(\d{1,2})(?::(\d{2}))?\s*([ap])\.?\s*m\.?$/i);
+  if (!m || +m[1] < 1 || +m[1] > 12 || +(m[2] || 0) > 59) return undefined;
+  return `${String(+m[1] % 12 + (m[3].toLowerCase() === 'p' ? 12 : 0)).padStart(2,'0')}:${String(+(m[2] || 0)).padStart(2,'0')}`;
+}
+
+/** One shared dinner/entertainment ticket must not give a meal the band's clock. */
+export function bindSharedAdmissionEntertainment(items: ExtractedItem[], caption: string): ExtractedItem[] {
+  if (items.length !== 1) return items;
+  const item = items[0];
+  if ('recurringPattern' in item && item.recurringPattern !== 'none') return items;
+  const text = caption.split(/\n\s*OCR TEXT:/i)[0];
+  if (!/\bdinner\s*(?:&|and)\s*entertainment\s*:/i.test(text)) return items;
+  const headline = text.split(/\r?\n/).map(line => line.trim()).find(Boolean)?.replace(/[!]+$/,'').trim() || '';
+  if (!headline || headline.length > 90 || !/\b(?:party|gala|celebration|dinner[ -]dance)\b/i.test(headline)) return items;
+  const normalizedName = String(item.name || '').trim().replace(/[!]+$/,'').trim();
+  if (!/^(?:buffet\s+)?(?:dinner|supper|meal)$/i.test(normalizedName) &&
+      normalizedName.toLowerCase() !== headline.toLowerCase()) return items;
+  const dates = [...text.matchAll(/\b(jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:tember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\s+(\d{1,2})(?:st|nd|rd|th)?\b/gi)];
+  const day = /^(\d{4})-(\d{2})-(\d{2})$/.exec(item.date || '');
+  if (!day || dates.length !== 1 || !months[+day[2]-1]?.startsWith(dates[0][1].toLowerCase()) || +day[3] !== +dates[0][2]) return items;
+  const clock = '(\\d{1,2}(?::\\d{2})?\\s*[ap]\\.?\\s*m\\.?)';
+  const mealClocks = [...text.matchAll(new RegExp('\\b(?:buffet\\s+)?(?:dinner|supper|meal)\\s+(?:(?:is|will\\s+be)\\s+)?(?:(?:served|serving|starts?)\\s+(?:(?:from|at)\\s+)?|from\\s+|at\\s+)' + clock, 'gi'))];
+  if (mealClocks.some(m => explicitClock(m[1]) === item.startTime)) return items;
+  const ranges = [...text.matchAll(new RegExp('\\blive\\s+(?:entertainment|music)\\s+by\\s+([^\\r\\n]{2,80}?)\\s+from\\s+' + clock + '\\s*[-–—]\\s*' + clock, 'gi'))];
+  if (ranges.length !== 1) return items;
+  const [, performer, start, end] = ranges[0];
+  if (!/[a-z]/i.test(performer) || explicitClock(start) !== item.startTime || explicitClock(end) !== item.endTime) return items;
+  const name = `${performer.trim()} — ${headline}`;
+  const evidence = ranges[0][0];
+  const normalized: ExtractedEvent = {...item, name, _sourceTitleResolution: name, _sourceType: 'event',
+    date: item.date, startTime: explicitClock(start)!, endTime: explicitClock(end)!,
+    venue: item.venue || '', price: String(item.price || ('pricing' in item ? item.pricing : '') || ''),
+    recurringPattern: 'none', extractionReason: item.extractionReason || 'source_bound_shared_admission_entertainment',
+    ...('type' in item ? {type: 'event' as const} : {}),
+    description: `${String(item.description || '').trim()} Live entertainment by ${performer.trim()} runs ${start.trim()}–${end.trim()}. Dinner serving time is not supplied.`,
+    timeFlags: {start: {source: 'explicit', evidence}, end: {source: 'explicit', toClose: false, evidence}}};
+  // The same supplied amount is now ticket price, not a second food-special item.
+  delete (normalized as unknown as Record<string,unknown>).pricing;
+  return [normalized];
+}
 
 /** Restore a ticket URL only when its own block identifies the occurrence date. */
 export function bindDatedTicketLink(item: ExtractedItem, caption: string): ExtractedItem {
@@ -50,6 +92,7 @@ export function needsWholeScheduleIdentityReview(items: ExtractedItem[]): boolea
 
 /** Item-local proofs only; never borrow another gallery cell's date, clock or venue. */
 export function reconcileSourceItemEvidence(items: ExtractedItem[], caption: string): ExtractedItem[] {
+  items = bindSharedAdmissionEntertainment(items, caption);
   const reconciled = items.map(original => {
     let item = bindDatedTicketLink(original, caption);
     const text = `${item.description || ''} ${item.extractionReason || ''}`;

@@ -1871,9 +1871,21 @@ function extractUmbrellaThemeCandidateLines(combinedText: string): string[] {
     .filter(Boolean);
 
   const candidates: string[] = [];
+  let inPackageInclusions = false;
   for (const line of lines) {
     const normalized = normalizeSplitCandidateText(line);
     if (!normalized) continue;
+    if (/^(?:(?:your|the)\s+)?package\s+(?:includes|inclusions?)$/.test(normalized)) {
+      inPackageInclusions = true;
+      continue;
+    }
+    if (inPackageInclusions) {
+      // Included meals/accommodation are components of one booking, not named
+      // theme nights to remap. End the section at the next unrelated heading.
+      if (/^[•●▪◦‣*\-–—]\s*/u.test(line) ||
+          /^(?:(?:buffet\s+)?(?:dinner|breakfast|brunch|lunch)(?:\s+the\s+next\s+morning)?|overnight\s+accommodation|(?:live\s+)?entertainment(?:\s+by\s+.+)?)$/.test(normalized)) continue;
+      inPackageInclusions = false;
+    }
     if (normalized.length < 8 || normalized.length > 80) continue;
     if (
       /^(join us|great food|great vibes|gather your crew|make it a night to remember|reserve your table|for reservations|menus and more|19\b|fridays\b|saturdays\b|fridays & saturdays\b|every weekend\b|theme nights at\b)/.test(
