@@ -1,8 +1,27 @@
 # Named venues incorrectly published as city events — October 16 audit
 
-Status: diagnosis and offline source playback complete. No parser change,
-deployment, paid model call, replay or live-data mutation was performed.
+Status: diagnosis and offline source playback complete. Craig subsequently
+accepted the recommended hardening, with the timing policy below. Implementation
+is pending; no parser change, deployment, paid model call, replay or live-data
+mutation was performed by this audit.
 Craig requested a small audit of three phone examples before further work.
+
+## Accepted doors/start policy
+
+Craig prefers the scheduled activity/performance start in the app's existing
+time row, with doors opening stated in the description. Use that policy in the
+implementation and regression controls. For Ireland the row is19:30–22:00;
+the description says “Doors open at6:30p.m.” Preserve independently evidenced
+doors metadata when available, without adding another time-row field. Doors
+opening alone does not prove an activity/performance start; retain the distinction
+and existing missing/conflicting-time holds. A structured Facebook start matching
+doors can explain the discrepancy, but is not proof by itself: the October12
+19:00 value still conflicts with the source's19:30 show and18:30 doors. Do not
+claim all clock differences are solved by classifying doors.
+
+Acceptance covers the recommended prevention work. Historical repair still
+requires the exact reviewed keeper/delete/review delta and source/media retention
+plan, rather than treating candidate IDs as approval for unspecified mutations.
 
 ## Findings
 
