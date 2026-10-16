@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {resolveFestivalMembership} from './festivalLinker.js';
 import type {FestivalEdition,FestivalSourceEvidence,FestivalCanonicalVenue,FestivalCanonicalRecord} from './festivalLinker.js';
 import {expandFestivalCaptionDateScope} from './festivalCaptionScope.js';
+import {expandFestivalSourceScope} from './festivalSourceScope.js';
 import {verifyAreaPublicationReferences} from './areaEventPublication.js';
 
 const edition=():FestivalEdition=>({id:'festival_fixture',name:'ANCHOR Fest',year:2026,startDate:'2026-10-14',endDate:'2026-10-18',
@@ -27,6 +28,25 @@ function changeText(e:FestivalSourceEvidence,from:string,to:string):void{
   if(e.activityRowText)e.activityRowText=e.activityRowText.replaceAll(from,to);
   if(e.dateHeaderText)e.dateHeaderText=e.dateHeaderText.replaceAll(from,to);
 }
+
+test('source-context proof links an English poster row and rejects tampered offsets/date',async()=>{
+ const heading='Saturday, October 17, 2026',row='7:00 pm\nUnholy Night\nTivoli Cinema';
+ const documents=[{index:-1,text:''},{index:0,text:'ANCHOR Fest 2026 Programme\n'+heading+'\n'+row}];
+ const expanded=expandFestivalSourceScope({scopeText:row,dateText:heading,timeText:'7:00 pm',venueText:'Tivoli Cinema',sourceIndices:[0]},documents);assert(expanded.sourceScope);
+ const e={...programme(),...expanded,source:{...programme().source,text:documents.map(d=>d.text).join('\n'),documents}};
+ const result=await resolveFestivalMembership({...input(),sources:[e]});assert.equal(result.links.length,1);assert(result.links[0].provenance[0].sourceScope);
+ const wrongDate={...e,activity:{...e.activity,startDate:'2026-10-16'}};assert.equal(await reason(wrongDate),'source_occurrence_conflict');
+ const wrongOffset={...e,sourceScope:{...e.sourceScope!,rowStart:e.sourceScope!.rowStart+1}};assert.equal(await reason(wrongOffset),'source_occurrence_conflict');
+});
+test('source-context proof permits caption shared venue, preserving canonical and membership checks',async()=>{
+ const heading='Join us Saturday, October 17, at Tivoli Cinema!',row='Unholy Night | 7:00 pm';
+ const documents=[{index:-1,text:'ANCHOR Fest 2026 Programme\n'+heading+'\n'+row}];
+ const expanded=expandFestivalSourceScope({scopeText:row,dateText:'Saturday, October 17',timeText:'7:00 pm',venueText:'Tivoli Cinema',sourceIndices:[-1]},documents);assert(expanded.sourceScope);
+ const e={...programme(),...expanded,source:{...programme().source,text:documents[0].text,documents}};
+ assert.equal(await reason(e),'eligible');
+ assert.notEqual(await reason({...e,source:{...e.source,id:'unreviewed_source',organizerId:undefined}}),'eligible');
+ assert.notEqual(await reason({...e,venueText:'Other Hall'}),'eligible');
+});
 
 test('same-source programme header binds the complete scoped row to one canonical child',async()=>{
   const result=await resolveFestivalMembership(input());assert.equal(result.links.length,1);assert.equal(result.outcomes[0].status,'eligible');

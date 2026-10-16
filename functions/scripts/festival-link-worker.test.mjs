@@ -1,6 +1,6 @@
 // Sanitized in-memory database controls; no credentials, production IDs, API or database access.
 import test from 'node:test';import assert from 'node:assert/strict';import {createRequire} from 'node:module';
-import {FESTIVAL_EVIDENCE_POLICY,festivalEvidenceSourceFingerprint,festivalEvidenceEditionFingerprint} from './festival-evidence-extractor.mjs';
+import {FESTIVAL_EVIDENCE_POLICY,FESTIVAL_PREVIOUS_EVIDENCE_POLICY,festivalEvidenceSourceFingerprint,festivalEvidenceEditionFingerprint} from './festival-evidence-extractor.mjs';
 const require=createRequire(import.meta.url),{runFestivalLinkWorker}=require('../lib/services/festivalLinkWorker.js'),{reviewedFestivalEdition}=require('../lib/services/festivalEditionRegistry.js'),{festivalShadowFingerprint}=require('../lib/services/festivalLinkShadowJob.js');
 class Database{
  values=new Map();sequence=100;writes=[];afterClaim;
@@ -77,4 +77,24 @@ test('revoking a reviewed negative decision during publication aborts the transa
 test('reviewed nonmembership without a complete cached capture still reports the source limitation',async()=>{
  const {db,key,cache,options}=fixture();db.values.delete('festival_link_captures/'+key);db.values.set('festival_link_source_decisions/'+key,{version:++db.sequence,data:{version:1,kind:'reviewed_not_member',editionId:'festival_fixture',sourceId:'1111111111111',captureKey:key,sourceFingerprint:cache.result.sourceFingerprint,evidencePolicy:FESTIVAL_EVIDENCE_POLICY,reviewId:'review_fixture',reason:'Separate exhibition with unreadable small wall text',reviewedAt:'2026-10-15T15:00:00Z'}});
  const r=await runFestivalLinkWorker(db,options);assert.equal(r.eventWrites,0);assert.equal(r.paidSources,0);assert.equal(r.reports[0].reviewedNonmembers[0].captureStillIncomplete,true);
+});
+function legacyFixture(){
+ const f=fixture(),oldKey=festivalShadowFingerprint({source:f.cache.result.sourceFingerprint,edition:f.cache.result.editionFingerprint,policy:FESTIVAL_PREVIOUS_EVIDENCE_POLICY});
+ f.db.values.delete('festival_link_captures/'+f.key);const previous={...f.cache,captureKey:oldKey,result:{...f.cache.result,evidencePolicy:FESTIVAL_PREVIOUS_EVIDENCE_POLICY}};
+ f.db.values.set('festival_link_captures/'+oldKey,{data:previous,version:++f.db.sequence});return{...f,oldKey,previous};
+}
+test('prior exact source captures revalidate without model work, copying or overwriting their evidence',async()=>{
+ const {db,key,oldKey,previous,options}=legacyFixture();const before=JSON.stringify(previous);
+ const r=await runFestivalLinkWorker(db,options);assert.equal(r.eventWrites,1);assert.equal(r.paidSources,0);assert.equal(JSON.stringify(db.values.get('festival_link_captures/'+oldKey).data),before);assert(!db.values.has('festival_link_captures/'+key));
+});
+test('prior exact reviewed nonmember keeps its original approval and incomplete-source flag',async()=>{
+ const {db,oldKey,previous,options}=legacyFixture();db.values.get('festival_link_captures/'+oldKey).data={captureKey:oldKey,error:'source_incomplete'};
+ db.values.set('festival_link_source_decisions/'+oldKey,{version:++db.sequence,data:{version:1,kind:'reviewed_not_member',editionId:'festival_fixture',sourceId:'1111111111111',captureKey:oldKey,sourceFingerprint:previous.result.sourceFingerprint,evidencePolicy:FESTIVAL_PREVIOUS_EVIDENCE_POLICY,reviewId:'review_fixture',reason:'Separate exhibition',reviewedAt:'2026-10-15T15:00:00Z'}});
+ const r=await runFestivalLinkWorker(db,options);assert.equal(r.eventWrites,0);assert.equal(r.paidSources,0);assert.equal(r.reports[0].reviewedNonmembers[0].captureStillIncomplete,true);
+});
+test('a newer policy record blocks legacy fallback; creation during publication fences old evidence',async()=>{
+ let f=legacyFixture();f.db.values.set('festival_link_source_decisions/'+f.key,{version:++f.db.sequence,data:{kind:'revoked'}});
+ assert.equal((await runFestivalLinkWorker(f.db,{...f.options,dryRun:true})).status,'source_evidence_not_captured');
+ f=legacyFixture();f.db.afterClaim=d=>d.values.set('festival_link_source_decisions/'+f.key,{version:++d.sequence,data:{kind:'revoked'}});
+ await assert.rejects(runFestivalLinkWorker(f.db,f.options),/reference_drift/);assert(!f.db.writes.some(p=>p.startsWith('events/')));
 });

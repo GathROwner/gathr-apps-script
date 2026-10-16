@@ -63,10 +63,16 @@ export async function runFestivalLinkWorker(db:admin.firestore.Firestore,options
   }).sort((a,b)=>String(a.get('uniqueId')).localeCompare(String(b.get('uniqueId'))));
   for(const source of scoped){const s=source.data(),caption=s.inputText||'',imageUrls=s.rowMeta?.mediaUrls,kind=s.stages?.find((x:any)=>x.stage==='format')?.output?.stageArtifacts?.stage3InputKind;
    if(!Array.isArray(imageUrls)||s.rowMeta?.sourceMediaUnavailable||imageUrls.length===0&&!['caption_only','text_only'].includes(kind)){items.push({r,source,gap:'original_gallery_unavailable'});continue;}
-   const key=festivalShadowFingerprint({source:extractor.festivalEvidenceSourceFingerprint({caption,imageUrls}),edition:extractor.festivalEvidenceEditionFingerprint(r.edition),policy:extractor.FESTIVAL_EVIDENCE_POLICY});
-   const cache=await db.doc(`festival_link_captures/${key}`).get(),decision=await db.doc(`festival_link_source_decisions/${key}`).get();cacheSnapshots.push(cache,decision);
-   const decisionData=options.localDecisions?.get(key)||decision.data(),nonmember=validFestivalNonmembership(decisionData,{editionId:r.edition.id,sourceId:String(s.uniqueId),captureKey:key,sourceFingerprint:extractor.festivalEvidenceSourceFingerprint({caption,imageUrls}),evidencePolicy:extractor.FESTIVAL_EVIDENCE_POLICY});
-   items.push({r,source,caption,imageUrls,key,cache,decision,nonmember,decisionData,captureData:options.localCaptures?.get(key)||cache.data()});
+   const identity={source:extractor.festivalEvidenceSourceFingerprint({caption,imageUrls}),edition:extractor.festivalEvidenceEditionFingerprint(r.edition)};
+   let capturePolicy=extractor.FESTIVAL_EVIDENCE_POLICY,key=festivalShadowFingerprint({...identity,policy:capturePolicy});
+   let cache=await db.doc(`festival_link_captures/${key}`).get(),decision=await db.doc(`festival_link_source_decisions/${key}`).get();cacheSnapshots.push(cache,decision);
+   if(!cache.exists&&!decision.exists&&!options.localCaptures?.has(key)&&!options.localDecisions?.has(key)){
+    const previousKey=festivalShadowFingerprint({...identity,policy:extractor.FESTIVAL_PREVIOUS_EVIDENCE_POLICY});
+    const previousCache=await db.doc(`festival_link_captures/${previousKey}`).get(),previousDecision=await db.doc(`festival_link_source_decisions/${previousKey}`).get();cacheSnapshots.push(previousCache,previousDecision);
+    if(previousCache.exists||previousDecision.exists){key=previousKey;capturePolicy=extractor.FESTIVAL_PREVIOUS_EVIDENCE_POLICY;cache=previousCache;decision=previousDecision;}
+   }
+   const decisionData=options.localDecisions?.get(key)||decision.data(),nonmember=validFestivalNonmembership(decisionData,{editionId:r.edition.id,sourceId:String(s.uniqueId),captureKey:key,sourceFingerprint:identity.source,evidencePolicy:capturePolicy});
+   items.push({r,source,caption,imageUrls,key,capturePolicy,cache,decision,nonmember,decisionData,captureData:options.localCaptures?.get(key)||cache.data()});
   }
  }
  const jobRef=db.doc(`festival_link_jobs/${festivalShadowJobId(fileId)}`),fingerprint=festivalShadowFingerprint({fileId,mode:options.mode,policy:'publication-worker-v1',editions:registered.map(r=>({edition:r.edition,umbrella:pin(r.umbrella),review:pin(r.review)})),sources:[...latest.values()].map(pin).sort((a,b)=>a.path.localeCompare(b.path)),children:children.docs.map(pin).sort((a,b)=>a.path.localeCompare(b.path)),venues:venueDocs.filter(d=>d.exists).map(pin),captures:cacheSnapshots.map(d=>({path:d.ref.path,version:d.exists?pin(d).version:null}))});
@@ -91,13 +97,13 @@ export async function runFestivalLinkWorker(db:admin.firestore.Firestore,options
     if(item.nonmember){reviewedNonmembers.push({sourceId:item.source.get('uniqueId'),reviewId:item.decisionData.reviewId,reason:item.decisionData.reason,captureStillIncomplete:item.captureData?.result?.complete!==true});continue;}
     const c=item.captureData;
     if(!c?.result){gaps.push({sourceId:item.source.get('uniqueId'),reason:c?.error||'source_evidence_not_captured'});continue;}
-    let result=c.result;if(c.captureKey!==item.key||result.evidencePolicy!==extractor.FESTIVAL_EVIDENCE_POLICY||result.sourceFingerprint!==extractor.festivalEvidenceSourceFingerprint(item)||result.editionFingerprint!==extractor.festivalEvidenceEditionFingerprint(r.edition))throw Error('Cached source identity changed');
+    let result=c.result;if(c.captureKey!==item.key||result.evidencePolicy!==item.capturePolicy||result.sourceFingerprint!==extractor.festivalEvidenceSourceFingerprint(item)||result.editionFingerprint!==extractor.festivalEvidenceEditionFingerprint(r.edition))throw Error('Cached source identity changed');
     result=extractor.validateFestivalEvidenceCapture(result,item);
     for(const [index,a]of result.activities.entries()){
      if(a.verification?.accepted!==true){gaps.push({sourceId:item.source.get('uniqueId'),item:index,reason:'source_evidence_unconfirmed'});continue;}
      const matches=venues.filter(v=>[v.label,...(v.aliases||[])].some(n=>normalize(n.replace(/^the /i,''))===normalize(a.venueText.replace(/^the /i,''))));const sid=String(item.source.get('uniqueId')),binding=r.edition.sourceBindings[sid];
      const named=Boolean(a.activityRowText&&a.dateHeaderText&&normalize(a.eventText).startsWith(normalize(r.edition.name))&&normalize(a.eventText).length>normalize(r.edition.name).length);
-     sources.push({id:'e_'+festivalShadowFingerprint({source:sid,index,scope:a.scopeText}).slice(0,40),source:{id:sid,url:item.source.get('facebookUrl'),text:result.sourceText,documents:result.documents,publisherId:'publisher_'+festivalShadowFingerprint(item.source.get('facebookUrl')||'').slice(0,24),revision:item.source.updateTime.toDate().toISOString(),...(binding?{organizerId:binding.organizerId}:{})},kind:named?'same_source_named_activity':a.kind,scopeText:a.scopeText,membershipText:named?a.eventText:a.membershipText,festivalNameText:a.festivalNameText,yearText:a.yearText,organizerText:a.organizerText,...(a.activityRowText?{activityRowText:a.activityRowText,dateHeaderText:a.dateHeaderText}:{}),...(a.captionScope?{captionScope:a.captionScope}:{}),activity:{name:a.name,venueId:matches.length===1?matches[0].id:'',startDate:a.startDate,startTime:a.startTime,...(a.ticketUrl?{ticketUrl:a.ticketUrl}:{})},eventText:a.eventText,dateText:a.dateText,timeText:a.timeText,venueText:a.venueText});
+     sources.push({id:'e_'+festivalShadowFingerprint({source:sid,index,scope:a.scopeText}).slice(0,40),source:{id:sid,url:item.source.get('facebookUrl'),text:result.sourceText,documents:result.documents,publisherId:'publisher_'+festivalShadowFingerprint(item.source.get('facebookUrl')||'').slice(0,24),revision:item.source.updateTime.toDate().toISOString(),...(binding?{organizerId:binding.organizerId}:{})},kind:named?'same_source_named_activity':a.kind,scopeText:a.scopeText,membershipText:named?a.eventText:a.membershipText,festivalNameText:a.festivalNameText,yearText:a.yearText,organizerText:a.organizerText,...(a.activityRowText?{activityRowText:a.activityRowText,dateHeaderText:a.dateHeaderText}:{}),...(a.captionScope?{captionScope:a.captionScope}:{}),...(a.sourceScope?{sourceScope:a.sourceScope}:{}),activity:{name:a.name,venueId:matches.length===1?matches[0].id:'',startDate:a.startDate,startTime:a.startTime,...(a.ticketUrl?{ticketUrl:a.ticketUrl}:{})},eventText:a.eventText,dateText:a.dateText,timeText:a.timeText,venueText:a.venueText});
     }
    }
    const ownershipRef=db.doc(`festival_link_publications/${r.edition.id}`),ownership=await ownershipRef.get();
@@ -109,6 +115,10 @@ export async function runFestivalLinkWorker(db:admin.firestore.Firestore,options
    await db.runTransaction(async tx=>{
     const locks=await tx.get(db.collection('processing_locks')),checkpoint=await tx.get(db.doc(`checkpoints/${fileId}`));if(checkpoint.exists)throw Error('Checkpoint reappeared');
     const [job,owned,feed]=await tx.getAll(jobRef,ownershipRef,db.doc('runtime_metadata/event_feed'));const read=await tx.getAll(...references.map(p=>db.doc(p.path)));
+    const captureState=[...new Map(cacheSnapshots.map(d=>[d.ref.path,d])).values()];
+    const currentCaptures=captureState.length?await tx.getAll(...captureState.map(d=>db.doc(d.ref.path))):[];
+    const cachePins=(docs:admin.firestore.DocumentSnapshot[])=>docs.map(d=>({path:d.ref.path,version:d.exists?pin(d).version:null}));
+    if(festivalShadowFingerprint(cachePins(currentCaptures))!==festivalShadowFingerprint(cachePins(captureState)))throw Error('festival_reference_drift:source_capture_state');
     const currentChildren=await tx.get(db.collectionGroup('events').where('startDate','>=',minimum).where('startDate','<=',maximum).limit(5001));
     if(festivalShadowFingerprint(currentChildren.docs.map(pin).sort((a,b)=>a.path.localeCompare(b.path)))!==festivalShadowFingerprint(children.docs.map(pin).sort((a,b)=>a.path.localeCompare(b.path))))throw Error('Canonical inventory changed');
     assertFestivalPublicationFence(job.data() as FestivalShadowJob,claim,Date.now(),references,new Map(read.map(d=>[d.ref.path,{exists:d.exists,version:d.exists?pin(d).version:undefined}])),active(locks.docs));

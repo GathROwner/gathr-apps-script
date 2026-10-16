@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {validateFestivalEvidenceCapture,extractFestivalEvidence,expandCaptionDateScope} from './festival-evidence-extractor.mjs';
+import {validateFestivalEvidenceCapture,extractFestivalEvidence,extractFestivalEvidencePerImage,expandCaptionDateScope} from './festival-evidence-extractor.mjs';
 const caption='Anchor Fest 2026 programme';
 const row='Film One | October 16, 2026 | 7:00 PM | Cinema';
 const input={caption,imageUrls:['https://example.test/poster.jpg']};
@@ -21,4 +21,44 @@ test('identical conference rows under different dates retain their own literal o
  const result=validateFestivalEvidenceCapture(value,{caption,imageUrls:[]});
  assert(result.activities.every(x=>x.captionScope&&!x.captureHoldReason));
  assert(result.activities[0].captionScope.rowStart<result.activities[1].captionScope.rowStart);
+});
+
+test('image programme rows retain their own preceding French/English date heading',()=>{
+ for(const [heading,time]of [['FRIDAY, OCTOBER 16','6 p.m.'],['VENDREDI 16 OCTOBRE','18 h']]){
+  const row=`${time}\nShow\nLocation: Hall`,caption='Festival 2026 programme';
+  const value={complete:true,limitations:[],documents:[{index:-1,text:caption},{index:0,text:heading+'\n'+row}],activities:[{kind:'programme_row',sourceIndices:[-1,0],scopeText:row,membershipText:caption,name:'Show',eventText:'Show',dateText:heading,timeText:time,venueText:'Hall'}]};
+  const result=validateFestivalEvidenceCapture(value,{caption,imageUrls:['https://example.test/poster.jpg']});assert(result.activities[0].sourceScope);assert(!result.activities[0].captureHoldReason);
+ }
+});
+test('shared caption venue is allowed only through exact caption context offsets',()=>{
+ const caption='Harvest Fest\nJoin us Saturday, October 17, at Hall!\nSalty Sailors | 3–5 PM';
+ const activity={kind:'festival_activity',sourceIndices:[-1],scopeText:'Salty Sailors | 3–5 PM',membershipText:'Harvest Fest',name:'Salty Sailors',eventText:'Salty Sailors',dateText:'Saturday, October 17',timeText:'3–5 PM',venueText:'Hall'};
+ const result=validateFestivalEvidenceCapture({complete:true,limitations:[],documents:[{index:-1,text:caption}],activities:[activity]},{caption,imageUrls:[]});assert(!result.activities[0].captureHoldReason);assert(result.activities[0].sourceScope);
+});
+test('bounded image recovery requires an exact output-limit failure and preserves all original image indices',async()=>{
+ const imageUrls=['https://example.test/french.jpg','https://example.test/english.jpg'];
+ const failedCapture={capture:{caption,imageUrls},error:'evidence_response_incomplete',diagnostics:{rawResponses:[{incomplete_details:{reason:'max_output_tokens'}}]}};
+ let calls=0;
+ const result=await extractFestivalEvidencePerImage({caption,imageUrls,edition:{id:'fixture'},apiKey:'fixture',failedCapture,fetchImpl:async()=>{
+  const pass=Math.floor(calls/2),extract=calls++%2===0;
+  const value=extract?{complete:true,limitations:[],documents:[{index:-1,text:caption},{index:0,text:'FRIDAY, OCTOBER 16\n6 p.m.\nShow '+pass+'\nHall'}],activities:[{kind:'programme_row',sourceIndices:[-1,0],scopeText:'6 p.m.\nShow '+pass+'\nHall',membershipText:caption,name:'Show '+pass,eventText:'Show '+pass,dateText:'FRIDAY, OCTOBER 16',timeText:'6 p.m.',venueText:'Hall'}]}:{checks:[{index:0,accepted:true,reason:'literal source'}]};
+  return new Response(JSON.stringify({status:'completed',output_text:JSON.stringify(value)}));
+ }});
+ assert.equal(calls,4);assert.deepEqual(result.documents.map(d=>d.index),[-1,0,1]);assert.deepEqual(result.activities.map(a=>a.sourceScope.documentIndex),[0,1]);assert.deepEqual(result.activities.map(a=>a.sourceIndices),[[-1,0],[-1,1]]);assert(result.activities.every(a=>a.verification.accepted));
+ await assert.rejects(extractFestivalEvidencePerImage({caption,imageUrls,edition:{},apiKey:'test',failedCapture:{...failedCapture,error:'timeout'}}),/matching_output_limit/);
+ await assert.rejects(extractFestivalEvidencePerImage({caption,imageUrls:[...imageUrls,'https://example.test/extra'],failedCapture}),/two_images/);
+});
+test('failure in a later image keeps earlier paid-call accounting and never yields partial complete evidence',async()=>{
+ const imageUrls=['https://example.test/one.jpg','https://example.test/two.jpg'];let calls=0;
+ const failedCapture={capture:{caption,imageUrls},error:'evidence_response_incomplete',diagnostics:{rawResponses:[{incomplete_details:{reason:'max_output_tokens'}}]}};
+ await assert.rejects(extractFestivalEvidencePerImage({caption,imageUrls,edition:{},apiKey:'fixture',failedCapture,fetchImpl:async()=>{
+  calls++;return calls===1?new Response(JSON.stringify({status:'completed',output_text:JSON.stringify({complete:true,limitations:[],documents:[{index:-1,text:caption},{index:0,text:'No member activities'}],activities:[]})})):new Response(JSON.stringify({status:'incomplete',incomplete_details:{reason:'max_output_tokens'}}));
+ }}),error=>{assert.equal(error.evidenceDiagnostics.requests.length,2);assert.equal(error.evidenceDiagnostics.rawResponses.length,2);assert.equal(error.evidenceDiagnostics.sourcePasses.length,1);return true;});
+});
+test('revalidating derived legacy holds still requires an affirmative independent model check',()=>{
+ const heading='FRIDAY, OCTOBER 16',row='6 p.m.\nShow\nHall';
+ const value={complete:true,limitations:[],documents:[{index:-1,text:caption},{index:0,text:heading+'\n'+row}],activities:[{kind:'programme_row',sourceIndices:[-1,0],scopeText:row,membershipText:caption,name:'Show',eventText:'Show',dateText:heading,timeText:'6 p.m.',venueText:'Hall',captureHoldReason:'cross_card_excerpt',verification:{accepted:false},modelVerification:{accepted:true,reason:'literal source'}}]};
+ const result=validateFestivalEvidenceCapture(value,input);assert(result.activities[0].verification.accepted);assert.equal(value.activities[0].captureHoldReason,'cross_card_excerpt','Original cache mutated');
+ value.activities[0].modelVerification.accepted=false;assert(!validateFestivalEvidenceCapture(value,input).activities[0].verification.accepted);
+ delete value.activities[0].modelVerification;assert(!validateFestivalEvidenceCapture(value,input).activities[0].verification.accepted);
 });

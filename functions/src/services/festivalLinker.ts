@@ -5,6 +5,8 @@ import {verifyAreaPublicationReferences,festivalActivityTitleIdentity} from './a
 import type {AreaEventLinkEvidence, EventAreaLocation} from './areaEventPublication.js';
 import {validFestivalCaptionScope,festivalCaptionHeadingDate} from './festivalCaptionScope.js';
 import type {FestivalCaptionScope,FestivalEvidenceDocument} from './festivalCaptionScope.js';
+import {validFestivalSourceScope,festivalSourceHeadingDates} from './festivalSourceScope.js';
+import type {FestivalSourceScope} from './festivalSourceScope.js';
 
 export interface FestivalEdition {
   id: string; name: string; year: number; startDate: string; endDate: string;
@@ -25,6 +27,7 @@ export interface FestivalSourceEvidence {
   activityRowText?: string;
   dateHeaderText?: string;
   captionScope?: FestivalCaptionScope;
+  sourceScope?: FestivalSourceScope;
   /** Literal programme heading or explicit current activity-membership statement. */
   membershipText: string;
   festivalNameText: string; yearText: string; organizerText?: string;
@@ -49,7 +52,7 @@ export interface FestivalLinkProposal {
   evidence: AreaEventLinkEvidence[];
   provenance: {evidenceId: string; sourceId: string; sourceUrl: string; publisherId: string;
     revision: string | null; sourceText: string; sourceFingerprint: string; evidenceFingerprint: string;
-    captionScope?: FestivalCaptionScope; sourceDocuments?: readonly FestivalEvidenceDocument[]}[];
+    captionScope?: FestivalCaptionScope; sourceScope?: FestivalSourceScope; sourceDocuments?: readonly FestivalEvidenceDocument[]}[];
   fingerprint: string;
 }
 export interface FestivalLinkResult {
@@ -109,6 +112,13 @@ function printedProgrammeYear(e: FestivalSourceEvidence, edition: FestivalEditio
 const CALENDAR_DATE=/\b(?:20\d{2}-\d{2}-\d{2}|(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\.?\s+\d{1,2}(?:,?\s+20\d{2})?)\b/gi;
 const WEEKDAY_HEADING=/^\s*(?:mon(?:day)?|tue(?:sday)?|wed(?:nesday)?|thu(?:rsday)?|fri(?:day)?|sat(?:urday)?|sun(?:day)?)\b/i;
 function scopedOccurrence(e: FestivalSourceEvidence): FestivalLinkReason | undefined {
+  if(e.sourceScope){
+    const docs=e.source.documents;
+    if(!Array.isArray(docs)||new Set(docs.map(d=>d.index)).size!==docs.length||docs.map(d=>d.text).join('\n')!==e.source.text||
+       !nonempty(e.activityRowText)||!e.activityRowText.includes(e.eventText)||
+       !validFestivalSourceScope({scope:e.sourceScope,documents:docs,scopeText:e.scopeText,rowText:e.activityRowText,dateText:e.dateText,timeText:e.timeText,venueText:e.venueText}))return 'source_occurrence_conflict';
+    return undefined;
+  }
   if(e.activityRowText===undefined&&e.dateHeaderText===undefined) {
     return [e.eventText,e.dateText,e.timeText,e.venueText].every(x=>nonempty(x)&&e.scopeText.includes(x))?undefined:'evidence_missing';
   }
@@ -231,7 +241,10 @@ export async function resolveFestivalMembership(input: {
     if(!nonempty(e.timeText)){stop('missing_clock');continue;}
     const scopeConflict=scopedOccurrence(e);if(scopeConflict){stop(scopeConflict);continue;}
     const association=membership(e,edition);if(association){stop(association,association==='membership_not_explicit'?'unmatched':'held');continue;}
-    if(e.dateHeaderText&&festivalCaptionHeadingDate(e.dateHeaderText,edition.year)!==e.activity.startDate){stop('source_occurrence_conflict');continue;}
+    if(e.sourceScope){
+      const document=e.source.documents!.find(d=>d.index===e.sourceScope!.documentIndex)!;
+      if(!festivalSourceHeadingDates(document.text.slice(e.sourceScope.dateStart,e.sourceScope.dateEnd),edition.year,e.sourceScope.kind).includes(e.activity.startDate)){stop('source_occurrence_conflict');continue;}
+    }else if(e.dateHeaderText&&festivalCaptionHeadingDate(e.dateHeaderText,edition.year)!==e.activity.startDate){stop('source_occurrence_conflict');continue;}
     if((ticketClaims.get(ticketIdentity(e.activity.ticketUrl))?.size||0)>1){stop('source_occurrence_conflict');continue;}
     if(!e.activity.startTime||!clock(e.activity.startTime)){stop('missing_clock');continue;}
     if(!validDate(e.activity.startDate)||activityKey(e.activity.name)!==activityKey(e.eventText)){stop('invalid_occurrence');continue;}
@@ -297,7 +310,7 @@ export async function resolveFestivalMembership(input: {
     const proposal=proposals.get(candidate.path)||{eventPath:candidate.path,eventId:id,venueId:venue.id,point,evidence:[],provenance:[]};
     proposal.evidence.push(evidence);proposal.provenance.push({evidenceId:e.id,sourceId:e.source.id,sourceUrl:e.source.url,publisherId:e.source.publisherId,
       revision:e.source.revision??null,sourceText:e.source.text,sourceFingerprint:fingerprint(e.source),evidenceFingerprint:hash,
-      ...(e.captionScope?{captionScope:{...e.captionScope}}:{}),...(e.source.documents?{sourceDocuments:e.source.documents.map(d=>({...d}))}:{})});
+      ...(e.captionScope?{captionScope:{...e.captionScope}}:{}),...(e.sourceScope?{sourceScope:{...e.sourceScope}}:{}),...(e.source.documents?{sourceDocuments:e.source.documents.map(d=>({...d}))}:{})});
     // Alias selection must not depend on source order.
     if(compare(point.label,proposal.point.label)<0)proposal.point={...proposal.point,label:point.label};
     proposals.set(candidate.path,proposal);

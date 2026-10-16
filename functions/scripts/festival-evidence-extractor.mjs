@@ -1,6 +1,7 @@
 // Optional, bounded post-parse evidence extraction. No Firestore/event writes.
 import {createHash} from 'node:crypto';
 import {expandFestivalCaptionDateScope} from '../lib/services/festivalCaptionScope.js';
+import {expandFestivalSourceScope,validFestivalSourceScope} from '../lib/services/festivalSourceScope.js';
 const obj=properties=>({type:'object',properties,required:Object.keys(properties),additionalProperties:false});
 const str={type:'string'};
 const schema=obj({complete:{type:'boolean'},limitations:{type:'array',items:str},documents:{type:'array',items:obj({index:{type:'integer'},text:str})},activities:{type:'array',items:obj({
@@ -14,7 +15,9 @@ const hash=x=>createHash('sha256').update(JSON.stringify(x)).digest('hex');
 export const festivalEvidenceEditionIdentity=e=>({id:e.id,name:e.name,year:e.year,startDate:e.startDate,endDate:e.endDate});
 export const festivalEvidenceSourceFingerprint=({caption,imageUrls})=>hash({caption,imageUrls});
 export const festivalEvidenceEditionFingerprint=e=>hash(festivalEvidenceEditionIdentity(e));
-export const FESTIVAL_EVIDENCE_POLICY = hash({instructions:FESTIVAL_EVIDENCE_INSTRUCTIONS,schema,model:'gpt-6-luna',effort:'high',verification:true,validatorVersion:'caption-occurrence-offsets-v3',verifierVersion:'literal-source-verify-v3'});
+export const FESTIVAL_EVIDENCE_POLICY = hash({instructions:FESTIVAL_EVIDENCE_INSTRUCTIONS,schema,model:'gpt-6-luna',effort:'high',verification:true,validatorVersion:'literal-source-context-v4',verifierVersion:'literal-source-verify-v3'});
+// Same source/model/transcription contract; prior captures are revalidated, never rewritten.
+export const FESTIVAL_PREVIOUS_EVIDENCE_POLICY = hash({instructions:FESTIVAL_EVIDENCE_INSTRUCTIONS,schema,model:'gpt-6-luna',effort:'high',verification:true,validatorVersion:'caption-occurrence-offsets-v3',verifierVersion:'literal-source-verify-v3'});
 const outputText=r=>typeof r.output_text==='string'?r.output_text:(r.output||[]).flatMap(x=>x.content||[]).filter(x=>x.type==='output_text').map(x=>x.text).join('');
 export function expandCaptionDateScope(item,documents){
  return expandFestivalCaptionDateScope(item,documents);
@@ -26,7 +29,9 @@ export function validateFestivalEvidenceCapture(value,{caption,imageUrls}){
  if(!indexes.has(-1)||imageUrls.some((_,i)=>!indexes.has(i)))throw Error('gallery_omitted');
  const text=value.documents.map(x=>x.text).join('\n');
  value={...value,activities:value.activities.map(item=>{
-  const expanded=expandCaptionDateScope(item,value.documents),row=expanded.activityRowText||expanded.scopeText;
+  item={...item};if(item.captureHoldReason==='cross_card_excerpt')delete item.captureHoldReason;
+  const old=expandCaptionDateScope(item,value.documents);
+  const expanded=old.captionScope?old:expandFestivalSourceScope(item,value.documents),row=expanded.activityRowText||expanded.scopeText;
   // A model may quote the whole time/venue row as eventText. Select only the
   // literal printed heading when its supplied name actually occurs in that row.
   return typeof expanded.name==='string'&&expanded.name.trim()&&row.includes(expanded.name)
@@ -39,11 +44,15 @@ export function validateFestivalEvidenceCapture(value,{caption,imageUrls}){
   if(!['eventText','dateText','timeText','venueText'].every(k=>typeof item[k]==='string'))throw Error('invalid_excerpt');
   // Empty excerpts remain reportable gaps; nonempty excerpts must be from this row.
   if(['eventText','dateText','timeText','venueText'].some(k=>item[k]&&!item.scopeText.includes(item[k])))item.captureHoldReason='cross_card_excerpt';
-  if(item.activityRowText&&['eventText','timeText','venueText'].some(k=>item[k]&&!item.activityRowText.includes(item[k])))item.captureHoldReason='cross_card_excerpt';
+  if(item.sourceScope){
+   if(!item.activityRowText||!item.activityRowText.includes(item.eventText)||!validFestivalSourceScope({scope:item.sourceScope,documents:value.documents,scopeText:item.scopeText,rowText:item.activityRowText,dateText:item.dateText,timeText:item.timeText,venueText:item.venueText}))item.captureHoldReason='cross_card_excerpt';
+  }else if(item.activityRowText&&['eventText','timeText','venueText'].some(k=>item[k]&&!item.activityRowText.includes(item[k])))item.captureHoldReason='cross_card_excerpt';
+  if(item.modelVerification)item.verification=item.captureHoldReason?{...item.modelVerification,accepted:false,reason:item.captureHoldReason}:item.modelVerification;
  }
  return{...value,sourceText:text};
 }
-export async function extractFestivalEvidence({caption,imageUrls,edition,apiKey,fetchImpl=fetch,verify=true}){
+export async function extractFestivalEvidence({caption,imageUrls,edition,apiKey,fetchImpl=fetch,verify=true,maxOutputTokens=12000}){
+ if(!Number.isInteger(maxOutputTokens)||maxOutputTokens<12000||maxOutputTokens>24000)throw Error('evidence_output_budget_hold');
  if(typeof caption!=='string'||!Array.isArray(imageUrls)||imageUrls.length>20)throw Error('source_size_hold');
  if(!apiKey)throw Error('Existing OPENAI_API_KEY required for explicit paid execution');
  if(imageUrls.some(u=>{try{return new URL(u).protocol!=='https:';}catch{return true;}}))throw Error('invalid_gallery_url');
@@ -51,10 +60,10 @@ export async function extractFestivalEvidence({caption,imageUrls,edition,apiKey,
  const requests=[],rawResponses=[];
  const call=async(instructions,input,format)=>{
   const started=Date.now();const response=await fetchImpl('https://api.openai.com/v1/responses',{method:'POST',headers:{Authorization:`Bearer ${apiKey}`,'Content-Type':'application/json'},
-   body:JSON.stringify({model:'gpt-6-luna',reasoning:{effort:'high'},store:false,instructions,input,max_output_tokens:12000,text:{format}}),signal:AbortSignal.timeout(150000)});
+   body:JSON.stringify({model:'gpt-6-luna',reasoning:{effort:'high'},store:false,instructions,input,max_output_tokens:maxOutputTokens,text:{format}}),signal:AbortSignal.timeout(150000)});
   const raw=await response.json();rawResponses.push(raw);if(!response.ok)throw Error(`evidence_api_error_${response.status}`);
   const replayed=response.headers?.get('x-gathr-offline-replay')==='1';
-  requests.push({id:raw.id,status:raw.status,incompleteDetails:raw.incomplete_details??null,usage:raw.usage??null,replayed,latencyMs:replayed?null:Date.now()-started});
+  requests.push({id:raw.id,status:raw.status,incompleteDetails:raw.incomplete_details??null,usage:raw.usage??null,maxOutputTokens,imageCount:imageUrls.length,replayed,latencyMs:replayed?null:Date.now()-started});
   if(raw.status!=='completed'||raw.incomplete_details)throw Error('evidence_response_incomplete');return JSON.parse(outputText(raw));
  };
  try {
@@ -69,4 +78,26 @@ export async function extractFestivalEvidence({caption,imageUrls,edition,apiKey,
  }
  return{version:1,model:'gpt-6-luna',effort:'high',sourceFingerprint:festivalEvidenceSourceFingerprint({caption,imageUrls}),editionFingerprint:festivalEvidenceEditionFingerprint(edition),evidencePolicy:FESTIVAL_EVIDENCE_POLICY,requests,rawResponses,...captured};
  } catch(error) {error.evidenceDiagnostics={requests,rawResponses};throw error;}
+}
+
+/** Explicit bounded recovery, not the default gallery path. No missing image may be dropped. */
+export async function extractFestivalEvidencePerImage({caption,imageUrls,edition,apiKey,fetchImpl=fetch,failedCapture,maxOutputTokens=12000}){
+ if(!Array.isArray(imageUrls)||imageUrls.length<2||imageUrls.length>2)throw Error('bounded_image_recovery_requires_two_images');
+ if(failedCapture?.capture?.caption!==caption||JSON.stringify(failedCapture?.capture?.imageUrls)!==JSON.stringify(imageUrls)||
+    failedCapture.error!=='evidence_response_incomplete'||failedCapture.diagnostics?.rawResponses?.at(-1)?.incomplete_details?.reason!=='max_output_tokens')throw Error('matching_output_limit_failure_required');
+ const documents=[{index:-1,text:caption}],activities=[],requests=[],rawResponses=[],sourcePasses=[];
+ for(const [imageIndex,imageUrl]of imageUrls.entries()){
+  let result;
+  try{result=await extractFestivalEvidence({caption,imageUrls:[imageUrl],edition,apiKey,fetchImpl,verify:true,maxOutputTokens});}
+  catch(error){error.evidenceDiagnostics={requests:[...requests,...(error.evidenceDiagnostics?.requests||[])],rawResponses:[...rawResponses,...(error.evidenceDiagnostics?.rawResponses||[])],sourcePasses};throw error;}
+  const imageDocument=result.documents.find(d=>d.index===0);if(!imageDocument||result.documents.length!==2)throw Error('source_pass_gallery_mismatch');
+  documents.push({...imageDocument,index:imageIndex});const base=activities.length;
+  for(const [i,a]of result.activities.entries())activities.push({...a,sourceIndices:a.sourceIndices.map(n=>n===0?imageIndex:n),
+   ...(a.sourceScope?{sourceScope:{...a.sourceScope,documentIndex:a.sourceScope.documentIndex===0?imageIndex:a.sourceScope.documentIndex}}:{}),
+   ...(a.modelVerification?{modelVerification:{...a.modelVerification,index:base+i}}:{}),...(a.verification?{verification:{...a.verification,index:base+i}}:{})});
+  requests.push(...result.requests.map(r=>({...r,sourceGalleryIndex:imageIndex})));rawResponses.push(...result.rawResponses);
+  sourcePasses.push({sourceGalleryIndex:imageIndex,imageUrl,activities:result.activities.length,sourceFingerprint:result.sourceFingerprint});
+ }
+ const validated=validateFestivalEvidenceCapture({complete:true,limitations:[],documents,activities},{caption,imageUrls});
+ return{version:1,model:'gpt-6-luna',effort:'high',sourceFingerprint:festivalEvidenceSourceFingerprint({caption,imageUrls}),editionFingerprint:festivalEvidenceEditionFingerprint(edition),evidencePolicy:FESTIVAL_EVIDENCE_POLICY,requests,rawResponses,sourcePasses,evidenceCaptureMode:'bounded_per_image_recovery',...validated};
 }
