@@ -876,3 +876,23 @@ profile cleanup protections remain separate verified releases. The historical
 deletion mechanism for these old files is not newly attributed by this repair.
 Evidence/backup/result/verification: `docs/venue-profile-four-repair-plan-2026-10-12.md`.
 Other inactive/blank-profile candidates require fresh review and exact plans.
+
+## October 15 Inn source limits and festival publication follow-up (prepared)
+
+The three older Inn records were independently reviewed against exact saved
+captions, eight retained source images and current first-party website evidence.
+Two genuine Saturday/Sunday16:00 tours lack the advertised October10 season
+cutoff and carry unsupported finishes. A separate October16 foraging card
+incorrectly borrowed15:00–21:00 despite its source saying morning without a
+clock. Exact live changes, private hold and replay constraints are prepared,
+not applied: `docs/inn-and-festival-oct15-approval-plan.md`.
+
+Automatic festival add-only writer/worker is implemented and tested locally.
+The unapproved live dry run correctly blocks one incomplete gallery. A separate
+explicit proposal accounts for the independently reviewed Soft Internet Theory
+source as nonmember without changing its incomplete-capture status or removing
+the exhibition from GathR. Four eligible Anchor matches are already linked;
+five clock/venue/provenance outcomes remain held. No live writes/deploy/paid
+calls occurred in this follow-up. Activation remains approval/release gated;
+source contracts and image-heading limitations are documented in
+`docs/festival-linker-oct15-publication.md`.
