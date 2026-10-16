@@ -934,3 +934,30 @@ the active feed and present with includeExpired=true. Exact serving-source
 Node20 reproduction confirms the fault; omitting hour12 yields the correct key.
 API/source/data remain unchanged. This needs a separate narrow API correction
 and Node20 midnight/DST/closing-time checks, not shifting the event's date/time.
+
+## October 16 automatic festival schedule correction (candidate, not live)
+
+PQ-SPATIAL/PQ-021: extraction success/zero-addition Anchor replays did not prove
+new automatic schedule publication. Actual Pumpkin saved-source replay initially
+matched zero children. Narrow same-image year/title heading binding, independent
+reviewed source registration, exact interior-parent context and generic-homepage
+handling now let the actual worker propose all13 retained canonical activities
+from an empty schedule. Incomplete sources and ambiguous/unmatched entries hold.
+An unrelated multi-location source no longer scopes itself to every edition.
+
+Machine links survive later parser/shared/review refresh only while still present
+and supported by private ownership proofs. Explicit removals remain suppressed;
+source/occurrence drift and racing public updates abort. Complete canonical-query
+fencing now avoids redundant per-document pins exceeding the400-reference guard
+on the441-event inventory;450 unrelated-event and new-ambiguity controls pass.
+
+Fresh completed-October14 replay reads151 real sources and the exact proposed
+bootstrap payload:13 additions, zero manually seeded links/source gaps/paid calls/
+live writes. In-memory publication verifies repeat zero, missing-child later
+arrival and refresh retention. Distinct serving-baseline assemblies preserve
+all stage/model/prompt/configuration contracts. Exact release/data batch remains
+approval-gated, not applied: `docs/festival-automatic-linking-oct16.md`.
+
+The separate midnight API defect above was subsequently repaired at9fb9d82,
+revision gathr-backend-00086-h5g. Craig confirmed the Oct16 Murder Mystery
+18–21 listing on his phone. That correction did not create this festival root.

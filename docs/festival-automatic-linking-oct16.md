@@ -102,5 +102,90 @@ Exact backup and plan:
 - `functions/artifacts/pumpkin-overview-oct16/bootstrap-plan-2026-10-16T09-53-01-759Z.json`
 
 The event-integrity repair skill requires exact live-target approval. Approval
-has **not** been requested for or applied to this new batch yet. Finish the
-isolated release checks first, then request one short combined approval.
+has **not** been requested for or applied to this new batch yet.
+
+## Final combined approval plan
+
+This supersedes the preliminary 09:53 plan above. Frozen data plan:
+`functions/artifacts/pumpkin-overview-oct16/bootstrap-plan-2026-10-16T10-17-46-925Z.json`.
+SHA256 of canonical plan JSON:
+`28b596a141e11e621b02125c5e186fdfc6b928f63167c6f694156865958a6bf9`.
+Full backup: matching `bootstrap-backup-2026-10-16T10-17-46-925Z.json`.
+Relevant inventory guards cover both existing venue inventories and Pumpkin
+titles in the edition window; unrelated venues cannot invalidate this bootstrap.
+The actual worker still transaction-fences the complete canonical query against
+new ambiguity or changed documents.
+
+One approval covers these sequential actions:
+
+1. Release refresh preservation to the three parsers, review finalizer and two
+   shared publishers, each from its own immutable serving archive. Release the
+   separate automatic linker. No Stage 1–5 request, model, effort, allocation,
+   queue or SDK change. Live parser locks must be terminal before release.
+2. Create exactly the public edition, private review and validated capture
+   paths listed above, with **zero** child links; advance feed268→269.
+3. Run the actual released worker, targeting only this edition and the completed
+   October14 dataset. It must propose exactly the13 IDs below before publishing.
+   Its atomic public delta is the edition's area links and feed269→270; its
+   private writes are the named ownership/job records. No existing child,
+   venue, source snapshot or media is changed.
+4. Independently verify ACTIVE/latest/configuration readback for all7 functions,
+   all protected document versions, source/private-data separation, repeat zero
+   additions, festival detail and all13 child details, plus the complete capable
+   active feed. No client release or map/emulator interaction is needed.
+
+| Release checkout | Exact candidate | Gates |
+| --- | --- | --- |
+| festival-auto-worker | 99ced66 (full SHA in assembly-worker.json) | Build;946 compiled tests;41 script checks; qualified worker dry run |
+| festival-refresh-parser | bbea8ac9df5666d2e6c929a7c72afbcdd368a2aa | Build;856 compiled tests; qualified three-parser dry run |
+| festival-refresh-finalizer | 98c5eabdc9c475e1196fb30c53e40d266a3bf105 | Build;328 compiled tests; qualified finalizer dry run |
+| festival-refresh-shared | d344468320bbb1534726e1e4602f691e58a428f1 | Build;375 compiled tests; qualified two-publisher dry run |
+
+The shared suite initially had two expired September fixtures. Their clocks
+are now fixed to August23; no runtime behavior was changed for those failures.
+The worker also removes redundant per-document child pins:441 current
+candidates exceeded the old400-reference fence despite the full transactional
+query already fencing them. A450-unrelated-event regression now passes while
+the new-ambiguity/changed-inventory abort regression remains intact.
+
+Historical replay is deliberately targeted with `editionId`; the scheduler's
+default still examines all reviewed editions. Targeting cannot bypass the full
+dataset, reviewed-source, active-parser or publication gates. Fresh playback
+of the **exact serialized bootstrap payload**, not just a synthetic draft,
+reads151 real source snapshots and proposes13 links, zero gaps and no paid
+calls/writes. Unconfirmed past French ghostwalk and unmatched programme entries
+are not invented as new children. This is13 existing activity links, not a claim
+that all41 bilingual entries are distinct publishable events.
+
+Exact existing child IDs (first12 at Centre Belle-Alliance, last at the library):
+
+```text
+oct14_repair_festival_20261016_1
+oct14_repair_festival_20261017_2
+oct14_repair_festival_20261019_3
+oct14_repair_festival_20261020_4
+oct14_repair_festival_20261021_5
+oct14_repair_festival_20261024_6
+oct14_repair_festival_20261026_7
+oct14_repair_festival_20261027_8
+oct14_repair_festival_20261028_9
+oct14_repair_festival_20261029_10
+oct14_repair_festival_20261030_11
+oct14_repair_festival_20261030_12
+oct14_repair_festival_20261031_13
+```
+
+Guarded helper `firebase/apply-pumpkin-automatic-links-oct16.mjs` is default dry
+and has passed fresh preflight. It requires the exact frozen plan/hash, clean
+committed worker checkout, fresh independent serving readback and unchanged
+target/source/related versions; a prewrite backup precedes an atomic bootstrap.
+After approval, run from this coordinator with the existing main credential
+path in `ANCHOR_CREDENTIAL_PATH`:
+
+```text
+node firebase/apply-pumpkin-automatic-links-oct16.mjs --apply --plan=functions/artifacts/pumpkin-overview-oct16/bootstrap-plan-2026-10-16T10-17-46-925Z.json
+```
+
+Any drift, unexpected addition, active parser or verification failure stops the
+batch. Do not broaden targets or regenerate an approved plan silently. Existing
+SDK-version warnings were left unchanged; upgrading dependencies is deferred.

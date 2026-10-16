@@ -17,11 +17,12 @@ const normalize=(v:unknown)=>String(v||'').normalize('NFKD').replace(/[\u0300-\u
 const plain=(v:any):any=>JSON.parse(JSON.stringify(v));
 const pin=(d:admin.firestore.DocumentSnapshot):FestivalPinnedDocument=>{if(!d.exists||!d.updateTime)throw Error('Missing pinned document');return{path:d.ref.path,version:{seconds:d.updateTime.seconds,nanoseconds:d.updateTime.nanoseconds}};};
 const captureModule=()=>import(pathToFileURL(path.join(__dirname,'../../scripts/festival-evidence-extractor.mjs')).href);
-export interface FestivalWorkerOptions {mode:'off'|'shadow'|'publish';apiKey?:string;asOf?:string;fileId?:string;dryRun?:boolean;localCaptures?:ReadonlyMap<string,any>;localDecisions?:ReadonlyMap<string,any>;}
+export interface FestivalWorkerOptions {mode:'off'|'shadow'|'publish';apiKey?:string;asOf?:string;fileId?:string;editionId?:string;dryRun?:boolean;localCaptures?:ReadonlyMap<string,any>;localDecisions?:ReadonlyMap<string,any>;}
 
 /** One bounded source capture per invocation. No stage/parser/review/venue mutations. */
 export async function runFestivalLinkWorker(db:admin.firestore.Firestore,options:FestivalWorkerOptions):Promise<Record<string,any>>{
  if(options.mode==='off')return{mode:'off',eventWrites:0};
+ if(options.editionId&&!/^[A-Za-z0-9_-]{1,160}$/.test(options.editionId))throw Error('Invalid targeted festival edition');
  if((options.localCaptures||options.localDecisions)&&!options.dryRun)throw Error('Local source playback is dry-run only');
  if(active((await db.collection('processing_locks').get()).docs))return{mode:options.mode,status:'parser_active',eventWrites:0};
  const markers=options.fileId?[await db.doc(`processed_datasets/${options.fileId}`).get()]:(await db.collection('processed_datasets').orderBy('processedAt','desc').limit(10).get()).docs;
@@ -38,7 +39,7 @@ export async function runFestivalLinkWorker(db:admin.firestore.Firestore,options
  const fileId=completion.fileId,asOf=options.asOf||DateTime.now().setZone('America/Halifax').toISODate()!;
  const area=await db.collection('events').where('locationScope','==','area').limit(1001).get();if(area.size>1000)throw Error('Umbrella scan overflow');
  const registered:{edition:NonNullable<ReturnType<typeof reviewedFestivalEdition>>;umbrella:admin.firestore.QueryDocumentSnapshot;review:admin.firestore.DocumentSnapshot}[]=[];
- for(const umbrella of area.docs){const id=umbrella.get('cityLevelReviewId');if(typeof id!=='string'||!/^[A-Za-z0-9_-]+$/.test(id)||umbrella.get('endDate')<asOf)continue;
+ for(const umbrella of area.docs){if(options.editionId&&umbrella.id!==options.editionId)continue;const id=umbrella.get('cityLevelReviewId');if(typeof id!=='string'||!/^[A-Za-z0-9_-]+$/.test(id)||umbrella.get('endDate')<asOf)continue;
   const review=await db.doc(`city_level_event_reviews/${id}`).get();if(!review.exists)continue;
   const edition=reviewedFestivalEdition({path:umbrella.ref.path,data:umbrella.data()},{path:review.ref.path,data:review.data()!},asOf);
   if(edition)registered.push({edition,umbrella,review});
@@ -115,7 +116,7 @@ export async function runFestivalLinkWorker(db:admin.firestore.Firestore,options
    const input:FestivalPublicationInput={edition:r.edition,umbrella:{path:r.umbrella.ref.path,data:plain(r.umbrella.data())},review:{path:r.review.ref.path,data:plain(r.review.data()!)},sources,candidates,venues,completion,sourceInventoryComplete:gaps.length===0,ownership:ownership.data() as FestivalPublicationOwnership|undefined};
    const proposal=await planFestivalLinkPublication(input);reports.push({editionId:r.edition.id,status:proposal.status,reason:proposal.reason,gaps,unconfirmedItems,reviewedNonmembers,outcomes:proposal.result?.outcomes||[],addedEventIds:proposal.addedEventIds});
    if(options.dryRun||options.mode!=='publish'||proposal.status!=='ready')continue;
-   const refs=[...completionRefs,pin(r.umbrella),pin(r.review),...sourceItems.map(i=>pin(i.source)),...sourceItems.filter(i=>i.cache?.exists).map(i=>pin(i.cache)),...sourceItems.filter(i=>i.nonmember&&i.decision?.exists).map(i=>pin(i.decision)),...children.docs.map(pin),...venueDocs.filter(d=>d.exists).map(pin)];
+   const refs=[...completionRefs,pin(r.umbrella),pin(r.review),...sourceItems.map(i=>pin(i.source)),...sourceItems.filter(i=>i.cache?.exists).map(i=>pin(i.cache)),...sourceItems.filter(i=>i.nonmember&&i.decision?.exists).map(i=>pin(i.decision)),...venueDocs.filter(d=>d.exists).map(pin)];
    const references=[...new Map(refs.map(p=>[p.path,p])).values()];
    await db.runTransaction(async tx=>{
     const locks=await tx.get(db.collection('processing_locks')),checkpoint=await tx.get(db.doc(`checkpoints/${fileId}`));if(checkpoint.exists)throw Error('Checkpoint reappeared');
@@ -124,6 +125,8 @@ export async function runFestivalLinkWorker(db:admin.firestore.Firestore,options
     const currentCaptures=captureState.length?await tx.getAll(...captureState.map(d=>db.doc(d.ref.path))):[];
     const cachePins=(docs:admin.firestore.DocumentSnapshot[])=>docs.map(d=>({path:d.ref.path,version:d.exists?pin(d).version:null}));
     if(festivalShadowFingerprint(cachePins(currentCaptures))!==festivalShadowFingerprint(cachePins(captureState)))throw Error('festival_reference_drift:source_capture_state');
+    // The complete canonical query below fences every candidate/version and new
+    // ambiguity. Do not also individually pin hundreds of unrelated children.
     const currentChildren=await tx.get(db.collectionGroup('events').where('startDate','>=',minimum).where('startDate','<=',maximum).limit(5001));
     if(festivalShadowFingerprint(currentChildren.docs.map(pin).sort((a,b)=>a.path.localeCompare(b.path)))!==festivalShadowFingerprint(children.docs.map(pin).sort((a,b)=>a.path.localeCompare(b.path))))throw Error('Canonical inventory changed');
     assertFestivalPublicationFence(job.data() as FestivalShadowJob,claim,Date.now(),references,new Map(read.map(d=>[d.ref.path,{exists:d.exists,version:d.exists?pin(d).version:undefined}])),active(locks.docs));

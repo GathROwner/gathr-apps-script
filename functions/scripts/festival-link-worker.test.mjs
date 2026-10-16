@@ -111,6 +111,12 @@ test('an unrelated multi-location post cannot create a capture gap for every reg
  const {db,options}=posterFixture();db.values.set('parse_snapshots/unrelated_fixture',{version:++db.sequence,data:{fileId:options.fileId,uniqueId:'2222222222222',facebookUrl:'https://other.example/post',venueId:'unrelated_venue',inputText:'Book a private art workshop. We can travel to your venue.',rowMeta:{parserMode:'full5stage',mediaUrls:['https://other.example/poster.jpg']},stages:[{stage:'format',output:{stageArtifacts:{stage3Items:[{name:'Art workshops',spatial:{kind:'multi_location'}}]}}}]}});
  const r=await runFestivalLinkWorker(db,{...options,dryRun:true});assert.equal(r.status,'completed');assert.deepEqual(r.reports[0].addedEventIds,['child_fixture']);assert.equal(r.paidSources,0);
 });
+test('targeted historical replay selects only an existing reviewed edition and cannot bypass its approval',async()=>{
+ const {db,options}=posterFixture();const r=await runFestivalLinkWorker(db,{...options,editionId:'festival_fixture',dryRun:true});assert.deepEqual(r.reports[0].addedEventIds,['child_fixture']);
+ assert.equal((await runFestivalLinkWorker(db,{...options,editionId:'unregistered_fixture',dryRun:true})).status,'no_reviewed_active_editions');
+ db.values.get('city_level_event_reviews/review_fixture').data.status='pending';assert.equal((await runFestivalLinkWorker(db,{...options,editionId:'festival_fixture',dryRun:true})).eventWrites,0);
+ await assert.rejects(runFestivalLinkWorker(db,{...options,editionId:'../unsafe'}),/Invalid targeted/);
+});
 test('prior exact source captures revalidate without model work, copying or overwriting their evidence',async()=>{
  const {db,key,oldKey,previous,options}=legacyFixture();const before=JSON.stringify(previous);
  const r=await runFestivalLinkWorker(db,options);assert.equal(r.eventWrites,1);assert.equal(r.paidSources,0);assert.equal(JSON.stringify(db.values.get('festival_link_captures/'+oldKey).data),before);assert(!db.values.has('festival_link_captures/'+key));
@@ -125,4 +131,10 @@ test('a newer policy record blocks legacy fallback; creation during publication 
  assert.equal((await runFestivalLinkWorker(f.db,{...f.options,dryRun:true})).status,'source_evidence_not_captured');
  f=legacyFixture();f.db.afterClaim=d=>d.values.set('festival_link_source_decisions/'+f.key,{version:++d.sequence,data:{kind:'revoked'}});
  await assert.rejects(runFestivalLinkWorker(f.db,f.options),/reference_drift/);assert(!f.db.writes.some(p=>p.startsWith('events/')));
+});
+
+test('large unrelated canonical inventory stays publishable while the complete query remains fenced',async()=>{
+ const {db,options}=fixture();
+ for(let i=0;i<450;i++)db.values.set('venues/other_fixture/events/unrelated_'+i,{version:++db.sequence,data:{eventName:'Other activity '+i,venueId:'other_fixture',startDate:'2026-10-17',startTime:'12:00',isRecurring:'No'}});
+ const result=await runFestivalLinkWorker(db,options);assert.equal(result.eventWrites,1);assert.deepEqual(result.reports[0].addedEventIds,['child_fixture']);
 });
