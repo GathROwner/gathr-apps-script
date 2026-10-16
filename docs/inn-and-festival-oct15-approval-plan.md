@@ -118,6 +118,19 @@ their extraction script and required pure area-reference/title helpers. Do not
 deploy the coordinator checkout wholesale. Deploy only the new function; the
 three parser functions remain at their separately verified guard release.
 
+Final isolated festival runtime is `48a6982` (assembly1da0d91 plus the reviewed
+100-link public point cap). Its922 backend tests and20 evidence/worker controls
+passed from `functions/`. The cap fails closed without deleting/truncating
+existing manual links. No production code deployment occurred during these tests.
+
+Both qualified Firebase deployment dry runs passed: the three parsers from
+372be0c and only `scheduledFestivalLinker` from48a6982. Final read-only preflight
+2026-10-16T01:31:22Z: zero active locks, October15 processed marker present,
+no matching checkpoint, feed marker267. The worker assembly's untracked local
+deployment env sets only `FESTIVAL_LINKER_MODE=shadow`; existing parsers are not
+a target of that worker release. Activation to publish is conditional on the
+approved first shadow result and independent function/traffic/env readback.
+
 Activation gates: approved internal bootstrap → isolated committed build/tests
 → new-function-only dry run/deploy with `FESTIVAL_LINKER_MODE=shadow` → fresh
 live worker result with zero unreviewed capture gaps, four existing links and

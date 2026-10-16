@@ -73,3 +73,21 @@ qualified three-parser dry run. The proposed-decision live-read/local-playback
 worker report passes with144 saved sources,4 already linked eligible children,
 5 held outcomes,1 explicitly reviewed nonmember,0 unreviewed capture gaps,
 0 public additions and0 paid calls. This is a reviewed proposal, not live activation.
+
+Final review added the post-addition public contract limit (coordinatorb6abb0c,
+isolated final release48a6982). The actual isolated release passed922/922 compiled
+backend tests and20/20 evidence/worker controls. An initial invocation of the
+existing fixture-based suite from repository root failed to locate its relative
+fixture; rerunning from the required `functions/` cwd passed. No fixture/test
+assertion was weakened. The new guard holds a 101st point link instead of
+truncating manual links or returning an invalid app contract.
+
+Both isolated deployment dry runs passed. Worker-only transcript:
+`C:/Users/craig/.codex/worktrees/festival-publication-release/gathr-apps-script/functions/artifacts/festival-release-dry-run.txt`.
+Its final backend and script reports are in the same artifacts directory.
+Parser-only transcript is `arts-mixer-release/gathr-apps-script/functions/artifacts/inn-release-dry-run.txt`.
+No actual deploy was issued. Final read-only01:31:22UTC preflight reports zero
+active locks, processed marker present, checkpoint absent and feed version267.
+Decision: approve the single exact batch, release/apply in its listed order,
+keep publication conditional on the first real shadow job and preserved human
+links/holds, then enable only the new worker. No new Codex heartbeat was created.
