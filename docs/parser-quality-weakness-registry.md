@@ -901,3 +901,36 @@ child details passed. Source hashfb36e3d398f53d32f68a2fcef1c093819edd28f0,
 revision scheduledfestivallinker-00002-toj. Source-contract and image-heading
 limitations remain documented; publication is add-only, and ambiguous evidence
 never grants a link. Existing stage/model/prompt/cache settings are preserved.
+
+## October 16 festival source-context hardening (deployed) and midnight API finding
+
+Craig approved the saved-row fixes/replays and clarified that higher-resolution
+retrieval is a fallback after a quality failure, not a parser-wide default.
+Literal source offsets now bind shared caption venues and English/French image
+date headings without borrowing another row/card/date. Prepended date quotes
+are rebound to exact contiguous source text. Legacy reviewed evidence/negative
+decisions retain original keys and are transaction-fenced, including revocation.
+
+Isolated worker release5210194 passed934 compiled tests/105 focused checks and
+its qualified narrow dry run. New revision scheduledfestivallinker-00003-jeg,
+hash a9c5992b246afc7f5213fd1a72d3fe15e9c3e22b, is independently ACTIVE/100% with
+full configuration preserved. Its actual run made0 public additions/model calls,
+preserved17 human links/36 protected document versions and all15 existing
+Pumpkin/music records. Parser revisions/models/prompts remain unchanged.
+
+Fresh Harvest source validation passes both performances. The Pumpkin thumbnail
+test genuinely failed; same-asset2048x1325 versions plus explicit bounded
+diagnostic recovery captured41 bilingual entries,39 verified/two held. English
+October23 museum inventory is missing in its pass but retained in French; no
+translated or additional live occurrence was invented. New festival overviews,
+new source authority and broad automatic discovery remain separate reviewed
+publication work. Evidence and limits: `docs/festival-context-oct16-hardening.md`.
+
+The final feed check exposed a separate pre-existing API midnight defect:
+Node20 renders the current en-CA formatter's00:xx as24:xx when hour12:false
+overrides hourCycle:h23. Same-day evening records are then wrongly expired.
+The unchanged October16 Murder Mystery details return200; it is absent from
+the active feed and present with includeExpired=true. Exact serving-source
+Node20 reproduction confirms the fault; omitting hour12 yields the correct key.
+API/source/data remain unchanged. This needs a separate narrow API correction
+and Node20 midnight/DST/closing-time checks, not shifting the event's date/time.
