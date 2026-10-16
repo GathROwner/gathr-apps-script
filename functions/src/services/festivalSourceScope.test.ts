@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {expandFestivalSourceScope,validFestivalSourceScope,festivalSourceHeadingDates} from './festivalSourceScope.js';
+import {expandFestivalSourceScope,validFestivalSourceScope,festivalSourceHeadingDates,bindFestivalProposedRow} from './festivalSourceScope.js';
 const item=(scopeText:string,dateText:string,sourceIndices=[0],venueText='Hall')=>({scopeText,dateText,sourceIndices,timeText:'6 p.m.',venueText});
 test('image date headings govern exact multiline activities in their own ordered image',()=>{
  const row='6 p.m.\nMurder Mystery Night\nLocation: Hall',docs=[{index:-1,text:''},{index:0,text:'FRIDAY, OCTOBER 16\n'+row}];
@@ -46,4 +46,13 @@ test('altered, substring, fractional and cross-image offsets cannot validate',()
 });
 test('prose with multiple dates, wrong weekday or conflicting year does not yield a date',()=>{
  for(const h of ['Join us Saturday, October 17 and Sunday, October 18 at Hall','Join us Friday, October 17 at Hall','Join us Saturday, October 17 at Hall for our 2025 programme'])assert.deepEqual(festivalSourceHeadingDates(h,2026,'caption_context'),[]);
+});
+test('a prepended date is rebound to the exact later row, preserving intervening real source text',()=>{
+ const heading='WEDNESDAY, OCTOBER 21',row='6 p.m.\nWorkshop',docs=[{index:0,text:`${heading}\n1 p.m. Another activity\n\n${row}\nLocation: Hall`}];
+ const e=bindFestivalProposedRow(item(heading+'\n'+row,heading),docs);assert(e.sourceScope);assert(e.scopeText.includes('Another activity'));assert.equal(e.activityRowText,row+'\nLocation: Hall');
+ assert(validFestivalSourceScope({scope:e.sourceScope,documents:docs,scopeText:e.scopeText,rowText:e.activityRowText!,dateText:e.dateText,timeText:e.timeText,venueText:e.venueText}));
+});
+test('rebinding never crosses a new date or finds a missing clock/venue on another activity',()=>{
+ const a='FRIDAY, OCTOBER 16',b='SATURDAY, OCTOBER 17',row='6 p.m.\nShow';
+ for(const text of [`${a}\nOther activity\n${b}\n${row}\nLocation: Hall`,`${a}\n${row}\n7 p.m.\nOther activity\nLocation: Hall`])assert(!bindFestivalProposedRow(item(a+'\n'+row,a),[{index:0,text}]).sourceScope);
 });

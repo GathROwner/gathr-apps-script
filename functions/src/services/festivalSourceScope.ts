@@ -96,3 +96,24 @@ export function expandFestivalSourceScope<T extends {scopeText:string;dateText?:
  if(matches.length!==1)return item;const m=matches[0];
  return{...item,activityRowText:item.scopeText,dateHeaderText:m.heading,scopeText:m.document.text.slice(m.scope.contextStart,m.scope.contextEnd),sourceScope:m.scope};
 }
+
+/** A model may prepend a governing date while skipping earlier rows. Rebind literal row only. */
+export function bindFestivalProposedRow<T extends {scopeText:string;dateText?:string;timeText?:string;venueText?:string;sourceIndices:number[]}>(item:T,documents:readonly FestivalEvidenceDocument[]):ReturnType<typeof expandFestivalSourceScope<T>>{
+ if(!item.dateText||!item.scopeText.startsWith(item.dateText))return item;
+ const row=item.scopeText.slice(item.dateText.length).trimStart();if(!row)return item;
+ const candidates:ReturnType<typeof expandFestivalSourceScope<T>>[]=[];
+ for(const doc of documents.filter(d=>item.sourceIndices.includes(d.index))){
+  let offset=doc.text.indexOf(row);
+  while(offset>=0){let literal=row;
+   if(item.venueText&&!literal.includes(item.venueText)){
+    const remainder=doc.text.slice(offset+row.length),next=remainder.match(/^\r?\n([^\r\n]+)/)?.[1];
+    const label=next?.match(/^\s*(?:Location|Lieu)\s*:\s*(.*)$/i)?.[1];
+    if(label?.startsWith(item.venueText)&&(!label.slice(item.venueText.length).trim()||/^[,|]/.test(label.slice(item.venueText.length).trim())))literal=doc.text.slice(offset,offset+row.length+remainder.indexOf(next!)+next!.length);
+   }
+   const expanded=expandFestivalSourceScope({...item,scopeText:literal,sourceIndices:[doc.index]},documents);
+   if(expanded.sourceScope?.rowStart===offset)candidates.push({...expanded,sourceIndices:item.sourceIndices});
+   offset=doc.text.indexOf(row,offset+Math.max(1,row.length));
+  }
+ }
+ if(candidates.length!==1)return item;return candidates[0];
+}

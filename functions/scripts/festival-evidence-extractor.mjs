@@ -1,7 +1,7 @@
 // Optional, bounded post-parse evidence extraction. No Firestore/event writes.
 import {createHash} from 'node:crypto';
 import {expandFestivalCaptionDateScope} from '../lib/services/festivalCaptionScope.js';
-import {expandFestivalSourceScope,validFestivalSourceScope} from '../lib/services/festivalSourceScope.js';
+import {expandFestivalSourceScope,validFestivalSourceScope,bindFestivalProposedRow} from '../lib/services/festivalSourceScope.js';
 const obj=properties=>({type:'object',properties,required:Object.keys(properties),additionalProperties:false});
 const str={type:'string'};
 const schema=obj({complete:{type:'boolean'},limitations:{type:'array',items:str},documents:{type:'array',items:obj({index:{type:'integer'},text:str})},activities:{type:'array',items:obj({
@@ -31,7 +31,9 @@ export function validateFestivalEvidenceCapture(value,{caption,imageUrls}){
  value={...value,activities:value.activities.map(item=>{
   item={...item};if(item.captureHoldReason==='cross_card_excerpt')delete item.captureHoldReason;
   const old=expandCaptionDateScope(item,value.documents);
-  const expanded=old.captionScope?old:expandFestivalSourceScope(item,value.documents),row=expanded.activityRowText||expanded.scopeText;
+  let expanded=old.captionScope?old:expandFestivalSourceScope(item,value.documents);
+  if(!expanded.captionScope&&!expanded.sourceScope)expanded=bindFestivalProposedRow(item,value.documents);
+  const row=expanded.activityRowText||expanded.scopeText;
   // A model may quote the whole time/venue row as eventText. Select only the
   // literal printed heading when its supplied name actually occurs in that row.
   return typeof expanded.name==='string'&&expanded.name.trim()&&row.includes(expanded.name)
