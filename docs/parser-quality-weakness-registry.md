@@ -1031,5 +1031,11 @@ show-versus-doors timing, conflict holds, protected retired/human reviews and
 stale-worker fencing are covered. Stage1–5 prompts/models/cache contracts remain
 unchanged. Deployment and historical cleanup evidence are recorded separately
 in `docs/city-point-venue-oct16-release.md` and the exact repair approval plan.
-The historical37-document repair has not been applied; no broad cleanup or
-additional date recovery is authorized by this prevention release.
+Craig subsequently approved the exact37-document repair. Its guarded atomic
+application at18:12UTC removed12 copies, updated11 keepers/13 reviews and
+advanced feed283→284. Full fresh backup, exact-delta verification,25 public
+detail checks, the complete1,044-event/11-page feed and two original-poster
+checks passed. All12 Beaconsfield dates remain; Ireland retains19:30–22:00,
+doors18:30 in description and all three source galleries. No broad cleanup,
+additional date recovery, venue/media deletion, family relabelling or replay
+was performed. Exact evidence is in the repair approval plan.

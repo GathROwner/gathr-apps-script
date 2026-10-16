@@ -1,6 +1,6 @@
 # Exact city/venue duplicate repair approval plan — October 16
 
-Status: guarded live dry run passed; **not applied**. Parser hardening is being tested separately. Craig approved the prevention work and actual-start/doors policy; this plan requests the remaining exact live-data approval.
+Status: **approved, applied and verified** on October16. Craig approved this exact batch after the parser/finalizer safeguards were deployed and independently verified. Historical planning text below describes the reviewed delta; completion evidence is appended at the end.
 
 ## Short approval summary
 
@@ -11,7 +11,7 @@ Status: guarded live dry run passed; **not applied**. Parser hardening is being 
 - Advance only runtime_metadata/event_feed283→284 so clients refresh.
 - No new event, October23 recovery, venue/profile change, media deletion, family-label change, or replay.
 
-Total:12 deletions,11 retained-event updates,13 review updates and1 feed-marker update =37 document mutations. No mutation has occurred.
+Total:12 deletions,11 retained-event updates,13 review updates and1 feed-marker update =37 document mutations, now applied with the exact delta verified.
 
 ## Backups, guards and verification
 
@@ -77,3 +77,22 @@ active feed and both original poster HTTP checks. Baseline artifact:
 | update | `runtime_metadata/event_feed` | Feed refresh  | version |
 
 Source evidence and current-serving diagnosis: `docs/city-point-venue-oct16-audit.md`. Private full before-documents, source snapshots, dates, gallery URLs, versions and field values are in the pinned backup/plan.
+
+## Approved application and verification
+
+Craig's direct `I approve` authorized this exact plan. The pinned helper applied
+it on2026-10-16 at18:12UTC after fresh source/target/sibling/media checks and
+parser-idle checks before and within the transaction. No drift was bypassed.
+
+- Fresh full backup: `firebase/artifacts/city-point-repair-oct16/prewrite-backup-2026-10-16T18-12-13-885Z.json`.
+- Applied result: `firebase/artifacts/city-point-repair-oct16/applied-2026-10-16T18-12-13-885Z.json`.
+- Exact37-document delta verified by rereading every target/reference.
+- Feed version advanced283→284.
+- Read-only public verification: `firebase/artifacts/city-point-repair-oct16/after-api-verified.json`.
+- All25 detail checks passed:12 deleted details404;13 retained details200 with correct venue scope, dates, explicit start/end flags and clocks. Both untouched Beaconsfield extra dates remain intact.
+- Complete active feed:1,044 events across11 pages; no deleted IDs/materialized copies, and every active keeper appears once.
+- Both original posters returned200. Venue documents, media objects, untargeted fields and family labels were preserved.
+
+The existing Ireland keeper retains19:30–22:00 and its original poster, with
+doors18:30 in its description. No October23 event was created. No replay or new
+OTA was performed or needed.

@@ -1,6 +1,6 @@
 # October 16 named venue and show/doors safeguards
 
-Status: all three parsers and the finalizer released and independently verified ACTIVE with100% latest traffic. Historical data repair is prepared but not applied.
+Status: all three parsers and the finalizer released and independently verified ACTIVE with100% latest traffic. The exact approved historical repair is also applied and verified.
 
 ## Reviewed release
 
@@ -27,7 +27,7 @@ Private evidence is in the parser task's `functions/artifacts/city-point-hardeni
 
 ## Historical data repair remains separate
 
-The exact37-document plan is [city-point-venue-oct16-repair-approval-plan.md](city-point-venue-oct16-repair-approval-plan.md). It removes12 duplicate copies, updates11 retained events and13 reviews, and advances one feed marker. All12 Beaconsfield dates remain; Ireland retains its verified venue/show clock/poster and doors description. No venue/media deletion, new date, family-label change or replay is included. Exact batch approval is pending. No live event/review repair has occurred.
+The exact37-document plan is [city-point-venue-oct16-repair-approval-plan.md](city-point-venue-oct16-repair-approval-plan.md). Craig subsequently approved it and the guarded helper applied it at18:12UTC:12 duplicate copies removed,11 retained events and13 reviews updated, feed version283→284. All12 Beaconsfield dates remain; Ireland retains its verified venue/show clock/poster and doors description. No venue/media deletion, new date, family-label change or replay was included. Full fresh backup, exact-delta result and25-detail/complete11-page active-feed verification are recorded in that plan. Both original posters remain available.
 
 Existing outdated firebase-functions warning remains; no dependency upgrade is included.
 
@@ -52,4 +52,4 @@ firebase deploy --only "functions:gathr-functions:processDataset,functions:gathr
 firebase deploy --only "functions:gathr-functions:finalizeCityLevelEventReviewTrigger" --project gathr-migrated --non-interactive
 ```
 
-Each command ran from its respective assembly's functions directory. No other functions or live event/review documents were modified. This release has not yet been exercised by a subsequent production full parse.
+Each command ran from its respective assembly's functions directory. Those deployments modified no other functions or live event/review documents. The separately approved repair described above followed afterward. This release has not yet been exercised by a subsequent production full parse.

@@ -225,7 +225,12 @@ description. Implementation/release evidence is tracked in
 `b4bc732` passed their focused/full suites and source playback. This supersedes
 the diagnostic-only implementation status above without rewriting its evidence.
 
-The exact historical repair is now prepared and dry-run verified in
+The exact historical repair was prepared and dry-run verified in
 `docs/city-point-venue-oct16-repair-approval-plan.md`:12 duplicate deletes,
-11 keeper updates,13 review redirects and1 feed marker. Its exact approval
-remains pending; deployment does not imply those records were repaired.
+11 keeper updates,13 review redirects and1 feed marker. Craig subsequently
+approved this exact batch; it applied at18:12UTC with full fresh backup and
+exact-delta verification. Public verification passed25 details, the complete
+1,044-event/11-page active feed and both original poster checks. All12
+Beaconsfield dates remain; Ireland retains19:30–22:00 with doors18:30 in the
+description. Result/backup paths are recorded in the plan. No additional date,
+venue/media deletion, family relabelling or replay was included.
