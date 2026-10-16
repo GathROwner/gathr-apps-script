@@ -34,3 +34,25 @@ reported likely omission, not proof that the parser alone lost the flag.
 Report a concise evidence-based recommendation and exact affected records for
 any subsequent live repair batch. No automatic relabelling, broad backfill,
 new schedule, or paid experiment is part of the current request.
+
+## October 16 source cohort saved before this investigation
+
+The completed regular full-run audit is in `docs/luna-oct16-production-audit.md`.
+Private source, snapshot, usage, current record/API and gallery evidence is in
+`functions/artifacts/luna-oct16-production-audit/`. Its156 model-source rows and
+155 touched parents provide an initial cohort, not an accuracy estimate:
+153 parents are `unlikely`, one `high`, one lacks a level. Thirteen original
+gallery references could not be downloaded and must remain explicit limits.
+
+Add these cases to the source-to-badge investigation:
+
+- `venues/4OcLMCRKRGoKO5eQncLi/events/vienqEqn0AgXiVcebm4G`: farm-animal
+  visit with family rates, score15/insufficient-family-evidence.
+- `venues/slug_sobeyfamilytheatre/events/ARClj8Qo5mCWzpZCI4GF`: Symphony
+  schedule line with score0 and `alcohol_focused`; inspect mixed-post evidence
+  leakage. A theatre's name alone does not establish family suitability.
+- Healthy positive control: Harvest Fest's explicit all-ages invitation,
+  score100. Healthy adult control: Be You's explicit19+, score0.
+
+No labels were changed by that audit. Resolve its recurrence/timing and other
+confirmed integrity failures before combining policy changes with a new parse.

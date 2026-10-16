@@ -1039,3 +1039,58 @@ checks passed. All12 Beaconsfield dates remain; Ireland retains19:30–22:00,
 doors18:30 in description and all three source galleries. No broad cleanup,
 additional date recovery, venue/media deletion, family relabelling or replay
 was performed. Exact evidence is in the repair approval plan.
+
+## October 16 next regular full-run findings
+
+Read-only audit of dataset `1_afb_0HkeOiHbp3s7lofsgKdtNbyKGCw`, run
+`330c717b-7612-427a-bd71-a7ec776e5cce`, is complete with explicit original-gallery
+limits. All four completion authorities agree at385/385;86m29s;100 creates,
+58 audited updates; one bounded Stage5 failure; estimated model costUSD0.485972.
+This run used `processdatasetresume-00457-vaz`/`ccae940c2d876badd058c446071d54a5cf0cb12d`
+and **predates** the current `8e366b3` venue/doors safeguards. Fresh current
+parser/worker ACTIVE/latest/common-hash readbacks are retained.
+
+Eight finite follow-up groups are recorded in `docs/luna-oct16-production-audit.md`:
+
+1. Whole-post recurrence fallback borrowed Montague poker's Thursday schedule
+   for two different rallies and three consecutive drop-in dates. Compact
+   validation rejected actual Nano corrections removing that recurrence; retry
+   preserved it. Collapse/recurring dedup then merged different source dates.
+   Fix item-scoped recurrence provenance and safe correction/removal together.
+2. Be You lost an explicit midnight end while retaining next-day endDate;
+   City Cinema and a recreated past Inn parent used publication timestamps as
+   performance starts. Preserve date/clock pairs and require show-clock evidence.
+3. Ruby's original$16 board became$18; Kool Breeze Craft Fair became Food
+   Special; Men of the Deeps chorus concert became Cinema. Three exact live
+   records need reviewed correction plus prevention evaluation.
+4. Belly Dance aggregator/first-party titles remain a probable duplicate pair;
+   first-party55-minute duration/Friday recurrence were lost. Verify older
+   source/room/instructor before a deletion; do not add fuzzy aliases.
+5. Harvest Stage5 returned two malformed completed JSON envelopes and held
+   correctly. Existing Harvest parent remains; no token-cap or missing-parent
+   claim. Programme child extraction is a separate issue from JSON recovery.
+6. Today's Anchor capture failed exact caption echo and the worker held with
+   no public delta. Carry original caption authoritatively while retaining
+   literal-excerpt and membership checks; do not weaken ownership/date guards.
+   Existing Anchor17/Pumpkin13 links remain; five actual post-run worker calls
+   cost an additional estimatedUSD0.006822, separately accounted.
+7. Legacy Two Pianos and Mayoral Candidates roots still retain city scope and
+   public private-review text; current guards preserve/hold them rather than
+   repairing history. ADL room, Witches street activity and Three Oaks country
+   city-hint queue cases need exact identity/spatial review; real unknown trail,
+   school/arena identities remain held without invention.
+8. Al Tuck rejection interpreted an unlabelled URL25 as year2025. Current
+   occurrence year remains unverified; hold recovery pending first-party proof.
+
+Healthy guards preserve separate pool sessions, aquatic categories, dated walk-in
+clinics, protected show clocks and Harbourfront live categories;11 matched
+out-of-region rows plus3 explicit Dorchester NB occurrences do not publish.
+385 distinct row starts and monotonic checkpoints show no row replay. Full
+155-detail readback and144 managed-media checks pass. This does not certify
+every semantic merge, all historical city records or13 unavailable originals.
+
+The separate family audit now has farm-rate, mixed-post alcohol-reason and
+positive/adult control cases. No live writes, deploys, replays, new generation
+calls, map interaction or family relabelling were performed by this audit.
+Exact source IDs, affected paths, costs, traces and repair boundaries are in
+the dated audit; prepare short exact approval batches before live correction.
