@@ -1,5 +1,14 @@
 # October 16 audit fixes: approved production batch
 
+Current follow-up status: Craig subsequently authorized fixing Al Tuck's remaining
+gap. Source releasee6c8d04, a new passing cloud dry run and exact one-source normal
+recovery are complete. Current parser hash10b3d3af4e8c9e4f2d9883b4194298a25e48d5c2;
+event `venues/slug_trailsidemusichall/events/i4JaLxkbHfhNkL1q6L7D` is API/feed/media
+verified. See `docs/altuck-oct16-recovery-release.md`. The failed first-run account
+below is historical; its proposed broad ticket-path diagnosis was refined by
+finding and repairing the existing exact Locarius helper. No general ticket
+allowlist expansion was needed.
+
 Craig approved `docs/oct16-audit-fixes-approval-plan.md` as one combined batch.
 The six narrow releases and the exact23-document repair are complete. Al Tuck's
 one-source cloud dry run completed but failed the approved publication gate;

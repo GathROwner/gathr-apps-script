@@ -1134,3 +1134,26 @@ Four actual cloud calls cost an estimatedUSD0.00335069 separately from the11
 local evaluation calls. Source, venue and original processed marker are unchanged;
 no checkpoint remains and the parser is idle. Full evidence and boundaries are
 in the release report.
+
+### Al Tuck follow-up completed after Craig's authorization
+
+Source review refined the prior diagnosis: the general Ticketpro allowlist was
+not the only ticket path. The existing exact Locarius helper discarded two-letter
+Al and required the erroneous date to already match. Releasee6c8d04 fixes that
+narrow source verifier and adds two Stage3 prompt rules.25 focused and916 full
+compiled checks passed; actual failed-response playback is recovered offline.
+No general allowlist expansion or current-year fallback was added. Printed years,
+text-bearing/unknown galleries, source identity/date/venue conflicts and unavailable
+pages retain holds. Independent parser ACTIVE/latest100%/preserved-config readback
+confirms common source10b3d3af4e8c9e4f2d9883b4194298a25e48d5c2.
+
+New dry run6aa1369c-8c30-4721-9d53-d1c08a50cef6 passed one-event date/clock/doors/
+unknown-finish/ticket/media gates with zero event/venue/queue/review changes.
+Normal recoveryf53c59b4-aa7d-40e0-8c91-4e92945a6497 created only
+`venues/slug_trailsidemusichall/events/i4JaLxkbHfhNkL1q6L7D`: October28,2026 at20:00,
+doors18:30 in description, unknown finish. Full source inventory shows one canonical
+event, no duplicate and no unrelated event/venue/queue/review delta. Detail, complete
+994-event/10-page feed, ticket and original managed media checks pass. Source and
+full-run marker are unchanged, no checkpoint remains and parser is idle. Ten actual
+cloud calls cost an estimatedUSD0.00549151; offline playback is separate and free.
+Current source/serving/recovery evidence: `docs/altuck-oct16-recovery-release.md`.
