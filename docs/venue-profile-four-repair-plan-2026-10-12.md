@@ -1,5 +1,11 @@
 # Four current-listing venue profile repairs - exact approval plan
 
+**COMPLETE:** approved four-venue repair applied and independently verified
+October 15 Halifax time (2026-10-16T00:37:33Z). All four managed replacement
+images and venue endpoints return 200. Five event details and both complete
+upcoming feeds return the corrected canonical profiles; all five stored event
+documents and all other venue fields are unchanged.
+
 ## October 15 approved refresh
 
 Craig approved repairing these exact four venues together (“Ok do that”) after
@@ -21,8 +27,8 @@ changes only the reviewed canonical image references/signatures and timestamp.
 No venue address or event update is included. API verification must wait for
 the existing five-minute venue cache when stale responses are observed.
 
-All four canonical image URLs return HTTP 404 and all four venues occur in the
-complete upcoming API feed. Default-dry-run helper:
+Before repair, all four canonical image URLs returned HTTP 404 and all four
+venues occurred in the complete upcoming API feed. Default-dry-run helper:
 `firebase/repair-venue-profiles-oct12.mjs`.
 
 | Exact Firestore target | Verified official replacement |
@@ -58,3 +64,37 @@ event detail endpoints and the full upcoming feed.
 The remaining eleven broken-image venues have no current stored events. Blank
 canonical profiles and the conflicting Sport PEI identity need separate reviewed
 targets and verified images; this plan does not authorize those changes.
+
+## Applied repair and independent evidence
+
+The approved four-target plan matched the fresh source/state verification
+exactly, including the original reviewed SHA-256 image bytes. Helper commit
+`7cd8ab4` adds transactional target/event-sibling/active-parser drift checks
+and safe equal-byte reuse of staged immutable objects. No existing object was
+deleted or overwritten. Four original assets were uploaded with create-only
+generation preconditions and checked publicly before the atomic venue update.
+
+- Fresh prewrite backup:
+  `firebase/venue-profiles-oct12-backup-2026-10-16T00-36-54-408Z.json`.
+- Exact result:
+  `functions/artifacts/oldedublin-profile-oct12/four-venue-repair-result-2026-10-16T00-36-54-408Z.json`.
+- Staged asset receipt:
+  `functions/artifacts/oldedublin-profile-oct12/four-venue-staged-assets-2026-10-16T00-36-54-408Z.json`.
+- Independent read-only verifier: `firebase/verify-four-venue-profiles-oct15-readonly.mjs`
+  (commit `d9e78e7`).
+- Final evidence:
+  `functions/artifacts/oldedublin-profile-oct12/four-venue-independent-verification-oct15.json`.
+
+Independent verification at00:37:33UTC confirmed all four image hashes/HTTP200,
+all four canonical venue responses, all five associated event details with
+correct profiles, exact venue-field deltas and all five event snapshots/update
+times unchanged. Complete default upcoming feed915events/10pages and capable
+upcoming feed923events/10pages each contained five affected occurrences with
+the correct profiles. Feed marker267 is unchanged. Public API cache responses
+were already fresh; no cache flush, API/parser deployment or client OTA was
+needed. Source images were visually inspected; device adoption is not claimed.
+
+This closes these four specific broken profiles. The October12 inventory of
+other inactive broken/blank profiles remains a separate, dated audit snapshot;
+refresh that inventory before proposing additional exact repairs. Montague's
+address discrepancy and SportPEI's conflicting identity were not changed.

@@ -854,3 +854,25 @@ evidence and coverage boundaries: `docs/venue-feed-index-oct15.md` and
 `firebase/artifacts/venue-feed-index-oct15/`. This closes the previously
 documented index failure; other optional query/filter combinations are not
 claimed universally covered by these specific controls.
+
+## October 15 four additional broken venue profile repairs (complete)
+
+The New Glasgow Lobster Suppers, Lost Anchor, Montague Rotary Library and PEI
+Brewing Company canonical managed profiles still returned404 on fresh review.
+Their exact October12 candidate plan was never assumed applied. Craig approved
+repairing these four together. The fresh dry run exactly matched the original
+reviewed target/event state and source-image hashes. All four candidates were
+independently viewed; immutable source bytes were copied to managed storage.
+The guarded transaction reread processing locks, four venues and all five
+event siblings before changing only canonical profileImage/source signature
+and updatedAt. Existing objects and all event documents were preserved.
+
+Independent verification2026-10-16T00:37:33Z (October15 Halifax) passed four
+image hashes/HTTP200, four venue APIs, five event details, exact venue deltas,
+five unchanged event snapshots/update times and both complete upcoming feeds
+(default915/10pages,capable923/10pages; five affected occurrences each).
+Feed marker267 is unchanged. No API/parser release or OTA was needed; existing
+profile cleanup protections remain separate verified releases. The historical
+deletion mechanism for these old files is not newly attributed by this repair.
+Evidence/backup/result/verification: `docs/venue-profile-four-repair-plan-2026-10-12.md`.
+Other inactive/blank-profile candidates require fresh review and exact plans.

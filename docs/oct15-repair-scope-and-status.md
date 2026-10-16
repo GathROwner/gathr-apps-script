@@ -79,7 +79,13 @@ parse and are not prerequisites for declaring an exact live repair complete:
 2. Automatic festival linking: finish source/ownership/context shadow gates,
    then implement and validate the separate public writer. Automatic publication
    is still OFF; four approved source-array corrections alone are not rollout.
-3. Missing/blank venue-profile review and validated first-party recovery.
+3. Four confirmed broken current-listing venue profiles are COMPLETE at
+   2026-10-16T00:37:33Z (October15 Halifax): New Glasgow Lobster Suppers,
+   The Lost Anchor, Montague Rotary Library and PEI Brewing Company. Four
+   source-verified managed images, four venue/five event details and complete
+   default/capable feeds pass; all five event docs and other venue fields
+   unchanged. Broader blank/inactive-profile review remains separate and needs
+   a fresh inventory. See `docs/venue-profile-four-repair-plan-2026-10-12.md`.
 4. COMPLETE23:57:48UTC: the venueId/startDate/startTime collection-group index
    is READY; 15 venue pagination cases plus date-window/empty-venue checks pass,
    normal feeds and all15 existing indexes preserved. See

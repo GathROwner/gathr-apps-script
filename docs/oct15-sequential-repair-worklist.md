@@ -257,7 +257,10 @@ not additional newly discovered failures in the Harvest batch.
 
 1. Finish date-only client delivery and bounded backend enablement validation.
 2. Festival source/provenance shadow gates, then separately validated public writer.
-3. Fresh missing/blank venue-profile review with validated first-party recovery.
+3. Four confirmed broken current-listing profiles repaired/verified00:37:33UTC
+   October16 (October15 Halifax); four managed images/venue endpoints, five
+   event details and both complete upcoming feeds pass. Other blank/inactive
+   profiles remain a separate fresh-inventory task; see the four-profile plan.
 4. COMPLETE23:57:48UTC: exact venueId/startDate/startTime index READY; 17 live
    API cases pass, complete normal feeds and15 existing indexes unchanged.
    Evidence: `docs/venue-feed-index-oct15.md`.
