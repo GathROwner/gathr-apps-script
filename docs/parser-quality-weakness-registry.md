@@ -970,3 +970,21 @@ programme occurrences remain guarded rather than silently invented.
 The separate midnight API defect above was subsequently repaired at9fb9d82,
 revision gathr-backend-00086-h5g. Craig confirmed the Oct16 Murder Mystery
 18–21 listing on his phone. That correction did not create this festival root.
+
+## October 16 participation-area presentation and deferred family audit
+
+Kensington Skeleton Selfie Hunt is one source-supported activity at multiple
+participating businesses, with no separate scheduled children. Its existing
+area document is correct; the browser's universal festival terminology caused
+the false appearance of an unlinked programme. Preserve reviewed unordered
+points and unknown access clocks. The approved frontend distinction must use
+positive hunt/participation evidence, preserve all explicit linked programmes
+even when unavailable, and use neutral language for ambiguous areas. No
+per-stop duplicate events or parser/data migration is needed. Diagnosis and
+release evidence: `docs/kensington-participation-oct16.md`.
+
+Craig separately requested future research into missing family-friendly labels,
+using this hunt as an example. Trace parser decisions, merge/persistence, API
+projection and badge rendering before attributing a missing badge to a model.
+This is deferred work, not approval for a broad relabelling/backfill. Scope:
+`docs/family-friendly-labelling-followup.md`.
