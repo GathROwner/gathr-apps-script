@@ -935,7 +935,7 @@ Node20 reproduction confirms the fault; omitting hour12 yields the correct key.
 API/source/data remain unchanged. This needs a separate narrow API correction
 and Node20 midnight/DST/closing-time checks, not shifting the event's date/time.
 
-## October 16 automatic festival schedule correction (candidate, not live)
+## October 16 automatic festival schedule correction (deployed and verified)
 
 PQ-SPATIAL/PQ-021: extraction success/zero-addition Anchor replays did not prove
 new automatic schedule publication. Actual Pumpkin saved-source replay initially
@@ -955,8 +955,17 @@ Fresh completed-October14 replay reads151 real sources and the exact proposed
 bootstrap payload:13 additions, zero manually seeded links/source gaps/paid calls/
 live writes. In-memory publication verifies repeat zero, missing-child later
 arrival and refresh retention. Distinct serving-baseline assemblies preserve
-all stage/model/prompt/configuration contracts. Exact release/data batch remains
-approval-gated, not applied: `docs/festival-automatic-linking-oct16.md`.
+all stage/model/prompt/configuration contracts. Craig subsequently approved the
+exact combined batch. All7 publishing/linking functions are ACTIVE/latest with
+their baseline configuration preserved. The live Pumpkin edition was created
+with zero manually seeded links and the actual worker generated13 existing
+activity links; repeat evaluation adds zero and18 protected document versions
+are unchanged. Root/all13 details and complete capable feed verification pass;
+no child, venue or media was changed. Feed version270. Provider environment
+ordering alone was independently proven against the immutable old revision
+before publication. Exact release, backup and applied/API evidence:
+`docs/festival-automatic-linking-oct16.md`. Future discovery and unconfirmed
+programme occurrences remain guarded rather than silently invented.
 
 The separate midnight API defect above was subsequently repaired at9fb9d82,
 revision gathr-backend-00086-h5g. Craig confirmed the Oct16 Murder Mystery

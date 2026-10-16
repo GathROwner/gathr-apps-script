@@ -2,10 +2,11 @@
 
 ## Status
 
-Candidate implemented and tested; **not deployed or published yet**. Craig
-correctly challenged the earlier completion claim: extraction success and an
-Anchor worker result with zero new additions did not prove a new festival's
-automatic schedule. No Pumpkin overview or new links existed on his phone.
+**Approved, deployed and published October16 at11:30–11:31UTC.** The actual
+worker generated13 links from an empty reviewed schedule; repeat evaluation
+adds zero. The existing13 child records, both venues and media were preserved.
+Craig correctly challenged the earlier completion claim: extraction success and
+an Anchor result with zero additions had not proved a new automatic schedule.
 
 ## Actual old-row reproduction and corrections
 
@@ -75,7 +76,7 @@ Coordinator build and **955 compiled tests +39 script tests passed**. Release
 assemblies still require their own build/tests and qualified dry runs before
 the final approval batch is presented.
 
-## Proposed live batch (not applied)
+## Reviewed live batch (subsequently applied; results below)
 
 Create the reviewed edition `events/local_pumpkin_2026`, private review
 `city_level_event_reviews/local_pumpkin_review_2026`, and exact validated source
@@ -101,8 +102,9 @@ Exact backup and plan:
 - `functions/artifacts/pumpkin-overview-oct16/bootstrap-backup-2026-10-16T09-53-01-759Z.json`
 - `functions/artifacts/pumpkin-overview-oct16/bootstrap-plan-2026-10-16T09-53-01-759Z.json`
 
-The event-integrity repair skill requires exact live-target approval. Approval
-has **not** been requested for or applied to this new batch yet.
+The event-integrity repair skill required exact live-target approval. Craig's
+reply, **I approve**, authorized this combined plan; the approval is recorded in
+`functions/artifacts/pumpkin-overview-oct16/approval-oct16.json`.
 
 ## Final combined approval plan
 
@@ -189,3 +191,63 @@ node firebase/apply-pumpkin-automatic-links-oct16.mjs --apply --plan=functions/a
 Any drift, unexpected addition, active parser or verification failure stops the
 batch. Do not broaden targets or regenerate an approved plan silently. Existing
 SDK-version warnings were left unchanged; upgrading dependencies is deferred.
+
+## Completed execution and independent verification
+
+All four qualified deployment commands completed successfully in project
+`gathr-migrated`, codebase `gathr-functions`, from the exact candidate checkouts
+listed above. The parser was idle at preflight and final readback. All7 functions
+are ACTIVE,100% latest traffic; user environment, secret bindings and runtime
+configuration are preserved. The separate midnight API release is untouched.
+
+| Function | Latest revision | Serving source hash |
+| --- | --- | --- |
+| processDataset | processdataset-00493-pog | ccae940c2d876badd058c446071d54a5cf0cb12d |
+| processDatasetResume | processdatasetresume-00457-vaz | ccae940c2d876badd058c446071d54a5cf0cb12d |
+| processDatasetSelectedRows | processdatasetselectedrows-00449-kit | ccae940c2d876badd058c446071d54a5cf0cb12d |
+| finalizeCityLevelEventReviewTrigger | finalizecityleveleventreviewtrigger-00077-bof | f028e8ea9a912dc8002f8f61870e787af725e36c |
+| processSharedEventPublicCandidates | processsharedeventpubliccandidates-00046-fax | 36074fe277460d63a75e11d8eb1b4ed217087468 |
+| scheduledSharedEventPublicCandidateProcessor | scheduledsharedeventpubliccandidateprocessor-00048-lin | 44184fae3e30aa764191e01dfe20e9cdd58358b3 |
+| scheduledFestivalLinker | scheduledfestivallinker-00004-wul | f84328f133a8410265e2011bde5cbb35c4a474f0 |
+
+The first apply attempt stopped **before Firestore mutation** because Cloud Run
+reordered the worker's literal environment entries. Readback of immutable old
+revision00003 matched the original pinned runtime hash exactly. Full old/new
+runtime comparison, normalizing only environment-array order, proved every
+value/secret/setting identical. The verifier now permits only that proven case,
+rejecting duplicate keys, order-dependent expansion, or any changed setting.
+The original baseline and approved data plan were not regenerated or relaxed.
+Evidence: `worker-runtime-comparison.json`, `serving-after.json`.
+
+The approved helper then completed against the **unchanged exact frozen plan**:
+
+- Bootstrap created the3 approved documents with zero child links, then the
+  released worker added exactly13 existing IDs to the public edition and saved
+  private ownership proofs/job state. Feed268→269→270.
+- Worker read151 unique historical sources, made one public edition update,
+  zero new model calls and zero child/venue/media changes. Repeat dry evaluation
+  returns completed with zero additions.18 protected documents retain their
+  exact versions/content. Created review/capture payloads and all other public
+  root fields match the approved plan.
+- Festival detail and all13 child detail endpoints returned200. The complete
+  capable active-feed pagination returned1000 records across11 requests;
+  the root and each of13 children occur exactly once, with all13 area links.
+- Separate Firestore/API readback at11:31:58UTC confirms manual child links0,
+  machine ownership13, public links13, feed270 and no active parser locks.
+
+Exact local evidence under `functions/artifacts/pumpkin-overview-oct16/`:
+
+- `prewrite-backup-2026-10-16T11-30-48-870Z.json`
+- `post-bootstrap-proposal-2026-10-16T11-30-48-870Z.json`
+- `worker-applied-2026-10-16T11-30-48-870Z.json`
+- `applied-2026-10-16T11-30-48-870Z.json`
+- `api-verified-2026-10-16T11-30-48-870Z.json`
+- `independent-post-publication-readback.json`
+- Four `*-release-deploy.txt` logs and `serving-after.json`.
+
+Decision: retain automatic add-only linking for reviewed editions and all source,
+completeness, ambiguity, manual-removal and parser/worker fencing safeguards.
+This does not authorize invented missing programme occurrences, new venue points
+or unreviewed festival discovery. Existing iOS festival flow needs no new OTA;
+search **Summerside Pumpkin Festival2026** and open its Event Info schedule.
+API/feed availability is verified; adoption on Craig's phone is not yet observed.
