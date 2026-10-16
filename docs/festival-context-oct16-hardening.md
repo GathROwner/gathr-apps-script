@@ -126,7 +126,14 @@ remain protected. That zero-delta result is not a newly created phone example.
 Release transcripts and test output are in the isolated release's
 `functions/artifacts/festival-context-release-*.txt`.
 
-## Separate API midnight defect — confirmed, not changed
+## Separate API midnight defect — subsequently corrected
+
+Follow-up: Craig approved the narrow API repair. It is now deployed and
+verified at `gathr-backend-00086-h5g`,100% traffic, clean source `9fb9d82`.
+See `docs/api-midnight-oct16-release.md` for Node20/22 regression evidence,
+unchanged runtime configuration, successful full-feed verification and the
+five expired October15 records reconciled before release. The diagnosis
+below describes the original finding; the API is no longer on00085.
 
 The final complete capable feed contained 833 entries across nine pages, with
 14 of the 15 retained activity targets present once. The October16 18:00–21:00

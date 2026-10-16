@@ -1,6 +1,42 @@
 # API midnight expiry fix — October 16
 
-## Current status: tested and committed; deployment awaiting CLI sign-in
+## Current status: deployed and independently verified
+
+Completed at06:13UTC October16 after Craig confirmed CLI sign-in.
+Cloud Build `adcadc0d-123c-4a62-9e09-74e987ba788c` succeeded; exact clean API
+commit `9fb9d829d4c51aa066287b3e0d23baa4e74f9b6d` is serving at
+`gathr-backend-00086-h5g`, Ready/Active,100% latest traffic. Immutable digest:
+`sha256:5718c759eedd70cd6fbc7661ad0ee128d96625859b19922fdd74d58b3ff40323`.
+
+All14 environment definitions, full runtime configuration hash
+`516b97d64d4e4913a1cf738cd597e011a515e7d60a8ef02b5e2a3eca432a17bc`
+and runtime annotation hash match the accepted pre-release baseline.
+Independent post-release `/api/release` confirms the exact source, clean
+build provenance and new revision. The complete capable active feed contains
+1,001 entries across11 pages; all15 checked activities occur exactly once.
+Murder Mystery Night detail and venue feed retain October16 18:00–21:00.
+All15 activity documents and31 surviving protected records are unchanged;
+17stored manual festival links and feed marker268 are preserved. No writes
+were made to Firestore, parsers, model settings or festival publication.
+
+The earlier36-record baseline crossed the scheduled03:00Halifax cleanup
+while authentication was pending. Before deployment, five October15 records
+were already absent: Arts Mixer, two Guild conference/comedy events, Tivoli
+Altered States and Trailside Captains of Everything. Saved inventory confirms
+all five ended October15;06:00UTC cleanup logs report83 expired records deleted
+with no errors. This is consistent with scheduled cleanup, not an API release
+effect. The exact five absences were reconciled in a fresh preflight; all31
+remaining hashes/versions matched. No missing records were recreated, and
+the post-release check requires the same five absences and31 unchanged pins.
+
+Release evidence under `functions/artifacts/api-midnight-oct16/`:
+`deploy.txt`, `build-status.json`, `build-log.txt`, `config-before.json`,
+`config-after.json`, `revision-after.json`, `idle-preflight.json`,
+`before-records-feed.json`, `after-records-feed.json`,
+`preflight-cleanup-reconciliation.json` and `cleanup-logs.json`.
+Frozen Node20 baseline proof remains the midnight-specific validation;
+these live checks occurred after01:00 and are not presented as a live
+midnight observation.
 
 Craig approved the proposed midnight API fix with "Ok do it" after the
 festival source-context release. Scope is Cloud Run `gathr-backend` only,
@@ -38,15 +74,15 @@ No changes to stored clocks, recurrence, date-only capability or image guards.
   This is natural post01:00 visibility, not evidence of an API deployment.
 - `verify-readonly.cjs`: bounded read-only independent post-release verifier.
 
-Live `/api/release` still reported accepted6e9fe16 and
+At the initial preflight, live `/api/release` still reported accepted6e9fe16 and
 `gathr-backend-00085-tts` at preflight. Google CLI configuration readback failed
 with an expired interactive account requiring reauthentication. `gcloud auth
-login` opened the browser and is awaiting completion; Craig was asked through
-the asynchronous input panel. Do not claim deployment or change credentials.
+login` opened the browser; Craig subsequently completed authentication.
+The release and verification above are now complete.
 
-## Remaining authorized steps
+## Release procedure used
 
-After sign-in, capture fresh service configuration by piping `gcloud run
+After sign-in, captured fresh service configuration by piping `gcloud run
 services describe ... --format=json` directly into
 `firebase/capture-api-serving-config-hashes.mjs` with the dedicated artifact
 output. Never persist or print raw service environment/credentials. Require
@@ -59,7 +95,7 @@ transcript outside the source export. Independently verify the exact9fb9d82
 commit, new ACTIVE/latest revision,100% traffic and preserved configuration
 hashes, then run the dedicated verifier with `after`. Its existing credential
 path is supplied only via `ANCHOR_CREDENTIAL_PATH`, never copied or printed.
-Update this document with actual release/build/readback evidence.
+Actual release/build/readback evidence is recorded above.
 
 Rollback target, if required, is immutable6e9fe16, preserving accepted
 date-only delivery. Pumpkin overview publication remains a separate later
