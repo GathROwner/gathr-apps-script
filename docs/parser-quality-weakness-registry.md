@@ -996,7 +996,8 @@ specials-only venues. No extra occurrences, pins, venue counts or inferred
 membership were introduced. All 139 focused/regression tests passed; eight
 native shared-component screenshots and the clean source/export were
 independently reviewed. Fresh EAS readback and the published bundle match;
-iPhone adoption remains pending. Evidence: `docs/venue-parent-links-oct16.md`.
+Craig subsequently confirmed the new links working on his phone. Evidence:
+`docs/venue-parent-links-oct16.md`.
 
 Craig separately requested future research into missing family-friendly labels,
 using this hunt as an example. Trace parser decisions, merge/persistence, API

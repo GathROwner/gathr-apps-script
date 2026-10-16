@@ -98,9 +98,10 @@ view/list readback confirms the exact update/commit as newest iOS Preview;
 Android Preview remains unchanged.
 
 The existing fingerprint advisory remains
-`9ee0b973a2f53ed5647ccafe1599ef64f1580ffb`. iPhone adoption and iOS native visual
-confirmation remain pending Craig's phone check; Android proof and EAS metadata
-do not establish adoption. No gesture, family-label, backend or live-data changes
+`9ee0b973a2f53ed5647ccafe1599ef64f1580ffb`. After publication Craig confirmed
+“Alright that's working” on his phone. This is direct user confirmation of the
+released backlink behaviour; Android proof and EAS metadata alone did not
+establish adoption. No gesture, family-label, backend or live-data changes
 were included. An unrelated old-context gesture suggestion was caught during
 coordination and produced no code changes.
 
