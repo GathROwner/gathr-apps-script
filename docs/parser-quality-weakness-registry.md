@@ -877,22 +877,27 @@ deletion mechanism for these old files is not newly attributed by this repair.
 Evidence/backup/result/verification: `docs/venue-profile-four-repair-plan-2026-10-12.md`.
 Other inactive/blank-profile candidates require fresh review and exact plans.
 
-## October 15 Inn source limits and festival publication follow-up (prepared)
+## October 15 Inn source limits and festival publication follow-up (complete)
 
 The three older Inn records were independently reviewed against exact saved
 captions, eight retained source images and current first-party website evidence.
 Two genuine Saturday/Sunday16:00 tours lack the advertised October10 season
 cutoff and carry unsupported finishes. A separate October16 foraging card
 incorrectly borrowed15:00–21:00 despite its source saying morning without a
-clock. Exact live changes, private hold and replay constraints are prepared,
-not applied: `docs/inn-and-festival-oct15-approval-plan.md`.
+clock. Craig approved the exact combined plan. Live corrections, private hold
+and deployed replay constraints are complete and independently verified:
+`docs/inn-festival-oct15-execution.md`.
 
-Automatic festival add-only writer/worker is implemented and tested locally.
-The unapproved live dry run correctly blocks one incomplete gallery. A separate
-explicit proposal accounts for the independently reviewed Soft Internet Theory
-source as nonmember without changing its incomplete-capture status or removing
-the exhibition from GathR. Four eligible Anchor matches are already linked;
-five clock/venue/provenance outcomes remain held. No live writes/deploy/paid
-calls occurred in this follow-up. Activation remains approval/release gated;
-source contracts and image-heading limitations are documented in
-`docs/festival-linker-oct15-publication.md`.
+The original dry run correctly blocked one incomplete gallery. Craig then
+approved its exact reviewed nonmembership decision: Soft Internet Theory stays
+listed but is excluded from this festival, with unreadable fine text still
+explicitly reported. Six validated historical captures and this one decision
+were privately bootstrapped. The isolated worker is now ACTIVE/100% latest in
+publication mode, scheduled every5minutes. Its real shadow and publish runs
+both preserved29 protected documents and17 manual links, confirmed4 already
+linked eligible matches, retained5 holds, and made0 additions/paid calls.
+Private evidence remained private; complete default/capable feeds and all17
+child details passed. Source hashfb36e3d398f53d32f68a2fcef1c093819edd28f0,
+revision scheduledfestivallinker-00002-toj. Source-contract and image-heading
+limitations remain documented; publication is add-only, and ambiguous evidence
+never grants a link. Existing stage/model/prompt/cache settings are preserved.

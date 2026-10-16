@@ -1,6 +1,8 @@
 # Inn corrections and automatic festival linking — one approval batch
 
-Status: **prepared; no live changes or deployment applied by this plan.**
+Status: **COMPLETE — approved by Craig, applied and independently verified.**
+Execution evidence: `docs/inn-festival-oct15-execution.md`. The pre-approval
+plan and dry-run status below are retained as the decision record.
 
 ## Short decision
 

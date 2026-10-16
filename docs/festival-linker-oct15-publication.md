@@ -1,12 +1,13 @@
 # Festival automatic publication implementation, October 15
 
-Status: implemented locally; **no worker deployment, private bootstrap or public
-publication applied** by this follow-up. Approval plan:
-`docs/inn-and-festival-oct15-approval-plan.md`.
+Status: **LIVE, approved and independently verified in publication mode.**
+Latest release/execution: `docs/inn-festival-oct15-execution.md`.
+The pre-approval evaluation below is retained as historical evidence, including
+its original gap and the exact later-approved nonmembership decision.
 
 ## Live evidence
 
-Fresh serving readback confirms all three parsers ACTIVE, latest traffic100%,
+Pre-approval serving readback confirmed all three parsers ACTIVE, latest traffic100%,
 hash8073c2d8a8520e8362a71df53c76b718751fabfb. The regular372-row October15
 dataset1YPf2cKvXfXl8L0HVL63VZ2zeTLEvWlit is complete; the worker's full-run
 gate independently rereads lock, marker, final batch and absence of checkpoint.

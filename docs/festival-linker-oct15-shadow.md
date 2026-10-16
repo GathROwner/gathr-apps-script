@@ -1,5 +1,10 @@
 # Automatic festival linking: October15 shadow preparation
 
+Historical preparation record. The subsequently approved narrow publication
+release is now LIVE and verified; see `docs/inn-festival-oct15-execution.md`.
+The incomplete historical evaluations and image-heading limitations below
+remain valid evidence, not a claim of universal source coverage.
+
 Craig approved automatic source-bound festival linking, with a historical
 evaluation followed by a complete regular-parse shadow run before live
 publication. Preparation started11:48 UTC,35 minutes before the stated parse

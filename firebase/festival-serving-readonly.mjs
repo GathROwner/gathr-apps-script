@@ -1,0 +1,18 @@
+// Secret-safe independent new-function, scheduler, traffic and mode readback.
+import fs from 'node:fs/promises';import path from 'node:path';import assert from 'node:assert/strict';import {createHash} from 'node:crypto';import {exec} from 'node:child_process';import {promisify} from 'node:util';
+const phase=process.argv[2];assert(['shadow','publish'].includes(phase));assert.equal(process.argv.length,3);const run=promisify(exec),dir=path.resolve(import.meta.dirname,'../functions/artifacts/festival-linker-oct15');
+const canonical=v=>Array.isArray(v)?v.map(canonical):v&&typeof v==='object'?Object.fromEntries(Object.keys(v).sort().map(k=>[k,canonical(v[k])])):v;
+const hash=v=>createHash('sha256').update(JSON.stringify(canonical(v))).digest('hex');
+const [f,s,j]=await Promise.all([
+ run('gcloud functions describe scheduledFestivalLinker --gen2 --region=northamerica-northeast1 --project=gathr-migrated --format=json',{maxBuffer:4194304}),
+ run('gcloud run services describe scheduledfestivallinker --region=northamerica-northeast1 --project=gathr-migrated --format=json',{maxBuffer:4194304}),
+ run('gcloud scheduler jobs describe firebase-schedule-scheduledFestivalLinker-northamerica-northeast1 --location=northamerica-northeast1 --project=gathr-migrated --format=json',{maxBuffer:4194304})]);
+const fn=JSON.parse(f.stdout),service=JSON.parse(s.stdout),job=JSON.parse(j.stdout);assert.equal(fn.state,'ACTIVE');assert.equal(fn.serviceConfig.allTrafficOnLatestRevision,true);assert.equal(fn.serviceConfig.environmentVariables.FESTIVAL_LINKER_MODE,phase);assert.equal(service.status.latestReadyRevisionName,fn.serviceConfig.revision);
+const traffic=service.status.traffic.filter(t=>Number(t.percent)>0);assert.equal(traffic.length,1);assert.equal(traffic[0].percent,100);assert.equal(traffic[0].revisionName,fn.serviceConfig.revision);
+assert.equal(job.state,'ENABLED');assert.equal(job.timeZone,'America/Halifax');assert(['every 5 minutes','*/5 * * * *'].includes(job.schedule));assert.equal(fn.serviceConfig.maxInstanceCount,1);assert.equal(fn.serviceConfig.timeoutSeconds,540);
+const secrets=fn.serviceConfig.secretEnvironmentVariables||[];assert(secrets.some(s=>s.key==='GATHR_OPENAI_API_KEY'));assert(!Object.hasOwn(fn.serviceConfig.environmentVariables,'OPENAI_API_KEY'));assert(!Object.hasOwn(fn.serviceConfig.environmentVariables,'GATHR_OPENAI_API_KEY'));
+const config=structuredClone(fn.serviceConfig);delete config.uri;delete config.revision;delete config.environmentVariables.FESTIVAL_LINKER_MODE;
+const spec=structuredClone(service.spec.template.spec);assert.equal(spec.containers.length,1);delete spec.containers[0].image;spec.containers[0].env=(spec.containers[0].env||[]).filter(e=>e.name!=='FESTIVAL_LINKER_MODE');
+const result={checkedAt:new Date().toISOString(),name:'scheduledFestivalLinker',phase,state:fn.state,hash:fn.labels['firebase-functions-hash'],revision:fn.serviceConfig.revision,trafficPercent:100,mode:phase,functionConfigSha256:hash(config),runtimeConfigSha256:hash(spec),secretBindingsSha256:hash(secrets),scheduler:{name:job.name,state:job.state,schedule:job.schedule,timeZone:job.timeZone,target:job.httpTarget?.uri},liveWrites:0};
+if(phase==='publish'){const old=JSON.parse(await fs.readFile(path.join(dir,'serving-shadow.json'),'utf8'));for(const field of ['functionConfigSha256','runtimeConfigSha256','secretBindingsSha256'])assert.equal(result[field],old[field],field+' drift');assert.deepEqual(result.scheduler,old.scheduler);}
+await fs.writeFile(path.join(dir,'serving-'+phase+'.json'),JSON.stringify(result,null,2));console.log(JSON.stringify({phase,state:result.state,hash:result.hash,revision:result.revision,trafficPercent:100,schedulerEnabled:true,mode:phase,configurationPreserved:phase==='publish'}));
