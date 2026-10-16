@@ -51,6 +51,7 @@ export async function planFestivalLinkPublication(input:FestivalPublicationInput
   owned.set(link.eventId,{eventId:link.eventId,venueId:link.venueId,fingerprint:link.fingerprint});
  }
  if(currentIds.size>500||suppressed.size>500)return hold('publication_inventory_limit');
+ try{validateEventAreaData(areaData);}catch{return hold('public_area_contract_limit');}
  return {status:'ready',reason:addedEventIds.length?'verified_additions':'no_public_delta',result,areaData,addedEventIds:addedEventIds.sort(),
   ownership:{version:1,umbrellaPath:input.umbrella.path,policy:FESTIVAL_PUBLICATION_POLICY,machineLinks:[...owned.values()].sort((a,b)=>a.eventId.localeCompare(b.eventId)),suppressedEventIds:[...suppressed].sort()}};
 }

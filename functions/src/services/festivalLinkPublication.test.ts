@@ -44,6 +44,9 @@ test('new, ambiguous, approximate or moved points cannot be silently invented',a
 test('invalid or foreign ownership state holds',async()=>{
  const x=input();x.ownership={version:1,umbrellaPath:'events/other_fixture',policy:FESTIVAL_PUBLICATION_POLICY,machineLinks:[],suppressedEventIds:[]};assert.equal((await plan(x)).status,'held');
 });
+test('the 100-link point contract is revalidated after additions without truncating human links',async()=>{
+ const x=input();x.umbrella.data.areaData.locations[0].linkedEventIds=Array.from({length:100},(_,i)=>'human_'+i);const r=await plan(x);assert.equal(r.status,'held');assert.equal(r.reason,'public_area_contract_limit');assert.equal(x.umbrella.data.areaData.locations[0].linkedEventIds.length,100);
+});
 test('source inventory omission cannot be disguised by an eligible-only result',async()=>{
  const x=input();x.sourceInventoryComplete=false;const r=await plan(x);assert.equal(r.reason,'source_inventory_incomplete');assert.equal(r.areaData,undefined);
 });
