@@ -215,3 +215,17 @@ Private evidence and read-only helpers:
 `trace-evidence.json`, four downloaded images, `api-evidence.json`,
 `serving-parser.json`, `serving-resume.json`, `serving-selected.json`,
 immutable `serving-source.zip`, and `serving-playback.json`.
+
+## Approved prevention and separate repair follow-through
+
+After this read-only audit, Craig accepted the prevention recommendations and
+specified actual show start in the time row, with doors opening in the
+description. Implementation/release evidence is tracked in
+`docs/city-point-venue-oct16-release.md`. Parser `8e366b3` and separate finalizer
+`b4bc732` passed their focused/full suites and source playback. This supersedes
+the diagnostic-only implementation status above without rewriting its evidence.
+
+The exact historical repair is now prepared and dry-run verified in
+`docs/city-point-venue-oct16-repair-approval-plan.md`:12 duplicate deletes,
+11 keeper updates,13 review redirects and1 feed marker. Its exact approval
+remains pending; deployment does not imply those records were repaired.

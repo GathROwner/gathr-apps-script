@@ -1021,3 +1021,15 @@ or new aliases are authorized. Full source chronology, exact candidate paths,
 current immutable-source playback and implementation/repair boundaries are in
 `docs/city-point-venue-oct16-audit.md`. This audit performed zero live writes,
 paid calls, replays or deployments.
+
+Approved prevention was subsequently implemented in parser `8e366b3` and a
+separate finalizer assembly `b4bc732`, preserving both serving baselines. The
+parser passed91 focused/893 full tests; finalizer48/332. Four bounded original
+image validations succeeded; cached source playback uses zero further paid
+calls/writes. Exact existing venue identity, postal-address reconciliation,
+show-versus-doors timing, conflict holds, protected retired/human reviews and
+stale-worker fencing are covered. Stage1–5 prompts/models/cache contracts remain
+unchanged. Deployment and historical cleanup evidence are recorded separately
+in `docs/city-point-venue-oct16-release.md` and the exact repair approval plan.
+The historical37-document repair has not been applied; no broad cleanup or
+additional date recovery is authorized by this prevention release.
