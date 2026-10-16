@@ -511,6 +511,7 @@ export interface FinalizeCityLevelEventReviewResult {
 
 export interface VenueData {
   id: string;
+  reviewedOccurrenceConstraints?: import('../services/reviewedOccurrenceConstraints.js').ReviewedOccurrenceConstraint[];
   reviewedOccurrenceRetirements?: import('../services/reviewedOccurrenceRetirement.js').ReviewedOccurrenceRetirementPolicy;
   name: string;
   normalizedName: string;

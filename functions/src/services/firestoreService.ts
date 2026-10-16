@@ -6,6 +6,7 @@ import {isGenericTrivia,resolveGenericTriviaOccurrence} from './genericTriviaOcc
 import {isPlainKaraoke, selectStandingKaraokeOccurrence} from './standingKaraokeOccurrence.js';
 import {createRecurringSeriesCatalogCache, sourceLinkedHistoricalSeriesKeepers} from './recurringSeriesCatalog.js';
 import {classifyReviewedOccurrenceRetirement} from './reviewedOccurrenceRetirement.js';
+import {classifyReviewedOccurrenceConstraint} from './reviewedOccurrenceConstraints.js';
 import {isRecurringSeries} from '../utils/recurringSeriesLifecycle.js';
 import {KNOWN_LOCATION_RELATIONSHIPS} from '../parsing/locationMentionRoles.js';
 import {isApprovedVenueOccurrenceMatch,approvedVenueOccurrenceSourcePatch,classifyApprovedVenueOccurrence} from './approvedVenueOccurrence.js';
@@ -4209,6 +4210,10 @@ export async function checkDuplicate(
   resolvedVenue?: VenueData
 ): Promise<{ isDuplicate: boolean; existingEvent?: EventData }> {
   if(resolvedVenue){
+    if(classifyReviewedOccurrenceConstraint({...event,venueId},resolvedVenue)==='hold'){
+      logger.warn('Held exact reviewed occurrence constraint',{venueId,uniqueId:event.uniqueId});
+      return{isDuplicate:true};
+    }
     const decision=classifyReviewedOccurrenceRetirement({...event,venueId},resolvedVenue);
     if(decision.kind!=='none'){
       logger.warn('Held reviewed retired occurrence identity',{venueId,uniqueId:event.uniqueId,reason:decision.kind,
