@@ -1,5 +1,26 @@
 # Four current-listing venue profile repairs - exact approval plan
 
+## October 15 approved refresh
+
+Craig approved repairing these exact four venues together (“Ok do that”) after
+a fresh public check found all four profile images still returned 404. Fresh
+dry run on October 15 local time (October 16 00:34:44 UTC) verified the same
+official source bytes, MIME types, four target references, absent destination
+objects, idle parser and complete venue/event state hash. It exactly matches
+the previously reviewed plan; no new venue or replacement is added.
+
+Fresh plan: `functions/artifacts/oldedublin-profile-oct12/four-venue-repair-plan-2026-10-16T00-34-44-222Z.json`.
+Full fresh backup: `firebase/venue-profiles-oct12-backup-2026-10-16T00-34-44-222Z.json`.
+Prewrite backup is refreshed automatically on apply. Helper reads target
+venues, all their event siblings and processing locks again inside the atomic
+transaction, aborting on drift. Immutable equal-byte uploads can be reused
+after an interrupted attempt; staged assets are reported and retained.
+
+All four image candidates were independently viewed again. This approval
+changes only the reviewed canonical image references/signatures and timestamp.
+No venue address or event update is included. API verification must wait for
+the existing five-minute venue cache when stale responses are observed.
+
 All four canonical image URLs return HTTP 404 and all four venues occur in the
 complete upcoming API feed. Default-dry-run helper:
 `firebase/repair-venue-profiles-oct12.mjs`.

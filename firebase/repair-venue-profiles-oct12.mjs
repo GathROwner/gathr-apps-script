@@ -19,17 +19,25 @@ try{
  const states=[],plans=[],uploads=[];
  for(const t of targets){const old=`https://storage.googleapis.com/${bucketName}/profilepictures/${t.old}`,path=`venues/${t.id}`,object=`profilepictures/${t.slug}-official-20261012-${t.hash.slice(0,12)}.${t.ext}`,next=`https://storage.googleapis.com/${bucketName}/${object}`;
   const [venue,events,response,previous,exists]=await Promise.all([db.doc(path).get(),db.collection(path+'/events').get(),fetch(t.source,{signal:AbortSignal.timeout(25000)}),fetch(old,{signal:AbortSignal.timeout(15000)}),bucket.file(object).exists()]);
-  assert(venue.exists);assert.equal(venue.data().name,t.name);assert.equal(venue.data().profileImage,old);assert.equal(previous.status,404);assert.equal(exists[0],false);assert.equal(response.status,200);assert.equal(response.headers.get('content-type'),t.type);
+  assert(venue.exists);assert.equal(venue.data().name,t.name);assert.equal(venue.data().profileImage,old);assert.equal(previous.status,404);assert.equal(response.status,200);assert.equal(response.headers.get('content-type'),t.type);
   const bytes=Buffer.from(await response.arrayBuffer());assert.equal(crypto.createHash('sha256').update(bytes).digest('hex'),t.hash);
+  if(exists[0]){const[existingBytes]=await bucket.file(object).download();assert.equal(crypto.createHash('sha256').update(existingBytes).digest('hex'),t.hash,'Existing immutable replacement differs');}
   const u=new URL(t.source);u.search='';const patch={profileImage:next,profileImageSourceSignature:u.host+u.pathname};
-  states.push({venue:capture(venue),events:events.docs.map(capture).sort((a,b)=>a.path.localeCompare(b.path))});plans.push({path,previous:old,source:t.source,sha256:t.hash,object,next,patch,eventMutations:0});uploads.push({file:bucket.file(object),bytes,type:t.type,source:t.source,hash:t.hash,venue});
+  states.push({venue:capture(venue),events:events.docs.map(capture).sort((a,b)=>a.path.localeCompare(b.path))});plans.push({path,previous:old,source:t.source,sha256:t.hash,object,next,patch,eventMutations:0});uploads.push({file:bucket.file(object),bytes,type:t.type,source:t.source,hash:t.hash,venue,reused:exists[0]});
  }
  const plan={targets:plans,stateHash:hash(states)},stamp=new Date().toISOString().replace(/[:.]/g,'-'),backup=`firebase/venue-profiles-oct12-backup-${stamp}.json`;
  await fs.writeFile(backup,JSON.stringify({plan,states},null,2));
  if(!apply){const planPath=`${dir}/four-venue-repair-plan-${stamp}.json`;await fs.writeFile(planPath,JSON.stringify(plan,null,2));console.log(JSON.stringify({mode:'dry-run',backup,planPath,plan},null,2));}
  else{assert.deepEqual(JSON.parse(await fs.readFile(planArg.slice(7),'utf8')),plan,'Reviewed plan drift');
-  for(const u of uploads){await u.file.save(u.bytes,{resumable:false,preconditionOpts:{ifGenerationMatch:0},metadata:{contentType:u.type,cacheControl:'public,max-age=86400',metadata:{sourceUrl:u.source,sha256:u.hash,repair:'venue-profiles-oct12'}}});const r=await fetch(`https://storage.googleapis.com/${bucketName}/${u.file.name}`,{signal:AbortSignal.timeout(15000)});assert.equal(r.status,200);assert.equal(crypto.createHash('sha256').update(Buffer.from(await r.arrayBuffer())).digest('hex'),u.hash);}
-  const batch=db.batch();for(let i=0;i<plans.length;i++)batch.update(uploads[i].venue.ref,{...plans[i].patch,updatedAt:admin.firestore.FieldValue.serverTimestamp()},{lastUpdateTime:uploads[i].venue.updateTime});await batch.commit();
+  for(const u of uploads){if(!u.reused)await u.file.save(u.bytes,{resumable:false,preconditionOpts:{ifGenerationMatch:0},metadata:{contentType:u.type,cacheControl:'public,max-age=86400',metadata:{sourceUrl:u.source,sha256:u.hash,repair:'venue-profiles-oct12'}}});const r=await fetch(`https://storage.googleapis.com/${bucketName}/${u.file.name}`,{signal:AbortSignal.timeout(15000)});assert.equal(r.status,200);assert.equal(crypto.createHash('sha256').update(Buffer.from(await r.arrayBuffer())).digest('hex'),u.hash);}
+  await fs.writeFile(`${dir}/four-venue-staged-assets-${stamp}.json`,JSON.stringify({backup,assets:uploads.map(u=>({object:u.file.name,sha256:u.hash,reused:u.reused})),note:'Retain these immutable assets if the guarded transaction aborts; do not delete automatically.'},null,2));
+  await db.runTransaction(async tx=>{
+   const currentLocks=await tx.get(db.collection('processing_locks'));assert(!currentLocks.docs.some(d=>!['completed','failed','cancelled'].includes(d.data().status)),'Active parser before write');
+   const venues=await tx.getAll(...uploads.map(u=>u.venue.ref)),current=[];
+   for(let i=0;i<plans.length;i++){const events=await tx.get(db.collection(plans[i].path+'/events'));current.push({venue:capture(venues[i]),events:events.docs.map(capture).sort((a,b)=>a.path.localeCompare(b.path))});}
+   assert.equal(hash(current),plan.stateHash,'Venue/event/sibling drift before transaction');
+   for(let i=0;i<plans.length;i++)tx.update(venues[i].ref,{...plans[i].patch,updatedAt:admin.firestore.FieldValue.serverTimestamp()},{lastUpdateTime:venues[i].updateTime});
+  });
   const after=[];for(let i=0;i<plans.length;i++){const v=await uploads[i].venue.ref.get(),events=await db.collection(plans[i].path+'/events').get();assert.deepEqual(v.data(),{...uploads[i].venue.data(),...plans[i].patch,updatedAt:v.data().updatedAt});assert.deepEqual(events.docs.map(capture).sort((a,b)=>a.path.localeCompare(b.path)),states[i].events);after.push(capture(v));}
   const result=`${dir}/four-venue-repair-result-${stamp}.json`;await fs.writeFile(result,JSON.stringify({backup,plan,after,verified:true},null,2));console.log(JSON.stringify({mode:'applied',backup,result,venues:4,eventMutations:0,verified:true}));
  }
