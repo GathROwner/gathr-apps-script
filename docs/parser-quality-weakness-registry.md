@@ -1004,3 +1004,20 @@ using this hunt as an example. Trace parser decisions, merge/persistence, API
 projection and badge rendering before attributing a missing badge to a model.
 This is deferred work, not approval for a broad relabelling/backfill. Scope:
 `docs/family-friendly-labelling-followup.md`.
+
+## October 16 named-venue city-scope audit
+
+Read-only source tracing of Beaconsfield By Candlelight and two Ireland From
+Famine to Freedom cards found old approved-recovery helpers hardcoding city
+scope after matching an existing physical venue, plus a still-serving structured
+Facebook Events shortcut that ignores title/poster venue evidence and clock
+conflicts. The Beaconsfield contextual-city classifier defect is already fixed
+in current serving playback; ten historical city roots remain alongside twelve
+complete venue occurrences. Ireland has three records with conflicting starts;
+the original poster proves19:30–22:00 and doors18:30. Repeated postal-address
+extraction at `P.O. Box` still falsely produces two locations. These extend the
+existing spatial/venue and cross-source duplicate mechanisms; no broad cleanup
+or new aliases are authorized. Full source chronology, exact candidate paths,
+current immutable-source playback and implementation/repair boundaries are in
+`docs/city-point-venue-oct16-audit.md`. This audit performed zero live writes,
+paid calls, replays or deployments.
