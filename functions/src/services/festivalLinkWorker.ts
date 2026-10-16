@@ -88,7 +88,7 @@ export async function runFestivalLinkWorker(db:admin.firestore.Firestore,options
   for(const r of registered){
    const sourceItems=items.filter(i=>i.r===r),sources:FestivalSourceEvidence[]=[],gaps:any[]=[],reviewedNonmembers:any[]=[];
    for(const item of sourceItems){if(item.gap){gaps.push({sourceId:item.source.get('uniqueId'),reason:item.gap});continue;}
-    if(item.nonmember){reviewedNonmembers.push({sourceId:item.source.get('uniqueId'),reviewId:item.decisionData.reviewId,reason:item.decisionData.reason,captureStillIncomplete:!!item.captureData?.error});continue;}
+    if(item.nonmember){reviewedNonmembers.push({sourceId:item.source.get('uniqueId'),reviewId:item.decisionData.reviewId,reason:item.decisionData.reason,captureStillIncomplete:item.captureData?.result?.complete!==true});continue;}
     const c=item.captureData;
     if(!c?.result){gaps.push({sourceId:item.source.get('uniqueId'),reason:c?.error||'source_evidence_not_captured'});continue;}
     let result=c.result;if(c.captureKey!==item.key||result.evidencePolicy!==extractor.FESTIVAL_EVIDENCE_POLICY||result.sourceFingerprint!==extractor.festivalEvidenceSourceFingerprint(item)||result.editionFingerprint!==extractor.festivalEvidenceEditionFingerprint(r.edition))throw Error('Cached source identity changed');

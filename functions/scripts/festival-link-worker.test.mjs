@@ -74,3 +74,7 @@ test('revoking a reviewed negative decision during publication aborts the transa
  const p='festival_link_source_decisions/'+key;db.values.set(p,{version:++db.sequence,data:{version:1,kind:'reviewed_not_member',editionId:'festival_fixture',sourceId:'1111111111111',captureKey:key,sourceFingerprint:cache.result.sourceFingerprint,evidencePolicy:FESTIVAL_EVIDENCE_POLICY,reviewId:'review_fixture',reason:'Separate exhibition',reviewedAt:'2026-10-15T15:00:00Z'}});
  db.afterClaim=d=>d.values.delete(p);await assert.rejects(runFestivalLinkWorker(db,options),/reference_drift/);assert(!db.writes.some(p=>p.startsWith('events/')));
 });
+test('reviewed nonmembership without a complete cached capture still reports the source limitation',async()=>{
+ const {db,key,cache,options}=fixture();db.values.delete('festival_link_captures/'+key);db.values.set('festival_link_source_decisions/'+key,{version:++db.sequence,data:{version:1,kind:'reviewed_not_member',editionId:'festival_fixture',sourceId:'1111111111111',captureKey:key,sourceFingerprint:cache.result.sourceFingerprint,evidencePolicy:FESTIVAL_EVIDENCE_POLICY,reviewId:'review_fixture',reason:'Separate exhibition with unreadable small wall text',reviewedAt:'2026-10-15T15:00:00Z'}});
+ const r=await runFestivalLinkWorker(db,options);assert.equal(r.eventWrites,0);assert.equal(r.paidSources,0);assert.equal(r.reports[0].reviewedNonmembers[0].captureStillIncomplete,true);
+});
