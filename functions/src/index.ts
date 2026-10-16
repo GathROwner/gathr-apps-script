@@ -67,6 +67,7 @@ export {
 export { scheduledCleanup } from './triggers/scheduledCleanup.js';
 // Scheduled Pipeline Cost Report - Daily parser usage summary and experiment tracking
 export { scheduledPipelineCostReport } from './triggers/pipelineCostReport.js';
+export { scheduledFestivalLinker } from './triggers/festivalLinker.js';
 
 // ===================
 // Task Queue Triggers
