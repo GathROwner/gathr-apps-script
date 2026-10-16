@@ -55,7 +55,67 @@ Use a conservative reusable presentation rule over existing public data:
   membership, paging, availability, and retry controls.
 
 Frontend owner: existing task `01a12ac6-42ef-7b30-842a-3131be446090`.
-Baseline worktree: `festival-browser-cache-first/GathR-upgrade-sdk54`.
-Release boundary: tested, visually reviewed iOS Preview only; no Android or
-Production publication in this batch. Runtime and evidence will be recorded
-after independent coordinator review.
+Accepted baseline: `3f7659d10bc6952d4004b2d507b999db3c87cbd7` in
+`festival-browser-cache-first/GathR-upgrade-sdk54`.
+
+## Completed iOS Preview release
+
+- Isolated worktree: `area-hunt-presentation/GathR-upgrade-sdk54`, branch
+  `codex/area-hunt-presentation-20261016`.
+- Runtime implementation: `571ed2db8c7199f46c1ab88c2e9233e083d14702`.
+- Exact published commit: `896f6a53600ddac69f503c89d307e4d75bdf2f8c`.
+- iOS Preview, runtime `1.1.10`, group
+  `a2233c4b-d417-40d6-ba6c-31871f66ed44`, update
+  `01a144ee-6772-7448-bfa8-49054339dae9`; expected footer `OTA 01a144ee`.
+- Independent coordinator EAS view/list confirms the exact commit, runtime,
+  platform and newest iOS Preview update at 13:39 UTC October 16.
+- Nine suites / 105 tests pass; TypeScript passes; lint has zero errors and
+  213 existing warnings. Auth, Social and Mapbox release checks pass.
+- Coordinator personally reviewed all eleven unedited Android native PNGs:
+  hunts, neutral area, unlinked festival, cached programme opening/paging/back,
+  truthful overview timing, long venue name and full instructions/scroll.
+  This verifies shared JavaScript; current iPhone adoption remains unverified.
+- All three temporary root/index/map entrypoints were restored with exact
+  original hashes, the fixture module removed, and the release checkout clean.
+- Published bundle is byte-identical to the reviewed export: 5,710,656 bytes,
+  SHA256 `abae89ed036ee0c3be9c0ac34ca93b0fe4ff0f1eb80233e494d6edbf5bcb94f4`.
+  2,498 modules / 2,454 mapped sources, seven independently matching source
+  checks and zero QA/test imports; 111 media asset metadata entries / 112
+  EAS iOS assets. Existing runtime fingerprint advisory is unchanged.
+- No parser/API runtime, Firestore, venue, media, Android or Production
+  modification was performed. Independent API reread retains all three
+  points, zero child links and unchanged source description/date fields.
+
+Frontend tracked evidence: `docs/qa/area-hunt-presentation-20261016/` in the
+app worktree. Publication report: its ignored
+`artifacts/area-hunt-presentation-20261016/RELEASE.md`.
+Coordinator private evidence: `functions/artifacts/kensington-participation-oct16/`,
+including API-before/unchanged checks, independent export review and
+`frontend-parent-release-verified.json` with fresh EAS readbacks.
+
+## Additional venue discovery proposal (not in this implementation)
+
+Craig subsequently supplied venue-screen screenshots and suggested a link
+back to the festival/hunt from a normal venue view. Preserve the current
+implementation boundary; this is the next proposed UX investigation.
+
+- An actual timed canonical child should remain a normal venue event and may
+  show `Part of [festival]` with navigation to its exact parent overview.
+- A participating hunt stop has no separate timed child. Show a distinct
+  `Participating in [hunt]` association card/link at the venue, without
+  creating per-stop event documents or inflating event/special counts.
+- Use the public root's exact child IDs and confirmed point venue IDs as the
+  reverse-membership source. Do not infer festival membership from same
+  venue, date, similar titles, or map proximity.
+- Preserve selected-date filters: Centre Belle-Alliance's one current-day
+  event is consistent with a festival browser containing twelve upcoming
+  activities across different dates. Do not inject all future festival
+  children into today's venue list.
+- Venue cards must handle specials-only venues, expiry, removed membership,
+  unavailable children/roots, multiple parent programmes, cached opening,
+  back navigation, and source certainty without changing counts or filters.
+
+Read-only source review confirms the current `EventCallout` consumes each
+venue's already projected events/specials and has no reverse area-membership
+affordance. Reuse loaded roots for a future association index; rendering and
+navigation need a separately validated additive app change.

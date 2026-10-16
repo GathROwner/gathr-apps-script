@@ -983,6 +983,13 @@ even when unavailable, and use neutral language for ambiguous areas. No
 per-stop duplicate events or parser/data migration is needed. Diagnosis and
 release evidence: `docs/kensington-participation-oct16.md`.
 
+The distinction is now published in iOS Preview at `896f6a5`, update
+`01a144ee-6772-7448-bfa8-49054339dae9`, after 105 tests, native visual review,
+exact entrypoint restoration and independently identical export/readback.
+This also replaces the misleading individual-event timing hint for affirmative
+unknown-clock hunts without changing their actual schedule/expiry. Normal
+venue-to-parent membership navigation is a separate proposed additive change.
+
 Craig separately requested future research into missing family-friendly labels,
 using this hunt as an example. Trace parser decisions, merge/persistence, API
 projection and badge rendering before attributing a missing badge to a model.
