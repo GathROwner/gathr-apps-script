@@ -29,6 +29,11 @@ node firebase/repair-city-point-duplicates-oct16.mjs --apply --plan=firebase/art
 
 The helper verifies every document against the exact expected delta. Coordinator then verifies retained/deleted API details, every retained occurrence and the complete active app feed. Expected:one October16 Ireland venue event with19:30–22:00 and description doors18:30; twelve Beaconsfield venue dates with17:30–18:30, zero deleted root copies, both untouched extra dates intact; no removed media. This is a backend/data correction; no new OTA is needed.
 
+Read-only verifier: `node firebase/verify-city-point-repair-oct16-readonly.mjs --after`.
+Its before-mode baseline passed25 detail checks, the complete1,057-event/11-page
+active feed and both original poster HTTP checks. Baseline artifact:
+`firebase/artifacts/city-point-repair-oct16/before-api-verified.json`.
+
 ## Exact targets
 
 | Action | Exact path | Event/date or purpose | Changed fields |
