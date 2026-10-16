@@ -1094,3 +1094,43 @@ positive/adult control cases. No live writes, deploys, replays, new generation
 calls, map interaction or family relabelling were performed by this audit.
 Exact source IDs, affected paths, costs, traces and repair boundaries are in
 the dated audit; prepare short exact approval batches before live correction.
+
+## October 16 approved audit-fix release and exact repair
+
+Craig approved the combined plan in `docs/oct16-audit-fixes-approval-plan.md`.
+Implementation796b666 is released to the three parsers, both venue resolvers
+and the festival worker, each from its appropriate immutable serving baseline.
+All six independently verified ACTIVE/latest100% with preserved user configuration,
+secrets, models and cache/compact contracts. Parser common hash:
+`918f9c77b08e7b94a81373983864bb93f60dd508`. Exact revisions, separate resolver/
+worker hashes, source archive generations and test limitations are in
+`docs/oct16-audit-fixes-release.md`.
+
+The exact23-document atomic repair completed after fresh source/version/sibling
+guards and full backup:17 updates,4 creates,2 deletes; feed284→285.30 detail,
+998-event/10-page complete active-feed and33 retained-image checks passed.
+All11 protected Inn evenings, Harvest, Belly's unproved duplicate and17/13
+Anchor/Pumpkin memberships were preserved at transactional verification. No
+broader deletion, venue creation, public Witches geometry, family relabelling,
+client/OTA/finalizer release or map interaction occurred.
+
+### Al Tuck: Stage1 prevention passes; full recovery still fails
+
+One approved cloud dry run for source1559528609526804 completed under run
+`72f9aa80-2c51-4040-bc26-41dcbe1c90df`, with zero event/queue/review changes.
+Stage1 explicitly rejected interpreting URL25 as a year, but Stage3 still emitted
+2025-10-28 and Stage4 rejected the past date. Stage3.7's production allowlist
+contains only Ticketpro, so it did not fetch the specific Locarius URL; the later
+website matcher correctly held the2025/2026 conflict. Stage5 was not reached,
+and no apply/recovery task was dispatched. This is a remaining gap, not a
+successful recovery or a reason to weaken Stage4/date-conflict safeguards.
+
+Next scope: Stage3 source-year provenance, exact trusted Locarius occurrence
+verification and unsupported URL-derived year handling, with explicit-old-year,
+unknown-year, wrong-identity and doors-versus-show controls. Adding a domain alone
+cannot fix a nonempty bad year. Capture this real route in anonymized regression
+fixtures and source-response playback before another reviewed release/dry run.
+Four actual cloud calls cost an estimatedUSD0.00335069 separately from the11
+local evaluation calls. Source, venue and original processed marker are unchanged;
+no checkpoint remains and the parser is idle. Full evidence and boundaries are
+in the release report.

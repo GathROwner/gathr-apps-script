@@ -1,6 +1,6 @@
 # October 16 audit fixes: one combined production approval
 
-Status: implementation and independent release preparation complete; awaiting this exact combined production approval. No deployment, live record mutation or replay has occurred.
+Status: Craig approved this exact combined batch. Six functions are released and independently verified; the exact23-document repair is applied and API/feed/media verified. The one-source Al Tuck cloud dry run failed its publication gate, so no normal recovery was dispatched. Execution evidence and the remaining source-to-extraction gap are in `docs/oct16-audit-fixes-release.md`. The sections below retain the reviewed pre-execution plan and preparation evidence.
 
 ## Requested batch
 
