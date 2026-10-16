@@ -988,7 +988,15 @@ The distinction is now published in iOS Preview at `896f6a5`, update
 exact entrypoint restoration and independently identical export/readback.
 This also replaces the misleading individual-event timing hint for affirmative
 unknown-clock hunts without changing their actual schedule/expiry. Normal
-venue-to-parent membership navigation is a separate proposed additive change.
+venue-to-parent membership navigation was subsequently approved and published
+as the additive iOS Preview release `2d40cb7`, update
+`01a14538-c839-782f-a845-87e89f643ed9`. Exact programme children show `Part of`;
+confirmed hunt stops show `Participating in` above the venue's tabs, including
+specials-only venues. No extra occurrences, pins, venue counts or inferred
+membership were introduced. All 139 focused/regression tests passed; eight
+native shared-component screenshots and the clean source/export were
+independently reviewed. Fresh EAS readback and the published bundle match;
+iPhone adoption remains pending. Evidence: `docs/venue-parent-links-oct16.md`.
 
 Craig separately requested future research into missing family-friendly labels,
 using this hunt as an example. Trace parser decisions, merge/persistence, API

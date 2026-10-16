@@ -59,6 +59,53 @@ Private read-only before captures: `functions/artifacts/venue-parent-links-oct16
 - Release only from a clean committed descendant of the fresh iOS Preview
   baseline after source/export checks; independently read back publication.
 
-Frontend owner: existing task `01a12ac6-42ef-7b30-842a-3131be446090`.
-Coordinator independently reviews evidence here. Implementation/release
-evidence is pending; this document does not claim publication.
+## Completed implementation and iOS Preview release
+
+Frontend owner: existing task `01a12ac6-42ef-7b30-842a-3131be446090`, now idle.
+Its isolated checkout is
+`C:/Users/craig/.codex/worktrees/area-membership-backlinks/GathR-upgrade-sdk54`,
+branch `codex/area-membership-backlinks-20261016`.
+
+- Functional commit: `70d969f72c3835a27cb4c5aada72a1fb44a6c4e0`.
+- Clean release commit: `2d40cb7c7f1b69d50074fe0343a233f1c32eb787`, a verified
+  descendant of accepted baseline `896f6a5`.
+- iOS Preview update: `01a14538-c839-782f-a845-87e89f643ed9`.
+- Group: `3b237578-33e4-49e6-9c85-191f1815391a`; runtime `1.1.10`.
+- Expected phone footer: `Runtime 1.1.10 · OTA 01a14538`.
+
+The reverse index uses the complete current public feed and current cache
+generations. Exact child IDs plus point venue ownership produce `Part of`;
+confirmed hunt stops produce `Participating in`, even above specials when
+Events is disabled. Neither changes occurrence counts. Newer removals,
+cancellations, expiry and confirmed 404/410 responses override stale copies.
+The provider opens ready parent data synchronously, validates stale data once,
+and preserves the original card on return. No parser/data migration is needed.
+
+Validation: 139 tests across 12 suites, TypeScript, lint with zero errors,
+Preview auth/social continuity and Mapbox preflight. The coordinator personally
+reviewed all eight unedited Android shared-component native screenshots:
+event row, each parent opening/return, specials-only hunt panel and both long
+titles. This was a synthetic in-memory harness; no map was mounted or operated.
+Temporary entry points were restored byte-for-byte and the fixture removed.
+
+The coordinator independently recomputed the export hash, compared all ten
+source-map contents with the reviewed files, verified accepted ancestry and
+clean status, and found zero QA imports. Published bundle hash is
+`f2cc5596fb537f742be836e07cca13b83f3af3e00689bf71786937076ceaf850`, byte-identical
+to that reviewed export: 2,502 modules, 2,458 map sources, 111 media assets
+(112 EAS iOS assets including the launch bundle). Fresh independent EAS
+view/list readback confirms the exact update/commit as newest iOS Preview;
+Android Preview remains unchanged.
+
+The existing fingerprint advisory remains
+`9ee0b973a2f53ed5647ccafe1599ef64f1580ffb`. iPhone adoption and iOS native visual
+confirmation remain pending Craig's phone check; Android proof and EAS metadata
+do not establish adoption. No gesture, family-label, backend or live-data changes
+were included. An unrelated old-context gesture suggestion was caught during
+coordination and produced no code changes.
+
+Evidence: app `docs/qa/area-membership-backlinks-20261016/README.md` and
+`export-check.json`; app `artifacts/area-membership-backlinks-20261016/RELEASE.md`;
+coordinator private `functions/artifacts/venue-parent-links-oct16/`
+`root-prepublish-review.json`, `root-published-view.json`,
+`root-published-list.json` and `root-published-verification.json`.
