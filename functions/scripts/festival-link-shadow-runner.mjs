@@ -4,7 +4,7 @@ import fs from 'node:fs/promises';import path from 'node:path';import assert fro
 import {createRequire} from 'node:module';
 import {extractFestivalEvidence,FESTIVAL_EVIDENCE_POLICY,festivalEvidenceSourceFingerprint,festivalEvidenceEditionFingerprint} from './festival-evidence-extractor.mjs';
 import {verifyFestivalFullRun,festivalShadowFingerprint,festivalShadowJobId,claimFestivalShadowJob,finishFestivalShadowJob,FESTIVAL_SHADOW_COLLECTION} from '../lib/services/festivalLinkShadowJob.js';
-import {resolveFestivalMembership} from '../lib/services/festivalLinker.js';
+import {resolveFestivalMembership,isFestivalTicketHomepage,festivalVenueMentionLabel} from '../lib/services/festivalLinker.js';
 const require=createRequire(import.meta.url),admin=require('firebase-admin');
 const args=process.argv.slice(2),opt=n=>args.find(x=>x.startsWith(`--${n}=`))?.slice(n.length+3);
 assert(args.every(x=>/^--(?:file-id|registry|out|max-sources)=/.test(x)||['--persist-shadow-job','--execute-evidence'].includes(x)),'Unknown argument');
@@ -52,7 +52,7 @@ try{
    if(editions.filter(e=>normalize(e.name)===normalize(edition.name)&&e.year===edition.year).length!==1){gaps.push({edition:edition.id,reason:'ambiguous_edition_registry'});continue;}
    const scoped=[...latest.values()].filter(s=>{
     const output=s.stages?.find(x=>x.stage==='format')?.output;
-    return normalize(s.inputText).includes(normalize(edition.name))||output?.stageArtifacts?.stage3Items?.some(i=>normalize(i.name).includes(normalize(edition.name))||i.spatial?.kind==='multi_location')||
+    return normalize(s.inputText).includes(normalize(edition.name))||output?.stageArtifacts?.stage3Items?.some(i=>normalize(i.name).includes(normalize(edition.name)))||
      (edition.venueIds?.includes(s.venueId)&&output?.stageArtifacts?.stage3Items?.some(i=>i.date>=edition.startDate&&i.date<=edition.endDate));
    }).sort((a,b)=>String(a.uniqueId).localeCompare(String(b.uniqueId)));
    const evidence=[];
@@ -73,7 +73,7 @@ try{
     const result=captured.result;
     for(const [index,item] of result.activities.entries()){
      if(item.verification?.accepted!==true){gaps.push({edition:edition.id,sourceId:s.uniqueId,item:index,reason:'source_evidence_unconfirmed'});continue;}
-     const matches=venues.filter(v=>[v.label,...v.aliases].some(n=>normalize(n.replace(/^the /i,''))===normalize(item.venueText.replace(/^the /i,''))));
+     const matches=venues.filter(v=>festivalVenueMentionLabel(v,item.venueText));
      const publisherId='publisher_'+festivalShadowFingerprint(s.facebookUrl||'').slice(0,24);
      const binding=edition.sourceBindings?.[s.uniqueId];
      const namedSourceActivity=Boolean(item.activityRowText&&item.dateHeaderText&&normalize(item.eventText).startsWith(normalize(edition.name))&&normalize(item.eventText).length>normalize(edition.name).length);
@@ -82,7 +82,7 @@ try{
       kind:namedSourceActivity?'same_source_named_activity':item.kind,scopeText:item.scopeText,membershipText:namedSourceActivity?item.eventText:item.membershipText,festivalNameText:item.festivalNameText,yearText:item.yearText,organizerText:item.organizerText,
       ...(item.activityRowText?{activityRowText:item.activityRowText,dateHeaderText:item.dateHeaderText}:{}),
       ...(item.captionScope?{captionScope:item.captionScope}:{}),...(item.sourceScope?{sourceScope:item.sourceScope}:{}),
-      activity:{name:item.name,venueId:matches.length===1?matches[0].id:'',startDate:item.startDate,startTime:item.startTime,...(item.ticketUrl?{ticketUrl:item.ticketUrl}:{})},
+      activity:{name:item.name,venueId:matches.length===1?matches[0].id:'',startDate:item.startDate,startTime:item.startTime,...(item.ticketUrl&&!isFestivalTicketHomepage(item.ticketUrl)?{ticketUrl:item.ticketUrl}:{})},
       eventText:item.eventText,dateText:item.dateText,timeText:item.timeText,venueText:item.venueText});
     }
    }

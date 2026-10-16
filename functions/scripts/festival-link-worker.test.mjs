@@ -2,22 +2,7 @@
 import test from 'node:test';import assert from 'node:assert/strict';import {createRequire} from 'node:module';
 import {FESTIVAL_EVIDENCE_POLICY,FESTIVAL_PREVIOUS_EVIDENCE_POLICY,festivalEvidenceSourceFingerprint,festivalEvidenceEditionFingerprint} from './festival-evidence-extractor.mjs';
 const require=createRequire(import.meta.url),{runFestivalLinkWorker}=require('../lib/services/festivalLinkWorker.js'),{reviewedFestivalEdition}=require('../lib/services/festivalEditionRegistry.js'),{festivalShadowFingerprint}=require('../lib/services/festivalLinkShadowJob.js');
-class Database{
- values=new Map();sequence=100;writes=[];afterClaim;
- constructor(entries){for(const [p,d]of entries)this.values.set(p,{data:d,version:++this.sequence});}
- doc(p){return{path:p,id:p.split('/').at(-1),get:async()=>this.snapshot(p)};}
- snapshot(p){const v=this.values.get(p),ref=this.doc(p);return{ref,id:ref.id,exists:!!v,updateTime:v?{seconds:0,nanoseconds:v.version,toMillis:()=>v.version,toDate:()=>new Date(v.version)}:undefined,data:()=>v?.data,get:k=>k.split('.').reduce((x,n)=>x?.[n],v?.data)};}
- collection(name){return this.query(name,false);}
- collectionGroup(name){return this.query(name,true);}
- query(name,group,filters=[],sort,limit=Infinity){const q={query:true,name,group,filters,sort,limit};q.where=(key,op,value)=>this.query(name,group,[...filters,[key,op,value]],sort,limit);q.orderBy=(key,direction)=>this.query(name,group,filters,[key,direction],limit);q.limit=n=>this.query(name,group,filters,sort,n);q.get=async()=>{
-  let docs=[...this.values.keys()].filter(p=>group?p.split('/').at(-2)===name:p.split('/').slice(0,-1).join('/')===name).map(p=>this.snapshot(p));
-  for(const [k,op,v]of filters)docs=docs.filter(d=>op==='=='?d.get(k)===v:op==='>='?d.get(k)>=v:d.get(k)<=v);
-  if(sort)docs.sort((a,b)=>(a.get(sort[0])>b.get(sort[0])?1:-1)*(sort[1]==='desc'?-1:1));docs=docs.slice(0,limit);return{docs,size:docs.length};};return q;}
- async getAll(...refs){return refs.map(r=>this.snapshot(r.path));}
- async runTransaction(fn){const pending=[];const tx={get:async r=>r.query?r.get():this.snapshot(r.path),getAll:(...refs)=>this.getAll(...refs),set:(r,d)=>pending.push([r.path,d]),create:(r,d)=>{assert(!this.values.has(r.path));pending.push([r.path,d]);},update:(r,d)=>{assert(this.values.has(r.path));pending.push([r.path,{...this.values.get(r.path).data,...d}]);}};
-  const out=await fn(tx);for(const [p,d]of pending){this.values.set(p,{data:d,version:++this.sequence});this.writes.push(p);}if(pending.some(([p,d])=>p.startsWith('festival_link_jobs/')&&d.status==='running')&&this.afterClaim){const hook=this.afterClaim;this.afterClaim=undefined;hook(this);}return out;
- }
-}
+import {Database} from './festival-worker-test-db.mjs';
 function fixture(){
  const caption='Unholy Night | October 17 | 7:00 pm | Tivoli Cinema\nThis screening is part of ANCHOR Fest 2026, presented by ANCHOR Fest.';
  const umbrella={locationScope:'area',cityLevelReviewId:'review_fixture',eventName:'ANCHOR Fest 2026',startDate:'2026-10-14',endDate:'2026-10-18',areaData:{version:1,status:'partial',sourceUrl:'https://festival.example/programme',locations:[{id:'venue_tivoli_fixture',label:'Tivoli Cinema',venueId:'tivoli_fixture',certainty:'confirmed',coordinates:{latitude:46.2,longitude:-63.1},linkedEventIds:['human_fixture']}]}};
@@ -83,6 +68,49 @@ function legacyFixture(){
  f.db.values.delete('festival_link_captures/'+f.key);const previous={...f.cache,captureKey:oldKey,result:{...f.cache.result,evidencePolicy:FESTIVAL_PREVIOUS_EVIDENCE_POLICY}};
  f.db.values.set('festival_link_captures/'+oldKey,{data:previous,version:++f.db.sequence});return{...f,oldKey,previous};
 }
+
+function posterFixture(ticketUrl=''){
+ const f=fixture(),db=f.db,source=db.values.get('parse_snapshots/source_fixture').data;
+ const heading='2026 ANCHOR Fest OCTOBER 14 TO 18',date='SATURDAY, OCTOBER 17',row='7:00 pm\nUnholy Night\nLocation: Tivoli Cinema'+(ticketUrl?'\nTickets: '+ticketUrl:'');
+ const caption='Here is the ANCHOR Fest programme.',imageUrls=['https://images.example/poster.jpg'];
+ source.inputText=caption;source.rowMeta.mediaUrls=imageUrls;
+ const umbrella=db.values.get('events/festival_fixture').data,review=db.values.get('city_level_event_reviews/review_fixture').data;
+ umbrella.areaData.sourceUrl=source.facebookUrl;umbrella.areaData.locations[0].linkedEventIds=[];
+ review.finalization.manual.programmeSources=[{sourceId:source.uniqueId,sourceUrl:source.facebookUrl,sourceFingerprint:festivalEvidenceSourceFingerprint({caption,imageUrls})}];
+ const edition=reviewedFestivalEdition({path:'events/festival_fixture',data:umbrella},{path:'city_level_event_reviews/review_fixture',data:review},'2026-10-15');assert(edition);
+ db.values.delete('festival_link_captures/'+f.key);
+ const key=festivalShadowFingerprint({source:festivalEvidenceSourceFingerprint({caption,imageUrls}),edition:festivalEvidenceEditionFingerprint(edition),policy:FESTIVAL_EVIDENCE_POLICY});
+ const a={...f.cache.result.activities[0],kind:'programme_row',membershipText:caption,festivalNameText:'ANCHOR Fest',organizerText:'',scopeText:row,dateText:date,timeText:'7:00 pm',ticketUrl,sourceIndices:[-1,0]};
+ const result={...f.cache.result,documents:[{index:-1,text:caption},{index:0,text:heading+'\n\n'+date+'\n'+row}],activities:[a],sourceFingerprint:festivalEvidenceSourceFingerprint({caption,imageUrls}),editionFingerprint:festivalEvidenceEditionFingerprint(edition)};
+ db.values.set('festival_link_captures/'+key,{data:{captureKey:key,sourceId:source.uniqueId,result},version:++db.sequence});return{...f,key,cache:db.values.get('festival_link_captures/'+key).data};
+}
+
+test('actual worker fills an empty schedule automatically from a reviewed original poster and is idempotent',async()=>{
+ const {db,options}=posterFixture();const result=await runFestivalLinkWorker(db,options);assert.equal(result.eventWrites,1);assert.deepEqual(result.reports[0].addedEventIds,['child_fixture']);assert.equal(result.paidSources,0);
+ assert.deepEqual(db.values.get('events/festival_fixture').data.areaData.locations[0].linkedEventIds,['child_fixture']);
+ assert.equal((await runFestivalLinkWorker(db,options)).eventWrites,0);assert.equal(db.values.get('runtime_metadata/event_feed').data.version,11);
+ assert(!db.writes.some(p=>p.startsWith('venues/')||p.startsWith('city_level_event_reviews/')));
+});
+test('a changed publisher or original gallery fingerprint cannot inherit programme ownership',async()=>{
+ for(const change of [s=>s.facebookUrl='https://other.example/post',s=>s.rowMeta.mediaUrls=['https://images.example/changed.jpg']]){
+  const {db,options}=posterFixture();change(db.values.get('parse_snapshots/source_fixture').data);const result=await runFestivalLinkWorker(db,{...options,dryRun:true});assert.equal(result.eventWrites,0);assert.equal(result.reports?.flatMap(r=>r.addedEventIds).length||0,0);
+ }
+});
+test('a complete transcription can publish confirmed rows while explicitly holding an unconfirmed row',async()=>{
+ const {db,cache,options}=posterFixture();cache.result.activities.push({...cache.result.activities[0],verification:{index:1,accepted:false,reason:'independent verifier could not confirm the activity'}});
+ const result=await runFestivalLinkWorker(db,options);assert.equal(result.eventWrites,1);assert.equal(result.reports[0].gaps.length,0);assert.equal(result.reports[0].unconfirmedItems.length,1);assert.deepEqual(result.reports[0].addedEventIds,['child_fixture']);
+});
+test('an incomplete original source still blocks the entire edition before publication',async()=>{
+ const {db,cache,options}=posterFixture();cache.result.complete=false;await assert.rejects(runFestivalLinkWorker(db,options),/source_incomplete/);assert(!db.writes.some(p=>p.startsWith('events/')));
+});
+test('a generic printed ticket homepage does not veto an otherwise exact occurrence; specific URL conflict still holds',async()=>{
+ for(const url of ['www.organizer.example','https://organizer.example/']){const {db,options}=posterFixture(url);assert.equal((await runFestivalLinkWorker(db,options)).eventWrites,1);}
+ const {db,options}=posterFixture('https://organizer.example/events/different-show');const r=await runFestivalLinkWorker(db,options);assert.equal(r.eventWrites,0);assert(r.reports[0].outcomes.some(o=>o.reason==='ticket_identity_conflict'));
+});
+test('an unrelated multi-location post cannot create a capture gap for every registered festival',async()=>{
+ const {db,options}=posterFixture();db.values.set('parse_snapshots/unrelated_fixture',{version:++db.sequence,data:{fileId:options.fileId,uniqueId:'2222222222222',facebookUrl:'https://other.example/post',venueId:'unrelated_venue',inputText:'Book a private art workshop. We can travel to your venue.',rowMeta:{parserMode:'full5stage',mediaUrls:['https://other.example/poster.jpg']},stages:[{stage:'format',output:{stageArtifacts:{stage3Items:[{name:'Art workshops',spatial:{kind:'multi_location'}}]}}}]}});
+ const r=await runFestivalLinkWorker(db,{...options,dryRun:true});assert.equal(r.status,'completed');assert.deepEqual(r.reports[0].addedEventIds,['child_fixture']);assert.equal(r.paidSources,0);
+});
 test('prior exact source captures revalidate without model work, copying or overwriting their evidence',async()=>{
  const {db,key,oldKey,previous,options}=legacyFixture();const before=JSON.stringify(previous);
  const r=await runFestivalLinkWorker(db,options);assert.equal(r.eventWrites,1);assert.equal(r.paidSources,0);assert.equal(JSON.stringify(db.values.get('festival_link_captures/'+oldKey).data),before);assert(!db.values.has('festival_link_captures/'+key));

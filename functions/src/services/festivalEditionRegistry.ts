@@ -1,7 +1,7 @@
 import {festivalShadowFingerprint} from './festivalLinkShadowJob.js';
 import type {FestivalEdition} from './festivalLinker.js';
 export interface ReviewedFestivalEdition extends FestivalEdition {
- sourceBindings:Record<string,{organizerId:string;sourceUrl:string;authority:string}>;
+ sourceBindings:Record<string,{organizerId:string;sourceUrl:string;authority:string;sourceFingerprint?:string}>;
  venueAliases:Record<string,string[]>;
  authority:{kind:'reviewed_edition';reviewPath:string;eventPath:string};
 }
@@ -18,6 +18,18 @@ export function reviewedFestivalEdition(event:{path:string;data:Record<string,an
  for(const proof of r.areaEventLinks||[]){let url:URL;try{url=new URL(proof.sourceUrl);}catch{continue;}
   if(!official||url.origin!==official.origin||!url.pathname.replace(/\//g,''))continue;
   const id=url.toString();sourceBindings[id]={organizerId,sourceUrl:id,authority:review.path};
+ }
+ // A reviewer can register an original programme source without pre-linking
+ // its activities. Identity/fingerprint authorization is private and exact.
+ const programmes=r.finalization.manual.programmeSources;
+ if(programmes!==undefined){
+  if(!Array.isArray(programmes)||programmes.length>20)return;
+  for(const p of programmes){
+   let source:URL;try{source=new URL(p.sourceUrl);}catch{return;}
+   if(!official||source.protocol!=='https:'||source.origin!==official.origin||source.pathname.replace(/\/$/,'')!==official.pathname.replace(/\/$/,'')||source.search!==official.search||
+      typeof p.sourceId!=='string'||!/^\d{8,25}$/.test(p.sourceId)||!/^\w{64}$/.test(p.sourceFingerprint)||!/^[a-f0-9]+$/.test(p.sourceFingerprint)||sourceBindings[p.sourceId])return;
+   sourceBindings[p.sourceId]={organizerId,sourceUrl:source.toString(),sourceFingerprint:p.sourceFingerprint,authority:review.path};
+  }
  }
  return {id:event.path.split('/')[1],name,year:Number(e.startDate.slice(0,4)),startDate:e.startDate,endDate:e.endDate,organizerId,organizerNames:[name],sourceIds:Object.keys(sourceBindings).sort(),sourceBindings,
   venueIds:[...new Set<string>(e.areaData.locations.filter((p:any)=>p.certainty==='confirmed'&&p.venueId).map((p:any)=>p.venueId))].sort(),

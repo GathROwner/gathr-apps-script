@@ -7,7 +7,9 @@ import type {FestivalShadowJob,FullRunEvidence} from './festivalLinkShadowJob.js
 import {planFestivalLinkPublication,assertFestivalPublicationFence} from './festivalLinkPublication.js';
 import type {FestivalPinnedDocument,FestivalPublicationInput,FestivalPublicationOwnership} from './festivalLinkPublication.js';
 import type {FestivalCanonicalVenue,FestivalSourceEvidence} from './festivalLinker.js';
+import {isFestivalTicketHomepage,festivalVenueMentionLabel} from './festivalLinker.js';
 import {validFestivalNonmembership} from './festivalSourceDecision.js';
+import {festivalCaptureSource} from './festivalCaptureSource.js';
 
 const terminal=new Set(['completed','failed','cancelled','canceled','released']);
 const active=(docs:admin.firestore.QueryDocumentSnapshot[])=>docs.some(d=>!terminal.has(String(d.get('status')||'')));
@@ -58,7 +60,7 @@ export async function runFestivalLinkWorker(db:admin.firestore.Firestore,options
  for(const r of registered){
   if(registered.filter(other=>normalize(other.edition.name)===normalize(r.edition.name)&&other.edition.year===r.edition.year).length!==1)throw Error('Ambiguous edition registry');
   const scoped=[...latest.values()].filter(d=>{const s=d.data(),output=s.stages?.find((x:any)=>x.stage==='format')?.output;
-   return normalize(s.inputText).includes(normalize(r.edition.name))||output?.stageArtifacts?.stage3Items?.some((i:any)=>normalize(i.name).includes(normalize(r.edition.name))||i.spatial?.kind==='multi_location')||
+   return normalize(s.inputText).includes(normalize(r.edition.name))||output?.stageArtifacts?.stage3Items?.some((i:any)=>normalize(i.name).includes(normalize(r.edition.name)))||
     r.edition.venueIds?.includes(s.venueId)&&output?.stageArtifacts?.stage3Items?.some((i:any)=>i.date>=r.edition.startDate&&i.date<=r.edition.endDate);
   }).sort((a,b)=>String(a.get('uniqueId')).localeCompare(String(b.get('uniqueId'))));
   for(const source of scoped){const s=source.data(),caption=s.inputText||'',imageUrls=s.rowMeta?.mediaUrls,kind=s.stages?.find((x:any)=>x.stage==='format')?.output?.stageArtifacts?.stage3InputKind;
@@ -92,23 +94,26 @@ export async function runFestivalLinkWorker(db:admin.firestore.Firestore,options
   }
   let eventWrites=0;const reports:any[]=[];
   for(const r of registered){
-   const sourceItems=items.filter(i=>i.r===r),sources:FestivalSourceEvidence[]=[],gaps:any[]=[],reviewedNonmembers:any[]=[];
+   const sourceItems=items.filter(i=>i.r===r),sources:FestivalSourceEvidence[]=[],gaps:any[]=[],unconfirmedItems:any[]=[],reviewedNonmembers:any[]=[];
    for(const item of sourceItems){if(item.gap){gaps.push({sourceId:item.source.get('uniqueId'),reason:item.gap});continue;}
     if(item.nonmember){reviewedNonmembers.push({sourceId:item.source.get('uniqueId'),reviewId:item.decisionData.reviewId,reason:item.decisionData.reason,captureStillIncomplete:item.captureData?.result?.complete!==true});continue;}
     const c=item.captureData;
     if(!c?.result){gaps.push({sourceId:item.source.get('uniqueId'),reason:c?.error||'source_evidence_not_captured'});continue;}
-    let result=c.result;if(c.captureKey!==item.key||result.evidencePolicy!==item.capturePolicy||result.sourceFingerprint!==extractor.festivalEvidenceSourceFingerprint(item)||result.editionFingerprint!==extractor.festivalEvidenceEditionFingerprint(r.edition))throw Error('Cached source identity changed');
-    result=extractor.validateFestivalEvidenceCapture(result,item);
+    const capturedSource=festivalCaptureSource(c,item,extractor.festivalEvidenceSourceFingerprint);
+    let result=c.result;if(c.captureKey!==item.key||result.evidencePolicy!==item.capturePolicy||result.sourceFingerprint!==extractor.festivalEvidenceSourceFingerprint(capturedSource)||result.editionFingerprint!==extractor.festivalEvidenceEditionFingerprint(r.edition))throw Error('Cached source identity changed');
+    result=extractor.validateFestivalEvidenceCapture(result,capturedSource);
     for(const [index,a]of result.activities.entries()){
-     if(a.verification?.accepted!==true){gaps.push({sourceId:item.source.get('uniqueId'),item:index,reason:'source_evidence_unconfirmed'});continue;}
-     const matches=venues.filter(v=>[v.label,...(v.aliases||[])].some(n=>normalize(n.replace(/^the /i,''))===normalize(a.venueText.replace(/^the /i,''))));const sid=String(item.source.get('uniqueId')),binding=r.edition.sourceBindings[sid];
+     if(a.verification?.accepted!==true){unconfirmedItems.push({sourceId:item.source.get('uniqueId'),item:index,reason:'source_evidence_unconfirmed',detail:a.verification?.reason||'not_verified'});continue;}
+     const matches=venues.filter(v=>festivalVenueMentionLabel(v,a.venueText));const sid=String(item.source.get('uniqueId')),proposedBinding=r.edition.sourceBindings[sid];
+     const publisher=(url:string)=>{try{const u=new URL(url);return u.origin+u.pathname.replace(/\/$/,'')+u.search;}catch{return '';}};
+     const binding=proposedBinding&&(!proposedBinding.sourceFingerprint||proposedBinding.sourceFingerprint===extractor.festivalEvidenceSourceFingerprint(item)&&publisher(proposedBinding.sourceUrl)===publisher(item.source.get('facebookUrl')||''))?proposedBinding:undefined;
      const named=Boolean(a.activityRowText&&a.dateHeaderText&&normalize(a.eventText).startsWith(normalize(r.edition.name))&&normalize(a.eventText).length>normalize(r.edition.name).length);
-     sources.push({id:'e_'+festivalShadowFingerprint({source:sid,index,scope:a.scopeText}).slice(0,40),source:{id:sid,url:item.source.get('facebookUrl'),text:result.sourceText,documents:result.documents,publisherId:'publisher_'+festivalShadowFingerprint(item.source.get('facebookUrl')||'').slice(0,24),revision:item.source.updateTime.toDate().toISOString(),...(binding?{organizerId:binding.organizerId}:{})},kind:named?'same_source_named_activity':a.kind,scopeText:a.scopeText,membershipText:named?a.eventText:a.membershipText,festivalNameText:a.festivalNameText,yearText:a.yearText,organizerText:a.organizerText,...(a.activityRowText?{activityRowText:a.activityRowText,dateHeaderText:a.dateHeaderText}:{}),...(a.captionScope?{captionScope:a.captionScope}:{}),...(a.sourceScope?{sourceScope:a.sourceScope}:{}),activity:{name:a.name,venueId:matches.length===1?matches[0].id:'',startDate:a.startDate,startTime:a.startTime,...(a.ticketUrl?{ticketUrl:a.ticketUrl}:{})},eventText:a.eventText,dateText:a.dateText,timeText:a.timeText,venueText:a.venueText});
+     sources.push({id:'e_'+festivalShadowFingerprint({source:sid,index,scope:a.scopeText}).slice(0,40),source:{id:sid,url:item.source.get('facebookUrl'),text:result.sourceText,documents:result.documents,publisherId:'publisher_'+festivalShadowFingerprint(item.source.get('facebookUrl')||'').slice(0,24),revision:item.source.updateTime.toDate().toISOString(),...(binding?{organizerId:binding.organizerId}:{})},kind:named?'same_source_named_activity':a.kind,scopeText:a.scopeText,membershipText:named?a.eventText:a.membershipText,festivalNameText:a.festivalNameText,yearText:a.yearText,organizerText:a.organizerText,...(a.activityRowText?{activityRowText:a.activityRowText,dateHeaderText:a.dateHeaderText}:{}),...(a.captionScope?{captionScope:a.captionScope}:{}),...(a.sourceScope?{sourceScope:a.sourceScope}:{}),activity:{name:a.name,venueId:matches.length===1?matches[0].id:'',startDate:a.startDate,startTime:a.startTime,...(a.ticketUrl&&!isFestivalTicketHomepage(a.ticketUrl)?{ticketUrl:a.ticketUrl}:{})},eventText:a.eventText,dateText:a.dateText,timeText:a.timeText,venueText:a.venueText});
     }
    }
    const ownershipRef=db.doc(`festival_link_publications/${r.edition.id}`),ownership=await ownershipRef.get();
    const input:FestivalPublicationInput={edition:r.edition,umbrella:{path:r.umbrella.ref.path,data:plain(r.umbrella.data())},review:{path:r.review.ref.path,data:plain(r.review.data()!)},sources,candidates,venues,completion,sourceInventoryComplete:gaps.length===0,ownership:ownership.data() as FestivalPublicationOwnership|undefined};
-   const proposal=await planFestivalLinkPublication(input);reports.push({editionId:r.edition.id,status:proposal.status,reason:proposal.reason,gaps,reviewedNonmembers,outcomes:proposal.result?.outcomes||[],addedEventIds:proposal.addedEventIds});
+   const proposal=await planFestivalLinkPublication(input);reports.push({editionId:r.edition.id,status:proposal.status,reason:proposal.reason,gaps,unconfirmedItems,reviewedNonmembers,outcomes:proposal.result?.outcomes||[],addedEventIds:proposal.addedEventIds});
    if(options.dryRun||options.mode!=='publish'||proposal.status!=='ready')continue;
    const refs=[...completionRefs,pin(r.umbrella),pin(r.review),...sourceItems.map(i=>pin(i.source)),...sourceItems.filter(i=>i.cache?.exists).map(i=>pin(i.cache)),...sourceItems.filter(i=>i.nonmember&&i.decision?.exists).map(i=>pin(i.decision)),...children.docs.map(pin),...venueDocs.filter(d=>d.exists).map(pin)];
    const references=[...new Map(refs.map(p=>[p.path,p])).values()];

@@ -17,6 +17,7 @@ import {isApprovedVenueOccurrenceMatch,approvedVenueOccurrenceSourcePatch,classi
 
 import * as admin from 'firebase-admin';
 import { createHash, randomUUID } from 'crypto';
+import {restoreFestivalAreaRefresh} from './festivalAreaRefresh.js';
 import { DateTime } from 'luxon';
 import {
   EventData,
@@ -2035,7 +2036,18 @@ async function writePublishedCityLevelEvent(
     record = {...record, timing: previous.get('timing')};
   }
   manual = reviewedCityLevelManual(record, manual);
-  const areaData = manual.areaData || record.areaData;
+  let areaData = manual.areaData || record.areaData;
+  let restoredMachineArea=false;
+  if(options.preserveCreatedAt&&previous.exists&&areaData&&previous.get('areaData')){
+    const owned=await db.doc(`festival_link_publications/${eventId}`).get();
+    if(owned.exists){
+      const restored=await restoreFestivalAreaRefresh({eventPath:eventRef.path,eventName:manual.eventName||record.eventName||'',
+        startDate:manual.eventDate||record.eventDate||'',endDate:manual.endDate||record.endDate||manual.eventDate||record.eventDate||'',
+        approvedArea:areaData,previousArea:previous.get('areaData'),ownership:owned.data()!,manualEvidence:manual.areaEventLinks||record.areaEventLinks,
+        read:async path=>{const doc=await db.doc(path).get();return doc.exists?doc.data():undefined;}});
+      areaData=restored.areaData;manual={...manual,areaData,areaEventLinks:restored.evidence};restoredMachineArea=true;
+    }
+  }
   if (areaData) {
     manual = {...manual, areaData: await verifyAreaPublicationReferences({
       areaData, evidence: manual.areaEventLinks || record.areaEventLinks,
@@ -2043,6 +2055,7 @@ async function writePublishedCityLevelEvent(
       startDate: manual.eventDate || record.eventDate || '',
       endDate: manual.endDate || record.endDate || manual.eventDate || record.eventDate || '',
       refreshing: options.preserveCreatedAt,
+      allowFestivalTitleAliases:restoredMachineArea,
       read: async path => {const snapshot = await db.doc(path).get(); return snapshot.exists ? snapshot.data() : undefined;},
     })};
   }
@@ -2071,7 +2084,10 @@ async function writePublishedCityLevelEvent(
 
   // Replace the complete public area map, rather than recursively retaining
   // unknown/private keys from an older areaData object.
-  await eventRef.set(eventData, areaData ? {mergeFields: Object.keys(eventData)} : {merge: true});
+  if(areaData&&previous.exists){
+    // An overlapping machine publication or human edit must force re-evaluation.
+    await eventRef.update(eventData,{lastUpdateTime:previous.updateTime!});
+  }else await eventRef.set(eventData, areaData ? {mergeFields: Object.keys(eventData)} : {merge: true});
   return eventRef;
 }
 

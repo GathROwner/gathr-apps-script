@@ -7,6 +7,7 @@ import {validFestivalCaptionScope,festivalCaptionHeadingDate} from './festivalCa
 import type {FestivalCaptionScope,FestivalEvidenceDocument} from './festivalCaptionScope.js';
 import {validFestivalSourceScope,festivalSourceHeadingDates} from './festivalSourceScope.js';
 import type {FestivalSourceScope} from './festivalSourceScope.js';
+import {literalFestivalProgrammeHeading} from './festivalProgrammeHeading.js';
 
 export interface FestivalEdition {
   id: string; name: string; year: number; startDate: string; endDate: string;
@@ -63,6 +64,14 @@ const key = (v: unknown): string => String(v || '').normalize('NFKD').replace(/[
   .toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
 const activityKey = (v: unknown): string => key(String(v || '').split(/\s+[—–]\s+/)[0]);
 const venueKey = (v: string): string => key(v).replace(/^the /,'');
+/** Explicit interior wording retains its literal room context and exact parent identity. */
+export function festivalVenueMentionLabel(venue:FestivalCanonicalVenue,mention:string):string|undefined {
+ const names=[venue.label,...(venue.aliases||[])];
+ const direct=names.filter(n=>venueKey(n)===venueKey(mention)).sort()[0];if(direct)return direct;
+ const inside=mention.match(/^(?:the\s+)?(?:corridors?|lobby|foyer)\s+(?:of|in|at)\s+(?:the\s+)?(.+)$/i);
+ if(inside&&names.some(n=>venueKey(n)===venueKey(inside[1])))return mention;
+ return undefined;
+}
 const nonempty = (v: unknown): v is string => typeof v === 'string' && Boolean(v.trim());
 const identifier = (v: unknown): v is string => typeof v === 'string' && /^[A-Za-z0-9_-]{1,160}$/.test(v);
 const opaqueId = (v: unknown): v is string => nonempty(v)&&v.length<=1000&&!/[\r\n\0]/.test(v);
@@ -83,6 +92,12 @@ function freeze<T>(value: T): T {
 function specificUrl(value: string): boolean {
   try {const url=new URL(value);return ['https:','http:'].includes(url.protocol) && url.pathname.replace(/\//g,'').length>0;}
   catch {return false;}
+}
+/** A printed organizer homepage is navigation, not a unique event ticket ID. */
+export function isFestivalTicketHomepage(value:unknown):boolean {
+ if(typeof value!=='string'||!value.trim())return false;
+ const raw=value.trim();if(!/^(?:https?:\/\/)?(?:[a-z0-9-]+\.)+[a-z]{2,}\/?$/i.test(raw))return false;
+ try{const u=new URL(/^https?:\/\//i.test(raw)?raw:'https://'+raw);return !u.search&&!u.hash&&(u.pathname===''||u.pathname==='/');}catch{return false;}
 }
 function ticketIdentity(value: unknown): string {
   if (!nonempty(value) || !specificUrl(value)) return '';
@@ -156,23 +171,28 @@ function membership(e: FestivalSourceEvidence, edition: FestivalEdition): Festiv
     return undefined;
   }
   const programme=e.kind==='programme_row';
+  const posterHeading=programme?literalFestivalProgrammeHeading({documents:e.source.documents||[],scope:e.sourceScope,festivalNameText:e.festivalNameText,yearText:e.yearText}):undefined;
+  const membershipText=posterHeading||e.membershipText;
+  const boundEvidence=posterHeading?{...e,membershipText}:e;
   const sameName=programme?key(e.festivalNameText).replace(/ /g,'')===key(edition.name).replace(/ /g,''):key(e.festivalNameText)===key(edition.name);
-  if (!sameName || (programme?!printedProgrammeYear(e,edition):e.yearText!==String(edition.year)) ||
-      !e.membershipText.includes(e.festivalNameText) || !e.membershipText.includes(e.yearText) ||
+  if (!sameName || (programme?!printedProgrammeYear(boundEvidence,edition):e.yearText!==String(edition.year)) ||
+      !membershipText.includes(e.festivalNameText) || !membershipText.includes(e.yearText) ||
       (e.source.organizerId && e.source.organizerId!==edition.organizerId)) return 'edition_conflict';
-  const years=e.membershipText.match(/\b(?:19|20)\d{2}\b/g)||[];
+  const years=membershipText.match(/\b(?:19|20)\d{2}\b/g)||[];
   if(years.some(y=>y!==String(edition.year)))return 'edition_conflict';
   if(e.organizerText && (!e.membershipText.includes(e.organizerText)||!edition.organizerNames.some(n=>key(n)===key(e.organizerText))))return 'edition_conflict';
   if(e.kind==='programme_row') {
+    const legacyHeading=key(e.membershipText).startsWith(`${key(e.festivalNameText)} `)&&/\b(programme|program|lineup|schedule|screenings)\b/i.test(e.membershipText);
     if(!edition.sourceIds.includes(e.source.id) || e.source.organizerId!==edition.organizerId ||
-        !key(e.membershipText).startsWith(`${key(e.festivalNameText)} `)||
-        !/\b(programme|program|lineup|schedule|screenings)\b/i.test(e.membershipText))return 'unbound_programme';
-    const header=e.source.text.indexOf(e.membershipText),row=e.source.text.indexOf(e.scopeText);
+        !(legacyHeading||posterHeading))return 'unbound_programme';
+    const sourceText=posterHeading?e.source.documents!.find(d=>d.index===e.sourceScope!.documentIndex)!.text:e.source.text;
+    const header=sourceText.indexOf(membershipText),row=sourceText.indexOf(e.scopeText);
     if(row<header)return 'unbound_programme';
     // A different section/edition header between the selected header and row
     // makes that association ambiguous. Do not borrow an earlier heading.
-    const intervening=e.source.text.slice(header+e.membershipText.length,row);
-    if(intervening.split(/\r?\n/).some(line=>/\b(?:programme|program|lineup|schedule|screenings)\b/i.test(line)))return 'unbound_programme';
+    const intervening=sourceText.slice(header+membershipText.length,row);
+    if(intervening.split(/\r?\n/).some(line=>/\b(?:programme|program|lineup|schedule|screenings)\b/i.test(line)||
+       /\b(?:fest|festival)\b/i.test(line)&&/\b(?:19|20)\d{2}\b/.test(line)&&!key(line).includes(key(e.festivalNameText))))return 'unbound_programme';
     return undefined;
   }
   if(e.kind!=='festival_activity' || !e.scopeText.includes(e.membershipText))return 'membership_not_explicit';
@@ -256,8 +276,8 @@ export async function resolveFestivalMembership(input: {
     if(e.activity.startDate<edition.startDate||e.activity.startDate>edition.endDate){stop('outside_edition');continue;}
     const venues=input.venues.filter(v=>v.id===e.activity.venueId);
     if(venues.length!==1||!identifier(e.activity.venueId)){stop('unknown_venue');continue;}
-    const venue=venues[0];const names=[venue.label,...(venue.aliases||[])];
-    const matchedName=names.filter(n=>venueKey(n)===venueKey(e.venueText)).sort(compare)[0];
+    const venue=venues[0];
+    const matchedName=festivalVenueMentionLabel(venue,e.venueText);
     if(!matchedName||!Number.isFinite(venue.latitude)||!Number.isFinite(venue.longitude)||Math.abs(venue.latitude)>90||Math.abs(venue.longitude)>180){stop('unknown_venue');continue;}
     const family=input.candidates.filter(c=>titleIdentity(c.data.eventName||c.data.name)===titleIdentity(e.activity.name)&&c.data.venueId===venue.id&&c.data.startDate===e.activity.startDate);
     const relatedAuthorities=authorities.filter(({proof})=>titleIdentity(proof.eventName)===titleIdentity(e.activity.name)&&proof.venueId===venue.id&&proof.startDate===e.activity.startDate||
@@ -296,8 +316,9 @@ export async function resolveFestivalMembership(input: {
        ['cancelled','canceled','deleted','rejected','superseded','expired'].includes(String(data.status||'').toLowerCase())){stop('inactive_or_noncanonical_child');continue;}
     const point:EventAreaLocation={id:`venue_${venue.id}`,label:matchedName,venueId:venue.id,
       coordinates:{latitude:venue.latitude,longitude:venue.longitude},certainty:'confirmed',linkedEventIds:[id]};
+    const posterHeading=e.kind==='programme_row'?literalFestivalProgrammeHeading({documents:e.source.documents||[],scope:e.sourceScope,festivalNameText:e.festivalNameText,yearText:e.yearText}):undefined;
     const evidence:AreaEventLinkEvidence={eventPath:candidate.path,eventName:data.eventName||data.name,venueId:venue.id,startDate:data.startDate,startTime:data.startTime,
-      festivalName:e.festivalNameText,sourceUrl:e.source.url,sourceText:`${e.membershipText}\n${e.scopeText}`,sourceEventText:e.eventText,
+      festivalName:e.festivalNameText,sourceUrl:e.source.url,sourceText:`${posterHeading||e.membershipText}\n${e.scopeText}`,sourceEventText:e.eventText,
       sourceDateText:e.dateText,sourceTimeText:e.timeText,sourceVenueText:e.venueText};
     // Membership above binds the literal typography alias to the canonical
     // edition. Validate occurrence excerpts using that literal name, retaining

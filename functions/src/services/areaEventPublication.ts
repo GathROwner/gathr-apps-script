@@ -83,7 +83,9 @@ function sourceBindsOccurrence(proof: AreaEventLinkEvidence, point: EventAreaLoc
       festivalActivityTitleIdentity(proof.sourceEventText,proof.festivalName)===festivalActivityTitleIdentity(proof.eventName,proof.festivalName)) &&
     // A reviewer may preserve a named sublocation/alias in the public point
     // label, but an unrelated place name in the source cannot bind this point.
-    (` ${key(point.label).replace(/^the /, '')} `).includes(` ${key(proof.sourceVenueText).replace(/^the /, '')} `) &&
+    ((` ${key(point.label).replace(/^the /, '')} `).includes(` ${key(proof.sourceVenueText).replace(/^the /, '')} `)||
+      /^(?:the\s+)?(?:corridors?|lobby|foyer)\s+(?:of|in|at)\s+(?:the\s+)?(.+)$/i.test(proof.sourceVenueText)&&
+      key(proof.sourceVenueText.replace(/^(?:the\s+)?(?:corridors?|lobby|foyer)\s+(?:of|in|at)\s+(?:the\s+)?/i,'')).replace(/^the /,'')===key(point.label).replace(/^the /,'')) &&
     evidenceDate(proof.sourceDateText, proof.startDate.slice(0,4)) === proof.startDate &&
     evidenceClock(proof.sourceTimeText) === proof.startTime;
 }
