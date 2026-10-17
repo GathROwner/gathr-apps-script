@@ -169,3 +169,32 @@ documents. Root owns the clean assembly review, final tests, deployment gate,
 backup/exact private-create approval and independent post-apply worker verification.
 No deployment, live write, new paid model request, parser replay, job reset,
 map/emulator/OTA work or shared serving-assembly edit was performed by this task.
+
+## Coordinator independent acceptance, October 17
+
+The isolated task completed and its committed report/tools were reconciled into
+the coordinator atde48e8a. Root independently reviewed the implementation,
+identified additional printed-date/edition/body-derivation/first-party venue
+controls, and reviewed their final tests. Its clean release was cloned directly
+from serving938320d and committed as
+`15d5c71f012c00a8723df46d035abd4180a117c1`. All four changed files match the
+manifest byte for byte; both serving environment files are byte-identical.
+
+Final root build passed. Final root **199/199 focused,14/14 actual-source playback
+and997/997 compiled backend** checks passed, no failures/skips. The full final
+run took81,832ms. Counts/logs are under
+`functions/artifacts/oct17-festival-corroboration-release/`. The exact one-function
+codebase-qualified Firebase deployment dry run exited0, Dry run complete.
+
+Root's exact three-private-create plan passed fresh live preflight against17
+read-set documents, idle parsers, the fully completed367-row regular run and no
+checkpoint. No source/canonical/review/venue pin drift was bypassed. Fresh Cloud
+readback confirmed all three parser functions remain ACTIVE at common hash
+0c06b198eacb9cf32171e0d68fbea89e889a93c3 with latest-traffic configuration and
+unchanged environments/secrets. No runtime deployment or private apply occurred.
+
+Approval/apply gates are consolidated with the newly identified Curling
+programme hold in `docs/oct17-remaining-batch-release-and-repair-approval-plan.md`.
+That plan contains one function release plus11 exact document operations, full
+backup locations and independent serving/API/worker verification. This acceptance
+does not imply the batch is live or that a new regular parse has been audited.

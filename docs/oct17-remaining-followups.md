@@ -286,3 +286,21 @@ remains. No outreach was sent and no replacement venue was invented.
 The existing `daily-post-parse-gathr-audits` automation is ACTIVE with its daily
 schedule and already excludes replays/partial runs. No duplicate monitor was
 created. Tomorrow's full-run completion/source quality remains unobserved.
+
+### Final prepared release and combined approval
+
+The isolated festival task is complete and independently accepted. Root's clean
+release15d5c71 passed build,199focused,14actual-source replay and997compiled
+backend checks, all without failures/skips. Exact narrow deployment dry run also
+passed. The private plan's live dry run passed17read-set controls and proposes
+only3privatecreates/4receipts; public/source/capture deltas remain0. Current
+parser runtimes were freshly verified unchanged at common hash0c06b198..., ACTIVE
+with unchanged environment/secrets and latest-traffic configuration.
+
+The combined release/data plan is
+`docs/oct17-remaining-batch-release-and-repair-approval-plan.md`: one worker
+release, the8-op Curling correction and3private festival creates. It supersedes
+the earlier family-only draft. New exact removals/private creates still require
+the reviewed data approval. No part of this new batch has been deployed/applied;
+feed remains302. Kay's/Coats location evidence gaps and the next fresh-run audit
+remain as recorded. No additional monitor was created.

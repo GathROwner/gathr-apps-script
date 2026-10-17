@@ -1367,3 +1367,23 @@ complete967-entry/10-page active feed and all five managed images were checked.
 See `docs/oct17-curling-sibling-review.md` for exact paths, source receipts,
 default-dry helper, backup plan and independent verification. The existing
 exact-ID constraint does not constitute a general programme-start parser repair.
+
+### October 17 private festival corroboration acceptance (prepared, not live)
+
+Independent root release15d5c71, based on actual worker serving938320d/hash24edc952...,
+passed build,199focused checks,14actual145-source playback checks and997compiled
+backend checks. Exact one-function deployment dry run passed. A reviewed private
+receipt acknowledges existing manual membership/self-reference without changing
+source literals, ownership or public links. Raw HTTP→derived-text identity,
+printed date/edition conflicts, independent verifier, exact business publisher,
+canonical/review/source versions, suppression, missing-child later arrival and
+transaction fences were checked. Initial proposal is3privatecreates/4receipts:
+three existing Harvest acknowledgements, one overview self-reference; two Harvest
+and22Anchor holds retained. Public/source/capture delta0; new paid calls0.
+
+The exact private plan passed live17-document preflight. Strict snapshot/version
+lifetime is explicit; this is not general website discovery or automatic renewal.
+New deployment/creates remain pending the combined approval in
+`docs/oct17-remaining-batch-release-and-repair-approval-plan.md`. No live changes
+or fresh full-run quality pass is claimed. All three accepted parsers were freshly
+verified ACTIVE at common0c06b198... with preserved environments/secrets.
