@@ -1157,3 +1157,55 @@ event, no duplicate and no unrelated event/venue/queue/review delta. Detail, com
 full-run marker are unchanged, no checkpoint remains and parser is idle. Ten actual
 cloud calls cost an estimatedUSD0.00549151; offline playback is separate and free.
 Current source/serving/recovery evidence: `docs/altuck-oct16-recovery-release.md`.
+
+## October 17 regular full-run audit — eight open follow-up groups
+
+Read-only audit of regular file `1JFQdQB-pAXdAb0usJhNFf5mrWnWyBd7g`, run
+`24bd52c0-fe67-4c1e-929c-ada0766febe6`, proves completion through matching lock,
+processed marker, final batch cursor367/367 and no checkpoint. Completed13:50 UTC;
+58 processed,89 skipped,220 invalid, zero hard errors;89 creates/76 updates.
+Fresh serving readback confirms all three parsers ACTIVE/latest100% on common
+hash `3136192244fb564f412541a6d76af37689d7ac0c`, preserved configuration.
+
+All147 model-source decisions/captions and252 available gallery images reviewed;
+four image references remained unavailable. Actual478 model calls cost an
+estimatedUSD0.430128665. This is not a clean quality pass. Open groups:
+
+1. Broad duplicate matching discards two distinct Tyne Valley classes and routes
+   both Eptek slots to Group1. Actual compiled predicate playback reproduces all
+   three collisions; preserve programme/group/window identity before similarity.
+2. Two source-proven duplicate pairs remain: November7 comedy under two venue
+   aliases, and October17 Founders generic/named NHL screening. Exact canonical
+   adjudication is required; simultaneous unrelated activities remain separate.
+3. Royalty artisan market and Sterling farmers market become Food Specials;
+   sponsor-prefixed Free Swim becomes Live Music. Harden item-specific activity
+   precedence and downstream flags while retaining genuine food specials.
+4. Family-v5 misses slash-separated family skating, colon/yr child-age notation
+   and friends-and-family invitations. Campaign beneficiary names can overstate
+   attendee suitability. Surviving approved family controls retain their scores.
+5. Six dated CFCY visits with named venues are wrongly routed to broad area reviews
+   and held. A separate Coats distribution event inherits a collection partner's
+   café as its attendance venue without source proof. Protect occurrence and role
+   ownership; exact source-grounded resolution or hold is required.
+6. One-day Coats donation visit inherits daily depot recurrence; the compact
+   contract rejects Nano's correct removal. It remains queued. My First Sports
+   loses Saturday programme intent; verify lifecycle before any recurrence repair.
+7. Moth Lane caption/image start and weekday conflicts are silently prioritized;
+   hold material source conflicts rather than choosing a source modality.
+8. Separate festival worker reaches held generation8: Anchor source completeness
+   and cross-card evidence remain unresolved; Harvest also has unconfirmed items.
+   Zero new links/public writes; existing Anchor17/Pumpkin13/Harvest4 remain.
+   Eleven normal worker calls cost an estimatedUSD0.012200675, separately counted.
+
+Victoria's four retired records, Daisy/Be You deletions and seven October14
+duplicate deletions remain absent. Existing linked programme and family controls
+survive. Five October14 keepers remain; the expired Arts Mixer keeper is absent,
+with cleanup cause not established by this audit. No new source-based coverage
+claim is made for older APM/Connolly/adjacent Lane Swim controls.
+
+No deployment, replay, live data repair, new model-generation call or map
+interaction was performed by this audit. Next step is one combined reviewed
+prevention/repair plan for these eight groups. Exact targets, source receipts,
+actual usage, saved-response playback and evidence limitations are recorded in
+`docs/luna-oct17-production-audit.md`; private evidence remains in
+`functions/artifacts/luna-oct17-production-audit/`.
