@@ -237,3 +237,52 @@ accepted serving hashes; no runtime redeploy, model/prompt change, parser replay
 or monitor was needed. Junior score/feed301 and the approved14-operation
 recovery/feed302 are applied and independently verified. The next full parse is
 still unobserved; these proofs do not claim a new full-run quality pass.
+
+## October 17 next batch: source checks and implementation in progress
+
+Craig requested all remaining follow-ups. The five Curling source siblings were
+reread at19:04UTC; all five details and the complete967-entry/10-page active feed
+were checked independently at19:08UTC. Four older family scores are confirmed.
+Further poster review proved three weekly programme parents are incorrectly
+offered in October before the printed November commencement. Current club
+registration pages have a conflicting November4 season bound, on a Wednesday,
+for Tuesday/Thursday/Sunday sessions. The club calendar confirms the two signup
+sessions but does not resolve the programme commencement. No November session
+date or horizon was invented. A combined eight-operation exact hold/signup-score
+batch passed live dry run and is awaiting its newly required data approval.
+See `docs/oct17-curling-sibling-review.md`. No new live writes yet; feed remains302.
+
+Fresh bounded first-party HTTP receipts were saved at19:12UTC under
+`firebase/artifacts/oct17-festival-corroboration-web/`: Harvest programme200,
+Anchor homepage200, both exact dated Anchor ticket pages200. Each raw body has a
+SHA256 and separate extracted text; dates are supplemental website evidence,
+never rewritten as original Facebook-gallery literals. The large Anchor film
+page exceeded the helper's5MB response limit and was not retained; exact tickets
+and edition homepage supply the reviewed dates. This does not revive expired
+films or resolve held clock/identity conflicts.
+
+The isolated implementation task is
+`01a14b3f-acea-77c0-93c0-2e5ff4fe1b36`, checkout `d43e`, with its own nested copy
+of the actual serving festival assembly938320d. Root verified zero baseline
+file differences in src/scripts/test and the read-only dependency junction.
+The task is implementing only private receipt dispositions for precisely reviewed
+existing members/self-reference. It has not deployed or changed public membership.
+Root still owes independent code/test/playback review before any release claim.
+
+Kay's primary campaign still explicitly names one joint stop at Wholesale and
+Fresh Market on October29,12–16. The owner's current Fresh Market site confirms
+it is directly beside Wholesale at167MinnaJaneDrive but does not identify the
+drive's entrance or hosting point. It contains inconsistent postal codes in its
+own header/footer; do not manufacture a combined business or arbitrarily choose
+one of the two separate place identities. The existing joint-stop hold remains.
+
+The Coats organizer's Facebook page was again unreadable through the web tool.
+The current211 page still explicitly describes the2025 distribution. Bounded
+searches yielded historical and unrelated campaigns, not a first-party attendee
+venue for the exact November7,2026 event. Neither Credit Union Place from2025 nor
+the organizer's directory address supplies current attendance proof. Its hold
+remains. No outreach was sent and no replacement venue was invented.
+
+The existing `daily-post-parse-gathr-audits` automation is ACTIVE with its daily
+schedule and already excludes replays/partial runs. No duplicate monitor was
+created. Tomorrow's full-run completion/source quality remains unobserved.

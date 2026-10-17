@@ -1345,3 +1345,25 @@ Backup/result stamp `2026-10-17T18-17-45-986Z` and independent proof:
 `firebase/artifacts/oct17-remaining-followups/remaining-independent-verification.json`.
 Exact targets,source evidence,remaining holds and limits:
 `docs/oct17-remaining-followups.md`. The next regular full run remains unobserved.
+
+### October 17 Junior Curling source-sibling follow-up (prepared, not applied)
+
+Source1732518712212204 has five retained Montague Curling parents. Four older
+family-v4 scores need current v6 metadata, but source review also proves the
+three weekly programme parents begin too early: current generated October18,
+20 and22 sessions precede the poster's November commencement. Signup opens
+October3; in-person signup occurs October17 and25. These are separate temporal
+roles. Current official registration pages give a November4,2026 season bound
+that conflicts with the poster and lands Wednesday for all three weekday
+programmes. The club calendar confirms signup but supplies no Junior session
+date resolving it. Do not guess a November first occurrence or terminal horizon.
+
+The initial four-family-only draft is superseded by a dry-run-proven eight-op
+proposal: retire/privately preserve three programme parents; add the already
+serving exact-ID hold policy at their venue; refresh only the two signup parents'
+family metadata; feed302→303. This newly identified removal batch is awaiting
+exact user approval, with no writes/deploy/replay/model calls. Current details,
+complete967-entry/10-page active feed and all five managed images were checked.
+See `docs/oct17-curling-sibling-review.md` for exact paths, source receipts,
+default-dry helper, backup plan and independent verification. The existing
+exact-ID constraint does not constitute a general programme-start parser repair.
