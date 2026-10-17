@@ -1317,3 +1317,31 @@ guards. The new venue creations await one combined exact-scope approval under
 the event-integrity repair skill. No new deployment, public recovery, row replay,
 model call or monitor occurred during preparation. Full paths, SHA256, backup
 and independent verification procedure: `docs/oct17-remaining-followups.md`.
+
+### October17 remaining exact recovery: approved, applied and verified
+
+Craig explicitly approved the combined14-operation plan, SHA256
+`9487b8a6afdc5319652af878872c3ebb3d92e9abc6bb78597494bd2a1282e52e`.
+Fresh full prewrite backup and guarded atomic application completed18:17:45 UTC:
+six canonical venue creates,six one-off collection-event creates,one exact private
+Anchor capture replacement,feed301→302. No deletes,media changes,parser replays,
+model calls,job resets or deployments. Original private review/queue schemas stay
+unchanged; Kay's,Coats distribution and historical Moth Lane remain held.
+
+Independent18:18:09 UTC proof verifies all14 exact deltas,18 unchanged read-set
+docs,exactly six public events for the two source roots,six details200,and exactly
+one copy of each in the complete990-entry/10-page active Preview feed. Both
+distinct retained managed source images return200. Source timestamps retain their
+Firestore timestamp type; app participation was not cloned.
+
+The actual released linker read-only pass covers145 sources,completes with zero
+gaps/unconfirmed excerpts,zero paid sources and zero public writes/additions.
+Anchor's incomplete-inventory blocker is cleared; its22 item-level evidence holds
+and Harvest's six edition outcomes remain honestly distinct from successful
+inventory completion. Pumpkin has no held outcome in this pass. No absent
+historical linked child was revived. All36 compact checks passed again.
+
+Backup/result stamp `2026-10-17T18-17-45-986Z` and independent proof:
+`firebase/artifacts/oct17-remaining-followups/remaining-independent-verification.json`.
+Exact targets,source evidence,remaining holds and limits:
+`docs/oct17-remaining-followups.md`. The next regular full run remains unobserved.

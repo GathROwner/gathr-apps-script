@@ -100,12 +100,13 @@ proof. Copies of their private evidence are preserved under this checkout's
 `firebase/artifacts/oct17-remaining-followups/{venue-evidence,festival-evidence}/`.
 No new monitor or tomorrow-run claim is implied.
 
-## Prepared combined recovery: exact14 operations, not yet applied
+## Completed combined recovery: exact14 operations
 
 The new venue documents were not part of the previously approved21-operation
-repair manifest. The event-integrity repair skill requires review of these exact
-new creation paths before publication. One combined approval covers the bounded
-batch below; no repeated approval is needed for its individual steps.
+repair manifest. The event-integrity repair skill required review of these exact
+new creation paths before publication. Craig explicitly replied **I approve** to
+the combined batch. It was applied atomically at18:17:45 UTC after the fresh
+prewrite checks passed; no further approval was requested for individual steps.
 
 Reviewed full private plan:
 `firebase/artifacts/oct17-remaining-followups/remaining-reviewed-plan.json`.
@@ -187,12 +188,29 @@ After exact approval, the helper writes a full timestamped prewrite backup to
 and a separate result receipt before/after the atomic transaction. No private
 review schema is changed and no evidence/media is removed.
 
-Prepared independent verifier:
+Independent verifier:
 `firebase/verify-oct17-remaining-recovery.mjs`. It checks every intended delta and
 untouched control, exactly six public source events, all six detail endpoints,
 the complete active Preview feed, one copy per one-off, retained managed media,
-and the actual released linker in read-only mode. Post-apply verification has not
-run because this batch has not been applied.
+and the actual released linker in read-only mode. The post-apply verifier passed:
+**14 exact operations,18 unchanged read-set documents,six details200,six public
+source events,exactly one copy each in the complete990-entry/10-page active
+Preview feed,and both distinct retained managed images200**. The released worker's
+read-only run completed with no source-inventory-incomplete result,zero event
+writes and zero paid sources. Item-level evidence holds remain separate from
+that completed inventory pass. All36 compact checks passed again.
+
+Applied receipts and proof (all private/local):
+
+- `firebase/artifacts/oct17-remaining-followups/remaining-prewrite-backup-2026-10-17T18-17-45-986Z.json`
+- `firebase/artifacts/oct17-remaining-followups/remaining-result-2026-10-17T18-17-45-986Z.json`
+- `firebase/artifacts/oct17-remaining-followups/remaining-independent-verification.json`
+- `functions/artifacts/oct17-remaining-housekeeping-qa/compact-approval-verification.log`
+
+The exact reviewed plan SHA remained
+`9487b8a6afdc5319652af878872c3ebb3d92e9abc6bb78597494bd2a1282e52e`.
+No source, version, sibling, lease or parser-idle guard was bypassed. Feed is now302.
+No public event/venue was deleted and no source media was deleted or rehosted.
 
 ## Explicit retained dispositions
 
@@ -215,6 +233,7 @@ run because this batch has not been applied.
 
 Detailed source reports: `docs/oct17-remaining-venue-evidence.md` and
 `docs/oct17-remaining-festival-evidence.md`. Current parsers/linker remain at the
-accepted serving hashes; only local helpers/tests/docs and the verified Junior
-score/feed301 changed in this follow-up session. The next full parse is still
-unobserved.
+accepted serving hashes; no runtime redeploy, model/prompt change, parser replay
+or monitor was needed. Junior score/feed301 and the approved14-operation
+recovery/feed302 are applied and independently verified. The next full parse is
+still unobserved; these proofs do not claim a new full-run quality pass.
