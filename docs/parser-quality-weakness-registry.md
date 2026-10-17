@@ -1387,3 +1387,33 @@ New deployment/creates remain pending the combined approval in
 `docs/oct17-remaining-batch-release-and-repair-approval-plan.md`. No live changes
 or fresh full-run quality pass is claimed. All three accepted parsers were freshly
 verified ACTIVE at common0c06b198... with preserved environments/secrets.
+
+### October 17 remaining batch executed; private proof acceptance exception
+
+Craig approved the combined exact plan. Curling's eight operations applied
+19:40:35UTC/feed303 and passed independent source/details/full-feed/media checks.
+Three premature programme parents are privately preserved; two signup parents
+retain dates/clocks with v6score70. Exact identity constraints are active, while
+the true November commencement remains unresolved.
+
+The single festival worker release is ACTIVE/latest100% at
+scheduledfestivallinker-00008-noh/hash95fe0fddd0a1a438bb41c0312eaee2d13b06fef9.
+Independent readback proves configuration/scheduler preservation and unchanged
+three parser releases. Its immutable archive matches1,410 tested files.
+The exact three private creates applied19:44:52UTC with no public delta.
+
+Final actual-worker verification fails three member acknowledgements because
+offline Timestamp.toDate parity was wrong: native Date truncated one source's
+revision to.758Z; Firestore SDK rounds to.759Z. Full source/capture/activity and
+canonical/review/venue pins remain unchanged. The production guard safely holds
+the invalid proofs. One self-reference works; Harvest has five holds instead of
+two. No public links were removed or invented. Corrected local adapter uses
+actual SDK Timestamp;14playback and6timestamp regression checks pass. Live
+read-only overlay confirms the intended3acknowledgements/1self-reference with
+2Harvest/22Anchor holds,145sources,0gaps/unconfirmed/paid/public writes.
+
+One private-document update replacing only three evidenceFingerprint strings is
+prepared, not applied, under a new exact approval request. Do not describe the
+full batch as accepted or silently rewrite receipt evidence. Details and artifact
+paths: docs/oct17-remaining-batch-applied-and-verification.md. Tomorrow's new
+regular parse still requires its own source-grounded audit.

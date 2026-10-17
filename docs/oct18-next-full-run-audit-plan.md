@@ -33,8 +33,8 @@ listings remain canonical, approved family/category/recurrence choices survive
 refresh, and source images are preserved. No broad cleanup is authorized.
 
 Read `docs/oct17-curling-sibling-review.md` and exact `season-hold-result-*.json`
-before assuming the eight-operation batch happened. It was prepared and awaiting
-new exact removal approval when this plan was written. If applied, verify all
+before interpreting the eight-operation batch. It applied19:40:35 UTC with
+independent API/feed/source proof and feed303. Verify all
 three programme parents/generated occurrences remain absent, their source-specific
 policy and complete private originals survive, and both registration dates/clocks
 remain unchanged with current family metadata. Do not invent first November
@@ -49,13 +49,18 @@ date, clock and attendance-location evidence supports it.
 
 ## Festival worker
 
-Fresh October17 serving readback at this preparation:
-`scheduledfestivallinker-00007-nov`, ACTIVE,
-hash `24edc95235106a71b30b2712d06b504d9d3bd2e1`.
-The private reviewed website-corroboration enhancement is in implementation in
-task `01a14b3f-acea-77c0-93c0-2e5ff4fe1b36`; do not assume release or private
-receipt application without final independent evidence. Follow the latest release
-document if that work completes later.
+Latest October17 independently verified serving release at19:44:38 UTC:
+`scheduledfestivallinker-00008-noh`, ACTIVE/latest100%,
+hash `95fe0fddd0a1a438bb41c0312eaee2d13b06fef9`. All configuration and all three
+parser releases are preserved. Exact three private creates applied19:44:52 UTC.
+However, independent worker acceptance found three invalid receipt fingerprints:
+the offline date adapter truncated where the Firestore SDK rounds, producing a
+1ms source revision string mismatch. No actual source/version drift or public
+delta occurred; the guard holds the three existing-member proofs safely.
+Read `docs/oct17-remaining-batch-applied-and-verification.md` and any exact
+`timestamp-correction-result-*.json` before assuming that additional one-document
+correction happened. Its tested live overlay is not an applied-result artifact.
+Do not silently renew fingerprints or weaken source/version guards.
 
 Check new regular-run source inventory completeness, cached failures/negative
 verification, job fencing/idempotence and actual worker outcomes. Distinguish

@@ -126,3 +126,19 @@ signup exactly once, expired signup absent, and all retained images200.
 This exact deletion/hold batch needs the event-integrity skill's reviewed
 production-data approval because the newly established schedule conflict was
 not included in Craig's earlier score-refresh approval.
+
+## Approved application and independent verification
+
+Craig approved the combined exact batch. Application completed October17 at
+19:40:35 UTC with all eight guarded deltas and feed302→303. Complete backup and
+result are `firebase/artifacts/oct17-curling-siblings/season-hold-prewrite-backup-2026-10-17T19-40-35-075Z.json`
+and `season-hold-result-2026-10-17T19-40-35-075Z.json` in the same directory.
+
+Independent verification at19:40:57 UTC checked all eight deltas and two unchanged
+source snapshots. Three programme details return404; both signup details return200.
+The complete963-entry/10-page active Preview feed contains no retired programme
+or generated copies, no expired October17 signup, and exactly one October25 signup
+with v6 score70. The complete source catalog now contains exactly the two signup
+parents. All five retained managed images return200. See
+`firebase/artifacts/oct17-curling-siblings/season-hold-independent-verification.json`.
+No November session was guessed; the first-session conflict remains privately held.

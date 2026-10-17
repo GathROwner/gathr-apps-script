@@ -13,6 +13,7 @@ try{
  const fresh=await db.getAll(...backup.documents.map(d=>db.doc(d.path)));
  for(const d of fresh){const o=result.plan.operations.find(o=>o.path===d.ref.path),before=backup.documents.find(b=>b.path===d.ref.path);assert.equal(d.exists,o?true:before.exists);if(d.exists)assert.equal(hash(d.data()),hash(o?o.payload:before.data),'Unexpected delta '+d.ref.path);}
  const report=await runFestivalLinkWorker(readonly,{mode:'publish',dryRun:true,asOf:'2026-10-17',fileId:result.plan.fileId});
+ await fs.writeFile(new URL('private-worker-readonly-report.json',out),JSON.stringify(report,null,2));
  assert.equal(report.sourceCount,145);assert.equal(report.eventWrites,0);assert.equal(report.paidSources,0);assert.equal(report.status,'completed');
  assert(report.reports.every(r=>r.reason==='no_public_delta'&&r.addedEventIds.length===0&&r.gaps.length===0&&r.unconfirmedItems.length===0));
  const harvest=report.reports.find(r=>r.editionId==='01q4d8wzK8R8VH0revQX');assert.equal(harvest.outcomes.filter(o=>o.status==='corroborated').length,3);assert.equal(harvest.outcomes.filter(o=>o.status==='self_reference').length,1);assert.equal(harvest.outcomes.filter(o=>o.status==='held').length,2);

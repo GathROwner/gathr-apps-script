@@ -2,6 +2,16 @@
 
 ## Short approval summary
 
+**October17 execution update:** Craig approved this batch. Curling applied and
+was independently verified at feed303. The single linker release is ACTIVE at
+`scheduledfestivallinker-00008-noh`/hash95fe0fddd0a1a438bb41c0312eaee2d13b06fef9,
+with independent configuration/traffic/archive proof. All three private creates
+applied exactly, but final worker acceptance found an offline timestamp rounding
+error in three receipt fingerprints. The guard holds those proofs safely.
+See `docs/oct17-remaining-batch-applied-and-verification.md` for actual results,
+the acceptance exception and the separately prepared one-document correction.
+The following sections retain the original reviewed plan as historical evidence.
+
 One combined approval covers **one backend function release and eleven document
 operations**, in the verified sequence below:
 
