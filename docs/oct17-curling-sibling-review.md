@@ -17,7 +17,7 @@ opens October 3. The original caption separately gives October 17, 13:00–15:00
 and October 25, 15:00–17:00 in-person registration. Registration dates must not be
 treated as programme dates.
 
-## Exact family-only batch, prepared but not applied
+## Initial family-only draft, superseded; not applied
 
 Parent prefix: `venues/1ehK5wrBKC460QSpqUMq/events/`.
 
@@ -83,3 +83,46 @@ Preserve both registration listings. A general parser hardening must distinguish
 registration opening, in-person signup and programme commencement before
 publishing weekly occurrences. No timing repair, hold write or parser deployment
 has been performed as part of this review.
+
+## Combined correction ready for one approval
+
+The family-only draft is superseded by this eight-operation plan. Do not apply
+both helpers: they share feed-version preconditions and incompatible dispositions.
+
+1. Remove exactly the three prematurely active programme parents
+   `A3QGhNGCFKfVvEElf4WB`, `OIRtvQql4zXietvUNQ2L`, `jW8Aw7dBxPi1Y9BBUEvR`
+   under the full parent prefix above.
+2. Create `event_integrity_holds/oct17_curling_programme_start_1732518712212204`
+   retaining all three complete original events, snapshot hashes and source
+   conflict evidence. No replacement date is invented.
+3. Update only `reviewedOccurrenceConstraints` on
+   `venues/1ehK5wrBKC460QSpqUMq` with the serving parser's existing exact-ID hold
+   contract for those three identities. Existing rules remain; the two signup
+   identities pass the actual serving classifier unchanged. This prevents exact
+   old identities from being recreated; it is not a general programme-start
+   extraction fix and does not promise to block every newly generated identity.
+4. Refresh only family metadata on the October 17 and October 25 registration
+   parents `c8LLevWr1BIaAxFyHscb` and `xeMgDmynvM7nuYntOGtQ` to v6 score70.
+   Their exact dates, clocks, expiry, sources and all media remain unchanged.
+5. Advance `runtime_metadata/event_feed` from302 to303.
+
+Default-dry `firebase/repair-oct17-curling-season-hold.mjs` passed fresh live
+preconditions for all eight operations: five exact source parents across the
+complete collection group, ten read-set documents, no active parser, feed302,
+absent hold destination and full hash/update-version guards. Actual compiled
+serving-classifier playback holds all three programme identities and leaves
+both registration identities alone. No new parser runtime/deploy is needed for
+this data batch. No writes have occurred.
+
+Private plan: `firebase/artifacts/oct17-curling-siblings/season-hold-reviewed-plan.json`.
+Apply requires `--apply`, repeats all transaction guards, and first writes
+complete `season-hold-prewrite-backup-<UTC>.json` plus a separate result receipt.
+Independent verifier: `firebase/verify-oct17-curling-season-hold.mjs`; requires
+an applied result, verifies all eight exact deltas and untouched snapshots,
+three details404, both signup details200, absence of deleted parents/generated
+occurrences from every active-feed page and complete source catalog, future
+signup exactly once, expired signup absent, and all retained images200.
+
+This exact deletion/hold batch needs the event-integrity skill's reviewed
+production-data approval because the newly established schedule conflict was
+not included in Craig's earlier score-refresh approval.
