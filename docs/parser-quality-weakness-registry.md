@@ -1417,3 +1417,20 @@ prepared, not applied, under a new exact approval request. Do not describe the
 full batch as accepted or silently rewrite receipt evidence. Details and artifact
 paths: docs/oct17-remaining-batch-applied-and-verification.md. Tomorrow's new
 regular parse still requires its own source-grounded audit.
+
+#### Resolved at 19:54:12 UTC: exact private timestamp correction
+
+Craig separately approved the one-document correction. Guarded application at
+19:53:34 UTC changed exactly three evidenceFingerprint strings in the approved
+private bundle, preserving all other fields and 16 read-set control documents.
+Full backup/result stamp2026-10-17T19-53-34-264Z is under
+firebase/artifacts/oct17-festival-corroboration/. Feed remains303; no public/source/
+capture/venue/media/runtime/job changes, paid calls, replay or deployment.
+
+Independent live verification, without overlay, confirms the actual released
+worker's145-source pass:3existing-member corroborations,1self-reference,
+2protected Harvest holds,22protected Anchor holds, zero gaps/unconfirmed/public
+deltas/writes/paid sources. Proof: timestamp-correction-independent-verification.json
+in that directory. The earlier acceptance exception is resolved; the approved
+remaining batch is complete. Exact source/version guards remain unchanged.
+Future revisions still require fresh source proof; no automatic renewal is implied.

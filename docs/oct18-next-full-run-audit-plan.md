@@ -53,14 +53,18 @@ Latest October17 independently verified serving release at19:44:38 UTC:
 `scheduledfestivallinker-00008-noh`, ACTIVE/latest100%,
 hash `95fe0fddd0a1a438bb41c0312eaee2d13b06fef9`. All configuration and all three
 parser releases are preserved. Exact three private creates applied19:44:52 UTC.
-However, independent worker acceptance found three invalid receipt fingerprints:
-the offline date adapter truncated where the Firestore SDK rounds, producing a
-1ms source revision string mismatch. No actual source/version drift or public
-delta occurred; the guard holds the three existing-member proofs safely.
-Read `docs/oct17-remaining-batch-applied-and-verification.md` and any exact
-`timestamp-correction-result-*.json` before assuming that additional one-document
-correction happened. Its tested live overlay is not an applied-result artifact.
-Do not silently renew fingerprints or weaken source/version guards.
+Initial independent acceptance found three invalid receipt fingerprints caused
+by offline versus SDK millisecond rounding. Craig separately approved the exact
+one-document correction; it applied at 19:53:34 UTC and passed independent live
+verification at 19:54:12 UTC, without any local overlay. Read
+`docs/oct17-remaining-batch-applied-and-verification.md`, the exact
+`timestamp-correction-result-2026-10-17T19-53-34-264Z.json`, and
+`timestamp-correction-independent-verification.json` under
+`firebase/artifacts/oct17-festival-corroboration/` for evidence.
+Acceptance covers 145 sources, three existing-member corroborations, one
+self-reference, two Harvest holds, 22 Anchor holds, zero gaps/unconfirmed items,
+public deltas, paid sources or writes. Feed remains303. Source/version guards
+remain strict; do not silently renew fingerprints after future revisions.
 
 Check new regular-run source inventory completeness, cached failures/negative
 verification, job fencing/idempotence and actual worker outcomes. Distinguish

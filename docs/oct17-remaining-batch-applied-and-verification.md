@@ -1,4 +1,8 @@
-# October 17 approved remaining batch: results and verification exception
+# October 17 approved remaining batch: completed results
+
+**Final status, October 17 at 19:54:12 UTC:** the approved batch and separately
+approved timestamp correction are complete and independently verified. The initial
+acceptance exception below is retained as the diagnostic record; it is resolved.
 
 ## Completed and independently verified
 
@@ -31,7 +35,7 @@ public writes and feed303 unchanged. All17 read-set documents match their exact
 approved delta or unchanged controls. Backup/result stamp:
 `firebase/artifacts/oct17-festival-corroboration/*2026-10-17T19-44-52-407Z.json`.
 
-## Independent worker acceptance failed; no green claim
+## Initial independent worker acceptance failed (resolved below)
 
 The actual live-database read-only worker covers145sources with no gaps,
 unconfirmed items, paid sources, public additions/removals or writes. It accepts
@@ -57,7 +61,7 @@ versions and nested timestamps. Corrected independent playback passes14/14 again
 recorded separately under `functions/artifacts/oct17-festival-corroboration-release/timestamp-correction-tools/`;
 the original approved proposal/logs are preserved. No serving assembly was edited.
 
-## Exact prepared correction; awaiting new private-update approval
+## Exact correction plan and approval history
 
 Update only the `receipts` array of
 `festival_link_corroborations/4a65b7a3f61f50846336731613aa93d421c8b2e966680a847e986833d990b49d`:
@@ -78,10 +82,37 @@ After exact approval, `--apply --sha256=<above>` performs one guarded update,
 creates a full backup/result, verifies16 unchanged read-set controls, and runs
 the real worker read-only without overlay. It cannot silently repin changed data.
 
-The event-integrity-repair skill's exact production-data boundary requires this
-new update approval: the previously approved private batch allowed three creates,
-not a subsequent fingerprint rewrite. No correction was applied while preparing
-this report. No rollback, extra deployment, job reset, replay or paid call occurred.
+The event-integrity-repair skill's exact production-data boundary required a new
+update approval because the previous private batch allowed three creates, not a
+subsequent fingerprint rewrite. Craig explicitly approved this correction with
+"Approve". No rollback, extra deployment, job reset, replay or paid call occurred.
+
+## Final guarded application and independent acceptance
+
+The exact approved plan applied at 19:53:34 UTC. Only three `evidenceFingerprint`
+strings in the one approved private document changed; every other receipt field
+and all 16 read-set controls remained identical. Full prewrite backup:
+`firebase/artifacts/oct17-festival-corroboration/timestamp-correction-prewrite-backup-2026-10-17T19-53-34-264Z.json`.
+Result in the same directory:
+`timestamp-correction-result-2026-10-17T19-53-34-264Z.json`.
+All parser locks were idle and matching checkpoints absent at the guarded write.
+Feed version remains 303. No public event, link, source, capture, venue, media,
+runtime, queue or job was changed by the correction.
+
+Independent verifier `firebase/verify-oct17-festival-timestamp-correction.mjs`
+completed at 19:54:12 UTC against actual live documents, without any local overlay.
+It verifies exactly one private-document update, exactly three fingerprint changes,
+16 unchanged read-set documents, and the actual released worker's 145-source pass:
+three existing-member corroborations, one umbrella self-reference, two protected
+Harvest holds and 22 protected Anchor holds. All editions report `no_public_delta`;
+zero gaps, unconfirmed items, public additions/removals, paid sources or writes.
+Full independent proof:
+`firebase/artifacts/oct17-festival-corroboration/timestamp-correction-independent-verification.json`.
+
+The local Timestamp adapter now matches the installed SDK, with six regression
+checks and all 14 saved-source playback checks passing. Production guards remain
+strict. Future source/document revisions can still invalidate these bounded proofs;
+this repair does not add automatic renewal or general website discovery.
 
 Kay's and Coats remain held for location proof; Curling's actual first November
 session remains unresolved. A fresh regular parse must still be audited separately.
