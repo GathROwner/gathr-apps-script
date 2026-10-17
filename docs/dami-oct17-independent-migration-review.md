@@ -7,6 +7,12 @@ Originating audit task: **Audit GathR Apify spend and optimization…**,
 
 ## Decision
 
+Follow-up: `docs/dami-oct17-mcp-input-and-shared-recovery-review.md` records an
+actual anonymous MCP metadata inspection, validates all nine pilot input sets,
+and evaluates Craig's original-publisher second-scrape proposal. No shared-post
+option was omitted. Secondary recovery is plausible where the exact original
+can be discovered; three observed originals predate the daily scrape window.
+
 The audit is useful and its recommendation for an adapter plus fallback is sound.
 Dami is worth a controlled implementation/shadow trial. **Do not switch production
 by changing the actor ID alone, or make Dami the sole source yet.** It replaces the
