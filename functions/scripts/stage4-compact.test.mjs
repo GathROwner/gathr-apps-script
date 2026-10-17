@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import {createHash} from 'node:crypto';
 import {createRequire} from 'node:module';
 import {bindCompactStage4Sources, compactStage4Enabled, compactStage4Prompt, compactStage4FormatForSources, isProductFlavourLineupOnly, parseCompactStage4Response, getCompactStage4Hold, removeExactCompactDuplicates} from '../lib/parsing/compactStage4.js';
 
@@ -175,13 +176,24 @@ test('a failed batch holds the entire post; successful sibling items cannot esca
     [Array.from({length:15},(_,n)=>n+1),[16,17],[16,17]]);
 });
 
-test('turning the switch off restores the original request body exactly',async()=>{
+test('turning compact off preserves the approved legacy request and weekly_custom wording exactly',async()=>{
   const source=JSON.parse(fs.readFileSync('artifacts/luna-stage4-cache-layout-oct11/full-offline/cohort.json'))[1];
   const old=fs.readFileSync('artifacts/luna-stage4-cache-layout-oct11/full-offline/results.jsonl','utf8').trim().split('\n').map(JSON.parse)
     .find(x=>x.row===source.row&&x.arm==='baseline').requests[0].original;
+  // Keep October11 captures immutable. The accepted serving baseline already
+  // added this exact recurrence rule; only this reviewed delta is permitted.
+  const sha=value=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
+  assert.equal(sha(old),'b718d2f56c1cdc0df42ecba27d986265c2a45a39508050b3e76e45d41780958d');
+  const before='  "none", "daily", "weekly_monday", "weekly_tuesday", "weekly_wednesday", "weekly_thursday", "weekly_friday", "weekly_saturday", "weekly_sunday"\n';
+  const after='  "none", "daily", "weekly_custom", "weekly_monday", "weekly_tuesday", "weekly_wednesday", "weekly_thursday", "weekly_friday", "weekly_saturday", "weekly_sunday"\n'+
+    '- weekly_custom is valid with recurringDaysOfWeek. Preserve an explicit weekday set such as Monday-Friday; do not reduce it to only Monday or expand it to weekends.\n';
+  const approved=structuredClone(old),prompt=approved.input[0].content[0];
+  assert.equal(prompt.text.split(before).length,2,'Exactly one reviewed recurrence rule');
+  prompt.text=prompt.text.replace(before,after);
+  assert.equal(sha(approved),'05a5f0c655e2c3d8a15b49ad1ce7b08030db45150aa1918226674748412a92a1');
   requests=[];respond=()=>({text:JSON.stringify({validatedItems:source.items.map(i=>({item:i,decision:'KEPT',reason:'Valid event',corrections:{}}))})});
   await performSecondaryValidation(source.items,source.venue,source.timestamp,{...config,stage4CompactValidation:false});
-  assert.deepEqual(requests[0],old);assert.equal(requests[0].text,undefined);assert.equal(requests[0].prompt_cache_key,undefined);
+  assert.deepEqual(requests[0],approved);assert.equal(requests[0].text,undefined);assert.equal(requests[0].prompt_cache_key,undefined);
 });
 
 test('replay consumer records a hold and never reaches Stage 5 or alternate model',async()=>{

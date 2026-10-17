@@ -1263,3 +1263,28 @@ Next regular full-run observation remains unexecuted, not claimed as a new pass.
 Exact targets, limitations, serving receipts and reconstruction patches:
 `docs/oct17-eight-group-release-and-repair.md` and
 `release-patches/oct17-{parser-quality,festival-shared-caption}.patch`.
+
+## October 17 remaining housekeeping: completed score refresh and test correction
+
+Craig authorized the remaining follow-ups. Junior Curling (10 and over), Thursday
+parent `venues/1ehK5wrBKC460QSpqUMq/events/A3QGhNGCFKfVvEElf4WB`, retained a
+family-v4 score15 despite the accepted v5/v6 calculation70. Two original source
+snapshots explicitly invite children's participation. The guarded atomic repair
+changed only its family scoring fields/updatedAt and feed300→301, preserving all
+schedule, recurrence, location, provenance and media fields. Backup/result are
+under `firebase/artifacts/oct17-remaining-followups/`, stamped
+`2026-10-17T17-26-37-967Z`. Independent readback verifies exactly two deltas,
+seven unchanged read-set docs, detail200 and a score70 occurrence in the complete
+997-entry/10-page active feed; retained source image200. Four source siblings
+remain unchanged and no broad family backfill is implied.
+
+The compact test now pins both the immutable October11 request hash and accepted
+serving request hash while permitting precisely the already-approved weekly_custom
+wording. Full emitted-request deep equality remains.36/36 offline checks pass
+against deployed compiled parser code; no production source, prompt, models,
+traffic or configuration changed, and no deployment was needed.
+
+Moth Lane's retained original image/caption still conflict (17:00 versus18:00);
+first-party correction was unavailable. Its expired parent remains absent and
+private hold intact. No redating or speculative revival. Venue/festival source
+investigation and exact remaining dispositions: `docs/oct17-remaining-followups.md`.
