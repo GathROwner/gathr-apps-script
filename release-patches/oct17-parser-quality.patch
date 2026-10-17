@@ -1,0 +1,1365 @@
+diff --git a/scripts/oct17-category-family-playback.cjs b/scripts/oct17-category-family-playback.cjs
+new file mode 100644
+index 0000000..ae35a01
+--- /dev/null
++++ b/scripts/oct17-category-family-playback.cjs
+@@ -0,0 +1,143 @@
++// Offline saved-source verification and exact repair preparation. No network,
++// credentials, model calls, or mutation mode. Generated reports stay local.
++const assert = require('node:assert/strict');
++const fs = require('node:fs');
++const path = require('node:path');
++const {createHash} = require('node:crypto');
++const {parseArgs} = require('node:util');
++const {execFileSync} = require('node:child_process');
++const Module = require('node:module');
++const ts = require('typescript');
++const {applyCategoryCorrectionsForRegression, rehydrateFamilyAudienceMetadata} = require('../lib/parsing/finalFormatter.js');
++const {scoreFamilyFriendly} = require('../lib/utils/familyFriendlyScoring.js');
++
++const {values} = parseArgs({options:{
++  'evidence-dir':{type:'string'}, 'out-dir':{type:'string'},
++}});
++assert(values['evidence-dir'], 'Pass --evidence-dir with the read-only captured audit folder.');
++const evidenceDir = path.resolve(values['evidence-dir']);
++const outputDir = path.resolve(values['out-dir'] || path.join(__dirname, '../tmp/oct17-category-family'));
++assert(outputDir !== evidenceDir && !outputDir.startsWith(evidenceDir + path.sep), 'Never write into captured evidence.');
++const read = name => JSON.parse(fs.readFileSync(path.join(evidenceDir, name), 'utf8').replace(/^\uFEFF/, ''));
++const ledger = read('ledger.json');
++const events = read('live-events.json');
++const controls = read('reviewed-family-controls.json');
++// Compare rule changes to the actual accepted code, separately from manually
++// reviewed stored numbers. A stored score is not scorer execution evidence.
++const baselineSource = execFileSync('git', ['-C','C:/Users/craig/.codex/worktrees/a2af/gathr-apps-script','show', 'dd6fe2cdffa587456d8c4e1db627f94337ab5fd6:functions/src/utils/familyFriendlyScoring.ts'], {encoding:'utf8'});
++const baselinePath = path.resolve(__dirname, '../lib/utils/familyFriendlyScoring.baseline.cjs');
++const baselineModule = new Module(baselinePath, module);
++baselineModule.filename = baselinePath;
++baselineModule.paths = module.paths;
++baselineModule._compile(ts.transpileModule(baselineSource, {compilerOptions:{module:ts.ModuleKind.CommonJS, target:ts.ScriptTarget.ES2022}}).outputText, baselinePath);
++const baselineScore = baselineModule.exports.scoreFamilyFriendly;
++const stable = value => Array.isArray(value) ? value.map(stable) : value && typeof value === 'object'
++  ? Object.fromEntries(Object.keys(value).sort().map(key => [key, stable(value[key])])) : value;
++const digest = value => createHash('sha256').update(JSON.stringify(stable(value))).digest('hex');
++const capture = target => {
++  const matches = events.filter(event => event.path === target);
++  assert.equal(matches.length, 1, `Expected exactly one captured target: ${target}`);
++  return matches[0];
++};
++const specs = [
++  {row:69, name:'HALLOWEEN ARTISAN MARKET', path:'venues/slug_royaltycrossing/events/6idnDEErpAB7Ex2skVxQ', category:'Gatherings & Parties', family:85},
++  {row:123, name:'Sterling Farmers Market', path:'venues/qUg3AMPeXX9URM0UrXEA/events/4ZxbxygV32qUmnT7Pbt7', category:'Gatherings & Parties', family:15},
++  {row:157, name:"Charlottetown Y's Club Free Swim", path:'venues/slug_bellaliantcentre/events/jjOj9C8U4xuOe87fdmGV', category:'Sports', family:15},
++  {row:318, name:'Family/Public Skate — Skate', path:'venues/LglliE42SPFssmoU01su/events/MaC5HZv3CVQR5M6koJCO', category:'Sports', family:85},
++  {row:343, name:'My First Sports Program', path:'venues/slug_cornwallciviccentre/events/NvtBo0lQs208nlxrHSYH', category:'Sports', family:80},
++];
++const familyKeys = ['familyAudienceEvidence','familyFriendlyScore','familyFriendlyLevel',
++  'familyFriendlyReasons','familyFriendlyScoringVersion','familyFriendlyContentHash'];
++const targets = specs.map(spec => {
++  const record = capture(spec.path);
++  const row = ledger.find(row => row.row === spec.row);
++  assert(row, `Missing source row ${spec.row}`);
++  const items = row.artifacts.stage4Items;
++  const candidates = items.filter(item => item.name === spec.name);
++  assert.equal(candidates.length, 1, `Ambiguous source item ${spec.name}`);
++  const item = candidates[0];
++  const sourceRoot = row.events[0].id;
++  assert(record.data.sourceUniqueIds?.includes(sourceRoot) || record.data.uniqueId.startsWith(sourceRoot + '_'), 'Target source ownership drift');
++  assert.equal(record.data.startDate, item.date);
++  // Use the captured formatted clocks for calendar cells with meridiem text.
++  const formatted = row.events.find(event => event.name === item.name && event.startDate === record.data.startDate);
++  assert(formatted, 'Missing aligned formatted item');
++  assert.equal(record.data.startTime, formatted.startTime);
++  assert.equal(record.data.endTime, formatted.endTime);
++  const before = record.data;
++  const corrected = applyCategoryCorrectionsForRegression({...before, name:before.eventName || before.name}, item);
++  assert.equal(corrected.category, spec.category);
++  assert.equal(corrected.isEvent, 'Yes');
++  assert.equal(corrected.isFoodSpecial, 'No');
++  const rehydrated = rehydrateFamilyAudienceMetadata(corrected, item, items, '');
++  const scored = {...rehydrated, ...scoreFamilyFriendly(rehydrated)};
++  assert.equal(scored.familyFriendlyScore, spec.family, spec.name);
++  const patch = {};
++  if (before.category !== scored.category) patch.category = scored.category;
++  for (const key of ['isEvent','isFoodSpecial']) {
++    const value = typeof before[key] === 'boolean' ? scored[key] === 'Yes' : scored[key];
++    if (before[key] !== value) patch[key] = value;
++  }
++  for (const key of familyKeys) if (JSON.stringify(before[key]) !== JSON.stringify(scored[key])) patch[key] = scored[key];
++  const siblings = events.filter(event => event.data.uniqueId?.startsWith(sourceRoot + '_') || event.data.sourceUniqueIds?.includes(sourceRoot))
++    .map(event => ({path:event.path, title:event.data.eventName || event.data.name,
++      startDate:event.data.startDate, startTime:event.data.startTime, endTime:event.data.endTime}));
++  const fingerprintKeys = ['eventName','name','uniqueId','sourceUniqueId','sourceUniqueIds','venueId',
++    'startDate','endDate','startTime','endTime','isRecurring','recurringPattern','totalOccurrences','recurrenceUntilDate',
++    'category','isEvent','isFoodSpecial','description', ...familyKeys];
++  return {path:spec.path, row:spec.row, sourceRoot, sourceItemDigest:digest(item),
++    capturedUpdateTime:record.updateTime, capturedFullDocumentDigest:digest(before),
++    expected:Object.fromEntries(fingerprintKeys.filter(key => key in before).map(key => [key,before[key]])),
++    beforeScore:before.familyFriendlyScore, afterScore:scored.familyFriendlyScore,
++    patch, capturedExactSourceSiblings:siblings};
++});
++
++// Same captured market post: soup remains a distinct special; all public pool
++// slots retain their printed clocks and Sports category.
++const preserved = [];
++for (const rowNumber of [123,157]) {
++  const row = ledger.find(row => row.row === rowNumber);
++  for (const item of row.artifacts.stage4Items) {
++    const original = row.events.find(event => event.name === item.name && event.startTime === item.startTime);
++    assert(original, 'Missing captured control');
++    const result = applyCategoryCorrectionsForRegression(original, item);
++    const special = item._sourceType === 'special';
++    assert.equal(result.category, special ? 'Food Special' : rowNumber === 157 ? 'Sports' : 'Gatherings & Parties');
++    assert.equal(result.isEvent, special ? 'No' : 'Yes');
++    assert.equal(result.isFoodSpecial, special ? 'Yes' : 'No');
++    assert.equal(result.startTime, original.startTime);
++    assert.equal(result.endTime, original.endTime);
++    preserved.push({row:rowNumber, name:item.name, category:result.category});
++  }
++}
++const approvedControls = controls.filter(control => control.present).map(control => {
++  const record = capture(control.path);
++  const result = scoreFamilyFriendly(record.data);
++  const baseline = baselineScore(record.data);
++  assert.equal(record.data.familyFriendlyScore, control.expectedScore, `Stored reviewed score drift: ${control.path}`);
++  assert.equal(result.familyFriendlyScore, baseline.familyFriendlyScore, `Rule change affected approved control: ${control.path}`);
++  return {path:control.path, storedScore:control.expectedScore, baselineScore:baseline.familyFriendlyScore,
++    score:result.familyFriendlyScore, preexistingStoredDifference:control.expectedScore !== baseline.familyFriendlyScore};
++});
++const heldRecord = capture('venues/RJ9iYyEWcYUr91hcGSeL/events/2DjVdRAtNrcyKPPgjjQU');
++const heldScore = scoreFamilyFriendly(heldRecord.data);
++assert.equal(heldScore.familyFriendlyScore, 15);
++assert(heldScore.familyFriendlyReasons.includes('beneficiary_not_audience'));
++const report = {mode:'offline-preparation-only', paidCalls:0, liveReads:0, liveWrites:0,
++  targets, preservedControls:preserved, approvedControls,
++  preexistingStoredScoreDifferences:approvedControls.filter(control => control.preexistingStoredDifference),
++  held:[{path:heldRecord.path, proposedAction:'HOLD under group 5; no patch in this plan',
++    sourceRow:283, beforeScore:heldRecord.data.familyFriendlyScore, diagnosticScore:heldScore,
++    reason:'Collection-partner location is not distribution-event venue proof; beneficiary campaign name is not child participation.'}],
++  applicationRequirements:[
++    'Coordinator must live-reread each target and exact-source siblings, fail closed on missing/drifted records, and retain complete prewrite backups.',
++    'Reconcile My First Sports with group 6 recurrence plan; this plan changes no dates/clocks/recurrence/location/media.',
++    'Coordinator owns one atomic combined patch batch with update-time preconditions, reread postconditions and detail/feed verification.',
++    'Offline captures are not current live state and this report does not authorize apply.',
++  ]};
++fs.mkdirSync(outputDir,{recursive:true});
++const outputPath = path.join(outputDir,'repair-plan.json');
++fs.writeFileSync(outputPath,JSON.stringify(report,null,2) + '\n');
++console.log(JSON.stringify({outputPath,targets:targets.length,categoryCorrections:3,familyMisses:3,
++  preservedControls:preserved.length,approvedControls:approvedControls.length,held:report.held.length,
++  liveWrites:0,paidCalls:0},null,2));
+diff --git a/scripts/oct17-occurrence-ownership-playback.mjs b/scripts/oct17-occurrence-ownership-playback.mjs
+new file mode 100644
+index 0000000..9edfa85
+--- /dev/null
++++ b/scripts/oct17-occurrence-ownership-playback.mjs
+@@ -0,0 +1,78 @@
++// Offline only: reads the original captured evidence in place. No network or model calls.
++import fs from 'node:fs';
++import path from 'node:path';
++import assert from 'node:assert/strict';
++import {createHash} from 'node:crypto';
++import {createRequire} from 'node:module';
++const require=createRequire(import.meta.url);
++const guards=require('../lib/parsing/occurrenceSourceOwnership.js');
++const {classifySpatialEvent}=require('../lib/parsing/spatialEventClassifier.js');
++const {parseCompactStage4Response}=require('../lib/parsing/compactStage4.js');
++const {applyRecurrenceNormalizationForRegression}=require('../lib/parsing/finalFormatter.js');
++const {resolvePostDerivedCityLevelEventLocation,resolveVenueForFullParserEventWithMatcherForRegression,fullParserEventLocationCheck}=require('../lib/processing/rowProcessor.js');
++const root=process.argv[2];
++assert.ok(root,'Usage: node scripts/oct17-occurrence-ownership-playback.mjs <read-only evidence directory> [local output json]');
++const read=name=>JSON.parse(fs.readFileSync(path.join(root,name),'utf8'));
++const snapshots=read('snapshots.json');
++const receipt=n=>{
++  const data=snapshots.find(x=>x.data.rowIndex===n)?.data;
++  assert.ok(data,`Missing row ${n}`);
++  const output=data.stages.find(x=>x.output.stageArtifacts?.stage3Items)?.output;
++  assert.ok(output,`Missing Stage 3 row ${n}`);
++  return {data,output,items:output.stageArtifacts.stage3Items,events:output.events};
++};
++const hash=value=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
++const report={mode:'offline_saved_source_only',modelCalls:0,liveWrites:0,rows:[],inputHashes:{}};
++for(const file of ['snapshots.json','stage4-response-readback.json','venues.json'])report.inputHashes[file]=hash(read(file));
++const visit=receipt(27);
++assert.equal(visit.items.length,6);assert.equal(visit.events.length,6);
++const venues=read('venues.json');
++for(let i=0;i<6;i++){
++  const source=visit.items[i],event=visit.events[i];
++  assert.ok(guards.datedOccurrenceLocation({date:source.date,name:source.name,location:source.venue,combinedText:visit.data.inputText}));
++  const classification=classifySpatialEvent({date:event.startDate,name:event.name,description:event.description,
++    location:event.additionalLocation,combinedText:visit.data.inputText});
++  assert.equal(classification.kind,'single_location');
++  const row={...visit.data.rowMeta,text:visit.data.inputText,uniqueId:visit.data.uniqueId};
++  assert.equal(resolvePostDerivedCityLevelEventLocation({item:event,row,establishment:visit.data.establishment}),null);
++  let attempts=0;
++  const venue=await resolveVenueForFullParserEventWithMatcherForRegression({item:event,row,rowVenue:null,
++    establishment:visit.data.establishment,rowIndex:27,matcher:async(name)=>{
++      attempts++;
++      const normalize=x=>String(x||'').toLowerCase().replace(/[^a-z0-9]/g,'');
++      const matches=venues.filter(x=>[x.data.name,x.data.pagename,...(x.data.aliases||[])].some(v=>normalize(v)===normalize(name)));
++      return matches.length===1?{isMatch:true,matchType:'exact',matchedVenue:{id:matches[0].id,...matches[0].data},confidence:100}
++        :{isMatch:false,matchType:'none',confidence:0};
++    }});
++  report.rows.push({row:27,source:visit.data.uniqueId,date:source.date,venue:source.venue,spatial:classification.kind,
++    canonicalVenueId:venue?.id||null,disposition:venue?'exact_existing_venue':'hold_specific_unresolved_point',matcherAttempts:attempts});
++}
++const donation=receipt(103),source=donation.items[0];
++const nano=read('stage4-response-readback.json').map(x=>x.body?.output?.flatMap(o=>o.content||[]).find(c=>c.type==='output_text')?.text)
++  .find(text=>text&&JSON.parse(text).decisions?.some(d=>d.sourceIdentity?.name===source.name&&d.corrections?.recurringPattern==='none'));
++assert.ok(nano,'Missing original captured Nano none correction');
++assert.equal(parseCompactStage4Response(nano,donation.items).validatedItems[0].corrections.recurringPattern,'none');
++const prepared=guards.prepareOccurrenceSourceItem(source,donation.data.inputText);
++assert.equal(prepared.recurringPattern,'none');
++const formatted=applyRecurrenceNormalizationForRegression({...donation.events[0]},prepared);
++const restored=guards.restoreOccurrenceSourceOwnership([formatted],[prepared])[0];
++assert.equal(restored.recurringPattern,'none');assert.equal(restored.isRecurring,'No');
++report.rows.push({row:103,source:donation.data.uniqueId,originalNanoCorrectionAccepted:true,patternAfterFormatting:restored.recurringPattern});
++const program=receipt(343),weekly=guards.prepareOccurrenceSourceItem(program.items[0],program.data.inputText);
++assert.equal(weekly.recurringPattern,'weekly_saturday');
++const normalized=applyRecurrenceNormalizationForRegression({...program.events[0]},weekly);
++const week=guards.restoreOccurrenceSourceOwnership([normalized],[weekly])[0];
++assert.equal(week.recurringPattern,'weekly_saturday');assert.equal(week.totalOccurrences,undefined);assert.equal(week.recurrenceUntilDate,undefined);
++report.rows.push({row:343,source:program.data.uniqueId,pattern:week.recurringPattern,count:week.totalOccurrences??null,until:week.recurrenceUntilDate??null});
++const collection=receipt(283),held=guards.prepareOccurrenceSourceItem(collection.items[0],collection.data.inputText);
++assert.equal(held.sourceLocationRole,'collection_partner_only');
++const cleared=guards.restoreOccurrenceSourceOwnership(collection.events,[held])[0];
++assert.equal(cleared.establishment,'');
++assert.equal(fullParserEventLocationCheck(cleared,{...collection.data.rowMeta,text:collection.data.inputText}).decision,'hold');
++report.rows.push({row:283,source:collection.data.uniqueId,role:held.sourceLocationRole,disposition:'hold_attendance_venue_unstated'});
++const clock=receipt(247);
++assert.equal(guards.materialCaptionClockConflict(clock.items[0],clock.data.inputText,clock.items.length),true);
++report.rows.push({row:247,source:clock.data.uniqueId,disposition:'material_clock_conflict_hold',historicalDate:clock.items[0].date,
++  originalSharedTimestamp:clock.data.rowMeta.sharedPostTimestamp,outerTimestamp:clock.data.rowMeta.timestamp});
++if(process.argv[3])fs.writeFileSync(process.argv[3],JSON.stringify(report,null,2)+'\n');
++console.log(JSON.stringify(report,null,2));
+diff --git a/scripts/playback-oct17-session-identity.mjs b/scripts/playback-oct17-session-identity.mjs
+new file mode 100644
+index 0000000..a07d4b6
+--- /dev/null
++++ b/scripts/playback-oct17-session-identity.mjs
+@@ -0,0 +1,42 @@
++// Offline saved-source regression. No replay, generation, network or writes.
++import fs from 'node:fs/promises';
++import path from 'node:path';
++import assert from 'node:assert/strict';
++import {createRequire} from 'node:module';
++const require=createRequire(new URL('../package.json',import.meta.url));
++const {isDuplicateEntry,isHighConfidenceSameOccurrenceDuplicate}=require('./lib/utils/similarity.js');
++const {hasMatchingLabeledSlotTimeEvidence}=require('./lib/utils/eventSlotIdentity.js');
++const {shouldSkipSiblingUniqueIdDuplicateCheck}=require('./lib/services/firestoreService.js');
++const {buildExpandedEventStoredUniqueId,previewDuplicateMerge}=require('./lib/processing/rowProcessor.js');
++const capture=process.argv[2];assert(capture,'Pass private audit directory');
++const read=async n=>JSON.parse(await fs.readFile(path.join(capture,n),'utf8'));
++const snapshots=await read('snapshots.json'),live=await read('live-events.json');
++const output=row=>snapshots.find(s=>s.data.rowIndex===row).data.stages.find(s=>s.stage==='format').output;
++const row318=output(318),accepted=[];
++for(const [i,item] of row318.events.entries()){
++  const incoming={...item,eventName:item.name,venueId:'LglliE42SPFssmoU01su',
++    uniqueId:buildExpandedEventStoredUniqueId({row:{uniqueId:'1733964295400114'},item,
++      eventName:item.name,startDate:item.startDate,endDate:item.endDate,startTime:item.startTime,endTime:item.endTime,
++      venueName:item.establishment,additionalLocation:item.additionalLocation})};
++  const match=accepted.find(existing=>!shouldSkipSiblingUniqueIdDuplicateCheck(incoming,existing)&&
++    (isDuplicateEntry(incoming,existing,{requireEstablishmentMatch:false})||isHighConfidenceSameOccurrenceDuplicate(incoming,existing)));
++  assert(!match,`Unexpected lost slot ${i+1}: ${incoming.name}`);accepted.push(incoming);
++}
++assert.equal(accepted.length,26);
++const groups=live.filter(e=>['3DO8t0Eyl1TB8scIBfEx','nOz8TgJISaSmdkMUVNzY'].includes(e.id));
++const eptek=[];
++for(const item of output(193).events){
++  const incoming={...item,eventName:item.name};
++  const matches=groups.filter(group=>hasMatchingLabeledSlotTimeEvidence(incoming,group.data));
++  assert.equal(matches.length,1);
++  assert.equal(matches[0].data.startTime,incoming.startTime);
++  const wrong=groups.find(g=>g.id!==matches[0].id);
++  assert.equal(isDuplicateEntry(incoming,wrong.data,{requireEstablishmentMatch:false}),false);
++  assert.equal(isHighConfidenceSameOccurrenceDuplicate(incoming,wrong.data),false);
++  const merged=previewDuplicateMerge({existingEvent:wrong.data,incomingEvent:incoming,
++    venue:{id:'slug_eptek.centre',name:'Eptek',normalizedName:'eptek',address:'fixture',latitude:0,longitude:0}});
++  assert.deepEqual(merged.changedFields,[]);
++  eptek.push({start:incoming.startTime,keeperId:matches[0].id,wrongGroupRejected:true});
++}
++console.log(JSON.stringify({skatingExtracted:row318.events.length,skatingAccepted:accepted.length,
++  eptek,liveWrites:0,networkCalls:0,paidCalls:0},null,2));
+diff --git a/src/parsing/compactStage4.ts b/src/parsing/compactStage4.ts
+index 630a12a..6ca7636 100644
+--- a/src/parsing/compactStage4.ts
++++ b/src/parsing/compactStage4.ts
+@@ -1,5 +1,6 @@
+ import type { ExtractedItem, ParsingConfig, SecondaryValidationResult } from './types.js';
+ import {isDeepStrictEqual} from 'node:util';
++import {hasOnlyAlternativeRecurrence, recurrenceOwnershipText} from './occurrenceSourceOwnership.js';
+ 
+ export const COMPACT_STAGE4_FORMAT = 'compact_v1';
+ type ValidationSource = ExtractedItem & { _pipelineIndex?: number; recurringPattern?: string };
+@@ -173,9 +174,10 @@ function objectKeys(value: unknown, keys: string[]): value is Record<string, unk
+ /** A correction cannot manufacture a recurring schedule from an isolated weekday/date. */
+ function supportedRecurrence(item: ValidationSource, proposed: string | null): boolean {
+   if (proposed === null || proposed === item.recurringPattern) return true;
+-  const text = `${item.name || ''} ${item.description || ''}`;
++  const text = recurrenceOwnershipText(item).text;
+   if (proposed === 'none') {
+     if (!item.recurringPattern || item.recurringPattern === 'none') return true;
++    if (hasOnlyAlternativeRecurrence(item)) return true;
+     return /\b(?:annual|one[ -](?:off|time)|christmas|thanksgiving|halloween|easter|valentine|father['’]?s\s+day|mother['’]?s\s+day|new\s+year|st\.?\s+patrick)\b/i.test(text) &&
+       /^\d{4}-\d{2}-\d{2}$/.test(String(item.date || ''));
+   }
+diff --git a/src/parsing/finalFormatter.oct17Category.test.ts b/src/parsing/finalFormatter.oct17Category.test.ts
+new file mode 100644
+index 0000000..1cce701
+--- /dev/null
++++ b/src/parsing/finalFormatter.oct17Category.test.ts
+@@ -0,0 +1,60 @@
++import assert from 'node:assert/strict';
++import test from 'node:test';
++import {applyCategoryCorrectionsForRegression} from './finalFormatter.js';
++import {ExtractedItem, FormattedEvent} from './types.js';
++
++function correct(name: string, description: string, overrides: Partial<ExtractedItem> = {}, category: FormattedEvent['category'] = 'Food Special') {
++  const item = {name, description, date:'2026-10-17', startTime:'09:00', endTime:'12:00',
++    venue:'Community Hall', recurringPattern:'none', ...overrides} as ExtractedItem;
++  const event = {name, description, category, isEvent:'No', isFoodSpecial:'Yes',
++    startDate:item.date, endDate:item.date, startTime:item.startTime, endTime:item.endTime,
++    venue:item.venue, establishment:item.venue, address:'', additionalLocation:'',
++    ticketPrice:'', ticketLink:'', relevantImageIndex:0, isRecurring:false, recurringPattern:'none'} as FormattedEvent;
++  return applyCategoryCorrectionsForRegression(event, item);
++}
++
++test('October 17 artisan and farmers market identities survive final food inference and flags', () => {
++  const cases = [
++    ['HALLOWEEN ARTISAN MARKET', 'Bring your friends and family. Local vendors, handmade goods, and unique finds.'],
++    ['Sterling Farmers Market', 'This week’s market supports over 18 local farms and helps fund food and nutrition programs and community events at the hall.'],
++    ['Sterling Farmers’ Market', 'Local produce and food vendors.'],
++    ["Sterling Farmer's Market", 'Local produce and food vendors.'],
++  ];
++  for (const [name, description] of cases) {
++    const result = correct(name, description);
++    assert.equal(result.category, 'Gatherings & Parties', name);
++    assert.equal(result.isEvent, 'Yes', name);
++    assert.equal(result.isFoodSpecial, 'No', name);
++  }
++});
++
++test('market venue or sibling context does not consume the distinct soup special', () => {
++  for (const name of ['Apple Sweet Potato Soup', 'Farmers Market Soup Special']) {
++    const result = correct(name, 'Apple Sweet Potato Soup served with a bun for just $5!',
++      {_sourceType:'special', venue:'Sterling Farmers Market'});
++    assert.equal(result.category, 'Food Special');
++    assert.equal(result.isEvent, 'No');
++    assert.equal(result.isFoodSpecial, 'Yes');
++  }
++});
++
++test('sponsor-prefixed free swim is Sports through the final flags', () => {
++  const result = correct("Charlottetown Y's Club Free Swim", "Free swim hosted by Charlottetown Y's Club.",
++    {_sourceType:'schedule', date:'2026-10-18', startTime:'12:00', endTime:'13:30'}, 'Live Music');
++  assert.equal(result.category, 'Sports');
++  assert.equal(result.isEvent, 'Yes');
++  assert.equal(result.isFoodSpecial, 'No');
++});
++
++test('a market music act and unrelated aquatic party, lesson or music keep their own activity', () => {
++  const cases = [
++    ['Live Music at the Artisan Market', 'A live concert with a singer.', 'Live Music'],
++    ['Pool Party', 'A pool party and social gathering.', 'Gatherings & Parties'],
++    ['Free Swim Party', 'A party with a DJ and live music.', 'Live Music'],
++    ['Free Swimming Lessons', 'An instructor-led swimming lesson.', 'Workshops & Classes'],
++    ['Free Swim Band Concert', 'A live music concert by Free Swim Band.', 'Live Music'],
++  ] as const;
++  for (const [name, description, category] of cases) {
++    assert.equal(correct(name, description, {_sourceType:'event'}, category).category, category, name);
++  }
++});
+diff --git a/src/parsing/finalFormatter.ts b/src/parsing/finalFormatter.ts
+index 99c4608..b916a54 100644
+--- a/src/parsing/finalFormatter.ts
++++ b/src/parsing/finalFormatter.ts
+@@ -1612,7 +1612,7 @@ function detectExplicitFoodSpecialCategory(
+   const foodOfferText = text.replace(/\bbeer\s+garden\b/g, ' ')
+     .replace(/\bmain\s+(?:level|floor|street|entrance|lobby)\b/g, ' ');
+   const hasNamedFoodCue =
+-    /\b(brunch|breakfast|lunch|dinner|menu|appetizer|mains|main course|main dish|dessert|prix fixe|set menu|deal|cocktail|cocktails|beer|wine|wines|mimosa|mimosas|burger|burgers|pizza|pizzas|taco|tacos|wing|wings)\b/.test(
++    /\b(brunch|breakfast|lunch|dinner|soup|menu|appetizer|mains|main course|main dish|dessert|prix fixe|set menu|deal|cocktail|cocktails|beer|wine|wines|mimosa|mimosas|burger|burgers|pizza|pizzas|taco|tacos|wing|wings)\b/.test(
+       foodOfferText
+     );
+   const hasPriceNearFoodCue = hasPrice && hasNamedFoodCue;
+@@ -2123,11 +2123,6 @@ function applyFinalCategoryNormalizationGuardrail(
+     return setCategory('Gatherings & Parties', 'keyword_inference', 'community, public care or produce-judging activity');
+   }
+ 
+-  if (/\b(?:vendors?|farmers?|craft)\s+market\b/i.test(String(event.name || ''))) {
+-    stats.keywordInference += 1;
+-    return setCategory('Gatherings & Parties', 'keyword_inference', 'market title');
+-  }
+-
+   const isStrongUpgradeOverWeakFinal = (candidate: Category | null): boolean =>
+     Boolean(
+       candidate &&
+@@ -2386,9 +2381,6 @@ function applyCategoryCorrections(
+     return event;
+   }
+   const rawCategory = String(event.category || '').trim();
+-  if (/\b(?:vendors?|farmers?|craft)\s+market\b/i.test(String(event.name || ''))) {
+-    event.category = 'Gatherings & Parties';
+-  }
+   const normalizedAlias = CATEGORY_ALIAS_MAP[rawCategory.toLowerCase()];
+   if (normalizedAlias && rawCategory !== normalizedAlias) {
+     logger.debug(`Category alias normalization: "${event.name}" -> ${normalizedAlias}`, {
+@@ -2549,7 +2541,18 @@ function sourceGroundedActivityCategory(event: FormattedEvent, originalItem?: Ex
+   const text = `${title} ${originalItem?.description || event.description || ''}`;
+   if (/\b(?:lunch|soup|chili|sandwich|burger|meal|dinner|supper|breakfast|brunch)\b/i.test(title) &&
+       (/\$\s*\d|\b(?:special|feature|deal|offer|buffet)\b/i.test(title) || originalItem?._sourceType==='special')) return null;
+-  if (/\bcraft\s+(?:fair|market)\b/i.test(title)) return 'Gatherings & Parties';
++  // These are item titles, never the publisher/venue or a sibling soup offer.
++  // A market's vendors and food fundraising do not change its activity type.
++  if (/\b(?:craft|artisans?|makers?|vendors?|farmers?(?:['’]s?)?)\s+(?:fair|market)\b/i.test(title) &&
++      !/\b(?:live\s+music|concert|performance|workshop|class|lesson|trivia|tasting)\b/i.test(title)) {
++    return 'Gatherings & Parties';
++  }
++  // Allow a sponsor prefix, while retaining separately named parties, lessons,
++  // films and music events as their own activities.
++  if (/\b(?:free|public|family|lane|leisure|recreational|open)\s+swim(?:ming)?\b/i.test(title) &&
++      !/\b(?:party|lessons?|classes?|workshop|concert|live\s+music|band|dj|film|movie|screening)\b/i.test(title)) {
++    return 'Sports';
++  }
+   if (/\b(?:choir|chorus|choral)\b/i.test(text) &&
+       /\b(?:sing(?:ing|ers)?|perform(?:s|ing|ance)?|concert|tour|music)\b/i.test(text) &&
+       !/\b(?:film|movie|screening|documentary)\b/i.test(text)) return 'Live Music';
+diff --git a/src/parsing/occurrenceSourceOwnership.test.ts b/src/parsing/occurrenceSourceOwnership.test.ts
+new file mode 100644
+index 0000000..ab02f8a
+--- /dev/null
++++ b/src/parsing/occurrenceSourceOwnership.test.ts
+@@ -0,0 +1,102 @@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import {datedOccurrenceLocation, hasOnlyAlternativeRecurrence, explicitStartingProgramPattern,
++  materialCaptionClockConflict, hasExplicitVenueAbsence, prepareOccurrenceSourceItem,
++  restoreOccurrenceSourceOwnership} from './occurrenceSourceOwnership.js';
++import {classifySpatialEvent} from './spatialEventClassifier.js';
++import {bindCompactStage4Sources, parseCompactStage4Response} from './compactStage4.js';
++import {allowsPublisherAddressHydration} from '../services/sourceLocationRole.js';
++import type {ExtractedEvent, FormattedEvent} from './types.js';
++
++const item = (overrides: any = {}): ExtractedEvent => ({name:'Donation Day',description:'Collect winter clothes.',
++  date:'2026-10-18',startTime:'12:00',endTime:'20:00',venue:'Fixture Grocery, 9 Example Rd',price:'',
++  recurringPattern:'daily',extractionReason:'Dated donation event',...overrides});
++const formatted = (source: ExtractedEvent, overrides: any = {}): FormattedEvent => ({...source,
++  startDate:source.date,endDate:source.date,establishment:source.venue,additionalLocation:source.venue,address:'',
++  category:'Gatherings & Parties',isEvent:'Yes',isFoodSpecial:'No',isRecurring:'Yes',ticketPrice:'',ticketLink:'',
++  relevantImageIndex:0,...overrides});
++const response = (source: any, proposed: string | null) => JSON.stringify({decisions:[{
++  sourceItemIndex:source._pipelineIndex,sourceIdentity:Object.fromEntries(['name','date','startTime','venue'].map(k=>[k,String(source[k]??'')])),
++  decision:'KEPT',reason:'Dated activity',corrections:{recurringPattern:proposed,correctionReason:proposed?'Source item owns this schedule.':''},
++}]});
++
++test('dated source lines own their named stops without flattening a global tour',()=>{
++  const combinedText='Island wide campaign at multiple locations.\nOct. 20 – 12p-4p – Fixture Grocery in Charlottetown\nOct. 22 – 4p-7p – Example Mansion in Kensington';
++  const input={name:'Island Wide Food Drive',date:'2026-10-20',location:'Fixture Grocery, Charlottetown',combinedText};
++  assert.ok(datedOccurrenceLocation(input));
++  const spatial=classifySpatialEvent(input);
++  assert.equal(spatial.kind,'single_location');assert.equal(spatial.locations.length,1);
++  assert.equal(spatial.locations[0].label,input.location);
++  assert.notEqual(classifySpatialEvent({...input,date:undefined}).kind,'single_location');
++  assert.equal(datedOccurrenceLocation({...input,date:'2026-10-21'}),null);
++  assert.equal(datedOccurrenceLocation({...input,location:'Other Grocery'}),null);
++  assert.equal(datedOccurrenceLocation({...input,name:'Parade route'}),null);
++  assert.equal(datedOccurrenceLocation({...input,combinedText:combinedText+'\nOct. 20 – Second Grocery'}),null);
++  assert.equal(datedOccurrenceLocation({...input,modelSpatialEvidence:{kind:'route'}}),null);
++  assert.equal(datedOccurrenceLocation({...input,combinedText:combinedText.replace('Fixture Grocery in Charlottetown','at both Fixture Grocery and Second Grocery in Charlottetown')}),null);
++  assert.equal(datedOccurrenceLocation({...input,combinedText:combinedText.replace('Fixture Grocery in Charlottetown','Fixture Grocery and Second Grocery in Charlottetown'),
++    modelSpatialEvidence:{kind:'multi_location',locations:[{label:'Fixture Grocery'},{label:'Second Grocery'}]}}),null);
++});
++
++test('a separate daily depot can neither lend recurrence nor prevent a compact none correction',()=>{
++  const original=item({description:'Collect winter clothes on October 18. An alternative drop-off depot is open daily in The Fixture Mall.'});
++  const source=bindCompactStage4Sources([original])[0];
++  assert.ok(hasOnlyAlternativeRecurrence(source));
++  assert.equal(parseCompactStage4Response(response(source,'none'),[source]).validatedItems[0].corrections?.recurringPattern,'none');
++  const prepared=prepareOccurrenceSourceItem(original,'');
++  assert.equal(prepared.recurringPattern,'none');
++  const restored=restoreOccurrenceSourceOwnership([formatted(prepared,{recurringPattern:'daily',isRecurring:'Yes'})],[prepared])[0];
++  assert.equal(restored.recurringPattern,'none');assert.equal(restored.isRecurring,'No');
++  const absent=bindCompactStage4Sources([{...original,recurringPattern:'none' as const}])[0];
++  assert.throws(()=>parseCompactStage4Response(response(absent,'daily'),[absent]),/unsupported_recurrence_correction/);
++});
++
++test('real daily depot and own weekly programme remain protected from recurrence removal',()=>{
++  for(const control of [item({name:'Donation depot',description:'Donation depot is open daily.',venue:'Fixture Mall'}),
++    item({description:'Our event runs daily at Fixture Grocery. An alternative drop-off depot is open daily in The Fixture Mall.'}),
++    item({description:'Every Sunday at Fixture Grocery.',recurringPattern:'weekly_sunday'})]){
++    assert.equal(hasOnlyAlternativeRecurrence(control),false);
++    const source=bindCompactStage4Sources([control])[0];
++    assert.throws(()=>parseCompactStage4Response(response(source,'none'),[source]),/unsupported_recurrence_correction/);
++  }
++});
++
++test('starting programme with labelled plural weekday preserves weekly intent without inventing extent',()=>{
++  const original=item({name:'First Games Program',description:'Starting Saturday October 24th! Day: Saturdays. Ages: 4–6yr.',date:'2026-10-24',recurringPattern:'none'});
++  const caption='First Games Program starting Saturday October 24th. Day: Saturdays.';
++  assert.equal(explicitStartingProgramPattern(original,caption),'weekly_saturday');
++  const prepared=prepareOccurrenceSourceItem(original,caption);
++  assert.equal(prepared.recurringPattern,'weekly_saturday');
++  const restored=restoreOccurrenceSourceOwnership([formatted(prepared,{recurringPattern:'none',isRecurring:'No',totalOccurrences:8,recurrenceUntilDate:'2026-12-12'})],[prepared])[0];
++  assert.equal(restored.recurringPattern,'weekly_saturday');assert.equal(restored.isRecurring,'Yes');
++  assert.equal(restored.totalOccurrences,undefined);assert.equal(restored.recurrenceUntilDate,undefined);
++  for(const overrides of [{description:'Saturday social.'},{description:'Formerly starting Saturday. Day: Saturdays.'},
++    {description:'Starting Saturday. Day: Saturdays. Day: Sundays.'},{description:'Starting Sunday. Day: Saturdays.'},{date:'2026-10-23'}]){
++    assert.equal(explicitStartingProgramPattern({...original,...overrides},caption),null);
++  }
++  assert.equal(explicitStartingProgramPattern(original,'Another Programme every Saturday.'),null);
++  assert.equal(explicitStartingProgramPattern(original,'First Games Program starting Saturday October 24th.'),null);
++});
++
++test('explicit absence of attendance venue holds collection identity and blocks publisher hydration',()=>{
++  const original=item({venue:'',spatial:{kind:'unknown',locations:[],evidenceNotes:'The post does not state the event venue; the businesses named are collection spots.'}});
++  assert.ok(hasExplicitVenueAbsence(original));
++  const prepared=prepareOccurrenceSourceItem(original,'');
++  assert.equal(prepared.sourceLocationRole,'collection_partner_only');assert.equal(allowsPublisherAddressHydration(prepared),false);
++  const restored=restoreOccurrenceSourceOwnership([formatted(prepared,{venue:'Publisher Cafe',establishment:'Publisher Cafe',address:'1 Example Rd'})],[prepared])[0];
++  assert.equal(restored.venue,'');assert.equal(restored.establishment,'');assert.equal(restored.address,'');
++  assert.equal(hasExplicitVenueAbsence({...original,venue:'Actual Distribution Hall'}),false);
++  assert.equal(hasExplicitVenueAbsence({...original,spatial:{kind:'unknown',locations:[],evidenceNotes:'No venue identified.'}}),false);
++});
++
++test('material advertised clock conflict holds without guessing priority, preserving doors and separate slots',()=>{
++  const original=item({name:'Wing Night',startTime:'17:00',timeFlags:{start:{source:'explicit',evidence:'Starts @ 5pm'}}});
++  assert.equal(materialCaptionClockConflict(original,'Wing night tonight.\nStarting at 6 till 9',1),true);
++  assert.equal(materialCaptionClockConflict(original,'Wing night tonight.\nStarting at 5 till 9',1),false);
++  assert.equal(materialCaptionClockConflict(original,'Wing night tonight.\nStarting at 6 till 9',2),false);
++  assert.equal(materialCaptionClockConflict(original,'Other event starting at 6 till 9',1),false);
++  assert.equal(materialCaptionClockConflict(original,'Wing Night doors starting at 6 till 9',1),false);
++  assert.equal(materialCaptionClockConflict({...original,timeFlags:{start:{source:'implied',evidence:''}}},'Wing Night starting at 6 till 9',1),false);
++  assert.equal(materialCaptionClockConflict(item({name:'Comedy',startTime:'20:00',timeFlags:{start:{source:'explicit',evidence:'Show 8PM'}}}),
++    'Comedy. Doors at 7PM. Show 8PM–10PM.',1),false);
++});
+diff --git a/src/parsing/occurrenceSourceOwnership.ts b/src/parsing/occurrenceSourceOwnership.ts
+new file mode 100644
+index 0000000..811bee6
+--- /dev/null
++++ b/src/parsing/occurrenceSourceOwnership.ts
+@@ -0,0 +1,148 @@
++import type {ExtractedItem, FormattedEvent, RecurringPattern} from './types.js';
++
++const key = (value: unknown) => String(value || '').normalize('NFKD').replace(/[\u0300-\u036f]/g, '')
++  .toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
++const captionOnly = (text: string) => text.split(/\n\s*OCR TEXT:/i)[0];
++const weekdays = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
++const cadence = /\b(?:daily|every\s+day|each\s+day|weekly|(?:every|each)\s+(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday)|(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday)s)\b/i;
++
++/** A dated stop has its own location even when the parent caption lists a tour. */
++export function datedOccurrenceLocation(input: {
++  date?: unknown; location?: unknown; name?: unknown; description?: unknown; combinedText?: unknown;
++  modelSpatialEvidence?: {kind?: unknown; locations?: unknown} | null;
++}): string | null {
++  const date = String(input.date || '');
++  const location = String(input.location || '').trim();
++  if (!/^20\d{2}-\d{2}-\d{2}$/.test(date) || !location ||
++      /\b(?:route|parade|procession|marathon|race|walkathon|bike\s+ride)\b/i.test(String(input.name || '')) ||
++      input.modelSpatialEvidence?.kind === 'route') return null;
++  const locations = input.modelSpatialEvidence?.locations;
++  if (Array.isArray(locations) && locations.some(x => x && typeof x === 'object' &&
++      ['start','finish','stop'].includes(String(x.role || '')))) return null;
++  const monthNames = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
++  const lines = captionOnly(String(input.combinedText || '')).split(/[\n;]+/).map(line => line.replace(/^\s*[•*–—-]\s*/, ''))
++    .filter(line => /^\s*(?:(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday),?\s+)?(?:20\d{2}-\d{2}-\d{2}|(?:jan\w*|feb\w*|mar\w*|apr\w*|may|jun\w*|jul\w*|aug\w*|sep\w*|oct\w*|nov\w*|dec\w*)\.?\s+\d{1,2})\b/i.test(line))
++    .map(line => {
++    const iso = line.match(/\b(20\d{2})-(\d{2})-(\d{2})\b/);
++    const named = line.match(/\b(jan\w*|feb\w*|mar\w*|apr\w*|may|jun\w*|jul\w*|aug\w*|sep\w*|oct\w*|nov\w*|dec\w*)\.?\s+(\d{1,2})(?:st|nd|rd|th)?\b/i);
++    return {line, date: iso?.[0] || (named ? `${date.slice(0,4)}-${String(monthNames.indexOf(named[1].slice(0,3).toLowerCase())+1).padStart(2,'0')}-${named[2].padStart(2,'0')}` : '')};
++  }).filter(x => x.date);
++  // Single-date global headings and two simultaneous sites do not establish a split stop.
++  if (new Set(lines.map(x => x.date)).size < 2) return null;
++  const matching = lines.filter(x => x.date === date);
++  if (matching.length !== 1) return null;
++  const matchingLine = key(matching[0].line);
++  if (/\b(?:at both|multiple locations|multiple venues|two locations|two venues|simultaneously)\b/.test(matchingLine)) return null;
++  if (input.modelSpatialEvidence?.kind === 'multi_location' && Array.isArray(locations)) {
++    const sameDatePlaces = locations.map(x => key(typeof x === 'string' ? x : x?.label))
++      .filter(label => label.split(' ').length >= 2 && matchingLine.includes(label));
++    if (new Set(sameDatePlaces).size > 1) return null;
++  }
++  const words = key(location).split(' ').filter(x => !['the','and','in','at','of'].includes(x));
++  if (words.length < 2 || /\b(?:locations?|island wide|pei|province wide)\b/i.test(location)) return null;
++  const lineWords = new Set(key(matching[0].line).split(' '));
++  return words.every(x => lineWords.has(x)) ? matching[0].line.trim() : null;
++}
++
++/** Remove only a clearly separate alternative depot sentence, never own cadence. */
++export function recurrenceOwnershipText(item: {name?: unknown; description?: unknown; venue?: unknown}): {
++  text: string; hasSeparateAlternative: boolean;
++} {
++  const venueWords = key(item.venue).split(' ').filter(x => x.length > 2);
++  const sentences = String(item.description || '').split(/(?<=[.!?])\s+|\n+/);
++  let hasSeparateAlternative = false;
++  const owned = sentences.filter(sentence => {
++    if (!venueWords.length || !/\b(?:an?\s+alternative|another|separate|other)\b/i.test(sentence) ||
++        !/\b(?:depot|drop[ -]?off|collection\s+(?:spot|site|point))\b/i.test(sentence) ||
++        !cadence.test(sentence) || !/\b(?:at|in)\s+(?:the\s+)?[A-Z]/.test(sentence)) return true;
++    const words = new Set(key(sentence).split(' '));
++    if (venueWords.every(x => words.has(x))) return true;
++    hasSeparateAlternative = true;
++    return false;
++  });
++  return {text: `${item.name || ''} ${owned.join(' ')}`, hasSeparateAlternative};
++}
++
++export function hasOnlyAlternativeRecurrence(item: {name?: unknown; description?: unknown; venue?: unknown; date?: unknown}): boolean {
++  const owned = recurrenceOwnershipText(item);
++  return /^20\d{2}-\d{2}-\d{2}$/.test(String(item.date || '')) && owned.hasSeparateAlternative && !cadence.test(owned.text);
++}
++
++/** A labelled plural weekday in a starting programme is affirmative weekly intent. */
++export function explicitStartingProgramPattern(item: {name?: unknown; description?: unknown; date?: unknown}, caption: string): RecurringPattern | null {
++  const text = String(item.description || '');
++  const name = String(item.name || '').trim();
++  if (!name || !key(captionOnly(caption)).includes(key(name)) || !/\bprogram(?:me)?\b/i.test(name) ||
++      !/\bstarting\s+(?:on\s+)?(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/i.test(text) ||
++      /\b(?:cancelled|canceled|not|formerly|previously|one[ -]off|one[ -]time)\b/i.test(text)) return null;
++  const labels = [...text.matchAll(/\bDay\s*:\s*(Mondays|Tuesdays|Wednesdays|Thursdays|Fridays|Saturdays|Sundays)\b/gi)];
++  if (labels.length !== 1 || !/^20\d{2}-\d{2}-\d{2}$/.test(String(item.date || ''))) return null;
++  const day = labels[0][1].toLowerCase().slice(0,-1);
++  const source = captionOnly(caption);
++  const sourceLabels = [...source.matchAll(/\bDay\s*:\s*(Mondays|Tuesdays|Wednesdays|Thursdays|Fridays|Saturdays|Sundays)\b/gi)];
++  if (sourceLabels.length !== 1 || sourceLabels[0][1].toLowerCase() !== `${day}s` ||
++      !new RegExp(`\\bstarting\\s+(?:on\\s+)?${day}\\b`, 'i').test(source) ||
++      !new RegExp(`\\bstarting\\s+(?:on\\s+)?${day}\\b`, 'i').test(text)) return null;
++  if (new Date(`${item.date}T12:00:00Z`).getUTCDay() !== weekdays.indexOf(day)) return null;
++  return `weekly_${day}` as RecurringPattern;
++}
++
++/** Collection partner identity is not proof of the attendee-facing event's venue. */
++export function hasExplicitVenueAbsence(item: {venue?: unknown; spatial?: {kind?: unknown; locations?: unknown; evidenceNotes?: unknown}}): boolean {
++  const spatial = item.spatial;
++  const notes = String(spatial?.evidenceNotes || '');
++  return !String(item.venue || '').trim() && spatial?.kind === 'unknown' &&
++    Array.isArray(spatial.locations) && spatial.locations.length === 0 &&
++    /\b(?:does not|doesn't|not)\s+(?:state|specify|identify|give)|\b(?:unspecified|unstated|unknown)\b/i.test(notes) &&
++    /\b(?:event\s+venue|distribution\s+(?:venue|location))\b/i.test(notes) &&
++    /\bcollection\s+(?:spots?|partners?|points?|sites?)\b/i.test(notes);
++}
++
++/** Compare conflicting advertised starts without guessing AM/PM or caption priority.
++ * Only a single named item and a literal starting range qualify. Doors are separate. */
++export function materialCaptionClockConflict(item: {
++  name?: unknown; startTime?: unknown; timeFlags?: {start?: {source?: unknown; evidence?: unknown}};
++}, caption: string, itemCount: number): boolean {
++  if (itemCount !== 1 || item.timeFlags?.start?.source !== 'explicit') return false;
++  const text = captionOnly(caption);
++  if (!key(text).includes(key(item.name)) || !key(item.name)) return false;
++  const ranges = [...text.matchAll(/\bstarting\s+(?:at\s+)?(\d{1,2})(?::([0-5]\d))?\s*(?:[ap]\.?m\.?)?\s*(?:till|until|to|[-–—])\s*\d{1,2}(?::[0-5]\d)?\b/gi)];
++  if (ranges.length !== 1 || /\bdoors?\b/i.test(ranges[0][0])) return false;
++  const lineStart = text.lastIndexOf('\n', ranges[0].index) + 1;
++  if (/\bdoors?\b/i.test(text.slice(lineStart, ranges[0].index))) return false;
++  const start = String(item.startTime || '').match(/^(\d{1,2}):([0-5]\d)$/);
++  const evidence = String(item.timeFlags.start.evidence || '');
++  if (!start || !/\b(?:starts?|starting|begins?|show)\b/i.test(evidence) || /\bdoors?\b/i.test(evidence)) return false;
++  return Number(start[1])%12 !== Number(ranges[0][1])%12 || Number(start[2]) !== Number(ranges[0][2] || 0);
++}
++
++export function prepareOccurrenceSourceItem<T extends ExtractedItem>(item: T, caption: string): T {
++  const pattern = explicitStartingProgramPattern(item, caption);
++  const currentPattern = (item as ExtractedItem & {recurringPattern?: string}).recurringPattern;
++  return {...item,
++    ...(currentPattern === 'daily' && hasOnlyAlternativeRecurrence(item) ? {recurringPattern:'none' as const} : {}),
++    ...(hasExplicitVenueAbsence(item) ? {sourceLocationRole:'collection_partner_only' as const} : {}),
++    ...(pattern && (!currentPattern || currentPattern === 'none' || currentPattern === pattern)
++      ? {recurringPattern:pattern, _sourceWeeklyProgramPattern:pattern} : {}),
++  };
++}
++
++/** Rebind local evidence after formatting by identity, never by array position. */
++export function restoreOccurrenceSourceOwnership<T extends FormattedEvent>(events: T[], sources: ExtractedItem[]): T[] {
++  return events.map(event => {
++    const matches = sources.filter(source => key(source.name) === key(event.name) &&
++      source.date === event.startDate && source.startTime === event.startTime);
++    if (matches.length !== 1) return event;
++    const source = matches[0] as ExtractedItem & {recurringPattern?: RecurringPattern;totalOccurrences?: number;recurrenceUntilDate?: string};
++    return {...event,
++      ...(source.sourceLocationRole === 'collection_partner_only'
++        ? {sourceLocationRole:source.sourceLocationRole, venue:'', establishment:'', additionalLocation:'', address:'', spatial:source.spatial} : {}),
++      ...(source._sourceWeeklyProgramPattern && source.recurringPattern === source._sourceWeeklyProgramPattern
++        ? {recurringPattern:source.recurringPattern, isRecurring:'Yes' as const, _sourceWeeklyProgramPattern:source._sourceWeeklyProgramPattern,
++          totalOccurrences:source.totalOccurrences, recurrenceUntilDate:source.recurrenceUntilDate} : {}),
++      ...(source.recurringPattern === 'none' && hasOnlyAlternativeRecurrence(source)
++        ? {recurringPattern:'none' as const, isRecurring:'No' as const, totalOccurrences:undefined, recurrenceUntilDate:undefined,
++          recurringDaysOfWeek:undefined, recurringWeekdaySequence:undefined, recurringWeekInterval:undefined} : {}),
++    };
++  });
++}
+diff --git a/src/parsing/postParser.ts b/src/parsing/postParser.ts
+index bb477a2..1bdf431 100644
+--- a/src/parsing/postParser.ts
++++ b/src/parsing/postParser.ts
+@@ -1,5 +1,6 @@
+ // @ts-nocheck
+ import {applyLocationMentionResolution} from './locationMentionRoles.js';
++import {materialCaptionClockConflict, prepareOccurrenceSourceItem, restoreOccurrenceSourceOwnership} from './occurrenceSourceOwnership.js';
+ // TODO: Fix type errors introduced during Phase 6/7 updates
+ /**
+  * Post Parser - Main Orchestrator
+@@ -708,7 +709,14 @@ async function replayPostDataFromArtifactsCore(
+   }
+ 
+   rawExtractedData = constrainSourceTimes(rawExtractedData, combinedText).filter(item => !sourceItemHoldReason(item))
+-    .map(item=>applyLocationMentionResolution(item,combinedText));
++    .map(item=>prepareOccurrenceSourceItem(applyLocationMentionResolution(item,combinedText),combinedText));
++  const replaySourceHolds = rawExtractedData.filter(item => item.sourceLocationRole === 'collection_partner_only' ||
++    materialCaptionClockConflict(item,combinedText,rawExtractedData.length));
++  if (replaySourceHolds.length) {
++    await emitStageArtifacts(cfg,{source:'replay',stage3HeldItems:deepCloneJson(replaySourceHolds)});
++    await reportSkipReason({stage:'stage3',reason:'Saved source requires attendance-venue or material clock-conflict review'});
++    return [];
++  }
+   rawExtractedData.forEach((item, idx) => {
+     item._pipelineIndex = item._pipelineIndex || idx + 1;
+     item._pipelineTotalStage3 = item._pipelineTotalStage3 || rawExtractedData.length;
+@@ -731,7 +739,7 @@ async function replayPostDataFromArtifactsCore(
+   logger.info('=== STAGE 4: SECONDARY VALIDATION (REPLAY) ===');
+   let validatedData: ExtractedItem[] = [];
+   if (Array.isArray(normalizedArtifacts.stage4Items) && normalizedArtifacts.stage4Items.length > 0) {
+-    validatedData = deepCloneJson(normalizedArtifacts.stage4Items);
++    validatedData = deepCloneJson(normalizedArtifacts.stage4Items).map(item=>prepareOccurrenceSourceItem(item,combinedText));
+     logger.info('Replay using provided Stage 4 artifacts', {
+       postId,
+       validatedCount: validatedData.length,
+@@ -751,6 +759,13 @@ async function replayPostDataFromArtifactsCore(
+   }
+ 
+   const compactReplayHold = getCompactStage4Hold(validatedData);
++  const replayValidationHolds = validatedData.filter(item => item.sourceLocationRole === 'collection_partner_only' ||
++    materialCaptionClockConflict(item,combinedText,validatedData.length));
++  if (replayValidationHolds.length) {
++    await emitStageArtifacts(cfg,{source:'replay',stage3HeldItems:deepCloneJson(replayValidationHolds)});
++    await reportSkipReason({stage:'stage3',reason:'Saved validation requires attendance-venue or material clock-conflict review'});
++    return [];
++  }
+   validatedData = constrainSourceTimes(validatedData, combinedText).filter(item => !sourceItemHoldReason(item));
+   if (compactReplayHold) {
+     await emitStageArtifacts(cfg, { source: 'replay', stage4ValidationHold: compactReplayHold, stage4Items: [] });
+@@ -798,7 +813,7 @@ async function replayPostDataFromArtifactsCore(
+     return [];
+   }
+ 
+-  const formattedEventsWithFlags = mergeTimeFlags(formattedEvents, validatedData);
++  const formattedEventsWithFlags = restoreOccurrenceSourceOwnership(mergeTimeFlags(formattedEvents, validatedData), validatedData);
+   const formattedEventsWithMediaHints = mergeTicketImageHints(
+     formattedEventsWithFlags,
+     validatedData,
+@@ -2050,7 +2065,7 @@ async function parsePostDataCore(
+ 
+     logger.info(`Extracted ${rawExtractedData.length} raw items`);
+ 
+-    rawExtractedData=rawExtractedData.map(item=>applyLocationMentionResolution(item,input.combinedText));
++    rawExtractedData=rawExtractedData.map(item=>prepareOccurrenceSourceItem(applyLocationMentionResolution(item,input.combinedText),input.combinedText));
+     // Add pipeline indices to each item for tracking
+     rawExtractedData.forEach((item, idx) => {
+       item._pipelineIndex = idx + 1;
+@@ -2108,6 +2123,21 @@ async function parsePostDataCore(
+     // ========================================
+     // STAGE 4: Secondary Validation
+     // ========================================
++    const clockConflicts = rawExtractedData.filter(item => materialCaptionClockConflict(item,input.combinedText,rawExtractedData.length));
++    if (clockConflicts.length) {
++      sourceDateHoldEncountered = true;
++      await emitStageArtifacts(cfg,{source:'live',stage3HeldItems:deepCloneJson(clockConflicts)});
++      await reportSkipReason({stage:'stage3',reason:'Material caption/image start-clock conflict requires source review'});
++      return [];
++    }
++    const missingAttendanceVenues = rawExtractedData.filter(item => item.sourceLocationRole === 'collection_partner_only');
++    if (missingAttendanceVenues.length) {
++      sourceDateHoldEncountered = true;
++      await emitStageArtifacts(cfg,{source:'live',stage3HeldItems:deepCloneJson(missingAttendanceVenues)});
++      await reportSkipReason({stage:'stage3',reason:'Collection partners do not establish the attendance venue; source review required'});
++      rawExtractedData = rawExtractedData.filter(item => item.sourceLocationRole !== 'collection_partner_only');
++      if (!rawExtractedData.length) return [];
++    }
+     logger.info('=== STAGE 4: SECONDARY VALIDATION ===');
+     const stage4Start = Date.now();
+     let validatedData = await performSecondaryValidation(
+@@ -2137,6 +2167,20 @@ async function parsePostDataCore(
+       });
+       const retryStage3Result = await runStage3Pipeline(stage3ModelRouting.fallbackModel, 'fallback');
+       rawExtractedData = retryStage3Result.items;
++      rawExtractedData = rawExtractedData.map(item => prepareOccurrenceSourceItem(item,input.combinedText));
++      if (rawExtractedData.some(item => materialCaptionClockConflict(item,input.combinedText,rawExtractedData.length))) {
++        sourceDateHoldEncountered = true;
++        await emitStageArtifacts(cfg,{source:'live',stage3HeldItems:deepCloneJson(rawExtractedData)});
++        await reportSkipReason({stage:'stage3',reason:'Material caption/image start-clock conflict requires source review'});
++        return [];
++      }
++      if (rawExtractedData.some(item => item.sourceLocationRole === 'collection_partner_only')) {
++        sourceDateHoldEncountered = true;
++        await emitStageArtifacts(cfg,{source:'live',stage3HeldItems:deepCloneJson(rawExtractedData.filter(item => item.sourceLocationRole === 'collection_partner_only'))});
++        await reportSkipReason({stage:'stage3',reason:'Collection partners do not establish the attendance venue; source review required'});
++        rawExtractedData = rawExtractedData.filter(item => item.sourceLocationRole !== 'collection_partner_only');
++        if (!rawExtractedData.length) return [];
++      }
+       stage37TicketUrl = retryStage3Result.ticketUrl || stage37TicketUrl;
+ 
+       if (rawExtractedData && rawExtractedData.length > 0) {
+@@ -2293,7 +2337,7 @@ async function parsePostDataCore(
+     });
+ 
+     // Merge Stage-4 timeFlags back if Stage-5 omitted them
+-    const formattedEventsWithFlags = mergeTimeFlags(formattedEvents, validatedData);
++    const formattedEventsWithFlags = restoreOccurrenceSourceOwnership(mergeTimeFlags(formattedEvents, validatedData), validatedData);
+     const formattedEventsWithMediaHints = mergeTicketImageHints(
+       formattedEventsWithFlags,
+       validatedData,
+diff --git a/src/parsing/spatialEventClassifier.ts b/src/parsing/spatialEventClassifier.ts
+index 20217e1..e27c67f 100644
+--- a/src/parsing/spatialEventClassifier.ts
++++ b/src/parsing/spatialEventClassifier.ts
+@@ -7,6 +7,7 @@
+  */
+ 
+ import {resolveLocationMentionRoles} from './locationMentionRoles.js';
++import {datedOccurrenceLocation} from './occurrenceSourceOwnership.js';
+ import {firstLocationSentence, postalStreetIdentity, compatibleStreetLocality} from '../utils/numberedStreetIdentity.js';
+ import {getVenueAliasEntry} from '../services/venueAliases.js';
+ 
+@@ -56,6 +57,7 @@ export interface SpatialEventClassification {
+ }
+ 
+ export interface ClassifySpatialEventInput {
++  date?: unknown;
+   name?: unknown;
+   description?: unknown;
+   location?: unknown;
+@@ -437,6 +439,12 @@ function chooseConfidence(params: {
+ export function classifySpatialEvent(
+   input: ClassifySpatialEventInput
+ ): SpatialEventClassification {
++  const occurrenceLocation = datedOccurrenceLocation(input);
++  if (occurrenceLocation) return {
++    version:1, kind:'single_location', representation:'venue', confidence:'high', ordered:false,
++    locations:[{label:String(input.location), role:'location', certainty:'confirmed', sourceText:occurrenceLocation}],
++    confirmedStreets:[], reviewReasons:[],
++  };
+   const roles=resolveLocationMentionRoles(input);
+   if(roles){
+     return {version:1,kind:'single_location',representation:'venue',confidence:'high',ordered:false,
+diff --git a/src/parsing/types.ts b/src/parsing/types.ts
+index 1eb0433..b3a70b7 100644
+--- a/src/parsing/types.ts
++++ b/src/parsing/types.ts
+@@ -385,6 +385,8 @@ export type RecurringPattern =
+ // NOTE: Monthly recurrence is used in legacy Apps Script and should be added in a dedicated recurrence pass.
+ 
+ export interface RecurrenceScheduleFields {
++  sourceLocationRole?: 'shared_original_business' | 'collection_partner_only';
++  _sourceWeeklyProgramPattern?: RecurringPattern;
+   familyAudienceEvidence?: import('../services/familyAudienceEvidence.js').FamilyAudienceEvidence;
+   _locationMentionResolution?: import('./locationMentionRoles.js').LocationMentionResolution;
+   ticketLink?: string;
+diff --git a/src/processing/rowProcessor.occurrenceSourceOwnership.test.ts b/src/processing/rowProcessor.occurrenceSourceOwnership.test.ts
+new file mode 100644
+index 0000000..eb1e8f5
+--- /dev/null
++++ b/src/processing/rowProcessor.occurrenceSourceOwnership.test.ts
+@@ -0,0 +1,33 @@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import {resolvePostDerivedCityLevelEventLocation,resolveVenueForFullParserEventWithMatcherForRegression,
++  fullParserEventLocationCheck} from './rowProcessor.js';
++import type {ProcessedEvent} from '../parsing/types.js';
++import type {RawRowData} from '../types/index.js';
++
++const row={uniqueId:'ownership-fixture',userName:'Fixture Radio',pageName:'Fixture Radio',timestamp:'2026-10-17T12:00:00Z',mediaUrls:[],
++  text:'An island wide food drive across PEI at multiple locations.\nOct. 20 – 12p-4p – Fixture Grocery in Charlottetown\nOct. 22 – 4p-7p – Example Mansion in Kensington'} as RawRowData;
++const item={name:'Island Wide Food Drive',description:'Collect food for banks across PEI.',startDate:'2026-10-20',startTime:'12:00',endTime:'16:00',
++  establishment:'Fixture Grocery, Charlottetown',additionalLocation:'Fixture Grocery, Charlottetown'} as ProcessedEvent;
++
++test('source-bound visit avoids broad area routing and accepts only exact canonical venue',async()=>{
++  assert.equal(resolvePostDerivedCityLevelEventLocation({item,row,establishment:row.userName}),null);
++  const venue={id:'fixture-grocery',name:'Fixture Grocery'} as any;
++  const params={item,row,rowVenue:{id:'radio',name:'Fixture Radio'} as any,establishment:row.userName,rowIndex:1};
++  let calls=0;
++  assert.equal(await resolveVenueForFullParserEventWithMatcherForRegression({...params,matcher:async()=>{
++    calls++;return {isMatch:true,matchType:'fuzzy',matchedVenue:venue,confidence:90} as any;}}),null);
++  assert.ok(calls>0);
++  assert.equal(await resolveVenueForFullParserEventWithMatcherForRegression({...params,matcher:async()=>
++    ({isMatch:true,matchType:'exact',matchedVenue:venue,confidence:100} as any)}),venue);
++});
++
++test('collection-only source role prevents even exact publisher venue or address matches',async()=>{
++  const held={...item,sourceLocationRole:'collection_partner_only' as const};
++  assert.equal(fullParserEventLocationCheck(held,row).reason,'collection_partner_is_not_event_venue');
++  let calls=0;
++  assert.equal(await resolveVenueForFullParserEventWithMatcherForRegression({item:held,row,rowVenue:{id:'publisher',name:'Publisher Cafe'} as any,
++    establishment:row.userName,rowIndex:1,matcher:async()=>{calls++;return {isMatch:true,matchType:'exact',matchedVenue:{id:'publisher'}} as any;},
++    addressMatcher:async()=>{calls++;return {isMatch:true,matchType:'exact',matchedVenue:{id:'publisher'}} as any;}}),null);
++  assert.equal(calls,0);
++});
+diff --git a/src/processing/rowProcessor.ts b/src/processing/rowProcessor.ts
+index 113d5b5..c73eb2e 100644
+--- a/src/processing/rowProcessor.ts
++++ b/src/processing/rowProcessor.ts
+@@ -1,4 +1,5 @@
+ import {hasConflictingOccurrenceIdentity} from '../utils/occurrenceMergeGuard.js';
++import {datedOccurrenceLocation} from '../parsing/occurrenceSourceOwnership.js';
+ import {validateStructuredLocation, hasCurrentStructuredValidation, protectedStructuredReview} from '../parsing/structuredLocationValidation.js';
+ import {readStructuredPosterEvidence} from '../parsing/structuredPosterValidator.js';
+ import {buildValidatedVenuePointFields} from '../services/validatedVenuePublication.js';
+@@ -1889,6 +1890,9 @@ export function resolvePostDerivedCityLevelEventLocation(params: {
+   ].filter(Boolean).join('\n');
+ 
+   const modelSpatial = (item.spatial || item.spatialEvidence || null) as any;
++  const occurrenceLocation = datedOccurrenceLocation({date:item.startDate || item.date,
++    location:observedCandidates[0]?.value, name:eventName, description, combinedText:contextText, modelSpatialEvidence:modelSpatial});
++  if (occurrenceLocation) return null;
+   const sourceLocations = Array.isArray(modelSpatial?.locations) ? modelSpatial.locations : [];
+   const sourceLocation = sourceLocations.length === 1
+     ? String(typeof sourceLocations[0] === 'string' ? sourceLocations[0] : sourceLocations[0]?.label || '') : '';
+@@ -1910,6 +1914,7 @@ export function resolvePostDerivedCityLevelEventLocation(params: {
+       normalizePlace(sourceLocation).startsWith(normalizePlace(observedLocation) + ' ')) &&
+     !/\b(?:parade|procession|march|marathon|race|walkathon|bike ride|cycling ride)\b/i.test(eventName);
+   const spatialEvidence = classifySpatialEvent({
++    date:item.startDate || item.date,
+     name: eventName,
+     description,
+     location: observedCandidates[0]?.value || '',
+@@ -4363,6 +4368,17 @@ export async function resolveVenueForFullParserEventWithMatcherForRegression(par
+ }): Promise<VenueData | null> {
+   const { rowVenue, row, establishment, rowIndex, matcher, addressMatcher } = params;
+   const item=applyVerifiedSourceComplexVenue(applyLocationMentionResolution(applySharedFoodOfferVenue(params.item,row,rowVenue),[row.text,row.sharedPostText].filter(Boolean).join('\n')),row,rowVenue);
++  if (item.sourceLocationRole === 'collection_partner_only') return null;
++  const boundLocation = item.additionalLocation || item.venue || item.establishment;
++  if (!isCityLevelFacebookEventLocation(row) && datedOccurrenceLocation({date:item.startDate, location:boundLocation, name:item.name,
++      description:item.description, combinedText:[row.text,row.sharedPostText].filter(Boolean).join('\n'),
++      modelSpatialEvidence:item.spatial || item.spatialEvidence})) {
++    for (const candidate of expandStageVenueCandidate(boundLocation)) {
++      const exact = await matcher(candidate, undefined, inferFullParserVenueMatchContext(row, establishment));
++      if (exact.isMatch && exact.matchType === 'exact' && exact.matchedVenue) return exact.matchedVenue;
++    }
++    return null;
++  }
+   const sharedOfferOwner=sharedFoodOfferOwner(item,row,rowVenue);
+   if(sharedOfferOwner){
+     const original=await matcher(sharedOfferOwner,row.sharedPostAuthorUrl,inferFullParserVenueMatchContext(row,sharedOfferOwner));
+@@ -4665,6 +4681,10 @@ export async function resolveVenueForFullParserEventWithMatcherForRegression(par
+ }
+ 
+ export function fullParserEventLocationCheck(item: ParserProcessedEvent, row: RawRowData) {
++  if (item.sourceLocationRole === 'collection_partner_only') {
++    return {decision:'hold' as const,reason:'collection_partner_is_not_event_venue',provinceCodes:[],
++      evidence:['Source explicitly leaves the attendance venue unstated and names collection partners only']};
++  }
+   const spatial=item.spatial || item.spatialEvidence;
+   const itemText=[item.name,item.description].filter(Boolean).join('\n');
+   const onlineText=[itemText,row.text].filter(Boolean).join('\n');
+diff --git a/src/services/firestoreService.ts b/src/services/firestoreService.ts
+index 02b4956..fa4458e 100644
+--- a/src/services/firestoreService.ts
++++ b/src/services/firestoreService.ts
+@@ -98,6 +98,7 @@ import {
+ import { withFamilyFriendlyScore, mergeFamilyAudienceEvidence } from '../utils/familyFriendlyScoring.js';
+ import {
+   hasConflictingExplicitSlotOrdinals,
++  hasConflictingProgrammeSlot,
+   hasConflictingLabeledSlotTimeEvidence,
+   hasMatchingExplicitSlotIdentity,
+   hasMatchingLabeledSlotTimeEvidence,
+@@ -4140,6 +4141,7 @@ export function shouldSkipSiblingUniqueIdDuplicateCheck(
+   incoming: EventData,
+   existing: EventData
+ ): boolean {
++  if (hasConflictingProgrammeSlot(incoming, existing)) return true;
+   const incomingUniqueId = String(incoming.uniqueId || '').trim();
+   const existingUniqueId = String(existing.uniqueId || '').trim();
+   if (!incomingUniqueId || !existingUniqueId || incomingUniqueId === existingUniqueId) {
+@@ -4491,6 +4493,7 @@ export async function checkDuplicate(
+   const matchingCurrentRunSlot = currentRunEntries.find((existing) =>
+     String(existing.venueId || '').trim() === String(venueId || '').trim() &&
+     existing.startDate === event.startDate &&
++    !hasConflictingProgrammeSlot(event, existing) &&
+     (hasMatchingExplicitSlotIdentity(event, existing) ||
+       hasMatchingLabeledSlotTimeEvidence(event, existing))
+   );
+@@ -4499,6 +4502,7 @@ export async function checkDuplicate(
+   }
+   for (const existing of currentRunEntries) {
+     const sameVenue = String(existing.venueId || '').trim() === String(venueId || '').trim();
++    if (hasConflictingProgrammeSlot(event, existing)) continue;
+     if (hasConflictingExplicitSlotOrdinals(event, existing)) continue;
+     if (hasConflictingLabeledSlotTimeEvidence(event, existing)) continue;
+     if (sameVenue && shouldSkipSiblingUniqueIdDuplicateCheck(event, existing)) {
+@@ -4555,6 +4559,7 @@ export async function checkDuplicate(
+ 
+   const matchingStoredSlot = existingEvents.find((existing) =>
+     existing.startDate === event.startDate &&
++    !hasConflictingProgrammeSlot(event, existing) &&
+     (hasMatchingExplicitSlotIdentity(event, existing) ||
+       hasMatchingLabeledSlotTimeEvidence(event, existing))
+   );
+@@ -4563,6 +4568,7 @@ export async function checkDuplicate(
+   }
+ 
+   for (const existing of existingEvents) {
++    if (hasConflictingProgrammeSlot(event, existing)) continue;
+     if (hasConflictingExplicitSlotOrdinals(event, existing)) continue;
+     if (hasConflictingLabeledSlotTimeEvidence(event, existing)) continue;
+     if (shouldSkipSiblingUniqueIdDuplicateCheck(event, existing)) {
+diff --git a/src/services/reviewedOccurrenceCopies.oct17.test.ts b/src/services/reviewedOccurrenceCopies.oct17.test.ts
+new file mode 100644
+index 0000000..a4e5fa5
+--- /dev/null
++++ b/src/services/reviewedOccurrenceCopies.oct17.test.ts
+@@ -0,0 +1,28 @@
++import assert from 'node:assert/strict';
++import {test} from 'node:test';
++import {EventData} from '../types/index.js';
++import {classifyReviewedOccurrenceConstraint, ReviewedOccurrenceConstraint} from './reviewedOccurrenceConstraints.js';
++import {checkDuplicate} from './firestoreService.js';
++
++// Synthetic source IDs: the live identities belong only in the private repair
++// manifest. The same existing reviewed-retirement contract covers both cases.
++for (const [title,canonicalVenue,retiredVenue,date,start] of [
++  ['NHL Game on the Screens','food_hall','food_hall','2026-10-17','17:00'],
++  ['THE COMEDY CAVE','comedy_room','factory','2026-11-07','20:00'],
++]) test(`reviewed ${title} copy is held without blanket same-time or venue-alias matching`, async()=>{
++  const rule:ReviewedOccurrenceConstraint={sourceUniqueId:'1111111111111111',uniqueIds:['1111111111111111_old'],
++    sourceUrls:['https://www.facebook.com/100000000000000/posts/1111111111111111'],
++    action:'retired_occurrence',reviewId:'oct17-reviewed-copy-fixture',startDate:date,startTime:start,
++    eventNames:[title],canonicalEventPath:`venues/${canonicalVenue}/events/keeper`};
++  const venue={id:retiredVenue,reviewedOccurrenceConstraints:[rule]};
++  const event={venueId:retiredVenue,uniqueId:'1111111111111111_regenerated',name:title,startDate:date,startTime:start} as EventData;
++  assert.equal(classifyReviewedOccurrenceConstraint(event,venue),'hold');
++  assert.deepEqual(await checkDuplicate(event,retiredVenue,[],venue as any),{isDuplicate:true});
++  for (const patch of [
++    {name:'Chris Burke'}, {name:'A separate comedy show'}, {startDate:'2026-11-08'},
++    {startTime:'21:00'}, {uniqueId:'2222222222222222_new'}, {venueId:'other_venue'},
++  ]) assert.equal(classifyReviewedOccurrenceConstraint({...event,...patch},venue),'none');
++  const before=JSON.stringify(venue);
++  classifyReviewedOccurrenceConstraint(event,venue);
++  assert.equal(JSON.stringify(venue),before);
++});
+diff --git a/src/services/sourceLocationRole.ts b/src/services/sourceLocationRole.ts
+index 3bf7be2..34d61a4 100644
+--- a/src/services/sourceLocationRole.ts
++++ b/src/services/sourceLocationRole.ts
+@@ -1,5 +1,5 @@
+ /** An original-business review carries its own source identity. Its sharing
+  * page's address must never be hydrated back from the outer spreadsheet row. */
+ export function allowsPublisherAddressHydration(sample: {sourceLocationRole?: string}): boolean {
+-  return sample.sourceLocationRole !== 'shared_original_business';
++  return !['shared_original_business', 'collection_partner_only'].includes(sample.sourceLocationRole || '');
+ }
+diff --git a/src/utils/eventSlotIdentity.oct17.test.ts b/src/utils/eventSlotIdentity.oct17.test.ts
+new file mode 100644
+index 0000000..858a560
+--- /dev/null
++++ b/src/utils/eventSlotIdentity.oct17.test.ts
+@@ -0,0 +1,71 @@
++import assert from 'node:assert/strict';
++import {test} from 'node:test';
++import {EventData} from '../types/index.js';
++import {hasConflictingProgrammeSlot, hasMatchingLabeledSlotTimeEvidence} from './eventSlotIdentity.js';
++import {isDuplicateEntry, isHighConfidenceSameOccurrenceDuplicate} from './similarity.js';
++import {shouldSkipSiblingUniqueIdDuplicateCheck} from '../services/firestoreService.js';
++import {isExactUniqueIdDuplicateCompatible} from '../services/exactUniqueIdCompatibility.js';
++import {previewDuplicateMerge} from '../processing/rowProcessor.js';
++
++const skating = (name: string, endTime: string): EventData => ({
++  uniqueId: '1733964295400114_1', venueId: 'fixture', establishment: 'Cavendish Farms Community Events Centre',
++  name, eventName: name, startDate: '2026-10-17', endDate: '2026-10-17',
++  startTime: name.includes('Can') ? '12:15' : '13:15', endTime,
++  category: 'Sports', recurringPattern: 'none', isRecurring: 'No',
++} as EventData);
++const merge = (existingEvent: EventData, incomingEvent: EventData) => previewDuplicateMerge({
++  existingEvent, incomingEvent,
++  venue:{id:'fixture',name:existingEvent.establishment,normalizedName:'fixture',address:'fixture',latitude:0,longitude:0},
++});
++
++test('Oct17 distinct overlapping skating programmes survive every duplicate entry path', () => {
++  const pairs = [
++    [skating('Figure Skating — PreCan', '12:45'), skating('Figure Skating — CanSkate', '13:00')],
++    [skating('Figure Skating — Stage 5-6', '14:00'), skating('Figure Skating — Star 1-2', '14:15')],
++  ];
++  for (const [a,b] of pairs) for (const [left,right] of [[a,b],[b,a]]) {
++    assert.equal(isDuplicateEntry(left,right), false);
++    assert.equal(isHighConfidenceSameOccurrenceDuplicate(left,right), false);
++    assert.equal(hasConflictingProgrammeSlot(left,right), true);
++    assert.equal(isExactUniqueIdDuplicateCompatible(left,right), false);
++    assert.deepEqual(merge(left,right).changedFields, []);
++    assert.equal(shouldSkipSiblingUniqueIdDuplicateCheck(left,{...right,uniqueId:'1733964295400114_2'}),true);
++  }
++});
++
++const art = (group: number, startTime: string, endTime: string, evidence: string): EventData => ({
++  uniqueId: `1586777749908244_${group}`, venueId: 'fixture', establishment: 'Eptek Art & Culture Centre',
++  name: `Let's Get Creative Art Club @ Eptek – Fall 2026 (Group ${group})`,
++  startDate: '2026-10-18', endDate: '2026-10-18', startTime, endTime,
++  category: 'Workshops & Classes', recurringPattern:'weekly_sunday',isRecurring:'Yes',totalOccurrences:8,
++  timeFlags:{start:{source:'explicit',evidence},end:{source:'explicit',evidence:endTime==='13:45'?'1:45':'3:30'}},
++} as EventData);
++
++test('Oct17 Eptek generic cross-post slots use both endpoints of range-only 12-hour evidence', () => {
++  const groups = [art(1,'12:30','13:45','12:30 – 1:45'),art(2,'14:15','15:30','2:15 – 3:30')];
++  for (const [index,group] of groups.entries()) {
++    const evidence=index===0?'12:30 - 1:45':'2:15 - 3:30';
++    const incoming={...group,uniqueId:'1629374475648571_1',name:'Let’s Get Creative Kid’s Art Club',
++      timeFlags:{start:{source:'explicit',evidence},end:{source:'explicit',evidence}}} as EventData;
++    const wrong=groups[1-index];
++    assert.equal(hasMatchingLabeledSlotTimeEvidence(incoming,group),true);
++    assert.equal(isDuplicateEntry(incoming,group),true);
++    for (const [left,right] of [[incoming,wrong],[wrong,incoming]]) {
++      assert.equal(isDuplicateEntry(left,right),false);
++      assert.equal(isHighConfidenceSameOccurrenceDuplicate(left,right),false);
++      assert.equal(isExactUniqueIdDuplicateCompatible(left,right),false);
++      assert.deepEqual(merge(left,right).changedFields,[]);
++    }
++    assert.equal(hasMatchingLabeledSlotTimeEvidence({...incoming,timeFlags:undefined},group),false);
++  }
++});
++
++test('genuine programme cross-posts and overlapping corrected clocks remain mergeable', () => {
++  const a=skating('Figure Skating — CanSkate','13:00');
++  const crossPost={...a,uniqueId:'another_1'};
++  assert.equal(isDuplicateEntry(a,crossPost),true);
++  assert.equal(isHighConfidenceSameOccurrenceDuplicate(a,{...a}),true);
++  const corrected={...a,startTime:'12:20'};
++  assert.equal(isDuplicateEntry(a,corrected),true);
++  assert.equal(shouldSkipSiblingUniqueIdDuplicateCheck(a,{...corrected,uniqueId:'1733964295400114_2'}),false);
++});
+diff --git a/src/utils/eventSlotIdentity.ts b/src/utils/eventSlotIdentity.ts
+index 985c60c..0c9a208 100644
+--- a/src/utils/eventSlotIdentity.ts
++++ b/src/utils/eventSlotIdentity.ts
+@@ -28,6 +28,21 @@ function title(event: SlotEvent): string {
+   return String(event.eventName || event.name || '');
+ }
+ 
++/** Programme names are source slot identity even when their clocks overlap. */
++export function hasConflictingSkatingProgramme(left: SlotEvent, right: SlotEvent): boolean {
++  const programme = (event: SlotEvent): string => {
++    const value = title(event).toLowerCase().replace(/[–—]/g, '-');
++    const named = value.match(/\b(pre\s*can(?:skate)?|can\s*skate)\b/);
++    if (named) return named[1].replace(/\s/g, '').replace(/^precanskate$/, 'precan');
++    // Stage 5-6 and STAR 1-2 are different teaching programmes, not typos.
++    if (!/\b(?:figure\s+skating|skate|skating)\b/.test(value)) return '';
++    const level = value.match(/\b(stage|star)\s*(\d+(?:\s*-\s*\d+|\s*\+)?)/);
++    return level ? `${level[1]}:${level[2].replace(/\s/g, '')}` : '';
++  };
++  const a = programme(left), b = programme(right);
++  return Boolean(a && b && a !== b);
++}
++
+ /** Separately printed public-access slots are not a fuzzy three-hour duplicate. */
+ export function hasConflictingBookableActivitySlot(left: SlotEvent, right: SlotEvent): boolean {
+   const activity = /\b(?:lane swim|public swim|open swim|waterslide|bookable ice|ice time|public skat(?:e|ing)|open skat(?:e|ing))\b/i;
+@@ -104,11 +119,17 @@ function printedLabeledSlotRange(event: SlotEvent): [string, string] | null {
+   const start = timeFlag(event, 'start');
+   const end = timeFlag(event, 'end');
+   if (start.source !== 'explicit' || end.source !== 'explicit') return null;
+-  const evidence = (start.evidence || end.evidence).replace(/[–—]/g, '-').toLowerCase();
++  const evidence = `${start.evidence} ${end.evidence}`.replace(/[–—]/g, '-').toLowerCase();
+   const match = evidence.match(/\b(\d{1,2}:\d{2})\s*(am|pm)?\s*(?:-|to)\s*(\d{1,2}:\d{2})\s*(am|pm)?\b/);
+   if (!match) return null;
+-  const startTime = clock(match[1], match[2] || match[4] || '');
+-  const endTime = clock(match[3], match[4] || match[2] || '');
++  // Without meridiems, use only clocks corroborated by both stored endpoints.
++  // In particular 12:30-1:45 means 12:30-13:45 in the captured Eptek slot;
++  // parsing it as 12:30-01:45 silently disabled the conflict guard.
++  const explicitMeridiem = Boolean(match[2] || match[4]);
++  const startTime = explicitMeridiem ? clock(match[1], match[2] || match[4]) :
++    incomingClockSupported(event, 'start') ? clock(String(event.startTime || ''), '') : '';
++  const endTime = explicitMeridiem ? clock(match[3], match[4] || match[2]) :
++    incomingClockSupported(event, 'end') ? clock(String(event.endTime || ''), '') : '';
+   if (!startTime || !endTime) return null;
+   const [startHour, startMinute] = startTime.split(':').map(Number);
+   const [endHour, endMinute] = endTime.split(':').map(Number);
+@@ -120,7 +141,11 @@ function incomingClockSupported(event: SlotEvent, side: 'start' | 'end'): boolea
+   const flag = timeFlag(event, side);
+   const value = String(side === 'start' ? event.startTime || '' : event.endTime || '');
+   if (flag.source !== 'explicit' || !/^\d{1,2}:\d{2}$/.test(value)) return false;
+-  const token = flag.evidence.toLowerCase().match(/\b(\d{1,2}:\d{2})\s*(am|pm)?\b/);
++  const tokens = [...flag.evidence.toLowerCase().matchAll(/\b(\d{1,2}:\d{2})\s*(am|pm)?\b/g)];
++  // Both flags may contain the whole range. End evidence then belongs to the
++  // second clock, never the first; a separate single-clock flag still works.
++  if (tokens.length > 2) return false;
++  const token = side === 'end' ? tokens.at(-1) : tokens[0];
+   if (!token) return false;
+   const sourceTime = clock(token[1], token[2] || '');
+   if (!sourceTime) return false;
+@@ -145,5 +170,14 @@ export function hasMatchingLabeledSlotTimeEvidence(incoming: SlotEvent, existing
+ }
+ 
+ export function hasConflictingLabeledSlotTimeEvidence(incoming: SlotEvent, existing: SlotEvent): boolean {
+-  return labeledSlotEvidenceComparison(incoming, existing) === false;
++  return labeledSlotEvidenceComparison(incoming, existing) === false ||
++    labeledSlotEvidenceComparison(existing, incoming) === false;
++}
++
++/** Shared defensive guard for fuzzy, exact-ID, recurring-family and merge
++ * callers. Slot identity must be checked before any broader OR fallback. */
++export function hasConflictingProgrammeSlot(left: SlotEvent, right: SlotEvent): boolean {
++  return hasConflictingSkatingProgramme(left, right) ||
++    hasConflictingExplicitSlotOrdinals(left, right) ||
++    hasConflictingLabeledSlotTimeEvidence(left, right);
+ }
+diff --git a/src/utils/familyFriendlyScoring.oct17.test.ts b/src/utils/familyFriendlyScoring.oct17.test.ts
+new file mode 100644
+index 0000000..01da6ef
+--- /dev/null
++++ b/src/utils/familyFriendlyScoring.oct17.test.ts
+@@ -0,0 +1,73 @@
++import assert from 'node:assert/strict';
++import test from 'node:test';
++import {bindFamilyAudienceEvidence, scoreFamilyFriendly} from './familyFriendlyScoring.js';
++
++test('slash skate wording and friends-and-family invitation express family attendance', () => {
++  for (const input of [
++    {name:'Family/Public Skate — Skate', description:'Activity: Family/Public Skate. Group/opponent: Skate.'},
++    {name:'Public / Family Swim'},
++    {name:'Artisan Market', description:'Bring your friends and family, enjoy the atmosphere, support small businesses.'},
++  ]) {
++    const result = scoreFamilyFriendly(input);
++    assert.equal(result.familyFriendlyScore, 85);
++    assert.deepEqual(result.familyFriendlyReasons, ['explicit_family_audience']);
++  }
++});
++
++test('children’s programme accepts colon and adjacent yr notation without broad numeric matches', () => {
++  for (const description of ['Ages: 4-6yr. Day: Saturdays.', 'Ages:4–6yrs.', 'Ages 4-6 yr.', 'Ages: 4 to 6 years old.']) {
++    const result = scoreFamilyFriendly({name:'My First Sports Program', description});
++    assert.equal(result.familyFriendlyScore, 80, description);
++    assert.deepEqual(result.familyFriendlyReasons, ['child_age_range']);
++  }
++  for (const description of ['Ages: 40-60yr.', 'Ages: 19-21yr.', 'Size: 4-6yr.', 'Ages: 4-60yr.']) {
++    assert.equal(scoreFamilyFriendly({name:'Activity', description}).familyFriendlyScore, 15, description);
++  }
++});
++
++test('campaign collection and distribution identify beneficiaries without proving child participation', () => {
++  for (const description of [
++    "Coats for Kids Summerside's annual free winter clothing event. Clothing collected at the listed local collection spots will go to this event.",
++    'Free winter clothing distribution for recipients.',
++    'Donate coats for children ages 6–12 at the collection depot.',
++    'Proceeds support classes for kids. Donations benefit children’s workshops.',
++  ]) {
++    const result = scoreFamilyFriendly({name:'Coats for Kids Summerside Annual Free Winter Clothing Event', description});
++    assert.equal(result.familyFriendlyScore, 15);
++    assert(result.familyFriendlyReasons.includes('beneficiary_not_audience'));
++    assert(!result.familyFriendlyReasons.includes('child_focused_program'));
++  }
++});
++
++test('independent child class participation survives beneficiary campaign context and source binding', () => {
++  const event = {name:'Coats for Kids Community Workshop'};
++  const description = 'A class for kids. Ages: 4-6yr. Proceeds support the clothing campaign.';
++  assert(scoreFamilyFriendly({...event, description}).familyFriendlyScore >= 60);
++  const familyAudienceEvidence = bindFamilyAudienceEvidence(event, `${event.name}. ${description}`, 'validated_item', 'exact-child-workshop');
++  assert(scoreFamilyFriendly({...event, familyAudienceEvidence}).familyFriendlyScore >= 60);
++  assert.equal(scoreFamilyFriendly({...event, name:'Separate Adult Workshop', familyAudienceEvidence}).familyFriendlyScore, 0);
++});
++
++test('new phrases transfer only through bound item evidence, including a truncated programme description', () => {
++  const event = {name:'My First Sports Program', startDate:'2026-10-24', venue:'Civic Centre'};
++  const familyAudienceEvidence = bindFamilyAudienceEvidence(event, 'My First Sports Program. Ages: 4-6yr.', 'validated_item', 'exact-sports-source');
++  assert.equal(scoreFamilyFriendly({...event, description:'Learn fundamental movement skills.', familyAudienceEvidence}).familyFriendlyScore, 80);
++  assert.equal(scoreFamilyFriendly({...event, name:'Adult Fitness', familyAudienceEvidence}).familyFriendlyScore, 15);
++  assert.equal(scoreFamilyFriendly({...event, contextText:'Another activity. Ages: 4-6yr.'}).familyFriendlyScore, 15);
++});
++
++test('mature restrictions override new phrases while accompanying guardians do not', () => {
++  for (const description of ['Bring your friends and family. 19+ event.', 'Family/Public Skate. Mature audiences only.']) {
++    assert.equal(scoreFamilyFriendly({name:'Benefit Event', description}).familyFriendlyScore, 0);
++  }
++  assert.equal(scoreFamilyFriendly({name:'My First Sports Program', description:'Ages: 4-6yr. A parent or guardian (18+) must accompany each child.'}).familyFriendlyScore, 80);
++});
++
++test('performer, food and family-brand words remain insufficient attendance evidence', () => {
++  for (const input of [
++    {name:'Teen Burger Donation Day'},
++    {name:'MacMaster Leahy Family', description:'Seven children perform on stage.'},
++    {name:'Family / Friends Band', description:'Live music.'},
++    {name:'Family Meal Deal', description:'Burger and fries for $5.'},
++  ]) assert.equal(scoreFamilyFriendly(input).familyFriendlyScore, 15);
++});
+diff --git a/src/utils/familyFriendlyScoring.ts b/src/utils/familyFriendlyScoring.ts
+index 7c3cead..cbfce27 100644
+--- a/src/utils/familyFriendlyScoring.ts
++++ b/src/utils/familyFriendlyScoring.ts
+@@ -4,7 +4,7 @@ import {
+   validFamilyAudienceEvidence,
+ } from '../services/familyAudienceEvidence.js';
+ 
+-export const FAMILY_FRIENDLY_SCORING_VERSION = 'family-friendly-v5';
++export const FAMILY_FRIENDLY_SCORING_VERSION = 'family-friendly-v6';
+ export const FAMILY_FRIENDLY_LIKELY_THRESHOLD = 60;
+ 
+ export type FamilyFriendlyLevel = 'unlikely' | 'possible' | 'likely' | 'high';
+@@ -137,19 +137,31 @@ export function scoreFamilyFriendly(
+   const hasExplicitFamilyAudience =
+     /\b(?:family[- ]friendly|family day|family fun|families welcome|for (?:the )?(?:whole )?family|fun for (?:the )?(?:whole )?family|family event|family activity|family activities)\b/.test(text) ||
+     /\b(?:familial|familiale|familiaux|familiales|pour les familles|activites familiales|journee familiale|en famille)\b/.test(text) ||
+-    /\b(?:family (?:movie|swim|skate)|bring (?:the|your|all the) family|(?:designed|intended|suitable) for families)\b/.test(text) || hasScoped('explicit_family_audience');
++    /\b(?:family (?:movie|swim|skate)|bring (?:the|your|all the) (?:friends (?:and|&) )?family|(?:designed|intended|suitable) for families)\b/.test(text) ||
++    /\b(?:family\s*\/\s*public|public\s*\/\s*family)\s+(?:skate|swim)\b/.test(text) || hasScoped('explicit_family_audience');
+   const hasExplicitAllAges =
+     /\b(?:all[- ]ages|all ages welcome|suitable for all ages|open to all ages)\b/.test(text) ||
+     /\b(?:tous les ages|tout age|pour tous les ages)\b/.test(text) || hasScoped('explicit_all_ages');
+   const hasChildAgeRange =
+-    /\bages?\s*(?:0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17)\s*(?:-|to|through|thru|–|—)\s*(?:1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17)\b/.test(text) ||
++    /\bages?\s*:?\s*(?:[0-9]|1[0-7])\s*(?:-|to|through|thru|–|—)\s*(?:[0-9]|1[0-7])(?:\s*(?:yrs?|years?(?: old)?|yo))?\b/.test(text) ||
+     /\b(?:children|kids?|youths?|teens?|toddlers?|babies)\s+(?:ages?|aged)\s+(?:\d{1,2})\b/.test(text) ||
+     /\b(?:ages?|age)\s+(?:0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17)\s*(?:and under|or younger)\b/.test(text) ||
+     /\b(?:ages?|age)\s+de\s+\d{1,2}\s+a\s+\d{1,2}\b/.test(text) ||
+     /\bages?\s*(?:[1-9]|1[0-7])\s*[-–—]\s*(?:[1-9]|1[0-8])(?:\s*(?:yo|years? old))?\b/.test(text) ||
+     (/\b(?:skating|powerskating|curling|hockey|soccer|sports?)\b/.test(text) && /\bu(?:[5-9]|1[0-7])\b/.test(text)) || hasScoped('child_age_range');
+-  const isBeneficiary = /\b(?:donat(?:e|ion|ions|ing)|collection depot|fundrais(?:er|ing)|charity)\b/.test(text) &&
+-    /\b(?:coats? for kids|children's coats?|beneficiar|proceeds (?:for|to)|funds for)\b/.test(text);
++  const isBeneficiary = /\bcoats? for kids\b/.test(text) || hasScoped('beneficiary_not_audience') ||
++    (/\b(?:donat(?:e|ion|ions|ing)|collect(?:ed|ion)?|distribut(?:e|ion)|fundrais(?:er|ing)|charity)\b/.test(text) &&
++      /\b(?:children's coats?|beneficiar|proceeds (?:for|to)|funds for)\b/.test(text));
++  // Campaign names identify recipients, not a children's activity. Retain
++  // independently stated participation (e.g. a class for kids) at a fundraiser.
++  const participationText = directText.replace(/\bcoats? for kids\b/g, 'clothing campaign')
++    .replace(/\b(?:proceeds|funds|donations?|money)\s+(?:will|go|are|raised|support|benefit|fund|for|to|towards?)\b[^.!?;]*/g, '')
++    .replace(/\bfundrais(?:er|ing) for\b[^.!?;]*/g, '');
++  const hasIndependentChildParticipation =
++    /\b(?:class(?:es)?|workshops?|camps?|programmes?|programs?|activities|lessons?) for (?:kids|children)\b/.test(participationText) ||
++    /\b(?:kids'?|children's) (?:class(?:es)?|workshops?|camps?|programmes?|programs?|activities|lessons?)\b/.test(participationText) ||
++    (hasScoped('beneficiary_not_audience') && hasScoped('child_focused_program'));
++  const beneficiaryOnly = isBeneficiary && !hasIndependentChildParticipation;
+   const hasChildFocusedProgram =
+     /\b(?:for kids|for children|kids?'?(?:\s+\w+){0,2}\s+(?:club|camp|camps|program|programme|activity|activities|workshop|class)|children'?s (?:club|camp|program|programme|activity|activities|workshop|class|storytime)|toddler (?:time|group|program|programme|activity|class|music)|baby (?:time|group|program|programme|activity)|junior (?:club|camp|program|activity))\b/.test(directText) ||
+     /\b(?:club de lecture d'ete|pour les enfants|activites? pour enfants|camp pour enfants|heure du conte)\b/.test(directText) ||
+@@ -178,15 +190,15 @@ export function scoreFamilyFriendly(
+     score += 70;
+     addReason(reasons, 'explicit_all_ages');
+   }
+-  if (hasChildAgeRange && !isBeneficiary) {
++  if (hasChildAgeRange && !beneficiaryOnly) {
+     score += 65;
+     addReason(reasons, 'child_age_range');
+   }
+-  if (hasChildFocusedProgram && !isBeneficiary) {
++  if (hasChildFocusedProgram && !beneficiaryOnly) {
+     score += 55;
+     addReason(reasons, 'child_focused_program');
+   }
+-  if (hasChildFocusedTitle && !isBeneficiary) {
++  if (hasChildFocusedTitle && !beneficiaryOnly) {
+     score += 55;
+     addReason(reasons, 'child_focused_title');
+   }
+diff --git a/src/utils/occurrenceMergeGuard.ts b/src/utils/occurrenceMergeGuard.ts
+index 47c4f1c..74539e3 100644
+--- a/src/utils/occurrenceMergeGuard.ts
++++ b/src/utils/occurrenceMergeGuard.ts
+@@ -1,4 +1,4 @@
+-import { hasConflictingBookableActivitySlot } from './eventSlotIdentity.js';
++import { hasConflictingBookableActivitySlot, hasConflictingProgrammeSlot } from './eventSlotIdentity.js';
+ import {hasConflictingStandingKaraokeOccurrence} from '../services/standingKaraokeOccurrence.js';
+ import {EventData} from '../types/index.js';
+ import {hasCrossSourceRecurringLifecycleConflict} from './recurringSeriesLifecycle.js';
+@@ -59,7 +59,7 @@ export function hasConflictingBoundedClassCycle(a: Occurrence, b: Occurrence): b
+ }
+ 
+ export function hasConflictingOccurrenceIdentity(a: Occurrence, b: Occurrence): boolean {
+-  return hasConflictingCinemaClock(a,b) || hasConflictingBoundedClassCycle(a,b) || hasConflictingBookableActivitySlot(a,b) ||
++  return hasConflictingProgrammeSlot(a,b) || hasConflictingCinemaClock(a,b) || hasConflictingBoundedClassCycle(a,b) || hasConflictingBookableActivitySlot(a,b) ||
+     hasCrossSourceRecurringLifecycleConflict(a as Partial<EventData>, b as Partial<EventData>) ||
+     hasConflictingStandingKaraokeOccurrence(a as Partial<EventData>, b as Partial<EventData>);
+ }

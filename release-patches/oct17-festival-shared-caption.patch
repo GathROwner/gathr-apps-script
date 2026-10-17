@@ -1,0 +1,261 @@
+diff --git a/scripts/festival-evidence-extractor.mjs b/scripts/festival-evidence-extractor.mjs
+index 2d45973..f51aa91 100644
+--- a/scripts/festival-evidence-extractor.mjs
++++ b/scripts/festival-evidence-extractor.mjs
+@@ -2,6 +2,7 @@
+ import {createHash} from 'node:crypto';
+ import {expandFestivalCaptionDateScope} from '../lib/services/festivalCaptionScope.js';
+ import {expandFestivalSourceScope,validFestivalSourceScope,bindFestivalProposedRow} from '../lib/services/festivalSourceScope.js';
++import {bindFestivalSharedCaptionScope,validFestivalSharedCaptionScope} from '../lib/services/festivalSharedCaptionScope.js';
+ const obj=properties=>({type:'object',properties,required:Object.keys(properties),additionalProperties:false});
+ const str={type:'string'};
+ const schema=obj({complete:{type:'boolean'},limitations:{type:'array',items:str},documents:{type:'array',items:obj({index:{type:'integer'},text:str})},activities:{type:'array',items:obj({
+@@ -36,9 +37,16 @@ export function validateFestivalEvidenceCapture(value,{caption,imageUrls}){
+  const text=value.documents.map(x=>x.text).join('\n');
+  value={...value,activities:value.activities.map(item=>{
+   item={...item};if(item.captureHoldReason==='cross_card_excerpt')delete item.captureHoldReason;
++  // Preserve a literal multiline heading; whitespace layout is evidence too.
++  if(!item.eventText && typeof item.name==='string' && item.name.trim()){
++   const escaped=item.name.trim().split(/\s+/).map(x=>x.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('\\s+');
++   const matches=[...item.scopeText.matchAll(new RegExp(escaped,'g'))];
++   if(matches.length===1)item.eventText=matches[0][0];
++  }
+   const old=expandCaptionDateScope(item,value.documents);
+   let expanded=old.captionScope?old:expandFestivalSourceScope(item,value.documents);
+   if(!expanded.captionScope&&!expanded.sourceScope)expanded=bindFestivalProposedRow(item,value.documents);
++  if(!expanded.captionScope&&!expanded.sourceScope)expanded=bindFestivalSharedCaptionScope(expanded,value.documents);
+   const row=expanded.activityRowText||expanded.scopeText;
+   // A model may quote the whole time/venue row as eventText. Select only the
+   // literal printed heading when its supplied name actually occurs in that row.
+@@ -54,7 +62,9 @@ export function validateFestivalEvidenceCapture(value,{caption,imageUrls}){
+   }
+   if(!['eventText','dateText','timeText','venueText'].every(k=>typeof item[k]==='string'))throw Error('invalid_excerpt');
+   // Empty excerpts remain reportable gaps; nonempty excerpts must be from this row.
+-  if(['eventText','dateText','timeText','venueText'].some(k=>item[k]&&!item.scopeText.includes(item[k])))item.captureHoldReason='cross_card_excerpt';
++  if(item.sharedCaptionScope){
++   if(!validFestivalSharedCaptionScope(item,value.documents))item.captureHoldReason='cross_card_excerpt';
++  }else if(['eventText','dateText','timeText','venueText'].some(k=>item[k]&&!item.scopeText.includes(item[k])))item.captureHoldReason='cross_card_excerpt';
+   if(item.sourceScope){
+    if(!item.activityRowText||!item.activityRowText.includes(item.eventText)||!validFestivalSourceScope({scope:item.sourceScope,documents:value.documents,scopeText:item.scopeText,rowText:item.activityRowText,dateText:item.dateText,timeText:item.timeText,venueText:item.venueText}))item.captureHoldReason='cross_card_excerpt';
+   }else if(item.activityRowText&&['eventText','timeText','venueText'].some(k=>item[k]&&!item.activityRowText.includes(item[k])))item.captureHoldReason='cross_card_excerpt';
+diff --git a/scripts/festival-shared-caption.test.mjs b/scripts/festival-shared-caption.test.mjs
+new file mode 100644
+index 0000000..43e1466
+--- /dev/null
++++ b/scripts/festival-shared-caption.test.mjs
+@@ -0,0 +1,24 @@
++import test from 'node:test';import assert from 'node:assert/strict';
++import {validateFestivalEvidenceCapture} from './festival-evidence-extractor.mjs';
++const caption='Harvest Fest is TOMORROW!\nRain or shine, join us at Founders’!\nSaturday, October 17 | 3–8 PM';
++const row='PHOTO BOOTH\n3-7 PM';
++const input={caption,imageUrls:['https://example.test/card']};
++const fixture=()=>({complete:true,limitations:[],documents:[{index:-1,text:caption},{index:0,text:row}],activities:[{
++ kind:'festival_activity',sourceIndices:[-1,0],scopeText:row,membershipText:'Harvest Fest is TOMORROW!',festivalNameText:'Harvest Fest',yearText:'',organizerText:'',ticketUrl:'',
++ name:'PHOTO BOOTH',eventText:'PHOTO BOOTH',dateText:'Saturday, October 17',timeText:'3-7 PM',venueText:'Founders’',modelVerification:{accepted:true,reason:'Original caption and card'},verification:{accepted:false,reason:'cross_card_excerpt'}}]});
++test('literal shared caption venue/date bind without changing the row or inventing an edition',()=>{
++ const x=fixture(),result=validateFestivalEvidenceCapture(x,input),a=result.activities[0];
++ assert(a.sharedCaptionScope);assert(a.verification.accepted);assert.equal(a.scopeText,row);assert.equal(a.yearText,'');assert.equal(x.activities[0].verification.accepted,false);
++});
++test('ambiguous dates/venues, borrowed clocks and unscoped images remain held',()=>{
++ for(const suffix of ['\nSunday, October 18','\nAlso at Other Hall!','\nLast year we performed at Founders’']){
++  const x=fixture();x.documents[0].text+=suffix;assert(!validateFestivalEvidenceCapture(x,{...input,caption:x.documents[0].text}).activities[0].verification.accepted);
++ }
++ const x=fixture();x.activities[0].timeText='6-8 PM';assert(!validateFestivalEvidenceCapture(x,input).activities[0].verification.accepted);
++ const other=fixture();other.documents[1].text+='\nLocation: Other Hall';other.activities[0].scopeText=other.documents[1].text;
++ assert(!validateFestivalEvidenceCapture(other,input).activities[0].verification.accepted);
++ const y=fixture();y.activities[0].sourceIndices=[0];assert.throws(()=>validateFestivalEvidenceCapture(y,input),/invented_activity_scope/);
++});
++test('an independent negative verification is never turned into a positive',()=>{
++ const x=fixture();x.activities[0].modelVerification.accepted=false;assert(!validateFestivalEvidenceCapture(x,input).activities[0].verification.accepted);
++});
+diff --git a/src/services/festivalLinkWorker.ts b/src/services/festivalLinkWorker.ts
+index 471a185..b0707ed 100644
+--- a/src/services/festivalLinkWorker.ts
++++ b/src/services/festivalLinkWorker.ts
+@@ -88,7 +88,7 @@ export async function runFestivalLinkWorker(db:admin.firestore.Firestore,options
+    items.push({r,source,caption,imageUrls,key,capturePolicy,cache,decision,nonmember,decisionData,captureData:options.localCaptures?.get(key)||cache.data()});
+   }
+  }
+- const jobRef=db.doc(`festival_link_jobs/${festivalShadowJobId(fileId)}`),fingerprint=festivalShadowFingerprint({fileId,mode:options.mode,policy:'publication-worker-v1',editions:registered.map(r=>({edition:r.edition,umbrella:pin(r.umbrella),review:pin(r.review)})),sources:[...latest.values()].map(pin).sort((a,b)=>a.path.localeCompare(b.path)),children:children.docs.map(pin).sort((a,b)=>a.path.localeCompare(b.path)),venues:venueDocs.filter(d=>d.exists).map(pin),captures:cacheSnapshots.map(d=>({path:d.ref.path,version:d.exists?pin(d).version:null}))});
++ const jobRef=db.doc(`festival_link_jobs/${festivalShadowJobId(fileId)}`),fingerprint=festivalShadowFingerprint({fileId,mode:options.mode,policy:'publication-worker-shared-caption-v2',editions:registered.map(r=>({edition:r.edition,umbrella:pin(r.umbrella),review:pin(r.review)})),sources:[...latest.values()].map(pin).sort((a,b)=>a.path.localeCompare(b.path)),children:children.docs.map(pin).sort((a,b)=>a.path.localeCompare(b.path)),venues:venueDocs.filter(d=>d.exists).map(pin),captures:cacheSnapshots.map(d=>({path:d.ref.path,version:d.exists?pin(d).version:null}))});
+  const claimed=options.dryRun?claimFestivalShadowJob(undefined,{fileId,inputFingerprint:fingerprint,workerToken:randomUUID(),nowMs:Date.now(),leaseMs:600000}):await db.runTransaction(async tx=>{if(active((await tx.get(db.collection('processing_locks'))).docs))return{decision:'busy'} as const;const old=await tx.get(jobRef);if(old.get('status')==='held'&&old.get('inputFingerprint')===fingerprint)return{decision:'already_held'} as const;const claim=claimFestivalShadowJob(old.data() as FestivalShadowJob|undefined,{fileId,inputFingerprint:fingerprint,workerToken:randomUUID(),nowMs:Date.now(),leaseMs:600000});if(claim.decision==='claimed')tx.set(jobRef,claim.job);return claim;});
+  if(claimed.decision!=='claimed')return{mode:options.mode,status:claimed.decision,eventWrites:0};
+  const claim=claimed.job;let paidSources=0;
+@@ -98,7 +98,7 @@ export async function runFestivalLinkWorker(db:admin.firestore.Firestore,options
+    if(options.dryRun)return{mode:options.mode,fileId,status:'source_evidence_not_captured',sourceId:missing.source.get('uniqueId'),paidSources:0,eventWrites:0,dryRun:true};
+    if(!options.apiKey)throw Error('Existing OpenAI secret required');paidSources=1;let capture:any;
+    try{const result=await extractor.extractFestivalEvidence({caption:missing.caption,imageUrls:missing.imageUrls,edition:missing.r.edition,apiKey:options.apiKey,verify:true});delete result.rawResponses;capture={captureKey:missing.key,sourceId:String(missing.source.get('uniqueId')),result};}
+-   catch(error:any){capture={captureKey:missing.key,sourceId:String(missing.source.get('uniqueId')),error:String(error.message).slice(0,300),requests:error.evidenceDiagnostics?.requests||[]};}
++   catch(error:any){capture={captureKey:missing.key,sourceId:String(missing.source.get('uniqueId')),error:String(error.message).slice(0,300),requests:error.evidenceDiagnostics?.requests||[],diagnostics:{rawResponses:error.evidenceDiagnostics?.rawResponses||[]}};}
+    if(Buffer.byteLength(JSON.stringify(capture),'utf8')>700000)capture={captureKey:missing.key,sourceId:String(missing.source.get('uniqueId')),error:'capture_document_size_hold',requests:capture.result?.requests||capture.requests||[]};
+    await db.runTransaction(async tx=>{const [job,cache]=await tx.getAll(jobRef,missing.cache.ref);const source=await tx.get(missing.source.ref as admin.firestore.DocumentReference);assertFestivalPublicationFence(job.data() as FestivalShadowJob,claim,Date.now(),[pin(missing.source)],new Map([[source.ref.path,{exists:source.exists,version:source.exists?pin(source).version:undefined}]]),false);if(cache.exists)throw Error('Capture already committed by another worker');tx.create(cache.ref,plain(capture));tx.set(jobRef,{...finishFestivalShadowJob(job.data() as FestivalShadowJob,claim,Date.now(),'retryable'),summary:{mode:options.mode,paidSources,eventWrites:0,status:'capture_progress'}});});
+    return{mode:options.mode,fileId,status:'capture_progress',paidSources,eventWrites:0,captureError:capture.error||null};
+@@ -119,7 +119,7 @@ export async function runFestivalLinkWorker(db:admin.firestore.Firestore,options
+      const publisher=(url:string)=>{try{const u=new URL(url);return u.origin+u.pathname.replace(/\/$/,'')+u.search;}catch{return '';}};
+      const binding=proposedBinding&&(!proposedBinding.sourceFingerprint||proposedBinding.sourceFingerprint===extractor.festivalEvidenceSourceFingerprint(item)&&publisher(proposedBinding.sourceUrl)===publisher(item.source.get('facebookUrl')||''))?proposedBinding:undefined;
+      const named=Boolean(a.activityRowText&&a.dateHeaderText&&normalize(a.eventText).startsWith(normalize(r.edition.name))&&normalize(a.eventText).length>normalize(r.edition.name).length);
+-     sources.push({id:'e_'+festivalShadowFingerprint({source:sid,index,scope:a.scopeText}).slice(0,40),source:{id:sid,url:item.source.get('facebookUrl'),text:result.sourceText,documents:result.documents,publisherId:'publisher_'+festivalShadowFingerprint(item.source.get('facebookUrl')||'').slice(0,24),revision:item.source.updateTime.toDate().toISOString(),...(binding?{organizerId:binding.organizerId}:{})},kind:named?'same_source_named_activity':a.kind,scopeText:a.scopeText,membershipText:named?a.eventText:a.membershipText,festivalNameText:a.festivalNameText,yearText:a.yearText,organizerText:a.organizerText,...(a.activityRowText?{activityRowText:a.activityRowText,dateHeaderText:a.dateHeaderText}:{}),...(a.captionScope?{captionScope:a.captionScope}:{}),...(a.sourceScope?{sourceScope:a.sourceScope}:{}),activity:{name:a.name,venueId:matches.length===1?matches[0].id:'',startDate:a.startDate,startTime:a.startTime,...(a.ticketUrl&&!isFestivalTicketHomepage(a.ticketUrl)?{ticketUrl:a.ticketUrl}:{})},eventText:a.eventText,dateText:a.dateText,timeText:a.timeText,venueText:a.venueText});
++     sources.push({id:'e_'+festivalShadowFingerprint({source:sid,index,scope:a.scopeText}).slice(0,40),source:{id:sid,url:item.source.get('facebookUrl'),text:result.sourceText,documents:result.documents,publisherId:'publisher_'+festivalShadowFingerprint(item.source.get('facebookUrl')||'').slice(0,24),revision:item.source.updateTime.toDate().toISOString(),...(binding?{organizerId:binding.organizerId}:{})},kind:named?'same_source_named_activity':a.kind,scopeText:a.scopeText,membershipText:named?a.eventText:a.membershipText,festivalNameText:a.festivalNameText,yearText:a.yearText,organizerText:a.organizerText,...(a.activityRowText?{activityRowText:a.activityRowText,dateHeaderText:a.dateHeaderText}:{}),...(a.captionScope?{captionScope:a.captionScope}:{}),...(a.sourceScope?{sourceScope:a.sourceScope}:{}),...(a.sharedCaptionScope?{sharedCaptionScope:a.sharedCaptionScope}:{}),activity:{name:a.name,venueId:matches.length===1?matches[0].id:'',startDate:a.startDate,startTime:a.startTime,...(a.ticketUrl&&!isFestivalTicketHomepage(a.ticketUrl)?{ticketUrl:a.ticketUrl}:{})},eventText:a.eventText,dateText:a.dateText,timeText:a.timeText,venueText:a.venueText});
+     }
+    }
+    const ownershipRef=db.doc(`festival_link_publications/${r.edition.id}`),ownership=await ownershipRef.get();
+diff --git a/src/services/festivalLinker.test.ts b/src/services/festivalLinker.test.ts
+index e16249f..8ac0a1e 100644
+--- a/src/services/festivalLinker.test.ts
++++ b/src/services/festivalLinker.test.ts
+@@ -5,6 +5,7 @@ import type {FestivalEdition,FestivalSourceEvidence,FestivalCanonicalVenue,Festi
+ import {expandFestivalCaptionDateScope} from './festivalCaptionScope.js';
+ import {expandFestivalSourceScope} from './festivalSourceScope.js';
+ import {verifyAreaPublicationReferences} from './areaEventPublication.js';
++import {bindFestivalSharedCaptionScope} from './festivalSharedCaptionScope.js';
+ 
+ const edition=():FestivalEdition=>({id:'festival_fixture',name:'ANCHOR Fest',year:2026,startDate:'2026-10-14',endDate:'2026-10-18',
+   organizerId:'organizer_fixture',organizerNames:['AMPA'],sourceIds:['programme_source']});
+@@ -23,6 +24,18 @@ const cross=():FestivalSourceEvidence=>{
+ };
+ const input=()=>({umbrella:edition(),sources:[programme()],candidates:[child()],venues:[venue()]});
+ const reason=async(e:FestivalSourceEvidence)=>(await resolveFestivalMembership({...input(),sources:[e]})).outcomes[0].reason;
++test('shared caption proof preserves exact edition/organizer/date and rejects forged offsets or missing year',async()=>{
++ const e=cross(),row='Unholy Night | 7:00 pm';
++ const caption=e.membershipText+'\nJoin us at Tivoli Cinema!\nSaturday, October 17, 2026';
++ const documents=[{index:-1,text:caption},{index:0,text:row}];
++ const bound=bindFestivalSharedCaptionScope({...e,scopeText:row,dateText:'Saturday, October 17, 2026',sourceIndices:[-1,0]},documents);
++ assert(bound.sharedCaptionScope);
++ const value:FestivalSourceEvidence={...bound,source:{...e.source,text:documents.map(d=>d.text).join('\n'),documents}};
++ assert.equal(await reason(value),'eligible');
++ assert.equal(await reason({...value,yearText:''}),'edition_conflict');
++ assert.equal(await reason({...value,activity:{...value.activity,startDate:'2026-10-24'}}),'source_occurrence_conflict');
++ assert.equal(await reason({...value,sharedCaptionScope:{...value.sharedCaptionScope!,rowStart:1}}),'source_occurrence_conflict');
++});
+ function changeText(e:FestivalSourceEvidence,from:string,to:string):void{
+   e.scopeText=e.scopeText.replaceAll(from,to);e.membershipText=e.membershipText.replaceAll(from,to);e.source.text=e.source.text.replaceAll(from,to);
+   if(e.activityRowText)e.activityRowText=e.activityRowText.replaceAll(from,to);
+diff --git a/src/services/festivalLinker.ts b/src/services/festivalLinker.ts
+index f15dd71..44fc9ce 100644
+--- a/src/services/festivalLinker.ts
++++ b/src/services/festivalLinker.ts
+@@ -8,6 +8,8 @@ import type {FestivalCaptionScope,FestivalEvidenceDocument} from './festivalCapt
+ import {validFestivalSourceScope,festivalSourceHeadingDates} from './festivalSourceScope.js';
+ import type {FestivalSourceScope} from './festivalSourceScope.js';
+ import {literalFestivalProgrammeHeading} from './festivalProgrammeHeading.js';
++import {validFestivalSharedCaptionScope} from './festivalSharedCaptionScope.js';
++import type {FestivalSharedCaptionScope} from './festivalSharedCaptionScope.js';
+ 
+ export interface FestivalEdition {
+   id: string; name: string; year: number; startDate: string; endDate: string;
+@@ -29,6 +31,7 @@ export interface FestivalSourceEvidence {
+   dateHeaderText?: string;
+   captionScope?: FestivalCaptionScope;
+   sourceScope?: FestivalSourceScope;
++  sharedCaptionScope?: FestivalSharedCaptionScope;
+   /** Literal programme heading or explicit current activity-membership statement. */
+   membershipText: string;
+   festivalNameText: string; yearText: string; organizerText?: string;
+@@ -53,7 +56,7 @@ export interface FestivalLinkProposal {
+   evidence: AreaEventLinkEvidence[];
+   provenance: {evidenceId: string; sourceId: string; sourceUrl: string; publisherId: string;
+     revision: string | null; sourceText: string; sourceFingerprint: string; evidenceFingerprint: string;
+-    captionScope?: FestivalCaptionScope; sourceScope?: FestivalSourceScope; sourceDocuments?: readonly FestivalEvidenceDocument[]}[];
++    captionScope?: FestivalCaptionScope; sourceScope?: FestivalSourceScope; sharedCaptionScope?:FestivalSharedCaptionScope; sourceDocuments?: readonly FestivalEvidenceDocument[]}[];
+   fingerprint: string;
+ }
+ export interface FestivalLinkResult {
+@@ -127,6 +130,12 @@ function printedProgrammeYear(e: FestivalSourceEvidence, edition: FestivalEditio
+ const CALENDAR_DATE=/\b(?:20\d{2}-\d{2}-\d{2}|(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\.?\s+\d{1,2}(?:,?\s+20\d{2})?)\b/gi;
+ const WEEKDAY_HEADING=/^\s*(?:mon(?:day)?|tue(?:sday)?|wed(?:nesday)?|thu(?:rsday)?|fri(?:day)?|sat(?:urday)?|sun(?:day)?)\b/i;
+ function scopedOccurrence(e: FestivalSourceEvidence): FestivalLinkReason | undefined {
++  if(e.sharedCaptionScope){
++    const docs=e.source.documents;
++    if(!docs||docs.map(d=>d.text).join('\n')!==e.source.text||!e.dateText||
++       !validFestivalSharedCaptionScope({...e,sharedCaptionScope:e.sharedCaptionScope},docs))return 'source_occurrence_conflict';
++    return undefined;
++  }
+   if(e.sourceScope){
+     const docs=e.source.documents;
+     if(!Array.isArray(docs)||new Set(docs.map(d=>d.index)).size!==docs.length||docs.map(d=>d.text).join('\n')!==e.source.text||
+@@ -195,7 +204,7 @@ function membership(e: FestivalSourceEvidence, edition: FestivalEdition): Festiv
+        /\b(?:fest|festival)\b/i.test(line)&&/\b(?:19|20)\d{2}\b/.test(line)&&!key(line).includes(key(e.festivalNameText))))return 'unbound_programme';
+     return undefined;
+   }
+-  if(e.kind!=='festival_activity' || !e.scopeText.includes(e.membershipText))return 'membership_not_explicit';
++  if(e.kind!=='festival_activity' || !e.scopeText.includes(e.membershipText)&&!e.sharedCaptionScope)return 'membership_not_explicit';
+   if(!nonempty(e.organizerText) || !e.membershipText.includes(e.organizerText) ||
+       !edition.organizerNames.some(n=>key(n)===key(e.organizerText)))return 'edition_conflict';
+   const statement=key(e.membershipText),festival=`${key(e.festivalNameText)} ${edition.year}`;
+@@ -261,6 +270,7 @@ export async function resolveFestivalMembership(input: {
+     if(!nonempty(e.timeText)){stop('missing_clock');continue;}
+     const scopeConflict=scopedOccurrence(e);if(scopeConflict){stop(scopeConflict);continue;}
+     const association=membership(e,edition);if(association){stop(association,association==='membership_not_explicit'?'unmatched':'held');continue;}
++    if(e.sharedCaptionScope&&festivalCaptionHeadingDate(e.dateText,edition.year)!==e.activity.startDate){stop('source_occurrence_conflict');continue;}
+     if(e.sourceScope){
+       const document=e.source.documents!.find(d=>d.index===e.sourceScope!.documentIndex)!;
+       if(!festivalSourceHeadingDates(document.text.slice(e.sourceScope.dateStart,e.sourceScope.dateEnd),edition.year,e.sourceScope.kind).includes(e.activity.startDate)){stop('source_occurrence_conflict');continue;}
+@@ -318,7 +328,7 @@ export async function resolveFestivalMembership(input: {
+       coordinates:{latitude:venue.latitude,longitude:venue.longitude},certainty:'confirmed',linkedEventIds:[id]};
+     const posterHeading=e.kind==='programme_row'?literalFestivalProgrammeHeading({documents:e.source.documents||[],scope:e.sourceScope,festivalNameText:e.festivalNameText,yearText:e.yearText}):undefined;
+     const evidence:AreaEventLinkEvidence={eventPath:candidate.path,eventName:data.eventName||data.name,venueId:venue.id,startDate:data.startDate,startTime:data.startTime,
+-      festivalName:e.festivalNameText,sourceUrl:e.source.url,sourceText:`${posterHeading||e.membershipText}\n${e.scopeText}`,sourceEventText:e.eventText,
++      festivalName:e.festivalNameText,sourceUrl:e.source.url,sourceText:e.sharedCaptionScope?e.source.text:`${posterHeading||e.membershipText}\n${e.scopeText}`,sourceEventText:e.eventText,
+       sourceDateText:e.dateText,sourceTimeText:e.timeText,sourceVenueText:e.venueText};
+     // Membership above binds the literal typography alias to the canonical
+     // edition. Validate occurrence excerpts using that literal name, retaining
+@@ -331,7 +341,7 @@ export async function resolveFestivalMembership(input: {
+     const proposal=proposals.get(candidate.path)||{eventPath:candidate.path,eventId:id,venueId:venue.id,point,evidence:[],provenance:[]};
+     proposal.evidence.push(evidence);proposal.provenance.push({evidenceId:e.id,sourceId:e.source.id,sourceUrl:e.source.url,publisherId:e.source.publisherId,
+       revision:e.source.revision??null,sourceText:e.source.text,sourceFingerprint:fingerprint(e.source),evidenceFingerprint:hash,
+-      ...(e.captionScope?{captionScope:{...e.captionScope}}:{}),...(e.sourceScope?{sourceScope:{...e.sourceScope}}:{}),...(e.source.documents?{sourceDocuments:e.source.documents.map(d=>({...d}))}:{})});
++      ...(e.captionScope?{captionScope:{...e.captionScope}}:{}),...(e.sourceScope?{sourceScope:{...e.sourceScope}}:{}),...(e.sharedCaptionScope?{sharedCaptionScope:{...e.sharedCaptionScope}}:{}),...(e.source.documents?{sourceDocuments:e.source.documents.map(d=>({...d}))}:{})});
+     // Alias selection must not depend on source order.
+     if(compare(point.label,proposal.point.label)<0)proposal.point={...proposal.point,label:point.label};
+     proposals.set(candidate.path,proposal);
+diff --git a/src/services/festivalSharedCaptionScope.ts b/src/services/festivalSharedCaptionScope.ts
+new file mode 100644
+index 0000000..899e72e
+--- /dev/null
++++ b/src/services/festivalSharedCaptionScope.ts
+@@ -0,0 +1,45 @@
++import type {FestivalEvidenceDocument} from './festivalCaptionScope.js';
++
++/** Separately pinned caption context; never concatenated into a fabricated row. */
++export interface FestivalSharedCaptionScope {
++  version:1; rowDocumentIndex:number; rowStart:number; rowEnd:number;
++  captionStart:number; captionEnd:number;
++}
++interface Item {
++  scopeText:string; membershipText:string; festivalNameText:string;
++  eventText:string; timeText:string; dateText:string; venueText:string;
++  sourceIndices?:number[];
++}
++const escape=(s:string)=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
++const count=(text:string,part:string)=>part?text.split(part).length-1:0;
++const dates=/\b(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:tember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\.?\s+\d{1,2}\b|\b20\d{2}-\d{2}-\d{2}\b/ig;
++
++export function bindFestivalSharedCaptionScope<T extends Item>(item:T,documents:readonly FestivalEvidenceDocument[]):T&{sharedCaptionScope?:FestivalSharedCaptionScope}{
++  const captions=documents.filter(d=>d.index===-1);
++  if(captions.length!==1||!item.sourceIndices?.includes(-1)||!item.venueText||!item.eventText||!item.timeText)return item;
++  const caption=captions[0].text,heading=caption.split(/\r?\n/)[0];
++  if(!item.membershipText||!item.festivalNameText||!heading.includes(item.membershipText)||!heading.includes(item.festivalNameText)||
++      (heading.match(/\b(?:fest|festival)\b/ig)||[]).length!==1||
++      /\b(?:last year|previous|formerly|past appearance|performed at|played at)\b/i.test(caption)||
++      count(caption,item.venueText)!==1||!new RegExp(`\\bat\\s+(?:the\\s+)?${escape(item.venueText)}(?=[\\s!.,;:]|$)`,'i').test(caption)||
++      (caption.match(/\bat\s+(?:the\s+)?[A-ZÀ-Ÿ]/g)||[]).length!==1)return item;
++  const dateMatches=caption.match(dates)||[];
++  if(dateMatches.length>1||item.dateText&&(!caption.includes(item.dateText)||count(caption,item.dateText)!==1))return item;
++  // Only a title/clock card may inherit context. A printed location or extra
++  // section is independent evidence and must not be overridden by a caption.
++  const remainder=item.scopeText.replace(item.eventText,'').replace(item.timeText,'');
++  if(!/^[\s|:\-–—()]*$/.test(remainder)||/\bat\s+[A-ZÀ-Ÿ]/.test(item.scopeText)&&!item.scopeText.includes(item.venueText))return item;
++  const rows=documents.filter(d=>item.sourceIndices!.includes(d.index)&&count(d.text,item.scopeText)===1&&
++      item.scopeText.includes(item.eventText)&&item.scopeText.includes(item.timeText));
++  if(rows.length!==1)return item;
++  const row=rows[0],start=row.text.indexOf(item.scopeText);
++  // A selected image cannot borrow a title or a clock from another image.
++  if(row.index>=0&&(item.sourceIndices!.filter(i=>i>=0).length!==1))return item;
++  const proof:FestivalSharedCaptionScope={version:1,rowDocumentIndex:row.index,rowStart:start,rowEnd:start+item.scopeText.length,captionStart:0,captionEnd:caption.length};
++  return {...item,sharedCaptionScope:proof};
++}
++
++export function validFestivalSharedCaptionScope(item:Item&{sharedCaptionScope:FestivalSharedCaptionScope},documents:readonly FestivalEvidenceDocument[]):boolean{
++  const derived=bindFestivalSharedCaptionScope({...item,sourceIndices:[...new Set([-1,item.sharedCaptionScope.rowDocumentIndex])]},documents).sharedCaptionScope;
++  return Boolean(derived&&JSON.stringify(derived)===JSON.stringify(item.sharedCaptionScope));
++}

@@ -1209,3 +1209,57 @@ prevention/repair plan for these eight groups. Exact targets, source receipts,
 actual usage, saved-response playback and evidence limitations are recorded in
 `docs/luna-oct17-production-audit.md`; private evidence remains in
 `functions/artifacts/luna-oct17-production-audit/`.
+
+## October 17 approved eight-group prevention and exact repair
+
+Craig approved all recommendations. Parser assembly `fe2aa98` and worker assembly
+`938320d` were released from their separate immutable serving baselines. Fresh
+readback verifies the three parsers ACTIVE/latest100%, common hash
+`0c06b198eacb9cf32171e0d68fbea89e889a93c3` at `processdataset-00501-lel`,
+`processdatasetresume-00465-tub`, `processdatasetselectedrows-00457-muz`.
+Separate linker is ACTIVE/latest100% at `scheduledfestivallinker-00007-nov`, hash
+`24edc95235106a71b30b2712d06b504d9d3bd2e1`. All serving configuration and secret
+bindings remain preserved; no model/prompt/cache/traffic/queue experiment.
+
+Prevention separates incompatible skating/Eptek slots through all merge paths;
+retains item-specific markets/swim categories; family-v6 handles slash, colon/yr
+and conjunction evidence without mistaking beneficiaries for participants;
+dated venues own their visits; collection-only venue absence and materially
+conflicting starts hold before publication; alternative daily depot recurrence
+cannot contaminate a one-day visit; supported Saturday programme intent survives
+formatting without an invented horizon. Shared festival caption context retains
+literal offsets, row clocks and independent verification, with source/edition
+holds intact and bounded failed-response diagnostics retained privately.
+
+Final combined parser build and972/972 compiled backend tests pass;24 new focused
+checks and original-source playback retain26/26 skating classes and both Eptek
+slots. Worker75 focused/950 full checks pass. Compact36-test script has the same
+one stale October11 legacy-off fixture on the untouched serving baseline and
+final release (35/36); accepted weekly_custom request is identical and no prompt,
+fixture or assertion was weakened. Category/family playback preserves61 reviewed
+controls relative to accepted v5, with the previously stored Junior Curling
+15/calculated70 difference unchanged outside scope.
+
+The guarded approved21-operation transaction is COMPLETE, backup/result stamped
+`2026-10-17T16-24-31-152Z` under `firebase/artifacts/oct17-eight-group/`:
+two restored events,two private source holds,eight event updates,four exact
+venue-policy updates,four event-only deletes,and feed299→300. No media deletion,
+venue merge,date shift or unrelated data repair. Exact plan SHA256 is
+`cf5fef8632a58f943d7b78cd38a0827a3733a58f2d16f33d4077520b2587d383`.
+Fresh independent readback confirms all21 intended deltas and101 untouched
+read-set documents unchanged,86 exact final source siblings,all four actual
+retirement/hold guards effective,no active parser or matching checkpoint. API:
+10 surviving details200,four retired404,complete1,014-entry/11-page Preview feed
+without retired/generated copies,33 retained managed media URLs200.
+
+Six CFCY review records and Stratford Sobeys remain private canonical-venue holds;
+no existing exact identity was found and the Souris Home Hardware is not HBM
+Summerside. Source-completeness and missing edition evidence still hold festival
+publication: worker generation10 has zero paid sources/new links/public writes,
+with all nine shared-context excerpts now verified and Anchor17/Pumpkin13/Harvest4
+preserved. No new real model call, source-row replay, map/OTA work or monitor.
+Next regular full-run observation remains unexecuted, not claimed as a new pass.
+
+Exact targets, limitations, serving receipts and reconstruction patches:
+`docs/oct17-eight-group-release-and-repair.md` and
+`release-patches/oct17-{parser-quality,festival-shared-caption}.patch`.
