@@ -1288,3 +1288,32 @@ Moth Lane's retained original image/caption still conflict (17:00 versus18:00);
 first-party correction was unavailable. Its expired parent remains absent and
 private hold intact. No redating or speculative revival. Venue/festival source
 investigation and exact remaining dispositions: `docs/oct17-remaining-followups.md`.
+
+### October17 remaining source recovery, prepared after full investigation
+
+Independent venue/festival tasks completed. The coordinator checked their final
+reports, primary sources and live inventories, reran the exact released-worker
+offline proof, and performed eight bounded Places reads. Six donation sessions
+have supported new canonical venue identities/points, including Haunted Mansion:
+its own2026 schedule confirms October22 despite stale provider closure metadata.
+Kay's remains one joint stop with two distinct businesses; Coats distribution
+still has no proved2026 attendee venue. Historical Moth Lane stays retired.
+
+Anchor's older complete capture has an identical caption and both original gallery
+files are byte-identical to the current failed source. An exact private recovery
+can reuse the independently verified result while embedding the original failure;
+no failed response body or missing year/date/venue literal is invented. Offline
+worker playback clears inventory incompleteness with zero new links/model calls.
+Harvest's explicit first-party2026 programme corroborates its four existing linked
+children; play-zone clock/firepit identity holds remain. Cross-source website
+corroboration is not yet a supported automatic proof interface; no capture was
+rewritten to manufacture literal year evidence.
+
+A separate exact14-operation plan is PREPARED, NOT APPLIED: six new venues, six
+one-off events, one Anchor private-capture replacement, feed301→302. Actual
+released-parser payload preview and live dry-run pass32 pinned input checks,
+source/canonical identity scans, parser-idle/completion/checkpoint/worker-lease
+guards. The new venue creations await one combined exact-scope approval under
+the event-integrity repair skill. No new deployment, public recovery, row replay,
+model call or monitor occurred during preparation. Full paths, SHA256, backup
+and independent verification procedure: `docs/oct17-remaining-followups.md`.
