@@ -1,0 +1,36 @@
+{
+  "baselineCommit": "938320ddce85c331d5361f22b5e0ed77abc2f91d",
+  "baselineServingHash": "24edc95235106a71b30b2712d06b504d9d3bd2e1",
+  "patchSha256": "c8b65d6d2f95866d37c829e111748c378beac12755df1be1e4b74956b9c7ee22",
+  "files": [
+    {
+      "path": "src/services/festivalReviewedCorroboration.ts",
+      "beforeSha256": null,
+      "afterSha256": "f45521bce26cb36bb35fdbfc67bc14cf5bcc43ad0b1e2019a5b0cc2943addeb6"
+    },
+    {
+      "path": "src/services/festivalReviewedCorroboration.test.ts",
+      "beforeSha256": null,
+      "afterSha256": "64ec03ffda9c85baaa98ac725dc36c1b7373cfd240317a5cbd02d2b1d912ec6e"
+    },
+    {
+      "path": "src/services/festivalLinkWorker.ts",
+      "beforeSha256": "bf909e9c6c0dbabd779b27c8a1802b76c938c7b0166896146ce1db8d00d5e445",
+      "afterSha256": "059c403ea52e71abff44a770491487740f068bbe1d50af15d37394edc4b0094a"
+    },
+    {
+      "path": "scripts/festival-link-worker.test.mjs",
+      "beforeSha256": "4344f3796db388ad2394b98faf0e683ce8881c6b22a15210a6c85bdae2467b88",
+      "afterSha256": "bc83ad1ef77137cb9b97ac77054d92b60743a8898ab42ad763f8451a8fddcecf"
+    }
+  ],
+  "unchangedContracts": [
+    "models",
+    "prompts",
+    "extractor policy",
+    "capture format",
+    "original source fields",
+    "registry",
+    "publication link resolver"
+  ]
+}

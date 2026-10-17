@@ -1,0 +1,295 @@
+diff --git a/scripts/festival-link-worker.test.mjs b/scripts/festival-link-worker.test.mjs
+index e86e82c..b8979a8 100644
+--- a/scripts/festival-link-worker.test.mjs
++++ b/scripts/festival-link-worker.test.mjs
+@@ -138,3 +138,17 @@ test('large unrelated canonical inventory stays publishable while the complete q
+  for(let i=0;i<450;i++)db.values.set('venues/other_fixture/events/unrelated_'+i,{version:++db.sequence,data:{eventName:'Other activity '+i,venueId:'other_fixture',startDate:'2026-10-17',startTime:'12:00',isRecurring:'No'}});
+  const result=await runFestivalLinkWorker(db,options);assert.equal(result.eventWrites,1);assert.deepEqual(result.reports[0].addedEventIds,['child_fixture']);
+ });
++
++test('new private corroboration during a publication is transaction-fenced even when previously absent',async()=>{
++ const {db,key,options}=fixture();db.afterClaim=d=>d.values.set('festival_link_corroborations/'+key,{version:++d.sequence,data:{version:1,receipts:[]}});
++ await assert.rejects(runFestivalLinkWorker(db,options),/reference_drift/);assert(!db.writes.some(p=>p.startsWith('events/')));
++});
++test('website evidence changes during publication are transaction-fenced',async()=>{
++ const {db,key,options}=fixture(),site='festival_website_evidence/site_fixture';
++ db.values.set('festival_link_corroborations/'+key,{version:++db.sequence,data:{version:1,receipts:[{evidenceId:'another_item',website:{path:site}}]}});
++ db.values.set(site,{version:++db.sequence,data:{body:'original'}});db.afterClaim=d=>d.values.set(site,{version:++d.sequence,data:{body:'changed'}});
++ await assert.rejects(runFestivalLinkWorker(db,options),/reference_drift/);assert(!db.writes.some(p=>p.startsWith('events/')));
++});
++test('malformed or disabled private corroboration inventory holds the source and cannot fall through',async()=>{
++ for(const data of [{version:1,receipts:'invalid'},{version:1,enabled:false,receipts:[]}]){const {db,key,options}=fixture();db.values.set('festival_link_corroborations/'+key,{version:++db.sequence,data});const r=await runFestivalLinkWorker(db,{...options,dryRun:true});assert.equal(r.eventWrites,0);assert.deepEqual(r.reports[0].addedEventIds,[]);assert.equal(r.reports[0].reason,'source_inventory_incomplete');assert.equal(r.reports[0].gaps[0].reason,'invalid_reviewed_corroboration_inventory');}
++});
+diff --git a/src/services/festivalLinkWorker.ts b/src/services/festivalLinkWorker.ts
+index b0707ed..423ebd3 100644
+--- a/src/services/festivalLinkWorker.ts
++++ b/src/services/festivalLinkWorker.ts
+@@ -10,6 +10,8 @@ import type {FestivalCanonicalVenue,FestivalSourceEvidence} from './festivalLink
+ import {isFestivalTicketHomepage,festivalVenueMentionLabel} from './festivalLinker.js';
+ import {validFestivalNonmembership} from './festivalSourceDecision.js';
+ import {festivalCaptureSource} from './festivalCaptureSource.js';
++import {reviewedFestivalCorroboration} from './festivalReviewedCorroboration.js';
++import type {FestivalCorroborationContext,CorroborationDocument} from './festivalReviewedCorroboration.js';
+ 
+ const terminal=new Set(['completed','failed','cancelled','canceled','released']);
+ const active=(docs:admin.firestore.QueryDocumentSnapshot[])=>docs.some(d=>!terminal.has(String(d.get('status')||'')));
+@@ -61,7 +63,7 @@ export async function runFestivalLinkWorker(db:admin.firestore.Firestore,options
+  }
+  const minimum=registered.map(x=>x.edition.startDate).sort()[0],maximum=registered.map(x=>x.edition.endDate).sort().at(-1)!;
+  const children=await db.collectionGroup('events').where('startDate','>=',minimum).where('startDate','<=',maximum).limit(5001).get();if(children.size>5000)throw Error('Canonical inventory overflow');
+- const candidates=children.docs.map(d=>({path:d.ref.path,data:plain(d.data())}));
++ const candidates=children.docs.map(d=>({path:d.ref.path,data:plain(d.data()),version:pin(d).version}));
+  const venueIds=[...new Set<string>([...candidates.map(c=>c.data.venueId),...registered.flatMap(r=>r.edition.venueIds||[])].filter(x=>typeof x==='string'&&/^[A-Za-z0-9_-]+$/.test(x)))].sort();
+  const venueDocs:admin.firestore.DocumentSnapshot[]=[];for(let i=0;i<venueIds.length;i+=100)venueDocs.push(...await db.getAll(...venueIds.slice(i,i+100).map(id=>db.doc(`venues/${id}`))));
+  const venues:FestivalCanonicalVenue[]=venueDocs.filter(d=>d.exists).map(d=>({id:d.id,label:d.get('name')||d.get('venueName')||d.get('establishment')||'',aliases:[...(Array.isArray(d.get('aliases'))?d.get('aliases'):[]),...registered.flatMap(r=>r.edition.venueAliases[d.id]||[])],latitude:Number(d.get('latitude')),longitude:Number(d.get('longitude'))}));
+@@ -85,7 +87,11 @@ export async function runFestivalLinkWorker(db:admin.firestore.Firestore,options
+     if(previousCache.exists&&!previousCache.get('error')&&previousCache.get('result')||previousDecision.exists){key=previousKey;capturePolicy=extractor.FESTIVAL_PREVIOUS_EVIDENCE_POLICY;cache=previousCache;decision=previousDecision;}
+    }
+    const decisionData=options.localDecisions?.get(key)||decision.data(),nonmember=validFestivalNonmembership(decisionData,{editionId:r.edition.id,sourceId:String(s.uniqueId),captureKey:key,sourceFingerprint:identity.source,evidencePolicy:capturePolicy});
+-   items.push({r,source,caption,imageUrls,key,capturePolicy,cache,decision,nonmember,decisionData,captureData:options.localCaptures?.get(key)||cache.data()});
++   const corroboration=await db.doc(`festival_link_corroborations/${key}`).get();cacheSnapshots.push(corroboration);
++   const bundle=corroboration.data(),websites:CorroborationDocument[]=[];
++   const validBundle=!corroboration.exists||bundle?.version===1&&bundle.enabled!==false&&Array.isArray(bundle.receipts)&&bundle.receipts.length<=20&&bundle.receipts.every((p:any)=>p&&typeof p.evidenceId==='string'&&/^festival_website_evidence\/[A-Za-z0-9_-]{1,160}$/.test(p.website?.path));
++   if(validBundle&&bundle)for(const p of [...new Set<string>(bundle.receipts.map((p:any)=>p.website.path))]){const site=await db.doc(p).get();cacheSnapshots.push(site);if(site.exists)websites.push({path:p,data:plain(site.data()),version:pin(site).version});}
++   items.push({r,source,caption,imageUrls,key,capturePolicy,cache,decision,nonmember,decisionData,corroboration,bundle,validBundle,websites,captureData:options.localCaptures?.get(key)||cache.data()});
+   }
+  }
+  const jobRef=db.doc(`festival_link_jobs/${festivalShadowJobId(fileId)}`),fingerprint=festivalShadowFingerprint({fileId,mode:options.mode,policy:'publication-worker-shared-caption-v2',editions:registered.map(r=>({edition:r.edition,umbrella:pin(r.umbrella),review:pin(r.review)})),sources:[...latest.values()].map(pin).sort((a,b)=>a.path.localeCompare(b.path)),children:children.docs.map(pin).sort((a,b)=>a.path.localeCompare(b.path)),venues:venueDocs.filter(d=>d.exists).map(pin),captures:cacheSnapshots.map(d=>({path:d.ref.path,version:d.exists?pin(d).version:null}))});
+@@ -105,9 +111,10 @@ export async function runFestivalLinkWorker(db:admin.firestore.Firestore,options
+   }
+   let eventWrites=0;const reports:any[]=[];
+   for(const r of registered){
+-   const sourceItems=items.filter(i=>i.r===r),sources:FestivalSourceEvidence[]=[],gaps:any[]=[],unconfirmedItems:any[]=[],reviewedNonmembers:any[]=[];
++   const sourceItems=items.filter(i=>i.r===r),sources:FestivalSourceEvidence[]=[],contexts=new Map<string,{item:any;context:FestivalCorroborationContext}>(),gaps:any[]=[],unconfirmedItems:any[]=[],reviewedNonmembers:any[]=[];
+    for(const item of sourceItems){if(item.gap){gaps.push({sourceId:item.source.get('uniqueId'),reason:item.gap});continue;}
+     if(item.nonmember){reviewedNonmembers.push({sourceId:item.source.get('uniqueId'),reviewId:item.decisionData.reviewId,reason:item.decisionData.reason,captureStillIncomplete:item.captureData?.result?.complete!==true});continue;}
++    if(!item.validBundle){gaps.push({sourceId:item.source.get('uniqueId'),reason:'invalid_reviewed_corroboration_inventory'});continue;}
+     const c=item.captureData;
+     if(!c?.result){gaps.push({sourceId:item.source.get('uniqueId'),reason:c?.error||'source_evidence_not_captured'});continue;}
+     const capturedSource=festivalCaptureSource(c,item,extractor.festivalEvidenceSourceFingerprint);
+@@ -119,12 +126,14 @@ export async function runFestivalLinkWorker(db:admin.firestore.Firestore,options
+      const publisher=(url:string)=>{try{const u=new URL(url);return u.origin+u.pathname.replace(/\/$/,'')+u.search;}catch{return '';}};
+      const binding=proposedBinding&&(!proposedBinding.sourceFingerprint||proposedBinding.sourceFingerprint===extractor.festivalEvidenceSourceFingerprint(item)&&publisher(proposedBinding.sourceUrl)===publisher(item.source.get('facebookUrl')||''))?proposedBinding:undefined;
+      const named=Boolean(a.activityRowText&&a.dateHeaderText&&normalize(a.eventText).startsWith(normalize(r.edition.name))&&normalize(a.eventText).length>normalize(r.edition.name).length);
+-     sources.push({id:'e_'+festivalShadowFingerprint({source:sid,index,scope:a.scopeText}).slice(0,40),source:{id:sid,url:item.source.get('facebookUrl'),text:result.sourceText,documents:result.documents,publisherId:'publisher_'+festivalShadowFingerprint(item.source.get('facebookUrl')||'').slice(0,24),revision:item.source.updateTime.toDate().toISOString(),...(binding?{organizerId:binding.organizerId}:{})},kind:named?'same_source_named_activity':a.kind,scopeText:a.scopeText,membershipText:named?a.eventText:a.membershipText,festivalNameText:a.festivalNameText,yearText:a.yearText,organizerText:a.organizerText,...(a.activityRowText?{activityRowText:a.activityRowText,dateHeaderText:a.dateHeaderText}:{}),...(a.captionScope?{captionScope:a.captionScope}:{}),...(a.sourceScope?{sourceScope:a.sourceScope}:{}),...(a.sharedCaptionScope?{sharedCaptionScope:a.sharedCaptionScope}:{}),activity:{name:a.name,venueId:matches.length===1?matches[0].id:'',startDate:a.startDate,startTime:a.startTime,...(a.ticketUrl&&!isFestivalTicketHomepage(a.ticketUrl)?{ticketUrl:a.ticketUrl}:{})},eventText:a.eventText,dateText:a.dateText,timeText:a.timeText,venueText:a.venueText});
++     const evidence:FestivalSourceEvidence={id:'e_'+festivalShadowFingerprint({source:sid,index,scope:a.scopeText}).slice(0,40),source:{id:sid,url:item.source.get('facebookUrl'),text:result.sourceText,documents:result.documents,publisherId:'publisher_'+festivalShadowFingerprint(item.source.get('facebookUrl')||'').slice(0,24),revision:item.source.updateTime.toDate().toISOString(),...(binding?{organizerId:binding.organizerId}:{})},kind:named?'same_source_named_activity':a.kind,scopeText:a.scopeText,membershipText:named?a.eventText:a.membershipText,festivalNameText:a.festivalNameText,yearText:a.yearText,organizerText:a.organizerText,...(a.activityRowText?{activityRowText:a.activityRowText,dateHeaderText:a.dateHeaderText}:{}),...(a.captionScope?{captionScope:a.captionScope}:{}),...(a.sourceScope?{sourceScope:a.sourceScope}:{}),...(a.sharedCaptionScope?{sharedCaptionScope:a.sharedCaptionScope}:{}),activity:{name:a.name,venueId:matches.length===1?matches[0].id:'',startDate:a.startDate,startTime:a.startTime,...(a.ticketUrl&&!isFestivalTicketHomepage(a.ticketUrl)?{ticketUrl:a.ticketUrl}:{})},eventText:a.eventText,dateText:a.dateText,timeText:a.timeText,venueText:a.venueText};
++     sources.push(evidence);contexts.set(evidence.id,{item,context:{captureKey:item.key,sourceFingerprint:extractor.festivalEvidenceSourceFingerprint(item),evidencePolicy:item.capturePolicy,activityFingerprint:festivalShadowFingerprint(a),verifierAccepted:a.verification.accepted===true}});
+     }
+    }
+    const ownershipRef=db.doc(`festival_link_publications/${r.edition.id}`),ownership=await ownershipRef.get();
+-   const input:FestivalPublicationInput={edition:r.edition,umbrella:{path:r.umbrella.ref.path,data:plain(r.umbrella.data())},review:{path:r.review.ref.path,data:plain(r.review.data()!)},sources,candidates,venues,completion,sourceInventoryComplete:gaps.length===0,ownership:ownership.data() as FestivalPublicationOwnership|undefined};
+-   const proposal=await planFestivalLinkPublication(input);reports.push({editionId:r.edition.id,status:proposal.status,reason:proposal.reason,gaps,unconfirmedItems,reviewedNonmembers,outcomes:proposal.result?.outcomes||[],addedEventIds:proposal.addedEventIds});
++   const dispositions:any[]=[],ordinary=sources.filter(source=>{const {item,context}=contexts.get(source.id)!;const disposition=reviewedFestivalCorroboration({edition:r.edition,source,context,receipts:item.bundle?.receipts||[],websites:item.websites,umbrella:{path:r.umbrella.ref.path,data:plain(r.umbrella.data()),version:pin(r.umbrella).version},review:{path:r.review.ref.path,data:plain(r.review.data()),version:pin(r.review).version},candidates,venueDocuments:venueDocs.filter(d=>d.exists).map(d=>({path:d.ref.path,data:plain(d.data()),version:pin(d).version})),suppressedEventIds:ownership.get('suppressedEventIds')||[],asOf});if(disposition)dispositions.push(disposition);return !disposition;});
++   const input:FestivalPublicationInput={edition:r.edition,umbrella:{path:r.umbrella.ref.path,data:plain(r.umbrella.data())},review:{path:r.review.ref.path,data:plain(r.review.data()!)},sources:ordinary,candidates,venues,completion,sourceInventoryComplete:gaps.length===0,ownership:ownership.data() as FestivalPublicationOwnership|undefined};
++   const proposal=await planFestivalLinkPublication(input);reports.push({editionId:r.edition.id,status:proposal.status,reason:proposal.reason,gaps,unconfirmedItems,reviewedNonmembers,outcomes:[...(proposal.result?.outcomes||[]),...dispositions].sort((a,b)=>a.id.localeCompare(b.id)),addedEventIds:proposal.addedEventIds});
+    if(options.dryRun||options.mode!=='publish'||proposal.status!=='ready')continue;
+    const refs=[...completionRefs,pin(r.umbrella),pin(r.review),...sourceItems.map(i=>pin(i.source)),...sourceItems.filter(i=>i.cache?.exists).map(i=>pin(i.cache)),...sourceItems.filter(i=>i.nonmember&&i.decision?.exists).map(i=>pin(i.decision)),...venueDocs.filter(d=>d.exists).map(pin)];
+    const references=[...new Map(refs.map(p=>[p.path,p])).values()];
+diff --git a/src/services/festivalReviewedCorroboration.test.ts b/src/services/festivalReviewedCorroboration.test.ts
+new file mode 100644
+index 0000000..516422b
+--- /dev/null
++++ b/src/services/festivalReviewedCorroboration.test.ts
+@@ -0,0 +1,81 @@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import {createHash} from 'node:crypto';
++import {reviewedFestivalCorroboration} from './festivalReviewedCorroboration.js';
++import {festivalShadowFingerprint as fp} from './festivalLinkShadowJob.js';
++import type {FestivalReviewedCorroboration} from './festivalReviewedCorroboration.js';
++const sha=(s:string)=>createHash('sha256').update(s).digest('hex');
++function fixture():Parameters<typeof reviewedFestivalCorroboration>[0] {
++ const edition={id:'festival_fixture',name:'Harvest Fest',year:2026,startDate:'2026-10-17',endDate:'2026-10-17',organizerId:'reviewed',organizerNames:['Harvest Fest'],sourceIds:['https://official.example/harvest']};
++ const source={id:'e_fixture',source:{id:'123456789',url:'https://social.example/post',text:'Harvest Fest Saturday October 17\nPHOTO BOOTH\n3-7 PM',publisherId:'publisher_fixture'},kind:'festival_activity' as const,scopeText:'PHOTO BOOTH\n3-7 PM',membershipText:'Harvest Fest',festivalNameText:'Harvest Fest',yearText:'',activity:{name:'Photo Booth',venueId:'venue_fixture',startDate:'',startTime:'15:00'},eventText:'PHOTO BOOTH',dateText:'Saturday October 17',timeText:'3-7 PM',venueText:'Venue'};
++ const context={captureKey:'capture_fixture',sourceFingerprint:sha('caption+ordered gallery'),evidencePolicy:'unchanged',activityFingerprint:sha('original captured activity'),verifierAccepted:true};
++ const version={seconds:100,nanoseconds:15};
++ const canonical={path:'venues/venue_fixture/events/child_fixture',version,data:{eventName:'Photo Booth',venueId:'venue_fixture',startDate:'2026-10-17',endDate:'2026-10-17',startTime:'15:00',endTime:'19:00',isRecurring:'No'}};
++ const programmeData={linkedEventIds:['child_fixture'],sourceUrl:'https://official.example/harvest'};
++ const umbrella={path:'venues/venue_fixture/events/festival_fixture',version,data:{eventName:'Harvest Fest',venueId:'venue_fixture',startDate:'2026-10-17',endDate:'2026-10-17',startTime:'15:00',endTime:'20:00',programmeData}};
++ const review={path:'festival_programme_reviews/review_fixture',version,data:{status:'published',finalization:{manual:{programmeData}},programmeEventLinks:[{eventPath:canonical.path,eventName:'Photo Booth',startDate:'2026-10-17',startTime:'15:00',sourceUrl:programmeData.sourceUrl}],heldItems:[{name:'Outdoor Play Zone'}]}};
++ const header='Harvest Fest at Venue Saturday, October 17, 2026 | 3:00 to 8:00 pm';
++ const row='Photo Booth | 3:00 to 7:00 pm',body=header+' '+row;
++ const site={path:'festival_website_evidence/festival_fixture',version,data:{version:1,editionId:edition.id,url:programmeData.sourceUrl,body,bodySha256:sha(body),httpBody:body,httpBodySha256:sha(body),observedAt:'2026-10-17T12:00:00Z'}};
++ const receipt:FestivalReviewedCorroboration={version:1,kind:'reviewed_existing_member',reviewId:'review_receipt_fixture',reviewedAt:'2026-10-17T13:00:00Z',editionId:edition.id,editionFingerprint:fp(edition),sourceId:source.source.id,sourceVenueText:source.venueText,...context,evidenceId:source.id,evidenceFingerprint:fp(source),review:{path:review.path,version,fingerprint:fp(review.data)},umbrella:{path:umbrella.path,version,fingerprint:fp(umbrella.data)},website:{path:site.path,url:site.data.url,bodySha256:sha(body),httpBodySha256:sha(body),venueText:'Venue',header:{start:0,end:header.length,text:header,dateText:'October 17, 2026',date:'2026-10-17',year:2026},rows:[{start:header.length+1,end:body.length,text:row,name:'Photo Booth',startTime:'15:00',endTime:'19:00'}]},rowIndex:0,canonical:{path:canonical.path,version,fingerprint:fp(canonical.data),name:'Photo Booth',venueId:'venue_fixture',date:'2026-10-17',startTime:'15:00',endTime:'19:00'}};
++ return {edition,source,context,receipts:[receipt],websites:[site],umbrella,review,candidates:[canonical],suppressedEventIds:[],asOf:'2026-10-17'};
++}
++test('acknowledges only an exact existing manual member; leaves source literals and ownership blank',()=>{
++ const f=fixture(),before=structuredClone(f),out=reviewedFestivalCorroboration(f)!;
++ assert.equal(out.status,'corroborated');assert.equal(out.reason,'reviewed_existing_member');assert.equal(out.supplementalEvidence?.originalEvidenceUnchanged,true);assert.deepEqual(f,before);assert.equal(f.source.yearText,'');assert.equal(f.source.activity.startDate,'');assert(!('links' in out));assert(!('sourceUniqueIds' in out));
++});
++const changes:Record<string,(f:ReturnType<typeof fixture>)=>void>={
++ 'changed website body':f=>{f.websites[0].data.body+='changed';},
++ 'changed raw HTTP body':f=>{f.websites[0].data.httpBody+='changed';},
++ 'unrelated derived text paired with valid HTTP body':f=>{const site=f.websites[0].data;site.httpBody='Unrelated valid HTTP body';site.httpBodySha256=sha(site.httpBody);f.receipts[0].website.httpBodySha256=site.httpBodySha256;},
++ 'changed body with recomputed hash':f=>{f.websites[0].data.body+='changed';f.websites[0].data.bodySha256=sha(f.websites[0].data.body);},
++ 'wrong year':f=>{f.receipts[0].website.header.year=2025;},
++ 'wrong header date':f=>{f.receipts[0].website.header.dateText='October 18, 2026';},
++ 'header slot drift':f=>{f.receipts[0].website.header.start++;},
++ 'gallery fingerprint drift':f=>{f.context.sourceFingerprint=sha('reordered gallery');},
++ 'source caption drift':f=>{f.source.source.text+='changed';},
++ 'canonical clock drift':f=>{f.candidates[0].data.startTime='16:00';},
++ 'canonical version drift':f=>{f.candidates[0].version={seconds:100,nanoseconds:16};},
++ 'different slot':f=>{f.source.activity.startTime='16:00';},
++ 'missing child':f=>{f.candidates=[];},
++ 'duplicate candidate':f=>{f.candidates=[...f.candidates,{...structuredClone(f.candidates[0]),path:'venues/venue_fixture/events/duplicate_fixture'}];},
++ 'same title different clock':f=>{f.candidates=[...f.candidates,{...structuredClone(f.candidates[0]),path:'venues/venue_fixture/events/other_slot',data:{...f.candidates[0].data,startTime:'18:00'}}];},
++ 'disabled receipt':f=>{f.receipts[0].enabled=false;},
++ 'disabled child':f=>{f.candidates[0].data.disabled=true;},
++ 'expired child':f=>{f.candidates[0].data.expired=true;},
++ 'recurring child':f=>{f.candidates[0].data.isRecurring='Yes';},
++ 'manual suppression':f=>{f.suppressedEventIds=['child_fixture'];},
++ 'removed current membership':f=>{f.umbrella.data.programmeData.linkedEventIds=[];},
++ 'removed manual membership':f=>{f.review.data.finalization.manual.programmeData.linkedEventIds=[];},
++ 'manual item hold':f=>{f.review.data.heldItems.push({name:'Photo Booth'});},
++ 'negative verifier':f=>{f.context.verifierAccepted=false;},
++ 'changed activity receipt':f=>{f.context.activityFingerprint=sha('changed');},
++ 'duplicate receipt':f=>{f.receipts=[...f.receipts,...f.receipts];},
++ 'historical expired occurrence':f=>{f.asOf='2026-10-18';},
++ 'wrong official URL':f=>{f.websites[0].data.url='https://other.example/harvest';},
++ 'reordered programme':f=>{f.receipts[0].website.rows.push(f.receipts[0].website.rows[0]);},
++ 'unprinted source end clock':f=>{f.source.timeText='3 PM';},
++ 'invalid asOf':f=>{f.asOf='2026-99-99';},
++ 'explicit conflicting printed date with blank normalized date':f=>{f.source.dateText='October 18';f.receipts[0].evidenceFingerprint=fp(f.source);},
++ 'explicit conflicting printed edition':f=>{f.source.festivalNameText='Another Festival';f.receipts[0].evidenceFingerprint=fp(f.source);},
++ 'explicit conflicting printed weekday':f=>{f.source.dateText='Sunday October 17';f.receipts[0].evidenceFingerprint=fp(f.source);},
++ 'website header names another festival':f=>{const h=f.receipts[0].website.header;h.text=h.text.replace('Harvest Fest','Another Fest');const site=f.websites[0].data;site.body=h.text+' '+f.receipts[0].website.rows[0].text;h.end=h.text.length;f.receipts[0].website.rows[0].start=h.end+1;f.receipts[0].website.rows[0].end=site.body.length;site.bodySha256=sha(site.body);site.httpBody=site.body;site.httpBodySha256=sha(site.body);f.receipts[0].website.bodySha256=site.bodySha256;f.receipts[0].website.httpBodySha256=site.httpBodySha256;},
++};
++for(const [name,change] of Object.entries(changes))test(name+' fails closed without ordinary fallback',()=>{const f=fixture();change(f);assert.equal(reviewedFestivalCorroboration(f)?.reason,'invalid_reviewed_corroboration');});
++test('missing receipt leaves ordinary strict resolver in charge',()=>{const f=fixture();f.receipts=[];assert.equal(reviewedFestivalCorroboration(f),undefined);});
++test('exact umbrella self-reference is neither unrelated nor a programme child',()=>{
++ const f=fixture(),r=f.receipts[0];f.source.activity={name:'Harvest Fest',venueId:'venue_fixture',startDate:'2026-10-17',startTime:'15:00'};f.source.eventText='Harvest Fest';f.source.timeText='3:00 pm';r.kind='reviewed_umbrella_self_reference';r.evidenceFingerprint=fp(f.source);r.rowIndex=-1;r.canonical={...r.canonical,...r.umbrella,name:'Harvest Fest',startTime:'15:00',endTime:'20:00'};
++ const out=reviewedFestivalCorroboration(f)!;assert.equal(out.status,'self_reference');assert.equal(out.reason,'umbrella_self_reference');assert.deepEqual(out.candidatePaths,[f.umbrella.path]);assert(!('links' in out));
++});
++function venueFixture(){const f=fixture(),r=f.receipts[0];f.source.activity.venueId='';f.edition.venueIds=['venue_fixture'];f.umbrella.data.locationScope='venue';f.review.data.reviewedVenueId='venue_fixture';f.review.data.finalization.manual.venueAliases=['Venue'];const venue={path:'venues/venue_fixture',version:{seconds:100,nanoseconds:15},data:{facebookUrl:f.source.source.url,website:'https://official.example/',name:'Venue'}};f.venueDocuments=[venue];r.evidenceFingerprint=fp(f.source);r.editionFingerprint=fp(f.edition);r.umbrella.fingerprint=fp(f.umbrella.data);r.review.fingerprint=fp(f.review.data);r.venueBinding={sourcePublisherUrl:f.source.source.url,officialWebsiteOrigin:'https://official.example',canonical:{path:venue.path,version:venue.version,fingerprint:fp(venue.data)}};return f;}
++test('explicit private venue identity acknowledges the exact original blank without adding an alias',()=>{const f=venueFixture(),before=structuredClone(f);assert.equal(reviewedFestivalCorroboration(f)?.status,'corroborated');assert.deepEqual(f,before);assert.equal(f.source.activity.venueId,'');});
++for(const[name,change]of Object.entries<(f:ReturnType<typeof venueFixture>)=>void>({
++ 'different first-party publisher':f=>{f.source.source.url='https://social.example/other';f.receipts[0].evidenceFingerprint=fp(f.source);},
++ 'canonical venue drift':f=>{f.venueDocuments![0].data.name='Other venue';},
++ 'different primary venue':f=>{f.umbrella.data.venueId='other_venue';f.receipts[0].umbrella.fingerprint=fp(f.umbrella.data);},
++ 'missing full official venue header':f=>{f.receipts[0].website.venueText='Other venue';},
++ 'changed original venue literal':f=>{f.source.venueText='Other';f.receipts[0].evidenceFingerprint=fp(f.source);},
++ 'conflicting nonempty original venue ID':f=>{f.source.activity.venueId='other_venue';f.receipts[0].evidenceFingerprint=fp(f.source);},
++ 'missing venue binding':f=>{delete f.receipts[0].venueBinding;},
++ 'wrong official website origin':f=>{f.receipts[0].venueBinding!.officialWebsiteOrigin='https://other.example';},
++}))test(name+' cannot inherit reviewed venue identity',()=>{const f=venueFixture();change(f);assert.equal(reviewedFestivalCorroboration(f)?.status,'held');});
+diff --git a/src/services/festivalReviewedCorroboration.ts b/src/services/festivalReviewedCorroboration.ts
+new file mode 100644
+index 0000000..6e849f9
+--- /dev/null
++++ b/src/services/festivalReviewedCorroboration.ts
+@@ -0,0 +1,115 @@
++/** Private supplemental evidence. This interface can acknowledge an existing member,
++ * never mint a link, ingestion ownership, or facts allegedly printed in a capture. */
++import {createHash} from 'node:crypto';
++import {DateTime} from 'luxon';
++import {festivalShadowFingerprint as fingerprint} from './festivalLinkShadowJob.js';
++import type {FestivalEdition,FestivalSourceEvidence,FestivalCanonicalRecord} from './festivalLinker.js';
++export interface CorroborationVersion {seconds:number;nanoseconds:number}
++export interface CorroborationDocument {path:string;data:Record<string,any>;version?:CorroborationVersion}
++export interface FestivalWebsiteEvidence {
++ version:1;editionId:string;url:string;body:string;bodySha256:string;httpBody:string;httpBodySha256:string;observedAt:string;
++ /** Body is the exact saved HTTP text representation, not the source caption. */
++}
++export interface FestivalReviewedCorroboration {
++ version:1;kind:'reviewed_existing_member'|'reviewed_umbrella_self_reference';enabled?:boolean;
++ reviewId:string;reviewedAt:string;editionId:string;editionFingerprint:string;
++ sourceId:string;sourceFingerprint:string;captureKey:string;evidencePolicy:string;sourceVenueText:string;
++ evidenceId:string;evidenceFingerprint:string;activityFingerprint:string;
++ review:{path:string;fingerprint:string;version:CorroborationVersion};
++ umbrella:{path:string;fingerprint:string;version:CorroborationVersion};
++ website:{path:string;version?:CorroborationVersion;url:string;bodySha256:string;httpBodySha256:string;venueText:string;
++  header:{start:number;end:number;text:string;dateText:string;date:string;year:number};
++  rows:{start:number;end:number;text:string;name:string;startTime:string;endTime:string}[]};
++ rowIndex:number;
++ venueBinding?:{sourcePublisherUrl:string;officialWebsiteOrigin:string;canonical:{path:string;fingerprint:string;version:CorroborationVersion}};
++ canonical:{path:string;fingerprint:string;version:CorroborationVersion;name:string;venueId:string;date:string;startTime:string;endTime:string};
++}
++export interface FestivalCorroborationContext {captureKey:string;sourceFingerprint:string;evidencePolicy:string;activityFingerprint:string;verifierAccepted:boolean}
++export interface FestivalCorroborationDisposition {
++ id:string;sourceId:string;evidenceFingerprint:string;status:'corroborated'|'self_reference'|'held';
++ reason:'reviewed_existing_member'|'umbrella_self_reference'|'invalid_reviewed_corroboration';pending:false;candidatePaths:string[];
++ supplementalEvidence?:{kind:'reviewed_website';receiptFingerprint:string;officialUrl:string;bodySha256:string;date:string;startTime:string;endTime:string;originalEvidenceUnchanged:true};
++}
++const hash=(v:string)=>createHash('sha256').update(v,'utf8').digest('hex');
++/** Versioned, deterministic text representation of the saved HTTP body. */
++export const festivalWebsiteBodyText=(body:string):string=>body.replace(/<(script|style)\b[^>]*>[\s\S]*?<\/\1>/gi,' ').replace(/<[^>]+>/g,' ').replace(/&(?:nbsp|#160);/g,' ').replace(/&amp;/g,'&').replace(/\s+/g,' ').trim();
++const flag=(v:unknown)=>v===true||v===1||typeof v==='string'&&['true','yes','1'].includes(v.toLowerCase());
++const inactive=(d:Record<string,any>)=>['disabled','deleted','isDeleted','cancelled','canceled','isCancelled','isCanceled','expired','isExpired','suppressed','manuallySuppressed'].some(k=>flag(d[k]))||['disabled','cancelled','canceled','deleted','rejected','superseded','expired','suppressed'].includes(String(d.status||'').toLowerCase());
++const key=(v:unknown)=>String(v||'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');
++const sameVersion=(a:any,b:any)=>a&&b&&Number.isInteger(a.seconds)&&Number.isInteger(a.nanoseconds)&&a.seconds===b.seconds&&a.nanoseconds===b.nanoseconds;
++const pinMatches=(p:any,d:CorroborationDocument)=>p?.path===d.path&&p.fingerprint===fingerprint(d.data)&&sameVersion(p.version,d.version);
++const clock=(s:unknown)=>typeof s==='string'&&/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(s);
++function literalClockRange(text:string,start:string,end:string):boolean {
++ // Only an explicit pair; no clock priority, guessed duration, or slot borrowing.
++ const m=text.match(/\b(\d{1,2})(?::(\d{2}))?\s*(am|pm)?\s*(?:to|[-–—])\s*(\d{1,2})(?::(\d{2}))?\s*(am|pm)\b/i);
++ if(!m)return false;
++ const hh=(h:string,min:string|undefined,mer:string)=>String(Number(h)%12+(mer.toLowerCase()==='pm'?12:0)).padStart(2,'0')+':'+(min||'00');
++ return Number(m[1])>=1&&Number(m[1])<=12&&Number(m[4])>=1&&Number(m[4])<=12&&hh(m[1],m[2],m[3]||m[6])===start&&hh(m[4],m[5],m[6])===end;
++}
++function consistentPrintedDate(text:string,expected:string):boolean {
++ const date=DateTime.fromISO(expected);if(!date.isValid)return false;
++ const months=['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
++ for(const token of text.match(/\b20\d{2}-\d{2}-\d{2}\b/g)||[])if(token!==expected)return false;
++ for(const m of text.matchAll(/\b(jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:tember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\.?\s+(\d{1,2})(?:,?\s+(20\d{2}))?\b/gi)) {
++  if(months.indexOf(m[1].slice(0,3).toLowerCase())+1!==date.month||Number(m[2])!==date.day||m[3]&&Number(m[3])!==date.year)return false;
++ }
++ const weekdays=['mon','tue','wed','thu','fri','sat','sun'];
++ for(const m of text.matchAll(/\b(mon(?:day)?|tue(?:sday)?|wed(?:nesday)?|thu(?:rsday)?|fri(?:day)?|sat(?:urday)?|sun(?:day)?)\b/gi))if(weekdays.indexOf(m[1].slice(0,3).toLowerCase())+1!==date.weekday)return false;
++ return true;
++}
++/** A missing receipt keeps the ordinary resolver. A present but invalid receipt
++ * fails closed for that item and must never fall through to ordinary linking. */
++export function reviewedFestivalCorroboration(input:{edition:FestivalEdition;source:FestivalSourceEvidence;context:FestivalCorroborationContext;
++ receipts:readonly FestivalReviewedCorroboration[];websites:readonly CorroborationDocument[];
++ umbrella:CorroborationDocument;review:CorroborationDocument;candidates:readonly (FestivalCanonicalRecord&{version?:CorroborationVersion})[];venueDocuments?:readonly CorroborationDocument[];
++ suppressedEventIds:readonly string[];asOf:string;}):FestivalCorroborationDisposition|undefined {
++ const {source:e,context:c}=input;
++ const receipts=input.receipts.filter(r=>r?.evidenceId===e.id);
++ if(!receipts.length)return;
++ const out:FestivalCorroborationDisposition={id:e.id,sourceId:e.source.id,evidenceFingerprint:fingerprint(e),status:'held',reason:'invalid_reviewed_corroboration',pending:false,candidatePaths:[]};
++ try {
++  if(receipts.length!==1)return out;const r=receipts[0],ed=input.edition;
++  if(!/^20\d{2}-\d{2}-\d{2}$/.test(input.asOf)||DateTime.fromISO(input.asOf).toISODate()!==input.asOf||r.version!==1||r.enabled===false||!['reviewed_existing_member','reviewed_umbrella_self_reference'].includes(r.kind)||!r.reviewId?.trim()||!Number.isFinite(Date.parse(r.reviewedAt))||
++   r.editionId!==ed.id||r.editionFingerprint!==fingerprint(ed)||r.sourceId!==e.source.id||r.sourceFingerprint!==c.sourceFingerprint||r.captureKey!==c.captureKey||r.evidencePolicy!==c.evidencePolicy||r.activityFingerprint!==c.activityFingerprint||!c.verifierAccepted||r.evidenceFingerprint!==fingerprint(e)||
++   !pinMatches(r.review,input.review)||!pinMatches(r.umbrella,input.umbrella)||inactive(input.review.data)||inactive(input.umbrella.data))return out;
++  const w=r.website,docs=input.websites.filter(d=>d.path===w.path);if(docs.length!==1||w.version&&!sameVersion(w.version,docs[0].version))return out;
++  const site=docs[0].data as FestivalWebsiteEvidence;
++  const official=input.umbrella.data.programmeData?.sourceUrl||input.umbrella.data.areaData?.sourceUrl;
++  const url=new URL(site.url);if(site.version!==1||site.editionId!==ed.id||site.url!==w.url||site.url!==official||url.protocol!=='https:'||url.username||url.password||!Number.isFinite(Date.parse(site.observedAt))||typeof site.body!=='string'||site.body.length>1000000||hash(site.body)!==site.bodySha256||site.bodySha256!==w.bodySha256||typeof site.httpBody!=='string'||site.httpBody.length>1000000||hash(site.httpBody)!==site.httpBodySha256||site.httpBodySha256!==w.httpBodySha256)return out;
++  if(inactive(site)||festivalWebsiteBodyText(site.httpBody)!==site.body)return out;
++  const slice=(x:{start:number;end:number;text:string})=>Number.isInteger(x.start)&&Number.isInteger(x.end)&&x.start>=0&&x.end>x.start&&site.body.slice(x.start,x.end)===x.text;
++  const h=w.header,date=DateTime.fromFormat(h.dateText,'MMMM d, yyyy',{locale:'en'});
++  if(!slice(h)||!key(h.text).includes(key(ed.name))||key(e.festivalNameText)!==key(ed.name)||!consistentPrintedDate(e.dateText,h.date)||!consistentPrintedDate(e.dateHeaderText||'',h.date)||!h.text.includes(h.dateText)||!date.isValid||date.toISODate()!==h.date||h.year!==ed.year||date.year!==h.year||h.date<ed.startDate||h.date>ed.endDate||
++    (h.text.match(/\b(?:19|20)\d{2}\b/g)||[]).some(y=>y!==String(ed.year))||!Array.isArray(w.rows)||!w.rows.length||w.rows.length>50)return out;
++  let previous=h.end;for(const row of w.rows){if(!slice(row)||row.start<previous||!row.text.includes(row.name)||!clock(row.startTime)||!clock(row.endTime)||row.endTime<=row.startTime||!literalClockRange(row.text,row.startTime,row.endTime))return out;previous=row.end;}
++  const p=r.canonical;
++  if(!Number.isInteger(r.rowIndex)||r.rowIndex< -1||r.rowIndex>=w.rows.length||r.rowIndex===-1&&r.kind!=='reviewed_umbrella_self_reference')return out;
++  const row=r.rowIndex===-1?{text:h.text,name:ed.name,startTime:p.startTime,endTime:p.endTime}:w.rows[r.rowIndex];
++  if(r.rowIndex===-1&&(!h.text.includes(ed.name)||!literalClockRange(h.text,p.startTime,p.endTime)))return out;
++  if(p.date!==h.date||!clock(p.startTime)||!clock(p.endTime)||p.startTime!==row.startTime||p.endTime!==row.endTime||key(e.activity.name)!==key(p.name)||key(row.name)!==key(p.name)||r.sourceVenueText!==e.venueText||!r.sourceVenueText.trim()||
++    (e.activity.venueId?e.activity.venueId!==p.venueId:input.umbrella.data.locationScope!=='venue'||input.umbrella.data.venueId!==p.venueId||input.review.data.reviewedVenueId!==p.venueId||!ed.venueIds?.includes(p.venueId)||!w.venueText||!h.text.includes(w.venueText)||!input.review.data.finalization?.manual?.venueAliases?.some((v:string)=>key(v)===key(w.venueText)))||e.activity.startTime!==p.startTime||e.activity.startDate&&e.activity.startDate!==p.date||e.yearText&&e.yearText!==String(ed.year))return out;
++  if(!e.activity.venueId){
++   const b=r.venueBinding,v=input.venueDocuments?.filter(d=>d.path===`venues/${p.venueId}`);
++   if(!b||v?.length!==1||!pinMatches(b.canonical,v[0])||inactive(v[0].data)||b.sourcePublisherUrl!==e.source.url||v[0].data.facebookUrl!==b.sourcePublisherUrl||new URL(v[0].data.website).origin!==b.officialWebsiteOrigin||new URL(site.url).origin!==b.officialWebsiteOrigin)return out;
++  }
++  const linked=input.umbrella.data.programmeData?.linkedEventIds||input.umbrella.data.areaData?.locations?.flatMap((l:any)=>l.linkedEventIds||[])||[];
++  const manual=input.review.data.finalization?.manual;
++  const held=[...(input.review.data.heldItems||[]),...(manual?.heldItems||[])];
++  if(held.some((v:any)=>key(v.name||v.eventName)===key(p.name))||input.suppressedEventIds.includes(p.path.split('/').at(-1)!))return out;
++  if(r.kind==='reviewed_umbrella_self_reference') {
++   if(p.path!==input.umbrella.path||!pinMatches(p,input.umbrella)||key(p.name)!==key(ed.name)||p.date!==input.umbrella.data.startDate||p.startTime!==input.umbrella.data.startTime||p.endTime!==input.umbrella.data.endTime)return out;
++  } else {
++   const id=p.path.split('/').at(-1)!;
++   if(p.path===input.umbrella.path||p.date<input.asOf||!linked.includes(id)||!literalClockRange(e.timeText,p.startTime,p.endTime))return out;
++   const manualIds=manual?.programmeData?.linkedEventIds||manual?.areaData?.locations?.flatMap((l:any)=>l.linkedEventIds||[])||[];
++   if(!manualIds.includes(id))return out;
++   const matches=input.candidates.filter(d=>d.path===p.path),slot=input.candidates.filter(d=>key(d.data.eventName||d.data.name)===key(p.name)&&d.data.venueId===p.venueId&&d.data.startDate===p.date);
++   if(matches.length!==1||slot.length!==1||input.candidates.filter(d=>d.path.split('/').at(-1)===id).length!==1)return out;
++   const child=matches[0],d=child.data;
++   if(!pinMatches(p,child)||!/^venues\/[A-Za-z0-9_-]+\/events\/[A-Za-z0-9_-]+$/.test(p.path)||p.path.split('/')[1]!==p.venueId||key(d.eventName||d.name)!==key(p.name)||d.venueId!==p.venueId||d.startDate!==p.date||d.endDate!==p.date||d.startTime!==p.startTime||d.endTime!==p.endTime||inactive(d)||flag(d.isRecurring)||d.recurringPattern&&!['none','no'].includes(String(d.recurringPattern).toLowerCase())||d.originalEventId||flag(d.isRecurringInstance))return out;
++   const authorities=input.review.data.programmeEventLinks||input.review.data.areaEventLinks||[];
++   if(!authorities.some((a:any)=>a.eventPath===p.path&&a.sourceUrl===site.url&&a.startDate===p.date&&a.startTime===p.startTime&&key(a.eventName)===key(p.name)))return out;
++  }
++  return {...out,status:r.kind==='reviewed_existing_member'?'corroborated':'self_reference',reason:r.kind==='reviewed_existing_member'?'reviewed_existing_member':'umbrella_self_reference',candidatePaths:[p.path],supplementalEvidence:{kind:'reviewed_website',receiptFingerprint:fingerprint(r),officialUrl:site.url,bodySha256:site.bodySha256,date:p.date,startTime:p.startTime,endTime:p.endTime,originalEvidenceUnchanged:true}};
++ }catch{return out;}
++}
