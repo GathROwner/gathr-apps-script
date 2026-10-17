@@ -1434,3 +1434,56 @@ deltas/writes/paid sources. Proof: timestamp-correction-independent-verification
 in that directory. The earlier acceptance exception is resolved; the approved
 remaining batch is complete. Exact source/version guards remain unchanged.
 Future revisions still require fresh source proof; no automatic renewal is implied.
+
+### October 17 remaining hold adjudication: closed for the reviewed sources
+
+Craig authorized decisions on every remaining hold and explicitly accepts missing
+uncertain events. All 24 festival outcomes plus six venue/programme/historical
+records were reviewed. These are 30 evidence decisions, not 30 distinct events:
+two existing verified Tivoli listings/links preserved, three historical references
+archived, and 25 additional recoveries skipped. No production status, source,
+event, link, venue, media, queue, job, traffic or parser code was changed.
+
+The current recovery checklist is closed. Keep existing protective holds; do not
+repeatedly chase unchanged cases or turn this into a permanent publisher ban.
+Materially new semantic evidence may reopen an individual case. A new dataset ID
+or signed CDN URL alone does not resolve the underlying issue.
+
+The fresh 145-source read-only worker pass retained the expected two Harvest and
+22 Anchor holds with zero gaps/unconfirmed/paid/public writes. Each held outcome
+was matched to its original source evidence and canonical inventory. Original
+ordered galleries, captions, current owner/directory pages and the Curling poster
+were reviewed. Full per-outcome decisions and raw evidence references:
+`docs/oct17-final-hold-decisions.md` and private
+`firebase/artifacts/oct17-final-hold-adjudication/final-decisions.json`.
+
+Corrected observations for future same-mechanism audits:
+
+- **Festival row/header contract:** sixteen Anchor roundup rows explicitly print
+  the festival and 2026 in the day heading. Bare extracted film titles prevent
+  the worker's festival-prefixed named-row branch; its fallback then requires
+  the year within the membership row. This is an open source-context software
+  limitation, not proof that the original posts are invalid. Preserve the two
+  already verified dated Tivoli records; omit additional recovery from this path.
+  Future hardening needs exact row/header reproduction and cross-date/venue controls.
+- **Location roles and version conflicts:** direct HTTP readback at 20:11:38 UTC
+  confirms both 211 organization and service pages now state November7,2026,
+  10am–1pm, Credit Union Place. Earlier cached service rendering still says2025.
+  Original campaign says10am–2pm. Venue evidence improved; the current exclusion
+  is now a finish-time conflict, not solely a missing2026venue. Preserve collection
+  partner versus attendee venue separation (existing venue-role mechanisms).
+- **Joint site identity:** Kay's is one advertised stop naming two neighbouring
+  businesses. Omit the current recovery; do not create duplicate events or merge
+  canonical businesses simply to make a point match.
+- **Programme lifecycle:** Curling signup and actual weekly commencement remain
+  different temporal roles. Preserve approved signup events and programme retirements.
+- **Relative dates and historical references:** don't borrow a TIFF2020 award year
+  from a film still or turn an October16 'tonight' post into an October17/18 event.
+- **Conflicting versions and occurrence identity:** current Harvest Play Zone
+  gallery/website agree2–7pm, but the older reviewed programme ends6pm; retain the
+  manual exclusion for this batch. Firepits3–8pm and outdoor-fire4–6pm need exact
+  identity before merging/adding. Archive Moth Lane's expired clock conflict.
+
+These observations are learning cases, not claims that general prevention is
+implemented. Record repeated failures against these mechanisms and implement
+general fixes only with source-grounded reproductions and healthy controls.

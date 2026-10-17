@@ -47,6 +47,17 @@ location evidence gaps. Moth Lane's historical clock conflict remains retired/he
 Do not infer recovery from deployment or a newer post unless the exact source,
 date, clock and attendance-location evidence supports it.
 
+**Later October17 human adjudication:** Craig accepts omitting these uncertain
+additions. Read `docs/oct17-final-hold-decisions.md`; the current source-specific
+recovery checklist is closed. Kay's is skipped; Curling programme parents stay
+retired; Moth Lane and the two October16 Cinema references are historical only.
+Fresh direct211 pages now name Credit Union Place for2026 but say10–13 versus
+the original campaign's10–14, so Coats remains excluded for conflicting finish
+times. Do not repeat the old missing2026venue explanation as the current finding.
+Preserve existing verified listings, links and signup sessions. Unchanged source
+holds are expected outcomes, not newly outstanding repair tasks. Reopen only for
+material new semantic evidence or a separately validated general prevention fix.
+
 ## Festival worker
 
 Latest October17 independently verified serving release at19:44:38 UTC:
