@@ -17,7 +17,7 @@ for(const row of assemblies){
  }
  console.log(JSON.stringify({mode,targets,commit:row.releaseCommit,startedAt:new Date().toISOString()}));
  const fd=fs.openSync(path.join(out,row.sourceFunction+'-'+mode+'.log'),'w');
- const run=cp.spawnSync(process.execPath,['C:/Users/craig/AppData/Roaming/npm/node_modules/firebase-tools/lib/bin/firebase.js',...args],{cwd:row.folder,stdio:['ignore',fd,fd],env:process.env});fs.closeSync(fd);
+ const run=cp.spawnSync(process.execPath,['C:/Users/craig/AppData/Roaming/npm/node_modules/firebase-tools/lib/bin/firebase.js',...args],{cwd:row.folder,stdio:['ignore',fd,fd],env:{...process.env,FUNCTIONS_DISCOVERY_TIMEOUT:'60'}});fs.closeSync(fd);
  const text=fs.readFileSync(path.join(out,row.sourceFunction+'-'+mode+'.log'),'utf8');
  // Firebase may write credentials into debug logs: print only progress/status lines.
  const safe=text.split('\n').filter(l=>/Successful|successful|Deploy complete|Dry run|dry run|Error:|Warning:|functions: (updating|creating)|functions\[/.test(l));console.log(safe.join('\n'));
