@@ -3,16 +3,17 @@
 Last updated: 2026-10-18 (Atlantic)
 
 October18 public-aquatics family omission (continuing the October17 family phrase
-coverage mechanism, with PQ-003/PQ-033 activity-versus-hours controls): Bell Aliant
-Centre's All pools open, Y's Club Free Swim and Waterslide open have live/API
-score15. The actual previously released v6 scorer reproduces15 for the exact
-source-supported items. Local v7 recognizes public recreational aquatic titles
-as family activities, preserves adult/private/closure/lane controls and proposes
-three exact15→60 label refreshes. **Not deployed or applied:** regular dataset
-`1Nwf4lh-reDH0alm37Lvkqu61Shv_mwer` remains running. Fresh serving metadata access
-returned403; later release requires restored read access, idle-parser checks and
-the exact batch approval. See [source trace, local prevention and proposed
-correction](pool-family-oct18-local-prevention.md). No live fields were changed.
+coverage mechanism, with PQ-003/PQ-033 activity-versus-hours controls): **deployed
+and exact correction complete** after the regular full run ended10:33 Halifax.
+Bell Aliant Centre's All pools open, Y's Club Free Swim and Waterslide open now
+have score60/likely/v7; lane swim remains15. All six publishing functions are
+ACTIVE/latest100%, with preserved configuration and their own serving baselines.
+The three parsers share hash `9c1f3208397eff88eb1d9432059001015afea848`.
+Fresh compiled tests1,000/1,000 pass. Guarded atomic correction changed only
+three computed-label sets/timestamps and feed312 to313; full backup and exact
+delta verified. Detail APIs and all10 pages/928 active events confirm correct
+scores and exactly one copy of each target/control. See [completed source trace,
+release and repair](pool-family-oct18-local-prevention.md).
 
 October14 Be You case (PQ-047, with PQ-035 generic-activity overlap): see [source trace and local prevention](be-you-duplicate-case-20261014.md).
 The active May karaoke parent aged out of the120-day family query, while a
