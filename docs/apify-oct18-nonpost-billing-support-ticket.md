@@ -1,6 +1,8 @@
-# Draft support ticket: diagnostic rows charged as Facebook posts
+# Support ticket: diagnostic rows charged as Facebook posts
 
-**Status:** Prepared for Craig to review/send; not submitted.
+**Status:** Submitted October 18, 2026 through Apify's private support chat at https://apify.com/contact. Human billing/support escalation confirmed in the conversation. Replies will go to `craig@burgoyneinsurance.ca`; Apify quoted a typical response within a couple of days. No case number was displayed and no credit has been granted yet.
+
+**Confirmation:** `functions/artifacts/apify-nonpost-billing-oct18/submitted-confirmation.jpg`; exact sent text `submitted-message.txt`; receipt `submitted-result.json` in the same folder. The submitted text includes the account username and a request for human review. A follow-up clarified that this actor is maintained by Apify and requested escalation; the billing category was confirmed.
 
 **Subject:** Facebook Posts Scraper billing: empty/unavailable diagnostic rows charged as posts and date-filter results
 
