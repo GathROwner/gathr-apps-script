@@ -2,10 +2,11 @@
 // No production modules are imported; VM blocks all network/cloud dependencies.
 const fs=require('fs'),path=require('path'),vm=require('vm'),crypto=require('crypto');
 const D=path.join(__dirname,'../functions/artifacts/scraper-one-oct17');
+const OUT=process.argv[4]?path.resolve(process.argv[4]):D;
 const XLSX=require(path.join(D,'offline-deps/node_modules/xlsx'));
 const ts=require(path.join(D,'offline-deps/node_modules/typescript'));
 const read=n=>JSON.parse(fs.readFileSync(path.join(D,n),'utf8'));
-const save=(n,x)=>fs.writeFileSync(path.join(D,n),JSON.stringify(x,null,2));
+const save=(n,x)=>fs.writeFileSync(path.join(OUT,n),JSON.stringify(x,null,2));
 const loaded={};
 function load(name){
  if(loaded[name])return loaded[name];
@@ -40,14 +41,18 @@ function adapt(r){
  return {Text:r.postText||'','Sharedpost Text':s.postText||'','User Name':a.name||'',Pagename:a.name||'',Time:date(r.timestamp),Facebookurl:r.inputUrl||'',topLevelUrl:r.url||'',postId:r.postId||'',profilePicUrl:a.profilePicture||'',mediaUrls:JSON.stringify(urls),likes:r.reactionsCount??'',shares:r.sharesCount??'',comments:r.commentsCount??'',topReactionsCount:r.reactions?Object.keys(r.reactions).length:'','sharedPost/user/name':sa.name||'','sharedPost/user/profileUrl':sa.profileUrl||'','sharedPost/url':s.url||'','sharedPost/time':date(s.timestamp)};
 }
 (async()=>{
- const label=process.argv[2]||'smoke',prefix=label==='smoke'?'scratch':'corrected';
- const m=read('manifest.json'),e=m.runs.find(x=>x.label===label);if(!e?.collected)throw Error('Requested run incomplete');
- const raw=read(e.id+'-items.json').filter(r=>r.postId&&!r.error),rows=raw.map(adapt);
+ const label=process.argv[2]||'smoke',prefix=label==='smoke'?'scratch':process.argv[3]?label:'corrected';
+ let input;
+ if(process.argv[3])input=JSON.parse(fs.readFileSync(path.resolve(process.argv[3]),'utf8'));
+ else {const m=read('manifest.json'),e=m.runs.find(x=>x.label===label);if(!e?.collected)throw Error('Requested run incomplete');input=read(e.id+'-items.json')}
+ const raw=input.filter(r=>r.postId&&!r.error),rows=raw.map(adapt);
  const w=XLSX.utils.book_new();XLSX.utils.book_append_sheet(w,XLSX.utils.json_to_sheet(rows),'Data');
- const buf=XLSX.write(w,{type:'buffer',bookType:'xlsx'});fs.writeFileSync(path.join(D,prefix+'-adapted-'+label+'.xlsx'),buf);
+ const buf=XLSX.write(w,{type:'buffer',bookType:'xlsx'});fs.writeFileSync(path.join(OUT,prefix+'-adapted-'+label+'.xlsx'),buf);
  const parsed=(await load('driveService').parseXlsxFile(buf)).rows;
  const checks=raw.map((r,i)=>{const p=parsed[i],s=r.sharedPost||{};return {postId:r.postId,source:r.inputUrl,validation:validate(p),captionPreserved:p.text===(r.postText||''),sharedCaptionPreserved:p.sharedPostText===(s.postText||''),outerIdPreserved:p.uniqueId===r.postId,sourceUrlPreserved:p.facebookUrl===r.inputUrl,timestampPreserved:p.timestamp===date(r.timestamp),mediaPreserved:JSON.stringify(p.mediaUrls||[])===JSON.stringify(images(r)),sharedAuthorPreserved:(p.sharedPostAuthorName||'')===(s.author?.name||''),sharedProfilePreserved:(p.sharedPostAuthorUrl||'')===(s.author?.profileUrl||''),sharedUrlPreserved:(p.sharedPostUrl||'')===(s.url||''),sharedTimePreserved:(p.sharedPostTimestamp||'')===date(s.timestamp),videoAttachmentsWithoutImage:[...(r.attachments||[]),...(s.attachments||[])].filter(a=>a.type==='video'&&!a.thumbnail&&!a.thumbnailUrl&&!a.image?.uri).length}});
  save(prefix+'-adapted-'+label+'.json',rows);save(prefix+'-imported-'+label+'.json',parsed);save(prefix+'-import-checks.json',checks);
+ const normalizations=checks.flatMap((c,i)=>!c.sharedAuthorPreserved&&(parsed[i].sharedPostAuthorName||'')===(raw[i].sharedPost?.author?.name||'').trim()?[{postId:c.postId,field:'sharedPostAuthorName',kind:'serving_importer_trims_outer_whitespace',native:raw[i].sharedPost?.author?.name,imported:parsed[i].sharedPostAuthorName}]:[]);
+ save(prefix+'-import-normalizations.json',normalizations);
  const summary={runtime:read('runtime-provenance.json'),networkBlocked:true,cloudClientsBlocked:true,modelCalls:0,productionWrites:0,rawPosts:raw.length,parsedRows:parsed.length,validRows:checks.filter(x=>x.validation.isValid).length,validationFailures:checks.filter(x=>!x.validation.isValid),preservationFailures:checks.filter(x=>Object.entries(x).some(([k,v])=>k.endsWith('Preserved')&&!v)),videoAttachmentCountWithoutThumbnail:checks.reduce((n,x)=>n+x.videoAttachmentsWithoutImage,0),validationFunctionSha256:crypto.createHash('sha256').update(fn.getText(ast)).digest('hex')};
  save(prefix+'-import-summary.json',summary);console.log(JSON.stringify({revision:summary.runtime.revision,rows:summary.rawPosts,validRows:summary.validRows,preservationFailures:summary.preservationFailures.length,validationFailures:summary.validationFailures.map(x=>({postId:x.postId,errors:x.validation.errors})),videoAttachmentCountWithoutThumbnail:summary.videoAttachmentCountWithoutThumbnail}));
  if(label==='corrected-daily-20'){
