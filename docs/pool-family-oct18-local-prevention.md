@@ -19,10 +19,10 @@ source-by-source quality audit of every record produced by that run.
 
 ## Confirmed source-to-app trace
 
-The October18 Bell Aliant Centre card “All pools open”,09:00–11:45, carries stored
+Before correction, the October18 Bell Aliant Centre card “All pools open”,09:00–11:45, carried stored
 score15 / `unlikely` / `insufficient_family_evidence`, version `family-friendly-v5`.
-Its detail API also returns15, so the missing badge is upstream of app rendering.
-The same source's free swim has v6 score15 and waterslide has v5 score15.
+Its detail API also returned15, so the missing badge was upstream of app rendering.
+The same source's free swim had v6 score15 and waterslide had v5 score15.
 
 Exact original source `1534850241996227`, posted October16 at13:00:04UTC:
 `https://www.facebook.com/100064137963639/posts/1534850241996227`.
