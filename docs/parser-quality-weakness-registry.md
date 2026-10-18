@@ -1582,3 +1582,20 @@ Corrected observations for future same-mechanism audits:
 These observations are learning cases, not claims that general prevention is
 implemented. Record repeated failures against these mechanisms and implement
 general fixes only with source-grounded reproductions and healthy controls.
+
+### October 18 automatic existing-venue recovery — local preparation only
+
+Existing location-proof mechanisms also apply to every automatic matcher path.
+The serving resolver can mark a queue `resolved_existing` without recovering its
+event; manual idempotence can then report `alreadyApplied`. Two isolated,
+serving-baseline candidates separate source-proven venue identity from fenced,
+item-specific event recovery and verified completion. They avoid broader manual
+finalization side effects and whole-row replay. OCR origin, paused/unknown locks,
+both checkpoint collections, source/sibling/manual drift and retry limits are
+explicit guards. Production gates remain OFF; no deployment or live recovery is
+included. Four retained resolver negatives hold, six separate CFCY area reviews
+are excluded, and the independently verified historical positive cohort is still
+incomplete. Unit positives must not be presented as measured production yield.
+Full contract, tests, source commits and next gates:
+`docs/automatic-existing-venue-recovery-oct18-readiness.md` and
+`functions/artifacts/automatic-existing-recovery-oct18/completion.json`.
