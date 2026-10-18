@@ -1,0 +1,1215 @@
+diff --git a/src/parsing/captionMealCoverage.ts b/src/parsing/captionMealCoverage.ts
+new file mode 100644
+index 0000000..ee41ce9
+--- /dev/null
++++ b/src/parsing/captionMealCoverage.ts
+@@ -0,0 +1,63 @@
++import {DateTime} from 'luxon';
++import type {ExtractedItem} from './types.js';
++
++const months=['january','february','march','april','may','june','july','august','september','october','november','december'];
++const clock=(raw:string,meridiem?:string):string|undefined=>{
++ const m=raw.replace(/\s/g,'').match(/^(\d{1,2})(?::?(\d{2}))?([ap])?m?$/i);
++ if(!m||+m[1]<1||+m[1]>12||+(m[2]||0)>59||!(m[3]||meridiem))return undefined;
++ return `${String(+m[1]%12+((m[3]||meridiem||'').toLowerCase()==='p'?12:0)).padStart(2,'0')}:${String(+(m[2]||0)).padStart(2,'0')}`;
++};
++/** Only one literal, item-bound caption range can restore explicit clock flags. */
++export function repairCaptionMealCoverage(items:ExtractedItem[],caption:string):ExtractedItem[]{
++ const text=caption.split(/\n\s*OCR TEXT:/i)[0];
++ const ranges=[...text.matchAll(/\b(\d{1,2}(?::?\d{2})?\s*(?:[ap]\s*m)?)\s*(?:[-–—]|to)\s*(\d{1,2}(?::?\d{2})?\s*([ap])\s*m)\b/gi)];
++ if(ranges.length!==1)return items;
++ const range=ranges[0],start=clock(range[1],range[3]),end=clock(range[2]);
++ if(!start||!end||end<=start)return items;
++ let result=items.map(item=>{
++  if(!/\b(?:breakfast|brunch)\b/i.test(item.name)||item.startTime!==start||item.endTime!==end)return item;
++  return {...item,timeFlags:{start:{source:'explicit' as const,evidence:range[0]},end:{source:'explicit' as const,toClose:false,evidence:range[0]}}};
++ });
++ // Saturday AND Sunday is a finite weekend unless the source explicitly says otherwise.
++ if(/\bweekend brunch\b/i.test(text)&&/\bsaturday\s+(?:and|&)\s+sunday\b/i.test(text)&&
++   !/\b(?:every|weekly|each weekend|all month)\b/i.test(text)){
++  const brunch=result.filter(i=>/\bbrunch\b/i.test(i.name));
++  if(brunch.length===1&&['none',''].includes(String((brunch[0] as any).recurringPattern||''))){
++   const base=brunch[0],date=DateTime.fromISO(base.date);
++   if(date.isValid&&date.weekday===6&&base.startTime===start&&base.endTime===end){
++    const sibling=date.plus({days:1}).toISODate()!;
++    result=[...result,{...base,date:sibling,recurringPattern:'none',extractionReason:'Explicit Saturday and Sunday weekend brunch; finite second occurrence'}];
++   }
++  }
++ }
++ // A club/community pancake breakfast is a public activity in its own right.
++ // Its serving clock belongs to breakfast, never to the adjacent untimed Hustle.
++ if(/\bjoin us\b/i.test(text)&&/\bpancake breakfast\b/i.test(text)&&
++    /\bbreakfast will run from\b/i.test(text)&&/\b(?:club|community|fundrais\w*)\b/i.test(text)&&
++    !/\b(?:menu|delivery|room service|private|closed)\b/i.test(text)&&
++    !result.some(i=>/\bpancake breakfast\b/i.test(i.name))){
++  const dates=[...text.matchAll(/\b(jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:tember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\s+(\d{1,2})(?:st|nd|rd|th)?\b/gi)];
++  const anchor=result.find(i=>/^\d{4}-\d{2}-\d{2}$/.test(i.date));
++  const date=anchor&&DateTime.fromISO(anchor.date);
++  if(dates.length===1&&anchor&&date?.isValid&&months[date.month-1].startsWith(dates[0][1].toLowerCase())&&date.day===+dates[0][2]){
++   result=[...result,{name:'Pancake Breakfast',date:anchor.date,startTime:start,endTime:end,
++    venue:anchor.venue||'',price:'',_sourceType:'event',recurringPattern:'none',
++    relevantImageIndex:anchor.relevantImageIndex,
++    description:`Community pancake breakfast at the club. Breakfast runs ${range[0]}.`,
++    extractionReason:'Source explicitly invites attendees to a separately timed public pancake breakfast',
++    timeFlags:{start:{source:'explicit',evidence:range[0]},end:{source:'explicit',toClose:false,evidence:range[0]}}} as ExtractedItem];
++  }
++ }
++ return result;
++}
++
++/** A dinner-theatre advertising run is not one continuously running performance. */
++export function unresolvedPerformanceRun(item:ExtractedItem,caption:string):boolean{
++ const text=caption.split(/\n\s*OCR TEXT:/i)[0];
++ const itemText=`${item.name} ${item.description||''}`;
++ const ownPerformance=/\bdinner\s+theat(?:re|er)s?\b/i.test(itemText) ||
++   /^(?:the )?dinner\s+theat(?:re|er)\b/i.test(text.trim().split('\n')[0]) && Number((item as any)._pipelineTotalStage3||1)===1;
++ return ownPerformance && !/\b(?:festival|market|conference)\b/i.test(item.name) &&
++  /\b(?:nov(?:ember)?|dec(?:ember)?|oct(?:ober)?|jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:tember)?)\s+\d{1,2}(?:st|nd|rd|th)?\s*[-–—]\s*(?:(?:nov(?:ember)?|dec(?:ember)?|oct(?:ober)?|jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:tember)?)\s+)?\d{1,2}/i.test(text)&&
++  !/\b(?:opening (?:night|performance)|first performance|performances? (?:on|every)|continuous|overnight)\b/i.test(text);
++}
+diff --git a/src/parsing/finalFormatter.ts b/src/parsing/finalFormatter.ts
+index b916a54..13f4e1a 100644
+--- a/src/parsing/finalFormatter.ts
++++ b/src/parsing/finalFormatter.ts
+@@ -2539,8 +2539,10 @@ function applyCategoryCorrections(
+ function sourceGroundedActivityCategory(event: FormattedEvent, originalItem?: ExtractedItem): Category | null {
+   const title = String(originalItem?.name || event.name || '');
+   const text = `${title} ${originalItem?.description || event.description || ''}`;
++  if (/\b(?:breakfast|brunch)\s+service\b/i.test(title) && !/\b(?:workshop|class|race|show|theatre|theater)\b/i.test(title)) return 'Food Special';
+   if (/\b(?:lunch|soup|chili|sandwich|burger|meal|dinner|supper|breakfast|brunch)\b/i.test(title) &&
+       (/\$\s*\d|\b(?:special|feature|deal|offer|buffet)\b/i.test(title) || originalItem?._sourceType==='special')) return null;
++  if (/\b(?:pancake breakfast|community (?:meal|dinner|supper)|book launch|author (?:conversation|reading)|in conversation with)\b/i.test(text) && !/\b(?:workshop|class|lesson|course)\b/i.test(title)) return 'Gatherings & Parties';
+   // These are item titles, never the publisher/venue or a sibling soup offer.
+   // A market's vendors and food fundraising do not change its activity type.
+   if (/\b(?:craft|artisans?|makers?|vendors?|farmers?(?:['’]s?)?)\s+(?:fair|market)\b/i.test(title) &&
+diff --git a/src/parsing/oct18Audit.test.ts b/src/parsing/oct18Audit.test.ts
+new file mode 100644
+index 0000000..cf01f99
+--- /dev/null
++++ b/src/parsing/oct18Audit.test.ts
+@@ -0,0 +1,46 @@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import fs from 'node:fs';
++import {constrainSourceTimes} from './sourceTimeConstraints.js';
++import {sourceItemHoldReason} from './sourceItemEvidence.js';
++import {applyCategoryCorrectionsForRegression} from './finalFormatter.js';
++import {parseDetailPageCandidate} from './websiteDetailEnricher.js';
++const fixtures=JSON.parse(fs.readFileSync('src/parsing/oct18SourceFixtures.json','utf8'));
++test('saved Hunter caption preserves both finite weekend dates and explicit finishes',()=>{
++ const f=fixtures['59'],items=constrainSourceTimes(f.items,f.caption);
++ assert.deepEqual(items.map(i=>i.date).sort(),['2026-10-17','2026-10-18']);
++ for(const i of items){assert.equal(i.startTime,'11:00');assert.equal(i.endTime,'15:00');assert.equal(i.timeFlags?.end?.source,'explicit');assert.equal((i as any).recurringPattern,'none');}
++ assert.deepEqual(constrainSourceTimes(items,f.caption),items,'second pass is idempotent');
++ assert.equal(constrainSourceTimes(f.items,f.caption.replace('Saturday and Sunday','Saturday')).length,1);
++ assert.equal(constrainSourceTimes(f.items,'Every weekend. '+f.caption).length,1);
++});
++test('saved Montague source recovers breakfast without giving its clocks to Halloween Hustle',()=>{
++ const f=fixtures['323'],items=constrainSourceTimes(f.items,f.caption);
++ const meal=items.find(i=>i.name==='Pancake Breakfast');assert(meal);
++ assert.equal(meal.date,'2026-10-31');assert.equal(meal.startTime,'09:30');assert.equal(meal.endTime,'11:00');
++ assert.equal(meal._sourceType,'event');
++ assert.equal(items.find(i=>/Hustle/.test(i.name))?.startTime,'');
++ assert.deepEqual(constrainSourceTimes(items,f.caption),items);
++ for(const caption of [f.caption.replace('Oct 31st','Oct 30th'),f.caption.replace('930-11am',''),f.caption+' Private booking.'])assert.equal(constrainSourceTimes(f.items,caption).length,1);
++});
++test('advertised dinner-theatre run holds without inventing performances',()=>{
++ const f=fixtures['55'],items=constrainSourceTimes(f.items,f.caption);
++ assert.equal(sourceItemHoldReason(items[0]),'performance_run_requires_individual_occurrence_dates');
++ for(const caption of [f.caption.replace('November 28 – December 19','November 28'), 'Anchor Fest October 14–18, 2026.']){
++  const input={...f.items[0],description:'',name:'Festival'};
++  assert.equal(sourceItemHoldReason(constrainSourceTimes([input],caption)[0]),undefined);
++ }
++});
++test('source activity categories survive incidental sports and venue priors',()=>{
++ for(const row of ['96','240']){
++  const f=fixtures[row],result=applyCategoryCorrectionsForRegression(f.final[0],f.items[0]);
++  assert.equal(result.category,row==='96'?'Food Special':'Gatherings & Parties');
++  assert.equal(result.isFoodSpecial,row==='96'?'Yes':'No');assert.equal(result.isEvent,row==='96'?'No':'Yes');
++ }
++ const meal=constrainSourceTimes(fixtures['323'].items,fixtures['323'].caption).find(i=>i.name==='Pancake Breakfast')!;
++ assert.equal(applyCategoryCorrectionsForRegression({...fixtures['96'].final[0],name:meal.name,description:meal.description,category:'Food Special'},meal).category,'Gatherings & Parties');
++});
++test('Harvest page uses the overall printed range, not the food-vendor window',()=>{
++ const result=parseDetailPageCandidate('https://fixture.example/harvest','<h1>Harvest Fest</h1><p>Saturday, October 17, 2026 | 3:00 to 8:00 pm</p><h2>Food and Drink</h2><p>16 vendors | 11:00 am to 8:00 pm</p>',2026);
++ assert.equal(result?.startTime,'15:00');assert.equal(result?.endTime,'20:00');
++});
+diff --git a/src/parsing/oct18SourceFixtures.json b/src/parsing/oct18SourceFixtures.json
+new file mode 100644
+index 0000000..298970c
+--- /dev/null
++++ b/src/parsing/oct18SourceFixtures.json
+@@ -0,0 +1,849 @@
++{
++  "55": {
++    "caption": " Dinner Theatre is BACK at Rodd Charlottetown!\n\nGet ready for Who\u2019s Yer Father? \u2014 a hilarious Mamma Mia! parody featuring a surprise Christmas wedding, three possible dads, live music, and plenty of holiday chaos!\n\n November 28 \u2013 December 19, 2026\n Doors open at 6:00 PM | Show starts at 6:30 PM\n\nMake it a night to remember with great food, live entertainment, and plenty of laughs!\n\n\ufe0f Grab your tickets:  https://bit.ly/4i1Vxtw\n Learn more: https://charlottetown.feastdinnertheatres.com\n\n#RoddCharlottetown #CharlottetownDinnerTheatre #FeastDinnerTheatres #PEIEvents #HolidayEntertainment\n\nOCR TEXT:\nMay be an image of text\nMay be an image of text",
++    "items": [
++      {
++        "name": "WHO\u2019S YER FATHER?",
++        "description": "A hilarious Mamma Mia! parody featuring a surprise Christmas wedding, three possible dads, live music, and holiday chaos. A Feast Dinner Theatres production; the poster describes it as a PEI Mamma Mia! Christmas parody. Advertised run: November 28\u2013December 19, 2026. Doors open at 6:00 PM; show starts at 6:30 PM.",
++        "date": "2026-11-28",
++        "startTime": "18:30",
++        "endTime": "",
++        "venue": "",
++        "ticketLink": "https://bit.ly/4i1Vxtw",
++        "price": "",
++        "relevantImageIndex": 0,
++        "recurringPattern": "none",
++        "extractionReason": "A dinner-theatre comedy show with live entertainment is an advertised entertainment event. The date range is retained in the description; no individual performance dates within the run are specified.",
++        "timeFlags": {
++          "start": {
++            "source": "explicit",
++            "evidence": "Show starts at 6:30 PM"
++          },
++          "end": {
++            "source": "none",
++            "toClose": false,
++            "evidence": ""
++          }
++        },
++        "spatial": {
++          "kind": "single_location",
++          "locations": [
++            {
++              "label": "Rodd Charlottetown",
++              "address": "",
++              "role": "location",
++              "certainty": "confirmed",
++              "sourceText": "Dinner Theatre is BACK at Rodd Charlottetown!"
++            }
++          ],
++          "confirmedStreets": [],
++          "ordered": false,
++          "evidenceNotes": "The caption explicitly identifies Rodd Charlottetown as the location."
++        },
++        "_sourceOccurrenceCount": 1,
++        "_pipelineIndex": 1,
++        "_pipelineTotalStage3": 1
++      }
++    ],
++    "final": [
++      {
++        "id": "1766365078822804",
++        "name": "WHO\u2019S YER FATHER?",
++        "category": "Comedy",
++        "isEvent": "Yes",
++        "isFoodSpecial": "No",
++        "establishment": "Rodd Charlottetown",
++        "additionalLocation": "",
++        "locationScope": "",
++        "locationLabel": "",
++        "locationCity": "",
++        "locationProvince": "",
++        "locationPrecision": "",
++        "locationReviewStatus": "",
++        "startDate": "2026-11-28",
++        "startTime": "18:30",
++        "endDate": "2026-12-19",
++        "endTime": "23:00",
++        "isRecurring": "No",
++        "recurringPattern": "none",
++        "recurringDaysOfWeek": [],
++        "recurringWeekdaySequence": [],
++        "recurringWeekInterval": null,
++        "totalOccurrences": null,
++        "recurrenceUntilDate": "",
++        "ticketLink": "https://bit.ly/4i1Vxtw",
++        "ticketsBuyUrl": "https://bit.ly/4i1Vxtw",
++        "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1792327746520-wjd4jc.webp",
++        "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1792327746520-wjd4jc.webp",
++        "sharedPostThumbnail": "",
++        "imageProvenance": {
++          "version": 1,
++          "primarySource": "post_media",
++          "primaryField": "relevantImageUrl",
++          "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1792327746520-wjd4jc.webp",
++          "isFallback": false,
++          "sourceFields": [
++            "relevantImageUrl",
++            "mediaUrls",
++            "icon"
++          ],
++          "media": [
++            {
++              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1792327746520-wjd4jc.webp",
++              "source": "post_media",
++              "field": "relevantImageUrl",
++              "isPrimary": true,
++              "isFallback": false
++            },
++            {
++              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1792327746520-wjd4jc.webp",
++              "source": "post_media",
++              "field": "mediaUrls",
++              "isPrimary": true,
++              "isFallback": false
++            },
++            {
++              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1792327746734-h58bgy.webp",
++              "source": "post_media",
++              "field": "mediaUrls",
++              "isPrimary": false,
++              "isFallback": false
++            },
++            {
++              "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1792327746999-8qadxh.webp",
++              "source": "profile_image",
++              "field": "icon",
++              "isPrimary": false,
++              "isFallback": false
++            }
++          ],
++          "selectionReason": "model_selected_analysis_frame_source",
++          "updatedBy": "parser"
++        },
++        "timeResolution": {
++          "hoursUsed": true,
++          "endFromHours": "category_default"
++        },
++        "timeFlags": {
++          "start": {
++            "source": "explicit",
++            "evidence": "Show starts at 6:30 PM"
++          },
++          "end": {
++            "source": "none",
++            "toClose": false,
++            "evidence": ""
++          }
++        },
++        "structuredLocationValidation": null,
++        "_sourceType": null,
++        "description": "A hilarious Mamma Mia! parody featuring a surprise Christmas wedding, three possible dads, live music, and holiday chaos. A Feast Dinner Theatres production; the poster describes it as a PEI Mamma Mia! Christmas parody. Advertised run: Nove"
++      }
++    ]
++  },
++  "59": {
++    "caption": "eggs, bacon, hashbrowns, toast. weekend brunch at Hunter\u2019s, Saturday and Sunday 11AM to 3PM. come eat.\n\nOCR TEXT:\nMay be an image of food\nNo photo description available.",
++    "items": [
++      {
++        "name": "Weekend Brunch",
++        "description": "Weekend brunch: eggs, bacon, hashbrowns, toast; Saturday and Sunday, 11AM to 3PM.",
++        "date": "2026-10-17",
++        "startTime": "11:00",
++        "endTime": "15:00",
++        "timeFlags": {
++          "start": {
++            "source": "explicit",
++            "evidence": "11AM"
++          },
++          "end": {
++            "toClose": false,
++            "evidence": "3PM"
++          }
++        },
++        "venue": "",
++        "pricing": {
++          "price": ""
++        },
++        "relevantImageIndex": 0,
++        "recurringPattern": "none",
++        "extractionReason": "The post advertises \u201cweekend brunch at Hunter\u2019s, Saturday and Sunday 11AM to 3PM\u201d and lists eggs, bacon, hashbrowns, and toast.",
++        "_sourceType": "special",
++        "_sourceOccurrenceCount": 1,
++        "_pipelineIndex": 1,
++        "_pipelineTotalStage3": 1
++      }
++    ],
++    "final": [
++      {
++        "id": "1568198158660735",
++        "name": "Weekend Brunch",
++        "category": "Food Special",
++        "isEvent": "No",
++        "isFoodSpecial": "Yes",
++        "establishment": "Hunter's Ale House",
++        "additionalLocation": "",
++        "locationScope": "",
++        "locationLabel": "",
++        "locationCity": "",
++        "locationProvince": "",
++        "locationPrecision": "",
++        "locationReviewStatus": "",
++        "startDate": "2026-10-17",
++        "startTime": "11:00",
++        "endDate": "2026-10-17",
++        "endTime": "15:00",
++        "isRecurring": "No",
++        "recurringPattern": "none",
++        "recurringDaysOfWeek": [],
++        "recurringWeekdaySequence": [],
++        "recurringWeekInterval": null,
++        "totalOccurrences": null,
++        "recurrenceUntilDate": "",
++        "ticketLink": "",
++        "ticketsBuyUrl": "",
++        "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1792327819191-0nkfr6.webp",
++        "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1792327819191-0nkfr6.webp",
++        "sharedPostThumbnail": "",
++        "imageProvenance": {
++          "version": 1,
++          "primarySource": "post_media",
++          "primaryField": "relevantImageUrl",
++          "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1792327819191-0nkfr6.webp",
++          "isFallback": false,
++          "sourceFields": [
++            "relevantImageUrl",
++            "mediaUrls",
++            "icon"
++          ],
++          "media": [
++            {
++              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1792327819191-0nkfr6.webp",
++              "source": "post_media",
++              "field": "relevantImageUrl",
++              "isPrimary": true,
++              "isFallback": false
++            },
++            {
++              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1792327819191-0nkfr6.webp",
++              "source": "post_media",
++              "field": "mediaUrls",
++              "isPrimary": true,
++              "isFallback": false
++            },
++            {
++              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1792327819472-zhzugi.webp",
++              "source": "post_media",
++              "field": "mediaUrls",
++              "isPrimary": false,
++              "isFallback": false
++            },
++            {
++              "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1792327819760-0hwbyi.webp",
++              "source": "profile_image",
++              "field": "icon",
++              "isPrimary": false,
++              "isFallback": false
++            }
++          ],
++          "selectionReason": "model_selected_analysis_frame_source",
++          "updatedBy": "parser"
++        },
++        "timeResolution": {
++          "hoursUsed": false
++        },
++        "timeFlags": {
++          "start": {
++            "source": "explicit",
++            "evidence": "11AM"
++          },
++          "end": {
++            "source": "none",
++            "toClose": false,
++            "evidence": "3PM"
++          }
++        },
++        "structuredLocationValidation": null,
++        "_sourceType": "special",
++        "description": "Weekend brunch: eggs, bacon, hashbrowns, toast; Saturday and Sunday, 11AM to 3PM."
++      }
++    ]
++  },
++  "96": {
++    "caption": "HAPPY PEI MARATHON DAY! \n\nWhether you\u2019re running, cheering from the sidelines, or just looking for a delicious breakfast, come refuel at Coach\u2019s! \n\nWe\u2019re serving up breakfast from 8 AM \u2013 2 PM!\n\nGood luck to all the runners hitting the streets today!\n\nOCR TEXT:\nMay be an image of rye bread",
++    "items": [
++      {
++        "name": "Breakfast service",
++        "description": "Breakfast is being served for PEI Marathon Day.",
++        "date": "2026-10-18",
++        "startTime": "08:00",
++        "endTime": "14:00",
++        "venue": "Coach\u2019s Restaurant & Sports Bar",
++        "pricing": "",
++        "price": "",
++        "discount": "",
++        "additionalLocation": "",
++        "recurringPattern": "none",
++        "extractionReason": "The post advertises breakfast service today from 8 AM to 2 PM.",
++        "timeFlags": {
++          "start": {
++            "source": "explicit",
++            "evidence": "\u201cWe\u2019re serving up breakfast from 8 AM \u2013 2 PM!\u201d"
++          },
++          "end": {
++            "source": "explicit",
++            "toClose": false,
++            "evidence": "\u201cWe\u2019re serving up breakfast from 8 AM \u2013 2 PM!\u201d"
++          }
++        },
++        "_sourceType": "special",
++        "_sourceOccurrenceCount": 1,
++        "_pipelineIndex": 1,
++        "_pipelineTotalStage3": 1
++      }
++    ],
++    "final": [
++      {
++        "id": "1785814723547515",
++        "name": "Breakfast service",
++        "category": "Sports",
++        "isEvent": "Yes",
++        "isFoodSpecial": "No",
++        "establishment": "Coach\u2019s Restaurant & Sports Bar",
++        "additionalLocation": "Coach\u2019s Restaurant & Sports Bar",
++        "locationScope": "",
++        "locationLabel": "",
++        "locationCity": "",
++        "locationProvince": "",
++        "locationPrecision": "",
++        "locationReviewStatus": "",
++        "startDate": "2026-10-18",
++        "startTime": "08:00",
++        "endDate": "2026-10-18",
++        "endTime": "14:00",
++        "isRecurring": "No",
++        "recurringPattern": "none",
++        "recurringDaysOfWeek": [],
++        "recurringWeekdaySequence": [],
++        "recurringWeekInterval": null,
++        "totalOccurrences": null,
++        "recurrenceUntilDate": "",
++        "ticketLink": "",
++        "ticketsBuyUrl": "",
++        "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1792328099669-hn3qs0.webp",
++        "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1792328099669-hn3qs0.webp",
++        "sharedPostThumbnail": "",
++        "imageProvenance": {
++          "version": 1,
++          "primarySource": "post_media",
++          "primaryField": "relevantImageUrl",
++          "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1792328099669-hn3qs0.webp",
++          "isFallback": false,
++          "sourceFields": [
++            "relevantImageUrl",
++            "mediaUrls",
++            "icon"
++          ],
++          "media": [
++            {
++              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1792328099669-hn3qs0.webp",
++              "source": "post_media",
++              "field": "relevantImageUrl",
++              "isPrimary": true,
++              "isFallback": false
++            },
++            {
++              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1792328099669-hn3qs0.webp",
++              "source": "post_media",
++              "field": "mediaUrls",
++              "isPrimary": true,
++              "isFallback": false
++            },
++            {
++              "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1792328100013-wf5tzq.webp",
++              "source": "profile_image",
++              "field": "icon",
++              "isPrimary": false,
++              "isFallback": false
++            }
++          ],
++          "selectionReason": "model_selected_analysis_frame_source",
++          "updatedBy": "parser"
++        },
++        "timeResolution": {
++          "hoursUsed": false
++        },
++        "timeFlags": {
++          "start": {
++            "source": "explicit",
++            "evidence": "\u201cWe\u2019re serving up breakfast from 8 AM \u2013 2 PM!\u201d"
++          },
++          "end": {
++            "source": "explicit",
++            "toClose": false,
++            "evidence": "\u201cWe\u2019re serving up breakfast from 8 AM \u2013 2 PM!\u201d"
++          }
++        },
++        "structuredLocationValidation": null,
++        "_sourceType": "special",
++        "description": "Breakfast is being served for PEI Marathon Day."
++      }
++    ]
++  },
++  "156": {
++    "caption": "Creative Kids: Write It, Draw It!\n\nJoin us weekly at the Charlottetown Library Learning Centre on Wednesdays from 3:30-4:30 p.m. \u2022 Grades K-6 \n\nThis month, we\u2019ll be writing, drawing, and telling stories \n\n#peilibrary\n\nOCR TEXT:\nMay be an image of child, studying and text",
++    "items": [
++      {
++        "name": "Creative Kids: Write It, Draw It!",
++        "description": "Join us weekly at the Charlottetown Library Learning Centre on Wednesdays from 3:30-4:30 p.m. \u2022 Grades K-6. This month, we\u2019ll be writing, drawing, and telling stories.",
++        "date": "2026-10-21",
++        "startTime": "15:30",
++        "endTime": "16:30",
++        "venue": "Charlottetown Library Learning Centre",
++        "ticketLink": "",
++        "price": "",
++        "relevantImageIndex": 0,
++        "recurringPattern": "weekly_wednesday",
++        "extractionReason": "A weekly creative writing and drawing activity for children is explicitly advertised, with a weekday, time, and venue.",
++        "timeFlags": {
++          "start": {
++            "source": "explicit",
++            "evidence": "3:30 p.m."
++          },
++          "end": {
++            "source": "explicit",
++            "toClose": false,
++            "evidence": "4:30 p.m."
++          }
++        },
++        "spatial": {
++          "kind": "single_location",
++          "locations": [
++            {
++              "label": "Charlottetown Library Learning Centre",
++              "address": "",
++              "role": "location",
++              "certainty": "confirmed",
++              "sourceText": "at the Charlottetown Library Learning Centre"
++            }
++          ],
++          "confirmedStreets": [],
++          "ordered": false,
++          "evidenceNotes": "The post names one venue and provides no street address."
++        },
++        "_sourceOccurrenceCount": 1,
++        "_pipelineIndex": 1,
++        "_pipelineTotalStage3": 1
++      }
++    ],
++    "final": [
++      {
++        "id": "1436879098627760",
++        "name": "Creative Kids: Write It, Draw It!",
++        "category": "Workshops & Classes",
++        "isEvent": "Yes",
++        "isFoodSpecial": "No",
++        "establishment": "Charlottetown Library Learning Centre",
++        "additionalLocation": "Charlottetown Library Learning Centre",
++        "locationScope": "",
++        "locationLabel": "",
++        "locationCity": "",
++        "locationProvince": "",
++        "locationPrecision": "",
++        "locationReviewStatus": "",
++        "startDate": "2026-10-21",
++        "startTime": "15:30",
++        "endDate": "2026-10-21",
++        "endTime": "16:30",
++        "isRecurring": "Yes",
++        "recurringPattern": "weekly_wednesday",
++        "recurringDaysOfWeek": [],
++        "recurringWeekdaySequence": [],
++        "recurringWeekInterval": null,
++        "totalOccurrences": null,
++        "recurrenceUntilDate": "",
++        "ticketLink": "",
++        "ticketsBuyUrl": "",
++        "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1792328705740-qsk09n.webp",
++        "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1792328705740-qsk09n.webp",
++        "sharedPostThumbnail": "",
++        "imageProvenance": {
++          "version": 1,
++          "primarySource": "post_media",
++          "primaryField": "relevantImageUrl",
++          "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1792328705740-qsk09n.webp",
++          "isFallback": false,
++          "sourceFields": [
++            "relevantImageUrl",
++            "mediaUrls",
++            "icon"
++          ],
++          "media": [
++            {
++              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1792328705740-qsk09n.webp",
++              "source": "post_media",
++              "field": "relevantImageUrl",
++              "isPrimary": true,
++              "isFallback": false
++            },
++            {
++              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1792328705740-qsk09n.webp",
++              "source": "post_media",
++              "field": "mediaUrls",
++              "isPrimary": true,
++              "isFallback": false
++            },
++            {
++              "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1792328706104-bp1pdp.webp",
++              "source": "profile_image",
++              "field": "icon",
++              "isPrimary": false,
++              "isFallback": false
++            }
++          ],
++          "selectionReason": "model_selected_analysis_frame_source",
++          "updatedBy": "parser"
++        },
++        "timeResolution": {
++          "hoursUsed": false
++        },
++        "timeFlags": {
++          "start": {
++            "source": "explicit",
++            "evidence": "3:30 p.m."
++          },
++          "end": {
++            "source": "explicit",
++            "toClose": false,
++            "evidence": "4:30 p.m."
++          }
++        },
++        "structuredLocationValidation": null,
++        "_sourceType": null,
++        "description": "Join us weekly at the Charlottetown Library Learning Centre on Wednesdays from 3:30-4:30 p.m. \u2022 Grades K-6. This month, we\u2019ll be writing, drawing, and telling stories."
++      }
++    ]
++  },
++  "240": {
++    "caption": "We are thrilled to be bringing international bestselling author Ann Cleeves, the creator of Vera, Shetland, and The Long Call, to Charlottetown for the launch of her new novel The Dying Light. Ann will be in conversation with Mattea Roach, host of CBC\u2019s popular radio program Bookends. This is going to be a wonderful evening, don\u2019t miss out - get your tickets today!\n\nDate: Thursday, October 29th\nTime: 7 pm\nLocation: Delta Prince Edward\nCost: Book \u2013 Book and admission: $40 or Admission: $25\nFor tickets: https://bookmarkreads.ca/events/6329720261019\n\nNew York Times bestselling author Ann Cleeves returns with the fourth Two Rivers mystery featuring detective Matthew Venn. In The Dying Light, Venn and his team are called in to investigate a puzzling death. The body of a young woman has been found in the swimming pool of a lavish holiday home in North Devon, and her best friend is missing. Caught between a powerful family\u2019s secrets and a powder keg of local tensions, Venn must navigate a treacherous path. Knowing that the real answers lie not in what people say, but in the silence that they keep.\n\n#AnnCleeves #ReadingWritingAndWonder #DowntownCharlottetown\nPEI Public Library Service des biblioth\u00e8ques publiques \u00ceP\u00c9 Publishers Group Canada Pan Macmillan @followers\n\nOCR TEXT:\nMay be an image of text",
++    "items": [
++      {
++        "name": "Ann Cleeves in Conversation with Mattea Roach",
++        "description": "Ann Cleeves, creator of Vera, Shetland, and The Long Call, will be in conversation with Mattea Roach, host of CBC\u2019s Bookends, for the launch of her new novel The Dying Light. Thursday, October 29. Tickets: Book and admission $40 or admission $25.",
++        "date": "2026-10-29",
++        "startTime": "19:00",
++        "endTime": "",
++        "venue": "Delta Prince Edward",
++        "ticketLink": "https://bookmarkreads.ca/events/6329720261019",
++        "price": "Book and admission: $40 or admission: $25",
++        "relevantImageIndex": 0,
++        "recurringPattern": "none",
++        "extractionReason": "A scheduled author event and book launch featuring Ann Cleeves in conversation with Mattea Roach. The caption gives Thursday, October 29, and the poster confirms the event names, time, and venue. The year is not printed; 2026 is resolved from the dated caption context, and October 29, 2026 is a Thursday.",
++        "timeFlags": {
++          "start": {
++            "source": "explicit",
++            "evidence": "7 pm"
++          },
++          "end": {
++            "source": "none",
++            "toClose": false,
++            "evidence": ""
++          }
++        },
++        "spatial": {
++          "kind": "single_location",
++          "locations": [
++            {
++              "label": "Delta Prince Edward",
++              "address": "",
++              "role": "location",
++              "certainty": "confirmed",
++              "sourceText": "Location: Delta Prince Edward"
++            }
++          ],
++          "confirmedStreets": [],
++          "ordered": false,
++          "evidenceNotes": "The source names Delta Prince Edward as the event location; no street address is provided."
++        },
++        "_sourceOccurrenceCount": 1,
++        "_pipelineIndex": 1,
++        "_pipelineTotalStage3": 1
++      }
++    ],
++    "final": [
++      {
++        "id": "1693893912330623",
++        "name": "Ann Cleeves in Conversation with Mattea Roach",
++        "category": "Workshops & Classes",
++        "isEvent": "Yes",
++        "isFoodSpecial": "No",
++        "establishment": "Delta Prince Edward",
++        "additionalLocation": "Delta Prince Edward",
++        "locationScope": "",
++        "locationLabel": "",
++        "locationCity": "",
++        "locationProvince": "",
++        "locationPrecision": "",
++        "locationReviewStatus": "",
++        "startDate": "2026-10-29",
++        "startTime": "19:00",
++        "endDate": "2026-10-29",
++        "endTime": "21:00",
++        "isRecurring": "No",
++        "recurringPattern": "none",
++        "recurringDaysOfWeek": [],
++        "recurringWeekdaySequence": [],
++        "recurringWeekInterval": null,
++        "totalOccurrences": null,
++        "recurrenceUntilDate": "",
++        "ticketLink": "https://bookmarkreads.ca/events/6329720261019",
++        "ticketsBuyUrl": "https://bookmarkreads.ca/events/6329720261019",
++        "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1792329204880-96gbf9.webp",
++        "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1792329204880-96gbf9.webp",
++        "sharedPostThumbnail": "",
++        "imageProvenance": {
++          "version": 1,
++          "primarySource": "post_media",
++          "primaryField": "relevantImageUrl",
++          "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1792329204880-96gbf9.webp",
++          "isFallback": false,
++          "sourceFields": [
++            "relevantImageUrl",
++            "mediaUrls",
++            "icon"
++          ],
++          "media": [
++            {
++              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1792329204880-96gbf9.webp",
++              "source": "post_media",
++              "field": "relevantImageUrl",
++              "isPrimary": true,
++              "isFallback": false
++            },
++            {
++              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1792329204880-96gbf9.webp",
++              "source": "post_media",
++              "field": "mediaUrls",
++              "isPrimary": true,
++              "isFallback": false
++            },
++            {
++              "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1792329205105-bwdfm3.webp",
++              "source": "profile_image",
++              "field": "icon",
++              "isPrimary": false,
++              "isFallback": false
++            }
++          ],
++          "selectionReason": "model_selected_analysis_frame_source",
++          "updatedBy": "parser"
++        },
++        "timeResolution": {
++          "hoursUsed": false,
++          "reason": "no_place_match",
++          "endFromHours": "category_default"
++        },
++        "timeFlags": {
++          "start": {
++            "source": "explicit",
++            "evidence": "7 pm"
++          },
++          "end": {
++            "source": "none",
++            "toClose": false,
++            "evidence": ""
++          }
++        },
++        "structuredLocationValidation": null,
++        "_sourceType": null,
++        "description": "Ann Cleeves, creator of Vera, Shetland, and The Long Call, will be in conversation with Mattea Roach, host of CBC\u2019s Bookends, for the launch of her new novel The Dying Light. Thursday, October 29. Tickets: Book and admission $40 or admissio"
++      }
++    ]
++  },
++  "247": {
++    "caption": "Chart-topping country anthems + timeless holiday classics = the ultimate November night out! \n\nTwo Canadian country icons, one stage, and a whole lot of holiday cheer. George Canyon and Aaron Pritchett are hitting our mainstage with Cowboy Christmas 2\u2014bringing together the big hits you love to sing along to and the festive classics that make the season bright.\n\nGEORGE CANYON & AARON PRITCHETT\nA Cowboy Christmas 2\nThursday, November 12, 2026 at 7:30 PM\n\nWhy not make a full night of it? Grab your boots and your favourite show buddy, and start the evening with a great local bite right down the road.\n\nSummerside is packed with fantastic spots to grab dinner or a drink before the lights go down\u2014or a sweet treat to finish off the night:\n\n@brothers2restaurant \n@summersideshipyard\n@evermoorebrewing \n@pepperscrafterssummerside \nFiveelevenwest \n@holmansicecream \n\nSupport local, treat yourself to a wonderful meal, and then stroll on over to join us for an incredible night of music!\n\nTickets: On sale now at harbourfronttheatre.com or call our box office at 902-888-2500!\n\n#HarbourfrontTheatre #GeorgeCanyon #AaronPritchett #CowboyChristmas #SummersidePEI #PEIMusic #LiveMusicPEI #PEIEvents #IslandTheatre #EatLocalPEI",
++    "items": [
++      {
++        "name": "GEORGE CANYON & AARON PRITCHETT \u2014 A Cowboy Christmas 2",
++        "description": "Thursday, November 12, 2026 at 7:30 PM. George Canyon and Aaron Pritchett perform chart-topping country anthems and timeless holiday classics on the mainstage.",
++        "date": "2026-11-12",
++        "startTime": "19:30",
++        "endTime": "",
++        "venue": "",
++        "ticketLink": "harbourfronttheatre.com",
++        "price": "",
++        "relevantImageIndex": 0,
++        "recurringPattern": "none",
++        "extractionReason": "A dated, timed live music performance is explicitly advertised in the caption.",
++        "timeFlags": {
++          "start": {
++            "source": "explicit",
++            "evidence": "Thursday, November 12, 2026 at 7:30 PM"
++          },
++          "end": {
++            "source": "none",
++            "toClose": false,
++            "evidence": ""
++          }
++        },
++        "spatial": {
++          "kind": "single_location",
++          "locations": [
++            {
++              "label": "our mainstage",
++              "address": "",
++              "role": "location",
++              "certainty": "confirmed",
++              "sourceText": "hitting our mainstage"
++            }
++          ],
++          "confirmedStreets": [],
++          "ordered": false,
++          "evidenceNotes": "The performance is advertised on the theatre's mainstage."
++        },
++        "_sourceOccurrenceCount": 1,
++        "_pipelineIndex": 1,
++        "_pipelineTotalStage3": 1
++      }
++    ],
++    "final": [
++      {
++        "id": "1736217035175926",
++        "name": "GEORGE CANYON & AARON PRITCHETT \u2014 A Cowboy Christmas 2",
++        "category": "Live Music",
++        "isEvent": "Yes",
++        "isFoodSpecial": "No",
++        "establishment": "Harbourfront Theatre",
++        "additionalLocation": "",
++        "locationScope": "",
++        "locationLabel": "",
++        "locationCity": "",
++        "locationProvince": "",
++        "locationPrecision": "",
++        "locationReviewStatus": "",
++        "startDate": "2026-11-12",
++        "startTime": "19:30",
++        "endDate": "2026-11-13",
++        "endTime": "01:00",
++        "isRecurring": "No",
++        "recurringPattern": "none",
++        "recurringDaysOfWeek": [],
++        "recurringWeekdaySequence": [],
++        "recurringWeekInterval": null,
++        "totalOccurrences": null,
++        "recurrenceUntilDate": "",
++        "ticketLink": "harbourfronttheatre.com",
++        "ticketsBuyUrl": "harbourfronttheatre.com",
++        "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1792329274507-cp9vte.webp",
++        "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1792329274507-cp9vte.webp",
++        "sharedPostThumbnail": "",
++        "imageProvenance": {
++          "version": 1,
++          "primarySource": "post_media",
++          "primaryField": "relevantImageUrl",
++          "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1792329274507-cp9vte.webp",
++          "isFallback": false,
++          "sourceFields": [
++            "relevantImageUrl",
++            "mediaUrls",
++            "icon"
++          ],
++          "media": [
++            {
++              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1792329274507-cp9vte.webp",
++              "source": "post_media",
++              "field": "relevantImageUrl",
++              "isPrimary": true,
++              "isFallback": false
++            },
++            {
++              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1792329274507-cp9vte.webp",
++              "source": "post_media",
++              "field": "mediaUrls",
++              "isPrimary": true,
++              "isFallback": false
++            },
++            {
++              "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1792329274819-fybydl.webp",
++              "source": "profile_image",
++              "field": "icon",
++              "isPrimary": false,
++              "isFallback": false
++            }
++          ],
++          "selectionReason": "model_selected_analysis_frame_source",
++          "updatedBy": "parser"
++        },
++        "timeResolution": {
++          "hoursUsed": true,
++          "endFromHours": "category_default"
++        },
++        "timeFlags": {
++          "start": {
++            "source": "explicit",
++            "evidence": "Thursday, November 12, 2026 at 7:30 PM"
++          },
++          "end": {
++            "source": "none",
++            "toClose": false,
++            "evidence": ""
++          }
++        },
++        "structuredLocationValidation": null,
++        "_sourceType": null,
++        "description": "George Canyon and Aaron Pritchett perform chart-topping country anthems and timeless holiday classics on the mainstage."
++      }
++    ]
++  },
++  "323": {
++    "caption": "Join us at the club on Oct 31st for the Halloween Hustle and Pancake Breakfast!  Breakfast will run from 930-11am, hosted by the Montague Junior Curling  !",
++    "items": [
++      {
++        "name": "Halloween Hustle",
++        "description": "Join us at the club on Oct 31st for the Halloween Hustle.",
++        "date": "2026-10-31",
++        "startTime": "",
++        "endTime": "",
++        "venue": "",
++        "ticketLink": "",
++        "price": "",
++        "relevantImageIndex": 0,
++        "recurringPattern": "none",
++        "extractionReason": "Halloween Hustle is an advertised activity. The pancake breakfast is food-focused and was excluded; its hours are not assigned to the activity.",
++        "timeFlags": {
++          "start": {
++            "source": "none",
++            "evidence": ""
++          },
++          "end": {
++            "source": "none",
++            "toClose": false,
++            "evidence": ""
++          }
++        },
++        "spatial": {
++          "kind": "single_location",
++          "locations": [
++            {
++              "label": "the club",
++              "address": "",
++              "role": "location",
++              "certainty": "possible",
++              "sourceText": "at the club"
++            }
++          ],
++          "confirmedStreets": [],
++          "ordered": false,
++          "evidenceNotes": "The caption says the activity is at the club but provides no address."
++        },
++        "_sourceOccurrenceCount": 1,
++        "_sourceTimeConstraint": {
++          "reason": "dated_activity_without_clock",
++          "evidence": "Dated activity has no advertised start clock"
++        },
++        "_pipelineIndex": 1,
++        "_pipelineTotalStage3": 1
++      }
++    ],
++    "final": []
++  }
++}
+\ No newline at end of file
+diff --git a/src/parsing/postParser.profileIconCleanup.test.ts b/src/parsing/postParser.profileIconCleanup.test.ts
+index 8c6a81a..92c2ce5 100644
+--- a/src/parsing/postParser.profileIconCleanup.test.ts
++++ b/src/parsing/postParser.profileIconCleanup.test.ts
+@@ -1,7 +1,7 @@
+ import assert from 'node:assert/strict';
+ import test from 'node:test';
+ 
+-import { prepareManagedProfileIconUrlForRegression } from './postParser.js';
++import { prepareManagedProfileIconUrlForRegression, selectUnusedManagedImageUrls } from './postParser.js';
+ 
+ test('existing managed venue profile is returned without cleanup ownership', async () => {
+   const url = 'https://storage.googleapis.com/gathr-uploaded-images/profilepictures/venue-avatar.webp';
+@@ -17,3 +17,8 @@ test('empty profile icon is not a cleanup candidate', async () => {
+     createdForThisParse: false,
+   });
+ });
++
++test('cleanup does not request deletion of protected profiles, even for a held post',()=>{
++ const base='https://storage.googleapis.com/gathr-uploaded-images/';
++ assert.deepEqual(selectUnusedManagedImageUrls([base+'profilepictures/new-avatar.webp',base+'postimages/temp-band.webp'],[]),[base+'postimages/temp-band.webp']);
++});
+diff --git a/src/parsing/postParser.ts b/src/parsing/postParser.ts
+index 30118fd..70ddaab 100644
+--- a/src/parsing/postParser.ts
++++ b/src/parsing/postParser.ts
+@@ -4307,7 +4307,9 @@ export function processEvents(
+         primaryField: processedEvent.relevantImageUrl ? 'relevantImageUrl' : processedEvent.image ? 'image' : undefined,
+         primarySource: primaryImageSource,
+         isFallback: primaryIsFallback,
+-        selectionReason: primaryImageReason,
++        selectionReason: primaryImageReason + (imageAnalysis.some(a=>a.imageIndex===Number(event.relevantImageIndex) &&
++          /(?:does not|doesn't|no|not).*?(?:title|date|ticket|event details)/i.test(a.relevanceToPost || '') &&
++          /(?:grainy|video|flatbed|clip|screenshot)/i.test(a.description || '')) ? '; generic_video_frame_without_event_details' : ''),
+         mediaUrls: normalizedDisplayMediaUrls,
+         mediaSource: mediaProvenanceSource,
+         icon: processedEvent.icon,
+@@ -5209,7 +5211,8 @@ export function selectUnusedManagedImageUrls(
+   }
+ 
+   return [...new Set(uploadedUrls.filter(url =>
+-    Boolean(url) && !keep.has(url) && isManagedImageUrl(url)
++    Boolean(url) && !keep.has(url) && isManagedImageUrl(url) &&
++    /^https:\/\/storage\.googleapis\.com\/gathr-uploaded-images\/postimages\//.test(url)
+   ))];
+ }
+ 
+diff --git a/src/parsing/sourceItemEvidence.ts b/src/parsing/sourceItemEvidence.ts
+index 08d80fc..b8645a5 100644
+--- a/src/parsing/sourceItemEvidence.ts
++++ b/src/parsing/sourceItemEvidence.ts
+@@ -72,6 +72,7 @@ export function bindDatedTicketLink(item: ExtractedItem, caption: string): Extra
+ }
+ 
+ export function sourceItemHoldReason(item: ExtractedItem): string | undefined {
++  if ((item as any)._sourceOccurrenceDateHold) return 'performance_run_requires_individual_occurrence_dates';
+   const title = String(item.name || '');
+   if (/\[[^\]]*\b(?:unclear|unreadable|unknown|illegible)\b[^\]]*\]|\btitle\s+(?:partly\s+)?(?:unclear|unreadable|illegible)\b/i.test(title))
+     return 'activity_identity_not_visible';
+diff --git a/src/parsing/sourceTimeConstraints.ts b/src/parsing/sourceTimeConstraints.ts
+index 4da2fb6..4231bb7 100644
+--- a/src/parsing/sourceTimeConstraints.ts
++++ b/src/parsing/sourceTimeConstraints.ts
+@@ -1,5 +1,6 @@
+ import type {ExtractedItem, FormattedEvent} from './types.js';
+ import {reconcileSourceItemEvidence} from './sourceItemEvidence.js';
++import {repairCaptionMealCoverage,unresolvedPerformanceRun} from './captionMealCoverage.js';
+ 
+ export interface SourceTimeConstraint {
+   reason: 'unresolved_meridiem' | 'meal_period_without_clock' | 'activity_offer_without_clock' | 'doors_without_showtime' | 'dated_activity_without_clock';
+@@ -119,7 +120,8 @@ export function hasUnresolvedSourceMeridiem(item?: Partial<ExtractedItem>): bool
+ 
+ /** No clock is invented here. Item-local evidence wins over a shared meal caption. */
+ export function constrainSourceTimes(items: ExtractedItem[], caption: string): ExtractedItem[] {
+-  items = reconcileSourceItemEvidence(items, caption);
++  items = reconcileSourceItemEvidence(repairCaptionMealCoverage(items, caption), caption);
++  items = items.map(item=>unresolvedPerformanceRun(item,caption)?{...item,_sourceOccurrenceDateHold:true} as ExtractedItem:item);
+   const captionOnly = caption.split(/\n\s*OCR TEXT:/i)[0];
+   const sharedMeals = captionOnly.match(/\b(?:breakfast|brunch|lunch|dinner|supper)\b/gi) || [];
+   const oneSharedMeal = new Set(sharedMeals.map(x => x.toLowerCase())).size === 1
+diff --git a/src/parsing/types.ts b/src/parsing/types.ts
+index 2c479a3..c266426 100644
+--- a/src/parsing/types.ts
++++ b/src/parsing/types.ts
+@@ -394,6 +394,7 @@ export interface RecurrenceScheduleFields {
+   _sourceMeridiemResolution?: SourceMeridiemResolution;
+   _sourceDurationResolution?: SourceDurationResolution;
+   _sourceTitleResolution?: string;
++  _sourceOccurrenceDateHold?: boolean;
+   _sourceOccurrenceCount?: number;
+   recurringDaysOfWeek?: RecurringWeekday[];
+   recurringWeekdaySequence?: RecurringWeekday[];
+diff --git a/src/parsing/websiteDetailEnricher.ts b/src/parsing/websiteDetailEnricher.ts
+index 28f5892..37157a8 100644
+--- a/src/parsing/websiteDetailEnricher.ts
++++ b/src/parsing/websiteDetailEnricher.ts
+@@ -971,11 +971,11 @@ function buildDateString(
+ function extractTimeInfoFromText(text: string): { startTime?: string; endTime?: string } {
+   const range =
+     text.match(
+-      /\b(\d{1,2}(?::\d{2})?\s*(?:a\.?m\.?|p\.?m\.?))\s*(?:-|–|—|to)\s*(\d{1,2}(?::\d{2})?\s*(?:a\.?m\.?|p\.?m\.?))\b/i
++      /\b(\d{1,2}(?::\d{2})?\s*(?:a\.?m\.?|p\.?m\.?)?)\s*(?:-|–|—|to)\s*(\d{1,2}(?::\d{2})?\s*(a\.?m\.?|p\.?m\.?))\b/i
+     ) || null;
+   if (range) {
+     return {
+-      startTime: parse12hTime(range[1]),
++      startTime: parse12hTime(/[ap]\.?m\.?/i.test(range[1])?range[1]:`${range[1].trim()} ${range[3]}`),
+       endTime: parse12hTime(range[2]),
+     };
+   }
+diff --git a/src/processing/rowProcessor.oct18Audit.test.ts b/src/processing/rowProcessor.oct18Audit.test.ts
+new file mode 100644
+index 0000000..25e4354
+--- /dev/null
++++ b/src/processing/rowProcessor.oct18Audit.test.ts
+@@ -0,0 +1,28 @@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import {previewDuplicateMerge,resolveVenueForFullParserEventWithMatcherForRegression} from './rowProcessor.js';
++const venue:any={id:'library',name:'Library',facebookUrl:'https://www.facebook.com/PEILibrary'};
++const existing:any={uniqueId:'1406589781656692_1',eventName:'Creative Kids program',name:'Creative Kids program',venueId:'library',facebookUrl:venue.facebookUrl,
++ category:'Workshops & Classes',eventType:'workshops_classes',description:'Join us weekly for after-school crafts. September’s theme is Maker Skills, where we explore basic craft techniques.',
++ startDate:'2026-09-16',endDate:'2026-09-16',startTime:'15:30',endTime:'16:30',isRecurring:'Yes',recurringPattern:'weekly_wednesday',sourceTimestamp:new Date('2026-09-15T12:00:00Z')};
++test('newer same-source recurring programme theme replaces stale longer monthly copy',()=>{
++ const incoming:any={...existing,uniqueId:'1436879098627760_1',eventName:'Creative Kids: Write It, Draw It!',name:'Creative Kids: Write It, Draw It!',startDate:'2026-10-21',endDate:'2026-10-21',description:'This month we are writing, drawing and telling stories.',sourceTimestamp:new Date('2026-10-17T12:00:00Z')};
++ const r=previewDuplicateMerge({existingEvent:existing,incomingEvent:incoming,venue});assert.equal(r.updates.description,incoming.description);
++ assert(!r.changedFields.includes('recurringPattern'));assert(!r.changedFields.includes('startDate'));
++ const stale=previewDuplicateMerge({existingEvent:existing,incomingEvent:{...incoming,sourceTimestamp:new Date('2026-09-01T12:00:00Z')},venue});assert.equal(stale.updates.description,undefined);
++ const other=previewDuplicateMerge({existingEvent:existing,incomingEvent:{...incoming,facebookUrl:'https://www.facebook.com/Other'},venue});assert.equal(other.updates.description,undefined);
++});
++test('generic video frame cannot repaint an existing managed poster; genuine owner poster still can',()=>{
++ const poster='https://storage.googleapis.com/gathr-uploaded-images/postimages/poster.webp',frame='https://storage.googleapis.com/gathr-uploaded-images/postimages/frame.webp';
++ const before:any={...existing,isRecurring:'No',recurringPattern:'none',image:poster,relevantImageUrl:poster,mediaUrls:[poster],imageProvenance:{isFallback:false,selectionReason:'model_selected_original_image_index'}};
++ const after:any={...before,sourceTimestamp:new Date('2026-10-17T12:00:00Z'),description:'An updated description with much more information about this event and its venue and admission details.',image:frame,relevantImageUrl:frame,mediaUrls:[frame],imageProvenance:{isFallback:false,selectionReason:'model_selected_analysis_frame_source; generic_video_frame_without_event_details'}};
++ const r=previewDuplicateMerge({existingEvent:before,incomingEvent:after,venue});for(const field of ['image','imageUrl','relevantImageUrl','mediaUrls','imageProvenance'])assert(!r.changedFields.includes(field));
++ const valid=previewDuplicateMerge({existingEvent:before,incomingEvent:{...after,imageProvenance:{...after.imageProvenance,selectionReason:'model_selected_original_image_index'}},venue});assert(valid.changedFields.includes('mediaUrls'));
++});
++
++test('Memorial Hall uses only the reviewed source-parent room alias',async()=>{
++ const venue:any={id:'slug_confedcentre',name:'Confederation Centre of the Arts',facebookUrl:'https://www.facebook.com/ConfedCentre',aliases:['Memorial Hall, Confederation Centre of the Arts']};
++ const row:any={userName:venue.name,pageName:'ConfedCentre',facebookUrl:venue.facebookUrl,text:'Rising Stars, December 5, 11:30 a.m. Memorial Hall'};
++ const resolve=(v:any)=>resolveVenueForFullParserEventWithMatcherForRegression({item:{name:'Rising Stars',establishment:'Memorial Hall',venue:'Memorial Hall'} as any,row,rowVenue:v,establishment:venue.name,rowIndex:234,matcher:async()=>({isMatch:false,matchType:'none',similarity:0})});
++ assert.equal((await resolve(venue))?.id,venue.id);assert.equal(await resolve({...venue,aliases:[]}),null);
++});
+diff --git a/src/processing/rowProcessor.ts b/src/processing/rowProcessor.ts
+index 4033f1a..a05992e 100644
+--- a/src/processing/rowProcessor.ts
++++ b/src/processing/rowProcessor.ts
+@@ -6197,7 +6197,12 @@ function buildDuplicateEventUpdates(
+     setField('isFoodSpecial', mergedTypeState.isFoodSpecial as EventData['isFoodSpecial']);
+   }
+ 
+-  if (shouldReplaceDescription(existing.description, incoming.description)) {
++  const newerProgrammeTheme = seriesRefresh && existingSourceDate && incomingSourceDate && incomingSourceDate > existingSourceDate &&
++    normalizeUrl(existing.facebookUrl || '') === normalizeUrl(incoming.facebookUrl || '') &&
++    existing.startTime === incoming.startTime && existing.endTime === incoming.endTime &&
++    /\b(?:theme|this month|september|october|november|december|january|february|march|april|june|july|august)\b/i.test(existing.description || '') &&
++    /\b(?:this month|theme|writing|drawing|telling stories)\b/i.test(incoming.description || '');
++  if (newerProgrammeTheme || shouldReplaceDescription(existing.description, incoming.description)) {
+     setField('description', incoming.description);
+     descriptionImproved = true;
+   }
+@@ -6371,7 +6376,9 @@ function buildDuplicateEventUpdates(
+     !incoming.imageProvenance?.isFallback && incoming.imageProvenance?.primaryUrl &&
+     [incoming.relevantImageUrl, incoming.image, incoming.imageUrl].includes(incoming.imageProvenance.primaryUrl)
+     ? incoming.imageProvenance.primaryUrl : '';
+-  const protectExistingMedia = unsafeCrossSourceDateMerge || (crossSourceSeriesRefresh && (!hasNewerSourceTimestamp || !attributedSeriesImage)) || Boolean(
++  const genericIncomingFrame = /(?:^|; )generic_video_frame_without_event_details(?:;|$)/.test(incoming.imageProvenance?.selectionReason || '') &&
++    /\/postimages\//.test(String(existing.relevantImageUrl || existing.image || '')) && !existing.imageProvenance?.isFallback;
++  const protectExistingMedia = genericIncomingFrame || unsafeCrossSourceDateMerge || (crossSourceSeriesRefresh && (!hasNewerSourceTimestamp || !attributedSeriesImage)) || Boolean(
+     normalizeUrl(existing.facebookUrl || '') !== normalizeUrl(incoming.facebookUrl || '') &&
+     normalizeUrl(incoming.facebookUrl || '') === 'facebook.com/downtowncharlottetowninc' &&
+     /\/postimages\//.test(String(existing.relevantImageUrl || existing.image || existing.imageUrl || ''))
+diff --git a/src/utils/familyFriendlyScoring.ts b/src/utils/familyFriendlyScoring.ts
+index f29ece6..a3d7254 100644
+--- a/src/utils/familyFriendlyScoring.ts
++++ b/src/utils/familyFriendlyScoring.ts
+@@ -4,7 +4,7 @@ import {
+   validFamilyAudienceEvidence,
+ } from '../services/familyAudienceEvidence.js';
+ 
+-export const FAMILY_FRIENDLY_SCORING_VERSION = 'family-friendly-v7';
++export const FAMILY_FRIENDLY_SCORING_VERSION = 'family-friendly-v8';
+ export const FAMILY_FRIENDLY_LIKELY_THRESHOLD = 60;
+ 
+ export type FamilyFriendlyLevel = 'unlikely' | 'possible' | 'likely' | 'high';
+@@ -182,12 +182,16 @@ export function scoreFamilyFriendly(
+     !/\b(?:films?|movies?|concerts?|parties|party|lessons?|classes?|training|competitions?|championships?)\b/.test(title) &&
+     !/\b(?:(?:all )?pools? (?:are )?closed|private (?:booking|event|swim)|(?:lap|lane) swim|(?:adult|senior) (?:swim|swimming|fitness)|(?:adults?|seniors?)[- ]only|(?:for|restricted to) (?:adults?|seniors?)|swim(?:ming)? lessons?)\b/.test(directText) &&
+     !['cinema', 'live music', 'comedy', 'food special', 'drink special'].includes(category);
++  const hasRecreationalSkateActivity =
++    /\b(?:public|free|community|recreational|open)\s+(?:ice[- ]?)?skates?\b|\bcommunity freeskate\b/i.test(title) &&
++    !/\b(?:adult|senior|private|closed|cancelled|canceled|fitness|training|lessons?|classes?|hockey|competition|championship|film|movie|concert|party)\b/i.test(directText) &&
++    !['cinema','live music','comedy','food special','drink special'].includes(category);
+   const hasFamilyActivity =
+     /\b(?:story ?time|petting zoo|face paint(?:ing)?|bouncy (?:house|castle)|inflatable(?:s)?|kids'? crafts?|children'?s crafts?|craft table|discovery tent|juggler|juggling|stilt walkers?|touch[- ]a[- ]truck|trucks? for kids|play day|play days|farm day|meet the animals|christmas festival|holiday festival|scarecrow festival|parade)\b/.test(directText) ||
+     /\b(?:maquillage|table de bricolage|tente decouverte|jongleur|jonglerie|echassiers?|chateau gonflable|chateaux gonflables|zoo pour enfants)\b/.test(directText) ||
+     (/\b(?:farm animals?|animal visits?)\b/.test(directText) && /\bfamily rates?\b/.test(directText)) ||
+     /\btrick[- ]or[- ]treat(?:ing)?\b/.test(directText) || hasScoped('family_activity') ||
+-    (hasRecreationalAquaticActivity && !hasExplicitFamilyAudience && !hasExplicitAllAges);
++    ((hasRecreationalAquaticActivity || hasRecreationalSkateActivity) && !hasExplicitFamilyAudience && !hasExplicitAllAges);
+   const hasYouthFocus =
+     /\b(?:youth (?:day|night|program|programme|event|activity|activities|workshop|camp|club)|teen (?:night|program|programme|event|activity|activities|workshop|camp|club))\b/.test(directText) ||
+     /\b(?:journee jeunesse|activites? jeunesse|pour les jeunes)\b/.test(directText) || hasScoped('youth_focused_program');
+diff --git a/src/utils/familyFriendlySkate.test.ts b/src/utils/familyFriendlySkate.test.ts
+new file mode 100644
+index 0000000..0ea6fc2
+--- /dev/null
++++ b/src/utils/familyFriendlySkate.test.ts
+@@ -0,0 +1,13 @@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import {scoreFamilyFriendly} from './familyFriendlyScoring.js';
++test('public recreational skates qualify without changing adult, sport or movie controls',()=>{
++ for(const name of ['Free Skate','Community Freeskate','Public Ice Skate']){
++  const result=scoreFamilyFriendly({name,description:'Public recreational skating.',category:'Sports'});
++  assert.equal(result.familyFriendlyScore,60);assert(result.familyFriendlyReasons.includes('family_activity'));assert.equal(result.familyFriendlyScoringVersion,'family-friendly-v8');
++ }
++ for(const name of ['Adult Free Skate','Senior Public Skate','Private Community Freeskate','Free Skate Lessons','Hockey Competition','Film: Free Skate'])assert(scoreFamilyFriendly({name,category:'Sports'}).familyFriendlyScore<60,name);
++ assert.equal(scoreFamilyFriendly({name:'All pools open',category:'Sports'}).familyFriendlyScore,60);
++ assert.equal(scoreFamilyFriendly({name:'Lane swim',category:'Sports'}).familyFriendlyScore,15);
++ assert.equal(scoreFamilyFriendly({name:'Family / Public Skate',category:'Sports'}).familyFriendlyScore,85);
++});

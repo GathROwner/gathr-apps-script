@@ -1,0 +1,50 @@
+diff --git a/src/utils/familyFriendlyScoring.ts b/src/utils/familyFriendlyScoring.ts
+index b2662de..1a27353 100644
+--- a/src/utils/familyFriendlyScoring.ts
++++ b/src/utils/familyFriendlyScoring.ts
+@@ -4,7 +4,7 @@ import {
+   validFamilyAudienceEvidence,
+ } from '../services/familyAudienceEvidence.js';
+ 
+-export const FAMILY_FRIENDLY_SCORING_VERSION = 'family-friendly-v7';
++export const FAMILY_FRIENDLY_SCORING_VERSION = 'family-friendly-v8';
+ export const FAMILY_FRIENDLY_LIKELY_THRESHOLD = 60;
+ 
+ export type FamilyFriendlyLevel = 'unlikely' | 'possible' | 'likely' | 'high';
+@@ -170,12 +170,16 @@ export function scoreFamilyFriendly(
+     !/\b(?:films?|movies?|concerts?|parties|party|lessons?|classes?|training|competitions?|championships?)\b/.test(title) &&
+     !/\b(?:(?:all )?pools? (?:are )?closed|private (?:booking|event|swim)|(?:lap|lane) swim|(?:adult|senior) (?:swim|swimming|fitness)|(?:adults?|seniors?)[- ]only|(?:for|restricted to) (?:adults?|seniors?)|swim(?:ming)? lessons?)\b/.test(directText) &&
+     !['cinema', 'live music', 'comedy', 'food special', 'drink special'].includes(category);
++  const hasRecreationalSkateActivity =
++    /\b(?:public|free|community|recreational|open)\s+(?:ice[- ]?)?skates?\b|\bcommunity freeskate\b/i.test(title) &&
++    !/\b(?:adult|senior|private|closed|cancelled|canceled|fitness|training|lessons?|classes?|hockey|competition|championship|film|movie|concert|party)\b/i.test(directText) &&
++    !['cinema','live music','comedy','food special','drink special'].includes(category);
+   const hasFamilyActivity =
+     /\b(?:story ?time|petting zoo|face paint(?:ing)?|bouncy (?:house|castle)|inflatable(?:s)?|kids'? crafts?|children'?s crafts?|craft table|discovery tent|juggler|juggling|stilt walkers?|touch[- ]a[- ]truck|trucks? for kids|play day|play days|farm day|meet the animals|christmas festival|holiday festival|scarecrow festival|parade)\b/.test(directText) ||
+     /\b(?:maquillage|table de bricolage|tente decouverte|jongleur|jonglerie|echassiers?|chateau gonflable|chateaux gonflables|zoo pour enfants)\b/.test(directText) ||
+     (/\b(?:farm animals?|animal visits?)\b/.test(directText) && /\bfamily rates?\b/.test(directText)) ||
+     /\btrick[- ]or[- ]treat(?:ing)?\b/.test(directText) || hasScoped('family_activity') ||
+-    (hasRecreationalAquaticActivity && !hasExplicitFamilyAudience && !hasExplicitAllAges);
++    ((hasRecreationalAquaticActivity || hasRecreationalSkateActivity) && !hasExplicitFamilyAudience && !hasExplicitAllAges);
+   const hasYouthFocus =
+     /\b(?:youth (?:day|night|program|programme|event|activity|activities|workshop|camp|club)|teen (?:night|program|programme|event|activity|activities|workshop|camp|club))\b/.test(directText) ||
+     /\b(?:journee jeunesse|activites? jeunesse|pour les jeunes)\b/.test(directText) || hasScoped('youth_focused_program');
+diff --git a/src/utils/familyFriendlySkate.test.ts b/src/utils/familyFriendlySkate.test.ts
+new file mode 100644
+index 0000000..fef31bc
+--- /dev/null
++++ b/src/utils/familyFriendlySkate.test.ts
+@@ -0,0 +1,13 @@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import {scoreFamilyFriendly} from './familyFriendlyScoring.js';
++test('public recreational skates qualify without changing adult, sport or movie controls',()=>{
++ for(const name of ['Free Skate','Community Freeskate','Public Ice Skate']){
++  const result=scoreFamilyFriendly({name,description:'Public recreational skating.',category:'Sports'});
++  assert.equal(result.familyFriendlyScore,60);assert(result.familyFriendlyReasons.includes('family_activity'));assert.equal(result.familyFriendlyScoringVersion,'family-friendly-v8');
++ }
++ for(const name of ['Adult Free Skate','Senior Public Skate','Private Community Freeskate','Free Skate Lessons','Hockey Competition','Film: Free Skate'])assert(scoreFamilyFriendly({name,category:'Sports'}).familyFriendlyScore<60,name);
++ assert.equal(scoreFamilyFriendly({name:'All pools open',category:'Sports'}).familyFriendlyScore,60);
++ assert.equal(scoreFamilyFriendly({name:'Lane swim',category:'Sports'}).familyFriendlyScore,15);
++ assert.equal(scoreFamilyFriendly({name:'Family / Public Skate',category:'Sports'}).familyFriendlyScore,60);
++});

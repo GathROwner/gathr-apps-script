@@ -1,0 +1,1116 @@
+diff --git a/src/services/festivalLinkWorker.ts b/src/services/festivalLinkWorker.ts
+index fb9cc7f..8ac70d4 100644
+--- a/src/services/festivalLinkWorker.ts
++++ b/src/services/festivalLinkWorker.ts
+@@ -2,6 +2,7 @@ import * as admin from 'firebase-admin';
+ import {randomUUID} from 'node:crypto';import {pathToFileURL} from 'node:url';import path from 'node:path';
+ import {DateTime} from 'luxon';
+ import {reviewedFestivalEdition} from './festivalEditionRegistry.js';
++import {literalNamedFestivalActivity} from './festivalNamedRow.js';
+ import {festivalShadowFingerprint,festivalShadowJobId,claimFestivalShadowJob,finishFestivalShadowJob,verifyFestivalFullRun} from './festivalLinkShadowJob.js';
+ import type {FestivalShadowJob,FullRunEvidence} from './festivalLinkShadowJob.js';
+ import {planFestivalLinkPublication,assertFestivalPublicationFence} from './festivalLinkPublication.js';
+@@ -31,9 +32,9 @@ export async function runFestivalLinkWorker(db:admin.firestore.Firestore,options
+  let completion:FullRunEvidence|undefined;let completionRefs:FestivalPinnedDocument[]=[];let start=0,end=0;
+  for(const marker of markers){
+   if(!marker.exists)continue;const fileId=marker.id;
+-  const [lock,checkpoint,batches]=await Promise.all([db.doc(`processing_locks/${fileId}`).get(),db.doc(`checkpoints/${fileId}`).get(),db.collection('batch_states').where('fileId','==',fileId).get()]);
++  const [lock,checkpoint,batches,currentCheckpoint,currentCheckpoints]=await Promise.all([db.doc(`processing_locks/${fileId}`).get(),db.doc(`checkpoints/${fileId}`).get(),db.collection('batch_states').where('fileId','==',fileId).get(),db.doc(`processing_checkpoints/${fileId}`).get(),db.collection('processing_checkpoints').where('fileId','==',fileId).get()]);
+   const batch=[...batches.docs].sort((a,b)=>Number(b.get('batchNumber'))-Number(a.get('batchNumber')))[0];
+-  const candidate={fileId,checkpointExists:checkpoint.exists,lock:lock.data(),marker:marker.data(),batch:batch?.data()} as FullRunEvidence;
++  const candidate={fileId,checkpointExists:checkpoint.exists||currentCheckpoint.exists||currentCheckpoints.size>0,lock:lock.data(),marker:marker.data(),batch:batch?.data()} as FullRunEvidence;
+   if(verifyFestivalFullRun(candidate).ready){completion=candidate;completionRefs=[pin(marker),pin(lock),pin(batch)];start=lock.get('startedAt')?.toMillis?.();end=marker.get('processedAt')?.toMillis?.();break;}
+  }
+  if(!completion)return{mode:options.mode,status:'no_completed_regular_run',eventWrites:0};
+@@ -94,7 +95,7 @@ export async function runFestivalLinkWorker(db:admin.firestore.Firestore,options
+    items.push({r,source,caption,imageUrls,key,capturePolicy,cache,decision,nonmember,decisionData,corroboration,bundle,validBundle,websites,captureData:options.localCaptures?.get(key)||cache.data()});
+   }
+  }
+- const jobRef=db.doc(`festival_link_jobs/${festivalShadowJobId(fileId)}`),fingerprint=festivalShadowFingerprint({fileId,mode:options.mode,policy:'publication-worker-shared-caption-v2',editions:registered.map(r=>({edition:r.edition,umbrella:pin(r.umbrella),review:pin(r.review)})),sources:[...latest.values()].map(pin).sort((a,b)=>a.path.localeCompare(b.path)),children:children.docs.map(pin).sort((a,b)=>a.path.localeCompare(b.path)),venues:venueDocs.filter(d=>d.exists).map(pin),captures:cacheSnapshots.map(d=>({path:d.ref.path,version:d.exists?pin(d).version:null}))});
++ const jobRef=db.doc(`festival_link_jobs/${festivalShadowJobId(fileId)}`),fingerprint=festivalShadowFingerprint({fileId,mode:options.mode,policy:'publication-worker-literal-row-context-v3',editions:registered.map(r=>({edition:r.edition,umbrella:pin(r.umbrella),review:pin(r.review)})),sources:[...latest.values()].map(pin).sort((a,b)=>a.path.localeCompare(b.path)),children:children.docs.map(pin).sort((a,b)=>a.path.localeCompare(b.path)),venues:venueDocs.filter(d=>d.exists).map(pin),captures:cacheSnapshots.map(d=>({path:d.ref.path,version:d.exists?pin(d).version:null}))});
+  const claimed=options.dryRun?claimFestivalShadowJob(undefined,{fileId,inputFingerprint:fingerprint,workerToken:randomUUID(),nowMs:Date.now(),leaseMs:600000}):await db.runTransaction(async tx=>{if(active((await tx.get(db.collection('processing_locks'))).docs))return{decision:'busy'} as const;const old=await tx.get(jobRef);if(old.get('status')==='held'&&old.get('inputFingerprint')===fingerprint)return{decision:'already_held'} as const;const claim=claimFestivalShadowJob(old.data() as FestivalShadowJob|undefined,{fileId,inputFingerprint:fingerprint,workerToken:randomUUID(),nowMs:Date.now(),leaseMs:600000});if(claim.decision==='claimed')tx.set(jobRef,claim.job);return claim;});
+  if(claimed.decision!=='claimed')return{mode:options.mode,status:claimed.decision,eventWrites:0};
+  const claim=claimed.job;let paidSources=0;
+@@ -125,20 +126,21 @@ export async function runFestivalLinkWorker(db:admin.firestore.Firestore,options
+      const matches=venues.filter(v=>festivalVenueMentionLabel(v,a.venueText));const sid=String(item.source.get('uniqueId')),proposedBinding=r.edition.sourceBindings[sid];
+      const publisher=(url:string)=>{try{const u=new URL(url);return u.origin+u.pathname.replace(/\/$/,'')+u.search;}catch{return '';}};
+      const binding=proposedBinding&&(!proposedBinding.sourceFingerprint||proposedBinding.sourceFingerprint===extractor.festivalEvidenceSourceFingerprint(item)&&publisher(proposedBinding.sourceUrl)===publisher(item.source.get('facebookUrl')||''))?proposedBinding:undefined;
+-     const named=Boolean(a.activityRowText&&a.dateHeaderText&&normalize(a.eventText).startsWith(normalize(r.edition.name))&&normalize(a.eventText).length>normalize(r.edition.name).length);
+-     const evidence:FestivalSourceEvidence={id:'e_'+festivalShadowFingerprint({source:sid,index,scope:a.scopeText}).slice(0,40),source:{id:sid,url:item.source.get('facebookUrl'),text:result.sourceText,documents:result.documents,publisherId:'publisher_'+festivalShadowFingerprint(item.source.get('facebookUrl')||'').slice(0,24),revision:item.source.updateTime.toDate().toISOString(),...(binding?{organizerId:binding.organizerId}:{})},kind:named?'same_source_named_activity':a.kind,scopeText:a.scopeText,membershipText:named?a.eventText:a.membershipText,festivalNameText:a.festivalNameText,yearText:a.yearText,organizerText:a.organizerText,...(a.activityRowText?{activityRowText:a.activityRowText,dateHeaderText:a.dateHeaderText}:{}),...(a.captionScope?{captionScope:a.captionScope}:{}),...(a.sourceScope?{sourceScope:a.sourceScope}:{}),...(a.sharedCaptionScope?{sharedCaptionScope:a.sharedCaptionScope}:{}),activity:{name:a.name,venueId:matches.length===1?matches[0].id:'',startDate:a.startDate,startTime:a.startTime,...(a.ticketUrl&&!isFestivalTicketHomepage(a.ticketUrl)?{ticketUrl:a.ticketUrl}:{})},eventText:a.eventText,dateText:a.dateText,timeText:a.timeText,venueText:a.venueText};
++     const namedText=literalNamedFestivalActivity(a,r.edition.name);
++     const named=Boolean(a.activityRowText&&a.dateHeaderText&&(namedText||normalize(a.eventText).startsWith(normalize(r.edition.name))&&normalize(a.eventText).length>normalize(r.edition.name).length));
++     const evidence:FestivalSourceEvidence={id:'e_'+festivalShadowFingerprint({source:sid,index,scope:a.scopeText}).slice(0,40),source:{id:sid,url:item.source.get('facebookUrl'),text:result.sourceText,documents:result.documents,publisherId:'publisher_'+festivalShadowFingerprint(item.source.get('facebookUrl')||'').slice(0,24),revision:item.source.updateTime.toDate().toISOString(),...(binding?{organizerId:binding.organizerId}:{})},kind:named?'same_source_named_activity':a.kind,scopeText:a.scopeText,membershipText:named?(namedText||a.eventText):a.membershipText,festivalNameText:a.festivalNameText,yearText:a.yearText,organizerText:a.organizerText,...(a.activityRowText?{activityRowText:a.activityRowText,dateHeaderText:a.dateHeaderText}:{}),...(a.captionScope?{captionScope:a.captionScope}:{}),...(a.sourceScope?{sourceScope:a.sourceScope}:{}),...(a.sharedCaptionScope?{sharedCaptionScope:a.sharedCaptionScope}:{}),activity:{name:named?(namedText||a.eventText):a.name,venueId:matches.length===1?matches[0].id:'',startDate:a.startDate,startTime:a.startTime,...(a.ticketUrl&&!isFestivalTicketHomepage(a.ticketUrl)?{ticketUrl:a.ticketUrl}:{})},eventText:named?(namedText||a.eventText):a.eventText,dateText:a.dateText,timeText:a.timeText,venueText:a.venueText};
+      sources.push(evidence);contexts.set(evidence.id,{item,context:{captureKey:item.key,sourceFingerprint:extractor.festivalEvidenceSourceFingerprint(item),evidencePolicy:item.capturePolicy,activityFingerprint:festivalShadowFingerprint(a),verifierAccepted:a.verification.accepted===true}});
+     }
+    }
+    const ownershipRef=db.doc(`festival_link_publications/${r.edition.id}`),ownership=await ownershipRef.get();
+    const dispositions:any[]=[],ordinary=sources.filter(source=>{const {item,context}=contexts.get(source.id)!;const disposition=reviewedFestivalCorroboration({edition:r.edition,source,context,receipts:item.bundle?.receipts||[],websites:item.websites,umbrella:{path:r.umbrella.ref.path,data:plain(r.umbrella.data()),version:pin(r.umbrella).version},review:{path:r.review.ref.path,data:plain(r.review.data()),version:pin(r.review).version},candidates,venueDocuments:venueDocs.filter(d=>d.exists).map(d=>({path:d.ref.path,data:plain(d.data()),version:pin(d).version})),suppressedEventIds:ownership.get('suppressedEventIds')||[],asOf});if(disposition)dispositions.push(disposition);return !disposition;});
+    const input:FestivalPublicationInput={edition:r.edition,umbrella:{path:r.umbrella.ref.path,data:plain(r.umbrella.data())},review:{path:r.review.ref.path,data:plain(r.review.data()!)},sources:ordinary,candidates,venues,completion,sourceInventoryComplete:gaps.length===0,ownership:ownership.data() as FestivalPublicationOwnership|undefined};
+-   const proposal=await planFestivalLinkPublication(input);reports.push({editionId:r.edition.id,status:proposal.status,reason:proposal.reason,gaps,unconfirmedItems,reviewedNonmembers,outcomes:[...(proposal.result?.outcomes||[]),...dispositions].sort((a,b)=>a.id.localeCompare(b.id)),addedEventIds:proposal.addedEventIds});
++   const proposal=await planFestivalLinkPublication(input);reports.push({editionId:r.edition.id,status:proposal.status,reason:proposal.reason,gaps,unconfirmedItems,reviewedNonmembers,outcomes:[...(proposal.result?.outcomes||[]),...dispositions].sort((a,b)=>a.id.localeCompare(b.id)),addedEventIds:proposal.addedEventIds,...(options.dryRun?{proposal}:{})});
+    if(options.dryRun||options.mode!=='publish'||proposal.status!=='ready')continue;
+    const refs=[...completionRefs,pin(r.umbrella),pin(r.review),...sourceItems.map(i=>pin(i.source)),...sourceItems.filter(i=>i.cache?.exists).map(i=>pin(i.cache)),...sourceItems.filter(i=>i.nonmember&&i.decision?.exists).map(i=>pin(i.decision)),...venueDocs.filter(d=>d.exists).map(pin)];
+    const references=[...new Map(refs.map(p=>[p.path,p])).values()];
+    await db.runTransaction(async tx=>{
+-    const locks=await tx.get(db.collection('processing_locks')),checkpoint=await tx.get(db.doc(`checkpoints/${fileId}`));if(checkpoint.exists)throw Error('Checkpoint reappeared');
++    const locks=await tx.get(db.collection('processing_locks')),checkpoint=await tx.get(db.doc(`checkpoints/${fileId}`)),currentCheckpoint=await tx.get(db.doc(`processing_checkpoints/${fileId}`)),currentCheckpoints=await tx.get(db.collection('processing_checkpoints').where('fileId','==',fileId));if(checkpoint.exists||currentCheckpoint.exists||currentCheckpoints.size>0)throw Error('Checkpoint reappeared');
+     const [job,owned,feed]=await tx.getAll(jobRef,ownershipRef,db.doc('runtime_metadata/event_feed'));const read=await tx.getAll(...references.map(p=>db.doc(p.path)));
+     const captureState=[...new Map(cacheSnapshots.map(d=>[d.ref.path,d])).values()];
+     const currentCaptures=captureState.length?await tx.getAll(...captureState.map(d=>db.doc(d.ref.path))):[];
+diff --git a/src/services/festivalNamedRow.test.ts b/src/services/festivalNamedRow.test.ts
+new file mode 100644
+index 0000000..0590808
+--- /dev/null
++++ b/src/services/festivalNamedRow.test.ts
+@@ -0,0 +1,23 @@
++import test from 'node:test';import assert from 'node:assert/strict';
++import fixtures from './oct18FestivalFixtures.json';
++import {literalNamedFestivalActivity} from './festivalNamedRow.js';
++import {literalFestivalProgrammeHeading} from './festivalProgrammeHeading.js';
++test('actual shortened roundup titles retain their literal ANCHOR prefix',()=>{
++ const roundup=fixtures.find(r=>r.activities.some(a=>a.kind==='festival_activity'))!;
++ assert.equal(roundup.activities.length,7);
++ for(const a of roundup.activities){const text=literalNamedFestivalActivity(a,'Anchor Fest');assert(text);assert(a.activityRowText!.includes(text));assert(text.includes(a.eventText));
++  assert.equal(literalNamedFestivalActivity({...a,activityRowText:a.eventText},'Anchor Fest'),undefined);
++  assert.equal(literalNamedFestivalActivity(a,'Different Festival'),undefined);
++  assert.equal(literalNamedFestivalActivity({...a,activityRowText:a.activityRowText+'\n'+a.activityRowText},'Anchor Fest'),undefined);
++ }
++});
++test('same-image day heading and immediately printed year bind; other image/year/section does not',()=>{
++ const programme:any=fixtures.find(r=>r.activities.some(a=>a.kind==='programme_row'))!;
++ const a=programme.activities.find((a:any)=>a.sourceScope?.documentIndex===1)!;
++ const input={documents:programme.documents,scope:a.sourceScope,festivalNameText:a.festivalNameText,yearText:a.yearText};
++ const h=literalFestivalProgrammeHeading(input);assert(h);assert(h.includes('2026'));assert(h.includes(a.festivalNameText));
++ assert.equal(literalFestivalProgrammeHeading({...input,yearText:'2025'}),undefined);
++ assert.equal(literalFestivalProgrammeHeading({...input,scope:{...input.scope!,documentIndex:0}}),undefined);
++ const documents=programme.documents.map((d:any)=>d.index===1?{...d,text:d.text.replace('ANCHOR\nFEST\nDAY 4','Another Festival\nDAY 4')}:d);
++ assert.equal(literalFestivalProgrammeHeading({...input,documents}),undefined);
++});
+diff --git a/src/services/festivalNamedRow.ts b/src/services/festivalNamedRow.ts
+new file mode 100644
+index 0000000..cb77ad2
+--- /dev/null
++++ b/src/services/festivalNamedRow.ts
+@@ -0,0 +1,12 @@
++/** Keep a literal festival prefix that the evidence model abbreviated away.
++ * No year, clock, venue, author or document text is generated here. */
++export function literalNamedFestivalActivity(a:{eventText:string;activityRowText?:string;festivalNameText:string},editionName:string):string|undefined {
++ const key=(v:string)=>v.toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
++ const row=a.activityRowText||'',name=a.festivalNameText,title=a.eventText;
++ if(!row||!name||!title||key(name)!==key(editionName)||!/\b(?:fest|festival)\b/i.test(name))return;
++ const start=row.indexOf(name),end=row.indexOf(title,start+name.length);
++ if(start<0||end<0||row.indexOf(name,start+name.length)>=0||row.indexOf(title,end+title.length)>=0)return;
++ if(!/^[\s:—–-]+$/.test(row.slice(start+name.length,end)))return;
++ const literal=row.slice(start,end+title.length);
++ return key(literal).startsWith(key(editionName)+' ')?literal:undefined;
++}
+diff --git a/src/services/festivalProgrammeHeading.ts b/src/services/festivalProgrammeHeading.ts
+index ef37df5..5aac410 100644
+--- a/src/services/festivalProgrammeHeading.ts
++++ b/src/services/festivalProgrammeHeading.ts
+@@ -11,9 +11,19 @@ export function literalFestivalProgrammeHeading(input:{documents:readonly Festiv
+  const {scope,documents,festivalNameText,yearText}=input;
+  if(!scope||scope.documentIndex<0||!/^20\d{2}$/.test(yearText)||!festivalNameText.trim())return;
+  const matching=documents.filter(d=>d.index===scope.documentIndex);if(matching.length!==1)return;
+- const doc=matching[0].text,heading=doc.split(/\n\s*\n/)[0];
++ const doc=matching[0].text,firstBlock=doc.split(/\n\s*\n/)[0],heading=firstBlock.length>scope.contextStart?doc.slice(0,scope.contextStart).trimEnd():firstBlock;
+  if(!heading||heading.length>500||heading.length>scope.contextStart||!heading.includes(festivalNameText))return;
+  const years=heading.match(/\b(?:19|20)\d{2}\b/g)||[];
++ if(years.length===0){
++  if(doc.indexOf(heading,heading.length)>=0)return;
++  const dateHeader=doc.slice(scope.dateStart,scope.dateEnd),between=doc.slice(heading.length,scope.dateStart);
++  const name=key(festivalNameText),head=key(heading);
++  if(scope.kind!=='date_heading'||between.trim()||!head.startsWith(name+' ')||
++     !/^(?:day \d+(?: schedule)?|schedule)$/.test(head.slice(name.length).trim())||
++     (dateHeader.match(/\b(?:19|20)\d{2}\b/g)||[]).join(',')!==yearText||
++     !/^(?:[a-z]+[,]?\s+)?(?:january|february|march|april|may|june|july|august|september|october|november|december)\s+\d{1,2},?\s+20\d{2}$/i.test(dateHeader.trim()))return;
++  return doc.slice(0,scope.dateEnd);
++ }
+  if(years.length!==1||years[0]!==yearText)return;
+  const normalized=key(heading),name=key(festivalNameText);
+  if(!/\b(?:fest|festival)\b/.test(name)||!(normalized.startsWith(`${yearText} ${name} `)||normalized===`${yearText} ${name}`||normalized.startsWith(`${name} ${yearText} `)||normalized===`${name} ${yearText}`))return;
+diff --git a/src/services/oct18FestivalFixtures.json b/src/services/oct18FestivalFixtures.json
+new file mode 100644
+index 0000000..8cd063e
+--- /dev/null
++++ b/src/services/oct18FestivalFixtures.json
+@@ -0,0 +1,978 @@
++[
++  {
++    "version": 1,
++    "model": "gpt-6-luna",
++    "effort": "high",
++    "sourceFingerprint": "cd60b96a0986005e08fbf2de160095e87ddd6a4507871d1018005478b9d976ae",
++    "editionFingerprint": "18663faca0b144c9b7f112db455cf8df2ac2b5442fb3a1568bc8dbfca9e0b7db",
++    "evidencePolicy": "3501d7e66fbff47e4cc48233c8c30a5bc348e06c6fd6fa1fcd251fc60b9b3af5",
++    "requests": [
++      {
++        "id": "resp_0329abe8e6b1a8c6016ad4cb0877c487d28d870bf9ad2e58c7",
++        "status": "completed",
++        "incompleteDetails": null,
++        "usage": {
++          "input_tokens": 1948,
++          "input_tokens_details": {
++            "cache_write_tokens": 1945,
++            "cached_tokens": 0
++          },
++          "output_tokens": 5004,
++          "output_tokens_details": {
++            "reasoning_tokens": 2047
++          },
++          "total_tokens": 6952
++        },
++        "maxOutputTokens": 12000,
++        "imageCount": 3,
++        "replayed": false,
++        "latencyMs": 43121
++      },
++      {
++        "id": "resp_06e67c91e31d0cc5016ad4cb33678887d298f445b82654145b",
++        "status": "completed",
++        "incompleteDetails": null,
++        "usage": {
++          "input_tokens": 5884,
++          "input_tokens_details": {
++            "cache_write_tokens": 5881,
++            "cached_tokens": 0
++          },
++          "output_tokens": 2130,
++          "output_tokens_details": {
++            "reasoning_tokens": 1471
++          },
++          "total_tokens": 8014
++        },
++        "maxOutputTokens": 12000,
++        "imageCount": 3,
++        "replayed": false,
++        "latencyMs": 22200
++      }
++    ],
++    "complete": true,
++    "limitations": [],
++    "documents": [
++      {
++        "index": -1,
++        "text": "\u2728DAY 4 \u2728\n\nHappy Saturday and welcome to our busiest day yet!\nWe\u2019ve got the final day of our industry forum, a bunch of movies, a couple awesome concerts, and a comedy show with Matt Wright featuring the cast of THE SNAKE  \n\nMake sure you book your tickets NOW\n\n link in bio\n\n#anchorfest2026 #anchorfest #charlottetown #pei\n\nCheck out today\u2019s, DAY 4, Schedule for 2026 Anchor Fest, in Downtown Charlottetown \n\nOCR TEXT:\nMay be an image of text\nMay be an image of text\nMay be a graphic of text\nMay be a graphic of text\nMay be an image of text\nMay be an image of text"
++      },
++      {
++        "index": 0,
++        "text": "ANCHOR\nFEST\nDAY 4\nSCHEDULE"
++      },
++      {
++        "index": 1,
++        "text": "ANCHOR\nFEST\nDAY 4\nOCTOBER 17, 2026\n\n9:00AM - 5:00PM\nINDUSTRY FORUM DAY 3\n(Industry Pass required)\nThe Arts Guild - 111 Queen St\n\n2:00PM\nIN THE HEART OF\nTHE SOUTH\nTivoli Cinema\n\n2:00PM\nPANORAMAS\n(SHORTS)\nCity Cinema\n\n4:30PM\nCAPTAIN\nNEWFOUNDLAND\nTivoli Cinema\n\n4:30PM\nSTRONG\nSON\nCity Cinema\n\n5:00PM - 7:00PM\nHOLIDAY HAPPY HOUR - CHRISTMAS IN\nOCTOBER: SPOTLIGHT ON UNHOLY NIGHT\nPresented by The Dairy Farmers of PEI & The\nScarecrow Festival\nDali Cafe - 155 Kent Street"
++      },
++      {
++        "index": 2,
++        "text": "ANCHOR\nFEST\nDAY 4\nOCTOBER 17, 2026\n\n6:00PM\nHeavenly Blue, UNCLE, Bilge, Dear\nBlossom, Cathedral Grove\nBeaconsfield Carriage House\n\n7:00PM\nUNHOLY\nNIGHT\nTivoli Cinema\n\n7:00PM\nPERMANENT\nDAMAGE\nCity Cinema\n\n7:00PM\nMATTURDAY WRIGHT LIVE\nFeaturing the cast of THE SNAKE\nThe Comedy Cave - 189 Kent Street\n\n9:30PM\nLADIES AND GENTLEMEN,\nBRIAN MULRONEY\nTivoli Cinema\n\n9:30PM\nA SAFE DISTANCE\nCity Cinema\n\n10:00PM\nPenny & The Pits, Space Bud, Green Eyes,\nWitch Hands, Day Blooms\nCharlottetown Beer Garden"
++      }
++    ],
++    "activities": [
++      {
++        "kind": "programme_row",
++        "scopeText": "OCTOBER 17, 2026\n\n9:00AM - 5:00PM\nINDUSTRY FORUM DAY 3\n(Industry Pass required)\nThe Arts Guild - 111 Queen St",
++        "membershipText": "ANCHOR\nFEST\nDAY 4",
++        "festivalNameText": "ANCHOR\nFEST",
++        "yearText": "2026",
++        "organizerText": "",
++        "name": "INDUSTRY FORUM DAY 3",
++        "venueText": "The Arts Guild - 111 Queen St",
++        "dateText": "OCTOBER 17, 2026",
++        "timeText": "9:00AM - 5:00PM",
++        "startDate": "2026-10-17",
++        "startTime": "09:00",
++        "eventText": "INDUSTRY FORUM DAY 3",
++        "ticketUrl": "",
++        "sourceIndices": [
++          1
++        ],
++        "activityRowText": "9:00AM - 5:00PM\nINDUSTRY FORUM DAY 3\n(Industry Pass required)\nThe Arts Guild - 111 Queen St",
++        "dateHeaderText": "OCTOBER 17, 2026",
++        "sourceScope": {
++          "version": 1,
++          "documentIndex": 1,
++          "kind": "date_heading",
++          "contextStart": 18,
++          "contextEnd": 127,
++          "rowStart": 36,
++          "rowEnd": 127,
++          "dateStart": 18,
++          "dateEnd": 34
++        },
++        "originalEventText": "(Industry Pass required)",
++        "modelVerification": {
++          "index": 0,
++          "accepted": true,
++          "reason": "The Day 4 Anchor Fest schedule shows the October 17, 2026 date heading and this row\u2019s title, time, and venue. Source image 1 supports it."
++        },
++        "verification": {
++          "index": 0,
++          "accepted": true,
++          "reason": "The Day 4 Anchor Fest schedule shows the October 17, 2026 date heading and this row\u2019s title, time, and venue. Source image 1 supports it."
++        }
++      },
++      {
++        "kind": "programme_row",
++        "scopeText": "OCTOBER 17, 2026\n\n9:00AM - 5:00PM\nINDUSTRY FORUM DAY 3\n(Industry Pass required)\nThe Arts Guild - 111 Queen St\n\n2:00PM\nIN THE HEART OF\nTHE SOUTH\nTivoli Cinema",
++        "membershipText": "ANCHOR\nFEST\nDAY 4",
++        "festivalNameText": "ANCHOR\nFEST",
++        "yearText": "2026",
++        "organizerText": "",
++        "name": "IN THE HEART OF\nTHE SOUTH",
++        "venueText": "Tivoli Cinema",
++        "dateText": "OCTOBER 17, 2026",
++        "timeText": "2:00PM",
++        "startDate": "2026-10-17",
++        "startTime": "14:00",
++        "eventText": "IN THE HEART OF\nTHE SOUTH",
++        "ticketUrl": "",
++        "sourceIndices": [
++          1
++        ],
++        "activityRowText": "2:00PM\nIN THE HEART OF\nTHE SOUTH\nTivoli Cinema",
++        "dateHeaderText": "OCTOBER 17, 2026",
++        "sourceScope": {
++          "version": 1,
++          "documentIndex": 1,
++          "kind": "date_heading",
++          "contextStart": 18,
++          "contextEnd": 175,
++          "rowStart": 129,
++          "rowEnd": 175,
++          "dateStart": 18,
++          "dateEnd": 34
++        },
++        "originalEventText": "IN THE HEART OF\nTHE SOUTH",
++        "modelVerification": {
++          "index": 1,
++          "accepted": true,
++          "reason": "The October 17, 2026 heading governs this row; title, 2:00PM time, and Tivoli Cinema venue match. Source image 1 supports it."
++        },
++        "verification": {
++          "index": 1,
++          "accepted": true,
++          "reason": "The October 17, 2026 heading governs this row; title, 2:00PM time, and Tivoli Cinema venue match. Source image 1 supports it."
++        }
++      },
++      {
++        "kind": "programme_row",
++        "scopeText": "OCTOBER 17, 2026\n\n9:00AM - 5:00PM\nINDUSTRY FORUM DAY 3\n(Industry Pass required)\nThe Arts Guild - 111 Queen St\n\n2:00PM\nIN THE HEART OF\nTHE SOUTH\nTivoli Cinema\n\n2:00PM\nPANORAMAS\n(SHORTS)\nCity Cinema",
++        "membershipText": "ANCHOR\nFEST\nDAY 4",
++        "festivalNameText": "ANCHOR\nFEST",
++        "yearText": "2026",
++        "organizerText": "",
++        "name": "PANORAMAS",
++        "venueText": "City Cinema",
++        "dateText": "OCTOBER 17, 2026",
++        "timeText": "2:00PM",
++        "startDate": "2026-10-17",
++        "startTime": "14:00",
++        "eventText": "PANORAMAS",
++        "ticketUrl": "",
++        "sourceIndices": [
++          1
++        ],
++        "activityRowText": "2:00PM\nPANORAMAS\n(SHORTS)\nCity Cinema",
++        "dateHeaderText": "OCTOBER 17, 2026",
++        "sourceScope": {
++          "version": 1,
++          "documentIndex": 1,
++          "kind": "date_heading",
++          "contextStart": 18,
++          "contextEnd": 214,
++          "rowStart": 177,
++          "rowEnd": 214,
++          "dateStart": 18,
++          "dateEnd": 34
++        },
++        "originalEventText": "(SHORTS)",
++        "modelVerification": {
++          "index": 2,
++          "accepted": true,
++          "reason": "The October 17, 2026 heading governs this row; PANORAMAS, the (SHORTS) label, 2:00PM time, and City Cinema venue match. Source image 1 supports it."
++        },
++        "verification": {
++          "index": 2,
++          "accepted": true,
++          "reason": "The October 17, 2026 heading governs this row; PANORAMAS, the (SHORTS) label, 2:00PM time, and City Cinema venue match. Source image 1 supports it."
++        }
++      },
++      {
++        "kind": "programme_row",
++        "scopeText": "OCTOBER 17, 2026\n\n9:00AM - 5:00PM\nINDUSTRY FORUM DAY 3\n(Industry Pass required)\nThe Arts Guild - 111 Queen St\n\n2:00PM\nIN THE HEART OF\nTHE SOUTH\nTivoli Cinema\n\n2:00PM\nPANORAMAS\n(SHORTS)\nCity Cinema\n\n4:30PM\nCAPTAIN\nNEWFOUNDLAND\nTivoli Cinema",
++        "membershipText": "ANCHOR\nFEST\nDAY 4",
++        "festivalNameText": "ANCHOR\nFEST",
++        "yearText": "2026",
++        "organizerText": "",
++        "name": "CAPTAIN\nNEWFOUNDLAND",
++        "venueText": "Tivoli Cinema",
++        "dateText": "OCTOBER 17, 2026",
++        "timeText": "4:30PM",
++        "startDate": "2026-10-17",
++        "startTime": "16:30",
++        "eventText": "CAPTAIN\nNEWFOUNDLAND",
++        "ticketUrl": "",
++        "sourceIndices": [
++          1
++        ],
++        "activityRowText": "4:30PM\nCAPTAIN\nNEWFOUNDLAND\nTivoli Cinema",
++        "dateHeaderText": "OCTOBER 17, 2026",
++        "sourceScope": {
++          "version": 1,
++          "documentIndex": 1,
++          "kind": "date_heading",
++          "contextStart": 18,
++          "contextEnd": 257,
++          "rowStart": 216,
++          "rowEnd": 257,
++          "dateStart": 18,
++          "dateEnd": 34
++        },
++        "originalEventText": "CAPTAIN\nNEWFOUNDLAND",
++        "modelVerification": {
++          "index": 3,
++          "accepted": true,
++          "reason": "The October 17, 2026 heading governs this row; title, 4:30PM time, and Tivoli Cinema venue match. Source image 1 supports it."
++        },
++        "verification": {
++          "index": 3,
++          "accepted": true,
++          "reason": "The October 17, 2026 heading governs this row; title, 4:30PM time, and Tivoli Cinema venue match. Source image 1 supports it."
++        }
++      },
++      {
++        "kind": "programme_row",
++        "scopeText": "OCTOBER 17, 2026\n\n9:00AM - 5:00PM\nINDUSTRY FORUM DAY 3\n(Industry Pass required)\nThe Arts Guild - 111 Queen St\n\n2:00PM\nIN THE HEART OF\nTHE SOUTH\nTivoli Cinema\n\n2:00PM\nPANORAMAS\n(SHORTS)\nCity Cinema\n\n4:30PM\nCAPTAIN\nNEWFOUNDLAND\nTivoli Cinema\n\n4:30PM\nSTRONG\nSON\nCity Cinema",
++        "membershipText": "ANCHOR\nFEST\nDAY 4",
++        "festivalNameText": "ANCHOR\nFEST",
++        "yearText": "2026",
++        "organizerText": "",
++        "name": "STRONG\nSON",
++        "venueText": "City Cinema",
++        "dateText": "OCTOBER 17, 2026",
++        "timeText": "4:30PM",
++        "startDate": "2026-10-17",
++        "startTime": "16:30",
++        "eventText": "STRONG\nSON",
++        "ticketUrl": "",
++        "sourceIndices": [
++          1
++        ],
++        "activityRowText": "4:30PM\nSTRONG\nSON\nCity Cinema",
++        "dateHeaderText": "OCTOBER 17, 2026",
++        "sourceScope": {
++          "version": 1,
++          "documentIndex": 1,
++          "kind": "date_heading",
++          "contextStart": 18,
++          "contextEnd": 288,
++          "rowStart": 259,
++          "rowEnd": 288,
++          "dateStart": 18,
++          "dateEnd": 34
++        },
++        "originalEventText": "STRONG\nSON",
++        "modelVerification": {
++          "index": 4,
++          "accepted": true,
++          "reason": "The October 17, 2026 heading governs this row; title, 4:30PM time, and City Cinema venue match. Source image 1 supports it."
++        },
++        "verification": {
++          "index": 4,
++          "accepted": true,
++          "reason": "The October 17, 2026 heading governs this row; title, 4:30PM time, and City Cinema venue match. Source image 1 supports it."
++        }
++      },
++      {
++        "kind": "programme_row",
++        "scopeText": "OCTOBER 17, 2026\n\n9:00AM - 5:00PM\nINDUSTRY FORUM DAY 3\n(Industry Pass required)\nThe Arts Guild - 111 Queen St\n\n2:00PM\nIN THE HEART OF\nTHE SOUTH\nTivoli Cinema\n\n2:00PM\nPANORAMAS\n(SHORTS)\nCity Cinema\n\n4:30PM\nCAPTAIN\nNEWFOUNDLAND\nTivoli Cinema\n\n4:30PM\nSTRONG\nSON\nCity Cinema\n\n5:00PM - 7:00PM\nHOLIDAY HAPPY HOUR - CHRISTMAS IN\nOCTOBER: SPOTLIGHT ON UNHOLY NIGHT\nPresented by The Dairy Farmers of PEI & The\nScarecrow Festival\nDali Cafe - 155 Kent Street",
++        "membershipText": "ANCHOR\nFEST\nDAY 4",
++        "festivalNameText": "ANCHOR\nFEST",
++        "yearText": "2026",
++        "organizerText": "Presented by The Dairy Farmers of PEI & The\nScarecrow Festival",
++        "name": "HOLIDAY HAPPY HOUR - CHRISTMAS IN\nOCTOBER: SPOTLIGHT ON UNHOLY NIGHT",
++        "venueText": "Dali Cafe - 155 Kent Street",
++        "dateText": "OCTOBER 17, 2026",
++        "timeText": "5:00PM - 7:00PM",
++        "startDate": "2026-10-17",
++        "startTime": "17:00",
++        "eventText": "HOLIDAY HAPPY HOUR - CHRISTMAS IN\nOCTOBER: SPOTLIGHT ON UNHOLY NIGHT",
++        "ticketUrl": "",
++        "sourceIndices": [
++          1
++        ],
++        "activityRowText": "5:00PM - 7:00PM\nHOLIDAY HAPPY HOUR - CHRISTMAS IN\nOCTOBER: SPOTLIGHT ON UNHOLY NIGHT\nPresented by The Dairy Farmers of PEI & The\nScarecrow Festival\nDali Cafe - 155 Kent Street",
++        "dateHeaderText": "OCTOBER 17, 2026",
++        "sourceScope": {
++          "version": 1,
++          "documentIndex": 1,
++          "kind": "date_heading",
++          "contextStart": 18,
++          "contextEnd": 465,
++          "rowStart": 290,
++          "rowEnd": 465,
++          "dateStart": 18,
++          "dateEnd": 34
++        },
++        "originalEventText": "HOLIDAY HAPPY HOUR - CHRISTMAS IN\nOCTOBER: SPOTLIGHT ON UNHOLY NIGHT",
++        "modelVerification": {
++          "index": 5,
++          "accepted": false,
++          "reason": "The row\u2019s title, time, venue, and source image are accurate, but \u201cPresented by\u201d identifies presenters, not an organizer. The organizer field should remain empty."
++        },
++        "verification": {
++          "index": 5,
++          "accepted": false,
++          "reason": "The row\u2019s title, time, venue, and source image are accurate, but \u201cPresented by\u201d identifies presenters, not an organizer. The organizer field should remain empty."
++        }
++      },
++      {
++        "kind": "programme_row",
++        "scopeText": "OCTOBER 17, 2026\n\n6:00PM\nHeavenly Blue, UNCLE, Bilge, Dear\nBlossom, Cathedral Grove\nBeaconsfield Carriage House",
++        "membershipText": "ANCHOR\nFEST\nDAY 4",
++        "festivalNameText": "ANCHOR\nFEST",
++        "yearText": "2026",
++        "organizerText": "",
++        "name": "Heavenly Blue, UNCLE, Bilge, Dear\nBlossom, Cathedral Grove",
++        "venueText": "Beaconsfield Carriage House",
++        "dateText": "OCTOBER 17, 2026",
++        "timeText": "6:00PM",
++        "startDate": "2026-10-17",
++        "startTime": "18:00",
++        "eventText": "Heavenly Blue, UNCLE, Bilge, Dear\nBlossom, Cathedral Grove",
++        "ticketUrl": "",
++        "sourceIndices": [
++          2
++        ],
++        "activityRowText": "6:00PM\nHeavenly Blue, UNCLE, Bilge, Dear\nBlossom, Cathedral Grove\nBeaconsfield Carriage House",
++        "dateHeaderText": "OCTOBER 17, 2026",
++        "sourceScope": {
++          "version": 1,
++          "documentIndex": 2,
++          "kind": "date_heading",
++          "contextStart": 18,
++          "contextEnd": 129,
++          "rowStart": 36,
++          "rowEnd": 129,
++          "dateStart": 18,
++          "dateEnd": 34
++        },
++        "originalEventText": "Heavenly Blue, UNCLE, Bilge, Dear\nBlossom, Cathedral Grove",
++        "modelVerification": {
++          "index": 6,
++          "accepted": true,
++          "reason": "The October 17, 2026 heading governs this row; title, 6:00PM time, and Beaconsfield Carriage House venue match. Source image 2 supports it."
++        },
++        "verification": {
++          "index": 6,
++          "accepted": true,
++          "reason": "The October 17, 2026 heading governs this row; title, 6:00PM time, and Beaconsfield Carriage House venue match. Source image 2 supports it."
++        }
++      },
++      {
++        "kind": "programme_row",
++        "scopeText": "OCTOBER 17, 2026\n\n6:00PM\nHeavenly Blue, UNCLE, Bilge, Dear\nBlossom, Cathedral Grove\nBeaconsfield Carriage House\n\n7:00PM\nUNHOLY\nNIGHT\nTivoli Cinema",
++        "membershipText": "ANCHOR\nFEST\nDAY 4",
++        "festivalNameText": "ANCHOR\nFEST",
++        "yearText": "2026",
++        "organizerText": "",
++        "name": "UNHOLY\nNIGHT",
++        "venueText": "Tivoli Cinema",
++        "dateText": "OCTOBER 17, 2026",
++        "timeText": "7:00PM",
++        "startDate": "2026-10-17",
++        "startTime": "19:00",
++        "eventText": "UNHOLY\nNIGHT",
++        "ticketUrl": "",
++        "sourceIndices": [
++          2
++        ],
++        "activityRowText": "7:00PM\nUNHOLY\nNIGHT\nTivoli Cinema",
++        "dateHeaderText": "OCTOBER 17, 2026",
++        "sourceScope": {
++          "version": 1,
++          "documentIndex": 2,
++          "kind": "date_heading",
++          "contextStart": 18,
++          "contextEnd": 164,
++          "rowStart": 131,
++          "rowEnd": 164,
++          "dateStart": 18,
++          "dateEnd": 34
++        },
++        "originalEventText": "UNHOLY\nNIGHT",
++        "modelVerification": {
++          "index": 7,
++          "accepted": true,
++          "reason": "The October 17, 2026 heading governs this row; title, 7:00PM time, and Tivoli Cinema venue match. Source image 2 supports it."
++        },
++        "verification": {
++          "index": 7,
++          "accepted": true,
++          "reason": "The October 17, 2026 heading governs this row; title, 7:00PM time, and Tivoli Cinema venue match. Source image 2 supports it."
++        }
++      },
++      {
++        "kind": "programme_row",
++        "scopeText": "OCTOBER 17, 2026\n\n6:00PM\nHeavenly Blue, UNCLE, Bilge, Dear\nBlossom, Cathedral Grove\nBeaconsfield Carriage House\n\n7:00PM\nUNHOLY\nNIGHT\nTivoli Cinema\n\n7:00PM\nPERMANENT\nDAMAGE\nCity Cinema",
++        "membershipText": "ANCHOR\nFEST\nDAY 4",
++        "festivalNameText": "ANCHOR\nFEST",
++        "yearText": "2026",
++        "organizerText": "",
++        "name": "PERMANENT\nDAMAGE",
++        "venueText": "City Cinema",
++        "dateText": "OCTOBER 17, 2026",
++        "timeText": "7:00PM",
++        "startDate": "2026-10-17",
++        "startTime": "19:00",
++        "eventText": "PERMANENT\nDAMAGE",
++        "ticketUrl": "",
++        "sourceIndices": [
++          2
++        ],
++        "activityRowText": "7:00PM\nPERMANENT\nDAMAGE\nCity Cinema",
++        "dateHeaderText": "OCTOBER 17, 2026",
++        "sourceScope": {
++          "version": 1,
++          "documentIndex": 2,
++          "kind": "date_heading",
++          "contextStart": 18,
++          "contextEnd": 201,
++          "rowStart": 166,
++          "rowEnd": 201,
++          "dateStart": 18,
++          "dateEnd": 34
++        },
++        "originalEventText": "PERMANENT\nDAMAGE",
++        "modelVerification": {
++          "index": 8,
++          "accepted": true,
++          "reason": "The October 17, 2026 heading governs this row; title, 7:00PM time, and City Cinema venue match. Source image 2 supports it."
++        },
++        "verification": {
++          "index": 8,
++          "accepted": true,
++          "reason": "The October 17, 2026 heading governs this row; title, 7:00PM time, and City Cinema venue match. Source image 2 supports it."
++        }
++      },
++      {
++        "kind": "programme_row",
++        "scopeText": "OCTOBER 17, 2026\n\n6:00PM\nHeavenly Blue, UNCLE, Bilge, Dear\nBlossom, Cathedral Grove\nBeaconsfield Carriage House\n\n7:00PM\nUNHOLY\nNIGHT\nTivoli Cinema\n\n7:00PM\nPERMANENT\nDAMAGE\nCity Cinema\n\n7:00PM\nMATTURDAY WRIGHT LIVE\nFeaturing the cast of THE SNAKE\nThe Comedy Cave - 189 Kent Street",
++        "membershipText": "ANCHOR\nFEST\nDAY 4",
++        "festivalNameText": "ANCHOR\nFEST",
++        "yearText": "2026",
++        "organizerText": "",
++        "name": "MATTURDAY WRIGHT LIVE",
++        "venueText": "The Comedy Cave - 189 Kent Street",
++        "dateText": "OCTOBER 17, 2026",
++        "timeText": "7:00PM",
++        "startDate": "2026-10-17",
++        "startTime": "19:00",
++        "eventText": "MATTURDAY WRIGHT LIVE",
++        "ticketUrl": "",
++        "sourceIndices": [
++          2
++        ],
++        "activityRowText": "7:00PM\nMATTURDAY WRIGHT LIVE\nFeaturing the cast of THE SNAKE\nThe Comedy Cave - 189 Kent Street",
++        "dateHeaderText": "OCTOBER 17, 2026",
++        "sourceScope": {
++          "version": 1,
++          "documentIndex": 2,
++          "kind": "date_heading",
++          "contextStart": 18,
++          "contextEnd": 297,
++          "rowStart": 203,
++          "rowEnd": 297,
++          "dateStart": 18,
++          "dateEnd": 34
++        },
++        "originalEventText": "Featuring the cast of THE SNAKE",
++        "modelVerification": {
++          "index": 9,
++          "accepted": true,
++          "reason": "The October 17, 2026 heading governs this row; title, 7:00PM time, and The Comedy Cave - 189 Kent Street venue match. The cast-of-THE-SNAKE line is also transcribed accurately. Source image 2 supports it."
++        },
++        "verification": {
++          "index": 9,
++          "accepted": true,
++          "reason": "The October 17, 2026 heading governs this row; title, 7:00PM time, and The Comedy Cave - 189 Kent Street venue match. The cast-of-THE-SNAKE line is also transcribed accurately. Source image 2 supports it."
++        }
++      },
++      {
++        "kind": "programme_row",
++        "scopeText": "OCTOBER 17, 2026\n\n6:00PM\nHeavenly Blue, UNCLE, Bilge, Dear\nBlossom, Cathedral Grove\nBeaconsfield Carriage House\n\n7:00PM\nUNHOLY\nNIGHT\nTivoli Cinema\n\n7:00PM\nPERMANENT\nDAMAGE\nCity Cinema\n\n7:00PM\nMATTURDAY WRIGHT LIVE\nFeaturing the cast of THE SNAKE\nThe Comedy Cave - 189 Kent Street\n\n9:30PM\nLADIES AND GENTLEMEN,\nBRIAN MULRONEY\nTivoli Cinema",
++        "membershipText": "ANCHOR\nFEST\nDAY 4",
++        "festivalNameText": "ANCHOR\nFEST",
++        "yearText": "2026",
++        "organizerText": "",
++        "name": "LADIES AND GENTLEMEN,\nBRIAN MULRONEY",
++        "venueText": "Tivoli Cinema",
++        "dateText": "OCTOBER 17, 2026",
++        "timeText": "9:30PM",
++        "startDate": "2026-10-17",
++        "startTime": "21:30",
++        "eventText": "LADIES AND GENTLEMEN,\nBRIAN MULRONEY",
++        "ticketUrl": "",
++        "sourceIndices": [
++          2
++        ],
++        "activityRowText": "9:30PM\nLADIES AND GENTLEMEN,\nBRIAN MULRONEY\nTivoli Cinema",
++        "dateHeaderText": "OCTOBER 17, 2026",
++        "sourceScope": {
++          "version": 1,
++          "documentIndex": 2,
++          "kind": "date_heading",
++          "contextStart": 18,
++          "contextEnd": 356,
++          "rowStart": 299,
++          "rowEnd": 356,
++          "dateStart": 18,
++          "dateEnd": 34
++        },
++        "originalEventText": "LADIES AND GENTLEMEN,\nBRIAN MULRONEY",
++        "modelVerification": {
++          "index": 10,
++          "accepted": true,
++          "reason": "The October 17, 2026 heading governs this row; title, 9:30PM time, and Tivoli Cinema venue match. Source image 2 supports it."
++        },
++        "verification": {
++          "index": 10,
++          "accepted": true,
++          "reason": "The October 17, 2026 heading governs this row; title, 9:30PM time, and Tivoli Cinema venue match. Source image 2 supports it."
++        }
++      },
++      {
++        "kind": "programme_row",
++        "scopeText": "OCTOBER 17, 2026\n\n6:00PM\nHeavenly Blue, UNCLE, Bilge, Dear\nBlossom, Cathedral Grove\nBeaconsfield Carriage House\n\n7:00PM\nUNHOLY\nNIGHT\nTivoli Cinema\n\n7:00PM\nPERMANENT\nDAMAGE\nCity Cinema\n\n7:00PM\nMATTURDAY WRIGHT LIVE\nFeaturing the cast of THE SNAKE\nThe Comedy Cave - 189 Kent Street\n\n9:30PM\nLADIES AND GENTLEMEN,\nBRIAN MULRONEY\nTivoli Cinema\n\n9:30PM\nA SAFE DISTANCE\nCity Cinema",
++        "membershipText": "ANCHOR\nFEST\nDAY 4",
++        "festivalNameText": "ANCHOR\nFEST",
++        "yearText": "2026",
++        "organizerText": "",
++        "name": "A SAFE DISTANCE",
++        "venueText": "City Cinema",
++        "dateText": "OCTOBER 17, 2026",
++        "timeText": "9:30PM",
++        "startDate": "2026-10-17",
++        "startTime": "21:30",
++        "eventText": "A SAFE DISTANCE",
++        "ticketUrl": "",
++        "sourceIndices": [
++          2
++        ],
++        "activityRowText": "9:30PM\nA SAFE DISTANCE\nCity Cinema",
++        "dateHeaderText": "OCTOBER 17, 2026",
++        "sourceScope": {
++          "version": 1,
++          "documentIndex": 2,
++          "kind": "date_heading",
++          "contextStart": 18,
++          "contextEnd": 392,
++          "rowStart": 358,
++          "rowEnd": 392,
++          "dateStart": 18,
++          "dateEnd": 34
++        },
++        "originalEventText": "A SAFE DISTANCE",
++        "modelVerification": {
++          "index": 11,
++          "accepted": true,
++          "reason": "The October 17, 2026 heading governs this row; title, 9:30PM time, and City Cinema venue match. Source image 2 supports it."
++        },
++        "verification": {
++          "index": 11,
++          "accepted": true,
++          "reason": "The October 17, 2026 heading governs this row; title, 9:30PM time, and City Cinema venue match. Source image 2 supports it."
++        }
++      },
++      {
++        "kind": "programme_row",
++        "scopeText": "OCTOBER 17, 2026\n\n6:00PM\nHeavenly Blue, UNCLE, Bilge, Dear\nBlossom, Cathedral Grove\nBeaconsfield Carriage House\n\n7:00PM\nUNHOLY\nNIGHT\nTivoli Cinema\n\n7:00PM\nPERMANENT\nDAMAGE\nCity Cinema\n\n7:00PM\nMATTURDAY WRIGHT LIVE\nFeaturing the cast of THE SNAKE\nThe Comedy Cave - 189 Kent Street\n\n9:30PM\nLADIES AND GENTLEMEN,\nBRIAN MULRONEY\nTivoli Cinema\n\n9:30PM\nA SAFE DISTANCE\nCity Cinema\n\n10:00PM\nPenny & The Pits, Space Bud, Green Eyes,\nWitch Hands, Day Blooms\nCharlottetown Beer Garden",
++        "membershipText": "ANCHOR\nFEST\nDAY 4",
++        "festivalNameText": "ANCHOR\nFEST",
++        "yearText": "2026",
++        "organizerText": "",
++        "name": "Penny & The Pits, Space Bud, Green Eyes,\nWitch Hands, Day Blooms",
++        "venueText": "Charlottetown Beer Garden",
++        "dateText": "OCTOBER 17, 2026",
++        "timeText": "10:00PM",
++        "startDate": "2026-10-17",
++        "startTime": "22:00",
++        "eventText": "Penny & The Pits, Space Bud, Green Eyes,\nWitch Hands, Day Blooms",
++        "ticketUrl": "",
++        "sourceIndices": [
++          2
++        ],
++        "activityRowText": "10:00PM\nPenny & The Pits, Space Bud, Green Eyes,\nWitch Hands, Day Blooms\nCharlottetown Beer Garden",
++        "dateHeaderText": "OCTOBER 17, 2026",
++        "sourceScope": {
++          "version": 1,
++          "documentIndex": 2,
++          "kind": "date_heading",
++          "contextStart": 18,
++          "contextEnd": 492,
++          "rowStart": 394,
++          "rowEnd": 492,
++          "dateStart": 18,
++          "dateEnd": 34
++        },
++        "originalEventText": "Penny & The Pits, Space Bud, Green Eyes,\nWitch Hands, Day Blooms",
++        "modelVerification": {
++          "index": 12,
++          "accepted": true,
++          "reason": "The October 17, 2026 heading governs this row; title, 10:00PM time, and Charlottetown Beer Garden venue match. Source image 2 supports it."
++        },
++        "verification": {
++          "index": 12,
++          "accepted": true,
++          "reason": "The October 17, 2026 heading governs this row; title, 10:00PM time, and Charlottetown Beer Garden venue match. Source image 2 supports it."
++        }
++      }
++    ],
++    "sourceText": "\u2728DAY 4 \u2728\n\nHappy Saturday and welcome to our busiest day yet!\nWe\u2019ve got the final day of our industry forum, a bunch of movies, a couple awesome concerts, and a comedy show with Matt Wright featuring the cast of THE SNAKE  \n\nMake sure you book your tickets NOW\n\n link in bio\n\n#anchorfest2026 #anchorfest #charlottetown #pei\n\nCheck out today\u2019s, DAY 4, Schedule for 2026 Anchor Fest, in Downtown Charlottetown \n\nOCR TEXT:\nMay be an image of text\nMay be an image of text\nMay be a graphic of text\nMay be a graphic of text\nMay be an image of text\nMay be an image of text\nANCHOR\nFEST\nDAY 4\nSCHEDULE\nANCHOR\nFEST\nDAY 4\nOCTOBER 17, 2026\n\n9:00AM - 5:00PM\nINDUSTRY FORUM DAY 3\n(Industry Pass required)\nThe Arts Guild - 111 Queen St\n\n2:00PM\nIN THE HEART OF\nTHE SOUTH\nTivoli Cinema\n\n2:00PM\nPANORAMAS\n(SHORTS)\nCity Cinema\n\n4:30PM\nCAPTAIN\nNEWFOUNDLAND\nTivoli Cinema\n\n4:30PM\nSTRONG\nSON\nCity Cinema\n\n5:00PM - 7:00PM\nHOLIDAY HAPPY HOUR - CHRISTMAS IN\nOCTOBER: SPOTLIGHT ON UNHOLY NIGHT\nPresented by The Dairy Farmers of PEI & The\nScarecrow Festival\nDali Cafe - 155 Kent Street\nANCHOR\nFEST\nDAY 4\nOCTOBER 17, 2026\n\n6:00PM\nHeavenly Blue, UNCLE, Bilge, Dear\nBlossom, Cathedral Grove\nBeaconsfield Carriage House\n\n7:00PM\nUNHOLY\nNIGHT\nTivoli Cinema\n\n7:00PM\nPERMANENT\nDAMAGE\nCity Cinema\n\n7:00PM\nMATTURDAY WRIGHT LIVE\nFeaturing the cast of THE SNAKE\nThe Comedy Cave - 189 Kent Street\n\n9:30PM\nLADIES AND GENTLEMEN,\nBRIAN MULRONEY\nTivoli Cinema\n\n9:30PM\nA SAFE DISTANCE\nCity Cinema\n\n10:00PM\nPenny & The Pits, Space Bud, Green Eyes,\nWitch Hands, Day Blooms\nCharlottetown Beer Garden"
++  },
++  {
++    "version": 1,
++    "model": "gpt-6-luna",
++    "effort": "high",
++    "sourceFingerprint": "5ba4b83aa449926391d16b6db9f030e4da7755e9e68459fd7aa9c16e23caf677",
++    "editionFingerprint": "18663faca0b144c9b7f112db455cf8df2ac2b5442fb3a1568bc8dbfca9e0b7db",
++    "evidencePolicy": "3501d7e66fbff47e4cc48233c8c30a5bc348e06c6fd6fa1fcd251fc60b9b3af5",
++    "requests": [
++      {
++        "id": "resp_02525d3e873927c9016ad4cc70ef7c87d2bcdd3507a7107b3f",
++        "status": "completed",
++        "incompleteDetails": null,
++        "usage": {
++          "input_tokens": 1590,
++          "input_tokens_details": {
++            "cache_write_tokens": 1587,
++            "cached_tokens": 0
++          },
++          "output_tokens": 3167,
++          "output_tokens_details": {
++            "reasoning_tokens": 2124
++          },
++          "total_tokens": 4757
++        },
++        "maxOutputTokens": 12000,
++        "imageCount": 1,
++        "replayed": false,
++        "latencyMs": 29509
++      },
++      {
++        "id": "resp_01b2c93ca83183af016ad4cc8e86b487d28f935e86c40a75fe",
++        "status": "completed",
++        "incompleteDetails": null,
++        "usage": {
++          "input_tokens": 3873,
++          "input_tokens_details": {
++            "cache_write_tokens": 3870,
++            "cached_tokens": 0
++          },
++          "output_tokens": 1112,
++          "output_tokens_details": {
++            "reasoning_tokens": 578
++          },
++          "total_tokens": 4985
++        },
++        "maxOutputTokens": 12000,
++        "imageCount": 1,
++        "replayed": false,
++        "latencyMs": 10890
++      }
++    ],
++    "complete": true,
++    "limitations": [
++      "Image 0 is a promotional graphic and contains no readable activity listing; the ANCHOR Fest activity rows below are from the caption."
++    ],
++    "documents": [
++      {
++        "index": -1,
++        "text": "What\u2019s happening today in Downtown Charlottetown? \n\nSunday October 18, 2026 events:\n\u200d\u2640\ufe0f7:00 am -  Confederation Landing: PEI MARATHON Start\n12:00 pm - Founders Food Hall & Market: Carter MacLellan \n1:00 pm - Olde Dublin Pub: Cole Brioux\n1:00 pm - Blank Canvas: Intermediate Bookbinding \n2:00 pm - Old Trianlge: Irish Music Sessions \n\u2693\ufe0f2:00 pm -Tivoli Cinema: ANCHOR Fest Purgatory \n\u2693\ufe0f2:00 pm -City Cinema: ANCHOR Fest The Snake\n2:30 pm - Sobey Family Theatre : PEI Sympothony  Orchestra \n\u2693\ufe0f4:30 pm -Tivoli Cinema: ANCHOR Fest Short Program Absurdities\n\u2693\ufe0f4:30 pm -City Cinema: ANCHOR Fest All About The Money \n\u2693\ufe0f7:00 pm - City Cinema: ANCHOR Fest Rite Of Passage\n6:00 pm - Olde Dublin Pub: Gordon Belsher & Courtney Hogan Chandler  \n9:00 pm - Hunter\u2019s Ale House: Name That Tune\n\u2693\ufe0f9:10 pm -City Cinema: ANCHOR Fest The Snake\n\u2693\ufe0f9:30 pm -Tivoli Cinema: ANCHOR Fest Castration Movie \n\nMonday October 19, 2026 events:   \n12:00 pm - Founders Food Hall & Market: Lunch Sounds Better Live with John Macallar\n7:00 pm - City Cinema: Winter of the Crow\n7:00 pm - Olde Dublin Pub: Gordon Belsher \n7:15 pm - Tivoli Cinema: Evil Dead 11\n8:30 pm - Baba\u2019s Lounge: Rat Tales Comedy Night\n9:10 pm - Tivoli Cinema: Screamplay\n10:00 pm - Hunter\u2019s Ale House: Open Mic\n10:00 pm - Baba\u2019s Lounge: Karaoke \n\nDaily Charlottetown Library Learning Centre Schedule: https://peilibrary.libcal.com/calendar/charlottetownlibrary\n\nOCR TEXT:\nMay be an image of text"
++      },
++      {
++        "index": 0,
++        "text": "WHAT'S HAPPENING?\nDOWNTOWN\nCHARLOTTETOWN\nScarecrow Festival"
++      }
++    ],
++    "activities": [
++      {
++        "kind": "festival_activity",
++        "scopeText": "Sunday October 18, 2026 events:\n\u200d\u2640\ufe0f7:00 am -  Confederation Landing: PEI MARATHON Start\n12:00 pm - Founders Food Hall & Market: Carter MacLellan \n1:00 pm - Olde Dublin Pub: Cole Brioux\n1:00 pm - Blank Canvas: Intermediate Bookbinding \n2:00 pm - Old Trianlge: Irish Music Sessions \n\u2693\ufe0f2:00 pm -Tivoli Cinema: ANCHOR Fest Purgatory",
++        "membershipText": "\u2693\ufe0f2:00 pm -Tivoli Cinema: ANCHOR Fest Purgatory",
++        "festivalNameText": "ANCHOR Fest",
++        "yearText": "2026",
++        "organizerText": "",
++        "name": "Purgatory",
++        "venueText": "Tivoli Cinema",
++        "dateText": "Sunday October 18, 2026",
++        "timeText": "2:00 pm",
++        "startDate": "2026-10-18",
++        "startTime": "14:00",
++        "eventText": "Purgatory",
++        "ticketUrl": "",
++        "sourceIndices": [
++          -1
++        ],
++        "activityRowText": "\u2693\ufe0f2:00 pm -Tivoli Cinema: ANCHOR Fest Purgatory",
++        "dateHeaderText": "Sunday October 18, 2026 events:",
++        "captionScope": {
++          "documentIndex": -1,
++          "headerStart": 52,
++          "headerEnd": 83,
++          "rowStart": 333,
++          "rowEnd": 380
++        },
++        "originalEventText": "Purgatory",
++        "modelVerification": {
++          "index": 0,
++          "accepted": true,
++          "reason": "The caption row explicitly says \u201cANCHOR Fest Purgatory\u201d at Tivoli Cinema, 2:00 pm. The Sunday October 18, 2026 heading governs the row. Title and date/time/venue match, and sourceIndices [-1] points to the supplied caption (captionIndex -1)."
++        },
++        "verification": {
++          "index": 0,
++          "accepted": true,
++          "reason": "The caption row explicitly says \u201cANCHOR Fest Purgatory\u201d at Tivoli Cinema, 2:00 pm. The Sunday October 18, 2026 heading governs the row. Title and date/time/venue match, and sourceIndices [-1] points to the supplied caption (captionIndex -1)."
++        }
++      },
++      {
++        "kind": "festival_activity",
++        "scopeText": "Sunday October 18, 2026 events:\n\u200d\u2640\ufe0f7:00 am -  Confederation Landing: PEI MARATHON Start\n12:00 pm - Founders Food Hall & Market: Carter MacLellan \n1:00 pm - Olde Dublin Pub: Cole Brioux\n1:00 pm - Blank Canvas: Intermediate Bookbinding \n2:00 pm - Old Trianlge: Irish Music Sessions \n\u2693\ufe0f2:00 pm -Tivoli Cinema: ANCHOR Fest Purgatory \n\u2693\ufe0f2:00 pm -City Cinema: ANCHOR Fest The Snake",
++        "membershipText": "\u2693\ufe0f2:00 pm -City Cinema: ANCHOR Fest The Snake",
++        "festivalNameText": "ANCHOR Fest",
++        "yearText": "2026",
++        "organizerText": "",
++        "name": "The Snake",
++        "venueText": "City Cinema",
++        "dateText": "Sunday October 18, 2026",
++        "timeText": "2:00 pm",
++        "startDate": "2026-10-18",
++        "startTime": "14:00",
++        "eventText": "The Snake",
++        "ticketUrl": "",
++        "sourceIndices": [
++          -1
++        ],
++        "activityRowText": "\u2693\ufe0f2:00 pm -City Cinema: ANCHOR Fest The Snake",
++        "dateHeaderText": "Sunday October 18, 2026 events:",
++        "captionScope": {
++          "documentIndex": -1,
++          "headerStart": 52,
++          "headerEnd": 83,
++          "rowStart": 382,
++          "rowEnd": 427
++        },
++        "originalEventText": "The Snake",
++        "modelVerification": {
++          "index": 1,
++          "accepted": true,
++          "reason": "The caption row explicitly says \u201cANCHOR Fest The Snake\u201d at City Cinema, 2:00 pm. The Sunday October 18, 2026 heading governs the row. Title and date/time/venue match, and sourceIndices [-1] points to the supplied caption (captionIndex -1)."
++        },
++        "verification": {
++          "index": 1,
++          "accepted": true,
++          "reason": "The caption row explicitly says \u201cANCHOR Fest The Snake\u201d at City Cinema, 2:00 pm. The Sunday October 18, 2026 heading governs the row. Title and date/time/venue match, and sourceIndices [-1] points to the supplied caption (captionIndex -1)."
++        }
++      },
++      {
++        "kind": "festival_activity",
++        "scopeText": "Sunday October 18, 2026 events:\n\u200d\u2640\ufe0f7:00 am -  Confederation Landing: PEI MARATHON Start\n12:00 pm - Founders Food Hall & Market: Carter MacLellan \n1:00 pm - Olde Dublin Pub: Cole Brioux\n1:00 pm - Blank Canvas: Intermediate Bookbinding \n2:00 pm - Old Trianlge: Irish Music Sessions \n\u2693\ufe0f2:00 pm -Tivoli Cinema: ANCHOR Fest Purgatory \n\u2693\ufe0f2:00 pm -City Cinema: ANCHOR Fest The Snake\n2:30 pm - Sobey Family Theatre : PEI Sympothony  Orchestra \n\u2693\ufe0f4:30 pm -Tivoli Cinema: ANCHOR Fest Short Program Absurdities",
++        "membershipText": "\u2693\ufe0f4:30 pm -Tivoli Cinema: ANCHOR Fest Short Program Absurdities",
++        "festivalNameText": "ANCHOR Fest",
++        "yearText": "2026",
++        "organizerText": "",
++        "name": "Short Program Absurdities",
++        "venueText": "Tivoli Cinema",
++        "dateText": "Sunday October 18, 2026",
++        "timeText": "4:30 pm",
++        "startDate": "2026-10-18",
++        "startTime": "16:30",
++        "eventText": "Short Program Absurdities",
++        "ticketUrl": "",
++        "sourceIndices": [
++          -1
++        ],
++        "activityRowText": "\u2693\ufe0f4:30 pm -Tivoli Cinema: ANCHOR Fest Short Program Absurdities",
++        "dateHeaderText": "Sunday October 18, 2026 events:",
++        "captionScope": {
++          "documentIndex": -1,
++          "headerStart": 52,
++          "headerEnd": 83,
++          "rowStart": 488,
++          "rowEnd": 551
++        },
++        "originalEventText": "Short Program Absurdities",
++        "modelVerification": {
++          "index": 2,
++          "accepted": true,
++          "reason": "The caption row explicitly says \u201cANCHOR Fest Short Program Absurdities\u201d at Tivoli Cinema, 4:30 pm. The Sunday October 18, 2026 heading governs the row. Title and date/time/venue match, and sourceIndices [-1] points to the supplied caption (captionIndex -1)."
++        },
++        "verification": {
++          "index": 2,
++          "accepted": true,
++          "reason": "The caption row explicitly says \u201cANCHOR Fest Short Program Absurdities\u201d at Tivoli Cinema, 4:30 pm. The Sunday October 18, 2026 heading governs the row. Title and date/time/venue match, and sourceIndices [-1] points to the supplied caption (captionIndex -1)."
++        }
++      },
++      {
++        "kind": "festival_activity",
++        "scopeText": "Sunday October 18, 2026 events:\n\u200d\u2640\ufe0f7:00 am -  Confederation Landing: PEI MARATHON Start\n12:00 pm - Founders Food Hall & Market: Carter MacLellan \n1:00 pm - Olde Dublin Pub: Cole Brioux\n1:00 pm - Blank Canvas: Intermediate Bookbinding \n2:00 pm - Old Trianlge: Irish Music Sessions \n\u2693\ufe0f2:00 pm -Tivoli Cinema: ANCHOR Fest Purgatory \n\u2693\ufe0f2:00 pm -City Cinema: ANCHOR Fest The Snake\n2:30 pm - Sobey Family Theatre : PEI Sympothony  Orchestra \n\u2693\ufe0f4:30 pm -Tivoli Cinema: ANCHOR Fest Short Program Absurdities\n\u2693\ufe0f4:30 pm -City Cinema: ANCHOR Fest All About The Money",
++        "membershipText": "\u2693\ufe0f4:30 pm -City Cinema: ANCHOR Fest All About The Money",
++        "festivalNameText": "ANCHOR Fest",
++        "yearText": "2026",
++        "organizerText": "",
++        "name": "All About The Money",
++        "venueText": "City Cinema",
++        "dateText": "Sunday October 18, 2026",
++        "timeText": "4:30 pm",
++        "startDate": "2026-10-18",
++        "startTime": "16:30",
++        "eventText": "All About The Money",
++        "ticketUrl": "",
++        "sourceIndices": [
++          -1
++        ],
++        "activityRowText": "\u2693\ufe0f4:30 pm -City Cinema: ANCHOR Fest All About The Money",
++        "dateHeaderText": "Sunday October 18, 2026 events:",
++        "captionScope": {
++          "documentIndex": -1,
++          "headerStart": 52,
++          "headerEnd": 83,
++          "rowStart": 552,
++          "rowEnd": 607
++        },
++        "originalEventText": "All About The Money",
++        "modelVerification": {
++          "index": 3,
++          "accepted": true,
++          "reason": "The caption row explicitly says \u201cANCHOR Fest All About The Money\u201d at City Cinema, 4:30 pm. The Sunday October 18, 2026 heading governs the row. Title and date/time/venue match, and sourceIndices [-1] points to the supplied caption (captionIndex -1)."
++        },
++        "verification": {
++          "index": 3,
++          "accepted": true,
++          "reason": "The caption row explicitly says \u201cANCHOR Fest All About The Money\u201d at City Cinema, 4:30 pm. The Sunday October 18, 2026 heading governs the row. Title and date/time/venue match, and sourceIndices [-1] points to the supplied caption (captionIndex -1)."
++        }
++      },
++      {
++        "kind": "festival_activity",
++        "scopeText": "Sunday October 18, 2026 events:\n\u200d\u2640\ufe0f7:00 am -  Confederation Landing: PEI MARATHON Start\n12:00 pm - Founders Food Hall & Market: Carter MacLellan \n1:00 pm - Olde Dublin Pub: Cole Brioux\n1:00 pm - Blank Canvas: Intermediate Bookbinding \n2:00 pm - Old Trianlge: Irish Music Sessions \n\u2693\ufe0f2:00 pm -Tivoli Cinema: ANCHOR Fest Purgatory \n\u2693\ufe0f2:00 pm -City Cinema: ANCHOR Fest The Snake\n2:30 pm - Sobey Family Theatre : PEI Sympothony  Orchestra \n\u2693\ufe0f4:30 pm -Tivoli Cinema: ANCHOR Fest Short Program Absurdities\n\u2693\ufe0f4:30 pm -City Cinema: ANCHOR Fest All About The Money \n\u2693\ufe0f7:00 pm - City Cinema: ANCHOR Fest Rite Of Passage",
++        "membershipText": "\u2693\ufe0f7:00 pm - City Cinema: ANCHOR Fest Rite Of Passage",
++        "festivalNameText": "ANCHOR Fest",
++        "yearText": "2026",
++        "organizerText": "",
++        "name": "Rite Of Passage",
++        "venueText": "City Cinema",
++        "dateText": "Sunday October 18, 2026",
++        "timeText": "7:00 pm",
++        "startDate": "2026-10-18",
++        "startTime": "19:00",
++        "eventText": "Rite Of Passage",
++        "ticketUrl": "",
++        "sourceIndices": [
++          -1
++        ],
++        "activityRowText": "\u2693\ufe0f7:00 pm - City Cinema: ANCHOR Fest Rite Of Passage",
++        "dateHeaderText": "Sunday October 18, 2026 events:",
++        "captionScope": {
++          "documentIndex": -1,
++          "headerStart": 52,
++          "headerEnd": 83,
++          "rowStart": 609,
++          "rowEnd": 661
++        },
++        "originalEventText": "Rite Of Passage",
++        "modelVerification": {
++          "index": 4,
++          "accepted": true,
++          "reason": "The caption row explicitly says \u201cANCHOR Fest Rite Of Passage\u201d at City Cinema, 7:00 pm. The Sunday October 18, 2026 heading governs the row. Title and date/time/venue match, and sourceIndices [-1] points to the supplied caption (captionIndex -1)."
++        },
++        "verification": {
++          "index": 4,
++          "accepted": true,
++          "reason": "The caption row explicitly says \u201cANCHOR Fest Rite Of Passage\u201d at City Cinema, 7:00 pm. The Sunday October 18, 2026 heading governs the row. Title and date/time/venue match, and sourceIndices [-1] points to the supplied caption (captionIndex -1)."
++        }
++      },
++      {
++        "kind": "festival_activity",
++        "scopeText": "Sunday October 18, 2026 events:\n\u200d\u2640\ufe0f7:00 am -  Confederation Landing: PEI MARATHON Start\n12:00 pm - Founders Food Hall & Market: Carter MacLellan \n1:00 pm - Olde Dublin Pub: Cole Brioux\n1:00 pm - Blank Canvas: Intermediate Bookbinding \n2:00 pm - Old Trianlge: Irish Music Sessions \n\u2693\ufe0f2:00 pm -Tivoli Cinema: ANCHOR Fest Purgatory \n\u2693\ufe0f2:00 pm -City Cinema: ANCHOR Fest The Snake\n2:30 pm - Sobey Family Theatre : PEI Sympothony  Orchestra \n\u2693\ufe0f4:30 pm -Tivoli Cinema: ANCHOR Fest Short Program Absurdities\n\u2693\ufe0f4:30 pm -City Cinema: ANCHOR Fest All About The Money \n\u2693\ufe0f7:00 pm - City Cinema: ANCHOR Fest Rite Of Passage\n6:00 pm - Olde Dublin Pub: Gordon Belsher & Courtney Hogan Chandler  \n9:00 pm - Hunter\u2019s Ale House: Name That Tune\n\u2693\ufe0f9:10 pm -City Cinema: ANCHOR Fest The Snake",
++        "membershipText": "\u2693\ufe0f9:10 pm -City Cinema: ANCHOR Fest The Snake",
++        "festivalNameText": "ANCHOR Fest",
++        "yearText": "2026",
++        "organizerText": "",
++        "name": "The Snake",
++        "venueText": "City Cinema",
++        "dateText": "Sunday October 18, 2026",
++        "timeText": "9:10 pm",
++        "startDate": "2026-10-18",
++        "startTime": "21:10",
++        "eventText": "The Snake",
++        "ticketUrl": "",
++        "sourceIndices": [
++          -1
++        ],
++        "activityRowText": "\u2693\ufe0f9:10 pm -City Cinema: ANCHOR Fest The Snake",
++        "dateHeaderText": "Sunday October 18, 2026 events:",
++        "captionScope": {
++          "documentIndex": -1,
++          "headerStart": 52,
++          "headerEnd": 83,
++          "rowStart": 777,
++          "rowEnd": 822
++        },
++        "originalEventText": "The Snake",
++        "modelVerification": {
++          "index": 5,
++          "accepted": true,
++          "reason": "The caption row explicitly says \u201cANCHOR Fest The Snake\u201d at City Cinema, 9:10 pm. The Sunday October 18, 2026 heading governs the row. Title and date/time/venue match, and sourceIndices [-1] points to the supplied caption (captionIndex -1)."
++        },
++        "verification": {
++          "index": 5,
++          "accepted": true,
++          "reason": "The caption row explicitly says \u201cANCHOR Fest The Snake\u201d at City Cinema, 9:10 pm. The Sunday October 18, 2026 heading governs the row. Title and date/time/venue match, and sourceIndices [-1] points to the supplied caption (captionIndex -1)."
++        }
++      },
++      {
++        "kind": "festival_activity",
++        "scopeText": "Sunday October 18, 2026 events:\n\u200d\u2640\ufe0f7:00 am -  Confederation Landing: PEI MARATHON Start\n12:00 pm - Founders Food Hall & Market: Carter MacLellan \n1:00 pm - Olde Dublin Pub: Cole Brioux\n1:00 pm - Blank Canvas: Intermediate Bookbinding \n2:00 pm - Old Trianlge: Irish Music Sessions \n\u2693\ufe0f2:00 pm -Tivoli Cinema: ANCHOR Fest Purgatory \n\u2693\ufe0f2:00 pm -City Cinema: ANCHOR Fest The Snake\n2:30 pm - Sobey Family Theatre : PEI Sympothony  Orchestra \n\u2693\ufe0f4:30 pm -Tivoli Cinema: ANCHOR Fest Short Program Absurdities\n\u2693\ufe0f4:30 pm -City Cinema: ANCHOR Fest All About The Money \n\u2693\ufe0f7:00 pm - City Cinema: ANCHOR Fest Rite Of Passage\n6:00 pm - Olde Dublin Pub: Gordon Belsher & Courtney Hogan Chandler  \n9:00 pm - Hunter\u2019s Ale House: Name That Tune\n\u2693\ufe0f9:10 pm -City Cinema: ANCHOR Fest The Snake\n\u2693\ufe0f9:30 pm -Tivoli Cinema: ANCHOR Fest Castration Movie",
++        "membershipText": "\u2693\ufe0f9:30 pm -Tivoli Cinema: ANCHOR Fest Castration Movie",
++        "festivalNameText": "ANCHOR Fest",
++        "yearText": "2026",
++        "organizerText": "",
++        "name": "Castration Movie",
++        "venueText": "Tivoli Cinema",
++        "dateText": "Sunday October 18, 2026",
++        "timeText": "9:30 pm",
++        "startDate": "2026-10-18",
++        "startTime": "21:30",
++        "eventText": "Castration Movie",
++        "ticketUrl": "",
++        "sourceIndices": [
++          -1
++        ],
++        "activityRowText": "\u2693\ufe0f9:30 pm -Tivoli Cinema: ANCHOR Fest Castration Movie",
++        "dateHeaderText": "Sunday October 18, 2026 events:",
++        "captionScope": {
++          "documentIndex": -1,
++          "headerStart": 52,
++          "headerEnd": 83,
++          "rowStart": 823,
++          "rowEnd": 877
++        },
++        "originalEventText": "Castration Movie",
++        "modelVerification": {
++          "index": 6,
++          "accepted": true,
++          "reason": "The caption row explicitly says \u201cANCHOR Fest Castration Movie\u201d at Tivoli Cinema, 9:30 pm. The Sunday October 18, 2026 heading governs the row. Title and date/time/venue match, and sourceIndices [-1] points to the supplied caption (captionIndex -1)."
++        },
++        "verification": {
++          "index": 6,
++          "accepted": true,
++          "reason": "The caption row explicitly says \u201cANCHOR Fest Castration Movie\u201d at Tivoli Cinema, 9:30 pm. The Sunday October 18, 2026 heading governs the row. Title and date/time/venue match, and sourceIndices [-1] points to the supplied caption (captionIndex -1)."
++        }
++      }
++    ],
++    "sourceText": "What\u2019s happening today in Downtown Charlottetown? \n\nSunday October 18, 2026 events:\n\u200d\u2640\ufe0f7:00 am -  Confederation Landing: PEI MARATHON Start\n12:00 pm - Founders Food Hall & Market: Carter MacLellan \n1:00 pm - Olde Dublin Pub: Cole Brioux\n1:00 pm - Blank Canvas: Intermediate Bookbinding \n2:00 pm - Old Trianlge: Irish Music Sessions \n\u2693\ufe0f2:00 pm -Tivoli Cinema: ANCHOR Fest Purgatory \n\u2693\ufe0f2:00 pm -City Cinema: ANCHOR Fest The Snake\n2:30 pm - Sobey Family Theatre : PEI Sympothony  Orchestra \n\u2693\ufe0f4:30 pm -Tivoli Cinema: ANCHOR Fest Short Program Absurdities\n\u2693\ufe0f4:30 pm -City Cinema: ANCHOR Fest All About The Money \n\u2693\ufe0f7:00 pm - City Cinema: ANCHOR Fest Rite Of Passage\n6:00 pm - Olde Dublin Pub: Gordon Belsher & Courtney Hogan Chandler  \n9:00 pm - Hunter\u2019s Ale House: Name That Tune\n\u2693\ufe0f9:10 pm -City Cinema: ANCHOR Fest The Snake\n\u2693\ufe0f9:30 pm -Tivoli Cinema: ANCHOR Fest Castration Movie \n\nMonday October 19, 2026 events:   \n12:00 pm - Founders Food Hall & Market: Lunch Sounds Better Live with John Macallar\n7:00 pm - City Cinema: Winter of the Crow\n7:00 pm - Olde Dublin Pub: Gordon Belsher \n7:15 pm - Tivoli Cinema: Evil Dead 11\n8:30 pm - Baba\u2019s Lounge: Rat Tales Comedy Night\n9:10 pm - Tivoli Cinema: Screamplay\n10:00 pm - Hunter\u2019s Ale House: Open Mic\n10:00 pm - Baba\u2019s Lounge: Karaoke \n\nDaily Charlottetown Library Learning Centre Schedule: https://peilibrary.libcal.com/calendar/charlottetownlibrary\n\nOCR TEXT:\nMay be an image of text\nWHAT'S HAPPENING?\nDOWNTOWN\nCHARLOTTETOWN\nScarecrow Festival"
++  }
++]
+\ No newline at end of file

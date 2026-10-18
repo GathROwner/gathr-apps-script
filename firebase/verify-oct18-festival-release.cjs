@@ -1,0 +1,12 @@
+const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),crypto=require('node:crypto');
+const out=path.resolve(__dirname,'../functions/artifacts/oct18-audit-fixes/festival-release');
+const before=JSON.parse(fs.readFileSync(path.join(out,'before.json'))),after=JSON.parse(fs.readFileSync(path.join(out,'after.json'))),assemblies=JSON.parse(fs.readFileSync(path.join(out,'assemblies.json')));
+const cli='C:/Users/craig/AppData/Roaming/npm/node_modules/firebase-tools/lib/';
+const auth=require(cli+'auth.js'),requireAuth=require(cli+'requireAuth.js').requireAuth,api=require(cli+'apiv2.js');
+(async()=>{
+ const rows=[];for(const b of before.rows){const a=after.rows.find(x=>x.name===b.name);assert(a);assert.equal(a.state,'ACTIVE');assert.equal(a.configurationHash,b.configurationHash,'Function configuration changed '+b.name);assert.equal(a.environmentHash,b.environmentHash);assert.equal(a.secretsHash,b.secretsHash);assert.notEqual(a.revision,b.revision);assert.notEqual(a.sourceHash,b.sourceHash);assert.equal(a.latestReadyRevision,a.revision);assert.equal(a.traffic.length,1);assert.equal(a.traffic[0].percent,100);assert.equal(a.traffic[0].latestRevision,true);assert.equal(a.traffic[0].revisionName,a.revision);rows.push(a);}
+
+ const account=auth.getGlobalDefaultAccount();await requireAuth({project:'gathr-migrated',...account,nonInteractive:true});const token=await api.getAccessToken();
+ for(const assembly of assemblies){const a=rows.find(x=>x.name===assembly.sourceFunction),s=a.source;const url='https://storage.googleapis.com/storage/v1/b/'+encodeURIComponent(s.bucket)+'/o/'+encodeURIComponent(s.object)+'?alt=media&generation='+encodeURIComponent(s.generation);const r=await fetch(url,{headers:{Authorization:'Bearer '+token}});assert(r.ok,'Serving archive download failed');const buf=Buffer.from(await r.arrayBuffer());fs.writeFileSync(path.join(out,a.name+'-after-serving.zip'),buf);assembly.servingArchiveSha256=crypto.createHash('sha256').update(buf).digest('hex');}
+ fs.writeFileSync(path.join(out,'verification-pending-code.json'),JSON.stringify({at:new Date().toISOString(),functionCount:1,rows,assemblies,configurationPreserved:true,latestTraffic:true},null,2));console.log('Worker ACTIVE/latest100%; config/env/secrets unchanged. Fresh serving archives saved for source verification.');
+})().catch(e=>{console.error(e.message);process.exitCode=1});

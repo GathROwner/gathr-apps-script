@@ -2,7 +2,44 @@
 
 Last updated: 2026-10-18 (Atlantic)
 
-October18 public-aquatics family omission (continuing the October17 family phrase
+October18 regular full-run audit: **complete; confirmed corrections and prevention
+deployed and independently verified**. Dataset `1Nwf4lh-reDH0alm37Lvkqu61Shv_mwer`
+completed all351 rows at10:33 Halifax, zero parser errors, completed lock/marker/final
+batch and no checkpoint. All101 saved decisions, original captions and available
+ordered galleries were reviewed. See [full findings, source decisions, costs and
+release/apply proof](luna-oct18-production-audit.md).
+
+This extends existing patterns: PQ-003/PQ-033 public-skate family suitability;
+PQ-034/PQ-044 finite weekend meal coverage and explicit clocks; PQ-047 newer monthly
+programme copy and source-poster preservation; PQ-046 protected profile-image cleanup;
+PQ-016 parent-qualified Memorial Hall resolution; PQ-009 advertising-run dates;
+PQ-020 expired Harvest copies; PQ-012 public/private review text; PQ-021 literal
+festival ownership and registered parent-versus-child fencing. No historical pattern
+is declared universally closed from this one batch.
+
+All three parsers are ACTIVE/latest100% at common hash
+`9087534a20b0bea00fa3c4e2af5e6586f41cc074`, retaining the prior pool guard and model,
+prompt, cache/compact and configuration contracts. Three other publishing functions
+were narrowly released from their own baselines with unchanged configuration. Build,
+99 focused and1,010 full parser tests pass. Exact backed-up atomic repair: seven
+public updates, four recoveries, three removals, four narrow supporting document
+changes and feed313→314. Fourteen details, managed media and the complete10-page feed
+verify the intended delta and prior cleanup/pool controls.
+
+Four source-proven Anchor memberships published,17→21 links with eight unchanged
+locations and feed314→315. A live completion bug was reproduced and fixed: registered
+festival roots are pinned authorities, not canonical child candidates; only the
+worker's verified own parent commit refreshes its authority pin. Real child/other
+parent drift still aborts. Worker ACTIVE/latest100% at
+`scheduledfestivallinker-00010-rof`, hash `9af99e18ea53be3bdb50be0ec3ab1016e6201dc9`.
+Build,148 focused,999 full worker tests and four actual-worker transaction playback
+tests pass. Fresh generation9 completed both editions at17:33:45 UTC, zero additional
+public writes/paid calls; source captures unchanged. All10 pages/907 active events
+and five parent/child details verify the four additions and no removals. Eighteen
+ambiguous programme/edition/clock candidates and one unconfirmed presenter role
+remain held; automatic linking is not claimed complete for every source.
+
+Earlier October18 public-aquatics family omission (continuing the October17 family phrase
 coverage mechanism, with PQ-003/PQ-033 activity-versus-hours controls): **deployed
 and exact correction complete** after the regular full run ended10:33 Halifax.
 Bell Aliant Centre's All pools open, Y's Club Free Swim and Waterslide open now
