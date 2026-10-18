@@ -2,6 +2,27 @@
 
 Last updated: 2026-10-18 (Atlantic)
 
+October18 OCR-caption boundary and CFCY backlog follow-up: **deployed and verified**.
+This extends PQ-SPATIAL/PQ-021 source ownership: an OCR marker at offset0 is now
+stripped before caption-grounded dated venue, programme-cadence and clock-conflict
+checks. The one-line runtime delta is release `559a0ed116e5e2b39aa2410ac95aba215954a15d`;
+1,026 compiled and23 retained-source/control checks pass. All three parsers are
+ACTIVE/latest100% at common hash `0fdf11b55618540c09d43b53ea1cae9463d19b63`, revisions
+`processdataset-00505-xeh`, `processdatasetresume-00469-lay`,
+`processdatasetselectedrows-00461-fus`. Exact live bytes, startup probes,
+configuration/env/secrets/IAM and unchanged resolver gates were verified.
+This supersedes earlier October18 serving identities below; it is not a new
+stop-splitting rule or demonstrated email-reduction fix.
+
+Fresh full-catalog/source/duplicate checks found all five approved CFCY food-drive
+occurrences already correctly published on October17. They were reused unchanged;
+five stale area reviews now link to those verified event paths. No event/venue/feed
+write or deletion occurred. All five detail endpoints and complete Preview feed
+membership passed before review resolution and again afterward. Original review
+evidence is retained, with complete backups and guarded transaction results.
+Kay's, Linkletter, Village Pottery and Tignish holds remain untouched. See [exact
+release, source/target paths, backup and verification evidence](ocr-caption-fooddrive-oct18-release-and-repair.md).
+
 October18 post-audit Island Open report: **exact correction and prevention complete**.
 The August22–23 Belvedere tournament had an unchanged August21 parent falsely
 repeating every Sunday, with20:24 borrowed from the post timestamp. Saved-item
