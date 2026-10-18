@@ -2,15 +2,29 @@
 
 Last updated: 2026-10-18 (Atlantic)
 
-October18 post-audit app report: Island Open at Belvedere is a confirmed historical
-false weekly recurrence, created August21 for the August22–23 tournament and
-unchanged by today's parse. Source-relative `this weekend`/`this Sunday` became an
-unbounded Sunday listing; its20:24 start is explicitly a post-timestamp fallback.
-Current serving recurrence normalization still reproduces the faulty repeat in
-offline saved-source playback. Related to PQ-005 and recurrence/date-span evidence;
-no live correction or new deployment is claimed. See [exact trace and proposed
-repair/prevention](island-open-oct18-source-trace.md). Two other Belvedere match-play
-weekend parents remain review candidates, not implicit cleanup targets.
+October18 post-audit Island Open report: **exact correction and prevention complete**.
+The August22–23 Belvedere tournament had an unchanged August21 parent falsely
+repeating every Sunday, with20:24 borrowed from the post timestamp. Saved-item
+normalization still reproduced an unbounded repeat; full-caption normalization
+already bounded it to one occurrence. Both variants now become actual one-offs.
+Related to PQ-005 and recurrence/date-span evidence; this scoped fix does not
+declare every historical recurrence/timestamp case resolved. See [complete source
+trace, release and exact correction](island-open-oct18-source-trace.md).
+
+Craig approved the exact one-parent removal and prevention. Full backup, fresh
+source/sibling/body/version/idle checks and atomic delete/feed315→316 passed.
+Detail404; zero parent/generated copies across nine pages/899 active events;
+original poster200 and all four other venue parents unchanged. Parser release
+`1f347717c84f230f508619aa912c4c6a9b7f2605` passes build,39 focused and1,024 full tests.
+Latest three-parser runtime is ACTIVE/latest100% at common hash
+`9b22abc40f77aca1dafb2bb7a549fb88f6f82afa`, with configuration/env/secrets and all prior
+October18 protections preserved. Fresh deployed archives match the exact tested
+code. Non-special Sports items cannot retain a marked post-time start without
+advertised explicit evidence; same-day food-offer behavior remains supported.
+The city/shared publishing functions and separate festival worker remain unchanged.
+Two September19–20 Belvedere match-play parents have source-confirmed analogous
+historical false recurrence; their separate cleanup is proposed, not applied by
+this exact one-parent approval.
 
 October18 regular full-run audit: **complete; confirmed corrections and prevention
 deployed and independently verified**. Dataset `1Nwf4lh-reDH0alm37Lvkqu61Shv_mwer`

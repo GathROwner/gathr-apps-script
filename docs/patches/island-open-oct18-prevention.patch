@@ -1,0 +1,161 @@
+diff --git a/src/parsing/finalFormatter.relativeWeekend.test.ts b/src/parsing/finalFormatter.relativeWeekend.test.ts
+new file mode 100644
+index 0000000..b359670
+--- /dev/null
++++ b/src/parsing/finalFormatter.relativeWeekend.test.ts
+@@ -0,0 +1,91 @@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import {applyRecurrenceNormalizationForRegression as normalize} from './finalFormatter.js';
++import {enforceDateTimeCompleteness,applySpecialTimeFallbacks} from './postParser.js';
++import type {FormattedEvent,TimeResolvedEvent} from './types.js';
++const source = " :    ⛳\n\nThe  , presented by A.M. Burgoyne Insurance returns to  this weekend for its 71st running!\n\nLet’s look back at the recent champions who have made their mark at Belvedere.\n\n |  \n   | \nLandine captured the 67th Island Open Championship in a  over our then-Head Professional, Jamie Moran.\n\n |  \n   | \nFormer Member Mike Fortier captured the overall Island Open title at - . Brian Affleck won the Professional Division at - .\n\n |  \n | \nMargeson tied Cecil Dowling’s 1960 course-record 63 on the final day to finish at -  and win, edging 2020 Champion Josh Landine by three strokes.\n\n |  \n | \nDunphy claimed the overall championship at -  in a playoff.  Our very own Connor Shea captured the Professional Division at - .  Dunphy was top Amateur in 2022.\n\n |  \n    | \nAffleck, who plays out of his namesake golf academy in Stellarton, went wire-to-wire to win the Overall Island Open title with a two day total of -  ().\n\n |  \n | \nOur defending Champion and Member Grant Koughan became our     after a dramatic playoff finish against fellow Member Curtis Hall.\nBoth players posted matching rounds of - (- ), before Koughan chipped in during the playoff to secure the overall title.  After finishing as top amateur in 2024, Grant returned the following year to take home the championship.\n~\n\nWho will be the next player to earn a place in Island Open history? \n\nThe mystery will be solved this Sunday.\n\n#IslandOpen\n\nOCR TEXT:\nMay be an image of golf, tennis and text that says 'Live Scoring And Updates THE エ ISLAND OPEN SCAN SCANME ME PRESENTED PRESENTED BY AM BURGOYNE INSURANCE ASSOCIATES INC.'";
++const saved = {
++  "address": "1 Greensview Dr, Charlottetown, PE",
++  "ticketPrice": "",
++  "ticketLink": "",
++  "relevantImageIndex": 0,
++  "venue": "Belvedere Golf Club",
++  "additionalLocation": "",
++  "name": "The Island Open (71st running)",
++  "description": "The Island Open, presented by A.M. Burgoyne Insurance returns to Belvedere this weekend for its 71st running! The mystery will be solved this Sunday.",
++  "category": "Sports",
++  "isEvent": "Yes",
++  "isFoodSpecial": "No",
++  "establishment": "Belvedere Golf Course",
++  "startDate": "2026-08-23",
++  "endDate": "2026-08-23",
++  "startTime": "20:24",
++  "endTime": "23:00",
++  "isRecurring": "Yes",
++  "recurringPattern": "weekly_sunday",
++  "timeResolution": {
++    "hoursUsed": false,
++    "reason": "no_place_match",
++    "startFromPostTime": true,
++    "endFromHours": "category_default"
++  },
++  "timeFlags": {
++    "start": {
++      "source": "semantic",
++      "evidence": "Start from post time 20:24"
++    },
++    "end": {
++      "source": "none",
++      "toClose": false,
++      "evidence": ""
++    }
++  }
++} as FormattedEvent;
++
++test('actual Island Open saved item and full caption cannot become an unbounded Sunday series',()=>{
++ for(const description of [saved.description,source]){
++  const result=normalize({...saved},{description} as any);
++  assert.equal(result.isRecurring,false);assert.equal(result.recurringPattern,'none');
++  assert.equal(result.startDate,'2026-08-23');assert.equal(result.endDate,'2026-08-23');
++  for(const k of ['totalOccurrences','recurrenceUntilDate','recurringDaysOfWeek','recurringWeekdaySequence','recurringWeekInterval'])assert.equal((result as any)[k],undefined);
++ }
++});
++for(const [name,description,pattern,date] of [
++ ['Two-Ball Matches','Saturday | Two-Ball Matches. 10 AM start. Two days of match play this weekend.','weekly_saturday','2026-09-19'],
++ ['Singles Matches','Sunday | Singles Matches. 9 AM start. Two days of match play this weekend.','weekly_sunday','2026-09-20'],
++ ['One-off open house','Join us this Sunday.','weekly_sunday','2026-10-18'],
++ ['Upcoming tournament','Our tournament returns next weekend.','weekly_sunday','2026-10-25'],
++] as const){test(name+' relative occurrence is one-off',()=>{
++ const r=normalize({...saved,name,description,startDate:date,endDate:date,recurringPattern:pattern});
++ assert.equal(r.isRecurring,false);assert.equal(r.recurringPattern,'none');assert.equal(r.startDate,date);
++});}
++for(const description of [
++ 'Golf practice is every Sunday. Join us this weekend.',
++ 'Golf practice runs each weekend. Join us this Sunday.',
++ 'Weekly golf practice starts this Sunday.',
++ 'Golf practice is held on Sundays. Join us this weekend.',
++]){test('explicit cadence survives relative invitation: '+description,()=>{
++ const r=normalize({...saved,name:'Golf practice',description});
++ assert.equal(r.isRecurring,true);assert.equal(r.recurringPattern,'weekly_sunday');
++});}
++test('finite source-supported weekly inventory is preserved',()=>{
++ const r=normalize({...saved,name:'Golf practice',description:'Weekly practice begins this Sunday, for three weeks.',totalOccurrences:3,recurrenceUntilDate:'2026-09-06'});
++ assert.equal(r.isRecurring,true);assert.equal(r.totalOccurrences,3);assert.equal(r.recurrenceUntilDate,'2026-09-06');
++});
++test('actual sports publication-time clock is held by completeness without mutating the source',()=>{
++ const input=structuredClone(saved) as TimeResolvedEvent;const before=structuredClone(input);
++ const r=enforceDateTimeCompleteness([input],'2026-08-20T20:24:44.000Z','America/Halifax',source);
++ assert.deepEqual(r,[]);assert.deepEqual(input,before);
++});
++test('untimed current-day sports also cannot inherit a marked publication clock',()=>{
++ const input={...structuredClone(saved),startDate:'2026-08-20',endDate:'2026-08-20'} as TimeResolvedEvent;
++ assert.equal(enforceDateTimeCompleteness([input],'2026-08-20T20:24:44.000Z','America/Halifax').length,0);
++});
++test('an explicitly advertised sports start survives a stale fallback marker',()=>{
++ const input={...structuredClone(saved),startTime:'09:00',endTime:'11:00',timeFlags:{start:{source:'explicit',evidence:'Tee-off at 9 AM'},end:{source:'explicit',toClose:false,evidence:'Ends at 11 AM'}}} as TimeResolvedEvent;
++ const [r]=enforceDateTimeCompleteness([input],'2026-08-20T20:24:44.000Z','America/Halifax');assert(r);assert.equal(r.startTime,'09:00');
++});
++test('same-day food offers retain their existing post-time contract',()=>{
++ const input={...structuredClone(saved),name:'Daily lunch special',category:'Food Special',isEvent:'No',isFoodSpecial:'Yes',startDate:'2026-08-20',endDate:'2026-08-20',startTime:'',endTime:'',timeResolution:{hoursUsed:false},timeFlags:{start:{source:'none',evidence:''},end:{source:'none',toClose:false,evidence:''}}} as TimeResolvedEvent;
++ const [r]=enforceDateTimeCompleteness(applySpecialTimeFallbacks([input],'2026-08-20T20:24:44.000Z','America/Halifax'),'2026-08-20T20:24:44.000Z','America/Halifax');assert(r);assert.equal(r.startTime,'17:24');assert.equal(r.timeResolution?.startFromPostTime,true);
++});
+diff --git a/src/parsing/finalFormatter.ts b/src/parsing/finalFormatter.ts
+index 13f4e1a..886c352 100644
+--- a/src/parsing/finalFormatter.ts
++++ b/src/parsing/finalFormatter.ts
+@@ -3443,6 +3443,15 @@ function hasStrongRecurringCue(text: string): boolean {
+   );
+ }
+ 
++function hasBoundedRelativeOccurrenceWithoutRepeat(text: string): boolean {
++  const normalized = normalizeWeekdayExtractionText(text);
++  const relativeWindow = /\b(?:this|coming|upcoming|next)\s+(?:weekend|week|monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/;
++  if (!relativeWindow.test(normalized)) return false;
++  // A single advertised weekend is not a weekly lifecycle. Explicit cadence
++  // elsewhere in the same item still protects real weekly/monthly programmes.
++  return !/\b(?:weekly|biweekly|fortnightly|daily|monthly|recurring|repeats?|weekdays|weekends|mondays|tuesdays|wednesdays|thursdays|fridays|saturdays|sundays)\b|\b(?:every|each)\s+(?:(?:other|second)\s+)?(?:week(?:end)?|day|month|monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/.test(normalized);
++}
++
+ function removeDurationOnlyEachCue(text: string): string {
+   return normalizeWeekdayExtractionText(text)
+     .replace(
+@@ -5287,6 +5296,17 @@ function normalizeRecurringForFormattedEvent(
+     isRecurring = false;
+   }
+ 
++  if (
++    isRecurring && recurringPattern.startsWith('weekly_') &&
++    !customRecurringConfiguration &&
++    (!recurrenceUntilDate || recurrenceUntilDate <= event.startDate) &&
++    (totalOccurrences === undefined || totalOccurrences <= 1) &&
++    hasBoundedRelativeOccurrenceWithoutRepeat(sourceText)
++  ) {
++    recurringPattern = 'none';
++    isRecurring = false;
++  }
++
+   if (!isRecurring) {
+     recurringPattern = 'none';
+     event.totalOccurrences = undefined;
+diff --git a/src/parsing/postParser.ts b/src/parsing/postParser.ts
+index 70ddaab..8e8f6ac 100644
+--- a/src/parsing/postParser.ts
++++ b/src/parsing/postParser.ts
+@@ -3438,6 +3438,21 @@ export function enforceDateTimeCompleteness(
+     const isSpecialLike =
+       isSpecial || SPECIAL_LIKE_CATEGORY_PATTERN.test(String(ev.category || ''));
+ 
++    // Legacy sports payloads can arrive with a publication-time clock already
++    // filled in. A saved fallback marker is not an advertised event start.
++    if (String(ev.category || '').toLowerCase() === 'sports' && !isSpecialLike &&
++        ev.timeResolution.startFromPostTime === true &&
++        ev.timeFlags?.start?.source !== 'explicit') {
++      ev.startTime = '';
++      ev.timeResolution = { ...ev.timeResolution };
++      delete ev.timeResolution.startFromPostTime;
++      ev.timeFlags = {
++        ...ev.timeFlags,
++        start: { source: 'none', evidence: '' },
++        end: ev.timeFlags?.end || { source: 'none', toClose: false, evidence: '' },
++      };
++    }
++
+     if (ev.timeResolution?.startFromHours === true && !isSpecialLike) {
+       const previousStartTime = ev.startTime;
+       ev.startTime = '';
