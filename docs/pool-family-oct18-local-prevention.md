@@ -2,11 +2,15 @@
 
 ## Status
 
-Local prevention and exact repair proposal prepared. **No production deployment,
-live correction, replay, model call, queue change or traffic change occurred.**
-Craig explicitly warned that the October18 regular large parse is active. Fresh
-Firestore readback confirms `processing_locks/1Nwf4lh-reDH0alm37Lvkqu61Shv_mwer`
-is `running`. Do not deploy over that parse or apply the proposed data batch.
+Craig approved the exact three-record correction and prevention release after
+the active full parse. The run completed at13:33:55UTC (10:33:55 Halifax), with
+zero recorded errors, completed lock and processed marker, final batch351/351,
+no matching checkpoint and no active parser locks. Completion evidence:
+`functions/artifacts/pool-family-oct18/completion-readback.json`.
+
+All approved target/source/control fingerprints remain unchanged after the parse.
+The repair dry run pins feed version312 to313. Release and apply are in progress;
+their completion requires independent serving-source/config and API/feed proof.
 
 ## Confirmed source-to-app trace
 
@@ -61,7 +65,7 @@ ages remain distinct from participant restrictions. Bound formatter proof and
 deterministic write-time recomputation retain the result on exact activity
 refreshes; unrelated source/gallery context remains ignored.
 
-## Exact proposed data delta — not approved/applied
+## Exact approved data delta
 
 | Target under `venues/slug_bellaliantcentre/events/` | Activity | Proposed score |
 | --- | --- | --- |
@@ -92,17 +96,27 @@ are the six writers covered by the earlier family release. Reconcile their
 actual current source/configuration and accepted policy differences before a
 narrow release; this local parser patch alone is not a six-function assembly.
 
-Fresh Cloud Functions metadata readback with the existing service account returned
-403 for all three parsers. No permission was changed. The historical October17
-release verification is retained separately; current serving hashes are **not**
-claimed freshly verified. Restored operator Google Cloud sign-in/read access is
-required for the later deployment gates. No sign-in interruption was requested
-while the active parse proceeds.
+The existing Firebase CLI login supports fresh function/service metadata and
+generation-pinned serving archive reads. The separate gcloud session has expired
+and the service account cannot read function metadata; neither blocks this
+release. No permission or credential was changed and no new sign-in was needed.
 
-The event-integrity-repair skill requires exact reviewed data approval before
-these three new live label corrections. Include the correction and release in
-the next concise batch after the parse; earlier unrelated repair approvals do
-not cover these new targets. No monitor or automatic apply was created.
+Fresh October18 baseline: all six publishing functions ACTIVE/latest100%.
+Parser hash `0c06b198eacb9cf32171e0d68fbea89e889a93c3`, revisions
+`processdataset-00501-lel`, `processdatasetresume-00465-tub` and
+`processdatasetselectedrows-00457-muz`. City finalizer hash
+`198a0049c6e64636e4aa54b74776c80262a669b8`; direct shared processor
+`2ae937870ac36ada11f2870e429ef421360e916e`; scheduled shared processor
+`9c16e50335f311bf84d9f38002999a57f582c296`.
+
+Four isolated assemblies preserve these exact serving archives. All parser
+source files match the previous immutable parser release, with the reviewed v7
+candidate added. Older publishers retain their own v5 policy and formatter
+interface, adding only the aquatic rule and version marker. Their tests exercise
+the preserved scorer interface; the newer parser-only formatter helper is not
+added to these old baselines. Builds and45 focused checks per publisher pass.
+Private metadata, generations, assembly commits and deployment logs are under
+`functions/artifacts/pool-family-oct18/release/`.
 
 ## Evidence and validation
 

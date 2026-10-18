@@ -11,7 +11,9 @@ for(const row of assemblies){
  const only=targets.map(n=>'functions:gathr-functions:'+n).join(',');
  const args=['deploy','--only',only,'--project','gathr-migrated','--non-interactive'];if(mode==='dry-run')args.push('--dry-run');
  if(mode==='apply'){
-  assert(fs.existsSync(path.join(out,row.sourceFunction+'-dry-run-ok.json')),'Dry run missing');
+  const dry=JSON.parse(fs.readFileSync(path.join(out,row.sourceFunction+'-dry-run-ok.json')));assert.equal(dry.commit,row.releaseCommit,'Dry-run commit drift');
+  const full=fs.readFileSync(path.join(assemblies[0].folder,'full-tests.log'),'utf8');assert(/# tests 1000\b/.test(full)&&/# pass 1000\b/.test(full)&&/# fail 0\b/.test(full),'Full parser tests incomplete');
+  const baseline=cp.spawnSync('node',[path.join(root,'firebase/pool-family-release-readonly-oct18.cjs'),'check',targets.join(',')],{cwd:root,encoding:'utf8'});if(baseline.status!==0){process.stderr.write(baseline.stderr);process.exit(baseline.status||1);}
   const guard=cp.spawnSync('node',[path.join(root,'firebase/repair-pool-family-oct18.mjs')],{cwd:root,encoding:'utf8',env:{...process.env,ANCHOR_CREDENTIAL_PATH:'C:/Users/craig/Dev/gathr-apps-script/firebase/service-account.json'}});
   if(guard.status!==0){process.stdout.write(guard.stdout);process.stderr.write(guard.stderr);process.exit(guard.status||1);}
  }
