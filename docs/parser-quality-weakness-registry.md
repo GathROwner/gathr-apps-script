@@ -2,6 +2,16 @@
 
 Last updated: 2026-10-18 (Atlantic)
 
+October18 post-audit app report: Island Open at Belvedere is a confirmed historical
+false weekly recurrence, created August21 for the August22–23 tournament and
+unchanged by today's parse. Source-relative `this weekend`/`this Sunday` became an
+unbounded Sunday listing; its20:24 start is explicitly a post-timestamp fallback.
+Current serving recurrence normalization still reproduces the faulty repeat in
+offline saved-source playback. Related to PQ-005 and recurrence/date-span evidence;
+no live correction or new deployment is claimed. See [exact trace and proposed
+repair/prevention](island-open-oct18-source-trace.md). Two other Belvedere match-play
+weekend parents remain review candidates, not implicit cleanup targets.
+
 October18 regular full-run audit: **complete; confirmed corrections and prevention
 deployed and independently verified**. Dataset `1Nwf4lh-reDH0alm37Lvkqu61Shv_mwer`
 completed all351 rows at10:33 Halifax, zero parser errors, completed lock/marker/final
