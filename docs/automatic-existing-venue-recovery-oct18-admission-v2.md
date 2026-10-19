@@ -149,6 +149,14 @@ checkpoints from admission is not part of this change.
 Keep both production automatic gates OFF. Before any pilot: obtain independent
 frozen-candidate clearance; qualify the separate source-complete positive cohort;
 resolve the historical checkpoint decision through its own exact approved batch;
-then review and approve a narrow release and one manual allowlisted pilot. No
+then review and approve a narrow release and one manual allowlisted pilot.
+The release must also include the separately serving
+`finalizeUnrecognizedVenueTrigger` handler that owns the broad manual workflow.
+Deploying only the two resolver functions would not install its shared admission
+wrapper. Its own fresh immutable serving baseline must be assembled, built/tested
+and independently verified; neither resolver candidate may replace that baseline
+wholesale. Fresh identity is saved as
+`admission-v2/manual-finalizer-serving-baseline.json`; its release assembly is not
+prepared or authorized by the two frozen-candidate receipts. No
 deployment, traffic/environment/IAM/index/schedule change, live event/queue write,
 email, credential change, paid model/provider call or checkpoint cleanup occurred.
