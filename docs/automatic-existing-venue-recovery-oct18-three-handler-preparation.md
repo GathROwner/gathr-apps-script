@@ -1,5 +1,7 @@
 # Existing-venue recovery — three-handler decision packet
 
+> Historical preparation snapshot. The three-function OFF-gate groundwork was subsequently authorized, deployed and verified. See [the release record](automatic-existing-venue-recovery-oct18-groundwork-release.md) for current serving identities; the approval holds below describe the earlier preparation stage.
+
 **Local source preparation and independent review are complete. No deployment,
 live write, automatic admission, cleanup, source replay or new monitor occurred.**
 Both automatic gates remain OFF on all three serving functions, with no allowlist.
