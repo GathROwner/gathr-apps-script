@@ -76,6 +76,14 @@ boundary verification passed against the compiled replacement, but frozen-commit
 independent clearance remains a separate gate. No production readiness is
 inferred from unit tests.
 
+Both replacement builds pass. Each exact frozen candidate passes **106 focused
+checks and all495 compiled backend tests across61 files**, with zero failures or
+skips. All634 source/compiled/package files match their before/after test hashes.
+The separate in-memory reproductions now reject the old gate-off/allowlist-removal
+counterexample and retain uncertain receipts after partial failure and expiry.
+The four retained resolver cases and eight incomplete historical projections
+remain held; those different coverage levels are reported separately.
+
 ## Historical cohort and checkpoint follow-up
 
 The pinned earliest-eight manifest is retained unchanged. Offline admission on
