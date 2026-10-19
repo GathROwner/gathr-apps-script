@@ -1599,3 +1599,34 @@ incomplete. Unit positives must not be presented as measured production yield.
 Full contract, tests, source commits and next gates:
 `docs/automatic-existing-venue-recovery-oct18-readiness.md` and
 `functions/artifacts/automatic-existing-recovery-oct18/completion.json`.
+
+## October 19 structured description end preservation (PQ-006 follow-up)
+
+Scholastic Chess Tournament source `870787649453729` explicitly advertises
+October25,12:45–16:00ADT in its description, while its structured `When:` supplies
+only the start. The retained `format` output and public root event
+`events/location_44dfa10df1b155cb33c36d35` had blank ends. Snapshot usage records
+zero model calls; exact frozen-helper playback reproduced a deterministic
+description-range coverage gap, not a demonstrated model omission.
+
+Commit `1c48a0bfe5fc38f7d202747110dd87e057485125` adds one conservative fallback:
+the unique dated range must agree with the structured local date/start. Doors,
+registration/deadlines, conflicting dates or clocks, multiple/ambiguous ranges,
+unsupported timezone tails and DST ambiguity hold. Existing When/Duration
+handling remains first; explicit description/poster disagreement holds too.
+The unmodified source fixture now resolves16:00 with explicit provenance.
+Build,100 focused checks and1,068 full tests passed; independent guarded review
+checked the frozen payload and nine date/timezone/header boundary negatives.
+
+All three parsers are verified ACTIVE/latest100% on common source hash
+`cc1a55eed5f9e305772c8965a1e29aea46c1ba2e`, revisions
+`processdataset-00506-jup`, `processdatasetresume-00470-kuc`,
+`processdatasetselectedrows-00462-voc`. All1,501 deployed payload files match;
+configuration/environment/secret/IAM fingerprints and resolver releases are
+preserved, startup probes passed and no runtime errors were observed. Both
+automatic switches remain OFF, allowlists absent, and historical checkpoints
+unchanged. **No live event repair occurred.** The broader PQ-006 mechanism is
+not declared closed; this is a narrow advertised-end preservation fix, with zero
+ordinary resolver positives claimed. See
+`docs/chess-description-endtime-oct19-release.md` and
+`functions/artifacts/chess-endtime-oct19/release/verified.json`.
