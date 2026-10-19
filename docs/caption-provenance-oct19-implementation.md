@@ -1,6 +1,6 @@
 # October 19 caption provenance groundwork
 
-Status: committed, locally validated candidates. Deployment requires the final independent delta review and fresh release preconditions.
+Status: deployed and verified on October 19, 2026, after independent final delta clearance. Both automatic gates remain OFF.
 
 ## Purpose and boundary
 
@@ -50,3 +50,27 @@ No gate enablement, event repair, provenance backfill, checkpoint retirement, ro
 - `functions/artifacts/caption-provenance-oct19/offline-playback-result.json`
 - `functions/artifacts/caption-provenance-oct19/serving-before.json`
 - `functions/artifacts/caption-provenance-oct19/release/` for assembly/dry-run/apply/verification receipts when produced.
+
+## Completed release
+
+Verified at `2026-10-19T14:45:30.891Z` in project `gathr-migrated`, codebase `gathr-functions`. All five functions are ACTIVE, latest-ready, with 100% latest traffic.
+
+| Function | Serving revision | Source hash |
+| --- | --- | --- |
+| processDataset | `processdataset-00507-mog` | `df28d94839b6b87753805c08443d86da7a190ab8` |
+| processDatasetResume | `processdatasetresume-00471-kah` | `df28d94839b6b87753805c08443d86da7a190ab8` |
+| processDatasetSelectedRows | `processdatasetselectedrows-00463-yir` | `df28d94839b6b87753805c08443d86da7a190ab8` |
+| scheduledUnknownVenueResolver | `scheduledunknownvenueresolver-00245-yeq` | `775f5b992297efd7aca0d186e79623392bce7198` |
+| processUnrecognizedVenues | `processunrecognizedvenues-00244-dof` | `0db3944f1d6b0417a1f5b87c187b08aba6e9367e` |
+
+Each assembly had a successful codebase-qualified dry run and apply. Exact commands are recorded in `release/{parser,scheduled,manual}/{dry-run,apply}-started.json`; each uses only its named function group, never a full codebase deploy. The parser assembly serves all three parsers; each resolver retains its distinct baseline assembly.
+
+Deployed archive verification matched all 1,516 expected parser files and all 648 expected files for each resolver, including opaque environment. Every startup probe passed; the bounded new-revision logs contained zero errors. This is startup/deployment evidence, not proof of a new business-source ingestion or production yield.
+
+Per-function runtime, configuration, actual environment/model settings, secret bindings, IAM and trigger hashes match the pre-release baseline. The finalizer remains `finalizeunrecognizedvenuetrigger-00237-zac` on source hash `ce7fd5e79c509337426be51eb7d2281146ecf56e`. There were zero active parser locks and all three historical checkpoint paths/update times were unchanged.
+
+No event/review/venue/media mutation, source-provenance backfill, checkpoint write, pilot, row replay, gate change, new observer, paid call, credential change or secret-value read was performed by this work. The original 4/4/0 denominator remains. The existing Firebase SDK version notice was the only release warning; dependencies were preserved.
+
+Independent delta clearance: `C:/Users/craig/Documents/Codex/2026-10-18/task/independent-caption-provenance-final-review.json`, recorded with its hash in `release/independent-review.json`. Final independent deployment readback and queue-owner handoff are performed by the originating coordinator.
+
+Next evidence: observe a genuinely new authenticated ordinary ingestion and its stored typed channels under the existing observer. Do not backfill retained captures or enable recovery/creation gates. Existing source, candidate, occurrence and publication holds still require their independent proof; this groundwork does not turn the four historical holds into ready plans.

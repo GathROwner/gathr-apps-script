@@ -1630,3 +1630,26 @@ not declared closed; this is a narrow advertised-end preservation fix, with zero
 ordinary resolver positives claimed. See
 `docs/chess-description-endtime-oct19-release.md` and
 `functions/artifacts/chess-endtime-oct19/release/verified.json`.
+
+
+### October 19 typed caption provenance groundwork (existing location-proof follow-up)
+
+Ordinary snapshot input mixed outer/shared captions with media descriptors under
+`OCR TEXT`, so legacy captures could not independently prove caption venue or
+clock ownership. Preserve original caption channels at authenticated ingestion;
+all row snapshot paths discard caller provenance and use the trusted writer
+metadata. Both resolver consumers validate the same complete file/row/source-bound
+channels, exclude media-only facts, and include provenance in recovery fencing.
+Hashes check consistency, not arbitrary-JSON authentication; privileged snapshot
+writers remain trusted. No HMAC or new credential dependency was introduced.
+
+Serving parser candidate `90326cc`, scheduled `6c372b1`, and manual `2ac3be5` were
+independently reviewed, narrowly deployed and source/configuration/IAM/traffic/
+startup verified on their separate serving baselines. TypeScript builds and
+1,079 / 506 / 506 full backend tests pass. Actual retained XLSX comparison keeps
+all348 rows unchanged; four historical captures and labelled local reconstruction
+remain held, preserving4 reviews /4 occurrences /0 ready plans. Synthetic unit
+positives do not establish historical yield. Both gates stay OFF; finalizer and
+three historical checkpoints are unchanged. No backfill, event repair or pilot.
+Evidence: `docs/caption-provenance-oct19-implementation.md` and
+`functions/artifacts/caption-provenance-oct19/release/completion.json`.
