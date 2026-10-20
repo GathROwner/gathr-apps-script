@@ -28,3 +28,7 @@ No parser release, paid replay, whole-catalog scan, media deletion, user/contact
 ## Prevention followup
 
 The concrete pattern is whole-market versus vendor-spotlight naming with the same source-supported venue/date/time. Add bounded identity regression fixtures and healthy distinct-vendor-event controls before proposing a matching change. This repair does not claim a new general duplicate-prevention algorithm was released.
+
+## Final independent verification
+
+All 23 independent receipt/body/delta checks passed at 14:09:33 America/Halifax. The review used the fresh owner live readbacks and saved exact bodies; it did not repeat the apply or scan. Receipt: `firebase/artifacts/royalty-crossing-oct20/final-independent-verification.json`, SHA256 `df2c64353327aecca5d81ebf8b1bf126dd7ccf799e58e3ee156a6f8234ee4bc3`. No pending action or execution blocker remains for this exact repair. The source/video/recall limitations above remain.
