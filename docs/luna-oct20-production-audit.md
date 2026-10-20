@@ -1,6 +1,6 @@
 # October20,2026 source-to-output accuracy audit
 
-**SOURCE ACCURACY REVIEW COMPLETE; CORRECTIONS IN PREPARATION.** Operational log coverage is explicitly partial. Owner chat `01a0ea83-7031-7423-b853-966f2180d186`. The 11:30 Halifax scheduled audit must reuse this report and its existing dataset key, not start another audit.
+**APPROVED RELEASE/REPAIRS COMPLETE; SOURCE-SEMANTIC COVERAGE QUALIFIED.** See `docs/oct20-source-semantic-coverage.md`:76individual downstream source notes,71generic rejection notes; exhaustive false-negative coverage is not established. Operational log coverage is explicitly partial. Owner chat `01a0ea83-7031-7423-b853-966f2180d186`. The 11:30 Halifax scheduled audit must reuse this report and its existing dataset key, not start another audit.
 
 ## Exact run and durable completion
 
@@ -16,7 +16,7 @@
 
 Local evidence root: `functions/artifacts/luna-oct20-production-audit/`.
 
-- All147 saved decisions reviewed against original captions and available ordered source galleries; durable row adjudications in `source-adjudications.json`.
+- The saved packet contains147source-caption/decision records.76downstream rows have individual source-specific notes;71Stage1rows have generic rejection wording. `adjudicate.py` sets both review booleans programmatically, so those flags alone do not prove147individual semantic checks or exhaustive missed-event screening. Recorded visual work is described below; exact qualification: `docs/oct20-source-semantic-coverage.md`.
 -268 of274 parser-gallery references visually reviewed on31 contact sheets. Missing: row38 image0; row39 images0–2; row72 image0; row154 image0. Errors were DNS failures, not proof the original sources never existed. Full videos were not replayed; parser-available stills/thumbnails were reviewed.
 - Original workbook reconciliation found **two additional shared attachment posters at row248** that the parser's media extraction omitted. Both were downloaded once and visually reviewed: total270 available images reviewed. See `supplemental-gallery.json`; original six failed references remain explicitly unverified.
 - All162 affected event-detail endpoints200, all149 unique managed primary images HEAD200. Complete saved active feed:978 events over10 pages. These availability checks do not imply semantic correctness.
@@ -120,3 +120,10 @@ The first TinyTot postflight assertion incorrectly expected all6dates in a next-
 
 
 Final independent closeout:29frozen +203applied/saved-public +28final checks passed; status `complete_deployed_applied_and_verified`, with no execution blocker or pending approved action. Receipt: `functions/artifacts/luna-oct20-production-audit/final-independent-verification.json`. Retained source-conflict/legacy followups remain as documented; no further execution was needed.
+
+
+## Source-semantic / missed-event clarification
+
+Accounting/release/repair completion is distinct from semantic recall acceptance.76downstream decisions have specific source notes (72main dictionary +4explicit fallback PASS notes);71Stage1rejections have generic wording.37model-identified multi-item posts all have individual notes, including8nonempty Stage3-to-formatted reductions, but no separately retained exhaustive source-first expected-event inventory exists.214scraperempty/unavailable placeholders cannot establish semantic recall;9geography rejects are separate, with source-specific row65investigation rather than uniform visual proof for all9.270available image references were recorded reviewed;6references/full videos remain uncovered.162source-attributed records/HTTP200checks do not themselves prove semantic correctness.
+
+8missing canonical events were created; the TinyTot parent additionally restores5later Saturdays. Broader missed-series/legacySoup/LindyHop and source holds remain unresolved. Saved RoyaltyCrossing rows91/92 also show two same-venue/date/clock records despite a one-keeper note; source identity remains unverified, no added live repair. Detailed evidence/limits and future two-direction audit standard: `docs/oct20-source-semantic-coverage.md`; machine clarification: `functions/artifacts/luna-oct20-production-audit/source-semantic-coverage-clarification.json`. Original evidence is unchanged; no repeat audit/scans/tests/replay/deploy/apply occurred.

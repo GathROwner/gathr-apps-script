@@ -80,3 +80,8 @@ Conflicting farm/Strut source clocks remain held; TorchRun geometry remains held
 ## Final independent confirmation
 
 Final independent verification at13:29Halifax confirms `complete_deployed_applied_and_verified`:29frozen,203applied/saved-public and28final checks passed. No execution blocker or pending approved apply remains. The retained source/legacy followups above remain separate. Receipt: `functions/artifacts/luna-oct20-production-audit/final-independent-verification.json`, SHA256 `1434e5cdd588235cd1c17b752952782a44a73e3195f3da3fd76bc17f7cc7fb78`. No additional scan, tests, deployment or mutation was performed for this documentation closeout.
+
+
+## Source-semantic audit scope qualification
+
+The release and55-action repair are complete; this does not establish exhaustive source recall. The retained evidence contains76individual downstream source notes and71generic Stage1rejection notes; review booleans are assigned programmatically.37model-identified multi-event posts have specific notes, but no independent expected-activity census for every source is established.214scraperempty/unavailable rows,9separate geography decisions,6unavailable image references and full-video coverage limit conclusions.8missing event documents plus5later TinyTot dates were restored; not all potential/legacy misses were resolved. Saved RoyaltyCrossing91/92 identity inconsistency remains a possible duplicate requiring source verification, not an applied target. Exact counts, source paths and future false-positive/false-negative audit standard: `docs/oct20-source-semantic-coverage.md`. This clarification used existing evidence only.

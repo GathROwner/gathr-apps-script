@@ -1679,3 +1679,8 @@ A first verification assumption that TinyTot should expose6feedrows was correcte
 
 
 October20 final independent closeout confirms29frozen/203applied-public/28final checks passed, no execution blocker or pending approved apply. Exact receipt: `functions/artifacts/luna-oct20-production-audit/final-independent-verification.json`. Broad pattern/source-conflict followups above remain open.
+
+
+### October20 audit evidence quality qualification
+
+Implementation completion above remains valid, but semantic/false-negative coverage is not exhaustive:76specific downstream source notes,71generic Stage1rejection notes; automatic review flags alone are not individual proof.37model-derived multi-event inventories have source notes, but no exhaustive source-first expected-event inventory is retained.214scraperplaceholders/9separate geography decisions/6missing images/full videos remain coverage limits.8event records and5later TinyTot occurrences recovered do not establish a recall percentage or resolve protected/legacy/source holds. A saved RoyaltyCrossing91/92 same-slot identity inconsistency is retained for source verification, not cleanup. Future audits must compare source→expected activities and final outputs→source support, including rejects/geography/partialposts. See `docs/oct20-source-semantic-coverage.md` and its machine clarification. No new source/live scan, test, replay, deployment or apply was done.
