@@ -90,3 +90,8 @@ The release and55-action repair are complete; this does not establish exhaustive
 ## Saved-source rejection followup
 
 Subsequent authorized saved-only review added specific expected-activity inventories/reasons to71formerly generic Stage1cases plus9geography cases.51Stage1rejections have no knownmedia gap;20remain conditional/potential/unresolved, including3potential held activities.136saved local image references actually inspected; no new download/model/test/live read/write or release.8geography exclusions supported;IslandChefsource/storedcoordinateconflict retained. No new publication-readyPEIevent established, but no exhaustive recall claim. Coordinator confirmed RoyaltyCrossingduplicate identity in saved snapshot only; no keeper/currentlive/repair decision. See `docs/oct20-rejected-source-followup.md` and exact80caseJSON.153independent checks passed. Approved55action release/repair remains unchanged.
+
+
+## Royalty Crossing exact followup — applied October 20
+
+Fresh live reads confirmed both duplicates. The independently reviewed exact repair is now applied and publicly verified: keeper `6idnDEErpAB7Ex2skVxQ`, duplicate `7ZldwUnCeCMmPsvxIwD6` retired, all five source links and six images retained, primary poster and other keeper fields unchanged; feed 341 → 342. Keeper detail 200, retired detail 404, complete venue/date-filtered feed returns one market. Three full typed originals archived; rollback eligibility verified without applying a restore. This supersedes earlier pending/live-unchecked Royalty Crossing wording only. No new matching implementation or broad scan. Evidence and remaining limits: `docs/royalty-crossing-oct20-duplicate-repair.md`.

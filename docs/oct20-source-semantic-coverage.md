@@ -51,3 +51,8 @@ Completion of row accounting, deployment tests or repair verification must not b
 ## Subsequent bounded source review
 
 The historical71generic-note gap above is now supplemented with71individual source-first inventories/dispositions plus9geography dispositions, saved evidence only.51Stage1rejections supported without knownmedia gaps;20conditional/potential/unresolved.136available local references actually inspected on16existing sheets. No repeat of76downstream cases and no new download/model/test/production work. Unknown/missing/fullvideo evidence remains unknown; no exhaustive dataset recall metric. Coordinator independently confirmedRoyaltyCrossing91/92duplicateidentity in saved original sources, superseding earlier tentative wording; currentlive/keeper/repair not assessed.153independent checks passed. Summary: `docs/oct20-rejected-source-followup.md`; exact80cases: `functions/artifacts/luna-oct20-production-audit/rejection-geography-source-dispositions.json`.
+
+
+## Royalty Crossing exact followup — applied October 20
+
+Fresh live reads confirmed both duplicates. The independently reviewed exact repair is now applied and publicly verified: keeper `6idnDEErpAB7Ex2skVxQ`, duplicate `7ZldwUnCeCMmPsvxIwD6` retired, all five source links and six images retained, primary poster and other keeper fields unchanged; feed 341 → 342. Keeper detail 200, retired detail 404, complete venue/date-filtered feed returns one market. Three full typed originals archived; rollback eligibility verified without applying a restore. This supersedes earlier pending/live-unchecked Royalty Crossing wording only. No new matching implementation or broad scan. Evidence and remaining limits: `docs/royalty-crossing-oct20-duplicate-repair.md`.

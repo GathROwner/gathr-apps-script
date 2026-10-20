@@ -39,3 +39,8 @@ The coordinating task actually read both original captions/images and confirmed 
 - Coordinator receipt: `C:/Users/craig/Documents/Codex/2026-10-18/task/oct20-royaltycrossing-saved-source-identity-review.json`, hash pinned in theJSONartifact. This task did not repeat its image review.
 
 The generic-note documentation gap is closed with individual decisions, including explicit unknown/held outcomes. Media completeness and overall recall remain qualified. New eligible-event recovery would need source/time/identity proof and separate exact live-state review; no such recovery or new architecture was attempted. The76downstream notes still do not constitute an independently enumerated source-first census of every possible activity in those posts.
+
+
+## Royalty Crossing exact followup — applied October 20
+
+Fresh live reads confirmed both duplicates. The independently reviewed exact repair is now applied and publicly verified: keeper `6idnDEErpAB7Ex2skVxQ`, duplicate `7ZldwUnCeCMmPsvxIwD6` retired, all five source links and six images retained, primary poster and other keeper fields unchanged; feed 341 → 342. Keeper detail 200, retired detail 404, complete venue/date-filtered feed returns one market. Three full typed originals archived; rollback eligibility verified without applying a restore. This supersedes earlier pending/live-unchecked Royalty Crossing wording only. No new matching implementation or broad scan. Evidence and remaining limits: `docs/royalty-crossing-oct20-duplicate-repair.md`.
