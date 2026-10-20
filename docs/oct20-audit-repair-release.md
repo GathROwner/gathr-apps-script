@@ -75,3 +75,8 @@ node firebase/repair-oct20-full-audit.cjs --rollback --result=<absolute-path-to-
 ## Separate followups retained
 
 Conflicting farm/Strut source clocks remain held; TorchRun geometry remains held. IslandChef’s inconsistent stored coordinates need a separately verified location repair. Broader finite-series/weekly-drink extraction requires a bounded followup rather than a new engine within this batch. The protected legacy LindyHop shape and RubySoup history remain unchanged. These limitations are not claimed solved by the completed release/repair. The next regular parser run will provide fresh production evidence for prevention; no paid replay or additional monitor was started.
+
+
+## Final independent confirmation
+
+Final independent verification at13:29Halifax confirms `complete_deployed_applied_and_verified`:29frozen,203applied/saved-public and28final checks passed. No execution blocker or pending approved apply remains. The retained source/legacy followups above remain separate. Receipt: `functions/artifacts/luna-oct20-production-audit/final-independent-verification.json`, SHA256 `1434e5cdd588235cd1c17b752952782a44a73e3195f3da3fd76bc17f7cc7fb78`. No additional scan, tests, deployment or mutation was performed for this documentation closeout.
