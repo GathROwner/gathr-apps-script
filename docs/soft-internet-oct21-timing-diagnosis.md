@@ -1,5 +1,7 @@
 # Soft Internet Theory timing trace — October 21, 2026
 
+Latest status: the label-only option below was superseded by Craig's selected-weekday instruction and subsequent minimum-functional-fix authorization. Source-explicit consumer candidate `add2c0d` is implemented/tested/exported for publiciOS79/Production/runtime1.1.20. Exact event repair remains dry-run only and Production approval/independent review are pending. See the superseding checkpoint in `visiting-hours-oct21-implementation-plan.md`; original diagnosis/evidence below remains unchanged.
+
 ## Exact identity and current state
 
 Parent visually identified the screenshot; this Windows task did not inspect its pixels. Exact canonical record: `venues/slug_ccoagallery/events/XDJ0vlTopBBg3rEibyOj`, SOFT INTERNET THEORY, Confederation Centre Art Gallery, 145 Richmond Street, Charlottetown.

@@ -1,5 +1,13 @@
 # Visiting hours: parser, API and selected-date app behavior
 
+## Superseding minimum-slice checkpoint
+
+Craig subsequently authorized the smallest functional fix through the coordinating chat. The broader 2–3 day architecture below is retained as planning history, not the current execution scope. A source-explicit first-case consumer is implemented in isolated app commit `add2c0de924822a6d00771da92f10b5b1c7208f1`, from public iOS79's exact source `6c773c3a13663c950e73438fd7447b613e81ffa8`. It uses optional timing.visitingHours metadata already passed by the API, with exact facility/range/source guards, selected weekday display, closed-day filtering, future-only Now suppression and cache transitions. No parser/API/Google-provider change is needed for the verified gallery case. It does not claim automatic generalized extraction or dated-exception scheduling.
+
+Twelve relevant suites / 117 tests pass, TypeScript passes, lint has zero errors (216 warnings: 215 baseline plus one import-position warning in the existing EventCallout import block). An iOS Production/runtime1.1.20 export passed; all12changed runtime source modules match bundle source-map content and no QA modules ship. Four actual shared RN-component cases were rendered through RN Web and inspected; native iOS appearance/adoption is not proven. Code/review evidence: `functions/artifacts/visiting-hours-oct21/review-ready.json` and `production-export-verification.json`; app implementation note: `C:/Windows/System32/GathR-Project/vh21/docs/visiting-hours-oct21.md`.
+
+Exact metadata repair is prepared and dry-run verified, not applied: `firebase/artifacts/soft-internet-oct21/visiting-review-ready.json`, one existing event plus feed342→343, two complete typed archives and two canonical actions. Source/gallery/opening-record/version/idle guards remain strict. Production publication approval is pending in the coordinating chat; no publish/apply has occurred. Independent frozen-plan/code review and that approval must pass before the documented release-then-repair sequence. Preview/runtime1.1.10 would not reach publiciOS79 and is not substituted.
+
 October 21, 2026. Craig agreed that hours should be stored and the app should display the hours for the date viewed/filtered. He also agreed to exact-facility Google Places fallback after explicit activity and official facility sources. This supersedes the earlier label-only proposal in `soft-internet-oct21-timing-diagnosis.md` as the intended direction. This document is the requested scope/estimate checkpoint before implementing a new schedule contract. No implementation, tests, deployment or live mutation is claimed.
 
 ## Confirmed motivating example
