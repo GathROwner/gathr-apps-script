@@ -24,6 +24,10 @@ The live drift-guarded rollback dry run passes: exactly three complete typed res
 
 This completes only the approved small batch. Original cinema OCR response remains unavailable, so reconstruction stays labelled. No new regular parse was run after release and no device adoption claim is made. Automatic resolution remains OFF; broader hours/Places, fifth-image coverage, generalized resurrection fences and ambiguous deferred cases are outside this slice.
 
+### Independent live completion confirmation
+
+Coordinator independently verified the live outcome at **2026-10-22T16:39:51.707Z**: both exact indexes READY/preserved entries, three expected ACTIVE/latest100% revisions/common hash, three canonical absences, four exact typed archives, protected keeper/two venue controls unchanged, six bounded global source queries, fresh three detail404/keeper200, both venue feeds and feed372→373, zero active locks. It separately inspected the owner's complete959-event/10-page feed receipt. No verifier writes occurred. Receipt: `functions/artifacts/oct22-small-batch/coordinator-independent-live-completion.json`; owner/independent receipt hashes and exact backup/rollback references: `independent-completion-acknowledgement.json`. No further queries/tests/mutations were performed for this acknowledgement.
+
 ## Earlier checkpoint after approved index provisioning
 
 Craig explicitly approved only the two missing query indexes and continuation of the existing small batch on October22 at16:22:54UTC. Both approved field updates were submitted once, each preserving its three existing COLLECTION indexes and adding only the requested COLLECTION_GROUP index. Both fields now report READY; all six preserved definitions and unchanged TTL settings were verified. The long-running administrative receipts still report PROCESSING while the index fields are READY and all required queries work; this finalization state is retained honestly in `index-readiness.json`, not treated as another operation or retried.
