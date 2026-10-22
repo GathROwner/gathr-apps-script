@@ -1,6 +1,30 @@
-# October22 small source guards and exact recoverable repair — final manifest review pending
+# October22 small source guards and exact recoverable repair — complete
 
-## Current checkpoint after approved index provisioning
+## Final release and repair verification
+
+Completed October22 at **13:38 Halifax /16:38UTC** after the coordinator's39-check independent refreshed manifest PASS. Final code **72dc7ee702f1ef1450b74eb031ab2b3cec444f33**, exact plan SHA **015a923aa59637fafd116d5201ee3a13afb3f8182c8dcde25121d238562a446c**, helper SHA **463ead98233680232e67022f1503de5044b7b6440cf2becfe18ac130032d513e**. The existing20focused/1,139compiled-backend passing results and both code reviews were reused; no audit/test/paid-call/scrape repeat.
+
+Qualified three-parser dry run and deployment pass in project `gathr-migrated`, codebase `gathr-functions`. All three functions are ACTIVE, ready and100%latest traffic at common source hash **2db00247f0e2aa8e36942b52cda98838bc50e92c**:
+
+| Function | Verified revision |
+| --- | --- |
+| processDataset | processdataset-00511-sif |
+| processDatasetResume | processdatasetresume-00475-vap |
+| processDatasetSelectedRows | processdatasetselectedrows-00467-yot |
+
+Exact1,555-file serving payload/environment comparison passes; startup probes pass for all three, zero new runtime errors in retained health logs. Source/config/environment/model/effort/prompt/cache/compact/secret-binding/IAM/runtime/trigger fingerprints match the accepted serving baseline except the reviewed three-file runtime delta. Resolver/finalizer source/revisions are unchanged. No active parser lock; historical checkpoints unchanged. Both automatic-resolution/creation gates remain OFF and the allowlist absent.
+
+Both approved index operations are now **SUCCESSFUL/done**, with READY entries, six existing index definitions preserved and zero duplicate operations. The earlier finalizing receipt below is historical; frozen preflight captures were preserved. Completion receipt: `index-operation-completion.json`.
+
+All apply-time full record/version/keeper/venue/global-source/sibling/feed/idle guards passed. Atomic repair commit **2026-10-22T16:38:23.854093Z** contains exactly8write results: three full typed event archives, three approved withdrawals, one full typed feed archive and feed **372→373**. Original inferred RCMP ends are preserved only in recovery snapshots, not endorsed as supported clocks. No venues, contacts, media objects, provenance, queues or other events changed.
+
+Postflight verifies all three canonical absences and full typed archives, the typed feed archive and exact feed metadata delta, protected Second Sundays' unchanged full document, both venue documents and seven unrelated sibling records unchanged. Three retired details return404; Second Sundays returns200. The complete959-event active feed (10pages) and both affected venue feeds (CityCinema6 /RCMP1) exclude retired parents/instances and retain the keeper. Six bounded post-repair source queries find only protected Second Sundays, with no unexpected secondary-source sibling.
+
+The live drift-guarded rollback dry run passes: exactly three complete typed restores with exists:false and monotonic feed373→374, four writes, all archives retained. **Rollback was not applied.** Full prewrite backup path/hash and all exact receipts are in `functions/artifacts/oct22-small-batch/release-and-repair-completion.json`; completion fingerprint is stored separately. Actual backup is under `firebase/artifacts/oct22-small-batch/`. Release logs preserve exact qualified commands/config/arguments; only processDataset, processDatasetResume and processDatasetSelectedRows were targeted. The existing outdated firebase-functions warning was retained, without unrelated dependency changes.
+
+This completes only the approved small batch. Original cinema OCR response remains unavailable, so reconstruction stays labelled. No new regular parse was run after release and no device adoption claim is made. Automatic resolution remains OFF; broader hours/Places, fifth-image coverage, generalized resurrection fences and ambiguous deferred cases are outside this slice.
+
+## Earlier checkpoint after approved index provisioning
 
 Craig explicitly approved only the two missing query indexes and continuation of the existing small batch on October22 at16:22:54UTC. Both approved field updates were submitted once, each preserving its three existing COLLECTION indexes and adding only the requested COLLECTION_GROUP index. Both fields now report READY; all six preserved definitions and unchanged TTL settings were verified. The long-running administrative receipts still report PROCESSING while the index fields are READY and all required queries work; this finalization state is retained honestly in `index-readiness.json`, not treated as another operation or retried.
 
