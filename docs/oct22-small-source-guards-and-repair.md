@@ -1,4 +1,16 @@
-# October22 small source guards and exact recoverable repair — blocked before release
+# October22 small source guards and exact recoverable repair — final manifest review pending
+
+## Current checkpoint after approved index provisioning
+
+Craig explicitly approved only the two missing query indexes and continuation of the existing small batch on October22 at16:22:54UTC. Both approved field updates were submitted once, each preserving its three existing COLLECTION indexes and adding only the requested COLLECTION_GROUP index. Both fields now report READY; all six preserved definitions and unchanged TTL settings were verified. The long-running administrative receipts still report PROCESSING while the index fields are READY and all required queries work; this finalization state is retained honestly in `index-readiness.json`, not treated as another operation or retried.
+
+Fresh serving/idle preflight passes at16:27:05UTC: all six serving source/environment baselines match, three parsers ACTIVE/latest100% on source8c014dae9dbbc3a36c4f76746fdd65883c965aee, no active parser locks, same three exact target versions, protected Second Sundays unchanged, two venue collections unchanged, feed372. Six bounded global source-specific queries pass and find exactly the four approved source records, with zero unexpected siblings. No broad scan occurred.
+
+Refreshed frozen plan SHA256 **`015a923aa59637fafd116d5201ee3a13afb3f8182c8dcde25121d238562a446c`**; helper SHA256 **`463ead98233680232e67022f1503de5044b7b6440cf2becfe18ac130032d513e`**. The source guard bytes remain unchanged; exact fresh source capture, refreshed preflight and index-readiness hashes are bound into the plan. A current dry run passes with exactly8writes/4archives/feed372→373;4-write rollback shape passes without apply. Earlier plan hashes/captures/reviews are preserved under the two superseded directories. Code remains72dc7ee;20focused/1,139compiled-backend results and both code reviews are reused, with no test/audit repeat.
+
+**Coordinator final independent manifest review is pending.** No parser deployment or live event/archive/feed/venue/media/queue mutation occurred. Only the two authorized index configurations changed. Automatic-resolution gates remain OFF. Exact review checkpoint: `functions/artifacts/oct22-small-batch/final-manifest-checkpoint.json`; current dry run: `repair-dry-run.json`; index/operation evidence: `index-readiness.json`. After manifest PASS, the already authorized release/apply/verification sequence below may proceed with fresh guards; no routine approval is needed.
+
+## Earlier preparation and missing-index blocker history
 
 ## Prepared implementation and independent review
 
