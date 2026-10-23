@@ -1,10 +1,22 @@
-# October 23 exact repair and narrow prevention — frozen for independent review
+# October 23 exact repair and narrow prevention — deployed, applied and live verified
 
 ## Current checkpoint
 
 The source audit is complete in [luna-oct23-production-audit.md](luna-oct23-production-audit.md). Its original ten-record recommendation has now become an implemented prevention candidate and an executable, guarded **twelve-event repair manifest** after Craig specifically authorized the two missing SeaWalk workshops. The original ten-record frozen packet is preserved under `functions/artifacts/oct23-small-batch/superseded-ten-record/`. No older applied repair helper was invoked.
 
-**Not yet deployed or applied.** Independent review of this exact packet is required before the already-authorized narrow release/apply. No additional routine user approval is requested. Automatic venue-resolution gates stay OFF. The dirty main checkout is untouched.
+**Completed October 23 at 13:17 Halifax.** The exact independent review passed81 checks. Its original receipt was copied byte-for-byte from the coordinator's `oct23-status/independent-frozen-batch-review.json`; no review was self-issued. Commit `af5d804` was narrowly deployed, independently read back, then the exact recoverable transaction committed at **16:16:43.489869 UTC / 13:16:43 Halifax**. Automatic venue-resolution gates remain OFF. The dirty main checkout is untouched.
+
+### Decisive completion evidence
+
+- All three parsers ACTIVE/latest100%, common source hash **`1adfb0a7af75586451bafc064461dca7ebd00af2`**: `processdataset-00512-wid`, `processdatasetresume-00476-zur`, `processdatasetselectedrows-00468-xak`. Actual serving ZIP verification passes all1,565 expected files and matching three-package identities. All three startup probes pass, zero logged errors; configuration/environment/secret bindings/IAM/models/prompts/cache/compact contracts match the accepted baseline. Resolver/finalizer releases remain unchanged.
+- **25 writes committed once:** four existing updates, six recoverable withdrawals, two exact SeaWalk creates, twelve archives and feed **386→387**. All twelve event outcomes and all complete archive fields match the reviewed typed payload. No prior helper or failed commit was retried.
+- **20 detail checks pass:** six withdrawn records404, six updated/new records200 with expected fields, four explicit protected festival/future-show controls200, four original SeaWalk sessions200. The complete active feed has **10 pages/972 events**; all six withdrawals are absent and both recovered sessions appear exactly once. All eight affected venue feeds pass; SeaWalk now has six sessions, with its four originals unchanged. November28 remains unpublished.
+- Sixteen protected documents (eight event controls and eight venues) remain fully unchanged, alongside22 unrelated source-sibling controls. No active parser; all three historical checkpoints unchanged, zero alternate checkpoints.
+- **13-write rollback dry run passes against actual postcommit versions**, restoring ten original events, deleting the two recoveries and advancing387→388. It was not executed; all twelve archives remain.
+- Final receipt: `functions/artifacts/oct23-small-batch/release-and-repair-completion.json`. Decisive supporting receipts: `release/parser/verified.json`, `release/completion.json`, `repair-commit-response.json`, `repair-apply-result.json`, `repair-live-postflight-result.json`, `repair-postflight-details.json`, `repair-postflight-active-feed.json`, `repair-postflight-venue-feeds.json`, `repair-rollback-dry-run.json`.
+- Actual fresh prewrite backup: `firebase/artifacts/oct23-small-batch/prewrite-backup-2026-10-23T16-16-41-795Z.json`, SHA256 `760ed2bb774285457429d2dbbdde01e974083084c33b4135cc3ad3a20546ecd5`. Frozen plan SHA256 `dd93f07f025794713ee47838eb580afd4a7a0097d6a0afe068e007aab6b82d32`; reviewed helper SHA256 `66d64b512aa077ea94c0c86bca46337f6ec6c21530c17e7bf322b10427e314b1`.
+
+No full audit or unchanged test suite was repeated. No new paid model call, scrape, parser replay, queue/venue/media mutation, client release or diagnostic deployment occurred. Existing firebase-functions package-version warning is retained without an unrelated dependency upgrade. The next regular-run effectiveness of the two prevention changes is not yet observed. The coordinator's separate live confirmation may be appended after its own readback.
 
 ## Committed code and baseline
 
@@ -20,8 +32,8 @@ The source audit is complete in [luna-oct23-production-audit.md](luna-oct23-prod
 - Offline playback of actual saved Stage 4 pottery clocks/flags plus same-source formatted metadata reproduces baseline 17:00–17:00 for all three occurrences; candidate keeps 10:00–17:00. The exact stored Friday Fun Swim object changes through the utility from 15/unlikely to 60/likely, with `family_activity`; no guessed score.
 - Healthy controls preserve independent explicit clocks, unknown ends, compact clocks, overnight rollover, lane/adult/private restrictions, and separate existing pool intervals.
 - Exact repair dry run passes inside a read-only Firestore transaction: ten existing records unchanged from audit; four explicit protected records, seven original venues, 32 original source-sibling records and 47 bounded global source queries; plus SeaWalk venue, four unchanged source sessions and three additional source queries. Both new IDs absent. Historical checkpoints unchanged. Feed **386→387**.
-- Codebase-qualified three-parser Firebase dry run passes. No production deploy or public event write has started.
-- Rollback shape passes: **13 writes**, restoring ten original events, deleting two recoveries and advancing feed **387→388**. It is deliberately non-executable until actual postcommit update versions are reread; post-apply rollback dry run will verify those exact versions. Archives are retained.
+- Codebase-qualified three-parser Firebase dry run passed before the deployment recorded above.
+- Rollback shape passed before apply; the actual-version post-apply rollback dry run now also passes. It remains unapplied and retains all archives.
 
 Receipts: `functions/artifacts/oct23-small-batch/test-results.json`, `baseline-saved-source-playback.json`, `candidate-saved-source-playback.json`, `release/parser/assembly-byte-verification.json`, `release/parser/dry-run-ok.json`, `repair-dry-run.json`, `repair-rollback-shape.json`.
 
@@ -61,11 +73,11 @@ The default-dry helper binds exact plan/code/helper hashes, full typed originals
 
 Serving must be independently reread by the narrow release controller immediately before repair; a completion receipt older than 90 seconds is rejected. The new helper never changes parser queue/checkpoints or automatic-resolution gates. Firestore canonical JSON normalization for empty arrays/maps and zero timestamp fractions is explicit, avoiding false postcommit failures while preserving original typed snapshots.
 
-## Independent review and execution sequence
+## Independent review and completed execution sequence
 
 Entry point: `functions/artifacts/oct23-small-batch/frozen-review-packet.json`. The coordinator must inspect actual code diff, baseline reproduction and test logs, byte-preservation proof, exact typed payload, fresh guards and rollback shape. Its passing receipt is `independent-review.json` in that directory, with the packet's exact parserCommit, plan/helper/contract/source-guard/release-controller/frozen-candidate/rollback and SeaWalk evidence/builder hashes, plus `testsPassed` and `protectedFieldsVerified`. No such passing receipt is manufactured by preparation.
 
-After review passes: narrow parser deploy, independent six-function ACTIVE/latest/config/common-parser-hash/serving-byte verification; fresh final serving readback; exact recoverable apply if all live transaction guards still pass; canonical/full archive/protected-record validation; exact detail responses, complete active feed and eight affected venue feeds; then actual-version rollback dry run. `live-postflight.cjs` performs read-only public/canonical verification. No UI or OTA release is involved.
+Executed after the81-check review passed: narrow parser deploy, independent six-function ACTIVE/latest/config/common-parser-hash/serving-byte verification; fresh final serving readback; exact recoverable apply after all live transaction guards passed; canonical/full archive/protected-record validation; exact detail responses, complete active feed and eight affected venue feeds; then actual-version rollback dry run. `live-postflight.cjs` performs read-only public/canonical verification. No UI or OTA release is involved.
 
 ## Prevention limits and deferred work
 

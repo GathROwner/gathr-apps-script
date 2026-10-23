@@ -1,5 +1,9 @@
 # October 23, 2026 source-to-output parser audit
 
+## Subsequent selected repair completion
+
+The audit below is retained at its original evidence cutoff. The selected ten existing records plus two subsequently authorized SeaWalk recoveries were deployed/applied and live verified at13:17 Halifax, October23. Exact scope,81-check independent review,25-write commit/12archives/feed386→387, full public-feed verification and remaining prevention limits are recorded in [oct23-small-source-guards-and-repair.md](oct23-small-source-guards-and-repair.md). This does not close the broader held/deferred findings below or imply that the audit itself made production writes.
+
 ## Outcome and execution checkpoint
 
 The regular run completed, but its published results have confirmed semantic defects. Dataset `1sc2srxE0po5eBYWax3itwhPfaYvsjYY6`, run `22592cf8-cb6e-4c2f-a2f9-2111f3cb619a`, is the sole subject of this audit. This report consolidates retained evidence; it does not repeat the audit or any test suite.
