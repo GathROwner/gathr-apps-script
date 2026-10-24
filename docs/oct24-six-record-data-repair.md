@@ -1,10 +1,10 @@
-# October24 six-record data-only repair — corrected v2 prepared for independent review
+# October24 six-record data-only repair — applied and live verified
 
 ## Scope and status
 
-The coordinator selected exactly six existing-record corrections from the completed October24 audit. This is a **new October24 packet**, not an October22/23 replay. **Nothing is applied and no deployment is selected.** The live parser baseline remains `af5d80435c14dd44cfa588fad1fabb3f8be9d306`, common hash `1adfb0a7af75586451bafc064461dca7ebd00af2`. Automatic-resolution/creation gates remain OFF.
+The coordinator selected exactly six existing-record corrections from the completed October24 audit. This is a **new October24 packet**, not an October22/23 replay. **Corrected v2 applied at16:00:58.073820UTC /13:00:58Halifax after the36-check independent coordinator PASS. No deployment occurred.** The live parser baseline remains `af5d80435c14dd44cfa588fad1fabb3f8be9d306`, common hash `1adfb0a7af75586451bafc064461dca7ebd00af2`. Automatic-resolution/creation gates remain OFF.
 
-Current v2 packet: `functions/artifacts/oct24-six-record-batch-v2/`. Original frozen packet and rejected execution receipts remain untouched under `functions/artifacts/oct24-six-record-batch/`. Review entry point after freeze: `frozen-review-packet.json`. The new tracked helpers are under `firebase/`; no parser/runtime source changes or unchanged backend test suites.
+Current v2 packet: `functions/artifacts/oct24-six-record-batch-v2/`. Original frozen packet and rejected execution receipts remain untouched under `functions/artifacts/oct24-six-record-batch/`. Frozen review entry point: `frozen-review-packet.json`. The new tracked helpers are under `firebase/`; no parser/runtime source changes or unchanged backend test suites.
 
 ## Exact event delta
 
@@ -50,11 +50,11 @@ Rollback shape passes: **seven writes**, restoring all six original typed event 
 
 The freeze step records exact plan/payload/capture/source-evidence/helper/auth-helper/dry-run/rollback hashes and the committed helper revision. Apply defaults to a read-only transaction. `--apply` additionally requires the coordinator's independent PASS receipt matching every frozen hash, the exact packet hash, clean tracked helper checkout/commit, source/document/version/keeper/venue/feed/checkpoint guards and current accepted serving state. No review receipt is self-issued.
 
-After apply, read-only postflight must check all six exact canonical outcomes, seven complete typed archives, four protected records, six venues and all unchanged source siblings; ten exact public details (four404/six200); complete paginated active feed; all six affected venue feeds; feed401; idle/checkpoint/serving/gates; then actual-version seven-write rollback dry run without execution. No emulator/map or client release is involved.
+Completed read-only postflight checks all six exact canonical outcomes, seven complete typed archives, four protected records, six venues and all unchanged source siblings; ten exact public details (four404/six200); complete paginated active feed; all six affected venue feeds; feed401; idle/checkpoint/serving/gates; then actual-version seven-write rollback dry run without execution. No emulator/map or client release is involved.
 
 Library relocation, monthly/finite-series changes, Soul Fit venue completion and broad publisher/postponement prevention remain deferred. **Withdrawals alone do not prevent next-run recreation.** Existing runtime tests/audit/media captures were reused; only the new repair helpers' syntax, payload invariants, fresh read-only guards and rollback shape were checked.
 
-The coordinator must inspect `frozen-review-packet.json` before apply. This document records readiness for review, not completion of the live repair.
+The coordinator inspected the exact v2 packet and issued the independent PASS, preserved byte-for-byte in v2 `independent-review.json`. Owner canonical/API/feed/rollback verification is complete; coordinator fresh live readback is the separate final independent check.
 
 
 ## Rejected first execution and corrected v2
@@ -63,6 +63,17 @@ The independently reviewed v1 commit request was rejected HTTP400 at15:55:22UTC.
 
 Fresh reconciliation at15:56:05UTC confirms all six original documents and server versions, four protected festival records, six venues, feed400, all82 source records and historical checkpoints unchanged; all seven planned archive paths absent. Thus known no execution is established. The failed apply marker, byte-for-byte independent receipt and full fresh prewrite backup `firebase/artifacts/oct24-six-record-batch/prewrite-backup-2026-10-24T15-55-22-448Z.json` remain intact. Its SHA256 is `4f0cd814ea132f2ee7676eef1512dd2880df6987115b69ddf04a1a54326f7018`. Reconciliation is `functions/artifacts/oct24-six-record-batch/repair-apply-rejected-reconciliation.json`.
 
-V2 corrects only archive resource naming, adds local URL/segment/closed-path checks for all14 apply writes and all7 rollback writes, and uses a separate artifact/backup namespace. Event deltas and all seven typed archive snapshots are identical to v1; original/protected/source/venue/feed versions remain unchanged in a fresh capture. V2 read-only transaction and rollback shape pass. A new independent receipt must explicitly bind the prior rejection reconciliation and every new frozen hash before one retry. The original independent PASS does not authorize changed v2 bytes. No parser deployment or event scope change is included.
+V2 corrects only archive resource naming, adds local URL/segment/closed-path checks for all14 apply writes and all7 rollback writes, and uses a separate artifact/backup namespace. Event deltas and all seven typed archive snapshots are identical to v1; original/protected/source/venue/feed versions remain unchanged in a fresh capture. V2 read-only transaction and rollback shape pass. The new independent36-check receipt explicitly bound the prior rejection reconciliation and every v2 hash before the single corrected attempt. The original v1 PASS was superseded, not reused. No parser deployment or event scope change is included.
 
 V2 plan SHA256: `f2094d67503355ea3c94f30473a0d84e6b4c8efac550b3610344d71dddbf2370`. V2 apply-helper SHA256: `1881fd0fce02843c1308a289a9f3a51993fd6c9a93d277c77b922e7edd3afd42`.
+
+## Decisive completed execution receipts
+
+- Atomic v2 commit: **2026-10-24T16:00:58.073820Z**, exactly14write results. Four withdrawals, two exact-field updates, seven complete typed archives; feed400→401. `repair-commit-response.json`, `repair-apply-result.json`, `repair-completion.json`.
+- Fresh full prewrite backup: `C:/Users/craig/.codex/worktrees/luna-accounting-release/gathr-apps-script/firebase/artifacts/oct24-six-record-batch-v2/prewrite-backup-2026-10-24T16-00-56-734Z.json`; SHA256 `3b33592c7d90cbdc2f6b239bf51e7b08b306f8957c3f0a7a5cc064d4ce606f14`. Original v1 failure/backup preserved unchanged.
+- Ten exact public details pass: four withdrawals404, two updated originals200 and four proper festival records200. Cyrus originalOctober23 19:30 survives withisRecurringfalse/patternnone; no future copies remain in the active feed. U7October31 10:10–11:10 remains upcoming; absent description restored, other fields byte-equivalent.
+- Complete public active-feed pagination: **11pages/1,000events**, nextPageToken exhausted; four withdrawals and expired Cyrus absent, upcomingU7 and all four festival controls present. All six affected venue feeds pass. Receipts: `repair-postflight-details.json`, `repair-postflight-active-feed.json`, `repair-postflight-venue-feeds.json`, `repair-live-postflight-result.json`.
+- Seven typed archives exact. Four protected festival documents, six venue documents and **76unrelated source-sibling controls** unchanged in full fields and server versions. No contact, interaction, queue or media object writes.
+- Actual postcommit-version rollback dry run passes: seven writes, restores six stored event originals, retains all seven archives and would advance401→402. **Not applied.** `repair-rollback-dry-run.json`.
+- Fresh postflight serving remainsaf5d804/source1adfb0a7, all three ACTIVE/latest100%, environment hashes unchanged,gatesOFF. No active parser, historical checkpoints unchanged. No deployment/runtime change,paidcall,replay,new scrape,backend-suite repeat or emulator/map interaction.
+- Larger prevention and deferred records remain open exactly as listed above. Withdrawing these copies does not prevent next-run recreation. Coordinator fresh live verification is pending after these owner receipts.
