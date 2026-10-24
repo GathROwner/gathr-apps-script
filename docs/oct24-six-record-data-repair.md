@@ -54,7 +54,7 @@ Completed read-only postflight checks all six exact canonical outcomes, seven co
 
 Library relocation, monthly/finite-series changes, Soul Fit venue completion and broad publisher/postponement prevention remain deferred. **Withdrawals alone do not prevent next-run recreation.** Existing runtime tests/audit/media captures were reused; only the new repair helpers' syntax, payload invariants, fresh read-only guards and rollback shape were checked.
 
-The coordinator inspected the exact v2 packet and issued the independent PASS, preserved byte-for-byte in v2 `independent-review.json`. Owner canonical/API/feed/rollback verification is complete; coordinator fresh live readback is the separate final independent check.
+The coordinator inspected the exact v2 packet and issued the independent PASS, preserved byte-for-byte in v2 `independent-review.json`. Owner canonical/API/feed/rollback verification and the coordinator's independent live readback are complete.
 
 
 ## Rejected first execution and corrected v2
@@ -76,4 +76,8 @@ V2 plan SHA256: `f2094d67503355ea3c94f30473a0d84e6b4c8efac550b3610344d71dddbf237
 - Seven typed archives exact. Four protected festival documents, six venue documents and **76unrelated source-sibling controls** unchanged in full fields and server versions. No contact, interaction, queue or media object writes.
 - Actual postcommit-version rollback dry run passes: seven writes, restores six stored event originals, retains all seven archives and would advance401→402. **Not applied.** `repair-rollback-dry-run.json`.
 - Fresh postflight serving remainsaf5d804/source1adfb0a7, all three ACTIVE/latest100%, environment hashes unchanged,gatesOFF. No active parser, historical checkpoints unchanged. No deployment/runtime change,paidcall,replay,new scrape,backend-suite repeat or emulator/map interaction.
-- Larger prevention and deferred records remain open exactly as listed above. Withdrawing these copies does not prevent next-run recreation. Coordinator fresh live verification is pending after these owner receipts.
+- Larger prevention and deferred records remain open exactly as listed above. Withdrawing these copies does not prevent next-run recreation. Coordinator independent live verification passed at16:03:02.101UTC /13:03:02Halifax.
+
+### Independent live closure
+
+Coordinator fresh verification passed **2026-10-24T16:03:02.101Z**: six exact canonical outcomes, seven complete typed archives, four protected festival records and six unchanged venues, ten public detail outcomes, six affected venue feeds, feed401 and unchanged serving/idle/checkpoint/gates. The existing complete11-page active-feed receipt was independently inspected, not rescanned. Rollback seven-write dry run passed and remains unapplied. Exact original receipt is retained byte-for-byte at `functions/artifacts/oct24-six-record-batch-v2/coordinator-independent-live-completion.json`, SHA256 `c03dd009e8998303a8a03d6fbef35e65790b6117d237269aff0f9bac419f0f5e`. This closure adds no queries, tests, replay, deployment or repair. The v1 HTTP400 failure/reconciliation/superseded review remain intact. Broader prevention, library, monthly/finite-series and SoulFit followups stay open. **This six-record batch is complete.**
