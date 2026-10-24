@@ -1,6 +1,6 @@
 // Exact Oct24 data-only scope. No deployment or automatic resolution.
 const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto'),assert=require('node:assert/strict');
-const repo=path.resolve(__dirname,'..'),root=path.join(repo,'functions/artifacts/oct24-six-record-batch');
+const repo=path.resolve(__dirname,'..'),root=path.join(repo,'functions/artifacts/oct24-six-record-batch-v2');
 const authPath=path.join(repo,'functions/artifacts/ocr-caption-fooddrive-oct18/tools/normal-auth.cjs');
 const a=require(authPath),TARGETS=[
  'venues/slug_exploresummerside/events/2keLVPPhiuAKJhG7TxIE',
@@ -50,6 +50,7 @@ async function serving(){
  assert.equal(rows.length,3);return {atUTC:new Date().toISOString(),commit:SERVING_COMMIT,rows,gates:'OFF',deploymentPerformed:false};
 }
 function validate(plan,capture){
+ assert.equal(plan.packetVersion,2);assert.equal(plan.priorRejectedReconciliationPath,path.join(repo,'functions/artifacts/oct24-six-record-batch/repair-apply-rejected-reconciliation.json'));assert.equal(plan.priorRejectedReconciliationSHA256,sha(plan.priorRejectedReconciliationPath));
  equal(plan.actions.map(x=>x.path),TARGETS);equal(Object.keys(capture.documents),TARGETS);equal(Object.keys(capture.protectedDocuments),PROTECTED);
  assert.equal(plan.scope,'October24 six existing records, data only');assert.equal(plan.captureSHA256,sha(path.join(root,'repair-preflight.json')));assert.equal(plan.servingCommit,SERVING_COMMIT);assert.equal(plan.servingHash,SERVING_HASH);assert.equal(plan.expectedWrites,14);assert.equal(plan.expectedArchives,7);assert.equal(plan.rollbackWrites,7);assert.equal(plan.expectedFeedVersion,a.data(capture.feed).version);assert.equal(plan.expectedFeedUpdateTime,capture.feed.updateTime);
  for(const [i,x]of plan.actions.entries()){
@@ -60,7 +61,7 @@ function validate(plan,capture){
  }
 }
 function payload(plan,capture,digest){
- validate(plan,capture);const base=a.database+'/documents/',writes=[],archives=[],expectedAfter={},archiveSnapshots={};
+ validate(plan,capture);const base=capture.feed.name.split('/documents/')[0]+'/documents/',writes=[],archives=[],expectedAfter={},archiveSnapshots={};
  const archive=(p,d,reason)=>{
   const ap='event_integrity_backups/oct24_six_'+crypto.createHash('sha256').update(p).digest('hex').slice(0,20)+'_'+digest.slice(0,12),fields=canonical({originalPath:a.encode(p),originalCreateTime:a.encode(d.createTime),originalUpdateTime:a.encode(d.updateTime),capturedAt:a.encode(capture.atUTC),repairTimestamp:a.encode(plan.repairTimestamp),planSHA256:a.encode(digest),reason:a.encode(reason),snapshot:{mapValue:{fields:d.fields}}});
   writes.push({update:{name:base+ap,fields},currentDocument:{exists:false}});archives.push(ap);archiveSnapshots[ap]=fields;
@@ -73,12 +74,13 @@ function payload(plan,capture,digest){
  archive('runtime_metadata/event_feed',capture.feed,'Full original feed metadata before monotonic invalidation');
  const feedFields=a.fields({version:plan.expectedFeedVersion+1,updatedAt:new Date(plan.repairTimestamp)});
  writes.push({update:{name:capture.feed.name,fields:feedFields},updateMask:{fieldPaths:['updatedAt','version']},currentDocument:{updateTime:capture.feed.updateTime}});
- assert.equal(writes.length,14);assert.equal(new Set(writes.map(x=>x.delete||x.update.name)).size,14);assert.equal(writes.filter(x=>x.delete).length,4);assert.equal(archives.length,7);
+ validateWriteNames(writes,[...TARGETS,...archives,'runtime_metadata/event_feed']);assert.equal(writes.length,14);assert.equal(new Set(writes.map(x=>x.delete||x.update.name)).size,14);assert.equal(writes.filter(x=>x.delete).length,4);assert.equal(archives.length,7);
  return {writes:canonical(writes),archives,archiveSnapshots,expectedAfter,expectedFeedFields:canonical({...capture.feed.fields,...feedFields})};
 }
+function validateWriteNames(writes,expectedPaths){const prefix='projects/gathr-migrated/databases/(default)/documents/',names=[];for(const w of writes){const n=w.update?.name||w.delete;assert(typeof n==='string'&&n.startsWith(prefix),'Invalid Firestore document resource name; HTTP URLs are not valid write names');const tail=n.split('/documents/')[1].split('/');assert(tail.length>=2&&tail.length%2===0&&tail.every(Boolean),'Invalid document path segment count');names.push(n);}assert.equal(new Set(names).size,names.length,'Duplicate write resource path');if(expectedPaths)equal([...names].sort(),expectedPaths.map(p=>prefix+p).sort(),'Write resource paths differ from closed reviewed set');}
 async function guard(capture,transaction){
  const state=await idle(transaction);equal(state,capture.idle,'Checkpoint drift');
  for(const[p,d]of Object.entries({...capture.documents,...capture.protectedDocuments,...capture.venues,'runtime_metadata/event_feed':capture.feed}))equal(await a.get(p,transaction),d,'Full typed document/version drift '+p);
  const current=await sourceQueries({...capture.documents,...capture.protectedDocuments},transaction);equal(current,capture.sourceSiblings,'Global source membership/version drift');return {idle:state,sourceQueries:current.queries.length,sourceSiblingRecords:Object.keys(current.documents).length};
 }
-module.exports={a,repo,root,authPath,TARGETS,PROTECTED,SOURCES,SERVING_COMMIT,SERVING_HASH,stable,equal,sha,canonical,load,save,docPath,idle,sourceQueries,serving,validate,payload,guard};
+module.exports={a,repo,root,authPath,TARGETS,PROTECTED,SOURCES,SERVING_COMMIT,SERVING_HASH,stable,equal,sha,canonical,load,save,docPath,idle,sourceQueries,serving,validate,validateWriteNames,payload,guard};

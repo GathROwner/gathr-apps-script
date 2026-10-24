@@ -1,10 +1,10 @@
-# October24 six-record data-only repair — prepared for independent review
+# October24 six-record data-only repair — corrected v2 prepared for independent review
 
 ## Scope and status
 
 The coordinator selected exactly six existing-record corrections from the completed October24 audit. This is a **new October24 packet**, not an October22/23 replay. **Nothing is applied and no deployment is selected.** The live parser baseline remains `af5d80435c14dd44cfa588fad1fabb3f8be9d306`, common hash `1adfb0a7af75586451bafc064461dca7ebd00af2`. Automatic-resolution/creation gates remain OFF.
 
-Local packet: `functions/artifacts/oct24-six-record-batch/`. Review entry point after freeze: `frozen-review-packet.json`. The new tracked helpers are under `firebase/`; no parser/runtime source changes or unchanged backend test suites.
+Current v2 packet: `functions/artifacts/oct24-six-record-batch-v2/`. Original frozen packet and rejected execution receipts remain untouched under `functions/artifacts/oct24-six-record-batch/`. Review entry point after freeze: `frozen-review-packet.json`. The new tracked helpers are under `firebase/`; no parser/runtime source changes or unchanged backend test suites.
 
 ## Exact event delta
 
@@ -40,7 +40,7 @@ Fresh preparation readback confirms all three parsers ACTIVE/latest100%, accepte
 
 Preparation backup (not an apply receipt):
 
-`firebase/artifacts/oct24-six-record-batch/preparation-backup-2026-10-24T15-49-44-129Z.json`
+`firebase/artifacts/oct24-six-record-batch-v2/preparation-backup-2026-10-24T15-57-20-982Z.json`
 
 This contains the full typed capture and exact payload. `preparation-backup.json` records its hash. Apply will first save another full timestamped **fresh prewrite backup** after all transaction guards pass. Local apply-started and commit-response receipts prevent blind retries; an unknown outcome stops for reconciliation. A serving check is performed immediately before the transaction and must be younger than90seconds before commit.
 
@@ -56,4 +56,13 @@ Library relocation, monthly/finite-series changes, Soul Fit venue completion and
 
 The coordinator must inspect `frozen-review-packet.json` before apply. This document records readiness for review, not completion of the live repair.
 
-Frozen plan SHA256: `4cb1d914a94aaef25b8cbb2633646350837afc3d2ae7f07104f93bb690ec8bfb`. Apply-helper SHA256: `6288647da9e7e2e0dc9f0024fada8bd758607743b67f79cf4de28eb92bdd7deb`. The packet binds all other helper, source, baseline, payload and check receipts.
+
+## Rejected first execution and corrected v2
+
+The independently reviewed v1 commit request was rejected HTTP400 at15:55:22UTC. Seven archive `update.name` fields incorrectly contained HTTP endpoint URLs instead of Firestore `projects/.../documents/...` resource names. The specific server response body was not retained; static inspection establishes the invalid resource names. This was a helper wire-format defect, not target/source drift. No retry of v1 was made.
+
+Fresh reconciliation at15:56:05UTC confirms all six original documents and server versions, four protected festival records, six venues, feed400, all82 source records and historical checkpoints unchanged; all seven planned archive paths absent. Thus known no execution is established. The failed apply marker, byte-for-byte independent receipt and full fresh prewrite backup `firebase/artifacts/oct24-six-record-batch/prewrite-backup-2026-10-24T15-55-22-448Z.json` remain intact. Its SHA256 is `4f0cd814ea132f2ee7676eef1512dd2880df6987115b69ddf04a1a54326f7018`. Reconciliation is `functions/artifacts/oct24-six-record-batch/repair-apply-rejected-reconciliation.json`.
+
+V2 corrects only archive resource naming, adds local URL/segment/closed-path checks for all14 apply writes and all7 rollback writes, and uses a separate artifact/backup namespace. Event deltas and all seven typed archive snapshots are identical to v1; original/protected/source/venue/feed versions remain unchanged in a fresh capture. V2 read-only transaction and rollback shape pass. A new independent receipt must explicitly bind the prior rejection reconciliation and every new frozen hash before one retry. The original independent PASS does not authorize changed v2 bytes. No parser deployment or event scope change is included.
+
+V2 plan SHA256: `f2094d67503355ea3c94f30473a0d84e6b4c8efac550b3610344d71dddbf2370`. V2 apply-helper SHA256: `1881fd0fce02843c1308a289a9f3a51993fd6c9a93d277c77b922e7edd3afd42`.
