@@ -100,6 +100,13 @@ export class BatchManager {
     );
   }
 
+  /** The private reuse receipt writer must fence its own transaction too. */
+  getWorkerFence(): { fileId: string; runId: string; workerId: string } | undefined {
+    return this.workerId && this.state.runId
+      ? { fileId: this.state.fileId, runId: this.state.runId, workerId: this.workerId }
+      : undefined;
+  }
+
   /**
    * Get current stats
    */

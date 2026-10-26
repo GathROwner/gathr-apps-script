@@ -71,6 +71,8 @@ export type GptUsageStage =
   | 'stage5';
 
 export interface GptUsageRecord {
+  /** Application response reuse; never counted as a newly billed model call. */
+  reusedResponse?: boolean;
   stage: GptUsageStage;
   component: string;
   endpoint: 'responses' | 'chat';

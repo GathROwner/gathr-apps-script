@@ -19,6 +19,7 @@ import {
   createBatchState,
 } from './batchManager.js';
 import { processRow, validateRowData } from './rowProcessor.js';
+import { processWithPostResponseReuse } from './postResponseReuseRunner.js';
 
 /**
  * Main file processing function
@@ -196,10 +197,10 @@ async function processRows(
     // Process the row
     const shouldParseInDryRun = config.dryRun && config.parserMode === 'full5stage';
     if (!config.dryRun || shouldParseInDryRun) {
-      await processRow(row, i, batchManager, {
+      await processWithPostResponseReuse(row, config, batchManager, () => processRow(row, i, batchManager, {
         ...config,
         lunaStage3EligibleQuota: true,
-      });
+      }));
     } else {
       // Dry run - just log what would happen
       logger.debug('Dry run: would process row', { rowIndex: i });

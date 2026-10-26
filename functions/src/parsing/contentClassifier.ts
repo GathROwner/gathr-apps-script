@@ -7,6 +7,7 @@
  */
 
 import OpenAI from 'openai';
+import { withPostResponseReuse } from './postResponseReuse.js';
 import {
   ClassificationResult,
   ContentType,
@@ -36,7 +37,7 @@ function getOpenAIClient(): OpenAI {
     }
     openaiClient = new OpenAI({ apiKey });
   }
-  return openaiClient;
+  return withPostResponseReuse(openaiClient);
 }
 
 /**

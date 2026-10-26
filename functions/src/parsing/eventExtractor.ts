@@ -9,6 +9,7 @@
  */
 
 import OpenAI from 'openai';
+import { withPostResponseReuse } from './postResponseReuse.js';
 import { DateTime } from 'luxon';
 import {
   ContentType,
@@ -50,7 +51,7 @@ function getOpenAIClient(): OpenAI {
     }
     openaiClient = new OpenAI({ apiKey });
   }
-  return openaiClient;
+  return withPostResponseReuse(openaiClient);
 }
 
 // Valid recurring patterns for sanitization

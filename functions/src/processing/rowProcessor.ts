@@ -49,6 +49,7 @@ import {
   ParseStageArtifactsSnapshot,
 } from '../parsing/types.js';
 import { parsePostData, prepareManagedDisplayImageUrls } from '../parsing/postParser.js';
+import { approvePostResponseReuse, invalidatePostResponseReuse, notePostResponseReuseDocument } from '../parsing/postResponseReuse.js';
 import { boundStageArtifactSnapshot } from '../parsing/stageArtifactBudget.js';
 import * as gptService from '../services/gptService.js';
 import * as firestoreService from '../services/firestoreService.js';
@@ -3101,6 +3102,7 @@ export async function processRow(
       }
     }
     let matchedVenueId = venue?.id;
+    if (venue?.id) notePostResponseReuseDocument(`venues/${venue.id}`);
     let facebookEventSourceContentSignature: string | undefined;
     let reusableFacebookEventMediaUrls: string[] = [];
     let reusableFacebookEventMediaSource: EventImageProvenanceSource = 'dedupe_existing';
@@ -3443,6 +3445,10 @@ export async function processRow(
         if (parserSkipReason?.failure) batchManager.markRowError(rowIndex,result.error);
         else batchManager.markRowSkipped(rowIndex, skipReason);
 
+        if (!parserSkipReason?.failure && ['stage1', 'stage2'].includes(parserSkipReason?.stage || '')) {
+          approvePostResponseReuse();
+        }
+
         if (enableSnapshots || parserSkipReason?.reason === 'Luna canary requires source review') {
           const state = batchManager.getState();
           const persistedStageArtifacts = enableStageArtifacts
@@ -3496,6 +3502,7 @@ export async function processRow(
       }
 
       if (!isDryRun) {
+        let allItemsResolved = true;
         let newFoodSpecialsCreated = 0;
         let newStandardEventsCreated = 0;
         let updatedFoodSpecials = 0;
@@ -3518,6 +3525,8 @@ export async function processRow(
             false,
             venueLookupCache
           );
+
+          if (!eventResult.created && !eventResult.updated && !eventResult.isDuplicate) allItemsResolved = false;
 
           if (eventResult.created) {
             result.eventsCreated++;
@@ -3564,6 +3573,10 @@ export async function processRow(
         }
         if (updatedFoodSpecials > 0) {
           batchManager.incrementUpdatedFoodSpecials(updatedFoodSpecials);
+        }
+        if (allItemsResolved && !stageArtifactsSnapshot?.stage3HeldItems?.length &&
+            fullParserEvents.every(event => !['hold', 'reject'].includes(fullParserEventLocationCheck(event, row).decision))) {
+          approvePostResponseReuse();
         }
       }
 
@@ -3914,6 +3927,7 @@ export async function processRow(
   } catch (error) {
     if (error instanceof Error && error.message === 'resume_worker_fenced') throw error;
     result.error = error instanceof Error ? error.message : String(error);
+    invalidatePostResponseReuse();
     batchManager.markRowError(rowIndex, error instanceof Error ? error : String(error));
 
     const enableSnapshots = process.env.ENABLE_PARSE_SNAPSHOTS !== 'false';
@@ -5264,6 +5278,10 @@ export async function processFullParserEvent(
     await batchManager.assertWorkerActive();
     const existingEvent = duplicateCheck.existingEvent;
     if (existingEvent) {
+      if (existingEvent.id) {
+        notePostResponseReuseDocument(`venues/${venue.id}`);
+        notePostResponseReuseDocument(existingEvent._canonicalDocumentPath || `venues/${venue.id}/events/${existingEvent.id}`);
+      }
       try {
         const updateResult = await updateDuplicateEventIfNeeded(
           venue,
@@ -5317,6 +5335,9 @@ export async function processFullParserEvent(
     parserMode: 'full5stage',
   });
   eventData.id = eventId;
+
+  notePostResponseReuseDocument(`venues/${venue.id}`);
+  notePostResponseReuseDocument(`venues/${venue.id}/events/${eventId}`);
 
   return { created: true, updated: false, isDuplicate: false, event: eventData };
 }
@@ -8815,11 +8836,13 @@ export function summarizeFullParserEvents(
   }));
 }
 
-function summarizeGptUsageRecords(
+export function summarizeGptUsageRecords(
   records: GptUsageRecord[]
 ): Record<string, unknown> {
   const summary: {
     totalCalls: number;
+    reusedResponses?: number;
+    reusedResponsesByStage?: Record<string, number>;
     inputTokens: number;
     outputTokens: number;
     totalTokens: number;
@@ -8845,6 +8868,12 @@ function summarizeGptUsageRecords(
 
   for (const record of records || []) {
     const stage = String(record.stage || 'unknown');
+    if (record.reusedResponse === true) {
+      summary.reusedResponses = (summary.reusedResponses || 0) + 1;
+      summary.reusedResponsesByStage ||= {};
+      summary.reusedResponsesByStage[stage] = (summary.reusedResponsesByStage[stage] || 0) + 1;
+      continue;
+    }
     const component = String(record.component || 'unknown');
     const model = String(record.model || 'unknown');
     const inputTokens = Number(record.inputTokens || 0);

@@ -9,6 +9,7 @@
  */
 
 import OpenAI from 'openai';
+import { withPostResponseReuse } from './postResponseReuse.js';
 import {hasUnresolvedSourceMeridiem as hasUnresolvedEarlyMeridiem} from './sourceTimeConstraints.js';
 import {sourceItemHoldReason} from './sourceItemEvidence.js';
 import {boundCinemaRunOccurrence} from './sourcePublicationPolicy.js';
@@ -50,7 +51,7 @@ function getOpenAIClient(): OpenAI {
     }
     openaiClient = new OpenAI({ apiKey });
   }
-  return openaiClient;
+  return withPostResponseReuse(openaiClient);
 }
 
 // Valid recurring patterns
