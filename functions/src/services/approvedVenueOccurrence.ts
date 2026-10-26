@@ -23,7 +23,7 @@ export function classifyApprovedVenueOccurrence(incoming: EventData, existing: E
   if (!approvedSources.has(metadata.source || '') || existing.locationReviewStatus !== 'approved' ||
       !incoming.venueId || existing.venueId !== incoming.venueId || recurring(incoming) || recurring(existing) ||
       ['area', 'route', 'province'].includes(String(existing.locationScope || '')) ||
-      (metadata.mapMode && metadata.mapMode !== 'point')) return 'none';
+      (metadata.mapMode && !['point','venue'].includes(metadata.mapMode))) return 'none';
   if (incoming.startDate !== existing.startDate || !/^\d{2}:\d{2}$/.test(incoming.startTime || '') ||
       incoming.startTime !== existing.startTime) return 'none';
   const a = addressKey(incoming.address), b = addressKey(existing.address);

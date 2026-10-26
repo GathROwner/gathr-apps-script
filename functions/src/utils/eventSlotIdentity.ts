@@ -28,6 +28,22 @@ function title(event: SlotEvent): string {
   return String(event.eventName || event.name || '');
 }
 
+/** Programme names are source slot identity even when their clocks overlap. */
+export function hasConflictingSkatingProgramme(left: SlotEvent, right: SlotEvent): boolean {
+  const programme = (event: SlotEvent): string => {
+    const value = title(event).toLowerCase().replace(/[–—]/g, '-');
+    const named = value.match(/\b(pre\s*can(?:skate)?|can\s*skate)\b/);
+    if (named) return named[1].replace(/\s/g, '').replace(/^precanskate$/, 'precan');
+    // Stage 5-6 and STAR 1-2 are different teaching programmes, not typos.
+    if (!/\b(?:figure\s+skating|skate|skating)\b/.test(value) &&
+        !/^(?:stage|star)\s*\d+(?:\s*-\s*\d+|\s*\+)?\s*$/.test(value.trim())) return '';
+    const level = value.match(/\b(stage|star)\s*(\d+(?:\s*-\s*\d+|\s*\+)?)/);
+    return level ? `${level[1]}:${level[2].replace(/\s/g, '')}` : '';
+  };
+  const a = programme(left), b = programme(right);
+  return Boolean(a && b && a !== b);
+}
+
 /** Separately printed public-access slots are not a fuzzy three-hour duplicate. */
 export function hasConflictingBookableActivitySlot(left: SlotEvent, right: SlotEvent): boolean {
   const activity = /\b(?:lane swim|public swim|open swim|waterslide|bookable ice|ice time|public skat(?:e|ing)|open skat(?:e|ing))\b/i;
@@ -104,11 +120,17 @@ function printedLabeledSlotRange(event: SlotEvent): [string, string] | null {
   const start = timeFlag(event, 'start');
   const end = timeFlag(event, 'end');
   if (start.source !== 'explicit' || end.source !== 'explicit') return null;
-  const evidence = (start.evidence || end.evidence).replace(/[–—]/g, '-').toLowerCase();
+  const evidence = `${start.evidence} ${end.evidence}`.replace(/[–—]/g, '-').toLowerCase();
   const match = evidence.match(/\b(\d{1,2}:\d{2})\s*(am|pm)?\s*(?:-|to)\s*(\d{1,2}:\d{2})\s*(am|pm)?\b/);
   if (!match) return null;
-  const startTime = clock(match[1], match[2] || match[4] || '');
-  const endTime = clock(match[3], match[4] || match[2] || '');
+  // Without meridiems, use only clocks corroborated by both stored endpoints.
+  // In particular 12:30-1:45 means 12:30-13:45 in the captured Eptek slot;
+  // parsing it as 12:30-01:45 silently disabled the conflict guard.
+  const explicitMeridiem = Boolean(match[2] || match[4]);
+  const startTime = explicitMeridiem ? clock(match[1], match[2] || match[4]) :
+    incomingClockSupported(event, 'start') ? clock(String(event.startTime || ''), '') : '';
+  const endTime = explicitMeridiem ? clock(match[3], match[4] || match[2]) :
+    incomingClockSupported(event, 'end') ? clock(String(event.endTime || ''), '') : '';
   if (!startTime || !endTime) return null;
   const [startHour, startMinute] = startTime.split(':').map(Number);
   const [endHour, endMinute] = endTime.split(':').map(Number);
@@ -120,7 +142,11 @@ function incomingClockSupported(event: SlotEvent, side: 'start' | 'end'): boolea
   const flag = timeFlag(event, side);
   const value = String(side === 'start' ? event.startTime || '' : event.endTime || '');
   if (flag.source !== 'explicit' || !/^\d{1,2}:\d{2}$/.test(value)) return false;
-  const token = flag.evidence.toLowerCase().match(/\b(\d{1,2}:\d{2})\s*(am|pm)?\b/);
+  const tokens = [...flag.evidence.toLowerCase().matchAll(/\b(\d{1,2}:\d{2})\s*(am|pm)?\b/g)];
+  // Both flags may contain the whole range. End evidence then belongs to the
+  // second clock, never the first; a separate single-clock flag still works.
+  if (tokens.length > 2) return false;
+  const token = side === 'end' ? tokens.at(-1) : tokens[0];
   if (!token) return false;
   const sourceTime = clock(token[1], token[2] || '');
   if (!sourceTime) return false;
@@ -145,5 +171,14 @@ export function hasMatchingLabeledSlotTimeEvidence(incoming: SlotEvent, existing
 }
 
 export function hasConflictingLabeledSlotTimeEvidence(incoming: SlotEvent, existing: SlotEvent): boolean {
-  return labeledSlotEvidenceComparison(incoming, existing) === false;
+  return labeledSlotEvidenceComparison(incoming, existing) === false ||
+    labeledSlotEvidenceComparison(existing, incoming) === false;
+}
+
+/** Shared defensive guard for fuzzy, exact-ID, recurring-family and merge
+ * callers. Slot identity must be checked before any broader OR fallback. */
+export function hasConflictingProgrammeSlot(left: SlotEvent, right: SlotEvent): boolean {
+  return hasConflictingSkatingProgramme(left, right) ||
+    hasConflictingExplicitSlotOrdinals(left, right) ||
+    hasConflictingLabeledSlotTimeEvidence(left, right);
 }

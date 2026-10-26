@@ -1,22 +1,49 @@
-import { hasConflictingBookableActivitySlot } from './eventSlotIdentity.js';
+import {corroboratedCalendarStart} from './calendarTileTiming.js';
+import { hasConflictingBookableActivitySlot, hasConflictingProgrammeSlot } from './eventSlotIdentity.js';
 import {hasConflictingStandingKaraokeOccurrence} from '../services/standingKaraokeOccurrence.js';
 import {EventData} from '../types/index.js';
 import {hasCrossSourceRecurringLifecycleConflict} from './recurringSeriesLifecycle.js';
 
 type Occurrence = {
-  name?: string; eventName?: string; category?: string; establishment?: string;
+  name?: string; eventName?: string; description?: string; category?: string; establishment?: string;
   venue?: string; startDate?: string; startTime?: string; endTime?: string;
   isRecurring?: unknown; recurringPattern?: string; totalOccurrences?: unknown;
   recurrenceUntilDate?: string; recurringDaysOfWeek?: unknown; recurringWeekInterval?: unknown;
   uniqueId?: string; timeFlags?: unknown;
+  _sourceType?: string; sourceType?: string;
   venueId?: string | null; sourceOccurrenceCount?: number;
 };
 const title = (e: Occurrence) => String(e.eventName || e.name || '');
 const source = (e: Occurrence) => String(e.uniqueId || '').split('_')[0];
 const dayNames = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
 
+/** Two explicitly printed starts in one class post are separate occurrences,
+ * not a fuzzy time correction. Single-item corrections retain existing rules. */
+export function hasConflictingSameSourceClassClock(a:Occurrence,b:Occurrence):boolean {
+  if(!/^\d{8,}$/.test(source(a))||source(a)!==source(b)||a.startDate!==b.startDate||
+      a.category!=='Workshops & Classes'||b.category!==a.category||
+      title(a).toLowerCase().replace(/[^a-z0-9]/g,'')!==title(b).toLowerCase().replace(/[^a-z0-9]/g,'')||
+      Math.max(Number(a.sourceOccurrenceCount)||0,Number(b.sourceOccurrenceCount)||0)<2)return false;
+  const known=(e:Occurrence)=>/^\d{2}:\d{2}$/.test(e.startTime||'')&&(e.timeFlags as any)?.start?.source==='explicit';
+  return known(a)&&known(b)&&a.startTime!==b.startTime;
+}
+
+/** Explicit plus-separated contents identify separate offers in one source.
+ * Price changes alone never create this distinction. */
+export function hasConflictingSameSourceBundle(a: Occurrence, b: Occurrence): boolean {
+  if (!source(a) || source(a) !== source(b) ||
+      a.category !== 'Food Special' || b.category !== 'Food Special') return false;
+  const parts = (e: Occurrence) => title(e).toLowerCase().split(/\s*\+\s*|\s+plus\s+/)
+    .map(s => s.replace(/[^a-z0-9]+/g,' ').trim()).filter(Boolean);
+  const left = parts(a), right = parts(b);
+  if (left.length < 2 || right.length < 2) return false;
+  const shared = left.filter(s => right.includes(s));
+  return shared.length >= 2 && (left.some(s => !right.includes(s)) || right.some(s => !left.includes(s)));
+}
+
 /** Cinema clocks are occurrence identity, not a three-hour fuzzy tolerance. */
 export function hasConflictingCinemaClock(a: Occurrence, b: Occurrence): boolean {
+  if (corroboratedCalendarStart(a,b) || corroboratedCalendarStart(b,a)) return false;
   const cinema = (e: Occurrence) => e.category === 'Cinema' ||
     /\b(?:cinema|screening|movie)\b/i.test(`${e.establishment || ''} ${e.venue || ''} ${title(e)}`);
   const known = (e: Occurrence) => {
@@ -31,7 +58,8 @@ export function hasConflictingCinemaClock(a: Occurrence, b: Occurrence): boolean
 export function hasConflictingBoundedClassCycle(a: Occurrence, b: Occurrence): boolean {
   const outside = (series: Occurrence, incoming: Occurrence): boolean => {
     if (source(series) && source(series) === source(incoming)) return false;
-    if (!/\b(?:course|class(?:es)?|session\s+\d+\s+of\s+\d+)\b/i.test(title(series))) return false;
+    const datedCalendarSlot = ['calendar', 'schedule'].includes(String(incoming._sourceType || incoming.sourceType || ''));
+    if (!datedCalendarSlot && !/\b(?:course|class(?:es)?|session\s+\d+\s+of\s+\d+)\b/i.test(title(series))) return false;
     const pattern = String(series.recurringPattern || '');
     if (pattern !== 'daily' && !pattern.startsWith('weekly_')) return false;
     const count = Number(series.totalOccurrences), until = String(series.recurrenceUntilDate || '');
@@ -59,7 +87,7 @@ export function hasConflictingBoundedClassCycle(a: Occurrence, b: Occurrence): b
 }
 
 export function hasConflictingOccurrenceIdentity(a: Occurrence, b: Occurrence): boolean {
-  return hasConflictingCinemaClock(a,b) || hasConflictingBoundedClassCycle(a,b) || hasConflictingBookableActivitySlot(a,b) ||
+  return hasConflictingSameSourceClassClock(a,b) || hasConflictingSameSourceBundle(a,b) || hasConflictingProgrammeSlot(a,b) || hasConflictingCinemaClock(a,b) || hasConflictingBoundedClassCycle(a,b) || hasConflictingBookableActivitySlot(a,b) ||
     hasCrossSourceRecurringLifecycleConflict(a as Partial<EventData>, b as Partial<EventData>) ||
     hasConflictingStandingKaraokeOccurrence(a as Partial<EventData>, b as Partial<EventData>);
 }

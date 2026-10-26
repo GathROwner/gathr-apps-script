@@ -11,6 +11,7 @@
 import OpenAI from 'openai';
 import {hasUnresolvedSourceMeridiem as hasUnresolvedEarlyMeridiem} from './sourceTimeConstraints.js';
 import {sourceItemHoldReason} from './sourceItemEvidence.js';
+import {boundCinemaRunOccurrence} from './sourcePublicationPolicy.js';
 import {
   ExtractedItem,
   FormattedEvent,
@@ -35,6 +36,8 @@ import { logger } from '../utils/logger.js';
 import { levenshteinDistance } from '../utils/similarity.js';
 import { DateTime } from 'luxon';
 import { stage5CachedTextBlocks } from './stage5PromptCache.js';
+import { bindFamilyAudienceEvidence } from '../utils/familyFriendlyScoring.js';
+import { selectActivityAudienceBlocks } from '../services/familyAudienceEvidence.js';
 
 // Initialize OpenAI client lazily
 let openaiClient: OpenAI | null = null;
@@ -462,6 +465,7 @@ Never return arrays of values for an item; each must be a JSON object.`;
 
       event = rehydrateFormattedEventMetadata(event, originalItem);
       event = preserveValidatedOccurrence(event, originalItem);
+      event = boundCinemaRunOccurrence(event, originalItem);
 
       // Run after recurrence normalization so pickup weekdays cannot turn a
       // finite ordering window into an open weekly series.
@@ -481,7 +485,7 @@ Never return arrays of values for an item; each must be a JSON object.`;
         establishment: processedEvent.establishment,
       });
 
-      return processedEvent;
+      return rehydrateFamilyAudienceMetadata(processedEvent, originalItem, validatedData, combinedText);
     });
 
     const workshopGroundedEvents = filterUnsupportedWorkshopBleed(processedEvents, combinedText);
@@ -578,6 +582,35 @@ export function parseFormattingJsonResponse(text: string): FormattingResult {
   }
 
   return { formattedEvents: [], formattingDecisions: [], _parseError: true } as FormattingResult;
+}
+
+/** Structured responses must contain one complete schema envelope, never a
+ * salvaged fragment of a commentary message or two concatenated answers. */
+export function parseStrictFormattingEnvelope(text: string, schema: GPTFunctionSchema[]): FormattingResult {
+  const failed = () => ({formattedEvents: [], formattingDecisions: [], _parseError: true} as FormattingResult);
+  let parsed: any;
+  try { parsed = JSON.parse(text); } catch { return failed(); }
+  const root = schema[0].parameters;
+  const shape = (value: any, s: any): boolean => {
+    if (s.type === 'object') return !!value && typeof value === 'object' && !Array.isArray(value) &&
+      s.required.every((key: string) => Object.hasOwn(value, key)) &&
+      Object.keys(value).every(key => Object.hasOwn(s.properties, key) && shape(value[key], s.properties[key]));
+    if (s.type === 'array') return Array.isArray(value) &&
+      (s.minItems === undefined || value.length >= s.minItems) &&
+      (s.maxItems === undefined || value.length <= s.maxItems) && value.every(item => shape(item, s.items));
+    if (s.type === 'integer' ? !Number.isSafeInteger(value) : typeof value !== s.type) return false;
+    return !s.enum || s.enum.includes(value);
+  };
+  return shape(parsed, root) ? normalizeFormattingResult(parsed) : failed();
+}
+
+export function createBoundFormattingSchema(itemCount: number, minimalOutput = false): GPTFunctionSchema[] {
+  const schema = createFormattingSchema(minimalOutput);
+  const items = schema[0].parameters.properties.formattedEvents;
+  items.minItems = itemCount;
+  items.maxItems = itemCount;
+  items.items.properties.sourceItemIndex.enum = Array.from({length:itemCount}, (_, index) => index);
+  return schema;
 }
 
 function normalizeJsonText(text: string): string {
@@ -1256,12 +1289,46 @@ export function preserveValidatedOccurrence(
   return restored;
 }
 
+/** Rebuild from the aligned validated item; discard any Stage 5 supplied proof. */
+export function rehydrateFamilyAudienceMetadata(
+  event: FormattedEvent, originalItem: ExtractedItem,
+  items: ExtractedItem[], sourceText: string
+): FormattedEvent {
+  const next = {...event};
+  delete next.familyAudienceEvidence;
+  // The model request schema is unchanged. Only retain an actual legacy/extracted
+  // age field if supplied; do not pretend every source has a dedicated age field.
+  const age = String((originalItem as {ageRestriction?: unknown})?.ageRestriction || '').trim();
+  if (age) next.ageRestriction = age; else delete next.ageRestriction;
+  if (!originalItem) return next;
+  const blocks = selectActivityAudienceBlocks(originalItem, items, sourceText);
+  const text = [originalItem.name, originalItem.description, age, ...blocks.map(block => block.text)].filter(Boolean).join('\n');
+  next.familyAudienceEvidence = bindFamilyAudienceEvidence(next, text,
+    blocks.some(block => block.scope === 'whole_programme') ? 'whole_programme' : blocks.length ? 'exact_source_block' : 'validated_item',
+    JSON.stringify({item:[originalItem.name,originalItem.date,originalItem.venue],text}));
+  return next;
+}
+
 export function rehydrateFormattedEventMetadata(
   event: FormattedEvent,
   originalItem?: ExtractedItem
 ): FormattedEvent {
   const nextEvent = { ...event } as FormattedEvent;
   let changed = false;
+  if(originalItem&&!String(originalItem.endTime||'').trim()&&
+      /\bvenue_website:.*approximate end omitted\b/i.test(String(originalItem.timeFlags?.end?.evidence||''))){
+    nextEvent.endTime='';nextEvent.endDate=originalItem.date;
+    nextEvent.timeFlags=cloneFormattedTimeFlags(originalItem.timeFlags);changed=true;
+  }
+  const locations = originalItem?.spatial?.kind === 'single_location' && Array.isArray(originalItem.spatial.locations)
+    ? originalItem.spatial.locations.filter(location => location && location.role === 'location' && location.certainty === 'confirmed') : [];
+  if (!String(nextEvent.address || '').trim() && locations.length === 1 &&
+      /^\d+[A-Za-z]?\s/.test(String(locations[0].address || '')) &&
+      String(locations[0].sourceText || '').toLowerCase().replace(/[^a-z0-9]/g,'')
+        .includes(String(locations[0].address).toLowerCase().replace(/[^a-z0-9]/g,''))) {
+    nextEvent.address = locations[0].address;
+    changed = true;
+  }
   if (originalItem?._locationMentionResolution) {
     const resolution=originalItem._locationMentionResolution;
     nextEvent._locationMentionResolution=resolution;
@@ -1444,6 +1511,10 @@ export function rehydrateFormattedEventMetadata(
   // Stage 5 uses a strict schema and intentionally does not reinterpret
   // spatial evidence. Preserve the Stage-3 evidence verbatim so the routing
   // gate can make a deterministic, review-safe decision later.
+  if (originalItem?.timeFlags?.end?.source === 'none') {
+    nextEvent.timeFlags = {...nextEvent.timeFlags,end:{...originalItem.timeFlags.end}};
+    changed = true;
+  }
   const originalSpatial = (originalItem as Record<string, unknown> | undefined)?.spatial;
   if (originalSpatial && typeof originalSpatial === 'object' &&
       (!(event as Record<string, unknown>).spatial || parseIsoDate(String(originalItem?.date || '')))) {
@@ -1519,6 +1590,7 @@ function detectExplicitFoodSpecialCategory(
   const sourceDetail = `${sourceName} ${originalItem?.description || ''}`.toLowerCase();
   if (originalItem?._sourceType === 'special' &&
       (/\bcocktails?\b/.test(sourceDetail) ||
+        (/\b(?:margaritas?|martinis?|sangria|pints?|wines?|well drinks?)\b/.test(sourceName) && !/\b(?:brunch|breakfast|lunch|dinner|buffet|meal|salad|sauce|pairing)\b/.test(sourceName)) ||
         (/\b(?:mimosas?|bloody\s+caesars?)\b/.test(sourceName) &&
           !/\b(?:brunch|breakfast|lunch|dinner|buffet|meal|salad)\b/.test(sourceName))) &&
       !/\b(?:trivia|quiz|workshop|class|tasting|festival|showdown|competition|contest|concert|performance|party)\b/.test(sourceName)) {
@@ -1547,7 +1619,7 @@ function detectExplicitFoodSpecialCategory(
   const foodOfferText = text.replace(/\bbeer\s+garden\b/g, ' ')
     .replace(/\bmain\s+(?:level|floor|street|entrance|lobby)\b/g, ' ');
   const hasNamedFoodCue =
-    /\b(brunch|breakfast|lunch|dinner|menu|appetizer|mains|main course|main dish|dessert|prix fixe|set menu|deal|cocktail|cocktails|beer|wine|wines|mimosa|mimosas|burger|burgers|pizza|pizzas|taco|tacos|wing|wings)\b/.test(
+    /\b(brunch|breakfast|lunch|dinner|soup|menu|appetizer|mains|main course|main dish|dessert|prix fixe|set menu|deal|cocktail|cocktails|beer|wine|wines|mimosa|mimosas|burger|burgers|pizza|pizzas|taco|tacos|wing|wings)\b/.test(
       foodOfferText
     );
   const hasPriceNearFoodCue = hasPrice && hasNamedFoodCue;
@@ -2047,14 +2119,15 @@ function applyFinalCategoryNormalizationGuardrail(
     return event;
   };
 
+  const activityCategory = sourceGroundedActivityCategory(event, originalItem);
+  if (activityCategory) {
+    stats.keywordInference += 1;
+    return setCategory(activityCategory, 'keyword_inference', 'source-local public activity identity');
+  }
+
   if (isNonMealCommunityActivity(event, originalItem)) {
     stats.keywordInference += 1;
     return setCategory('Gatherings & Parties', 'keyword_inference', 'community, public care or produce-judging activity');
-  }
-
-  if (/\b(?:vendors?|farmers?|craft)\s+market\b/i.test(String(event.name || ''))) {
-    stats.keywordInference += 1;
-    return setCategory('Gatherings & Parties', 'keyword_inference', 'market title');
   }
 
   const isStrongUpgradeOverWeakFinal = (candidate: Category | null): boolean =>
@@ -2186,8 +2259,9 @@ export async function formatStage5BatchesWithRecovery(
     }
     const response = normalizeFormattingResponse(rawResponse, items, items.length);
     const aligned = alignFormattedEventsToValidatedData(response.formattedEvents, items);
-    if (getStage5SourceIdentityIssues(aligned).length > 0) {
-      logger.warn('Stage 5 canary batch source identity mismatch', { offset, batchCount: items.length });
+    const identityIssues = getStage5SourceIdentityIssues(aligned);
+    if (identityIssues.length > 0) {
+      logger.warn('Stage 5 canary batch source identity mismatch', { offset, batchCount: items.length, identityIssues });
       return null;
     }
     return aligned.map((entry, index) => ({ ...entry.event, sourceItemIndex: offset + index }));
@@ -2308,14 +2382,13 @@ function applyCategoryCorrections(
   event: FormattedEvent,
   originalItem: ExtractedItem | undefined
 ): FormattedEvent {
+  const activityCategory = sourceGroundedActivityCategory(event, originalItem);
+  if (activityCategory) { event.category = activityCategory; return event; }
   if (isNonMealCommunityActivity(event, originalItem)) {
     event.category = 'Gatherings & Parties';
     return event;
   }
   const rawCategory = String(event.category || '').trim();
-  if (/\b(?:vendors?|farmers?|craft)\s+market\b/i.test(String(event.name || ''))) {
-    event.category = 'Gatherings & Parties';
-  }
   const normalizedAlias = CATEGORY_ALIAS_MAP[rawCategory.toLowerCase()];
   if (normalizedAlias && rawCategory !== normalizedAlias) {
     logger.debug(`Category alias normalization: "${event.name}" -> ${normalizedAlias}`, {
@@ -2469,6 +2542,47 @@ function applyCategoryCorrections(
   return event;
 }
 
+/** Source-local activity identity wins over incidental vendors/treats or a
+ * theatre venue prior. Film/documentary subjects remain cinema controls. */
+function sourceGroundedActivityCategory(event: FormattedEvent, originalItem?: ExtractedItem): Category | null {
+  const title = String(originalItem?.name || event.name || '');
+  const text = `${title} ${originalItem?.description || event.description || ''}`;
+  if (originalItem?._sourceType === 'special' && /^discounted\s+apps$/i.test(title.trim())) return 'Food Special';
+  if (originalItem?._sourceType === 'special' && /^(?:\$\d+(?:\.\d+)?\s*)?pitchers?$/i.test(title.trim())) return 'Drink Special';
+  if (/\bcooking\s+demo(?:nstration)?\b/i.test(text)) return 'Workshops & Classes';
+  if (/\binformation\s+night\b/i.test(title) && /\b(?:contractors?|construction|building\s+code)\b/i.test(text)) return 'Gatherings & Parties';
+  if (/\bholiday\s+sale\s+(?:and\s+|&\s*)?social\b/i.test(title)) return 'Gatherings & Parties';
+  if (/\bbook\s+club\b/i.test(title) && !/\b(?:concert|live music|band|performance|dj)\b/i.test(title)) return 'Gatherings & Parties';
+  if (/\b(?:illusion(?:s|ists?)?|magic show)\b/i.test(text) && /\b(?:live|theatrical|evening|performance|show|stage|master)\b/i.test(text) &&
+      !/\b(?:film|movie|screening|documentary)\b/i.test(text)) return 'Gatherings & Parties';
+  if (/^read,?\s*sing,?\s*(?:and\s+)?play$/i.test(title.trim()) &&
+      /\b(?:stories|rhymes|kids|children|ages?\s*0)\b/i.test(text)) return 'Workshops & Classes';
+  if (/^(?:exercise|(?:seniors?\s+)?fitness|mat\s+yoga|chair\s+yoga|line\s+danc(?:e|ing))$/i.test(title.trim()) &&
+      ['calendar','schedule'].includes(String(originalItem?._sourceType || ''))) return 'Workshops & Classes';
+  if (/\b(?:dinner|supper|meal|breakfast)\b/i.test(text) && /\bfundraiser\b/i.test(text) &&
+      /\b(?:tickets?|admission|carnival|community|famil(?:y|ies))\b/i.test(text)) return 'Gatherings & Parties';
+  if (/\b(?:breakfast|brunch)\s+service\b/i.test(title) && !/\b(?:workshop|class|race|show|theatre|theater)\b/i.test(title)) return 'Food Special';
+  if (/\b(?:lunch|soup|chili|sandwich|burger|meal|dinner|supper|breakfast|brunch)\b/i.test(title) &&
+      (/\$\s*\d|\b(?:special|feature|deal|offer|buffet)\b/i.test(title) || originalItem?._sourceType==='special')) return null;
+  if (/\b(?:pancake breakfast|community (?:meal|dinner|supper)|book launch|author (?:conversation|reading)|in conversation with)\b/i.test(text) && !/\b(?:workshop|class|lesson|course)\b/i.test(title)) return 'Gatherings & Parties';
+  // These are item titles, never the publisher/venue or a sibling soup offer.
+  // A market's vendors and food fundraising do not change its activity type.
+  if (/\b(?:craft|artisans?|makers?|vendors?|farmers?(?:['’]s?)?)\s+(?:fair|market)\b/i.test(title) &&
+      !/\b(?:live\s+music|concert|performance|workshop|class|lesson|trivia|tasting)\b/i.test(title)) {
+    return 'Gatherings & Parties';
+  }
+  // Allow a sponsor prefix, while retaining separately named parties, lessons,
+  // films and music events as their own activities.
+  if (/\b(?:free|public|family|lane|leisure|recreational|open)\s+swim(?:ming)?\b/i.test(title) &&
+      !/\b(?:party|lessons?|classes?|workshop|concert|live\s+music|band|dj|film|movie|screening)\b/i.test(title)) {
+    return 'Sports';
+  }
+  if (/\b(?:choir|chorus|choral)\b/i.test(text) &&
+      /\b(?:sing(?:ing|ers)?|perform(?:s|ing|ance)?|concert|tour|music)\b/i.test(text) &&
+      !/\b(?:film|movie|screening|documentary)\b/i.test(text)) return 'Live Music';
+  return null;
+}
+
 /**
  * Handle establishment mapping with venue override logic
  */
@@ -2555,7 +2669,9 @@ function handleEstablishmentMapping(event: FormattedEvent, userName: string): Fo
  * Validate and correct isEvent/isFoodSpecial based on category
  */
 function validateEventTypeFlags(event: FormattedEvent, originalItem?: ExtractedItem): FormattedEvent {
-  const forcedFoodCategory = detectExplicitFoodSpecialCategory(event, originalItem);
+  const activityCategory = sourceGroundedActivityCategory(event, originalItem);
+  if (activityCategory) event.category = activityCategory;
+  const forcedFoodCategory = activityCategory ? null : detectExplicitFoodSpecialCategory(event, originalItem);
   const forcedWorkshopCategory = detectExplicitWorkshopCategory(event, originalItem);
   if (
     forcedFoodCategory &&
@@ -3347,6 +3463,15 @@ function hasStrongRecurringCue(text: string): boolean {
   return /\b(every|each|weekly|daily|biweekly|every other|recurring|repeats?|weekdays|monthly)\b/.test(
     normalized
   );
+}
+
+function hasBoundedRelativeOccurrenceWithoutRepeat(text: string): boolean {
+  const normalized = normalizeWeekdayExtractionText(text);
+  const relativeWindow = /\b(?:this|coming|upcoming|next)\s+(?:weekend|week|monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/;
+  if (!relativeWindow.test(normalized)) return false;
+  // A single advertised weekend is not a weekly lifecycle. Explicit cadence
+  // elsewhere in the same item still protects real weekly/monthly programmes.
+  return !/\b(?:weekly|biweekly|fortnightly|daily|monthly|recurring|repeats?|weekdays|weekends|mondays|tuesdays|wednesdays|thursdays|fridays|saturdays|sundays)\b|\b(?:every|each)\s+(?:(?:other|second)\s+)?(?:week(?:end)?|day|month|monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/.test(normalized);
 }
 
 function removeDurationOnlyEachCue(text: string): string {
@@ -4586,6 +4711,16 @@ function normalizeRecurringForFormattedEvent(
   originalItem?: ExtractedItem
 ): FormattedEvent {
   const sourceText = buildRecurrenceSourceText(event, originalItem);
+  const soupCadenceText = `${originalItem?.name || event.name || ''} ${originalItem?.description || ''}`
+    .replace(/\bdaily\s+soup\b/gi, 'soup');
+  const explicitSoupCadence = /\b(?:daily|weekly|monthly|biweekly|weekdays|weekends|mondays|tuesdays|wednesdays|thursdays|fridays|saturdays|sundays)\b|\b(?:every|each)\s+(?:(?:other|second)\s+)?(?:day|week|month|weekday|weekend|monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/i.test(soupCadenceText);
+  // A changing flavour branded Daily Soup does not establish repeat dates.
+  if (FOOD_CATEGORIES.includes(event.category) && /\bdaily\s+soup\b/i.test(String(originalItem?.name || event.name)) &&
+      originalItem?._sourceType==='special' &&
+      !explicitSoupCadence) {
+    return {...event,isRecurring:'No',recurringPattern:'none',totalOccurrences:undefined,recurrenceUntilDate:undefined,
+      recurringDaysOfWeek:undefined,recurringWeekdaySequence:undefined,recurringWeekInterval:undefined};
+  }
   // A shop's "weekly special" describes its current offer window. It does not
   // promise that the same product repeats every Thursday indefinitely.
   if (FOOD_CATEGORIES.includes(event.category) && /\bweekly\s+special\b/i.test(sourceText) &&
@@ -5190,6 +5325,17 @@ function normalizeRecurringForFormattedEvent(
     recurringPattern = 'none';
     totalOccurrences = undefined;
     recurrenceUntilDate = undefined;
+    isRecurring = false;
+  }
+
+  if (
+    isRecurring && recurringPattern.startsWith('weekly_') &&
+    !customRecurringConfiguration &&
+    (!recurrenceUntilDate || recurrenceUntilDate <= event.startDate) &&
+    (totalOccurrences === undefined || totalOccurrences <= 1) &&
+    hasBoundedRelativeOccurrenceWithoutRepeat(sourceText)
+  ) {
+    recurringPattern = 'none';
     isRecurring = false;
   }
 
@@ -5936,7 +6082,7 @@ function promoteFiniteWeeklyOneOffSequences(events: FormattedEvent[]): Formatted
   return promoted;
 }
 
-function collapseRecurringSeriesEvents(events: FormattedEvent[]): FormattedEvent[] {
+export function collapseRecurringSeriesEvents(events: FormattedEvent[]): FormattedEvent[] {
   const collapsed: FormattedEvent[] = [];
   const collapseIndexByKey = new Map<string, number>();
   const collapseDatesByKey = new Map<string, Set<string>>();
@@ -6271,6 +6417,11 @@ function patternFromIsoDate(dateValue: string | undefined): RecurringPattern | n
 function detectRecurringPatternFromText(text: string): RecurringPattern {
   const t = String(text || '').toLowerCase();
 
+  const ongoingDays = [...t.matchAll(/\b(mondays|tuesdays|wednesdays|thursdays|fridays|saturdays|sundays)\b/g)];
+  if (/\bongoing\s+(?:classes|lessons|sessions)\b/i.test(t) &&
+      !/\b(?:cancelled|canceled|no\s+longer|not\s+ongoing)\b/i.test(t) &&
+      new Set(ongoingDays.map(m => m[1])).size === 1) return mapWeekdayTokenToPattern(ongoingDays[0][1])!;
+
   if (/\b(every\s+single\s+day|every\s+day|everyday|daily)\b/.test(t)) {
     return 'daily';
   }
@@ -6528,13 +6679,14 @@ async function callGPTWithSchema(
       const callStart = Date.now();
       const cachedText = model === 'gpt-6-luna'
         ? stage5CachedTextBlocks(prompt, batch.userName) : null;
+      const boundSchema = createBoundFormattingSchema(batch.itemCount, Boolean(config.stage5MinimalOutputProbe));
       const response = await client.responses.create({
         model,
         input: [{ role: 'user', content: cachedText || [{ type: 'input_text', text: prompt }] }],
         ...(cachedText ? { prompt_cache_options: { mode: 'explicit', ttl: '30m' } } : {}),
         text: { format: {
-          type: 'json_schema', name: functionName, strict: true,
-          schema: schema[0].parameters,
+          type: 'json_schema', name: 'stage5_single_envelope_v2', strict: true,
+          schema: boundSchema[0].parameters,
         } },
         max_output_tokens: stage5ResponsesMaxTokens,
         ...(stage5ReasoningEffort ? { reasoning: { effort: stage5ReasoningEffort } } : {}),
@@ -6549,7 +6701,7 @@ async function callGPTWithSchema(
       });
       const usage = extractTokenUsage(response.usage);
       const messageContent = extractResponsesText(response);
-      const parsedResponse = parseFormattingJsonResponse(messageContent || '');
+      const parsedResponse = parseStrictFormattingEnvelope(messageContent || '', boundSchema);
       const diagnostics = {
         ...config.diagnosticContext,
         responseId: String(response.id || ''),

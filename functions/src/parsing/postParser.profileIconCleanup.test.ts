@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { prepareManagedProfileIconUrlForRegression } from './postParser.js';
+import { prepareManagedProfileIconUrlForRegression, selectUnusedManagedImageUrls } from './postParser.js';
 
 test('existing managed venue profile is returned without cleanup ownership', async () => {
   const url = 'https://storage.googleapis.com/gathr-uploaded-images/profilepictures/venue-avatar.webp';
@@ -16,4 +16,9 @@ test('empty profile icon is not a cleanup candidate', async () => {
     url: '',
     createdForThisParse: false,
   });
+});
+
+test('cleanup does not request deletion of protected profiles, even for a held post',()=>{
+ const base='https://storage.googleapis.com/gathr-uploaded-images/';
+ assert.deepEqual(selectUnusedManagedImageUrls([base+'profilepictures/new-avatar.webp',base+'postimages/temp-band.webp'],[]),[base+'postimages/temp-band.webp']);
 });

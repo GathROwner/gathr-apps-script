@@ -1,5 +1,6 @@
 import type { ExtractedItem, ParsingConfig, SecondaryValidationResult } from './types.js';
 import {isDeepStrictEqual} from 'node:util';
+import {hasOnlyAlternativeRecurrence, recurrenceOwnershipText} from './occurrenceSourceOwnership.js';
 
 export const COMPACT_STAGE4_FORMAT = 'compact_v1';
 type ValidationSource = ExtractedItem & { _pipelineIndex?: number; recurringPattern?: string };
@@ -110,7 +111,14 @@ export function compactStage4FormatForSources(sources: ValidationSource[]) {
   const properties = format.schema.properties.decisions.items.properties;
   properties.sourceItemIndex.enum = sources.map(item => item._pipelineIndex);
   for (const key of ['name', 'date', 'startTime', 'venue']) {
-    properties.sourceIdentity.properties[key].enum = [...new Set(sources.map(item => String((item as any)[key] ?? '')))];
+    const values = [...new Set(sources.map(item => String((item as any)[key] ?? '')))];
+    // Strict-output enum literals reject control characters, even though JSON
+    // strings can represent them. Keep the original identity and verify its
+    // exact binding below rather than sending an invalid schema or altering
+    // source text. Index/count and all other safe enums remain constrained.
+    if (!values.some(value => /[\u0000-\u001f\u007f]/.test(value))) {
+      properties.sourceIdentity.properties[key].enum = values;
+    }
   }
   return format;
 }
@@ -173,9 +181,10 @@ function objectKeys(value: unknown, keys: string[]): value is Record<string, unk
 /** A correction cannot manufacture a recurring schedule from an isolated weekday/date. */
 function supportedRecurrence(item: ValidationSource, proposed: string | null): boolean {
   if (proposed === null || proposed === item.recurringPattern) return true;
-  const text = `${item.name || ''} ${item.description || ''}`;
+  const text = recurrenceOwnershipText(item).text;
   if (proposed === 'none') {
     if (!item.recurringPattern || item.recurringPattern === 'none') return true;
+    if (hasOnlyAlternativeRecurrence(item)) return true;
     return /\b(?:annual|one[ -](?:off|time)|christmas|thanksgiving|halloween|easter|valentine|father['’]?s\s+day|mother['’]?s\s+day|new\s+year|st\.?\s+patrick)\b/i.test(text) &&
       /^\d{4}-\d{2}-\d{2}$/.test(String(item.date || ''));
   }

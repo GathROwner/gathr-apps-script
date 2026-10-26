@@ -19,6 +19,7 @@ import {
 } from './types.js';
 import { logger } from '../utils/logger.js';
 import {blocksStartTimeFallback} from './sourceTimeConstraints.js';
+import {hasUnadvertisedActivityEnd} from './sourcePublicationPolicy.js';
 import { convertToOperatingHours, findVenue, getHoursForDay, getPlaceDetails } from '../services/placesService.js';
 import { findVenueByName, updateVenueOperatingHours } from '../services/firestoreService.js';
 
@@ -106,7 +107,8 @@ export async function resolveTimesWithOperatingHours(
   const postedHHMM = extractPostedTime(timestamp);
   const postedDate = DateTime.fromISO(timestamp, { zone: cfg.timezone }).toFormat('yyyy-MM-dd');
 
-  for (const event of formattedEvents) {
+  for (const raw of formattedEvents) {
+    const event = hasUnadvertisedActivityEnd(raw) ? {...raw,endTime:''} : raw;
     try {
       const resolved = await resolveEventTimes(
         event,
@@ -154,7 +156,7 @@ async function resolveEventTimes(
     return resolved;
   }
   const approximateLinkedPageEnd = hasApproximateLinkedPageEnd(event);
-  const needsEndTime = (!event.endTime || event.endTime.trim() === '') && !approximateLinkedPageEnd;
+  const needsEndTime = (!event.endTime || event.endTime.trim() === '') && !approximateLinkedPageEnd && !hasUnadvertisedActivityEnd(event);
   const toClose = event.timeFlags?.end?.toClose === true && !approximateLinkedPageEnd;
 
   if (!needsStartTime && !needsEndTime && !toClose) {
@@ -234,6 +236,7 @@ async function resolveEventTimes(
       // Use venue closing time
       resolved.endTime = dayHours.close;
       resolved.timeResolution.endFromHours = 'to_close';
+      preserveConflictingCloseAsUnknown(resolved,dayHours);
 
       logger.debug(`Resolved end time (to close) for "${event.name}"`, {
         endTime: dayHours.close,
@@ -367,6 +370,10 @@ export function applyFallbackTimes(
   postedHHMM: string,
   postedDate: string
 ): TimeResolvedEvent {
+  if (hasUnadvertisedActivityEnd(event)) {
+    resolved.endTime = '';
+    if (resolved.timeResolution) delete resolved.timeResolution.endFromHours;
+  }
   if (!resolved.startTime && blocksStartTimeFallback(event)) return resolved;
   const isSpecial =
     event.isFoodSpecial === 'Yes' ||
@@ -410,7 +417,7 @@ export function applyFallbackTimes(
 
   // Apply category default for end time if missing and toClose was set
   const hasEndClock = resolved.endTime && resolved.endTime.trim() !== '';
-  if (!hasEndClock && !hasApproximateLinkedPageEnd(event)) {
+  if (!hasEndClock && !hasApproximateLinkedPageEnd(event) && !hasUnadvertisedActivityEnd(event)) {
     resolved.timeResolution = resolved.timeResolution || { hoursUsed: false };
 
     if (event.timeFlags?.end?.toClose) {
@@ -638,3 +645,13 @@ function logResolutionSummary(events: TimeResolvedEvent[]): void {
 
 // Re-export types for convenience
 export type { OperatingHours, DayHours };
+
+/** A close-time cache contradiction is not an explicit zero-length session. */
+export function preserveConflictingCloseAsUnknown(event: TimeResolvedEvent,hours: DayHours): void {
+  if (event.timeFlags?.end?.toClose !== true || event.startTime !== hours.close || hours.open===hours.close) return;
+  event.endTime='';
+  event.timeResolution={...event.timeResolution!,reason:'venue_close_conflicts_with_start'};
+  delete event.timeResolution.endFromHours;
+  event.timeFlags={...event.timeFlags,end:{source:'none',toClose:true,
+    evidence:'Source says until close; venue closing hour equals the advertised start. Actual finish unknown.'}};
+}

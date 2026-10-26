@@ -2,6 +2,7 @@ import {hasConflictingOccurrenceIdentity} from '../utils/occurrenceMergeGuard.js
 import { EventData } from '../types/index.js';
 import { hasConflictingDevelopmentSlot } from '../utils/eventSlotIdentity.js';
 import {recurringSeriesLabelsCompatible} from '../utils/recurringSeriesLifecycle.js';
+import {samePricedDailyOffer} from './pricedDailyOfferIdentity.js';
 import {
   calculateTimeDifferenceHours,
   normalizeVenueName,
@@ -355,6 +356,8 @@ function getWeekdayFromPattern(recurringPattern: unknown): string {
 }
 
 function collectWeekdayIntent(event: EventData): Set<string> {
+  // A daily family is not restricted to the weekday of its first stored date.
+  if (event.recurringPattern === 'daily') return new Set(WEEKDAY_NAMES);
   const weekdays = new Set<string>();
 
   const patternWeekday = getWeekdayFromPattern(event.recurringPattern);
@@ -764,6 +767,8 @@ export function isRecurringFamilyFallbackCompatible(
   existing: EventData,
   options?: RecurringFamilyFallbackOptions
 ): boolean {
+  if ((samePricedDailyOffer(incoming,incoming) || samePricedDailyOffer(existing,existing)) &&
+      !samePricedDailyOffer(incoming,existing)) return false;
   if (!recurringSeriesLabelsCompatible(incoming, existing)) return false;
   if (hasConflictingDevelopmentSlot(incoming, existing) || hasConflictingOccurrenceIdentity(incoming, existing)) return false;
   if (!hasCompatibleVenue(incoming, existing, options?.venueId)) {
@@ -807,10 +812,11 @@ export function isRecurringFamilyFallbackCompatible(
   }
 
   if (!hasCompatibleHostTokens(incoming, existing)) {
+    if (samePricedDailyOffer(incoming, existing)) return true;
     return false;
   }
 
-  return computeFamilyAnchorScore(incoming, existing).score >= 0.9;
+  return samePricedDailyOffer(incoming, existing) || computeFamilyAnchorScore(incoming, existing).score >= 0.9;
 }
 
 export function pickRecurringFamilyFallbackMatch(

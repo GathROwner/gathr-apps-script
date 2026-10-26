@@ -1,4 +1,5 @@
 import type {ExtractedEvent, ExtractedItem} from './types.js';
+import {sourcePublicationHoldReason,preserveCalendarClockPresence} from './sourcePublicationPolicy.js';
 
 const months = ['january','february','march','april','may','june','july','august','september','october','november','december'];
 
@@ -72,7 +73,17 @@ export function bindDatedTicketLink(item: ExtractedItem, caption: string): Extra
 }
 
 export function sourceItemHoldReason(item: ExtractedItem): string | undefined {
+  if ((item as any)._sourcePublicationHold) return String((item as any)._sourcePublicationHold);
+  const identityText = `${item.description || ''} ${item.extractionReason || ''}`;
+  if (['calendar','schedule'].includes(String(item._sourceType || '')) &&
+      /\bdate\s+(?:digit\s+)?(?:is\s+)?(?:faint|unclear|obscured|partly\s+obscured)|\bdate\b.{0,35}\b(?:faint|partly\s+obscured|illegible)\b/i.test(identityText)) return 'calendar_date_identity_uncertain';
+  if (['calendar','schedule'].includes(String(item._sourceType || '')) &&
+      /\b(?:away\s+game|marked\s+away)\b/i.test(`${item.description || ''} ${item.spatial?.evidenceNotes || ''}`) &&
+      !String(item.venue || '').trim() && !(Array.isArray(item.spatial?.locations) && item.spatial.locations.length)) return 'away_game_without_attendee_venue';
+  if (item._sourceTimeConstraint?.reason === 'unresolved_meridiem') return 'source_meridiem_unresolved';
+  if ((item as any)._sourceOccurrenceDateHold) return 'performance_run_requires_individual_occurrence_dates';
   const title = String(item.name || '');
+  if (/^(?:we['’]?re|we\s+are)\s+looking\s+forward\b/i.test(title)) return 'activity_identity_not_visible';
   if (/\[[^\]]*\b(?:unclear|unreadable|unknown|illegible)\b[^\]]*\]|\btitle\s+(?:partly\s+)?(?:unclear|unreadable|illegible)\b/i.test(title))
     return 'activity_identity_not_visible';
   if (/\b(?:title\s+(?:not\s+(?:visible|shown)|unknown|unreadable)|(?:unknown|unidentified)\s+event)\b/i.test(title))
@@ -94,9 +105,19 @@ export function needsWholeScheduleIdentityReview(items: ExtractedItem[]): boolea
 export function reconcileSourceItemEvidence(items: ExtractedItem[], caption: string): ExtractedItem[] {
   items = bindSharedAdmissionEntertainment(items, caption);
   const reconciled = items.map(original => {
-    let item = bindDatedTicketLink(original, caption);
+    let item = preserveCalendarClockPresence(bindDatedTicketLink(original, caption));
+    const publicationHold = sourcePublicationHoldReason(item,caption);
+    if(publicationHold)(item as any)._sourcePublicationHold=publicationHold;
     const text = `${item.description || ''} ${item.extractionReason || ''}`;
     const primaryCaption = caption.split(/\n\s*OCR TEXT:/i)[0];
+    const fundraiserHeadings = primaryCaption.split(/\r?\n/).map(line=>line.replace(/^[^\p{L}\d]+/u,'').trim())
+      .filter(line=>line.length<=100 && /\bfundraiser\s*!?$/i.test(line));
+    const normalizedName = String(item.name || '').toLowerCase().replace(/[^a-z0-9]/g,'');
+    const normalizedVenue = String(item.venue || '').toLowerCase().replace(/[^a-z0-9]/g,'');
+    if (normalizedName && normalizedName===normalizedVenue && fundraiserHeadings.length===1 &&
+        /\b(?:dinner|supper|spaghetti|meal)\b/i.test(`${primaryCaption} ${text}`)) {
+      item={...item,name:fundraiserHeadings[0],_sourceTitleResolution:fundraiserHeadings[0]};
+    }
     // "Screening back to back with X" describes an adjacent screening, not the primary title.
     const adjacent = primaryCaption.match(/screening\s+back[ -]to[ -]back\s+with\s+(.+?)\s+on\b/i);
     if (adjacent && /\b(?:film|screening|cinema)\b/i.test(text) &&

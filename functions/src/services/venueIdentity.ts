@@ -86,7 +86,7 @@ export function namedVenueCandidateIsCompatible(input: {
   const geographicOnly = ['route', 'street_address', 'intersection', 'locality', 'postal_code',
     'administrative_area_level_1', 'administrative_area_level_2'].some(type => types.has(type));
   const place = ['park', 'establishment', 'event_venue', 'museum',
-    'stadium', 'library', 'community_center'].some(type => types.has(type));
+    'stadium', 'library', 'community_center', 'school', 'secondary_school', 'primary_school'].some(type => types.has(type));
   const namedPlace = /\b(?:park|centre|center|rink|arena|hall|museum|theatre|theater|library|club|church|school)\b/i
     .test(input.observedName);
   return !(namedPlace && geographicOnly && !place);

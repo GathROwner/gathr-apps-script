@@ -5,6 +5,8 @@ import {
   inferLegacyFamilyFriendlyPrimaryCategory,
   scoreFamilyFriendly,
   withFamilyFriendlyScore,
+  bindFamilyAudienceEvidence,
+  FAMILY_FRIENDLY_SCORING_VERSION,
 } from './familyFriendlyScoring.js';
 
 const isLikely = (event: Parameters<typeof scoreFamilyFriendly>[0]): boolean =>
@@ -54,12 +56,14 @@ test('scores family activity formats in English and French', () => {
   assert.equal(isLikely({ name: 'Tente découverte de l’Acadie' }), true);
 });
 
-test('uses parent source context for split sub-events', () => {
-  const scored = scoreFamilyFriendly({
+test('uses bound programme evidence and ignores unscoped source text', () => {
+  const event = {
     name: 'Community Concert',
     category: 'Live Music',
-    contextText: 'An all-ages afternoon with activities for the whole family.',
-  });
+  };
+  const scored = scoreFamilyFriendly({...event, familyAudienceEvidence:bindFamilyAudienceEvidence(
+    event, 'An all-ages afternoon with activities for the whole family.', 'whole_programme', 'reviewed-programme-source'
+  )});
   assert.equal(scored.familyFriendlyScore >= FAMILY_FRIENDLY_LIKELY_THRESHOLD, true);
   assert.equal(scored.familyFriendlyReasons.includes('explicit_all_ages'), true);
 
@@ -119,22 +123,49 @@ test('late time is a supporting penalty, not an unsupported positive signal', ()
   assert.equal(scored.familyFriendlyReasons.includes('very_late_start'), true);
 });
 
+test('explicit family spooky activity retains its younger-child caution without a blanket horror rejection', () => {
+  const event={name:'Haunted Woodland Walk',description:'Designed for families, teens and Halloween fans. Not recommended for very young children.'};
+  assert(isLikely(event));
+  assert.equal(withFamilyFriendlyScore(event).description,event.description);
+  assert.equal(isLikely({name:'Haunted Woodland Walk',description:'A frightening evening in the woods.'}),false);
+});
+
+test('age roles distinguish accompanying guardians and donation beneficiaries from participant admission', () => {
+  assert(isLikely({name:'Community Craft Workshop',description:'Ages 6–12. A parent or guardian (18+) must accompany each child.'}));
+  assert(isLikely({name:'Community Craft Workshop',description:'Children ages 6–12 must be accompanied by a guardian aged 18 or older.'}));
+  assert.equal(isLikely({name:'Coats for Kids Campaign',description:'Donate coats for children ages 6–12 at the collection depot.'}),false);
+  assert.equal(isLikely({name:'All Ages Concert',ageRestriction:'18'}),false);
+});
+
 test('scores are deterministic and versioned', () => {
   const event = { name: 'Trucks for Kids', description: 'A touch-a-truck event for kids.' };
   assert.deepEqual(scoreFamilyFriendly(event), scoreFamilyFriendly(event));
-  assert.equal(scoreFamilyFriendly(event).familyFriendlyScoringVersion, 'family-friendly-v4');
+  assert.equal(scoreFamilyFriendly(event).familyFriendlyScoringVersion, FAMILY_FRIENDLY_SCORING_VERSION);
 });
 
 test('central write scoring preserves a current contextual score', () => {
-  const contextual = scoreFamilyFriendly({
-    name: 'Main Stage Performance',
-    contextText: 'All ages are welcome.',
-  });
+  const event = {name:'Main Stage Performance'};
+  const familyAudienceEvidence = bindFamilyAudienceEvidence(event, 'All ages are welcome.', 'reviewed_activity', 'reviewed-exact-item');
+  const contextual = scoreFamilyFriendly({...event, familyAudienceEvidence});
   const preserved = withFamilyFriendlyScore({
     name: 'Main Stage Performance',
+    familyAudienceEvidence,
     ...contextual,
   });
-  assert.deepEqual(preserved, { name: 'Main Stage Performance', ...contextual });
+  assert.deepEqual(preserved, { name: 'Main Stage Performance', familyAudienceEvidence, ...contextual });
+});
+
+test('invalidates stale and malformed scores, while binding evidence to activity identity', () => {
+  const original = {name:'Community Concert',startDate:'2026-10-20',venueId:'venue-a'};
+  const proof = bindFamilyAudienceEvidence(original,'Family friendly and all ages.','reviewed_activity','source-a');
+  const scored = withFamilyFriendlyScore({...original,familyAudienceEvidence:proof});
+  assert(scored.familyFriendlyScore >= 60);
+  assert.equal(withFamilyFriendlyScore({...scored,description:'Adults only.'}).familyFriendlyScore,0);
+  assert(withFamilyFriendlyScore({...scored,venueId:'venue-b'}).familyFriendlyScore < 60);
+  assert(withFamilyFriendlyScore({...scored,startDate:'2026-10-21'}).familyFriendlyScore < 60);
+  assert(withFamilyFriendlyScore({...scored,name:'Different activity'}).familyFriendlyScore < 60);
+  assert(withFamilyFriendlyScore({...original,familyFriendlyScore:999,familyFriendlyLevel:'high'}).familyFriendlyScore < 60);
+  assert.notEqual(scored.familyFriendlyContentHash,withFamilyFriendlyScore({...scored,description:'Updated details.'}).familyFriendlyContentHash);
 });
 
 test('legacy family category migration preserves the actual event type', () => {

@@ -6,13 +6,21 @@
 import { google, drive_v3 } from 'googleapis';
 import { Readable } from 'node:stream';
 import * as XLSX from 'xlsx';
+import {createHash, randomUUID} from 'node:crypto';
 import {
   FacebookEventDateTimeSource,
   FacebookEventLocationSource,
   FacebookEventTitleSource,
   RawRowData,
+  CaptionSourceCell,
+  IngestedCaptionProvenance,
+  ParseSnapshot,
+  SnapshotCaptionProvenance,
+  captionTextSHA256,
+  composeCapturedInput,
 } from '../types/index.js';
 import { logger } from '../utils/logger.js';
+import {typedOrganizerPlace} from '../utils/ownedPlaceEvidence.js';
 import {
   fetchApifyDatasetItemsById,
   getApifyDatasetFallbackLimit,
@@ -22,6 +30,30 @@ import {
 } from './apifyService.js';
 
 let driveClient: drive_v3.Drive | null = null;
+// Process-local authority: callers cannot opt local buffers/JSON into ingestion.
+const authenticatedBuffers = new WeakMap<Buffer, {fileId: string; datasetSHA256: string; downloadedAt: string; captureId: string}>();
+const trustedCaptures = new WeakMap<IngestedCaptionProvenance, string>();
+
+function sourceCell(headers: string[], values: unknown[], index: number | undefined): CaptionSourceCell {
+  const absent = index === undefined;
+  const text = absent ? '' : String(values[index] ?? '');
+  return {column: absent ? null : headers[index!], columnIndex: absent ? null : index!, text,
+    sourceLength: text.length, storedLength: text.length, utf8Bytes: Buffer.byteLength(text, 'utf8'),
+    sha256: captionTextSHA256(text), completeness: absent ? 'absent_column' : 'complete_as_read'};
+}
+
+/** Only the row-processor snapshot writer calls this; JSON/caller claims lack the
+ * private ingestion brand. Hashes are consistency checks, never authentication. */
+export function buildSnapshotCaptionProvenance(row: RawRowData, snapshot: ParseSnapshot): SnapshotCaptionProvenance | undefined {
+  const p = row.captionProvenance;
+  if (!p || trustedCaptures.get(p) !== JSON.stringify(p) || snapshot.fileId !== p.origin.fileId ||
+      snapshot.rowIndex !== p.origin.parserRowIndex || snapshot.uniqueId !== p.identity.sourceId ||
+      row.uniqueId !== p.identity.sourceId || row.text !== p.composition.text ||
+      (row.sharedPostText || '') !== p.composition.sharedText || (row.ocrText || '') !== p.composition.mediaText ||
+      snapshot.inputText !== composeCapturedInput(p)) return undefined;
+  return {...p, writer: {kind: 'process_row_snapshot_v1', fileId: snapshot.fileId, rowIndex: snapshot.rowIndex,
+    sourceId: p.identity.sourceId, inputTextSHA256: captionTextSHA256(snapshot.inputText), inputTextLength: snapshot.inputText.length}};
+}
 
 /**
  * Initialize the Drive client with service account credentials
@@ -115,7 +147,10 @@ export async function downloadFile(fileId: string): Promise<Buffer> {
       });
     }
 
-    return Buffer.from(response.data as ArrayBuffer);
+    const buffer = Buffer.from(response.data as ArrayBuffer);
+    authenticatedBuffers.set(buffer, {fileId, datasetSHA256: createHash('sha256').update(buffer).digest('hex'),
+      downloadedAt: new Date().toISOString(), captureId: randomUUID()});
+    return buffer;
   } catch (error) {
     logger.error('Drive downloadFile failed', error, { fileId });
     throw error;
@@ -844,6 +879,11 @@ function collectMediaUrls(row: unknown[], headerMap: HeaderIndexMap): string[] {
     add(getColumnValue(row, headerMap, [`sharedPost/media/${i}/preferred_thumbnail/image/uri`]));
     add(getColumnValue(row, headerMap, [`sharedPost/media/${i}/thumbnailImage/uri`]));
     add(getColumnValue(row, headerMap, [`sharedpost/media/${i}/thumbnail`]));
+    // Some shares expose their ordered gallery as attachments, not media.
+    // Never use attachment/url here: it may be an album/permalink, not pixels.
+    add(getColumnValue(row, headerMap, [`sharedPost/attachments/${i}/image/uri`]));
+    add(getColumnValue(row, headerMap, [`sharedPost/attachments/${i}/photo_image/uri`]));
+    add(getColumnValue(row, headerMap, [`sharedPost/attachments/${i}/thumbnail`]));
   }
 
   return Array.from(new Set(urls));
@@ -1005,7 +1045,10 @@ function extractRowData(
     getFirstNonEmptyColumnValue(row, headerMap, ['organizators/0/name', 'organizedBy']) || ''
   );
   const fallbackUserName = String(getFirstNonEmptyColumnValue(row, headerMap, ['User Name', 'user/name']) || '');
-  const locationNameIsCityLevel = isLikelyCityLevelLocation(locationName);
+  const ownedPlace = isFacebookEvent ? typedOrganizerPlace({name:locationName,organizer:organizerName,
+    type:String(getFirstNonEmptyColumnValue(row,headerMap,['location/placeType'])||''),
+    url:String(getFirstNonEmptyColumnValue(row,headerMap,['location/url'])||''),description}) : undefined;
+  const locationNameIsCityLevel = !ownedPlace && isLikelyCityLevelLocation(locationName);
   const contextualLocationNameIsCityLevel = isLikelyCityLevelLocation(contextualLocationName);
   const locationNameIsAreaLevel = isLikelyAreaLevelLocation(locationName);
   const contextualLocationNameIsAreaLevel = isLikelyAreaLevelLocation(contextualLocationName);
@@ -1121,7 +1164,7 @@ function extractRowData(
       'address',
       'location/streetAddress',
       'location/city',
-    ]) || locationAddress || ''
+    ]) || ownedPlace?.address || locationAddress || ''
   );
 
   const likes = parseMetricNumber(
@@ -1244,10 +1287,12 @@ export async function parseXlsxFile(
 
   // Process data rows (skip header)
   const rows: RawRowData[] = [];
+  const originalRows = new WeakMap<RawRowData, {values: unknown[]; sourceRowIndex: number}>();
   const isFacebookEvents = isFacebookEventsDataset(headerMap);
   for (let i = 1; i < data.length; i++) {
     const rowData = extractRowData(data[i] as unknown[], columnMap, headerMap, i);
     if (rowData) {
+      originalRows.set(rowData, {values: data[i] as unknown[], sourceRowIndex: i - 1});
       rows.push(rowData);
     }
   }
@@ -1269,6 +1314,36 @@ export async function parseXlsxFile(
     }
   }
 
+  const authority = authenticatedBuffers.get(buffer);
+  if (authority && createHash('sha256').update(buffer).digest('hex') === authority.datasetSHA256) effectiveRows.forEach((row, parserRowIndex) => {
+    const original = originalRows.get(row)!;
+    const cell = (aliases: string[]) => {
+      const selected = getFirstNonEmptyColumnValueWithHeader(original.values, headerMap, aliases);
+      const index = selected ? headerMap[normalizeHeader(selected.header)] :
+        aliases.map(alias => headerMap[normalizeHeader(alias)]).find(index => index !== undefined);
+      return sourceCell(headers, original.values, index);
+    };
+    const sourceId = cell(['id','ID','postId','post_id','eventId','childEvents/0/id']);
+    if (!sourceId.text || sourceId.text !== row.uniqueId || !sourceId.column || sourceId.columnIndex === null) return;
+    const sharedId = cell(['sharedPost/id']);
+    const p: IngestedCaptionProvenance = {version: 'caption_channels_v1',
+      origin: {kind: 'google_auth_drive_download_v1', ...authority, sheetName,
+        sheetRow: original.sourceRowIndex + 2, sourceRowIndex: original.sourceRowIndex, parserRowIndex},
+      sourceKind: row.sourceScraperType === 'events' ? 'structured_event' : 'ordinary_post',
+      identity: {sourceId: sourceId.text, sourceIdColumn: sourceId.column, sourceIdColumnIndex: sourceId.columnIndex,
+        ...(sharedId.text ? {sharedSourceId: sharedId.text, sharedSourceIdColumn: sharedId.column!} : {})},
+      outerCaption: cell(['Text','text','description']), sharedCaption: cell(['Sharedpost Text','sharedPost/text','name']),
+      mediaText: headers.flatMap((header,index) => /^(?:sharedpost\/)?media\/\d+\/ocrtext$/i.test(header) &&
+        original.values[index] !== null && original.values[index] !== undefined
+        ? [sourceCell(headers, original.values, index)] : []),
+      composition: {text: row.text, sharedText: row.sharedPostText || '', mediaText: row.ocrText || ''},
+      completeness: 'complete_as_read'};
+    // Never truncate a verbatim channel to obtain a passing capture.
+    const serialized = JSON.stringify(p);
+    if (Buffer.byteLength(serialized, 'utf8') > 128000) return;
+    trustedCaptures.set(p, serialized);
+    row.captionProvenance = p;
+  });
   return {
     rows: effectiveRows,
     totalRows: effectiveRows.length,

@@ -1,0 +1,3320 @@
+{
+  "dataset": "12JeGpiiUUUPe-fLKJdqOax9-hpfKFuw2",
+  "rows": [
+    {
+      "row": 12,
+      "source": "1144353818121650",
+      "caption": "Tuesday\nOpen till 8pm\n\nGrab ‘n Go Fresh Fridge;\n• Mac ‘n Cheeses\n• Chicken Bacon Alfredo\n• Seafood Chowder\n• BBQ Chicken Dip (small and large)\n• Lasagna Slices\n• Mini Chicken Parms + Spaghetti\n• Beef + Vegetable Soup\n• Fresh Baked Pizzas\n• Full Stock of Ice Creams + Sorbets\n\nSoup of the Day\nBeef Chilli - Served w Garlic Bread\n\nAll Day Special\nBeef Dip + Fries $20\nShaved Island Beef, Candy Onions, Sharp Cheddar + Herb Jus\n\nPizza Night\nStarts at 4pm\n\n• Classic Pepperoni $18 (picture 1)\n• Mediterranean Pesto Chicken - artichoke, red peppers, pickled red onions, olives, feta, mozza, pesto, chicken and such $24\n• Pork & Pickle - BBQ pulled pork, dill pickle, pickled red onion, nacho cheese $20\n• Italian Stallion - Assorted Cured Meats + Mozza (picture 2)\n\nDeals\n\n• Any Pizza + Not Your Mama’s Garlic Fingers + 2 Pop $35 add a pizza + $15\n\n• Any Pizza + Not Your Mama’s Garlic Fingers + 1lb Wings + 2 Pop $45 add a pizza + $15\n\n*****\n\n120 Main Street, Souris\n902.743.2003",
+      "stage3": [
+        {
+          "name": "Soup of the Day – Beef Chilli",
+          "description": "Soup of the Day: Beef Chilli, served with garlic bread.",
+          "date": "2026-10-20",
+          "startTime": "",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "none",
+              "evidence": ""
+            },
+            "end": {
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "recurringPattern": "none",
+          "_sourceType": "special",
+          "venue": "Tipsy Farmers",
+          "price": "",
+          "pricing": "",
+          "relevantImageIndex": 0,
+          "_sourceOccurrenceCount": 1
+        },
+        {
+          "name": "Beef Dip + Fries",
+          "description": "All Day Special: Beef Dip + Fries, with shaved Island Beef, candy onions, sharp cheddar, and herb jus.",
+          "date": "2026-10-20",
+          "startTime": "",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "semantic",
+              "evidence": "All Day"
+            },
+            "end": {
+              "toClose": true,
+              "evidence": "All Day"
+            }
+          },
+          "recurringPattern": "none",
+          "_sourceType": "special",
+          "venue": "Tipsy Farmers",
+          "price": "$20",
+          "pricing": "$20",
+          "relevantImageIndex": 0,
+          "_sourceOccurrenceCount": 1
+        },
+        {
+          "name": "Classic Pepperoni",
+          "description": "Pizza Night special: Classic Pepperoni, $18.",
+          "date": "2026-10-20",
+          "startTime": "16:00",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Starts at 4pm"
+            },
+            "end": {
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "recurringPattern": "none",
+          "_sourceType": "special",
+          "venue": "Tipsy Farmers",
+          "price": "$18",
+          "pricing": "$18",
+          "relevantImageIndex": 0,
+          "_sourceOccurrenceCount": 1
+        },
+        {
+          "name": "Mediterranean Pesto Chicken",
+          "description": "Pizza Night special: Mediterranean Pesto Chicken with artichoke, red peppers, pickled red onions, olives, feta, mozzarella, pesto, and chicken; $24.",
+          "date": "2026-10-20",
+          "startTime": "16:00",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Starts at 4pm"
+            },
+            "end": {
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "recurringPattern": "none",
+          "_sourceType": "special",
+          "venue": "Tipsy Farmers",
+          "price": "$24",
+          "pricing": "$24",
+          "relevantImageIndex": 0,
+          "_sourceOccurrenceCount": 1
+        },
+        {
+          "name": "Pork & Pickle",
+          "description": "Pizza Night special: Pork & Pickle with BBQ pulled pork, dill pickle, pickled red onion, and nacho cheese; $20.",
+          "date": "2026-10-20",
+          "startTime": "16:00",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Starts at 4pm"
+            },
+            "end": {
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "recurringPattern": "none",
+          "_sourceType": "special",
+          "venue": "Tipsy Farmers",
+          "price": "$20",
+          "pricing": "$20",
+          "relevantImageIndex": 0,
+          "_sourceOccurrenceCount": 1
+        },
+        {
+          "name": "Italian Stallion",
+          "description": "Pizza Night special: Italian Stallion with assorted cured meats and mozzarella.",
+          "date": "2026-10-20",
+          "startTime": "16:00",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Starts at 4pm"
+            },
+            "end": {
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "recurringPattern": "none",
+          "_sourceType": "special",
+          "venue": "Tipsy Farmers",
+          "price": "",
+          "pricing": "",
+          "relevantImageIndex": 0,
+          "_sourceOccurrenceCount": 1
+        },
+        {
+          "name": "Any Pizza + Not Your Mama’s Garlic Fingers + 2 Pop",
+          "description": "Deal: Any pizza plus Not Your Mama’s Garlic Fingers and 2 pop for $35; add a pizza for $15.",
+          "date": "2026-10-20",
+          "startTime": "",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "none",
+              "evidence": ""
+            },
+            "end": {
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "recurringPattern": "none",
+          "_sourceType": "special",
+          "venue": "Tipsy Farmers",
+          "price": "$35",
+          "pricing": "$35; add a pizza +$15",
+          "relevantImageIndex": 0,
+          "_sourceOccurrenceCount": 1
+        },
+        {
+          "name": "Any Pizza + Not Your Mama’s Garlic Fingers + 1lb Wings + 2 Pop",
+          "description": "Deal: Any pizza plus Not Your Mama’s Garlic Fingers, 1 lb wings, and 2 pop for $45; add a pizza for $15.",
+          "date": "2026-10-20",
+          "startTime": "",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "none",
+              "evidence": ""
+            },
+            "end": {
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "recurringPattern": "none",
+          "_sourceType": "special",
+          "venue": "Tipsy Farmers",
+          "price": "$45",
+          "pricing": "$45; add a pizza +$15",
+          "relevantImageIndex": 0,
+          "_sourceOccurrenceCount": 1
+        }
+      ],
+      "stage4": [
+        {
+          "name": "Soup of the Day – Beef Chilli",
+          "description": "Soup of the Day: Beef Chilli, served with garlic bread.",
+          "date": "2026-10-20",
+          "startTime": "",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "none",
+              "evidence": ""
+            },
+            "end": {
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "recurringPattern": "none",
+          "_sourceType": "special",
+          "venue": "Tipsy Farmers",
+          "price": "",
+          "pricing": "",
+          "relevantImageIndex": 0,
+          "_sourceOccurrenceCount": 1
+        },
+        {
+          "name": "Beef Dip + Fries",
+          "description": "All Day Special: Beef Dip + Fries, with shaved Island Beef, candy onions, sharp cheddar, and herb jus.",
+          "date": "2026-10-20",
+          "startTime": "",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "semantic",
+              "evidence": "All Day"
+            },
+            "end": {
+              "toClose": true,
+              "evidence": "All Day"
+            }
+          },
+          "recurringPattern": "none",
+          "_sourceType": "special",
+          "venue": "Tipsy Farmers",
+          "price": "$20",
+          "pricing": "$20",
+          "relevantImageIndex": 0,
+          "_sourceOccurrenceCount": 1
+        },
+        {
+          "name": "Classic Pepperoni",
+          "description": "Pizza Night special: Classic Pepperoni, $18.",
+          "date": "2026-10-20",
+          "startTime": "16:00",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Starts at 4pm"
+            },
+            "end": {
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "recurringPattern": "none",
+          "_sourceType": "special",
+          "venue": "Tipsy Farmers",
+          "price": "$18",
+          "pricing": "$18",
+          "relevantImageIndex": 0,
+          "_sourceOccurrenceCount": 1
+        },
+        {
+          "name": "Mediterranean Pesto Chicken",
+          "description": "Pizza Night special: Mediterranean Pesto Chicken with artichoke, red peppers, pickled red onions, olives, feta, mozzarella, pesto, and chicken; $24.",
+          "date": "2026-10-20",
+          "startTime": "16:00",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Starts at 4pm"
+            },
+            "end": {
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "recurringPattern": "none",
+          "_sourceType": "special",
+          "venue": "Tipsy Farmers",
+          "price": "$24",
+          "pricing": "$24",
+          "relevantImageIndex": 0,
+          "_sourceOccurrenceCount": 1
+        },
+        {
+          "name": "Pork & Pickle",
+          "description": "Pizza Night special: Pork & Pickle with BBQ pulled pork, dill pickle, pickled red onion, and nacho cheese; $20.",
+          "date": "2026-10-20",
+          "startTime": "16:00",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Starts at 4pm"
+            },
+            "end": {
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "recurringPattern": "none",
+          "_sourceType": "special",
+          "venue": "Tipsy Farmers",
+          "price": "$20",
+          "pricing": "$20",
+          "relevantImageIndex": 0,
+          "_sourceOccurrenceCount": 1
+        },
+        {
+          "name": "Italian Stallion",
+          "description": "Pizza Night special: Italian Stallion with assorted cured meats and mozzarella.",
+          "date": "2026-10-20",
+          "startTime": "16:00",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Starts at 4pm"
+            },
+            "end": {
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "recurringPattern": "none",
+          "_sourceType": "special",
+          "venue": "Tipsy Farmers",
+          "price": "",
+          "pricing": "",
+          "relevantImageIndex": 0,
+          "_sourceOccurrenceCount": 1
+        },
+        {
+          "name": "Any Pizza + Not Your Mama’s Garlic Fingers + 2 Pop",
+          "description": "Deal: Any pizza plus Not Your Mama’s Garlic Fingers and 2 pop for $35; add a pizza for $15.",
+          "date": "2026-10-20",
+          "startTime": "",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "none",
+              "evidence": ""
+            },
+            "end": {
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "recurringPattern": "none",
+          "_sourceType": "special",
+          "venue": "Tipsy Farmers",
+          "price": "$35",
+          "pricing": "$35; add a pizza +$15",
+          "relevantImageIndex": 0,
+          "_sourceOccurrenceCount": 1
+        },
+        {
+          "name": "Any Pizza + Not Your Mama’s Garlic Fingers + 1lb Wings + 2 Pop",
+          "description": "Deal: Any pizza plus Not Your Mama’s Garlic Fingers, 1 lb wings, and 2 pop for $45; add a pizza for $15.",
+          "date": "2026-10-20",
+          "startTime": "",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "none",
+              "evidence": ""
+            },
+            "end": {
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "recurringPattern": "none",
+          "_sourceType": "special",
+          "venue": "Tipsy Farmers",
+          "price": "$45",
+          "pricing": "$45; add a pizza +$15",
+          "relevantImageIndex": 0,
+          "_sourceOccurrenceCount": 1
+        }
+      ],
+      "formatted": [
+        {
+          "name": "Soup of the Day – Beef Chilli",
+          "description": "Soup of the Day: Beef Chilli, served with garlic bread.",
+          "startDate": "2026-10-20",
+          "endDate": "2026-10-20",
+          "startTime": "10:00",
+          "endTime": "20:00",
+          "timeFlags": {
+            "start": {
+              "source": "semantic",
+              "evidence": "Start from venue hours (opens 10:00)"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "timeResolution": {
+            "hoursUsed": true,
+            "startFromHours": true,
+            "endFromHours": "category_default",
+            "reason": "category_default_bounded_by_venue_close"
+          },
+          "category": "Food Special",
+          "isEvent": "No",
+          "isFoodSpecial": "Yes",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "_sourceType": "special",
+          "establishment": "Tipsy Farmers",
+          "ticketLink": "",
+          "additionalLocation": "Tipsy Farmers"
+        },
+        {
+          "name": "Beef Dip + Fries",
+          "description": "All Day Special: Beef Dip + Fries, with shaved Island Beef, candy onions, sharp cheddar, and herb jus.",
+          "startDate": "2026-10-20",
+          "endDate": "2026-10-20",
+          "startTime": "10:00",
+          "endTime": "20:00",
+          "timeFlags": {
+            "start": {
+              "source": "semantic",
+              "evidence": "Start from venue hours (opens 10:00)"
+            },
+            "end": {
+              "source": "none",
+              "toClose": true,
+              "evidence": "All Day"
+            }
+          },
+          "timeResolution": {
+            "hoursUsed": true,
+            "startFromHours": true,
+            "endFromHours": "to_close"
+          },
+          "category": "Food Special",
+          "isEvent": "No",
+          "isFoodSpecial": "Yes",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "_sourceType": "special",
+          "establishment": "Tipsy Farmers",
+          "ticketLink": "",
+          "additionalLocation": "Tipsy Farmers"
+        },
+        {
+          "name": "Classic Pepperoni",
+          "description": "Pizza Night special: Classic Pepperoni, $18.",
+          "startDate": "2026-10-20",
+          "endDate": "2026-10-20",
+          "startTime": "16:00",
+          "endTime": "20:00",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Starts at 4pm"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "timeResolution": {
+            "hoursUsed": true,
+            "endFromHours": "category_default",
+            "reason": "category_default_bounded_by_venue_close"
+          },
+          "category": "Food Special",
+          "isEvent": "No",
+          "isFoodSpecial": "Yes",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "_sourceType": "special",
+          "establishment": "Tipsy Farmers",
+          "ticketLink": "",
+          "additionalLocation": "Tipsy Farmers"
+        },
+        {
+          "name": "Mediterranean Pesto Chicken",
+          "description": "Pizza Night special: Mediterranean Pesto Chicken with artichoke, red peppers, pickled red onions, olives, feta, mozzarella, pesto, and chicken; $24.",
+          "startDate": "2026-10-20",
+          "endDate": "2026-10-20",
+          "startTime": "16:00",
+          "endTime": "20:00",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Starts at 4pm"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "timeResolution": {
+            "hoursUsed": true,
+            "endFromHours": "category_default",
+            "reason": "category_default_bounded_by_venue_close"
+          },
+          "category": "Food Special",
+          "isEvent": "No",
+          "isFoodSpecial": "Yes",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "_sourceType": "special",
+          "establishment": "Tipsy Farmers",
+          "ticketLink": "",
+          "additionalLocation": "Tipsy Farmers"
+        },
+        {
+          "name": "Pork & Pickle",
+          "description": "Pizza Night special: Pork & Pickle with BBQ pulled pork, dill pickle, pickled red onion, and nacho cheese; $20.",
+          "startDate": "2026-10-20",
+          "endDate": "2026-10-20",
+          "startTime": "16:00",
+          "endTime": "20:00",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Starts at 4pm"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "timeResolution": {
+            "hoursUsed": true,
+            "endFromHours": "category_default",
+            "reason": "category_default_bounded_by_venue_close"
+          },
+          "category": "Food Special",
+          "isEvent": "No",
+          "isFoodSpecial": "Yes",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "_sourceType": "special",
+          "establishment": "Tipsy Farmers",
+          "ticketLink": "",
+          "additionalLocation": "Tipsy Farmers"
+        },
+        {
+          "name": "Italian Stallion",
+          "description": "Pizza Night special: Italian Stallion with assorted cured meats and mozzarella.",
+          "startDate": "2026-10-20",
+          "endDate": "2026-10-20",
+          "startTime": "16:00",
+          "endTime": "20:00",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Starts at 4pm"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "timeResolution": {
+            "hoursUsed": true,
+            "endFromHours": "category_default",
+            "reason": "category_default_bounded_by_venue_close"
+          },
+          "category": "Food Special",
+          "isEvent": "No",
+          "isFoodSpecial": "Yes",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "_sourceType": "special",
+          "establishment": "Tipsy Farmers",
+          "ticketLink": "",
+          "additionalLocation": "Tipsy Farmers"
+        },
+        {
+          "name": "Any Pizza + Not Your Mama’s Garlic Fingers + 2 Pop",
+          "description": "Deal: Any pizza plus Not Your Mama’s Garlic Fingers and 2 pop for $35; add a pizza for $15.",
+          "startDate": "2026-10-20",
+          "endDate": "2026-10-20",
+          "startTime": "10:00",
+          "endTime": "20:00",
+          "timeFlags": {
+            "start": {
+              "source": "semantic",
+              "evidence": "Start from venue hours (opens 10:00)"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "timeResolution": {
+            "hoursUsed": true,
+            "startFromHours": true,
+            "endFromHours": "category_default",
+            "reason": "category_default_bounded_by_venue_close"
+          },
+          "category": "Food Special",
+          "isEvent": "No",
+          "isFoodSpecial": "Yes",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "_sourceType": "special",
+          "establishment": "Tipsy Farmers",
+          "ticketLink": "",
+          "additionalLocation": "Tipsy Farmers"
+        },
+        {
+          "name": "Any Pizza + Not Your Mama’s Garlic Fingers + 1lb Wings + 2 Pop",
+          "description": "Deal: Any pizza plus Not Your Mama’s Garlic Fingers, 1 lb wings, and 2 pop for $45; add a pizza for $15.",
+          "startDate": "2026-10-20",
+          "endDate": "2026-10-20",
+          "startTime": "10:00",
+          "endTime": "20:00",
+          "timeFlags": {
+            "start": {
+              "source": "semantic",
+              "evidence": "Start from venue hours (opens 10:00)"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "timeResolution": {
+            "hoursUsed": true,
+            "startFromHours": true,
+            "endFromHours": "category_default",
+            "reason": "category_default_bounded_by_venue_close"
+          },
+          "category": "Food Special",
+          "isEvent": "No",
+          "isFoodSpecial": "Yes",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "_sourceType": "special",
+          "establishment": "Tipsy Farmers",
+          "ticketLink": "",
+          "additionalLocation": "Tipsy Farmers"
+        }
+      ]
+    },
+    {
+      "row": 66,
+      "source": "1539750088172909",
+      "caption": "Thursday October 22nd at the BAC!\nPublic Skate on MacLauchlan Arena B - 11:15 am - 1:00 pm *Helmets MANDATORY for all skaters* \nAll pools CLOSED for Swimming Lessons - 4:00 pm - 8:00 pm\nLane Swim open - 5:30 am - 7:15 am*1 lane only*, 7:15 am - 4:00 pm, 8:00 pm - 9:00 pm\nLeisure and Toddler pools open - 5:30 am - 4:00 pm, 8:00 pm - 9:00 pm\nAll pools open - 10:00 am - 4:00 pm, 8:00 pm - 9:00 pm\nAquafit\nAqua Arthritis - 8:45 am",
+      "stage3": [
+        {
+          "name": "Public Skate",
+          "description": "Helmets mandatory for all skaters.",
+          "date": "2026-10-22",
+          "startTime": "11:15",
+          "endTime": "13:00",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "11:15 am - 1:00 pm"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "11:15 am - 1:00 pm"
+            }
+          },
+          "recurringPattern": "none",
+          "_sourceType": "schedule",
+          "venue": "MacLauchlan Arena B",
+          "price": "",
+          "relevantImageIndex": 0,
+          "_sourceOccurrenceCount": 1
+        },
+        {
+          "name": "Swimming Lessons (all pools closed)",
+          "description": "All pools are closed during this period for swimming lessons.",
+          "date": "2026-10-22",
+          "startTime": "16:00",
+          "endTime": "20:00",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "4:00 pm - 8:00 pm"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "4:00 pm - 8:00 pm"
+            }
+          },
+          "recurringPattern": "none",
+          "_sourceType": "schedule",
+          "venue": "",
+          "price": "",
+          "relevantImageIndex": 0,
+          "_sourceOccurrenceCount": 1
+        },
+        {
+          "name": "Leisure and Toddler Pools Open",
+          "description": "",
+          "date": "2026-10-22",
+          "startTime": "05:30",
+          "endTime": "16:00",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "5:30 am - 4:00 pm"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "5:30 am - 4:00 pm"
+            }
+          },
+          "recurringPattern": "none",
+          "_sourceType": "schedule",
+          "venue": "",
+          "price": "",
+          "relevantImageIndex": 0,
+          "_sourceOccurrenceCount": 2
+        },
+        {
+          "name": "Leisure and Toddler Pools Open",
+          "description": "",
+          "date": "2026-10-22",
+          "startTime": "20:00",
+          "endTime": "21:00",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "8:00 pm - 9:00 pm"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "8:00 pm - 9:00 pm"
+            }
+          },
+          "recurringPattern": "none",
+          "_sourceType": "schedule",
+          "venue": "",
+          "price": "",
+          "relevantImageIndex": 0,
+          "_sourceOccurrenceCount": 2
+        },
+        {
+          "name": "Aqua Arthritis",
+          "description": "Listed under Aquafit.",
+          "date": "2026-10-22",
+          "startTime": "08:45",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "8:45 am"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "recurringPattern": "none",
+          "_sourceType": "schedule",
+          "venue": "",
+          "price": "",
+          "relevantImageIndex": 0,
+          "_sourceOccurrenceCount": 1
+        },
+        {
+          "name": "Lane Swim",
+          "description": "Lane Swim open - 5:30 am - 7:15 am*1 lane only*, 7:15 am - 4:00 pm, 8:00 pm - 9:00 pm",
+          "date": "2026-10-22",
+          "startTime": "05:30",
+          "endTime": "07:15",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "5:30 am - 7:15 am"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "5:30 am - 7:15 am"
+            }
+          },
+          "recurringPattern": "none",
+          "_sourceType": "schedule",
+          "venue": "Bell Aliant Centre",
+          "price": "",
+          "relevantImageIndex": -1,
+          "_sourceOccurrenceCount": 3
+        },
+        {
+          "name": "Lane Swim",
+          "description": "Lane Swim open - 5:30 am - 7:15 am*1 lane only*, 7:15 am - 4:00 pm, 8:00 pm - 9:00 pm",
+          "date": "2026-10-22",
+          "startTime": "07:15",
+          "endTime": "16:00",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "7:15 am - 4:00 pm"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "7:15 am - 4:00 pm"
+            }
+          },
+          "recurringPattern": "none",
+          "_sourceType": "schedule",
+          "venue": "Bell Aliant Centre",
+          "price": "",
+          "relevantImageIndex": -1,
+          "_sourceOccurrenceCount": 3
+        },
+        {
+          "name": "Lane Swim",
+          "description": "Lane Swim open - 5:30 am - 7:15 am*1 lane only*, 7:15 am - 4:00 pm, 8:00 pm - 9:00 pm",
+          "date": "2026-10-22",
+          "startTime": "20:00",
+          "endTime": "21:00",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "8:00 pm - 9:00 pm"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "8:00 pm - 9:00 pm"
+            }
+          },
+          "recurringPattern": "none",
+          "_sourceType": "schedule",
+          "venue": "Bell Aliant Centre",
+          "price": "",
+          "relevantImageIndex": -1,
+          "_sourceOccurrenceCount": 3
+        },
+        {
+          "name": "All pools open",
+          "description": "All pools open - 10:00 am - 4:00 pm, 8:00 pm - 9:00 pm",
+          "date": "2026-10-22",
+          "startTime": "10:00",
+          "endTime": "16:00",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "10:00 am - 4:00 pm"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "10:00 am - 4:00 pm"
+            }
+          },
+          "recurringPattern": "none",
+          "_sourceType": "schedule",
+          "venue": "Bell Aliant Centre",
+          "price": "",
+          "relevantImageIndex": -1,
+          "_sourceOccurrenceCount": 2
+        },
+        {
+          "name": "All pools open",
+          "description": "All pools open - 10:00 am - 4:00 pm, 8:00 pm - 9:00 pm",
+          "date": "2026-10-22",
+          "startTime": "20:00",
+          "endTime": "21:00",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "8:00 pm - 9:00 pm"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "8:00 pm - 9:00 pm"
+            }
+          },
+          "recurringPattern": "none",
+          "_sourceType": "schedule",
+          "venue": "Bell Aliant Centre",
+          "price": "",
+          "relevantImageIndex": -1,
+          "_sourceOccurrenceCount": 2
+        }
+      ],
+      "stage4": [
+        {
+          "name": "Public Skate",
+          "description": "Helmets mandatory for all skaters.",
+          "date": "2026-10-22",
+          "startTime": "11:15",
+          "endTime": "13:00",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "11:15 am - 1:00 pm"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "11:15 am - 1:00 pm"
+            }
+          },
+          "recurringPattern": "none",
+          "_sourceType": "schedule",
+          "venue": "MacLauchlan Arena B",
+          "price": "",
+          "relevantImageIndex": 0,
+          "_sourceOccurrenceCount": 1
+        },
+        {
+          "name": "Leisure and Toddler Pools Open",
+          "description": "",
+          "date": "2026-10-22",
+          "startTime": "05:30",
+          "endTime": "16:00",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "5:30 am - 4:00 pm"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "5:30 am - 4:00 pm"
+            }
+          },
+          "recurringPattern": "none",
+          "_sourceType": "schedule",
+          "venue": "",
+          "price": "",
+          "relevantImageIndex": 0,
+          "_sourceOccurrenceCount": 2
+        },
+        {
+          "name": "Leisure and Toddler Pools Open",
+          "description": "",
+          "date": "2026-10-22",
+          "startTime": "20:00",
+          "endTime": "21:00",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "8:00 pm - 9:00 pm"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "8:00 pm - 9:00 pm"
+            }
+          },
+          "recurringPattern": "none",
+          "_sourceType": "schedule",
+          "venue": "",
+          "price": "",
+          "relevantImageIndex": 0,
+          "_sourceOccurrenceCount": 2
+        },
+        {
+          "name": "Aqua Arthritis",
+          "description": "Listed under Aquafit.",
+          "date": "2026-10-22",
+          "startTime": "08:45",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "8:45 am"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "recurringPattern": "none",
+          "_sourceType": "schedule",
+          "venue": "",
+          "price": "",
+          "relevantImageIndex": 0,
+          "_sourceOccurrenceCount": 1
+        },
+        {
+          "name": "Lane Swim",
+          "description": "Lane Swim open - 5:30 am - 7:15 am*1 lane only*, 7:15 am - 4:00 pm, 8:00 pm - 9:00 pm",
+          "date": "2026-10-22",
+          "startTime": "05:30",
+          "endTime": "07:15",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "5:30 am - 7:15 am"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "5:30 am - 7:15 am"
+            }
+          },
+          "recurringPattern": "none",
+          "_sourceType": "schedule",
+          "venue": "Bell Aliant Centre",
+          "price": "",
+          "relevantImageIndex": -1,
+          "_sourceOccurrenceCount": 3
+        },
+        {
+          "name": "Lane Swim",
+          "description": "Lane Swim open - 5:30 am - 7:15 am*1 lane only*, 7:15 am - 4:00 pm, 8:00 pm - 9:00 pm",
+          "date": "2026-10-22",
+          "startTime": "07:15",
+          "endTime": "16:00",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "7:15 am - 4:00 pm"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "7:15 am - 4:00 pm"
+            }
+          },
+          "recurringPattern": "none",
+          "_sourceType": "schedule",
+          "venue": "Bell Aliant Centre",
+          "price": "",
+          "relevantImageIndex": -1,
+          "_sourceOccurrenceCount": 3
+        },
+        {
+          "name": "Lane Swim",
+          "description": "Lane Swim open - 5:30 am - 7:15 am*1 lane only*, 7:15 am - 4:00 pm, 8:00 pm - 9:00 pm",
+          "date": "2026-10-22",
+          "startTime": "20:00",
+          "endTime": "21:00",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "8:00 pm - 9:00 pm"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "8:00 pm - 9:00 pm"
+            }
+          },
+          "recurringPattern": "none",
+          "_sourceType": "schedule",
+          "venue": "Bell Aliant Centre",
+          "price": "",
+          "relevantImageIndex": -1,
+          "_sourceOccurrenceCount": 3
+        },
+        {
+          "name": "All pools open",
+          "description": "All pools open - 10:00 am - 4:00 pm, 8:00 pm - 9:00 pm",
+          "date": "2026-10-22",
+          "startTime": "10:00",
+          "endTime": "16:00",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "10:00 am - 4:00 pm"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "10:00 am - 4:00 pm"
+            }
+          },
+          "recurringPattern": "none",
+          "_sourceType": "schedule",
+          "venue": "Bell Aliant Centre",
+          "price": "",
+          "relevantImageIndex": -1,
+          "_sourceOccurrenceCount": 2
+        },
+        {
+          "name": "All pools open",
+          "description": "All pools open - 10:00 am - 4:00 pm, 8:00 pm - 9:00 pm",
+          "date": "2026-10-22",
+          "startTime": "20:00",
+          "endTime": "21:00",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "8:00 pm - 9:00 pm"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "8:00 pm - 9:00 pm"
+            }
+          },
+          "recurringPattern": "none",
+          "_sourceType": "schedule",
+          "venue": "Bell Aliant Centre",
+          "price": "",
+          "relevantImageIndex": -1,
+          "_sourceOccurrenceCount": 2
+        }
+      ],
+      "formatted": [
+        {
+          "name": "Public Skate",
+          "description": "Helmets mandatory for all skaters.",
+          "startDate": "2026-10-22",
+          "endDate": "2026-10-22",
+          "startTime": "11:15",
+          "endTime": "13:00",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "11:15 am - 1:00 pm"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "11:15 am - 1:00 pm"
+            }
+          },
+          "timeResolution": {
+            "hoursUsed": false
+          },
+          "category": "Sports",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "_sourceType": "schedule",
+          "establishment": "MacLauchlan Arena B",
+          "ticketLink": "",
+          "additionalLocation": "MacLauchlan Arena B"
+        },
+        {
+          "name": "Leisure and Toddler Pools Open",
+          "description": "",
+          "startDate": "2026-10-22",
+          "endDate": "2026-10-22",
+          "startTime": "05:30",
+          "endTime": "16:00",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "5:30 am - 4:00 pm"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "5:30 am - 4:00 pm"
+            }
+          },
+          "timeResolution": {
+            "hoursUsed": false
+          },
+          "category": "Sports",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "_sourceType": "schedule",
+          "establishment": "Bell Aliant Centre",
+          "ticketLink": "",
+          "additionalLocation": ""
+        },
+        {
+          "name": "Leisure and Toddler Pools Open",
+          "description": "",
+          "startDate": "2026-10-22",
+          "endDate": "2026-10-22",
+          "startTime": "20:00",
+          "endTime": "21:00",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "8:00 pm - 9:00 pm"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "8:00 pm - 9:00 pm"
+            }
+          },
+          "timeResolution": {
+            "hoursUsed": false
+          },
+          "category": "Sports",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "_sourceType": "schedule",
+          "establishment": "Bell Aliant Centre",
+          "ticketLink": "",
+          "additionalLocation": ""
+        },
+        {
+          "name": "Aqua Arthritis",
+          "description": "Listed under Aquafit.",
+          "startDate": "2026-10-22",
+          "endDate": "2026-10-22",
+          "startTime": "08:45",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "8:45 am"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "timeResolution": {
+            "hoursUsed": false
+          },
+          "category": "Sports",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "_sourceType": "schedule",
+          "establishment": "Bell Aliant Centre",
+          "ticketLink": "",
+          "additionalLocation": ""
+        },
+        {
+          "name": "Lane Swim",
+          "description": "Lane Swim open - 5:30 am - 7:15 am*1 lane only*, 7:15 am - 4:00 pm, 8:00 pm - 9:00 pm",
+          "startDate": "2026-10-22",
+          "endDate": "2026-10-22",
+          "startTime": "05:30",
+          "endTime": "07:15",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "5:30 am - 7:15 am"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "5:30 am - 7:15 am"
+            }
+          },
+          "timeResolution": {
+            "hoursUsed": false
+          },
+          "category": "Sports",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "_sourceType": "schedule",
+          "establishment": "Bell Aliant Centre",
+          "ticketLink": "",
+          "additionalLocation": "Bell Aliant Centre"
+        },
+        {
+          "name": "Lane Swim",
+          "description": "Lane Swim open - 5:30 am - 7:15 am*1 lane only*, 7:15 am - 4:00 pm, 8:00 pm - 9:00 pm",
+          "startDate": "2026-10-22",
+          "endDate": "2026-10-22",
+          "startTime": "07:15",
+          "endTime": "16:00",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "7:15 am - 4:00 pm"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "7:15 am - 4:00 pm"
+            }
+          },
+          "timeResolution": {
+            "hoursUsed": false
+          },
+          "category": "Sports",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "_sourceType": "schedule",
+          "establishment": "Bell Aliant Centre",
+          "ticketLink": "",
+          "additionalLocation": "Bell Aliant Centre"
+        },
+        {
+          "name": "Lane Swim",
+          "description": "Lane Swim open - 5:30 am - 7:15 am*1 lane only*, 7:15 am - 4:00 pm, 8:00 pm - 9:00 pm",
+          "startDate": "2026-10-22",
+          "endDate": "2026-10-22",
+          "startTime": "20:00",
+          "endTime": "21:00",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "8:00 pm - 9:00 pm"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "8:00 pm - 9:00 pm"
+            }
+          },
+          "timeResolution": {
+            "hoursUsed": false
+          },
+          "category": "Sports",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "_sourceType": "schedule",
+          "establishment": "Bell Aliant Centre",
+          "ticketLink": "",
+          "additionalLocation": "Bell Aliant Centre"
+        },
+        {
+          "name": "All pools open",
+          "description": "All pools open - 10:00 am - 4:00 pm, 8:00 pm - 9:00 pm",
+          "startDate": "2026-10-22",
+          "endDate": "2026-10-22",
+          "startTime": "10:00",
+          "endTime": "16:00",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "10:00 am - 4:00 pm"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "10:00 am - 4:00 pm"
+            }
+          },
+          "timeResolution": {
+            "hoursUsed": false
+          },
+          "category": "Sports",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "_sourceType": "schedule",
+          "establishment": "Bell Aliant Centre",
+          "ticketLink": "",
+          "additionalLocation": "Bell Aliant Centre"
+        },
+        {
+          "name": "All pools open",
+          "description": "All pools open - 10:00 am - 4:00 pm, 8:00 pm - 9:00 pm",
+          "startDate": "2026-10-22",
+          "endDate": "2026-10-22",
+          "startTime": "20:00",
+          "endTime": "21:00",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "8:00 pm - 9:00 pm"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "8:00 pm - 9:00 pm"
+            }
+          },
+          "timeResolution": {
+            "hoursUsed": false
+          },
+          "category": "Sports",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "_sourceType": "schedule",
+          "establishment": "Bell Aliant Centre",
+          "ticketLink": "",
+          "additionalLocation": "Bell Aliant Centre"
+        }
+      ]
+    },
+    {
+      "row": 101,
+      "source": "1721486916651615",
+      "caption": "Join us tonight for Trivia Tuesday at Boston Pizza! \n\nTrivia starts at 8pm\n\nSign up online through our events page or call us at 902-894-7300. Walk-ins are welcome ! \n\nHope to see you there",
+      "stage3": [
+        {
+          "name": "Trivia Tuesday",
+          "description": "Trivia starts at 8pm. Hosted by Darcy Campbell. Sign up online through our events page or call 902-894-7300. Walk-ins are welcome.",
+          "date": "2026-10-20",
+          "startTime": "20:00",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "8PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "recurringPattern": "none",
+          "_sourceType": "event",
+          "venue": "",
+          "price": "",
+          "ticketLink": "",
+          "relevantImageIndex": 0,
+          "_sourceOccurrenceCount": 1
+        },
+        {
+          "name": "Discounted Apps",
+          "description": "Discounted apps during Trivia Tuesday on October 20.",
+          "date": "2026-10-20",
+          "startTime": "20:00",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "8PM"
+            },
+            "end": {
+              "toClose": false
+            }
+          },
+          "recurringPattern": "none",
+          "_sourceType": "special",
+          "venue": "",
+          "price": "",
+          "pricing": "Discounted; no price specified",
+          "relevantImageIndex": 0,
+          "_sourceOccurrenceCount": 1
+        },
+        {
+          "name": "$15 Pitchers",
+          "description": "$15 pitchers during Trivia Tuesday on October 20.",
+          "date": "2026-10-20",
+          "startTime": "20:00",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "8PM"
+            },
+            "end": {
+              "toClose": false
+            }
+          },
+          "recurringPattern": "none",
+          "_sourceType": "special",
+          "venue": "",
+          "price": "$15",
+          "pricing": "$15 pitchers",
+          "relevantImageIndex": 0,
+          "_sourceOccurrenceCount": 1
+        }
+      ],
+      "stage4": [
+        {
+          "name": "Trivia Tuesday",
+          "description": "Trivia starts at 8pm. Hosted by Darcy Campbell. Sign up online through our events page or call 902-894-7300. Walk-ins are welcome.",
+          "date": "2026-10-20",
+          "startTime": "20:00",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "8PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "recurringPattern": "none",
+          "_sourceType": "event",
+          "venue": "",
+          "price": "",
+          "ticketLink": "",
+          "relevantImageIndex": 0,
+          "_sourceOccurrenceCount": 1
+        },
+        {
+          "name": "Discounted Apps",
+          "description": "Discounted apps during Trivia Tuesday on October 20.",
+          "date": "2026-10-20",
+          "startTime": "20:00",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "8PM"
+            },
+            "end": {
+              "toClose": false
+            }
+          },
+          "recurringPattern": "none",
+          "_sourceType": "special",
+          "venue": "",
+          "price": "",
+          "pricing": "Discounted; no price specified",
+          "relevantImageIndex": 0,
+          "_sourceOccurrenceCount": 1
+        },
+        {
+          "name": "$15 Pitchers",
+          "description": "$15 pitchers during Trivia Tuesday on October 20.",
+          "date": "2026-10-20",
+          "startTime": "20:00",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "8PM"
+            },
+            "end": {
+              "toClose": false
+            }
+          },
+          "recurringPattern": "none",
+          "_sourceType": "special",
+          "venue": "",
+          "price": "$15",
+          "pricing": "$15 pitchers",
+          "relevantImageIndex": 0,
+          "_sourceOccurrenceCount": 1
+        }
+      ],
+      "formatted": [
+        {
+          "name": "Trivia Tuesday",
+          "description": "Trivia starts at 8pm. Hosted by Darcy Campbell. Sign up online through our events page or call 902-894-7300. Walk-ins are welcome.",
+          "startDate": "2026-10-20",
+          "endDate": "2026-10-20",
+          "startTime": "20:00",
+          "endTime": "22:00",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "8PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "timeResolution": {
+            "hoursUsed": true,
+            "endFromHours": "category_default"
+          },
+          "category": "Trivia Night",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "_sourceType": "event",
+          "establishment": "Boston Pizza",
+          "ticketLink": "",
+          "additionalLocation": ""
+        },
+        {
+          "name": "Discounted Apps",
+          "description": "Discounted apps during Trivia Tuesday on October 20.",
+          "startDate": "2026-10-20",
+          "endDate": "2026-10-20",
+          "startTime": "20:00",
+          "endTime": "22:00",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "8PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "timeResolution": {
+            "hoursUsed": true,
+            "endFromHours": "category_default"
+          },
+          "category": "Trivia Night",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "_sourceType": "special",
+          "establishment": "Boston Pizza",
+          "ticketLink": "",
+          "additionalLocation": ""
+        },
+        {
+          "name": "$15 Pitchers",
+          "description": "$15 pitchers during Trivia Tuesday on October 20.",
+          "startDate": "2026-10-20",
+          "endDate": "2026-10-20",
+          "startTime": "20:00",
+          "endTime": "22:00",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "8PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "timeResolution": {
+            "hoursUsed": true,
+            "endFromHours": "category_default"
+          },
+          "category": "Trivia Night",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "_sourceType": "special",
+          "establishment": "Boston Pizza",
+          "ticketLink": "",
+          "additionalLocation": ""
+        }
+      ]
+    },
+    {
+      "row": 123,
+      "source": "1806570937819555",
+      "caption": " Pharmacist Led Walk-In Clinic and Senior's Day today!\n\nOur Rxtra Care Walk-In Clinic is running all day today from 9 AM to 6 PM, and our pharmacists are ready to help!\n\nWhether it's a flu or COVID shot, a minor ailment, a blood pressure check, or a medication review, we're happy to take the time to look after you. No appointment needed!\n\n And don't forget, it's Seniors Day!\n\nEvery Wednesday, our customers aged 65 and older enjoy 20% off regular-priced items in our front store. Just a little way for us to show our appreciation!\n\nWhether you're stopping in for care, picking up a prescription, or just saying hello, it's always nice to see you.\n\nHave a wonderful Wednesday from all of us at Seaside Pharmacy! ",
+      "stage3": [
+        {
+          "name": "Rxtra Care Walk-In Clinic",
+          "description": "Pharmacist-led walk-in clinic offering flu and COVID shots, minor ailment assessments, blood pressure monitoring, and medication reviews. No appointment needed.",
+          "date": "2026-10-21",
+          "startTime": "09:00",
+          "endTime": "18:00",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "“9 AM to 6 PM”"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "“9 AM to 6 PM”"
+            }
+          },
+          "recurringPattern": "none",
+          "_sourceType": "event",
+          "venue": "Seaside Pharmacy & Medical",
+          "price": "",
+          "_sourceOccurrenceCount": 1
+        },
+        {
+          "name": "Seniors Day: 20% Off Regular-Priced Items",
+          "description": "Customers aged 65 and older receive 20% off regular-priced items in the front store.",
+          "date": "2026-10-21",
+          "startTime": "",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "none",
+              "evidence": "No offer start time is stated."
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": "No offer end time is stated."
+            }
+          },
+          "recurringPattern": "weekly_wednesday",
+          "_sourceType": "special",
+          "venue": "Seaside Pharmacy & Medical",
+          "price": "20% off regular-priced front-store items for customers aged 65 and older",
+          "pricing": "20% off regular-priced front-store items for customers aged 65 and older",
+          "additionalLocation": "",
+          "_sourceOccurrenceCount": 1
+        }
+      ],
+      "stage4": [
+        {
+          "name": "Rxtra Care Walk-In Clinic",
+          "description": "Pharmacist-led walk-in clinic offering flu and COVID shots, minor ailment assessments, blood pressure monitoring, and medication reviews. No appointment needed.",
+          "date": "2026-10-21",
+          "startTime": "09:00",
+          "endTime": "18:00",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "“9 AM to 6 PM”"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "“9 AM to 6 PM”"
+            }
+          },
+          "recurringPattern": "none",
+          "_sourceType": "event",
+          "venue": "Seaside Pharmacy & Medical",
+          "price": "",
+          "_sourceOccurrenceCount": 1
+        },
+        {
+          "name": "Seniors Day: 20% Off Regular-Priced Items",
+          "description": "Customers aged 65 and older receive 20% off regular-priced items in the front store.",
+          "date": "2026-10-21",
+          "startTime": "",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "none",
+              "evidence": "No offer start time is stated."
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": "No offer end time is stated."
+            }
+          },
+          "recurringPattern": "weekly_wednesday",
+          "_sourceType": "special",
+          "venue": "Seaside Pharmacy & Medical",
+          "price": "20% off regular-priced front-store items for customers aged 65 and older",
+          "pricing": "20% off regular-priced front-store items for customers aged 65 and older",
+          "additionalLocation": "",
+          "_sourceOccurrenceCount": 1
+        }
+      ],
+      "formatted": [
+        {
+          "name": "Rxtra Care Walk-In Clinic",
+          "description": "Pharmacist-led walk-in clinic offering flu and COVID shots, minor ailment assessments, blood pressure monitoring, and medication reviews. No appointment needed.",
+          "startDate": "2026-10-21",
+          "endDate": "2026-10-21",
+          "startTime": "09:00",
+          "endTime": "18:00",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "“9 AM to 6 PM”"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "“9 AM to 6 PM”"
+            }
+          },
+          "timeResolution": {
+            "hoursUsed": false
+          },
+          "category": "Gatherings & Parties",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "_sourceType": "event",
+          "establishment": "Seaside Pharmacy & Medical",
+          "ticketLink": "",
+          "additionalLocation": "Seaside Pharmacy & Medical"
+        },
+        {
+          "name": "Seniors Day: 20% Off Regular-Priced Items",
+          "description": "Customers aged 65 and older receive 20% off regular-priced items in the front store.",
+          "startDate": "2026-10-21",
+          "endDate": "2026-10-21",
+          "startTime": "10:22",
+          "endTime": "21:00",
+          "timeFlags": {
+            "start": {
+              "source": "semantic",
+              "evidence": "Start from post time 10:22"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": "No offer end time is stated."
+            }
+          },
+          "timeResolution": {
+            "hoursUsed": false,
+            "reason": "no_place_match",
+            "startFromPostTime": true,
+            "endFromHours": "category_default"
+          },
+          "category": "Food Special",
+          "isEvent": "No",
+          "isFoodSpecial": "Yes",
+          "isRecurring": "Yes",
+          "recurringPattern": "weekly_wednesday",
+          "_sourceType": "special",
+          "establishment": "Seaside Pharmacy & Medical",
+          "ticketLink": "",
+          "additionalLocation": "Seaside Pharmacy & Medical"
+        }
+      ]
+    },
+    {
+      "row": 135,
+      "source": "1753621130104687",
+      "caption": "Alright Souris movie fans.. If we can get 15 people to commit to this by Sunday we will run it. We love movies too at the Souris Show Hall but we are all volunteer and we get lonely if we come out in the cold and the dark and make popcorn with REAL BUTTER and we are all alone with a scarey movie…. Can we do this?? \nUPDATE: I think we are at 8 now…. Do I have a few more takers????\n#sourisshowhall #townofsouris #blairwitchproject #scareymovies",
+      "stage3": [
+        {
+          "name": "The Blair Witch Project",
+          "description": "Tuesday October 27, 7pm; $12. Souris Show Hall says the screening will run if 15 people commit by Sunday. The post update says 8 people have committed so far.",
+          "date": "2026-10-27",
+          "startTime": "19:00",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "7pm"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "recurringPattern": "none",
+          "venue": "",
+          "price": "$12",
+          "ticketLink": "",
+          "relevantImageIndex": 0,
+          "_sourceOccurrenceCount": 1
+        }
+      ],
+      "stage4": [
+        {
+          "name": "The Blair Witch Project",
+          "description": "Tuesday October 27, 7pm; $12. Souris Show Hall says the screening will run if 15 people commit by Sunday. The post update says 8 people have committed so far.",
+          "date": "2026-10-27",
+          "startTime": "19:00",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "7pm"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "recurringPattern": "none",
+          "venue": "",
+          "price": "$12",
+          "ticketLink": "",
+          "relevantImageIndex": 0,
+          "_sourceOccurrenceCount": 1
+        }
+      ],
+      "formatted": [
+        {
+          "name": "The Blair Witch Project",
+          "description": "Movie screening scheduled for Tuesday, October 27, 2026, at 7:00 PM for $12. Screening is conditional on 15 people committing by Sunday; 8 had committed at the time of the update.",
+          "startDate": "2026-10-27",
+          "endDate": "2026-10-27",
+          "startTime": "19:00",
+          "endTime": "23:00",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "7pm"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "timeResolution": {
+            "hoursUsed": false,
+            "reason": "no_place_match",
+            "endFromHours": "category_default"
+          },
+          "category": "Cinema",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "_sourceType": null,
+          "establishment": "Souris Show Hall",
+          "ticketLink": "",
+          "additionalLocation": ""
+        }
+      ]
+    },
+    {
+      "row": 149,
+      "source": "1713885693869952",
+      "caption": "",
+      "sharedCaption": "Imagine - 20 potters, live music, twinkle lights and amazing vibes! \n\nJoin us at Alley Street Clay Club for our second annual Holiday Sale & Social - there will be something special for everyone on your list! \n\nWe will also have a seconds table with all proceeds going to local charities! \n\nWe cannot wait to welcome you!",
+      "stage3": [
+        {
+          "name": "Holiday Sale & Social",
+          "description": "Second annual Holiday Sale & Social at Alley Street Clay Club, featuring 20 potters, live music, twinkle lights, and a seconds table with all proceeds going to local charities.",
+          "date": "2026-11-15",
+          "startTime": "10:00",
+          "endTime": "16:00",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "from 10am"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "4pm"
+            }
+          },
+          "recurringPattern": "none",
+          "venue": "Alley Street Clay Club",
+          "price": "",
+          "ticketLink": "",
+          "relevantImageIndex": 0,
+          "_sourceOccurrenceCount": 1
+        }
+      ],
+      "stage4": [
+        {
+          "name": "Holiday Sale & Social",
+          "description": "Second annual Holiday Sale & Social at Alley Street Clay Club, featuring 20 potters, live music, twinkle lights, and a seconds table with all proceeds going to local charities.",
+          "date": "2026-11-15",
+          "startTime": "10:00",
+          "endTime": "16:00",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "from 10am"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "4pm"
+            }
+          },
+          "recurringPattern": "none",
+          "venue": "Alley Street Clay Club",
+          "price": "",
+          "ticketLink": "",
+          "relevantImageIndex": 0,
+          "_sourceOccurrenceCount": 1
+        }
+      ],
+      "formatted": [
+        {
+          "name": "Holiday Sale & Social",
+          "description": "Second annual Holiday Sale & Social at Alley Street Clay Club, featuring 20 potters, live music, twinkle lights, and a seconds table with all proceeds going to local charities.",
+          "startDate": "2026-11-15",
+          "endDate": "2026-11-15",
+          "startTime": "10:00",
+          "endTime": "16:00",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "from 10am"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "4pm"
+            }
+          },
+          "timeResolution": {
+            "hoursUsed": false
+          },
+          "category": "Live Music",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "_sourceType": null,
+          "establishment": "Alley Street Clay Club",
+          "ticketLink": "",
+          "additionalLocation": "Alley Street Clay Club"
+        }
+      ]
+    },
+    {
+      "row": 195,
+      "source": "1735329065262933",
+      "caption": " CALLING ALL CONTRACTORS!\n\nWhether you've been working with us for years, are new to Main Street Home Hardware, or haven't had the chance to work with us yet, you're invited!\n\nJoin us for our Contractor Information Night on Thursday, October 22!\n\nWe'll be welcoming two industry representatives:\nCherry Seely from Regal Ideas\nScott Kennedy from Kennedy Metals\n\nThis is your opportunity to connect directly with the reps, learn more about their products, explore what's available, get some insider industry knowledge, and ask the questions that matter to you and your projects.\n\n Thursday, October 22\n\n Main Street Home Hardware, Souris\n\n 6:00 PM | Pizza & refreshments (non-alcoholic)\n\n️ 6:30 PM | Presentations begin\n\nThere's no cost to attend, and everyone in the contracting and trades community is welcome!\n\nWe're looking forward to an evening of good food, useful information, and connecting with the people who keep our local construction industry moving.\n\n Planning to join us? Email to RSVP at stephanie@mepei.ca\n\n We'd love to have an idea of numbers so we can make sure there's plenty of pizza to go around.\n\nSee you Thursday!",
+      "stage3": [
+        {
+          "name": "CONTRACTOR INFORMATION NIGHT",
+          "description": "Thursday, October 22 — Connect with industry representatives Cherry Seely from Regal Ideas and Scott Kennedy from Kennedy Metals, learn about their products and industry insights, and ask questions about your projects. Pizza and non-alcoholic refreshments at 6:00 PM; presentations begin at 6:30 PM. No cost to attend; RSVP by email to stephanie@mepei.ca.",
+          "date": "2026-10-22",
+          "startTime": "18:00",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "6:00 PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "recurringPattern": "none",
+          "venue": "Main Street Home Hardware, Souris",
+          "price": "No cost",
+          "ticketLink": "",
+          "relevantImageIndex": 0,
+          "_sourceOccurrenceCount": 1
+        }
+      ],
+      "stage4": [
+        {
+          "name": "CONTRACTOR INFORMATION NIGHT",
+          "description": "Thursday, October 22 — Connect with industry representatives Cherry Seely from Regal Ideas and Scott Kennedy from Kennedy Metals, learn about their products and industry insights, and ask questions about your projects. Pizza and non-alcoholic refreshments at 6:00 PM; presentations begin at 6:30 PM. No cost to attend; RSVP by email to stephanie@mepei.ca.",
+          "date": "2026-10-22",
+          "startTime": "18:00",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "6:00 PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "recurringPattern": "none",
+          "venue": "Main Street Home Hardware, Souris",
+          "price": "No cost",
+          "ticketLink": "",
+          "relevantImageIndex": 0,
+          "_sourceOccurrenceCount": 1
+        }
+      ],
+      "formatted": [
+        {
+          "name": "CONTRACTOR INFORMATION NIGHT",
+          "description": "Connect with industry representatives Cherry Seely from Regal Ideas and Scott Kennedy from Kennedy Metals, learn about their products and industry insights, and ask questions about your projects. Pizza and non-alcoholic refreshments at 6:00",
+          "startDate": "2026-10-22",
+          "endDate": "2026-10-22",
+          "startTime": "18:00",
+          "endTime": "21:00",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "6:00 PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "timeResolution": {
+            "hoursUsed": false,
+            "reason": "no_place_match",
+            "endFromHours": "category_default"
+          },
+          "category": "Food Special",
+          "isEvent": "No",
+          "isFoodSpecial": "Yes",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "_sourceType": null,
+          "establishment": "Main Street Home Hardware, Souris",
+          "ticketLink": "",
+          "additionalLocation": "Main Street Home Hardware, Souris"
+        }
+      ]
+    },
+    {
+      "row": 200,
+      "source": "1440541954928141",
+      "caption": "Join our Youth Art Show at the Cornwall Public Library!\n\nThe annual Cornwall Library Youth Art Show runs during December. Any young artists are welcome to submit a piece of visual art to our group show. Deadline for dropping off your piece is Friday, November 27 at 5:00 p.m.\n\nYou may submit any single item you would like to include, which has NOT previously been exhibited in the gallery. Picture frames are not required, but any canvas or frame MUST have two eye-hooks and a wire on the back.  Contact the library for details at 902-629-8415.\n\nThe show will run the entire month of December during open library hours.  \n\nMeet the artists on Tuesday, December 1 at 7:00 p.m.\n\n#peilibrary Town of Cornwall PEI",
+      "stage3": [
+        {
+          "name": "Cornwall Library Youth Art Show",
+          "description": "The annual Cornwall Library Youth Art Show runs during the entire month of December during open library hours. Young artists are welcome to submit one piece of visual art that has not previously been exhibited in the gallery. Frames are not required, but any canvas or frame must have two eye-hooks and a wire on the back. The deadline for dropping off a piece is Friday, November 27 at 5:00 p.m. Contact the library at 902-629-8415 for details.",
+          "date": "2026-12-01",
+          "startTime": "",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "none",
+              "evidence": ""
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "recurringPattern": "none",
+          "venue": "Cornwall Public Library",
+          "price": "",
+          "ticketLink": "",
+          "relevantImageIndex": 0,
+          "_sourceOccurrenceCount": 1
+        },
+        {
+          "name": "Meet the artists",
+          "description": "Meet the artists at the Cornwall Library Youth Art Show.",
+          "date": "2026-12-01",
+          "startTime": "19:00",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "7:00 p.m."
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "recurringPattern": "none",
+          "venue": "Cornwall Public Library",
+          "price": "",
+          "ticketLink": "",
+          "relevantImageIndex": 0,
+          "_sourceOccurrenceCount": 1
+        }
+      ],
+      "stage4": [
+        {
+          "name": "Cornwall Library Youth Art Show",
+          "description": "The annual Cornwall Library Youth Art Show runs during the entire month of December during open library hours. Young artists are welcome to submit one piece of visual art that has not previously been exhibited in the gallery. Frames are not required, but any canvas or frame must have two eye-hooks and a wire on the back. The deadline for dropping off a piece is Friday, November 27 at 5:00 p.m. Contact the library at 902-629-8415 for details.",
+          "date": "2026-12-01",
+          "startTime": "",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "none",
+              "evidence": ""
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "recurringPattern": "none",
+          "venue": "Cornwall Public Library",
+          "price": "",
+          "ticketLink": "",
+          "relevantImageIndex": 0,
+          "_sourceOccurrenceCount": 1
+        },
+        {
+          "name": "Meet the artists",
+          "description": "Meet the artists at the Cornwall Library Youth Art Show.",
+          "date": "2026-12-01",
+          "startTime": "19:00",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "7:00 p.m."
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "recurringPattern": "none",
+          "venue": "Cornwall Public Library",
+          "price": "",
+          "ticketLink": "",
+          "relevantImageIndex": 0,
+          "_sourceOccurrenceCount": 1
+        }
+      ],
+      "formatted": [
+        {
+          "name": "Meet the artists",
+          "description": "Meet the artists at the Cornwall Library Youth Art Show.",
+          "startDate": "2026-12-01",
+          "endDate": "2026-12-01",
+          "startTime": "19:00",
+          "endTime": "23:00",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "7:00 p.m."
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "timeResolution": {
+            "hoursUsed": true,
+            "endFromHours": "category_default"
+          },
+          "category": "Gatherings & Parties",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "_sourceType": null,
+          "establishment": "Cornwall Public Library",
+          "ticketLink": "",
+          "additionalLocation": "Cornwall Public Library"
+        }
+      ]
+    },
+    {
+      "row": 201,
+      "source": "1439932451655758",
+      "caption": "Seniors' Café is happening tomorrow, Wednesday October 21st at the Charlottetown Library Learning Centre \n\nJoin Margaret Prouse, Home Economist, for a Fall Flavours Cooking Demo and tasting from 1:00 pm - 3:00 pm in the Community Kitchen ‍\n\nThis free event is funded by the Seniors' Secretariat!\n\n#peilibrary",
+      "stage3": [
+        {
+          "name": "Seniors' Café: Fall Flavours Cooking Demo and tasting",
+          "description": "Join Margaret Prouse, Home Economist, for a Fall Flavours Cooking Demo and tasting from 1:00 pm - 3:00 pm in the Community Kitchen. This free event is funded by the Seniors' Secretariat!",
+          "date": "2026-10-21",
+          "startTime": "13:00",
+          "endTime": "15:00",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "1:00 pm - 3:00 pm"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "1:00 pm - 3:00 pm"
+            }
+          },
+          "recurringPattern": "none",
+          "venue": "Charlottetown Library Learning Centre",
+          "price": "Free",
+          "ticketLink": "",
+          "relevantImageIndex": 0,
+          "_sourceOccurrenceCount": 1
+        }
+      ],
+      "stage4": [
+        {
+          "name": "Seniors' Café: Fall Flavours Cooking Demo and tasting",
+          "description": "Join Margaret Prouse, Home Economist, for a Fall Flavours Cooking Demo and tasting from 1:00 pm - 3:00 pm in the Community Kitchen. This free event is funded by the Seniors' Secretariat!",
+          "date": "2026-10-21",
+          "startTime": "13:00",
+          "endTime": "15:00",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "1:00 pm - 3:00 pm"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "1:00 pm - 3:00 pm"
+            }
+          },
+          "recurringPattern": "none",
+          "venue": "Charlottetown Library Learning Centre",
+          "price": "Free",
+          "ticketLink": "",
+          "relevantImageIndex": 0,
+          "_sourceOccurrenceCount": 1
+        }
+      ],
+      "formatted": [
+        {
+          "name": "Seniors' Café: Fall Flavours Cooking Demo and tasting",
+          "description": "Join Margaret Prouse, Home Economist, for a Fall Flavours Cooking Demo and tasting from 1:00 pm - 3:00 pm in the Community Kitchen. This free event is funded by the Seniors' Secretariat!",
+          "startDate": "2026-10-21",
+          "endDate": "2026-10-21",
+          "startTime": "13:00",
+          "endTime": "15:00",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "1:00 pm - 3:00 pm"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "1:00 pm - 3:00 pm"
+            }
+          },
+          "timeResolution": {
+            "hoursUsed": false
+          },
+          "category": "Food Special",
+          "isEvent": "No",
+          "isFoodSpecial": "Yes",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "_sourceType": null,
+          "establishment": "Charlottetown Library Learning Centre",
+          "ticketLink": "",
+          "additionalLocation": "Charlottetown Library Learning Centre"
+        }
+      ]
+    },
+    {
+      "row": 306,
+      "source": "1737634535033090",
+      "caption": "@top fans\n\nHere's what's on today!",
+      "stage3": [
+        {
+          "name": "Star 1–2",
+          "description": "Figure skating schedule.",
+          "date": "2026-10-20",
+          "startTime": "16:15",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "4:15 PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "recurringPattern": "none",
+          "_sourceType": "schedule",
+          "venue": "",
+          "price": "",
+          "relevantImageIndex": 0,
+          "_sourceOccurrenceCount": 1
+        },
+        {
+          "name": "Stage 5–6",
+          "description": "Figure skating schedule.",
+          "date": "2026-10-20",
+          "startTime": "16:30",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "4:30 PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "recurringPattern": "none",
+          "_sourceType": "schedule",
+          "venue": "",
+          "price": "",
+          "relevantImageIndex": 0,
+          "_sourceOccurrenceCount": 1
+        },
+        {
+          "name": "PreCan",
+          "description": "Figure skating schedule.",
+          "date": "2026-10-20",
+          "startTime": "17:15",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "5:15 PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "recurringPattern": "none",
+          "_sourceType": "schedule",
+          "venue": "",
+          "price": "",
+          "relevantImageIndex": 0,
+          "_sourceOccurrenceCount": 1
+        },
+        {
+          "name": "CanSkate",
+          "description": "Figure skating schedule.",
+          "date": "2026-10-20",
+          "startTime": "17:45",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "5:45 PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "recurringPattern": "none",
+          "_sourceType": "schedule",
+          "venue": "",
+          "price": "",
+          "relevantImageIndex": 0,
+          "_sourceOccurrenceCount": 1
+        },
+        {
+          "name": "Star 3+",
+          "description": "Figure skating schedule.",
+          "date": "2026-10-20",
+          "startTime": "18:45",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "6:45 PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "recurringPattern": "none",
+          "_sourceType": "schedule",
+          "venue": "",
+          "price": "",
+          "relevantImageIndex": 0,
+          "_sourceOccurrenceCount": 1
+        },
+        {
+          "name": "Rusty Blades",
+          "description": "Figure skating schedule.",
+          "date": "2026-10-20",
+          "startTime": "20:30",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "8:30 PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "recurringPattern": "none",
+          "_sourceType": "schedule",
+          "venue": "",
+          "price": "",
+          "relevantImageIndex": 0,
+          "_sourceOccurrenceCount": 1
+        },
+        {
+          "name": "Diesel Stop vs. Noye & Noye",
+          "description": "Men’s rec hockey matchup.",
+          "date": "2026-10-20",
+          "startTime": "21:45",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "9:45 PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "recurringPattern": "none",
+          "_sourceType": "schedule",
+          "venue": "",
+          "price": "",
+          "relevantImageIndex": 0,
+          "_sourceOccurrenceCount": 1
+        },
+        {
+          "name": "Canteen Open",
+          "description": "Canteen hours; the poster invites attendees to support local skaters and players.",
+          "date": "2026-10-20",
+          "startTime": "16:00",
+          "endTime": "20:30",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "FROM 4:00 PM - 8:30 PM"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "FROM 4:00 PM - 8:30 PM"
+            }
+          },
+          "recurringPattern": "none",
+          "_sourceType": "schedule",
+          "venue": "",
+          "price": "",
+          "relevantImageIndex": 0,
+          "_sourceOccurrenceCount": 1
+        }
+      ],
+      "stage4": [
+        {
+          "name": "Star 1–2",
+          "description": "Figure skating schedule.",
+          "date": "2026-10-20",
+          "startTime": "16:15",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "4:15 PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "recurringPattern": "none",
+          "_sourceType": "schedule",
+          "venue": "",
+          "price": "",
+          "relevantImageIndex": 0,
+          "_sourceOccurrenceCount": 1
+        },
+        {
+          "name": "Stage 5–6",
+          "description": "Figure skating schedule.",
+          "date": "2026-10-20",
+          "startTime": "16:30",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "4:30 PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "recurringPattern": "none",
+          "_sourceType": "schedule",
+          "venue": "",
+          "price": "",
+          "relevantImageIndex": 0,
+          "_sourceOccurrenceCount": 1
+        },
+        {
+          "name": "PreCan",
+          "description": "Figure skating schedule.",
+          "date": "2026-10-20",
+          "startTime": "17:15",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "5:15 PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "recurringPattern": "none",
+          "_sourceType": "schedule",
+          "venue": "",
+          "price": "",
+          "relevantImageIndex": 0,
+          "_sourceOccurrenceCount": 1
+        },
+        {
+          "name": "CanSkate",
+          "description": "Figure skating schedule.",
+          "date": "2026-10-20",
+          "startTime": "17:45",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "5:45 PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "recurringPattern": "none",
+          "_sourceType": "schedule",
+          "venue": "",
+          "price": "",
+          "relevantImageIndex": 0,
+          "_sourceOccurrenceCount": 1
+        },
+        {
+          "name": "Star 3+",
+          "description": "Figure skating schedule.",
+          "date": "2026-10-20",
+          "startTime": "18:45",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "6:45 PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "recurringPattern": "none",
+          "_sourceType": "schedule",
+          "venue": "",
+          "price": "",
+          "relevantImageIndex": 0,
+          "_sourceOccurrenceCount": 1
+        },
+        {
+          "name": "Rusty Blades",
+          "description": "Figure skating schedule.",
+          "date": "2026-10-20",
+          "startTime": "20:30",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "8:30 PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "recurringPattern": "none",
+          "_sourceType": "schedule",
+          "venue": "",
+          "price": "",
+          "relevantImageIndex": 0,
+          "_sourceOccurrenceCount": 1
+        },
+        {
+          "name": "Diesel Stop vs. Noye & Noye",
+          "description": "Men’s rec hockey matchup.",
+          "date": "2026-10-20",
+          "startTime": "21:45",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "9:45 PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "recurringPattern": "none",
+          "_sourceType": "schedule",
+          "venue": "",
+          "price": "",
+          "relevantImageIndex": 0,
+          "_sourceOccurrenceCount": 1
+        },
+        {
+          "name": "Canteen Open",
+          "description": "Canteen hours; the poster invites attendees to support local skaters and players.",
+          "date": "2026-10-20",
+          "startTime": "16:00",
+          "endTime": "20:30",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "FROM 4:00 PM - 8:30 PM"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "FROM 4:00 PM - 8:30 PM"
+            }
+          },
+          "recurringPattern": "none",
+          "_sourceType": "schedule",
+          "venue": "",
+          "price": "",
+          "relevantImageIndex": 0,
+          "_sourceOccurrenceCount": 1
+        }
+      ],
+      "formatted": [
+        {
+          "name": "Star 1–2",
+          "description": "Figure skating schedule.",
+          "startDate": "2026-10-20",
+          "endDate": "2026-10-20",
+          "startTime": "16:15",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "4:15 PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "timeResolution": {
+            "hoursUsed": false
+          },
+          "category": "Sports",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "_sourceType": "schedule",
+          "establishment": "Cavendish Farms Community Events Centre",
+          "ticketLink": "",
+          "additionalLocation": ""
+        },
+        {
+          "name": "Stage 5–6",
+          "description": "Figure skating schedule.",
+          "startDate": "2026-10-20",
+          "endDate": "2026-10-20",
+          "startTime": "16:30",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "4:30 PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "timeResolution": {
+            "hoursUsed": false
+          },
+          "category": "Sports",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "_sourceType": "schedule",
+          "establishment": "Cavendish Farms Community Events Centre",
+          "ticketLink": "",
+          "additionalLocation": ""
+        },
+        {
+          "name": "PreCan",
+          "description": "Figure skating schedule.",
+          "startDate": "2026-10-20",
+          "endDate": "2026-10-20",
+          "startTime": "17:15",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "5:15 PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "timeResolution": {
+            "hoursUsed": false
+          },
+          "category": "Sports",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "_sourceType": "schedule",
+          "establishment": "Cavendish Farms Community Events Centre",
+          "ticketLink": "",
+          "additionalLocation": ""
+        },
+        {
+          "name": "CanSkate",
+          "description": "Figure skating schedule.",
+          "startDate": "2026-10-20",
+          "endDate": "2026-10-20",
+          "startTime": "17:45",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "5:45 PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "timeResolution": {
+            "hoursUsed": false
+          },
+          "category": "Sports",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "_sourceType": "schedule",
+          "establishment": "Cavendish Farms Community Events Centre",
+          "ticketLink": "",
+          "additionalLocation": ""
+        },
+        {
+          "name": "Star 3+",
+          "description": "Figure skating schedule.",
+          "startDate": "2026-10-20",
+          "endDate": "2026-10-20",
+          "startTime": "18:45",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "6:45 PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "timeResolution": {
+            "hoursUsed": false
+          },
+          "category": "Sports",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "_sourceType": "schedule",
+          "establishment": "Cavendish Farms Community Events Centre",
+          "ticketLink": "",
+          "additionalLocation": ""
+        },
+        {
+          "name": "Rusty Blades",
+          "description": "Figure skating schedule.",
+          "startDate": "2026-10-20",
+          "endDate": "2026-10-20",
+          "startTime": "20:30",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "8:30 PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "timeResolution": {
+            "hoursUsed": false
+          },
+          "category": "Sports",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "_sourceType": "schedule",
+          "establishment": "Cavendish Farms Community Events Centre",
+          "ticketLink": "",
+          "additionalLocation": ""
+        },
+        {
+          "name": "Diesel Stop vs. Noye & Noye",
+          "description": "Men’s rec hockey matchup.",
+          "startDate": "2026-10-20",
+          "endDate": "2026-10-20",
+          "startTime": "21:45",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "9:45 PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "timeResolution": {
+            "hoursUsed": false
+          },
+          "category": "Sports",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "_sourceType": "schedule",
+          "establishment": "Cavendish Farms Community Events Centre",
+          "ticketLink": "",
+          "additionalLocation": ""
+        },
+        {
+          "name": "Canteen Open",
+          "description": "Canteen hours; the poster invites attendees to support local skaters and players.",
+          "startDate": "2026-10-20",
+          "endDate": "2026-10-20",
+          "startTime": "16:00",
+          "endTime": "20:30",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "FROM 4:00 PM - 8:30 PM"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "FROM 4:00 PM - 8:30 PM"
+            }
+          },
+          "timeResolution": {
+            "hoursUsed": false
+          },
+          "category": "Gatherings & Parties",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "_sourceType": "schedule",
+          "establishment": "Cavendish Farms Community Events Centre",
+          "ticketLink": "",
+          "additionalLocation": ""
+        }
+      ]
+    },
+    {
+      "row": 316,
+      "source": "122318310764189551",
+      "caption": "TUESDAY Meals!",
+      "stage3": [
+        {
+          "name": "Quickserve Chicken Broccoli Casserole",
+          "description": "Tuesday Meals: $10 Quickserve — Chicken Broccoli Casserole.",
+          "date": "2026-10-20",
+          "startTime": "",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "none",
+              "evidence": ""
+            },
+            "end": {
+              "toClose": false
+            }
+          },
+          "recurringPattern": "none",
+          "_sourceType": "special",
+          "venue": "The Scenic Route",
+          "price": "$10",
+          "pricing": "$10",
+          "relevantImageIndex": 0,
+          "_sourceOccurrenceCount": 1
+        },
+        {
+          "name": "Quickserve Meatloaf Meal",
+          "description": "Tuesday Meals: $10 Quickserve — meatloaf, veggies, mashed potato and gravy.",
+          "date": "2026-10-20",
+          "startTime": "",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "none",
+              "evidence": ""
+            },
+            "end": {
+              "toClose": false
+            }
+          },
+          "recurringPattern": "none",
+          "_sourceType": "special",
+          "venue": "The Scenic Route",
+          "price": "$10",
+          "pricing": "$10",
+          "relevantImageIndex": 0,
+          "_sourceOccurrenceCount": 1
+        },
+        {
+          "name": "Daily Soup — Beef Chili",
+          "description": "$6 Daily Soup: Beef Chili.",
+          "date": "2026-10-20",
+          "startTime": "",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "none",
+              "evidence": ""
+            },
+            "end": {
+              "toClose": false
+            }
+          },
+          "recurringPattern": "daily",
+          "_sourceType": "special",
+          "venue": "The Scenic Route",
+          "price": "$6",
+          "pricing": "$6",
+          "relevantImageIndex": 0,
+          "_sourceOccurrenceCount": 1
+        },
+        {
+          "name": "Kitchen Feature — Philly Oven Sub",
+          "description": "Tuesday Meals: $16 Kitchen Feature — ½-size Philly Oven Sub with onion, peppers and cheese, your choice of a side and a small beverage.",
+          "date": "2026-10-20",
+          "startTime": "",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "none",
+              "evidence": ""
+            },
+            "end": {
+              "toClose": false
+            }
+          },
+          "recurringPattern": "none",
+          "_sourceType": "special",
+          "venue": "The Scenic Route",
+          "price": "$16",
+          "pricing": "$16",
+          "relevantImageIndex": 0,
+          "_sourceOccurrenceCount": 1
+        }
+      ],
+      "stage4": [
+        {
+          "name": "Quickserve Chicken Broccoli Casserole",
+          "description": "Tuesday Meals: $10 Quickserve — Chicken Broccoli Casserole.",
+          "date": "2026-10-20",
+          "startTime": "",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "none",
+              "evidence": ""
+            },
+            "end": {
+              "toClose": false
+            }
+          },
+          "recurringPattern": "none",
+          "_sourceType": "special",
+          "venue": "The Scenic Route",
+          "price": "$10",
+          "pricing": "$10",
+          "relevantImageIndex": 0,
+          "_sourceOccurrenceCount": 1
+        },
+        {
+          "name": "Quickserve Meatloaf Meal",
+          "description": "Tuesday Meals: $10 Quickserve — meatloaf, veggies, mashed potato and gravy.",
+          "date": "2026-10-20",
+          "startTime": "",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "none",
+              "evidence": ""
+            },
+            "end": {
+              "toClose": false
+            }
+          },
+          "recurringPattern": "none",
+          "_sourceType": "special",
+          "venue": "The Scenic Route",
+          "price": "$10",
+          "pricing": "$10",
+          "relevantImageIndex": 0,
+          "_sourceOccurrenceCount": 1
+        },
+        {
+          "name": "Daily Soup — Beef Chili",
+          "description": "$6 Daily Soup: Beef Chili.",
+          "date": "2026-10-20",
+          "startTime": "",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "none",
+              "evidence": ""
+            },
+            "end": {
+              "toClose": false
+            }
+          },
+          "recurringPattern": "daily",
+          "_sourceType": "special",
+          "venue": "The Scenic Route",
+          "price": "$6",
+          "pricing": "$6",
+          "relevantImageIndex": 0,
+          "_sourceOccurrenceCount": 1
+        },
+        {
+          "name": "Kitchen Feature — Philly Oven Sub",
+          "description": "Tuesday Meals: $16 Kitchen Feature — ½-size Philly Oven Sub with onion, peppers and cheese, your choice of a side and a small beverage.",
+          "date": "2026-10-20",
+          "startTime": "",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "none",
+              "evidence": ""
+            },
+            "end": {
+              "toClose": false
+            }
+          },
+          "recurringPattern": "none",
+          "_sourceType": "special",
+          "venue": "The Scenic Route",
+          "price": "$16",
+          "pricing": "$16",
+          "relevantImageIndex": 0,
+          "_sourceOccurrenceCount": 1
+        }
+      ],
+      "formatted": [
+        {
+          "name": "Quickserve Chicken Broccoli Casserole",
+          "description": "Tuesday Meals: $10 Quickserve — Chicken Broccoli Casserole.",
+          "startDate": "2026-10-20",
+          "endDate": "2026-10-20",
+          "startTime": "11:31",
+          "endTime": "21:00",
+          "timeFlags": {
+            "start": {
+              "source": "semantic",
+              "evidence": "Start from post time 11:31"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "timeResolution": {
+            "hoursUsed": false,
+            "reason": "no_place_match",
+            "startFromPostTime": true,
+            "endFromHours": "category_default"
+          },
+          "category": "Food Special",
+          "isEvent": "No",
+          "isFoodSpecial": "Yes",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "_sourceType": "special",
+          "establishment": "The Scenic Route",
+          "ticketLink": "",
+          "additionalLocation": "The Scenic Route"
+        },
+        {
+          "name": "Quickserve Meatloaf Meal",
+          "description": "Tuesday Meals: $10 Quickserve — meatloaf, veggies, mashed potato and gravy.",
+          "startDate": "2026-10-20",
+          "endDate": "2026-10-20",
+          "startTime": "11:31",
+          "endTime": "21:00",
+          "timeFlags": {
+            "start": {
+              "source": "semantic",
+              "evidence": "Start from post time 11:31"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "timeResolution": {
+            "hoursUsed": false,
+            "reason": "no_place_match",
+            "startFromPostTime": true,
+            "endFromHours": "category_default"
+          },
+          "category": "Food Special",
+          "isEvent": "No",
+          "isFoodSpecial": "Yes",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "_sourceType": "special",
+          "establishment": "The Scenic Route",
+          "ticketLink": "",
+          "additionalLocation": "The Scenic Route"
+        },
+        {
+          "name": "Daily Soup — Beef Chili",
+          "description": "$6 Daily Soup: Beef Chili.",
+          "startDate": "2026-10-20",
+          "endDate": "2026-10-20",
+          "startTime": "11:31",
+          "endTime": "21:00",
+          "timeFlags": {
+            "start": {
+              "source": "semantic",
+              "evidence": "Start from post time 11:31"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "timeResolution": {
+            "hoursUsed": false,
+            "reason": "no_place_match",
+            "startFromPostTime": true,
+            "endFromHours": "category_default"
+          },
+          "category": "Food Special",
+          "isEvent": "No",
+          "isFoodSpecial": "Yes",
+          "isRecurring": "Yes",
+          "recurringPattern": "daily",
+          "_sourceType": "special",
+          "establishment": "The Scenic Route",
+          "ticketLink": "",
+          "additionalLocation": "The Scenic Route"
+        },
+        {
+          "name": "Kitchen Feature — Philly Oven Sub",
+          "description": "Tuesday Meals: $16 Kitchen Feature — ½-size Philly Oven Sub with onion, peppers and cheese, your choice of a side and a small beverage.",
+          "startDate": "2026-10-20",
+          "endDate": "2026-10-20",
+          "startTime": "11:31",
+          "endTime": "21:00",
+          "timeFlags": {
+            "start": {
+              "source": "semantic",
+              "evidence": "Start from post time 11:31"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "timeResolution": {
+            "hoursUsed": false,
+            "reason": "no_place_match",
+            "startFromPostTime": true,
+            "endFromHours": "category_default"
+          },
+          "category": "Food Special",
+          "isEvent": "No",
+          "isFoodSpecial": "Yes",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "_sourceType": "special",
+          "establishment": "The Scenic Route",
+          "ticketLink": "",
+          "additionalLocation": "The Scenic Route"
+        }
+      ]
+    }
+  ],
+  "cornwallVenue": {
+    "id": "slug_cornwallpubliclibrary",
+    "name": "Cornwall Public Library",
+    "normalizedName": "cornwall public library",
+    "address": "15 Mercedes Dr, Cornwall, PE C0A 1H0, Canada",
+    "latitude": 46.236189499999995,
+    "longitude": -63.206905199999994
+  }
+}

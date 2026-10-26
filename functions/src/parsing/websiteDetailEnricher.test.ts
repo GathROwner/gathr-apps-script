@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { enrichEventsFromVenueWebsite, websiteCandidateTitleMatchesEventForRegression, eventDetailHtml } from './websiteDetailEnricher.js';
+import { enrichEventsFromVenueWebsite, websiteCandidateTitleMatchesEventForRegression, eventDetailHtml,parseDetailPageCandidate } from './websiteDetailEnricher.js';
 import { DEFAULT_PARSING_CONFIG, EstablishmentInfo, ExtractedItem } from './types.js';
 
 function buildEventItem(overrides: Partial<ExtractedItem> = {}): ExtractedItem {
@@ -57,6 +57,16 @@ function jsonResponse(value: unknown): Response {
     headers: { 'content-type': 'application/json; charset=utf-8' },
   });
 }
+
+test('course registration open/close clocks cannot become lesson hours, while labelled class clocks remain usable',async()=>{
+ for(const [labelled,expected]of [[false,''],[true,'18:15']] as const){
+  const page='https://fixture-curling.example/programs/learn-to-curl';
+  const html='<html><h1>Learn to Curl</h1><p>Starts November 12, 2026 at 8:06 am. Ends December 17, 2026 at 8:06 am. Registration opens October 3 at 8:06 am and closes December 17 at 8:06 am.</p>'+
+   (labelled?'<p>Class starts at 6:15 pm.</p>':'')+'</html>';
+  const result=parseDetailPageCandidate(page,html,2026);
+  assert.equal(result?.startTime||'',expected);
+ }
+});
 
 test('audition detail cannot borrow regular building, box-office or navigation clocks', async () => {
   const site = 'https://auditions-oct15.example/';

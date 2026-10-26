@@ -1,5 +1,6 @@
 import type {ExtractedItem, FormattedEvent} from './types.js';
 import {reconcileSourceItemEvidence} from './sourceItemEvidence.js';
+import {repairCaptionMealCoverage,unresolvedPerformanceRun} from './captionMealCoverage.js';
 
 export interface SourceTimeConstraint {
   reason: 'unresolved_meridiem' | 'meal_period_without_clock' | 'activity_offer_without_clock' | 'doors_without_showtime' | 'dated_activity_without_clock';
@@ -30,7 +31,8 @@ export function hasSourceClock(value: unknown): boolean {
 export function resolveSourceDuration(item: ExtractedItem): ExtractedItem {
   if (hasSourceClock(item.endTime)) return item;
   // A film's running time, a song length or a meal's service window is not a session duration.
-  if (!/\b(?:class|lesson|workshop|session|fitness|yoga|zumba|course|practice|guided\s+tour)\b/i.test(item.name)) return item;
+  if (!/\b(?:class|lesson|workshop|session|fitness|yoga|zumba|course|practice|guided\s+tour)\b/i.test(item.name) &&
+      !/\b(?:class|lesson|workshop|session)\b/i.test(String(item.description || ''))) return item;
   const text = String(item.description || '');
   // Arrival offsets, opening windows and multi-activity durations are not this occurrence's length.
   if (/\b(?:before|after|doors?|arrival|each\s+of|sessions?\s+of)\b/i.test(text)) return item;
@@ -110,15 +112,16 @@ function resolveCalendarRange(items: ExtractedItem[], item: ExtractedItem): Extr
 export function hasUnresolvedSourceMeridiem(item?: Partial<ExtractedItem>): boolean {
   if (!item) return false;
   const clock = String(item.startTime || '').trim();
-  if (!/^0?[1-8](?::\d{2}|\s*h\s*\d{2})/i.test(clock) ||
+  if (!/^(?:(?:0?[1-9]|1[0-2]):\d{2}|0?[1-8]\s*h\s*\d{2})/i.test(clock) ||
       /\d\s*[ap]\.?\s*m\.?\s*$/i.test(clock)) return false;
   const evidence = `${item.description || ''} ${item.extractionReason || ''} ${clock}`;
-  return /(?:meridiem|am\s*\/\s*pm).{0,35}(?:unspecified|unknown|ambiguous|not\s+(?:printed|shown|stated|specified))|(?:does\s+not\s+specify|without|no\s+printed).{0,20}(?:a\.?m\.?\s*(?:or|\/)\s*p\.?m\.?|meridiem)|times?\s+(?:are\s+)?(?:left\s+)?ambiguous/i.test(evidence);
+  return /(?:meridiem|am\s*\/\s*pm).{0,35}(?:unspecified|unknown|ambiguous|not\s+(?:printed|shown|stated|specified))|(?:(?:does|do)\s+not\s+specify|without|no\s+printed).{0,20}(?:a\.?m\.?\s*(?:or|\/)\s*p\.?m\.?|meridiem)|times?\s+(?:are\s+)?(?:left\s+)?ambiguous/i.test(evidence);
 }
 
 /** No clock is invented here. Item-local evidence wins over a shared meal caption. */
 export function constrainSourceTimes(items: ExtractedItem[], caption: string): ExtractedItem[] {
-  items = reconcileSourceItemEvidence(items, caption);
+  items = reconcileSourceItemEvidence(repairCaptionMealCoverage(items, caption), caption);
+  items = items.map(item=>unresolvedPerformanceRun(item,caption)?{...item,_sourceOccurrenceDateHold:true} as ExtractedItem:item);
   const captionOnly = caption.split(/\n\s*OCR TEXT:/i)[0];
   const sharedMeals = captionOnly.match(/\b(?:breakfast|brunch|lunch|dinner|supper)\b/gi) || [];
   const oneSharedMeal = new Set(sharedMeals.map(x => x.toLowerCase())).size === 1
@@ -141,8 +144,8 @@ export function constrainSourceTimes(items: ExtractedItem[], caption: string): E
     const diningService = /\b(?:dinner|supper|lunch|breakfast|brunch)\s+(?:service|special|served|offer|buffet)\b|\b(?:harvest\s+feast|prix\s*fixe)\b/i.test(detail) &&
       !/\b(?:concert|band|music|show|theatre|theater|fundrais(?:er|ing)|community\s+(?:meal|dinner))\b/i.test(item.name);
     const special = item._sourceType === 'special' || ('type' in item && item.type === 'special') || diningService;
-    if (!special) return (item as any)._stage4NeedsTimeEnrichment === true ? {...item,
-      _sourceTimeConstraint:{reason:'dated_activity_without_clock',evidence:'Validated dated activity has no advertised start clock'}} : item;
+    if (!special) return {...item,
+      _sourceTimeConstraint:{reason:'dated_activity_without_clock',evidence:'Dated activity has no advertised start clock'}};
     if (/\b(?:all\s*day|open\s*to\s*close)\b/i.test(`${detail} ${item.timeFlags?.start?.evidence || ''}`)) return item;
     const meal = detail.match(/\b(?:breakfast|brunch|lunch|dinner|supper)\b/i)?.[0] ||
       (items.every(x => x._sourceType === 'special') ? oneSharedMeal : '');

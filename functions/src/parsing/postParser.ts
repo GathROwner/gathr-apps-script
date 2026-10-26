@@ -1,5 +1,7 @@
 // @ts-nocheck
 import {applyLocationMentionResolution} from './locationMentionRoles.js';
+import {hasUnadvertisedActivityEnd} from './sourcePublicationPolicy.js';
+import {materialCaptionClockConflict, prepareOccurrenceSourceItem, restoreOccurrenceSourceOwnership} from './occurrenceSourceOwnership.js';
 // TODO: Fix type errors introduced during Phase 6/7 updates
 /**
  * Post Parser - Main Orchestrator
@@ -17,7 +19,7 @@ import {applyLocationMentionResolution} from './locationMentionRoles.js';
  */
 
 import { DateTime } from 'luxon';
-import { reconcilePublicPoolWindows, hasUnsupportedPostDateFallback } from './sourceOccurrenceGuards.js';
+import { reconcilePublicPoolWindows, hasUnsupportedPostDateFallback, reconcileDatedPosterOccurrences, SEPARATE_STARTS_WITHOUT_END } from './sourceOccurrenceGuards.js';
 import { AsyncLocalStorage } from 'async_hooks';
 import { execFile } from 'child_process';
 import { promisify } from 'util';
@@ -59,7 +61,7 @@ import { resolveTimesWithOperatingHours } from './venueResolver.js';
 import {constrainSourceTimes, blocksStartTimeFallback} from './sourceTimeConstraints.js';
 import {dateOnlyActivity} from './dateOnlyActivity.js';
 import {sourceItemHoldReason,needsWholeScheduleIdentityReview} from './sourceItemEvidence.js';
-import {enrichLinkedPerformanceStarts} from './linkedPerformanceTime.js';
+import {enrichLinkedPerformanceStarts,linkedPerformanceImagesTextFree} from './linkedPerformanceTime.js';
 import { shouldHoldUndatedStandingSchedule, shouldRetrySeasonalLeagueWithLegacy,
   isSelectedLunaCanaryPost, isSampledLunaCanaryPost,
   canRetryLunaCanaryWithLegacy, canaryGeneratedCleanupUrls,
@@ -660,6 +662,49 @@ async function replayPostDataFromArtifactsCore(
     contentType: normalizedArtifacts.contentType || 'unknown',
   });
 
+  // Retain policy evidence before removing items, including when saved Stage4
+  // metadata has omitted the flag that was established from saved Stage3.
+  const replayHeldReasons = new Map<string,string>();
+  const replayItemKey = (item:ExtractedItem)=>JSON.stringify([
+    String(item.name || '').trim().toLowerCase(),item.date || '',
+    normalizeTimeHHMM(item.startTime) || String(item.startTime || '').trim().toLowerCase()]);
+  const replaySourceItems:ExtractedItem[]=deepCloneJson(Array.isArray(normalizedArtifacts.stage3Items)
+    ? normalizedArtifacts.stage3Items : normalizedArtifacts.stage4Items || []);
+  replaySourceItems.forEach((item,idx)=>{item._pipelineIndex=item._pipelineIndex || idx+1;});
+  const uniqueOccurrence = (items:ExtractedItem[],key:string)=>items.filter(item=>replayItemKey(item)===key).length===1;
+  const indexedReplayKey = (item:ExtractedItem)=>Number.isInteger(item._pipelineIndex) && Number(item._pipelineIndex)>0
+    ? `${item._pipelineIndex}:${replayItemKey(item)}` : undefined;
+  const retainReplayPublicationHolds = async (items:ExtractedItem[])=>{
+    const constrained=constrainSourceTimes(items,combinedText).map(item=>{
+      const occurrence=replayItemKey(item),indexed=indexedReplayKey(item);
+      // A stable source index takes precedence. Legacy unindexed artifacts may
+      // match only an occurrence unique in both source and destination lists.
+      const reason=indexed ? replayHeldReasons.get(indexed)
+        : uniqueOccurrence(replaySourceItems,occurrence) && uniqueOccurrence(items,occurrence)
+          ? replayHeldReasons.get(`unique:${occurrence}`) : undefined;
+      return reason ? {...item,_sourcePublicationHold:reason} : item;
+    });
+    const held=constrained.filter(item=>sourceItemHoldReason(item));
+    if(held.length){
+      for(const item of held){
+        const indexed=indexedReplayKey(item),occurrence=replayItemKey(item),reason=sourceItemHoldReason(item)!;
+        if(indexed)replayHeldReasons.set(indexed,reason);
+        if(uniqueOccurrence(replaySourceItems,occurrence))replayHeldReasons.set(`unique:${occurrence}`,reason);
+      }
+      await emitStageArtifacts(cfg,{source:'replay',stage3HeldItems:deepCloneJson(held)});
+      await reportSkipReason({stage:'stage3',reason:'Saved source publication held',
+        detail:held.map(item=>`${item.name}: ${sourceItemHoldReason(item)}`).join('; ')});
+    }
+    return constrained.filter(item=>!sourceItemHoldReason(item));
+  };
+  let rawExtractedData:ExtractedItem[]=deepCloneJson(replaySourceItems);
+  if(!rawExtractedData.length){
+    await reportSkipReason({stage:'stage3',reason:'Replay artifacts contained no usable items'});
+    return [];
+  }
+  rawExtractedData=await retainReplayPublicationHolds(rawExtractedData);
+  if(!rawExtractedData.length)return [];
+
   const establishmentInfo = establishmentMap[facebookUrl] || {};
   let partialAddress = establishmentInfo.address || '';
   const sourcePostMediaUrls = normalizeImageUrls(mediaUrls || [], MAX_SOURCE_GALLERY_IMAGES);
@@ -693,22 +738,15 @@ async function replayPostDataFromArtifactsCore(
     displayImageUrls.length > 0 ? displayImageUrls : sourcePostMediaUrls;
   let stage37TicketUrl = String(normalizedArtifacts.stage37TicketUrl || '').trim();
 
-  let rawExtractedData: ExtractedItem[] = Array.isArray(normalizedArtifacts.stage3Items)
-    ? deepCloneJson(normalizedArtifacts.stage3Items)
-    : Array.isArray(normalizedArtifacts.stage4Items)
-      ? deepCloneJson(normalizedArtifacts.stage4Items)
-      : [];
-
-  if (rawExtractedData.length === 0) {
-    await reportSkipReason({
-      stage: 'stage3',
-      reason: 'Replay artifacts contained no usable items',
-    });
+  rawExtractedData = rawExtractedData
+    .map(item=>prepareOccurrenceSourceItem(applyLocationMentionResolution(item,combinedText),combinedText));
+  const replaySourceHolds = rawExtractedData.filter(item => item.sourceLocationRole === 'collection_partner_only' ||
+    materialCaptionClockConflict(item,combinedText,rawExtractedData.length));
+  if (replaySourceHolds.length) {
+    await emitStageArtifacts(cfg,{source:'replay',stage3HeldItems:deepCloneJson(replaySourceHolds)});
+    await reportSkipReason({stage:'stage3',reason:'Saved source requires attendance-venue or material clock-conflict review'});
     return [];
   }
-
-  rawExtractedData = constrainSourceTimes(rawExtractedData, combinedText).filter(item => !sourceItemHoldReason(item))
-    .map(item=>applyLocationMentionResolution(item,combinedText));
   rawExtractedData.forEach((item, idx) => {
     item._pipelineIndex = item._pipelineIndex || idx + 1;
     item._pipelineTotalStage3 = item._pipelineTotalStage3 || rawExtractedData.length;
@@ -731,7 +769,7 @@ async function replayPostDataFromArtifactsCore(
   logger.info('=== STAGE 4: SECONDARY VALIDATION (REPLAY) ===');
   let validatedData: ExtractedItem[] = [];
   if (Array.isArray(normalizedArtifacts.stage4Items) && normalizedArtifacts.stage4Items.length > 0) {
-    validatedData = deepCloneJson(normalizedArtifacts.stage4Items);
+    validatedData = deepCloneJson(normalizedArtifacts.stage4Items).map(item=>prepareOccurrenceSourceItem(item,combinedText));
     logger.info('Replay using provided Stage 4 artifacts', {
       postId,
       validatedCount: validatedData.length,
@@ -751,7 +789,14 @@ async function replayPostDataFromArtifactsCore(
   }
 
   const compactReplayHold = getCompactStage4Hold(validatedData);
-  validatedData = constrainSourceTimes(validatedData, combinedText).filter(item => !sourceItemHoldReason(item));
+  const replayValidationHolds = validatedData.filter(item => item.sourceLocationRole === 'collection_partner_only' ||
+    materialCaptionClockConflict(item,combinedText,validatedData.length));
+  if (replayValidationHolds.length) {
+    await emitStageArtifacts(cfg,{source:'replay',stage3HeldItems:deepCloneJson(replayValidationHolds)});
+    await reportSkipReason({stage:'stage3',reason:'Saved validation requires attendance-venue or material clock-conflict review'});
+    return [];
+  }
+  validatedData = await retainReplayPublicationHolds(validatedData);
   if (compactReplayHold) {
     await emitStageArtifacts(cfg, { source: 'replay', stage4ValidationHold: compactReplayHold, stage4Items: [] });
     await reportSkipReason({ stage: 'stage4', reason: `Compact validation held: ${compactReplayHold.reason}` });
@@ -798,7 +843,7 @@ async function replayPostDataFromArtifactsCore(
     return [];
   }
 
-  const formattedEventsWithFlags = mergeTimeFlags(formattedEvents, validatedData);
+  const formattedEventsWithFlags = restoreOccurrenceSourceOwnership(mergeTimeFlags(formattedEvents, validatedData), validatedData);
   const formattedEventsWithMediaHints = mergeTicketImageHints(
     formattedEventsWithFlags,
     validatedData,
@@ -1850,7 +1895,10 @@ async function parsePostDataCore(
       const stage37Start = Date.now();
       stage3Items = constrainSourceTimes(stage3Items, combinedText);
       if (stage3Cfg.ticketLinkEnrichment?.enabled !== false)
-        stage3Items = await enrichLinkedPerformanceStarts(stage3Items, combinedText, cfg.timezone);
+        stage3Items = await enrichLinkedPerformanceStarts(stage3Items, combinedText, cfg.timezone,{
+          caption:combinedText,venueName:establishmentInfo?.name || userName,
+          imagesTextFree:linkedPerformanceImagesTextFree(ocrImageUrls.length,validation.imageAnalysis || []),
+        });
       const ticketUrls = extractedData?.ticketsBuyUrl ? [extractedData.ticketsBuyUrl] : [];
       const enrichmentResult = await enrichEventsFromTicketLinks(
         stage3Items,
@@ -1927,10 +1975,10 @@ async function parsePostDataCore(
 
       const sourceLocalDate = DateTime.fromISO(timestamp, { zone: cfg.timezone }).toISODate() || '';
       stage3Items = reconcilePublicPoolWindows(stage3Items, combinedText, sourceLocalDate, userName);
-      const unsupportedDateItems = stage3Items.filter(item => hasUnsupportedPostDateFallback(item, sourceLocalDate));
+      const unsupportedDateItems = stage3Items.filter(item => hasUnsupportedPostDateFallback(item, sourceLocalDate, combinedText));
       if (unsupportedDateItems.length) {
         sourceDateHoldEncountered = true;
-        stage3Items = stage3Items.filter(item => !hasUnsupportedPostDateFallback(item, sourceLocalDate));
+        stage3Items = stage3Items.filter(item => !hasUnsupportedPostDateFallback(item, sourceLocalDate, combinedText));
         await emitStageArtifacts(cfg, { source: 'live', contentType: resolvedContentType,
           stage3HeldItems: deepCloneJson(unsupportedDateItems) });
         await reportSkipReason({ stage: 'stage3', reason: 'Activity has no source-grounded date; post-date fallback held',
@@ -2047,7 +2095,7 @@ async function parsePostDataCore(
 
     logger.info(`Extracted ${rawExtractedData.length} raw items`);
 
-    rawExtractedData=rawExtractedData.map(item=>applyLocationMentionResolution(item,input.combinedText));
+    rawExtractedData=rawExtractedData.map(item=>prepareOccurrenceSourceItem(applyLocationMentionResolution(item,input.combinedText),input.combinedText));
     // Add pipeline indices to each item for tracking
     rawExtractedData.forEach((item, idx) => {
       item._pipelineIndex = idx + 1;
@@ -2105,6 +2153,21 @@ async function parsePostDataCore(
     // ========================================
     // STAGE 4: Secondary Validation
     // ========================================
+    const clockConflicts = rawExtractedData.filter(item => materialCaptionClockConflict(item,input.combinedText,rawExtractedData.length));
+    if (clockConflicts.length) {
+      sourceDateHoldEncountered = true;
+      await emitStageArtifacts(cfg,{source:'live',stage3HeldItems:deepCloneJson(clockConflicts)});
+      await reportSkipReason({stage:'stage3',reason:'Material caption/image start-clock conflict requires source review'});
+      return [];
+    }
+    const missingAttendanceVenues = rawExtractedData.filter(item => item.sourceLocationRole === 'collection_partner_only');
+    if (missingAttendanceVenues.length) {
+      sourceDateHoldEncountered = true;
+      await emitStageArtifacts(cfg,{source:'live',stage3HeldItems:deepCloneJson(missingAttendanceVenues)});
+      await reportSkipReason({stage:'stage3',reason:'Collection partners do not establish the attendance venue; source review required'});
+      rawExtractedData = rawExtractedData.filter(item => item.sourceLocationRole !== 'collection_partner_only');
+      if (!rawExtractedData.length) return [];
+    }
     logger.info('=== STAGE 4: SECONDARY VALIDATION ===');
     const stage4Start = Date.now();
     let validatedData = await performSecondaryValidation(
@@ -2134,6 +2197,20 @@ async function parsePostDataCore(
       });
       const retryStage3Result = await runStage3Pipeline(stage3ModelRouting.fallbackModel, 'fallback');
       rawExtractedData = retryStage3Result.items;
+      rawExtractedData = rawExtractedData.map(item => prepareOccurrenceSourceItem(item,input.combinedText));
+      if (rawExtractedData.some(item => materialCaptionClockConflict(item,input.combinedText,rawExtractedData.length))) {
+        sourceDateHoldEncountered = true;
+        await emitStageArtifacts(cfg,{source:'live',stage3HeldItems:deepCloneJson(rawExtractedData)});
+        await reportSkipReason({stage:'stage3',reason:'Material caption/image start-clock conflict requires source review'});
+        return [];
+      }
+      if (rawExtractedData.some(item => item.sourceLocationRole === 'collection_partner_only')) {
+        sourceDateHoldEncountered = true;
+        await emitStageArtifacts(cfg,{source:'live',stage3HeldItems:deepCloneJson(rawExtractedData.filter(item => item.sourceLocationRole === 'collection_partner_only'))});
+        await reportSkipReason({stage:'stage3',reason:'Collection partners do not establish the attendance venue; source review required'});
+        rawExtractedData = rawExtractedData.filter(item => item.sourceLocationRole !== 'collection_partner_only');
+        if (!rawExtractedData.length) return [];
+      }
       stage37TicketUrl = retryStage3Result.ticketUrl || stage37TicketUrl;
 
       if (rawExtractedData && rawExtractedData.length > 0) {
@@ -2290,7 +2367,7 @@ async function parsePostDataCore(
     });
 
     // Merge Stage-4 timeFlags back if Stage-5 omitted them
-    const formattedEventsWithFlags = mergeTimeFlags(formattedEvents, validatedData);
+    const formattedEventsWithFlags = restoreOccurrenceSourceOwnership(mergeTimeFlags(formattedEvents, validatedData), validatedData);
     const formattedEventsWithMediaHints = mergeTicketImageHints(
       formattedEventsWithFlags,
       validatedData,
@@ -2387,12 +2464,11 @@ async function parsePostDataCore(
       validation.imageAnalysis || [],
       lunaAnalysisFrames
     );
-    const raceReconciliation = lunaCanarySelected
-      ? reconcileRaceSchedule(processedEvents, input.combinedText)
-      : { events: processedEvents, applied: false, foldedCount: 0,
-          correctedStart: false, restoredRegistrationUrl: false };
+    // Source-bound reconciliation applies equally after the normal formatter
+    // and a legacy fallback; model selection cannot resurrect race logistics.
+    const raceReconciliation = reconcileRaceSchedule(processedEvents, input.combinedText);
     if (raceReconciliation.applied) {
-      logger.info('Luna race schedule source reconciliation', {
+      logger.info('Race schedule source reconciliation', {
         postId,
         foldedCount: raceReconciliation.foldedCount,
         correctedStart: raceReconciliation.correctedStart,
@@ -3166,7 +3242,7 @@ export function applySpecialTimeFallbacks(
 
       if (
         !blocksStartTimeFallback(ev) &&
-        (isSpecial || (isEventLikely && hasTodayCue && !(ev as any)._stage4NeedsTimeEnrichment)) &&
+        isSpecial &&
         !hasStartClock &&
         !hasExplicitStart &&
         postedHHMM &&
@@ -3203,6 +3279,7 @@ export function enforceDateTimeCompleteness(
   const posted = DateTime.fromISO(timestamp, { zone: timezone });
   const postedDate = posted.isValid ? posted.toFormat('yyyy-MM-dd') : '';
   const postedHHMM = posted.isValid ? posted.toFormat('HH:mm') : '';
+  events=reconcileDatedPosterOccurrences(events,combinedText,postedDate);
   // A single extracted event may still come from a post with several dated
   // sessions. In that case a range from another day cannot supply its end.
   const printedDates = new Set(
@@ -3220,6 +3297,8 @@ export function enforceDateTimeCompleteness(
 
   for (const [index, raw] of events.entries()) {
     const ev: TimeResolvedEvent = { ...raw };
+    const omitCalendarEnd = hasUnadvertisedActivityEnd(raw) || raw.timeFlags?.end?.source==='none'&&raw.timeFlags.end.evidence===SEPARATE_STARTS_WITHOUT_END;
+    const absentCalendarEndFlags = omitCalendarEnd ? {...raw.timeFlags!.end} : undefined;
     ev.timeResolution = ev.timeResolution || { hoursUsed: false };
 
     // Ensure date window has a usable anchor.
@@ -3392,6 +3471,21 @@ export function enforceDateTimeCompleteness(
     const isSpecialLike =
       isSpecial || SPECIAL_LIKE_CATEGORY_PATTERN.test(String(ev.category || ''));
 
+    // Legacy sports payloads can arrive with a publication-time clock already
+    // filled in. A saved fallback marker is not an advertised event start.
+    if (String(ev.category || '').toLowerCase() === 'sports' && !isSpecialLike &&
+        ev.timeResolution.startFromPostTime === true &&
+        ev.timeFlags?.start?.source !== 'explicit') {
+      ev.startTime = '';
+      ev.timeResolution = { ...ev.timeResolution };
+      delete ev.timeResolution.startFromPostTime;
+      ev.timeFlags = {
+        ...ev.timeFlags,
+        start: { source: 'none', evidence: '' },
+        end: ev.timeFlags?.end || { source: 'none', toClose: false, evidence: '' },
+      };
+    }
+
     if (ev.timeResolution?.startFromHours === true && !isSpecialLike) {
       const previousStartTime = ev.startTime;
       ev.startTime = '';
@@ -3417,7 +3511,7 @@ export function enforceDateTimeCompleteness(
     // A post-time fallback is only defensible for a same-day offer. Reusing the
     // publication time on a later calendar date invents an event start time.
     if (!blocksStartTimeFallback(ev) && !ev.startTime && postedHHMM && ev.startDate === postedDate &&
-        (isSpecial || (!(ev as any)._stage4NeedsTimeEnrichment && (hasTodayCue || isSemanticStart)))) {
+        isSpecial) {
       ev.startTime = postedHHMM;
       ev.timeFlags = ev.timeFlags || {
         start: { source: 'none', evidence: '' },
@@ -3509,6 +3603,14 @@ export function enforceDateTimeCompleteness(
 
     applyPrintedSpecialClosingLimit(ev,combinedText,postedDate);
 
+    // The item-local source explicitly lacks an end. Neither a formatter guess,
+    // another programme row nor a deterministic fallback can advertise one.
+    if (omitCalendarEnd) {
+      ev.endTime = '';
+      ev.timeFlags = {...ev.timeFlags,end:absentCalendarEndFlags!};
+      delete ev.timeResolution.endFromHours;
+    }
+
     // Normalize overnight endDate in one place (Stage 5.6 only).
     applyOvernightEndDate(ev, timezone);
 
@@ -3516,7 +3618,7 @@ export function enforceDateTimeCompleteness(
       !ev.startDate ? 'startDate' : '',
       !ev.startTime ? 'startTime' : '',
       !ev.endDate ? 'endDate' : '',
-      !ev.endTime && !hasApproximateLinkedPageEnd(ev) ? 'endTime' : '',
+      !ev.endTime && !hasApproximateLinkedPageEnd(ev) && !omitCalendarEnd ? 'endTime' : '',
     ].filter(Boolean);
 
     if (missingFields.length > 0) {
@@ -3866,6 +3968,10 @@ function applyOvernightEndDate(event: TimeResolvedEvent, timezone: string): void
     const startDt = DateTime.fromFormat(startDate, 'yyyy-MM-dd', { zone: timezone });
     if (!startDt.isValid) return;
     event.endDate = startDt.plus({ days: 1 }).toFormat('yyyy-MM-dd');
+  } else if (endMinutes > startMinutes && endDate !== startDate &&
+      (event.timeResolution?.endFromHours === 'category_default' || event.timeResolution?.endFromHours === 'duration_default')) {
+    const startDt = DateTime.fromFormat(startDate, 'yyyy-MM-dd', {zone:timezone});
+    if (startDt.isValid && startDt.plus({days:1}).toFormat('yyyy-MM-dd') === endDate) event.endDate = startDate;
   }
 }
 
@@ -4012,14 +4118,22 @@ function extractExplicitTimeRangeFromEvidence(
   startEvidence: unknown,
   endEvidence: unknown
 ): { startTime: string; endTime: string } | null {
-  const startRawEvidence = String(startEvidence || '').trim();
-  const endRawEvidence = String(endEvidence || '').trim();
+  // Compact printed clocks are whole endpoints: never recover the suffix
+  // "30-11am" from "930-11am" and overwrite an already correct 09:30 start.
+  const compactClock = (value: unknown): string => String(value || '').trim().replace(
+    /\b(\d{1,2})([0-5]\d)(?=\s*(?:[ap]m\b|[-–—~]\s*\d{1,2}(?::\d{2})?\s*[ap]m\b))/gi,
+    '$1:$2'
+  );
+  const startRawEvidence = compactClock(startEvidence);
+  const endRawEvidence = compactClock(endEvidence);
   const candidates = [startRawEvidence, endRawEvidence].filter(Boolean);
   if (candidates.length === 0) return null;
 
-  const endpointPattern = String.raw`(?:\d{1,2}(?::\d{2})?|midnight|noon)`;
+  const endpointPattern = String.raw`(?<![\d:])(?:\d{1,2}(?::\d{2})?|midnight|noon)(?![\d:])`;
+  // Printed tilde ranges are ranges too: otherwise the standalone fallback
+  // reads the closing "5 pm" twice and overwrites a supported 10:00–17:00.
   const rangePattern = new RegExp(
-    `(${endpointPattern})\\s*(AM|PM)?\\s*(?:[-\\u2013\\u2014]|to|until|til|till)\\s*(${endpointPattern})\\s*(AM|PM)?`,
+    `(${endpointPattern})\\s*(AM|PM)?\\s*(?:[-\\u2013\\u2014~]|to|until|til|till)\\s*(${endpointPattern})\\s*(AM|PM)?`,
     'i'
   );
   const betweenPattern = new RegExp(
@@ -4257,7 +4371,9 @@ export function processEvents(
         primaryField: processedEvent.relevantImageUrl ? 'relevantImageUrl' : processedEvent.image ? 'image' : undefined,
         primarySource: primaryImageSource,
         isFallback: primaryIsFallback,
-        selectionReason: primaryImageReason,
+        selectionReason: primaryImageReason + (imageAnalysis.some(a=>a.imageIndex===Number(event.relevantImageIndex) &&
+          /(?:does not|doesn't|no|not).*?(?:title|date|ticket|event details)/i.test(a.relevanceToPost || '') &&
+          /(?:grainy|video|flatbed|clip|screenshot)/i.test(a.description || '')) ? '; generic_video_frame_without_event_details' : ''),
         mediaUrls: normalizedDisplayMediaUrls,
         mediaSource: mediaProvenanceSource,
         icon: processedEvent.icon,
@@ -5159,7 +5275,8 @@ export function selectUnusedManagedImageUrls(
   }
 
   return [...new Set(uploadedUrls.filter(url =>
-    Boolean(url) && !keep.has(url) && isManagedImageUrl(url)
+    Boolean(url) && !keep.has(url) && isManagedImageUrl(url) &&
+    /^https:\/\/storage\.googleapis\.com\/gathr-uploaded-images\/postimages\//.test(url)
   ))];
 }
 
@@ -5487,14 +5604,19 @@ function hasExplicitMidnight(event: TimeResolvedEvent, which: 'start' | 'end'): 
     .filter(Boolean)
     .join(' ');
   return (
+    (which === 'end' && ['explicit','semantic'].includes(event.timeFlags?.end?.source || '') &&
+      event.endTime === '00:00' && /\b(?:tonight|evening|night)\b/i.test(haystack) &&
+      /\b\d{1,2}(?::\d{2})?\s*[-–—]\s*12\b/i.test(String(evidence || ''))) ||
     /\bmidnight\b/i.test(haystack) ||
     /\b12(?::00)?\s*a\.?m\.?\b/i.test(haystack) ||
     /\ball[\s-]?day\b|\bopen\s*to\s*close\b/i.test(haystack)
   );
 }
 
-function hasApproximateLinkedPageEnd(event: Pick<TimeResolvedEvent, 'timeFlags'>): boolean {
-  return /\bapproximate end omitted\b/i.test(String(event.timeFlags?.end?.evidence || ''));
+function hasApproximateLinkedPageEnd(event: Pick<TimeResolvedEvent, 'timeFlags' | 'timeResolution'>): boolean {
+  return /\bapproximate end omitted\b/i.test(String(event.timeFlags?.end?.evidence || '')) ||
+    (event.timeResolution?.reason === 'venue_close_conflicts_with_start' &&
+      event.timeFlags?.end?.source === 'none' && event.timeFlags.end.toClose === true);
 }
 
 // Re-export types and config for convenience

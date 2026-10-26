@@ -1,0 +1,14 @@
+{
+  "note": "Sanitized public-source excerpts only; no document IDs, media URLs, credentials or production envelopes.",
+  "caption": "Membership Rally: October 17 from 1:00-3:00 PM or October 25 from 3:00-5:00 PM.\nTry Curling/ Drop In Ice Times: Oct 28, Oct 29, Oct 30, 6-8pm each night.\nLearn to Curl: Starts Thursday Nov 12th for 6 weeks.\nPoker continues each Thursday evening; next is Thursday Oct 15th at 6:30pm.",
+  "items": [
+    {"name":"Membership Rally","description":"October 17th from 1:00-3:00 PM. Board members help you get registered.","date":"2026-10-17","startTime":"13:00","endTime":"15:00","recurringPattern":"none"},
+    {"name":"Membership Rally","description":"October 25th from 3:00-5:00 PM. Free BBQ at the rally.","date":"2026-10-25","startTime":"15:00","endTime":"17:00","recurringPattern":"none"},
+    {"name":"Try Curling/ Drop In Ice Times","description":"Free drop-in try curling session. Bring clean indoor shoes.","date":"2026-10-28","startTime":"18:00","endTime":"20:00","recurringPattern":"none"},
+    {"name":"Try Curling/ Drop In Ice Times","description":"Free drop-in try curling session. Bring clean indoor shoes.","date":"2026-10-29","startTime":"18:00","endTime":"20:00","recurringPattern":"none"},
+    {"name":"Try Curling/ Drop In Ice Times","description":"Free drop-in try curling session. Bring clean indoor shoes.","date":"2026-10-30","startTime":"18:00","endTime":"20:00","recurringPattern":"none"},
+    {"name":"Learn to Curl","description":"Starts Thursday Nov 12th for 6 weeks.","date":"2026-11-12","startTime":"","endTime":"","recurringPattern":"weekly_thursday","totalOccurrences":6,"recurrenceUntilDate":"2026-12-17"},
+    {"name":"Poker","description":"Poker continues each Thursday evening; the next is tonight, October 15th at 6:30pm.","date":"2026-10-15","startTime":"18:30","endTime":"","recurringPattern":"weekly_thursday"}
+  ],
+  "belly": {"name":"Belly Dance Fridays","description":"ONGOING CLASSES. A 55-MINUTE FUN, REJUVENATING CLASS. All levels welcome. With Alika.","date":"2026-10-16","startTime":"19:00","endTime":"","recurringPattern":"none","timeFlags":{"start":{"source":"explicit","evidence":"7:00 P.M."},"end":{"source":"none","toClose":false,"evidence":""}}}
+}

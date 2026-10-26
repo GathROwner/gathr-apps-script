@@ -8,9 +8,14 @@ export type VenueAliasEntry = {
 };
 
 // Keep this list small and explicit. Add/remove entries as needed.
-export const VENUE_ALIAS_RULESET_VERSION = '2026-04-13-maclauchlan-arena-a';
+export const VENUE_ALIAS_RULESET_VERSION = '2026-10-16-benevolent-irish-society';
 
 const VENUE_ALIASES: VenueAliasEntry[] = [
+  {
+    alias: 'Benevolent Irish Society',
+    canonical: 'Irish Cultural Centre',
+    note: 'Reviewed October 16 source/poster and existing 582 North River Road venue identity. Organizer mentions alone never establish event placement.',
+  },
   {
     alias: 'Confederation Court Mall',
     canonical: 'The Confederation Court Mall',
@@ -80,6 +85,16 @@ const VENUE_ALIASES: VenueAliasEntry[] = [
     note: 'Arena inside Bell Aliant Centre.',
   },
   // Founders Food Hall aliases
+  // Preserve the existing same-place classifier control without equating
+  // arbitrary independent businesses that share an address.
+  {
+    alias: 'Founders Food Hall',
+    canonical: "Founders' Food Hall and Market",
+  },
+  {
+    alias: 'Founders Food Hall & Market',
+    canonical: "Founders' Food Hall and Market",
+  },
   {
     alias: "Founders' Hall",
     canonical: "Founders' Food Hall and Market",

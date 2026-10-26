@@ -155,7 +155,7 @@ test('schedule normalization preserves explicit 2:30-5:30 ranges unchanged when 
   assert.equal(resolved.endTime, '17:30');
 });
 
-test('start-only schedule items use short duration fallback instead of category-close defaults', () => {
+test('start-only schedule items retain unknown ends instead of generated duration defaults', () => {
   const [originalStage3Item] = parseScheduleTextForRegression(
     'Saturday April 18\n1PM SASS Class w/Karina',
     '2026-04-15',
@@ -192,8 +192,9 @@ test('start-only schedule items use short duration fallback instead of category-
     ''
   );
 
-  assert.equal(resolved.endTime, '15:00');
-  assert.equal(resolved.timeResolution?.endFromHours, 'duration_default');
+  assert.equal(resolved.endTime, '');
+  assert.equal(resolved.timeResolution?.endFromHours, undefined);
+  assert.equal(resolved.timeFlags?.end?.source, 'none');
 });
 
 test('ordinary non-schedule events do not gain synthetic schedule time flags', () => {

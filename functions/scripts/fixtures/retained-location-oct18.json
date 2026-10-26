@@ -1,0 +1,1692 @@
+{
+  "mode": "deterministic-retained-output-replay",
+  "mediaPipelineCoverage": false,
+  "modelRegeneration": false,
+  "catalogCoverage": "exact five authorized current canonical records; no global uniqueness claim",
+  "rows": [
+    {
+      "snapshotPath": "parse_snapshots/1JFQdQB-pAXdAb0usJhNFf5mrWnWyBd7g_214_1792243327677",
+      "snapshotOriginalBodyHash": "b8b2336d9bcfc5b2287694dafbea9b04030494f00ca138d3b217c16a6216bbfe",
+      "rowIndex": 214,
+      "fileId": "1JFQdQB-pAXdAb0usJhNFf5mrWnWyBd7g",
+      "sourceUniqueId": "1708908254577321",
+      "establishment": "Kool Breeze Farms",
+      "row": {
+        "text": "✨ We’re feeling extra merry and bright as we get ready for our 4th Annual Christmas Craft Fair at the Garden Centre! ❤️\n\n Saturday, November 14 | 10 AM–3 PM\n\nBring your family and friends and kick off the holiday season with us! ❤️ Admission is by donation, and there’s something for everyone to enjoy, including door prizes, festive treats, handmade crafts, homemade goodies, and so much more!\n\n While you’re here, be sure to wander through our Christmas Store and soak up all the holiday magic!\n\n✨ Check out the vendor list below to see who will be joining us!\n\n❤️ Make a day of it and explore the Summerside Christmas Craft Trail! There are more festive markets happening on Saturday, November 14, so be sure to visit these other wonderful local craft fairs, too! ⤵\n\n Artisans Christmas Market\n Linkletter Community Centre\n⏰ 10 AM–4 PM\n\n Three Oaks High School Annual Craft Fair\n Three Oaks High School\n⏰ Sat 9 AM-7 PM | Sun 9 AM-5 PM \n\n Kool Breeze Farms Christmas Market\n Kool Breeze Farms\n⏰ 10 AM–3 PM\n\n️ Shop local, support talented artisans, and enjoy a full day of Christmas shopping and holiday cheer! ❤️\n\n Please note: We are no longer accepting vendor applications.\n\nWe can’t wait to celebrate the most wonderful time of the year with you! ❤️",
+        "sharedPostText": "",
+        "pageName": "KoolBreezeFarms",
+        "userName": "Kool Breeze Farms",
+        "timestamp": "2026-10-16T12:00:12.000Z",
+        "utcStartDate": "",
+        "parserMode": "full5stage",
+        "dryRun": false,
+        "uniqueId": "1708908254577321",
+        "ocrText": "May be an image of christmas tree and text",
+        "facebookUrl": "https://www.facebook.com/KoolBreezeFarms/"
+      },
+      "combinedText": "✨ We’re feeling extra merry and bright as we get ready for our 4th Annual Christmas Craft Fair at the Garden Centre! ❤️\n\n Saturday, November 14 | 10 AM–3 PM\n\nBring your family and friends and kick off the holiday season with us! ❤️ Admission is by donation, and there’s something for everyone to enjoy, including door prizes, festive treats, handmade crafts, homemade goodies, and so much more!\n\n While you’re here, be sure to wander through our Christmas Store and soak up all the holiday magic!\n\n✨ Check out the vendor list below to see who will be joining us!\n\n❤️ Make a day of it and explore the Summerside Christmas Craft Trail! There are more festive markets happening on Saturday, November 14, so be sure to visit these other wonderful local craft fairs, too! ⤵\n\n Artisans Christmas Market\n Linkletter Community Centre\n⏰ 10 AM–4 PM\n\n Three Oaks High School Annual Craft Fair\n Three Oaks High School\n⏰ Sat 9 AM-7 PM | Sun 9 AM-5 PM \n\n Kool Breeze Farms Christmas Market\n Kool Breeze Farms\n⏰ 10 AM–3 PM\n\n️ Shop local, support talented artisans, and enjoy a full day of Christmas shopping and holiday cheer! ❤️\n\n Please note: We are no longer accepting vendor applications.\n\nWe can’t wait to celebrate the most wonderful time of the year with you! ❤️\n\nOCR TEXT:\nMay be an image of christmas tree and text",
+      "stage3Items": [
+        {
+          "name": "4th Annual Christmas Craft Fair",
+          "description": "Saturday, November 14 — Holiday craft fair at the Garden Centre, with admission by donation. Features door prizes, festive treats, handmade crafts, homemade goodies, and the Christmas Store. Vendors listed on the poster: Kool Breeze Farms; PEI Shorefinds; Crafty Creations; Island Made By Rosy; Butter Bits; Get My Drift; Fin's Pallet; Laughing Lavender Farm; Guss Cloths; Melody Lake Handmade; ILoveKnitsPEI; South Shore Soaps; Little Daisy Clay Studio; Barb's Baked Goods & Sewing; Comes From A Wave; Pain in the Glass; Rustic Timber; Sandy's Sewing; BH Creations PEI; Island Tyes; Cici's Crazy Creations; Paper Hugs & Giggle Cards; Mary's Seaside Creations; Sugar & Spice | Homemade Goods; Glorious Essentials; Homestyle Flavours - Country Market; Red Fox Designs; Beer Blossom Designz; Kinkora Wood Crafts; Raindragon Creative; Crone Age Creations; Island Girl Designs PEI; Island Fibrescapes; Layerlings Studio. Also promoted in the caption as Kool Breeze Farms Christmas Market on the Summerside Christmas Craft Trail.",
+          "date": "2026-11-14",
+          "startTime": "10:00",
+          "endTime": "15:00",
+          "venue": "",
+          "ticketLink": "",
+          "price": "Admission by donation",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "A dated, timed annual public craft fair with admission and activities is advertised. The poster lists vendors as part of the fair, not as separate events.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "10 AM–3 PM"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "10 AM–3 PM"
+            }
+          },
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              {
+                "label": "Kool Breeze Farms",
+                "address": "231 READ DRIVE, SUMMERSIDE PE",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "Kool Breeze Farms; 231 READ DRIVE, SUMMERSIDE PE"
+              }
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The poster identifies Kool Breeze Farms and prints its street address."
+          },
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 4
+        },
+        {
+          "name": "Artisans Christmas Market",
+          "description": "Saturday, November 14 — Craft market listed as part of the Summerside Christmas Craft Trail.",
+          "date": "2026-11-14",
+          "startTime": "10:00",
+          "endTime": "16:00",
+          "venue": "Linkletter Community Centre",
+          "ticketLink": "",
+          "price": "",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "A separate local craft market is explicitly named with its own venue and hours.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "10 AM–4 PM"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "10 AM–4 PM"
+            }
+          },
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              {
+                "label": "Linkletter Community Centre",
+                "address": "",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "Linkletter Community Centre"
+              }
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The caption names Linkletter Community Centre as the market venue."
+          },
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 2,
+          "_pipelineTotalStage3": 4
+        },
+        {
+          "name": "Three Oaks High School Annual Craft Fair",
+          "description": "Saturday — Craft fair listed as part of the Summerside Christmas Craft Trail.",
+          "date": "2026-11-14",
+          "startTime": "09:00",
+          "endTime": "19:00",
+          "venue": "Three Oaks High School",
+          "ticketLink": "",
+          "price": "",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "A separately named craft fair has explicit Saturday hours and a named venue.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Sat 9 AM-7 PM"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "Sat 9 AM-7 PM"
+            }
+          },
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              {
+                "label": "Three Oaks High School",
+                "address": "",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "Three Oaks High School"
+              }
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The caption names Three Oaks High School as the fair venue."
+          },
+          "_sourceOccurrenceCount": 2,
+          "_pipelineIndex": 3,
+          "_pipelineTotalStage3": 4
+        },
+        {
+          "name": "Three Oaks High School Annual Craft Fair",
+          "description": "Sunday — Craft fair listed as part of the Summerside Christmas Craft Trail.",
+          "date": "2026-11-15",
+          "startTime": "09:00",
+          "endTime": "17:00",
+          "venue": "Three Oaks High School",
+          "ticketLink": "",
+          "price": "",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "The fair has separately advertised Sunday hours; this is the Sunday occurrence of the named two-day event.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Sun 9 AM-5 PM"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "Sun 9 AM-5 PM"
+            }
+          },
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              {
+                "label": "Three Oaks High School",
+                "address": "",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "Three Oaks High School"
+              }
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The caption names Three Oaks High School as the fair venue."
+          },
+          "_sourceOccurrenceCount": 2,
+          "_pipelineIndex": 4,
+          "_pipelineTotalStage3": 4
+        }
+      ],
+      "stage4Items": [
+        {
+          "name": "4th Annual Christmas Craft Fair",
+          "description": "Saturday, November 14 — Holiday craft fair at the Garden Centre, with admission by donation. Features door prizes, festive treats, handmade crafts, homemade goodies, and the Christmas Store. Vendors listed on the poster: Kool Breeze Farms; PEI Shorefinds; Crafty Creations; Island Made By Rosy; Butter Bits; Get My Drift; Fin's Pallet; Laughing Lavender Farm; Guss Cloths; Melody Lake Handmade; ILoveKnitsPEI; South Shore Soaps; Little Daisy Clay Studio; Barb's Baked Goods & Sewing; Comes From A Wave; Pain in the Glass; Rustic Timber; Sandy's Sewing; BH Creations PEI; Island Tyes; Cici's Crazy Creations; Paper Hugs & Giggle Cards; Mary's Seaside Creations; Sugar & Spice | Homemade Goods; Glorious Essentials; Homestyle Flavours - Country Market; Red Fox Designs; Beer Blossom Designz; Kinkora Wood Crafts; Raindragon Creative; Crone Age Creations; Island Girl Designs PEI; Island Fibrescapes; Layerlings Studio. Also promoted in the caption as Kool Breeze Farms Christmas Market on the Summerside Christmas Craft Trail.",
+          "date": "2026-11-14",
+          "startTime": "10:00",
+          "endTime": "15:00",
+          "venue": "",
+          "ticketLink": "",
+          "price": "Admission by donation",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "A dated, timed annual public craft fair with admission and activities is advertised. The poster lists vendors as part of the fair, not as separate events.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "10 AM–3 PM"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "10 AM–3 PM"
+            }
+          },
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              {
+                "label": "Kool Breeze Farms",
+                "address": "231 READ DRIVE, SUMMERSIDE PE",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "Kool Breeze Farms; 231 READ DRIVE, SUMMERSIDE PE"
+              }
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The poster identifies Kool Breeze Farms and prints its street address."
+          },
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 4
+        },
+        {
+          "name": "Artisans Christmas Market",
+          "description": "Saturday, November 14 — Craft market listed as part of the Summerside Christmas Craft Trail.",
+          "date": "2026-11-14",
+          "startTime": "10:00",
+          "endTime": "16:00",
+          "venue": "Linkletter Community Centre",
+          "ticketLink": "",
+          "price": "",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "A separate local craft market is explicitly named with its own venue and hours.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "10 AM–4 PM"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "10 AM–4 PM"
+            }
+          },
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              {
+                "label": "Linkletter Community Centre",
+                "address": "",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "Linkletter Community Centre"
+              }
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The caption names Linkletter Community Centre as the market venue."
+          },
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 2,
+          "_pipelineTotalStage3": 4
+        },
+        {
+          "name": "Three Oaks High School Annual Craft Fair",
+          "description": "Saturday — Craft fair listed as part of the Summerside Christmas Craft Trail.",
+          "date": "2026-11-14",
+          "startTime": "09:00",
+          "endTime": "19:00",
+          "venue": "Three Oaks High School",
+          "ticketLink": "",
+          "price": "",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "A separately named craft fair has explicit Saturday hours and a named venue.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Sat 9 AM-7 PM"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "Sat 9 AM-7 PM"
+            }
+          },
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              {
+                "label": "Three Oaks High School",
+                "address": "",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "Three Oaks High School"
+              }
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The caption names Three Oaks High School as the fair venue."
+          },
+          "_sourceOccurrenceCount": 2,
+          "_pipelineIndex": 3,
+          "_pipelineTotalStage3": 4
+        },
+        {
+          "name": "Three Oaks High School Annual Craft Fair",
+          "description": "Sunday — Craft fair listed as part of the Summerside Christmas Craft Trail.",
+          "date": "2026-11-15",
+          "startTime": "09:00",
+          "endTime": "17:00",
+          "venue": "Three Oaks High School",
+          "ticketLink": "",
+          "price": "",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "The fair has separately advertised Sunday hours; this is the Sunday occurrence of the named two-day event.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Sun 9 AM-5 PM"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "Sun 9 AM-5 PM"
+            }
+          },
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              {
+                "label": "Three Oaks High School",
+                "address": "",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "Three Oaks High School"
+              }
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The caption names Three Oaks High School as the fair venue."
+          },
+          "_sourceOccurrenceCount": 2,
+          "_pipelineIndex": 4,
+          "_pipelineTotalStage3": 4
+        }
+      ],
+      "savedPostFormatEvents": [
+        {
+          "id": "1708908254577321",
+          "name": "4th Annual Christmas Craft Fair",
+          "category": "Gatherings & Parties",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "establishment": "Kool Breeze Farms",
+          "additionalLocation": "",
+          "locationScope": "",
+          "locationLabel": "",
+          "locationCity": "",
+          "locationProvince": "",
+          "locationPrecision": "",
+          "locationReviewStatus": "",
+          "startDate": "2026-11-14",
+          "startTime": "10:00",
+          "endDate": "2026-11-14",
+          "endTime": "15:00",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "recurringDaysOfWeek": [],
+          "recurringWeekdaySequence": [],
+          "recurringWeekInterval": null,
+          "totalOccurrences": null,
+          "recurrenceUntilDate": "",
+          "ticketLink": "",
+          "ticketsBuyUrl": "",
+          "timeResolution": {
+            "hoursUsed": false
+          },
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "10 AM–3 PM"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "10 AM–3 PM"
+            }
+          },
+          "structuredLocationValidation": null,
+          "_sourceType": null,
+          "description": "Saturday, November 14 — Holiday craft fair at the Garden Centre, with admission by donation. Features door prizes, festive treats, handmade crafts, homemade goodies, and the Christmas Store. Vendors listed on the poster: Kool Breeze Farms; "
+        },
+        {
+          "id": "1708908254577321",
+          "name": "Artisans Christmas Market",
+          "category": "Gatherings & Parties",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "establishment": "Linkletter Community Centre",
+          "additionalLocation": "Linkletter Community Centre",
+          "locationScope": "",
+          "locationLabel": "",
+          "locationCity": "",
+          "locationProvince": "",
+          "locationPrecision": "",
+          "locationReviewStatus": "",
+          "startDate": "2026-11-14",
+          "startTime": "10:00",
+          "endDate": "2026-11-14",
+          "endTime": "16:00",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "recurringDaysOfWeek": [],
+          "recurringWeekdaySequence": [],
+          "recurringWeekInterval": null,
+          "totalOccurrences": null,
+          "recurrenceUntilDate": "",
+          "ticketLink": "",
+          "ticketsBuyUrl": "",
+          "timeResolution": {
+            "hoursUsed": false
+          },
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "10 AM–4 PM"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "10 AM–4 PM"
+            }
+          },
+          "structuredLocationValidation": null,
+          "_sourceType": null,
+          "description": "Saturday, November 14 — Craft market listed as part of the Summerside Christmas Craft Trail."
+        },
+        {
+          "id": "1708908254577321",
+          "name": "Three Oaks High School Annual Craft Fair",
+          "category": "Gatherings & Parties",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "establishment": "Three Oaks High School",
+          "additionalLocation": "Three Oaks High School",
+          "locationScope": "",
+          "locationLabel": "",
+          "locationCity": "",
+          "locationProvince": "",
+          "locationPrecision": "",
+          "locationReviewStatus": "",
+          "startDate": "2026-11-14",
+          "startTime": "09:00",
+          "endDate": "2026-11-14",
+          "endTime": "19:00",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "recurringDaysOfWeek": [],
+          "recurringWeekdaySequence": [],
+          "recurringWeekInterval": null,
+          "totalOccurrences": null,
+          "recurrenceUntilDate": "",
+          "ticketLink": "",
+          "ticketsBuyUrl": "",
+          "timeResolution": {
+            "hoursUsed": false
+          },
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Sat 9 AM-7 PM"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "Sat 9 AM-7 PM"
+            }
+          },
+          "structuredLocationValidation": null,
+          "_sourceType": null,
+          "description": "Saturday — Craft fair listed as part of the Summerside Christmas Craft Trail."
+        },
+        {
+          "id": "1708908254577321",
+          "name": "Three Oaks High School Annual Craft Fair",
+          "category": "Gatherings & Parties",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "establishment": "Three Oaks High School",
+          "additionalLocation": "Three Oaks High School",
+          "locationScope": "",
+          "locationLabel": "",
+          "locationCity": "",
+          "locationProvince": "",
+          "locationPrecision": "",
+          "locationReviewStatus": "",
+          "startDate": "2026-11-15",
+          "startTime": "09:00",
+          "endDate": "2026-11-15",
+          "endTime": "17:00",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "recurringDaysOfWeek": [],
+          "recurringWeekdaySequence": [],
+          "recurringWeekInterval": null,
+          "totalOccurrences": null,
+          "recurrenceUntilDate": "",
+          "ticketLink": "",
+          "ticketsBuyUrl": "",
+          "timeResolution": {
+            "hoursUsed": false
+          },
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Sun 9 AM-5 PM"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "Sun 9 AM-5 PM"
+            }
+          },
+          "structuredLocationValidation": null,
+          "_sourceType": null,
+          "description": "Sunday — Craft fair listed as part of the Summerside Christmas Craft Trail."
+        }
+      ],
+      "binding": {
+        "uniqueSnapshot": true,
+        "inputComplete": true,
+        "originalRawRowAvailable": true,
+        "originalCaptionFieldsEvidence": "luna-oct17-production-audit/input-rows.json: index214",
+        "rawCaptionEqualsSnapshotPrefix": true,
+        "inputTextOriginalSHA256": "5a6ee61bebdd183a99f4f30156ec737fc77080aff92fc013c883aa78186642f5",
+        "stage3SpatialPresence": [
+          true,
+          true,
+          true,
+          true
+        ],
+        "stage4SpatialPresence": [
+          true,
+          true,
+          true,
+          true
+        ],
+        "savedPostFormatSpatialPresence": [
+          false,
+          false,
+          false,
+          false
+        ]
+      }
+    },
+    {
+      "snapshotPath": "parse_snapshots/1YPf2cKvXfXl8L0HVL63VZ2zeTLEvWlit_105_1792068722420",
+      "snapshotOriginalBodyHash": "50628ea4f88027e9253134badc5b19e856b356b84add6a3c113bf81dd2d95614",
+      "rowIndex": 105,
+      "fileId": "1YPf2cKvXfXl8L0HVL63VZ2zeTLEvWlit",
+      "sourceUniqueId": "1732801838854635",
+      "establishment": "Central Coastal Drive PEI",
+      "row": {
+        "text": "Join Village Pottery on Saturday, October 24th for Pumpkins & Pottery, a hands-on workshop where you’ll create your own clay jack-o’-lantern tea light, enjoy fall-inspired treats, and get 15% off in-store purchases!\n\n Saturday, October 24 | 10–11:30 AM\n\nSpaces are limited, so be sure to grab your tickets! ",
+        "sharedPostText": "Introducing: Pumpkins & Pottery! \n\nSaturday, October 24th from 10am-11:30am. We’ll teach you how to craft your own clay jack-o’-lantern tea light and you’ll also receive 15% off the entire store. Fall flavored drinks and snacks provided. \n\nSpace is very limited so get your tickets ➡️ [OMITTED_QUERY_URL]\n\nYour pottery creation will be glazed and finished by the Village Pottery team within 2-3 weeks. We will contact you when it’s ready for pickup! \n\nHappy Halloween  \n\n#pottery #workshop #playintheclay #villagepottery #diy",
+        "sharedPostAuthorName": "Village Pottery",
+        "sharedPostAuthorUrl": "https://www.facebook.com/VillagePotteryPEI",
+        "sharedPostUrl": "https://www.facebook.com/VillagePotteryPEI/posts/pfbid0Gkxby53zp8dSVdF2EfoJMH6fTff3wNYMD5t18chKPpyMtRo6rJ3B3wt1zMk2Wirxl",
+        "sharedPostTimestamp": "2026-10-14T15:57:26.000Z",
+        "pageName": "CentralCoastalPEI",
+        "userName": "Central Coastal Drive PEI",
+        "timestamp": "2026-10-14T18:25:27.000Z",
+        "utcStartDate": "",
+        "parserMode": "full5stage",
+        "dryRun": false,
+        "uniqueId": "1732801838854635",
+        "ocrText": "May be an image of text\nMay be an image of text",
+        "facebookUrl": "https://www.facebook.com/CentralCoastalPEI"
+      },
+      "combinedText": "Introducing: Pumpkins & Pottery! \n\nSaturday, October 24th from 10am-11:30am. We’ll teach you how to craft your own clay jack-o’-lantern tea light and you’ll also receive 15% off the entire store. Fall flavored drinks and snacks provided. \n\nSpace is very limited so get your tickets ➡️ [OMITTED_QUERY_URL]\n\nYour pottery creation will be glazed and finished by the Village Pottery team within 2-3 weeks. We will contact you when it’s ready for pickup! \n\nHappy Halloween  \n\n#pottery #workshop #playintheclay #villagepottery #diy\n\nJoin Village Pottery on Saturday, October 24th for Pumpkins & Pottery, a hands-on workshop where you’ll create your own clay jack-o’-lantern tea light, enjoy fall-inspired treats, and get 15% off in-store purchases!\n\n Saturday, October 24 | 10–11:30 AM\n\nSpaces are limited, so be sure to grab your tickets! \n\nOCR TEXT:\nMay be an image of text\nMay be an image of text",
+      "stage3Items": [
+        {
+          "name": "PUMPKINS & POTTERY",
+          "description": "Saturday, October 24th: A hands-on workshop to create your own clay jack-o’-lantern tea light. The Village Pottery team will glaze and finish your creation within 2–3 weeks and contact you when it is ready for pickup. Participants also receive 15% off the entire store.",
+          "date": "2026-10-24",
+          "startTime": "10:00",
+          "endTime": "11:30",
+          "venue": "Village Pottery",
+          "ticketLink": "[OMITTED_MEDIA_OR_QUERY_URL]",
+          "price": "",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "A dated, timed hands-on pottery workshop is explicitly advertised.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "10–11:30am"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "10–11:30am"
+            }
+          },
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              {
+                "label": "Village Pottery",
+                "address": "",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "Join Village Pottery on Saturday, October 24th for Pumpkins & Pottery"
+              }
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "Village Pottery is named as the workshop host; no street address is provided."
+          },
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 1
+        }
+      ],
+      "stage4Items": [
+        {
+          "name": "PUMPKINS & POTTERY",
+          "description": "Saturday, October 24th: A hands-on workshop to create your own clay jack-o’-lantern tea light. The Village Pottery team will glaze and finish your creation within 2–3 weeks and contact you when it is ready for pickup. Participants also receive 15% off the entire store.",
+          "date": "2026-10-24",
+          "startTime": "10:00",
+          "endTime": "11:30",
+          "venue": "Village Pottery",
+          "ticketLink": "[OMITTED_MEDIA_OR_QUERY_URL]",
+          "price": "",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "A dated, timed hands-on pottery workshop is explicitly advertised.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "10–11:30am"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "10–11:30am"
+            }
+          },
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              {
+                "label": "Village Pottery",
+                "address": "",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "Join Village Pottery on Saturday, October 24th for Pumpkins & Pottery"
+              }
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "Village Pottery is named as the workshop host; no street address is provided."
+          },
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 1
+        }
+      ],
+      "savedPostFormatEvents": [
+        {
+          "id": "1732801838854635",
+          "name": "PUMPKINS & POTTERY",
+          "category": "Workshops & Classes",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "establishment": "Village Pottery",
+          "additionalLocation": "Village Pottery",
+          "locationScope": "",
+          "locationLabel": "",
+          "locationCity": "",
+          "locationProvince": "",
+          "locationPrecision": "",
+          "locationReviewStatus": "",
+          "startDate": "2026-10-24",
+          "startTime": "10:00",
+          "endDate": "2026-10-24",
+          "endTime": "11:30",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "recurringDaysOfWeek": [],
+          "recurringWeekdaySequence": [],
+          "recurringWeekInterval": null,
+          "totalOccurrences": null,
+          "recurrenceUntilDate": "",
+          "ticketLink": "[OMITTED_MEDIA_OR_QUERY_URL]",
+          "ticketsBuyUrl": "[OMITTED_MEDIA_OR_QUERY_URL]",
+          "timeResolution": {
+            "hoursUsed": false
+          },
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "10–11:30am"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "10–11:30am"
+            }
+          },
+          "_sourceType": null,
+          "description": "A hands-on workshop to create your own clay jack-o’-lantern tea light. The Village Pottery team will glaze and finish your creation within 2–3 weeks and contact you when it is ready for pickup. Participants also receive 15% off the entire s"
+        }
+      ],
+      "binding": {
+        "uniqueSnapshot": true,
+        "inputComplete": true,
+        "originalRawRowAvailable": false,
+        "originalCaptionFieldsEvidence": "luna-oct15-production-audit/source-review/source-row-ledger-372.json: row105 exact source ID",
+        "rawCaptionEqualsSnapshotPrefix": true,
+        "inputTextOriginalSHA256": "30e546bab66a7a6047080750e23f8fe218b700fa19bf066d0fae2f782219311e",
+        "stage3SpatialPresence": [
+          true
+        ],
+        "stage4SpatialPresence": [
+          true
+        ],
+        "savedPostFormatSpatialPresence": [
+          false
+        ]
+      }
+    },
+    {
+      "snapshotPath": "parse_snapshots/1JFQdQB-pAXdAb0usJhNFf5mrWnWyBd7g_185_1792242837240",
+      "snapshotOriginalBodyHash": "e94d6fe66afbe7790a1e4e6446202956cbf5f5d3de70ef66c353fa471e7e5a3b",
+      "rowIndex": 185,
+      "fileId": "1JFQdQB-pAXdAb0usJhNFf5mrWnWyBd7g",
+      "sourceUniqueId": "1696239855847852",
+      "establishment": "Tignish Co-op",
+      "row": {
+        "text": "",
+        "sharedPostText": "",
+        "pageName": "tignish.coop",
+        "userName": "Tignish Co-op",
+        "timestamp": "2026-10-16T01:58:43.000Z",
+        "utcStartDate": "",
+        "parserMode": "full5stage",
+        "dryRun": false,
+        "uniqueId": "1696239855847852",
+        "ocrText": "May be an image of text",
+        "facebookUrl": "https://www.facebook.com/tignish.coop"
+      },
+      "combinedText": "OCR TEXT:\nMay be an image of text",
+      "stage3Items": [
+        {
+          "name": "Family Skate",
+          "description": "Every Sunday. Oct 18th | 5 PM. Begins the 2026/2027 Family Skate season. Free family fun!",
+          "date": "2026-10-18",
+          "startTime": "17:00",
+          "endTime": "",
+          "venue": "Tignish Credit Union Arena",
+          "ticketLink": "",
+          "price": "Free",
+          "relevantImageIndex": 0,
+          "recurringPattern": "weekly_sunday",
+          "extractionReason": "The poster advertises a public family skating activity every Sunday, with the season beginning October 18 at 5 PM.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "5 PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              {
+                "label": "Tignish Credit Union Arena",
+                "address": "",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "TIGNISH CREDIT UNION ARENA"
+              }
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The poster names Tignish Credit Union Arena as the event location."
+          },
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 1
+        }
+      ],
+      "stage4Items": [
+        {
+          "name": "Family Skate",
+          "description": "Every Sunday. Oct 18th | 5 PM. Begins the 2026/2027 Family Skate season. Free family fun!",
+          "date": "2026-10-18",
+          "startTime": "17:00",
+          "endTime": "",
+          "venue": "Tignish Credit Union Arena",
+          "ticketLink": "",
+          "price": "Free",
+          "relevantImageIndex": 0,
+          "recurringPattern": "weekly_sunday",
+          "extractionReason": "The poster advertises a public family skating activity every Sunday, with the season beginning October 18 at 5 PM.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "5 PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              {
+                "label": "Tignish Credit Union Arena",
+                "address": "",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "TIGNISH CREDIT UNION ARENA"
+              }
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The poster names Tignish Credit Union Arena as the event location."
+          },
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 1
+        }
+      ],
+      "savedPostFormatEvents": [
+        {
+          "id": "1696239855847852",
+          "name": "Family Skate",
+          "category": "Sports",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "establishment": "Tignish Credit Union Arena",
+          "additionalLocation": "Tignish Credit Union Arena",
+          "locationScope": "",
+          "locationLabel": "",
+          "locationCity": "",
+          "locationProvince": "",
+          "locationPrecision": "",
+          "locationReviewStatus": "",
+          "startDate": "2026-10-18",
+          "startTime": "17:00",
+          "endDate": "2026-10-18",
+          "endTime": "23:00",
+          "isRecurring": "Yes",
+          "recurringPattern": "weekly_sunday",
+          "recurringDaysOfWeek": [],
+          "recurringWeekdaySequence": [],
+          "recurringWeekInterval": null,
+          "totalOccurrences": null,
+          "recurrenceUntilDate": "",
+          "ticketLink": "",
+          "ticketsBuyUrl": "",
+          "timeResolution": {
+            "hoursUsed": false,
+            "reason": "no_place_match",
+            "endFromHours": "category_default"
+          },
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "5 PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "structuredLocationValidation": null,
+          "_sourceType": null,
+          "description": "Every Sunday. Oct 18th | 5 PM. Begins the 2026/2027 Family Skate season. Free family fun!"
+        }
+      ],
+      "binding": {
+        "uniqueSnapshot": true,
+        "inputComplete": true,
+        "originalRawRowAvailable": true,
+        "originalCaptionFieldsEvidence": "luna-oct17-production-audit/input-rows.json: index185",
+        "rawCaptionEqualsSnapshotPrefix": true,
+        "inputTextOriginalSHA256": "44f4b19a1da38da7004e453fc72ac06329a2c1d58aa8446e28ffaffaa811d76a",
+        "stage3SpatialPresence": [
+          true
+        ],
+        "stage4SpatialPresence": [
+          true
+        ],
+        "savedPostFormatSpatialPresence": [
+          false
+        ]
+      }
+    },
+    {
+      "snapshotPath": "parse_snapshots/1JFQdQB-pAXdAb0usJhNFf5mrWnWyBd7g_27_1792240925261",
+      "snapshotOriginalBodyHash": "e3a2604e080d70184e01c5315556134a4709fbe2e01e2f20d628fa2d085bdd20",
+      "rowIndex": 27,
+      "fileId": "1JFQdQB-pAXdAb0usJhNFf5mrWnWyBd7g",
+      "sourceUniqueId": "1735968125204476",
+      "establishment": "95.1 FM CFCY",
+      "row": {
+        "text": "",
+        "sharedPostText": "This fall, 95.1 FM CFCY is coming together to help Islanders in need!\n\nJoin us for the Island Wide Food Drive, every Tuesday and Thursday, October 20th through November 5th.\n\n95.1 FM CFCY will be live on location collecting food donations for food banks across PEI!\n\nVisit us at The Haunted Mansion, No Frills Charlottetown, Kay’s Wholesale, HBM Summerside, or Summerside Butcher Shop. ‘\n\nLet’s fill the shelves and help feed our Island community!\n\nOct. 20 – 12p-4p – Connor and Kennedys No Frills in Charlottetown\nOct. 22 – 4p-7p – The Haunted Mansion in Kensington\nOct. 27 – 12p-4p – Summerside Butcher Shop\nOct. 29 – 12p-4p – Kay’s Wholesale and Fresh Market\nNov. 3 – 12p-4p – Browns Volkswagen\nNov. 5 – 12p-4p – HBM Summerside",
+        "sharedPostAuthorName": "95.1 FM CFCY",
+        "sharedPostAuthorUrl": "https://www.facebook.com/951fmcfcy",
+        "sharedPostUrl": "https://www.facebook.com/951fmcfcy/posts/pfbid0uPeGjgLfm6CFx9pH6KArSaXMEBcZ4ans3gMFeh1659RxSrCmKczZcPx7GcoY9xnhl",
+        "sharedPostTimestamp": "2026-10-16T14:13:47.000Z",
+        "pageName": "951fmcfcy",
+        "userName": "95.1 FM CFCY",
+        "timestamp": "2026-10-16T15:59:03.000Z",
+        "utcStartDate": "",
+        "parserMode": "full5stage",
+        "dryRun": false,
+        "uniqueId": "1735968125204476",
+        "ocrText": "May be a graphic of text\nMay be a graphic of text",
+        "facebookUrl": "https://www.facebook.com/951fmcfcy"
+      },
+      "combinedText": "This fall, 95.1 FM CFCY is coming together to help Islanders in need!\n\nJoin us for the Island Wide Food Drive, every Tuesday and Thursday, October 20th through November 5th.\n\n95.1 FM CFCY will be live on location collecting food donations for food banks across PEI!\n\nVisit us at The Haunted Mansion, No Frills Charlottetown, Kay’s Wholesale, HBM Summerside, or Summerside Butcher Shop. ‘\n\nLet’s fill the shelves and help feed our Island community!\n\nOct. 20 – 12p-4p – Connor and Kennedys No Frills in Charlottetown\nOct. 22 – 4p-7p – The Haunted Mansion in Kensington\nOct. 27 – 12p-4p – Summerside Butcher Shop\nOct. 29 – 12p-4p – Kay’s Wholesale and Fresh Market\nNov. 3 – 12p-4p – Browns Volkswagen\nNov. 5 – 12p-4p – HBM Summerside\n\nOCR TEXT:\nMay be a graphic of text\nMay be a graphic of text",
+      "stage3Items": [
+        {
+          "name": "Island Wide Food Drive",
+          "day": "Tuesday",
+          "date": "2026-10-20",
+          "recurringPattern": "none",
+          "startTime": "12:00",
+          "endTime": "16:00",
+          "venue": "Connor and Kennedys No Frills, Charlottetown",
+          "price": "",
+          "description": "95.1 FM CFCY will be live on location collecting food donations for food banks across PEI.",
+          "extractionReason": "A dated schedule line lists a food drive stop, time range, and venue.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "12p-4p"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "12p-4p"
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_sourceOccurrenceCount": 6,
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 6
+        },
+        {
+          "name": "Island Wide Food Drive",
+          "day": "Thursday",
+          "date": "2026-10-22",
+          "recurringPattern": "none",
+          "startTime": "16:00",
+          "endTime": "19:00",
+          "venue": "The Haunted Mansion, Kensington",
+          "price": "",
+          "description": "95.1 FM CFCY will be live on location collecting food donations for food banks across PEI.",
+          "extractionReason": "A dated schedule line lists a food drive stop, time range, and venue.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "4p-7p"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "4p-7p"
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_sourceOccurrenceCount": 6,
+          "_pipelineIndex": 2,
+          "_pipelineTotalStage3": 6
+        },
+        {
+          "name": "Island Wide Food Drive",
+          "day": "Tuesday",
+          "date": "2026-10-27",
+          "recurringPattern": "none",
+          "startTime": "12:00",
+          "endTime": "16:00",
+          "venue": "Summerside Butcher Shop",
+          "price": "",
+          "description": "95.1 FM CFCY will be live on location collecting food donations for food banks across PEI.",
+          "extractionReason": "A dated schedule line lists a food drive stop, time range, and venue.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "12p-4p"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "12p-4p"
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_sourceOccurrenceCount": 6,
+          "_pipelineIndex": 3,
+          "_pipelineTotalStage3": 6
+        },
+        {
+          "name": "Island Wide Food Drive",
+          "day": "Thursday",
+          "date": "2026-10-29",
+          "recurringPattern": "none",
+          "startTime": "12:00",
+          "endTime": "16:00",
+          "venue": "Kay’s Wholesale and Fresh Market",
+          "price": "",
+          "description": "95.1 FM CFCY will be live on location collecting food donations for food banks across PEI.",
+          "extractionReason": "A dated schedule line lists a food drive stop, time range, and venue.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "12p-4p"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "12p-4p"
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_sourceOccurrenceCount": 6,
+          "_pipelineIndex": 4,
+          "_pipelineTotalStage3": 6
+        },
+        {
+          "name": "Island Wide Food Drive",
+          "day": "Tuesday",
+          "date": "2026-11-03",
+          "recurringPattern": "none",
+          "startTime": "12:00",
+          "endTime": "16:00",
+          "venue": "Browns Volkswagen",
+          "price": "",
+          "description": "95.1 FM CFCY will be live on location collecting food donations for food banks across PEI.",
+          "extractionReason": "A dated schedule line lists a food drive stop, time range, and venue.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "12p-4p"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "12p-4p"
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_sourceOccurrenceCount": 6,
+          "_pipelineIndex": 5,
+          "_pipelineTotalStage3": 6
+        },
+        {
+          "name": "Island Wide Food Drive",
+          "day": "Thursday",
+          "date": "2026-11-05",
+          "recurringPattern": "none",
+          "startTime": "12:00",
+          "endTime": "16:00",
+          "venue": "HBM Summerside",
+          "price": "",
+          "description": "95.1 FM CFCY will be live on location collecting food donations for food banks across PEI.",
+          "extractionReason": "A dated schedule line lists a food drive stop, time range, and venue.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "12p-4p"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "12p-4p"
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_sourceOccurrenceCount": 6,
+          "_pipelineIndex": 6,
+          "_pipelineTotalStage3": 6
+        }
+      ],
+      "stage4Items": [
+        {
+          "name": "Island Wide Food Drive",
+          "day": "Tuesday",
+          "date": "2026-10-20",
+          "recurringPattern": "none",
+          "startTime": "12:00",
+          "endTime": "16:00",
+          "venue": "Connor and Kennedys No Frills, Charlottetown",
+          "price": "",
+          "description": "95.1 FM CFCY will be live on location collecting food donations for food banks across PEI.",
+          "extractionReason": "A dated schedule line lists a food drive stop, time range, and venue.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "12p-4p"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "12p-4p"
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_sourceOccurrenceCount": 6,
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 6
+        },
+        {
+          "name": "Island Wide Food Drive",
+          "day": "Thursday",
+          "date": "2026-10-22",
+          "recurringPattern": "none",
+          "startTime": "16:00",
+          "endTime": "19:00",
+          "venue": "The Haunted Mansion, Kensington",
+          "price": "",
+          "description": "95.1 FM CFCY will be live on location collecting food donations for food banks across PEI.",
+          "extractionReason": "A dated schedule line lists a food drive stop, time range, and venue.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "4p-7p"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "4p-7p"
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_sourceOccurrenceCount": 6,
+          "_pipelineIndex": 2,
+          "_pipelineTotalStage3": 6
+        },
+        {
+          "name": "Island Wide Food Drive",
+          "day": "Tuesday",
+          "date": "2026-10-27",
+          "recurringPattern": "none",
+          "startTime": "12:00",
+          "endTime": "16:00",
+          "venue": "Summerside Butcher Shop",
+          "price": "",
+          "description": "95.1 FM CFCY will be live on location collecting food donations for food banks across PEI.",
+          "extractionReason": "A dated schedule line lists a food drive stop, time range, and venue.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "12p-4p"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "12p-4p"
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_sourceOccurrenceCount": 6,
+          "_pipelineIndex": 3,
+          "_pipelineTotalStage3": 6
+        },
+        {
+          "name": "Island Wide Food Drive",
+          "day": "Thursday",
+          "date": "2026-10-29",
+          "recurringPattern": "none",
+          "startTime": "12:00",
+          "endTime": "16:00",
+          "venue": "Kay’s Wholesale and Fresh Market",
+          "price": "",
+          "description": "95.1 FM CFCY will be live on location collecting food donations for food banks across PEI.",
+          "extractionReason": "A dated schedule line lists a food drive stop, time range, and venue.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "12p-4p"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "12p-4p"
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_sourceOccurrenceCount": 6,
+          "_pipelineIndex": 4,
+          "_pipelineTotalStage3": 6
+        },
+        {
+          "name": "Island Wide Food Drive",
+          "day": "Tuesday",
+          "date": "2026-11-03",
+          "recurringPattern": "none",
+          "startTime": "12:00",
+          "endTime": "16:00",
+          "venue": "Browns Volkswagen",
+          "price": "",
+          "description": "95.1 FM CFCY will be live on location collecting food donations for food banks across PEI.",
+          "extractionReason": "A dated schedule line lists a food drive stop, time range, and venue.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "12p-4p"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "12p-4p"
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_sourceOccurrenceCount": 6,
+          "_pipelineIndex": 5,
+          "_pipelineTotalStage3": 6
+        },
+        {
+          "name": "Island Wide Food Drive",
+          "day": "Thursday",
+          "date": "2026-11-05",
+          "recurringPattern": "none",
+          "startTime": "12:00",
+          "endTime": "16:00",
+          "venue": "HBM Summerside",
+          "price": "",
+          "description": "95.1 FM CFCY will be live on location collecting food donations for food banks across PEI.",
+          "extractionReason": "A dated schedule line lists a food drive stop, time range, and venue.",
+          "relevantImageIndex": 0,
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "12p-4p"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "12p-4p"
+            }
+          },
+          "type": "event",
+          "_sourceType": "schedule",
+          "_sourceOccurrenceCount": 6,
+          "_pipelineIndex": 6,
+          "_pipelineTotalStage3": 6
+        }
+      ],
+      "savedPostFormatEvents": [
+        {
+          "id": "1735968125204476",
+          "name": "Island Wide Food Drive",
+          "category": "Gatherings & Parties",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "establishment": "Connor and Kennedys No Frills, Charlottetown",
+          "additionalLocation": "Connor and Kennedys No Frills, Charlottetown",
+          "locationScope": "",
+          "locationLabel": "",
+          "locationCity": "",
+          "locationProvince": "",
+          "locationPrecision": "",
+          "locationReviewStatus": "",
+          "startDate": "2026-10-20",
+          "startTime": "12:00",
+          "endDate": "2026-10-20",
+          "endTime": "16:00",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "recurringDaysOfWeek": [],
+          "recurringWeekdaySequence": [],
+          "recurringWeekInterval": null,
+          "totalOccurrences": null,
+          "recurrenceUntilDate": "",
+          "ticketLink": "",
+          "ticketsBuyUrl": "",
+          "timeResolution": {
+            "hoursUsed": false
+          },
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "12p-4p"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "12p-4p"
+            }
+          },
+          "structuredLocationValidation": null,
+          "_sourceType": "schedule",
+          "description": "95.1 FM CFCY will be live on location collecting food donations for food banks across PEI."
+        },
+        {
+          "id": "1735968125204476",
+          "name": "Island Wide Food Drive",
+          "category": "Gatherings & Parties",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "establishment": "The Haunted Mansion, Kensington",
+          "additionalLocation": "The Haunted Mansion, Kensington",
+          "locationScope": "",
+          "locationLabel": "",
+          "locationCity": "",
+          "locationProvince": "",
+          "locationPrecision": "",
+          "locationReviewStatus": "",
+          "startDate": "2026-10-22",
+          "startTime": "16:00",
+          "endDate": "2026-10-22",
+          "endTime": "19:00",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "recurringDaysOfWeek": [],
+          "recurringWeekdaySequence": [],
+          "recurringWeekInterval": null,
+          "totalOccurrences": null,
+          "recurrenceUntilDate": "",
+          "ticketLink": "",
+          "ticketsBuyUrl": "",
+          "timeResolution": {
+            "hoursUsed": false
+          },
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "4p-7p"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "4p-7p"
+            }
+          },
+          "structuredLocationValidation": null,
+          "_sourceType": "schedule",
+          "description": "95.1 FM CFCY will be live on location collecting food donations for food banks across PEI."
+        },
+        {
+          "id": "1735968125204476",
+          "name": "Island Wide Food Drive",
+          "category": "Gatherings & Parties",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "establishment": "Summerside Butcher Shop",
+          "additionalLocation": "Summerside Butcher Shop",
+          "locationScope": "",
+          "locationLabel": "",
+          "locationCity": "",
+          "locationProvince": "",
+          "locationPrecision": "",
+          "locationReviewStatus": "",
+          "startDate": "2026-10-27",
+          "startTime": "12:00",
+          "endDate": "2026-10-27",
+          "endTime": "16:00",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "recurringDaysOfWeek": [],
+          "recurringWeekdaySequence": [],
+          "recurringWeekInterval": null,
+          "totalOccurrences": null,
+          "recurrenceUntilDate": "",
+          "ticketLink": "",
+          "ticketsBuyUrl": "",
+          "timeResolution": {
+            "hoursUsed": false
+          },
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "12p-4p"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "12p-4p"
+            }
+          },
+          "structuredLocationValidation": null,
+          "_sourceType": "schedule",
+          "description": "95.1 FM CFCY will be live on location collecting food donations for food banks across PEI."
+        },
+        {
+          "id": "1735968125204476",
+          "name": "Island Wide Food Drive",
+          "category": "Gatherings & Parties",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "establishment": "Kay’s Wholesale and Fresh Market",
+          "additionalLocation": "Kay’s Wholesale and Fresh Market",
+          "locationScope": "",
+          "locationLabel": "",
+          "locationCity": "",
+          "locationProvince": "",
+          "locationPrecision": "",
+          "locationReviewStatus": "",
+          "startDate": "2026-10-29",
+          "startTime": "12:00",
+          "endDate": "2026-10-29",
+          "endTime": "16:00",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "recurringDaysOfWeek": [],
+          "recurringWeekdaySequence": [],
+          "recurringWeekInterval": null,
+          "totalOccurrences": null,
+          "recurrenceUntilDate": "",
+          "ticketLink": "",
+          "ticketsBuyUrl": "",
+          "timeResolution": {
+            "hoursUsed": false
+          },
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "12p-4p"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "12p-4p"
+            }
+          },
+          "structuredLocationValidation": null,
+          "_sourceType": "schedule",
+          "description": "95.1 FM CFCY will be live on location collecting food donations for food banks across PEI."
+        },
+        {
+          "id": "1735968125204476",
+          "name": "Island Wide Food Drive",
+          "category": "Gatherings & Parties",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "establishment": "Browns Volkswagen",
+          "additionalLocation": "Browns Volkswagen",
+          "locationScope": "",
+          "locationLabel": "",
+          "locationCity": "",
+          "locationProvince": "",
+          "locationPrecision": "",
+          "locationReviewStatus": "",
+          "startDate": "2026-11-03",
+          "startTime": "12:00",
+          "endDate": "2026-11-03",
+          "endTime": "16:00",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "recurringDaysOfWeek": [],
+          "recurringWeekdaySequence": [],
+          "recurringWeekInterval": null,
+          "totalOccurrences": null,
+          "recurrenceUntilDate": "",
+          "ticketLink": "",
+          "ticketsBuyUrl": "",
+          "timeResolution": {
+            "hoursUsed": false
+          },
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "12p-4p"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "12p-4p"
+            }
+          },
+          "structuredLocationValidation": null,
+          "_sourceType": "schedule",
+          "description": "95.1 FM CFCY will be live on location collecting food donations for food banks across PEI."
+        },
+        {
+          "id": "1735968125204476",
+          "name": "Island Wide Food Drive",
+          "category": "Gatherings & Parties",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "establishment": "HBM Summerside",
+          "additionalLocation": "HBM Summerside",
+          "locationScope": "",
+          "locationLabel": "",
+          "locationCity": "",
+          "locationProvince": "",
+          "locationPrecision": "",
+          "locationReviewStatus": "",
+          "startDate": "2026-11-05",
+          "startTime": "12:00",
+          "endDate": "2026-11-05",
+          "endTime": "16:00",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "recurringDaysOfWeek": [],
+          "recurringWeekdaySequence": [],
+          "recurringWeekInterval": null,
+          "totalOccurrences": null,
+          "recurrenceUntilDate": "",
+          "ticketLink": "",
+          "ticketsBuyUrl": "",
+          "timeResolution": {
+            "hoursUsed": false
+          },
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "12p-4p"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "12p-4p"
+            }
+          },
+          "structuredLocationValidation": null,
+          "_sourceType": "schedule",
+          "description": "95.1 FM CFCY will be live on location collecting food donations for food banks across PEI."
+        }
+      ],
+      "binding": {
+        "uniqueSnapshot": true,
+        "inputComplete": true,
+        "originalRawRowAvailable": true,
+        "originalCaptionFieldsEvidence": "luna-oct17-production-audit/input-rows.json: index27",
+        "rawCaptionEqualsSnapshotPrefix": true,
+        "inputTextOriginalSHA256": "14532cb9caa206de10d9a43668dd2ebc997ce4fd9117f7f8bc1b36317d6a4a5d",
+        "stage3SpatialPresence": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ],
+        "stage4SpatialPresence": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ],
+        "savedPostFormatSpatialPresence": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ]
+      }
+    }
+  ],
+  "venues": [
+    {
+      "id": "place_d5c0c0e38cd71fdd",
+      "name": "Connor & Kennedy’s No Frills",
+      "normalizedName": "connor and kennedys no frills",
+      "pagename": "Connor & Kennedy’s No Frills",
+      "aliases": [
+        "Connor and Kennedys No Frills, Charlottetown",
+        "No Frills Charlottetown"
+      ],
+      "aliasesNormalized": [
+        "connor and kennedys no frills charlottetown",
+        "no frills charlottetown"
+      ],
+      "address": "339 University Ave, Charlottetown, PE C1A 4M8",
+      "city": "Charlottetown",
+      "province": "PE"
+    },
+    {
+      "id": "place_ae278e31081b5555",
+      "name": "Haunted Mansion",
+      "normalizedName": "haunted mansion",
+      "pagename": "Haunted Mansion",
+      "aliases": [
+        "The Haunted Mansion, Kensington"
+      ],
+      "aliasesNormalized": [
+        "the haunted mansion kensington"
+      ],
+      "address": "81 Victoria St W, Kensington, PE C0B 1M0",
+      "city": "Kensington",
+      "province": "PE"
+    },
+    {
+      "id": "place_f12b183ec2b477d2",
+      "name": "Summerside Butcher’s Shop",
+      "normalizedName": "summerside butchers shop",
+      "pagename": "Summerside Butcher’s Shop",
+      "aliases": [
+        "Summerside Butcher Shop"
+      ],
+      "aliasesNormalized": [
+        "summerside butcher shop"
+      ],
+      "address": "470 Central St, Summerside, PE C1N 3N7",
+      "city": "Summerside",
+      "province": "PE"
+    },
+    {
+      "id": "place_933863c47c88487a",
+      "name": "Brown’s Volkswagen",
+      "normalizedName": "browns volkswagen",
+      "pagename": "Brown’s Volkswagen",
+      "aliases": [
+        "Browns Volkswagen"
+      ],
+      "aliasesNormalized": [
+        "browns volkswagen"
+      ],
+      "address": "190 Sherwood Road, Charlottetown, PE, Canada",
+      "city": "Charlottetown",
+      "province": "PE"
+    },
+    {
+      "id": "place_b6bbbbce247714b6",
+      "name": "Highland Bottle & Metal",
+      "normalizedName": "highland bottle and metal",
+      "pagename": "Highland Bottle & Metal",
+      "aliases": [
+        "HBM Summerside"
+      ],
+      "aliasesNormalized": [
+        "hbm summerside"
+      ],
+      "address": "578 Notre Dame St, Summerside, PE C1N 0M1",
+      "city": "Summerside",
+      "province": "PE"
+    }
+  ]
+}

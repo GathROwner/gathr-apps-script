@@ -75,7 +75,7 @@ function buildValidatedItem(overrides: Record<string, unknown> = {}): ExtractedI
   } as ExtractedItem;
 }
 
-test('preserves calendar source type so start-only Milton classes use duration defaults', () => {
+test('preserves calendar source type so start-only Milton classes keep unknown ends', () => {
   const validatedItem = preserveValidatedItemSourceType(
     buildValidatedItem(),
     buildOriginalItem()
@@ -94,11 +94,12 @@ test('preserves calendar source type so start-only Milton classes use duration d
     ''
   );
 
-  assert.equal(resolved.endTime, '11:00');
-  assert.equal(resolved.timeResolution?.endFromHours, 'duration_default');
+  assert.equal(resolved.endTime, '');
+  assert.equal(resolved.timeResolution?.endFromHours, undefined);
+  assert.equal(resolved.timeFlags?.end?.source, 'none');
 });
 
-test('preserves calendar source type so start-only Milton social entries do not fall back to venue-close defaults', () => {
+test('preserves calendar source type so start-only Milton social entries keep unknown ends', () => {
   const validatedItem = preserveValidatedItemSourceType(
     buildValidatedItem({
       name: 'Knit/Crochet Social',
@@ -141,8 +142,9 @@ test('preserves calendar source type so start-only Milton social entries do not 
     ''
   );
 
-  assert.equal(resolved.endTime, '15:30');
-  assert.equal(resolved.timeResolution?.endFromHours, 'duration_default');
+  assert.equal(resolved.endTime, '');
+  assert.equal(resolved.timeResolution?.endFromHours, undefined);
+  assert.equal(resolved.timeFlags?.end?.source, 'none');
 });
 
 test('stage 4 source-type preservation restores missing calendar metadata from the original extracted item', () => {

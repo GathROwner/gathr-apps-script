@@ -31,6 +31,7 @@ import {
   resolveStageModel,
 } from './runtimeConfig.js';
 import { logger } from '../utils/logger.js';
+import { isCalendarVenueOnlyHeading } from './sourcePublicationPolicy.js';
 import { findCalendarOcrNameDisputes } from './calendarNameDisputes.js';
 import { buildGuardedCalendarInventoryAdditions, hasCompleteCalendarInventoryReads,
   isCalendarInventoryEventObject,
@@ -225,6 +226,7 @@ async function extractEvents(
     if (parsed && Array.isArray(parsed.extractedEvents)) {
       // Post-process each event
       const processedEvents = parsed.extractedEvents.map((event: ExtractedEvent) => {
+        delete (event as any)._recurrenceEvidence;
         // Sanitize recurringPattern
         event.recurringPattern = sanitizeRecurringPattern(event.recurringPattern);
 
@@ -245,19 +247,9 @@ async function extractEvents(
         }
 
         // Recurring pattern detection
-        let detectedPattern = detectRecurringPattern(event.description);
-        if (detectedPattern === 'none') {
-          detectedPattern = detectRecurringPattern(combinedText);
-        }
-
-        if (detectedPattern !== 'none') {
-          if (!event.recurringPattern || event.recurringPattern === 'none') {
-            logger.debug(`Detected recurring pattern for "${event.name}": ${detectedPattern}`);
-            event.recurringPattern = detectedPattern;
-          }
-        }
-
-        return event;
+        // A mixed announcement can contain independent one-offs and a weekly
+        // programme. Only this item's wording can supply fallback recurrence.
+        return applyItemScopedRecurrence(event, combinedText);
       });
 
       // Log extraction summary
@@ -3160,6 +3152,7 @@ function parseCalendarOcrText(
   let currentDay: number | null = null;
   let pendingNameParts: string[] = [];
   let lastEventName = '';
+  let venueHeadingWithoutActivity = false;
 
   const dayHeaderRe =
     /^(sun|mon|tue|wed|thu|fri|sat)(\s+(sun|mon|tue|wed|thu|fri|sat))*$/i;
@@ -3175,6 +3168,12 @@ function parseCalendarOcrText(
     if (/^(&|and)$/i.test(line)) continue;
     if (/^(am|pm)$/i.test(line)) continue;
     if (/^no\b/i.test(line)) continue;
+    if (isCalendarVenueOnlyHeading(line,userName)) {
+      pendingNameParts=[line];
+      lastEventName='';
+      venueHeadingWithoutActivity=true;
+      continue;
+    }
 
     const dayMatch = line.match(standaloneDayLineRe);
     if (dayMatch) {
@@ -3216,6 +3215,14 @@ function parseCalendarOcrText(
         ? cleanedLineName
         : cleanOcrEventName(previousName || lastEventName || 'Event');
 
+      if (explicitDate && name && isCalendarVenueOnlyHeading(name,userName)) {
+        // Do not borrow a more distant name, last activity, or generic Event.
+        currentDay = explicitDay;
+        pendingNameParts = [];
+        lastEventName = '';
+        venueHeadingWithoutActivity=true;
+        continue;
+      }
       if (explicitDate && name && (resolvedRange?.startTime || extractTimeTokens(line).length > 0)) {
         const timeTokens = resolvedRange?.startTime ? [] : extractTimeTokens(line);
         const startTimes = resolvedRange?.startTime ? [resolvedRange.startTime] : timeTokens;
@@ -3267,6 +3274,9 @@ function parseCalendarOcrText(
           : nameFromLine || lastEventName || 'Event';
       pendingNameParts = [];
       lastEventName = name;
+      if (isCalendarVenueOnlyHeading(name,userName) ||
+          (venueHeadingWithoutActivity && name==='Event')) { lastEventName=''; continue; }
+      venueHeadingWithoutActivity=false;
       events.push({
         name,
         type: 'event',
@@ -3290,6 +3300,9 @@ function parseCalendarOcrText(
           : nameFromLine || lastEventName || 'Event';
       pendingNameParts = [];
       lastEventName = name;
+      if (isCalendarVenueOnlyHeading(name,userName) ||
+          (venueHeadingWithoutActivity && name==='Event')) { lastEventName=''; continue; }
+      venueHeadingWithoutActivity=false;
 
       for (const startTime of timeMatches) {
         events.push({
@@ -3307,6 +3320,7 @@ function parseCalendarOcrText(
       continue;
     }
 
+    if(venueHeadingWithoutActivity) { pendingNameParts=[]; venueHeadingWithoutActivity=false; }
     pendingNameParts.push(line);
   }
 
@@ -3352,6 +3366,7 @@ function parseExplicitDateLineCalendarOcrItems(
     const lineName = cleanOcrEventName(stripTimeTokens(line.replace(explicitDateMatch[0], ' ')));
     const previousName = findPreviousOcrName(lines, index);
     const name = lineName || previousName || 'Event';
+    if (isCalendarVenueOnlyHeading(name,userName)) continue;
     items.push({
       name,
       type: 'event',
@@ -3756,6 +3771,7 @@ Image Preprocessing
 - If the poster shows separate weekday tiles/lines (e.g., Thursday / Friday / Saturday), treat EACH tile/line as its own region. Read the time from WITHIN the same region as the act for that day.
 
 DATE RESOLUTION RULES (MANDATORY — EXACT ALGORITHM):
+- A bare two-digit URL slug token is not a printed year: in october-28th-25-doors-630-pm, 25 may be a ticket price. Never promote it into 2025 or describe it as year proof. Preserve a clearly printed full year; otherwise use the dated caption context and retain uncertainty for linked-source verification. Doors opening is not the performance start.
 - Never use the post date as a fallback for an undated activity. Resolve a printed date, today/tonight, an explicitly advertised current availability period, or a relative weekday/weekend; otherwise leave date empty and explain the missing anchor.
 - A Weekend Market advertised on a weekday belongs to the coming Saturday/Sunday, not the posting weekday. Create each offered day separately, obey explicit closures, and do not infer indefinite recurrence.
 - Timezone: use ${tz}. Convert ${timestamp} to the posted LOCAL date = ${postedLocalDate} and weekday = ${postedLocalPretty.split(' ')[1]}.
@@ -4248,6 +4264,7 @@ CONTENT:
 ${calendarRules}
 
 RULES:
+- Never infer a year from a bare two-digit URL slug token; it may be a ticket price. Preserve explicitly printed full years and retain unresolved year/clock uncertainty for source verification. Doors opening is not the performance start.
 - Use image text (OCR) when available; otherwise rely on the text.
 - Use explicit dates or unambiguous relative dates such as today/tonight or the coming advertised weekday/weekend. Never assign the reference date to an undated activity; leave date empty. A currently advertised food deal can use the post date as its offer-window start.
 - If a time is not explicit, leave startTime/endTime as empty strings.
@@ -4411,6 +4428,24 @@ function sanitizeRecurringPattern(pattern: string | undefined): RecurringPattern
 /**
  * Detect recurring pattern from text
  */
+export function applyItemScopedRecurrence<T extends ExtractedItem>(event: T, caption = ''): T {
+  let text = `${event.name} ${event.description || ''}`;
+  let detectedPattern = detectRecurringPattern(text);
+  if (detectedPattern === 'none' && event.name.trim()) {
+    // Recover an omitted cadence only from a literal caption sentence that
+    // names this exact activity. OCR/global context is never a fallback.
+    const escaped = event.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const title = new RegExp(`\\b${escaped}\\b`, 'i');
+    const namedCadence=new RegExp(`${escaped}[\\s:,-]*(?:(?:continues?|runs?|happens?|is|are|on)\\s+){0,2}(?:every|each|weekly)\\b|(?:every|each|weekly)\\s+(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday)s?[\\s:,-]*${escaped}`, 'i');
+    const scopes = caption.split(/\n\s*OCR TEXT:/i)[0].split(/[.!?;\n]+/)
+      .filter(scope => scope.length <= 300 && title.test(scope) && namedCadence.test(scope) && detectRecurringPattern(scope) !== 'none');
+    if (scopes.length === 1) { text = scopes[0]; detectedPattern = detectRecurringPattern(text); }
+  }
+  if (detectedPattern === 'none' || event.recurringPattern && event.recurringPattern !== 'none') return event;
+  return {...event, recurringPattern:detectedPattern,
+    _recurrenceEvidence:{origin:'item_text',pattern:detectedPattern,text}};
+}
+
 export function detectRecurringPattern(text: string): RecurringPattern {
   const t = String(text || '').toLowerCase();
 
@@ -4438,6 +4473,15 @@ export function detectRecurringPattern(text: string): RecurringPattern {
     sunday: 'weekly_sunday',
     sun: 'weekly_sunday',
   };
+
+  // Plural weekdays paired with an affirmative ongoing class lifecycle are
+  // stronger than a branded weekday title on its own. Do not infer a horizon.
+  const ongoingClass = /\bongoing\s+(?:classes|lessons|sessions)\b/i.test(t) &&
+    !/\b(?:cancelled|canceled|no\s+longer|not\s+ongoing)\b/i.test(t);
+  const days = [...t.matchAll(/\b(mondays|tuesdays|wednesdays|thursdays|fridays|saturdays|sundays)\b/gi)];
+  if (ongoingClass && new Set(days.map(m => m[1].toLowerCase())).size === 1) {
+    return dayMap[days[0][1].toLowerCase().slice(0, -1)];
+  }
 
   // ONLY match when preceded by explicit recurring keywords
   const weeklyMatch = t.match(

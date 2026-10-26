@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 /**
  * GathR Cloud Functions Type Definitions
  */
@@ -156,6 +157,7 @@ export interface EventImageProvenance {
 }
 
 export interface EventData {
+  structuredLocationValidation?: import('../services/structuredLocationContract.js').StructuredLocationValidation;
   /** Internal reference for an approved top-level keeper; never persisted. */
   _canonicalDocumentPath?: string;
   locationMentionResolution?: import('../parsing/locationMentionRoles.js').LocationMentionResolution;
@@ -176,6 +178,8 @@ export interface EventData {
   mapMode?: 'venue' | 'area' | 'route' | 'none';
   spatialEvidence?: SpatialEventClassification;
   areaData?: import('../services/areaEventPublication.js').EventAreaData;
+  programmeData?: import('../services/venueProgramme.js').EventProgrammeData;
+  programmeReviewId?: string;
   timing?: unknown;
   cityLevelReviewId?: string;
   sourceScraperType?: ScraperType;
@@ -190,6 +194,8 @@ export interface EventData {
   familyFriendlyLevel?: 'unlikely' | 'possible' | 'likely' | 'high';
   familyFriendlyReasons?: string[];
   familyFriendlyScoringVersion?: string;
+  familyFriendlyContentHash?: string;
+  familyAudienceEvidence?: import('../services/familyAudienceEvidence.js').FamilyAudienceEvidence | null;
   isEvent?: boolean | 'Yes' | 'No' | null;
   isFoodSpecial?: boolean | 'Yes' | 'No' | null;
   startDate: string;
@@ -273,6 +279,8 @@ export interface CityLevelAutoPublishFieldSources {
 }
 
 export interface RawRowData {
+  captionProvenance?: IngestedCaptionProvenance;
+  structuredLocationValidation?: import('../services/structuredLocationContract.js').StructuredLocationValidation;
   uniqueId?: string;
   text: string;
   sharedPostText?: string;
@@ -316,6 +324,10 @@ export interface RawRowData {
 }
 
 export interface QueueCityLevelEventReviewInput {
+  familyAudienceEvidence?: import('../services/familyAudienceEvidence.js').FamilyAudienceEvidence;
+  structuredLocationValidation?: import('../services/structuredLocationContract.js').StructuredLocationValidation;
+  timeFlags?: unknown;
+  timeResolution?: unknown;
   uniqueId?: string;
   fileId?: string;
   fileName?: string;
@@ -390,6 +402,10 @@ export interface CityLevelEventReviewSample {
 }
 
 export interface CityLevelEventReviewRecord {
+  familyAudienceEvidence?: import('../services/familyAudienceEvidence.js').FamilyAudienceEvidence;
+  structuredLocationValidation?: import('../services/structuredLocationContract.js').StructuredLocationValidation;
+  timeFlags?: unknown;
+  timeResolution?: unknown;
   id?: string;
   status: 'needs_review' | 'approved' | 'rejected' | 'published' | 'ignored';
   uniqueId?: string;
@@ -734,6 +750,7 @@ export interface UnrecognizedVenueRecord {
 }
 
 export interface QueueUnrecognizedVenueInput {
+  sourceContextText?: string;
   sourceLocationRole?: 'shared_original_business';
   sharingPageName?: string;
   sharingPageFacebookUrl?: string;
@@ -802,6 +819,7 @@ export interface ParseSnapshotStage {
 }
 
 export interface ParseSnapshot {
+  captionProvenance?: SnapshotCaptionProvenance;
   fileId: string;
   fileName?: string;
   rowIndex: number;
@@ -946,4 +964,87 @@ export interface LogContext {
   eventId?: string;
   venueId?: string;
   [key: string]: unknown;
+}
+
+// Source-channel provenance uses the existing trusted server-writer boundary.
+// Hashes detect inconsistent capture data; they are NOT signatures/authentication.
+export interface CaptionSourceCell {
+  column: string | null; columnIndex: number | null; text: string;
+  sourceLength: number; storedLength: number; utf8Bytes: number;
+  sha256: string; completeness: 'complete_as_read' | 'absent_column';
+}
+export interface IngestedCaptionProvenance {
+  version: 'caption_channels_v1';
+  origin: {kind: 'google_auth_drive_download_v1'; captureId: string; downloadedAt: string;
+    fileId: string; datasetSHA256: string; sheetName: string; sheetRow: number;
+    sourceRowIndex: number; parserRowIndex: number};
+  sourceKind: 'ordinary_post' | 'structured_event';
+  identity: {sourceId: string; sourceIdColumn: string; sourceIdColumnIndex: number;
+    sharedSourceId?: string; sharedSourceIdColumn?: string};
+  outerCaption: CaptionSourceCell;
+  sharedCaption: CaptionSourceCell;
+  mediaText: CaptionSourceCell[];
+  composition: {text: string; sharedText: string; mediaText: string};
+  completeness: 'complete_as_read';
+}
+export interface SnapshotCaptionProvenance extends IngestedCaptionProvenance {
+  writer: {kind: 'process_row_snapshot_v1'; fileId: string; rowIndex: number;
+    sourceId: string; inputTextSHA256: string; inputTextLength: number};
+}
+export function captionTextSHA256(text: string): string {
+  return createHash('sha256').update(text, 'utf8').digest('hex');
+}
+export function composeCapturedInput(capture: IngestedCaptionProvenance): string {
+  const c = capture.composition;
+  return [c.sharedText, c.text, c.mediaText ? `OCR TEXT:\n${c.mediaText}` : ''].filter(Boolean).join('\n\n');
+}
+export type CaptionChannelsResult = {status: 'verified'; captionText: string;
+  sourceKind: IngestedCaptionProvenance['sourceKind']; channels: CaptionSourceCell[];
+  authority: 'existing_trusted_snapshot_writer_boundary'} | {status: 'hold'; reason: string};
+/** Callers obtain snapshots from the existing server-only Firestore capture reads.
+ * This does not authenticate arbitrary JSON or defend against privileged writers
+ * forging an entire consistent snapshot. No local reconstruction is promoted. */
+export function validatedSnapshotCaptionChannels(
+  snapshot: ParseSnapshot,
+  expected: {fileId: string; rowIndex: number; sourceId: string}
+): CaptionChannelsResult {
+  const hold = (reason: string): CaptionChannelsResult => ({status: 'hold', reason});
+  const p = snapshot.captionProvenance;
+  if (!p) return hold('caption_provenance_missing');
+  if (p.version !== 'caption_channels_v1' || p.origin?.kind !== 'google_auth_drive_download_v1' ||
+      p.writer?.kind !== 'process_row_snapshot_v1' || p.completeness !== 'complete_as_read') return hold('caption_origin_untrusted');
+  if (!p.identity || typeof p.identity !== 'object') return hold('caption_ingestion_identity_incomplete');
+  if (!['ordinary_post', 'structured_event'].includes(p.sourceKind) ||
+      !p.origin.captureId || !Number.isFinite(Date.parse(p.origin.downloadedAt)) ||
+      !/^[a-f0-9]{64}$/.test(p.origin.datasetSHA256) || !p.origin.sheetName ||
+      !Number.isInteger(p.origin.sheetRow) || p.origin.sheetRow < 2 ||
+      !Number.isInteger(p.origin.sourceRowIndex) || p.origin.sourceRowIndex < 0 ||
+      p.origin.sheetRow !== p.origin.sourceRowIndex + 2 ||
+      !p.identity.sourceIdColumn || !Number.isInteger(p.identity.sourceIdColumnIndex) || p.identity.sourceIdColumnIndex < 0)
+    return hold('caption_ingestion_identity_incomplete');
+  if (snapshot.fileId !== expected.fileId || snapshot.rowIndex !== expected.rowIndex || snapshot.uniqueId !== expected.sourceId ||
+      p.origin.fileId !== expected.fileId || p.origin.parserRowIndex !== expected.rowIndex ||
+      p.identity.sourceId !== expected.sourceId || p.writer.fileId !== expected.fileId ||
+      p.writer.rowIndex !== expected.rowIndex || p.writer.sourceId !== expected.sourceId) return hold('caption_occurrence_identity_mismatch');
+  const validCell = (c: CaptionSourceCell) => c && typeof c.text === 'string' &&
+    (c.column === null && c.columnIndex === null && c.completeness === 'absent_column' && c.text === '' ||
+      typeof c.column === 'string' && c.column && Number.isInteger(c.columnIndex) && c.columnIndex! >= 0 && c.completeness === 'complete_as_read') &&
+    c.sourceLength === c.text.length && c.storedLength === c.text.length && c.utf8Bytes === Buffer.byteLength(c.text, 'utf8') &&
+    /^[a-f0-9]{64}$/.test(c.sha256) && captionTextSHA256(c.text) === c.sha256;
+  if (!validCell(p.outerCaption) || !validCell(p.sharedCaption) || !Array.isArray(p.mediaText) ||
+      p.mediaText.some(c => !validCell(c))) return hold('caption_cell_incomplete_or_inconsistent');
+  if (p.outerCaption.column !== null && !['text','description'].includes(p.outerCaption.column.toLowerCase()) ||
+      p.sharedCaption.column !== null && !['sharedpost text','sharedpost/text','name'].includes(p.sharedCaption.column.toLowerCase()) ||
+      p.mediaText.some(c => !c.column || !/^(?:sharedpost\/)?media\/\d+\/ocrtext$/i.test(c.column))) return hold('caption_column_role_mismatch');
+  if (!p.composition || typeof p.composition.text !== 'string' || typeof p.composition.sharedText !== 'string' ||
+      typeof p.composition.mediaText !== 'string' || p.composition.sharedText !== p.sharedCaption.text ||
+      p.sourceKind === 'ordinary_post' && p.composition.text !== p.outerCaption.text) return hold('caption_composition_inconsistent');
+  if (typeof snapshot.inputText !== 'string' || snapshot.inputTextLength !== snapshot.inputText.length ||
+      p.writer.inputTextLength !== snapshot.inputText.length || p.writer.inputTextSHA256 !== captionTextSHA256(snapshot.inputText) ||
+      composeCapturedInput(p) !== snapshot.inputText) return hold('caption_snapshot_truncated_or_inconsistent');
+  const channels = [p.sharedCaption, p.outerCaption].filter(c => c.text.trim());
+  if (!channels.length) return hold('caption_channels_empty');
+  return {status: 'verified', channels, sourceKind: p.sourceKind,
+    captionText: p.sourceKind === 'structured_event' ? p.composition.text : channels.map(c => c.text).join('\n\n'),
+    authority: 'existing_trusted_snapshot_writer_boundary'};
 }

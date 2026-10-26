@@ -49,14 +49,15 @@ test('keeps Friday pickup, folds Saturday logistics, and restores race source de
   assert.equal(result.events[0].startDate, '2026-10-16');
   assert.equal(result.events[1].name, 'Kids Fox Trot Presented by Boston Pizza');
   assert.equal(result.events[1].startTime, '11:00');
-  assert.equal(result.events[1].timeFlags?.end?.source, 'semantic');
+  assert.equal(result.events[1].timeFlags?.end?.source, 'none');
+  assert.equal(result.events[1].endTime, '');
   assert.match(result.events[1].description, /Kids Ages 10–12/);
   assert.match(result.events[1].description, /On-Site Registration/);
   assert.match(result.events[1].ticketsBuyUrl || '', /raceroster\.com/);
   assert.equal(result.events[1].imageProvenance?.media?.length, 2);
 });
 
-test('corrects a race start mistaken for the warm-up and moves inferred end', () => {
+test('corrects a race start mistaken for the warm-up and removes invented finish', () => {
   const input = [
     event('Kids Fox Trot Presented by Boston Pizza', '2026-10-17', '10:45', '12:45'),
     event('Kids Fox Trot Race Kit Pick-Up', '2026-10-16', '11:00', '18:00'),
@@ -65,9 +66,43 @@ test('corrects a race start mistaken for the warm-up and moves inferred end', ()
   assert.equal(result.events.length, 2);
   assert.equal(result.correctedStart, true);
   assert.equal(result.events[0].startTime, '11:00');
-  assert.equal(result.events[0].endTime, '13:00');
+  assert.equal(result.events[0].endTime, '');
   assert.equal(result.events[0].timeFlags?.start?.source, 'explicit');
-  assert.equal(result.events[0].timeFlags?.end?.source, 'semantic');
+  assert.equal(result.events[0].timeFlags?.end?.source, 'none');
+});
+
+test('a retained legacy first heat uses the printed race host and folds only its same-day logistics',()=>{
+  const heat=event('Kids Fox Trot First Heat — Ages 5 & Under','2026-10-17','11:00','23:00');
+  heat.establishment='Victoria Park Pavilion';
+  heat.spatial={kind:'multi_location',locations:[{label:'Victoria Park Pavilion'},{label:'Victoria Park'}]};
+  const result=reconcileRaceSchedule([
+    event('Race Kit Pick-Up (Kids Fox Trot)','2026-10-16','11:00','18:00'),
+    event('On-Site Registration & Race Kit Pick-Up (Kids Fox Trot)','2026-10-17','10:00','10:45'),
+    event('Fun Warm-Up (Kids Fox Trot)','2026-10-17','10:45','23:00'),heat,
+  ],caption);
+  assert.equal(result.events.length,2);
+  assert.equal(result.events[1].establishment,'Victoria Park');
+  assert.equal(result.events[1].spatial?.kind,'single_location');
+  assert.equal(result.events[1].endTime,'');
+  assert.match(result.events[1].description,/10:00.*10:45/);
+  assert.match(result.events[1].description,/10–12/);
+});
+
+test('independently named races and separate sessions are never folded into a heat parent',()=>{
+  for(const title of ['Kids Fox Trot 5K Race','Kids Fox Trot Afternoon Session']){
+    const input=[event('Kids Fox Trot','2026-10-17','11:00','13:00'),event(title,'2026-10-17','14:00','15:00')];
+    assert.equal(reconcileRaceSchedule(input,caption).applied,false);
+  }
+  assert.equal(reconcileRaceSchedule([event('Kids Fox Trot','2026-10-17','11:00','12:00'),
+    event('Kids Fox Trot','2026-10-17','14:00','15:00')],caption).applied,false);
+});
+
+test('an explicit parent finish is preserved and repeated reconciliation is idempotent',()=>{
+  const parent=event('Kids Fox Trot','2026-10-17','11:00','12:15');
+  parent.timeFlags!.end={source:'explicit',evidence:'Race ends 12:15',toClose:false};
+  const first=reconcileRaceSchedule([parent],caption);
+  assert.equal(first.events[0].endTime,'12:15');
+  assert.deepEqual(reconcileRaceSchedule(first.events,caption).events,first.events);
 });
 
 test('does not reinterpret another schedule or a race with mismatched date', () => {

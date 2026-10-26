@@ -104,7 +104,7 @@ test('non-nightlife posters do not convert footer closing-hours text into event 
   assert.equal(resolved.timeFlags?.end?.toClose, false);
 });
 
-test('schedule-derived rows do not use the nightlife closing-hours hint', () => {
+test('schedule-derived rows without printed ends use neither closing-hours nor duration defaults', () => {
   const [resolved] = enforceDateTimeCompleteness(
     [
       buildEvent({
@@ -118,8 +118,9 @@ test('schedule-derived rows do not use the nightlife closing-hours hint', () => 
     'Thursday schedule: Karaoke 10PM. Open until 2AM.'
   );
 
-  assert.equal(resolved.endTime, '00:00');
-  assert.equal(resolved.timeResolution?.endFromHours, 'duration_default');
+  assert.equal(resolved.endTime, '');
+  assert.equal(resolved.timeResolution?.endFromHours, undefined);
+  assert.equal(resolved.timeFlags?.end?.source, 'none');
   assert.equal(resolved.timeFlags?.end?.toClose, false);
 });
 

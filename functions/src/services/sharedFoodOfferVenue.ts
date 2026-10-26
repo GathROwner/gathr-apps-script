@@ -22,6 +22,15 @@ export function sharedFoodOfferOwner(item: ProcessedEvent, row: RawRowData, publ
     !/\b(?:our|we|us)\b/i.test(row.sharedPostText))return undefined;
   const sharingNames=new Set([row.userName,row.pageName,publisher?.name].map(identity).filter(Boolean));
   if(sharingNames.has(identity(owner)))return undefined;
+  // A fundraising organizer can share a dinner explicitly hosted by the
+  // publishing restaurant. A standalone named host in the original caption
+  // is attendee evidence; the organizer's first-person wording is not a venue.
+  const publisherNames = new Set([publisher?.name,publisher?.name?.split('|')[0]].map(identity).filter(Boolean));
+  const explicitPublisherHost = publisher?.name && row.sharedPostText.split(/\r?\n/)
+    .some(line => publisherNames.has(identity(line)));
+  if (explicitPublisherHost && /\bfundraiser\b/i.test(row.sharedPostText) &&
+      /\b\d{1,2}(?::\d{2})?\s*(?:[-–—]\s*\d{1,2}(?::\d{2})?)?\s*[ap]m\b/i.test(row.sharedPostText) &&
+      [item.venue,item.establishment].some(value => publisherNames.has(identity(value)))) return undefined;
   if(['city','area','route','province'].includes(String(item.locationScope || '')))return undefined;
   if(item.additionalLocation && !sharingNames.has(identity(item.additionalLocation)) && identity(item.additionalLocation)!==identity(owner))return undefined;
   const locations=[item.establishment,item.venue].filter(Boolean).map(identity);

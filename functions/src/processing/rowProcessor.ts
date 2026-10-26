@@ -1,8 +1,18 @@
+import {getBoundCalendarTileStart, corroboratedCalendarStart} from '../utils/calendarTileTiming.js';
 import {hasConflictingOccurrenceIdentity} from '../utils/occurrenceMergeGuard.js';
+import {datedOccurrenceLocation} from '../parsing/occurrenceSourceOwnership.js';
+import {validateStructuredLocation, hasCurrentStructuredValidation, protectedStructuredReview} from '../parsing/structuredLocationValidation.js';
+import {readStructuredPosterEvidence} from '../parsing/structuredPosterValidator.js';
+import {buildSnapshotCaptionProvenance} from '../services/driveService.js';
+import {buildValidatedVenuePointFields} from '../services/validatedVenuePublication.js';
+import {isOwnedSpaceTailAtAddress} from '../utils/ownedPlaceEvidence.js';
 import {applySharedFoodOfferVenue, sharedFoodOfferOwner, sharedPostMetadata, sharedFoodOfferReviewContext} from '../services/sharedFoodOfferVenue.js';
+import {sharedEventRequiresOriginalHost,outdoorProgrammeRequiresHost} from '../services/sharedEventVenueEvidence.js';
 import {isPlainKaraoke, isStandingKaraoke, coversStandingKaraokeOccurrence, selectStandingKaraokeOccurrence} from '../services/standingKaraokeOccurrence.js';
 import {isRecurringSeries, recurringSeriesLabelsCompatible} from '../utils/recurringSeriesLifecycle.js';
 import {hasProvenSourceDurationEnd} from '../parsing/sourceTimeConstraints.js';
+import {reviewedSourcePrice,contradictsReviewedPrice} from './reviewedSourcePrice.js';
+import {contradictsReviewedOccurrenceTiming} from './reviewedOccurrenceTiming.js';
 import { CacheWriteMetrics, createCacheWriteMetrics, addCacheWriteUsage } from '../parsing/cacheAccounting.js';
 import { hasConflictingDevelopmentSlot } from '../utils/eventSlotIdentity.js';
 /**
@@ -22,6 +32,7 @@ import {
   ExtractedItem,
   ProcessingConfig,
   ParseSnapshotStage,
+  ParseSnapshot,
   MatchInfo,
   UnrecognizedVenueRecord,
   CityLevelAutoPublishFieldSources,
@@ -61,9 +72,10 @@ import {
   normalizeCanadianAddress,
 } from '../utils/addressNormalization.js';
 import {
-  FAMILY_FRIENDLY_SCORING_VERSION,
   scoreFamilyFriendly,
+  mergeFamilyAudienceEvidence,
 } from '../utils/familyFriendlyScoring.js';
+import { transferFamilyAudienceEvidence } from '../services/familyAudienceEvidence.js';
 import {
   classifySpatialEvent,
   SpatialEventClassification,
@@ -268,7 +280,7 @@ type FacebookEventEndResolution = {
   endDate?: string;
   endTime?: string;
   evidence: string;
-  source: 'dateTimeSentence' | 'duration';
+  source: 'dateTimeSentence' | 'duration' | 'descriptionRange';
 };
 
 type FacebookEventRecurrenceResolution = {
@@ -376,6 +388,97 @@ function parseFacebookEventDurationMinutes(value: unknown): number | null {
   return Number.isFinite(minutes) && minutes > 0 ? Math.round(minutes) : null;
 }
 
+/** Narrow fallback: one dated event range, anchored to the structured local start.
+ * Never borrow doors, registration/deadline clocks or infer an overnight end. */
+function resolveFacebookDescriptionEnd(
+  row: RawRowData,
+  local: { date: string; time: string }
+): FacebookEventEndResolution | null {
+  const description = String(row.facebookEventDescription ||
+    row.text.match(/(?:^|\n)Description:\s*([\s\S]*)$/i)?.[1] || '').replace(/\r\n?/g, '\n').trim();
+  const start = DateTime.fromISO(`${local.date}T${local.time}`, { zone: FACEBOOK_EVENT_TIMEZONE });
+  if (!description || !start.isValid || start.toFormat('yyyy-MM-dd HH:mm') !== `${local.date} ${local.time}` ||
+      start.getPossibleOffsets().length !== 1) return null;
+  const utcStart = row.utcStartDate || row.timestamp;
+  if (utcStart) {
+    const captured = DateTime.fromISO(utcStart, { setZone: true }).setZone(FACEBOOK_EVENT_TIMEZONE);
+    if (!captured.isValid || captured.toFormat('yyyy-MM-dd HH:mm') !== `${local.date} ${local.time}`) return null;
+  }
+  const ranges = [...description.matchAll(/\b(\d{1,2}(?::\d{2})?\s*(?:[ap]\.?m\.?)?)\s*(?:[-\u2013\u2014]|\bto\b)\s*(\d{1,2}(?::\d{2})?\s*(?:[ap]\.?m\.?)?)(?:\s+(ADT|AST|EDT|EST|UTC|GMT))?\b/gi)]
+    .filter(match => /:|[ap]\.?m/i.test(match[1] + match[2]));
+  if (ranges.length !== 1) return null;
+  const range = ranges[0], index = range.index!;
+  const previousSentence = Math.max(description.lastIndexOf('. ', index),
+    description.lastIndexOf('! ', index), description.lastIndexOf('? ', index));
+  const clauseStart = Math.max(description.lastIndexOf('\n', index) + 1,
+    previousSentence < 0 ? 0 : previousSentence + 2);
+  const prefix = description.slice(clauseStart, index);
+  const boundaries=['. ','! ','? ','\n\n'].map(x=>description.indexOf(x,index+range[0].length)).filter(x=>x>=0);
+  const nextSentence = boundaries.length?Math.min(...boundaries):-1;
+  const clause = description.slice(clauseStart, nextSentence < 0 ? description.length : nextSentence);
+  const roles = /\b(?:doors?|registration|register|check[\s-]?in|deadline|pre[\s-]?register|rsvp)\b/i;
+  const paragraphBreak = description.lastIndexOf('\n\n', index);
+  const paragraphPrefix = description.slice(paragraphBreak < 0 ? 0 : paragraphBreak + 2, index);
+  const lineBreak = description.lastIndexOf('\n', index);
+  const previousLine = lineBreak < 0 ? '' : description.slice(0, lineBreak).trimEnd().split('\n').at(-1) || '';
+  const months = `(?:${Object.keys(FACEBOOK_EVENT_MONTHS).sort((a, b) => b.length - a.length).join('|')})`;
+  const datePattern = new RegExp(`\\b(?:\\d{4}-\\d{2}-\\d{2}|\\d{1,2}/\\d{1,2}(?:/\\d{2,4})?|${months}\\.?\\s+\\d{1,2}(?:st|nd|rd|th)?(?:,?\\s+\\d{4})?|\\d{1,2}(?:st|nd|rd|th)?\\s+${months}\\.?(?:,?\\s+\\d{4})?)\\b`, 'gi');
+  const dates = [...prefix.matchAll(datePattern)];
+  const printedYear = dates[0]?.[0].match(/\b\d{4}\b/)?.[0];
+  const weekdays = prefix.match(/\b(?:mon(?:day)?|tue(?:sday)?|wed(?:nesday)?|thu(?:rsday)?|fri(?:day)?|sat(?:urday)?|sun(?:day)?)\b/gi) || [];
+  if (!/\b(?:from|time\s*:)\s*$/i.test(prefix) ||
+      roles.test(clause) || roles.test(paragraphPrefix) || /:\s*$/.test(previousLine) && roles.test(previousLine) ||
+      /\b(?:rescheduled|moved|relocated|postponed|instead)\b/i.test(prefix) ||
+      dates.length !== 1 || /\d/.test(prefix.replace(datePattern, '')) ||
+      printedYear && printedYear !== local.date.slice(0, 4) ||
+      weekdays.some(day => day.slice(0, 3).toLowerCase() !== start.weekdayLong!.slice(0, 3).toLowerCase()) ||
+      parseFacebookEventDate(prefix.replace(/(\d)(?:st|nd|rd|th)\b/gi,'$1'), local.date) !== local.date) return null;
+  const clock = (value: string): { hour: number; minute: number; period?: string } | null => {
+    const m = value.replace(/\./g, '').trim().match(/^(\d{1,2})(?::(\d{2}))?\s*(am|pm)?$/i);
+    if (!m) return null;
+    const hour = Number(m[1]), minute = Number(m[2] || 0), period = m[3]?.toLowerCase();
+    return minute <= 59 && hour <= 23 && (!period || hour >= 1 && hour <= 12)
+      ? { hour, minute, period } : null;
+  };
+  const left = clock(range[1]), right = clock(range[2]);
+  if (!left || !right) return null;
+  const format = (hour: number, minute: number) => `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+  const explicitHour = (c: NonNullable<ReturnType<typeof clock>>) =>
+    c.period ? c.hour % 12 + (c.period === 'pm' ? 12 : 0) : c.hour;
+  const starts = left.period ? [explicitHour(left)] :
+    [...new Set([left.hour, ...(left.hour >= 1 && left.hour <= 12 ? [left.hour % 12, left.hour % 12 + 12] : [])])];
+  if (starts.filter(hour => format(hour, left.minute) === local.time).length !== 1) return null;
+  // An unmarked 1–12 end can have two interpretations. Require explicit AM/PM
+  // or an unmistakable 24-hour token (00, 09:00, 16:00), never borrow a period.
+  if (!right.period && (!range[2].includes(':') || right.hour >= 1 && right.hour <= 12 && !/^0\d:/.test(range[2].trim()))) return null;
+  const endTime = format(explicitHour(right), right.minute);
+  const end = DateTime.fromISO(`${local.date}T${endTime}`, { zone: FACEBOOK_EVENT_TIMEZONE });
+  if (!end.isValid || end.toFormat('HH:mm') !== endTime || end.getPossibleOffsets().length !== 1 ||
+      end.toMillis() <= start.toMillis()) return null;
+  const trimTail = (value: string) => value.replace(/^[\s\p{P}]+/u, '').trim();
+  let tail = trimTail(description.slice(index + range[0].length));
+  let zone = range[3];
+  if (!zone) {
+    const localZone = tail.match(/^(ADT|AST)\b/i);
+    if (localZone) { zone = localZone[1]; tail = trimTail(tail.slice(localZone[0].length)); }
+  }
+  if (zone && (!['ADT', 'AST'].includes(zone.toUpperCase()) ||
+      end.offset !== (zone.toUpperCase() === 'ADT' ? -180 : -240))) return null;
+  // Only an empty tail, a verified local zone, or "at <captured location>"
+  // is supported. Do not swallow unknown zones, long zone names or "in PDT".
+  if (tail && !isOwnedSpaceTailAtAddress(tail,String(row.address||''))) {
+    const attendee = normalizeFacebookEventTimeText(row.facebookEventLocationName ||
+      extractFacebookEventTextValue(row.text, 'Location') || row.userName).toLowerCase();
+    const at = tail.match(/^at\s+([\s\S]+)$/i);
+    const place = at ? normalizeFacebookEventTimeText(at[1]).toLowerCase() : '';
+    if (!attendee || !place.startsWith(attendee)) return null;
+    const afterPlace = place.slice(attendee.length).trimStart();
+    if (afterPlace && !/^[,.;!?]/.test(afterPlace)) return null;
+  }
+  return { endDate: local.date, endTime, source: 'descriptionRange',
+    evidence: `Description: ${(prefix + range[0]).trim().slice(0, 240)}` };
+}
+
 export function resolveFacebookEventEndDateTime(
   row: RawRowData,
   localDateTime: { date: string; time: string }
@@ -413,7 +516,7 @@ export function resolveFacebookEventEndDateTime(
     };
   }
 
-  return null;
+  return resolveFacebookDescriptionEnd(row, localDateTime);
 }
 
 const FACEBOOK_EVENT_WEEKDAY_TOKENS: Record<string, RecurringWeekday> = {
@@ -1883,6 +1986,9 @@ export function resolvePostDerivedCityLevelEventLocation(params: {
   ].filter(Boolean).join('\n');
 
   const modelSpatial = (item.spatial || item.spatialEvidence || null) as any;
+  const occurrenceLocation = datedOccurrenceLocation({date:item.startDate || item.date,
+    location:observedCandidates[0]?.value, name:eventName, description, combinedText:contextText, modelSpatialEvidence:modelSpatial});
+  if (occurrenceLocation) return null;
   const sourceLocations = Array.isArray(modelSpatial?.locations) ? modelSpatial.locations : [];
   const sourceLocation = sourceLocations.length === 1
     ? String(typeof sourceLocations[0] === 'string' ? sourceLocations[0] : sourceLocations[0]?.label || '') : '';
@@ -1904,6 +2010,7 @@ export function resolvePostDerivedCityLevelEventLocation(params: {
       normalizePlace(sourceLocation).startsWith(normalizePlace(observedLocation) + ' ')) &&
     !/\b(?:parade|procession|march|marathon|race|walkathon|bike ride|cycling ride)\b/i.test(eventName);
   const spatialEvidence = classifySpatialEvent({
+    date:item.startDate || item.date,
     name: eventName,
     description,
     location: observedCandidates[0]?.value || '',
@@ -2061,7 +2168,7 @@ function rowEstablishmentLooksLikePostDerivedCityLevelSource(
   return Boolean(details);
 }
 
-async function buildStructuredFacebookEventScraperEvents(
+export async function buildStructuredFacebookEventScraperEvents(
   row: RawRowData,
   establishment: string,
   mediaUrls: string[],
@@ -2080,6 +2187,9 @@ async function buildStructuredFacebookEventScraperEvents(
   const utcStartDate = String(row.utcStartDate || row.timestamp || '').trim();
   if (!title || !utcStartDate) {
     return null;
+  }
+  if (isCityLevelFacebookEventLocation(row) && (!row.structuredLocationValidation || row.structuredLocationValidation.decision === 'hold')) {
+    throw new Error('Broad structured Facebook row requires completed location validation');
   }
 
   const localDateTime = utcToLocal(utcStartDate);
@@ -2115,6 +2225,7 @@ async function buildStructuredFacebookEventScraperEvents(
     });
   }
   if (sourceMediaUrls.length > 0 && managedMediaUrls.length === 0) {
+    if (isCityLevelFacebookEventLocation(row)) throw new Error('Structured validation display media unavailable; no full-parser retry');
     logger.warn('Structured Facebook Events image upload produced no managed URLs; falling back to full parser', {
       uniqueId: row.uniqueId,
       title,
@@ -2135,6 +2246,7 @@ async function buildStructuredFacebookEventScraperEvents(
   const ticketLink = extractFacebookEventTextValue(row.text, 'Ticket link');
   const ticketSummary = extractFacebookEventTextValue(row.text, 'Tickets');
   const cleanDescription = String(row.facebookEventDescription || row.text || title).trim();
+  const validation = row.structuredLocationValidation;
   const endResolution = resolveFacebookEventEndDateTime(row, localDateTime);
   const recurrenceResolution = resolveFacebookEventRecurrence(row, localDateTime);
 
@@ -2145,13 +2257,13 @@ async function buildStructuredFacebookEventScraperEvents(
     isFoodSpecial: 'No',
     category: inferFacebookEventCategory(row),
     name: title,
-    description: cleanDescription || title,
+    description: validation?.doorsTime ? `${cleanDescription || title}\nDoors open at ${DateTime.fromFormat(validation.doorsTime, 'HH:mm').toFormat('h:mm a').toLowerCase().replace(/([ap])m$/, '$1.m.')}` : cleanDescription || title,
     establishment: venueName || establishment,
     address: String(row.address || '').trim(),
     startDate: localDateTime.date,
     endDate: endResolution?.endDate || localDateTime.date,
-    startTime: localDateTime.time,
-    endTime: endResolution?.endTime || '',
+    startTime: validation?.startTime || localDateTime.time,
+    endTime: validation?.endTime || endResolution?.endTime || '',
     ticketPrice: ticketSummary,
     ticketLink,
     ticketsBuyUrl: ticketLink || row.ticketsBuyUrl,
@@ -2221,7 +2333,13 @@ async function buildStructuredFacebookEventScraperEvents(
     _pipelineIndex: 1,
     _pipelineTotalStage3: 1,
     _sourceType: 'facebook_events_scraper_structured_row',
+    structuredLocationValidation: validation,
   };
+  if (validation?.timeFlags) {
+    event.timeFlags = {start: validation.timeFlags.start, end: validation.endTime ? validation.timeFlags.end : event.timeFlags!.end};
+    event.timeResolution = {...event.timeResolution, hoursUsed: false, startFromFacebookEvent: validation.startTime === localDateTime.time};
+  }
+  if (matchedVenue) Object.assign(event, buildValidatedVenuePointFields(matchedVenue, event));
 
   logger.info('Using structured Facebook Events scraper row adapter', {
     uniqueId: row.uniqueId,
@@ -2425,6 +2543,7 @@ function deriveAggregatorAddressForUnknownQueue(row: RawRowData): string | undef
 }
 
 async function queueCityLevelFacebookEventForReview(params: {
+  audienceItem?: ParserProcessedEvent;
   row: RawRowData;
   rowIndex: number;
   batchManager: BatchManager;
@@ -2451,6 +2570,8 @@ async function queueCityLevelFacebookEventForReview(params: {
   ticketsBuyUrl?: string;
   externalLinks?: string[];
   sourceContentSignature?: string;
+  timeFlags?: unknown;
+  timeResolution?: unknown;
 }): Promise<void> {
   const location = getCityLevelFacebookEventLocationDetails(params.row);
   if (!location) return;
@@ -2471,6 +2592,9 @@ async function queueCityLevelFacebookEventForReview(params: {
       eventType: params.eventType,
       category: params.category,
       description: params.description,
+      familyAudienceEvidence: params.audienceItem ? transferFamilyAudienceEvidence(params.audienceItem, {
+        eventName:params.eventName,startDate:params.eventDate,startTime:params.eventTime,establishment:location.locationLabel,
+      }) : undefined,
       imageUrl: params.imageUrl,
       mediaUrls: params.mediaUrls,
       usersResponded: params.usersResponded,
@@ -2496,6 +2620,10 @@ async function queueCityLevelFacebookEventForReview(params: {
         buildFacebookEventSourceContentSignature(params.row),
       autoPublishSource: getCityLevelAutoPublishSource(params.parserSourceType),
       autoPublishFieldSources: buildCityLevelAutoPublishFieldSources(params.row),
+      structuredLocationValidation: params.row.structuredLocationValidation,
+      autoPublishReviewReasons: params.row.structuredLocationValidation?.reasons,
+      timeFlags: params.timeFlags,
+      timeResolution: params.timeResolution,
     });
 
     if (!result.queued) {
@@ -2589,6 +2717,7 @@ function buildPostDerivedCityLevelSourceContentSignature(params: {
 }
 
 async function queuePostDerivedCityLevelEventForReview(params: {
+  audienceItem?: ParserProcessedEvent;
   location: PostDerivedCityLevelLocationDetails;
   row: RawRowData;
   rowIndex: number;
@@ -2631,6 +2760,9 @@ async function queuePostDerivedCityLevelEventForReview(params: {
       endTime: params.endTime,
       eventType: params.eventType,
       category: params.category,
+      familyAudienceEvidence: params.audienceItem ? transferFamilyAudienceEvidence(params.audienceItem, {
+        eventName:params.eventName,startDate:params.eventDate,startTime:params.eventTime,establishment:params.location.locationLabel,
+      }) : undefined,
       // Review reasons and observed locations have private structured fields.
       description: params.description,
       imageUrl: params.imageUrl,
@@ -2713,9 +2845,7 @@ async function queueUnknownVenueForReview(params: {
 
   try {
     const state = params.batchManager.getState();
-    const sourceUniqueId = params.row.sourceScraperType === 'events'
-      ? asTrimmedString(params.row.uniqueId)
-      : undefined;
+    const sourceUniqueId = unknownVenueSourceIdentity(params.row);
     const sourceContentSignature = sourceUniqueId
       ? buildFacebookEventSourceContentSignature(params.row)
       : undefined;
@@ -2731,6 +2861,7 @@ async function queueUnknownVenueForReview(params: {
       aggregatorAddress: deriveAggregatorAddressForUnknownQueue(params.row),
       topLevelUrl: deriveTopLevelPostUrlForUnknownQueue(params.row),
       sourceUniqueId,
+      sourceContextText: params.row.text,
       sourceContentSignature,
       eventName: params.eventName,
       eventDate: params.eventDate,
@@ -2762,15 +2893,30 @@ async function queueUnknownVenueForReview(params: {
   }
 }
 
+/** Only raw-row source identity, never a model's generated occurrence ID. */
+export function unknownVenueSourceIdentity(row:RawRowData):string|undefined{
+ const id=asTrimmedString(row.uniqueId);
+ return row.sourceScraperType==='events'||/^\d{8,25}$/.test(id)?id||undefined:undefined;
+}
+
 /**
  * Process a single row from the dataset
  */
+async function saveCaptionSnapshot(row: RawRowData, snapshot: ParseSnapshot): Promise<string> {
+  // Never persist a caller-provided origin claim, even when its hashes match.
+  const {captionProvenance: _ignored, ...body} = snapshot;
+  const captionProvenance = buildSnapshotCaptionProvenance(row, body);
+  return firestoreService.saveParseSnapshot({...body, ...(captionProvenance ? {captionProvenance} : {})});
+}
+
 export async function processRow(
   row: RawRowData,
   rowIndex: number,
   batchManager: BatchManager,
   config?: Partial<ProcessingConfig>
 ): Promise<RowProcessingResult> {
+  const failureUsageRecords: GptUsageRecord[] = [];
+  let failureStageArtifacts: ParseStageArtifactsSnapshot | undefined;
   const result: RowProcessingResult = {
     success: false,
     rowIndex,
@@ -2850,6 +2996,21 @@ export async function processRow(
     const isDryRun = config?.dryRun === true;
 
     const cityLevelFacebookEventLocation = isCityLevelFacebookEventLocation(row);
+    let priorStructuredReview: CityLevelEventReviewRecord | null = null;
+    // Inspect review ownership before venue resolution or paid validation. A
+    // historical city publication is a separate repair, never a silent migration.
+    if (cityLevelFacebookEventLocation) {
+      const review = await firestoreService.findCityLevelEventReviewByUniqueId(row.uniqueId || '');
+      priorStructuredReview = review;
+      const signature = buildFacebookEventSourceContentSignature(row);
+      if (review && (protectedStructuredReview(review as CityLevelEventReviewRecord & Record<string, unknown>) ||
+          (signature && hasCurrentStructuredValidation(review.structuredLocationValidation, signature, row.mediaUrls) &&
+           review.sourceContentSignature === signature))) {
+        result.success = true; result.skipped = true;
+        batchManager.markRowSkipped(rowIndex, 'facebook_event_review_preserved');
+        return result;
+      }
+    }
     const postDerivedCityLevelRowSource = rowEstablishmentLooksLikePostDerivedCityLevelSource(
       row,
       establishment
@@ -2862,6 +3023,12 @@ export async function processRow(
       similarity: 0,
     };
     if (cityLevelFacebookEventLocation) {
+      const preliminary = validateStructuredLocation({row, sourceSignature: buildFacebookEventSourceContentSignature(row) || '',
+        venues: await firestoreService.getAllVenues(), poster: 'no_media'});
+      if (preliminary.decision === 'venue' && preliminary.venueId) {
+        const exactVenue = await firestoreService.getVenue(preliminary.venueId);
+        if (exactVenue) {venueMatch = {isMatch: true, matchType: 'exact', similarity: 1, matchedVenue: exactVenue}; establishment = getVenueDisplayNameForProcessing(exactVenue);}
+      }
       logger.info('Skipping row-level venue match for city-level Facebook Event location', {
         rowIndex,
         establishment,
@@ -2908,7 +3075,7 @@ export async function processRow(
       }
     }
 
-    const venue = venueMatch.isMatch ? venueMatch.matchedVenue! : null;
+    let venue = venueMatch.isMatch ? venueMatch.matchedVenue! : null;
     // Structured Facebook Events are checked from their event coordinates
     // above. Ordinary page posts can still resolve to an out-of-region venue;
     // stop them before gallery upload, model calls, or event writes.
@@ -2933,7 +3100,7 @@ export async function processRow(
         return result;
       }
     }
-    const matchedVenueId = venue?.id;
+    let matchedVenueId = venue?.id;
     let facebookEventSourceContentSignature: string | undefined;
     let reusableFacebookEventMediaUrls: string[] = [];
     let reusableFacebookEventMediaSource: EventImageProvenanceSource = 'dedupe_existing';
@@ -2961,6 +3128,7 @@ export async function processRow(
             existingEvent &&
             existingSignature === facebookEventSourceContentSignature &&
             reusableFacebookEventMediaUrls.length > 0 &&
+            (!cityLevelFacebookEventLocation || hasCurrentStructuredValidation(existingEvent.structuredLocationValidation, facebookEventSourceContentSignature, row.mediaUrls)) &&
             !needsRecurrenceUpdate
           ) {
             logger.info('Skipping unchanged Facebook Events source row', {
@@ -2998,6 +3166,7 @@ export async function processRow(
             existingReview &&
             existingSignature === facebookEventSourceContentSignature &&
             reusableFacebookEventMediaUrls.length > 0
+            && hasCurrentStructuredValidation(existingReview.structuredLocationValidation, facebookEventSourceContentSignature, row.mediaUrls)
           ) {
             logger.info('Skipping unchanged city-level Facebook Events source row', {
               rowIndex,
@@ -3145,7 +3314,7 @@ export async function processRow(
       }
 
       let ocrDebugSnapshot: OcrDebugSnapshot | undefined;
-      const gptUsageRecords: GptUsageRecord[] = [];
+      const gptUsageRecords = failureUsageRecords;
       let parserSkipReason: ParseSkipReason | undefined;
       let stageArtifactsSnapshot: ParseStageArtifactsSnapshot | undefined;
       const parserConfig: Partial<ParsingConfig> = {
@@ -3178,6 +3347,7 @@ export async function processRow(
       if (enableStageArtifacts) {
         parserConfig.stageArtifactsHandler = (snapshot: ParseStageArtifactsSnapshot) => {
           stageArtifactsSnapshot = mergeStageArtifactsSnapshot(stageArtifactsSnapshot, snapshot);
+          failureStageArtifacts = stageArtifactsSnapshot;
         };
       }
       if (enableOcrDebug) {
@@ -3193,6 +3363,41 @@ export async function processRow(
       }
 
       const parseStart = Date.now();
+      if (cityLevelFacebookEventLocation) {
+        row = {...row, structuredLocationValidation: validateStructuredLocation({row,
+          sourceSignature: buildFacebookEventSourceContentSignature(row) || '',
+          venues: await firestoreService.getAllVenues(), poster: await readStructuredPosterEvidence(row, parserConfig),
+          structuredEnd: resolveFacebookEventEndDateTime(row, utcToLocal(row.utcStartDate || row.timestamp || ''))})};
+        if (!isDryRun) await batchManager.assertWorkerActive();
+        const validation = row.structuredLocationValidation!;
+        if (priorStructuredReview?.status === 'published' && validation.decision !== 'broad') {
+          validation.decision = 'hold';
+          validation.reasons = [...new Set([...validation.reasons, 'historical_publication_requires_reviewed_repair'])];
+        }
+        if (validation.decision === 'hold') {
+          const local = utcToLocal(row.utcStartDate || row.timestamp || '');
+          if (!isDryRun) await queueCityLevelFacebookEventForReview({row, rowIndex, batchManager, parserMode: 'full5stage',
+            parserSourceType: 'facebook_events_scraper_structured_row', eventName: row.sharedPostText,
+            eventDate: local.date, eventTime: local.time, description: row.facebookEventDescription || row.text,
+            mediaUrls: row.mediaUrls});
+          if (enableSnapshots && !isDryRun) {
+            await batchManager.assertWorkerActive();
+            const state = batchManager.getState();
+            await saveCaptionSnapshot(row, {fileId: state.fileId, fileName: state.fileName, batchNumber: state.batchNumber,
+              rowIndex, uniqueId: row.uniqueId, establishment, facebookUrl: row.facebookUrl, inputText: combinedText,
+              rowMeta: {...sharedPostMetadata(row), sourceScraperType: row.sourceScraperType, structuredLocationValidation: validation},
+              stages: [{stage: 'format', success: true, output: {parserMode: 'full5stage', eventCount: 0, events: [],
+                structuredLocationValidation: validation, gptUsageSummary: summarizeGptUsageRecords(gptUsageRecords)}}]});
+            batchManager.incrementParseSnapshotWrites();
+          }
+          result.success = true; result.skipped = true;
+          batchManager.markRowSkipped(rowIndex, `structured_location_hold:${validation.reasons.join(',')}`);
+          return result;
+        }
+        venue = validation.venueId ? await firestoreService.getVenue(validation.venueId) : null;
+        matchedVenueId = venue?.id;
+        if (venue) establishment = getVenueDisplayNameForProcessing(venue);
+      }
       let fullParserEvents = await buildStructuredFacebookEventScraperEvents(
         row,
         establishment,
@@ -3243,7 +3448,7 @@ export async function processRow(
           const persistedStageArtifacts = enableStageArtifacts
             ? sanitizeStageArtifactsSnapshot(stageArtifactsSnapshot)
             : undefined;
-          await firestoreService.saveParseSnapshot({
+          await saveCaptionSnapshot(row, {
             fileId: state.fileId,
             fileName: state.fileName,
             batchNumber: state.batchNumber,
@@ -3386,7 +3591,7 @@ export async function processRow(
         const persistedStageArtifacts = enableStageArtifacts
           ? sanitizeStageArtifactsSnapshot(stageArtifactsSnapshot)
           : undefined;
-        await firestoreService.saveParseSnapshot({
+        await saveCaptionSnapshot(row, {
           fileId: state.fileId,
           fileName: state.fileName,
           batchNumber: state.batchNumber,
@@ -3454,7 +3659,7 @@ export async function processRow(
       batchManager.markRowError(rowIndex, parseResult.error || 'Parse failed');
       if (enableSnapshots && snapshotStages.length > 0) {
         const state = batchManager.getState();
-        await firestoreService.saveParseSnapshot({
+        await saveCaptionSnapshot(row, {
           fileId: state.fileId,
           fileName: state.fileName,
           batchNumber: state.batchNumber,
@@ -3488,7 +3693,7 @@ export async function processRow(
       batchManager.markRowSkipped(rowIndex, 'No events extracted');
       if (enableSnapshots && snapshotStages.length > 0) {
         const state = batchManager.getState();
-        await firestoreService.saveParseSnapshot({
+        await saveCaptionSnapshot(row, {
           fileId: state.fileId,
           fileName: state.fileName,
           batchNumber: state.batchNumber,
@@ -3682,7 +3887,7 @@ export async function processRow(
 
     if (enableSnapshots && snapshotStages.length > 0) {
       const state = batchManager.getState();
-      await firestoreService.saveParseSnapshot({
+      await saveCaptionSnapshot(row, {
         fileId: state.fileId,
         fileName: state.fileName,
         batchNumber: state.batchNumber,
@@ -3714,7 +3919,7 @@ export async function processRow(
     const enableSnapshots = process.env.ENABLE_PARSE_SNAPSHOTS !== 'false';
     if (enableSnapshots) {
       const state = batchManager.getState();
-      await firestoreService.saveParseSnapshot({
+      await saveCaptionSnapshot(row, {
         fileId: state.fileId,
         fileName: state.fileName,
         batchNumber: state.batchNumber,
@@ -3731,7 +3936,13 @@ export async function processRow(
           utcStartDate: row.utcStartDate,
           mediaUrls: row.mediaUrls,
         },
-        stages: [],
+        stages: failureUsageRecords.length || failureStageArtifacts ? [{
+          stage: 'format',
+          success: false,
+          error: result.error,
+          output: {gptUsageSummary:summarizeGptUsageRecords(failureUsageRecords),
+            ...(failureStageArtifacts ? {stageArtifacts:sanitizeStageArtifactsSnapshot(failureStageArtifacts)} : {})},
+        }] : [],
         error: result.error,
       });
       batchManager.incrementParseSnapshotWrites();
@@ -4269,6 +4480,23 @@ export async function resolveVenueForFullParserEventWithMatcherForRegression(par
 }): Promise<VenueData | null> {
   const { rowVenue, row, establishment, rowIndex, matcher, addressMatcher } = params;
   const item=applyVerifiedSourceComplexVenue(applyLocationMentionResolution(applySharedFoodOfferVenue(params.item,row,rowVenue),[row.text,row.sharedPostText].filter(Boolean).join('\n')),row,rowVenue);
+  if (item.sourceLocationRole === 'collection_partner_only') return null;
+  if(sharedEventRequiresOriginalHost(item,row,rowVenue))return null;
+  const boundLocation = item.additionalLocation || item.venue || item.establishment;
+  const printedRoom=String(boundLocation || '').match(/^.+?\s*\(\s*in\s+([^()]+)\s*\)\s*$/i);
+  if(printedRoom){
+    const room=await matcher(printedRoom[1].trim(),undefined,inferFullParserVenueMatchContext(row,establishment));
+    return room.isMatch && room.matchType==='exact' && room.matchedVenue ? room.matchedVenue : null;
+  }
+  if (!isCityLevelFacebookEventLocation(row) && datedOccurrenceLocation({date:item.startDate, location:boundLocation, name:item.name,
+      description:item.description, combinedText:[row.text,row.sharedPostText].filter(Boolean).join('\n'),
+      modelSpatialEvidence:item.spatial || item.spatialEvidence})) {
+    for (const candidate of expandStageVenueCandidate(boundLocation)) {
+      const exact = await matcher(candidate, undefined, inferFullParserVenueMatchContext(row, establishment));
+      if (exact.isMatch && exact.matchType === 'exact' && exact.matchedVenue) return exact.matchedVenue;
+    }
+    return null;
+  }
   const sharedOfferOwner=sharedFoodOfferOwner(item,row,rowVenue);
   if(sharedOfferOwner){
     const original=await matcher(sharedOfferOwner,row.sharedPostAuthorUrl,inferFullParserVenueMatchContext(row,sharedOfferOwner));
@@ -4288,6 +4516,10 @@ export async function resolveVenueForFullParserEventWithMatcherForRegression(par
   const normalizedRowEstablishment = normalizeVenueName(establishment);
   const venueMatchContext = inferFullParserVenueMatchContext(row, establishment);
   const cityLevelFacebookEventLocation = isCityLevelFacebookEventLocation(row);
+  const validation = row.structuredLocationValidation;
+  if (cityLevelFacebookEventLocation && validation) {
+    return validation.decision === 'venue' && validation.venueId === rowVenue?.id ? rowVenue : null;
+  }
   const postDerivedCityLevelLocation = resolvePostDerivedCityLevelEventLocation({
     item,
     row,
@@ -4567,6 +4799,14 @@ export async function resolveVenueForFullParserEventWithMatcherForRegression(par
 }
 
 export function fullParserEventLocationCheck(item: ParserProcessedEvent, row: RawRowData) {
+  if(outdoorProgrammeRequiresHost(item,row))return {decision:'hold' as const,
+    reason:'outdoor_programme_requires_attendee_host',provinceCodes:[],evidence:['Outdoor programme cannot inherit a council or arena publisher venue']};
+  if(sharedEventRequiresOriginalHost(item,row))return {decision:'hold' as const,
+    reason:'shared_original_host_not_sharing_venue',provinceCodes:[],evidence:['First-person shared programme has a different original author; publisher fallback is unsupported']};
+  if (item.sourceLocationRole === 'collection_partner_only') {
+    return {decision:'hold' as const,reason:'collection_partner_is_not_event_venue',provinceCodes:[],
+      evidence:['Source explicitly leaves the attendance venue unstated and names collection partners only']};
+  }
   const spatial=item.spatial || item.spatialEvidence;
   const itemText=[item.name,item.description].filter(Boolean).join('\n');
   const onlineText=[itemText,row.text].filter(Boolean).join('\n');
@@ -4653,6 +4893,7 @@ export async function processFullParserEvent(
         batchManager,
         parserMode: 'full5stage',
         parserSourceType: String((item as unknown as { _sourceType?: string })._sourceType || ''),
+        audienceItem:item,
         eventName: String(item.name || (item as unknown as { eventName?: string }).eventName || '').trim() || undefined,
         eventDate: String(item.startDate || '').trim() || undefined,
         eventTime: String(item.startTime || '').trim() || undefined,
@@ -4674,6 +4915,8 @@ export async function processFullParserEvent(
         ticketsBuyUrl: item.ticketsBuyUrl || row.ticketsBuyUrl,
         externalLinks: row.externalLinks,
         sourceContentSignature: buildFacebookEventSourceContentSignature(row),
+        timeFlags: item.timeFlags,
+        timeResolution: item.timeResolution,
       });
       logger.debug('Skipping app event write for city-level Facebook Event location', {
         rowIndex,
@@ -4696,6 +4939,7 @@ export async function processFullParserEvent(
         rowIndex,
         batchManager,
         parserMode: 'full5stage',
+        audienceItem:item,
         eventName: String(item.name || (item as unknown as { eventName?: string }).eventName || '').trim() || undefined,
         eventDate: String(item.startDate || '').trim() || undefined,
         eventTime: String(item.startTime || '').trim() || undefined,
@@ -4886,7 +5130,7 @@ export async function processFullParserEvent(
     startTime: startTime || undefined,
     endTime: endTime || undefined,
     price: String(item.ticketPrice || '').trim() || undefined,
-    ageRestriction: undefined,
+    ageRestriction: item.ageRestriction || undefined,
     imageUrl: resolvedImage,
     mediaUrls: eventMediaUrls,
     imageProvenance: (item.imageProvenance as EventData['imageProvenance']) ||
@@ -4906,6 +5150,7 @@ export async function processFullParserEvent(
     sourceScraperType: row.sourceScraperType,
     sourceTimestamp: row.timestamp ? new Date(row.timestamp) : undefined,
     sourceContentSignature: buildFacebookEventSourceContentSignature(row),
+    structuredLocationValidation: row.structuredLocationValidation,
     usersResponded: item.usersResponded || row.usersResponded,
     usersGoing: item.usersGoing || row.usersGoing,
     usersInterested: item.usersInterested || row.usersInterested,
@@ -4975,11 +5220,10 @@ export async function processFullParserEvent(
     eventData.ticketingLocation=item._locationMentionResolution.ticketingLocation;
   }
 
+  Object.assign(eventData, buildValidatedVenuePointFields(venue, eventData));
   enforceCategoryTypeConsistency(eventData);
-  Object.assign(eventData, scoreFamilyFriendly({
-    ...eventData,
-    contextText: buildFamilyFriendlyScoringContext(row),
-  }));
+  eventData.familyAudienceEvidence = transferFamilyAudienceEvidence(item, eventData);
+  Object.assign(eventData, scoreFamilyFriendly(eventData));
 
   // Construct the real event payload, then stop before profile-image promotion,
   // duplicate checks, and all Firestore writes during a local preview.
@@ -5223,10 +5467,7 @@ async function processExtractedItem(
   };
 
   enforceCategoryTypeConsistency(eventData);
-  Object.assign(eventData, scoreFamilyFriendly({
-    ...eventData,
-    contextText: buildFamilyFriendlyScoringContext(row),
-  }));
+  Object.assign(eventData, scoreFamilyFriendly(eventData));
 
   const canonicalIcon = await resolveCanonicalVenueIcon({
     venue,
@@ -5770,6 +6011,8 @@ function buildDuplicateEventUpdates(
   const changedFields: string[] = [];
   let descriptionImproved = false;
   let timeImproved = false;
+  const priceProof=reviewedSourcePrice(existing,incoming);
+  if(contradictsReviewedOccurrenceTiming(existing,incoming))return {updates,changedFields,descriptionImproved,timeImproved};
   // Defense in depth: never enrich a different development slot, even if a caller
   // bypassed one of the duplicate selectors.
   if (hasConflictingDevelopmentSlot(existing, incoming) || hasConflictingOccurrenceIdentity(existing, incoming)) {
@@ -5989,7 +6232,11 @@ function buildDuplicateEventUpdates(
   const existingCategoryForMerge = asTrimmedString(
     (updates.category ?? existing.category) as EventData['category']
   );
-  const incomingCategoryForMerge = asTrimmedString(
+  const categoryProof=(existing as any).reviewedCategory;
+  const reviewedCategory = existing.locationReviewStatus === 'approved' && categoryProof?.version===1 &&
+    categoryProof.category===existingCategoryForMerge && typeof categoryProof.reviewId==='string' && categoryProof.reviewId.trim() &&
+    /^approved_(?:location_review|existing_venue_review|city_review_recovery)$/.test(String((existing as any).source || ''));
+  const incomingCategoryForMerge = reviewedCategory ? existingCategoryForMerge : asTrimmedString(
     normalizeCategoryAlias(incoming.category)
   );
   const existingIsFoodSpecialCategory = isFoodSpecialCategory(existingCategoryForMerge);
@@ -6072,7 +6319,18 @@ function buildDuplicateEventUpdates(
     setField('isFoodSpecial', mergedTypeState.isFoodSpecial as EventData['isFoodSpecial']);
   }
 
-  if (shouldReplaceDescription(existing.description, incoming.description)) {
+  const newerProgrammeTheme = seriesRefresh && existingSourceDate && incomingSourceDate && incomingSourceDate > existingSourceDate &&
+    normalizeUrl(existing.facebookUrl || '') === normalizeUrl(incoming.facebookUrl || '') &&
+    existing.startTime === incoming.startTime && existing.endTime === incoming.endTime &&
+    /\b(?:theme|this month|september|october|november|december|january|february|march|april|june|july|august)\b/i.test(existing.description || '') &&
+    /\b(?:this month|theme|writing|drawing|telling stories)\b/i.test(incoming.description || '');
+  // Keep the old description and clock together when a reparse might be a
+  // distinct showing. A conflicting tile transcription is not a correction.
+  const incomingTileClock = getBoundCalendarTileStart(incoming);
+  const conflictingTileDescription = Boolean(incomingTileClock &&
+    incomingTileClock !== toComparableTime(String(existing.startTime || '')) &&
+    !shouldReplaceTimeField(existing.startTime, incoming.startTime, existing, incoming, 'start'));
+  if (!conflictingTileDescription && (newerProgrammeTheme || shouldReplaceDescription(existing.description, incoming.description))) {
     setField('description', incoming.description);
     descriptionImproved = true;
   }
@@ -6227,6 +6485,13 @@ function buildDuplicateEventUpdates(
   }
 
   const mergedExternalLinks = mergeUniqueUrls(existing.externalLinks, incoming.externalLinks);
+  const locationProof = incoming.structuredLocationValidation;
+  if (venue && locationProof?.decision === 'venue' && locationProof.venueId === venue.id &&
+      existing.uniqueId === incoming.uniqueId && existing.startDate === incoming.startDate &&
+      existing.startTime === incoming.startTime && !unsafeCrossSourceDateMerge &&
+      valuesDiffer(existing.structuredLocationValidation, locationProof)) {
+    setField('structuredLocationValidation', locationProof);
+  }
   if (mergedExternalLinks.length > 0 && valuesDiffer(existing.externalLinks, mergedExternalLinks)) {
     setField('externalLinks', mergedExternalLinks);
   }
@@ -6239,7 +6504,9 @@ function buildDuplicateEventUpdates(
     !incoming.imageProvenance?.isFallback && incoming.imageProvenance?.primaryUrl &&
     [incoming.relevantImageUrl, incoming.image, incoming.imageUrl].includes(incoming.imageProvenance.primaryUrl)
     ? incoming.imageProvenance.primaryUrl : '';
-  const protectExistingMedia = unsafeCrossSourceDateMerge || (crossSourceSeriesRefresh && (!hasNewerSourceTimestamp || !attributedSeriesImage)) || Boolean(
+  const genericIncomingFrame = /(?:^|; )generic_video_frame_without_event_details(?:;|$)/.test(incoming.imageProvenance?.selectionReason || '') &&
+    /\/postimages\//.test(String(existing.relevantImageUrl || existing.image || '')) && !existing.imageProvenance?.isFallback;
+  const protectExistingMedia = genericIncomingFrame || unsafeCrossSourceDateMerge || (crossSourceSeriesRefresh && (!hasNewerSourceTimestamp || !attributedSeriesImage)) || Boolean(
     normalizeUrl(existing.facebookUrl || '') !== normalizeUrl(incoming.facebookUrl || '') &&
     normalizeUrl(incoming.facebookUrl || '') === 'facebook.com/downtowncharlottetowninc' &&
     /\/postimages\//.test(String(existing.relevantImageUrl || existing.image || existing.imageUrl || ''))
@@ -6318,30 +6585,24 @@ function buildDuplicateEventUpdates(
     setField('imageProvenance', buildDuplicateMergeImageProvenance(existing, incoming, updates));
   }
 
-  const mergedFamilyFriendlyScore = scoreFamilyFriendly({ ...existing, ...updates });
-  const incomingHasCurrentContextualScore =
-    incoming.familyFriendlyScoringVersion === FAMILY_FRIENDLY_SCORING_VERSION &&
-    typeof incoming.familyFriendlyScore === 'number' &&
-    typeof incoming.familyFriendlyLevel === 'string' &&
-    Array.isArray(incoming.familyFriendlyReasons);
-  const mergedHasHardAdultExclusion = mergedFamilyFriendlyScore.familyFriendlyReasons.some((reason) =>
-    reason === 'adult_age_restriction' || reason === 'adult_entertainment'
-  );
-  const familyFriendlyScore =
-    incomingHasCurrentContextualScore &&
-    !mergedHasHardAdultExclusion &&
-    Number(incoming.familyFriendlyScore) > mergedFamilyFriendlyScore.familyFriendlyScore
-      ? {
-          familyFriendlyScore: incoming.familyFriendlyScore as number,
-          familyFriendlyLevel: incoming.familyFriendlyLevel as NonNullable<EventData['familyFriendlyLevel']>,
-          familyFriendlyReasons: incoming.familyFriendlyReasons as string[],
-          familyFriendlyScoringVersion: incoming.familyFriendlyScoringVersion as string,
-        }
-      : mergedFamilyFriendlyScore;
+  if(priceProof){
+    for(const field of ['price','ticketPrice','name','eventName','description'] as const){
+      if(Object.hasOwn(updates,field)&&contradictsReviewedPrice(updates[field],priceProof,field==='price'||field==='ticketPrice')){
+        delete updates[field];const index=changedFields.indexOf(field);if(index>=0)changedFields.splice(index,1);
+        if(field==='description')descriptionImproved=false;
+      }
+    }
+  }
+
+  const mergedAudienceEvent = {...existing, ...updates};
+  const audienceEvidence = mergeFamilyAudienceEvidence(existing, incoming, mergedAudienceEvent);
+  setField('familyAudienceEvidence', audienceEvidence || null as any);
+  const familyFriendlyScore = scoreFamilyFriendly({...mergedAudienceEvent, familyAudienceEvidence:audienceEvidence});
   setField('familyFriendlyScore', familyFriendlyScore.familyFriendlyScore);
   setField('familyFriendlyLevel', familyFriendlyScore.familyFriendlyLevel);
   setField('familyFriendlyReasons', familyFriendlyScore.familyFriendlyReasons);
   setField('familyFriendlyScoringVersion', familyFriendlyScore.familyFriendlyScoringVersion);
+  setField('familyFriendlyContentHash', familyFriendlyScore.familyFriendlyContentHash);
 
   return {
     updates,
@@ -8022,6 +8283,11 @@ function getEvidenceComparableTime(
       : comparableTimes[0] || '';
   }
 
+  if (side === 'start' && options?.allowDescriptionFallback) {
+    const tileClock = corroboratedCalendarStart(event, options.counterpartEvent);
+    if (tileClock) return tileClock;
+  }
+
   if (
     options?.allowDescriptionFallback &&
     shouldUseDescriptionRangeFallback(event, options.counterpartEvent)
@@ -8543,6 +8809,7 @@ export function summarizeFullParserEvents(
     imageProvenance: event.imageProvenance || null,
     timeResolution: event.timeResolution || null,
     timeFlags: event.timeFlags || null,
+    structuredLocationValidation: event.structuredLocationValidation || null,
     _sourceType: (event as unknown as Record<string, unknown>)._sourceType || null,
     description: String(event.description || '').slice(0, 240),
   }));
@@ -8689,11 +8956,4 @@ export function combineTextContent(row: RawRowData): string {
   }
 
   return parts.join('\n\n');
-}
-
-function buildFamilyFriendlyScoringContext(row: RawRowData): string {
-  return [row.sharedPostText, row.text, row.ocrText]
-    .map((value) => String(value || '').trim())
-    .filter(Boolean)
-    .join('\n\n');
 }

@@ -1,4 +1,5 @@
 import {hasConflictingOccurrenceIdentity,findConflictingSourceCinemaDate} from '../utils/occurrenceMergeGuard.js';
+import {hasCurrentStructuredValidation, isRetiredVenueReview} from './structuredLocationContract.js';
 import {publicCityLevelDescription, requiresReviewedAreaPoints, validateEventAreaData, verifyAreaPublicationReferences} from './areaEventPublication.js';
 import {resolveAreaDateRangeTiming} from './areaDateRangeTiming.js';
 import {resolveAggregatorCinemaOccurrence} from './aggregatorCinemaOccurrence.js';
@@ -46,6 +47,7 @@ import {
   UnrecognizedVenueStatus,
 } from '../types/index.js';
 import { logger } from '../utils/logger.js';
+import {cityGranularityHint} from './locationHintGranularity.js';
 import { classifyResumeTaskClaim, ResumeTaskCheckpoint } from '../processing/resumeTaskGuard.js';
 import {
   normalizeVenueName,
@@ -93,9 +95,10 @@ import {
   choosePreferredAddress,
   normalizeCanadianAddress,
 } from '../utils/addressNormalization.js';
-import { withFamilyFriendlyScore } from '../utils/familyFriendlyScoring.js';
+import { withFamilyFriendlyScore, mergeFamilyAudienceEvidence } from '../utils/familyFriendlyScoring.js';
 import {
   hasConflictingExplicitSlotOrdinals,
+  hasConflictingProgrammeSlot,
   hasConflictingLabeledSlotTimeEvidence,
   hasMatchingExplicitSlotIdentity,
   hasMatchingLabeledSlotTimeEvidence,
@@ -219,7 +222,7 @@ const EVENT_UPDATE_AUDIT_BASE_FIELDS = [
 ] as const;
 const DEFAULT_LOCK_TTL_MS = 30 * 60 * 1000;
 const CITY_SUFFIX_REGEX =
-  /^(.*?)(?:\s*[|,-]\s*)([A-Za-z .'-]+?)\s*,?\s*(PEI?|NS|NB|NL|ON|QC|AB|BC|SK|MB)\s*$/i;
+  /^(.*?)(?:\s*[|,-]\s*)([A-Za-z .'-]+?)(?:\s*,\s*|\s+)(PEI?|NS|NB|NL|ON|QC|AB|BC|SK|MB)\s*$/i;
 const UNKNOWN_VENUE_SAMPLE_LIMIT = 5;
 const UNKNOWN_VENUE_DESCRIPTION_PREVIEW_LEN = 240;
 const CITY_LEVEL_EVENT_REVIEW_SAMPLE_LIMIT = 10;
@@ -587,7 +590,7 @@ function inferPEICityProvinceHintsFromCorpus(corpusInput?: string): { cityHint?:
 function inferHintsFromAggregatorVenue(venue: VenueData | null): { cityHint?: string; provinceHint?: string } {
   if (!venue) return {};
 
-  const explicitCity = String(venue.city || '').trim() || undefined;
+  const explicitCity = cityGranularityHint(venue.city);
   const explicitProvince = normalizeProvinceToken(String(venue.province || '').trim()) || undefined;
   if (explicitCity || explicitProvince) {
     return {
@@ -614,10 +617,10 @@ async function inferUnknownVenueCityProvinceHints(params: {
 }): Promise<{ cityHint?: string; provinceHint?: string }> {
   const venueName = String(params.venueName || '').trim();
   const fromVenue = splitCitySuffix(venueName);
-  if (fromVenue?.city || fromVenue?.region) {
+  if (cityGranularityHint(fromVenue?.city)) {
     return {
-      cityHint: fromVenue.city || undefined,
-      provinceHint: normalizeProvinceToken(fromVenue.region),
+      cityHint: cityGranularityHint(fromVenue?.city),
+      provinceHint: normalizeProvinceToken(fromVenue?.region),
     };
   }
 
@@ -694,7 +697,7 @@ function normalizeStringRecord(value: unknown): Record<string, string> {
   return result;
 }
 
-function buildUnrecognizedVenueDocId(
+export function buildUnrecognizedVenueDocId(
   establishmentNormalized: string,
   cityHint?: string,
   provinceHint?: string
@@ -710,19 +713,28 @@ function buildUnrecognizedVenueDocId(
 
 export function pickUnrecognizedVenueDocIdForSource(
   records: UnrecognizedVenueRecord[],
-  establishmentNormalized: string
+  establishmentNormalized: string,
+  context?:{cityHint?:string;provinceHint?:string}
 ): string {
   const normalized = normalizeVenueName(establishmentNormalized);
   if (!normalized) return '';
 
   const matchingRecords = records
     .filter((record) => normalizeVenueName(record.establishmentNormalized || record.establishment || '') === normalized)
+    .filter(record=>!context || normalizeVenueName(cityGranularityHint(record.cityHint)||'')===normalizeVenueName(context.cityHint||'') &&
+      (!context.provinceHint||!record.provinceHint||normalizeProvinceToken(record.provinceHint)===normalizeProvinceToken(context.provinceHint)))
     .filter((record) => String(record.id || '').trim());
 
   const activeRecord = matchingRecords.find((record) =>
     !isTerminalUnrecognizedStatus(String(record.status || 'pending'))
   );
   return String(activeRecord?.id || matchingRecords[0]?.id || '').trim();
+}
+
+export function resolveQueueCityHint(inputCity:unknown,inferredCity:unknown,sourceContextText=''):string|undefined{
+ const direct=cityGranularityHint(inputCity)||cityGranularityHint(inferredCity);if(direct)return direct;
+ const matches=PEI_CITY_HINTS.filter(entry=>entry.patterns.some(pattern=>pattern.test(sourceContextText)));
+ return matches.length===1?matches[0].city:undefined;
 }
 
 export function buildUnrecognizedVenueSample(
@@ -1187,7 +1199,7 @@ function parseTimestampMillis(value: unknown): number | null {
   return Number.isNaN(parsed) ? null : parsed;
 }
 
-function splitCitySuffix(
+export function splitCitySuffix(
   name: string
 ): { baseName: string; city: string; region: string } | null {
   const raw = String(name || '').trim();
@@ -1547,6 +1559,9 @@ export async function queueCityLevelEventReview(
         autoPublishSource: input.autoPublishSource,
         autoPublishFieldSources: input.autoPublishFieldSources,
         autoPublishReviewReasons,
+        structuredLocationValidation: input.structuredLocationValidation,
+        timeFlags: input.timeFlags,
+        timeResolution: input.timeResolution,
         spatialEvidence: input.spatialEvidence,
         observedLocationName: input.observedLocationName,
         description,
@@ -1564,6 +1579,7 @@ export async function queueCityLevelEventReview(
         eventType: String(input.eventType || '').trim() || undefined,
         category: String(input.category || '').trim() || undefined,
         descriptionPreview,
+        familyAudienceEvidence: input.familyAudienceEvidence,
         imageUrl,
         mediaUrls: mediaUrls.length > 0 ? mediaUrls : undefined,
         usersResponded,
@@ -1593,6 +1609,8 @@ export async function queueCityLevelEventReview(
     }
 
     const existing = (snapshot.data() || {}) as Partial<CityLevelEventReviewRecord> & Record<string, unknown>;
+    // Preserve a venue keeper redirect before unknown statuses normalize.
+    if (isRetiredVenueReview(existing)) return;
     const nextStatus = normalizeCityLevelReviewStatus(String(existing.status || 'needs_review'));
     shouldRefreshPublishedEvent = nextStatus === 'published';
     const sampleRows = mergeCityLevelEventReviewSamples(existing.sampleRows, sample);
@@ -1652,6 +1670,9 @@ export async function queueCityLevelEventReview(
             : undefined
         ),
         spatialEvidence: input.spatialEvidence || existing.spatialEvidence,
+        structuredLocationValidation: input.structuredLocationValidation || existing.structuredLocationValidation,
+        timeFlags: input.timeFlags || existing.timeFlags,
+        timeResolution: input.timeResolution || existing.timeResolution,
         observedLocationName: input.observedLocationName || existing.observedLocationName,
         description: description || existing.description,
         locationScope: existing.locationScope || locationScope,
@@ -1668,6 +1689,7 @@ export async function queueCityLevelEventReview(
         eventType: String(existing.eventType || input.eventType || '').trim() || undefined,
         category: String(existing.category || input.category || '').trim() || undefined,
         descriptionPreview: descriptionPreview || asOptionalTrimmedString(existing.descriptionPreview),
+        familyAudienceEvidence: input.familyAudienceEvidence || existing.familyAudienceEvidence,
         imageUrl: imageUrl || asOptionalTrimmedString(existing.imageUrl),
         mediaUrls: mergedMediaUrls.length > 0 ? mergedMediaUrls : undefined,
         usersResponded: usersResponded || asOptionalTrimmedString(existing.usersResponded),
@@ -1919,9 +1941,15 @@ function buildPublishedCityLevelEventData(
   reviewId: string,
   record: CityLevelEventReviewRecord,
   manual: FinalizeCityLevelEventReviewInput['manual'] = {},
-  mediaFields: Partial<EventData> = {}
+  mediaFields: Partial<EventData> = {},
+  previous?: EventData
 ): EventData & Record<string, unknown> {
   manual = reviewedCityLevelManual(record, manual);
+  if (isRetiredVenueReview(record as unknown as Record<string, unknown>) ||
+      String(manual.locationScope || record.locationScope) === 'venue' ||
+      record.structuredLocationValidation?.decision === 'venue') {
+    throw new Error('Venue-bound publication requires the validated venue publication path');
+  }
   const locationScope = normalizePublishedCityLevelScope(manual.locationScope || record.locationScope);
   const areaData = manual.areaData || record.areaData;
   if (areaData && (locationScope !== 'area' || record.spatialEvidence?.kind === 'route')) {
@@ -1971,12 +1999,16 @@ function buildPublishedCityLevelEventData(
     cityLevelReviewId: reviewId,
     sourceScraperType: record.sourceScraperType,
     sourceContentSignature: asOptionalTrimmedString(record.sourceContentSignature),
+    structuredLocationValidation: record.structuredLocationValidation,
+    timeFlags: record.timeFlags,
+    timeResolution: record.timeResolution,
     establishment: locationLabel,
     venue: locationLabel,
     name: eventName,
     eventName,
     description,
     eventType: normalizePublishedCityLevelEventType(manual.eventType || record.eventType),
+    familyAudienceEvidence: record.familyAudienceEvidence,
     category: normalizePublishedCityLevelCategory(manual.category || record.category),
     isEvent: 'Yes',
     isFoodSpecial: 'No',
@@ -2020,6 +2052,10 @@ function buildPublishedCityLevelEventData(
     lastSeenAt: admin.firestore.FieldValue.serverTimestamp(),
   }) as unknown as EventData & Record<string, unknown>;
 
+  // Reviewed repairs can establish proof on the public event without changing
+  // its historical review. Preserve that proof only for this same activity;
+  // a changed identity or fresh restriction is still rescored, never max-reused.
+  if(previous)eventData.familyAudienceEvidence=mergeFamilyAudienceEvidence(previous,eventData,eventData)||null;
   return withFamilyFriendlyScore(eventData);
 }
 
@@ -2060,7 +2096,8 @@ async function writePublishedCityLevelEvent(
     })};
   }
   const mediaFields = await buildPublishedCityLevelMediaFields(manual, record);
-  const rawEventData = buildPublishedCityLevelEventData(reviewId, record, manual, mediaFields);
+  const rawEventData = buildPublishedCityLevelEventData(reviewId, record, manual, mediaFields,
+    previous.exists ? previous.data() as EventData : undefined);
   const sanitizedEventData = await sanitizeEventManagedImageReferencesForWrite(rawEventData, {
     operation: 'writePublishedCityLevelEvent',
     reviewId,
@@ -2101,6 +2138,9 @@ async function refreshPublishedCityLevelEventFromReview(reviewId: string): Promi
     ...(snapshot.data() || {}),
   } as CityLevelEventReviewRecord;
 
+  if (isRetiredVenueReview(record as unknown as Record<string, unknown>) ||
+      record.structuredLocationValidation?.decision === 'hold' ||
+      record.structuredLocationValidation?.decision === 'venue') return;
   if (normalizeCityLevelReviewStatus(String(record.status || '')) !== 'published') {
     return;
   }
@@ -2422,6 +2462,13 @@ function evaluateCityLevelAutoPublishEligibility(
   record: CityLevelEventReviewRecord
 ): CityLevelAutoPublishEligibility {
   const reasons: string[] = [];
+  if (isRetiredVenueReview(record as unknown as Record<string, unknown>)) reasons.push('retired_venue_review');
+  if (record.autoPublishSource === 'structured_facebook_event') {
+    const proof = record.structuredLocationValidation;
+    if (!hasCurrentStructuredValidation(proof, record.sourceContentSignature || '')) reasons.push('missing_current_structured_location_validation');
+    if (proof?.decision !== 'broad' || proof?.reasons.length) reasons.push('structured_location_requires_review');
+    if (record.autoPublishReviewReasons?.length) reasons.push(...record.autoPublishReviewReasons);
+  }
 
   if (!isCityLevelAutoPublishEnabled()) {
     reasons.push('auto_publish_disabled');
@@ -2523,6 +2570,7 @@ export async function autoPublishCityLevelEventReview(
   } as CityLevelEventReviewRecord;
 
   const status = normalizeCityLevelReviewStatus(String(record.status || 'needs_review'));
+  if (isRetiredVenueReview(record as unknown as Record<string, unknown>)) return {published: false, reason: 'retired_venue_review'};
   if (status !== 'needs_review') {
     return { published: false, reason: `status_${status}` };
   }
@@ -2639,7 +2687,7 @@ export async function queueUnrecognizedVenue(
     description: input.description,
     aggregatorFacebookUrl: input.aggregatorFacebookUrl,
   });
-  const cityHint = String(input.cityHint || inferredHints.cityHint || '').trim() || undefined;
+  const cityHint = resolveQueueCityHint(input.cityHint,inferredHints.cityHint,input.sourceContextText);
   const provinceHint = normalizeProvinceToken(
     String(input.provinceHint || inferredHints.provinceHint || '').trim()
   );
@@ -2651,7 +2699,8 @@ export async function queueUnrecognizedVenue(
     : [];
   const existingSourceDocId = pickUnrecognizedVenueDocIdForSource(
     existingSourceRecords,
-    establishmentNormalized
+    establishmentNormalized,
+    {cityHint,provinceHint}
   );
   const docId =
     existingSourceDocId || buildUnrecognizedVenueDocId(establishmentNormalized, cityHint, provinceHint);
@@ -2751,7 +2800,7 @@ export async function queueUnrecognizedVenue(
         establishmentNormalized,
         status: nextStatus,
         occurrences: existingOccurrences + 1,
-        cityHint: String(existing.cityHint || cityHint || '').trim() || undefined,
+        cityHint: cityGranularityHint(existing.cityHint) || cityHint,
         provinceHint: normalizeProvinceToken(String(existing.provinceHint || provinceHint || '').trim()),
         aliasCandidates: mergedAliases,
         sourceTypes: mergedSources,
@@ -4092,6 +4141,7 @@ export function shouldSkipSiblingUniqueIdDuplicateCheck(
   incoming: EventData,
   existing: EventData
 ): boolean {
+  if (hasConflictingProgrammeSlot(incoming, existing)) return true;
   const incomingUniqueId = String(incoming.uniqueId || '').trim();
   const existingUniqueId = String(existing.uniqueId || '').trim();
   if (!incomingUniqueId || !existingUniqueId || incomingUniqueId === existingUniqueId) {
@@ -4443,6 +4493,7 @@ export async function checkDuplicate(
   const matchingCurrentRunSlot = currentRunEntries.find((existing) =>
     String(existing.venueId || '').trim() === String(venueId || '').trim() &&
     existing.startDate === event.startDate &&
+    !hasConflictingProgrammeSlot(event, existing) &&
     (hasMatchingExplicitSlotIdentity(event, existing) ||
       hasMatchingLabeledSlotTimeEvidence(event, existing))
   );
@@ -4451,6 +4502,7 @@ export async function checkDuplicate(
   }
   for (const existing of currentRunEntries) {
     const sameVenue = String(existing.venueId || '').trim() === String(venueId || '').trim();
+    if (hasConflictingProgrammeSlot(event, existing)) continue;
     if (hasConflictingExplicitSlotOrdinals(event, existing)) continue;
     if (hasConflictingLabeledSlotTimeEvidence(event, existing)) continue;
     if (sameVenue && shouldSkipSiblingUniqueIdDuplicateCheck(event, existing)) {
@@ -4507,6 +4559,7 @@ export async function checkDuplicate(
 
   const matchingStoredSlot = existingEvents.find((existing) =>
     existing.startDate === event.startDate &&
+    !hasConflictingProgrammeSlot(event, existing) &&
     (hasMatchingExplicitSlotIdentity(event, existing) ||
       hasMatchingLabeledSlotTimeEvidence(event, existing))
   );
@@ -4515,6 +4568,7 @@ export async function checkDuplicate(
   }
 
   for (const existing of existingEvents) {
+    if (hasConflictingProgrammeSlot(event, existing)) continue;
     if (hasConflictingExplicitSlotOrdinals(event, existing)) continue;
     if (hasConflictingLabeledSlotTimeEvidence(event, existing)) continue;
     if (shouldSkipSiblingUniqueIdDuplicateCheck(event, existing)) {
@@ -7257,9 +7311,10 @@ export function buildPublishedCityLevelEventDataForRegression(
   reviewId: string,
   record: CityLevelEventReviewRecord,
   manual: FinalizeCityLevelEventReviewInput['manual'] = {},
-  mediaFields: Partial<EventData> = {}
+  mediaFields: Partial<EventData> = {},
+  previous?: EventData
 ): EventData & Record<string, unknown> {
-  return buildPublishedCityLevelEventData(reviewId, record, manual, mediaFields);
+  return buildPublishedCityLevelEventData(reviewId, record, manual, mediaFields, previous);
 }
 
 export async function buildPublishedCityLevelMediaFieldsForRegression(

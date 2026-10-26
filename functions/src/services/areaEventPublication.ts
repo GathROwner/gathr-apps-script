@@ -56,7 +56,7 @@ function evidenceDate(value: string, year: string): string {
 }
 
 function evidenceClock(value: string): string {
-  const clock = value.toLowerCase().replace(/\./g, '').match(/^\s*(\d{1,2})(?::(\d{2}))?(?:\s*[-–]\s*\d{1,2}(?::\d{2})?)?\s*(am|pm)?\s*$/);
+  const clock = value.toLowerCase().replace(/\./g, '').match(/^\s*(\d{1,2})(?::(\d{2}))?(?:\s*(?:[-–]|to)\s*\d{1,2}(?::\d{2})?)?\s*(am|pm)?\s*$/);
   if (!clock || (!clock[2] && !clock[3])) return '';
   let hour = Number(clock[1]);
   if (clock[3]) { if (hour < 1 || hour > 12) return ''; hour = hour % 12 + (clock[3] === 'pm' ? 12 : 0); }

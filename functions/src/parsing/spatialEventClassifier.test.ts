@@ -2,6 +2,90 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { classifySpatialEvent } from './spatialEventClassifier.js';
 
+test('one named park and its pavilion are a host and sublocation, including saved model multi-location evidence',()=>{
+  for(const location of ['Victoria Park','Victoria Park Pavilion']) {
+    const result=classifySpatialEvent({name:'Fun Warm-Up (Kids Fox Trot)',location,
+      description:'Saturday, October 17th – Victoria Park Pavilion — 10:45 AM – Fun Warm-Up',
+      modelSpatialEvidence:{kind:'multi_location',locations:[
+        {label:'Victoria Park Pavilion',role:'location',certainty:'confirmed'},
+        {label:'Victoria Park',role:'location',certainty:'confirmed'},
+      ]}});
+    assert.equal(result.kind,'single_location');assert.equal(result.locations.length,1);
+    assert.equal(result.locations[0].label,'Victoria Park');assert.deepEqual(result.reviewReasons,[]);
+  }
+});
+
+test('distinct parks/pavilions, conflicting addresses and explicit routes or multi-sites remain separate',()=>{
+  for(const overrides of [
+    {labels:['Victoria Park Pavilion','Other Park']},
+    {labels:['Victoria Park North Pavilion','Victoria Park South Pavilion']},
+    {labels:['Victoria Park Pavilion','Victoria Park'],description:'Activities at multiple venues'},
+    {labels:['Victoria Park Pavilion','Victoria Park'],name:'Fun Run',roles:['start','finish']},
+    {labels:['Victoria Park Pavilion','Victoria Park'],addresses:['1 Example Road','2 Example Road']},
+  ]){
+    const result=classifySpatialEvent({name:overrides.name||'Programme',location:'Victoria Park',description:overrides.description,
+      modelSpatialEvidence:{kind:'multi_location',locations:overrides.labels.map((label,i)=>({label,role:overrides.roles?.[i]||'location',address:overrides.addresses?.[i]}))}});
+    assert.equal(result.locations.length,2);assert.notEqual(result.kind,'single_location');
+  }
+});
+
+test('a postal abbreviation inside one labelled address stays one venue', () => {
+  const result = classifySpatialEvent({name: 'Community Concert',
+    combinedText: 'Location: 582 North River Road, P.O. Box 123, Charlottetown, PEI',
+    description: 'A concert at one location.'});
+  assert.equal(result.kind, 'single_location');
+  assert.equal(result.locations.length, 1);
+  assert.match(result.locations[0].label, /P\.O\. Box 123/);
+});
+
+test('identical numbered street mentions reconcile postal suffixes only', () => {
+  const result = classifySpatialEvent({name: 'Concert',
+    combinedText: 'Location: 582 North River Road, P.O. Box 123, Charlottetown, PEI',
+    modelSpatialEvidence: {kind: 'multi_location', locations: [{label: '582 North River Road'}]}});
+  assert.equal(result.kind, 'single_location');
+  assert.equal(result.locations.length, 1);
+});
+
+test('same street number in different towns and independent rooms remain distinct', () => {
+  for (const locations of [
+    ['582 North River Road, Charlottetown, PE', '582 North River Road, Summerside, PE'],
+    ['582 North River Road, Room A', '582 North River Road, Room B'],
+    ['582 North River Road', '583 North River Road'],
+  ]) {
+    const result = classifySpatialEvent({name: 'Community Festival', modelSpatialEvidence: {kind: 'multi_location', locations: locations.map(label => ({label}))}});
+    assert.equal(result.locations.length, 2);
+    if (!locations[0].includes('Room')) assert.equal(result.kind, 'multi_location');
+  }
+});
+
+test('retained model postal prefix cannot resurrect a reconciled second location', () => {
+  const result = classifySpatialEvent({name: 'Community Concert', combinedText: 'Location: 42 Example Road, P.O. Box 7, Charlottetown, PE',
+    modelSpatialEvidence: {kind: 'multi_location', locations: [
+      {label: '42 Example Road, P.O. Box 7, Charlottetown, PE'}, {label: '42 Example Road, P.O'},
+    ]}});
+  assert.equal(result.kind, 'single_location'); assert.equal(result.locations.length, 1); assert.deepEqual(result.reviewReasons, []);
+});
+
+test('independently named venues at one street address do not become aliases', () => {
+  const result = classifySpatialEvent({name: 'Community Festival', modelSpatialEvidence: {kind: 'multi_location', locations: [
+    {label: 'Alpha Hall', address: '42 Example Road'}, {label: 'Beta Theatre', address: '42 Example Road'},
+  ]}});
+  assert.equal(result.kind, 'multi_location'); assert.equal(result.locations.length, 2);
+});
+
+test('identical venue labels and known aliases keep different addresses, towns and rooms distinct', () => {
+  for (const locations of [
+    [{label: 'Legion Hall', address: '42 Example Road, Charlottetown, PE'}, {label: 'Legion Hall', address: '43 Example Road, Charlottetown, PE'}],
+    [{label: 'Legion Hall', address: '42 Example Road, Charlottetown, PE'}, {label: 'Legion Hall', address: '42 Example Road, Summerside, PE'}],
+    [{label: 'Room 1', address: '42 Example Road'}, {label: 'Room 1', address: '43 Example Road'}],
+    [{label: 'Founders Food Hall', address: '42 Example Road'}, {label: 'Founders Food Hall & Market', address: '43 Example Road'}],
+    [{label: 'Legion Hall', address: '42 Example Road, Room A'}, {label: 'Legion Hall', address: '42 Example Road, Room B'}],
+  ]) {
+    const result = classifySpatialEvent({name: 'Community Festival', modelSpatialEvidence: {kind: 'multi_location', locations}});
+    assert.equal(result.locations.length, 2);
+  }
+});
+
 test('festival partnership city context cannot resurrect a discarded second location', () => {
   const result = classifySpatialEvent({
     name: 'Arts Mixer',

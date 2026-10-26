@@ -1,0 +1,220 @@
+{
+  "dataset": "10i5p3EGVPCEYvVUx2aZdx-Dq7kHSaa0a",
+  "cinema": {
+    "source": "1655600776576837",
+    "caption": "We still have two great weeks of films for October with Winter of the Crow this week and a selection of Horror classics old and new for Halloween starting on Sunday, but we couldn't wait to share our November line-up with you, so here it is! Tickets now on sale at citycinema.ca\n\nOCR TEXT:\nMay be a graphic of text",
+    "originalPoster": "C:/Users/craig/.codex/worktrees/luna-accounting-release/gathr-apps-script/functions/artifacts/luna-oct22-production-audit/media/81-media-0.img",
+    "ocrFixtureKind": "reconstructed transcription from retained poster, not original paid OCR response",
+    "reconstructedOcr": "CITY CINEMA\nSunday November 15th 4pm",
+    "phantom": {
+      "name": "CITY CINEMA",
+      "type": "event",
+      "date": "2026-11-15",
+      "startTime": "16:00",
+      "endTime": "",
+      "venue": "City Cinema",
+      "description": "",
+      "extractionReason": "calendar_ocr_explicit_date_line",
+      "_sourceType": "calendar",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "Extracted item clock: 16:00"
+        },
+        "end": {
+          "source": "none",
+          "toClose": false,
+          "evidence": ""
+        }
+      },
+      "_sourceOccurrenceCount": 1,
+      "_pipelineIndex": 10,
+      "_pipelineTotalStage3": 10
+    },
+    "valid": {
+      "name": "Second Sundays Films from Around the World",
+      "type": "event",
+      "date": "2026-11-15",
+      "startTime": "4:00 PM",
+      "endTime": "",
+      "venue": "City Cinema",
+      "price": "",
+      "description": "The poster specifies Sunday, November 15th at 4pm.",
+      "extractionReason": "The event name, date, time, and City Cinema venue are printed on the poster.",
+      "relevantImageIndex": 0,
+      "spatial": {
+        "kind": "single_location",
+        "locations": [
+          "City Cinema"
+        ],
+        "confirmedStreets": [],
+        "ordered": false,
+        "evidenceNotes": "The poster explicitly says City Cinema."
+      },
+      "_sourceType": "calendar",
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "Extracted item clock: 4:00 PM"
+        },
+        "end": {
+          "source": "none",
+          "toClose": false,
+          "evidence": ""
+        }
+      },
+      "_sourceOccurrenceCount": 1,
+      "_pipelineIndex": 5,
+      "_pipelineTotalStage3": 10
+    }
+  },
+  "rcmp": {
+    "source": "1572718361567136",
+    "caption": "Thinking about a career with the RCMP?  Want to check your fitness levels? \n\nJoin us for a Police Fitness Assessment Field Exposure Workshop and see how your fitness measures up to the physical demands of policing.\n\nParticipants will learn about common physical tasks required of RCMP officers, explore realistic training scenarios, and gain a better understanding of the fitness benchmarks expected at the RCMP's National Depot Training Academy. This voluntary session will be conducted in English.\n\n October 30, 2026\n ⏰ Session 1: 9:30 a.m.\n ⏰ Session 2: 1:00 p.m.\n\n To register, email PEIrecruiting-recrutementIPE@rcmp-grc.gc.ca and indicate your preferred session.\n\n⚠️ Spots are limited!\n\nLocation details and preparation guidelines will be provided upon registration.\n\n#PEIRCMP #RCMPRecruiting #CareerInPolicing #JoinRCMP #PoliceFitness\n\nOCR TEXT:\nMay be an image of text\nMay be an image of segway",
+    "stage3": [
+      {
+        "name": "Police Fitness Assessment Field Exposure Workshop — Session 1",
+        "description": "Join us for a Police Fitness Assessment Field Exposure Workshop and see how your fitness measures up to the physical demands of policing. Participants will learn about common physical tasks required of RCMP officers, explore realistic training scenarios, and gain a better understanding of the fitness benchmarks expected at the RCMP's National Depot Training Academy. This voluntary session will be conducted in English. To register, email PEIrecruiting-recrutementIPE@rcmp-grc.gc.ca and indicate your preferred session. Spots are limited! Location details and preparation guidelines will be provided upon registration.",
+        "date": "2026-10-30",
+        "startTime": "09:30",
+        "endTime": "",
+        "venue": "",
+        "ticketLink": "",
+        "price": "",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none",
+        "extractionReason": "A dated fitness assessment workshop is an advertised activity. Session 1 has its own explicitly listed start time, so it is extracted separately.",
+        "timeFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "9:30 a.m."
+          },
+          "end": {
+            "source": "none",
+            "toClose": false,
+            "evidence": ""
+          }
+        },
+        "spatial": {
+          "kind": "unknown",
+          "locations": [],
+          "confirmedStreets": [],
+          "ordered": false,
+          "evidenceNotes": "The caption says location details will be provided upon registration and does not state a venue."
+        },
+        "_sourceOccurrenceCount": 1,
+        "_pipelineIndex": 1,
+        "_pipelineTotalStage3": 2
+      },
+      {
+        "name": "Police Fitness Assessment Field Exposure Workshop — Session 2",
+        "description": "Join us for a Police Fitness Assessment Field Exposure Workshop and see how your fitness measures up to the physical demands of policing. Participants will learn about common physical tasks required of RCMP officers, explore realistic training scenarios, and gain a better understanding of the fitness benchmarks expected at the RCMP's National Depot Training Academy. This voluntary session will be conducted in English. To register, email PEIrecruiting-recrutementIPE@rcmp-grc.gc.ca and indicate your preferred session. Spots are limited! Location details and preparation guidelines will be provided upon registration.",
+        "date": "2026-10-30",
+        "startTime": "13:00",
+        "endTime": "",
+        "venue": "",
+        "ticketLink": "",
+        "price": "",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none",
+        "extractionReason": "A dated fitness assessment workshop is an advertised activity. Session 2 has its own explicitly listed start time, so it is extracted separately.",
+        "timeFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "1:00 p.m."
+          },
+          "end": {
+            "source": "none",
+            "toClose": false,
+            "evidence": ""
+          }
+        },
+        "spatial": {
+          "kind": "unknown",
+          "locations": [],
+          "confirmedStreets": [],
+          "ordered": false,
+          "evidenceNotes": "The caption says location details will be provided upon registration and does not state a venue."
+        },
+        "_sourceOccurrenceCount": 1,
+        "_pipelineIndex": 2,
+        "_pipelineTotalStage3": 2
+      }
+    ],
+    "stage4": [
+      {
+        "name": "Police Fitness Assessment Field Exposure Workshop — Session 1",
+        "description": "Join us for a Police Fitness Assessment Field Exposure Workshop and see how your fitness measures up to the physical demands of policing. Participants will learn about common physical tasks required of RCMP officers, explore realistic training scenarios, and gain a better understanding of the fitness benchmarks expected at the RCMP's National Depot Training Academy. This voluntary session will be conducted in English. To register, email PEIrecruiting-recrutementIPE@rcmp-grc.gc.ca and indicate your preferred session. Spots are limited! Location details and preparation guidelines will be provided upon registration.",
+        "date": "2026-10-30",
+        "startTime": "09:30",
+        "endTime": "",
+        "venue": "",
+        "ticketLink": "",
+        "price": "",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none",
+        "extractionReason": "A dated fitness assessment workshop is an advertised activity. Session 1 has its own explicitly listed start time, so it is extracted separately.",
+        "timeFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "9:30 a.m."
+          },
+          "end": {
+            "source": "none",
+            "toClose": false,
+            "evidence": ""
+          }
+        },
+        "spatial": {
+          "kind": "unknown",
+          "locations": [],
+          "confirmedStreets": [],
+          "ordered": false,
+          "evidenceNotes": "The caption says location details will be provided upon registration and does not state a venue."
+        },
+        "_sourceOccurrenceCount": 1,
+        "_pipelineIndex": 1,
+        "_pipelineTotalStage3": 2
+      },
+      {
+        "name": "Police Fitness Assessment Field Exposure Workshop — Session 2",
+        "description": "Join us for a Police Fitness Assessment Field Exposure Workshop and see how your fitness measures up to the physical demands of policing. Participants will learn about common physical tasks required of RCMP officers, explore realistic training scenarios, and gain a better understanding of the fitness benchmarks expected at the RCMP's National Depot Training Academy. This voluntary session will be conducted in English. To register, email PEIrecruiting-recrutementIPE@rcmp-grc.gc.ca and indicate your preferred session. Spots are limited! Location details and preparation guidelines will be provided upon registration.",
+        "date": "2026-10-30",
+        "startTime": "13:00",
+        "endTime": "",
+        "venue": "",
+        "ticketLink": "",
+        "price": "",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none",
+        "extractionReason": "A dated fitness assessment workshop is an advertised activity. Session 2 has its own explicitly listed start time, so it is extracted separately.",
+        "timeFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "1:00 p.m."
+          },
+          "end": {
+            "source": "none",
+            "toClose": false,
+            "evidence": ""
+          }
+        },
+        "spatial": {
+          "kind": "unknown",
+          "locations": [],
+          "confirmedStreets": [],
+          "ordered": false,
+          "evidenceNotes": "The caption says location details will be provided upon registration and does not state a venue."
+        },
+        "_sourceOccurrenceCount": 1,
+        "_pipelineIndex": 2,
+        "_pipelineTotalStage3": 2
+      }
+    ]
+  },
+  "targetPaths": [
+    "venues/slug_citycinemachtown/events/u1tYDY5oORcQWo2TGQgQ",
+    "venues/slug_rcmpgrcpei/events/blGN5zztgqkkzPkABp6s",
+    "venues/slug_rcmpgrcpei/events/E0YfIMoFyyB0kR1KJMdK"
+  ]
+}

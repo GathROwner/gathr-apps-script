@@ -1,5 +1,6 @@
 import { DateTime } from 'luxon';
 import { ProcessedEvent } from './types.js';
+import {transferFamilyAudienceEvidence} from '../services/familyAudienceEvidence.js';
 
 export interface RaceScheduleReconciliation {
   events: ProcessedEvent[];
@@ -51,11 +52,22 @@ export function reconcileRaceSchedule(
   if (!printedRaceDate?.isValid || printedRaceDate.toISODate() !== raceDate) return unchanged();
   const sameDay = related.filter(event => event.startDate === raceDate);
   if (sameDay.length === 0) return unchanged();
+  // Separate distance races or independently ticketed sessions are not heats
+  // in one advertised children's race. Require every folded title to identify
+  // the parent or one of the printed logistics/heat roles.
+  const titleKey = (value: unknown) => String(value || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+  if (sameDay.some(event => !/\b(?:kit pick[ -]?up|registration|warm[ -]?up|heat)\b/i.test(event.name || '') &&
+      ![titleKey(rawTitle),titleKey(anchor)].includes(titleKey(event.name)) &&
+      !titleKey(event.name).startsWith(titleKey(anchor) + ' free event for kids'))) return unchanged();
 
   const hour = Number(firstHeat[1]) % 12 + (firstHeat[3].toLowerCase() === 'pm' ? 12 : 0);
   const minute = Number(firstHeat[2] || 0);
   if (hour > 23 || minute > 59) return unchanged();
   const explicitStart = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+  const warmupClock = text.match(/\b(\d{1,2})(?::(\d{2}))?\s*(AM|PM)\s*[–—-]\s*(?:Fun\s+)?Warm[ -]?Up\b/i);
+  const printedWarmup = warmupClock ? `${String(Number(warmupClock[1]) % 12 + (warmupClock[3].toLowerCase()==='pm'?12:0)).padStart(2,'0')}:${String(Number(warmupClock[2]||0)).padStart(2,'0')}` : '';
+  if (sameDay.some(event => !/\b(?:kit pick[ -]?up|registration|warm[ -]?up|heat)\b/i.test(event.name || '') &&
+      event.startTime && event.startTime!==explicitStart && event.startTime!==printedWarmup)) return unchanged();
 
   const registrationUrl = text.match(/\bRegister(?:\s+today)?\s*:\s*(https?:\/\/[^\s<>]+)/i)?.[1]
     ?.replace(/[.,;!]+$/, '') || '';
@@ -64,6 +76,16 @@ export function reconcileRaceSchedule(
   const title = rawTitle.toLowerCase().replace(/\b\w/g, letter => letter.toUpperCase())
     .replace(/\bBy\b/g, 'by');
   const parent: ProcessedEvent = { ...parentSource, name: title, startTime: explicitStart };
+  // Reset item spatial evidence to the source's explicitly labelled race host.
+  // Friday pickup remains its own item and cannot become a race map location.
+  const raceLocation = text.match(/^\s*Location\s*:\s*([^\r\n]+)$/im)?.[1]?.trim();
+  if (raceLocation && !/[;|]/.test(raceLocation) && !/\b(?:and|or|various|multiple)\b/i.test(raceLocation)) {
+    parent.establishment = raceLocation;
+    parent.venue = raceLocation;
+    parent.additionalLocation = raceLocation;
+    parent.spatial = {kind:'single_location',locations:[{label:raceLocation,role:'location',certainty:'confirmed'}]};
+    parent.spatialEvidence = undefined;
+  }
   const description = String(parent.description || '').trim();
   const detailKinds = [
     /on-site registration/i,
@@ -83,14 +105,13 @@ export function reconcileRaceSchedule(
     parent.ticketsBuyUrl = registrationUrl;
   }
   const correctedStart = parentSource.startTime !== explicitStart;
-  if (correctedStart &&
-      parent.timeResolution?.endFromHours === 'duration_default' &&
-      parent.timeFlags?.end?.source !== 'explicit') {
-    const start = DateTime.fromISO(`${raceDate}T${explicitStart}`);
-    if (start.isValid) {
-      parent.endTime = start.plus({ hours: 2 }).toFormat('HH:mm');
-      parent.endDate = start.plus({ hours: 2 }).toISODate() || raceDate;
-    }
+  if (parent.timeFlags?.end?.source !== 'explicit') {
+    parent.endTime = '';
+    parent.endDate = raceDate;
+    parent.timeResolution = {hoursUsed:false};
+    parent.timeFlags = {...parent.timeFlags,
+      start:{source:'explicit',evidence:firstHeat[0]},
+      end:{source:'none',toClose:false,evidence:'No race finish advertised in the source schedule'}};
   }
   if (parent.timeFlags?.start) {
     parent.timeFlags = {
@@ -98,18 +119,7 @@ export function reconcileRaceSchedule(
       start: { source: 'explicit', evidence: firstHeat[0] },
     };
   }
-  if (parent.timeResolution?.endFromHours === 'duration_default' &&
-      parent.timeFlags?.end?.source !== 'explicit') {
-    parent.timeFlags = {
-      ...parent.timeFlags,
-      start: parent.timeFlags?.start || { source: 'explicit', evidence: firstHeat[0] },
-      end: {
-        source: 'semantic',
-        toClose: false,
-        evidence: 'Two-hour race duration inferred by parser; no end printed',
-      },
-    };
-  }
+  parent.familyAudienceEvidence = transferFamilyAudienceEvidence(parentSource,parent);
 
   const folded = new Set(sameDay);
   const result = events.filter(event => !folded.has(event));

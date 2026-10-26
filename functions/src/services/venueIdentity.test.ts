@@ -59,3 +59,8 @@ test('real parks and venues remain candidates; route lookup remains independent'
   assert.equal(namedVenueCandidateIsCompatible({ observedName: 'Connolly Street', candidateTypes: ['route'] }), true);
   assert.equal(namedVenueCandidateIsCompatible({ observedName: 'Community Hall', candidateTypes: ['establishment'] }), true);
 });
+
+test('school identity is a physical place while a similarly named road stays incompatible',()=>{
+ assert.equal(namedVenueCandidateIsCompatible({observedName:'Example Senior High School',candidateTypes:['school','street_address']}),true);
+ assert.equal(namedVenueCandidateIsCompatible({observedName:'Example Senior High School',candidateTypes:['route','point_of_interest']}),false);
+});

@@ -1,0 +1,12 @@
+{
+  "atUTC": "2026-10-26T13:39:41.708Z",
+  "verifiedServingSourceHash": "ed111d2797fe07a3ad733ce2e330ba83a208fd30",
+  "servingArchiveSha256": "cf2bacff11126efea67b3d4c9a5b928b3b678712faad245efec55ccb14fd883b",
+  "originalCandidate": "bb1ea30dc74a2b4db223969730cf99c492133184",
+  "method": "Reconstructed source/runtime baseline from independently verified immutable serving source; historical candidate Git object is not present in main repository",
+  "copiedAndByteVerified": 1599,
+  "removedAbsentBaselineFiles": 30,
+  "credentialFilesCopied": 0,
+  "environmentFileCopied": false,
+  "liveWrites": 0
+}

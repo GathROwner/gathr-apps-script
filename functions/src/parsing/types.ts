@@ -385,12 +385,16 @@ export type RecurringPattern =
 // NOTE: Monthly recurrence is used in legacy Apps Script and should be added in a dedicated recurrence pass.
 
 export interface RecurrenceScheduleFields {
+  sourceLocationRole?: 'shared_original_business' | 'collection_partner_only';
+  _sourceWeeklyProgramPattern?: RecurringPattern;
+  familyAudienceEvidence?: import('../services/familyAudienceEvidence.js').FamilyAudienceEvidence;
   _locationMentionResolution?: import('./locationMentionRoles.js').LocationMentionResolution;
   ticketLink?: string;
   _sourceTimeConstraint?: SourceTimeConstraint;
   _sourceMeridiemResolution?: SourceMeridiemResolution;
   _sourceDurationResolution?: SourceDurationResolution;
   _sourceTitleResolution?: string;
+  _sourceOccurrenceDateHold?: boolean;
   _sourceOccurrenceCount?: number;
   recurringDaysOfWeek?: RecurringWeekday[];
   recurringWeekdaySequence?: RecurringWeekday[];
@@ -556,6 +560,7 @@ export const ALLOWED_CATEGORIES: readonly Category[] = [
 ];
 
 export interface FormattedEvent extends RecurrenceScheduleFields {
+  ageRestriction?: string;
   timing?: unknown;
   isEvent: 'Yes' | 'No';
   isFoodSpecial: 'Yes' | 'No';
@@ -616,8 +621,8 @@ export interface TimeResolution {
   startFromPostTime?: boolean;
   endFromHours?: 'to_close' | 'category_default' | 'duration_default';
   startFromFacebookEvent?: boolean;
-  endFromFacebookEvent?: 'dateTimeSentence' | 'duration';
-  reason?: 'no_place_match' | 'no_hours' | 'no_date' | 'calendar_time_not_advertised' | 'category_default_bounded_by_venue_close' | SourceTimeConstraint['reason'];
+  endFromFacebookEvent?: 'dateTimeSentence' | 'duration' | 'descriptionRange';
+  reason?: 'no_place_match' | 'no_hours' | 'no_date' | 'calendar_time_not_advertised' | 'category_default_bounded_by_venue_close' | 'venue_close_conflicts_with_start' | SourceTimeConstraint['reason'];
 }
 
 export interface TimeResolvedEvent extends FormattedEvent {
@@ -671,6 +676,7 @@ export interface ImageProvenance {
 }
 
 export interface ProcessedEvent extends TimeResolvedEvent {
+  structuredLocationValidation?: import('../services/structuredLocationContract.js').StructuredLocationValidation;
   // Core identification
   id?: string;
   uniqueId?: string;

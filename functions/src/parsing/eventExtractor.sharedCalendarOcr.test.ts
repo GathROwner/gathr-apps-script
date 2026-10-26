@@ -2,6 +2,35 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import { mergeCalendarItemsForRegression, parseCalendarOcrTextForRegression } from './eventExtractor.js';
+import fixture from './__fixtures__/sourceAuditOct22.smallBatch.json';
+
+test('reconstructed October22 poster OCR cannot publish its venue masthead beside Second Sundays',()=>{
+  // This is an honest layout reconstruction, not the unavailable paid OCR text.
+  const extra=parseCalendarOcrTextForRegression(fixture.cinema.reconstructedOcr,'2026-10-21','City Cinema');
+  assert.deepEqual(extra,[]);
+  const merged=mergeCalendarItemsForRegression([fixture.cinema.valid] as any,extra);
+  assert.equal(merged.length,1);assert.match(merged[0].name,/Second Sundays/);
+  assert.equal(merged[0].date,'2026-11-15');assert.equal(merged[0].startTime,'4:00 PM');
+});
+
+for(const layout of [
+  'CITY CINEMA\nSunday November 15th | 4-6 PM',
+  'November 2026\n15\nCITY CINEMA\n4 PM',
+  'November 2026\n15\nCITY CINEMA\n4-6 PM',
+  'A Different Poster\nCITY CINEMA\nSunday November 15th 4pm\n5pm',
+])test('venue-only heading is rejected in OCR branch: '+layout.replace(/\n/g,' / '),()=>{
+  assert.deepEqual(parseCalendarOcrTextForRegression(layout,'2026-10-21','City Cinema'),[]);
+});
+
+test('venue mentions and concurrent named events remain valid activities',()=>{
+  for(const title of ['City Cinema Presents: Film Night','City Cinema | Film Night']){
+    const items=parseCalendarOcrTextForRegression(title+'\nSunday November 15th 4pm','2026-10-21','City Cinema');
+    assert.equal(items.length,1);assert.match(items[0].name,/Film Night/);
+  }
+  const primary=[{name:'Second Sundays',date:'2026-11-15',startTime:'16:00'},
+    {name:'Independent Film Talk',date:'2026-11-15',startTime:'16:00'}] as any;
+  assert.equal(mergeCalendarItemsForRegression(primary,[]).length,2);
+});
 
 test('calendar OCR fallback extracts single flyer date line without explicit year', () => {
   const items = parseCalendarOcrTextForRegression(

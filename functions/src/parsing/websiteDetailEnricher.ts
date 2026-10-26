@@ -773,7 +773,7 @@ export function eventDetailHtml(html: string): string {
   return kept.join('');
 }
 
-function parseDetailPageCandidate(
+export function parseDetailPageCandidate(
   detailUrl: string,
   html: string,
   yearHint: number
@@ -812,7 +812,12 @@ function parseDetailPageCandidate(
     : [];
   // A page with separately named same-day sessions has no safe page-wide
   // start time. Keep those times attached to their labels for reconciliation.
-  const timeInfo = namedSeatings.length >= 2 ? {} : extractTimeInfoFromText(text);
+  const administrativeClock = /\bregistration\b/i.test(text) &&
+    /\b(?:opens?|closes?)\b/i.test(text) &&
+    !/\b(?:class|session|lesson|draw|performance|showtime)\s+(?:starts?|time|at)\b/i.test(text);
+  // Registration open/close clocks are not occurrence clocks. A genuine
+  // labelled lesson/session schedule below can still supply its own hours.
+  const timeInfo = namedSeatings.length >= 2 || administrativeClock ? {} : extractTimeInfoFromText(text);
   const namedSeries = extractNamedSeriesSchedule(occurrenceHtml, title, yearHint);
 
   if (!title && !dateInfo.date && !dateInfo.dateRangeStart) {
@@ -966,11 +971,11 @@ function buildDateString(
 function extractTimeInfoFromText(text: string): { startTime?: string; endTime?: string } {
   const range =
     text.match(
-      /\b(\d{1,2}(?::\d{2})?\s*(?:a\.?m\.?|p\.?m\.?))\s*(?:-|–|—|to)\s*(\d{1,2}(?::\d{2})?\s*(?:a\.?m\.?|p\.?m\.?))\b/i
+      /\b(\d{1,2}(?::\d{2})?\s*(?:a\.?m\.?|p\.?m\.?)?)\s*(?:-|–|—|to)\s*(\d{1,2}(?::\d{2})?\s*(a\.?m\.?|p\.?m\.?))\b/i
     ) || null;
   if (range) {
     return {
-      startTime: parse12hTime(range[1]),
+      startTime: parse12hTime(/[ap]\.?m\.?/i.test(range[1])?range[1]:`${range[1].trim()} ${range[3]}`),
       endTime: parse12hTime(range[2]),
     };
   }
@@ -1040,7 +1045,8 @@ function applyWebsiteCandidates(
       if (bestCandidate.performanceStartEvidence && updated._sourceTimeConstraint?.reason === 'doors_without_showtime') {
         delete updated._sourceTimeConstraint;
       }
-      if (bestCandidate.source === 'article_paragraph' &&
+      if ((bestCandidate.source === 'article_paragraph' ||
+           bestCandidate.source === 'locarius_api' && bestCandidate.performanceStartEvidence) &&
           !hasUsableFieldValue(bestCandidate.endTime) &&
           !hasUsableFieldValue(updated.endTime)) {
         updated.timeFlags.end = {

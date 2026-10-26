@@ -7,6 +7,9 @@
  */
 
 import {resolveLocationMentionRoles} from './locationMentionRoles.js';
+import {datedOccurrenceLocation} from './occurrenceSourceOwnership.js';
+import {firstLocationSentence, postalStreetIdentity, compatibleStreetLocality} from '../utils/numberedStreetIdentity.js';
+import {getVenueAliasEntry} from '../services/venueAliases.js';
 
 export type SpatialEventKind =
   | 'single_location'
@@ -54,6 +57,7 @@ export interface SpatialEventClassification {
 }
 
 export interface ClassifySpatialEventInput {
+  date?: unknown;
   name?: unknown;
   description?: unknown;
   location?: unknown;
@@ -200,9 +204,19 @@ function dedupeLocations(values: SpatialLocationEvidence[]): SpatialLocationEvid
   const result: SpatialLocationEvidence[] = [];
   const byKey = new Map<string, number>();
   for (const value of values) {
-    const key = normalizeKey(value.address || value.label);
+    const key = postalStreetIdentity(value.label) ? `street:${postalStreetIdentity(value.label)}` : normalizeKey(value.address || value.label);
     if (!key) continue;
-    const existingIndex = byKey.get(key);
+    const candidateIndex = byKey.get(key);
+    const canonicalLabel = (label: string): string => {
+      const alias = getVenueAliasEntry(label);
+      return normalizeKey(alias && !alias.isSubVenue ? alias.canonical : label);
+    };
+    const candidate = candidateIndex === undefined ? undefined : result[candidateIndex];
+    const incompatible = candidate && (key.startsWith('street:')
+      ? !compatibleStreetLocality(candidate.label, value.label) ||
+        Boolean(candidate.address && value.address && normalizeKey(candidate.address) !== normalizeKey(value.address))
+      : canonicalLabel(candidate.label) !== canonicalLabel(value.label));
+    const existingIndex = incompatible ? undefined : candidateIndex;
     if (existingIndex === undefined) {
       byKey.set(key, result.length);
       result.push(value);
@@ -211,6 +225,7 @@ function dedupeLocations(values: SpatialLocationEvidence[]): SpatialLocationEvid
     const existing = result[existingIndex];
     result[existingIndex] = {
       ...existing,
+      label: value.label.length > existing.label.length ? value.label : existing.label,
       address: existing.address || value.address,
       role: existing.role === 'location' ? value.role : existing.role,
       certainty:
@@ -293,7 +308,7 @@ function extractInlineLabeledLocations(text: string): SpatialLocationEvidence[] 
     const end = nextLineBreak >= 0 ? Math.min(nextHeading, nextLineBreak) : nextHeading;
     let section = cleanText(source.slice(start, end), 600);
     // Explanatory prose after the labelled value is not part of a place name.
-    section = section.split(/\.\s+(?=[A-Z])/)[0].trim();
+    section = firstLocationSentence(section);
     if (!section) continue;
 
     const headingCertainty = /possible|approximate|estimated/i.test(match[1] || '')
@@ -424,6 +439,12 @@ function chooseConfidence(params: {
 export function classifySpatialEvent(
   input: ClassifySpatialEventInput
 ): SpatialEventClassification {
+  const occurrenceLocation = datedOccurrenceLocation(input);
+  if (occurrenceLocation) return {
+    version:1, kind:'single_location', representation:'venue', confidence:'high', ordered:false,
+    locations:[{label:String(input.location), role:'location', certainty:'confirmed', sourceText:occurrenceLocation}],
+    confirmedStreets:[], reviewReasons:[],
+  };
   const roles=resolveLocationMentionRoles(input);
   if(roles){
     return {version:1,kind:'single_location',representation:'venue',confidence:'high',ordered:false,
@@ -435,6 +456,10 @@ export function classifySpatialEvent(
   const location = cleanText(input.location, 300);
   const combinedText = String(input.combinedText || '');
   const corpus = [name, description, location, combinedText].filter(Boolean).join('\n');
+  const streetHeading=!/^\d/.test(location)&&STREET_SUFFIX_PATTERN.test(location)&&!DURABLE_HOST_PATTERN.test(location)&&
+    !/\b(?:pub|bar|cafe|café|shop|parlou?r)\b/i.test(location);
+  const streetParticipationCue=streetHeading&&/\b(?:downtown|participating)\s+businesses\b/i.test(corpus)&&
+    /\b(?:activities|activity\s+lineup|crafts|games|colouring|coloring)\b/i.test(corpus);
   const model = input.modelSpatialEvidence || null;
   const normalizedModelKind = modelKind(model?.kind);
   const modelLocations = Array.isArray(model?.locations)
@@ -454,7 +479,22 @@ export function classifySpatialEvent(
         singleVenue.startsWith(city + ' '));
     }),
   ];
+  // A street activity can name several on-site hosts while naming other
+  // businesses only as providers. "at" establishes an activity location;
+  // "by" and "from" do not. This only routes to area review, never geocodes.
+  const streetActivity = streetHeading &&
+    /\b(?:activities|activity\s+lineup|colouring|coloring|lawn\s+games)\b/i.test(description);
+  const participating = streetActivity ? description.split(/[;\n]/).flatMap(clause => {
+    const match=clause.match(/\bat\s+(?:the\s+)?([^;.!?\n]{3,100})/i);
+    if(!match||!/\b(?:bookshop|bookstore|library|ice\s*cream\s+parlou?r|museum|gallery|cafe|café|community\s+centre)\b/i.test(match[1]))return [];
+    return [{label:cleanText(match[1]),role:'location' as const,certainty:'confirmed' as const,sourceText:clause.trim()}];
+  }) : [];
   let locations = dedupeLocations([...modelLocations, ...textLocations]);
+  if(dedupeLocations(participating).length>=2){
+    locations=dedupeLocations(participating);
+  }else if(streetParticipationCue){
+    locations=locations.filter(entry=>!STREET_SUFFIX_PATTERN.test(entry.label));
+  }
   // A city attached to a named venue is context, not a second occurrence.
   // Preserve city-only tour stops, different cities, and real route/multi-site evidence.
   const cityKeys=new Set(locations.filter(x=>/^(charlottetown|summerside|montague|cornwall|stratford|georgetown|souris|kensington)$/i.test(x.label)).map(x=>normalizeKey(x.label)));
@@ -474,8 +514,24 @@ export function classifySpatialEvent(
   const trafficNotice = TRAFFIC_NOTICE_PATTERN.test(corpus);
   const trafficNoticeHeadline = /\b(traffic|road|street)\s+(?:notice|advisory|closure|impact)\b/i.test(name);
   const nonEventTrafficNotice = trafficNotice && (trafficNoticeHeadline || !EVENT_OCCURRENCE_PATTERN.test(name));
-  const multiCue = MULTI_LOCATION_PATTERN.test(corpus) ||
+  const multiCue = streetParticipationCue || MULTI_LOCATION_PATTERN.test(corpus) ||
     /\ball\s+[^.!?\n]{0,60}\blocations?\s+(?:in\s+)?(?:PEI|Prince Edward Island)\b|\ball\s+[^.!?\n]{0,40}\bPEI\s+locations?\b/i.test(corpus);
+  // One explicitly named park and that same park's pavilion are a host and
+  // sublocation. Do not generalize this to separate parks, named pavilions,
+  // addresses, route stops or an explicit multi-site programme.
+  let parkSublocationCollapsed = false;
+  if (locations.length === 2 && !multiCue && !ROUTE_EVENT_PATTERN.test(name) &&
+      !confirmedStreets.length && locations.every(entry =>
+        entry.role === 'location' && entry.certainty === 'confirmed' && !entry.address)) {
+    const park = locations.find(entry => /\bpark$/i.test(entry.label));
+    const pavilion = locations.find(entry => park &&
+      normalizeKey(entry.label) === normalizeKey(park.label) + ' pavilion');
+    if (park && pavilion && normalizeKey(park.label).split(' ').length >= 2 &&
+        [normalizeKey(park.label), normalizeKey(pavilion.label)].includes(normalizeKey(location))) {
+      locations = [park];
+      parkSublocationCollapsed = true;
+    }
+  }
   // A schedule with many dates at one named venue is normal calendar data,
   // not an area event. Only retain separate-occurrence routing when there are
   // at least two distinct extracted places to split.
@@ -512,7 +568,8 @@ export function classifySpatialEvent(
     // Use the reconciled locations. The original model list may still contain
     // a city already discarded as context for one named venue; counting it
     // again resurrects the false multi-location classification.
-    (multiCue || hasExplicitMultiplePlaces || (!contextualCityRemoved && modelLocations.length >= 2));
+    (multiCue || hasExplicitMultiplePlaces || (!contextualCityRemoved && !parkSublocationCollapsed && modelLocations.length >= 2 &&
+      (!modelLocations.every(entry => Boolean(postalStreetIdentity(entry.label))) || dedupeLocations(modelLocations).length >= 2)));
   const modelSeparateOccurrencesIsSupported =
     normalizedModelKind === 'separate_occurrences' && separateOccurrences;
 

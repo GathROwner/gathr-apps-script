@@ -24,3 +24,30 @@ test('actual write-selection service holds reviewed stale tour and morning card 
  assert.deepEqual(await checkDuplicate(event,venue.id,[],venue as any),{isDuplicate:true});
  assert.deepEqual(await checkDuplicate(event,venue.id,[],{...venue,reviewedOccurrenceConstraints:[{...rule,action:'hold'}]} as any),{isDuplicate:true});
 });
+
+test('exact reviewed dated occurrence rejects obsolete date and inferred finish without touching other sources',async()=>{
+ const fixed={...rule,action:'fixed_occurrence' as const,startDate:'2026-10-15',endDate:'2026-10-15',startTime:'19:00',endTime:''};
+ const v={...venue,reviewedOccurrenceConstraints:[fixed]};
+ const current:any={...event,startDate:fixed.startDate,endDate:fixed.endDate,startTime:fixed.startTime,endTime:'',recurringPattern:'none',isRecurring:'No',timeFlags:{start:{source:'explicit'},end:{source:'none'}}};
+ assert.equal(classify(current,v),'none');
+ for(const patch of [{startDate:'2026-10-16',endDate:'2026-10-16'},{endTime:'23:00'},{startTime:'09:38'},{recurringPattern:'weekly_friday'},{timeFlags:{start:{source:'post_timestamp'}}}]){
+  assert.equal(classify({...current,...patch},v),'hold');
+  assert.deepEqual(await checkDuplicate({...current,...patch},venue.id,[],v as any),{isDuplicate:true});
+ }
+ assert.equal(classify({...current,startDate:'2026-10-16',uniqueId:'2222222222222_other'},v),'none');
+ assert.equal(classify(current,{...v,reviewedOccurrenceConstraints:[{...fixed,startDate:'2026-02-30'}]}),'hold');
+});
+
+test('reviewed office-pinned duplicate holds exact occurrence through changed semantic IDs without moving its venue',async()=>{
+ const retired={...rule,action:'retired_occurrence' as const,startDate:'2026-10-17',startTime:'11:00',
+   eventNames:['Kids Fox Trot'],canonicalEventPath:'venues/real_park/events/canonical'};
+ const v={...venue,reviewedOccurrenceConstraints:[retired]};
+ const e={...event,name:'Kids Fox Trot',startDate:'2026-10-17',startTime:'11:00',uniqueId:'1111111111111_new_semantic_id'};
+ assert.equal(classify(e,v),'hold');
+ assert.deepEqual(await checkDuplicate(e,v.id,[],v as any),{isDuplicate:true});
+ for(const patch of [{name:'Team Relay'},{startDate:'2026-10-18'},{startTime:'14:00'},
+   {uniqueId:'2222222222222_new'},{venueId:'real_park'}])assert.equal(classify({...e,...patch},v),'none');
+ const before=JSON.stringify(v);classify(e,v);assert.equal(JSON.stringify(v),before);
+ for(const patch of [{eventNames:[]},{canonicalEventPath:'events/unverified'},{startTime:'25:00'},{startDate:'2026-02-30'}])
+   assert.equal(classify(e,{...v,reviewedOccurrenceConstraints:[{...retired,...patch}]}),'hold');
+});

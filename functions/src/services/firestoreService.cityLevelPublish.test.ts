@@ -7,6 +7,39 @@ import {
   evaluateCityLevelAutoPublishEligibilityForRegression,
 } from './firestoreService.js';
 import type { CityLevelEventReviewRecord } from '../types/index.js';
+import {structuredMediaSignature} from './structuredLocationContract.js';
+import {bindFamilyAudienceEvidence} from '../utils/familyFriendlyScoring.js';
+
+test('reviewed broad publication scores scoped evidence and invalidates it when identity is edited', () => {
+  const record=baseRecord({eventName:'Community Concert',eventDate:'2026-10-17',description:'An afternoon programme.'});
+  record.familyAudienceEvidence=bindFamilyAudienceEvidence({eventName:record.eventName,startDate:record.eventDate,establishment:record.locationLabel},'Family-friendly programme.','validated_item','source');
+  const payload=buildPublishedCityLevelEventDataForRegression('review-fixture',record);
+  assert(payload.familyFriendlyScore!>=60);
+  const edited=buildPublishedCityLevelEventDataForRegression('review-fixture',record,{eventName:'Adult Drawing Workshop',description:'Adults only.'});
+  assert.equal(edited.familyFriendlyScore,0);
+});
+
+test('published refresh retains reviewed event proof when its historical review has no audience metadata', () => {
+  const record=baseRecord({eventName:'Community Hunt',eventDate:'2026-10-17',description:'Visit participating displays.'});
+  const previous=buildPublishedCityLevelEventDataForRegression('review-fixture',record);
+  previous.familyAudienceEvidence=bindFamilyAudienceEvidence(previous,'A reviewed family-friendly activity.','reviewed_activity','source');
+  const refreshed=buildPublishedCityLevelEventDataForRegression('review-fixture',record,{description:'An updated description of the same displays.'},{},previous);
+  assert(refreshed.familyFriendlyScore!>=60);
+  assert.deepEqual(refreshed.familyAudienceEvidence,previous.familyAudienceEvidence);
+  const again=buildPublishedCityLevelEventDataForRegression('review-fixture',record,{description:refreshed.description},{},refreshed);
+  assert.deepEqual(again.familyAudienceEvidence,refreshed.familyAudienceEvidence);
+});
+
+test('published refresh cannot carry previous proof to a changed identity or override a fresh adult restriction', () => {
+  const record=baseRecord({eventName:'Community Hunt',eventDate:'2026-10-17',description:'Visit participating displays.'});
+  const previous=buildPublishedCityLevelEventDataForRegression('review-fixture',record);
+  previous.familyAudienceEvidence=bindFamilyAudienceEvidence(previous,'A reviewed family-friendly activity.','reviewed_activity','source');
+  const restricted=buildPublishedCityLevelEventDataForRegression('review-fixture',record,{description:'Adults only. 19+'},{},previous);
+  assert.equal(restricted.familyFriendlyScore,0);
+  const changed=buildPublishedCityLevelEventDataForRegression('review-fixture',record,{eventDate:'2026-10-18'},{},previous);
+  assert(changed.familyFriendlyScore!<60);
+  assert.equal(changed.familyAudienceEvidence,null);
+});
 
 function baseRecord(overrides: Partial<CityLevelEventReviewRecord> = {}): CityLevelEventReviewRecord {
   return {
@@ -28,6 +61,9 @@ function baseRecord(overrides: Partial<CityLevelEventReviewRecord> = {}): CityLe
 function autoPublishReadyRecord(overrides: Partial<CityLevelEventReviewRecord> = {}): CityLevelEventReviewRecord {
   return baseRecord({
     autoPublishSource: 'structured_facebook_event',
+    sourceContentSignature: 'synthetic-source-v1',
+    structuredLocationValidation: {version: 1, sourceSignature: 'synthetic-source-v1', mediaSignature: structuredMediaSignature([]), decision: 'broad',
+      posterStatus: 'no_media', evidence: [], reasons: []},
     autoPublishFieldSources: {
       title: 'facebook_event_name',
       dateTime: 'facebook_event_utc_start_date',
@@ -102,6 +138,32 @@ test('published city-level event carries centroid coordinates for a recognized c
   assert.equal(data.locationReviewStatus, 'approved');
   assert.equal(data.locationScope, 'city');
   assert.equal(data.venueId, null);
+});
+
+test('structured city publication rejects an old signature without current validation', () => {
+  const result = evaluateWithAutoPublishEnabled(autoPublishReadyRecord({structuredLocationValidation: undefined}));
+  assert.equal(result.eligible, false);
+  assert.ok(result.reasons.includes('missing_current_structured_location_validation'));
+});
+
+test('structured venue and clock holds cannot pass city auto publication', () => {
+  const base = autoPublishReadyRecord();
+  for (const decision of ['hold', 'venue'] as const) {
+    assert.equal(evaluateWithAutoPublishEnabled({...base, structuredLocationValidation: {...base.structuredLocationValidation!, decision,
+      reasons: decision === 'hold' ? ['structured_poster_start_conflict'] : []}}).eligible, false);
+  }
+});
+
+test('city builder preserves timing evidence and rejects a retired venue keeper redirect', () => {
+  const record = autoPublishReadyRecord({eventTime: '19:30', endTime: '22:00',
+    timeFlags: {start: {source: 'explicit', evidence: '7:30 PM'}, end: {source: 'explicit', evidence: '10 PM', toClose: false}},
+    timeResolution: {hoursUsed: false}});
+  const published = buildPublishedCityLevelEventDataForRegression('synthetic', record);
+  assert.deepEqual(published.timeFlags, record.timeFlags);
+  assert.deepEqual(published.timeResolution, record.timeResolution);
+  assert.throws(() => buildPublishedCityLevelEventDataForRegression('synthetic', {...record, publishedEventPath: 'venues/hall/events/keeper'}), /validated venue/);
+  assert.throws(() => buildPublishedCityLevelEventDataForRegression('synthetic', {...record,
+    structuredLocationValidation: {...record.structuredLocationValidation!, decision: 'venue', venueId: 'hall'}}), /validated venue/);
 });
 
 test('published area-scope event resolves the downtown centroid', () => {

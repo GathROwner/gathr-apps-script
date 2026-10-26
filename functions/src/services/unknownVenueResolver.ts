@@ -8,6 +8,7 @@ import * as sharedEventCandidateStore from './sharedEventCandidateStore.js';
 import { processPublicSharedEventCandidateById } from './sharedEventPublicPromotion.js';
 import { getVenueAliasCandidates } from './venueAliases.js';
 import { logger } from '../utils/logger.js';
+import {cityGranularityHint} from './locationHintGranularity.js';
 import {allowsPublisherAddressHydration} from './sourceLocationRole.js';
 import { namedVenueCandidateIsCompatible } from './venueIdentity.js';
 import {
@@ -435,7 +436,7 @@ function getResolverConfig(): ResolverConfig {
 }
 
 function normalizeCity(value?: string): string {
-  return String(value || '').trim();
+  return cityGranularityHint(value) || '';
 }
 
 function normalizeProvince(value?: string): string {

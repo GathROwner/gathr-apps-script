@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import {enrichEventsFromVenueWebsite} from './websiteDetailEnricher.js';
 import {reconcileSourceItemEvidence} from './sourceItemEvidence.js';
 import {DEFAULT_PARSING_CONFIG} from './types.js';
+import {rehydrateFormattedEventMetadata} from './finalFormatter.js';
+import {enforceDateTimeCompleteness} from './postParser.js';
 
 async function playback(suffix:string, changes:Record<string,unknown>={}, itemChanges:Record<string,unknown>={}) {
   const site=`https://ticket-role-${suffix}.example/`;
@@ -27,6 +29,12 @@ async function playback(suffix:string, changes:Record<string,unknown>={}, itemCh
 test('separate agreeing API/local event start survives a doors-named ticket URL after source reconciliation',async()=>{
   const item=await playback('separate');assert.equal(item.startTime,'20:00');assert.equal(item.endTime,'');
   assert.equal(item._sourceTimeConstraint,undefined);assert.match(item.timeFlags!.start.evidence,/performance start.*20:00.*separate doors 18:30/);
+});
+test('verified ticket start without a printed finish keeps an honest unknown end through formatting/completeness',async()=>{
+ const item=await playback('unknown-finish');assert.match(item.timeFlags!.end.evidence,/approximate end omitted/);
+ const formatted=rehydrateFormattedEventMetadata({name:item.name,description:'Live show',startDate:item.date,endDate:item.date,startTime:'20:00',endTime:'23:00',category:'Live Music',isEvent:'Yes',isFoodSpecial:'No',isRecurring:'No',recurringPattern:'none',establishment:'Fixture Hall',venue:'Fixture Hall',address:'',additionalLocation:'',ticketPrice:'',ticketLink:'',relevantImageIndex:0} as any,item);
+ assert.equal(formatted.endTime,'');
+ const out=enforceDateTimeCompleteness([formatted],'2026-10-15T12:00:00Z','America/Halifax');assert.equal(out.length,1);assert.equal(out[0].endTime,'');
 });
 test('fresh agreeing proof clears a previous doors hold but preserves other source holds',async()=>{
   const resolved=await playback('previous',{}, {_sourceTimeConstraint:{reason:'doors_without_showtime',evidence:'previous doors-only URL'}});

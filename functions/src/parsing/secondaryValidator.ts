@@ -417,6 +417,11 @@ export function preserveValidatedItemSourceType(
     (nextItem as any).timeFlags = cloneTimeFlags((originalItem as any)?.timeFlags);
   }
 
+  // A validator must not upgrade an absent item-local end into an advertised
+  // clock merely because the programme header has an overall closing time.
+  if (originalItem?.timeFlags?.end?.source === 'none') {
+    nextItem.timeFlags = {...nextItem.timeFlags!,end:{...originalItem.timeFlags.end}};
+  }
   return nextItem;
 }
 
@@ -613,6 +618,9 @@ export async function performSecondaryValidation(
         } catch (error) {
           failure = error instanceof CompactStage4Error ? error.code : 'api_error';
           logger.warn('Stage 4 compact validation attempt failed', { ...cfg.diagnosticContext, attempt, reason: failure });
+          // Repeating an unchanged invalid schema cannot repair it. Retain the
+          // held result and original error diagnostics without another request.
+          if ((error as {code?: string})?.code === 'invalid_json_schema') return heldCompactStage4(failure, attempt);
           if (attempt === 2) return heldCompactStage4(failure, attempt);
         }
       }

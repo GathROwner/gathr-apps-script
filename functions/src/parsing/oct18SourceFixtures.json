@@ -1,0 +1,849 @@
+{
+  "55": {
+    "caption": " Dinner Theatre is BACK at Rodd Charlottetown!\n\nGet ready for Who\u2019s Yer Father? \u2014 a hilarious Mamma Mia! parody featuring a surprise Christmas wedding, three possible dads, live music, and plenty of holiday chaos!\n\n November 28 \u2013 December 19, 2026\n Doors open at 6:00 PM | Show starts at 6:30 PM\n\nMake it a night to remember with great food, live entertainment, and plenty of laughs!\n\n\ufe0f Grab your tickets:  https://bit.ly/4i1Vxtw\n Learn more: https://charlottetown.feastdinnertheatres.com\n\n#RoddCharlottetown #CharlottetownDinnerTheatre #FeastDinnerTheatres #PEIEvents #HolidayEntertainment\n\nOCR TEXT:\nMay be an image of text\nMay be an image of text",
+    "items": [
+      {
+        "name": "WHO\u2019S YER FATHER?",
+        "description": "A hilarious Mamma Mia! parody featuring a surprise Christmas wedding, three possible dads, live music, and holiday chaos. A Feast Dinner Theatres production; the poster describes it as a PEI Mamma Mia! Christmas parody. Advertised run: November 28\u2013December 19, 2026. Doors open at 6:00 PM; show starts at 6:30 PM.",
+        "date": "2026-11-28",
+        "startTime": "18:30",
+        "endTime": "",
+        "venue": "",
+        "ticketLink": "https://bit.ly/4i1Vxtw",
+        "price": "",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none",
+        "extractionReason": "A dinner-theatre comedy show with live entertainment is an advertised entertainment event. The date range is retained in the description; no individual performance dates within the run are specified.",
+        "timeFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "Show starts at 6:30 PM"
+          },
+          "end": {
+            "source": "none",
+            "toClose": false,
+            "evidence": ""
+          }
+        },
+        "spatial": {
+          "kind": "single_location",
+          "locations": [
+            {
+              "label": "Rodd Charlottetown",
+              "address": "",
+              "role": "location",
+              "certainty": "confirmed",
+              "sourceText": "Dinner Theatre is BACK at Rodd Charlottetown!"
+            }
+          ],
+          "confirmedStreets": [],
+          "ordered": false,
+          "evidenceNotes": "The caption explicitly identifies Rodd Charlottetown as the location."
+        },
+        "_sourceOccurrenceCount": 1,
+        "_pipelineIndex": 1,
+        "_pipelineTotalStage3": 1
+      }
+    ],
+    "final": [
+      {
+        "id": "1766365078822804",
+        "name": "WHO\u2019S YER FATHER?",
+        "category": "Comedy",
+        "isEvent": "Yes",
+        "isFoodSpecial": "No",
+        "establishment": "Rodd Charlottetown",
+        "additionalLocation": "",
+        "locationScope": "",
+        "locationLabel": "",
+        "locationCity": "",
+        "locationProvince": "",
+        "locationPrecision": "",
+        "locationReviewStatus": "",
+        "startDate": "2026-11-28",
+        "startTime": "18:30",
+        "endDate": "2026-12-19",
+        "endTime": "23:00",
+        "isRecurring": "No",
+        "recurringPattern": "none",
+        "recurringDaysOfWeek": [],
+        "recurringWeekdaySequence": [],
+        "recurringWeekInterval": null,
+        "totalOccurrences": null,
+        "recurrenceUntilDate": "",
+        "ticketLink": "https://bit.ly/4i1Vxtw",
+        "ticketsBuyUrl": "https://bit.ly/4i1Vxtw",
+        "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1792327746520-wjd4jc.webp",
+        "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1792327746520-wjd4jc.webp",
+        "sharedPostThumbnail": "",
+        "imageProvenance": {
+          "version": 1,
+          "primarySource": "post_media",
+          "primaryField": "relevantImageUrl",
+          "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1792327746520-wjd4jc.webp",
+          "isFallback": false,
+          "sourceFields": [
+            "relevantImageUrl",
+            "mediaUrls",
+            "icon"
+          ],
+          "media": [
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1792327746520-wjd4jc.webp",
+              "source": "post_media",
+              "field": "relevantImageUrl",
+              "isPrimary": true,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1792327746520-wjd4jc.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": true,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1792327746734-h58bgy.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1792327746999-8qadxh.webp",
+              "source": "profile_image",
+              "field": "icon",
+              "isPrimary": false,
+              "isFallback": false
+            }
+          ],
+          "selectionReason": "model_selected_analysis_frame_source",
+          "updatedBy": "parser"
+        },
+        "timeResolution": {
+          "hoursUsed": true,
+          "endFromHours": "category_default"
+        },
+        "timeFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "Show starts at 6:30 PM"
+          },
+          "end": {
+            "source": "none",
+            "toClose": false,
+            "evidence": ""
+          }
+        },
+        "structuredLocationValidation": null,
+        "_sourceType": null,
+        "description": "A hilarious Mamma Mia! parody featuring a surprise Christmas wedding, three possible dads, live music, and holiday chaos. A Feast Dinner Theatres production; the poster describes it as a PEI Mamma Mia! Christmas parody. Advertised run: Nove"
+      }
+    ]
+  },
+  "59": {
+    "caption": "eggs, bacon, hashbrowns, toast. weekend brunch at Hunter\u2019s, Saturday and Sunday 11AM to 3PM. come eat.\n\nOCR TEXT:\nMay be an image of food\nNo photo description available.",
+    "items": [
+      {
+        "name": "Weekend Brunch",
+        "description": "Weekend brunch: eggs, bacon, hashbrowns, toast; Saturday and Sunday, 11AM to 3PM.",
+        "date": "2026-10-17",
+        "startTime": "11:00",
+        "endTime": "15:00",
+        "timeFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "11AM"
+          },
+          "end": {
+            "toClose": false,
+            "evidence": "3PM"
+          }
+        },
+        "venue": "",
+        "pricing": {
+          "price": ""
+        },
+        "relevantImageIndex": 0,
+        "recurringPattern": "none",
+        "extractionReason": "The post advertises \u201cweekend brunch at Hunter\u2019s, Saturday and Sunday 11AM to 3PM\u201d and lists eggs, bacon, hashbrowns, and toast.",
+        "_sourceType": "special",
+        "_sourceOccurrenceCount": 1,
+        "_pipelineIndex": 1,
+        "_pipelineTotalStage3": 1
+      }
+    ],
+    "final": [
+      {
+        "id": "1568198158660735",
+        "name": "Weekend Brunch",
+        "category": "Food Special",
+        "isEvent": "No",
+        "isFoodSpecial": "Yes",
+        "establishment": "Hunter's Ale House",
+        "additionalLocation": "",
+        "locationScope": "",
+        "locationLabel": "",
+        "locationCity": "",
+        "locationProvince": "",
+        "locationPrecision": "",
+        "locationReviewStatus": "",
+        "startDate": "2026-10-17",
+        "startTime": "11:00",
+        "endDate": "2026-10-17",
+        "endTime": "15:00",
+        "isRecurring": "No",
+        "recurringPattern": "none",
+        "recurringDaysOfWeek": [],
+        "recurringWeekdaySequence": [],
+        "recurringWeekInterval": null,
+        "totalOccurrences": null,
+        "recurrenceUntilDate": "",
+        "ticketLink": "",
+        "ticketsBuyUrl": "",
+        "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1792327819191-0nkfr6.webp",
+        "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1792327819191-0nkfr6.webp",
+        "sharedPostThumbnail": "",
+        "imageProvenance": {
+          "version": 1,
+          "primarySource": "post_media",
+          "primaryField": "relevantImageUrl",
+          "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1792327819191-0nkfr6.webp",
+          "isFallback": false,
+          "sourceFields": [
+            "relevantImageUrl",
+            "mediaUrls",
+            "icon"
+          ],
+          "media": [
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1792327819191-0nkfr6.webp",
+              "source": "post_media",
+              "field": "relevantImageUrl",
+              "isPrimary": true,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1792327819191-0nkfr6.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": true,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1792327819472-zhzugi.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": false,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1792327819760-0hwbyi.webp",
+              "source": "profile_image",
+              "field": "icon",
+              "isPrimary": false,
+              "isFallback": false
+            }
+          ],
+          "selectionReason": "model_selected_analysis_frame_source",
+          "updatedBy": "parser"
+        },
+        "timeResolution": {
+          "hoursUsed": false
+        },
+        "timeFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "11AM"
+          },
+          "end": {
+            "source": "none",
+            "toClose": false,
+            "evidence": "3PM"
+          }
+        },
+        "structuredLocationValidation": null,
+        "_sourceType": "special",
+        "description": "Weekend brunch: eggs, bacon, hashbrowns, toast; Saturday and Sunday, 11AM to 3PM."
+      }
+    ]
+  },
+  "96": {
+    "caption": "HAPPY PEI MARATHON DAY! \n\nWhether you\u2019re running, cheering from the sidelines, or just looking for a delicious breakfast, come refuel at Coach\u2019s! \n\nWe\u2019re serving up breakfast from 8 AM \u2013 2 PM!\n\nGood luck to all the runners hitting the streets today!\n\nOCR TEXT:\nMay be an image of rye bread",
+    "items": [
+      {
+        "name": "Breakfast service",
+        "description": "Breakfast is being served for PEI Marathon Day.",
+        "date": "2026-10-18",
+        "startTime": "08:00",
+        "endTime": "14:00",
+        "venue": "Coach\u2019s Restaurant & Sports Bar",
+        "pricing": "",
+        "price": "",
+        "discount": "",
+        "additionalLocation": "",
+        "recurringPattern": "none",
+        "extractionReason": "The post advertises breakfast service today from 8 AM to 2 PM.",
+        "timeFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "\u201cWe\u2019re serving up breakfast from 8 AM \u2013 2 PM!\u201d"
+          },
+          "end": {
+            "source": "explicit",
+            "toClose": false,
+            "evidence": "\u201cWe\u2019re serving up breakfast from 8 AM \u2013 2 PM!\u201d"
+          }
+        },
+        "_sourceType": "special",
+        "_sourceOccurrenceCount": 1,
+        "_pipelineIndex": 1,
+        "_pipelineTotalStage3": 1
+      }
+    ],
+    "final": [
+      {
+        "id": "1785814723547515",
+        "name": "Breakfast service",
+        "category": "Sports",
+        "isEvent": "Yes",
+        "isFoodSpecial": "No",
+        "establishment": "Coach\u2019s Restaurant & Sports Bar",
+        "additionalLocation": "Coach\u2019s Restaurant & Sports Bar",
+        "locationScope": "",
+        "locationLabel": "",
+        "locationCity": "",
+        "locationProvince": "",
+        "locationPrecision": "",
+        "locationReviewStatus": "",
+        "startDate": "2026-10-18",
+        "startTime": "08:00",
+        "endDate": "2026-10-18",
+        "endTime": "14:00",
+        "isRecurring": "No",
+        "recurringPattern": "none",
+        "recurringDaysOfWeek": [],
+        "recurringWeekdaySequence": [],
+        "recurringWeekInterval": null,
+        "totalOccurrences": null,
+        "recurrenceUntilDate": "",
+        "ticketLink": "",
+        "ticketsBuyUrl": "",
+        "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1792328099669-hn3qs0.webp",
+        "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1792328099669-hn3qs0.webp",
+        "sharedPostThumbnail": "",
+        "imageProvenance": {
+          "version": 1,
+          "primarySource": "post_media",
+          "primaryField": "relevantImageUrl",
+          "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1792328099669-hn3qs0.webp",
+          "isFallback": false,
+          "sourceFields": [
+            "relevantImageUrl",
+            "mediaUrls",
+            "icon"
+          ],
+          "media": [
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1792328099669-hn3qs0.webp",
+              "source": "post_media",
+              "field": "relevantImageUrl",
+              "isPrimary": true,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1792328099669-hn3qs0.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": true,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1792328100013-wf5tzq.webp",
+              "source": "profile_image",
+              "field": "icon",
+              "isPrimary": false,
+              "isFallback": false
+            }
+          ],
+          "selectionReason": "model_selected_analysis_frame_source",
+          "updatedBy": "parser"
+        },
+        "timeResolution": {
+          "hoursUsed": false
+        },
+        "timeFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "\u201cWe\u2019re serving up breakfast from 8 AM \u2013 2 PM!\u201d"
+          },
+          "end": {
+            "source": "explicit",
+            "toClose": false,
+            "evidence": "\u201cWe\u2019re serving up breakfast from 8 AM \u2013 2 PM!\u201d"
+          }
+        },
+        "structuredLocationValidation": null,
+        "_sourceType": "special",
+        "description": "Breakfast is being served for PEI Marathon Day."
+      }
+    ]
+  },
+  "156": {
+    "caption": "Creative Kids: Write It, Draw It!\n\nJoin us weekly at the Charlottetown Library Learning Centre on Wednesdays from 3:30-4:30 p.m. \u2022 Grades K-6 \n\nThis month, we\u2019ll be writing, drawing, and telling stories \n\n#peilibrary\n\nOCR TEXT:\nMay be an image of child, studying and text",
+    "items": [
+      {
+        "name": "Creative Kids: Write It, Draw It!",
+        "description": "Join us weekly at the Charlottetown Library Learning Centre on Wednesdays from 3:30-4:30 p.m. \u2022 Grades K-6. This month, we\u2019ll be writing, drawing, and telling stories.",
+        "date": "2026-10-21",
+        "startTime": "15:30",
+        "endTime": "16:30",
+        "venue": "Charlottetown Library Learning Centre",
+        "ticketLink": "",
+        "price": "",
+        "relevantImageIndex": 0,
+        "recurringPattern": "weekly_wednesday",
+        "extractionReason": "A weekly creative writing and drawing activity for children is explicitly advertised, with a weekday, time, and venue.",
+        "timeFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "3:30 p.m."
+          },
+          "end": {
+            "source": "explicit",
+            "toClose": false,
+            "evidence": "4:30 p.m."
+          }
+        },
+        "spatial": {
+          "kind": "single_location",
+          "locations": [
+            {
+              "label": "Charlottetown Library Learning Centre",
+              "address": "",
+              "role": "location",
+              "certainty": "confirmed",
+              "sourceText": "at the Charlottetown Library Learning Centre"
+            }
+          ],
+          "confirmedStreets": [],
+          "ordered": false,
+          "evidenceNotes": "The post names one venue and provides no street address."
+        },
+        "_sourceOccurrenceCount": 1,
+        "_pipelineIndex": 1,
+        "_pipelineTotalStage3": 1
+      }
+    ],
+    "final": [
+      {
+        "id": "1436879098627760",
+        "name": "Creative Kids: Write It, Draw It!",
+        "category": "Workshops & Classes",
+        "isEvent": "Yes",
+        "isFoodSpecial": "No",
+        "establishment": "Charlottetown Library Learning Centre",
+        "additionalLocation": "Charlottetown Library Learning Centre",
+        "locationScope": "",
+        "locationLabel": "",
+        "locationCity": "",
+        "locationProvince": "",
+        "locationPrecision": "",
+        "locationReviewStatus": "",
+        "startDate": "2026-10-21",
+        "startTime": "15:30",
+        "endDate": "2026-10-21",
+        "endTime": "16:30",
+        "isRecurring": "Yes",
+        "recurringPattern": "weekly_wednesday",
+        "recurringDaysOfWeek": [],
+        "recurringWeekdaySequence": [],
+        "recurringWeekInterval": null,
+        "totalOccurrences": null,
+        "recurrenceUntilDate": "",
+        "ticketLink": "",
+        "ticketsBuyUrl": "",
+        "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1792328705740-qsk09n.webp",
+        "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1792328705740-qsk09n.webp",
+        "sharedPostThumbnail": "",
+        "imageProvenance": {
+          "version": 1,
+          "primarySource": "post_media",
+          "primaryField": "relevantImageUrl",
+          "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1792328705740-qsk09n.webp",
+          "isFallback": false,
+          "sourceFields": [
+            "relevantImageUrl",
+            "mediaUrls",
+            "icon"
+          ],
+          "media": [
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1792328705740-qsk09n.webp",
+              "source": "post_media",
+              "field": "relevantImageUrl",
+              "isPrimary": true,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1792328705740-qsk09n.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": true,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1792328706104-bp1pdp.webp",
+              "source": "profile_image",
+              "field": "icon",
+              "isPrimary": false,
+              "isFallback": false
+            }
+          ],
+          "selectionReason": "model_selected_analysis_frame_source",
+          "updatedBy": "parser"
+        },
+        "timeResolution": {
+          "hoursUsed": false
+        },
+        "timeFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "3:30 p.m."
+          },
+          "end": {
+            "source": "explicit",
+            "toClose": false,
+            "evidence": "4:30 p.m."
+          }
+        },
+        "structuredLocationValidation": null,
+        "_sourceType": null,
+        "description": "Join us weekly at the Charlottetown Library Learning Centre on Wednesdays from 3:30-4:30 p.m. \u2022 Grades K-6. This month, we\u2019ll be writing, drawing, and telling stories."
+      }
+    ]
+  },
+  "240": {
+    "caption": "We are thrilled to be bringing international bestselling author Ann Cleeves, the creator of Vera, Shetland, and The Long Call, to Charlottetown for the launch of her new novel The Dying Light. Ann will be in conversation with Mattea Roach, host of CBC\u2019s popular radio program Bookends. This is going to be a wonderful evening, don\u2019t miss out - get your tickets today!\n\nDate: Thursday, October 29th\nTime: 7 pm\nLocation: Delta Prince Edward\nCost: Book \u2013 Book and admission: $40 or Admission: $25\nFor tickets: https://bookmarkreads.ca/events/6329720261019\n\nNew York Times bestselling author Ann Cleeves returns with the fourth Two Rivers mystery featuring detective Matthew Venn. In The Dying Light, Venn and his team are called in to investigate a puzzling death. The body of a young woman has been found in the swimming pool of a lavish holiday home in North Devon, and her best friend is missing. Caught between a powerful family\u2019s secrets and a powder keg of local tensions, Venn must navigate a treacherous path. Knowing that the real answers lie not in what people say, but in the silence that they keep.\n\n#AnnCleeves #ReadingWritingAndWonder #DowntownCharlottetown\nPEI Public Library Service des biblioth\u00e8ques publiques \u00ceP\u00c9 Publishers Group Canada Pan Macmillan @followers\n\nOCR TEXT:\nMay be an image of text",
+    "items": [
+      {
+        "name": "Ann Cleeves in Conversation with Mattea Roach",
+        "description": "Ann Cleeves, creator of Vera, Shetland, and The Long Call, will be in conversation with Mattea Roach, host of CBC\u2019s Bookends, for the launch of her new novel The Dying Light. Thursday, October 29. Tickets: Book and admission $40 or admission $25.",
+        "date": "2026-10-29",
+        "startTime": "19:00",
+        "endTime": "",
+        "venue": "Delta Prince Edward",
+        "ticketLink": "https://bookmarkreads.ca/events/6329720261019",
+        "price": "Book and admission: $40 or admission: $25",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none",
+        "extractionReason": "A scheduled author event and book launch featuring Ann Cleeves in conversation with Mattea Roach. The caption gives Thursday, October 29, and the poster confirms the event names, time, and venue. The year is not printed; 2026 is resolved from the dated caption context, and October 29, 2026 is a Thursday.",
+        "timeFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "7 pm"
+          },
+          "end": {
+            "source": "none",
+            "toClose": false,
+            "evidence": ""
+          }
+        },
+        "spatial": {
+          "kind": "single_location",
+          "locations": [
+            {
+              "label": "Delta Prince Edward",
+              "address": "",
+              "role": "location",
+              "certainty": "confirmed",
+              "sourceText": "Location: Delta Prince Edward"
+            }
+          ],
+          "confirmedStreets": [],
+          "ordered": false,
+          "evidenceNotes": "The source names Delta Prince Edward as the event location; no street address is provided."
+        },
+        "_sourceOccurrenceCount": 1,
+        "_pipelineIndex": 1,
+        "_pipelineTotalStage3": 1
+      }
+    ],
+    "final": [
+      {
+        "id": "1693893912330623",
+        "name": "Ann Cleeves in Conversation with Mattea Roach",
+        "category": "Workshops & Classes",
+        "isEvent": "Yes",
+        "isFoodSpecial": "No",
+        "establishment": "Delta Prince Edward",
+        "additionalLocation": "Delta Prince Edward",
+        "locationScope": "",
+        "locationLabel": "",
+        "locationCity": "",
+        "locationProvince": "",
+        "locationPrecision": "",
+        "locationReviewStatus": "",
+        "startDate": "2026-10-29",
+        "startTime": "19:00",
+        "endDate": "2026-10-29",
+        "endTime": "21:00",
+        "isRecurring": "No",
+        "recurringPattern": "none",
+        "recurringDaysOfWeek": [],
+        "recurringWeekdaySequence": [],
+        "recurringWeekInterval": null,
+        "totalOccurrences": null,
+        "recurrenceUntilDate": "",
+        "ticketLink": "https://bookmarkreads.ca/events/6329720261019",
+        "ticketsBuyUrl": "https://bookmarkreads.ca/events/6329720261019",
+        "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1792329204880-96gbf9.webp",
+        "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1792329204880-96gbf9.webp",
+        "sharedPostThumbnail": "",
+        "imageProvenance": {
+          "version": 1,
+          "primarySource": "post_media",
+          "primaryField": "relevantImageUrl",
+          "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1792329204880-96gbf9.webp",
+          "isFallback": false,
+          "sourceFields": [
+            "relevantImageUrl",
+            "mediaUrls",
+            "icon"
+          ],
+          "media": [
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1792329204880-96gbf9.webp",
+              "source": "post_media",
+              "field": "relevantImageUrl",
+              "isPrimary": true,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1792329204880-96gbf9.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": true,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1792329205105-bwdfm3.webp",
+              "source": "profile_image",
+              "field": "icon",
+              "isPrimary": false,
+              "isFallback": false
+            }
+          ],
+          "selectionReason": "model_selected_analysis_frame_source",
+          "updatedBy": "parser"
+        },
+        "timeResolution": {
+          "hoursUsed": false,
+          "reason": "no_place_match",
+          "endFromHours": "category_default"
+        },
+        "timeFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "7 pm"
+          },
+          "end": {
+            "source": "none",
+            "toClose": false,
+            "evidence": ""
+          }
+        },
+        "structuredLocationValidation": null,
+        "_sourceType": null,
+        "description": "Ann Cleeves, creator of Vera, Shetland, and The Long Call, will be in conversation with Mattea Roach, host of CBC\u2019s Bookends, for the launch of her new novel The Dying Light. Thursday, October 29. Tickets: Book and admission $40 or admissio"
+      }
+    ]
+  },
+  "247": {
+    "caption": "Chart-topping country anthems + timeless holiday classics = the ultimate November night out! \n\nTwo Canadian country icons, one stage, and a whole lot of holiday cheer. George Canyon and Aaron Pritchett are hitting our mainstage with Cowboy Christmas 2\u2014bringing together the big hits you love to sing along to and the festive classics that make the season bright.\n\nGEORGE CANYON & AARON PRITCHETT\nA Cowboy Christmas 2\nThursday, November 12, 2026 at 7:30 PM\n\nWhy not make a full night of it? Grab your boots and your favourite show buddy, and start the evening with a great local bite right down the road.\n\nSummerside is packed with fantastic spots to grab dinner or a drink before the lights go down\u2014or a sweet treat to finish off the night:\n\n@brothers2restaurant \n@summersideshipyard\n@evermoorebrewing \n@pepperscrafterssummerside \nFiveelevenwest \n@holmansicecream \n\nSupport local, treat yourself to a wonderful meal, and then stroll on over to join us for an incredible night of music!\n\nTickets: On sale now at harbourfronttheatre.com or call our box office at 902-888-2500!\n\n#HarbourfrontTheatre #GeorgeCanyon #AaronPritchett #CowboyChristmas #SummersidePEI #PEIMusic #LiveMusicPEI #PEIEvents #IslandTheatre #EatLocalPEI",
+    "items": [
+      {
+        "name": "GEORGE CANYON & AARON PRITCHETT \u2014 A Cowboy Christmas 2",
+        "description": "Thursday, November 12, 2026 at 7:30 PM. George Canyon and Aaron Pritchett perform chart-topping country anthems and timeless holiday classics on the mainstage.",
+        "date": "2026-11-12",
+        "startTime": "19:30",
+        "endTime": "",
+        "venue": "",
+        "ticketLink": "harbourfronttheatre.com",
+        "price": "",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none",
+        "extractionReason": "A dated, timed live music performance is explicitly advertised in the caption.",
+        "timeFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "Thursday, November 12, 2026 at 7:30 PM"
+          },
+          "end": {
+            "source": "none",
+            "toClose": false,
+            "evidence": ""
+          }
+        },
+        "spatial": {
+          "kind": "single_location",
+          "locations": [
+            {
+              "label": "our mainstage",
+              "address": "",
+              "role": "location",
+              "certainty": "confirmed",
+              "sourceText": "hitting our mainstage"
+            }
+          ],
+          "confirmedStreets": [],
+          "ordered": false,
+          "evidenceNotes": "The performance is advertised on the theatre's mainstage."
+        },
+        "_sourceOccurrenceCount": 1,
+        "_pipelineIndex": 1,
+        "_pipelineTotalStage3": 1
+      }
+    ],
+    "final": [
+      {
+        "id": "1736217035175926",
+        "name": "GEORGE CANYON & AARON PRITCHETT \u2014 A Cowboy Christmas 2",
+        "category": "Live Music",
+        "isEvent": "Yes",
+        "isFoodSpecial": "No",
+        "establishment": "Harbourfront Theatre",
+        "additionalLocation": "",
+        "locationScope": "",
+        "locationLabel": "",
+        "locationCity": "",
+        "locationProvince": "",
+        "locationPrecision": "",
+        "locationReviewStatus": "",
+        "startDate": "2026-11-12",
+        "startTime": "19:30",
+        "endDate": "2026-11-13",
+        "endTime": "01:00",
+        "isRecurring": "No",
+        "recurringPattern": "none",
+        "recurringDaysOfWeek": [],
+        "recurringWeekdaySequence": [],
+        "recurringWeekInterval": null,
+        "totalOccurrences": null,
+        "recurrenceUntilDate": "",
+        "ticketLink": "harbourfronttheatre.com",
+        "ticketsBuyUrl": "harbourfronttheatre.com",
+        "image": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1792329274507-cp9vte.webp",
+        "relevantImageUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1792329274507-cp9vte.webp",
+        "sharedPostThumbnail": "",
+        "imageProvenance": {
+          "version": 1,
+          "primarySource": "post_media",
+          "primaryField": "relevantImageUrl",
+          "primaryUrl": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1792329274507-cp9vte.webp",
+          "isFallback": false,
+          "sourceFields": [
+            "relevantImageUrl",
+            "mediaUrls",
+            "icon"
+          ],
+          "media": [
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1792329274507-cp9vte.webp",
+              "source": "post_media",
+              "field": "relevantImageUrl",
+              "isPrimary": true,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/postimages/1792329274507-cp9vte.webp",
+              "source": "post_media",
+              "field": "mediaUrls",
+              "isPrimary": true,
+              "isFallback": false
+            },
+            {
+              "url": "https://storage.googleapis.com/gathr-uploaded-images/profilepictures/1792329274819-fybydl.webp",
+              "source": "profile_image",
+              "field": "icon",
+              "isPrimary": false,
+              "isFallback": false
+            }
+          ],
+          "selectionReason": "model_selected_analysis_frame_source",
+          "updatedBy": "parser"
+        },
+        "timeResolution": {
+          "hoursUsed": true,
+          "endFromHours": "category_default"
+        },
+        "timeFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "Thursday, November 12, 2026 at 7:30 PM"
+          },
+          "end": {
+            "source": "none",
+            "toClose": false,
+            "evidence": ""
+          }
+        },
+        "structuredLocationValidation": null,
+        "_sourceType": null,
+        "description": "George Canyon and Aaron Pritchett perform chart-topping country anthems and timeless holiday classics on the mainstage."
+      }
+    ]
+  },
+  "323": {
+    "caption": "Join us at the club on Oct 31st for the Halloween Hustle and Pancake Breakfast!  Breakfast will run from 930-11am, hosted by the Montague Junior Curling  !",
+    "items": [
+      {
+        "name": "Halloween Hustle",
+        "description": "Join us at the club on Oct 31st for the Halloween Hustle.",
+        "date": "2026-10-31",
+        "startTime": "",
+        "endTime": "",
+        "venue": "",
+        "ticketLink": "",
+        "price": "",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none",
+        "extractionReason": "Halloween Hustle is an advertised activity. The pancake breakfast is food-focused and was excluded; its hours are not assigned to the activity.",
+        "timeFlags": {
+          "start": {
+            "source": "none",
+            "evidence": ""
+          },
+          "end": {
+            "source": "none",
+            "toClose": false,
+            "evidence": ""
+          }
+        },
+        "spatial": {
+          "kind": "single_location",
+          "locations": [
+            {
+              "label": "the club",
+              "address": "",
+              "role": "location",
+              "certainty": "possible",
+              "sourceText": "at the club"
+            }
+          ],
+          "confirmedStreets": [],
+          "ordered": false,
+          "evidenceNotes": "The caption says the activity is at the club but provides no address."
+        },
+        "_sourceOccurrenceCount": 1,
+        "_sourceTimeConstraint": {
+          "reason": "dated_activity_without_clock",
+          "evidence": "Dated activity has no advertised start clock"
+        },
+        "_pipelineIndex": 1,
+        "_pipelineTotalStage3": 1
+      }
+    ],
+    "final": []
+  }
+}
