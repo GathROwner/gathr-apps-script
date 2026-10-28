@@ -48,11 +48,15 @@ Completion, full typed backup and actual receipt: `functions/artifacts/oct28-rep
 
 Two appointment services stay excluded: Stratford Tech Time has no fixed date/start, and Seniors Navigator on November 3 requires an individually arranged appointment with no published time. They are not treated as scheduled group activities.
 
-Two contradictory dates remain unpublished **awaiting Craig's input**. The two original images were shown directly in chat and both source questions were submitted together:
+Two contradictory dates remain unpublished, but **official event pages now resolve both conflicts**. Craig suggested checking the web after finding Kinkora's calendar listing. Fresh direct reads of the matching official PEI Library event pages supersede the earlier pending date-choice questions; no guessed human date choice is needed. These are verified source decisions, not completed live recoveries.
 
-| Activity | Printed source | Conflict / pending choices |
+| Activity | Printed source | Official matching event page |
 |---|---|---|
-| Kinkora PD Day: Dinovember Story & Craft, 10:30 | Friday, November 7 | In 2026, Friday is November 6 and November 7 is Saturday. Kinkora's regular Saturday schedule is closed. Hold, Friday November 6, or Saturday November 7; no answer inferred. |
-| Stratford Service Canada Information Session, 13:30–15:30 | Tuesday, November 18 | In 2026, Tuesday is November 17 and November 18 is Wednesday. Hold, Tuesday November 17, or Wednesday November 18; no answer inferred. |
+| Kinkora PD Day: Dinovember Story & Craft | Friday, November 7, 10:30 | [Official event 4083184](https://peilibrary.libcal.com/event/4083184): Friday November 6, 2026, 10:30–11:00 Atlantic, Kinkora Public Library; exact title, description and family audience match. The explicit finish is new corroborating evidence. |
+| Stratford Service Canada Information Session | Tuesday, November 18, 13:30–15:30 | [Official event 4085345](https://peilibrary.libcal.com/event/4085345): Wednesday November 18, 2026, 13:30–15:30 Atlantic, Stratford Public Library; exact title and David/Service Canada description match. |
+
+The current official pages disagree with the posters. Their historical edit timing was not established, so this does not prove when a correction was made. Both original posters remain preserved. Captured official pages and retrieval time: `functions/artifacts/oct28-repairs/library-holds/OFFICIAL_DATE_CONFLICT_VERIFICATION.json`.
+
+Recommended future handling: only when source fields conflict, perform a bounded targeted search, then read a matching official organizer/venue event page. Verify activity, venue and edition/year; retain both conflicting evidence and the corroborating URL, capture and rationale. Search summaries and third-party copies alone cannot resolve the conflict. If official evidence remains ambiguous or disagrees, retain the hold. This is a proposed exception workflow, not implemented parser behavior; automatic-resolution gates remain OFF.
 
 No further venue creation, queue write, storage upload, parser call/replay/deployment, schedule/traffic/gate change, app release or map interaction occurred. Verification is native/API and saved-source evidence; phone cache adoption was not tested. Automatic future handling of these explicit drop-in patterns is not certified by this manual recovery.
