@@ -18,6 +18,15 @@ are preserved; both sources/galleries retained. No media deletion or replay.
 Official CLI queue poststeps were blocked before forwarding; fresh readback proves
 the three functions and unchanged queues. Four approved service-agent requests
 returned200/done with unchanged project policy. Uncertain recoveries remain held.
+The four named follow-up omissions are now source-confirmed and recovered:
+BreadalbaneNov5craft17:00/Nov17watercolour13:00, CrapaudNov18bookmarks18:00,
+and PhaseIINov10atStPaul's19:00. Four create-only records plus one full private
+typed source/absence backup and feed491→492 committed at21:22:52.692476UTC.
+Explicit starts/unknown ends/one-offs/original sources and media are preserved;
+the children's craft is family-labelled, adult workshops are not. All four200
+details and unique membership across7pages/657active-window rows pass. Existing
+FaithTalk/other shows stay unchanged. No venue, alias, queue, media-object or
+parser change. Other unverified library items and missing-source holds remain.
 See [October28 source decisions, exact targets and release/apply evidence](oct28-large-parse-corrections-release.md).
 
 October18 OCR-caption boundary and CFCY backlog follow-up: **deployed and verified**.
