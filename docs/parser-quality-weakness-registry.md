@@ -1,6 +1,24 @@
 # GathR parser-quality weakness registry
 
-Last updated: 2026-10-18 (Atlantic)
+Last updated: 2026-10-28 (Atlantic)
+
+October28 accepted audit corrections and prevention: **deployed and live verified**.
+Latest parser source is `ab2b62d80f7ede432b7b031603e27122d691a322`, reviewed commit
+`0e9403a1ab789ef61afa4a0777fa7bc180373abc`, all three ACTIVE/latest100%, max20,
+revisions517-qol/483-guj/475-cov. This supersedes older serving identities below.
+Source-owned quoted attendee venues, original shared-post relative-date anchors,
+conservative November ceilings, affirmative occurrence-date restoration, isolated
+recurrence holds and mixed cross-source identity/clock protection are included.
+Familyv13 adds reviewed phrase evidence and scoped audience-heading instructions;
+future model heading compliance remains unproven by paid replay. Compact wire,
+models/efforts/cache controls, resolver baselines and automatic gates stay unchanged/OFF.
+Nineteen updates/two exact duplicate deletes/21typed archives committed across
+three transactions, feed488→491. Both Hunter host clocks/primary images/engagement
+are preserved; both sources/galleries retained. No media deletion or replay.
+Official CLI queue poststeps were blocked before forwarding; fresh readback proves
+the three functions and unchanged queues. Four approved service-agent requests
+returned200/done with unchanged project policy. Uncertain recoveries remain held.
+See [October28 source decisions, exact targets and release/apply evidence](oct28-large-parse-corrections-release.md).
 
 October18 OCR-caption boundary and CFCY backlog follow-up: **deployed and verified**.
 This extends PQ-SPATIAL/PQ-021 source ownership: an OCR marker at offset0 is now
