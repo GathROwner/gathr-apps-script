@@ -48,7 +48,7 @@ Completion, full typed backup and actual receipt: `functions/artifacts/oct28-rep
 
 Two appointment services stay excluded: Stratford Tech Time has no fixed date/start, and Seniors Navigator on November 3 requires an individually arranged appointment with no published time. They are not treated as scheduled group activities.
 
-Two contradictory dates remain unpublished, but **official event pages now resolve both conflicts**. Craig suggested checking the web after finding Kinkora's calendar listing. Fresh direct reads of the matching official PEI Library event pages supersede the earlier pending date-choice questions; no guessed human date choice is needed. These are verified source decisions, not completed live recoveries.
+Both formerly contradictory dates are **now recovered from matching official event pages**. Craig suggested checking the web after finding Kinkora's calendar listing, then accepted the two corroborated decisions with `I agree` (`01a184cb-3c28-7561-bc92-cd5d2e039bd0`). Fresh direct reads of the matching official PEI Library event pages supersede the earlier pending date-choice questions; no guessed human date choice was used.
 
 | Activity | Printed source | Official matching event page |
 |---|---|---|
@@ -57,6 +57,17 @@ Two contradictory dates remain unpublished, but **official event pages now resol
 
 The current official pages disagree with the posters. Their historical edit timing was not established, so this does not prove when a correction was made. Both original posters remain preserved. Captured official pages and retrieval time: `functions/artifacts/oct28-repairs/library-holds/OFFICIAL_DATE_CONFLICT_VERIFICATION.json`.
 
-Recommended future handling: only when source fields conflict, perform a bounded targeted search, then read a matching official organizer/venue event page. Verify activity, venue and edition/year; retain both conflicting evidence and the corroborating URL, capture and rationale. Search summaries and third-party copies alone cannot resolve the conflict. If official evidence remains ambiguous or disagrees, retain the hold. This is a proposed exception workflow, not implemented parser behavior; automatic-resolution gates remain OFF.
+The source-backed four-write transaction committed at **2026-10-28T23:20:59.158733Z**, feed **495 → 496**: two create-only event parents, one full native private archive and the feed increment. No existing venue, event, queue or source was updated. Paths:
+
+- `venues/slug_kinkorapubliclibrary/events/oct28_recovery_571f64f01c3380cbb792`
+- `venues/slug_stratfordpubliclibrary/events/oct28_recovery_17c0a317eabdd96f9a4d`
+
+Both time endpoints are explicit, corroborated by the official event pages in **Atlantic Time**; scraper metadata's `America/New_York` is not event-time evidence. Kinkora has the child/family badge (100), Stratford's adult/senior information session does not (15). Each retains all five original images, with relevant poster frame1/frame3 primary. The regular Kinkora Read, Sing, Play template also has a November6 10:30 occurrence; no source expressly replaces/cancels it, so it remains unchanged and that overlap is not claimed resolved.
+
+Helper commit `91b64ac`, `firebase/recover-oct28-library-dates.cjs`. Sixteen focused independent controls, actual read-only guards and fresh outside/inside idle checks (342 locks, zero active) pass. Exact native afterstates, source and venue versions, full typed archive/backup, two public details, all seven complete active-feed pages and five original media objects pass. The feed has exactly two additions, 658 byte-identical retained rows and 20 pre-existing occurrences filtered after their stored 19:40–20:15 Atlantic finishes elapsed; no existing row was edited/deleted. Evidence is under `functions/artifacts/oct28-repairs/library-date-conflicts/`.
+
+The **audit/review workflow is now updated**, using the shared source-evidence packet linked by `gathr-parse-audit`: only when source fields conflict, use at most two targeted searches and three official pages, verify activity/venue/edition/year and each changed field, retain original and corroborating evidence, and keep ambiguity held. Search summaries and third-party copies are leads only. Both skill validators passed, and the actual edited skill files passed independent review. This is a review-time evidence-gathering step, **not production parser runtime integration**; all automatic-resolution/publication gates remain OFF.
+
+Independent postapply receipt SHA256 `471cecb7b56d79784a777aee7d683241732dca843a0c4cfa65837eb827342ae4`; actual skill-byte review SHA256 `443d5818077270c00f4015e20c7919eda42b1c961525d1f10282697b8e30490c`. Root rechecked all 30 bound evidence artifact hashes, both skill files and source/helper bindings. `library-date-conflicts/COMPLETION.json` records completion; `AUTHORITY_CLOSED.json` closes the consumed one-attempt scope without mutating the hash-bound as-at-apply authority. `DATE_DECISIONS_RESOLVED.json` supersedes the prior pending questions. No remaining human date input is required for the seven library entries: five recovered, two appointment services excluded. Device cache adoption was not tested.
 
 No further venue creation, queue write, storage upload, parser call/replay/deployment, schedule/traffic/gate change, app release or map interaction occurred. Verification is native/API and saved-source evidence; phone cache adoption was not tested. Automatic future handling of these explicit drop-in patterns is not certified by this manual recovery.
