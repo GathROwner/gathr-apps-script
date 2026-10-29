@@ -2,6 +2,17 @@
 
 Last updated: 2026-10-28 (Atlantic)
 
+October28 dated food/drink offer service-hours prevention: **prepared, not serving**.
+Craig accepted verified relevant service hours as inferred availability for an
+otherwise unrestricted dated offer. The isolated `codex/offer-service-hours-20261028`
+candidate preserves estimated provenance at both endpoints and holds ambiguous
+branches, mismatched dates/addresses, truncated/split hours and lookup failures.
+It prevents a seasonal-word match from lending a party clock to a distinct drink
+offer. Three A&W branch offers and two PonyBoat corrections are prepared with
+original media preserved; two missing A&W canonical branches require exact batch
+approval. See `docs/oct28-offer-service-hours-approval-plan.md`. No live changes
+or automatic gate activation are implied by preparation.
+
 October28 accepted audit corrections and prevention: **deployed and live verified**.
 Latest parser source is `ab2b62d80f7ede432b7b031603e27122d691a322`, reviewed commit
 `0e9403a1ab789ef61afa4a0777fa7bc180373abc`, all three ACTIVE/latest100%, max20,
