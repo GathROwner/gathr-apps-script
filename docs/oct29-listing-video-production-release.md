@@ -11,3 +11,6 @@ Validation passed: TypeScript, seven video tests, lint with zero errors (222 rep
 Production source plus postrelease documentation is pushed to the named feature branch. The verified incremental bundle `C:/Users/craig/Documents/Codex/2026-10-29/task/listing-video-production-candidate.bundle` requires the retained exact baseline `875f630`; its SHA256 is in the JSON receipt. Rollback group `4f6c7f70-8da6-4a35-82a2-47b52e5c2307` is preserved. No backend, event data, parser, gate, schedule, Android or Preview mutation occurred during this port. The separate full October 29 parse audit remains outstanding.
 
 Detailed receipt: `oct29-listing-video-production-release.json`. Mockup: `C:/Users/craig/.codex/generated_images/01a0ea83-7031-7423-b853-966f2180d186/exec-9d1d5423-a78c-40c8-94ae-9370adc25ba0.png`.
+
+
+Subsequent phone acceptance: Craig confirmed this original Watch video release works and supplied card/lightbox screenshots. The later authorized poster-first autoplay release supersedes it as the newest Production update; see `oct29-listing-video-autoplay-release.md` (OTA 01a188ba).
