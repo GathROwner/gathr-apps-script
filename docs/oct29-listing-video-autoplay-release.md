@@ -9,3 +9,6 @@ Branch `codex/listing-video-autoplay-20261029` in `C:/Windows/System32/GathR-Pro
 Evidence limits: Android development harness proves shared component behavior, not physical iPhone adoption, a complete live feed/Profile route check or a full map lightbox session. No map or ad interaction occurred. The emulator has no reliable sound driver; sound-state controls were checked, and Craig had already listened to both source clips. Native proof: app `docs/qa/listing-video-autoplay-20261029/QA_RECEIPT.json`. Detailed release: `oct29-listing-video-autoplay-release.json`. Phone check: close/reopen twice, confirm Profile OTA **01a188ba**, then view Ben Kunder or Cowboy Christmas.
 
 The temporary app entry was restored and own Metro stopped. Final bounded port-8093 reverse cleanup timed out; its client alone was stopped, with no ADB server reset or data wipe. Any leftover mapping is inert because the QA server is stopped. The separate full October 29 source-to-output parse audit is still outstanding; this UI release does not complete it.
+
+
+Craig subsequently confirmed the initial autoplay feature works on his Production phone and authorized refinements. The newer 01a188f6 refinement OTA is recorded in `oct29-listing-video-refinements-release.md`; initial autoplay remains its accepted baseline.

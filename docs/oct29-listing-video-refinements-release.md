@@ -1,0 +1,15 @@
+# Listing video refinements: iOS Production
+
+Craig accepted the initial autoplay release, then authorized all feasible refinements without a new native build and a durable tag for hardware-volume unmuting. Published exact source **41768963d92d4db7fbcdc5587548d6edefc5895f**, runtime **1.1.20**, iOS Production native shell **1.1.20 (79)**; update **01a188f6-f176-7ce0-968e-8967db5cf856**, group **40a99276-3c32-4cd7-a03d-7a217c5d7d03**. Independent EAS group/list/channel reads verify exact source, newest iOS update, active full Production mapping and unchanged native fingerprint `6baab265658bbf45b6735e70da70e3a41bfabd41`. Rollback is accepted autoplay group `b46ce890-450f-43d9-9f9d-82e4b64912bf`.
+
+Implemented: one-second intentional poster dwell; inline Replay including with autoplay off; completed clips become eligible again after actually leaving view and returning; full-viewport video viewer with original-poster blur, floating fading controls, title and progress; actual decoded video dimensions select portrait/square/landscape layout; full-frame default and optional Fill screen/Fit frame; downward swipe closes active playback while preserving control/seek interaction. Original source images, clips, event data, expiry and public path boundaries remain intact.
+
+Twenty-five focused checks passed, TypeScript passed, lint passed with zero errors and 221 existing repository warnings. Exact shared-component native QA on the existing s24 client was independently reviewed for inline replay, actual scroll-return, square/landscape frames, Fit/Fill, seeking and active swipe-dismiss. Native proof and hashes are in app `docs/qa/listing-video-refinements-20261029/QA_RECEIPT.json`. Portrait classification is exercised in metadata/DOM tests; no extra portrait clip was approved/uploaded solely for testing. Physical iOS adoption and complete live app/map routes were not claimed; no map or ad interaction occurred. Expo clean export: 2,551 modules, 112 EAS iOS assets. Production social/auth/App Check/Mapbox settings and accepted dd8a943 source lineage are preserved.
+
+Authoritative app checkout: `C:/Windows/System32/GathR-Project/video-production`, branch `codex/listing-video-refinements-20261029`, pushed and read back on GitHub. Recovery bundle and SHA256 are in `oct29-listing-video-refinements-release.json`. Own Metro is stopped, normal app entry restored, reverse8093 removed and native app data preserved. No backend/parser/gate/data/media upload/native/Android/Preview changes. The separate October 29 full parse audit remains outstanding.
+
+## Deferred native feature
+
+**VIDEO-NATIVE-001: media-volume adjustment unmutes the focused, playing video.** Authoritative follow-up: app `docs/listing-video-native-followups.md`. Native support inventory and real phone volume-button testing are still needed; if no existing bridge suffices, use a separately authorized native build. No native build is started or promised by this OTA.
+
+Phone check: close/reopen twice, confirm Profile **OTA 01a188f6**, and test Ben Kunder or Cowboy Christmas. New refinement OTA adoption remains unverified until Craig confirms it.
