@@ -1,0 +1,56 @@
+# October 28: one roundup and movie repair batch
+
+Status: **prepared and read-only checked; not applied**. Craig asked to investigate the four remaining source groups (`01a184f6-5232-7d30-8ae4-94b51b6cfc17`, “Okay give them a shot”). This document presents the supported exact mutation scope for one approval, including a new venue intake. A&W and PonyBoat are excluded from the mutation batch. No parser/runtime/gate change is proposed.
+
+## App-visible result
+
+| Listing | Current → proposed | Evidence |
+|---|---|---|
+| Cheap Night at The Alley | Held/unpublished → October29, 16:30, finish unknown; Sports. Add The Alley as its own bowling venue at 200 Richmond St, Suite302, Charlottetown. | Original Downtown Charlottetown October29 roundup; the [festival organiser's specific October29 schedule](https://www.discovercharlottetown.com/scarecrow/) links [the venue's official website](https://thealley.ca/). One exact Places result corroborates name/address/point/website. |
+| Oracle Readings at Marc's Lounge | Held/unpublished → October29, 17:00–19:00, at the existing Marc's Lounge above The Brickhouse. | [Official festival activity](https://www.discovercharlottetown.com/events/pop-up-oracle-readings/) explicitly binds October29 to Marc's Lounge and 17:00–19:00. Its generic 18:00 header is not used for this dated row. |
+| Wicked Wednesdays Screening Hereditary | Held/unpublished → **Thursday October29, 19:00**, finish unknown. Doors17:00 in description; Cinema. | [Festival activity](https://www.discovercharlottetown.com/events/wicked-wednesdays-at-marcs-lounge/) explicitly says “Date Change to Oct29”; movie19:00, doors17:00. [Marc's official page](https://brickhousepei.com/lounge/) confirms the lounge is on The Brickhouse's third floor at125Sydney. The branded weekday and stale generic header do not override the explicit occurrence correction. |
+| Teen After Hours Movie and Pizza Night: Ghostbusters, Jumanji, The Lion/The Witch/The Wardrobe | Three existing listings retained, respectively October30, November27 and December18. Food Special → **Cinema/event**, estimated21:00 finishes → explicit**20:30**. Correct17:30 screening starts stay. Each description retains back-door entry17:00–17:15, screening17:30, programme end20:30, registration and Rotary Auditorium. Family badges remain80 with current scoring hashes/versions. | Separate exact official pages: [October30 event4051345](https://peilibrary.libcal.com/event/4051345), [November27 event4051346](https://peilibrary.libcal.com/event/4051346), [December18 event4051347](https://peilibrary.libcal.com/event/4051347). Each independently supports its own date and entry/movie/finish roles. |
+
+All clocks are Atlantic local time. No finish is inferred for Cheap Night or Hereditary. No fee, child/family badge or broad recurrence is invented for the three new listings. All three existing movies keep their IDs/paths, old source lineage, original image/provenance, counters and correct venue/starts. The sibling check found the same classification/default-finish error on the November and December movies; they are included in this one concrete approval batch, not silently treated as healthy controls or left for another approval.
+
+## Exact nine-write scope
+
+Create-only:
+
+1. `venues/place_920a12b96dbd244f` — The Alley Restaurant and Bowling Alley; alias `The Alley`; PlaceID `ChIJOVixQ-FSXksRm34xMMoHS-E`; 200RichmondStSte302; point46.235042,-63.124762999999994; websitehttps://thealley.ca/. No Facebook scrape configuration. The existing Alley Street Clay Club is a separate business and stays unchanged.
+2. `venues/place_920a12b96dbd244f/events/oct28_recovery_8e0e03ed8659bbbeec41` — Cheap Night.
+3. `venues/slug_marcslounge/events/oct28_recovery_0c8b26a110d83f88e2e2` — Oracle Readings.
+4. `venues/slug_marcslounge/events/oct28_recovery_2f3fce839dcb7ca90ee7` — Hereditary.
+
+Three masked existing-document updates:
+
+5. `venues/slug_charlottetownlibrarylearningcentre/events/W9Pqy5zQEu0avCoMnQno` — Ghostbusters, October30.
+6. `venues/slug_charlottetownlibrarylearningcentre/events/Rhxx220ynjWK0ayHhQvU` — Jumanji, November27.
+7. `venues/slug_charlottetownlibrarylearningcentre/events/Hol06hz1M9f2OKHPL7FU` — The Lion, the Witch and the Wardrobe, December18.
+
+Exact mask on each: `eventType`, `category`, `isEvent`, `isFoodSpecial`, `endTime`, `description`, `additionalLocation`, `timeFlags`, `timeResolution`, `updatedAt`, `familyFriendlyScore`, `familyFriendlyLevel`, `familyFriendlyReasons`, `familyFriendlyScoringVersion`, `familyFriendlyContentHash`. Each score remains80; current v13 hashes/versions are rebound to corrected content. Stale `timeResolution.endFromHours=category_default` is removed so explicit finishes can display correctly. No other fields change.
+
+8. Create full native private prestate archive `event_repair_archives/O28_ROUNDUP_AND_MOVIE_RECOVERY_20261028`.
+9. Serialized `runtime_metadata/event_feed` increment, **496→497** if unchanged at apply time. Feed drift stops the packet rather than silently taking a new version.
+
+Fresh full typed backup is written before submission to `functions/artifacts/oct28-repairs/remaining-four/PREWRITE_BACKUP_<timestamp>.json`. No deletion, relocation, queue status update, existing venue edit, media upload/delete, parser replay/deployment, traffic/config/model change, app release or map interaction is included. Existing unresolved queue documents are protected unchanged; adding events is not presented as queue finalization or automatic future linking.
+
+## Evidence and limits
+
+The source roundup is post `1578271271007071`, Downtown Charlottetown, October28,2026. Its relevant original text is under “Thursday, October29,2026 events”: “4:30pm - The Alley: Cheap Night”; “5:00pm - The Brickhouse Kitchen & Bar (Marc's Lounge): Oracle Readings”; “7:00pm - The Brickhouse Kitchen & Bar (Marc's Lounge): Wicked Wednesdays Screening Hereditary”. Full original caption and unchanged saved snapshot are in the packet. The original roundup image was displayed in this chat.
+
+An initial read-only preparation detected that the OCR staging object had expired. The canonical event-media object `postimages/1793192705599-tft3sd.webp` is still referenced by this same source and downloads200; its bytes exactly match the saved original `149-stored-0.img` (SHA256`c885ae058dbe81caf54f5e63a8623065f77f8db507b262cc0d61347050191138`). It is reused without any upload. `ROUNDUP_MEDIA_PROOF.json` records the proof; the earlier staging-reference payload is retained as an unused artifact.
+
+The newer teen source is PEI Library post/event`1434446588808520`, October27,2026, with an empty caption and extracted poster wording mentioning GhostbustersOctober30 and back-door entry17:15–17:30. Its original Facebook CDN pixels could not be downloaded (transport failure); no fresh inspection of those pixels is claimed. Exact official event4051345 and the older canonical listing agree on17:30 screening start and17:00–17:15 entry; the official programme explicitly ends20:30. The existing managed image was inspected and is a generic cinema illustration, not a poster proving clocks. It is preserved. The official page has contradictory “online event” boilerplate, but its In-Person heading, physical back-door instructions, Rotary Auditorium location and branch calendar bind the physical activity. These source qualifications remain private evidence rather than public diagnostic text.
+
+A&W post1939264440811908 remains unpublished: the costume/BuddyBurger offer names Summerside/Charlottetown/Stratford, without branch-specific offer hours. Neither the existing650UniversityAve venue nor regular restaurant hours establish all participating branches or the promotional clocks. Bounded official search provided no usable clock correction. All three original restaurant photos were inspected; no offer clocks appear.
+
+PonyBoat post1119028204045061 advertises drinks/treat bags Friday/Saturday. Its [official Saints&Sinners party page](https://www.ponyboat.ca/events/saints-sinners-halloween-party) supports a separate Saturday22:00–Sunday02:00 party, not the whole drinks-offer window. The two existing offer listings remain unchanged: Friday12:00–23:00 and Saturday22:00–23:00. Their exact offer clocks are **not validated** by this investigation; no replacement time is invented and this case is not claimed fixed.
+
+## Verification and apply conditions
+
+Packet: `functions/artifacts/oct28-repairs/remaining-four/`. Helper: `firebase/recover-oct28-roundup-movie.cjs`, default dry-run. Current nine-write plan digest `c0685c6a31509575491cf2b5fcf6dfc488e43bebef537c02bfdf156f25be75ce`. Earlier seven-write and description variants are retained separately. The final actual read-only transaction checks all23query fingerprints and passes with342parserlocks/zeroactive; no production mutation has occurred.
+
+Read-only transaction checks cover exact source/venue/target versions and absence, complete event/venue identity projections, scoped parent/source/UID siblings and matching checkpoint absence. The run's processed/terminal batch/completed lock proof is preserved; fresh parser-idle checks are required outside and inside the eventual transaction. Existing image generations/hashes and all serving-source/gate checks must remain unchanged. Archive structure is validated at depth12, under the Firestore limit20. Independent focused operational review must pass on this exact digest. No broad test suite or paid parse is repeated.
+
+Apply additionally requires actual exact user approval bound to this reviewed scope in `EXACT_BATCH_APPROVAL.json`, a single root-owned lane with no conflicting reservation, unchanged frozen packet/hash bindings and no prior attempt/commit marker. No write authority exists yet. One atomic commit; uncertain outcomes stop for readback, with no automatic retry or rollback. After any authorized commit, report its receipt immediately, then verify exact native afterstates/archive, all six details, complete active feed through December31 and canonical venue membership, protected sources/siblings and both original media objects. Phone adoption is not claimed from API proof.
