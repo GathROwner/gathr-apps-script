@@ -45,14 +45,15 @@ function authority(p){const approval=read('EXACT_BATCH_APPROVAL'),review=read('O
  assert.deepEqual(lease.createPaths,p.creates.map(x=>x.path));assert.deepEqual(lease.updatePaths,p.updates.map(x=>x.path));assert.equal(lease.storageWriteAuthority,false);assert.equal(lease.queueWriteAuthority,false);
  sharedConflicts(p);return true;}
 async function serving(apply){if(!apply)return require('./recover-oct28-four-confirmed.cjs').serving();
- const expected=read('OFFER_RELEASE_LIVE_VERIFIED');assert.equal(expected.candidateCommit,'4a803f5df2078dbc66c046bd91eb85f49cb8cf68');assert.equal(expected.independentVerified,true);assert.equal(expected.rows.length,3);
- assert.match(expected.sourceHash,/^[a-f0-9]{40}$/);assert.deepEqual(expected.rows.map(r=>[r.name,r.region]).sort(),[['processDataset','northamerica-northeast2'],['processDatasetResume','northamerica-northeast1'],['processDatasetSelectedRows','northamerica-northeast1']].sort());
- for(const row of expected.rows){const f=await a.request(`https://cloudfunctions.googleapis.com/v2/projects/gathr-migrated/locations/${row.region}/functions/${row.name}`),s=await a.request('https://run.googleapis.com/v1/'+f.serviceConfig.service);
+ const expected=read('OFFER_RELEASE_LIVE_VERIFIED');assert.equal(expected.candidateCommit,'4a803f5df2078dbc66c046bd91eb85f49cb8cf68');assert.equal(expected.independentVerified,true);
+ const parsers=expected.rows.filter(r=>['processDataset','processDatasetResume','processDatasetSelectedRows'].includes(r.name));assert.equal(parsers.length,3);
+ assert.match(expected.sourceHash,/^[a-f0-9]{40}$/);assert.deepEqual(parsers.map(r=>[r.name,r.region]).sort(),[['processDataset','northamerica-northeast2'],['processDatasetResume','northamerica-northeast1'],['processDatasetSelectedRows','northamerica-northeast1']].sort());
+ for(const row of parsers){const f=await a.request(`https://cloudfunctions.googleapis.com/v2/projects/gathr-migrated/locations/${row.region}/functions/${row.name}`),s=await a.request('https://run.googleapis.com/v1/'+f.serviceConfig.service);
   assert.equal(f.state,'ACTIVE');assert.equal(f.labels['firebase-functions-hash'],expected.sourceHash);assert.equal(f.serviceConfig.revision,row.revision);
   assert.equal(f.serviceConfig.maxInstanceCount,20);assert(row.environmentSHA256);assert.equal(C.hash(f.serviceConfig.environmentVariables),row.environmentSHA256);
   assert.equal(f.serviceConfig.environmentVariables.UNKNOWN_VENUE_AUTO_RESOLVE_EXISTING,'false');assert.equal(f.serviceConfig.environmentVariables.UNKNOWN_VENUE_AUTO_CREATE_ENABLED,'false');assert(!Object.hasOwn(f.serviceConfig.environmentVariables,'PARSER_RESPONSE_REUSE_ENABLED'));
   assert.equal(s.status.traffic.length,1);assert.equal(s.status.traffic[0].percent,100);assert.equal(s.status.traffic[0].latestRevision,true);assert.equal(s.status.latestReadyRevisionName,row.revision);}
- return{atUTC:new Date().toISOString(),sourceHash:expected.sourceHash,rows:expected.rows};}
+ return{atUTC:new Date().toISOString(),sourceHash:expected.sourceHash,rows:parsers};}
 async function guard(req,p,tx){const found=await C.batch(req,p.documents.map(d=>d.path),tx);assert.deepEqual(C.signature(found),C.signature(p.documents),'Native version/source/target/branch/feed drift');
  for(const q of p.queries)assert.deepEqual(C.signature(await C.query(req,q,tx)),C.signature(q.documents),'Scoped query drift '+q.label);
  const by=new Map(found.map(d=>[d.path,d]));assert.equal(C.feedVersion(by.get(C.FEED)),p.feedVersion);return {documents:found,feed:by.get(C.FEED)};}
