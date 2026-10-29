@@ -1,0 +1,14 @@
+{
+  "atUTC": "2026-10-29T15:14:13.213923+00:00",
+  "appBranch": "codex/listing-video-preview-20261029",
+  "remoteRefVerified": "a5187fa47c24e392ce060cac7540f5596f162b38",
+  "includesPublishedRuntimeCommit": "7961bd894867db0bef02493d10bba78376c99ff6",
+  "includesRecoveredPriorPreview": "b27a8081331ff5739f066ba607ddcbb97510cc6e",
+  "appRecoveryBundle": "C:/Users/craig/Documents/Codex/2026-10-29/task/listing-video-preview-candidate.bundle",
+  "appRecoverySHA256": "c9791c20aeda9a69899122917273c312219523ea10d1317bb7c621622fc96d85",
+  "backendRecoveryBundle": "C:/Users/craig/Documents/Codex/2026-10-29/task/listing-video-backend-release.bundle",
+  "backendRecoverySHA256": "91cdb0bbc7695bf1762b221f9dc4149e37642b9562dd189cf87a88eb9e64250c",
+  "backendBundleRequires": "4a803f5df2078dbc66c046bd91eb85f49cb8cf68",
+  "acceptedBackendBaseBundle": "C:/Users/craig/.codex/worktrees/post-reuse-oct26/gathr-apps-script/functions/artifacts/oct28-repairs/accepted-baseline.bundle",
+  "scope": "Source recovery and backups verified; neither bundle contains ignored local credentials or source download packets."
+}
