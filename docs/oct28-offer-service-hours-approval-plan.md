@@ -14,7 +14,7 @@ A date-specific, one-off food/drink offer without advertised clocks may use veri
 | PonyBoat Halloween drinks & treat bags, October 30 | 12:00–23:00 category default → inferred bar availability 12:00–02:00 next day. |
 | PonyBoat Halloween drinks & treat bags, October 31 | Unrelated party-page start22:00/category-default finish23:00 → inferred bar availability12:00–02:00 next day. Remove the exact unrelated party ticket links. |
 
-All times are America/Halifax. October31 overnight windows finish November1 after the DST transition; local02:00 is06:00UTC. A&W overnight continuation is inferred from the business service day, not a separately advertised November1 promotion. The descriptions explicitly advise confirming availability, especially after midnight. A&W original children/costume wording supports family badges; the prepared payloads score70. PonyBoat remains below the family threshold. PonyBoat's kitchen16:00–00:00 and separate22:00 party do not define these drink offers.
+All times are America/Halifax. October31 overnight windows finish November1 after the DST transition; local02:00 is06:00UTC. A&W overnight continuation is inferred from the business service day, not a separately advertised November1 promotion. The A&W descriptions explicitly advise confirming availability, especially after midnight. A&W original children/costume wording supports family badges; the prepared payloads score70. PonyBoat remains below the family threshold. PonyBoat's kitchen16:00–00:00 and separate22:00 party do not define these drink offers.
 
 ## Evidence and limits
 
