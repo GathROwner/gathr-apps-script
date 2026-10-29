@@ -1,22 +1,33 @@
 # GathR parser-quality weakness registry
 
-Last updated: 2026-10-28 (Atlantic)
+Last updated: 2026-10-29 (Atlantic)
 
-October28 dated food/drink offer service-hours prevention: **prepared, not serving**.
+October29 dated food/drink offer service-hours prevention: **deployed, applied and independently verified**.
 Craig accepted verified relevant service hours as inferred availability for an
 otherwise unrestricted dated offer. The isolated `codex/offer-service-hours-20261028`
-candidate preserves estimated provenance at both endpoints and holds ambiguous
+serving commit `4a803f5df2078dbc66c046bd91eb85f49cb8cf68` preserves estimated provenance at both endpoints and holds ambiguous
 branches, mismatched dates/addresses, truncated/split hours and lookup failures.
 It prevents a seasonal-word match from lending a party clock to a distinct drink
-offer. Three A&W branch offers and two PonyBoat corrections are prepared with
-original media preserved; two missing A&W canonical branches require exact batch
-approval. See `docs/oct28-offer-service-hours-approval-plan.md`. No live changes
-or automatic gate activation are implied by preparation.
+offer. All three parsers are ACTIVE/latest100%, max20, at common source hash
+`7d0b1ba37f453531818cef3f82559ea1455bd970`, revisions518-hef/484-lat/476-les.
+Three A&W branch offers and two PonyBoat corrections are live with original
+media/lineage and existing IDs preserved; two missing A&W canonical branches were
+created under Craig's exact approval. Nine writes committed once at
+2026-10-29T11:15:32.800639Z, feed497→498. All five details and the complete745-row
+feed passed; three additions, two corrections,740unrelated rows unchanged,
+zero removals. Source/API timing retains estimated availability at both endpoints.
+Models/efforts/cache/compact/configuration, protected resolvers and queues remain
+unchanged; automatic gates stay OFF and response reuse stays parked OFF. No paid
+replay or app OTA occurred. See `docs/oct29-offer-service-hours-release.md` and
+`offer-service-hours/COMPLETION.json`. The approved plan remains an immutable
+as-at-approval record; current evidence is in that completion report. Future parser
+work starts from the clean `offer-hours-candidate` commit4a803f5, not the parked
+response-reuse runtime in this documentation checkout.
 
 October28 accepted audit corrections and prevention: **deployed and live verified**.
-Latest parser source is `ab2b62d80f7ede432b7b031603e27122d691a322`, reviewed commit
+Previous October28 parser source was `ab2b62d80f7ede432b7b031603e27122d691a322`, reviewed commit
 `0e9403a1ab789ef61afa4a0777fa7bc180373abc`, all three ACTIVE/latest100%, max20,
-revisions517-qol/483-guj/475-cov. This supersedes older serving identities below.
+revisions517-qol/483-guj/475-cov. The October29 serving identity above supersedes it.
 Source-owned quoted attendee venues, original shared-post relative-date anchors,
 conservative November ceilings, affirmative occurrence-date restoration, isolated
 recurrence holds and mixed cross-source identity/clock protection are included.
