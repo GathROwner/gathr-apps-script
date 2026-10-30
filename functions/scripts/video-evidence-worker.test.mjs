@@ -8,7 +8,7 @@ import {promisify} from 'node:util';
 import {VERSION, MODELS, LIMITS, SYSTEM_PROMPT, OUTPUT_SCHEMA, canonical, sha256, safeText,
   validateManifest, contained, selectFrames, samplingCoverage, jpegDimensions,
   prepare, transcribe, compare, buildSharedEvidence, buildRequest, validateDecision,
-  postcheck, estimatedTextCost, main} from './video-evidence-worker.mjs';
+  postcheck, estimatedTextCost, textTokenBuckets, triage, rebindTranscripts, evidenceBlockers, main} from './video-evidence-worker.mjs';
 
 const exec = promisify(execFile);
 const hash = value => sha256(canonical(value));
@@ -17,7 +17,7 @@ const put = (file, value) => fs.writeFile(file, JSON.stringify(value));
 let root, preparedPath, audioPreparedPath, prepared, audioPrepared, originalFetch;
 const opts = name => path.join(root, name);
 const recommendation = () => ({contentDecision: 'useful', listingAssociation: 'matched', motionValue: 'actual_experience',
-  scheduleConflicts: [], audioCoverageLimitations: ['Sampled frames and speech transcript only.'],
+  motionEvidence: [], scheduleConflicts: [], audioCoverageLimitations: ['Sampled frames and speech transcript only.'],
   reasoning: 'Attendee-relevant activity visible in supplied frames.', recommendation: 'recommend'});
 function clipInput(id, videoPath, sourceAudio) {
   return {id, videoPath, sourcePostId: '123', sourceVideoId: '456', caption: 'Activity on Friday.', sourceAudio,
@@ -27,7 +27,7 @@ function clipInput(id, videoPath, sourceAudio) {
 }
 function apiResponse(decision = recommendation(), overrides = {}) {
   return new Response(JSON.stringify({id: 'resp_mock', model: 'gpt-6-luna', status: 'completed',
-    usage: {input_tokens: 1000, input_tokens_details: {cached_tokens: 100}, output_tokens: 200},
+    usage: {input_tokens: 1000, input_tokens_details: {cached_tokens: 100, cache_write_tokens: 0}, output_tokens: 200},
     output: [{type: 'message', content: [{type: 'output_text', text: JSON.stringify(decision)}]}], ...overrides}),
   {status: 200, headers: {'x-request-id': 'req_mock'}});
 }
@@ -68,10 +68,11 @@ test('offline prepare decodes full local MP4; records actual first/final/regular
   const clip = prepared.clips[0];
   assert.equal(clip.video.durationSeconds, 4.4);
   assert.equal(clip.video.completeDecode, true);
-  assert.deepEqual(clip.frames.map(f => f.timestampSeconds), [0, 1.3, 2, 2.7, 4, 4.3]);
+  assert.deepEqual(clip.frames.map(f => f.timestampSeconds), [0, .5, 1, 1.3, 1.5, 2, 2.5, 2.7, 3, 3.5, 4, 4.3]);
   assert(clip.frames.find(f => f.timestampSeconds === 1.3).reasons.includes('scene_change'));
   assert(clip.frames.at(-1).reasons.includes('final'));
-  assert(clip.sampling.maximumGapSeconds <= 1.31);
+  assert.equal(clip.sampling.regularIntervalSeconds, .5);
+  assert(clip.sampling.maximumGapSeconds <= .5);
   for (const frame of clip.frames) {
     const bytes = await fs.readFile(opts(`prepared/${frame.relativePath}`));
     assert.equal(frame.sha256, sha256(bytes));
@@ -337,10 +338,248 @@ test('prepared bytes and transcription artifact binding are verified before ANY 
 });
 
 test('costs use actual usage and explicitly stated assumptions; missing cache breakdown is not fabricated', () => {
-  const usage = {input_tokens: 1000, input_tokens_details: {cached_tokens: 100}, output_tokens: 200};
+  const usage = {input_tokens: 1000, input_tokens_details: {cached_tokens: 100, cache_write_tokens: 0}, output_tokens: 200};
   assert.equal(estimatedTextCost(MODELS[0], usage), .000191);
   assert.equal(estimatedTextCost(MODELS[1], usage), .001905);
   assert.equal(estimatedTextCost(MODELS[0], null), null);
   assert.equal(estimatedTextCost(MODELS[0], {input_tokens: 1000, output_tokens: 200}), null);
   assert.equal(estimatedTextCost(MODELS[0], {...usage, input_tokens_details: {cached_tokens: 2000}}), null);
+});
+
+const animated = () => ({...recommendation(), motionValue: 'animated_promotion',
+  motionEvidence: [{startTimestampSeconds: 0, endTimestampSeconds: 1.5, evidence: 'Decorative foreground changes while the central poster remains legible.'}]});
+const uncertain = () => ({...recommendation(), motionValue: 'uncertain', recommendation: 'hold', reasoning: 'PRIVATE_LUNA_REASON_NOT_MODEL_INPUT'});
+async function variant(name, mutate) {
+  await fs.cp(opts('prepared'), opts(name), {recursive: true});
+  const artifact = structuredClone(prepared);
+  mutate(artifact.clips[0]); artifact.digest = hash(artifact.clips);
+  await put(opts(`${name}/prepared.json`), artifact);
+  return opts(`${name}/prepared.json`);
+}
+
+test('short sampling is .5s through 12 seconds, longer sampling remains 2s; intervals reach shared evidence', () => {
+  for (const duration of [5, 12, 12.1, 60]) {
+    const times = Array.from({length: Math.round(duration * 10)}, (_, i) => i / 10);
+    const result = selectFrames(times, [], LIMITS.frames, duration);
+    const interval = duration <= 12 ? .5 : 2;
+    assert.equal(result.regularIntervalSeconds, interval);
+    assert(result.selected.length <= 48);
+    for (let t = interval; t <= times.at(-1); t += interval)
+      assert(result.selected.some(s => times[s.index] === t));
+    assert.equal(result.selected[0].index, 0); assert.equal(result.selected.at(-1).index, times.length - 1);
+  }
+  assert.equal(buildSharedEvidence(prepared.clips[0]).evidence.sampling.regularIntervalSeconds, .5);
+});
+
+test('useful animated posters qualify with timestamped evidence; static repeats reject; unclear motion holds', () => {
+  const clip = prepared.clips[0];
+  assert.equal(postcheck(clip, undefined, validateDecision(animated(), clip)).recommendation, 'recommend');
+  const noEvidence = animated(); noEvidence.motionEvidence = [];
+  assert.throws(() => validateDecision(noEvidence, clip), /requires_timestamped_motion_evidence/);
+  assert.equal(postcheck(clip, undefined, noEvidence).recommendation, 'hold');
+  const invented = animated(); invented.motionEvidence[0].endTimestampSeconds = 1.234;
+  assert.throws(() => validateDecision(invented, clip), /motion_evidence_timestamps/);
+  const same = animated(); same.motionEvidence[0].endTimestampSeconds = 0;
+  assert.throws(() => validateDecision(same, clip), /motion_evidence_timestamps/);
+  const still = {...recommendation(), contentDecision: 'reject', motionValue: 'static_poster', recommendation: 'reject'};
+  assert.equal(postcheck(clip, undefined, still).recommendation, 'reject');
+  assert.equal(postcheck(clip, undefined, {...still, motionValue: 'uncertain'}).recommendation, 'hold');
+  assert.equal(postcheck(clip, undefined, {...recommendation(), motionValue: 'static_poster'}).recommendation, 'hold');
+  assert(SYSTEM_PROMPT.includes('Camera footage is NOT necessary'));
+  assert(!JSON.stringify(OUTPUT_SCHEMA).includes('poster_only'));
+});
+
+test('triage keeps clean Luna recommend or reject to one call, with accurate new/reused costs on resume', async () => {
+  for (const [name, decision, expected] of [
+    ['animated', animated(), 'recommend_for_manual_review'],
+    ['reject', {...recommendation(), contentDecision: 'reject', motionValue: 'static_poster', recommendation: 'reject'}, 'reject'],
+  ]) {
+    let calls = 0; const out = opts(`triage-luna-${name}`);
+    const report = await triage({preparedPath, out, execute: true, apiKey: 'mock', fetchImpl: async (_url, options) => {
+      calls++; assert.equal(JSON.parse(options.body).model, MODELS[0]); return apiResponse(decision);
+    }});
+    assert.equal(report.entries[0].terminalDecision, expected);
+    assert.equal(report.entries[0].route, 'luna_only'); assert.equal(report.entries[0].terra, null);
+    assert.equal(report.counts.terraSkippedClips, 1); assert.equal(report.callSummary.attemptedRequests, 1);
+    assert.equal(report.callSummary.newCallRecords, 1); assert.equal(report.callSummary.reusedCallRecords, 0);
+    const resumed = await triage({preparedPath, out, execute: true, apiKey: 'mock', fetchImpl: async () => assert.fail('resume must cache')});
+    assert.equal(resumed.entries[0].terminalDecision, expected);
+    assert.equal(resumed.callSummary.attemptedRequests, 0); assert.equal(resumed.callSummary.newCallRecords, 0);
+    assert.equal(resumed.callSummary.reusedCallRecords, 1); assert.equal(resumed.callSummary.estimatedNewCostUSD, 0);
+    assert.notEqual(report.invocationId, resumed.invocationId); assert.equal(calls, 1);
+    assert.equal((await fs.readdir(path.join(out, 'invocations'))).length, 2);
+  }
+});
+
+test('genuine Luna uncertainty invokes exactly one blind Terra assessment on identical evidence; cached resume sends nothing', async () => {
+  const bodies = [], out = opts('triage-uncertain');
+  const report = await triage({preparedPath, out, execute: true, apiKey: 'mock', fetchImpl: async (_url, options) => {
+    const body = JSON.parse(options.body); bodies.push(body);
+    return apiResponse(body.model === MODELS[0] ? uncertain() : animated(), {model: body.model});
+  }});
+  assert.deepEqual(bodies.map(b => b.model), MODELS);
+  const [{model: aModel, ...a}, {model: bModel, ...b}] = bodies;
+  assert.deepEqual(a, b); assert(!JSON.stringify(b).includes('PRIVATE_LUNA_REASON'));
+  const entry = report.entries[0];
+  assert.equal(entry.route, 'terra_escalated'); assert.equal(entry.terminalDecision, 'recommend_for_manual_review');
+  assert.equal(entry.luna.sharedEvidenceDigest, entry.terra.sharedEvidenceDigest);
+  assert.equal(report.counts.terraEscalatedClips, 1); assert.equal(report.callSummary.newCallRecords, 2);
+  const resumed = await triage({preparedPath, out, execute: true, apiKey: 'mock', fetchImpl: async () => assert.fail('no paid repeat')});
+  assert.equal(resumed.callSummary.reusedCallRecords, 2); assert.equal(resumed.callSummary.attemptedRequests, 0);
+  assert.equal(resumed.entries[0].terminalDecision, 'recommend_for_manual_review');
+});
+
+test('unresolvable binding, context, audio, transcript and coverage blockers never waste a Terra call', async () => {
+  const cases = [
+    ['source', clip => { clip.listingContext.sourceMatched = false; }],
+    ['source-id', clip => { clip.sourceVideoId = ''; }],
+    ['context', clip => { clip.listingContext.venue = ''; }],
+    ['expected-audio', clip => { clip.sourceAudioExpected = true; }],
+    ['unknown-audio', clip => { clip.sourceAudioExpected = null; }],
+    ['coverage', clip => { clip.frames = clip.frames.filter(f => f.timestampSeconds === 0 || f.timestampSeconds === 4.3);
+      // Renumbered physical files are supplied below to preserve the strict asset naming contract.
+      clip.frames[1].relativePath = 'assets/silent/frame-002.jpg'; }],
+  ];
+  for (const [name, mutate] of cases) {
+    const preparedFile = await variant(`blocked-${name}`, mutate);
+    if (name === 'coverage') await fs.copyFile(opts('prepared/assets/silent/frame-012.jpg'), path.join(path.dirname(preparedFile), 'assets/silent/frame-002.jpg'));
+    let calls = 0;
+    const report = await triage({preparedPath: preparedFile, out: opts(`blocked-out-${name}`), execute: true, apiKey: 'mock',
+      fetchImpl: async (_url, options) => { calls++; assert.equal(JSON.parse(options.body).model, MODELS[0]); return apiResponse(uncertain()); }});
+    assert.equal(calls, 1); assert.equal(report.entries[0].route, 'evidence_blocked_no_terra');
+    assert.equal(report.entries[0].terminalDecision, 'hold'); assert.equal(report.entries[0].terra, null);
+    assert(report.entries[0].hardBlockers.length > 0);
+  }
+  const audio = await triage({preparedPath: audioPreparedPath, out: opts('blocked-missing-transcript'), execute: true, apiKey: 'mock', fetchImpl: async () => apiResponse(uncertain())});
+  assert(audio.entries[0].hardBlockers.includes('required_transcription_missing'));
+  assert.equal(audio.entries[0].terra, null);
+  const emptyEntries = [{id: 'audio', status: 'transcribed', transcriptionComplete: true, text: '', transcriptHash: sha256(''),
+    audioSha256: audioPrepared.clips[0].audio.sha256, transcriptionModel: 'gpt-transcribe', settings: {}}];
+  await put(opts('empty-transcript.json'), {version: VERSION, preparedDigest: audioPrepared.digest, entries: emptyEntries, digest: hash(emptyEntries)});
+  let emptyCalls = 0;
+  const empty = await triage({preparedPath: audioPreparedPath, transcriptsPath: opts('empty-transcript.json'), out: opts('blocked-empty-transcript'),
+    execute: true, apiKey: 'mock', fetchImpl: async () => { emptyCalls++; return apiResponse(uncertain()); }});
+  assert.equal(emptyCalls, 1); assert.equal(empty.entries[0].terra, null);
+  assert(empty.entries[0].hardBlockers.includes('empty_transcript_requires_audio_review'));
+  assert(evidenceBlockers({...prepared.clips[0], video: {...prepared.clips[0].video, completeDecode: false}}, undefined).includes('required_visual_evidence_incomplete'));
+});
+
+test('questionable conflicts, unresolved cross-model disagreement and invalid Terra outputs stay held', async () => {
+  const conflict = {...recommendation(), scheduleConflicts: [{modality: 'visible', field: 'date', timestampSeconds: 2, evidence: 'Saturday', listingValue: 'Friday'}]};
+  for (const [name, luna, terra, holdReason] of [
+    ['conflict-cleared', conflict, recommendation(), 'luna_schedule_or_venue_conflict_requires_human_review'],
+    ['conflict-agreed', conflict, conflict, 'schedule_or_venue_conflict'],
+    ['disagree', uncertain(), {...recommendation(), contentDecision: 'reject', motionValue: 'static_poster', recommendation: 'reject'}, 'cross_model_contentDecision_disagreement'],
+    ['invalid-terra', uncertain(), {...recommendation(), extra: 'invalid'}, 'valid_model_output_missing'],
+  ]) {
+    let calls = 0;
+    const report = await triage({preparedPath, out: opts(`triage-${name}`), execute: true, apiKey: 'mock',
+      fetchImpl: async () => apiResponse(calls++ === 0 ? luna : terra)});
+    assert.equal(calls, 2); assert.equal(report.entries[0].terminalDecision, 'hold');
+    assert(report.entries[0].holdReasons.includes(holdReason));
+  }
+});
+
+test('invalid or inconsistent Luna output can escalate once, while malformed animated evidence cannot pass as a clean decision', async () => {
+  for (const [name, luna] of [
+    ['schema', {...recommendation(), illegal: true}],
+    ['inconsistent', {...recommendation(), recommendation: 'reject'}],
+    ['missing-motion', {...animated(), motionEvidence: []}],
+  ]) {
+    let calls = 0;
+    const report = await triage({preparedPath, out: opts(`triage-invalid-${name}`), execute: true, apiKey: 'mock', fetchImpl: async () => apiResponse(calls++ ? animated() : luna)});
+    assert.equal(calls, 2); assert.equal(report.entries[0].route, 'terra_escalated');
+    assert.equal(report.entries[0].terminalDecision, name === 'inconsistent' ? 'hold' : 'recommend_for_manual_review');
+  }
+});
+
+test('triage transport failures stop without retries or cascading fallback, including resumed and Terra failures', async () => {
+  for (const [name, failAt, failure] of [
+    ['network', 0, () => { throw new Error('uncertain billed request'); }],
+    ['http', 0, () => new Response('error', {status: 500})],
+    ['incomplete', 0, () => apiResponse(recommendation(), {status: 'incomplete'})],
+    ['refused', 0, () => apiResponse(recommendation(), {output: [{type: 'message', content: [{type: 'refusal', refusal: 'mock refusal'}]}]})],
+    ['terra-network', 1, () => { throw new Error('uncertain Terra request'); }],
+  ]) {
+    let calls = 0; const out = opts(`triage-fail-${name}`);
+    const report = await triage({preparedPath, out, execute: true, apiKey: 'mock', fetchImpl: async () => calls++ === failAt ? failure() : apiResponse(uncertain())});
+    assert.equal(report.executionStatus, 'stopped_on_call_error'); assert.equal(report.entries[0].terminalDecision, 'hold');
+    assert.equal(calls, failAt + 1); assert.equal(report.callSummary.attemptedRequests, failAt + 1);
+    const resumed = await triage({preparedPath, out, execute: true, apiKey: 'mock', fetchImpl: async () => assert.fail('must never retry')});
+    assert.equal(resumed.executionStatus, 'stopped_on_call_error'); assert.equal(resumed.callSummary.attemptedRequests, 0);
+    assert.equal(resumed.callSummary.reusedCallRecords, failAt + 1);
+    await assert.rejects(fs.stat(path.join(out, 'triage.json')), {code: 'ENOENT'});
+  }
+});
+
+test('triage dry run sends no requests; phase/prompt/routing binding prevents silent summary reuse', async () => {
+  const out = opts('triage-plan');
+  const report = await triage({preparedPath, out, fetchImpl: async () => assert.fail('dry run')});
+  assert.equal(report.dryRun, true); assert.equal(report.callSummary.attemptedRequests, 0);
+  assert.equal(report.counts.plannedLunaCalls, 1); assert.equal(report.counts.plannedMaximumTerraCalls, 1);
+  await assert.rejects(compare({preparedPath, out}), /out_bound_to_other_phase/);
+  const run = await json(path.join(out, 'run.json')); run.inputDigest = '0'.repeat(64);
+  await put(path.join(out, 'run.json'), run);
+  await assert.rejects(triage({preparedPath, out, execute: true, apiKey: 'mock', fetchImpl: async () => assert.fail('bound run')}), /out_bound_to_other_phase/);
+});
+
+test('v1 prepared evidence is rejected; explicit offline transcript rebinding verifies audio/model/settings and preserves original bytes', async () => {
+  const v1Path = await variant('v1-prepared', () => {});
+  const v1Prepared = await json(v1Path); v1Prepared.version = 'video-evidence-v1'; await put(v1Path, v1Prepared);
+  await assert.rejects(triage({preparedPath: v1Path, out: opts('v1-no-relabel')}), /prepared_digest_or_version/);
+  const audio = audioPrepared.clips[0].audio;
+  const text = 'Friday at seven.';
+  const inputDigest = hash({version: 'video-evidence-v1', audioSha256: audio.sha256, model: 'gpt-transcribe', settings: {}});
+  const entry = {id: 'audio', status: 'transcribed', audioSha256: audio.sha256, inputDigest,
+    transcriptHash: sha256(text), text, languages: [{code: 'en'}], transcriptionComplete: true, timestampsAvailable: false,
+    call: {version: 'video-evidence-v1', modelRequested: 'gpt-transcribe', inputDigest, text, status: 'completed', usage: null}};
+  const source = {version: 'video-evidence-v1', preparedDigest: 'a'.repeat(64), dryRun: false, entries: [entry], digest: hash([entry])};
+  const sourcePath = opts('v1-transcripts.json'); await put(sourcePath, source);
+  const original = await fs.readFile(sourcePath);
+  const rebound = await rebindTranscripts({preparedPath: audioPreparedPath, transcriptsPath: sourcePath, out: opts('rebound')});
+  assert.equal(rebound.version, VERSION); assert.equal(rebound.preparedDigest, audioPrepared.digest);
+  assert.equal(rebound.attemptedRequests, 0); assert.equal(rebound.entries[0].transcriptHash, entry.transcriptHash);
+  assert.deepEqual(rebound.entries[0].settings, {}); assert.deepEqual(await fs.readFile(sourcePath), original);
+  assert.equal(buildSharedEvidence(audioPrepared.clips[0], rebound.entries[0]).evidence.transcript.text, text);
+  const chained = await rebindTranscripts({preparedPath: audioPreparedPath, transcriptsPath: opts('rebound/transcripts.json'), out: opts('rebound-again')});
+  assert.equal(chained.entries[0].transcriptHash, entry.transcriptHash);
+  assert.equal(chained.entries[0].reboundFrom.requestVersion, 'video-evidence-v1');
+  const wrongAudio = structuredClone(source); wrongAudio.entries[0].audioSha256 = 'b'.repeat(64); wrongAudio.digest = hash(wrongAudio.entries);
+  await put(opts('wrong-audio-rebind.json'), wrongAudio);
+  await assert.rejects(rebindTranscripts({preparedPath: audioPreparedPath, transcriptsPath: opts('wrong-audio-rebind.json'), out: opts('wrong-audio-rebound')}), /rebind_audio_or_transcript/);
+  const wrongSettings = structuredClone(source); wrongSettings.entries[0].inputDigest = 'b'.repeat(64); wrongSettings.digest = hash(wrongSettings.entries);
+  await put(opts('wrong-settings-rebind.json'), wrongSettings);
+  await assert.rejects(rebindTranscripts({preparedPath: audioPreparedPath, transcriptsPath: opts('wrong-settings-rebind.json'), out: opts('wrong-settings-rebound')}), /rebind_transcription_model_or_settings/);
+});
+
+test('cache-write accounting separates ordinary/read/30m/12h tokens, validates sums, and returns null for unknown buckets', () => {
+  const usage = {input_tokens: 12_000, output_tokens: 200, input_tokens_details: {cached_tokens: 4000, cache_write_tokens: 7000,
+    cache_write_tokens_details: {ttl_30m_tokens: 3000, ttl_12h_tokens: 4000}}};
+  assert.deepEqual(textTokenBuckets(usage), {ordinaryInput: 1000, cachedInput: 4000, cacheWrite30m: 3000, cacheWrite12h: 4000,
+    output: 200, lifetimeSource: 'returned_ttl_breakdown'});
+  assert.equal(estimatedTextCost(MODELS[0], usage), .001615);
+  assert.equal(estimatedTextCost(MODELS[1], usage), .01595);
+  const allWrite = {input_tokens: 1000, output_tokens: 200, input_tokens_details: {cached_tokens: 0, cache_write_tokens: 900}};
+  assert.equal(estimatedTextCost(MODELS[0], allWrite), .0002225);
+  assert.equal(textTokenBuckets(allWrite).lifetimeSource, 'request_default_30m');
+  assert.equal(estimatedTextCost(MODELS[0], allWrite, {defaultWriteTtl: null}), null);
+  assert.equal(estimatedTextCost(MODELS[0], allWrite, {defaultWriteTtl: '12h'}), .000335);
+  const invalidSum = structuredClone(usage); invalidSum.input_tokens_details.cache_write_tokens_details.ttl_12h_tokens = 5000;
+  assert.equal(estimatedTextCost(MODELS[0], invalidSum), null);
+  const over = structuredClone(usage); over.input_tokens_details.cached_tokens = 6000;
+  assert.equal(estimatedTextCost(MODELS[0], over), null);
+  const missing = structuredClone(usage); delete missing.input_tokens_details.cache_write_tokens;
+  assert.equal(estimatedTextCost(MODELS[0], missing), null);
+});
+
+test('returned TTL usage survives transport sanitization and drives the saved triage cost report', async () => {
+  const usage = {input_tokens: 1000, output_tokens: 200, input_tokens_details: {cached_tokens: 100, cache_write_tokens: 800,
+    cache_write_tokens_details: {ttl_30m_tokens: 300, ttl_12h_tokens: 500}}};
+  const out = opts('triage-ttl-usage');
+  const report = await triage({preparedPath, out, execute: true, apiKey: 'mock', fetchImpl: async () => apiResponse(animated(), {usage})});
+  assert.deepEqual(report.entries[0].luna.actualTokenUsage, usage);
+  assert.equal(report.entries[0].luna.tokenBuckets.cacheWrite12h, 500);
+  assert.equal(report.entries[0].luna.estimatedTextCostUSD, .0002735);
+  assert.equal(report.callSummary.estimatedNewCostUSD, .0002735);
+  assert.equal((await json(path.join(out, 'triage.json'))).callSummary.estimatedNewCostUSD, .0002735);
 });
