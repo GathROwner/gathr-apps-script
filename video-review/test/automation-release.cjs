@@ -85,6 +85,17 @@ async function update(doc,delta){return auth.request(auth.database+'/documents:c
   for(const name of ['reviewListingVideos','publishListingVideos'])await auth.request(scheduler+`firebase-schedule-${name}-northamerica-northeast1:run`,'POST',{});
   console.log(JSON.stringify({enabled:true,automaticPublication:true,maxSeconds:90,migrationFieldsUpdated:migration.length,longerClipsQueued:migration.filter(x=>x.queued).length,legacyCleanupPaused:true}));return;
  }
+ if(mode==='publication-pause'||mode==='publication-resume'){
+  const config=await auth.get('runtime_metadata/video_review'),c=auth.data(config),enable=mode==='publication-resume';
+  if(c.enabled!==true||c.maxSeconds!==90||c.automaticPublication===enable)throw Error('Video activation drift');
+  const receipt=await update(config,{automaticPublication:enable});await save(enable?'PUBLICATION_RESUMED.json':'PUBLICATION_PAUSED.json',{before:config,receipt});
+  console.log(JSON.stringify({automaticPublication:enable,reviewContinues:true}));return;
+ }
+ if(mode==='discover'){
+  const config=auth.data(await auth.get('runtime_metadata/video_review'));
+  if(config.enabled!==true||config.automaticPublication!==true||config.maxSeconds!==90)throw Error('Video activation drift');
+  await auth.request(scheduler+'firebase-schedule-discoverListingVideos-northamerica-northeast1:run','POST',{});console.log('Activated video discovery check triggered');return;
+ }
  if(mode==='verify'){
   const before=JSON.parse(await fs.readFile(root+'/BEFORE.json','utf8')),docs=await auth.query('private_video_candidates',null),assets=await auth.query('listing_video_assets',null),links=await auth.query('listing_video_links',null),config=auth.data(await auth.get('runtime_metadata/video_review'));
   const parser=await auth.request('https://cloudfunctions.googleapis.com/v2/projects/gathr-migrated/locations/-/functions');for(const p of before.parser){const now=parser.functions.find(f=>f.name===p.name);if(now?.serviceConfig.revision!==p.serviceConfig.revision||now.labels?.['firebase-functions-hash']!==p.labels?.['firebase-functions-hash'])throw Error('Parser deployment drift');}

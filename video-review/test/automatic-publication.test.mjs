@@ -32,6 +32,13 @@ test('no title-only, stale-assessment, missing-audio or ambiguous listing public
 test('parser activity blocks reservation and public upload',async()=>{
  const s=setup();s.db.rows.set('processing_locks/live',{data:{status:'processing'},v:1});await assert.rejects(publishCandidate(s,s.db.snap(candidatePath),s.fence,s.options),/parser_busy/);assert.equal(s.publicBucket.saved,0);assert.equal(s.db.snap(`listing_video_assets/${sha}`).exists,false);
 });
+test('a listing selection changed during review queues its new context instead of publishing the old match',async()=>{
+ const s=setup();s.db.rows.delete(REGISTRY_LOCK);
+ await s.db.doc(candidatePath).update({reviewedListingPath:eventPath,humanJudgment:{choice:'use',sha256:sha,listingPath:'venues/v/events/new-selection'}});
+ const result=await publishTick(s);assert.equal(result.reviewQueued,1);assert.equal(result.errors,0);
+ assert.equal(s.db.snap(candidatePath).data().state,'queued');assert.equal(s.publicBucket.saved,0);
+ assert.equal(s.db.snap(`listing_video_links/${hash(eventPath)}`).exists,false);
+});
 test('retained old legacy checkpoints are distinguished from a newly paused run',async()=>{
  const s=setup();s.db.rows.set('checkpoints/legacy',{v:1,data:{fileId:'old'}});await parserIdle(s.db);
  s.db.rows.set('checkpoints/recent',{v:Math.floor(Date.now()/1000),data:{fileId:'new'}});await assert.rejects(parserIdle(s.db),/parser_busy/);
