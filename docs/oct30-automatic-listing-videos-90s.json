@@ -1,0 +1,117 @@
+{
+  "verifiedAtUTC": "2026-10-30T18:11:14.916Z",
+  "project": "gathr-migrated",
+  "codebase": "listing-video-review",
+  "platform": "backend and private web review only",
+  "automaticPublication": true,
+  "maxSeconds": 90,
+  "perParseClipCountCap": null,
+  "workflow": [
+    "Discover retained posts after completed parses",
+    "Luna assesses usefulness separately from exact-source listing matching",
+    "Independent Terra review only for uncertainty",
+    "Confirmed clear matches attach automatically; no human click or follow-up message",
+    "Unmatched, ambiguous or conflicting clips stay private for review",
+    "Use queues automatic attachment after a confirmed match; Don’t use vetoes or retires owned links"
+  ],
+  "parserUnchanged": true,
+  "eventDocumentWrites": 0,
+  "photoChanges": false,
+  "humanChoicesPreserved": 45,
+  "sourceIdentitiesPreserved": true,
+  "publicAssets": 9,
+  "publicLinks": 10,
+  "baselinePublicLinksResolve": 10,
+  "baselinePublicHashesVerified": 9,
+  "publicationHealth": {
+    "errors": 0,
+    "cursor": null,
+    "checkedAt": "2026-10-30T18:11:06.561Z",
+    "checked": 45,
+    "reviewQueued": 0,
+    "published": 0
+  },
+  "cleanup": {
+    "cursor": null,
+    "checkedAt": "2026-10-30T18:01:36.838Z",
+    "protected": 9,
+    "inspected": 9,
+    "deleted": 0
+  },
+  "jobs": {
+    "publishListingVideos": "ENABLED",
+    "cleanupPublishedListingVideos": "ENABLED",
+    "scheduledListingVideoCleanup": "PAUSED"
+  },
+  "functions": [
+    {
+      "name": "cleanupPublishedListingVideos",
+      "state": "ACTIVE",
+      "revision": "cleanuppublishedlistingvideos-00001-zey",
+      "hash": "259a4ef0b8ee73c842456c881d17403bae5d443c",
+      "identity": "firebase-adminsdk-fbsvc@gathr-migrated.iam.gserviceaccount.com"
+    },
+    {
+      "name": "discoverListingVideos",
+      "state": "ACTIVE",
+      "revision": "discoverlistingvideos-00003-dub",
+      "hash": "259a4ef0b8ee73c842456c881d17403bae5d443c",
+      "identity": "924732524090-compute@developer.gserviceaccount.com"
+    },
+    {
+      "name": "videoReviewPortal",
+      "state": "ACTIVE",
+      "revision": "videoreviewportal-00005-kug",
+      "hash": "259a4ef0b8ee73c842456c881d17403bae5d443c",
+      "identity": "924732524090-compute@developer.gserviceaccount.com"
+    },
+    {
+      "name": "publishListingVideos",
+      "state": "ACTIVE",
+      "revision": "publishlistingvideos-00002-mot",
+      "hash": "8b440b0b6631e95d19c40810eeccf77306fb86cf",
+      "identity": "firebase-adminsdk-fbsvc@gathr-migrated.iam.gserviceaccount.com"
+    },
+    {
+      "name": "reviewListingVideos",
+      "state": "ACTIVE",
+      "revision": "reviewlistingvideos-00004-dav",
+      "hash": "f0423c7b7311d87430a13c03e0e67ee1fd72c1be",
+      "identity": "924732524090-compute@developer.gserviceaccount.com"
+    }
+  ],
+  "frontendFilesMatch": [
+    "index.html",
+    "app.js",
+    "review-ui.js",
+    "style.css"
+  ],
+  "anonymousAPIStatus": 401,
+  "longerClipSmoke": {
+    "seconds": 83.06,
+    "frames": 48,
+    "decision": "recommended",
+    "speechReused": true,
+    "estimatedReviewUSD": 0.0027676750000000003,
+    "publicWrites": 0
+  },
+  "initialReview": {
+    "queuedRemaining": 0,
+    "needsReview": 8,
+    "filtered": 15,
+    "declined": 12,
+    "automaticClearMatchAlreadyCovered": 1
+  },
+  "validation": {
+    "focusedChecks": "PASS",
+    "newSelectionRaceChecks": 2,
+    "real83SecondReview": "PASS",
+    "renderedResponsiveWebsite": "PASS at 390x844 using retained real records and mocked button writes",
+    "liveWebsiteFilesMatchRenderedSource": true,
+    "liveAuthenticatedBrowserSession": "Not opened; unauthenticated sign-in page and private API boundary verified",
+    "liveAutomaticRoute": "Confirmed an existing approved clip already covers its source-linked listing; no duplicate asset created"
+  },
+  "evidenceDirectory": "C:/Users/craig/Documents/Codex/2026-10-30/video-model-comparison/automation-90s",
+  "sourceCommit": "ac3ec274",
+  "releaseBranch": "codex/video-auto-publication-90s-20261030"
+}
