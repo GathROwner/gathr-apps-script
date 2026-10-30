@@ -193,7 +193,7 @@ export const recordCheckInEligibilitySampleCallable = onCall(releaseTwoOptions, 
   });
 });
 
-export const recordCheckInReadinessSampleCallable = onCall(releaseTwoOptions, async (request) => {
+export const recordCheckInReadinessSampleCallable = onCall({ ...releaseTwoOptions, maxInstances: 20 }, async (request) => {
   const uid = requireUid(request.auth);
   const data = asData(request.data);
   return run(async () => {
@@ -212,7 +212,7 @@ export const recordCheckInReadinessSampleCallable = onCall(releaseTwoOptions, as
   });
 });
 
-export const bindCheckInReadinessCallable = onCall(releaseTwoOptions, async (request) => {
+export const bindCheckInReadinessCallable = onCall({ ...releaseTwoOptions, maxInstances: 20 }, async (request) => {
   const uid = requireUid(request.auth);
   const data = asData(request.data);
   return run(async () => {
@@ -233,7 +233,7 @@ export const bindCheckInReadinessCallable = onCall(releaseTwoOptions, async (req
   });
 });
 
-export const discoverNearbyCheckInPlacesCallable = onCall(releaseTwoOptions, async (request) => {
+export const discoverNearbyCheckInPlacesCallable = onCall({ ...releaseTwoOptions, maxInstances: 20 }, async (request) => {
   const uid = requireUid(request.auth);
   const data = asData(request.data);
   return run(async () => {
@@ -263,7 +263,7 @@ export const listNearbyCanonicalCheckInVenuesCallable = onCall(releaseTwoOptions
   });
 });
 
-export const createPrivateCheckInPlaceCandidateCallable = onCall(releaseTwoOptions, async (request) => {
+export const createPrivateCheckInPlaceCandidateCallable = onCall({ ...releaseTwoOptions, maxInstances: 20 }, async (request) => {
   const uid = requireUid(request.auth);
   const data = asData(request.data);
   return run(async () => {
