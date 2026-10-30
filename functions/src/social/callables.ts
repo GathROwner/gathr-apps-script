@@ -267,7 +267,6 @@ export const createPrivateCheckInPlaceCandidateCallable = onCall(releaseTwoOptio
   const uid = requireUid(request.auth);
   const data = asData(request.data);
   return run(async () => {
-    await enforceSocialRateLimit(uid, 'private_check_in_place', 20, 24 * 60 * 60_000);
     return createPrivateCheckInPlaceCandidate(uid, {
       label: data.label,
       readinessSessionId: data.readinessSessionId,

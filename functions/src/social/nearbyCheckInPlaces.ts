@@ -10,6 +10,7 @@ import {
 import { SocialDomainError, validateUid, validateSocialOperationId } from './validation.js';
 import { storedQualifiedArrival } from './checkInArrival.js';
 import { preparedCanonicalVenueRecords } from './checkInVenueQuery.js';
+import { buildSocialRateLimitRecord } from './socialRateLimit.js';
 import { checkInPlaceDistance, parseCheckInBoundary, publicCheckInRadius, type BoundaryPoint } from './checkInPlaceGeometry.js';
 import { logProviderHttpFailure, logProviderException, type FailureLogger, type ProviderAlias } from './nearbyPlaceDiagnostics.js';
 
@@ -290,7 +291,8 @@ async function nearbyCanonicalVenues(
   longitude: number,
   accuracyMeters: number,
   now: Timestamp,
-  preparation = false
+  preparation = false,
+  legacyListingRadiusMetres?: number
 ): Promise<NearbyCheckInPlaceCandidate[]> {
   const documents = preparation
     ? await preparedCanonicalVenueRecords(db, latitude, now.toMillis())
@@ -307,7 +309,9 @@ async function nearbyCanonicalVenues(
       || !Number.isFinite(venueLongitude) || venueLongitude < -180 || venueLongitude > 180
     ) continue;
     const distance = distanceMetres(latitude, longitude, venueLatitude, venueLongitude);
-    if (distance > (preparation ? CHECK_IN_PLACE_DISCOVERY_RADIUS_METRES : publicCheckInRadius(accuracyMeters))) continue;
+    const radius = preparation ? CHECK_IN_PLACE_DISCOVERY_RADIUS_METRES
+      : legacyListingRadiusMetres ?? publicCheckInRadius(accuracyMeters);
+    if (distance > radius) continue;
     candidates.push({
       id: `venue:${document.id}`,
       type: 'gathr_venue',
@@ -335,7 +339,8 @@ export async function listNearbyCanonicalCheckInVenues(
   const now = options.now || Timestamp.now();
   const { latitude, longitude, accuracyMeters } = parseFreshNearbyLocation(input, now);
   return {
-    candidates: await nearbyCanonicalVenues(db, latitude, longitude, accuracyMeters, now, input.preparation === true),
+    candidates: await nearbyCanonicalVenues(db, latitude, longitude, accuracyMeters, now, input.preparation === true,
+      CHECK_IN_PLACE_DISCOVERY_RADIUS_METRES + accuracyMeters),
     expiresAt: Timestamp.fromMillis(now.toMillis() + CHECK_IN_PLACE_CANDIDATE_TTL_MS),
     ...(input.preparation === true ? {preparationRadiusMetres: CHECK_IN_PLACE_DISCOVERY_RADIUS_METRES} : {}),
   };
@@ -516,20 +521,28 @@ export async function createPrivateCheckInPlaceCandidate(
   const candidateId = randomUUID();
   const locationKey = `private:${createHash('sha256').update(candidateId).digest('hex').slice(0, 32)}`;
   const expiresAt = Timestamp.fromMillis(now.toMillis() + CHECK_IN_PLACE_CANDIDATE_TTL_MS);
-  await db.collection('checkInPlaceCandidates').doc(candidateId).set({
-    uid,
-    candidateId,
-    source: 'user_private_place',
-    place: {
-      type: 'private_place',
-      locationKey,
-      name,
-      category: 'Private location',
-      latitude,
-      longitude,
-    },
-    createdAt: now,
-    expiresAt,
+  const candidateRef = db.collection('checkInPlaceCandidates').doc(candidateId);
+  const rateLimitRef = db.collection('socialRateLimits').doc(`${uid}_private_check_in_place_candidate`);
+  await db.runTransaction(async (transaction) => {
+    const rateLimitSnapshot = await transaction.get(rateLimitRef);
+    const rateLimit = buildSocialRateLimitRecord(uid, 'private_check_in_place_candidate', 20, 60 * 60_000,
+      rateLimitSnapshot.data() || {}, now, 'Please wait before trying again.');
+    transaction.set(rateLimitRef, rateLimit);
+    transaction.set(candidateRef, {
+      uid,
+      candidateId,
+      source: 'user_private_place',
+      place: {
+        type: 'private_place',
+        locationKey,
+        name,
+        category: 'Private location',
+        latitude,
+        longitude,
+      },
+      createdAt: now,
+      expiresAt,
+    });
   });
   return {
     candidate: {

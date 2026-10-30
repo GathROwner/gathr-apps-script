@@ -232,6 +232,26 @@ test('Here arrival creates private candidate from server coordinates after60s, n
   assert.equal(grant.locationType, 'private_place');
 });
 
+test('private candidate preserves the serving atomic20/hour limit and rejects without an extra candidate write', async () => {
+  const db = new MemoryFirestore();
+  const input = {...point, label: 'Home', accuracyMeters: 8, capturedAtMs: base};
+  for (let count = 0; count < 20; count++) await createPrivateCheckInPlaceCandidate(uid, input,
+    {db: db.asFirestore(), now: time(0)});
+  const ratePath = `socialRateLimits/${uid}_private_check_in_place_candidate`;
+  assert.equal(db.documents.get(ratePath)?.count, 20);
+  assert.equal(db.documents.get(ratePath)?.action, 'private_check_in_place_candidate');
+  assert.equal((db.documents.get(ratePath)?.expiresAt as Timestamp).toMillis(), base + 2 * 60 * 60_000);
+  const writesBefore = db.writes;
+  await assert.rejects(createPrivateCheckInPlaceCandidate(uid, input, {db: db.asFirestore(), now: time(0)}),
+    (error: unknown) => error instanceof SocialDomainError && error.code === 'resource-exhausted');
+  assert.equal(db.writes, writesBefore);
+  assert.equal([...db.documents.keys()].filter(key => key.startsWith('checkInPlaceCandidates/')).length, 20);
+  await createPrivateCheckInPlaceCandidate(uid, {...input, capturedAtMs: time(3600).toMillis()},
+    {db: db.asFirestore(), now: time(3600)});
+  assert.equal(db.documents.get(ratePath)?.count, 1);
+  assert.equal((db.documents.get(ratePath)?.windowStartedAt as Timestamp).toMillis(), time(3600).toMillis());
+});
+
 test('legacy bind still needs a fresh supplied fix and never borrows qualified lease implicitly', async () => {
   const db = new MemoryFirestore(); await qualify(db); venue(db);
   await assert.rejects(bindCheckInReadiness(uid, bindInput({useQualifiedArrival: undefined}), db.asFirestore(), time(200)), failedPrecondition);
@@ -250,13 +270,13 @@ test('OpenStreetMap failure preserves canonical choices and reports partial prep
   assert.equal(db.writes, 0);
 });
 
-test('empty successful discovery differs from outage; preparation widens only candidate pool, not legacy selection', async () => {
+test('legacy canonical listing retains its serving radius while prepared responses expose capability', async () => {
   const db = new MemoryFirestore();
   for (let index = 0; index < 8; index++) venue(db, `venue-${index}`, 80 + index);
   const input = {...point, accuracyMeters: 8, capturedAtMs: base};
   const legacy = await listNearbyCanonicalCheckInVenues(input, {db: db.asFirestore(), now: time(0)});
   const prepared = await listNearbyCanonicalCheckInVenues({...input, preparation: true}, {db: db.asFirestore(), now: time(0)});
-  assert.equal(legacy.candidates.length, 0);
+  assert.equal(legacy.candidates.length, 8);
   assert.equal('preparationRadiusMetres' in legacy, false);
   assert.equal(prepared.candidates.length, 8);
   assert.equal(prepared.preparationRadiusMetres, 175);
@@ -267,6 +287,23 @@ test('empty successful discovery differs from outage; preparation widens only ca
   assert.equal(empty.externalLookupStatus, 'complete');
   assert.equal('preparationRadiusMetres' in empty, false);
   assert.deepEqual(empty.candidates, []);
+});
+
+test('standalone legacy canonical and discovery keep their distinct serving boundary contracts', async () => {
+  const db = new MemoryFirestore();
+  venue(db, 'inside-discovery-55m', 55);
+  venue(db, 'listing-only-180m', 180);
+  venue(db, 'outside-listing-190m', 190);
+  const input = {...point, accuracyMeters: 8, capturedAtMs: base};
+  const options = {db: db.asFirestore(), now: time(0)};
+  const listing = await listNearbyCanonicalCheckInVenues(input, options);
+  assert.deepEqual(listing.candidates.map(candidate => candidate.venueId), ['inside-discovery-55m', 'listing-only-180m']);
+  const discovery = await discoverNearbyCheckInPlaces(uid, input,
+    {...options, fetchImpl: async () => new Response('{"elements":[]}')});
+  assert.deepEqual(discovery.candidates.map(candidate => candidate.venueId), ['inside-discovery-55m']);
+  const prepared = await listNearbyCanonicalCheckInVenues({...input, preparation: true}, options);
+  assert.deepEqual(prepared.candidates.map(candidate => candidate.venueId), ['inside-discovery-55m']);
+  assert.equal(prepared.preparationRadiusMetres, 175);
 });
 
 test('no canonical choices plus provider outage yields typed retryable failure without candidate writes', async () => {
