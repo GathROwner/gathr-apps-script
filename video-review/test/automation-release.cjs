@@ -43,6 +43,24 @@ async function update(doc,delta){return auth.request(auth.database+'/documents:c
   const receipt=await update(config,{publishedCleanupEnabled:true});await save('CLEANUP_ENABLED.json',{receipt});
   await auth.request(scheduler+'firebase-schedule-cleanupPublishedListingVideos-northamerica-northeast1:run','POST',{});console.log('New paginated owned-video cleanup triggered');return;
  }
+ if(mode==='scheduler-invoker'){
+  const changes=[];
+  for(const name of ['publishListingVideos','cleanupPublishedListingVideos']){
+   const f=await auth.request(functionBase+name),job=await auth.request(scheduler+`firebase-schedule-${name}-northamerica-northeast1`);
+   const expected='firebase-adminsdk-fbsvc@gathr-migrated.iam.gserviceaccount.com';
+   if(f.state!=='ACTIVE'||f.serviceConfig.serviceAccountEmail!==expected||job.httpTarget?.oidcToken?.serviceAccountEmail!==expected)throw Error('Scheduled identity drift');
+   const base='https://run.googleapis.com/v2/'+f.serviceConfig.service,policy=await auth.request(base+':getIamPolicy');
+   const member='serviceAccount:'+expected,bindings=policy.bindings||[];
+   if(bindings.some(b=>b.role==='roles/run.invoker'&&!b.condition&&b.members?.includes(member)))continue;
+   await save(name+'-INVOKER_BEFORE.json',policy);
+   const binding=bindings.find(b=>b.role==='roles/run.invoker'&&!b.condition);
+   if(binding)binding.members=[...new Set([...binding.members,member])];else bindings.push({role:'roles/run.invoker',members:[member]});
+   const result=await auth.request(base+':setIamPolicy','POST',{policy:{...policy,bindings}});
+   await save(name+'-INVOKER_APPLIED.json',result);changes.push(name);
+  }
+  for(const name of ['cleanupPublishedListingVideos','publishListingVideos'])await auth.request(scheduler+`firebase-schedule-${name}-northamerica-northeast1:run`,'POST',{});
+  console.log(JSON.stringify({scheduledInvocationGrantedOnlyFor:changes,publicAccessGranted:false}));return;
+ }
  if(mode==='activate'){
   for(const name of names){const f=await auth.request(functionBase+name);if(f?.state!=='ACTIVE')throw Error(name+' is not active');}
   const health=auth.data(await auth.get('runtime_metadata/published_video_cleanup_health'));if(!health||health.deleted!==0||health.protected<9)throw Error('Baseline cleanup protection not verified');
