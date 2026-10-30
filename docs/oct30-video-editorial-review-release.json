@@ -1,0 +1,122 @@
+{
+  "atUTC": "2026-10-30T16:38:50.057Z",
+  "sourceCommit": "3a695a1a7a3b6f2793e136c38754bf6f084f481c",
+  "portal": "https://videoreviewportal-6ju7yi5g2a-nn.a.run.app/",
+  "codebase": "listing-video-review",
+  "changes": [
+    "Explicit Use this video, Don’t use this video, Not sure decisions",
+    "Separate content usefulness and listing association",
+    "Generic evergreen advertising and past-only recaps filtered out",
+    "Specific static or animated event and offer posters permitted",
+    "No speech is an audio note, not a hold",
+    "Exact integer video PTS mapping avoids rounded timestamp extraction failures"
+  ],
+  "deployed": [
+    {
+      "name": "projects/gathr-migrated/locations/northamerica-northeast1/functions/videoReviewPortal",
+      "revision": "videoreviewportal-00004-lof",
+      "uri": "https://videoreviewportal-6ju7yi5g2a-nn.a.run.app",
+      "state": "ACTIVE",
+      "codebase": "listing-video-review",
+      "hash": "5457790ccaef8c9ade5245705339ea5e4c6f96ac"
+    },
+    {
+      "name": "projects/gathr-migrated/locations/northamerica-northeast1/functions/reviewListingVideos",
+      "revision": "reviewlistingvideos-00003-biy",
+      "uri": "https://reviewlistingvideos-6ju7yi5g2a-nn.a.run.app",
+      "state": "ACTIVE",
+      "codebase": "listing-video-review",
+      "hash": "9ae4233371f6cb5cdc3f6aa90e4526d1b07d64b0",
+      "secretKeys": [
+        "GATHR_OPENAI_API_KEY"
+      ]
+    }
+  ],
+  "parserUnchanged": true,
+  "verification": {
+    "focusedChecks": 36,
+    "realClipRegressionPassed": true,
+    "realClipCases": [
+      {
+        "label": "spa",
+        "state": "rejected",
+        "content": "reject"
+      },
+      {
+        "label": "faith",
+        "state": "recommended",
+        "content": "useful"
+      },
+      {
+        "label": "chefs",
+        "state": "held",
+        "content": "useful"
+      },
+      {
+        "label": "dinner",
+        "state": "held",
+        "content": "useful"
+      },
+      {
+        "label": "poutine",
+        "state": "held",
+        "content": "useful"
+      },
+      {
+        "label": "tarot",
+        "state": "held",
+        "content": "useful"
+      },
+      {
+        "label": "animated",
+        "state": "recommended",
+        "content": "useful"
+      }
+    ],
+    "frontendExactBytes": true,
+    "anonymousPrivateApi": 401,
+    "phoneViewport": [
+      390,
+      844
+    ],
+    "phoneScreenshot": "C:\\Users\\craig\\Documents\\Codex\\2026-10-30\\video-model-comparison\\editorial-rollout/BUTTONS_PHONE_QA.png"
+  },
+  "reassessment": {
+    "downloadedClips": 33,
+    "states": {
+      "recommended": 7,
+      "held": 11,
+      "rejected": 15
+    },
+    "content": {
+      "useful": 18,
+      "reject": 15
+    },
+    "failures": 0,
+    "queued": 0,
+    "sourceAndMediaUnchanged": true,
+    "priorHumanDecisionsPreserved": true,
+    "newHumanDecisions": 4,
+    "newHumanDecisionHistoryVerified": true
+  },
+  "evidenceDirectory": "C:\\Users\\craig\\Documents\\Codex\\2026-10-30\\video-model-comparison\\editorial-rollout",
+  "oldAssessmentsArchived": true,
+  "privateReviewEnabled": true,
+  "automaticPublication": false,
+  "publicEventWrites": 0,
+  "clipCountCap": null,
+  "terraEscalationCap": null,
+  "hokum": {
+    "anonymousMetadataRecovered": true,
+    "sourceScrapeOmittedDirectUrl": true,
+    "durationSeconds": 83.033,
+    "status": "Held: current 60-second duration limit; content has not been assessed"
+  },
+  "limits": {
+    "clipSeconds": 60,
+    "inputBytes": 50000000,
+    "privateRenditionBytes": 8000000,
+    "retentionDays": 14
+  },
+  "rollback": "Pause only runtime_metadata/video_review.enabled. Candidate native backups and archived automated assessments are retained in the evidence directory and candidate assessments subcollections. Preserve concurrent human judgments; restore only reviewed automated fields with fresh preconditions."
+}
