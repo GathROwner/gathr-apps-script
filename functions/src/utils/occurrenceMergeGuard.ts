@@ -21,7 +21,7 @@ const dayNames = ['sunday','monday','tuesday','wednesday','thursday','friday','s
  * not a fuzzy time correction. Single-item corrections retain existing rules. */
 export function hasConflictingSameSourceClassClock(a:Occurrence,b:Occurrence):boolean {
   if(!/^\d{8,}$/.test(source(a))||source(a)!==source(b)||a.startDate!==b.startDate||
-      a.category!=='Workshops & Classes'||b.category!==a.category||
+      !(/\b(?:clinic|class|workshop|session)\b/i.test(title(a))||a.category==='Workshops & Classes')||
       title(a).toLowerCase().replace(/[^a-z0-9]/g,'')!==title(b).toLowerCase().replace(/[^a-z0-9]/g,'')||
       Math.max(Number(a.sourceOccurrenceCount)||0,Number(b.sourceOccurrenceCount)||0)<2)return false;
   const known=(e:Occurrence)=>/^\d{2}:\d{2}$/.test(e.startTime||'')&&(e.timeFlags as any)?.start?.source==='explicit';
@@ -87,7 +87,19 @@ export function hasConflictingBoundedClassCycle(a: Occurrence, b: Occurrence): b
 }
 
 export function hasConflictingOccurrenceIdentity(a: Occurrence, b: Occurrence): boolean {
-  return hasConflictingSameSourceClassClock(a,b) || hasConflictingSameSourceBundle(a,b) || hasConflictingProgrammeSlot(a,b) || hasConflictingCinemaClock(a,b) || hasConflictingBoundedClassCycle(a,b) || hasConflictingBookableActivitySlot(a,b) ||
+  const offWeek=(series:Occurrence,item:Occurrence)=>{
+    const interval=Math.max(1,Number(series.recurringWeekInterval)||1);
+    if(!/^\d{8,}$/.test(source(series))||source(series)!==source(item)||
+        !['calendar','schedule'].includes(String(item._sourceType||item.sourceType||''))||
+        !/^weekly_(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday)$/.test(series.recurringPattern||'')||
+        interval<=1||series.startDate===item.startDate)return false;
+    const difference=(Date.parse(String(item.startDate)+'T00:00:00Z')-Date.parse(String(series.startDate)+'T00:00:00Z'))/86400000;
+    return Number.isInteger(difference)&&difference%(7*interval)!==0;
+  };
+  const audience=(e:Occurrence)=>`${title(e)} ${e.description||''}`;
+  const gender=(text:string)=>/\b(?:women['’]?s|female|girls)\b/i.test(text)?'female':/\b(?:men['’]?s|male|boys)\b/i.test(text)?'male':'';
+  const genderConflict=Boolean(gender(audience(a))&&gender(audience(b))&&gender(audience(a))!==gender(audience(b)));
+  return offWeek(a,b) || offWeek(b,a) || genderConflict || hasConflictingSameSourceClassClock(a,b) || hasConflictingSameSourceBundle(a,b) || hasConflictingProgrammeSlot(a,b) || hasConflictingCinemaClock(a,b) || hasConflictingBoundedClassCycle(a,b) || hasConflictingBookableActivitySlot(a,b) ||
     hasCrossSourceRecurringLifecycleConflict(a as Partial<EventData>, b as Partial<EventData>) ||
     hasConflictingStandingKaraokeOccurrence(a as Partial<EventData>, b as Partial<EventData>);
 }

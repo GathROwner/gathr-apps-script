@@ -9,6 +9,8 @@
 import { DateTime } from 'luxon';
 import { EstablishmentInfo, ExtractedItem, ParsingConfig } from './types.js';
 import { logger } from '../utils/logger.js';
+import {isRejectedReviewedTicketBinding} from './reviewedTicketBinding.js';
+import {websiteTitleSupportsOffer} from './offerServiceHours.js';
 
 type VenueWebsiteEnrichmentSummary = {
   attemptedUrls: number;
@@ -129,7 +131,8 @@ export async function enrichEventsFromVenueWebsite(
   ocrText: string | undefined,
   timestamp: string,
   establishmentInfo: EstablishmentInfo | undefined,
-  config: ParsingConfig
+  config: ParsingConfig,
+  sourceUniqueId = config.diagnosticContext?.postId
 ): Promise<{ items: ExtractedItem[]; summary: VenueWebsiteEnrichmentSummary }> {
   const summary: VenueWebsiteEnrichmentSummary = {
     attemptedUrls: 0,
@@ -216,13 +219,13 @@ export async function enrichEventsFromVenueWebsite(
 
     summary.candidateItemsFound += discoveredCandidates.length;
     const articleAlignedItems = config.lunaCalendarLiteralSourcePrompt === true
-      ? reconcileRepeatedWeekdaySessions(inputItems, pageHtml, candidateUrl, summary)
+      ? reconcileRepeatedWeekdaySessions(inputItems, pageHtml, candidateUrl, summary, sourceUniqueId)
       : inputItems;
     if (discoveredCandidates.length === 0 && summary.appliedCount === 0) {
       continue;
     }
 
-    const applied = applyWebsiteCandidates(articleAlignedItems, discoveredCandidates, summary, combinedText);
+    const applied = applyWebsiteCandidates(articleAlignedItems, discoveredCandidates, summary, combinedText, sourceUniqueId);
     if (applied.summary.appliedCount > 0) {
       return {
         items: applied.items,
@@ -619,10 +622,11 @@ async function discoverDetailPageCandidates(
 
 function reconcileRepeatedWeekdaySessions(
   items: ExtractedItem[], html: string, sourceUrl: string,
-  summary: VenueWebsiteEnrichmentSummary
+  summary: VenueWebsiteEnrichmentSummary, sourceUniqueId?: string
 ): ExtractedItem[] {
   const groups = new Map<string, number[]>();
   items.forEach((item, index) => {
+    if (isRejectedReviewedTicketBinding({...item, sourceUniqueId}, sourceUrl)) return;
     const date = String(item.date || '');
     const name = String(item.name || '').trim().toLowerCase();
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || name.length < 4) return;
@@ -1012,12 +1016,14 @@ function applyWebsiteCandidates(
   items: ExtractedItem[],
   candidates: WebsiteCandidate[],
   summary: VenueWebsiteEnrichmentSummary,
-  combinedText: string
+  combinedText: string,
+  sourceUniqueId?: string
 ): { items: ExtractedItem[]; summary: VenueWebsiteEnrichmentSummary } {
   const nextItems = items.map((item) => {
     if (!shouldAttemptForItem(item)) return item;
 
-    const bestCandidate = findBestCandidateForItem(item, candidates);
+    const bestCandidate = findBestCandidateForItem(item, candidates.filter(candidate =>
+      !isRejectedReviewedTicketBinding({...item, sourceUniqueId}, candidate.sourceUrl)));
     if (
       !bestCandidate ||
       (!hasUsableFieldValue(bestCandidate.startTime) && !hasUsableFieldValue(bestCandidate.date))
@@ -1087,12 +1093,13 @@ function applyWebsiteCandidates(
     return item;
   });
 
-  const reconciledItems = reconcileSameDayNamedSeatingTimes(nextItems, candidates, summary, items);
+  const reconciledItems = reconcileSameDayNamedSeatingTimes(nextItems, candidates, summary, items, sourceUniqueId);
   if (reconciledItems) return { items: reconciledItems, summary };
 
   if (nextItems.length === 1 && hasExplicitMultipleSeatingCue(combinedText)) {
     const original = items[0];
-    const candidate = findBestCandidateForItem(original, candidates);
+    const candidate = findBestCandidateForItem(original, candidates.filter(candidate =>
+      !isRejectedReviewedTicketBinding({...original, sourceUniqueId}, candidate.sourceUrl)));
     const seatings = candidate?.namedSeatings || [];
     const initialStart = String(original.startTime || '').trim();
     const linkedPage = String(candidate?.sourceUrl || '').replace(/\/$/, '');
@@ -1134,7 +1141,8 @@ function reconcileSameDayNamedSeatingTimes(
   items: ExtractedItem[],
   candidates: WebsiteCandidate[],
   summary: VenueWebsiteEnrichmentSummary,
-  originalItems: ExtractedItem[]
+  originalItems: ExtractedItem[],
+  sourceUniqueId?: string
 ): ExtractedItem[] | null {
   const groups = [
     ...findRepeatedSameDayStartTimeGroups(items),
@@ -1142,6 +1150,7 @@ function reconcileSameDayNamedSeatingTimes(
   ];
   for (const group of groups) {
     for (const candidate of candidates) {
+      if (group.indices.some(index => isRejectedReviewedTicketBinding({...items[index], sourceUniqueId}, candidate.sourceUrl))) continue;
       const seatings = candidate.namedSeatings || [];
       if (!candidate.date || candidate.date !== group.date ||
           candidate.dateRangeStart || candidate.dateRangeEnd || seatings.length !== group.indices.length) {
@@ -1323,6 +1332,7 @@ function findBestCandidateForItem(
     // sub-event's clock the parent event's clock. Date agreement alone is not
     // enough to borrow a time from "Bookstore Open House" for "Fall Open House".
     if (!websiteCandidateTitleMatchesEvent(item.name || '', candidate.title || '')) continue;
+    if (item._sourceType === 'special' && !websiteTitleSupportsOffer(item.name || '', candidate.title || '')) continue;
     if (candidate.source === 'locarius_api') {
       const identityTokens = itemTokens.filter(token =>
         token.length >= 3 && !TOKEN_STOP_WORDS.has(token) &&

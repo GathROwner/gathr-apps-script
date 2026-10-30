@@ -67,7 +67,7 @@ test('a separate daily depot can neither lend recurrence nor prevent a compact n
   const restored=restoreOccurrenceSourceOwnership([formatted(prepared,{recurringPattern:'daily',isRecurring:'Yes'})],[prepared])[0];
   assert.equal(restored.recurringPattern,'none');assert.equal(restored.isRecurring,'No');
   const absent=bindCompactStage4Sources([{...original,recurringPattern:'none' as const}])[0];
-  assert.throws(()=>parseCompactStage4Response(response(absent,'daily'),[absent]),/unsupported_recurrence_correction/);
+  assert.equal(parseCompactStage4Response(response(absent,'daily'),[absent]).validatedItems[0].sourceHoldReason,'unsupported_recurrence_correction');
 });
 
 test('real daily depot and own weekly programme remain protected from recurrence removal',()=>{
@@ -76,7 +76,7 @@ test('real daily depot and own weekly programme remain protected from recurrence
     item({description:'Every Sunday at Fixture Grocery.',recurringPattern:'weekly_sunday'})]){
     assert.equal(hasOnlyAlternativeRecurrence(control),false);
     const source=bindCompactStage4Sources([control])[0];
-    assert.throws(()=>parseCompactStage4Response(response(source,'none'),[source]),/unsupported_recurrence_correction/);
+    assert.equal(parseCompactStage4Response(response(source,'none'),[source]).validatedItems[0].sourceHoldReason,'unsupported_recurrence_correction');
   }
 });
 

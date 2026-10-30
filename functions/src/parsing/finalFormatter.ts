@@ -1316,6 +1316,27 @@ export function rehydrateFormattedEventMetadata(
 ): FormattedEvent {
   const nextEvent = { ...event } as FormattedEvent;
   let changed = false;
+  // An aligned validated item owns its explicit clocks, even when Stage 5
+  // supplies a nonempty but different default. Keep overnight date semantics.
+  const alignedClockItem=Boolean(originalItem?.date && originalItem.date===event.startDate &&
+    normalizeLooseText(originalItem.name)===normalizeLooseText(event.name));
+  const explicitStart=alignedClockItem && originalItem?.timeFlags?.start?.source==='explicit'
+    ? normalizeUnambiguousSourceStartTime(String(originalItem.startTime||'')) : '';
+  const explicitEnd=alignedClockItem && originalItem?.timeFlags?.end?.source==='explicit'
+    ? normalizeUnambiguousSourceStartTime(String(originalItem.endTime||'')) : '';
+  if(explicitStart){nextEvent.startTime=explicitStart;changed=true;}
+  if(explicitEnd){nextEvent.endTime=explicitEnd;changed=true;}
+  const explicitSourceEnd=String(originalItem?.endDate||'');
+  if(explicitStart && explicitEnd && originalItem?.date===nextEvent.startDate &&
+      (!nextEvent.endDate || nextEvent.endDate===nextEvent.startDate ||
+        parseIsoDate(explicitSourceEnd) && explicitSourceEnd>=originalItem.date)){
+    const date=parseIsoDate(originalItem.date);
+    if(parseIsoDate(explicitSourceEnd) && explicitSourceEnd>originalItem.date)nextEvent.endDate=explicitSourceEnd;
+    else if(date){if(explicitEnd<explicitStart)date.setUTCDate(date.getUTCDate()+1);nextEvent.endDate=toIsoDateUtc(date);}
+  }
+  if((explicitStart||explicitEnd)&&originalItem?.timeFlags){
+    nextEvent.timeFlags=cloneFormattedTimeFlags(originalItem.timeFlags);changed=true;
+  }
   if(originalItem&&!String(originalItem.endTime||'').trim()&&
       /\bvenue_website:.*approximate end omitted\b/i.test(String(originalItem.timeFlags?.end?.evidence||''))){
     nextEvent.endTime='';nextEvent.endDate=originalItem.date;
@@ -1323,6 +1344,16 @@ export function rehydrateFormattedEventMetadata(
   }
   const locations = originalItem?.spatial?.kind === 'single_location' && Array.isArray(originalItem.spatial.locations)
     ? originalItem.spatial.locations.filter(location => location && location.role === 'location' && location.certainty === 'confirmed') : [];
+  if(originalItem){
+    // Stage 5 cannot create source proof. Restore the aligned item's evidence,
+    // including unknown/absent evidence, before any host guard consumes it.
+    nextEvent.spatial=originalItem.spatial?structuredClone(originalItem.spatial):undefined;changed=true;
+  }
+  if(originalItem?._sourceProgrammeMonthEnd&&originalItem.recurrenceUntilDate===originalItem._sourceProgrammeMonthEnd&&
+      /^weekly_/.test(String(originalItem.recurringPattern||''))&&nextEvent.recurringPattern===originalItem.recurringPattern){
+    nextEvent.recurrenceUntilDate=earlierProgrammeCutoff(nextEvent.recurrenceUntilDate,originalItem._sourceProgrammeMonthEnd);
+    nextEvent._sourceProgrammeMonthEnd=originalItem._sourceProgrammeMonthEnd;changed=true;
+  }
   if (!String(nextEvent.address || '').trim() && locations.length === 1 &&
       /^\d+[A-Za-z]?\s/.test(String(locations[0].address || '')) &&
       String(locations[0].sourceText || '').toLowerCase().replace(/[^a-z0-9]/g,'')
@@ -1372,6 +1403,12 @@ export function rehydrateFormattedEventMetadata(
     nextEvent.endTime = meridiem.endTime;
     nextEvent.timeFlags = cloneFormattedTimeFlags(originalItem.timeFlags);
     if (nextEvent._sourceTimeConstraint?.reason === 'unresolved_meridiem') delete nextEvent._sourceTimeConstraint;
+    if (meridiem.scope === 'takeout') {
+      const availability = `Takeout availability only: ${meridiem.startTime}-${meridiem.endTime}.`;
+      if (!String(nextEvent.description || '').includes(availability))
+        nextEvent.description = `${nextEvent.description || originalItem.description || originalItem.name} ${availability}`;
+      if (nextEvent._sourceTimeConstraint?.reason === 'meal_period_without_clock') delete nextEvent._sourceTimeConstraint;
+    }
     changed = true;
   }
   if (originalItem?._sourceTimeConstraint) {
@@ -2548,6 +2585,8 @@ function applyCategoryCorrections(
 function sourceGroundedActivityCategory(event: FormattedEvent, originalItem?: ExtractedItem): Category | null {
   const title = String(originalItem?.name || event.name || '');
   const text = `${title} ${originalItem?.description || event.description || ''}`;
+  if (/\b(?:exhibition|exhibit)\b/i.test(text) && /\b(?:paintings?|sculptures?|artworks?)\b/i.test(text) &&
+      !/\b(?:film|movie|screening|documentary)\b/i.test(text)) return 'Gatherings & Parties';
   if (originalItem?._sourceType === 'special' && /^discounted\s+apps$/i.test(title.trim())) return 'Food Special';
   if (originalItem?._sourceType === 'special' && /^(?:\$\d+(?:\.\d+)?\s*)?pitchers?$/i.test(title.trim())) return 'Drink Special';
   if (/\bcooking\s+demo(?:nstration)?\b/i.test(text)) return 'Workshops & Classes';
@@ -4711,7 +4750,21 @@ function normalizeRecurringForFormattedEvent(
   event: FormattedEvent,
   originalItem?: ExtractedItem
 ): FormattedEvent {
-  const sourceText = buildRecurrenceSourceText(event, originalItem);
+  const sourceText = recurrenceScheduleText(buildRecurrenceSourceText(event, originalItem));
+  if(originalItem && /^20\d{2}-\d{2}-\d{2}$/.test(originalItem.date||'') &&
+      hasOnlyDescriptiveSkillRecurrence(`${originalItem.name} ${originalItem.description||''}`)){
+    return {...event,isRecurring:false,recurringPattern:'none',totalOccurrences:undefined,recurrenceUntilDate:undefined,
+      recurringDaysOfWeek:undefined,recurringWeekdaySequence:undefined,recurringWeekInterval:undefined};
+  }
+  if(originalItem?._sourceWeeklyProgramPattern===originalItem?.recurringPattern &&
+      /^weekly_/.test(String(originalItem?.recurringPattern||'')) &&
+      originalItem?._sourceProgrammeMonthEnd===originalItem?.recurrenceUntilDate &&
+      originalItem?._sourceProgrammeMonthEnd && !sourceItemHoldReason(originalItem)){
+    return {...event,isRecurring:true,recurringPattern:originalItem.recurringPattern,
+      recurrenceUntilDate:earlierProgrammeCutoff(event.recurrenceUntilDate,originalItem._sourceProgrammeMonthEnd),
+      _sourceWeeklyProgramPattern:originalItem._sourceWeeklyProgramPattern,
+      _sourceProgrammeMonthEnd:originalItem._sourceProgrammeMonthEnd};
+  }
   const soupCadenceText = `${originalItem?.name || event.name || ''} ${originalItem?.description || ''}`
     .replace(/\bdaily\s+soup\b/gi, 'soup');
   const explicitSoupCadence = /\b(?:daily|weekly|monthly|biweekly|weekdays|weekends|mondays|tuesdays|wednesdays|thursdays|fridays|saturdays|sundays)\b|\b(?:every|each)\s+(?:(?:other|second)\s+)?(?:day|week|month|weekday|weekend|monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/i.test(soupCadenceText);

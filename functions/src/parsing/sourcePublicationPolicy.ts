@@ -17,6 +17,10 @@ function explicitlyWithholdsAttendeeVenue(text: string): boolean {
 export function sourcePublicationHoldReason(item: ExtractedItem, caption: string): string | undefined {
   const title=String(item.name || ''), detail=String(item.description || '');
   const source=caption.split(/\n\s*OCR TEXT:/i)[0];
+  if (/\b(?:exhibition|exhibit)\b/i.test(detail) &&
+      /\bon\s+display\b[\s\S]*\buntil\b/i.test(detail) &&
+      !String(item.startTime||'').trim())
+    return 'exhibition_attendee_availability_unverified';
   if (item._sourceType==='calendar' &&
       /(?:^|;\s*)calendar_ocr(?:_explicit_date_line)?(?:;|$)/i.test(String(item.extractionReason || '')) &&
       isCalendarVenueOnlyHeading(title,item.venue)) return 'calendar_venue_masthead_not_activity';

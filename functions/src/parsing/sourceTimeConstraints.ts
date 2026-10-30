@@ -1,13 +1,15 @@
 import type {ExtractedItem, FormattedEvent} from './types.js';
+import {offerHasSourceDate} from './offerServiceHours.js';
 import {reconcileSourceItemEvidence} from './sourceItemEvidence.js';
-import {repairCaptionMealCoverage,unresolvedPerformanceRun} from './captionMealCoverage.js';
+import {repairCaptionMealCoverage,repairCaptionTakeoutWindow,unresolvedPerformanceRun} from './captionMealCoverage.js';
 
 export interface SourceTimeConstraint {
-  reason: 'unresolved_meridiem' | 'meal_period_without_clock' | 'activity_offer_without_clock' | 'doors_without_showtime' | 'dated_activity_without_clock';
+  reason: 'unresolved_meridiem' | 'meal_period_without_clock' | 'activity_offer_without_clock' | 'doors_without_showtime' | 'dated_activity_without_clock' | 'offer_service_hours_unverified';
   evidence: string;
 }
 
 export interface SourceMeridiemResolution {
+  scope?: 'takeout';
   date: string;
   startTime: string;
   endTime: string;
@@ -30,24 +32,46 @@ export function hasSourceClock(value: unknown): boolean {
 /** An item-local duration is evidence; a category's default duration is not. */
 export function resolveSourceDuration(item: ExtractedItem): ExtractedItem {
   if (hasSourceClock(item.endTime)) return item;
+  const text = String(item.description || '');
+  const programDuration = /\b(?:\d+(?:\.\d+)?|one|two|three|half)\s*[- ]?\s*(?:hours?|hrs?|minutes?|mins?)\s+(?:concert|program|programme|performance|recital)\b/i.test(text);
   // A film's running time, a song length or a meal's service window is not a session duration.
   if (!/\b(?:class|lesson|workshop|session|fitness|yoga|zumba|course|practice|guided\s+tour)\b/i.test(item.name) &&
-      !/\b(?:class|lesson|workshop|session)\b/i.test(String(item.description || ''))) return item;
-  const text = String(item.description || '');
+      !/\b(?:class|lesson|workshop|session)\b/i.test(text) &&
+      !programDuration) return item;
   // Arrival offsets, opening windows and multi-activity durations are not this occurrence's length.
   if (/\b(?:before|after|doors?|arrival|each\s+of|sessions?\s+of)\b/i.test(text)) return item;
+  if (/\b(?:film|movie|screening|runtime|running\s+time)\b/i.test(text) ||
+      /\b(?:two|three|multiple|separate|both)\s+(?:(?:\d+|one|two|three|half)\s*[- ]?\s*(?:hours?|minutes?)\s+)?(?:classes|lessons|workshops|sessions|concerts|programs|programmes|performances|recitals)\b/i.test(text) ||
+      /\b(?:and|plus|then|followed\s+by)\s+(?:(?:a|an|the|another|a\s+second)\s+)?(?:(?:\d+|one|two|three|half)\s*[- ]?\s*(?:hours?|minutes?)\s+)?(?:class|lesson|workshop|session|concert|program|programme|performance|recital)\b/i.test(text)) return item;
   const matches = [...text.matchAll(/\b(\d+(?:\.\d+)?|one|two|three|half)\s*[- ]?\s*(hours?|hrs?|minutes?|mins?)\b/gi)];
-  if (matches.length !== 1) return item;
-  const m = matches[0], words: Record<string, number> = {one:1,two:2,three:3,half:0.5};
-  const amount = words[m[1].toLowerCase()] ?? Number(m[1]);
-  const minutes = amount * (/^(?:hour|hr)/i.test(m[2]) ? 60 : 1);
+  if (!matches.length || matches.length > 1 && !programDuration) return item;
+  if (matches.some(m=>/^\s+(?:songs?|pieces?|selections?|breaks?|intermissions?)\b/i.test(text.slice(m.index!+m[0].length)))) return item;
+  const words: Record<string, number> = {one:1,two:2,three:3,half:0.5};
+  const durations = matches.map(m => (words[m[1].toLowerCase()] ?? Number(m[1])) *
+    (/^(?:hour|hr)/i.test(m[2]) ? 60 : 1));
+  if (new Set(durations).size !== 1) return item;
+  const minutes = durations[0];
   const bare = String(item.startTime || '').trim().match(/^(\d{1,2}):(\d{2})$/);
   const start = printedClock(String(item.startTime || '')) ??
     (bare && +bare[1] <= 23 && +bare[2] < 60 ? +bare[1]*60 + +bare[2] : undefined);
   if (start === undefined || !Number.isInteger(minutes) || minutes < 15 || minutes > 720 ||
       !['explicit','implied'].includes(item.timeFlags?.start?.source || '')) return item;
+  if (matches.length > 1) {
+    // Equal lengths alone do not join separate components. Accept only an
+    // introductory whole-occurrence description restated as "the/this program"
+    // starting at this item's clock, with no intervening sequencing language.
+    if (matches.length !== 2) return item;
+    const [first,repeat] = matches;
+    const between = text.slice(first.index!+first[0].length,repeat.index);
+    const reference = text.slice(repeat.index!+repeat[0].length).match(/^\s+(?:program|programme|concert|performance|recital)\s+(?:starts?|begins?)\s+at\s+(\d{1,2}(?::\d{2})?\s*[ap]\.?\s*m\.?)/i);
+    if (!/^\s*(?:a|an|the|this)\s*$/i.test(text.slice(0,first.index)) ||
+        !/^\s*,?\s*(?:[\p{L}-]+\s+){0,3}(?:evening|concert|program|programme|performance|recital)\b/iu.test(between) ||
+        !/\b(?:the|this)\s*$/i.test(between) ||
+        /\b(?:followed\s+by|then|next|plus|also|and\s+(?:a|an|another))\b/i.test(between) ||
+        !reference || printedClock(reference[1]) !== start) return item;
+  }
   const endTime = hhmm((start + minutes) % 1440);
-  const evidence = `Source duration: ${m[0]}; ${hhmm(start)} + ${minutes} minutes = ${endTime}`;
+  const evidence = `Source duration: ${[...new Set(matches.map(m=>m[0]))].join(' / ')}; ${hhmm(start)} + ${minutes} minutes = ${endTime}`;
   return {...item, endTime, _sourceDurationResolution: {
     date: item.date, startTime: hhmm(start), endTime, minutes, evidence},
     timeFlags: {start: item.timeFlags!.start, end: {source:'implied', toClose:false, evidence}}};
@@ -120,7 +144,7 @@ export function hasUnresolvedSourceMeridiem(item?: Partial<ExtractedItem>): bool
 
 /** No clock is invented here. Item-local evidence wins over a shared meal caption. */
 export function constrainSourceTimes(items: ExtractedItem[], caption: string): ExtractedItem[] {
-  items = reconcileSourceItemEvidence(repairCaptionMealCoverage(items, caption), caption);
+  items = reconcileSourceItemEvidence(repairCaptionTakeoutWindow(repairCaptionMealCoverage(items, caption), caption), caption);
   items = items.map(item=>unresolvedPerformanceRun(item,caption)?{...item,_sourceOccurrenceDateHold:true} as ExtractedItem:item);
   const captionOnly = caption.split(/\n\s*OCR TEXT:/i)[0];
   const sharedMeals = captionOnly.match(/\b(?:breakfast|brunch|lunch|dinner|supper)\b/gi) || [];
@@ -157,7 +181,11 @@ export function constrainSourceTimes(items: ExtractedItem[], caption: string): E
       x.relevantImageIndex === item.relevantImageIndex);
     if (Number.isInteger(item.relevantImageIndex) && siblings.length) return {...item, _sourceTimeConstraint: {
       reason: 'activity_offer_without_clock', evidence: 'Untimed offer shares a dated image with a timed activity'}};
-    return item;
+    // Preserve the accepted exact branch/date service-hours path. A date
+    // inherited only from the post is insufficient to enter that path.
+    if(offerHasSourceDate(`${item.name} ${item.description||''}`))return item;
+    return {...item,_sourceTimeConstraint:{reason:'offer_service_hours_unverified',
+      evidence:'Offer has no advertised start; exact attendee-branch service hours require verification'}};
   });
 }
 

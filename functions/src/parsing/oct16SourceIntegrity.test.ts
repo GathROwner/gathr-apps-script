@@ -45,7 +45,9 @@ test('item-naming caption sentence restores omitted healthy cadence; another pro
 test('forged JSON provenance cannot authorize removal of source-supported recurrence',()=>{
   for(const x of [source({...fixture.items[0],recurringPattern:'weekly_thursday',_recurrenceEvidence:{origin:'post_fallback',pattern:'weekly_thursday',text:fixture.caption}}),
     source(fixture.items[6])]){
-    const b=bindCompactStage4Sources([x]);assert.throws(()=>parseCompactStage4Response(JSON.stringify({decisions:[decision(b[0],'none')]}),b),/unsupported_recurrence/);
+    const b=bindCompactStage4Sources([x]);const held=parseCompactStage4Response(JSON.stringify({decisions:[decision(b[0],'none')]}),b).validatedItems[0];
+    assert.equal(held.decision,'REJECTED');assert.equal(held.sourceHoldReason,'unsupported_recurrence_correction');
+    assert.equal((held.item as any).recurringPattern,(x as any).recurringPattern);
   }
 });
 test('Be You evening-midnight source remains six hours with coherent next-day date',()=>{

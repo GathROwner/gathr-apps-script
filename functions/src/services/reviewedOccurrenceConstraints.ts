@@ -7,6 +7,7 @@ export interface ReviewedOccurrenceConstraint {
   action:'hold'|'season_bound'|'fixed_occurrence'|'retired_occurrence'; untilDate?:string; startTime?:string; recurringPattern?:string;
   startDate?:string; endDate?:string; endTime?:string;
   eventNames?:string[]; canonicalEventPath?:string;
+  match?:'source_date_clock_name';
 }
 export function classifyReviewedOccurrenceConstraint(event:EventData,venue:{id:string;reviewedOccurrenceConstraints?:ReviewedOccurrenceConstraint[]}):'none'|'hold' {
   if(event.venueId!==venue.id||!venue.reviewedOccurrenceConstraints)return 'none';
@@ -33,7 +34,21 @@ export function classifyReviewedOccurrenceConstraint(event:EventData,venue:{id:s
         rule.eventNames.some(name=>key(name)===key(event.eventName||event.name))))return 'hold';
       continue;
     }
-    if(root!==rule.sourceUniqueId||!rule.uniqueIds.includes(uid))continue;
+    // A reviewed source/date/start/literal title can survive changes to the
+    // parser's generated end or venue label. Existing UID-only holds retain
+    // their old behavior; this never becomes a whole-source/title-only ban.
+    let exactHeldActivity=false;
+    if(rule.match!==undefined&&rule.match!=='source_date_clock_name')return 'hold';
+    if(rule.action==='hold' && rule.match==='source_date_clock_name'){
+      if(typeof rule.startDate!=='string'||DateTime.fromISO(rule.startDate).toISODate()!==rule.startDate||
+         !/^20\d{2}-\d{2}-\d{2}$/.test(rule.startDate)||!/^([01]\d|2[0-3]):[0-5]\d$/.test(rule.startTime||'')||
+         !Array.isArray(rule.eventNames)||!rule.eventNames.length||rule.eventNames.length>16||
+         !rule.eventNames.every(name=>typeof name==='string'&&name.trim().length>=8))return 'hold';
+      const key=(value:unknown)=>String(value||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
+      exactHeldActivity=event.startDate===rule.startDate&&event.startTime===rule.startTime&&
+        rule.eventNames.some(name=>key(name)===key(event.eventName||event.name));
+    }
+    if(root!==rule.sourceUniqueId||!rule.uniqueIds.includes(uid)&&!exactHeldActivity)continue;
     if(rule.action==='hold')return 'hold';
     if(rule.action==='fixed_occurrence'){
       const date=(v:unknown):v is string=>typeof v==='string'&&/^20\d{2}-\d{2}-\d{2}$/.test(v)&&DateTime.fromISO(v).toISODate()===v;

@@ -474,6 +474,7 @@ function normalizeClassificationResponse(
   if (foodSignals.hasAny && !contentAnalysis.hasFoodSpecials) {
     contentAnalysis.hasFoodSpecials = true;
   }
+  if (foodSignals.hasAny) confidence = Math.max(confidence, 0.78);
 
   // A small performance lineup must not hide its concurrent meal/drink offer
   // behind the schedule-only extractor. Keep dense calendar/schedule routes.
@@ -482,8 +483,6 @@ function normalizeClassificationResponse(
     estimatedItemCount > 0 && estimatedItemCount <= 5;
   if ((contentType === 'EVENT' || smallSchedule) && contentAnalysis.hasFoodSpecials) {
     contentType = contentAnalysis.hasEvents ? 'MIXED_EVENTS_AND_SPECIALS' : 'FOOD_SPECIAL';
-    // Model flags alone must not promote a low-confidence unrelated offer.
-    if (foodSignals.hasAny) confidence = Math.max(confidence, 0.78);
     classificationReason = `${classificationReason} | Safeguard: food-special-aware routing from source cues or model analysis.`;
   }
 

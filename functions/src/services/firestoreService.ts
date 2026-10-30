@@ -8,6 +8,7 @@ import {isPlainKaraoke, selectStandingKaraokeOccurrence} from './standingKaraoke
 import {createRecurringSeriesCatalogCache, sourceLinkedHistoricalSeriesKeepers} from './recurringSeriesCatalog.js';
 import {classifyReviewedOccurrenceRetirement} from './reviewedOccurrenceRetirement.js';
 import {classifyReviewedOccurrenceConstraint} from './reviewedOccurrenceConstraints.js';
+import {withoutRejectedReviewedTicketLinks} from '../parsing/reviewedTicketBinding.js';
 import {isRecurringSeries} from '../utils/recurringSeriesLifecycle.js';
 import {KNOWN_LOCATION_RELATIONSHIPS} from '../parsing/locationMentionRoles.js';
 import {isApprovedVenueOccurrenceMatch,approvedVenueOccurrenceSourcePatch,classifyApprovedVenueOccurrence} from './approvedVenueOccurrence.js';
@@ -3236,7 +3237,7 @@ export interface VenueMatchContext {
   regionHint?: string;
 }
 
-async function findVenueExactNameCandidates(name: string): Promise<VenueData[]> {
+export async function findVenueExactNameCandidates(name: string): Promise<VenueData[]> {
   const normalizedName = normalizeVenueName(name);
   if (!normalizedName) return [];
 
@@ -5803,7 +5804,7 @@ export async function createEvent(
   venueId: string,
   event: Omit<EventData, 'id' | 'createdAt' | 'venueId'>
 ): Promise<string> {
-  const normalizedEvent = withNormalizedEventAddressForWrite(withFamilyFriendlyScore({ ...event }));
+  const normalizedEvent = withNormalizedEventAddressForWrite(withFamilyFriendlyScore(withoutRejectedReviewedTicketLinks({ ...event, venueId })));
   const sanitizedEvent = await sanitizeEventManagedImageReferencesForWrite(normalizedEvent, {
     operation: 'createEvent',
     venueId,

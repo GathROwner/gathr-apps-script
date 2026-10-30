@@ -8,10 +8,12 @@ import {buildValidatedVenuePointFields} from '../services/validatedVenuePublicat
 import {isOwnedSpaceTailAtAddress} from '../utils/ownedPlaceEvidence.js';
 import {applySharedFoodOfferVenue, sharedFoodOfferOwner, sharedPostMetadata, sharedFoodOfferReviewContext} from '../services/sharedFoodOfferVenue.js';
 import {sharedEventRequiresOriginalHost,outdoorProgrammeRequiresHost} from '../services/sharedEventVenueEvidence.js';
+import {sourceInterpretationTimestamp} from '../parsing/programmeSourceGuards.js';
 import {isPlainKaraoke, isStandingKaraoke, coversStandingKaraokeOccurrence, selectStandingKaraokeOccurrence} from '../services/standingKaraokeOccurrence.js';
 import {isRecurringSeries, recurringSeriesLabelsCompatible} from '../utils/recurringSeriesLifecycle.js';
 import {hasProvenSourceDurationEnd} from '../parsing/sourceTimeConstraints.js';
 import {reviewedSourcePrice,contradictsReviewedPrice} from './reviewedSourcePrice.js';
+import {withoutRejectedReviewedTicketLinks} from '../parsing/reviewedTicketBinding.js';
 import {contradictsReviewedOccurrenceTiming} from './reviewedOccurrenceTiming.js';
 import { CacheWriteMetrics, createCacheWriteMetrics, addCacheWriteUsage } from '../parsing/cacheAccounting.js';
 import { hasConflictingDevelopmentSlot } from '../utils/eventSlotIdentity.js';
@@ -2386,6 +2388,7 @@ export function mergeStageArtifactsSnapshot(
     imageFrameManifest,
     stage3Items,
     stage3HeldItems: [...(base?.stage3HeldItems || []), ...(incoming.stage3HeldItems || [])],
+    sourceCoverageHolds:[...(base?.sourceCoverageHolds||[]),...(incoming.sourceCoverageHolds||[])],
     stage1Validation: incoming.stage1Validation || base?.stage1Validation,
     stage1Pilot: incoming.stage1Pilot || base?.stage1Pilot,
     stage3InputKind: incoming.stage3InputKind || base?.stage3InputKind,
@@ -2417,6 +2420,7 @@ export function sanitizeStageArtifactsSnapshot(
     stage37TicketUrl: snapshot.stage37TicketUrl,
     stage3Items: truncateItems(snapshot.stage3Items) as ParseStageArtifactsSnapshot['stage3Items'],
     stage3HeldItems: truncateItems(snapshot.stage3HeldItems) as ParseStageArtifactsSnapshot['stage3HeldItems'],
+    sourceCoverageHolds:snapshot.sourceCoverageHolds?.slice(0,64),
     stage1Validation: snapshot.stage1Validation,
     stage1Pilot: snapshot.stage1Pilot,
     stage3InputKind: snapshot.stage3InputKind,
@@ -3283,7 +3287,7 @@ export async function processRow(
         sharedPostThumbnails: parserSharedPostThumbnails,
         userName: row.userName || establishment,
         pageName: row.pageName || establishment,
-        timestamp: row.timestamp || '',
+        timestamp: sourceInterpretationTimestamp(row),
         facebookUrl: row.facebookUrl || '',
         profilePicUrl: selectParserProfilePicUrl(row, venue),
         extractedData: {
@@ -4283,19 +4287,19 @@ async function findFirstFullParserVenueMatch(params: {
 }
 
 function fuzzyLocationSuffixMatchHasVenueIdentity(candidate: string, match: MatchInfo): boolean {
-  if (match.matchType !== 'fuzzy' || !candidate.includes(',') || !match.matchedVenue) return true;
+  if (match.matchType !== 'fuzzy' || !match.matchedVenue) return true;
   const venuePart = normalizeVenueName(candidate.split(',')[0] || '');
   const genericWords = new Set([
     'the', 'and', 'studio', 'hall', 'club', 'centre', 'center', 'restaurant',
     'cafe', 'coffee', 'bar', 'theatre', 'theater', 'market', 'stage', 'arena',
-    'park', 'community', 'events', 'event',
+    'park', 'community', 'events', 'event', 'united', 'church', 'public', 'library',
   ]);
   const identityWords = venuePart.split(/\s+/).filter(word =>
     word.length >= 4 && !genericWords.has(word));
   if (identityWords.length === 0) return false;
   return Array.from(normalizedVenueNamesForVenue(match.matchedVenue)).some(name => {
     const nameWords = new Set(name.split(/\s+/));
-    return identityWords.some(word => nameWords.has(word));
+    return identityWords.every(word => nameWords.has(word));
   });
 }
 
@@ -4497,6 +4501,21 @@ export async function resolveVenueForFullParserEventWithMatcherForRegression(par
   if (item.sourceLocationRole === 'collection_partner_only') return null;
   if(sharedEventRequiresOriginalHost(item,row,rowVenue))return null;
   const boundLocation = item.additionalLocation || item.venue || item.establishment;
+  const branchSpatial=(item.spatial || item.spatialEvidence) as any;
+  const branchLocations=branchSpatial?.kind==='single_location' && Array.isArray(branchSpatial.locations)
+    ? branchSpatial.locations.filter((location:any)=>location?.role==='location'&&location.certainty==='confirmed') : [];
+  const branch=branchLocations.length===1?String(branchLocations[0].label||'').trim():'';
+  // Provincial library posts sometimes print only a branch town as the heading.
+  // Context can expand its name for exact lookup; publisher identity cannot pin it.
+  if(sourceSuggestsPeiLibrarySystem(row,establishment) && /^[\p{L}-]+$/u.test(String(boundLocation||'')) &&
+      normalizeVenueName(boundLocation)!==normalizeVenueName(rowVenue?.name || '')){
+    if(normalizeVenueName(branch)!==normalizeVenueName(boundLocation))return null;
+    for(const candidate of [`${branch} Public Library`,branch]){
+      const match=await matcher(candidate,undefined,inferFullParserVenueMatchContext(row,establishment));
+      if(match.isMatch && match.matchType==='exact' && match.matchedVenue && match.matchedVenue.id!==rowVenue?.id)return match.matchedVenue;
+    }
+    return null;
+  }
   const printedRoom=String(boundLocation || '').match(/^.+?\s*\(\s*in\s+([^()]+)\s*\)\s*$/i);
   if(printedRoom){
     const room=await matcher(printedRoom[1].trim(),undefined,inferFullParserVenueMatchContext(row,establishment));
@@ -4886,6 +4905,13 @@ export async function processFullParserEvent(
   );
   if (!previewOnly) await batchManager.assertWorkerActive();
 
+  const offerProof = item.timeResolution?.offerAvailability;
+  if (offerProof && (!venue || venue.id !== offerProof.venueId || venue.googlePlaceId !== offerProof.placeId)) {
+    logger.warn('Held offer whose final venue differs from verified service-hour identity', {rowIndex, itemName:item.name || ''});
+    if (previewOnly) throw new Error('Offer service-hour venue identity mismatch');
+    return {created:false,updated:false,isDuplicate:false};
+  }
+
   if (venue && checkEventCoordinatesAgainstAllowedRegions({
     latitude: venue.latitude, longitude: venue.longitude,
   }).decision === 'reject') {
@@ -5112,7 +5138,7 @@ export async function processFullParserEvent(
   });
   const captionRegistrationUrl = findCaptionRegistrationUrlForEventForRegression(row.text, name);
 
-  const eventData = {
+  let eventData = {
     uniqueId: buildExpandedEventStoredUniqueId({
       row,
       item,
@@ -5228,6 +5254,7 @@ export async function processFullParserEvent(
   // location-role resolution was needed. Never reconstruct it from event IDs.
   eventData.sourceUniqueIds=[String(row.uniqueId||'').trim()].filter(Boolean);
   eventData.sourceUrls=[String(row.topLevelUrl||row.facebookUrl||'').trim()].filter(Boolean);
+  eventData = withoutRejectedReviewedTicketLinks(eventData);
   if(item._locationMentionResolution){
     eventData.locationMentionResolution=item._locationMentionResolution;
     eventData.complexContext=item._locationMentionResolution.complexContext;
@@ -6014,6 +6041,20 @@ async function updateDuplicateEventIfNeeded(
   };
 }
 
+export function unresolvedCrossSourceIdentityClockConflict(existing:EventData,incoming:EventData):boolean {
+  const oldRoot=getEventDuplicateMergeSourceRoot(existing),newRoot=getEventDuplicateMergeSourceRoot(incoming);
+  const title=(e:EventData)=>asTrimmedString(e.eventName||e.name).toLowerCase().replace(/[^a-z0-9]/g,'');
+  const oldTitle=title(existing),newTitle=title(incoming);
+  const clock=(v:unknown)=>/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(String(v||''));
+  return /^\d{8,}$/.test(oldRoot)&&/^\d{8,}$/.test(newRoot)&&oldRoot!==newRoot&&
+    Boolean(existing.venueId)&&existing.venueId===incoming.venueId&&
+    Boolean(normalizeIsoDateValue(existing.startDate))&&normalizeIsoDateValue(existing.startDate)===normalizeIsoDateValue(incoming.startDate)&&
+    !isRecurringLikeEvent(existing)&&!isRecurringLikeEvent(incoming)&&
+    oldTitle.length>=6&&newTitle.length>=6&&oldTitle!==newTitle&&
+    clock(existing.startTime)&&clock(incoming.startTime)&&existing.startTime!==incoming.startTime&&
+    (incoming.timeFlags as {start?:{source?:string}}|undefined)?.start?.source==='explicit';
+}
+
 function buildDuplicateEventUpdates(
   existing: EventData,
   incoming: EventData,
@@ -6032,8 +6073,23 @@ function buildDuplicateEventUpdates(
   const changedFields: string[] = [];
   let descriptionImproved = false;
   let timeImproved = false;
+  incoming = withoutRejectedReviewedTicketLinks(incoming, existing);
+  const incomingOffer = (incoming.timeResolution as any)?.offerAvailability;
+  const existingOffer = (existing.timeResolution as any)?.offerAvailability;
+  // An inferred service window is one provenance-bound value. Do not replace
+  // part of an existing occurrence (especially a source-printed clock) with it.
+  // Legacy misbound occurrences require the reviewed recoverable repair path.
+  if (incomingOffer && ['startDate','endDate','startTime','endTime'].some(key =>
+      String((existing as any)[key] || '') !== String((incoming as any)[key] || ''))) {
+    return {updates, changedFields, descriptionImproved, timeImproved};
+  }
   const priceProof=reviewedSourcePrice(existing,incoming);
   if(contradictsReviewedOccurrenceTiming(existing,incoming))return {updates,changedFields,descriptionImproved,timeImproved};
+  if(unresolvedCrossSourceIdentityClockConflict(existing,incoming)){
+    logger.warn('Held cross-source title/clock identity conflict',{eventId:existing.id,
+      existingSource:getEventDuplicateMergeSourceRoot(existing),incomingSource:getEventDuplicateMergeSourceRoot(incoming)});
+    return {updates,changedFields,descriptionImproved,timeImproved};
+  }
   // Defense in depth: never enrich a different development slot, even if a caller
   // bypassed one of the duplicate selectors.
   if (hasConflictingDevelopmentSlot(existing, incoming) || hasConflictingOccurrenceIdentity(existing, incoming)) {
@@ -6442,6 +6498,15 @@ function buildDuplicateEventUpdates(
     if (incoming.timeFlags != null) {
       setField('timeFlags', incoming.timeFlags);
     }
+    if (existingOffer) {
+      // A newer explicit clock must not retain the older estimated window.
+      setField('timing', incoming.timing ?? null);
+    }
+  }
+  if (incomingOffer && existingOffer) {
+    setField('timing', incoming.timing);
+    setField('timeResolution', incoming.timeResolution);
+    setField('timeFlags', incoming.timeFlags);
   }
 
   if (shouldReplacePriceValue(existing.price, incoming.price)) {
@@ -7089,6 +7154,25 @@ function selectRecurringLifecycleMerge(
   const existingRecurringState = normalizeFlagState(existing.isRecurring);
   const incomingRecurringState = normalizeFlagState(incoming.isRecurring);
   const unsafeCrossSourceDateMerge = isUnsafeCrossSourceDateDuplicateMerge(existing, incoming);
+  // A different generated occurrence in the same source calendar is not a
+  // correction of the series keeper. Preserve its lifecycle when corroborated.
+  const sameSourceCalendarOccurrence = existing.uniqueId!==incoming.uniqueId &&
+    /^\d{8,}$/.test(getEventDuplicateMergeSourceRoot(existing)) &&
+    getEventDuplicateMergeSourceRoot(existing)===getEventDuplicateMergeSourceRoot(incoming) &&
+    ['calendar','schedule'].includes(String((incoming as any)._sourceType || (incoming as any).sourceType || '')) &&
+    existing.startDate!==incoming.startDate && existing.startTime===incoming.startTime &&
+    (firestoreService.recurringSeriesCoversOccurrence(existing,incoming.startDate||'') ||
+      /^weekly_(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday)$/.test(existingPattern) &&
+      existingRecurringWeekInterval===1 && !existingRecurringSequence?.length &&
+      (!existingRecurringDays?.length || existingRecurringDays.length===1 && existingRecurringDays[0]===existingPattern.slice(7)) &&
+      Number.isInteger(existingTotal) && Number(existingTotal)>1 &&
+      Number(incoming.sourceOccurrenceCount)>=Number(existingTotal)+1 &&
+      existingUntil && incoming.startDate===new Date(Date.parse(existingUntil+'T00:00:00Z')+7*86400000).toISOString().slice(0,10));
+  if(sameSourceCalendarOccurrence && existingUntil && incoming.startDate>existingUntil && existingTotal){
+    return {recurringPattern:existingPattern,recurringDaysOfWeek:existingRecurringDays,
+      recurringWeekdaySequence:existingRecurringSequence,recurringWeekInterval:existingRecurringWeekInterval,
+      totalOccurrences:existingTotal+1,recurrenceUntilDate:incoming.startDate,isRecurring:true,forceIsRecurring:true};
+  }
 
   let recurringPattern: string | undefined;
   let recurringDaysOfWeek: RecurringWeekday[] | undefined;
@@ -7121,6 +7205,7 @@ function selectRecurringLifecycleMerge(
     incomingRecurringState === 'no' &&
     !incomingHasPattern &&
     !incomingHasCustomSchedule &&
+    !sameSourceCalendarOccurrence &&
     !unsafeCrossSourceDateMerge &&
     (!(getDuplicateMergeSourceRoot(existing.recurrenceSourceUniqueId) || getEventDuplicateMergeSourceRoot(existing)) ||
       !getEventDuplicateMergeSourceRoot(incoming) ||
@@ -8836,13 +8921,11 @@ export function summarizeFullParserEvents(
   }));
 }
 
-export function summarizeGptUsageRecords(
+function summarizeGptUsageRecords(
   records: GptUsageRecord[]
 ): Record<string, unknown> {
   const summary: {
     totalCalls: number;
-    reusedResponses?: number;
-    reusedResponsesByStage?: Record<string, number>;
     inputTokens: number;
     outputTokens: number;
     totalTokens: number;
@@ -8868,12 +8951,6 @@ export function summarizeGptUsageRecords(
 
   for (const record of records || []) {
     const stage = String(record.stage || 'unknown');
-    if (record.reusedResponse === true) {
-      summary.reusedResponses = (summary.reusedResponses || 0) + 1;
-      summary.reusedResponsesByStage ||= {};
-      summary.reusedResponsesByStage[stage] = (summary.reusedResponsesByStage[stage] || 0) + 1;
-      continue;
-    }
     const component = String(record.component || 'unknown');
     const model = String(record.model || 'unknown');
     const inputTokens = Number(record.inputTokens || 0);

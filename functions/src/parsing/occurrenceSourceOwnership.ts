@@ -1,4 +1,5 @@
 import type {ExtractedItem, FormattedEvent, RecurringPattern} from './types.js';
+import {bindProgrammeMonth,restoreExplainedOccurrenceDate,earlierProgrammeCutoff,restoreMonthlyProgrammeWeekday,hasOnlyDescriptiveSkillRecurrence} from './programmeSourceGuards.js';
 
 const key = (value: unknown) => String(value || '').normalize('NFKD').replace(/[\u0300-\u036f]/g, '')
   .toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
@@ -117,6 +118,10 @@ export function materialCaptionClockConflict(item: {
 }
 
 export function prepareOccurrenceSourceItem<T extends ExtractedItem>(item: T, caption: string): T {
+  item=bindProgrammeMonth(restoreMonthlyProgrammeWeekday(restoreExplainedOccurrenceDate(item,caption),caption),caption);
+  const own=`${item.name} ${item.description||''}`;
+  if((item as ExtractedItem & {recurringPattern?:string}).recurringPattern==='daily' &&
+      hasOnlyDescriptiveSkillRecurrence(own))item={...item,recurringPattern:'none',_recurrenceEvidence:undefined};
   const pattern = explicitStartingProgramPattern(item, caption);
   const currentPattern = (item as ExtractedItem & {recurringPattern?: string}).recurringPattern;
   return {...item,
@@ -135,11 +140,15 @@ export function restoreOccurrenceSourceOwnership<T extends FormattedEvent>(event
     if (matches.length !== 1) return event;
     const source = matches[0] as ExtractedItem & {recurringPattern?: RecurringPattern;totalOccurrences?: number;recurrenceUntilDate?: string};
     return {...event,
+      ...(source._sourceProgrammeMonthEnd && source.recurrenceUntilDate===source._sourceProgrammeMonthEnd &&
+          /^weekly_/.test(String(source.recurringPattern||'')) && source.recurringPattern===event.recurringPattern
+        ? {recurrenceUntilDate:earlierProgrammeCutoff(event.recurrenceUntilDate,source._sourceProgrammeMonthEnd),_sourceProgrammeMonthEnd:source._sourceProgrammeMonthEnd}:{}),
       ...(source.sourceLocationRole === 'collection_partner_only'
         ? {sourceLocationRole:source.sourceLocationRole, venue:'', establishment:'', additionalLocation:'', address:'', spatial:source.spatial} : {}),
       ...(source._sourceWeeklyProgramPattern && source.recurringPattern === source._sourceWeeklyProgramPattern
         ? {recurringPattern:source.recurringPattern, isRecurring:'Yes' as const, _sourceWeeklyProgramPattern:source._sourceWeeklyProgramPattern,
-          totalOccurrences:source.totalOccurrences, recurrenceUntilDate:source.recurrenceUntilDate} : {}),
+          totalOccurrences:source.totalOccurrences, recurrenceUntilDate:source._sourceProgrammeMonthEnd&&source.recurrenceUntilDate===source._sourceProgrammeMonthEnd
+            ? earlierProgrammeCutoff(event.recurrenceUntilDate,source._sourceProgrammeMonthEnd):source.recurrenceUntilDate} : {}),
       ...(source.recurringPattern === 'none' && hasOnlyAlternativeRecurrence(source)
         ? {recurringPattern:'none' as const, isRecurring:'No' as const, totalOccurrences:undefined, recurrenceUntilDate:undefined,
           recurringDaysOfWeek:undefined, recurringWeekdaySequence:undefined, recurringWeekInterval:undefined} : {}),

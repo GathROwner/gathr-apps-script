@@ -4,7 +4,7 @@ import {
   validFamilyAudienceEvidence,
 } from '../services/familyAudienceEvidence.js';
 
-export const FAMILY_FRIENDLY_SCORING_VERSION = 'family-friendly-v12';
+export const FAMILY_FRIENDLY_SCORING_VERSION = 'family-friendly-v14';
 export const FAMILY_FRIENDLY_LIKELY_THRESHOLD = 60;
 
 export type FamilyFriendlyLevel = 'unlikely' | 'possible' | 'likely' | 'high';
@@ -135,6 +135,8 @@ export function scoreFamilyFriendly(
   let score = 15;
 
   const hasExplicitFamilyAudience =
+    /(?:^|[.!?]\s*)bring family\s*(?:,\s*|(?:and|&)\s+)friends\b/.test(description) ||
+    /\bfamily (?:halloween|costume) (?:evening|event|party)\b|\bpour toute la famille\b/.test(text) ||
     /(?:^|[.!?]\s*)for families(?:[.!?:]|$)/.test(description) ||
     /\b(?:family[- ]friendly|family day|family fun|families welcome|for (?:the )?(?:whole )?family|fun for (?:the )?(?:whole )?family|family event|family activity|family activities)\b/.test(text) ||
     /\b(?:familial|familiale|familiaux|familiales|pour les familles|activites familiales|journee familiale|en famille)\b/.test(text) ||
@@ -164,6 +166,7 @@ export function scoreFamilyFriendly(
     (hasScoped('beneficiary_not_audience') && hasScoped('child_focused_program'));
   const beneficiaryOnly = isBeneficiary && !hasIndependentChildParticipation;
   const hasChildFocusedProgram =
+    /\bplay\b[^.!?]{0,70}\bwith other (?:kids|children)\b|\bjunior board games?\b/.test(directText) ||
     /\b(?:for kids|for children|kids?'?(?:\s+\w+){0,2}\s+(?:club|camp|camps|program|programme|activity|activities|workshop|class)|children'?s (?:club|camp|program|programme|activity|activities|workshop|class|storytime)|toddler (?:time|group|program|programme|activity|class|music)|baby (?:time|group|program|programme|activity)|junior (?:club|camp|program|activity))\b/.test(directText) ||
     /\b(?:club de lecture d'ete|pour les enfants|activites? pour enfants|camp pour enfants|heure du conte)\b/.test(directText) ||
     /\b(?:toddler (?:pool|play)|junior curling|preschool (?:program|programme|class))\b/.test(directText) || hasScoped('child_focused_program');
@@ -171,6 +174,7 @@ export function scoreFamilyFriendly(
     /\b(?:kids?|children'?s|youth|teen|toddler|baby)\s+(?:trivia|quiz|movie|film|cinema|screening|concert|show|dance|disco|party|festival|day|night|sports?|hockey|soccer|basketball|baseball|football|golf|skating|swim|crafts?|art|music|theatre|theater|performance|series)\b/.test(title) ||
     /\b(?:trivia|quiz|movie|film|cinema|screening|concert|show|dance|disco|party|festival|day|night|sports?|hockey|soccer|basketball|baseball|football|golf|skating|swim|crafts?|art|music|theatre|theater|performance|series)\s+(?:for|pour)\s+(?:kids?|children|youths?|teens?|toddlers?|babies|enfants|jeunes)\b/.test(title) || hasScoped('child_focused_title');
   const hasFamilyAttendanceContext =
+    /\bbring (?:your|the) (?:kids|kiddos|children)\b/.test(text) ||
     /\b(?:parents? (?:and|with) (?:kids?|children)|kids? and (?:their )?(?:parents?|grown-ups?|caregivers?)|children and (?:their )?(?:parents?|grown-ups?|caregivers?)|parent[- ]and[- ]child|caregivers? (?:and|with) (?:kids?|children)|grown-ups? (?:and|with) (?:kids?|children))\b/.test(text) ||
     /\b(?:parents? et enfants|enfants et parents|avec leurs parents|kids and adults|children and adults|children are free with a participating adult)\b/.test(text) ||
     (/\ball are welcome\b/.test(text) && /\bif you have (?:kids|children)\b/.test(text)) || hasScoped('family_attendance_context');
@@ -239,7 +243,7 @@ export function scoreFamilyFriendly(
     reason !== 'legacy_family_category'
   );
   const hasAlcoholFocus =
-    /\b(?:beer|wine|cocktail|spirits?|brewery|brewing company|taproom|pub crawl|wine tasting|beer festival)\b/.test(text) || hasScoped('alcohol_focused');
+    /\b(?:beer|wine|cocktail|spirits|spirit\s+(?:tasting|flight|distill(?:ing|ation))|brewery|brewing company|taproom|pub crawl|wine tasting|beer festival)\b/.test(text) || hasScoped('alcohol_focused');
   if (hasAlcoholFocus) {
     score -= hasPositiveAudienceEvidence ? 15 : 30;
     addReason(reasons, 'alcohol_focused');

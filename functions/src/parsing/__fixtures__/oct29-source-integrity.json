@@ -1,0 +1,2779 @@
+{
+  "runId": "61446cfa-5ae7-4d1a-9e90-f7d9f08b4725",
+  "rows": [
+    {
+      "row": 16,
+      "sourceId": "1448322924150044",
+      "caption": "November at our Eastern Region Libraries!\n\nFind all the event details, here: https://peilibrary.libcal.com/\n\nOCR TEXT:\nMay be a graphic of text\nMay be an image of text\nMay be a graphic of text\nMay be a graphic of text\nMay be an image of chess and text",
+      "publisher": "PEI Public Library Service des bibliothèques publiques ÎPÉ",
+      "rowMeta": {
+        "timestamp": "2026-10-29T11:31:02.000Z"
+      },
+      "stage3": [],
+      "stage4": [
+        {
+          "name": "Book Club",
+          "type": "event",
+          "date": "2026-11-18",
+          "startTime": "6:30 p.m.",
+          "endTime": "",
+          "venue": "Mount Stewart Public Library",
+          "description": "For adults. Grab a copy of this month's selection at the desk and join for a fun discussion and some light refreshments.",
+          "extractionReason": "The Mount Stewart Public Library listing prints Book Club on Wednesday, November 18th at 6:30 p.m. for Adults.",
+          "relevantImageIndex": 0,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Mount Stewart Public Library"
+            ],
+            "confirmedStreets": [
+              "104 Main Street"
+            ],
+            "ordered": false,
+            "evidenceNotes": "The library name and street address are printed on the flyer."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 6:30 p.m."
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 1,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Watercolour & Wishes: Holiday Card Making",
+          "type": "event",
+          "date": "2026-11-21",
+          "startTime": "2:00 p.m.",
+          "endTime": "",
+          "venue": "Mount Stewart Public Library",
+          "description": "For adults. Create handmade watercolour holiday cards in a relaxed, beginner-friendly program. No painting experience is needed; all supplies are provided.",
+          "extractionReason": "The Mount Stewart Public Library listing prints this event on Saturday, November 21st at 2:00 p.m. for Adults.",
+          "relevantImageIndex": 0,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Mount Stewart Public Library"
+            ],
+            "confirmedStreets": [
+              "104 Main Street"
+            ],
+            "ordered": false,
+            "evidenceNotes": "The library name and street address are printed on the flyer."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 2:00 p.m."
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceOccurrenceCount": 2,
+          "_pipelineIndex": 2,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Fiber Arts Club",
+          "type": "event",
+          "date": "2026-11-25",
+          "startTime": "6:30 p.m.",
+          "endTime": "",
+          "venue": "Mount Stewart Public Library",
+          "description": "For adults. Bring a project such as knitting, crocheting, or embroidery and enjoy the company. All skill levels are welcome.",
+          "extractionReason": "The Mount Stewart Public Library listing prints Fiber Arts Club on Wednesday, November 25th at 6:30 p.m. for Adults.",
+          "relevantImageIndex": 0,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Mount Stewart Public Library"
+            ],
+            "confirmedStreets": [
+              "104 Main Street"
+            ],
+            "ordered": false,
+            "evidenceNotes": "The library name and street address are printed on the flyer."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 6:30 p.m."
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 3,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Read, Sing, Play!",
+          "type": "event",
+          "date": "2026-11-06",
+          "startTime": "10:00 a.m.",
+          "endTime": "",
+          "venue": "Mount Stewart Public Library",
+          "description": "For children. Ages 0–5. Enjoy stories, songs, and rhymes for kids and their grown-ups. Listed for Fridays; this is the first Friday in November.",
+          "extractionReason": "The Children section lists Read, Sing, Play! on Fridays at 10:00 a.m. for ages 0–5; November 6 is the first Friday in the November program month.",
+          "relevantImageIndex": 0,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Mount Stewart Public Library"
+            ],
+            "confirmedStreets": [
+              "104 Main Street"
+            ],
+            "ordered": false,
+            "evidenceNotes": "The library name and street address are printed on the flyer."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 10:00 a.m."
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceOccurrenceCount": 3,
+          "_pipelineIndex": 4,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Button Art",
+          "type": "event",
+          "date": "2026-11-06",
+          "startTime": "10:30 a.m.",
+          "endTime": "",
+          "venue": "Mount Stewart Public Library",
+          "description": "For children. Ages 6–12. PD Day Programs: No school? Join at the library for art. The November 6 activity is Button Art.",
+          "extractionReason": "The Children section lists PD Day Programs for ages 6–12 at 10:30 a.m. and specifies Button Art for November 6th.",
+          "relevantImageIndex": 0,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Mount Stewart Public Library"
+            ],
+            "confirmedStreets": [
+              "104 Main Street"
+            ],
+            "ordered": false,
+            "evidenceNotes": "The library name and street address are printed on the flyer."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 10:30 a.m."
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 5,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Colourful Foil Prints",
+          "type": "event",
+          "date": "2026-11-27",
+          "startTime": "10:30 a.m.",
+          "endTime": "",
+          "venue": "Mount Stewart Public Library",
+          "description": "For children. Ages 6–12. PD Day Programs: No school? Join at the library for art. The November 27th activity is Colourful Foil Prints.",
+          "extractionReason": "The Children section lists PD Day Programs for ages 6–12 at 10:30 a.m. and specifies Colourful Foil Prints for November 27th.",
+          "relevantImageIndex": 0,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Mount Stewart Public Library"
+            ],
+            "confirmedStreets": [
+              "104 Main Street"
+            ],
+            "ordered": false,
+            "evidenceNotes": "The library name and street address are printed on the flyer."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 10:30 a.m."
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 6,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Colour Lab: Mix It Up!",
+          "type": "event",
+          "date": "2026-11-14",
+          "startTime": "2:00 p.m.",
+          "endTime": "",
+          "venue": "Mount Stewart Public Library",
+          "description": "For children. Ages 6–12. Explore the science of colour using washable markers and water. Discover how colours change as they mix and separate, and predict what will happen.",
+          "extractionReason": "The Children section prints Colour Lab: Mix It Up! on Saturday, November 14th at 2:00 p.m. for ages 6–12.",
+          "relevantImageIndex": 0,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Mount Stewart Public Library"
+            ],
+            "confirmedStreets": [
+              "104 Main Street"
+            ],
+            "ordered": false,
+            "evidenceNotes": "The library name and street address are printed on the flyer."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 2:00 p.m."
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 7,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Read, Sing, Play!",
+          "type": "event",
+          "date": "2026-11-04",
+          "startTime": "11:00 a.m.",
+          "endTime": "",
+          "venue": "St. Peters Public Library",
+          "description": "For children. Ages 0–5. Enjoy stories, songs, and rhymes for kids and their grown-ups. Listed for Wednesdays; this is the first Wednesday in the November program month.",
+          "extractionReason": "The St. Peters Public Library listing gives Wednesdays at 11:00 a.m. for ages 0–5; November 4 is the first Wednesday in the November program month.",
+          "relevantImageIndex": 1,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "St. Peters Public Library"
+            ],
+            "confirmedStreets": [
+              "1968 Cardigan Road"
+            ],
+            "ordered": false,
+            "evidenceNotes": "The library name and street address are printed on the flyer."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 11:00 a.m."
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceOccurrenceCount": 3,
+          "_pipelineIndex": 8,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "St. Peter's Book Club",
+          "type": "event",
+          "date": "2026-11-19",
+          "startTime": "5:00 p.m.",
+          "endTime": "",
+          "venue": "St. Peters Public Library",
+          "description": "For adults. Stop by and pick up a copy of this month's book and join for a lively discussion. New members are welcome.",
+          "extractionReason": "The St. Peters Public Library listing prints St. Peter's Book Club on Thursday, November 19th at 5:00 p.m. for Adults.",
+          "relevantImageIndex": 1,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "St. Peters Public Library"
+            ],
+            "confirmedStreets": [
+              "1968 Cardigan Road"
+            ],
+            "ordered": false,
+            "evidenceNotes": "The library name and street address are printed on the flyer."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 5:00 p.m."
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 9,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Coffee Filter Leaves",
+          "type": "event",
+          "date": "2026-11-26",
+          "startTime": "3:00 p.m.",
+          "endTime": "",
+          "venue": "St. Peters Public Library",
+          "description": "For children. Ages 6–12. Craft colourful fallen leaves using coffee filters. All supplies are provided.",
+          "extractionReason": "The St. Peters Public Library listing prints Coffee Filter Leaves on Thursday, November 26th at 3:00 p.m. for ages 6–12.",
+          "relevantImageIndex": 1,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "St. Peters Public Library"
+            ],
+            "confirmedStreets": [
+              "1968 Cardigan Road"
+            ],
+            "ordered": false,
+            "evidenceNotes": "The library name and street address are printed on the flyer."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 3:00 p.m."
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 10,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Read, Sing, Play!",
+          "type": "event",
+          "date": "2026-11-06",
+          "startTime": "11:00 a.m.",
+          "endTime": "",
+          "venue": "Souris",
+          "description": "For children. Ages 0–5. Enjoy stories, songs, and rhymes for kids and their grown-ups. Listed for Fridays; this is the first Friday in the November program month.",
+          "extractionReason": "The Souris listing gives Fridays at 11:00 a.m. for ages 0–5; November 6 is the first Friday in the November program month.",
+          "relevantImageIndex": 1,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Souris"
+            ],
+            "confirmedStreets": [
+              "175 Main Street"
+            ],
+            "ordered": false,
+            "evidenceNotes": "The flyer identifies the library as Souris and prints its street address."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 11:00 a.m."
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceOccurrenceCount": 3,
+          "_pipelineIndex": 11,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Digital Health Week Info Session",
+          "type": "event",
+          "date": "2026-11-19",
+          "startTime": "10:00 a.m.",
+          "endTime": "12:00 p.m.",
+          "venue": "Souris",
+          "description": "For adults. MyPEI Account and MyHealthPEI teams are partnering with PEI Public Libraries to help island residents sign up for and use MyHealthPEI. Staff will be available to help create and verify a MyPEI Account and answer questions.",
+          "extractionReason": "The Souris listing prints Digital Health Week Info Session on Thursday, November 19th from 10:00 a.m. to 12:00 p.m. for Adults.",
+          "relevantImageIndex": 1,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Souris"
+            ],
+            "confirmedStreets": [
+              "175 Main Street"
+            ],
+            "ordered": false,
+            "evidenceNotes": "The flyer identifies the library as Souris and prints its street address."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 10:00 a.m."
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "Extracted item clock: 12:00 p.m."
+            }
+          },
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 12,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "PD Day Art - Coffee Filter Leaves",
+          "type": "event",
+          "date": "2026-11-27",
+          "startTime": "1:00 p.m.",
+          "endTime": "",
+          "venue": "Souris",
+          "description": "For children. Ages 6–12. Craft colourful fallen leaves using coffee filters. All supplies are provided.",
+          "extractionReason": "The Souris listing prints PD Day Art - Coffee Filter Leaves on Friday, November 27th at 1:00 p.m. for ages 6–12.",
+          "relevantImageIndex": 1,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Souris"
+            ],
+            "confirmedStreets": [
+              "175 Main Street"
+            ],
+            "ordered": false,
+            "evidenceNotes": "The flyer identifies the library as Souris and prints its street address."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 1:00 p.m."
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 13,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Watercolour Cricut Cards",
+          "type": "event",
+          "date": "2026-11-24",
+          "startTime": "3:00 p.m.",
+          "endTime": "",
+          "venue": "Georgetown Genevieve Solomon Library",
+          "description": "For adults. Make custom watercolour cards for holiday greetings, invitations, and art projects.",
+          "extractionReason": "The adult listing prints Watercolour Cricut Cards on Tuesday, November 24th at 3:00 p.m.",
+          "relevantImageIndex": 2,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Georgetown Genevieve Solomon Library"
+            ],
+            "confirmedStreets": [
+              "47 Kent Street"
+            ],
+            "ordered": false,
+            "evidenceNotes": "The library name and street address are printed on the flyer."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 3:00 p.m."
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 14,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Read, Sing, Play!",
+          "type": "event",
+          "date": "2026-11-02",
+          "startTime": "11:00 a.m.",
+          "endTime": "",
+          "venue": "Georgetown Genevieve Solomon Library",
+          "description": "For children. Ages 0–5. Enjoy stories, songs, movement, and rhymes for kids and their grown-ups. Listed for Mondays; this is the first Monday in the November program month.",
+          "extractionReason": "The Children section lists Read, Sing, Play! on Mondays at 11:00 a.m. for ages 0–5; November 2 is the first Monday in the November program month.",
+          "relevantImageIndex": 2,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Georgetown Genevieve Solomon Library"
+            ],
+            "confirmedStreets": [
+              "47 Kent Street"
+            ],
+            "ordered": false,
+            "evidenceNotes": "The library name and street address are printed on the flyer."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 11:00 a.m."
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceOccurrenceCount": 3,
+          "_pipelineIndex": 15,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Paws to Read",
+          "type": "event",
+          "date": "2026-11-04",
+          "startTime": "4:00 p.m.",
+          "endTime": "",
+          "venue": "Georgetown Genevieve Solomon Library",
+          "description": "For children. Ages 6–12. Build confidence by reading to a dog; the dogs are excellent listeners. Registration is required; call to book a time or find out more about reading to therapy dog Serendipity.",
+          "extractionReason": "The Children section prints Paws to Read on Wednesday, November 4th at 4:00 p.m. for ages 6–12.",
+          "relevantImageIndex": 2,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Georgetown Genevieve Solomon Library"
+            ],
+            "confirmedStreets": [
+              "47 Kent Street"
+            ],
+            "ordered": false,
+            "evidenceNotes": "The library name and street address are printed on the flyer."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 4:00 p.m."
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceOccurrenceCount": 2,
+          "_pipelineIndex": 16,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Paws to Read",
+          "type": "event",
+          "date": "2026-11-18",
+          "startTime": "4:00 p.m.",
+          "endTime": "",
+          "venue": "Georgetown Genevieve Solomon Library",
+          "description": "For children. Ages 6–12. Build confidence by reading to a dog; the dogs are excellent listeners. Registration is required; call to book a time or find out more about reading to therapy dog Serendipity.",
+          "extractionReason": "The Children section prints Paws to Read on Wednesday, November 18th at 4:00 p.m. for ages 6–12; it is a separate dated session from November 4th.",
+          "relevantImageIndex": 2,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Georgetown Genevieve Solomon Library"
+            ],
+            "confirmedStreets": [
+              "47 Kent Street"
+            ],
+            "ordered": false,
+            "evidenceNotes": "The library name and street address are printed on the flyer."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 4:00 p.m."
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceOccurrenceCount": 2,
+          "_pipelineIndex": 17,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Puffy Paint Poppies",
+          "type": "event",
+          "date": "2026-11-06",
+          "startTime": "10:30 a.m.",
+          "endTime": "",
+          "venue": "Georgetown Genevieve Solomon Library",
+          "description": "For children. Families/All Ages. Explore texture with homemade DIY puffy paint poppies.",
+          "extractionReason": "The Children section prints Puffy Paint Poppies on Friday, November 6th at 10:30 a.m. for Families/All Ages.",
+          "relevantImageIndex": 2,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Georgetown Genevieve Solomon Library"
+            ],
+            "confirmedStreets": [
+              "47 Kent Street"
+            ],
+            "ordered": false,
+            "evidenceNotes": "The library name and street address are printed on the flyer."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 10:30 a.m."
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 18,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Watercolour & Wishes: Holiday Card Making",
+          "type": "event",
+          "date": "2026-11-24",
+          "startTime": "6:00 p.m.",
+          "endTime": "",
+          "venue": "Morell Public Library",
+          "description": "For adults. Create handmade watercolour holiday cards in a relaxed, beginner-friendly program. No painting experience is needed; all supplies are provided.",
+          "extractionReason": "The adult listing prints Watercolour & Wishes: Holiday Card Making on Tuesday, November 24th at 6:00 p.m.; this is a distinct listing from the Mount Stewart event.",
+          "relevantImageIndex": 3,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Morell Public Library"
+            ],
+            "confirmedStreets": [
+              "89 Red Head Road"
+            ],
+            "ordered": false,
+            "evidenceNotes": "The library name and street address are printed on the flyer."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 6:00 p.m."
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceOccurrenceCount": 2,
+          "_pipelineIndex": 19,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Read, Sing, Play!",
+          "type": "event",
+          "date": "2026-11-04",
+          "startTime": "10:30 a.m.",
+          "endTime": "",
+          "venue": "Morell Public Library",
+          "description": "For children. Ages 0–5. Enjoy stories, songs, and rhymes for kids and their grown-ups. Listed for Wednesdays; this is the first Wednesday in the November program month.",
+          "extractionReason": "The Children section lists Read, Sing, Play! on Wednesdays at 10:30 a.m. for ages 0–5; November 4 is the first Wednesday in the November program month.",
+          "relevantImageIndex": 3,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Morell Public Library"
+            ],
+            "confirmedStreets": [
+              "89 Red Head Road"
+            ],
+            "ordered": false,
+            "evidenceNotes": "The library name and street address are printed on the flyer."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 10:30 a.m."
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceOccurrenceCount": 3,
+          "_pipelineIndex": 20,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Button Art",
+          "type": "event",
+          "date": "2026-11-06",
+          "startTime": "2:00 p.m.",
+          "endTime": "",
+          "venue": "Morell Public Library",
+          "description": "For children. Ages 6–12. PD Day Programs: No school? Join at the library for art. The November 6th activity is Button Art.",
+          "extractionReason": "The Children section lists PD Day Programs for ages 6–12 at 2:00 p.m. and specifies Button Art for November 6th.",
+          "relevantImageIndex": 3,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Morell Public Library"
+            ],
+            "confirmedStreets": [
+              "89 Red Head Road"
+            ],
+            "ordered": false,
+            "evidenceNotes": "The library name and street address are printed on the flyer."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 2:00 p.m."
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 21,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Colourful Foil Prints",
+          "type": "event",
+          "date": "2026-11-27",
+          "startTime": "2:00 p.m.",
+          "endTime": "",
+          "venue": "Morell Public Library",
+          "description": "For children. Ages 6–12. PD Day Programs: No school? Join at the library for art. The November 27th activity is Colourful Foil Prints.",
+          "extractionReason": "The Children section lists PD Day Programs for ages 6–12 at 2:00 p.m. and specifies Colourful Foil Prints for November 27th.",
+          "relevantImageIndex": 3,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Morell Public Library"
+            ],
+            "confirmedStreets": [
+              "89 Red Head Road"
+            ],
+            "ordered": false,
+            "evidenceNotes": "The library name and street address are printed on the flyer."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 2:00 p.m."
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 22,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Colour Lab: Mix It Up!",
+          "type": "event",
+          "date": "2026-11-14",
+          "startTime": "10:00 a.m.",
+          "endTime": "",
+          "venue": "Morell Public Library",
+          "description": "For children. Ages 6–12. Explore the science of colour using washable markers and water. Discover how colours change as they mix and separate, and predict what will happen.",
+          "extractionReason": "The Children section prints Colour Lab: Mix It Up! on Saturday, November 14th at 10:00 a.m. for ages 6–12.",
+          "relevantImageIndex": 3,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Morell Public Library"
+            ],
+            "confirmedStreets": [
+              "89 Red Head Road"
+            ],
+            "ordered": false,
+            "evidenceNotes": "The library name and street address are printed on the flyer."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 10:00 a.m."
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 23,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Santas for Seniors Card-making Station",
+          "type": "event",
+          "date": "2026-11-12",
+          "startTime": "",
+          "endTime": "",
+          "venue": "Montague Rotary Library",
+          "description": "For adults. Begins Thursday, November 12 during open hours. Drop in to make a card or two for Santas for Seniors to deliver to local seniors. All supplies are provided.",
+          "extractionReason": "The adult listing explicitly says the card-making station begins Thursday, November 12 during open hours.",
+          "relevantImageIndex": 4,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Montague Rotary Library"
+            ],
+            "confirmedStreets": [
+              "21 Sullivan Lane"
+            ],
+            "ordered": false,
+            "evidenceNotes": "The library name and street address are printed on the flyer."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "none",
+              "evidence": ""
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 24,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "DIY Bookmarks",
+          "type": "event",
+          "date": "2026-11-16",
+          "startTime": "2:30 p.m.",
+          "endTime": "",
+          "venue": "Montague Rotary Library",
+          "description": "For adults. Create custom bookmarks for yourself or to give to others for the cozy reading season ahead. Please contact the library to register.",
+          "extractionReason": "The adult listing prints DIY Bookmarks on Monday, November 16th at 2:30 p.m.",
+          "relevantImageIndex": 4,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Montague Rotary Library"
+            ],
+            "confirmedStreets": [
+              "21 Sullivan Lane"
+            ],
+            "ordered": false,
+            "evidenceNotes": "The library name and street address are printed on the flyer."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 2:30 p.m."
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 25,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Afternoon Book Club",
+          "type": "event",
+          "date": "2026-11-18",
+          "startTime": "2:00 p.m.",
+          "endTime": "",
+          "venue": "Montague Rotary Library",
+          "description": "For adults. Pick up a copy of This Summer Will Be Different by Carley Fortune from the desk and join other readers for a discussion.",
+          "extractionReason": "The adult listing prints Afternoon Book Club on Wednesday, November 18th at 2:00 p.m.",
+          "relevantImageIndex": 4,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Montague Rotary Library"
+            ],
+            "confirmedStreets": [
+              "21 Sullivan Lane"
+            ],
+            "ordered": false,
+            "evidenceNotes": "The library name and street address are printed on the flyer."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 2:00 p.m."
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 26,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Chess Club",
+          "type": "event",
+          "date": "2026-11-04",
+          "startTime": "4:30 p.m.",
+          "endTime": "",
+          "venue": "Montague Rotary Library",
+          "description": "For adults. All Ages. Drop by for a friendly game or two of chess with beginner and avid players. Listed for Wednesdays; this is the first Wednesday in the November program month.",
+          "extractionReason": "The adult section lists Chess Club on Wednesdays at 4:30 p.m. and prints All Ages; November 4 is the first Wednesday in the November program month.",
+          "relevantImageIndex": 4,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Montague Rotary Library"
+            ],
+            "confirmedStreets": [
+              "21 Sullivan Lane"
+            ],
+            "ordered": false,
+            "evidenceNotes": "The library name and street address are printed on the flyer."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 4:30 p.m."
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 27,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Digital Health Week Info Sessions",
+          "type": "event",
+          "date": "2026-11-19",
+          "startTime": "2:00 p.m.",
+          "endTime": "4:00 p.m.",
+          "venue": "Montague Rotary Library",
+          "description": "For adults. MyPEI Account and MyHealthPEI teams are partnering with PEI Public Libraries to help island residents sign up for and use MyHealthPEI. Staff will be available to help create and verify a MyPEI Account and answer questions.",
+          "extractionReason": "The adult listing prints Digital Health Week Info Sessions on Thursday, November 19th from 2:00 to 4:00 p.m.",
+          "relevantImageIndex": 4,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Montague Rotary Library"
+            ],
+            "confirmedStreets": [
+              "21 Sullivan Lane"
+            ],
+            "ordered": false,
+            "evidenceNotes": "The library name and street address are printed on the flyer."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 2:00 p.m."
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "Extracted item clock: 4:00 p.m."
+            }
+          },
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 28,
+          "recurringPattern": "none"
+        }
+      ],
+      "events": []
+    },
+    {
+      "row": 176,
+      "sourceId": "1744686364332822",
+      "caption": " **THAT'S A WRAP ON CARROT & PARSNIP HARVEST!** \n\nWe've finally finished harvesting all those delicious carrots, and just yesterday evening, we finished up the parsnips too!  Everything is tucked away safely in storage! ❤️\n\n **This is our LAST WEEK of regular hours at Toby's Farm Market!**\n\nWe apologize if our hours have been a little sketchy lately! We've been busy trying to get the harvest finished up before the season ends. Thanks for understanding! ❤️\n\nWe'll be closing the market for a few months, but don't worry!\n\n You can still purchase your farm-fresh veggies directly from us! Our root vegetables are kept fresh in temperature-controlled storage year-round.\n\n☎️ **Call or text 902-215-0219 to place your orders!**\n\n **LOVE PARSNIPS?**\nWe sell them in convenient **1 lb bags or in bulk!**\n\n **The more you buy, the more you SAVE!**\n\n **Now tell us… HOW DO YOU LOVE YOUR CARROTS?** \n\n Raw and crunchy?\n\n Boiled with butter?\n\n Roasted?\n\n Traditional orange or colourful Rainbow Heirloom carrots? \n\n**Tell us your favourite!** \n\n❤️ **Toby's Farm Market** ",
+      "publisher": "Fortune Bridge Farms & Toby’s Farm Market",
+      "rowMeta": {
+        "timestamp": "2026-10-29T11:26:33.000Z"
+      },
+      "stage3": [],
+      "stage4": [
+        {
+          "name": "Parsnip Bulk Savings Deal",
+          "description": "LOVE PARSNIPS? We sell them in convenient 1 lb bags or in bulk! The more you buy, the more you SAVE!",
+          "date": "2026-10-29",
+          "startTime": "",
+          "endTime": "",
+          "venue": "Toby's Farm Market",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "timeFlags": {
+            "start": {
+              "source": "none",
+              "evidence": ""
+            },
+            "end": {
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "extractionReason": "“The more you buy, the more you SAVE!”",
+          "_sourceType": "special",
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 1
+        }
+      ],
+      "events": [
+        {
+          "name": "Parsnip Bulk Savings Deal",
+          "category": "Food Special",
+          "isEvent": "No",
+          "isFoodSpecial": "Yes",
+          "establishment": "Toby's Farm Market",
+          "additionalLocation": "Toby's Farm Market",
+          "startDate": "2026-10-29",
+          "startTime": "11:26",
+          "endDate": "2026-10-29",
+          "endTime": "21:00",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "totalOccurrences": null,
+          "recurrenceUntilDate": "",
+          "timeFlags": {
+            "start": {
+              "source": "semantic",
+              "evidence": "Start from post time 11:26"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceType": "special",
+          "description": "LOVE PARSNIPS? We sell them in convenient 1 lb bags or in bulk! The more you buy, the more you SAVE!"
+        }
+      ]
+    },
+    {
+      "row": 17,
+      "sourceId": "1447322934250043",
+      "caption": "November at our Western Region Libraries!\n\nFind all the event details, here: https://peilibrary.libcal.com/\n\nOCR TEXT:\nMay be a graphic of text\nMay be a graphic of text\nMay be a graphic of text\nMay be an image of text\nMay be an image of text",
+      "publisher": "PEI Public Library Service des bibliothèques publiques ÎPÉ",
+      "rowMeta": {
+        "timestamp": "2026-10-28T11:27:03.000Z"
+      },
+      "stage3": [],
+      "stage4": [
+        {
+          "name": "A Ukulele Christmas",
+          "type": "event",
+          "date": "2026-11-06",
+          "startTime": "10:30 AM",
+          "endTime": "",
+          "venue": "Alberton Public Library",
+          "description": "For adults. Learn to play the ukulele with some well-known festive tunes. No experience needed and a limited number of ukuleles are available to borrow.",
+          "extractionReason": "Listed in the Alberton Public Library ADULTS section for Friday, November 6.",
+          "relevantImageIndex": 0,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Alberton Public Library, 11 Railway Street"
+            ],
+            "confirmedStreets": [
+              "Railway Street"
+            ],
+            "ordered": false,
+            "evidenceNotes": "Library name and street address are printed on the image."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 10:30 AM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceOccurrenceCount": 3,
+          "_pipelineIndex": 1,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "A Ukulele Christmas",
+          "type": "event",
+          "date": "2026-11-13",
+          "startTime": "10:30 AM",
+          "endTime": "",
+          "venue": "Alberton Public Library",
+          "description": "For adults. Learn to play the ukulele with some well-known festive tunes. No experience needed and a limited number of ukuleles are available to borrow.",
+          "extractionReason": "Listed in the Alberton Public Library ADULTS section for Friday, November 13.",
+          "relevantImageIndex": 0,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Alberton Public Library, 11 Railway Street"
+            ],
+            "confirmedStreets": [
+              "Railway Street"
+            ],
+            "ordered": false,
+            "evidenceNotes": "Library name and street address are printed on the image."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 10:30 AM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceOccurrenceCount": 3,
+          "_pipelineIndex": 2,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "A Ukulele Christmas",
+          "type": "event",
+          "date": "2026-11-20",
+          "startTime": "10:30 AM",
+          "endTime": "",
+          "venue": "Alberton Public Library",
+          "description": "For adults. Learn to play the ukulele with some well-known festive tunes. No experience needed and a limited number of ukuleles are available to borrow.",
+          "extractionReason": "Listed in the Alberton Public Library ADULTS section for Friday, November 20.",
+          "relevantImageIndex": 0,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Alberton Public Library, 11 Railway Street"
+            ],
+            "confirmedStreets": [
+              "Railway Street"
+            ],
+            "ordered": false,
+            "evidenceNotes": "Library name and street address are printed on the image."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 10:30 AM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceOccurrenceCount": 3,
+          "_pipelineIndex": 3,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Alberton Book Club",
+          "type": "event",
+          "date": "2026-11-25",
+          "startTime": "7:00 PM",
+          "endTime": "",
+          "venue": "Alberton Public Library",
+          "description": "For adults. Pick up a copy of this month's book at the circulation desk and join in for a lively discussion.",
+          "extractionReason": "Dated event listed in the Alberton Public Library ADULTS section for Wednesday, November 25.",
+          "relevantImageIndex": 0,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Alberton Public Library, 11 Railway Street"
+            ],
+            "confirmedStreets": [
+              "Railway Street"
+            ],
+            "ordered": false,
+            "evidenceNotes": "Library name and street address are printed on the image."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 7:00 PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 4,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Read. Sing. Play!",
+          "type": "event",
+          "date": "2026-11-04",
+          "startTime": "1:00 PM",
+          "endTime": "",
+          "venue": "Alberton Public Library",
+          "description": "For children. Ages 0 - 5 years. Join us for stories, songs, games, dancing and fun! Listed for Wednesdays; dated to the first Wednesday in November.",
+          "extractionReason": "Weekly Wednesday program in the Alberton Public Library CHILDREN section; the first Wednesday in November 2026 is November 4.",
+          "relevantImageIndex": 0,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Alberton Public Library, 11 Railway Street"
+            ],
+            "confirmedStreets": [
+              "Railway Street"
+            ],
+            "ordered": false,
+            "evidenceNotes": "Library name and street address are printed on the image."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 1:00 PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceOccurrenceCount": 3,
+          "_pipelineIndex": 5,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Saturday Fun",
+          "type": "event",
+          "date": "2026-11-07",
+          "startTime": "11:00 AM",
+          "endTime": "",
+          "venue": "Alberton Public Library",
+          "description": "For children. Children of all ages are invited to play, build, and create! Children under 10 must be accompanied by an adult. Listed for Saturdays; dated to the first Saturday in November.",
+          "extractionReason": "Weekly Saturday program in the Alberton Public Library CHILDREN section; the first Saturday in November 2026 is November 7.",
+          "relevantImageIndex": 0,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Alberton Public Library, 11 Railway Street"
+            ],
+            "confirmedStreets": [
+              "Railway Street"
+            ],
+            "ordered": false,
+            "evidenceNotes": "Library name and street address are printed on the image."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 11:00 AM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 6,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Book Club",
+          "type": "event",
+          "date": "2026-11-26",
+          "startTime": "6:00 PM",
+          "endTime": "",
+          "venue": "Tignish Public Library",
+          "description": "For adults. Come join in the discussion about some of today's most thought-provoking books.",
+          "extractionReason": "Dated event listed in the Tignish Public Library ADULTS section for Thursday, November 26.",
+          "relevantImageIndex": 1,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Tignish Public Library, 103 School Street"
+            ],
+            "confirmedStreets": [
+              "School Street"
+            ],
+            "ordered": false,
+            "evidenceNotes": "Library name and street address are printed on the image."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 6:00 PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 7,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Read. Sing. Play!",
+          "type": "event",
+          "date": "2026-11-03",
+          "startTime": "1:00 PM",
+          "endTime": "",
+          "venue": "Tignish Public Library",
+          "description": "For children. Ages 0-5. Snuggle up for cozy stories, songs, and rhymes. Listed for Tuesdays; dated to the first Tuesday in November.",
+          "extractionReason": "Weekly Tuesday program in the Tignish Public Library CHILDREN section; the first Tuesday in November 2026 is November 3.",
+          "relevantImageIndex": 1,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Tignish Public Library, 103 School Street"
+            ],
+            "confirmedStreets": [
+              "School Street"
+            ],
+            "ordered": false,
+            "evidenceNotes": "Library name and street address are printed on the image."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 1:00 PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceOccurrenceCount": 3,
+          "_pipelineIndex": 8,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Screen Free Saturdays",
+          "type": "event",
+          "date": "2026-11-07",
+          "startTime": "10:00 AM",
+          "endTime": "12:00 PM",
+          "venue": "Tignish Public Library",
+          "description": "For children. Come in for family fun with our games and blocks or enjoy some reading and coloring. Listed for Saturdays; dated to the first Saturday in November.",
+          "extractionReason": "Weekly Saturday program in the Tignish Public Library CHILDREN section; the first Saturday in November 2026 is November 7.",
+          "relevantImageIndex": 1,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Tignish Public Library, 103 School Street"
+            ],
+            "confirmedStreets": [
+              "School Street"
+            ],
+            "ordered": false,
+            "evidenceNotes": "Library name and street address are printed on the image."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 10:00 AM"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "Extracted item clock: 12:00 PM"
+            }
+          },
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 9,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Tech Help",
+          "type": "event",
+          "date": "2026-11-03",
+          "startTime": "5:00 PM",
+          "endTime": "7:00 PM",
+          "venue": "Tyne Valley Public Library",
+          "description": "For adults. Bring your own device or use our computers for some basic tech help. Listed for Tuesdays; dated to the first Tuesday in November.",
+          "extractionReason": "Weekly Tuesday program in the Tyne Valley Public Library ADULTS section; the first Tuesday in November 2026 is November 3.",
+          "relevantImageIndex": 2,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Tyne Valley Public Library, 19 Allen Road"
+            ],
+            "confirmedStreets": [
+              "Allen Road"
+            ],
+            "ordered": false,
+            "evidenceNotes": "Library name and street address are printed on the image."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 5:00 PM"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "Extracted item clock: 7:00 PM"
+            }
+          },
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 10,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Adult Craft Night",
+          "type": "event",
+          "date": "2026-11-17",
+          "startTime": "5:30 PM",
+          "endTime": "",
+          "venue": "Tyne Valley Public Library",
+          "description": "For adults. Join us for a night of creating and conversation. This month we will be making something wonderful using the book folding technique.",
+          "extractionReason": "Dated event listed in the Tyne Valley Public Library ADULTS section for Tuesday, November 17.",
+          "relevantImageIndex": 2,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Tyne Valley Public Library, 19 Allen Road"
+            ],
+            "confirmedStreets": [
+              "Allen Road"
+            ],
+            "ordered": false,
+            "evidenceNotes": "Library name and street address are printed on the image."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 5:30 PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 11,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Read. Sing. Play!",
+          "type": "event",
+          "date": "2026-11-04",
+          "startTime": "1:15 PM",
+          "endTime": "",
+          "venue": "Tyne Valley Public Library",
+          "description": "For children. Ages 0-5. Songs, stories, and fun for preschoolers and their families! Listed for Wednesdays; dated to the first Wednesday in November.",
+          "extractionReason": "Weekly Wednesday program in the Tyne Valley Public Library CHILDREN section; the first Wednesday in November 2026 is November 4.",
+          "relevantImageIndex": 2,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Tyne Valley Public Library, 19 Allen Road"
+            ],
+            "confirmedStreets": [
+              "Allen Road"
+            ],
+            "ordered": false,
+            "evidenceNotes": "Library name and street address are printed on the image."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 1:15 PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceOccurrenceCount": 3,
+          "_pipelineIndex": 12,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Screen Free Saturdays",
+          "type": "event",
+          "date": "2026-11-07",
+          "startTime": "1:00 PM",
+          "endTime": "4:00 PM",
+          "venue": "Tyne Valley Public Library",
+          "description": "For children. Come in for family fun with our Lego, games, and craft activities. Listed for Saturdays; dated to the first Saturday in November.",
+          "extractionReason": "Weekly Saturday program in the Tyne Valley Public Library CHILDREN section; the first Saturday in November 2026 is November 7.",
+          "relevantImageIndex": 2,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Tyne Valley Public Library, 19 Allen Road"
+            ],
+            "confirmedStreets": [
+              "Allen Road"
+            ],
+            "ordered": false,
+            "evidenceNotes": "Library name and street address are printed on the image."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 1:00 PM"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "Extracted item clock: 4:00 PM"
+            }
+          },
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 13,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Board Game Social",
+          "type": "event",
+          "date": "2026-11-05",
+          "startTime": "6:00 PM",
+          "endTime": "",
+          "venue": "Kensington Heritage Library",
+          "description": "For adults. Bring yourself and some friends for a fun-filled night of board games! All games supplied or bring your own!",
+          "extractionReason": "Dated event listed in the Kensington Heritage Library ADULTS section for Thursday, November 5.",
+          "relevantImageIndex": 3,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Kensington Heritage Library, 6 Commercial Street"
+            ],
+            "confirmedStreets": [
+              "Commercial Street"
+            ],
+            "ordered": false,
+            "evidenceNotes": "Library name and street address are printed on the image."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 6:00 PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 14,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Senior's Club",
+          "type": "event",
+          "date": "2026-11-04",
+          "startTime": "11:00 AM",
+          "endTime": "",
+          "venue": "Kensington Heritage Library",
+          "description": "For adults. Join us for light refreshments, conversations, games, and/or a simple craft! Listed for Wednesdays; dated to the first Wednesday in November.",
+          "extractionReason": "Weekly Wednesday program in the Kensington Heritage Library ADULTS section; the first Wednesday in November 2026 is November 4.",
+          "relevantImageIndex": 3,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Kensington Heritage Library, 6 Commercial Street"
+            ],
+            "confirmedStreets": [
+              "Commercial Street"
+            ],
+            "ordered": false,
+            "evidenceNotes": "Library name and street address are printed on the image."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 11:00 AM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 15,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Fall Mason Jar Craft",
+          "type": "event",
+          "date": "2026-11-12",
+          "startTime": "5:00 PM",
+          "endTime": "",
+          "venue": "Kensington Heritage Library",
+          "description": "For adults. Join us for a cozy evening of crafting. Relax and chat with other while turning a mason jar into fall décor.",
+          "extractionReason": "Dated event listed in the Kensington Heritage Library ADULTS section for Thursday, November 12.",
+          "relevantImageIndex": 3,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Kensington Heritage Library, 6 Commercial Street"
+            ],
+            "confirmedStreets": [
+              "Commercial Street"
+            ],
+            "ordered": false,
+            "evidenceNotes": "Library name and street address are printed on the image."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 5:00 PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 16,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Book Club",
+          "type": "event",
+          "date": "2026-11-26",
+          "startTime": "2:00 PM",
+          "endTime": "",
+          "venue": "Kensington Heritage Library",
+          "description": "For adults. Join us for a lively discussion. Drop by the library to pick up a copy of the current book.",
+          "extractionReason": "Dated event listed in the Kensington Heritage Library ADULTS section for Thursday, November 26.",
+          "relevantImageIndex": 3,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Kensington Heritage Library, 6 Commercial Street"
+            ],
+            "confirmedStreets": [
+              "Commercial Street"
+            ],
+            "ordered": false,
+            "evidenceNotes": "Library name and street address are printed on the image."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 2:00 PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 17,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Read. Sing. Play!",
+          "type": "event",
+          "date": "2026-11-06",
+          "startTime": "11:00 AM",
+          "endTime": "",
+          "venue": "Kensington Heritage Library",
+          "description": "For children. Ages 1-3. Toddlers and their caregivers can join in the fun with rhymes, songs, and movement. Listed for Fridays; dated to the first Friday in November.",
+          "extractionReason": "Weekly Friday program in the Kensington Heritage Library CHILDREN section; the first Friday in November 2026 is November 6.",
+          "relevantImageIndex": 4,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Kensington Heritage Library, 6 Commercial Street"
+            ],
+            "confirmedStreets": [
+              "Commercial Street"
+            ],
+            "ordered": false,
+            "evidenceNotes": "Library name and street address are printed on the image."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 11:00 AM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceOccurrenceCount": 3,
+          "_pipelineIndex": 18,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Remembrance Day Craft",
+          "type": "event",
+          "date": "2026-11-07",
+          "startTime": "11:00 AM",
+          "endTime": "",
+          "venue": "Kensington Heritage Library",
+          "description": "For children. We will be making homemade poppies out of paper.",
+          "extractionReason": "Dated craft event listed in the Kensington Heritage Library CHILDREN section for Saturday, November 7.",
+          "relevantImageIndex": 4,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Kensington Heritage Library, 6 Commercial Street"
+            ],
+            "confirmedStreets": [
+              "Commercial Street"
+            ],
+            "ordered": false,
+            "evidenceNotes": "Library name and street address are printed on the image."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 11:00 AM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 19,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Junior Board Game Social",
+          "type": "event",
+          "date": "2026-11-14",
+          "startTime": "11:00 AM",
+          "endTime": "",
+          "venue": "Kensington Heritage Library",
+          "description": "For children. Come play some classic board games with other kids!",
+          "extractionReason": "Listed in the Kensington Heritage Library CHILDREN section for Saturday, November 14 and 28; this item is the November 14 session.",
+          "relevantImageIndex": 4,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Kensington Heritage Library, 6 Commercial Street"
+            ],
+            "confirmedStreets": [
+              "Commercial Street"
+            ],
+            "ordered": false,
+            "evidenceNotes": "Library name and street address are printed on the image."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 11:00 AM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceOccurrenceCount": 2,
+          "_pipelineIndex": 20,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Junior Board Game Social",
+          "type": "event",
+          "date": "2026-11-28",
+          "startTime": "11:00 AM",
+          "endTime": "",
+          "venue": "Kensington Heritage Library",
+          "description": "For children. Come play some classic board games with other kids!",
+          "extractionReason": "Listed in the Kensington Heritage Library CHILDREN section for Saturday, November 14 and 28; this item is the November 28 session.",
+          "relevantImageIndex": 4,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Kensington Heritage Library, 6 Commercial Street"
+            ],
+            "confirmedStreets": [
+              "Commercial Street"
+            ],
+            "ordered": false,
+            "evidenceNotes": "Library name and street address are printed on the image."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 11:00 AM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceOccurrenceCount": 2,
+          "_pipelineIndex": 21,
+          "recurringPattern": "none"
+        },
+        {
+          "name": "Learn about Braille",
+          "type": "event",
+          "date": "2026-11-21",
+          "startTime": "11:00 AM",
+          "endTime": "",
+          "venue": "Kensington Heritage Library",
+          "description": "For children. Come learn about Braille with our Braille Lego set then make a craft using braille to write your name!",
+          "extractionReason": "Dated event listed in the Kensington Heritage Library CHILDREN section for Saturday, November 21.",
+          "relevantImageIndex": 4,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Kensington Heritage Library, 6 Commercial Street"
+            ],
+            "confirmedStreets": [
+              "Commercial Street"
+            ],
+            "ordered": false,
+            "evidenceNotes": "Library name and street address are printed on the image."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 11:00 AM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 22,
+          "recurringPattern": "none"
+        }
+      ],
+      "events": []
+    },
+    {
+      "row": 242,
+      "sourceId": "1641456884440330",
+      "caption": "We're in the final days of our Satellite exhibit, \"Scotland: My ancestral home\", which is on display in the lounge at the Harbourfront Theatre until Sunday, November 1st! Come see this exhibit one last time before it leaves! \n\n“Scotland: My ancestral home” with oil paintings by Ellen Martin, is based on spiritual experiences Martin had during a recent trip to Scotland and endeavors to capture the magic and mystery she found in the ancient landscape. It's rugged and raw beauty gave her a sense of going back in time.\n\nThe exhibition includes large original oil paintings of Moy Castle, Duart Castle, associated with the MacLean clan, and Eilean Donan Castle, among other well-known Scottish landmarks. At Duart Castle, Martin observed swallows swooping and darting about, while sparrows had seemingly taken over Eilean Donan Castle.\n\nBe sure to check out Ellen's book of the same name, available for sale in the Eptek giftshop!\n\nEptek Art & Culture Centre is open from 10am-4pm Tuesdays-Fridays and 12pm-4pm on Sundays. Admission is by donation. For more information, please contact the Eptek team at 902-888-8373 or at eptek@gov.pe.ca.\n\n-\n#eptekcentre #eptekartandculturecentre #peimuseums #northcapecoastaldrive #experiencethecoast #exploresummerside #summerside #downtownsummerside #thecitybythesea #lovelocalpei #togetherbythewater #explorePEI #PEI #princeedwardisland\n\nOCR TEXT:\nMay be an illustration of text",
+      "publisher": "Eptek Art & Culture Centre",
+      "rowMeta": {
+        "timestamp": "2026-10-28T17:49:56.000Z"
+      },
+      "stage3": [],
+      "stage4": [
+        {
+          "name": "Scotland: My ancestral home",
+          "description": "Satellite exhibition of oil paintings by Ellen Martin, based on spiritual experiences Martin had during a recent trip to Scotland and seeking to capture the magic and mystery she found in the ancient landscape. Its rugged and raw beauty gave her a sense of going back in time. The exhibition includes large original oil paintings of Moy Castle, Duart Castle, associated with the MacLean clan, and Eilean Donan Castle, among other well-known Scottish landmarks. At Duart Castle, Martin observed swallows swooping and darting about, while sparrows had seemingly taken over Eilean Donan Castle. The exhibit is on display in the lounge at the Harbourfront Theatre until Sunday, November 1st.",
+          "date": "2026-11-01",
+          "startTime": "",
+          "endTime": "",
+          "venue": "Harbourfront Theatre",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "The post invites visitors to see a named exhibition and explicitly states its display period ends Sunday, November 1st. The year is resolved from the 2026 post context.",
+          "timeFlags": {
+            "start": {
+              "source": "none",
+              "evidence": ""
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              {
+                "label": "lounge at the Harbourfront Theatre",
+                "address": "",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "on display in the lounge at the Harbourfront Theatre"
+              }
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The caption identifies the exhibition's location as the lounge at the Harbourfront Theatre."
+          },
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 1
+        }
+      ],
+      "events": [
+        {
+          "name": "Scotland: My ancestral home",
+          "category": "Cinema",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "establishment": "Harbourfront Theatre",
+          "additionalLocation": "Harbourfront Theatre",
+          "startDate": "2026-11-01",
+          "startTime": "10:00",
+          "endDate": "2026-11-01",
+          "endTime": "16:00",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "totalOccurrences": null,
+          "recurrenceUntilDate": "",
+          "timeFlags": {
+            "start": {
+              "source": "none",
+              "evidence": ""
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceType": null,
+          "description": "Satellite exhibition of oil paintings by Ellen Martin, based on spiritual experiences Martin had during a recent trip to Scotland and seeking to capture the magic and mystery she found in the ancient landscape. Its rugged and raw beauty gav"
+        }
+      ]
+    },
+    {
+      "row": 266,
+      "sourceId": "122151785031035455",
+      "caption": "Contact the instructor directly to learn more!",
+      "publisher": "Side Door Studio, Charlottetown",
+      "rowMeta": {
+        "timestamp": "2026-10-28T20:39:38.000Z"
+      },
+      "stage3": [],
+      "stage4": [],
+      "events": [
+        {
+          "name": "Age Well Gabmoves",
+          "category": "Gatherings & Parties",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "establishment": "Side Door Studio",
+          "additionalLocation": "",
+          "startDate": "2026-11-03",
+          "startTime": "09:30",
+          "endDate": "2026-11-03",
+          "endTime": "10:15",
+          "isRecurring": true,
+          "recurringPattern": "weekly_tuesday",
+          "totalOccurrences": 3,
+          "recurrenceUntilDate": "2026-11-17",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 9:30 AM"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "Extracted item clock: 10:15 AM"
+            }
+          },
+          "_sourceType": "calendar",
+          "description": ""
+        },
+        {
+          "name": "Age Well Gabmoves",
+          "category": "Workshops & Classes",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "establishment": "Side Door Studio",
+          "additionalLocation": "",
+          "startDate": "2026-11-24",
+          "startTime": "09:30",
+          "endDate": "2026-11-24",
+          "endTime": "10:15",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "totalOccurrences": null,
+          "recurrenceUntilDate": "",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 9:30 AM"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "Extracted item clock: 10:15 AM"
+            }
+          },
+          "_sourceType": "calendar",
+          "description": ""
+        }
+      ]
+    },
+    {
+      "row": 296,
+      "sourceId": "1550124313820606",
+      "caption": " Parents & Caregivers of Gender-Creative Youth in Charlottetown! \nJoin us for \"Roots & Shoots Charlottetown,\" a FREE peer-support program designed just for you! Connect with others, share experiences, and find support in a welcoming environment.\n\n️ Date: Wednesday, October 28th, 2025 \n⏰ Time: 6:00 PM - 8:00 PM \n Location: Park Royal United\n Pizza and childcare are provided! \n\nWe look forward to seeing you there.\n\nOCR TEXT:\nMay be a graphic of text",
+      "publisher": "PEERS Alliance",
+      "rowMeta": {
+        "timestamp": "2026-10-28T14:11:01.000Z"
+      },
+      "stage3": [],
+      "stage4": [
+        {
+          "name": "Roots & Shoots/Saplings",
+          "description": "A peer-support program for gender-creative youth and their caregivers. For parents and caregivers of gender-creative youth. Pizza and childcare are provided.",
+          "date": "2026-10-28",
+          "startTime": "18:00",
+          "endTime": "20:00",
+          "venue": "Park Royal United Church",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "A dated, timed peer-support program is advertised. The poster gives October 28, 2026, which agrees with its printed Wednesday; the caption instead says October 28, 2025, a conflicting date that does not agree with the poster's weekday.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "6:00-8.00PM"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "6:00-8.00PM"
+            }
+          },
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              {
+                "label": "Park Royal United Church",
+                "address": "11 Christie Dr, Charlottetown",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "Park Royal United Church (11 Christie Dr, Charlottetown)"
+              }
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The poster names one venue and gives its address."
+          },
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 1
+        }
+      ],
+      "events": []
+    },
+    {
+      "row": 314,
+      "sourceId": "1587840766704951",
+      "caption": "PLANNING FOR PEACE OF MIND III\nNOVEMBER 6 – 11:30 A.M.\nFraud & Scam Prevention\nMedical Assistance in Dying (MAiD)\nWest River United Church\n10 Church Street, Cornwall\nOpen to the Public\n\nOCR TEXT:\nMay be a graphic of text\nMay be a graphic of text",
+      "publisher": "Town of Cornwall PEI",
+      "rowMeta": {
+        "timestamp": "2026-10-28T13:03:00.000Z"
+      },
+      "stage3": [],
+      "stage4": [],
+      "events": [
+        {
+          "name": "Planning for Peace of Mind III: Fraud and Scam Prevention and Awareness",
+          "category": "Food Special",
+          "isEvent": "No",
+          "isFoodSpecial": "Yes",
+          "establishment": "West River United Church",
+          "additionalLocation": "West River United Church",
+          "startDate": "2026-11-06",
+          "startTime": "12:00",
+          "endDate": "2026-11-06",
+          "endTime": "13:15",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "totalOccurrences": null,
+          "recurrenceUntilDate": "",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 12:00 PM"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "Extracted item clock: 1:15 PM"
+            }
+          },
+          "_sourceType": "calendar",
+          "description": "Part of Planning for Peace of Mind III. Presented by Amy Handrahan, West Prince RCMP District. Lunch and welcome are at 11:30 a.m.; a light lunch will be served. Time for questions and discussion is included. Open to the public; all are wel"
+        },
+        {
+          "name": "Planning for Peace of Mind III: Understanding Medical Assistance in Dying (MAiD)",
+          "category": "Food Special",
+          "isEvent": "No",
+          "isFoodSpecial": "Yes",
+          "establishment": "West River United Church",
+          "additionalLocation": "West River United Church",
+          "startDate": "2026-11-06",
+          "startTime": "13:30",
+          "endDate": "2026-11-06",
+          "endTime": "15:00",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "totalOccurrences": null,
+          "recurrenceUntilDate": "",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 1:30 PM"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "Extracted item clock: 3:00 PM"
+            }
+          },
+          "_sourceType": "calendar",
+          "description": "Part of Planning for Peace of Mind III. Presented by the Provincial MAiD Program, Health PEI. Lunch and welcome are at 11:30 a.m.; a light lunch will be served. Time for questions and discussion is included. Open to the public; all are welc"
+        }
+      ]
+    },
+    {
+      "row": 31,
+      "sourceId": "1544701244351119",
+      "caption": "⛸️ Powering Up & Moving Forward ⛸️\nJoin the Town of Souris and the Eastern Kings Sportsplex this Sunday, November 1st as we celebrate the start of the 2026-27 season!\nWe've completed some exciting upgrades at the Sportsplex over the summer thanks to our funding partners, and we can't wait to show them off to our community.\nCome lace up your skates, hit the ice, and burn off some of that Halloween candy from Saturday night! ⛸️\nWhile you're there, you can help us celebrate and cheer on our amazing home teams. It's a great opportunity to showcase the talented athletes who represent our community in both ringette and hockey and kick off another great season together!   And let's not forget our Souris Curling Club members. \nBring your family, friends, and community spirit as we celebrate our arena, our teams, and the people who make it all possible.\n\nSee you at the rink! ❄️\n\n#sourispei #hockeyfamily #RingetteFamily #smalltownbighearts⛸️",
+      "publisher": "Town of Souris",
+      "rowMeta": {
+        "timestamp": "2026-10-28T17:09:20.000Z"
+      },
+      "stage3": [],
+      "stage4": [
+        {
+          "name": "POWERING UP AND MOVING FORWARD!",
+          "description": "Join the Town of Souris and the Eastern Kings Sportsplex to celebrate the start of the 2026-27 season and show off the Sportsplex upgrades completed over the summer. Lace up your skates and hit the ice, cheer on the community's ringette and hockey home teams, and celebrate Souris Curling Club members. Bring family, friends, and community spirit.",
+          "date": "2026-11-01",
+          "startTime": "12:30",
+          "endTime": "14:30",
+          "venue": "Eastern Kings Sportsplex",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "A dated community season kickoff with public skating and team celebrations is an advertised entertainment and recreation activity.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "12:30"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "2:30"
+            }
+          },
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              {
+                "label": "EASTERN KINGS SPORTSPLEX - SOURIS",
+                "address": "",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "EASTERN KINGS SPORTSPLEX - SOURIS"
+              }
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The poster identifies Eastern Kings Sportsplex in Souris as the event location."
+          },
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 1
+        }
+      ],
+      "events": [
+        {
+          "name": "POWERING UP AND MOVING FORWARD!",
+          "category": "Sports",
+          "isEvent": "Yes",
+          "isFoodSpecial": "No",
+          "establishment": "Eastern Kings Sportsplex",
+          "additionalLocation": "Eastern Kings Sportsplex",
+          "startDate": "2026-11-01",
+          "startTime": "12:30",
+          "endDate": "2026-11-01",
+          "endTime": "14:30",
+          "isRecurring": "No",
+          "recurringPattern": "none",
+          "totalOccurrences": null,
+          "recurrenceUntilDate": "",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "12:30"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "2:30"
+            }
+          },
+          "_sourceType": null,
+          "description": "Join the Town of Souris and the Eastern Kings Sportsplex to celebrate the start of the 2026-27 season and show off the Sportsplex upgrades completed over the summer. Lace up your skates and hit the ice, cheer on the community's ringette and"
+        }
+      ]
+    },
+    {
+      "row": 324,
+      "sourceId": "122145261297157304",
+      "caption": "Planning on trick or treating in St Peter's? We'll be open and handing out candy from 4-7pm. \n\nPlease note we have live entertainment starting at 7:30pm.\n\nOCR TEXT:\nMay be a doodle of text",
+      "publisher": "Pints East",
+      "rowMeta": {
+        "timestamp": "2026-10-28T16:00:15.000Z"
+      },
+      "stage3": [
+        {
+          "name": "Trick or Treaters",
+          "description": "Candy available 4-7pm; live entertainment starts at 7:30pm.",
+          "date": "",
+          "startTime": "19:30",
+          "endTime": "",
+          "venue": "",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "The post advertises live entertainment, an eligible activity, and the image names the event “Trick or Treaters.” The candy handout is included as context, not a separate food event.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "starting at 7:30pm"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              {
+                "label": "St Peter's",
+                "address": "",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "Planning on trick or treating in St Peter's?"
+              }
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "St Peter's is named as the area for trick-or-treating; no street address is provided."
+          },
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 1
+        }
+      ],
+      "stage4": [],
+      "events": []
+    },
+    {
+      "row": 33,
+      "sourceId": "1544605041027406",
+      "caption": " Great News! \n\nThe Woofer Willows Dog Park, at 209 Main St., now has lights, making it possible for our furry friends to enjoy the park during these darker fall evenings! ✨\nAs always, we ask everyone to please respect the posted rules and be courteous to fellow dog owners so that the park remains a safe, fun, and welcoming place for everyone.\nHappy walking, playing, and tail-wagging! ",
+      "publisher": "Town of Souris",
+      "rowMeta": {
+        "timestamp": "2026-10-28T15:13:42.000Z"
+      },
+      "stage3": [],
+      "stage4": [],
+      "events": []
+    },
+    {
+      "row": 354,
+      "sourceId": "1686222046298513",
+      "caption": "Souris PEI in November\n\nOCR TEXT:\nMay be an image of phone and text\nMay be an image of phone and text",
+      "publisher": "Eastern Kings Sportsplex",
+      "rowMeta": {
+        "timestamp": "2026-10-28T23:58:18.000Z"
+      },
+      "stage3": [],
+      "stage4": [
+        {
+          "name": "BJORN -PD DAY CLINIC",
+          "description": "Friday: 10AM-Noon PM U7/U9/U11 rec. Skating and puck skills daily. Jon has worked with thousands of Elite players over the years and understands the minor hockey, private hockey landscape and will help chart the paths of the next generation of ELITE players. Jon connects with the kids, follows their progress and does relevant drills. Practice with a Purpose—covering all aspects of the game, with game-like situations in every session. Jon MacWilliams is an expert at skating, the science behind it, and correction and education on skating mechanics, upper- and lower-body assimilation, edge angles, and skating-related skills. Jon MacWilliams has 35 plus years of skill development experience. Former students include Makar, Crosby, MacKinnon.",
+          "date": "2026-11-27",
+          "startTime": "10:00",
+          "endTime": "12:00",
+          "venue": "",
+          "relevantImageIndex": 0,
+          "recurringPattern": "daily",
+          "extractionReason": "A dated hockey clinic with an explicitly advertised 10AM-to-noon time block and U7/U9/U11 rec group.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "10AM"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "Noon"
+            }
+          },
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              {
+                "label": "Eastern Kings Sportsplex- Souris PEI",
+                "address": "",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "Eastern Kings Sportsplex- Souris PEI"
+              }
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The poster identifies Eastern Kings Sportsplex in Souris PEI as the clinic location."
+          },
+          "_sourceOccurrenceCount": 2,
+          "_pipelineIndex": 1
+        },
+        {
+          "name": "BJORN -PD DAY CLINIC",
+          "description": "Friday: Noon-2 PM U11 Rep U13/U15. Skating and puck skills daily. Jon has worked with thousands of Elite players over the years and understands the minor hockey, private hockey landscape and will help chart the paths of the next generation of ELITE players. Jon connects with the kids, follows their progress and does relevant drills. Practice with a Purpose—covering all aspects of the game, with game-like situations in every session. Jon MacWilliams is an expert at skating, the science behind it, and correction and education on skating mechanics, upper- and lower-body assimilation, edge angles, and skating-related skills. Jon MacWilliams has 35 plus years of skill development experience. Former students include Makar, Crosby, MacKinnon.",
+          "date": "2026-11-27",
+          "startTime": "12:00",
+          "endTime": "14:00",
+          "venue": "",
+          "relevantImageIndex": 0,
+          "recurringPattern": "daily",
+          "extractionReason": "A dated hockey clinic with a separately listed noon-to-2 PM time block for U11 Rep and U13/U15.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Noon"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "2 PM"
+            }
+          },
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              {
+                "label": "Eastern Kings Sportsplex- Souris PEI",
+                "address": "",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "Eastern Kings Sportsplex- Souris PEI"
+              }
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The poster identifies Eastern Kings Sportsplex in Souris PEI as the clinic location."
+          },
+          "_sourceOccurrenceCount": 2,
+          "_pipelineIndex": 2
+        }
+      ],
+      "events": []
+    },
+    {
+      "row": 45,
+      "sourceId": "1691209256147934",
+      "caption": "November \n\nOCR TEXT:\nMay be an image of text",
+      "publisher": "Baba's Lounge",
+      "rowMeta": {
+        "timestamp": "2026-10-28T16:38:31.000Z"
+      },
+      "stage3": [
+        {
+          "name": "Chris Corrigan Vinyl Night",
+          "type": "event",
+          "date": "2026-11-03",
+          "startTime": "8:00 PM",
+          "endTime": "",
+          "venue": "",
+          "description": "",
+          "extractionReason": "Listed in the November 3 calendar cell with an 8PM start.",
+          "relevantImageIndex": 0,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Baba's Lounge, 181 Great George St, Charlottetown, PE"
+            ],
+            "confirmedStreets": [
+              "Great George St"
+            ],
+            "ordered": false,
+            "evidenceNotes": "The calendar is branded Baba's Lounge and prints the address."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 8:00 PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 3
+        },
+        {
+          "name": "10 Wings – $10 Until 10PM",
+          "type": "special",
+          "date": "2026-11-03",
+          "startTime": "",
+          "endTime": "10:00 PM",
+          "venue": "",
+          "description": "10 wings for $10, available until 10PM.",
+          "extractionReason": "Explicit food deal listed in the November 3 calendar cell; the printed 10PM applies to the deal.",
+          "relevantImageIndex": 0,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Baba's Lounge, 181 Great George St, Charlottetown, PE"
+            ],
+            "confirmedStreets": [
+              "Great George St"
+            ],
+            "ordered": false,
+            "evidenceNotes": "The calendar is branded Baba's Lounge and prints the address."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "none",
+              "evidence": ""
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "Extracted item clock: 10:00 PM"
+            }
+          },
+          "_sourceOccurrenceCount": 4,
+          "_pipelineIndex": 4
+        }
+      ],
+      "stage4": [],
+      "events": []
+    }
+  ],
+  "duplicatePairs": [
+    [
+      {
+        "path": "venues/fb_100064116963888/events/jdjk0U9hGt5Hs3wfVDbl",
+        "venueId": "fb_100064116963888",
+        "uniqueId": "1579388434228688_400f51c3c2179b75",
+        "establishment": "Hunter's Ale House | Charlottetown PE",
+        "eventName": "Darcy’s Entertainment Trivia",
+        "description": "⁉️ - Hunter's Ale House: Darcy’s Entertainment Trivia",
+        "startDate": "2026-10-29",
+        "endDate": "2026-10-29",
+        "startTime": "21:00",
+        "facebookUrl": "https://www.facebook.com/DowntownCharlottetownInc",
+        "category": "Trivia Night",
+        "name": "Darcy’s Entertainment Trivia",
+        "isRecurring": "No",
+        "recurringPattern": "none",
+        "timeFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "9:00 pm"
+          },
+          "end": {
+            "source": "none",
+            "toClose": false,
+            "evidence": ""
+          }
+        },
+        "_sourceType": "schedule",
+        "sourceOccurrenceCount": 1
+      },
+      {
+        "path": "venues/fb_100064116963888/events/0gFrm9JIJ3FY3mMDUkE0",
+        "venueId": "fb_100064116963888",
+        "uniqueId": "1578478137632737_2a120715240fa696",
+        "establishment": "Hunter's Ale House | Charlottetown PE",
+        "eventName": "Trivia with Darcy",
+        "description": "The caption calls this Darcy's Spooky Trivia.",
+        "startDate": "2026-10-29",
+        "endDate": "2026-10-29",
+        "startTime": "21:00",
+        "facebookUrl": "https://www.facebook.com/hunterspei",
+        "category": "Trivia Night",
+        "name": "Trivia with Darcy",
+        "isRecurring": "No",
+        "recurringPattern": "none",
+        "timeFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "Extracted item clock: 9:00 PM"
+          },
+          "end": {
+            "source": "none",
+            "toClose": false,
+            "evidence": ""
+          }
+        },
+        "_sourceType": "calendar",
+        "sourceOccurrenceCount": 1
+      }
+    ],
+    [
+      {
+        "path": "venues/fb_100064116963888/events/Rf2zYX3C1Fy7iM1In9dI",
+        "venueId": "fb_100064116963888",
+        "uniqueId": "1579388434228688_111db0221b50b1ad",
+        "establishment": "Hunter's Ale House | Charlottetown PE",
+        "eventName": "Matt and Adam",
+        "description": "Hunter's Ale House: Matt and Adam",
+        "startDate": "2026-10-29",
+        "endDate": "2026-10-29",
+        "startTime": "23:00",
+        "facebookUrl": "https://www.facebook.com/DowntownCharlottetownInc",
+        "category": "Live Music",
+        "name": "Matt and Adam",
+        "isRecurring": "No",
+        "recurringPattern": "none",
+        "timeFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "11:00 pm"
+          },
+          "end": {
+            "source": "none",
+            "toClose": false,
+            "evidence": ""
+          }
+        },
+        "_sourceType": "schedule",
+        "sourceOccurrenceCount": 1
+      },
+      {
+        "path": "venues/fb_100064116963888/events/Zrbi7gYZpT0GUVRyl6cT",
+        "venueId": "fb_100064116963888",
+        "uniqueId": "1578478137632737_0a7b82efe844f048",
+        "establishment": "Hunter's Ale House | Charlottetown PE",
+        "eventName": "Mat & Adam Acoustic Night",
+        "description": "The caption describes this as a Mat & Adam acoustic set.",
+        "startDate": "2026-10-29",
+        "endDate": "2026-10-29",
+        "startTime": "22:00",
+        "facebookUrl": "https://www.facebook.com/hunterspei",
+        "category": "Live Music",
+        "name": "Mat & Adam Acoustic Night",
+        "isRecurring": "No",
+        "recurringPattern": "none",
+        "timeFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "Extracted item clock: 10:00 PM"
+          },
+          "end": {
+            "source": "none",
+            "toClose": false,
+            "evidence": ""
+          }
+        },
+        "_sourceType": "calendar",
+        "sourceOccurrenceCount": 1
+      }
+    ],
+    [
+      {
+        "path": "venues/fb_100064116963888/events/JGtKy5K1GSQ6tiKJoZfT",
+        "venueId": "fb_100064116963888",
+        "uniqueId": "1550097550470796_e0d7539d31bc4717",
+        "establishment": "Hunter's Ale House | Charlottetown PE",
+        "eventName": "Headbangers Halloween Bash (Paratomb + Sticky Honey)",
+        "description": "Friday October 30th, get ready for a night of heavy riffs, loud amps, and Halloween mayhem at Hunter's Ale House! Paratomb. Sticky Honey opening the show. Show starts at 10 PM. $10 Cover.",
+        "startDate": "2026-10-30",
+        "endDate": "2026-10-31",
+        "startTime": "22:00",
+        "endTime": "01:00",
+        "facebookUrl": "https://www.facebook.com/hunterspei",
+        "category": "Live Music",
+        "name": "Headbangers Halloween Bash (Paratomb + Sticky Honey)",
+        "isRecurring": "No",
+        "recurringPattern": "none",
+        "timeFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "Show starts at 10 PM"
+          },
+          "end": {
+            "source": "none",
+            "toClose": false,
+            "evidence": ""
+          }
+        },
+        "_sourceType": "event",
+        "additionalLocation": ""
+      },
+      {
+        "path": "venues/fb_100064116963888/events/yMyTITD1eyDre3vIFBAn",
+        "venueId": "fb_100064116963888",
+        "uniqueId": "1578478137632737_c47cd58adb283e52",
+        "establishment": "Hunter's Ale House | Charlottetown PE",
+        "eventName": "Paratomb & Sticky Honey Live Music Night",
+        "description": "Part of the Headbangers Bash, which the caption says kicks off with Paratomb & Sticky Honey.",
+        "startDate": "2026-10-30",
+        "endDate": "2026-10-30",
+        "startTime": "22:00",
+        "facebookUrl": "https://www.facebook.com/hunterspei",
+        "category": "Live Music",
+        "name": "Paratomb & Sticky Honey Live Music Night",
+        "isRecurring": "No",
+        "recurringPattern": "none",
+        "timeFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "Extracted item clock: 10:00 PM"
+          },
+          "end": {
+            "source": "none",
+            "toClose": false,
+            "evidence": ""
+          }
+        },
+        "_sourceType": "calendar",
+        "sourceOccurrenceCount": 1
+      }
+    ],
+    [
+      {
+        "path": "venues/slug_thecorkandcast/events/DyPMmgJZ473dbRWbRiLl",
+        "venueId": "slug_thecorkandcast",
+        "uniqueId": "1578271271007071_26473711552e93f6",
+        "establishment": "Delta Hotels by Marriott Prince Edward | Charlottetown PE",
+        "eventName": "An Evening with New York Times best selling author, Ann Cleeves",
+        "description": "Delta Hotels by Marriott Prince Edward: An Evening with New York Times best selling author, Ann Cleeves",
+        "startDate": "2026-10-29",
+        "endDate": "2026-10-29",
+        "startTime": "19:00",
+        "facebookUrl": "https://www.facebook.com/DowntownCharlottetownInc",
+        "category": "Gatherings & Parties",
+        "name": "An Evening with New York Times best selling author, Ann Cleeves",
+        "isRecurring": "No",
+        "recurringPattern": "none",
+        "timeFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "7:00 pm"
+          },
+          "end": {
+            "source": "none",
+            "toClose": false,
+            "evidence": ""
+          }
+        },
+        "_sourceType": "schedule",
+        "sourceOccurrenceCount": 1,
+        "additionalLocation": "the Delta Hotels by Marriott Prince Edward"
+      },
+      {
+        "path": "venues/slug_thecorkandcast/events/cityrecovered_c0bf2105949f1382319fac5e",
+        "venueId": "slug_thecorkandcast",
+        "uniqueId": "cityrecovered_c0bf2105949f1382319fac5e_venue",
+        "establishment": "Delta Hotels by Marriott Prince Edward | Charlottetown PE",
+        "name": "Bookmark Presents: Ann Cleeves in Conversation with Mattea Roach",
+        "eventName": "Bookmark Presents: Ann Cleeves in Conversation with Mattea Roach",
+        "startDate": "2026-10-29",
+        "startTime": "19:00",
+        "endDate": "2026-10-29",
+        "endTime": "21:00",
+        "facebookUrl": "https://www.facebook.com/PEILibrary",
+        "additionalLocation": "Delta Prince Edward",
+        "recurringPattern": "none",
+        "isRecurring": "No",
+        "description": "Ann Cleeves launches her new mystery The Dying Light in conversation with Mattea Roach, host of CBC’s Bookends. A book event for readers, book clubs, and fans of Shetland, Vera, and The Long Call. In The Dying Light, detective Matthew Venn and his team investigate a puzzling death and the disappearance of a young woman’s best friend in North Devon. Book and admission: $40; admission: $25.",
+        "category": "Workshops & Classes"
+      }
+    ]
+  ]
+}

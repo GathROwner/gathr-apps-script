@@ -365,6 +365,7 @@ function isLikelyPlaceholderMidnight(startTime?: string, endTime?: string): bool
 function normalizeEventText(value: string): string {
   return String(value || '')
     .toLowerCase()
+    .replace(/['\u2019]s\b/g, '')
     .replace(/&#0?39;/g, "'")
     .replace(/&amp;/g, '&')
     .replace(/&quot;/g, '"')
@@ -462,6 +463,7 @@ function hasConflictingExplicitAgeGroups(left: string, right: string): boolean {
 
 const GENERIC_EVENT_TITLE_TOKENS = new Set([
   'author',
+  'acoustic',
   'book',
   'celebration',
   'community',
@@ -485,7 +487,8 @@ const GENERIC_EVENT_TITLE_TOKENS = new Set([
 ]);
 
 function getComparableEventCoreSequence(value: string): string[] {
-  return normalizeEventText(value)
+  return normalizeEventText(value.replace(/\bnew\s+york\s+times\s+best[ -]?selling\s+author\b/gi,'author')
+    .replace(/\ban?\s+evening\s+with\b/gi,''))
     .split(' ')
     .map((token) => token.trim())
     .filter((token) =>
@@ -540,6 +543,7 @@ function hasContainedDistinctiveEventCore(left: string, right: string): boolean 
 
 export function isHighConfidenceSameOccurrenceDuplicate(
   newData: {
+    venueId?: string | null;
     establishment: string;
     additionalLocation?: string;
     subVenue?: string;
@@ -549,6 +553,7 @@ export function isHighConfidenceSameOccurrenceDuplicate(
     name?: string;
   },
   existingData: {
+    venueId?: string | null;
     establishment: string;
     additionalLocation?: string;
     subVenue?: string;
@@ -573,7 +578,15 @@ export function isHighConfidenceSameOccurrenceDuplicate(
   const existingLocation = normalizeVenueName(
     existingData.additionalLocation || existingData.subVenue || existingData.establishment
   );
-  if (newLocation && existingLocation && newLocation !== existingLocation) return false;
+  const labelWords=(value:string)=>value.split(' ').filter(word=>!['the','and','by'].includes(word));
+  const canonical=normalizeVenueName(newData.establishment);
+  const canonicalWords=new Set(labelWords(canonical));
+  const leftWords=labelWords(newLocation),rightWords=labelWords(existingLocation);
+  const sameStoredVenueLabel=Boolean(newData.venueId && newData.venueId===existingData.venueId &&
+    canonical===normalizeVenueName(existingData.establishment) && !newData.subVenue && !existingData.subVenue &&
+    leftWords.every(word=>canonicalWords.has(word)) && rightWords.every(word=>canonicalWords.has(word)) &&
+    leftWords.filter(word=>word.length>=4 && rightWords.includes(word)).length>=2);
+  if (newLocation && existingLocation && newLocation !== existingLocation && !sameStoredVenueLabel) return false;
 
   const newName = getComparableEventName(newData);
   const existingName = getComparableEventName(existingData);
@@ -720,7 +733,8 @@ export function isDuplicateEntry(
   const strongNameMatch = hasBothNames && (nameMatchScore >= 0.82 || strongTokenMatch);
   const moderateNameMatch =
     hasBothNames &&
-    (nameMatchScore >= similarityThreshold || moderateTokenMatch);
+    (nameMatchScore >= similarityThreshold || moderateTokenMatch ||
+      hasContainedDistinctiveEventCore(normalizedNewName,normalizedExistingName));
   const strongDescriptionMatch = descSimilarity >= 0.9;
 
   // Step 3: Time must match + semantic similarity (prevents different titles at same time collapsing)

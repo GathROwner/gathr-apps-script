@@ -6,6 +6,13 @@ export function detectStage2FoodSpecialSignals(text: string): { hasAny: boolean 
   const explicit = /\b(?:happy\s*hour|wings?\s+night|(?:two|\d+)\s+can\s+dine|(?:food|drinks?|brunch|breakfast|lunch|dinner)\s+specials?)\b/;
   if (explicit.test(value)) return { hasAny: true };
 
+  // The audited source formats the purchase as a standalone product heading
+  // followed by ingredient bullets and a subject-omitted bonus bullet. Bind
+  // the bonus to that heading; don't infer a purchase from nearby mentions.
+  const productHeading = /^\s*(?:the\s+)?(?:[\w-]*burgers?|pizza|fish\s*cakes?|tacos?|sandwich(?:es)?)\s*$/im;
+  const standaloneCandyBonus = /^\s*[-•]\s*comes\s+with\s+a\s+halloween\s+candy\s*[.!?;,]?\s*$/im;
+  if (productHeading.test(value) && standaloneCandyBonus.test(value)) return { hasAny: true };
+
   // Require a nearby offer and food/drink context. An address, admission fee,
   // special guest/gift, or room rate alone cannot create a food-special route.
   const foodWords = '(?:food|drinks?|brunch|breakfast|lunch|dinner|meals?|appetizers?|desserts?|cocktails?|beer|wine|wings?|burgers?|pizza|fish\\s*cakes?|tacos?|soup|sandwich(?:es)?|coffee)';

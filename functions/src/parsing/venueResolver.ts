@@ -21,7 +21,9 @@ import { logger } from '../utils/logger.js';
 import {blocksStartTimeFallback} from './sourceTimeConstraints.js';
 import {hasUnadvertisedActivityEnd} from './sourcePublicationPolicy.js';
 import { convertToOperatingHours, findVenue, getHoursForDay, getPlaceDetails } from '../services/placesService.js';
-import { findVenueByName, updateVenueOperatingHours } from '../services/firestoreService.js';
+import { findVenueByName, findVenueExactNameCandidates, updateVenueOperatingHours } from '../services/firestoreService.js';
+import {datedUntimedOfferService, inferOfferAvailability, typesSupportOfferService} from './offerServiceHours.js';
+import {postalStreetIdentity, compatibleStreetLocality} from '../utils/numberedStreetIdentity.js';
 
 // Category defaults for closing times
 const CATEGORY_END_DEFAULTS: Record<string, string> = {
@@ -102,6 +104,7 @@ export async function resolveTimesWithOperatingHours(
 
   const resolvedEvents: TimeResolvedEvent[] = [];
   const operatingHoursMemo = new Map<string, Promise<OperatingHours | null>>();
+  const offerHoursMemo = new Map<string, Promise<Awaited<ReturnType<typeof getPlaceDetails>>>>();
 
   // Get posted time for fallback
   const postedHHMM = extractPostedTime(timestamp);
@@ -117,12 +120,15 @@ export async function resolveTimesWithOperatingHours(
         postedHHMM,
         postedDate,
         cfg,
-        operatingHoursMemo
+        operatingHoursMemo,
+        offerHoursMemo
       );
       resolvedEvents.push(resolved);
     } catch (error) {
       logger.error(`Error resolving times for "${event.name}"`, error);
-      resolvedEvents.push({ ...event });
+      resolvedEvents.push(datedUntimedOfferService(event, true)
+        ? {...event, _sourceTimeConstraint: {reason: 'offer_service_hours_unverified', evidence: 'Exact branch/date service-hour verification failed.'}}
+        : {...event});
     }
   }
 
@@ -142,7 +148,8 @@ async function resolveEventTimes(
   postedHHMM: string,
   postedDate: string,
   config: ParsingConfig,
-  operatingHoursMemo: Map<string, Promise<OperatingHours | null>>
+  operatingHoursMemo: Map<string, Promise<OperatingHours | null>>,
+  offerHoursMemo: Map<string, Promise<Awaited<ReturnType<typeof getPlaceDetails>>>>
 ): Promise<TimeResolvedEvent> {
   const resolved: TimeResolvedEvent = { ...event };
   resolved.timeResolution = {
@@ -154,6 +161,48 @@ async function resolveEventTimes(
   if (needsStartTime && blocksStartTimeFallback(event)) {
     resolved.timeResolution.reason = event._sourceTimeConstraint!.reason;
     return resolved;
+  }
+  const offer = datedUntimedOfferService(event, true);
+  if (offer) {
+    const held: TimeResolvedEvent = {...resolved, _sourceTimeConstraint: {
+      reason: 'offer_service_hours_unverified', evidence: 'No unrestricted offer window bound to exact branch and date-specific service hours.'}};
+    const service = datedUntimedOfferService(event);
+    if (!service) return held;
+    // Current Places periods preserve split shifts and missing closes which the
+    // legacy weekday cache flattens. Only an existing canonical Place ID can
+    // qualify; a text-search candidate must not silently select a chain branch.
+    let venues = await findVenueExactNameCandidates(event.establishment || userName);
+    const address = event.address || partialAddress;
+    if (postalStreetIdentity(address)) venues = venues.filter(v =>
+      postalStreetIdentity(v.address || '') === postalStreetIdentity(address) && compatibleStreetLocality(v.address || '', address));
+    const venue = venues.length === 1 ? venues[0] : null;
+    const placeId = venue?.googlePlaceId;
+    if (!venue || !placeId) return held;
+    let pending = offerHoursMemo.get(placeId);
+    if (!pending) {
+      pending = getPlaceDetails(placeId);
+      offerHoursMemo.set(placeId, pending);
+    }
+    const details = await pending;
+    if (!details || details.placeId !== placeId || details.businessStatus !== 'OPERATIONAL' ||
+        !typesSupportOfferService(details.types || [], service)) return held;
+    const canonicalStreet = postalStreetIdentity(venue.address || '');
+    if (!canonicalStreet || postalStreetIdentity(details.formattedAddress || '') !== canonicalStreet ||
+        !compatibleStreetLocality(details.formattedAddress || '', venue.address || '')) return held;
+    const dt = DateTime.fromISO(event.startDate, {zone: config.timezone});
+    const weekday = dt.weekday % 7;
+    const periods = (details.openingHours?.periods || []).filter(p => p.open.date === event.startDate);
+    if (periods.length !== 1 || !periods[0].close) return held;
+    const period = periods[0];
+    const close = period.close!;
+    const overnight = close.time < period.open.time;
+    const expectedEndDate = overnight ? dt.plus({days: 1}).toISODate() : event.startDate;
+    if (period.open.day !== weekday || period.open.truncated || close.truncated ||
+        close.date !== expectedEndDate || close.day !== (weekday + (overnight ? 1 : 0)) % 7) return held;
+    const inferred = inferOfferAvailability(event, {venueId: venue.id, placeId,
+      verifiedAt: new Date().toISOString(), sourceUrl: `https://www.google.com/maps/search/?api=1&query=venue&query_place_id=${encodeURIComponent(placeId)}`,
+      service, hours: {open: period.open.time, close: close.time}}, config.timezone);
+    return inferred || held;
   }
   const approximateLinkedPageEnd = hasApproximateLinkedPageEnd(event);
   const needsEndTime = (!event.endTime || event.endTime.trim() === '') && !approximateLinkedPageEnd && !hasUnadvertisedActivityEnd(event);

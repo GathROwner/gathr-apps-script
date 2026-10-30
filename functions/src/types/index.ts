@@ -904,8 +904,8 @@ export interface PlaceDetails {
   openingHours?: {
     weekdayText: string[];
     periods: Array<{
-      open: { day: number; time: string };
-      close?: { day: number; time: string };
+      open: { day: number; time: string; date?: string; truncated?: boolean };
+      close?: { day: number; time: string; date?: string; truncated?: boolean };
     }>;
   };
   rating?: number;

@@ -7,6 +7,7 @@
 import { DateTime } from 'luxon';
 import { ExtractedItem, ParsingConfig } from './types.js';
 import { logger } from '../utils/logger.js';
+import {isRejectedReviewedTicketBinding} from './reviewedTicketBinding.js';
 
 type TicketInfo = {
   title?: string;
@@ -52,7 +53,8 @@ export async function enrichEventsFromTicketLinks(
   ocrText: string | undefined,
   extraUrls: string[],
   timestamp: string,
-  config: ParsingConfig
+  config: ParsingConfig,
+  sourceUniqueId = config.diagnosticContext?.postId
 ): Promise<{ items: ExtractedItem[]; summary: EnrichmentSummary }> {
   const summary: EnrichmentSummary = {
     attemptedUrls: 0,
@@ -99,6 +101,10 @@ export async function enrichEventsFromTicketLinks(
 
   if (inputItems.length === 0) {
     const bootstrapped = buildBootstrapItem(ticketInfo, combinedText, timestamp, config.timezone);
+    if (bootstrapped && isRejectedReviewedTicketBinding({...bootstrapped, sourceUniqueId}, ticketInfo.sourceUrl)) {
+      summary.reason = 'reviewed_ticket_binding_rejected';
+      return {items: inputItems, summary};
+    }
     if (!bootstrapped) {
       summary.reason = 'ticket_data_not_usable';
       logger.info('Stage 3.7 summary', summary);
@@ -117,7 +123,7 @@ export async function enrichEventsFromTicketLinks(
     return { items: [bootstrapped], summary };
   }
 
-  const itemsWithImageHints = applyTicketImageHints(inputItems, ticketInfo);
+  const itemsWithImageHints = applyTicketImageHints(inputItems, ticketInfo, sourceUniqueId);
   summary.updatedFields.images = itemsWithImageHints.imageHintsApplied;
   const enrichedItems = itemsWithImageHints.items;
   const candidates = enrichedItems.filter((item) => shouldEnrichItem(item));
@@ -136,6 +142,7 @@ export async function enrichEventsFromTicketLinks(
     !normalizedInfoTitle;
 
   const updatedItems = enrichedItems.map((item) => {
+    if (isRejectedReviewedTicketBinding({...item, sourceUniqueId}, ticketInfo.sourceUrl)) return item;
     if (!shouldEnrichItem(item)) return item;
 
     const shouldApply =
@@ -217,7 +224,8 @@ function isEventishTicketItem(item: ExtractedItem): boolean {
 
 function applyTicketImageHints(
   items: ExtractedItem[],
-  ticketInfo: TicketInfo
+  ticketInfo: TicketInfo,
+  sourceUniqueId?: string
 ): { items: ExtractedItem[]; imageHintsApplied: number } {
   if (!ticketInfo?.imageUrl) {
     return { items, imageHintsApplied: 0 };
@@ -233,6 +241,7 @@ function applyTicketImageHints(
 
   let imageHintsApplied = 0;
   const nextItems = items.map((item) => {
+    if (isRejectedReviewedTicketBinding({...item, sourceUniqueId}, ticketInfo.sourceUrl)) return item;
     if (!isEventishTicketItem(item)) return item;
 
     const shouldApply =

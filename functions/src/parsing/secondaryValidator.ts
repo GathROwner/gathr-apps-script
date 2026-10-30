@@ -30,7 +30,7 @@ import { bindCompactStage4Sources, compactStage4Enabled, compactStage4Prompt,
   isProductFlavourLineupOnly, isSubmissionDeadlineOnly, isAnnualSingleDateWithoutSeries,
   isPublicRecreationClosure, isOrdinaryMenuLaunch,
   parseCompactStage4Response, heldCompactStage4,
-  getCompactStage4Hold, removeExactCompactDuplicates, CompactStage4Error } from './compactStage4.js';
+  getCompactStage4Hold, getItemValidationHolds, removeExactCompactDuplicates, CompactStage4Error } from './compactStage4.js';
 
 // Initialize OpenAI client lazily
 let openaiClient: OpenAI | null = null;
@@ -398,6 +398,7 @@ export function preserveValidatedItemSourceType(
   if (originalItem?._locationMentionResolution) item._locationMentionResolution=originalItem._locationMentionResolution;
   const originalSourceType = String((originalItem as any)?._sourceType || '').trim();
   const nextItem = { ...item } as ExtractedItem;
+  if(originalItem?._sourcePublicationHold)nextItem._sourcePublicationHold=originalItem._sourcePublicationHold;
 
   if (!existingSourceType && originalSourceType) {
     (nextItem as any)._sourceType = originalSourceType as ExtractedItem['_sourceType'];
@@ -422,6 +423,35 @@ export function preserveValidatedItemSourceType(
   // clock merely because the programme header has an overall closing time.
   if (originalItem?.timeFlags?.end?.source === 'none') {
     nextItem.timeFlags = {...nextItem.timeFlags!,end:{...originalItem.timeFlags.end}};
+  }
+  // Stage 4 may omit internal proofs. Keep an item-bound source resolution only
+  // for the same identity/date and compatible clocks; a conflicting clock wins.
+  const duration = originalItem?._sourceDurationResolution;
+  const range = originalItem?._sourceMeridiemResolution;
+  const proof = duration || range;
+  const identity = (name:string)=>name.toLowerCase().replace(/[^\p{L}\d]/gu,'');
+  const missingClockCompatible = (clock:string|undefined, flag:{source?:string;evidence?:string}|undefined,
+    originalFlag:{evidence?:string}|undefined)=>Boolean(String(clock || '').trim()) ||
+      flag?.source !== 'explicit' || flag.evidence === originalFlag?.evidence;
+  if (proof && originalItem && identity(nextItem.name) === identity(originalItem.name) &&
+      nextItem.date === proof.date && originalItem.date === proof.date &&
+      originalItem.startTime === proof.startTime && originalItem.endTime === proof.endTime &&
+      (!String(nextItem.startTime || '').trim() || nextItem.startTime === proof.startTime) &&
+      (!String(nextItem.endTime || '').trim() || nextItem.endTime === proof.endTime) &&
+      missingClockCompatible(nextItem.startTime,nextItem.timeFlags?.start,originalItem.timeFlags?.start) &&
+      missingClockCompatible(nextItem.endTime,nextItem.timeFlags?.end,originalItem.timeFlags?.end) &&
+      (!nextItem._sourceTimeConstraint || range?.scope === 'takeout' && nextItem._sourceTimeConstraint.reason === 'meal_period_without_clock')) {
+    nextItem.startTime = proof.startTime;
+    nextItem.endTime = proof.endTime;
+    if (duration) nextItem._sourceDurationResolution = {...duration};
+    if (range) nextItem._sourceMeridiemResolution = {...range};
+    const flags = cloneTimeFlags(originalItem.timeFlags);
+    if (flags) nextItem.timeFlags = {
+      start:nextItem.timeFlags?.start?.source === 'explicit' ? nextItem.timeFlags.start : flags.start,
+      end:nextItem.timeFlags?.end?.source === 'explicit' ? nextItem.timeFlags.end : flags.end,
+    };
+    if (range?.scope === 'takeout' && nextItem._sourceTimeConstraint?.reason === 'meal_period_without_clock')
+      delete nextItem._sourceTimeConstraint;
   }
   return nextItem;
 }
@@ -559,6 +589,7 @@ export async function performSecondaryValidation(
     const concurrency = Number.isInteger(configuredConcurrency)
       ? Math.max(1, Math.min(3, configuredConcurrency)) : 1;
     const kept: ExtractedItem[] = [];
+    const sourceHolds: ExtractedItem[] = [];
     const aggregate = {
       _calendarDealAllDayNormalizationCount: 0,
       _calendarDealAllDayOverrideCount: 0,
@@ -573,6 +604,7 @@ export async function performSecondaryValidation(
       for (const [groupIndex, result] of results.entries()) {
         const compactHold = getCompactStage4Hold(result);
         if (compactHold) return heldCompactStage4(`chunk_${start + groupIndex + 1}:${compactHold.reason}`, compactHold.attempts);
+        sourceHolds.push(...getItemValidationHolds(result));
         const index = start + groupIndex;
         for (const item of result) {
           item._pipelineTotalStage3 = originalStage3Count;
@@ -591,6 +623,7 @@ export async function performSecondaryValidation(
       kept.splice(0, kept.length, ...unique);
     }
     Object.assign(kept, aggregate);
+    if(sourceHolds.length)(kept as any)._sourceValidationHolds=sourceHolds;
     if (fallbackReasons.length) (kept as any)._validationFallbackReason = fallbackReasons.join(',');
     logger.info('Stage 4 batched validation summary', {
       inputCount: rawData.length,
@@ -691,9 +724,17 @@ export async function performSecondaryValidation(
 
     if (validationResult.validatedItems) {
       validationResult.validatedItems.forEach((validatedItem, index) => {
+        if(validatedItem.sourceHoldReason){
+          // Item-local source holds cannot be overridden by pool/deal/clock
+          // exceptions. Other identity-validated decisions remain usable.
+          rejectedItems.push({item:rawData[index],reason:validatedItem.sourceHoldReason});
+          logger.warn('Stage 4 held one source item',{name:rawData[index]?.name,
+            sourceItemIndex:rawData[index]?._pipelineIndex,reason:validatedItem.sourceHoldReason});
+          return;
+        }
         let decision = validatedItem.decision;
         const sourcePoolWindow = isSourcePublicPoolWindow(rawData[index]);
-        const item = sourcePoolWindow ? { ...rawData[index] } :
+        let item = sourcePoolWindow ? { ...rawData[index] } :
           preserveValidatedItemSourceType(validatedItem.item, rawData[index]);
         if (sourcePoolWindow) decision = 'KEPT';
         validatedItem.item = item;
@@ -841,7 +882,17 @@ export async function performSecondaryValidation(
               !hasNonEmptyValue(item.startTime)) {
             item._stage4NeedsTimeEnrichment = true;
           }
-          keptItems.push(item);
+          // Re-read the aligned source's own weekday evidence, without giving
+          // the text-only validator access to another gallery item's cadence.
+          const original=rawData[index];
+          if(original && item.name===original.name && item.date===original.date &&
+              original._sourceWeeklyProgramPattern && original._sourceProgrammeMonthEnd){
+            item={...item,recurringPattern:original._sourceWeeklyProgramPattern,
+              _sourceWeeklyProgramPattern:original._sourceWeeklyProgramPattern,
+              _sourceProgrammeMonthEnd:original._sourceProgrammeMonthEnd,
+              recurrenceUntilDate:original.recurrenceUntilDate};
+          }
+          keptItems.push(prepareOccurrenceSourceItem(item,''));
         } else {
           rejectedItems.push({ item, reason });
         }
@@ -874,6 +925,10 @@ export async function performSecondaryValidation(
     (keptItems as any)._calendarDealAllDayOverrideCount = calendarDealAllDayOverrideCount;
     (keptItems as any)._calendarDealAllDayNormalizationCount = calendarDealAllDayNormalizationCount;
     (keptItems as any)._operatingHoursOnlyRejectCount = operatingHoursOnlyRejectCount;
+    const sourceHolds=[...validationResult.validatedItems.filter(item=>item.sourceHoldReason).map(item=>structuredClone(item.item)),
+      ...rejectedItems.filter(entry=>!validationResult.validatedItems.some((v,index)=>v.sourceHoldReason && rawData[index]===entry.item))
+        .map(entry=>({...structuredClone(entry.item),_sourcePublicationHold:`stage4_rejected: ${entry.reason}`}))];
+    if(sourceHolds.length)(keptItems as any)._sourceValidationHolds=sourceHolds;
 
     return keptItems;
   } catch (error) {

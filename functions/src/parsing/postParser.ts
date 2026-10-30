@@ -50,16 +50,19 @@ import { classifyContent } from './contentClassifier.js';
 import { extractContentByType, extractOcrDebugText } from './eventExtractor.js';
 import { sharedScheduleSource, printedScheduleAnchors, checkPrintedScheduleItem } from './printedScheduleGuard.js';
 import { enrichEventsFromTicketLinks } from './ticketLinkEnricher.js';
+import {withoutRejectedReviewedTicketLinks} from './reviewedTicketBinding.js';
 import { enrichEventsFromCalendarLinks } from './calendarLinkEnricher.js';
 import { enrichEventsFromVenueWebsite } from './websiteDetailEnricher.js';
 import { performSecondaryValidation } from './secondaryValidator.js';
-import { getCompactStage4Hold } from './compactStage4.js';
+import { getCompactStage4Hold, getItemValidationHolds } from './compactStage4.js';
 import { performFinalFormatting } from './finalFormatter.js';
 import { reconcileCaptionOnlyWeeklyEvents } from './captionOnlyWeekly.js';
 import { reconcileRaceSchedule } from './raceScheduleReconciler.js';
 import { resolveTimesWithOperatingHours } from './venueResolver.js';
 import {constrainSourceTimes, blocksStartTimeFallback} from './sourceTimeConstraints.js';
+import {imageExtractionCoverageHold} from './sourceCandidateRetention.js';
 import {dateOnlyActivity} from './dateOnlyActivity.js';
+import {coherentOfferAvailability} from './offerServiceHours.js';
 import {sourceItemHoldReason,needsWholeScheduleIdentityReview} from './sourceItemEvidence.js';
 import {enrichLinkedPerformanceStarts,linkedPerformanceImagesTextFree} from './linkedPerformanceTime.js';
 import { shouldHoldUndatedStandingSchedule, shouldRetrySeasonalLeagueWithLegacy,
@@ -789,6 +792,12 @@ async function replayPostDataFromArtifactsCore(
   }
 
   const compactReplayHold = getCompactStage4Hold(validatedData);
+  const replayItemHolds=getItemValidationHolds(validatedData);
+  if(replayItemHolds.length){
+    await emitStageArtifacts(cfg,{source:'replay',stage3HeldItems:deepCloneJson(replayItemHolds)});
+    await reportSkipReason({stage:'stage4',reason:'Unsupported recurrence correction held for source review'});
+    if(!validatedData.length)return [];
+  }
   const replayValidationHolds = validatedData.filter(item => item.sourceLocationRole === 'collection_partner_only' ||
     materialCaptionClockConflict(item,combinedText,validatedData.length));
   if (replayValidationHolds.length) {
@@ -1307,6 +1316,8 @@ async function parsePostDataCore(
     });
 
     if (!validation.hasValidContent || validation.validationDecision === 'VALIDATION_FAILED') {
+      await emitStageArtifacts(cfg,{source:'live',sourceCoverageHolds:imageExtractionCoverageHold(ocrImageUrls.length,
+        'stage1_rejected_attached_images_require_source_review')});
       if (lunaCanarySelected) return retryCanaryWithLegacy('stage1_validation_failed');
       logger.info(`Content validation failed: ${validation.reason}`);
       await reportSkipReason({
@@ -1893,6 +1904,7 @@ async function parsePostDataCore(
 
       logger.info('=== STAGE 3.7: TICKET LINK ENRICHMENT ===');
       const stage37Start = Date.now();
+      stage3Items = stage3Items.map(item => withoutRejectedReviewedTicketLinks(item, {...item, sourceUniqueId: postId}));
       stage3Items = constrainSourceTimes(stage3Items, combinedText);
       if (stage3Cfg.ticketLinkEnrichment?.enabled !== false)
         stage3Items = await enrichLinkedPerformanceStarts(stage3Items, combinedText, cfg.timezone,{
@@ -1906,7 +1918,8 @@ async function parsePostDataCore(
         ocrDebugSnapshot?.ocrText,
         ticketUrls,
         timestamp,
-        stage3Cfg
+        stage3Cfg,
+        postId
       );
       const ticketUrl = String(
         enrichmentResult.summary.usedUrl || enrichmentResult.summary.candidateUrl || ''
@@ -1955,7 +1968,8 @@ async function parsePostDataCore(
         ocrDebugSnapshot?.ocrText,
         timestamp,
         establishmentInfo,
-        stage3Cfg
+        stage3Cfg,
+        postId
       );
       stage3Items = Array.isArray(venueWebsiteResult.items) ? venueWebsiteResult.items : [];
       logTiming('stage3_9_venue_website', stage39Start, {
@@ -2188,6 +2202,12 @@ async function parsePostDataCore(
       return [];
     }
 
+    const itemValidationHolds=getItemValidationHolds(validatedData);
+    if(itemValidationHolds.length){
+      await emitStageArtifacts(cfg,{source:'live',stage3HeldItems:deepCloneJson(itemValidationHolds)});
+      await reportSkipReason({stage:'stage4',reason:'Unsupported recurrence correction held for source review'});
+      if(!validatedData.length)return [];
+    }
     if ((!validatedData || validatedData.length === 0) && stage3CanFallback && !fallbackAttempted && !sourceDateHoldEncountered) {
       fallbackAttempted = true;
       logger.warn('Stage 3 fallback retry triggered (Stage 4 validation failed)', {
@@ -2237,6 +2257,12 @@ async function parsePostDataCore(
     }
 
     const compactRetryHold = getCompactStage4Hold(validatedData);
+    const retryItemHolds=getItemValidationHolds(validatedData);
+    if(retryItemHolds.length){
+      await emitStageArtifacts(cfg,{source:'live',stage3HeldItems:deepCloneJson(retryItemHolds)});
+      await reportSkipReason({stage:'stage4',reason:'Unsupported recurrence correction held for source review'});
+      if(!validatedData.length)return [];
+    }
     if (compactRetryHold) {
       await emitStageArtifacts(cfg, { source: 'live', stage4ValidationHold: compactRetryHold, stage4Items: [] });
       await reportSkipReason({ stage: 'stage4', reason: `Compact validation held: ${compactRetryHold.reason}` });
@@ -3450,13 +3476,13 @@ export function enforceDateTimeCompleteness(
     }
 
     // Guard against unverified midnight defaults.
-    if (ev.startTime === '00:00' && !hasExplicitMidnight(ev, 'start')) {
+    if (ev.startTime === '00:00' && !hasExplicitMidnight(ev, 'start') && !coherentOfferAvailability(ev)) {
       ev.startTime = '';
       if (ev.timeFlags?.start) {
         ev.timeFlags.start = { ...ev.timeFlags.start, source: 'none' };
       }
     }
-    if (ev.endTime === '00:00' && !hasExplicitMidnight(ev, 'end')) {
+    if (ev.endTime === '00:00' && !hasExplicitMidnight(ev, 'end') && !coherentOfferAvailability(ev)) {
       ev.endTime = '';
       if (ev.timeFlags?.end) {
         ev.timeFlags.end = { ...ev.timeFlags.end, source: 'none' };
@@ -3613,6 +3639,11 @@ export function enforceDateTimeCompleteness(
 
     // Normalize overnight endDate in one place (Stage 5.6 only).
     applyOvernightEndDate(ev, timezone);
+
+    if (ev.timeResolution?.offerAvailability && !coherentOfferAvailability(ev)) {
+      rejectedByReason.incoherent_offer_availability = (rejectedByReason.incoherent_offer_availability || 0) + 1;
+      continue;
+    }
 
     const missingFields = [
       !ev.startDate ? 'startDate' : '',

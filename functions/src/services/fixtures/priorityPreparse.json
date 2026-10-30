@@ -1,0 +1,241 @@
+{
+  "evidenceAssessmentSHA256": "82e821ba8c9c11a35e9ccc8c5584e74757f21d7d7e243ca34bae063b531a1f3f",
+  "policies": [
+    {
+      "case": "P02",
+      "retiredPath": "venues/slug_easternkingssportsplex/events/1VlpgUL0h6Nw4BS4VWoH",
+      "venueId": "slug_easternkingssportsplex",
+      "rule": {
+        "sourceUniqueId": "1680961583491226",
+        "uniqueIds": [
+          "1680961583491226_14c84f08f05b23b3"
+        ],
+        "reviewId": "priority-preparse-20261026-p02",
+        "sourceUrls": [
+          "https://www.facebook.com/100047322026065/posts/1680961583491226"
+        ],
+        "action": "hold"
+      },
+      "event": {
+        "uniqueId": "1680961583491226_14c84f08f05b23b3",
+        "eventName": "PRIVATE",
+        "name": "PRIVATE",
+        "establishment": "Eastern Kings Sportsplex",
+        "description": "The schedule labels this slot PRIVATE.",
+        "venueId": "slug_easternkingssportsplex",
+        "startDate": "2026-10-30",
+        "endDate": "2026-10-30",
+        "startTime": "15:30",
+        "endTime": "16:00",
+        "eventType": "gatherings_parties",
+        "isRecurring": "No",
+        "recurringPattern": "none",
+        "timeFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "Extracted item clock: 3:30 PM"
+          },
+          "end": {
+            "source": "explicit",
+            "toClose": false,
+            "evidence": "Extracted item clock: 4:00 PM"
+          }
+        },
+        "timeResolution": {
+          "hoursUsed": false
+        },
+        "_sourceType": "calendar"
+      }
+    },
+    {
+      "case": "P02",
+      "retiredPath": "venues/slug_easternkingssportsplex/events/JXMzn7HauivGfJGhGeR3",
+      "venueId": "slug_easternkingssportsplex",
+      "rule": {
+        "sourceUniqueId": "1680961583491226",
+        "uniqueIds": [
+          "1680961583491226_d3aadae79818a473"
+        ],
+        "reviewId": "priority-preparse-20261026-p02",
+        "sourceUrls": [
+          "https://www.facebook.com/100047322026065/posts/1680961583491226"
+        ],
+        "action": "hold"
+      },
+      "event": {
+        "uniqueId": "1680961583491226_d3aadae79818a473",
+        "eventName": "PRIVATE",
+        "name": "PRIVATE",
+        "establishment": "Eastern Kings Sportsplex",
+        "description": "The schedule labels this slot PRIVATE.",
+        "venueId": "slug_easternkingssportsplex",
+        "startDate": "2026-10-29",
+        "endDate": "2026-10-29",
+        "startTime": "15:30",
+        "endTime": "16:00",
+        "eventType": "gatherings_parties",
+        "isRecurring": "No",
+        "recurringPattern": "none",
+        "timeFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "Extracted item clock: 3:30 PM"
+          },
+          "end": {
+            "source": "explicit",
+            "toClose": false,
+            "evidence": "Extracted item clock: 4:00 PM"
+          }
+        },
+        "timeResolution": {
+          "hoursUsed": false
+        },
+        "_sourceType": "calendar"
+      }
+    },
+    {
+      "case": "P05",
+      "retiredPath": "venues/slug_centralcoastalpei/events/9JuF6qAH1BRldggWibP0",
+      "venueId": "slug_centralcoastalpei",
+      "rule": {
+        "sourceUniqueId": "1719028883565264",
+        "uniqueIds": [
+          "1719028883565264_6ca44b93778dcce2"
+        ],
+        "reviewId": "priority-preparse-20261026-p05",
+        "sourceUrls": [
+          "https://www.facebook.com/CentralCoastalPEI"
+        ],
+        "action": "retired_occurrence",
+        "startDate": "2026-10-31",
+        "startTime": "11:00",
+        "eventNames": [
+          "Halloween at the Farm (Halloween Party)"
+        ],
+        "canonicalEventPath": "venues/4OcLMCRKRGoKO5eQncLi/events/92o6dIhzy6rMiTpQz9ag"
+      },
+      "event": {
+        "uniqueId": "1719028883565264_6ca44b93778dcce2",
+        "eventName": "Halloween at the Farm (Halloween Party)",
+        "name": "Halloween at the Farm (Halloween Party)",
+        "establishment": "Central Coastal Drive PEI | Cavendish PE",
+        "description": "Come celebrate on the farm. Costumes welcome. Crafts & treats available. Mdme Abbey from The Nest. Bright Side Face Painting. Event admission $12. Free for members.",
+        "venueId": "slug_centralcoastalpei",
+        "startDate": "2026-10-31",
+        "endDate": "2026-10-31",
+        "startTime": "11:00",
+        "endTime": "15:00",
+        "eventType": "gatherings_parties",
+        "isRecurring": "No",
+        "recurringPattern": "none",
+        "timeResolution": {
+          "hoursUsed": false
+        },
+        "_sourceType": "calendar"
+      }
+    },
+    {
+      "case": "P05",
+      "retiredPath": "venues/slug_centralcoastalpei/events/WkUzd90XPBOvFszMqmne",
+      "venueId": "slug_centralcoastalpei",
+      "rule": {
+        "sourceUniqueId": "1719028883565264",
+        "uniqueIds": [
+          "1719028883565264_b30b0f6a53628618"
+        ],
+        "reviewId": "priority-preparse-20261026-p05",
+        "sourceUrls": [
+          "https://www.facebook.com/CentralCoastalPEI"
+        ],
+        "action": "retired_occurrence",
+        "startDate": "2026-10-25",
+        "startTime": "11:00",
+        "eventNames": [
+          "SAVE THE DATE HALLOWEEN party ISLAND HILL FARM 31 OCT COME CELEBRATE ON THE FARM COSTUMES WELCOME"
+        ],
+        "canonicalEventPath": "venues/4OcLMCRKRGoKO5eQncLi/events/92o6dIhzy6rMiTpQz9ag"
+      },
+      "event": {
+        "uniqueId": "1719028883565264_b30b0f6a53628618",
+        "eventName": "SAVE THE DATE HALLOWEEN party ISLAND HILL FARM 31 OCT COME CELEBRATE ON THE FARM COSTUMES WELCOME",
+        "name": "SAVE THE DATE HALLOWEEN party ISLAND HILL FARM 31 OCT COME CELEBRATE ON THE FARM COSTUMES WELCOME",
+        "establishment": "Central Coastal Drive PEI | Cavendish PE",
+        "venueId": "slug_centralcoastalpei",
+        "startDate": "2026-10-25",
+        "endDate": "2026-10-25",
+        "startTime": "11:00",
+        "endTime": "15:00",
+        "eventType": "gatherings_parties",
+        "isRecurring": "No",
+        "recurringPattern": "none",
+        "timeResolution": {
+          "hoursUsed": false
+        },
+        "_sourceType": "calendar"
+      }
+    }
+  ],
+  "ticket": {
+    "source": "1740954254704708",
+    "caption": "Coming Up: Two Pianos, No Rodeo\n\nBob Wiseman and Mike Boguski, one founding and one current member of Blue Rodeo are coming to the Charlotte Street Arts Centre! \n\nFull details and ticket info here: https://www.zeffy.com/en-CA/ticketing/bob-wiseman-and-mike-boguski-two-pianos-no-rodeo\n\n#CSAC #charlottestreetarts #fredericton\n\nWe are so thrilled that these 2 amazing artists will perform at the Souris Show Hall on October 24th!\n\nOCR TEXT:\nMay be an image of accordion, piano and text\nMay be an image of accordion, piano and text",
+    "event": {
+      "uniqueId": "1740954254704708_d50a12775d97d20b",
+      "establishment": "PEI Brewing Company",
+      "eventType": "live_music",
+      "eventName": "Two Pianos, No Rodeo: Bob Wiseman and Mike Boguski",
+      "description": "Maritimes 2026 tour stop in Charlottetown, Prince Edward Island.",
+      "startDate": "2026-10-30",
+      "endDate": "2026-10-30",
+      "startTime": "19:30",
+      "endTime": "21:30",
+      "venueId": "slug_peibrewingcompany",
+      "name": "Two Pianos, No Rodeo: Bob Wiseman and Mike Boguski",
+      "isRecurring": "No",
+      "recurringPattern": "none",
+      "timeResolution": {
+        "hoursUsed": false,
+        "reason": "no_place_match",
+        "endFromHours": "duration_default"
+      },
+      "timeFlags": {
+        "start": {
+          "source": "explicit",
+          "evidence": "venue_website:https://www.sourisshowhall.com/shows/two-pianos%2C-no-rodeo"
+        },
+        "end": {
+          "source": "none",
+          "toClose": false,
+          "evidence": ""
+        }
+      },
+      "_sourceType": "calendar"
+    },
+    "rejectedUrl": "https://www.sourisshowhall.com/shows/two-pianos%2C-no-rodeo"
+  },
+  "rootRecovery": {
+    "event": {
+      "uniqueId": "cityrecovered_945857dde45256f91d627fb8_venue",
+      "cityLevelReviewIds": [
+        "cityevt_8441640117b16aa4fa4f9491"
+      ],
+      "source": "approved_city_review_recovery",
+      "venueId": "slug_thescottmacaulayperformingartscentre",
+      "establishment": "The Scott MacAulay Performing Arts Centre at the College of Piping | Summerside PE",
+      "name": "The Rolling Stones Experience Featuring The Blushing Brides",
+      "eventName": "The Rolling Stones Experience Featuring The Blushing Brides",
+      "description": "Since 1979, the Blushing Brides have been cranking out their versions of the hits from Satisfaction and Midnight Rambler to Gimme Shelter. A cover band that grabbed the attention of the Rolling Stones guitarist Keith Richards, who said it was a \"brilliant rendition.\" With thousands of performances in multiple countries under their belts, it becomes abunda...",
+      "eventType": "live_music",
+      "startDate": "2027-03-21",
+      "startTime": "19:30",
+      "endDate": "2027-03-21",
+      "endTime": "21:30",
+      "sourceUniqueIds": [
+        "995691343001179"
+      ],
+      "sourceUrls": [
+        "https://www.facebook.com/events/995691343001179/"
+      ]
+    },
+    "canonicalEventPath": "venues/slug_thescottmacaulayperformingartscentre/events/kxApwTPtatQL93YjqfCO"
+  }
+}

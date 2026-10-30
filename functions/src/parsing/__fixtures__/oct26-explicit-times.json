@@ -1,0 +1,317 @@
+[
+  {
+    "group": "O26-03",
+    "sourceId": "1427992466187211",
+    "row": 98,
+    "sourceTimestamp": "2026-10-25T14:40:57Z",
+    "caption": "Happy Sunny Sunday \n\nToday’s Specials \n-Roast Pork Dinner $20\n-Bacon corn chowder $8\n-Seafood Chowder $20\n\nCome on out on this beautiful day we would love to serve you ! \n☎️ Takeout orders available from 11:30-7:00pm give us a call at 902-853-0000 \n\nCome support local !! , In need for a spot for your Christmas party ? We can help message for more info ",
+    "stage3": [
+      {
+        "name": "Roast Pork Dinner",
+        "description": "Roast Pork Dinner $20",
+        "date": "2026-10-25",
+        "startTime": "",
+        "endTime": "",
+        "timeFlags": {
+          "start": {
+            "source": "none",
+            "evidence": ""
+          },
+          "end": {
+            "toClose": false
+          }
+        },
+        "venue": "Albert & Crown Pub",
+        "pricing": "$20",
+        "price": "$20",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none",
+        "extractionReason": "Listed under “Today’s Specials”: “-Roast Pork Dinner $20”",
+        "_sourceType": "special",
+        "_sourceOccurrenceCount": 1,
+        "_sourceTimeConstraint": {
+          "reason": "meal_period_without_clock",
+          "evidence": "Dinner: source gives no serving clock"
+        },
+        "_pipelineIndex": 1,
+        "_pipelineTotalStage3": 3
+      },
+      {
+        "name": "Bacon corn chowder",
+        "description": "Bacon corn chowder $8",
+        "date": "2026-10-25",
+        "startTime": "",
+        "endTime": "",
+        "timeFlags": {
+          "start": {
+            "source": "none",
+            "evidence": ""
+          },
+          "end": {
+            "toClose": false
+          }
+        },
+        "venue": "Albert & Crown Pub",
+        "pricing": "$8",
+        "price": "$8",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none",
+        "extractionReason": "Listed under “Today’s Specials”: “-Bacon corn chowder $8”",
+        "_sourceType": "special",
+        "_sourceOccurrenceCount": 1,
+        "_sourceTimeConstraint": {
+          "reason": "meal_period_without_clock",
+          "evidence": "Dinner: source gives no serving clock"
+        },
+        "_pipelineIndex": 2,
+        "_pipelineTotalStage3": 3
+      },
+      {
+        "name": "Seafood Chowder",
+        "description": "Seafood Chowder $20",
+        "date": "2026-10-25",
+        "startTime": "",
+        "endTime": "",
+        "timeFlags": {
+          "start": {
+            "source": "none",
+            "evidence": ""
+          },
+          "end": {
+            "toClose": false
+          }
+        },
+        "venue": "Albert & Crown Pub",
+        "pricing": "$20",
+        "price": "$20",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none",
+        "extractionReason": "Listed under “Today’s Specials”: “-Seafood Chowder $20”",
+        "_sourceType": "special",
+        "_sourceOccurrenceCount": 1,
+        "_sourceTimeConstraint": {
+          "reason": "meal_period_without_clock",
+          "evidence": "Dinner: source gives no serving clock"
+        },
+        "_pipelineIndex": 3,
+        "_pipelineTotalStage3": 3
+      }
+    ],
+    "stage4": [
+      {
+        "name": "Roast Pork Dinner",
+        "description": "Roast Pork Dinner $20",
+        "date": "2026-10-25",
+        "startTime": "",
+        "endTime": "",
+        "timeFlags": {
+          "start": {
+            "source": "none",
+            "evidence": ""
+          },
+          "end": {
+            "toClose": false
+          }
+        },
+        "venue": "Albert & Crown Pub",
+        "pricing": "$20",
+        "price": "$20",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none",
+        "extractionReason": "Listed under “Today’s Specials”: “-Roast Pork Dinner $20”",
+        "_sourceType": "special",
+        "_sourceOccurrenceCount": 1,
+        "_sourceTimeConstraint": {
+          "reason": "meal_period_without_clock",
+          "evidence": "Dinner: source gives no serving clock"
+        },
+        "_pipelineIndex": 1,
+        "_pipelineTotalStage3": 3,
+        "_stage4NeedsTimeEnrichment": true
+      },
+      {
+        "name": "Bacon corn chowder",
+        "description": "Bacon corn chowder $8",
+        "date": "2026-10-25",
+        "startTime": "",
+        "endTime": "",
+        "timeFlags": {
+          "start": {
+            "source": "none",
+            "evidence": ""
+          },
+          "end": {
+            "toClose": false
+          }
+        },
+        "venue": "Albert & Crown Pub",
+        "pricing": "$8",
+        "price": "$8",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none",
+        "extractionReason": "Listed under “Today’s Specials”: “-Bacon corn chowder $8”",
+        "_sourceType": "special",
+        "_sourceOccurrenceCount": 1,
+        "_sourceTimeConstraint": {
+          "reason": "meal_period_without_clock",
+          "evidence": "Dinner: source gives no serving clock"
+        },
+        "_pipelineIndex": 2,
+        "_pipelineTotalStage3": 3,
+        "_stage4NeedsTimeEnrichment": true
+      },
+      {
+        "name": "Seafood Chowder",
+        "description": "Seafood Chowder $20",
+        "date": "2026-10-25",
+        "startTime": "",
+        "endTime": "",
+        "timeFlags": {
+          "start": {
+            "source": "none",
+            "evidence": ""
+          },
+          "end": {
+            "toClose": false
+          }
+        },
+        "venue": "Albert & Crown Pub",
+        "pricing": "$20",
+        "price": "$20",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none",
+        "extractionReason": "Listed under “Today’s Specials”: “-Seafood Chowder $20”",
+        "_sourceType": "special",
+        "_sourceOccurrenceCount": 1,
+        "_sourceTimeConstraint": {
+          "reason": "meal_period_without_clock",
+          "evidence": "Dinner: source gives no serving clock"
+        },
+        "_pipelineIndex": 3,
+        "_pipelineTotalStage3": 3,
+        "_stage4NeedsTimeEnrichment": true
+      }
+    ],
+    "expected": {
+      "distinctItems": 3,
+      "prices": [
+        "$20",
+        "$8",
+        "$20"
+      ],
+      "takeoutStart": "11:30",
+      "takeoutEnd": "19:00",
+      "date": "2026-10-25",
+      "provenance": "Start meridiem inferred from same-day forward takeout window; do not claim dine-in serving hours.",
+      "publication": "Past candidates must not be recreated/replayed."
+    }
+  },
+  {
+    "group": "O26-04",
+    "sourceId": "1583077490512003",
+    "row": 267,
+    "sourceTimestamp": "2026-10-25T13:00:39Z",
+    "caption": "“Spook Organa” Returns to Charlottetown!\nThis tradition of scary Hallowe’en music will be celebrated at St. Peter’s Cathedral on Sunday October 25 at 7 pm, when members from the Royal Canadian College of Organists presents Spook Organa!, an evening of spooky organ music for all ages. Between the musical selections, creepy tales will be told guaranteed to make the hair stand on end.\nSt. Peter’s is located on All Soul’s Lane in Charlottetown. The one-hour program starts at 7 pm. Admission is by donation. Children 12 and under are asked to bring along a canned good for the food bank. Those who arrive in costume will receive a complimentary treat bag.",
+    "stage3": [
+      {
+        "name": "SPOOK ORGANA!",
+        "description": "A 60-minute, family-friendly evening of spooky organ music for all ages, with creepy tales between musical selections. The one-hour program starts at 7 pm. Admission is by donation. Children 12 and under are asked to bring a canned good for the food bank. Those who arrive in costume will receive a complimentary treat bag.",
+        "date": "2026-10-25",
+        "startTime": "19:00",
+        "endTime": "",
+        "venue": "St. Peter's Cathedral",
+        "ticketLink": "",
+        "price": "By donation",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none",
+        "extractionReason": "Advertised live organ music and storytelling event with an explicit date, concert start time, and venue.",
+        "timeFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "CONCERT 7 PM"
+          },
+          "end": {
+            "source": "none",
+            "toClose": false,
+            "evidence": ""
+          }
+        },
+        "spatial": {
+          "kind": "single_location",
+          "locations": [
+            {
+              "label": "St. Peter's Cathedral",
+              "address": "All Soul's Lane, Charlottetown",
+              "role": "location",
+              "certainty": "confirmed",
+              "sourceText": "at St. Peter's Cathedral\"; \"St. Peter's Church / All Soul's Lane / Charlottetown"
+            }
+          ],
+          "confirmedStreets": [
+            "All Soul's Lane"
+          ],
+          "ordered": false,
+          "evidenceNotes": "The caption names St. Peter's Cathedral; the poster gives St. Peter's Church on All Soul's Lane in Charlottetown."
+        },
+        "_sourceOccurrenceCount": 1,
+        "_pipelineIndex": 1,
+        "_pipelineTotalStage3": 1
+      }
+    ],
+    "stage4": [
+      {
+        "name": "SPOOK ORGANA!",
+        "description": "A 60-minute, family-friendly evening of spooky organ music for all ages, with creepy tales between musical selections. The one-hour program starts at 7 pm. Admission is by donation. Children 12 and under are asked to bring a canned good for the food bank. Those who arrive in costume will receive a complimentary treat bag.",
+        "date": "2026-10-25",
+        "startTime": "19:00",
+        "endTime": "",
+        "venue": "St. Peter's Cathedral",
+        "ticketLink": "",
+        "price": "By donation",
+        "relevantImageIndex": 0,
+        "recurringPattern": "none",
+        "extractionReason": "Advertised live organ music and storytelling event with an explicit date, concert start time, and venue.",
+        "timeFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "CONCERT 7 PM"
+          },
+          "end": {
+            "source": "none",
+            "toClose": false,
+            "evidence": ""
+          }
+        },
+        "spatial": {
+          "kind": "single_location",
+          "locations": [
+            {
+              "label": "St. Peter's Cathedral",
+              "address": "All Soul's Lane, Charlottetown",
+              "role": "location",
+              "certainty": "confirmed",
+              "sourceText": "at St. Peter's Cathedral\"; \"St. Peter's Church / All Soul's Lane / Charlottetown"
+            }
+          ],
+          "confirmedStreets": [
+            "All Soul's Lane"
+          ],
+          "ordered": false,
+          "evidenceNotes": "The caption names St. Peter's Cathedral; the poster gives St. Peter's Church on All Soul's Lane in Charlottetown."
+        },
+        "_sourceOccurrenceCount": 1,
+        "_pipelineIndex": 1,
+        "_pipelineTotalStage3": 1
+      }
+    ],
+    "expected": {
+      "start": "19:00",
+      "end": "20:00",
+      "endDate": "2026-10-25",
+      "minutes": 60,
+      "sourceYear": "2026 contextual source timestamp+Sunday match; year not printedonposter",
+      "venue": "unrecognized_venues/uv_9ca3d6f8ad38ad1564d0062e remains manual_review",
+      "publication": "No expiredrecovery/replay; do not repair different prior P18 source/record."
+    }
+  }
+]

@@ -1,4 +1,5 @@
 import type {ExtractedEvent, ExtractedItem} from './types.js';
+import {retainCaptionCandyCandidate} from './sourceCandidateRetention.js';
 import {sourcePublicationHoldReason,preserveCalendarClockPresence} from './sourcePublicationPolicy.js';
 
 const months = ['january','february','march','april','may','june','july','august','september','october','november','december'];
@@ -83,6 +84,7 @@ export function sourceItemHoldReason(item: ExtractedItem): string | undefined {
   if (item._sourceTimeConstraint?.reason === 'unresolved_meridiem') return 'source_meridiem_unresolved';
   if ((item as any)._sourceOccurrenceDateHold) return 'performance_run_requires_individual_occurrence_dates';
   const title = String(item.name || '');
+  if(/^(?:the|this)\s+(?:night|evening|event)\s+will\s+(?:feature|include|have)\b/i.test(title))return 'activity_identity_not_visible';
   if (/^(?:we['’]?re|we\s+are)\s+looking\s+forward\b/i.test(title)) return 'activity_identity_not_visible';
   if (/\[[^\]]*\b(?:unclear|unreadable|unknown|illegible)\b[^\]]*\]|\btitle\s+(?:partly\s+)?(?:unclear|unreadable|illegible)\b/i.test(title))
     return 'activity_identity_not_visible';
@@ -103,7 +105,7 @@ export function needsWholeScheduleIdentityReview(items: ExtractedItem[]): boolea
 
 /** Item-local proofs only; never borrow another gallery cell's date, clock or venue. */
 export function reconcileSourceItemEvidence(items: ExtractedItem[], caption: string): ExtractedItem[] {
-  items = bindSharedAdmissionEntertainment(items, caption);
+  items = retainCaptionCandyCandidate(bindSharedAdmissionEntertainment(items, caption),caption);
   const reconciled = items.map(original => {
     let item = preserveCalendarClockPresence(bindDatedTicketLink(original, caption));
     const publicationHold = sourcePublicationHoldReason(item,caption);

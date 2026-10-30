@@ -172,10 +172,14 @@ export async function getPlaceDetails(
           open: {
             day: period.open?.day || 0,
             time: formatPlacesTime(period.open?.hour ?? undefined, period.open?.minute ?? undefined),
+            date: period.open?.date ? `${period.open.date.year}-${String(period.open.date.month).padStart(2, '0')}-${String(period.open.date.day).padStart(2, '0')}` : undefined,
+            truncated: period.open?.truncated === true,
           },
           close: period.close ? {
             day: period.close.day || 0,
             time: formatPlacesTime(period.close.hour ?? undefined, period.close.minute ?? undefined),
+            date: period.close.date ? `${period.close.date.year}-${String(period.close.date.month).padStart(2, '0')}-${String(period.close.date.day).padStart(2, '0')}` : undefined,
+            truncated: period.close.truncated === true,
           } : undefined,
         })),
       };

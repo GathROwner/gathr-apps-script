@@ -71,8 +71,6 @@ export type GptUsageStage =
   | 'stage5';
 
 export interface GptUsageRecord {
-  /** Application response reuse; never counted as a newly billed model call. */
-  reusedResponse?: boolean;
   stage: GptUsageStage;
   component: string;
   endpoint: 'responses' | 'chat';
@@ -97,6 +95,7 @@ export interface GptUsageRecord {
 
 export interface ParseStageArtifactsSnapshot {
   source: 'live' | 'replay';
+  sourceCoverageHolds?: Array<{reason:string;imageIndices:number[]}>;
   artifactTruncation?: { originalBytes: number; maxBytes: number };
   contentType?: ContentType;
   stage1Validation?: ValidationResult;
@@ -387,6 +386,8 @@ export type RecurringPattern =
 // NOTE: Monthly recurrence is used in legacy Apps Script and should be added in a dedicated recurrence pass.
 
 export interface RecurrenceScheduleFields {
+  _sourcePublicationHold?: string;
+  _sourceProgrammeMonthEnd?: string;
   sourceLocationRole?: 'shared_original_business' | 'collection_partner_only';
   _sourceWeeklyProgramPattern?: RecurringPattern;
   familyAudienceEvidence?: import('../services/familyAudienceEvidence.js').FamilyAudienceEvidence;
@@ -485,6 +486,7 @@ export type ExtractedItem = ExtractedEvent | ExtractedSpecial | CalendarItem;
 // ===================
 
 export interface ValidatedItem {
+  sourceHoldReason?: 'unsupported_recurrence_correction';
   item: ExtractedItem;
   decision: 'KEPT' | 'REJECTED';
   reason: string;
@@ -619,12 +621,13 @@ export interface FormattingResult {
 
 export interface TimeResolution {
   hoursUsed: boolean;
+  offerAvailability?: import('./offerServiceHours.js').VerifiedOfferHours & {version: 1; startDate: string; endDate: string};
   startFromHours?: boolean;
   startFromPostTime?: boolean;
   endFromHours?: 'to_close' | 'category_default' | 'duration_default';
   startFromFacebookEvent?: boolean;
   endFromFacebookEvent?: 'dateTimeSentence' | 'duration' | 'descriptionRange';
-  reason?: 'no_place_match' | 'no_hours' | 'no_date' | 'calendar_time_not_advertised' | 'category_default_bounded_by_venue_close' | 'venue_close_conflicts_with_start' | SourceTimeConstraint['reason'];
+  reason?: 'no_place_match' | 'no_hours' | 'no_date' | 'calendar_time_not_advertised' | 'category_default_bounded_by_venue_close' | 'venue_close_conflicts_with_start' | 'dated_offer_service_hours' | SourceTimeConstraint['reason'];
 }
 
 export interface TimeResolvedEvent extends FormattedEvent {

@@ -26,7 +26,7 @@ test('Stage 5 cannot discard Stage-3 route evidence', () => {
   assert.notEqual(result.spatial, spatial, 'evidence should be cloned before later mutation');
 });
 
-test('Stage 5 spatial evidence is retained when it is already present', () => {
+test('aligned source spatial evidence outranks formatter guesses without mutating either input', () => {
   const formattedSpatial = {
     kind: 'multi_location',
     ordered: false,
@@ -45,6 +45,8 @@ test('Stage 5 spatial evidence is retained when it is already present', () => {
 
   const result = rehydrateFormattedEventMetadata(formatted, original);
 
-  assert.equal(result, formatted);
-  assert.equal(result.spatial, formattedSpatial);
+  assert.deepEqual(result.spatial, originalSpatial);
+  assert.notEqual(result.spatial, originalSpatial, 'source proof is cloned before later mutation');
+  assert.equal(formatted.spatial, formattedSpatial, 'formatter input remains unchanged');
+  assert.equal(original.spatial, originalSpatial, 'source input remains unchanged');
 });

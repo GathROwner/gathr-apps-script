@@ -210,6 +210,7 @@ export function parseCompactStage4Response(text: string, sources: ValidationSour
     throw new CompactStage4Error('invalid_input_source_identity');
   }
   const decisions = new Map<number, any>();
+  const recurrenceHolds=new Set<number>();
   for (const entry of parsed.decisions) {
     if (!objectKeys(entry, ['sourceItemIndex', 'sourceIdentity', 'decision', 'reason', 'corrections'])) throw new CompactStage4Error('invalid_decision_shape');
     const id = entry.sourceItemIndex;
@@ -233,11 +234,17 @@ export function parseCompactStage4Response(text: string, sources: ValidationSour
     // source's explicit weekly schedule. Explained changes still need evidence.
     if (entry.decision === 'KEPT' && entry.corrections.recurringPattern === 'none' &&
         !entry.corrections.correctionReason.trim()) entry.corrections.recurringPattern = null;
-    if (!supportedRecurrence(byId.get(id)!, entry.corrections.recurringPattern as string | null)) throw new CompactStage4Error('unsupported_recurrence_correction');
+    if (!supportedRecurrence(byId.get(id)!, entry.corrections.recurringPattern as string | null)) recurrenceHolds.add(id);
     decisions.set(id, entry);
   }
   return { validatedItems: sources.map(item => {
     const entry = decisions.get(item._pipelineIndex!);
+    if(recurrenceHolds.has(item._pipelineIndex!))return {
+      item:structuredClone(item),decision:'REJECTED' as const,
+      reason:'Held: unsupported recurrence correction; source item retained for review.',
+      corrections:{recurringPattern:null,correctionReason:''},
+      sourceHoldReason:'unsupported_recurrence_correction' as const,
+    };
     return { item: structuredClone(item), decision: entry.decision, reason: entry.reason, corrections: { ...entry.corrections } };
   }) } as SecondaryValidationResult;
 }
@@ -248,6 +255,11 @@ export function heldCompactStage4(reason: string, attempts: number): ExtractedIt
 }
 export function getCompactStage4Hold(items: ExtractedItem[]): CompactStage4Hold | undefined {
   return (items as any)?._compactValidationHold;
+}
+
+/** Internal source holds survive batching; they never become public events. */
+export function getItemValidationHolds(items: ExtractedItem[]): ExtractedItem[] {
+  return (items as any)?._sourceValidationHolds || [];
 }
 
 /** Same-post, fully identical timed one-offs only. Never merge differing evidence. */

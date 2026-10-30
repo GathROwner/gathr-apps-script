@@ -41,6 +41,7 @@ import { buildGuardedCalendarInventoryAdditions, hasCompleteCalendarInventoryRea
   type CalendarInventoryListing } from './calendarInventoryReconciliation.js';
 
 // Initialize OpenAI client lazily
+export const ACTIVITY_AUDIENCE_CONTEXT_RULE='Preserve only the matching activity\'s printed audience heading and age range in its description. A CHILDREN section becomes "For children." on those exact items; an ADULTS section stays adult-scoped. Never borrow an audience from another section or gallery page. Use an actual event name, not a body heading such as "The night will feature".\n';
 let openaiClient: OpenAI | null = null;
 
 function getOpenAIClient(): OpenAI {
@@ -209,7 +210,7 @@ async function extractEvents(
   const postedLocalPretty = postedDt.toFormat('yyyy-MM-dd EEE HH:mm:ss');
   const postedLocalDate = postedDt.toFormat('yyyy-MM-dd');
 
-  const prompt = captionOnlyActivityExtractionRules(imageUrls.length) + createEventExtractionPrompt(
+  const prompt = INDEPENDENT_SOURCE_ITEM_RULES + ACTIVITY_AUDIENCE_CONTEXT_RULE + captionOnlyActivityExtractionRules(imageUrls.length) + createEventExtractionPrompt(
     combinedText,
     userName,
     timestamp,
@@ -846,7 +847,7 @@ async function extractCalendarContent(
   const literalSourceNames = modernCalendarPilot &&
     (config.lunaCalendarLiteralSourcePrompt === true ||
       parseBooleanEnv('LUNA_CALENDAR_LITERAL_SOURCE_PROMPT', false));
-  const prompt = createCalendarExtractionPrompt(combinedText, userName, timestamp,
+  const prompt = INDEPENDENT_SOURCE_ITEM_RULES + ACTIVITY_AUDIENCE_CONTEXT_RULE + createCalendarExtractionPrompt(combinedText, userName, timestamp,
     lunaHighGrouping, modernCalendarPilot, literalSourceNames);
 
   const response = await callGPT(prompt, imageUrls, config);
@@ -1159,7 +1160,7 @@ async function extractScheduleContent(
     return scheduleTextItems;
   }
 
-  const prompt = createScheduleExtractionPrompt(combinedText, userName, timestamp);
+  const prompt = INDEPENDENT_SOURCE_ITEM_RULES + ACTIVITY_AUDIENCE_CONTEXT_RULE + createScheduleExtractionPrompt(combinedText, userName, timestamp);
 
   const response = await callGPT(prompt, imageUrls, config);
 
@@ -1479,7 +1480,7 @@ async function extractFallbackItems(
   const postedLocalPretty = postedDt.toFormat('yyyy-MM-dd EEE HH:mm:ss');
   const postedLocalDate = postedDt.toFormat('yyyy-MM-dd');
 
-  const prompt = captionOnlyActivityExtractionRules(imageUrls.length) + createFallbackExtractionPrompt(
+  const prompt = INDEPENDENT_SOURCE_ITEM_RULES + ACTIVITY_AUDIENCE_CONTEXT_RULE + captionOnlyActivityExtractionRules(imageUrls.length) + createFallbackExtractionPrompt(
     combinedText,
     userName,
     timestamp,
@@ -4448,7 +4449,7 @@ export function applyItemScopedRecurrence<T extends ExtractedItem>(event: T, cap
 }
 
 export function detectRecurringPattern(text: string): RecurringPattern {
-  const t = String(text || '').toLowerCase();
+  const t = recurrenceScheduleText(String(text || '')).toLowerCase();
 
   // Check for daily/everyday patterns FIRST
   if (/\b(everyday|daily)\b/i.test(t)) {
