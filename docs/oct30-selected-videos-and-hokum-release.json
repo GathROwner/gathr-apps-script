@@ -1,0 +1,178 @@
+{
+  "atUTC": "2026-10-30T17:10:45.560Z",
+  "selected": 12,
+  "counts": {
+    "published": 5,
+    "already_covered": 4,
+    "held": 3
+  },
+  "decisions": [
+    {
+      "sourceVideoId": "2140658959887034",
+      "checkedAt": "2026-10-30T16:54:57.886Z",
+      "reason": "Explicit Use selection published and app metadata/public bytes verified.",
+      "assetId": "ce8f7eef359496c01052417235a1ce159bb3806295d919144e1d2397808acbcf",
+      "state": "published",
+      "paths": [
+        "venues/slug_upeisu/events/wt1jmdKU11NwhyFrjev5"
+      ]
+    },
+    {
+      "sourceVideoId": "1850333096322421",
+      "state": "already_covered",
+      "paths": [
+        "venues/slug_royaltycrossing/events/6idnDEErpAB7Ex2skVxQ"
+      ],
+      "checkedAt": "2026-10-30T16:54:57.986Z",
+      "assetId": "9916c07401dc94ef5d7fdbb8515c94c648d3f5c5e7e96818e623d18372ca01bb",
+      "reason": "The event already has the other market video you also selected; one video per listing is currently supported."
+    },
+    {
+      "sourceVideoId": "1758094778823149",
+      "state": "already_covered",
+      "paths": [
+        "venues/BKaKU7O4J56sipdJRrHM/events/ko0acxhAluPpblFGlvXN"
+      ],
+      "reason": "Your selected Ben Kunder video was already published.",
+      "checkedAt": "2026-10-30T16:54:58.078Z",
+      "assetId": "7efb5b92223a59987044171151bfbcdd6f520b9aa824b8d78d322cf453f55b3d"
+    },
+    {
+      "sourceVideoId": "1068937392790830",
+      "assetId": "43c9faed839551b4f3908e714f97d08763bc78a0576a2ecd17f1643885220dd1",
+      "reason": "83-second human-selected trial published after compatible iOS Production update; both current screening links verified.",
+      "checkedAt": "2026-10-30T17:10:40.331Z",
+      "paths": [
+        "venues/slug_citycinemachtown/events/eOgxECuJQTd8mDr9nuLI",
+        "venues/slug_citycinemachtown/events/2WeB14bM4anHk3Eujh2A"
+      ],
+      "state": "published"
+    },
+    {
+      "sourceVideoId": "1105723392177986",
+      "state": "published",
+      "assetId": "6d30dba628068dae63caa75295047d90463e5619fe415788070e54795622f621",
+      "reason": "Explicit Use selection published and app metadata/public bytes verified.",
+      "checkedAt": "2026-10-30T16:55:00.448Z",
+      "paths": [
+        "venues/fb_100063617721610/events/harvest_20261015_20261031_1700"
+      ]
+    },
+    {
+      "sourceVideoId": "1634610118071598",
+      "checkedAt": "2026-10-30T16:55:00.503Z",
+      "state": "published",
+      "paths": [
+        "venues/fb_100063555340128/events/kwDxQf54x5dXfVASOifz"
+      ],
+      "reason": "Explicit Use selection published and app metadata/public bytes verified.",
+      "assetId": "55540eb68afdec5853946ec3aa664777b506398fcb5209901d4a784ec17c26f7"
+    },
+    {
+      "sourceVideoId": "1582649633172659",
+      "checkedAt": "2026-10-30T16:55:00.568Z",
+      "paths": [
+        "venues/slug_royaltycrossing/events/6idnDEErpAB7Ex2skVxQ"
+      ],
+      "reason": "Your selected market video was already published.",
+      "assetId": "9916c07401dc94ef5d7fdbb8515c94c648d3f5c5e7e96818e623d18372ca01bb",
+      "state": "already_covered"
+    },
+    {
+      "sourceVideoId": "1093074256958235",
+      "checkedAt": "2026-10-30T16:55:00.624Z",
+      "assetId": "86b3ffbeb17e0e9180c70e6816e57169b72557acf176841dbccba8e7e100995b",
+      "reason": "Your selected Cowboy Christmas video was already published.",
+      "paths": [
+        "venues/slug_harbourfronttheatre/events/z8SX5iklVWSITkroSaht"
+      ],
+      "state": "already_covered"
+    },
+    {
+      "sourceVideoId": "1110993928391583",
+      "checkedAt": "2026-10-30T16:55:00.692Z",
+      "assetId": "783a8bbe63e38ece3484a6d05279a0d4f926d1d767fdbe6a23c248878a4076d4",
+      "reason": "Explicit Use selection published and app metadata/public bytes verified.",
+      "state": "published",
+      "paths": [
+        "venues/slug_stpaulschurchinpei/events/Rc7yZb5itaERchXAQ83p"
+      ]
+    },
+    {
+      "sourceVideoId": "1433521478237078",
+      "state": "held",
+      "paths": [],
+      "checkedAt": "2026-10-30T16:55:00.743Z",
+      "reason": "The video poster says October 31; the newer official Friday dinner post and current $18 lasagna listing say October 30. Hold the conflicting poster until the date is resolved."
+    },
+    {
+      "sourceVideoId": "29106205172342675",
+      "checkedAt": "2026-10-30T16:55:00.799Z",
+      "reason": "No official December 5 Johnny Reid event listing exists at Credit Union Place. The separate root listing is a third-party ticket resale, which is not an eligible match.",
+      "state": "held",
+      "paths": []
+    },
+    {
+      "sourceVideoId": "1151769894376124",
+      "reason": "The source says today and was posted October 27. No current matching poutine listing exists; not attached to a different day or the freezer sale.",
+      "state": "held",
+      "paths": [],
+      "checkedAt": "2026-10-30T16:55:00.852Z"
+    }
+  ],
+  "humanChoicesPreserved": true,
+  "eventWrites": 0,
+  "photosChanged": false,
+  "publicRegistry": {
+    "assets": 9,
+    "listingLinks": 10,
+    "bytes": 7528819,
+    "allLinksResolve": true
+  },
+  "hokum": {
+    "durationSeconds": 83.06,
+    "bytes": 2546243,
+    "paths": [
+      "venues/slug_citycinemachtown/events/eOgxECuJQTd8mDr9nuLI",
+      "venues/slug_citycinemachtown/events/2WeB14bM4anHk3Eujh2A"
+    ],
+    "reviewFrames": 48,
+    "lunaUSD": 0.00268505,
+    "transcriptionUSD": 0.006299999999999999,
+    "totalEstimatedAPIUSD": 0.00898505,
+    "terraCalls": 0,
+    "basis": "Actual response usage at documented standard API rates; estimate, not an invoice. Local CPU, storage and playback transfer excluded.",
+    "pricing": "https://developers.openai.com/api/docs/pricing"
+  },
+  "ota": {
+    "verifiedAtUTC": "2026-10-30T17:09:32.5494018Z",
+    "commit": "1cb68ecc37e19fe665cc1067cb6a04bc7c64f765",
+    "group": "789a6729-f648-4783-850c-b784cdb4de85",
+    "id": "01a18dc9-196e-7535-9f69-41cdad5f76da",
+    "runtime": "1.1.20",
+    "platform": "ios",
+    "branch": "production",
+    "newest": true,
+    "physicalDeviceAdoption": "Not yet confirmed",
+    "focusedTests": 24,
+    "typecheck": "PASS",
+    "lint": "Zero errors; 221 existing warnings, changed coordinator files also passed",
+    "phonePlayerScreenshot": "PLAYER_PHONE_QA.png",
+    "nativeFilesUnchanged": true,
+    "nativeBuild": false
+  },
+  "parserUnchanged": true,
+  "privateReviewEnabled": true,
+  "automaticPublication": false,
+  "dailyReviewDurationLimitUnchanged": 60,
+  "verification": {
+    "newVideoPublicHashes": true,
+    "newVideoHTTP206": true,
+    "nativeEventVersionsUnchanged": true,
+    "focusedPublicationTests": 4,
+    "focusedPlaybackTests": 24,
+    "renderedPhonePlayer": true,
+    "physicalIosAdoption": "Not yet confirmed"
+  },
+  "evidenceDirectory": "C:/Users/craig/Documents/Codex/2026-10-30/video-model-comparison"
+}
