@@ -1,0 +1,16 @@
+{
+  "name": "gathr-private-video-review",
+  "private": true,
+  "type": "module",
+  "main": "index.mjs",
+  "engines": {"node": "22"},
+  "scripts": {"test": "node --test test/*.test.mjs", "check": "node --check index.mjs && node --check pipeline.mjs && node --check policy.mjs"},
+  "dependencies": {
+    "firebase-admin": "^13.0.0",
+    "firebase-functions": "^7.2.5",
+    "googleapis": "^144.0.0",
+    "xlsx": "^0.18.5",
+    "ffmpeg-static": "^5.2.0",
+    "ffprobe-static": "^3.1.0"
+  }
+}

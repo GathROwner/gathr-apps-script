@@ -1,0 +1,4 @@
+node_modules/
+artifacts/
+firebase-debug*.log
+.env*
