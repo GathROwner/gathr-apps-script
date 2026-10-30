@@ -9,7 +9,8 @@ import {google} from 'googleapis';
 import XLSX from 'xlsx';
 import {Timestamp,FieldValue} from 'firebase-admin/firestore';
 import {POLICY,hash,cdnUrl,discover} from './policy.mjs';
-import {prepare,transcribe,triage} from './evidence-worker.mjs';
+import {prepare,transcribe,rebindTranscripts,canonical,sha256} from './evidence-worker.mjs';
+import {reviewEditorial,EDITORIAL_VERSION} from './editorial-review.mjs';
 const exec=promisify(execFile);
 process.env.FFMPEG_PATH=ffmpeg; process.env.FFPROBE_PATH=ffprobe.path;
 const now=()=>new Date().toISOString();
@@ -112,6 +113,27 @@ async function recordUsage(db,kind) {
   const day=new Date().toISOString().slice(0,10),ref=db.doc(`private_video_usage/${day}`);
   await db.runTransaction(async tx=>{const s=await tx.get(ref);const count=Number(s.data()?.[kind]||0);tx.set(ref,{[kind]:count+1,updatedAt:now()},{merge:true});});
 }
+/** Reuse exact complete audio evidence. Cache entries remain immutable and hash-bound. */
+export async function speechEvidence({bucket,root,prepared,apiKey,fetchImpl}) {
+  const audioSHA=prepared.clips[0].audio?.sha256;
+  if(audioSHA) {
+    const object=bucket.file(`speech-cache/${audioSHA}.json`);
+    try {
+      const [meta]=await object.getMetadata();
+      if(Number(meta.size)>1_000_000||meta.metadata?.owner!==POLICY.version)throw Error('speech_cache_ownership_invalid');
+      const [bytes]=await object.download();if(hash(bytes)!==meta.metadata?.sha256)throw Error('speech_cache_hash_invalid');
+      await fs.writeFile(join(root,'cached-speech.json'),bytes,{flag:'wx'});
+      await rebindTranscripts({preparedPath:join(root,'prepared/prepared.json'),transcriptsPath:join(root,'cached-speech.json'),out:join(root,'transcripts'),matchByAudioSHA:true});
+      return {reused:true};
+    }catch(e){if(e.code!==404)throw e;}
+  }
+  const report=await transcribe({preparedPath:join(root,'prepared/prepared.json'),out:join(root,'transcripts'),execute:true,apiKey,fetchImpl});
+  if(audioSHA) {
+    const bytes=Buffer.from(JSON.stringify(report));
+    try{await bucket.file(`speech-cache/${audioSHA}.json`).save(bytes,{resumable:false,preconditionOpts:{ifGenerationMatch:0},metadata:{cacheControl:'private, no-store',metadata:{sha256:hash(bytes),owner:POLICY.version}}});}catch(e){if(e.code!==412)throw e;}
+  }
+  return {reused:false};
+}
 export async function work({db,bucket},apiKey) {
   if(!(await db.doc('runtime_metadata/video_review').get()).data()?.enabled)return {disabled:true};
   // One fenced owner across scheduler retries, cold starts and manual invocations.
@@ -127,24 +149,31 @@ export async function work({db,bucket},apiKey) {
     for(const doc of queue.docs) {
       if(Date.now()>deadline)break;
       const c=doc.data(); if(Date.parse(c.expiresAt)<=Date.now()){await doc.ref.update({state:'expired',reasons:['review_retention_expired']});continue;}
-      const root=join(tmpdir(),'gathr-video-review',doc.id);const prefix=`evidence/${doc.id}`;const uploaded=new Map();
+      const root=join(tmpdir(),'gathr-video-review',doc.id,EDITORIAL_VERSION);const prefix=`evidence/${doc.id}/${EDITORIAL_VERSION}`;const uploaded=new Map();
       // Never reset a paid attempt: crash recovery creates a hold, not another charge.
       await doc.ref.update({state:'processing',lease:{owner,until:new Date(Date.now()+32*60000).toISOString()},startedAt:now()});
       try {
         await recordUsage(db,'clips');await fs.mkdir(root,{recursive:true});
-        const raw=await download(c.sourceUrl,join(root,'input.mp4'));
-        const rendition=await normalize(join(root,'input.mp4'),join(root,'video.mp4'));
-        const sha=hash(rendition.bytes),object=`clips/${doc.id}.mp4`;
-        await bucket.file(object).save(rendition.bytes,{resumable:false,preconditionOpts:{ifGenerationMatch:0},metadata:{contentType:'video/mp4',cacheControl:'private, no-store',metadata:{sha256:sha,owner:'daily-video-review-v1'}}});
+        let sha,object,base;
+        if(c.object) {
+          if(c.object!==`clips/${doc.id}.mp4`)throw Error('retained_clip_namespace_invalid');
+          const file=bucket.file(c.object),[meta]=await file.getMetadata();
+          if(Number(meta.size)>8_000_000||meta.metadata?.owner!==POLICY.version||meta.metadata?.sha256!==c.sha256)throw Error('retained_clip_ownership_invalid');
+          const [bytes]=await file.download();if(hash(bytes)!==c.sha256)throw Error('retained_clip_hash_invalid');
+          await fs.writeFile(join(root,'video.mp4'),bytes,{flag:'wx'});sha=c.sha256;object=c.object;
+          base={object,sha256:sha,bytes:bytes.length};
+        }else{
+          const raw=await download(c.sourceUrl,join(root,'input.mp4'));
+          const rendition=await normalize(join(root,'input.mp4'),join(root,'video.mp4'));
+          sha=hash(rendition.bytes);object=`clips/${doc.id}.mp4`;
+          await bucket.file(object).save(rendition.bytes,{resumable:false,preconditionOpts:{ifGenerationMatch:0},metadata:{contentType:'video/mp4',cacheControl:'private, no-store',metadata:{sha256:sha,owner:POLICY.version}}});
+          base={object,sha256:sha,originalSHA256:hash(raw),bytes:rendition.bytes.length,durationSeconds:rendition.durationSeconds,hasAudio:rendition.hasAudio};
+        }
         const listings=await exactListings(db,c);
-        const base={object,sha256:sha,originalSHA256:hash(raw),bytes:rendition.bytes.length,durationSeconds:rendition.durationSeconds,hasAudio:rendition.hasAudio,listings};
-        await doc.ref.update(base);
-        const blockers=[];
-        if(listings.length!==1)blockers.push(listings.length?'multiple_exact_listings_need_selection':'no_current_exact_source_listing');
-        if(c.sourceAudio==='unknown'||c.sourceAudio!==rendition.hasAudio)blockers.push('source_audio_unknown_or_mismatched');
-        if(blockers.length){await doc.ref.update({state:'held',decision:'hold',reasons:blockers,finishedAt:now(),revision:hash(JSON.stringify([sha,listings,blockers]))});processed++;continue;}
-        await fs.writeFile(join(root,'input.json'),JSON.stringify({clips:[{id:doc.id,videoPath:join(root,'video.mp4'),sourcePostId:c.sourcePostId,sourceVideoId:c.sourceVideoId,caption:c.caption,listingContext:listings[0],sourceAudio:c.sourceAudio}]}));
-        await prepare({manifestPath:join(root,'input.json'),out:join(root,'prepared')});
+        await doc.ref.update({...base,listings});
+        const listingContext=listings.length===1?listings[0]:{sourceMatched:false,notes:listings.length?'Multiple exact listings need selection.':'No existing exact source-linked listing was found.'};
+        await fs.writeFile(join(root,'input.json'),JSON.stringify({clips:[{id:doc.id,videoPath:join(root,'video.mp4'),sourcePostId:c.sourcePostId,sourceVideoId:c.sourceVideoId,caption:c.caption,listingContext,sourceAudio:c.sourceAudio}]}));
+        const prepared=await prepare({manifestPath:join(root,'input.json'),out:join(root,'prepared')});
         const boundedFetch=async(url,options)=>{
           const model=options.body instanceof FormData?String(options.body.get('model')):JSON.parse(options.body).model;
           const kind=model==='gpt-6-luna'?'luna':model==='gpt-6.1-terra'?'terra':model==='gpt-transcribe'?'transcriptions':null;
@@ -153,18 +182,19 @@ export async function work({db,bucket},apiKey) {
           await uploadDirectory(bucket,root,prefix,uploaded);await recordUsage(db,kind);
           return fetch(url,options);
         };
-        await transcribe({preparedPath:join(root,'prepared/prepared.json'),out:join(root,'transcripts'),execute:true,apiKey,fetchImpl:boundedFetch});
+        const speech=await speechEvidence({bucket,root,prepared,apiKey,fetchImpl:boundedFetch});
         await uploadDirectory(bucket,root,prefix,uploaded);
-        const report=await triage({preparedPath:join(root,'prepared/prepared.json'),transcriptsPath:join(root,'transcripts/transcripts.json'),out:join(root,'triage'),execute:true,apiKey,fetchImpl:boundedFetch});
+        const report=await reviewEditorial({preparedPath:join(root,'prepared/prepared.json'),transcriptsPath:join(root,'transcripts/transcripts.json'),out:join(root,'editorial'),execute:true,apiKey,fetchImpl:boundedFetch});
         await uploadDirectory(bucket,root,prefix,uploaded);
-        const e=report.entries[0]; const decision=e.terminalDecision;
-        await doc.ref.update({state:decision==='reject'?'rejected':decision==='hold'?'held':'recommended',decision,
-          reasons:[...e.holdReasons,...e.routeReasons],route:e.route,luna:e.luna?.modelAssessment??null,terra:e.terra?.modelAssessment??null,
-          callSummary:report.callSummary,finishedAt:now(),revision:hash(JSON.stringify([sha,listings,e])),artifacts:prefix});processed++;
+        const e=report.entries[0];
+        const listingCheck={status:listings.length===0?'not_found':listings.length>1?'needs_selection':e.listingAssessment?.conflicts.length?'conflict':e.listingAssessment?.association==='matched'?'matched':'uncertain',reason:e.listingAssessment?.reason||'A listing match needs review.'};
+        await doc.ref.update({state:e.state,decision:e.decision,reasons:e.reasons,route:e.route,luna:e.luna,terra:e.terra,
+          contentAssessment:e.contentAssessment,listingCheck,audioNotes:e.audioNotes,reviewVersion:EDITORIAL_VERSION,speechReused:speech.reused,
+          callSummary:e.callSummary,finishedAt:now(),revision:hash(JSON.stringify([sha,listings,e])),artifacts:prefix});processed++;
       } catch(e) {
         await uploadDirectory(bucket,root,prefix,uploaded).catch(()=>{});
         const code=/^[a-z0-9_]+$/.test(e.message||'')?e.message:'video_processing_failed_private_evidence_retained';
-        await doc.ref.update({state:'held',decision:'hold',reasons:[code],finishedAt:now(),revision:hash(`${doc.id}:${code}`)});
+        await doc.ref.update({state:'held',decision:'hold',reasons:[code],reviewVersion:EDITORIAL_VERSION,finishedAt:now(),revision:hash(`${doc.id}:${EDITORIAL_VERSION}:${code}`)});
       } finally {await fs.rm(root,{recursive:true,force:true}).catch(()=>{});}
     }
     await db.doc('runtime_metadata/video_review_health').set({workerAt:now(),processed},{merge:true});

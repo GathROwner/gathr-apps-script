@@ -173,7 +173,7 @@ const INPUT_OPTIONS = ['-protocol_whitelist', 'file', '-f', 'mov', '-enable_dref
 async function probeVideo(videoPath) {
   const {stdout, stderr} = await run('ffprobe', ['-v', 'error', ...INPUT_OPTIONS, '-i', videoPath,
     '-show_format', '-show_streams', '-show_frames', '-select_streams', 'v:0',
-    '-show_entries', 'format=duration,format_name:stream=index,codec_type,width,height,sample_aspect_ratio,start_time,duration:frame=best_effort_timestamp_time,pkt_duration_time,duration_time', '-of', 'json']);
+    '-show_entries', 'format=duration,format_name:stream=index,codec_type,width,height,sample_aspect_ratio,start_time,duration,time_base:frame=best_effort_timestamp,best_effort_timestamp_time,pkt_duration_time,duration_time', '-of', 'json']);
   check(!stderr.trim(), 'video_probe_decode_errors');
   const probe = JSON.parse(stdout);
   const stream = probe.streams?.[0];
@@ -185,7 +185,13 @@ async function probeVideo(videoPath) {
   check(sar[1] > 0 && sar[0] / sar[1] >= .1 && sar[0] / sar[1] <= 10, 'video_aspect_invalid');
   const frames = probe.frames ?? [];
   check(frames.length > 0 && frames.length <= 7201, 'decoded_frame_count_invalid');
-  const pts = frames.map(f => Number(f.best_effort_timestamp_time));
+  const timeBase = String(stream.time_base);
+  check(/^\d+\/[1-9]\d*$/.test(timeBase), 'video_time_base_invalid');
+  const [numerator, denominator] = timeBase.split('/').map(Number);
+  const ptsUnits = frames.map(f => Number(f.best_effort_timestamp));
+  check(ptsUnits.every(Number.isSafeInteger), 'video_integer_pts_invalid');
+  const pts = ptsUnits.map(p => p * numerator / denominator);
+  check(pts.every((p,i)=>Math.abs(p-Number(frames[i].best_effort_timestamp_time))<.0000011), 'video_pts_provenance_mismatch');
   check(pts.every((t, i) => Number.isFinite(t) && (i === 0 || t > pts[i - 1])), 'video_timestamps_invalid');
   const first = pts[0];
   const times = pts.map(t => t - first);
@@ -201,7 +207,18 @@ async function probeVideo(videoPath) {
   check(allStreams.filter(s => s.codec_type === 'video').length === 1, 'one_video_stream_required');
   const audio = allStreams.filter(s => s.codec_type === 'audio');
   check(audio.length <= 1, 'multiple_audio_streams_not_supported');
-  return {duration, firstPTS: first, finalFrameDuration: tail, ptsStrings: frames.map(f => f.best_effort_timestamp_time), times, audio: audio[0] ?? null};
+  return {duration, firstPTS: first, finalFrameDuration: tail, ptsStrings: frames.map(f => f.best_effort_timestamp_time), ptsUnits, timeBase, times, audio: audio[0] ?? null};
+}
+
+/** showinfo's pts_time text is rounded to significant digits; integer PTS is exact. */
+export function exactShowinfoPTS(stderr, expectedTimeBase) {
+  const bases=[...stderr.matchAll(/config in time_base:\s*(\d+)\/(\d+)/g)];
+  check(bases.length>0, 'showinfo_time_base_missing');
+  const [a,b]=expectedTimeBase.split('/').map(BigInt);
+  check(bases.every(m=>BigInt(m[1])*b===a*BigInt(m[2])), 'showinfo_time_base_changed');
+  return [...stderr.matchAll(/\bn:\s*\d+\s+pts:\s*([-+\d]+)\s+pts_time:/g)].map(m=>{
+    const p=Number(m[1]);check(Number.isSafeInteger(p),'showinfo_pts_invalid');return p;
+  });
 }
 
 export const regularIntervalSeconds = duration => duration <= 12 ? .5 : 2;
@@ -274,9 +291,9 @@ export async function prepare({manifestPath, out}) {
     // Decode the ENTIRE video, detect scenes, and fail on decoder errors. No seeks/trimming.
     const scenes = await run('ffmpeg', ['-hide_banner', '-nostdin', '-v', 'info', '-copyts', '-xerror', '-err_detect', 'explode',
       ...INPUT_OPTIONS, '-i', videoPath, '-map', '0:v:0', '-an', '-vf', "select='gt(scene,0.3)',showinfo=checksum=0", '-fps_mode', 'passthrough', '-f', 'null', '-']);
-    const sceneTimes = [...scenes.stderr.matchAll(/\bpts_time:([-+\d.eE]+)/g)].map(m => Number(m[1]));
-    const sceneIndices = sceneTimes.map(t => {
-      const index = probe.times.findIndex(relative => Math.abs(relative - (t - probe.firstPTS)) < .00002);
+    const scenePTS = exactShowinfoPTS(scenes.stderr,probe.timeBase);
+    const sceneIndices = scenePTS.map(p => {
+      const index = probe.ptsUnits.indexOf(p);
       check(index >= 0, 'scene_timestamp_not_in_probed_video'); return index;
     });
     const selection = selectFrames(probe.times, sceneIndices, LIMITS.frames, probe.duration);
@@ -286,12 +303,14 @@ export async function prepare({manifestPath, out}) {
     const extraction = await run('ffmpeg', ['-hide_banner', '-nostdin', '-n', '-v', 'info', '-copyts', '-xerror', '-err_detect', 'explode',
       ...INPUT_OPTIONS, '-i', videoPath, '-map', '0:v:0', '-an', '-vf', `select='${selectExpression}',showinfo=checksum=0,${scale}`,
       '-fps_mode', 'passthrough', '-q:v', '3', '-threads', '1', framePattern]);
-    const extractedTimes = [...extraction.stderr.matchAll(/\bpts_time:([-+\d.eE]+)/g)].map(m => Number(m[1]));
-    check(extractedTimes.length === selection.selected.length, 'frame_extraction_count_mismatch');
+    const extractedPTS = exactShowinfoPTS(extraction.stderr,probe.timeBase);
+    check(extractedPTS.length === selection.selected.length, 'frame_extraction_count_mismatch');
+    const [tbN,tbD]=probe.timeBase.split('/').map(Number);
+    const extractedTimes=extractedPTS.map(p=>p*tbN/tbD);
     const frames = [];
     for (let n = 0; n < selection.selected.length; n++) {
       const selected = selection.selected[n];
-      check(Math.abs(extractedTimes[n] - probe.firstPTS - probe.times[selected.index]) < .00002, 'extracted_timestamp_mismatch');
+      check(extractedPTS[n] === probe.ptsUnits[selected.index], 'extracted_timestamp_mismatch');
       const relativePath = `${prefix}/frame-${String(n + 1).padStart(3, '0')}.jpg`;
       const frame = await fileRecord(root, relativePath, LIMITS.frameBytes);
       const dimensions = jpegDimensions(frame.bytes);
@@ -466,17 +485,19 @@ export async function transcribe({preparedPath, out, execute = false, apiKey, fe
 }
 
 /** Offline, explicit artifact migration. Never relabel or rewrite the source transcript artifact. */
-export async function rebindTranscripts({preparedPath, transcriptsPath, out}) {
+export async function rebindTranscripts({preparedPath, transcriptsPath, out, matchByAudioSHA = false}) {
   const {prepared, loaded} = await loadPrepared(preparedPath);
   const source = await readJson(transcriptsPath);
   check(['video-evidence-v1', VERSION].includes(source.version) && Array.isArray(source.entries) &&
     source.digest === digest(source.entries) && !source.dryRun &&
     new Set(source.entries.map(e => e.id)).size === source.entries.length, 'rebind_source_artifact_invalid');
-  const root = await phaseRoot(out, 'rebind-transcripts', digest({prepared: prepared.digest, source: source.digest}), [preparedPath, transcriptsPath]);
+  const root = await phaseRoot(out, 'rebind-transcripts', digest({prepared: prepared.digest, source: source.digest, ...(matchByAudioSHA?{matchByAudioSHA:true}:{})}), [preparedPath, transcriptsPath]);
   const entries = loaded.map(({clip}) => {
     if (!clip.audio.present) return {id: clip.id, status: 'not_present_metadata_only', audioSha256: null,
       transcriptionComplete: false, limitations: [NO_SPEECH_PROOF]};
-    const entry = source.entries.find(e => e.id === clip.id);
+    const matches = source.entries.filter(e => matchByAudioSHA ? e.audioSha256 === clip.audio.sha256 : e.id === clip.id);
+    check(matches.length > 0 && new Set(matches.map(e=>e.transcriptHash)).size === 1, 'rebind_ambiguous_or_missing_audio');
+    const entry = matches[0];
     check(entry?.status === 'transcribed' && entry.transcriptionComplete === true &&
       entry.audioSha256 === clip.audio.sha256 && typeof entry.text === 'string' && entry.transcriptHash === sha256(entry.text), 'rebind_audio_or_transcript_hash_mismatch');
     const requestVersion = entry.call?.version;
@@ -492,7 +513,8 @@ export async function rebindTranscripts({preparedPath, transcriptsPath, out}) {
       transcriptHash: entry.transcriptHash, text: safeText(entry.text, 80_000), languages: entry.languages ?? [],
       transcriptionModel: TRANSCRIPTION_MODEL, settings: TRANSCRIPTION_SETTINGS, transcriptionComplete: true,
       timestampsAvailable: false, limitations: [NO_SPEECH_PROOF], call: entry.call,
-      reboundFrom: {version: source.version, requestVersion, preparedDigest: source.preparedDigest, transcriptArtifactDigest: source.digest}};
+      reboundFrom: {version: source.version, requestVersion, preparedDigest: source.preparedDigest, transcriptArtifactDigest: source.digest,
+        ...(matchByAudioSHA?{sourceClipId:entry.id,match:'exact_audio_sha256'}:{})}};
   });
   const report = {version: VERSION, preparedDigest: prepared.digest, dryRun: false,
     migration: 'verified_audio_sha_and_file_model_only_settings', attemptedRequests: 0, entries, digest: digest(entries)};
@@ -860,3 +882,4 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     console.error(JSON.stringify({status: 'failed', code, publicationAuthorized: false})); process.exitCode = 1;
   });
 }
+export {loadPrepared, callOnce, phaseRoot, writeNew, optionalJson, validateSchema};

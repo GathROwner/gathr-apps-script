@@ -1,39 +1,69 @@
 import {initializeApp} from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js';
 import {getAuth,signInWithEmailAndPassword,onAuthStateChanged,signOut} from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
+import {humanChoice,choiceLabels,needsReview,presentation} from './review-ui.js';
 const app=initializeApp({apiKey:'AIzaSyDlTVz1oAxaYgBQVupUFmhgWd1CLAmu2Xs',authDomain:'gathr-m1.firebaseapp.com',projectId:'gathr-m1'});
-const auth=getAuth(app);let candidates=[],filter='attention',nextCursor=null;const blobs=[];const drafts=new Map();
-const $=id=>document.getElementById(id);const status=text=>{$('status').textContent=text;};
-const base=new URL('./',location.href);
-async function api(path,options={}) {const token=await auth.currentUser.getIdToken();const r=await fetch(new URL(path,base),{...options,headers:{Authorization:`Bearer ${token}`,...options.headers}});if(!r.ok){let message;try{message=(await r.json()).error;}catch{}throw Error(message||`Request failed (${r.status})`);}return r;}
+const auth=getAuth(app);let candidates=[],filter='attention',nextCursor=null;const blobs=[],drafts=new Map();
+const $=id=>document.getElementById(id),status=text=>{$('status').textContent=text;},base=new URL('./',location.href);
+async function api(path,options={}){
+ const token=await auth.currentUser.getIdToken(),r=await fetch(new URL(path,base),{...options,headers:{Authorization:`Bearer ${token}`,...options.headers}});
+ if(!r.ok){let msg;try{msg=(await r.json()).error;}catch{}throw Error(msg||`Request failed (${r.status})`);}return r;
+}
 function node(tag,text,className){const e=document.createElement(tag);if(text)e.textContent=text;if(className)e.className=className;return e;}
-const friendly={no_current_exact_source_listing:'No current listing is linked to this exact post. The clip may still be useful.',multiple_exact_listings_need_selection:'This post links to several listings. We need to select the right one.',source_audio_unknown_or_mismatched:'The saved audio does not have enough source evidence.',direct_video_url_unavailable:'The scraper did not provide a downloadable video. You can still open the source post.',clip_over_60_seconds:'Longer than the current 60-second limit.',terra_cannot_supply_missing_source_context_or_audio:'Missing source, listing or audio evidence needs a person to check it.',clean_decisive_luna_no_terra:'Luna reached a clear decision; Terra was not needed.',blind_review_did_not_resolve_all_concerns:'Terra reviewed independently, but concerns remain.',empty_speech_transcript:'No speech was transcribed. Music or other audio still needs a listen.'};
-Object.assign(friendly,{empty_transcript_requires_audio_review:'No speech was transcribed. Please listen to check the music or other audio.',source_binding_not_confirmed:'A matching title is not enough: the clip is not linked to this exact listing by its source post.',listing_context_incomplete:'The linked listing is missing date, time or venue evidence needed for a complete comparison.'});
-function explain(s){return friendly[s]||s.replaceAll('_',' ').replace(/^./,c=>c.toUpperCase());}
-async function load(more=false){const payload=await(await api(`api/candidates${more&&nextCursor?'?after='+nextCursor:''}`)).json();candidates=more?[...new Map([...candidates,...payload.candidates].map(c=>[c.id,c])).values()]:payload.candidates;nextCursor=payload.nextCursor;render();$('more').hidden=!nextCursor;$('note').textContent=`${candidates.length} clips loaded · ${payload.retentionDays}-day private playback · Publication is manual`;status(payload.health.workerAt?`Last worker check: ${new Date(payload.health.workerAt).toLocaleString()}`:'The next completed parse will appear here automatically.');}
+async function load(more=false){
+ const p=await(await api(`api/candidates${more&&nextCursor?'?after='+nextCursor:''}`)).json();
+ candidates=more?[...new Map([...candidates,...p.candidates].map(c=>[c.id,c])).values()]:p.candidates;nextCursor=p.nextCursor;render();$('more').hidden=!nextCursor;
+ $('note').textContent=`${candidates.length} clips loaded · Filtered clips remain available to inspect · Publication is manual`;
+ status(p.health.workerAt?`Last worker check: ${new Date(p.health.workerAt).toLocaleString()}`:'New clips will appear after a completed parse.');
+}
 $('more').onclick=async()=>{try{await load(true);}catch(e){status(e.message);}};
 $('refresh').onclick=async()=>{$('refresh').disabled=true;try{await load();}catch(e){status(e.message);}finally{$('refresh').disabled=false;}};
-function render(){document.querySelectorAll('video').forEach(v=>v.pause());blobs.splice(0).forEach(URL.revokeObjectURL);$('cards').replaceChildren();$('summary').replaceChildren();
- for(const [state,label]of[['waiting','Waiting'],['rejected','Rejected'],['held','Held'],['recommended','Recommended']]){const stat=node('div',null,'stat');stat.append(node('strong',String(candidates.filter(c=>state==='waiting'?['queued','processing'].includes(c.state):c.state===state).length)),node('span',label));$('summary').append(stat);}
- const list=candidates.filter(c=>filter==='all'||filter==='attention'&&['held','rejected'].includes(c.state)||c.state===filter);
- if(!list.length){$('cards').append(node('p','No clips in this view yet. New reviews will appear after a completed parse.','empty'));return;}
- for(const c of list){const card=node('article',null,'review'),visual=node('div',null,'visual'),detail=node('div',null,'details');
-  if(c.object&&Date.parse(c.expiresAt)>Date.now()){const play=node('button','▶  Watch clip','play');play.setAttribute('aria-label',`Watch ${c.listings?.[0]?.title||'source video'}`);play.onclick=async()=>{play.disabled=true;play.textContent='Loading clip…';try{const response=await api(`api/candidates/${c.id}/media`);const blob=URL.createObjectURL(await response.blob());blobs.push(blob);document.querySelectorAll('video').forEach(v=>v.pause());const video=node('video');video.controls=true;video.playsInline=true;video.src=blob;visual.replaceChildren(video);await video.play().catch(()=>{});}catch(e){visual.replaceChildren(node('p',e.message,'unavailable'));}};visual.append(play);}
-  else visual.append(node('p',c.state==='queued'?'Waiting for download and review. This clip has not failed.':c.state==='processing'?'Preparing this clip. Playback will be available when its download finishes.':c.state==='expired'?'Private preview expired. The source link is still available.':'A downloadable preview is unavailable. Open the source post to inspect it.','unavailable'));
+function render(){
+ document.querySelectorAll('video').forEach(v=>v.pause());blobs.splice(0).forEach(URL.revokeObjectURL);$('cards').replaceChildren();$('summary').replaceChildren();
+ for(const [state,label]of[['waiting','Waiting'],['rejected','Filtered out'],['held','Needs review'],['recommended','Looks useful']]){
+  const n=candidates.filter(c=>state==='waiting'?['queued','processing'].includes(c.state):c.state===state).length,s=node('div',null,'stat');s.append(node('strong',String(n)),node('span',label));$('summary').append(s);
+ }
+ const list=candidates.filter(c=>filter==='all'||filter==='attention'&&needsReview(c)||c.state===filter);
+ if(!list.length){$('cards').append(node('p','No clips in this view. Use “Filtered out” or “All clips” to inspect other results.','empty'));return;}
+ for(const c of list){
+  const view=presentation(c),card=node('article',null,'review'),visual=node('div',null,'visual'),detail=node('div',null,'details');
+  if(c.object&&Date.parse(c.expiresAt)>Date.now()){
+   const play=node('button','▶  Watch clip','play');play.setAttribute('aria-label',`Watch ${c.listings?.[0]?.title||'source video'}`);
+   play.onclick=async()=>{play.disabled=true;play.textContent='Loading clip…';try{
+    const r=await api(`api/candidates/${c.id}/media`),blob=URL.createObjectURL(await r.blob());blobs.push(blob);document.querySelectorAll('video').forEach(v=>v.pause());
+    const video=node('video');video.controls=true;video.playsInline=true;video.src=blob;visual.replaceChildren(video);await video.play().catch(()=>{});
+   }catch(e){visual.replaceChildren(node('p',e.message,'unavailable'));}};visual.append(play);
+  }else visual.append(node('p',c.state==='queued'?'Waiting for download and review. This clip has not failed.':c.state==='processing'?'Preparing this clip.':c.state==='expired'?'Private preview expired. The original post is still linked.':c.reasons?.includes('clip_over_60_seconds')?'This clip exceeds the current 60-second review limit. Open the original post to watch it. This is not a content rejection.':'No playable preview was retrieved. Open the original post to inspect the video. This is not a content rejection.','unavailable'));
   const captionTitle=c.caption?.split('\n').find(t=>/[a-zA-Z]{4}/.test(t))?.slice(0,130);
-  detail.append(node('span',c.state==='held'?'HELD · NEEDS EVIDENCE':c.state==='queued'?'WAITING FOR REVIEW':c.state==='processing'?'REVIEW IN PROGRESS':c.state.toUpperCase(),`badge ${c.state}`),node('h2',(c.listings?.[0]?.title||captionTitle||'Source post video').slice(0,150)));
+  detail.append(node('span',view.badge,`badge ${c.state}`),node('h2',(c.listings?.[0]?.title||captionTitle||'Source post video').slice(0,150)));
   detail.append(node('p',[c.listings?.[0]?.venue,c.durationSeconds?`${Math.round(c.durationSeconds)} sec`:null,c.hasAudio===true?'Sound available':c.hasAudio===false?'No audio track':null,c.importedFrom?'Saved comparison':null].filter(Boolean).join(' · '),'meta'));
-  const waiting=['queued','processing'].includes(c.state),model=c.terra||c.luna;detail.append(node('p',waiting?'REVIEW STATUS':'WHY IT LANDED HERE','label'),node('p',c.state==='queued'?'The worker will download and check this clip. Refresh to see its progress.':c.state==='processing'?'The worker is checking this clip now. Refresh shortly for its result.':c.state==='held'?(c.reasons||[]).map(explain).join(' '):model?.reasoning||(c.reasons||[]).map(explain).join(' '),'reason'));
-  detail.append(node('span',waiting?'No decision yet':c.route==='terra_escalated'?'Luna → independent Terra review':c.luna?'Reviewed by Luna':'Evidence check · no model charge','route'));
-  const source=node('p');const link=node('a','Open original post ↗');link.href=c.sourcePage;link.target='_blank';link.rel='noopener noreferrer';source.append(link);detail.append(source);
-  const more=node('details'),summary=node('summary','Evidence & review details');more.append(summary);
-  for(const [label,assessment]of [["Luna’s review",c.luna],["Terra’s independent review",c.terra]])if(assessment){more.append(node('p',label,'label'),node('p',assessment.reasoning,'reason'));if(assessment.scheduleConflicts?.length)for(const conflict of assessment.scheduleConflicts)more.append(node('p',`Possible ${conflict.field} conflict: ${conflict.evidence}`,'reason'));}
-  if(c.caption)more.append(node('p','SOURCE POST','label'),node('p',c.caption.slice(0,1600),'reason'));
-  more.append(node('p',`Private playback expires ${new Date(c.expiresAt).toLocaleDateString()}.`,'hint'));detail.append(more);
-  if(c.revision){detail.append(node('p','YOUR TAKE','label'));const notes=node('textarea');notes.placeholder='Optional: what did the reviewer miss?';notes.maxLength=2000;notes.value=drafts.get(c.id)??c.humanJudgment?.notes??'';notes.oninput=()=>drafts.set(c.id,notes.value);notes.setAttribute('aria-label','Your review notes');detail.append(notes);const actions=node('div',null,'actions'),saved=node('p',c.humanJudgment?`Saved: ${explain(c.humanJudgment.judgment)}`:'','saved');
-   for(const [value,label]of[['want_video','I want this video'],['agree_with_decision','Decision is right'],['unsure','Not sure']]){const button=node('button',label);button.onclick=async()=>{actions.querySelectorAll('button').forEach(b=>b.disabled=true);try{await api(`api/candidates/${c.id}/judgment`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({judgment:value,notes:notes.value,revision:c.revision})});c.humanJudgment={judgment:value,notes:notes.value};saved.textContent=`Saved: ${label}. Nothing published.`;}catch(e){saved.textContent=e.message;}finally{actions.querySelectorAll('button').forEach(b=>b.disabled=false);}};actions.append(button);}detail.append(actions,saved);
+  detail.append(node('p',view.waiting?'REVIEW STATUS':'USEFULNESS','label'),node('p',view.waiting?view.reason:view.title,'verdict'),node('p',view.waiting?'Refresh to see progress.':view.reason,'reason'));
+  if(!view.waiting){
+   detail.append(node('p','LISTING MATCH','label'),node('p',view.listing,'verdict'),node('p',view.listingReason,'reason'));
+   if(c.state==='held'&&view.reviewReasons.length)detail.append(node('p',view.reviewReasons.join(' '),'hint'));
+   if(c.audioNotes?.includes('no_speech_detected'))detail.append(node('p','Audio note: no speech detected. This is not a rejection reason; you can listen to the music or other sounds.','audio-note'));
+  }
+  detail.append(node('span',view.waiting?'No decision yet':c.route==='terra_escalated'?'Luna + independent Terra review':c.luna?'Reviewed by Luna':'Content review not completed','route'));
+  const source=node('p'),link=node('a','Open original post ↗');link.href=c.sourcePage;link.target='_blank';link.rel='noopener noreferrer';source.append(link);detail.append(source);
+  const more=node('details');more.append(node('summary','Review details & source post'));
+  for(const [label,a]of [["Luna’s review",c.luna],["Terra’s independent review",c.terra]])if(a){
+   more.append(node('p',label,'label'),node('p',a.content?.reason||a.reasoning,'reason'));
+   for(const conflict of a.listing?.conflicts||a.scheduleConflicts||[])more.append(node('p',`Possible ${conflict.field} conflict: ${conflict.evidence}`,'reason'));
+  }
+  if(c.caption)more.append(node('p','SOURCE POST','label'),node('p',c.caption.slice(0,1600),'reason'));more.append(node('p',`Private playback expires ${new Date(c.expiresAt).toLocaleDateString()}.`,'hint'));detail.append(more);
+  if(c.revision){
+   detail.append(node('p','YOUR DECISION','label'));const notes=node('textarea');notes.placeholder='Optional notes';notes.maxLength=2000;notes.value=drafts.get(c.id)??c.humanJudgment?.notes??'';notes.oninput=()=>drafts.set(c.id,notes.value);notes.setAttribute('aria-label','Your review notes');detail.append(notes);
+   const actions=node('div',null,'actions'),selected=humanChoice(c.humanJudgment),saved=node('p',selected?`Your saved decision: ${choiceLabels[selected]}.`:'Your choice saves feedback; it does not publish.','saved');
+   for(const [value,label,choice]of [['use_video','Use this video','use'],['dont_use_video','Don’t use this video','dont_use'],['unsure','Not sure','unsure']]){
+    const button=node('button',label,`choice-${choice}`);button.setAttribute('aria-pressed',String(selected===choice));
+    button.onclick=async()=>{actions.querySelectorAll('button').forEach(b=>b.disabled=true);try{
+     await api(`api/candidates/${c.id}/judgment`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({judgment:value,notes:notes.value,revision:c.revision})});
+     c.humanJudgment={judgment:value,choice,notes:notes.value};drafts.delete(c.id);actions.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));saved.textContent=`Saved: ${label}. Nothing published.`;
+    }catch(e){saved.textContent=e.message;}finally{actions.querySelectorAll('button').forEach(b=>b.disabled=false);}};actions.append(button);
+   }detail.append(actions,saved);
   }card.append(visual,detail);$('cards').append(card);
  }
 }
 $('loginform').onsubmit=async e=>{e.preventDefault();status('Signing in…');try{await signInWithEmailAndPassword(auth,$('email').value,$('password').value);$('password').value='';}catch{status('Could not sign in. Check your GathR email and password.');}};
-$('signout').onclick=()=>signOut(auth);$('filters').onclick=e=>{if(!e.target.dataset.filter)return;filter=e.target.dataset.filter;document.querySelectorAll('#filters button').forEach(b=>b.classList.toggle('selected',b===e.target));render();};
+$('signout').onclick=()=>signOut(auth);
+$('filters').onclick=e=>{if(!e.target.dataset.filter)return;filter=e.target.dataset.filter;document.querySelectorAll('#filters button').forEach(b=>b.classList.toggle('selected',b===e.target));render();};
 onAuthStateChanged(auth,async user=>{$('login').hidden=!!user;$('refresh').hidden=!user;$('signout').hidden=!user;$('inbox').hidden=!user;if(user){try{await load();}catch(e){status(e.message);}}else{document.querySelectorAll('video').forEach(v=>v.pause());$('cards').replaceChildren();candidates=[];drafts.clear();blobs.splice(0).forEach(URL.revokeObjectURL);status('');}});

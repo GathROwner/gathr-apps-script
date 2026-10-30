@@ -6,6 +6,35 @@ public listing, public video asset, automatic-resolution gate or app bundle.
 
 ## Operation
 
+### Separate content usefulness from listing matching
+
+The editorial worker uses one Luna assessment with independent `content` and
+`listing` sections. Generic evergreen business advertising and past-event-only
+thank-you recaps can be filtered out without a listing. A specific event or
+special remains useful when no exact listing has been found; it then needs a
+match, not a negative content label. Static offer posters qualify as well as
+animated posters. Empty speech/music is an audio note, not an automatic hold.
+Actually missing/corrupt source audio and incomplete visual evidence still hold.
+Terra receives the same evidence, without Luna's answer, only for eligible
+semantic uncertainty. No clip-count or escalation-count cap is applied.
+
+The portal offers **Use this video**, **Don’t use this video**, and **Not sure**.
+These explicit choices are saved separately from automated assessments. Old
+`want_video` means use; old `agree_with_decision` stays an ambiguous legacy
+agreement and is never converted into a rejection. Filtered clips stay available
+under **Filtered out**/**All clips**, and are excluded from the default review
+inbox. Reassessments archive previous automated results without changing human
+judgments or notes. Publication remains manual.
+
+Exact WAV hashes permit speech transcript reuse across clip IDs, with original
+call/version/model/settings evidence verified. Media-frame timestamps use
+integer PTS plus the verified time base, rather than rounded `showinfo` text.
+The scraper can omit a downloadable URL even when a Facebook login prompt is
+dismissible and public playback works; a prompt alone is not an access barrier.
+
+The implementation below describes the acquisition/retention service; editorial
+assessment now proceeds even when listing matching is incomplete.
+
 * `discoverListingVideos`: every ten minutes, reads completed Drive datasets from
   the last 48 hours after the explicitly configured activation timestamp. Flattens
   both ordinary and shared-post video fields, retaining the outer post identity.
@@ -13,7 +42,8 @@ public listing, public video asset, automatic-resolution gate or app bundle.
 * `reviewListingVideos`: every minute, one globally fenced worker, up to five
   clips per invocation. Full clips only: 60 seconds / 50 MB original / 8 MB private
   rendition. No trimming, invented context, title-only source matching or public
-  writes. Known missing context/audio skips paid calls and stays watchable.
+  writes. Missing listing context does not skip content assessment. Retained
+  private clips are reused during explicitly requested policy reassessments.
 * Existing v2 worker samples frames and transcribes speech once, calls Luna first,
   then at most one blind Terra review for eligible uncertainty. Animated promotions
   qualify. Missing evidence is held; Terra cannot manufacture it.
@@ -33,7 +63,8 @@ public listing, public video asset, automatic-resolution gate or app bundle.
   is public; queue, playback, notes and source transport URLs require authorization.
   Source CDN URLs and API keys are never returned to browsers. Expired/missing or
   over-limit clips provide an original-post link instead of pretending to play.
-* Human actions are `want_video`, `agree_with_decision`, or `unsure`. Each binds the
+* New human actions are `use_video`, `dont_use_video`, or `unsure`; legacy clients
+  remain compatible. Each binds the
   exact saved assessment revision and clip hash. They do not publish videos or
   overwrite automated decisions.
 

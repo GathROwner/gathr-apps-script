@@ -28,7 +28,7 @@ function headers(res) {
 export const videoReviewPortal=onRequest({...base,maxInstances:2,concurrency:20,timeoutSeconds:120,memory:'512MiB',secrets:[],invoker:'public'},async(req,res)=>{
   headers(res);const path=req.path.replace(/\/$/,'')||'/';
   try {
-    if(req.method==='GET'&&['/','/app.js','/style.css'].includes(path)) {
+    if(req.method==='GET'&&['/','/app.js','/review-ui.js','/style.css'].includes(path)) {
       const f=path==='/'?'index.html':path.slice(1);
       res.type(f.endsWith('.html')?'html':f.endsWith('.js')?'application/javascript':'css').send(await readFile(new URL(`./public/${f}`,import.meta.url)));return;
     }
@@ -59,7 +59,8 @@ export const videoReviewPortal=onRequest({...base,maxInstances:2,concurrency:20,
     if(match[2]==='judgment'&&req.method==='POST') {
       const opinion=validateJudgment(req.body);
       if(!c.revision||req.body.revision!==c.revision){res.status(409).json({error:'The review changed. Refresh before saving.'});return;}
-      const at=new Date().toISOString(),judgment={...opinion,reviewerUid:uid,reviewedAt:at,revision:c.revision,sha256:c.sha256||null};
+      const at=new Date().toISOString(),judgment={...opinion,reviewerUid:uid,reviewedAt:at,revision:c.revision,sha256:c.sha256||null,
+        assessmentSnapshot:{state:c.state,decision:c.decision,reviewVersion:c.reviewVersion||'legacy',content:c.contentAssessment||null,listing:c.listingCheck||null}};
       await db.runTransaction(async tx=>{
         const fresh=(await tx.get(ref)).data();if(fresh.revision!==c.revision)throw Error('review_drift');
         tx.create(ref.collection('judgments').doc(hash(JSON.stringify([uid,at,judgment]))),judgment);

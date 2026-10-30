@@ -31,7 +31,7 @@ test('HTTP range handling covers suffix, open-ended and bounded requests',()=>{
   for(const x of ['bytes=100-','bytes=9-1','bytes=-','bytes=0-1,5-6','nonsense'])assert.throws(()=>rangeRequest(x,100));
 });
 test('human opinions are revision-bound and cannot request publication',()=>{
-  assert.deepEqual(validateJudgment({judgment:'want_video',notes:'Animation helps',revision:'a'.repeat(64)}),{judgment:'want_video',notes:'Animation helps'});
+  assert.deepEqual(validateJudgment({judgment:'want_video',notes:'Animation helps',revision:'a'.repeat(64)}),{judgment:'want_video',choice:'use',notes:'Animation helps'});
   for(const x of [{judgment:'publish',notes:'',revision:'a'.repeat(64)},{judgment:'want_video',notes:'',revision:'stale'},{judgment:'unsure',notes:'x'.repeat(2001),revision:'a'.repeat(64)}])assert.throws(()=>validateJudgment(x));
 });
 test('300 distinct clips are retained without a per-parse count cap',()=>{

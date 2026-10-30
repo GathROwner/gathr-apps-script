@@ -60,9 +60,10 @@ export function publicCandidate(c) {
   return safe;
 }
 export function validateJudgment(body) {
-  if(!['want_video','agree_with_decision','unsure'].includes(body?.judgment)||
+  if(!['use_video','dont_use_video','unsure','want_video','agree_with_decision'].includes(body?.judgment)||
       typeof body.notes!=='string'||body.notes.length>2000||!/^[a-f0-9]{64}$/.test(body.revision??'')) throw Error('invalid_judgment');
-  return {judgment:body.judgment,notes:body.notes};
+  const choice={use_video:'use',want_video:'use',dont_use_video:'dont_use',unsure:'unsure',agree_with_decision:'legacy_agreement'}[body.judgment];
+  return {judgment:body.judgment,choice,notes:body.notes};
 }
 export function allowedIdentity(decoded,config) {
   return decoded?.email_verified===true&&typeof decoded.uid==='string'&&
