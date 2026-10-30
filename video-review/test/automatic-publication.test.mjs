@@ -34,10 +34,17 @@ test('parser activity blocks reservation and public upload',async()=>{
 });
 test('a listing selection changed during review queues its new context instead of publishing the old match',async()=>{
  const s=setup();s.db.rows.delete(REGISTRY_LOCK);
- await s.db.doc(candidatePath).update({reviewedListingPath:eventPath,humanJudgment:{choice:'use',sha256:sha,listingPath:'venues/v/events/new-selection'}});
+ await s.db.doc(candidatePath).update({listings:[...s.c.listings,{...s.c.listings[0],path:'venues/v/events/new-selection'}],reviewedListingPath:eventPath,humanJudgment:{choice:'use',sha256:sha,listingPath:'venues/v/events/new-selection'}});
  const result=await publishTick(s);assert.equal(result.reviewQueued,1);assert.equal(result.errors,0);
  assert.equal(s.db.snap(candidatePath).data().state,'queued');assert.equal(s.publicBucket.saved,0);
  assert.equal(s.db.snap(`listing_video_links/${hash(eventPath)}`).exists,false);
+});
+test('a selected listing removed from source matches is held without repeated paid review',async()=>{
+ const s=setup();s.db.rows.delete(REGISTRY_LOCK);
+ await s.db.doc(eventPath).update({uniqueId:'different',sourceUniqueIds:['different']});
+ await s.db.doc(candidatePath).update({reviewedListingPath:null,listings:[],humanJudgment:{choice:'use',sha256:sha,listingPath:eventPath}});
+ const result=await publishTick(s);assert.equal(result.reviewQueued,0);assert.equal(result.errors,0);
+ assert.equal(s.db.snap(candidatePath).data().state,'recommended');assert.equal(s.db.snap(candidatePath).data().publication.state,'needs_review');assert.equal(s.publicBucket.saved,0);
 });
 test('retained old legacy checkpoints are distinguished from a newly paused run',async()=>{
  const s=setup();s.db.rows.set('checkpoints/legacy',{v:1,data:{fileId:'old'}});await parserIdle(s.db);

@@ -28,7 +28,9 @@ export function eligibility(c,editorialVersion) {
  if(c.state==='expired'||Date.parse(c.expiresAt)<=Date.now())return {state:'unavailable',reason:'The retained private preview expired.'};
  if(!c.object||!/^[a-f0-9]{64}$/.test(c.sha256||'')||typeof c.sourceAudio!=='boolean')return {state:'needs_review',reason:'The complete video or its source audio is unavailable.'};
  if((c.reasons||[]).some(x=>/interrupted|paid.*unknown|processing_failed/.test(x)))return {state:'needs_review',reason:'An interrupted processing attempt needs inspection.'};
- if(choice==='use'&&c.humanJudgment.listingPath&&c.humanJudgment.listingPath!==c.reviewedListingPath)return {state:'upgrade_review',reason:'Checking the listing you selected against this video.'};
+ if(choice==='use'&&c.humanJudgment.listingPath&&c.humanJudgment.listingPath!==c.reviewedListingPath)return (c.listings||[]).some(l=>l.path===c.humanJudgment.listingPath)
+  ?{state:'upgrade_review',reason:'Checking the listing you selected against this video.'}
+  :{state:'needs_review',reason:'Your selected listing no longer matches this source post.'};
  if(c.contentAssessment?.decision==='reject'&&choice!=='use')return {state:'filtered',reason:c.contentAssessment.reason||'This clip does not fit GathR.'};
  if(c.reviewVersion!==editorialVersion)return {state:'upgrade_review',reason:'The current automatic-publication review is required.'};
  if((c.reasons||[]).some(x=>/incomplete|missing|interrupted|failed|conflict|invalid|mismatch/.test(x)||x.includes('disagree')&&choice!=='use'))return {state:'needs_review',reason:'Evidence is incomplete or conflicting; publication is held.'};
