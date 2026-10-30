@@ -1,0 +1,494 @@
+[
+  {
+    "venue": {
+      "id": "XDftgtPHnE8qzqMbRXdb",
+      "reviewedOccurrenceConstraints": [
+        {
+          "sourceUniqueId": "1448322924150044",
+          "uniqueIds": [
+            "1448322924150044_893ae1f44cd507c2"
+          ],
+          "reviewId": "O29-01_REVIEWED_NOVEMBER_2026_LIBRARY_DATES",
+          "sourceUrls": [
+            "https://www.facebook.com/100069170510210/posts/1448322924150044",
+            "https://peilibrary.libcal.com/event/4003849?image"
+          ],
+          "action": "hold",
+          "match": "source_date_clock_name",
+          "startDate": "2026-11-04",
+          "startTime": "10:30",
+          "eventNames": [
+            "Read, Sing, Play!"
+          ]
+        },
+        {
+          "sourceUniqueId": "1448322924150044",
+          "uniqueIds": [
+            "1448322924150044_96ebe55df3d06022"
+          ],
+          "reviewId": "O29-01_REVIEWED_NOVEMBER_2026_LIBRARY_DATES",
+          "sourceUrls": [
+            "https://www.facebook.com/100069170510210/posts/1448322924150044",
+            "https://peilibrary.libcal.com/event/4003849?image"
+          ],
+          "action": "hold",
+          "match": "source_date_clock_name",
+          "startDate": "2026-11-11",
+          "startTime": "10:30",
+          "eventNames": [
+            "Read, Sing, Play!"
+          ]
+        },
+        {
+          "sourceUniqueId": "1448322924150044",
+          "uniqueIds": [
+            "1448322924150044_af73303ac302d15b"
+          ],
+          "reviewId": "O29-01_REVIEWED_NOVEMBER_2026_LIBRARY_DATES",
+          "sourceUrls": [
+            "https://www.facebook.com/100069170510210/posts/1448322924150044",
+            "https://peilibrary.libcal.com/event/4003849?image"
+          ],
+          "action": "hold",
+          "match": "source_date_clock_name",
+          "startDate": "2026-11-18",
+          "startTime": "10:30",
+          "eventNames": [
+            "Read, Sing, Play!"
+          ]
+        },
+        {
+          "sourceUniqueId": "1448322924150044",
+          "uniqueIds": [
+            "1448322924150044_10956f035b6d848d"
+          ],
+          "reviewId": "O29-01_REVIEWED_NOVEMBER_2026_LIBRARY_DATES",
+          "sourceUrls": [
+            "https://www.facebook.com/100069170510210/posts/1448322924150044",
+            "https://peilibrary.libcal.com/event/4003849?image"
+          ],
+          "action": "hold",
+          "match": "source_date_clock_name",
+          "startDate": "2026-11-25",
+          "startTime": "10:30",
+          "eventNames": [
+            "Read, Sing, Play!"
+          ]
+        }
+      ]
+    },
+    "activity": "Read, Sing, Play!",
+    "source": "1448322924150044",
+    "clock": "10:30"
+  },
+  {
+    "venue": {
+      "id": "slug_montague-rotary-library",
+      "reviewedOccurrenceConstraints": [
+        {
+          "sourceUniqueId": "1448322924150044",
+          "uniqueIds": [
+            "1448322924150044_3d7997bb6042dcde"
+          ],
+          "reviewId": "O29-01_REVIEWED_NOVEMBER_2026_LIBRARY_DATES",
+          "sourceUrls": [
+            "https://www.facebook.com/100069170510210/posts/1448322924150044",
+            "https://peilibrary.libcal.com/event/4003849?image"
+          ],
+          "action": "hold",
+          "match": "source_date_clock_name",
+          "startDate": "2026-11-04",
+          "startTime": "16:30",
+          "eventNames": [
+            "Chess Club"
+          ]
+        },
+        {
+          "sourceUniqueId": "1448322924150044",
+          "uniqueIds": [
+            "1448322924150044_290213658ab9ee73"
+          ],
+          "reviewId": "O29-01_REVIEWED_NOVEMBER_2026_LIBRARY_DATES",
+          "sourceUrls": [
+            "https://www.facebook.com/100069170510210/posts/1448322924150044",
+            "https://peilibrary.libcal.com/event/4003849?image"
+          ],
+          "action": "hold",
+          "match": "source_date_clock_name",
+          "startDate": "2026-11-11",
+          "startTime": "16:30",
+          "eventNames": [
+            "Chess Club"
+          ]
+        },
+        {
+          "sourceUniqueId": "1448322924150044",
+          "uniqueIds": [
+            "1448322924150044_4395caa2511f4581"
+          ],
+          "reviewId": "O29-01_REVIEWED_NOVEMBER_2026_LIBRARY_DATES",
+          "sourceUrls": [
+            "https://www.facebook.com/100069170510210/posts/1448322924150044",
+            "https://peilibrary.libcal.com/event/4003849?image"
+          ],
+          "action": "hold",
+          "match": "source_date_clock_name",
+          "startDate": "2026-11-18",
+          "startTime": "16:30",
+          "eventNames": [
+            "Chess Club"
+          ]
+        },
+        {
+          "sourceUniqueId": "1448322924150044",
+          "uniqueIds": [
+            "1448322924150044_edcd8d5385e892a9"
+          ],
+          "reviewId": "O29-01_REVIEWED_NOVEMBER_2026_LIBRARY_DATES",
+          "sourceUrls": [
+            "https://www.facebook.com/100069170510210/posts/1448322924150044",
+            "https://peilibrary.libcal.com/event/4003849?image"
+          ],
+          "action": "hold",
+          "match": "source_date_clock_name",
+          "startDate": "2026-11-25",
+          "startTime": "16:30",
+          "eventNames": [
+            "Chess Club"
+          ]
+        }
+      ]
+    },
+    "activity": "Chess Club",
+    "source": "1448322924150044",
+    "clock": "16:30"
+  },
+  {
+    "venue": {
+      "id": "LGaHQ5TdjMpTzDd2Cmn8",
+      "reviewedOccurrenceConstraints": [
+        {
+          "sourceUniqueId": "1447322934250043",
+          "uniqueIds": [
+            "1447322934250043_61c6d5898b04e0c8"
+          ],
+          "reviewId": "O29-01_REVIEWED_NOVEMBER_2026_LIBRARY_DATES",
+          "sourceUrls": [
+            "https://www.facebook.com/100069170510210/posts/1447322934250043",
+            "https://peilibrary.libcal.com/event/4003849?image"
+          ],
+          "action": "hold",
+          "match": "source_date_clock_name",
+          "startDate": "2026-11-04",
+          "startTime": "13:00",
+          "eventNames": [
+            "Read. Sing. Play!"
+          ]
+        },
+        {
+          "sourceUniqueId": "1447322934250043",
+          "uniqueIds": [
+            "1447322934250043_2d5f678d1e2a9fa1"
+          ],
+          "reviewId": "O29-01_REVIEWED_NOVEMBER_2026_LIBRARY_DATES",
+          "sourceUrls": [
+            "https://www.facebook.com/100069170510210/posts/1447322934250043",
+            "https://peilibrary.libcal.com/event/4003849?image"
+          ],
+          "action": "hold",
+          "match": "source_date_clock_name",
+          "startDate": "2026-11-11",
+          "startTime": "13:00",
+          "eventNames": [
+            "Read. Sing. Play!"
+          ]
+        },
+        {
+          "sourceUniqueId": "1447322934250043",
+          "uniqueIds": [
+            "1447322934250043_8f7b43b3465bbc3b"
+          ],
+          "reviewId": "O29-01_REVIEWED_NOVEMBER_2026_LIBRARY_DATES",
+          "sourceUrls": [
+            "https://www.facebook.com/100069170510210/posts/1447322934250043",
+            "https://peilibrary.libcal.com/event/4003849?image"
+          ],
+          "action": "hold",
+          "match": "source_date_clock_name",
+          "startDate": "2026-11-18",
+          "startTime": "13:00",
+          "eventNames": [
+            "Read. Sing. Play!"
+          ]
+        },
+        {
+          "sourceUniqueId": "1447322934250043",
+          "uniqueIds": [
+            "1447322934250043_e936ba53d8b0d4e2"
+          ],
+          "reviewId": "O29-01_REVIEWED_NOVEMBER_2026_LIBRARY_DATES",
+          "sourceUrls": [
+            "https://www.facebook.com/100069170510210/posts/1447322934250043",
+            "https://peilibrary.libcal.com/event/4003849?image"
+          ],
+          "action": "hold",
+          "match": "source_date_clock_name",
+          "startDate": "2026-11-25",
+          "startTime": "13:00",
+          "eventNames": [
+            "Read. Sing. Play!"
+          ]
+        }
+      ]
+    },
+    "activity": "Read. Sing. Play!",
+    "source": "1447322934250043",
+    "clock": "13:00"
+  },
+  {
+    "venue": {
+      "id": "n9vE85tFgU4QIpWrHM8d",
+      "reviewedOccurrenceConstraints": [
+        {
+          "sourceUniqueId": "1447322934250043",
+          "uniqueIds": [
+            "1447322934250043_14e3060184dd41c7"
+          ],
+          "reviewId": "O29-01_REVIEWED_NOVEMBER_2026_LIBRARY_DATES",
+          "sourceUrls": [
+            "https://www.facebook.com/100069170510210/posts/1447322934250043",
+            "https://peilibrary.libcal.com/event/4003849?image"
+          ],
+          "action": "hold",
+          "match": "source_date_clock_name",
+          "startDate": "2026-11-04",
+          "startTime": "11:00",
+          "eventNames": [
+            "Senior's Club"
+          ]
+        },
+        {
+          "sourceUniqueId": "1447322934250043",
+          "uniqueIds": [
+            "1447322934250043_2819617b4105c7d9"
+          ],
+          "reviewId": "O29-01_REVIEWED_NOVEMBER_2026_LIBRARY_DATES",
+          "sourceUrls": [
+            "https://www.facebook.com/100069170510210/posts/1447322934250043",
+            "https://peilibrary.libcal.com/event/4003849?image"
+          ],
+          "action": "hold",
+          "match": "source_date_clock_name",
+          "startDate": "2026-11-11",
+          "startTime": "11:00",
+          "eventNames": [
+            "Senior's Club"
+          ]
+        },
+        {
+          "sourceUniqueId": "1447322934250043",
+          "uniqueIds": [
+            "1447322934250043_b4afdb6192d8db93"
+          ],
+          "reviewId": "O29-01_REVIEWED_NOVEMBER_2026_LIBRARY_DATES",
+          "sourceUrls": [
+            "https://www.facebook.com/100069170510210/posts/1447322934250043",
+            "https://peilibrary.libcal.com/event/4003849?image"
+          ],
+          "action": "hold",
+          "match": "source_date_clock_name",
+          "startDate": "2026-11-18",
+          "startTime": "11:00",
+          "eventNames": [
+            "Senior's Club"
+          ]
+        },
+        {
+          "sourceUniqueId": "1447322934250043",
+          "uniqueIds": [
+            "1447322934250043_ec5883740e48f84e"
+          ],
+          "reviewId": "O29-01_REVIEWED_NOVEMBER_2026_LIBRARY_DATES",
+          "sourceUrls": [
+            "https://www.facebook.com/100069170510210/posts/1447322934250043",
+            "https://peilibrary.libcal.com/event/4003849?image"
+          ],
+          "action": "hold",
+          "match": "source_date_clock_name",
+          "startDate": "2026-11-25",
+          "startTime": "11:00",
+          "eventNames": [
+            "Senior's Club"
+          ]
+        }
+      ]
+    },
+    "activity": "Senior's Club",
+    "source": "1447322934250043",
+    "clock": "11:00"
+  },
+  {
+    "venue": {
+      "id": "slug_tynevalleypubliclibrary",
+      "reviewedOccurrenceConstraints": [
+        {
+          "sourceUniqueId": "1447322934250043",
+          "uniqueIds": [
+            "1447322934250043_4e498f8f81a439f3"
+          ],
+          "reviewId": "O29-01_REVIEWED_NOVEMBER_2026_LIBRARY_DATES",
+          "sourceUrls": [
+            "https://www.facebook.com/100069170510210/posts/1447322934250043",
+            "https://peilibrary.libcal.com/event/4003849?image"
+          ],
+          "action": "hold",
+          "match": "source_date_clock_name",
+          "startDate": "2026-11-04",
+          "startTime": "13:15",
+          "eventNames": [
+            "Read. Sing. Play!"
+          ]
+        },
+        {
+          "sourceUniqueId": "1447322934250043",
+          "uniqueIds": [
+            "1447322934250043_a9376cf2fcb9d888"
+          ],
+          "reviewId": "O29-01_REVIEWED_NOVEMBER_2026_LIBRARY_DATES",
+          "sourceUrls": [
+            "https://www.facebook.com/100069170510210/posts/1447322934250043",
+            "https://peilibrary.libcal.com/event/4003849?image"
+          ],
+          "action": "hold",
+          "match": "source_date_clock_name",
+          "startDate": "2026-11-11",
+          "startTime": "13:15",
+          "eventNames": [
+            "Read. Sing. Play!"
+          ]
+        },
+        {
+          "sourceUniqueId": "1447322934250043",
+          "uniqueIds": [
+            "1447322934250043_917cd0627659de23"
+          ],
+          "reviewId": "O29-01_REVIEWED_NOVEMBER_2026_LIBRARY_DATES",
+          "sourceUrls": [
+            "https://www.facebook.com/100069170510210/posts/1447322934250043",
+            "https://peilibrary.libcal.com/event/4003849?image"
+          ],
+          "action": "hold",
+          "match": "source_date_clock_name",
+          "startDate": "2026-11-18",
+          "startTime": "13:15",
+          "eventNames": [
+            "Read. Sing. Play!"
+          ]
+        },
+        {
+          "sourceUniqueId": "1447322934250043",
+          "uniqueIds": [
+            "1447322934250043_5f744eb965a5619f"
+          ],
+          "reviewId": "O29-01_REVIEWED_NOVEMBER_2026_LIBRARY_DATES",
+          "sourceUrls": [
+            "https://www.facebook.com/100069170510210/posts/1447322934250043",
+            "https://peilibrary.libcal.com/event/4003849?image"
+          ],
+          "action": "hold",
+          "match": "source_date_clock_name",
+          "startDate": "2026-11-25",
+          "startTime": "13:15",
+          "eventNames": [
+            "Read. Sing. Play!"
+          ]
+        }
+      ]
+    },
+    "activity": "Read. Sing. Play!",
+    "source": "1447322934250043",
+    "clock": "13:15"
+  },
+  {
+    "venue": {
+      "id": "slug_stpeterspubliclibrary",
+      "reviewedOccurrenceConstraints": [
+        {
+          "sourceUniqueId": "1448322924150044",
+          "uniqueIds": [
+            "1448322924150044_43e8b62e6448175c"
+          ],
+          "reviewId": "O29-01_REVIEWED_NOVEMBER_2026_LIBRARY_DATES",
+          "sourceUrls": [
+            "https://www.facebook.com/PEILibrary/posts/pfbid0TTib6W7tciJqvMAVaQjMMdmz22eQ2UoAbAepwnFeAjdYsZHsDpasJH32a2VEoPhRl",
+            "https://peilibrary.libcal.com/event/4003849?image"
+          ],
+          "action": "hold",
+          "match": "source_date_clock_name",
+          "startDate": "2026-11-04",
+          "startTime": "11:00",
+          "eventNames": [
+            "Read, Sing, Play!"
+          ]
+        },
+        {
+          "sourceUniqueId": "1448322924150044",
+          "uniqueIds": [
+            "1448322924150044_2ba40cdd90b98193"
+          ],
+          "reviewId": "O29-01_REVIEWED_NOVEMBER_2026_LIBRARY_DATES",
+          "sourceUrls": [
+            "https://www.facebook.com/PEILibrary/posts/pfbid0TTib6W7tciJqvMAVaQjMMdmz22eQ2UoAbAepwnFeAjdYsZHsDpasJH32a2VEoPhRl",
+            "https://peilibrary.libcal.com/event/4003849?image"
+          ],
+          "action": "hold",
+          "match": "source_date_clock_name",
+          "startDate": "2026-11-11",
+          "startTime": "11:00",
+          "eventNames": [
+            "Read, Sing, Play!"
+          ]
+        },
+        {
+          "sourceUniqueId": "1448322924150044",
+          "uniqueIds": [
+            "1448322924150044_9d52e875335d716f"
+          ],
+          "reviewId": "O29-01_REVIEWED_NOVEMBER_2026_LIBRARY_DATES",
+          "sourceUrls": [
+            "https://www.facebook.com/PEILibrary/posts/pfbid0TTib6W7tciJqvMAVaQjMMdmz22eQ2UoAbAepwnFeAjdYsZHsDpasJH32a2VEoPhRl",
+            "https://peilibrary.libcal.com/event/4003849?image"
+          ],
+          "action": "hold",
+          "match": "source_date_clock_name",
+          "startDate": "2026-11-18",
+          "startTime": "11:00",
+          "eventNames": [
+            "Read, Sing, Play!"
+          ]
+        },
+        {
+          "sourceUniqueId": "1448322924150044",
+          "uniqueIds": [
+            "1448322924150044_19a2f32392a91157"
+          ],
+          "reviewId": "O29-01_REVIEWED_NOVEMBER_2026_LIBRARY_DATES",
+          "sourceUrls": [
+            "https://www.facebook.com/PEILibrary/posts/pfbid0TTib6W7tciJqvMAVaQjMMdmz22eQ2UoAbAepwnFeAjdYsZHsDpasJH32a2VEoPhRl",
+            "https://peilibrary.libcal.com/event/4003849?image"
+          ],
+          "action": "hold",
+          "match": "source_date_clock_name",
+          "startDate": "2026-11-25",
+          "startTime": "11:00",
+          "eventNames": [
+            "Read, Sing, Play!"
+          ]
+        }
+      ]
+    },
+    "activity": "Read, Sing, Play!",
+    "source": "1448322924150044",
+    "clock": "11:00"
+  }
+]

@@ -39,7 +39,6 @@ export function extractTokenUsage(usage: any): {
   totalTokens: number;
   cachedInputTokens: number;
   cacheWriteTokens?: number;
-  reusedResponse?: boolean;
 } {
   const inputTokens = Number(
     usage?.input_tokens ??
@@ -65,7 +64,6 @@ export function extractTokenUsage(usage: any): {
     usage?.input_tokens_details?.cache_write_tokens ?? usage?.prompt_tokens_details?.cache_write_tokens
   );
   return {
-    ...(usage?.gathr_reused_response === true ? { reusedResponse: true } : {}),
     inputTokens,
     outputTokens,
     totalTokens,

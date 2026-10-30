@@ -9,7 +9,7 @@
  */
 
 import OpenAI from 'openai';
-import { withPostResponseReuse } from './postResponseReuse.js';
+import {prepareOccurrenceSourceItem} from './occurrenceSourceOwnership.js';
 import { isSourcePublicPoolWindow } from './sourceOccurrenceGuards.js';
 import {
   ExtractedItem,
@@ -43,7 +43,7 @@ function getOpenAIClient(): OpenAI {
     }
     openaiClient = new OpenAI({ apiKey });
   }
-  return withPostResponseReuse(openaiClient);
+  return openaiClient;
 }
 
 // Valid recurring patterns for sanitization

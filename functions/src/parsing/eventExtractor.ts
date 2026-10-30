@@ -9,7 +9,8 @@
  */
 
 import OpenAI from 'openai';
-import { withPostResponseReuse } from './postResponseReuse.js';
+import {recurrenceScheduleText} from './programmeSourceGuards.js';
+import {INDEPENDENT_SOURCE_ITEM_RULES} from './sourceCandidateRetention.js';
 import { DateTime } from 'luxon';
 import {
   ContentType,
@@ -52,7 +53,7 @@ function getOpenAIClient(): OpenAI {
     }
     openaiClient = new OpenAI({ apiKey });
   }
-  return withPostResponseReuse(openaiClient);
+  return openaiClient;
 }
 
 // Valid recurring patterns for sanitization

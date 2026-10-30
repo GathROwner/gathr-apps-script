@@ -1,0 +1,220 @@
+{
+  "baseline": "3f432e6a8533dbff31e6d13c984286baa9aeafbd",
+  "checked": [
+    {
+      "path": "functions/src/index.ts",
+      "matchesAcceptedBaseline": true,
+      "sha256": "4afded75f60ebef1b9e144741f435f715feec9fadda10d9dd43f9bb16309b160"
+    },
+    {
+      "path": "video-review/.gitignore",
+      "matchesAcceptedBaseline": true,
+      "sha256": "8593f43064fb879f70481e848b329b91507a242bce4d5157053a2d9515279639"
+    },
+    {
+      "path": "video-review/README.md",
+      "matchesAcceptedBaseline": true,
+      "sha256": "3ae2b7a15f78f841cf2e595a51edcb28c5eff732601eaf1db6eee1125d005ee6"
+    },
+    {
+      "path": "video-review/automatic-publication.mjs",
+      "matchesAcceptedBaseline": true,
+      "sha256": "2a6386cdce58a3723fbae5dc4e2dbc16df19029ddac148c90633dec304873b81"
+    },
+    {
+      "path": "video-review/editorial-review.mjs",
+      "matchesAcceptedBaseline": true,
+      "sha256": "b174f03d8223719b7677d15d530c508661de961c624927d0b31ba86ff7862d76"
+    },
+    {
+      "path": "video-review/evidence-worker.mjs",
+      "matchesAcceptedBaseline": true,
+      "sha256": "4dec4ba525ac1f0ec2acef28cb51741de14cfdf05d5bad07704def5681a3234c"
+    },
+    {
+      "path": "video-review/firebase.json",
+      "matchesAcceptedBaseline": true,
+      "sha256": "4c9a8ec4ae20a1cb35a3d038c40cf169e19b7540d475e15ed6fdde85600b7a7f"
+    },
+    {
+      "path": "video-review/index.mjs",
+      "matchesAcceptedBaseline": true,
+      "sha256": "f87332b893aebf277565c1fd334b972a10313b72ac3e247c725e1239716cda35"
+    },
+    {
+      "path": "video-review/manual-publication.mjs",
+      "matchesAcceptedBaseline": true,
+      "sha256": "90ea27d793b49b36029a8a2280f7c8078991226327e6b1a9684b5a6f14aa71f0"
+    },
+    {
+      "path": "video-review/package-lock.json",
+      "matchesAcceptedBaseline": true,
+      "sha256": "dd89c1d655169d4568996d5de202d28a6b04911a75288e28c4adf9421da274ad"
+    },
+    {
+      "path": "video-review/package.json",
+      "matchesAcceptedBaseline": true,
+      "sha256": "347eabe50c9117636075204f9661b79330c7cd571728898e9d9f89080caf7665"
+    },
+    {
+      "path": "video-review/pipeline.mjs",
+      "matchesAcceptedBaseline": true,
+      "sha256": "41750a729dec14e619a821d4c11923dfe4d6122f5f86332f3e0e3760eceb3f0c"
+    },
+    {
+      "path": "video-review/policy.mjs",
+      "matchesAcceptedBaseline": true,
+      "sha256": "3eb6ef61f4e2e65b6af319f8a8ac14d9751e8ab2623746646769cbc6f4a754fb"
+    },
+    {
+      "path": "video-review/public/app.js",
+      "matchesAcceptedBaseline": true,
+      "sha256": "6efd246d1b692824f8d571de637165c00693a185993ede30cd3853feda76fb08"
+    },
+    {
+      "path": "video-review/public/index.html",
+      "matchesAcceptedBaseline": true,
+      "sha256": "c3311a8056ecee2972cfafeda7b5f4a2573f28bad70833cb30b498918bb38d6f"
+    },
+    {
+      "path": "video-review/public/review-ui.js",
+      "matchesAcceptedBaseline": true,
+      "sha256": "cb948144b5afb87e666168828ea20283f09653b9dfd382eff1d17b9b6c7c46c1"
+    },
+    {
+      "path": "video-review/public/style.css",
+      "matchesAcceptedBaseline": true,
+      "sha256": "cc6acc427f644351570c1e6885e71f9b06e04c134acccce1a2c778f839a54024"
+    },
+    {
+      "path": "video-review/published-policy.mjs",
+      "matchesAcceptedBaseline": true,
+      "sha256": "e40c103f939ac00c09ee8073e933aa4ef50df061fd6a97501fb9cdee97aecd8d"
+    },
+    {
+      "path": "video-review/test/automatic-publication.test.mjs",
+      "matchesAcceptedBaseline": true,
+      "sha256": "01be9d15692106f196f0d13c704c569bd88d5fa05c544f5e32fec400203f5069"
+    },
+    {
+      "path": "video-review/test/automation-release.cjs",
+      "matchesAcceptedBaseline": true,
+      "sha256": "51d7cb530a792dd0ff7ea4b45a6ea2f668385846e9845f40004d81a4cfc60656"
+    },
+    {
+      "path": "video-review/test/editorial-rollout.cjs",
+      "matchesAcceptedBaseline": true,
+      "sha256": "039760ba872a98495e7dcba15f97305bb6a82a1e3e70ffe85c0053f71841eb43"
+    },
+    {
+      "path": "video-review/test/editorial-routing.test.mjs",
+      "matchesAcceptedBaseline": true,
+      "sha256": "c3a72e07e254fea6b6a4cc0ef566f72c025bbf93075d9ea180e7d0dddb8847e6"
+    },
+    {
+      "path": "video-review/test/editorial.test.mjs",
+      "matchesAcceptedBaseline": true,
+      "sha256": "c2b642ce3a91a45b9dcdb5cc253ea5c07e00f74c39436ea5fc4df41002c2984a"
+    },
+    {
+      "path": "video-review/test/fake-publication.mjs",
+      "matchesAcceptedBaseline": true,
+      "sha256": "410dd45c0634cbcac63171b2cf3924a790e5e357f0b2ff1d642bcffd2a9bd470"
+    },
+    {
+      "path": "video-review/test/finalize-automation-release.cjs",
+      "matchesAcceptedBaseline": true,
+      "sha256": "6fd6b8e020ffd1d27dec47c0836cbd51e092158ebca44a7725bfa633035f1e62"
+    },
+    {
+      "path": "video-review/test/finalize-selected.cjs",
+      "matchesAcceptedBaseline": true,
+      "sha256": "e63c0a13744d72ec737e157d1ed7cd748594dd37e74d51607690bd50f00c8fcd"
+    },
+    {
+      "path": "video-review/test/hokum-trial.cjs",
+      "matchesAcceptedBaseline": true,
+      "sha256": "ef7d5c4dfe0cb4e6438ba39014ffe487a3946e09e2d78ec7aa1bdcdd42bf7196"
+    },
+    {
+      "path": "video-review/test/manual-publication.test.mjs",
+      "matchesAcceptedBaseline": true,
+      "sha256": "66c5ded2746d889d5bb02975879ddc6aa56e11330cf2c5fee30d1df37c3e67a6"
+    },
+    {
+      "path": "video-review/test/match-selected.cjs",
+      "matchesAcceptedBaseline": true,
+      "sha256": "81298f6b5d7f8a3ba0dac4877b521e869f304824fa30eb68072fa5bb7cb1b9aa"
+    },
+    {
+      "path": "video-review/test/ops.cjs",
+      "matchesAcceptedBaseline": true,
+      "sha256": "19a756f5b68d1e9706aef1924c0ba10009452dae6b1c97f6fe80a55d7d27ba29"
+    },
+    {
+      "path": "video-review/test/pipeline.test.mjs",
+      "matchesAcceptedBaseline": true,
+      "sha256": "753bdd7d1093acdffe32b7671938238c50c204f8a300dd9181bddbe4630e2b77"
+    },
+    {
+      "path": "video-review/test/policy.test.mjs",
+      "matchesAcceptedBaseline": true,
+      "sha256": "710106dcd42d82c28595098d03e967b79849e96d4d8486cd9a891c2763f560da"
+    },
+    {
+      "path": "video-review/test/portal-publication.test.mjs",
+      "matchesAcceptedBaseline": true,
+      "sha256": "c1bf4951b6cee26cfcf97ab443c8c04bb1eb23c3c446a711e00e20f9d77337a5"
+    },
+    {
+      "path": "video-review/test/preview-automation.cjs",
+      "matchesAcceptedBaseline": true,
+      "sha256": "99f7ebad18e2fc527dedb0ffd12f30acd5bf591d370cf4bde769b1ebc7790c92"
+    },
+    {
+      "path": "video-review/test/preview.mjs",
+      "matchesAcceptedBaseline": true,
+      "sha256": "7abc5f9369fca2d3efe2acc98050f3ce220badfa18ef324dac191b6803031842"
+    },
+    {
+      "path": "video-review/test/publish-hokum.cjs",
+      "matchesAcceptedBaseline": true,
+      "sha256": "8da4d574b105eb8db94ca3e8120b78ae07e6813095089ce5c157613ab76d190e"
+    },
+    {
+      "path": "video-review/test/publish-selected.cjs",
+      "matchesAcceptedBaseline": true,
+      "sha256": "e0174cf63834bc5e1b287448cedd7c24b3bb175c401381e252659643250e0c4a"
+    },
+    {
+      "path": "video-review/test/record-selected-results.cjs",
+      "matchesAcceptedBaseline": true,
+      "sha256": "14c6d069990a3f3d181fb44ed97f73f0298c08388fb8be7bbe5ec4b4f1544bed"
+    },
+    {
+      "path": "video-review/test/selected-publication.cjs",
+      "matchesAcceptedBaseline": true,
+      "sha256": "dd5b18ec232d5749a15088cbed596f488086ae7e37b7f3a9705ccb726e43c7ed"
+    },
+    {
+      "path": "video-review/test/storage.test.mjs",
+      "matchesAcceptedBaseline": true,
+      "sha256": "9f6443aa509a0e094ef996b6a786508e4f64dea4da32df06c1f0253f4691252c"
+    },
+    {
+      "path": "video-review/test/timing.test.mjs",
+      "matchesAcceptedBaseline": true,
+      "sha256": "7a561ed4971140ba806b79281c0d536407d321444b95e6e760d7aef46550dab3"
+    },
+    {
+      "path": "video-review/test/verify-automation-live.cjs",
+      "matchesAcceptedBaseline": true,
+      "sha256": "2741be44badfee748bee134a2577ff5f85a4f867162ceef56248343208e7f73b"
+    },
+    {
+      "path": "video-review/test/video-runtime-status.cjs",
+      "matchesAcceptedBaseline": true,
+      "sha256": "1a928e26a05c566ba8c9b2b2a9f2d7b469a12ce3305dd43a4f870e045a7c7700"
+    }
+  ]
+}

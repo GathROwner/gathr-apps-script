@@ -8,7 +8,6 @@
  */
 
 import OpenAI from 'openai';
-import { withPostResponseReuse } from './postResponseReuse.js';
 import {
   ImageComplexity,
   ValidationResult,
@@ -147,7 +146,7 @@ function getOpenAIClient(): OpenAI {
     }
     openaiClient = new OpenAI({ apiKey });
   }
-  return withPostResponseReuse(openaiClient);
+  return openaiClient;
 }
 
 /**

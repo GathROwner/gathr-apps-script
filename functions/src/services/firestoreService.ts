@@ -1,3 +1,4 @@
+import {reviewedSourceDuplicateRule,matchesReviewedSourceKeeper} from './reviewedSourceDuplicates.js';
 import {hasConflictingOccurrenceIdentity,findConflictingSourceCinemaDate} from '../utils/occurrenceMergeGuard.js';
 import {hasCurrentStructuredValidation, isRetiredVenueReview} from './structuredLocationContract.js';
 import {publicCityLevelDescription, requiresReviewedAreaPoints, validateEventAreaData, verifyAreaPublicationReferences} from './areaEventPublication.js';
@@ -4290,6 +4291,20 @@ export async function checkDuplicate(
       return{isDuplicate:true};
     }
   }
+  const reviewedDuplicate=reviewedSourceDuplicateRule(event,venueId);
+  if(reviewedDuplicate){
+    const snapshot=await db.doc(reviewedDuplicate.path).get();
+    const keeper=snapshot.exists?{...snapshot.data(),id:snapshot.id,venueId:reviewedDuplicate.path.split('/')[1]} as EventData:null;
+    if(keeper && matchesReviewedSourceKeeper(reviewedDuplicate,keeper)){
+      logger.info('Corroborated exact reviewed source duplicate',{venueId,sourceId:reviewedDuplicate.source,canonicalEventPath:reviewedDuplicate.path});
+      // A room/host consolidation needs the separate reviewed data repair.
+      // Suppress this exact duplicate without selecting a new canonical host.
+      if(keeper.venueId!==venueId)return {isDuplicate:true};
+      return {isDuplicate:true,existingEvent:{...keeper,_sourceCorroborationOnly:true} as EventData};
+    }
+    logger.warn('Held drifted or missing reviewed duplicate keeper',{venueId,sourceId:reviewedDuplicate.source,canonicalEventPath:reviewedDuplicate.path});
+    return {isDuplicate:true};
+  }
   // The active recurring catalog is shared across activities. Base-date age
   // cannot make a still-running program disappear from duplicate selection.
   const catalog = /^\d{4}-\d{2}-\d{2}$/.test(event.startDate || '') ? await getRecurringSeriesCatalog(venueId) : {events:[],complete:true,scanned:0};
@@ -5802,7 +5817,8 @@ function isReusableSharedEventResult(event: PrivateSharedEventRecord): boolean {
  */
 export async function createEvent(
   venueId: string,
-  event: Omit<EventData, 'id' | 'createdAt' | 'venueId'>
+  event: Omit<EventData, 'id' | 'createdAt' | 'venueId'>,
+  context: {fileId?:string;runId?:string;rowIndex?:number;sourceId?:string} = {}
 ): Promise<string> {
   const normalizedEvent = withNormalizedEventAddressForWrite(withFamilyFriendlyScore(withoutRejectedReviewedTicketLinks({ ...event, venueId })));
   const sanitizedEvent = await sanitizeEventManagedImageReferencesForWrite(normalizedEvent, {
@@ -5849,7 +5865,7 @@ export async function createEvent(
     .collection(COLLECTIONS.EVENTS)
     .add(data);
 
-  logger.debug('Created event', { venueId, eventId: docRef.id, eventType: event.eventType });
+  logger.debug('Created event', { ...context, venueId, eventId: docRef.id, eventType: event.eventType });
   if (isRecurringSeries(event)) recurringSeriesCatalog.invalidate(venueId);
   return docRef.id;
 }

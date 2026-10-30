@@ -1,0 +1,31 @@
+{
+  "status": "PARKED_NOT_IN_ACTIVE_PARSER_OR_RELEASE_TREE",
+  "origin": "3f432e6a video checkout contained unshipped reuse candidate",
+  "relocatedSource": [
+    {
+      "from": "functions\\src\\parsing\\postResponseReuse.ts",
+      "to": "artifacts\\oct30-prevention\\parked-response-reuse\\src\\parsing\\postResponseReuse.ts"
+    },
+    {
+      "from": "functions\\src\\parsing\\postResponseReuse.test.ts",
+      "to": "artifacts\\oct30-prevention\\parked-response-reuse\\src\\parsing\\postResponseReuse.test.ts"
+    },
+    {
+      "from": "functions\\src\\processing\\postResponseReuseRunner.ts",
+      "to": "artifacts\\oct30-prevention\\parked-response-reuse\\src\\processing\\postResponseReuseRunner.ts"
+    },
+    {
+      "from": "functions\\src\\processing\\postResponseReuseRunner.test.ts",
+      "to": "artifacts\\oct30-prevention\\parked-response-reuse\\src\\processing\\postResponseReuseRunner.test.ts"
+    },
+    {
+      "from": "functions\\src\\services\\postResponseReuseStore.ts",
+      "to": "artifacts\\oct30-prevention\\parked-response-reuse\\src\\services\\postResponseReuseStore.ts"
+    },
+    {
+      "from": "functions\\src\\services\\postResponseReuseStore.test.ts",
+      "to": "artifacts\\oct30-prevention\\parked-response-reuse\\src\\services\\postResponseReuseStore.test.ts"
+    }
+  ],
+  "reason": "Coordinator explicitly forbids integration or deployment of parked response reuse. Hooks removed from active source; original candidate modules retained here for recovery."
+}

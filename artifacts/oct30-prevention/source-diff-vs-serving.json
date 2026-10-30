@@ -1,0 +1,136 @@
+{
+  "baselineSourceHash": "e179029b583fc29c700f8c66e4ca39beb259f6df",
+  "baselineArchiveSHA256": "3cb669e6642d18158c35d5bc48174ab1d0910141dd2bdac2ddc2a12709de45f5",
+  "changes": [
+    {
+      "path": "src/parsing/finalFormatter.ts",
+      "kind": "changed",
+      "sha256": "3f2533cad47df3629df9cc457deab3e3072fbd3c3caaf481cc9d6fb107a6a551",
+      "reason": "Preserve exact reviewed image branch/address/index through formatting.",
+      "production": true
+    },
+    {
+      "path": "src/parsing/oct29SourceIntegrity.test.ts",
+      "kind": "new",
+      "sha256": "5d006105bdced881f87ff245be18d41e81d172f60f56be76a56425513950e601",
+      "reason": "Focused regression fixtures/tests for the accepted October 29 parser safeguards; not a runtime change.",
+      "production": false
+    },
+    {
+      "path": "src/parsing/oct30SourceIntegrity.test.ts",
+      "kind": "new",
+      "sha256": "469e09640bac8cc3c8719bf162de58cb5ab4d1e8b2e75d293c72cc0fba303924",
+      "reason": "Focused October 30 prevention regression tests and exact saved source fixtures; not a runtime change.",
+      "production": false
+    },
+    {
+      "path": "src/parsing/postParser.ts",
+      "kind": "changed",
+      "sha256": "6212d86b356e447b5d51a4e50cec08291b8ee14ec47413e966820181a4a3cd80",
+      "reason": "Apply item-specific reviewed source guards and repair explicit between-and/ampersand range parsing.",
+      "production": true
+    },
+    {
+      "path": "src/parsing/reviewedSourceItems.ts",
+      "kind": "new",
+      "sha256": "3175314335df8c2e458d860934d5b71f0504e5e2e981885b151a1cd9d0885c99",
+      "reason": "Bounded reviewed source/image/item bindings, election item eligibility and Handpie missing-essential hold.",
+      "production": true
+    },
+    {
+      "path": "src/parsing/sourceCandidateRetention.ts",
+      "kind": "changed",
+      "sha256": "bb631e2c271918eb45052fcdb94f4155ef3e2be95fa2b0422f7b51aebee3388a",
+      "reason": "Require image-specific library footers and item-level polling eligibility in the existing extraction instruction.",
+      "production": true
+    },
+    {
+      "path": "src/parsing/types.ts",
+      "kind": "changed",
+      "sha256": "4ab968c52093e72864a8ce84596929ecedce5ea314bb866fd79607e60763699a",
+      "reason": "Types for held eligibility/missing essentials and reviewed image location proof.",
+      "production": true
+    },
+    {
+      "path": "src/processing/reviewedCanonicalSourceVenue.ts",
+      "kind": "new",
+      "sha256": "9cb5a6030ced6386d1e1e82984159a8d68e594fb9f69ed62d554ffa76d4b3a54",
+      "reason": "Exact current source/canonical place/address/city/point guards for Island Chef.",
+      "production": true
+    },
+    {
+      "path": "src/processing/rowProcessor.ts",
+      "kind": "changed",
+      "sha256": "009d2b59a891eca6f66af4004464ad4ea6fdf571456d1d972f4af14a1c4326d4",
+      "reason": "Guarded current Island Chef canonical-source routing and explicit creation logging context.",
+      "production": true
+    },
+    {
+      "path": "src/services/familyAudienceEvidence.ts",
+      "kind": "changed",
+      "sha256": "fff9c7f04d8e058578de79df7424e2d3997330307406c3ac672aee63f999ff02",
+      "reason": "Narrow paragraph-bound family meal audience evidence.",
+      "production": true
+    },
+    {
+      "path": "src/services/firestoreService.creationContext.test.ts",
+      "kind": "new",
+      "sha256": "18de9842288c77b6efca5c8c04f66a0d1f21db1bfd9e74764ed5e6d374bab0ed",
+      "reason": "Focused October 30 prevention regression tests and exact saved source fixtures; not a runtime change.",
+      "production": false
+    },
+    {
+      "path": "src/services/firestoreService.ts",
+      "kind": "changed",
+      "sha256": "0101781fd26fe65623743db8e2331217f4f665988bceb536c63c151db4cec314",
+      "reason": "Exact reviewed duplicate suppression/corroboration and creation logging context.",
+      "production": true
+    },
+    {
+      "path": "src/services/reviewedOccurrenceConstraints.oct29Library.test.ts",
+      "kind": "new",
+      "sha256": "8cfd62cdfcd5bfa8ece532a66e4e87a27934ac9a1307adf8e46c930a573dc735",
+      "reason": "Focused regression fixtures/tests for the accepted October 29 parser safeguards; not a runtime change.",
+      "production": false
+    },
+    {
+      "path": "src/services/reviewedSourceDuplicates.ts",
+      "kind": "new",
+      "sha256": "16a21b4a70cf6f51e9b3bfd9e53d9ff659c065356cc73beba83c0664d3306e36",
+      "reason": "Exact source/date/start/title/venue duplicate and keeper fingerprints.",
+      "production": true
+    },
+    {
+      "path": "src/utils/familyFriendlyScoring.ts",
+      "kind": "changed",
+      "sha256": "dd77561fdddf1c75064e6d2a4b82ed0f715d86fece71b8168d8c0b209031ce59",
+      "reason": "Explicit feed-the-family audience wording; scorer version 15.",
+      "production": true
+    },
+    {
+      "path": "src/parsing/__fixtures__/oct29-source-integrity.json",
+      "kind": "new",
+      "sha256": "8fd2f82adc7cbc9da719696aa68561720f86068a46ceecde0a47fe67f4705a8b",
+      "reason": "Focused regression fixtures/tests for the accepted October 29 parser safeguards; not a runtime change.",
+      "production": false
+    },
+    {
+      "path": "src/parsing/__fixtures__/oct30-source-integrity.json",
+      "kind": "new",
+      "sha256": "0db2eb74e8fc86a7ab927faf56e5b47eaacc6172327041a4666263cdfb908140",
+      "reason": "Focused October 30 prevention regression tests and exact saved source fixtures; not a runtime change.",
+      "production": false
+    },
+    {
+      "path": "src/services/__fixtures__/oct29ReviewedLibraryConstraints.json",
+      "kind": "new",
+      "sha256": "0fab62aec6952ce55dafe6b063251db8b2ad2ddb241cccfeef2ecd0363e838ff",
+      "reason": "Focused regression fixtures/tests for the accepted October 29 parser safeguards; not a runtime change.",
+      "production": false
+    }
+  ],
+  "unexpectedProductionDifferences": [],
+  "sourceReuseReferences": [],
+  "parkedSourceAndTests": "artifacts/oct30-prevention/parked-response-reuse",
+  "noVideoIntegrationRequiredInMainParser": true
+}

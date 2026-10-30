@@ -1,0 +1,45 @@
+{
+  "status": "PASS_BUILD_AND_85_FOCUSED_TESTS_NO_RELEASE",
+  "build": {
+    "command": "npm run build",
+    "exitCode": 0,
+    "log": "build.log"
+  },
+  "focusedTests": {
+    "tests": 85,
+    "pass": 85,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "exitCode": 0,
+    "log": "final-focused.log",
+    "files": [
+      "parsing/oct30SourceIntegrity.test",
+      "services/firestoreService.creationContext.test",
+      "parsing/oct29SourceIntegrity.test",
+      "parsing/programmeSourceGuards.test",
+      "parsing/oct26ExplicitTimes.test",
+      "parsing/sourceTimeConstraints.test",
+      "services/reviewedOccurrenceConstraints.oct29Library.test",
+      "services/familyAudienceEvidence.test",
+      "utils/familyFriendlyScoring.test",
+      "processing/rowProcessor.familyAudience.test",
+      "utils/similarity.sameOccurrenceDuplicate.test"
+    ]
+  },
+  "sourceDiffManifestSHA256": "f00292d143381d4f7574a4ed80badc426f227bb1798bb0fd738ab907d20c2d04",
+  "offlinePackageManifestSHA256": "a8de3f47be561ec8e889a94f9a70ef579fcd998619785232859a07ae0c095218",
+  "scope": {
+    "newPaidCalls": 0,
+    "parserReplays": 0,
+    "deployments": 0,
+    "liveWrites": 0,
+    "fullBackendSuiteRun": false,
+    "unshippedReuseIntegration": false
+  },
+  "initialFailuresResolved": [
+    "Test initially used the stricter performer matcher for generic Chess title; switched to the ordinary duplicate matcher used by production.",
+    "Serving-import reconciliation lost four imports while initially preserving reuse wrappers; imports restored and active reuse integration then removed entirely per coordinator.",
+    "Scorer-version expectation in the accepted October 29 test now references the scoring version constant."
+  ]
+}

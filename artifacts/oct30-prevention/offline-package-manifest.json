@@ -1,0 +1,377 @@
+{
+  "status": "OFFLINE_PREPARED_NOT_DEPLOYED",
+  "baseSourceHash": "e179029b583fc29c700f8c66e4ca39beb259f6df",
+  "baseArchiveSHA256": "3cb669e6642d18158c35d5bc48174ab1d0910141dd2bdac2ddc2a12709de45f5",
+  "baseMembers": 1668,
+  "candidateMembers": 1683,
+  "unrelatedBaseMembersPreservedByteForByte": 1628,
+  "overlayMembers": 55,
+  "productionSourceFiles": 11,
+  "parkedReuseMembers": 0,
+  "parkedReuseReferences": 0,
+  "sources": [
+    {
+      "path": "src/parsing/finalFormatter.ts",
+      "kind": "changed",
+      "sha256": "3f2533cad47df3629df9cc457deab3e3072fbd3c3caaf481cc9d6fb107a6a551",
+      "reason": "Preserve exact reviewed image branch/address/index through formatting.",
+      "production": true
+    },
+    {
+      "path": "src/parsing/postParser.ts",
+      "kind": "changed",
+      "sha256": "6212d86b356e447b5d51a4e50cec08291b8ee14ec47413e966820181a4a3cd80",
+      "reason": "Apply item-specific reviewed source guards and repair explicit between-and/ampersand range parsing.",
+      "production": true
+    },
+    {
+      "path": "src/parsing/reviewedSourceItems.ts",
+      "kind": "new",
+      "sha256": "3175314335df8c2e458d860934d5b71f0504e5e2e981885b151a1cd9d0885c99",
+      "reason": "Bounded reviewed source/image/item bindings, election item eligibility and Handpie missing-essential hold.",
+      "production": true
+    },
+    {
+      "path": "src/parsing/sourceCandidateRetention.ts",
+      "kind": "changed",
+      "sha256": "bb631e2c271918eb45052fcdb94f4155ef3e2be95fa2b0422f7b51aebee3388a",
+      "reason": "Require image-specific library footers and item-level polling eligibility in the existing extraction instruction.",
+      "production": true
+    },
+    {
+      "path": "src/parsing/types.ts",
+      "kind": "changed",
+      "sha256": "4ab968c52093e72864a8ce84596929ecedce5ea314bb866fd79607e60763699a",
+      "reason": "Types for held eligibility/missing essentials and reviewed image location proof.",
+      "production": true
+    },
+    {
+      "path": "src/processing/reviewedCanonicalSourceVenue.ts",
+      "kind": "new",
+      "sha256": "9cb5a6030ced6386d1e1e82984159a8d68e594fb9f69ed62d554ffa76d4b3a54",
+      "reason": "Exact current source/canonical place/address/city/point guards for Island Chef.",
+      "production": true
+    },
+    {
+      "path": "src/processing/rowProcessor.ts",
+      "kind": "changed",
+      "sha256": "009d2b59a891eca6f66af4004464ad4ea6fdf571456d1d972f4af14a1c4326d4",
+      "reason": "Guarded current Island Chef canonical-source routing and explicit creation logging context.",
+      "production": true
+    },
+    {
+      "path": "src/services/familyAudienceEvidence.ts",
+      "kind": "changed",
+      "sha256": "fff9c7f04d8e058578de79df7424e2d3997330307406c3ac672aee63f999ff02",
+      "reason": "Narrow paragraph-bound family meal audience evidence.",
+      "production": true
+    },
+    {
+      "path": "src/services/firestoreService.ts",
+      "kind": "changed",
+      "sha256": "0101781fd26fe65623743db8e2331217f4f665988bceb536c63c151db4cec314",
+      "reason": "Exact reviewed duplicate suppression/corroboration and creation logging context.",
+      "production": true
+    },
+    {
+      "path": "src/services/reviewedSourceDuplicates.ts",
+      "kind": "new",
+      "sha256": "16a21b4a70cf6f51e9b3bfd9e53d9ff659c065356cc73beba83c0664d3306e36",
+      "reason": "Exact source/date/start/title/venue duplicate and keeper fingerprints.",
+      "production": true
+    },
+    {
+      "path": "src/utils/familyFriendlyScoring.ts",
+      "kind": "changed",
+      "sha256": "dd77561fdddf1c75064e6d2a4b82ed0f715d86fece71b8168d8c0b209031ce59",
+      "reason": "Explicit feed-the-family audience wording; scorer version 15.",
+      "production": true
+    }
+  ],
+  "overlay": [
+    {
+      "path": "lib/parsing/finalFormatter.d.ts",
+      "sha256": "ff9318e8467813fc9dce198a8d186870ccafdc1eb4dc61a35169da2755e068d4",
+      "new": false
+    },
+    {
+      "path": "lib/parsing/finalFormatter.d.ts.map",
+      "sha256": "3e300cbcfc0a2b019e338a443b88c12f4e518abf3838afd9648d71099c78dfdf",
+      "new": false
+    },
+    {
+      "path": "lib/parsing/finalFormatter.js",
+      "sha256": "509c1996adf890ddc64cead85fc6368561ccf57d52f1e9bb6eff6221cf84effb",
+      "new": false
+    },
+    {
+      "path": "lib/parsing/finalFormatter.js.map",
+      "sha256": "1cf1eb6fcb3484867a74a1f32e976c0d3d3f1c08c34a23e9b3df2f45734ff18a",
+      "new": false
+    },
+    {
+      "path": "lib/parsing/postParser.d.ts",
+      "sha256": "30975efe3c02cd1c86a39fdecc4286e1b8330fb5aa65209e7e0814028df70e5c",
+      "new": false
+    },
+    {
+      "path": "lib/parsing/postParser.d.ts.map",
+      "sha256": "def2e11b7db7d0522a6afdd23bde8ae1e3a8d41ddcee4259957df55cef70ecb3",
+      "new": false
+    },
+    {
+      "path": "lib/parsing/postParser.js",
+      "sha256": "2600a700b6fee18d1e8fcfa122c084d004801e413c787ec5893eff76bb8850b6",
+      "new": false
+    },
+    {
+      "path": "lib/parsing/postParser.js.map",
+      "sha256": "19c18e6a4bdccf04b154bef0ebecb0b5e83125412bc4eb9207fc616a56a27f23",
+      "new": false
+    },
+    {
+      "path": "lib/parsing/reviewedSourceItems.d.ts",
+      "sha256": "a18b3021ff1cdfb4b1466225f5674001f95c8551650de13f36520a02d438cc97",
+      "new": true
+    },
+    {
+      "path": "lib/parsing/reviewedSourceItems.d.ts.map",
+      "sha256": "84b754dace75ee5f6648ee95900cc47484cbb290fd7523fea8e764d29a5a7b77",
+      "new": true
+    },
+    {
+      "path": "lib/parsing/reviewedSourceItems.js",
+      "sha256": "6fd376b662438bfa9d08639b29f4522970c2f81f557d7d3083d44809cc265ca9",
+      "new": true
+    },
+    {
+      "path": "lib/parsing/reviewedSourceItems.js.map",
+      "sha256": "c1983d07e0605e64e8142e73ff41e57825489b64a068182035021fca070af00f",
+      "new": true
+    },
+    {
+      "path": "lib/parsing/sourceCandidateRetention.d.ts",
+      "sha256": "52a396e429b224d34d22b1bda8c9aeabc884fce26a6c0bb8df0d5c1c5c1e233f",
+      "new": false
+    },
+    {
+      "path": "lib/parsing/sourceCandidateRetention.d.ts.map",
+      "sha256": "1ec5cde2934daa1df761b88d9992ad23dfd23207f47edad9ba9a170b135d4345",
+      "new": false
+    },
+    {
+      "path": "lib/parsing/sourceCandidateRetention.js",
+      "sha256": "7c5da75a1a8f39e0f75aa0e8119f30a221edbd5fb61a030d623fd7af14ba7344",
+      "new": false
+    },
+    {
+      "path": "lib/parsing/sourceCandidateRetention.js.map",
+      "sha256": "c0056fca3d25c5a0bd18529027e13272fd36c2dd92f905bcafd370aae9edd7a0",
+      "new": false
+    },
+    {
+      "path": "lib/parsing/types.d.ts",
+      "sha256": "387b138fe11e7ac4e6833d39a56cba38d835594915d8cfb40423e994fcf393dd",
+      "new": false
+    },
+    {
+      "path": "lib/parsing/types.d.ts.map",
+      "sha256": "42c6f68528844eb14965c889a4599b9c1a485527819f25fb8d3f23d7e95072d1",
+      "new": false
+    },
+    {
+      "path": "lib/parsing/types.js",
+      "sha256": "17ac77aa96c090c8a07ad4e350253f0bdbb4c60eedc0c6eef6dd5e45209cba68",
+      "new": false
+    },
+    {
+      "path": "lib/parsing/types.js.map",
+      "sha256": "d7b5dbb5fbe069c69f164c045611ddbc53b3d8c14a05f2daf01bd0984620e491",
+      "new": false
+    },
+    {
+      "path": "lib/processing/reviewedCanonicalSourceVenue.d.ts",
+      "sha256": "cf6fdbcd822c745a0b40de65f68d75ce34b6437eb6c5ebd58a7a489b29bde5fc",
+      "new": true
+    },
+    {
+      "path": "lib/processing/reviewedCanonicalSourceVenue.d.ts.map",
+      "sha256": "e4a3904748306d76774b428c61e88413e82c7533e81678cea27f06bf54e9d3c2",
+      "new": true
+    },
+    {
+      "path": "lib/processing/reviewedCanonicalSourceVenue.js",
+      "sha256": "151414dc0fff2141276951d96cd4f48bb912bdac0f0ad825d2eeda1fa6bb2cb3",
+      "new": true
+    },
+    {
+      "path": "lib/processing/reviewedCanonicalSourceVenue.js.map",
+      "sha256": "41ed602c508144f9eaadd7f934ac4b62da1404bcffb58f09f8ea60237d6f7c43",
+      "new": true
+    },
+    {
+      "path": "lib/processing/rowProcessor.d.ts",
+      "sha256": "e971647070a483dad3e8162eca0359bedc68ca87059260e7562307c1b9753f39",
+      "new": false
+    },
+    {
+      "path": "lib/processing/rowProcessor.d.ts.map",
+      "sha256": "1429c731d58c8095ba3044a2972d53f10b23cad16fde53747ade25365a2f7de7",
+      "new": false
+    },
+    {
+      "path": "lib/processing/rowProcessor.js",
+      "sha256": "fd9dfc668b2390bb8104b199f3d7881ae0750ffc0434e16187904391d8bb43c1",
+      "new": false
+    },
+    {
+      "path": "lib/processing/rowProcessor.js.map",
+      "sha256": "6ab35fcc66ac6351dda62d95eca06b7746e9f33ec4dc4579779bef2c6903b07f",
+      "new": false
+    },
+    {
+      "path": "lib/services/familyAudienceEvidence.d.ts",
+      "sha256": "df4d2d536a7f34c03c322c74f20126606c165726c6d12ab6b7c56540754ee0f5",
+      "new": false
+    },
+    {
+      "path": "lib/services/familyAudienceEvidence.d.ts.map",
+      "sha256": "fe6a5e8c471cb80ac4b37c05ab2f041fb37a7c53dff8d2b0f8177ceaab9618cd",
+      "new": false
+    },
+    {
+      "path": "lib/services/familyAudienceEvidence.js",
+      "sha256": "966d5ef8c12d21836103226d5fa64cfbae890ded1e2eb555753eeb712d11f4ca",
+      "new": false
+    },
+    {
+      "path": "lib/services/familyAudienceEvidence.js.map",
+      "sha256": "535582ac7187b59a91d2811ab1c2ed726ec1ca118289510f76ae4eacbf922a78",
+      "new": false
+    },
+    {
+      "path": "lib/services/firestoreService.d.ts",
+      "sha256": "54306d454a462343325cb82afc491451aea732f990338aa8584347f9aaa76c7f",
+      "new": false
+    },
+    {
+      "path": "lib/services/firestoreService.d.ts.map",
+      "sha256": "0f89a43aa407cba1a2d9fef2f4d28daf2c56ec47e2abf61e155135fe2c3f16d4",
+      "new": false
+    },
+    {
+      "path": "lib/services/firestoreService.js",
+      "sha256": "5785cecf6c93e2ee0418453e81097b8847e8af9b3d47eacb9424bf3e9ff442ae",
+      "new": false
+    },
+    {
+      "path": "lib/services/firestoreService.js.map",
+      "sha256": "b708a7f172a7f598f33a83a7ff92e5ba23c7cf76ef97bbb876cdf5c587de0083",
+      "new": false
+    },
+    {
+      "path": "lib/services/reviewedSourceDuplicates.d.ts",
+      "sha256": "affab4cfacaf5c38b17df1bbff1bf280cd88afb23abd9122eca58efb0cc137d5",
+      "new": true
+    },
+    {
+      "path": "lib/services/reviewedSourceDuplicates.d.ts.map",
+      "sha256": "4ff0147a420439a178e2b1840e8a47b2bc05c5b222e84048f12c8a5577a6e62f",
+      "new": true
+    },
+    {
+      "path": "lib/services/reviewedSourceDuplicates.js",
+      "sha256": "05782ab7b1c85cfb277e19bb92c5a9688bfafe737a250062905916aef3b7115b",
+      "new": true
+    },
+    {
+      "path": "lib/services/reviewedSourceDuplicates.js.map",
+      "sha256": "976749a06b1771fa97b564fa1ad057285d3097e97f9bb08cd305c8c981ff5bd3",
+      "new": true
+    },
+    {
+      "path": "lib/utils/familyFriendlyScoring.d.ts",
+      "sha256": "2f110ee871082d7d57c73f376c274a1faaaa744019a51116e1592f8986b0901e",
+      "new": false
+    },
+    {
+      "path": "lib/utils/familyFriendlyScoring.d.ts.map",
+      "sha256": "a962984e3edb2591a04951c3ac762fb94b22d7877829f769611f92212947ab6c",
+      "new": false
+    },
+    {
+      "path": "lib/utils/familyFriendlyScoring.js",
+      "sha256": "54cfd72d868dda977212595ec51b08d389f44ca3a092cfa085098728fcf2d0fe",
+      "new": false
+    },
+    {
+      "path": "lib/utils/familyFriendlyScoring.js.map",
+      "sha256": "b8f26e59e45102428b46ad99d64082ccb6cc5fb9218822c59e12e765c77937ed",
+      "new": false
+    },
+    {
+      "path": "src/parsing/finalFormatter.ts",
+      "sha256": "3f2533cad47df3629df9cc457deab3e3072fbd3c3caaf481cc9d6fb107a6a551",
+      "new": false
+    },
+    {
+      "path": "src/parsing/postParser.ts",
+      "sha256": "6212d86b356e447b5d51a4e50cec08291b8ee14ec47413e966820181a4a3cd80",
+      "new": false
+    },
+    {
+      "path": "src/parsing/reviewedSourceItems.ts",
+      "sha256": "3175314335df8c2e458d860934d5b71f0504e5e2e981885b151a1cd9d0885c99",
+      "new": true
+    },
+    {
+      "path": "src/parsing/sourceCandidateRetention.ts",
+      "sha256": "bb631e2c271918eb45052fcdb94f4155ef3e2be95fa2b0422f7b51aebee3388a",
+      "new": false
+    },
+    {
+      "path": "src/parsing/types.ts",
+      "sha256": "4ab968c52093e72864a8ce84596929ecedce5ea314bb866fd79607e60763699a",
+      "new": false
+    },
+    {
+      "path": "src/processing/reviewedCanonicalSourceVenue.ts",
+      "sha256": "9cb5a6030ced6386d1e1e82984159a8d68e594fb9f69ed62d554ffa76d4b3a54",
+      "new": true
+    },
+    {
+      "path": "src/processing/rowProcessor.ts",
+      "sha256": "009d2b59a891eca6f66af4004464ad4ea6fdf571456d1d972f4af14a1c4326d4",
+      "new": false
+    },
+    {
+      "path": "src/services/familyAudienceEvidence.ts",
+      "sha256": "fff9c7f04d8e058578de79df7424e2d3997330307406c3ac672aee63f999ff02",
+      "new": false
+    },
+    {
+      "path": "src/services/firestoreService.ts",
+      "sha256": "0101781fd26fe65623743db8e2331217f4f665988bceb536c63c151db4cec314",
+      "new": false
+    },
+    {
+      "path": "src/services/reviewedSourceDuplicates.ts",
+      "sha256": "16a21b4a70cf6f51e9b3bfd9e53d9ff659c065356cc73beba83c0664d3306e36",
+      "new": true
+    },
+    {
+      "path": "src/utils/familyFriendlyScoring.ts",
+      "sha256": "dd77561fdddf1c75064e6d2a4b82ed0f715d86fece71b8168d8c0b209031ce59",
+      "new": false
+    }
+  ],
+  "archiveSHA256": {
+    "parser-prevention-overlay.zip": "8e353c7110a1b9d4440a4f5721694844db0acb2dd6ce80f0a64b37c05c35b35e",
+    "parser-candidate-source.zip": "fd60e5f7ccc63b121fdc6c0f277dde73fa75491809574e6d69fc51c68b81be18"
+  },
+  "functionManifestInBaselineArchive": false,
+  "indexUnchanged": true,
+  "runtimeConfigUnchanged": true,
+  "fileProcessorUnchanged": true,
+  "batchManagerUnchanged": true
+}

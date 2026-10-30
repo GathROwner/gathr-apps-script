@@ -149,7 +149,7 @@ test('O29-08 exact row31 source loses false alcohol penalty in create and duplic
   assert(withFamilyFriendlyScore(persisted).familyFriendlyScore>=FAMILY_FRIENDLY_LIKELY_THRESHOLD);
   const result=previewDuplicateMerge({existingEvent:{...persisted,uniqueId:'1000000001_a'},
     incomingEvent:{...persisted,uniqueId:'1000000002_a'},venue:{id:'rink',name:event.establishment} as any});
-  assert.equal(result.updates.familyFriendlyScoringVersion,'family-friendly-v14');
+  assert.equal(result.updates.familyFriendlyScoringVersion,FAMILY_FRIENDLY_SCORING_VERSION);
   assert(Number(result.updates.familyFriendlyScore)>=FAMILY_FRIENDLY_LIKELY_THRESHOLD);
   assert(!(result.updates.familyFriendlyReasons||[]).includes('alcohol_focused'));
   for(const description of ['community spirit','school spirit','team spirit'])assert(!scoreFamilyFriendly({description}).familyFriendlyReasons.includes('alcohol_focused'));

@@ -1,7 +1,7 @@
 import type {ExtractedItem} from './types.js';
 
 export const INDEPENDENT_SOURCE_ITEM_RULES = `
-Inspect attached posters independently from the caption: an unrelated caption does not negate a dated public activity printed on a poster. Keep the poster's own date, clock, attendee venue and image index together.
+Inspect attached posters independently from the caption: an unrelated caption does not negate a dated public activity printed on a poster. Keep the poster's own date, clock, attendee venue and image index together. For multi-library galleries, read each individual image footer (branch name, street address and phone) and bind only that image's activities to it. Do not copy a neighbouring image's footer or infer a branch from the gallery caption. Polling hours and election administration remain ineligible item by item even when a mixed post contains eligible coffee or craft activities.
 Retain each separately advertised food offer in a calendar cell, including an end-only offer (for example wings until 10pm). Leave an unprinted start empty; never borrow the music start or venue opening time.
 A candy handout is a public activity separate from adjacent unnamed entertainment. Extract its own printed window; leave an unprinted date empty for source review. Halloween context alone does not prove October 31. Do not invent a concert name from a bare entertainment clock.
 `;

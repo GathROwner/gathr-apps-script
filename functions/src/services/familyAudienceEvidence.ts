@@ -65,6 +65,22 @@ export function selectActivityAudienceBlocks(
   const caption = sourceText.split(/\n\s*OCR TEXT\s*:/i)[0];
   const blocks = caption.split(/\n\s*\n/).map(text => text.trim()).filter(Boolean);
   const result: Array<{text: string; scope: 'exact_source_block' | 'whole_programme'}> = [];
+  // A single takeout meal may be named differently on its poster. Require the
+  // meal's literal food nouns in the caption plus an explicit family invitation;
+  // neither a one-item extraction nor generic restaurant branding is proof.
+  if (items.length===1 && /\b(?:takeout|take out|pick up|pickup)\b/i.test(caption) &&
+      /\bfeed (?:the|your|whole) family\b/i.test(caption) &&
+      /\b(?:parents?|children|kids)\b/i.test(caption)) {
+    const foods=title.split(/[^a-z]+/).filter(word=>/^(?:cheeseburgers?|burgers?|fries|sandwiches|pizzas?|handpies?)$/.test(word));
+    const mealBlocks=blocks.map((text,index)=>({text,index,normalized:normalizeAudienceText(text)}))
+      .filter(block=>new Set(foods).size>=2&&foods.every(word=>new RegExp(`\\b${word}\\b`).test(block.normalized)));
+    if(mealBlocks.length===1){
+      const index=mealBlocks[0].index;
+      if(index>=2 && /\bfeed (?:the|your|whole) family\b/i.test(blocks[index-2]) &&
+          /\bfor (?:the little[^.!?]*|children|kids)[^.!?]*\band (?:their )?parents\b/i.test(blocks[index-1]))
+        result.push({text:blocks.slice(index-2,index+1).join('\n'),scope:'exact_source_block'});
+    }
+  }
   for (const text of blocks) {
     const normalized = normalizeAudienceText(text);
     // Mixed lists remain unscored even when one title is a substring of another.

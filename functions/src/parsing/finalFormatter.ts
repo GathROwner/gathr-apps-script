@@ -9,7 +9,7 @@
  */
 
 import OpenAI from 'openai';
-import { withPostResponseReuse } from './postResponseReuse.js';
+import {earlierProgrammeCutoff,recurrenceScheduleText,hasOnlyDescriptiveSkillRecurrence} from './programmeSourceGuards.js';
 import {hasUnresolvedSourceMeridiem as hasUnresolvedEarlyMeridiem} from './sourceTimeConstraints.js';
 import {sourceItemHoldReason} from './sourceItemEvidence.js';
 import {boundCinemaRunOccurrence} from './sourcePublicationPolicy.js';
@@ -51,7 +51,7 @@ function getOpenAIClient(): OpenAI {
     }
     openaiClient = new OpenAI({ apiKey });
   }
-  return withPostResponseReuse(openaiClient);
+  return openaiClient;
 }
 
 // Valid recurring patterns
@@ -1348,6 +1348,12 @@ export function rehydrateFormattedEventMetadata(
     // Stage 5 cannot create source proof. Restore the aligned item's evidence,
     // including unknown/absent evidence, before any host guard consumes it.
     nextEvent.spatial=originalItem.spatial?structuredClone(originalItem.spatial):undefined;changed=true;
+  }
+  const reviewedLocation=originalItem?._reviewedSourceImageLocation;
+  if(reviewedLocation && originalItem.venue===reviewedLocation.venue){
+    nextEvent.establishment=reviewedLocation.venue;nextEvent.venue=reviewedLocation.venue;
+    nextEvent.additionalLocation=reviewedLocation.venue;nextEvent.address=reviewedLocation.address;
+    nextEvent.relevantImageIndex=originalItem.relevantImageIndex;changed=true;
   }
   if(originalItem?._sourceProgrammeMonthEnd&&originalItem.recurrenceUntilDate===originalItem._sourceProgrammeMonthEnd&&
       /^weekly_/.test(String(originalItem.recurringPattern||''))&&nextEvent.recurringPattern===originalItem.recurringPattern){

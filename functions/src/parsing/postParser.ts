@@ -1,4 +1,5 @@
 // @ts-nocheck
+import {applyReviewedSourceItems} from './reviewedSourceItems.js';
 import {applyLocationMentionResolution} from './locationMentionRoles.js';
 import {hasUnadvertisedActivityEnd} from './sourcePublicationPolicy.js';
 import {materialCaptionClockConflict, prepareOccurrenceSourceItem, restoreOccurrenceSourceOwnership} from './occurrenceSourceOwnership.js';
@@ -678,7 +679,7 @@ async function replayPostDataFromArtifactsCore(
   const indexedReplayKey = (item:ExtractedItem)=>Number.isInteger(item._pipelineIndex) && Number(item._pipelineIndex)>0
     ? `${item._pipelineIndex}:${replayItemKey(item)}` : undefined;
   const retainReplayPublicationHolds = async (items:ExtractedItem[])=>{
-    const constrained=constrainSourceTimes(items,combinedText).map(item=>{
+    const constrained=constrainSourceTimes(applyReviewedSourceItems(items,postId,normalizeImageUrls([...(mediaUrls||[]),...(sharedPostThumbnails||[])],MAX_OCR_IMAGES)),combinedText).map(item=>{
       const occurrence=replayItemKey(item),indexed=indexedReplayKey(item);
       // A stable source index takes precedence. Legacy unindexed artifacts may
       // match only an occurrence unique in both source and destination lists.
@@ -1902,6 +1903,7 @@ async function parsePostDataCore(
         }
       }
 
+      stage3Items = applyReviewedSourceItems(stage3Items, postId, allImageUrls);
       logger.info('=== STAGE 3.7: TICKET LINK ENRICHMENT ===');
       const stage37Start = Date.now();
       stage3Items = stage3Items.map(item => withoutRejectedReviewedTicketLinks(item, {...item, sourceUniqueId: postId}));
@@ -2019,6 +2021,7 @@ async function parsePostDataCore(
         }
         stage3Items = partition.kept;
       }
+      stage3Items = applyReviewedSourceItems(stage3Items, postId, allImageUrls);
       const holdWholeSchedule = isCalendarOrSchedule && needsWholeScheduleIdentityReview(stage3Items);
       const identityHeld = holdWholeSchedule ? stage3Items : stage3Items.filter(item => sourceItemHoldReason(item));
       if (identityHeld.length) {
@@ -2292,6 +2295,17 @@ async function parsePostDataCore(
       }
     }
 
+    validatedData=applyReviewedSourceItems(validatedData,postId,allImageUrls);
+    const reviewedValidationHolds=validatedData.filter(item=>sourceItemHoldReason(item));
+    if(reviewedValidationHolds.length){
+      await emitStageArtifacts(cfg,{source:'live',stage3HeldItems:deepCloneJson(reviewedValidationHolds)});
+      validatedData=validatedData.filter(item=>!sourceItemHoldReason(item));
+      if(!validatedData.length){
+        await reportSkipReason({stage:'stage4',reason:'Source items withheld from publication',
+          detail:reviewedValidationHolds.map(item=>`${item.name}: ${sourceItemHoldReason(item)}`).join('; ')});
+        return [];
+      }
+    }
     logger.info(`${validatedData.length} items passed secondary validation`, {
       before: rawExtractedData.length,
       after: validatedData.length,
@@ -4168,7 +4182,7 @@ function extractExplicitTimeRangeFromEvidence(
     'i'
   );
   const betweenPattern = new RegExp(
-    `\\bbetween\\s+(${endpointPattern})\\s*(AM|PM)?\\s+and\\s+(${endpointPattern})\\s*(AM|PM)?`, 'i'
+    `\\bbetween\\s+(${endpointPattern})\\s*(AM|PM)?\\s*(?:and|&)\\s*(${endpointPattern})\\s*(AM|PM)?`, 'i'
   );
 
   for (const raw of candidates) {
@@ -4184,6 +4198,7 @@ function extractExplicitTimeRangeFromEvidence(
     if (resolvedRange) return resolvedRange;
   }
 
+  if (candidates.some(raw => /\bbetween\b/i.test(raw))) return null;
   const standaloneStart = extractStandaloneExplicitTime(startRawEvidence);
   const standaloneEnd = extractStandaloneExplicitTime(endRawEvidence);
   if (standaloneStart && standaloneEnd) {

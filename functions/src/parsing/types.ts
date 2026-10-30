@@ -386,6 +386,10 @@ export type RecurringPattern =
 // NOTE: Monthly recurrence is used in legacy Apps Script and should be added in a dedicated recurrence pass.
 
 export interface RecurrenceScheduleFields {
+  _reviewedSourceImageLocation?: {sourceId:string;imageObject:string;venue:string;address:string};
+  _itemEligibility?: 'ineligible';
+  _sourceReviewMissing?: string[];
+  _sourceId?: string;
   _sourcePublicationHold?: string;
   _sourceProgrammeMonthEnd?: string;
   sourceLocationRole?: 'shared_original_business' | 'collection_partner_only';

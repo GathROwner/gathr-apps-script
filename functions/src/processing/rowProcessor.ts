@@ -1,3 +1,4 @@
+import {requestsReviewedDowntownVenue,isReviewedDowntownVenue,ISLAND_CHEF_DOWNTOWN_VENUE} from './reviewedCanonicalSourceVenue.js';
 import {getBoundCalendarTileStart, corroboratedCalendarStart} from '../utils/calendarTileTiming.js';
 import {hasConflictingOccurrenceIdentity} from '../utils/occurrenceMergeGuard.js';
 import {datedOccurrenceLocation} from '../parsing/occurrenceSourceOwnership.js';
@@ -51,7 +52,6 @@ import {
   ParseStageArtifactsSnapshot,
 } from '../parsing/types.js';
 import { parsePostData, prepareManagedDisplayImageUrls } from '../parsing/postParser.js';
-import { approvePostResponseReuse, invalidatePostResponseReuse, notePostResponseReuseDocument } from '../parsing/postResponseReuse.js';
 import { boundStageArtifactSnapshot } from '../parsing/stageArtifactBudget.js';
 import * as gptService from '../services/gptService.js';
 import * as firestoreService from '../services/firestoreService.js';
@@ -3080,6 +3080,17 @@ export async function processRow(
       }
     }
 
+    if(requestsReviewedDowntownVenue(row)){
+      const canonical=await firestoreService.getVenue(ISLAND_CHEF_DOWNTOWN_VENUE);
+      if(isReviewedDowntownVenue(canonical)){
+        venueMatch={isMatch:true,matchType:'exact',similarity:1,matchedVenue:canonical!};
+        establishment=getVenueDisplayNameForProcessing(canonical!);
+      } else {
+        result.success=true;result.skipped=true;
+        batchManager.markRowSkipped(rowIndex,'reviewed_canonical_source_venue_drift');
+        return result;
+      }
+    }
     let venue = venueMatch.isMatch ? venueMatch.matchedVenue! : null;
     // Structured Facebook Events are checked from their event coordinates
     // above. Ordinary page posts can still resolve to an out-of-region venue;
@@ -3106,7 +3117,6 @@ export async function processRow(
       }
     }
     let matchedVenueId = venue?.id;
-    if (venue?.id) notePostResponseReuseDocument(`venues/${venue.id}`);
     let facebookEventSourceContentSignature: string | undefined;
     let reusableFacebookEventMediaUrls: string[] = [];
     let reusableFacebookEventMediaSource: EventImageProvenanceSource = 'dedupe_existing';
@@ -3449,10 +3459,6 @@ export async function processRow(
         if (parserSkipReason?.failure) batchManager.markRowError(rowIndex,result.error);
         else batchManager.markRowSkipped(rowIndex, skipReason);
 
-        if (!parserSkipReason?.failure && ['stage1', 'stage2'].includes(parserSkipReason?.stage || '')) {
-          approvePostResponseReuse();
-        }
-
         if (enableSnapshots || parserSkipReason?.reason === 'Luna canary requires source review') {
           const state = batchManager.getState();
           const persistedStageArtifacts = enableStageArtifacts
@@ -3506,7 +3512,6 @@ export async function processRow(
       }
 
       if (!isDryRun) {
-        let allItemsResolved = true;
         let newFoodSpecialsCreated = 0;
         let newStandardEventsCreated = 0;
         let updatedFoodSpecials = 0;
@@ -3529,8 +3534,6 @@ export async function processRow(
             false,
             venueLookupCache
           );
-
-          if (!eventResult.created && !eventResult.updated && !eventResult.isDuplicate) allItemsResolved = false;
 
           if (eventResult.created) {
             result.eventsCreated++;
@@ -3577,10 +3580,6 @@ export async function processRow(
         }
         if (updatedFoodSpecials > 0) {
           batchManager.incrementUpdatedFoodSpecials(updatedFoodSpecials);
-        }
-        if (allItemsResolved && !stageArtifactsSnapshot?.stage3HeldItems?.length &&
-            fullParserEvents.every(event => !['hold', 'reject'].includes(fullParserEventLocationCheck(event, row).decision))) {
-          approvePostResponseReuse();
         }
       }
 
@@ -3931,7 +3930,6 @@ export async function processRow(
   } catch (error) {
     if (error instanceof Error && error.message === 'resume_worker_fenced') throw error;
     result.error = error instanceof Error ? error.message : String(error);
-    invalidatePostResponseReuse();
     batchManager.markRowError(rowIndex, error instanceof Error ? error : String(error));
 
     const enableSnapshots = process.env.ENABLE_PARSE_SNAPSHOTS !== 'false';
@@ -4501,6 +4499,9 @@ export async function resolveVenueForFullParserEventWithMatcherForRegression(par
   if (item.sourceLocationRole === 'collection_partner_only') return null;
   if(sharedEventRequiresOriginalHost(item,row,rowVenue))return null;
   const boundLocation = item.additionalLocation || item.venue || item.establishment;
+  if(requestsReviewedDowntownVenue(row) && isReviewedDowntownVenue(rowVenue) &&
+      (!String(boundLocation||'').trim() || ['island chef down town','island chef downtown',
+        'island chef downtown lounge and eatery'].includes(normalizeVenueName(boundLocation)))) return rowVenue;
   const branchSpatial=(item.spatial || item.spatialEvidence) as any;
   const branchLocations=branchSpatial?.kind==='single_location' && Array.isArray(branchSpatial.locations)
     ? branchSpatial.locations.filter((location:any)=>location?.role==='location'&&location.certainty==='confirmed') : [];
@@ -5305,10 +5306,6 @@ export async function processFullParserEvent(
     await batchManager.assertWorkerActive();
     const existingEvent = duplicateCheck.existingEvent;
     if (existingEvent) {
-      if (existingEvent.id) {
-        notePostResponseReuseDocument(`venues/${venue.id}`);
-        notePostResponseReuseDocument(existingEvent._canonicalDocumentPath || `venues/${venue.id}/events/${existingEvent.id}`);
-      }
       try {
         const updateResult = await updateDuplicateEventIfNeeded(
           venue,
@@ -5354,7 +5351,8 @@ export async function processFullParserEvent(
 
   const writeStart = Date.now();
   await batchManager.assertWorkerActive();
-  const eventId = await firestoreService.createEvent(venue.id, eventData);
+  const eventId = await firestoreService.createEvent(venue.id, eventData, {fileId:batchManager.getState().fileId,
+    runId:batchManager.getState().runId,rowIndex,sourceId:String(row.uniqueId||'')});
   logTiming('write_event', writeStart, {
     rowIndex,
     venueId: venue.id,
@@ -5362,9 +5360,6 @@ export async function processFullParserEvent(
     parserMode: 'full5stage',
   });
   eventData.id = eventId;
-
-  notePostResponseReuseDocument(`venues/${venue.id}`);
-  notePostResponseReuseDocument(`venues/${venue.id}/events/${eventId}`);
 
   return { created: true, updated: false, isDuplicate: false, event: eventData };
 }
@@ -5592,7 +5587,8 @@ async function processExtractedItem(
 
   // Create the event
   const writeStart = Date.now();
-  const eventId = await firestoreService.createEvent(venue.id, eventData);
+  const eventId = await firestoreService.createEvent(venue.id, eventData, {fileId:batchManager.getState().fileId,
+    runId:batchManager.getState().runId,rowIndex,sourceId:String(row.uniqueId||'')});
   logTiming('write_event', writeStart, {
     rowIndex,
     venueId: venue.id,

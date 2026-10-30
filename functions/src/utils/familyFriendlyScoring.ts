@@ -4,7 +4,7 @@ import {
   validFamilyAudienceEvidence,
 } from '../services/familyAudienceEvidence.js';
 
-export const FAMILY_FRIENDLY_SCORING_VERSION = 'family-friendly-v14';
+export const FAMILY_FRIENDLY_SCORING_VERSION = 'family-friendly-v15';
 export const FAMILY_FRIENDLY_LIKELY_THRESHOLD = 60;
 
 export type FamilyFriendlyLevel = 'unlikely' | 'possible' | 'likely' | 'high';
@@ -138,6 +138,7 @@ export function scoreFamilyFriendly(
     /(?:^|[.!?]\s*)bring family\s*(?:,\s*|(?:and|&)\s+)friends\b/.test(description) ||
     /\bfamily (?:halloween|costume) (?:evening|event|party)\b|\bpour toute la famille\b/.test(text) ||
     /(?:^|[.!?]\s*)for families(?:[.!?:]|$)/.test(description) ||
+    /\bfeed (?:the|your|whole) family\b/.test(text) ||
     /\b(?:family[- ]friendly|family day|family fun|families welcome|for (?:the )?(?:whole )?family|fun for (?:the )?(?:whole )?family|family event|family activity|family activities)\b/.test(text) ||
     /\b(?:familial|familiale|familiaux|familiales|pour les familles|activites familiales|journee familiale|en famille)\b/.test(text) ||
     /\b(?:family (?:movie|swim|skate)|bring (?:the|your|all the) (?:friends (?:and|&) )?family|(?:designed|intended|suitable) for families)\b/.test(text) ||
