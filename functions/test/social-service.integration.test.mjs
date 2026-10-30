@@ -389,7 +389,7 @@ test('target-free readiness exposes distinct Here and Place thresholds before bi
   }, db, Timestamp.fromMillis(start + 90_001)), (error) => error?.code === 'failed-precondition');
 });
 
-test('Here readiness permits only approximate private sharing until Place is ready', async () => {
+test('Here readiness preserves approximate all-friends sharing and requires selected-friend consent for an exact pin', async () => {
   await makeFriends('alice', 'bob');
   const sessionId = 'readiness-private-001';
   const start = Date.now();
@@ -426,17 +426,18 @@ test('Here readiness permits only approximate private sharing until Place is rea
     capturedAtMs: start + 30_000,
   }, db, Timestamp.fromMillis(start + 30_000));
   assert.equal(bound.locationType, 'private_place');
-  assert.equal(bound.exactPrivateAllowed, false);
+  // The accepted October 7 baseline already permits Here-level exact private
+  // sharing with explicit selected-friend consent; all-friends remains coarse.
+  assert.equal(bound.exactPrivateAllowed, true);
 
   await assert.rejects(() => createCheckIn('alice', {
     operationId: 'private-here-exact-denied-001',
     eligibilitySessionId: sessionId,
     placeCandidateId: privateCandidate.candidate.id,
     durationMinutes: 30,
-    audienceMode: 'selected_friends',
-    selectedUids: ['bob'],
+    audienceMode: 'all_friends',
     shareExactLocation: true,
-  }, db), (error) => error?.code === 'failed-precondition');
+  }, db), (error) => error?.code === 'invalid-argument');
 
   const created = await createCheckIn('alice', {
     operationId: 'private-here-approximate-001',

@@ -77,7 +77,7 @@ function asData(value: unknown): Record<string, unknown> {
 function rethrowSafe(error: unknown): never {
   if (error instanceof HttpsError) throw error;
   if (error instanceof SocialDomainError) {
-    throw new HttpsError(error.code, error.message);
+    throw new HttpsError(error.code, error.message, error.details);
   }
   logger.error('Unhandled social callable error', {
     error_type: error instanceof Error ? error.name : 'unknown',
@@ -220,6 +220,7 @@ export const bindCheckInReadinessCallable = onCall(releaseTwoOptions, async (req
     return bindCheckInReadiness(uid, {
       protocolVersion: data.protocolVersion,
       readinessSessionId: data.readinessSessionId,
+      useQualifiedArrival: data.useQualifiedArrival,
       operationId: data.operationId,
       venueId: data.venueId,
       placeCandidateId: data.placeCandidateId,
@@ -238,6 +239,7 @@ export const discoverNearbyCheckInPlacesCallable = onCall(releaseTwoOptions, asy
   return run(async () => {
     await enforceSocialRateLimit(uid, 'nearby_check_in_places', 20, 24 * 60 * 60_000);
     return discoverNearbyCheckInPlaces(uid, {
+      preparation: data.preparation,
       latitude: data.latitude,
       longitude: data.longitude,
       accuracyMeters: data.accuracyMeters,
@@ -252,6 +254,7 @@ export const listNearbyCanonicalCheckInVenuesCallable = onCall(releaseTwoOptions
   return run(async () => {
     await enforceSocialRateLimit(uid, 'nearby_gathr_check_in_venues', 30, 60 * 60_000);
     return listNearbyCanonicalCheckInVenues({
+      preparation: data.preparation,
       latitude: data.latitude,
       longitude: data.longitude,
       accuracyMeters: data.accuracyMeters,
@@ -267,6 +270,7 @@ export const createPrivateCheckInPlaceCandidateCallable = onCall(releaseTwoOptio
     await enforceSocialRateLimit(uid, 'private_check_in_place', 20, 24 * 60 * 60_000);
     return createPrivateCheckInPlaceCandidate(uid, {
       label: data.label,
+      readinessSessionId: data.readinessSessionId,
       latitude: data.latitude,
       longitude: data.longitude,
       accuracyMeters: data.accuracyMeters,

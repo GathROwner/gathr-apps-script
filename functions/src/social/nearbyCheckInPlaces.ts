@@ -7,7 +7,10 @@ import {
   type Firestore,
 } from 'firebase-admin/firestore';
 
-import { SocialDomainError, validateUid } from './validation.js';
+import { SocialDomainError, validateUid, validateSocialOperationId } from './validation.js';
+import { storedQualifiedArrival } from './checkInArrival.js';
+import { checkInPlaceDistance, parseCheckInBoundary, publicCheckInRadius, type BoundaryPoint } from './checkInPlaceGeometry.js';
+import { logProviderHttpFailure, logProviderException, type FailureLogger, type ProviderAlias } from './nearbyPlaceDiagnostics.js';
 
 type FetchLike = (input: string | URL | Request, init?: RequestInit) => Promise<Response>;
 
@@ -18,6 +21,8 @@ export const CHECK_IN_PLACE_LOCATION_MAX_AGE_MS = 60_000;
 const MAX_RETURNED_CANDIDATES = 5;
 const MAX_RESERVED_EXTERNAL_CANDIDATES = 2;
 const MAX_CANONICAL_VENUES_SCANNED = 500;
+const MAX_PREPARED_CANONICAL_VENUES_SCANNED = 5_000;
+const MAX_PREPARED_EXTERNAL_CANDIDATES = 20;
 
 export interface ExternalCheckInPlaceSnapshot {
   type: 'external_place';
@@ -50,9 +55,11 @@ export interface NearbyCheckInPlaceCandidate {
   latitude: number;
   longitude: number;
   distanceMetres: number;
+  checkInBoundary?: BoundaryPoint[];
 }
 
 interface ParsedExternalPlace extends ExternalCheckInPlaceSnapshot {
+  checkInBoundary?: BoundaryPoint[];
   osmElementKey: string;
   distanceMetres: number;
 }
@@ -62,10 +69,12 @@ interface NearbyPlaceInput {
   longitude?: unknown;
   accuracyMeters?: unknown;
   capturedAtMs?: unknown;
+  preparation?: unknown;
 }
 
 interface PrivatePlaceInput extends NearbyPlaceInput {
   label?: unknown;
+  readinessSessionId?: unknown;
 }
 
 const PRIVATE_PLACE_PRESET_LABELS = new Set([
@@ -203,7 +212,7 @@ const DISALLOWED_PUBLIC_PLACE_TERMS = [
 
 export function parsePublicNearbyPlaces(
   payload: unknown,
-  origin: { latitude: number; longitude: number }
+  origin: { latitude: number; longitude: number; accuracyMeters?: number; preparation?: boolean }
 ): ParsedExternalPlace[] {
   const elements = Array.isArray(record(payload).elements)
     ? record(payload).elements as unknown[]
@@ -227,8 +236,19 @@ export function parsePublicNearbyPlaces(
       80
     ));
     const category = firstCategory(tags);
-    const latitude = Number(element.lat ?? center.lat);
-    const longitude = Number(element.lon ?? center.lon);
+    const checkInBoundary = elementType === 'way' && tags.area !== 'no'
+      ? parseCheckInBoundary(element.geometry) : undefined;
+    // Overpass geom output may supply bounds instead of center. Use bounds only
+    // for the display pin; eligibility still uses the complete closed footprint.
+    const bounds = record(element.bounds);
+    const boundaryLatitudes = checkInBoundary?.map(point => point.lat) || [];
+    const boundaryLongitudes = checkInBoundary?.map(point => point.lon) || [];
+    const minLat = Number(bounds.minlat ?? (checkInBoundary ? Math.min(...boundaryLatitudes) : NaN));
+    const maxLat = Number(bounds.maxlat ?? (checkInBoundary ? Math.max(...boundaryLatitudes) : NaN));
+    const minLon = Number(bounds.minlon ?? (checkInBoundary ? Math.min(...boundaryLongitudes) : NaN));
+    const maxLon = Number(bounds.maxlon ?? (checkInBoundary ? Math.max(...boundaryLongitudes) : NaN));
+    const latitude = Number(element.lat ?? center.lat ?? (minLat + maxLat) / 2);
+    const longitude = Number(element.lon ?? center.lon ?? (minLon + maxLon) / 2);
     if (
       !elementId || !name || !hasPublicPlaceTag
       || !Number.isFinite(latitude) || latitude < -90 || latitude > 90
@@ -236,8 +256,8 @@ export function parsePublicNearbyPlaces(
     ) continue;
     const publicDescriptor = normalizedMatchText(category);
     if (DISALLOWED_PUBLIC_PLACE_TERMS.some((term) => publicDescriptor.includes(term))) continue;
-    const distance = distanceMetres(origin.latitude, origin.longitude, latitude, longitude);
-    if (distance > CHECK_IN_PLACE_DISCOVERY_RADIUS_METRES) continue;
+    const distance = checkInPlaceDistance(origin, { latitude, longitude }, checkInBoundary);
+    if (distance > (origin.preparation ? CHECK_IN_PLACE_DISCOVERY_RADIUS_METRES : publicCheckInRadius(origin.accuracyMeters || 0))) continue;
     const dedupeKey = `${normalizedMatchText(name)}|${normalizedMatchText(address) || elementType + elementId}`;
     if (seen.has(dedupeKey)) continue;
     seen.add(dedupeKey);
@@ -245,6 +265,7 @@ export function parsePublicNearbyPlaces(
     parsed.push({
       type: 'external_place',
       osmElementKey,
+      ...(checkInBoundary ? { checkInBoundary } : {}),
       locationKey: `external:${createHash('sha256').update(osmElementKey).digest('hex').slice(0, 32)}`,
       name,
       address: address || 'Address not listed',
@@ -268,11 +289,28 @@ async function nearbyCanonicalVenues(
   latitude: number,
   longitude: number,
   accuracyMeters: number,
-  now: Timestamp
+  now: Timestamp,
+  preparation = false
 ): Promise<NearbyCheckInPlaceCandidate[]> {
-  const snapshot = await db.collection('venues').limit(MAX_CANONICAL_VENUES_SCANNED).get();
+  const collection = db.collection('venues');
+  let snapshot = await collection.limit(MAX_CANONICAL_VENUES_SCANNED).get();
+  const documents = [...snapshot.docs];
+  // Preparation must not silently omit an applicable venue after the first
+  // page. Default document ordering supports cursors without a new index.
+  while (preparation && snapshot.docs.length === MAX_CANONICAL_VENUES_SCANNED) {
+    const last = snapshot.docs[snapshot.docs.length - 1];
+    if (documents.length >= MAX_PREPARED_CANONICAL_VENUES_SCANNED) {
+      const remainder = await collection.startAfter(last).limit(1).get();
+      if (remainder.docs.length) throw new SocialDomainError('unavailable',
+        'GathR venues could not be fully prepared. Please try again later.',
+        {condition: 'nearby_gathr_venues_incomplete', retryable: true});
+      break;
+    }
+    snapshot = await collection.startAfter(last).limit(MAX_CANONICAL_VENUES_SCANNED).get();
+    documents.push(...snapshot.docs);
+  }
   const candidates: NearbyCheckInPlaceCandidate[] = [];
-  for (const document of snapshot.docs) {
+  for (const document of documents) {
     const venue = document.data();
     if (!canonicalVenueAvailable(venue, now)) continue;
     const venueLatitude = Number(venue.latitude);
@@ -282,7 +320,7 @@ async function nearbyCanonicalVenues(
       || !Number.isFinite(venueLongitude) || venueLongitude < -180 || venueLongitude > 180
     ) continue;
     const distance = distanceMetres(latitude, longitude, venueLatitude, venueLongitude);
-    if (distance > CHECK_IN_PLACE_DISCOVERY_RADIUS_METRES + accuracyMeters) continue;
+    if (distance > (preparation ? CHECK_IN_PLACE_DISCOVERY_RADIUS_METRES : publicCheckInRadius(accuracyMeters))) continue;
     candidates.push({
       id: `venue:${document.id}`,
       type: 'gathr_venue',
@@ -305,13 +343,14 @@ async function nearbyCanonicalVenues(
 export async function listNearbyCanonicalCheckInVenues(
   input: NearbyPlaceInput,
   options: { db?: Firestore; now?: Timestamp } = {}
-): Promise<{ candidates: NearbyCheckInPlaceCandidate[]; expiresAt: Timestamp }> {
+): Promise<{ candidates: NearbyCheckInPlaceCandidate[]; expiresAt: Timestamp; preparationRadiusMetres?: 175 }> {
   const db = options.db || getFirestore();
   const now = options.now || Timestamp.now();
   const { latitude, longitude, accuracyMeters } = parseFreshNearbyLocation(input, now);
   return {
-    candidates: await nearbyCanonicalVenues(db, latitude, longitude, accuracyMeters, now),
+    candidates: await nearbyCanonicalVenues(db, latitude, longitude, accuracyMeters, now, input.preparation === true),
     expiresAt: Timestamp.fromMillis(now.toMillis() + CHECK_IN_PLACE_CANDIDATE_TTL_MS),
+    ...(input.preparation === true ? {preparationRadiusMetres: CHECK_IN_PLACE_DISCOVERY_RADIUS_METRES} : {}),
   };
 }
 
@@ -340,20 +379,22 @@ export async function discoverNearbyCheckInPlaces(
     fetchImpl?: FetchLike;
     now?: Timestamp;
     overpassEndpoint?: string;
+    providerFailureLogger?: FailureLogger;
   } = {}
-): Promise<{ candidates: NearbyCheckInPlaceCandidate[]; expiresAt: Timestamp }> {
+): Promise<{ candidates: NearbyCheckInPlaceCandidate[]; expiresAt: Timestamp; externalLookupStatus: 'complete' | 'partial_unavailable'; preparationRadiusMetres?: 175 }> {
   const uid = validateUid(uidValue, 'uid');
   const db = options.db || getFirestore();
   const now = options.now || Timestamp.now();
   const { latitude, longitude, accuracyMeters } = parseFreshNearbyLocation(input, now);
   const expiresAt = Timestamp.fromMillis(now.toMillis() + CHECK_IN_PLACE_CANDIDATE_TTL_MS);
-  const canonical = await nearbyCanonicalVenues(db, latitude, longitude, accuracyMeters, now);
+  const preparation = input.preparation === true;
+  const canonical = await nearbyCanonicalVenues(db, latitude, longitude, accuracyMeters, now, preparation);
   const overpassQuery = `[out:json][timeout:8];(`
     + `nwr(around:${CHECK_IN_PLACE_DISCOVERY_RADIUS_METRES},${latitude},${longitude})["name"]["amenity"];`
     + `nwr(around:${CHECK_IN_PLACE_DISCOVERY_RADIUS_METRES},${latitude},${longitude})["name"]["shop"];`
     + `nwr(around:${CHECK_IN_PLACE_DISCOVERY_RADIUS_METRES},${latitude},${longitude})["name"]["tourism"];`
     + `nwr(around:${CHECK_IN_PLACE_DISCOVERY_RADIUS_METRES},${latitude},${longitude})["name"]["leisure"];`
-    + `);out center tags;`;
+    + `);out center geom;`;
   const configuredEndpoint = options.overpassEndpoint || process.env.OVERPASS_API_ENDPOINT;
   const endpoints = configuredEndpoint
     ? [configuredEndpoint]
@@ -362,7 +403,11 @@ export async function discoverNearbyCheckInPlaces(
       'https://overpass.kumi.systems/api/interpreter',
     ];
   let payload: unknown;
-  for (const endpoint of endpoints) {
+  for (const [index, endpoint] of endpoints.entries()) {
+    const provider: ProviderAlias = configuredEndpoint ? 'configured' : index === 0 ? 'overpass_de' : 'overpass_kumi';
+    const startedAt = Date.now();
+    let stage: 'request' | 'json' = 'request';
+    let status: number | null = null;
     try {
       const response = await (options.fetchImpl || fetch)(endpoint, {
         method: 'POST',
@@ -374,22 +419,36 @@ export async function discoverNearbyCheckInPlaces(
         body: new URLSearchParams({ data: overpassQuery }),
         signal: AbortSignal.timeout(10_000),
       });
-      if (!response.ok) continue;
+      status = response.status;
+      if (!response.ok) {
+        await logProviderHttpFailure(provider, response, startedAt, options.providerFailureLogger);
+        continue;
+      }
+      stage = 'json';
       payload = await response.json();
       break;
-    } catch {
+    } catch (error) {
       // Public Preview providers have no SLA. Try the next configured endpoint
       // without logging coordinates or other user location data.
+      logProviderException(provider, stage, status, error, startedAt, options.providerFailureLogger);
     }
   }
   if (payload === undefined) {
-    throw new SocialDomainError('unavailable', 'Nearby places could not be loaded right now.');
+    // Keep independently usable GathR options during a public-provider failure.
+    if (canonical.length) return { candidates: preparation ? canonical : canonical.slice(0, MAX_RETURNED_CANDIDATES),
+      expiresAt, externalLookupStatus: 'partial_unavailable',
+      ...(preparation ? {preparationRadiusMetres: CHECK_IN_PLACE_DISCOVERY_RADIUS_METRES} : {}) };
+    throw new SocialDomainError('unavailable', 'Nearby public places could not be loaded right now.', {
+      condition: 'nearby_public_places_external_lookup_unavailable', retryable: true,
+    });
   }
-  const external = parsePublicNearbyPlaces(payload, { latitude, longitude })
+  const external = parsePublicNearbyPlaces(payload, { latitude, longitude, accuracyMeters, preparation })
     .filter((candidate) => !externalMatchesCanonical(candidate, canonical));
   // A dense downtown can easily fill all five slots with existing GathR venues.
   // Keep room for nearby public places so an unknown venue is actually selectable.
-  const selected = selectNearbyPlaceCandidateSlots(canonical, external);
+  const selected = preparation
+    ? { canonical, external: external.slice(0, MAX_PREPARED_EXTERNAL_CANDIDATES) }
+    : selectNearbyPlaceCandidateSlots(canonical, external);
   const selectedCanonical = selected.canonical;
   const selectedExternal = selected.external;
   const batch = db.batch();
@@ -399,6 +458,7 @@ export async function discoverNearbyCheckInPlaces(
       uid,
       candidateId,
       source: 'openstreetmap_overpass',
+      ...(candidate.checkInBoundary ? { checkInBoundary: candidate.checkInBoundary } : {}),
       osmElementKeyHash: createHash('sha256').update(candidate.osmElementKey).digest('hex'),
       place: {
         type: candidate.type,
@@ -421,13 +481,15 @@ export async function discoverNearbyCheckInPlaces(
       latitude: candidate.latitude,
       longitude: candidate.longitude,
       distanceMetres: candidate.distanceMetres,
+      ...(candidate.checkInBoundary ? { checkInBoundary: candidate.checkInBoundary } : {}),
     } satisfies NearbyCheckInPlaceCandidate;
   });
   if (selectedExternal.length > 0) await batch.commit();
   const candidates = [...selectedCanonical, ...externalCandidates]
     .sort((left, right) => left.distanceMetres - right.distanceMetres
       || (left.type === 'gathr_venue' ? -1 : 1));
-  return { candidates, expiresAt };
+  return { candidates, expiresAt, externalLookupStatus: 'complete',
+    ...(preparation ? {preparationRadiusMetres: CHECK_IN_PLACE_DISCOVERY_RADIUS_METRES} : {}) };
 }
 
 export async function createPrivateCheckInPlaceCandidate(
@@ -441,7 +503,28 @@ export async function createPrivateCheckInPlaceCandidate(
   const uid = validateUid(uidValue, 'uid');
   const db = options.db || getFirestore();
   const now = options.now || Timestamp.now();
-  const { latitude, longitude } = parseFreshNearbyLocation(input, now);
+  let location: { latitude: number; longitude: number };
+  if (input.readinessSessionId !== undefined) {
+    const sessionId = validateSocialOperationId(input.readinessSessionId);
+    const [sessionSnapshot, ownerSnapshot] = await db.getAll(
+      db.collection('checkInEligibilitySessions').doc(`${uid}_${sessionId}`),
+      db.collection('checkInEligibilitySessions').doc(`${uid}__readiness_owner`)
+    );
+    const session = sessionSnapshot.data() || {};
+    const owner = ownerSnapshot.data() || {};
+    const arrival = storedQualifiedArrival(session.arrival, sessionId, now.toMillis());
+    if (session.uid !== uid || session.mode !== 'prequalification_v1'
+      || session.consumedAt || session.boundAt || !arrival
+      || owner.uid !== uid || owner.mode !== 'prequalification_owner_v1'
+      || owner.activeSessionId !== sessionId
+      || !(owner.expiresAt instanceof Timestamp) || owner.expiresAt.toMillis() <= now.toMillis()) {
+      throw new SocialDomainError('failed-precondition', 'Your prepared arrival expired. Refresh your location before choosing a private place.');
+    }
+    location = arrival;
+  } else {
+    location = parseFreshNearbyLocation(input, now);
+  }
+  const { latitude, longitude } = location;
   const name = parsePrivatePlaceLabel(input.label);
   const candidateId = randomUUID();
   const locationKey = `private:${createHash('sha256').update(candidateId).digest('hex').slice(0, 32)}`;

@@ -12,6 +12,8 @@ import {
   validateVenueId,
 } from './validation.js';
 import { validateCheckInPlaceCandidate } from './nearbyCheckInPlaces.js';
+import { CHECK_IN_ARRIVAL_TTL_MS, storedQualifiedArrival, type CheckInQualifiedArrival } from './checkInArrival.js';
+import { checkInPlaceDistance, parseCheckInBoundary } from './checkInPlaceGeometry.js';
 
 export const CHECK_IN_DWELL_TARGET_MS = 90_000;
 export const CHECK_IN_HERE_TARGET_MS = 30_000;
@@ -94,6 +96,7 @@ export interface CheckInReadinessResult {
   reason: CheckInReadinessReason;
   expiresAt: Timestamp;
   expiresAtMs: number;
+  arrival?: CheckInQualifiedArrival;
 }
 
 export interface BindCheckInReadinessInput {
@@ -107,6 +110,7 @@ export interface BindCheckInReadinessInput {
   accuracyMeters: unknown;
   speedMetersPerSecond?: unknown;
   capturedAtMs: unknown;
+  useQualifiedArrival?: unknown;
 }
 
 export interface BoundCheckInReadinessResult {
@@ -261,7 +265,8 @@ function readinessResult(
   placeQualifyingMsValue: number,
   reasonValue: CheckInReadinessReason,
   sessionExpiresAt: Timestamp,
-  receiptExpiresAtMs: number
+  receiptExpiresAtMs: number,
+  arrival: CheckInQualifiedArrival | null = null
 ): CheckInReadinessResult {
   const hereQualifyingMs = Math.max(0, Math.min(hereQualifyingMsValue, CHECK_IN_HERE_TARGET_MS));
   const placeQualifyingMs = Math.max(0, Math.min(placeQualifyingMsValue, CHECK_IN_PLACE_TARGET_MS));
@@ -287,6 +292,7 @@ function readinessResult(
     reason,
     expiresAt: sessionExpiresAt,
     expiresAtMs: receiptExpiresAtMs,
+    ...(arrival ? { arrival } : {}),
   };
 }
 
@@ -416,9 +422,27 @@ export async function recordCheckInReadinessSample(
     );
     const accurateHere = sample.accuracyMeters <= CHECK_IN_HERE_MAX_ACCURACY_METRES;
     const accuratePlace = sample.accuracyMeters <= CHECK_IN_PLACE_MAX_ACCURACY_METRES;
+    const priorArrival = continuing && !resetRequested
+      ? storedQualifiedArrival(previous.arrival, sessionId, nowMs) : null;
+    const arrivalDistance = priorArrival ? distanceMetres(sample.latitude, sample.longitude,
+      priorArrival.latitude, priorArrival.longitude) : 0;
+    // A noisy indoor fix must not erase an already qualified arrival. Only
+    // accuracy-aware departure or corroborated vehicle movement revokes it.
+    const clearDeparture = !!priorArrival && accurateHere
+      && arrivalDistance - Math.max(sample.accuracyMeters, priorArrival.accuracyMeters)
+        > CHECK_IN_BASE_RADIUS_METRES;
     const driving = sample.speedMetersPerSecond !== null
       && sample.speedMetersPerSecond >= CHECK_IN_DRIVING_SPEED_METRES_PER_SECOND;
-    if (driving) drivingSuppressedUntilMs = nowMs + CHECK_IN_DRIVING_COOLDOWN_MS;
+    const corroboratedDriving = driving && priorEvidence
+      && Number(priorEvidence.lastSpeedMetersPerSecond) >= CHECK_IN_DRIVING_SPEED_METRES_PER_SECOND
+      && Number.isFinite(lastCapturedAtMs) && sample.capturedAtMs > lastCapturedAtMs
+      && sample.capturedAtMs - lastCapturedAtMs <= CHECK_IN_SAMPLE_MAX_AGE_MS
+      && accurateHere && Number.isFinite(previousAccuracy) && previousAccuracy >= 0
+      && previousAccuracy <= CHECK_IN_HERE_MAX_ACCURACY_METRES
+      && distanceMetres(sample.latitude, sample.longitude, previousLatitude, previousLongitude)
+        - Math.max(sample.accuracyMeters, previousAccuracy) > CHECK_IN_STATIONARY_RADIUS_METRES;
+    const confirmedDriving = driving && (!priorArrival || !!corroboratedDriving);
+    if (confirmedDriving) drivingSuppressedUntilMs = nowMs + CHECK_IN_DRIVING_COOLDOWN_MS;
     const drivingSuppressed = drivingSuppressedUntilMs !== null
       && drivingSuppressedUntilMs > nowMs;
     const previousPositionIsValid = Number.isFinite(previousLatitude)
@@ -430,15 +454,21 @@ export async function recordCheckInReadinessSample(
     const stationary = sample.speedMetersPerSecond === null
       ? stableUnknownSpeed
       : sample.speedMetersPerSecond <= CHECK_IN_STATIONARY_MAX_SPEED_METRES_PER_SECOND;
+    const unknownSpeedNeedsBaseline = sample.speedMetersPerSecond === null
+      && previousPositionIsValid
+      && (!Number.isFinite(previousAccuracy) || previousAccuracy > CHECK_IN_HERE_MAX_ACCURACY_METRES);
     const inside = accurateHere && distanceFromAnchor <= CHECK_IN_STATIONARY_RADIUS_METRES;
     let reason: CheckInReadinessReason;
     if (!accurateHere) reason = 'low_accuracy';
-    else if (driving || drivingSuppressed) reason = 'driving';
+    else if (confirmedDriving || drivingSuppressed) reason = 'driving';
+    else if (unknownSpeedNeedsBaseline && distanceFromAnchor <= CHECK_IN_STATIONARY_RADIUS_METRES) reason = 'low_accuracy';
     else if (!stationary) reason = 'moving';
     else if (!inside) reason = 'outside';
     else reason = 'qualifying';
 
-    if (reason === 'driving') {
+    const lastHereQualifyingAtMs = timestampMillis(previous.lastHereQualifyingAt);
+    const lastPlaceQualifyingAtMs = timestampMillis(previous.lastPlaceQualifyingAt);
+    if (reason === 'driving' || clearDeparture) {
       hereQualifyingMs = 0;
       placeQualifyingMs = 0;
       anchorLatitude = sample.latitude;
@@ -476,12 +506,19 @@ export async function recordCheckInReadinessSample(
       }
       if (validGap) {
         const creditMs = Math.min(captureGapMs, serverGapMs);
-        hereQualifyingMs += creditMs;
+        if (previousAccuracy <= CHECK_IN_HERE_MAX_ACCURACY_METRES) hereQualifyingMs += creditMs;
         if (accuratePlace && previousAccuracy <= CHECK_IN_PLACE_MAX_ACCURACY_METRES) {
           placeQualifyingMs += creditMs;
-        } else {
-          placeQualifyingMs = 0;
         }
+      }
+    } else if (reason === 'low_accuracy') {
+      // Uncertainty earns no time. Keep already earned evidence only within the
+      // existing five-minute interruption bound, and never credit across this fix.
+      if (lastHereQualifyingAtMs === null || nowMs - lastHereQualifyingAtMs > CHECK_IN_RESUME_MAX_GAP_MS) {
+        hereQualifyingMs = 0;
+      }
+      if (lastPlaceQualifyingAtMs === null || nowMs - lastPlaceQualifyingAtMs > CHECK_IN_RESUME_MAX_GAP_MS) {
+        placeQualifyingMs = 0;
       }
     } else {
       hereQualifyingMs = 0;
@@ -492,6 +529,24 @@ export async function recordCheckInReadinessSample(
 
     hereQualifyingMs = Math.min(hereQualifyingMs, CHECK_IN_HERE_TARGET_MS);
     placeQualifyingMs = Math.min(placeQualifyingMs, CHECK_IN_PLACE_TARGET_MS);
+    if (!accuratePlace && !priorArrival?.place
+      && (lastPlaceQualifyingAtMs === null || nowMs - lastPlaceQualifyingAtMs > CHECK_IN_RESUME_MAX_GAP_MS)) {
+      placeQualifyingMs = 0;
+    }
+    let arrival = clearDeparture || confirmedDriving || resetRequested ? null : priorArrival;
+    if (reason === 'qualifying' && accurateHere && hereQualifyingMs >= CHECK_IN_HERE_TARGET_MS) {
+      const place = placeQualifyingMs >= CHECK_IN_PLACE_TARGET_MS && accuratePlace;
+      // Upgrading to Place captures the stronger fix. Otherwise renew the same
+      // qualified area only from a genuinely stationary, accurate return fix.
+      if (!arrival || place && !arrival.place) {
+        arrival = { sessionId, expiresAtMs: nowMs + CHECK_IN_ARRIVAL_TTL_MS,
+          latitude: sample.latitude, longitude: sample.longitude, accuracyMeters: sample.accuracyMeters,
+          capturedAtMs: sample.capturedAtMs, here: true, place };
+      } else if ((!arrival.place || accuratePlace)
+        && arrivalDistance <= CHECK_IN_STATIONARY_RADIUS_METRES) {
+        arrival = { ...arrival, expiresAtMs: nowMs + CHECK_IN_ARRIVAL_TTL_MS };
+      }
+    }
     const expiresAt = Timestamp.fromMillis(nowMs + CHECK_IN_SESSION_TTL_MS);
     const receiptExpiresAtMs = nowMs + CHECK_IN_SAMPLE_MAX_GAP_MS;
     transaction.set(sessionRef, {
@@ -511,6 +566,9 @@ export async function recordCheckInReadinessSample(
       lastSpeedMetersPerSecond: sample.speedMetersPerSecond,
       lastCapturedAtMs: sample.capturedAtMs,
       lastSeenAt: now,
+      arrival,
+      lastHereQualifyingAt: reason === 'qualifying' && accurateHere ? now : previous.lastHereQualifyingAt || null,
+      lastPlaceQualifyingAt: reason === 'qualifying' && accuratePlace ? now : previous.lastPlaceQualifyingAt || null,
       interruptedSinceAt: reason === 'qualifying' ? null : now,
       drivingSuppressedUntilAt: drivingSuppressedUntilMs === null
         ? null
@@ -544,7 +602,8 @@ export async function recordCheckInReadinessSample(
       placeQualifyingMs,
       reason,
       expiresAt,
-      receiptExpiresAtMs
+      receiptExpiresAtMs,
+      arrival
     );
   });
 }
@@ -570,7 +629,9 @@ export async function bindCheckInReadiness(
   const placeCandidateId = hasPlaceCandidateId
     ? validateSocialOperationId(input.placeCandidateId)
     : '';
-  const sample = parseFreshSample(input, now);
+  const useQualifiedArrival = input.useQualifiedArrival === undefined
+    ? false : boolean(input.useQualifiedArrival, 'useQualifiedArrival');
+  const suppliedSample = useQualifiedArrival ? null : parseFreshSample(input, now);
   const sessionRef = db.collection('checkInEligibilitySessions')
     .doc(checkInEligibilitySessionId(uid, readinessSessionId));
   const ownerRef = db.collection('checkInEligibilitySessions')
@@ -636,11 +697,20 @@ export async function bindCheckInReadiness(
         expiresAtMs: completedExpiresAt.toMillis(),
       };
     }
+    const arrival = useQualifiedArrival ? storedQualifiedArrival(session.arrival, readinessSessionId, nowMs) : null;
+    if (useQualifiedArrival && !arrival) {
+      throw new SocialDomainError('failed-precondition', 'Your prepared arrival expired. Refresh your location before checking in.');
+    }
+    // The opt-in path uses only server-owned qualified coordinates. Caller
+    // coordinates and timestamps cannot move or refresh the arrival.
+    const sample = arrival ? { latitude: arrival.latitude, longitude: arrival.longitude,
+      accuracyMeters: arrival.accuracyMeters, speedMetersPerSecond: 0,
+      capturedAtMs: arrival.capturedAtMs } : suppliedSample!;
     const lastSeenAtMs = timestampMillis(session.lastSeenAt);
     const drivingSuppressedUntilMs = timestampMillis(owner.drivingSuppressedUntilAt);
     if (
-      lastSeenAtMs === null
-      || nowMs - lastSeenAtMs > CHECK_IN_SAMPLE_MAX_AGE_MS
+      (!arrival && (lastSeenAtMs === null
+      || nowMs - lastSeenAtMs > CHECK_IN_SAMPLE_MAX_AGE_MS))
       || (drivingSuppressedUntilMs !== null && drivingSuppressedUntilMs > nowMs)
     ) {
       throw new SocialDomainError('failed-precondition', 'This check-in readiness expired. Stay nearby again.');
@@ -650,39 +720,34 @@ export async function bindCheckInReadiness(
     const placeQualifyingMs = Math.max(0, Number(session.placeQualifyingMs) || 0);
     const requiredMs = privatePlace ? CHECK_IN_HERE_TARGET_MS : CHECK_IN_PLACE_TARGET_MS;
     const qualifyingMs = privatePlace ? hereQualifyingMs : placeQualifyingMs;
-    if (qualifyingMs < requiredMs) {
+    if (arrival ? !(privatePlace ? arrival.here : arrival.place) : qualifyingMs < requiredMs) {
       throw new SocialDomainError('failed-precondition', 'Stay nearby a little longer before checking in here.');
     }
     const requiredAccuracy = privatePlace
       ? CHECK_IN_HERE_MAX_ACCURACY_METRES
       : CHECK_IN_PLACE_MAX_ACCURACY_METRES;
-    const accurate = sample.accuracyMeters <= requiredAccuracy
-      && Number(session.lastAccuracyMeters) <= requiredAccuracy;
+    const latestAccuracy = arrival ? arrival.accuracyMeters : Number(session.lastAccuracyMeters);
+    const accurate = sample.accuracyMeters <= requiredAccuracy && latestAccuracy <= requiredAccuracy;
     const evidenceDistance = distanceMetres(
       sample.latitude,
       sample.longitude,
-      parseLatitude(session.lastLatitude),
-      parseLongitude(session.lastLongitude)
+      arrival?.latitude ?? parseLatitude(session.lastLatitude),
+      arrival?.longitude ?? parseLongitude(session.lastLongitude)
     );
     const stationary = sample.speedMetersPerSecond === null
       ? evidenceDistance <= CHECK_IN_STATIONARY_RADIUS_METRES
       : sample.speedMetersPerSecond <= CHECK_IN_STATIONARY_MAX_SPEED_METRES_PER_SECOND;
     const notDriving = sample.speedMetersPerSecond === null
       || sample.speedMetersPerSecond < CHECK_IN_DRIVING_SPEED_METRES_PER_SECOND;
-    const anchorDistance = distanceMetres(
-      parseLatitude(session.anchorLatitude),
-      parseLongitude(session.anchorLongitude),
-      targetLatitude,
-      targetLongitude
-    );
-    const sampleDistance = distanceMetres(
-      sample.latitude,
-      sample.longitude,
-      targetLatitude,
-      targetLongitude
-    );
+    const boundary = locationType === 'external_place' ? parseCheckInBoundary(venue.checkInBoundary) : undefined;
+    const pin = { latitude: targetLatitude, longitude: targetLongitude };
+    const anchorDistance = checkInPlaceDistance({
+      latitude: arrival?.latitude ?? parseLatitude(session.anchorLatitude),
+      longitude: arrival?.longitude ?? parseLongitude(session.anchorLongitude),
+    }, pin, boundary);
+    const sampleDistance = checkInPlaceDistance(sample, pin, boundary);
     const allowedDistance = CHECK_IN_BASE_RADIUS_METRES
-      + Math.max(sample.accuracyMeters, Number(session.lastAccuracyMeters) || 0);
+      + Math.max(sample.accuracyMeters, latestAccuracy || 0);
     if (!accurate || !stationary || !notDriving
       || evidenceDistance > CHECK_IN_STATIONARY_RADIUS_METRES
       || anchorDistance > allowedDistance || sampleDistance > allowedDistance) {
@@ -690,9 +755,9 @@ export async function bindCheckInReadiness(
     }
     const completedExpiresAt = Timestamp.fromMillis(nowMs + CHECK_IN_COMPLETION_TTL_MS);
     const exactPrivateAllowed = privatePlace
-      && hereQualifyingMs >= CHECK_IN_HERE_TARGET_MS
+      && (arrival?.here || hereQualifyingMs >= CHECK_IN_HERE_TARGET_MS)
       && sample.accuracyMeters <= CHECK_IN_HERE_MAX_ACCURACY_METRES
-      && Number(session.lastAccuracyMeters) <= CHECK_IN_HERE_MAX_ACCURACY_METRES;
+      && latestAccuracy <= CHECK_IN_HERE_MAX_ACCURACY_METRES;
     transaction.update(sessionRef, {
       boundAt: now,
       bindOperationId: operationId,
@@ -702,7 +767,7 @@ export async function bindCheckInReadiness(
       locationKey,
       locationType,
       eligible: true,
-      eligibilityLevel: placeQualifyingMs >= CHECK_IN_PLACE_TARGET_MS ? 'place' : 'here',
+      eligibilityLevel: arrival?.place || placeQualifyingMs >= CHECK_IN_PLACE_TARGET_MS ? 'place' : 'here',
       exactPrivateAllowed,
       completedAt: now,
       completedExpiresAt,
