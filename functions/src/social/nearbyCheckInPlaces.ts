@@ -9,6 +9,7 @@ import {
 
 import { SocialDomainError, validateUid, validateSocialOperationId } from './validation.js';
 import { storedQualifiedArrival } from './checkInArrival.js';
+import { preparedCanonicalVenueRecords } from './checkInVenueQuery.js';
 import { checkInPlaceDistance, parseCheckInBoundary, publicCheckInRadius, type BoundaryPoint } from './checkInPlaceGeometry.js';
 import { logProviderHttpFailure, logProviderException, type FailureLogger, type ProviderAlias } from './nearbyPlaceDiagnostics.js';
 
@@ -21,7 +22,6 @@ export const CHECK_IN_PLACE_LOCATION_MAX_AGE_MS = 60_000;
 const MAX_RETURNED_CANDIDATES = 5;
 const MAX_RESERVED_EXTERNAL_CANDIDATES = 2;
 const MAX_CANONICAL_VENUES_SCANNED = 500;
-const MAX_PREPARED_CANONICAL_VENUES_SCANNED = 5_000;
 const MAX_PREPARED_EXTERNAL_CANDIDATES = 20;
 
 export interface ExternalCheckInPlaceSnapshot {
@@ -292,26 +292,13 @@ async function nearbyCanonicalVenues(
   now: Timestamp,
   preparation = false
 ): Promise<NearbyCheckInPlaceCandidate[]> {
-  const collection = db.collection('venues');
-  let snapshot = await collection.limit(MAX_CANONICAL_VENUES_SCANNED).get();
-  const documents = [...snapshot.docs];
-  // Preparation must not silently omit an applicable venue after the first
-  // page. Default document ordering supports cursors without a new index.
-  while (preparation && snapshot.docs.length === MAX_CANONICAL_VENUES_SCANNED) {
-    const last = snapshot.docs[snapshot.docs.length - 1];
-    if (documents.length >= MAX_PREPARED_CANONICAL_VENUES_SCANNED) {
-      const remainder = await collection.startAfter(last).limit(1).get();
-      if (remainder.docs.length) throw new SocialDomainError('unavailable',
-        'GathR venues could not be fully prepared. Please try again later.',
-        {condition: 'nearby_gathr_venues_incomplete', retryable: true});
-      break;
-    }
-    snapshot = await collection.startAfter(last).limit(MAX_CANONICAL_VENUES_SCANNED).get();
-    documents.push(...snapshot.docs);
-  }
+  const documents = preparation
+    ? await preparedCanonicalVenueRecords(db, latitude, now.toMillis())
+    : (await db.collection('venues').limit(MAX_CANONICAL_VENUES_SCANNED).get()).docs
+      .map(document => ({id: document.id, data: document.data()}));
   const candidates: NearbyCheckInPlaceCandidate[] = [];
   for (const document of documents) {
-    const venue = document.data();
+    const venue = document.data;
     if (!canonicalVenueAvailable(venue, now)) continue;
     const venueLatitude = Number(venue.latitude);
     const venueLongitude = Number(venue.longitude);
@@ -435,7 +422,7 @@ export async function discoverNearbyCheckInPlaces(
   }
   if (payload === undefined) {
     // Keep independently usable GathR options during a public-provider failure.
-    if (canonical.length) return { candidates: preparation ? canonical : canonical.slice(0, MAX_RETURNED_CANDIDATES),
+    if (preparation || canonical.length) return { candidates: preparation ? canonical : canonical.slice(0, MAX_RETURNED_CANDIDATES),
       expiresAt, externalLookupStatus: 'partial_unavailable',
       ...(preparation ? {preparationRadiusMetres: CHECK_IN_PLACE_DISCOVERY_RADIUS_METRES} : {}) };
     throw new SocialDomainError('unavailable', 'Nearby public places could not be loaded right now.', {

@@ -12,20 +12,41 @@ type Doc = Record<string, unknown>;
 class MemoryFirestore {
   documents = new Map<string, Doc>();
   writes = 0;
+  venueQueryAttempts = 0;
+  venueQueryError: Error | null = null;
+  venueQueries: {filters: {field: string; operator: string; value: unknown}[]; limit: number; returned: number}[] = [];
   snapshot(path: string) {
     const value = this.documents.get(path);
     return { id: path.split('/').at(-1)!, path, exists: !!value, data: () => value };
   }
   collection(name: string) {
-    const query = (cursor?: {path: string}) => ({limit: (count: number) => ({get: async () => {
-      const keys = [...this.documents.keys()].filter(path => path.startsWith(`${name}/`));
+    const query = (cursor?: {path: string}, filters: {field: string; operator: string; value: unknown}[] = []) => ({
+      where: (field: string, operator: string, value: unknown) => query(cursor, [...filters, {field, operator, value}]),
+      limit: (count: number) => ({get: async () => {
+      if (name === 'venues') {
+        this.venueQueryAttempts++;
+        if (this.venueQueryError) throw this.venueQueryError;
+      }
+      const keys = [...this.documents.keys()].filter(path => path.startsWith(`${name}/`)).filter(path => filters.every(filter => {
+        const value = this.documents.get(path)?.[filter.field];
+        if (typeof value === 'number' && typeof filter.value === 'number') {
+          return filter.operator === '>=' ? value >= filter.value : value <= filter.value;
+        }
+        if (typeof value === 'string' && typeof filter.value === 'string') {
+          return filter.operator === '>=' ? value >= filter.value : value <= filter.value;
+        }
+        return false;
+      }));
       const offset = cursor ? keys.indexOf(cursor.path) + 1 : 0;
-      return {docs: keys.slice(offset, offset + count).map(path => this.snapshot(path))};
+      const docs = keys.slice(offset, offset + count).map(path => this.snapshot(path));
+      if (name === 'venues') this.venueQueries.push({filters, limit: count, returned: docs.length});
+      return {docs};
     }})});
     return {
       doc: (id: string) => ({ path: `${name}/${id}`,
         set: async (value: Doc) => { this.writes++; this.documents.set(`${name}/${id}`, value); } }),
       limit: query().limit,
+      where: query().where,
       startAfter: (cursor: {path: string}) => query(cursor),
     };
   }
@@ -258,16 +279,135 @@ test('no canonical choices plus provider outage yields typed retryable failure w
   assert.equal(db.writes, 0);
 });
 
-test('preparation pages beyond500 venues and rejects an incomplete pool beyond the5000 scan budget', async () => {
+test('spatial preparation covers numeric and legacy string coordinates beyond the former first500 documents', async () => {
   const db = new MemoryFirestore();
-  for (let index = 0; index < 501; index++) venue(db, `far-${index}`, 500);
+  for (let index = 0; index < 5001; index++) venue(db, `far-${index}`, 500);
   venue(db, 'near-after-first-page');
+  db.documents.set('venues/legacy-whitespace', {pagename: 'Whitespace', latitude: ` ${point.latitude} `,
+    longitude: ` ${point.longitude} `});
+  db.documents.set('venues/legacy-exponent', {pagename: 'Exponent', latitude: (point.latitude * 1000).toString() + 'e-3',
+    longitude: String(point.longitude)});
   const input = {...point, preparation: true, accuracyMeters: 8, capturedAtMs: base};
   const result = await listNearbyCanonicalCheckInVenues(input, {db: db.asFirestore(), now: time(0)});
-  assert.deepEqual(result.candidates.map(candidate => candidate.venueId), ['near-after-first-page']);
-  for (let index = 501; index < 5001; index++) venue(db, `far-${index}`, 500);
+  assert.deepEqual(new Set(result.candidates.map(candidate => candidate.venueId)),
+    new Set(['near-after-first-page', 'legacy-whitespace', 'legacy-exponent']));
+  assert.equal(db.venueQueries.length, 2);
+  assert.equal(db.venueQueries.reduce((sum, query) => sum + query.returned, 0), 3);
+  assert.ok(db.venueQueries.every(query => query.filters.length > 0));
+});
+
+test('concurrent combined preparations deduplicate queries, covered fringe retries read zero and new bands reuse legacy cache', async () => {
+  const db = new MemoryFirestore(); venue(db); venue(db, 'fringe-180m', 180);
+  const input = {...point, preparation: true, accuracyMeters: 8, capturedAtMs: base};
+  const request = (location = input, seconds = 0) => discoverNearbyCheckInPlaces(uid, location,
+    {db: db.asFirestore(), now: time(seconds), fetchImpl: async () => new Response('{"elements":[]}')});
+  const [first, duplicate] = await Promise.all([request(), request()]);
+  assert.equal(db.venueQueries.length, 2);
+  assert.deepEqual(first.candidates, duplicate.candidates);
+  assert.equal(first.candidates.some(candidate => candidate.venueId === 'fringe-180m'), false);
+  const nearby = await request({...input, latitude: point.latitude + 20 / 111195,
+    capturedAtMs: time(10).toMillis()}, 10);
+  assert.equal(nearby.candidates.some(candidate => candidate.venueId === 'fringe-180m'), true);
+  assert.equal(db.venueQueries.length, 2);
+  await request({...input, latitude: point.latitude + 1000 / 111195,
+    capturedAtMs: time(20).toMillis()}, 20);
+  assert.equal(db.venueQueries.length, 3);
+  assert.equal(typeof db.venueQueries[2]?.filters[0]?.value, 'number');
+  await request({...input, capturedAtMs: time(301).toMillis()}, 301);
+  assert.equal(db.venueQueries.length, 5);
+});
+
+test('prepared cache reevaluates mirror expiry without requerying or sharing a different database cache', async () => {
+  const db = new MemoryFirestore(); venue(db);
+  db.documents.get('venues/holy-whale')!.socialVenueMirrorSource = 'gathr-event-api';
+  db.documents.get('venues/holy-whale')!.socialVenueMirrorExpiresAt = time(60);
+  const input = {...point, preparation: true, accuracyMeters: 8, capturedAtMs: base};
+  const first = await listNearbyCanonicalCheckInVenues(input, {db: db.asFirestore(), now: time(0)});
+  assert.equal(first.candidates.length, 1);
+  const expired = await listNearbyCanonicalCheckInVenues({...input, capturedAtMs: time(70).toMillis()},
+    {db: db.asFirestore(), now: time(70)});
+  assert.equal(expired.candidates.length, 0);
+  assert.equal(db.venueQueries.length, 2);
+  const other = new MemoryFirestore();
+  const isolated = await listNearbyCanonicalCheckInVenues(input, {db: other.asFirestore(), now: time(0)});
+  assert.equal(isolated.candidates.length, 0);
+  assert.equal(other.venueQueries.length, 2);
+});
+
+test('a legacy-to-numeric coordinate conversion emits one venue and prefers the normalized numeric entry', async () => {
+  const db = new MemoryFirestore();
+  const nextLatitude = point.latitude + 1000 / 111195;
+  db.documents.set('venues/converted', {pagename: 'Legacy', latitude: String(nextLatitude), longitude: String(point.longitude)});
+  const input = {...point, preparation: true, accuracyMeters: 8, capturedAtMs: base};
+  await listNearbyCanonicalCheckInVenues(input, {db: db.asFirestore(), now: time(0)});
+  db.documents.set('venues/converted', {pagename: 'Normalized', latitude: nextLatitude, longitude: point.longitude});
+  const converted = await listNearbyCanonicalCheckInVenues({...input, latitude: nextLatitude,
+    capturedAtMs: time(10).toMillis()}, {db: db.asFirestore(), now: time(10)});
+  assert.equal(converted.candidates.length, 1);
+  assert.equal(converted.candidates[0]?.venueId, 'converted');
+  assert.equal(converted.candidates[0]?.name, 'Normalized');
+  assert.equal(db.venueQueries.length, 3);
+});
+
+test('spatial query/index failure fails closed without catalog fallback and is not cached as complete', async () => {
+  const db = new MemoryFirestore(); venue(db);
+  const failure = new Error('synthetic missing single-field index');
+  db.venueQueryError = failure;
+  const input = {...point, preparation: true, accuracyMeters: 8, capturedAtMs: base};
   await assert.rejects(listNearbyCanonicalCheckInVenues(input, {db: db.asFirestore(), now: time(0)}),
-    (error: unknown) => error instanceof SocialDomainError && error.details?.condition === 'nearby_gathr_venues_incomplete');
+    (error: unknown) => error === failure);
+  assert.equal(db.venueQueryAttempts, 2);
+  assert.equal(db.venueQueries.length, 0);
+  db.venueQueryError = null;
+  const recovered = await listNearbyCanonicalCheckInVenues(input, {db: db.asFirestore(), now: time(0)});
+  assert.equal(recovered.candidates.length, 1);
+  assert.equal(db.venueQueryAttempts, 4);
+  assert.ok(db.venueQueries.every(query => query.filters.length > 0));
+});
+
+test('numeric and legacy query caps fail explicitly before provider work and never return incomplete readiness', async () => {
+  for (const type of ['numeric', 'legacy']) {
+    const db = new MemoryFirestore();
+    const count = type === 'numeric' ? 1001 : 501;
+    for (let index = 0; index < count; index++) {
+      db.documents.set(`venues/dense-${index}`, {pagename: `Venue ${index}`,
+        latitude: type === 'numeric' ? point.latitude : String(point.latitude), longitude: point.longitude});
+    }
+    let fetches = 0;
+    await assert.rejects(discoverNearbyCheckInPlaces(uid, {...point, preparation: true,
+      accuracyMeters: 8, capturedAtMs: base}, {db: db.asFirestore(), now: time(0),
+      fetchImpl: async () => { fetches++; return new Response('{"elements":[]}'); }}),
+      (error: unknown) => error instanceof SocialDomainError && error.details?.condition === 'nearby_gathr_venues_incomplete');
+    assert.equal(fetches, 0);
+    db.documents.delete('venues/dense-0');
+    const complete = await listNearbyCanonicalCheckInVenues({...point, preparation: true,
+      accuracyMeters: 8, capturedAtMs: base}, {db: db.asFirestore(), now: time(0)});
+    assert.equal(complete.preparationRadiusMetres, 175);
+    assert.equal(complete.candidates.length, count - 1);
+  }
+});
+
+test('latitude band coverage is valid at both poles and legacy numeric formats remain included', async () => {
+  for (const latitude of [-90, 90]) {
+    const db = new MemoryFirestore();
+    db.documents.set('venues/pole', {pagename: 'Pole', latitude, longitude: -120});
+    db.documents.set('venues/legacy-pole', {pagename: 'Legacy Pole', latitude: `${latitude / 10}e1`, longitude: ' 120 '});
+    const result = await listNearbyCanonicalCheckInVenues({latitude, longitude: 0, preparation: true,
+      accuracyMeters: 8, capturedAtMs: base}, {db: db.asFirestore(), now: time(0)});
+    assert.equal(result.candidates.length, 2);
+    const numeric = db.venueQueries.find(query => typeof query.filters[0]?.value === 'number');
+    assert.ok(numeric?.filters.every(filter => Number(filter.value) >= -90 && Number(filter.value) <= 90));
+  }
+});
+
+test('prepared provider outage still proves a complete empty canonical list', async () => {
+  const db = new MemoryFirestore();
+  const result = await discoverNearbyCheckInPlaces(uid, {...point, preparation: true,
+    accuracyMeters: 8, capturedAtMs: base}, {db: db.asFirestore(), now: time(0),
+    providerFailureLogger: () => {}, fetchImpl: async () => new Response('', {status: 502})});
+  assert.deepEqual(result.candidates, []);
+  assert.equal(result.preparationRadiusMetres, 175);
+  assert.equal(result.externalLookupStatus, 'partial_unavailable');
 });
 
 test('prepared external pool is capped at20 and preserves public footprint geometry for client eligibility filtering', async () => {
