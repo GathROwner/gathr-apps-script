@@ -19,7 +19,7 @@
     {
       "path": "src/parsing/oct30SourceIntegrity.test.ts",
       "kind": "new",
-      "sha256": "469e09640bac8cc3c8719bf162de58cb5ab4d1e8b2e75d293c72cc0fba303924",
+      "sha256": "24e915972ff9febe1a299ad2df33ea052b4b85b7ca6524186f46e6a7eb539528",
       "reason": "Focused October 30 prevention regression tests and exact saved source fixtures; not a runtime change.",
       "production": false
     },
@@ -33,7 +33,7 @@
     {
       "path": "src/parsing/reviewedSourceItems.ts",
       "kind": "new",
-      "sha256": "3175314335df8c2e458d860934d5b71f0504e5e2e981885b151a1cd9d0885c99",
+      "sha256": "542e54605f64a1b7910204b43a19bfd6dbd3e50bc401c43f130ac18ee0f3fa8f",
       "reason": "Bounded reviewed source/image/item bindings, election item eligibility and Handpie missing-essential hold.",
       "production": true
     },
@@ -96,7 +96,7 @@
     {
       "path": "src/services/reviewedSourceDuplicates.ts",
       "kind": "new",
-      "sha256": "16a21b4a70cf6f51e9b3bfd9e53d9ff659c065356cc73beba83c0664d3306e36",
+      "sha256": "8fff516626f9d13aad49187f8543c4fe3f55b3f2f17bdaff89a93c0a3fbe657e",
       "reason": "Exact source/date/start/title/venue duplicate and keeper fingerprints.",
       "production": true
     },
@@ -132,5 +132,14 @@
   "unexpectedProductionDifferences": [],
   "sourceReuseReferences": [],
   "parkedSourceAndTests": "artifacts/oct30-prevention/parked-response-reuse",
-  "noVideoIntegrationRequiredInMainParser": true
+  "noVideoIntegrationRequiredInMainParser": true,
+  "afterstateAlignment": {
+    "parentCommit": "8b5fb1d82f5757a7eb45616c092695a30fdbb50a",
+    "scope": [
+      "Decor keeper repaired title/source lineage",
+      "Comedy Cave canonical keeper and retired Factory source suppression on November 6 only",
+      "Exact Election for Councillors label with voting/polling context"
+    ],
+    "authority": "Coordinator supplied committed repair afterstates; no live read/write by this task"
+  }
 }

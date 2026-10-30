@@ -137,6 +137,7 @@ test('bounded duplicate identities require exact source/date/start/title/venue a
     {source:'1947068440080491',name:'Decor',date:'2026-11-12',start:'18:00',venue:'nvQTJXSbDsSfJTCxDKCH'},
     {source:'1946140366839965',name:'Coffee',date:'2026-11-02',start:'10:00',venue:'nvQTJXSbDsSfJTCxDKCH'},
     {source:'1869669937859249',name:'Laughs for a Friend',date:'2026-11-06',start:'20:00',venue:'V7zQ5unfTY1GtNKUvR7c'},
+    {source:'10176142294500537',name:'Stand Up Comedy at the Factory',date:'2026-11-06',start:'20:00',venue:'DZ4nQZQnOKCkTotuKYVv'},
   ];
   for(const sample of samples){
     const candidate:any={uniqueId:sample.source+'_changed',eventName:sample.name,startDate:sample.date,startTime:sample.start,venueId:sample.venue};
@@ -149,6 +150,47 @@ test('bounded duplicate identities require exact source/date/start/title/venue a
       assert.equal(reviewedSourceDuplicateRule({...candidate,...patch},sample.venue),undefined);
     assert.equal(reviewedSourceDuplicateRule(candidate,'another-venue'),undefined);
   }
+});
+
+test('repaired Decor keeper fingerprint recognizes the committed title and preserved merged sources',()=>{
+  const candidate:any={uniqueId:'1947068440080491_generic',eventName:'Decor',venueId:'nvQTJXSbDsSfJTCxDKCH',startDate:'2026-11-12',startTime:'18:00'};
+  const rule=reviewedSourceDuplicateRule(candidate,candidate.venueId)!;assert(rule);
+  assert.equal(rule.path,'venues/nvQTJXSbDsSfJTCxDKCH/events/4dAjYh8KuZLMx2S4EtIr');
+  const after:any={id:'4dAjYh8KuZLMx2S4EtIr',venueId:candidate.venueId,eventName:'Holiday Decor with Sue Pitchforth',
+    startDate:'2026-11-12',startTime:'18:00',isRecurring:'No',recurringPattern:'none',
+    sourceUniqueIds:['1938244704296198','1942582787195723','1947068440080491']};
+  assert(matchesReviewedSourceKeeper(rule,after));
+  assert.equal(matchesReviewedSourceKeeper(rule,{...after,eventName:'Christmas Decor'}),false);
+});
+
+test('repaired Comedy Cave keeper blocks the retired Factory source while every November 7 identity remains separate',()=>{
+  const after:any={id:'M9TXK6kXWQTKMWTNSpu3',venueId:'V7zQ5unfTY1GtNKUvR7c',eventName:'Laughs for a Friend',
+    startDate:'2026-11-06',startTime:'20:00',isRecurring:'No',recurringPattern:'none',
+    sourceUniqueIds:['1869669937859249','10176142294500537']};
+  const candidates:any[]=[
+    {uniqueId:'10176142294500537_reformatted',eventName:'Stand Up Comedy at the Factory',venueId:'DZ4nQZQnOKCkTotuKYVv',startDate:'2026-11-06',startTime:'20:00'},
+    {uniqueId:'1869669937859249_reformatted',eventName:'Laughs for a Friend',venueId:after.venueId,startDate:'2026-11-06',startTime:'20:00'},
+  ];
+  for(const candidate of candidates){
+    const rule=reviewedSourceDuplicateRule(candidate,candidate.venueId)!;assert(rule);
+    assert.equal(rule.path,'venues/V7zQ5unfTY1GtNKUvR7c/events/M9TXK6kXWQTKMWTNSpu3');
+    assert(matchesReviewedSourceKeeper(rule,after));
+    assert.equal(matchesReviewedSourceKeeper(rule,{...after,venueId:'DZ4nQZQnOKCkTotuKYVv',eventName:'Stand Up Comedy at the Factory'}),false);
+    assert.equal(reviewedSourceDuplicateRule({...candidate,startDate:'2026-11-07'},candidate.venueId),undefined);
+    assert.equal(matchesReviewedSourceKeeper(rule,{...after,startDate:'2026-11-07'}),false);
+    assert.equal(reviewedSourceDuplicateRule({...candidate,startTime:'21:00'},candidate.venueId),undefined);
+  }
+});
+
+test('retired councillor-election sibling is ineligible only with item-local voting or polling context',()=>{
+  for(const context of ['Voting is from 9 a.m. to 7 p.m.','Municipal polling station open Monday.']){
+    const item:any={name:'Election for Councillors',description:context,extractionReason:'',date:'2026-11-02',startTime:'09:00',endTime:'19:00',venue:'Milton Community Hall'};
+    assert(isAdministrativePollingItem(item));
+    const held:any=applyReviewedSourceItems([item],'older-election-source',[])[0];
+    assert.equal(sourceItemHoldReason(held),'ineligible_election_administration');assert.equal(held._itemEligibility,'ineligible');
+  }
+  assert.equal(isAdministrativePollingItem({name:'Election for Councillors',description:'Meet candidates at a public forum.',extractionReason:''}),false);
+  assert.equal(isAdministrativePollingItem({name:'Election for Councillors discussion',description:'Discuss voting and polling rules.',extractionReason:''}),false);
 });
 
 test('existing duplicate logic matches corrected library/racing occurrence while protecting distinct sessions and performers',()=>{

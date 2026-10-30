@@ -3,6 +3,8 @@ import type {ExtractedItem} from './types.js';
 /** Item eligibility is independent of a mixed post's Stage 1 eligibility. */
 export function isAdministrativePollingItem(item: Pick<ExtractedItem,'name'|'description'|'extractionReason'>): boolean {
   const name=String(item.name||'').trim();
+  if (/^Election for Councillors$/i.test(name))
+    return /\b(?:vot(?:e|ing)|poll(?:ing|s)?)\b/i.test(`${item.description||''} ${item.extractionReason||''}`);
   if (!/^(?:advance poll(?:ing)?|election (?:day|voting|poll(?:ing)?)|(?:municipal )?polling (?:station|hours|notice)|voting hours)$/i.test(name)) return false;
   return /\b(?:election|vot(?:e|ing)|poll(?:ing)?)\b/i.test(`${item.description||''} ${item.extractionReason||''}`);
 }
