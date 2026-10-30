@@ -1,0 +1,78 @@
+{
+  "atUTC": "2026-10-30T15:53:47.030Z",
+  "commit": "ee15b5c5e839d018bb07a5bc66a9ab87faa2fdfe",
+  "portal": "https://videoreviewportal-6ju7yi5g2a-nn.a.run.app/",
+  "codebase": "listing-video-review",
+  "deployed": [
+    {
+      "name": "projects/gathr-migrated/locations/northamerica-northeast1/functions/discoverListingVideos",
+      "revision": "discoverlistingvideos-00002-cek",
+      "uri": "https://discoverlistingvideos-6ju7yi5g2a-nn.a.run.app",
+      "state": "ACTIVE",
+      "codebase": "listing-video-review",
+      "hash": "2e17f1270af0f64987e6c76d4e4a13457c70aefa"
+    },
+    {
+      "name": "projects/gathr-migrated/locations/northamerica-northeast1/functions/videoReviewPortal",
+      "revision": "videoreviewportal-00003-vis",
+      "uri": "https://videoreviewportal-6ju7yi5g2a-nn.a.run.app",
+      "state": "ACTIVE",
+      "codebase": "listing-video-review",
+      "hash": "a817d6ee748d5b568d9c5b2b0f6c19b4f3706508"
+    },
+    {
+      "name": "projects/gathr-migrated/locations/northamerica-northeast1/functions/cleanupVideoReviews",
+      "revision": "cleanupvideoreviews-00002-fej",
+      "uri": "https://cleanupvideoreviews-6ju7yi5g2a-nn.a.run.app",
+      "state": "ACTIVE",
+      "codebase": "listing-video-review",
+      "hash": "2e17f1270af0f64987e6c76d4e4a13457c70aefa"
+    },
+    {
+      "name": "projects/gathr-migrated/locations/northamerica-northeast1/functions/reviewListingVideos",
+      "revision": "reviewlistingvideos-00002-lok",
+      "uri": "https://reviewlistingvideos-6ju7yi5g2a-nn.a.run.app",
+      "state": "ACTIVE",
+      "codebase": "listing-video-review",
+      "hash": "48676d892a3802af0ef6fbae3acf5af067cf0bdf",
+      "secretKeys": [
+        "GATHR_OPENAI_API_KEY"
+      ]
+    }
+  ],
+  "parserUnchanged": true,
+  "automaticPublication": false,
+  "reviewEnabled": true,
+  "clipCountCap": null,
+  "terraEscalationCap": null,
+  "perClipLimits": {
+    "seconds": 60,
+    "originalBytes": 50000000,
+    "privateRenditionBytes": 8000000
+  },
+  "retentionDays": 14,
+  "tests": {
+    "focusedPassed": 17,
+    "phoneAndDesktopRendered": true,
+    "refreshPreservesDrafts": true,
+    "phoneViewport": "390x844",
+    "accountAccessConfirmedByCraig": true
+  },
+  "liveResults": {
+    "todayCandidates": 35,
+    "queueRemaining": 0,
+    "allEntries": 45,
+    "watchableAndByteVerified": 33,
+    "unavailableReasons": {
+      "direct_video_url_unavailable": 7,
+      "clip_over_60_seconds": 5
+    },
+    "realTerraEscalations": 1
+  },
+  "limits": [
+    "Automatic publication remains off",
+    "Legacy scalar-only source identity metadata remains a hold",
+    "Overlong or missing-direct-URL videos have source links without in-page playback"
+  ],
+  "evidenceFolder": "C:/Users/craig/Documents/Codex/2026-10-30/video-model-comparison/daily-release"
+}
