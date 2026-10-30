@@ -4,6 +4,14 @@ Standalone manual-shadow experiment in `functions/scripts/video-evidence-worker.
 
 Requires the existing Node 22 runtime and installed `ffmpeg`/`ffprobe` on PATH. No dependency or package changes. Validated locally with Node's test runner and ffmpeg 8.1.1. Run from this worktree, not the saved project checkout.
 
+## Accepted animation preference, October 30
+
+Craig watched Royalty Crossing's complete five-second Halloween Artisan Market clip (source post `1621083896343590`, video `1582649633172659`) and explicitly requested it because its animation adds real value over a static image. That human decision supersedes the earlier visual-only low-value rejection. Useful animated posters and event promotions qualify; camera footage of a performance or activity is not required. Evaluate engagement, legibility and relevance rather than rejecting a clip merely because its starting material is a poster.
+
+Preserve the original experiment's requests and responses. Under Craig's clarified preference, Luna's recommendation on this example was appropriate and Terra's rejection was too restrictive; it is not evidence of Terra being more accurate. Keep the later human adjudication separate from the original frozen reference labels, and do not invent an updated accuracy score.
+
+The v1 schema and consistency check group static and animated posters under `poster_only`; that distinction is too coarse for the next trial. This documentation records the accepted policy, not a changed model prompt or automatic gate. Before further automated screening, distinguish useful animated promotion from low-value static repetition and retain exact source, schedule, audio, readability and content checks. Automatic publication remains off. No new paid requests were needed for this adjudication.
+
 ## Manifest contract
 
 Parent-supplied normalized file: `C:/Users/craig/Documents/Codex/2026-10-30/video-model-comparison/INPUT_WORKER.json` (the initial request called it `INPUT.json`). The worker takes the path explicitly and has no hardcoded source cohort. The parent runs known cases before unseen cases with frozen prompts/evidence.
