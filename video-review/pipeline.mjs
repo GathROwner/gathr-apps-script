@@ -91,13 +91,19 @@ export async function exactListings(db,c) {
   }
   return all;
 }
-async function uploadDirectory(bucket,root,prefix) {
+export async function uploadDirectory(bucket,root,prefix,uploaded=new Map()) {
   async function walk(dir,relative='') {
     for(const entry of await fs.readdir(dir,{withFileTypes:true})) {
       const rel=relative?`${relative}/${entry.name}`:entry.name;
       if(entry.isDirectory())await walk(join(dir,entry.name),rel);
-      else if(entry.isFile()&&!['input.mp4','video.mp4','input.json'].includes(entry.name))
-        await bucket.file(`${prefix}/${rel}`).save(await fs.readFile(join(dir,entry.name)),{resumable:false,metadata:{cacheControl:'private, no-store'}});
+      else if(entry.isFile()&&!['input.mp4','video.mp4','input.json'].includes(entry.name)) {
+        const bytes=await fs.readFile(join(dir,entry.name)),sha=hash(bytes);
+        if(uploaded.get(rel)===sha)continue;
+        const object=bucket.file(`${prefix}/${rel}`);
+        try{await object.save(bytes,{resumable:false,preconditionOpts:{ifGenerationMatch:0},metadata:{cacheControl:'private, no-store',metadata:{sha256:sha,owner:POLICY.version}}});}
+        catch(e){if(e.code!==412)throw e;const [m]=await object.getMetadata();if(m.metadata?.sha256!==sha||m.metadata?.owner!==POLICY.version||Number(m.size)!==bytes.length)throw Error('evidence_object_drift');}
+        uploaded.set(rel,sha);
+      }
     }
   }
   await walk(root);
@@ -121,7 +127,7 @@ export async function work({db,bucket},apiKey) {
     for(const doc of queue.docs) {
       if(Date.now()>deadline)break;
       const c=doc.data(); if(Date.parse(c.expiresAt)<=Date.now()){await doc.ref.update({state:'expired',reasons:['review_retention_expired']});continue;}
-      const root=join(tmpdir(),'gathr-video-review',doc.id);const prefix=`evidence/${doc.id}`;
+      const root=join(tmpdir(),'gathr-video-review',doc.id);const prefix=`evidence/${doc.id}`;const uploaded=new Map();
       // Never reset a paid attempt: crash recovery creates a hold, not another charge.
       await doc.ref.update({state:'processing',lease:{owner,until:new Date(Date.now()+32*60000).toISOString()},startedAt:now()});
       try {
@@ -144,19 +150,19 @@ export async function work({db,bucket},apiKey) {
           const kind=model==='gpt-6-luna'?'luna':model==='gpt-6.1-terra'?'terra':model==='gpt-transcribe'?'transcriptions':null;
           if(!kind)throw Error('unexpected_paid_model');
           // Worker has already fsynced an intent; persist it remotely BEFORE sending money.
-          await uploadDirectory(bucket,root,prefix);await recordUsage(db,kind);
+          await uploadDirectory(bucket,root,prefix,uploaded);await recordUsage(db,kind);
           return fetch(url,options);
         };
         await transcribe({preparedPath:join(root,'prepared/prepared.json'),out:join(root,'transcripts'),execute:true,apiKey,fetchImpl:boundedFetch});
-        await uploadDirectory(bucket,root,prefix);
+        await uploadDirectory(bucket,root,prefix,uploaded);
         const report=await triage({preparedPath:join(root,'prepared/prepared.json'),transcriptsPath:join(root,'transcripts/transcripts.json'),out:join(root,'triage'),execute:true,apiKey,fetchImpl:boundedFetch});
-        await uploadDirectory(bucket,root,prefix);
+        await uploadDirectory(bucket,root,prefix,uploaded);
         const e=report.entries[0]; const decision=e.terminalDecision;
         await doc.ref.update({state:decision==='reject'?'rejected':decision==='hold'?'held':'recommended',decision,
           reasons:[...e.holdReasons,...e.routeReasons],route:e.route,luna:e.luna?.modelAssessment??null,terra:e.terra?.modelAssessment??null,
           callSummary:report.callSummary,finishedAt:now(),revision:hash(JSON.stringify([sha,listings,e])),artifacts:prefix});processed++;
       } catch(e) {
-        await uploadDirectory(bucket,root,prefix).catch(()=>{});
+        await uploadDirectory(bucket,root,prefix,uploaded).catch(()=>{});
         const code=/^[a-z0-9_]+$/.test(e.message||'')?e.message:'video_processing_failed_private_evidence_retained';
         await doc.ref.update({state:'held',decision:'hold',reasons:[code],finishedAt:now(),revision:hash(`${doc.id}:${code}`)});
       } finally {await fs.rm(root,{recursive:true,force:true}).catch(()=>{});}
@@ -173,7 +179,7 @@ export async function cleanup({db,bucket}) {
     if(d.data().state==='processing')continue;
     if(d.data().object) {
       if(d.data().object!==`clips/${d.id}.mp4`)throw Error('cleanup_namespace_drift');
-      const f=bucket.file(d.data().object);try{const [meta]=await f.getMetadata();if(meta.metadata?.owner!==POLICY.version)throw Error('cleanup_owner_drift');await f.delete({ifGenerationMatch:meta.generation});}catch(e){if(e.code!==404)throw e;}
+      const f=bucket.file(d.data().object);try{const [meta]=await f.getMetadata();if(meta.metadata?.owner!==POLICY.version||meta.metadata?.sha256!==d.data().sha256)throw Error('cleanup_owner_drift');await f.delete({ifGenerationMatch:meta.generation});}catch(e){if(e.code!==404)throw e;}
     }
     // Preserve decisions/audit metadata; raw source URLs and playback are no longer served.
     await d.ref.update({state:'expired',object:FieldValue.delete(),sourceUrl:FieldValue.delete(),cleanupAt:FieldValue.delete(),expiredAt:now()});count++;

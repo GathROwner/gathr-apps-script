@@ -25,11 +25,12 @@ export function discover(rows, fileId, now=Date.now()) {
       if(r[`${p}/__typename`]!=='Video') continue;
       const sourceVideoId=String(r[`${p}/videoId`]??r[`${p}/id`]??'');
       if(!/^\d{5,30}$/.test(sourceVideoId)) continue;
-      const rawUrl=r[`${p}/videoDeliveryLegacyFields/browser_native_sd_url`]??r[`${p}/videoDeliveryLegacyFields/browser_native_hd_url`]??r[`${p}/videoUrl`];
+      const rawUrls=[r[`${p}/videoDeliveryLegacyFields/browser_native_sd_url`],r[`${p}/videoDeliveryLegacyFields/browser_native_hd_url`],r[`${p}/videoUrl`]];
       const milliseconds=Number(r[`${p}/playable_duration_in_ms`]);
       const seconds=Number.isFinite(milliseconds)&&milliseconds>0?milliseconds/1000:Number(r[`${p}/duration`]);
       let sourceUrl=null,reason=null;
-      try { sourceUrl=cdnUrl(rawUrl); } catch { reason='direct_video_url_unavailable'; }
+      for(const rawUrl of rawUrls){try{sourceUrl=cdnUrl(rawUrl);break;}catch{}}
+      if(!sourceUrl)reason='direct_video_url_unavailable';
       if(Number.isFinite(seconds)&&seconds>60) reason='clip_over_60_seconds';
       const caption=[r.text??r.Text??'',r['sharedPost/text']??''].filter(Boolean).join('\n\n').slice(0,16000);
       const id=hash(JSON.stringify([sourcePostId,sourceVideoId,caption,POLICY.version]));

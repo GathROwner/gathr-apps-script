@@ -10,7 +10,7 @@ public listing, public video asset, automatic-resolution gate or app bundle.
   the last 48 hours after the explicitly configured activation timestamp. Flattens
   both ordinary and shared-post video fields, retaining the outer post identity.
   Uses deterministic source/video/caption/policy IDs across repeated datasets.
-* `reviewListingVideos`: every five minutes, one globally fenced worker, up to five
+* `reviewListingVideos`: every minute, one globally fenced worker, up to five
   clips per invocation. Full clips only: 60 seconds / 50 MB original / 8 MB private
   rendition. No trimming, invented context, title-only source matching or public
   writes. Known missing context/audio skips paid calls and stays watchable.
@@ -19,7 +19,8 @@ public listing, public video asset, automatic-resolution gate or app bundle.
   qualify. Missing evidence is held; Terra cannot manufacture it.
 * No per-parse or daily clip-count caps, and no Terra escalation quota. Small
   batches pace work without discarding overflow. UTC request counts track cost.
-  Call intents are uploaded before a paid request. An interrupted attempt becomes
+  Immutable evidence is uploaded once; unchanged files are not rewritten between
+  phases. Call intents are uploaded before a paid request. An interrupted attempt becomes
   held and is never automatically retried. The same captured candidate is not paid
   for again on the next day's dataset. Exact transcript reuse across different
   posts is not implemented in this initial service.

@@ -11,7 +11,7 @@ const loginApp=initializeApp({projectId:'gathr-m1'},'review-login');
 const db=getFirestore(app), svc={db,bucket:getStorage(app).bucket(POLICY.bucket)};
 const base={region:'northamerica-northeast1',maxInstances:1,concurrency:1,serviceAccount:'924732524090-compute@developer.gserviceaccount.com'};
 export const discoverListingVideos=onSchedule({...base,schedule:'every 10 minutes',timeoutSeconds:300,memory:'512MiB',retryCount:0,secrets:[]},async()=>{const {scan}=await import('./pipeline.mjs');console.log(JSON.stringify({videoDiscovery:await scan(svc)}));});
-export const reviewListingVideos=onSchedule({...base,schedule:'every 5 minutes',timeoutSeconds:1800,memory:'2GiB',cpu:1,retryCount:0,secrets:['GATHR_OPENAI_API_KEY']},async()=>{const {work}=await import('./pipeline.mjs');console.log(JSON.stringify({videoReview:await work(svc,process.env.GATHR_OPENAI_API_KEY)}));});
+export const reviewListingVideos=onSchedule({...base,schedule:'* * * * *',timeoutSeconds:1800,memory:'2GiB',cpu:1,retryCount:0,secrets:['GATHR_OPENAI_API_KEY']},async()=>{const {work}=await import('./pipeline.mjs');console.log(JSON.stringify({videoReview:await work(svc,process.env.GATHR_OPENAI_API_KEY)}));});
 export const cleanupVideoReviews=onSchedule({...base,schedule:'45 4 * * *',timeZone:'America/Halifax',timeoutSeconds:300,memory:'512MiB',retryCount:0,secrets:[]},async()=>{const {cleanup}=await import('./pipeline.mjs');console.log(JSON.stringify(await cleanup(svc)));});
 async function authorize(req) {
   const token=/^Bearer (\S+)$/.exec(req.headers.authorization||'')?.[1];
