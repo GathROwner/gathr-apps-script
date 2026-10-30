@@ -11,6 +11,11 @@ const candidates=report.entries.map(e=>{const c=input.clips.find(c=>c.id===e.id)
   reasons:e.holdReasons,luna:e.luna?.modelAssessment,terra:e.terra?.modelAssessment,route:e.route,revision:'a'.repeat(64),object:'fixture',
   durationSeconds:c.probe?.durationSeconds,hasAudio:c.sourceAudio,expiresAt:'2026-11-13T00:00:00Z'
 };});
+// A saved current-run candidate exercises waiting UI without fabricating a model result.
+const {discover,publicCandidate}=await import('../policy.mjs');
+const todayRows=JSON.parse(await readFile('C:/Users/craig/Documents/Codex/2026-10-30/video-model-comparison/daily-release/PRIVATE_INPUT_ROWS.json','utf8'));
+const queued=discover(todayRows,'preview-file').find(c=>c.state==='queued'&&/Happy Halloween/i.test(c.caption));
+if(queued)candidates.unshift(publicCandidate(queued));
 http.createServer(async(req,res)=>{try{
  const path=new URL(req.url,'http://localhost').pathname;
  if(path==='/api/candidates'){res.setHeader('Content-Type','application/json');res.end(JSON.stringify({candidates,health:{},retentionDays:14,automaticPublication:false}));return;}
