@@ -41,8 +41,8 @@ async function commit(writes){return auth.request(auth.database+'/documents:comm
  if(mode==='seed'){
   const root='C:/Users/craig/Documents/Codex/2026-10-30/video-model-comparison/v2-triage';
   const input=JSON.parse((await fs.readFile(root+'/INPUT.json','utf8')).replace(/^\uFEFF/,''));const report=JSON.parse(await fs.readFile(root+'/triage/triage.json','utf8'));
-  const {initializeApp}=require('../node_modules/firebase-admin/app');const {getStorage}=require('../node_modules/firebase-admin/storage');
-  const a=initializeApp({credential:require('../node_modules/firebase-admin/app').cert(require('C:/Users/craig/Dev/gathr-apps-script/firebase/service-account.json'))});const storage=getStorage(a).bucket(bucket);
+  const {initializeApp,cert}=require('firebase-admin/app');const {getStorage}=require('firebase-admin/storage');
+  const a=initializeApp({credential:cert(require('C:/Users/craig/Dev/gathr-apps-script/firebase/service-account.json'))});const storage=getStorage(a).bucket(bucket);
   const ids=[];
   for(const e of report.entries){const c=input.clips.find(c=>c.id===e.id);const bytes=await fs.readFile(c.videoPath),sha=hash(bytes);
    const id=hash(JSON.stringify([c.sourcePostId,c.sourceVideoId,c.caption,'daily-video-review-v1']));
