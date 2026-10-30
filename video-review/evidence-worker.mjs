@@ -10,7 +10,7 @@ const execFileAsync = promisify(execFile);
 export const VERSION = 'video-evidence-v2';
 export const ROUTING_VERSION = 'luna-first-blind-terra-v1';
 export const MODELS = Object.freeze(['gpt-6-luna', 'gpt-6.1-terra']);
-export const LIMITS = Object.freeze({clips: 12, frames: 48, seconds: 60, videoBytes: 50_000_000,
+export const LIMITS = Object.freeze({clips: 12, frames: 48, seconds: 90, videoBytes: 50_000_000,
   audioBytes: 25_000_000, frameBytes: 1_000_000, comparisons: 24, transcriptions: 12});
 const RESPONSES = 'https://api.openai.com/v1/responses';
 const TRANSCRIPTIONS = 'https://api.openai.com/v1/audio/transcriptions';
@@ -71,7 +71,7 @@ function metadata(clip) {
   const listing = clip.listingContext;
   check(listing && typeof listing === 'object' && !Array.isArray(listing), 'listingContext_required');
   const context = {};
-  for (const field of ['title', 'date', 'time', 'venue', 'notes']) {
+  for (const field of ['title', 'date', 'time', 'venue', 'price', 'description', 'notes']) {
     context[field] = listing[field] == null ? '' : safeText(listing[field], field === 'notes' ? 4000 : 1000);
   }
   check([true, false, null, undefined].includes(listing.sourceMatched), 'sourceMatched_must_be_boolean_or_null');
@@ -330,7 +330,7 @@ export async function prepare({manifestPath, out}) {
       const result = await run('ffprobe', ['-v', 'error', '-protocol_whitelist', 'file', '-f', 'wav', '-i', audioPath, '-show_entries', 'format=duration', '-of', 'json']);
       const decodedSeconds = Number(JSON.parse(result.stdout).format?.duration);
       const sourceDuration = Number(probe.audio.duration);
-      check(decodedSeconds > 0 && decodedSeconds <= 60.25 && sourceDuration > 0 && Math.abs(decodedSeconds - sourceDuration) <= .25, 'audio_extraction_incomplete');
+      check(decodedSeconds > 0 && decodedSeconds <= LIMITS.seconds + .25 && sourceDuration > 0 && Math.abs(decodedSeconds - sourceDuration) <= .25, 'audio_extraction_incomplete');
       const startSeconds = Number(probe.audio.start_time ?? probe.firstPTS) - probe.firstPTS;
       const coversTimeline = Math.abs(startSeconds) <= .25 && Math.abs(startSeconds + decodedSeconds - probe.duration) <= .25;
       if (!coversTimeline) problems.push('audio_does_not_cover_video_timeline');
@@ -357,7 +357,7 @@ async function loadPrepared(preparedPath) {
   const loaded = [];
   for (const clip of prepared.clips) {
     check(idOK(clip.id) && isHash(clip.video?.sha256) && clip.video.completeDecode === true &&
-      clip.video.durationSeconds > 0 && clip.video.durationSeconds <= 60, 'prepared_video_invalid');
+      clip.video.durationSeconds > 0 && clip.video.durationSeconds <= LIMITS.seconds, 'prepared_video_invalid');
     check(finite(clip.video.finalFrameDurationSeconds) && clip.video.finalFrameDurationSeconds >= 0 &&
       clip.sampling?.regularIntervalSeconds === regularIntervalSeconds(clip.video.durationSeconds), 'prepared_sampling_policy_invalid');
     check(Array.isArray(clip.frames) && clip.frames.length > 0 && clip.frames.length <= LIMITS.frames, 'prepared_frames_invalid');

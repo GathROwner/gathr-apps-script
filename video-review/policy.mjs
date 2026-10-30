@@ -1,6 +1,6 @@
 import {createHash} from 'node:crypto';
 export const POLICY = Object.freeze({version:'daily-video-review-v1', bucket:'gathr-private-video-reviews',
-  queue:'private_video_candidates', files:'private_video_datasets', days:14, maxBytes:50_000_000});
+  queue:'private_video_candidates', files:'private_video_datasets', days:14, maxSeconds:90, maxBytes:50_000_000});
 export const hash = v => createHash('sha256').update(v).digest('hex');
 export const canonical = v => JSON.stringify(v, Object.keys(v).sort());
 export function cdnUrl(value) {
@@ -31,13 +31,14 @@ export function discover(rows, fileId, now=Date.now()) {
       let sourceUrl=null,reason=null;
       for(const rawUrl of rawUrls){try{sourceUrl=cdnUrl(rawUrl);break;}catch{}}
       if(!sourceUrl)reason='direct_video_url_unavailable';
-      if(Number.isFinite(seconds)&&seconds>60) reason='clip_over_60_seconds';
+      if(Number.isFinite(seconds)&&seconds>POLICY.maxSeconds) reason='clip_over_90_seconds';
       const caption=[r.text??r.Text??'',r['sharedPost/text']??''].filter(Boolean).join('\n\n').slice(0,16000);
       const id=hash(JSON.stringify([sourcePostId,sourceVideoId,caption,POLICY.version]));
       const audio=String(r[`${p}/audio_availability`]??r[`${p}/audioAvailability`]??'unknown');
       candidates.set(id,{id,sourcePostId,sourceVideoId,caption,fileId,mediaPath:p,sourceUrl,
         sourceAudio:audio==='UNAVAILABLE'?false:['AVAILABLE','AVAILABLE_BUT_MUTED'].includes(audio)?true:'unknown',
         durationSeconds:Number.isFinite(seconds)?seconds:null,sourcePage:`https://www.facebook.com/reel/${sourceVideoId}/`,
+        ...(/^\d{4}-\d\d-\d\dT/.test(String(r.time||''))&&Number.isFinite(Date.parse(r.time))?{sourcePostedAt:new Date(r.time).toISOString()}:{}),
         discoveredAt:new Date(now).toISOString(),expiresAt:new Date(now+POLICY.days*86400000).toISOString(),
         state:reason?'held':'queued',decision:'hold',reasons:reason?[reason]:[],policy:POLICY.version,
         cleanupAt:new Date(now+POLICY.days*86400000).toISOString(),
@@ -63,7 +64,8 @@ export function validateJudgment(body) {
   if(!['use_video','dont_use_video','unsure','want_video','agree_with_decision'].includes(body?.judgment)||
       typeof body.notes!=='string'||body.notes.length>2000||!/^[a-f0-9]{64}$/.test(body.revision??'')) throw Error('invalid_judgment');
   const choice={use_video:'use',want_video:'use',dont_use_video:'dont_use',unsure:'unsure',agree_with_decision:'legacy_agreement'}[body.judgment];
-  return {judgment:body.judgment,choice,notes:body.notes};
+  if(body.listingPath!==undefined&&body.listingPath!==''&&!/^(venues\/[A-Za-z0-9_.-]+\/events\/[A-Za-z0-9_.-]+|events\/[A-Za-z0-9_.-]+)$/.test(body.listingPath))throw Error('invalid_judgment');
+  return {judgment:body.judgment,choice,notes:body.notes,...(body.listingPath?{listingPath:body.listingPath}:{})};
 }
 export function allowedIdentity(decoded,config) {
   return decoded?.email_verified===true&&typeof decoded.uid==='string'&&

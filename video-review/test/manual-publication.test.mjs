@@ -6,7 +6,7 @@ const config={adminUids:['reviewer']},probe={durationSeconds:10,bytes:1234,width
 test('A human Use is required and cannot approve different bytes, unknown sound or rejected content',()=>{
  validateSelection(c,config,probe,at);
  for(const bad of [{...c,humanJudgment:{...c.humanJudgment,choice:'dont_use'}},{...c,humanJudgment:{...c.humanJudgment,sha256:'b'.repeat(64)}},{...c,sourceAudio:'unknown'},{...c,contentAssessment:{decision:'reject'}}])assert.throws(()=>validateSelection(bad,config,probe,at));
- assert.throws(()=>validateSelection(c,config,{...probe,durationSeconds:83},at));
+ assert.throws(()=>validateSelection(c,config,{...probe,durationSeconds:91},at));
 });
 test('Cross-post matches preserve the listing source but require exact venue, date and written evidence',()=>{
  const event={venueId:'v',startDate:'2026-10-31',sourceUniqueIds:['67890']};

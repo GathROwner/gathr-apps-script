@@ -12,7 +12,7 @@ export function validateSelection(c,config,probe,now=Date.now(),longerTrial=null
   now-Date.parse(c.humanJudgment.reviewedAt)>86400000)throw Error('Current byte-bound human Use selection required');
  if(c.contentAssessment?.decision!=='useful')throw Error('Content review is unresolved');
  if(typeof c.sourceAudio!=='boolean'||c.sourceAudio!==probe.hasAudio)throw Error('Source audio fidelity unresolved');
- if(!Number.isFinite(probe.durationSeconds)||probe.durationSeconds<=0||probe.durationSeconds>(hokumTrial?90:60)||
+ if(!Number.isFinite(probe.durationSeconds)||probe.durationSeconds<=0||probe.durationSeconds>90||
   !Number.isInteger(probe.bytes)||probe.bytes<=0||probe.bytes>8000000||probe.codec!=='h264'||
   !Number.isInteger(probe.width)||!Number.isInteger(probe.height)||Math.min(probe.width,probe.height)<1||
   Math.min(probe.width,probe.height)>720||Math.max(probe.width,probe.height)>1280||

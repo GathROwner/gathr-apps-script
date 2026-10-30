@@ -1,103 +1,81 @@
-# Daily private video review
+# Automatic listing videos
 
-Independent Firebase codebase `listing-video-review`. This observes the existing
-`processed_datasets` completion records; it does not redeploy or modify any parser,
-public listing, public video asset, automatic-resolution gate or app bundle.
+This independent Firebase codebase, `listing-video-review`, observes completed
+parse datasets. It reuses existing scrape data; it does not change the main parser,
+its automatic-resolution gates, venue assignments, event fields, images or app code.
 
-## Operation
+## Daily flow
 
-### Separate content usefulness from listing matching
+1. `discoverListingVideos` checks completed retained Drive datasets every ten
+   minutes. Source/post/video/caption identities deduplicate repeated captures.
+2. `reviewListingVideos` processes small batches every minute. Complete videos
+   up to **90 seconds**, 50 MB input and 8 MB retained rendition are eligible.
+   No per-parse/day clip quota or Terra escalation quota is applied.
+3. Luna reviews sampled frames, source caption, current listing details/prices
+   and a hash-bound speech transcript. Useful static and animated posters qualify.
+   Generic business ads and past-only recaps are filtered. Empty speech/music is
+   an audio note. Missing/corrupt evidence and concrete conflicts remain held.
+   Terra independently reviews only eligible uncertainty, on identical evidence.
+4. `publishListingVideos` runs every minute. Clear useful content with one exact,
+   current source-linked listing is attached automatically, without a human click.
+   It rechecks the assessment, source, listing fingerprint, human choices, full
+   media hash/audio/format, activation flag, parser activity and registry lease
+   before reserving and again before publishing. It never invents an event,
+   fuzzy-matches a title, or overwrites another approved video.
+5. The private site defaults to exceptions. **In GathR** shows published clips;
+   **Filtered out**, **Waiting** and **All clips** retain the other outcomes.
+   Refresh fetches current results without interrupting video playback or notes.
 
-The editorial worker uses one Luna assessment with independent `content` and
-`listing` sections. Generic evergreen business advertising and past-event-only
-thank-you recaps can be filtered out without a listing. A specific event or
-special remains useful when no exact listing has been found; it then needs a
-match, not a negative content label. Static offer posters qualify as well as
-animated posters. Empty speech/music is an audio note, not an automatic hold.
-Actually missing/corrupt source audio and incomplete visual evidence still hold.
-Terra receives the same evidence, without Luna's answer, only for eligible
-semantic uncertainty. No clip-count or escalation-count cap is applied.
+## Human decisions
 
-The portal offers **Use this video**, **Don’t use this video**, and **Not sure**.
-These explicit choices are saved separately from automated assessments. Old
-`want_video` means use; old `agree_with_decision` stays an ambiguous legacy
-agreement and is never converted into a rejection. Filtered clips stay available
-under **Filtered out**/**All clips**, and are excluded from the default review
-inbox. Reassessments archive previous automated results without changing human
-judgments or notes. Publication remains manual.
+**Use this video** queues attachment when a confirmed match exists. Multiple exact
+source-linked listings can be selected on the page; the worker rechecks that chosen
+context. Missing listings or contradictory facts still need resolution. No separate
+message to the assistant is required for a confirmed match.
 
-Exact WAV hashes permit speech transcript reuse across clip IDs, with original
-call/version/model/settings evidence verified. Media-frame timestamps use
-integer PTS plus the verified time base, rather than rounded `showinfo` text.
-The scraper can omit a downloadable URL even when a Facebook login prompt is
-dismissible and public playback works; a prompt alone is not an access barrier.
+**Don’t use** prevents publication and removes this clip's owned published links
+recoverably. **Not sure** holds a pending clip or pauses an owned published clip
+until Use is selected. Historic pre-automation feedback is not retroactive removal
+permission. An alternate candidate cannot remove another approved clip covering
+the same listing. Human choices and notes remain separate from model assessments.
 
-The implementation below describes the acquisition/retention service; editorial
-assessment now proceeds even when listing matching is incomplete.
+## Safety and retention
 
-* `discoverListingVideos`: every ten minutes, reads completed Drive datasets from
-  the last 48 hours after the explicitly configured activation timestamp. Flattens
-  both ordinary and shared-post video fields, retaining the outer post identity.
-  Uses deterministic source/video/caption/policy IDs across repeated datasets.
-* `reviewListingVideos`: every minute, one globally fenced worker, up to five
-  clips per invocation. Full clips only: 60 seconds / 50 MB original / 8 MB private
-  rendition. No trimming, invented context, title-only source matching or public
-  writes. Missing listing context does not skip content assessment. Retained
-  private clips are reused during explicitly requested policy reassessments.
-* Existing v2 worker samples frames and transcribes speech once, calls Luna first,
-  then at most one blind Terra review for eligible uncertainty. Animated promotions
-  qualify. Missing evidence is held; Terra cannot manufacture it.
-* No per-parse or daily clip-count caps, and no Terra escalation quota. Small
-  batches pace work without discarding overflow. UTC request counts track cost.
-  Immutable evidence is uploaded once; unchanged files are not rewritten between
-  phases. Call intents are uploaded before a paid request. An interrupted attempt becomes
-  held and is never automatically retried. The same captured candidate is not paid
-  for again on the next day's dataset. Exact transcript reuse across different
-  posts is not implemented in this initial service.
-* `cleanupVideoReviews`: daily, generation-checked deletion of owned private clips
-  after 14 days. A bucket lifecycle also expires evidence after 14 days. GCS soft
-  deletion retains recoverable objects another seven days; this affects billing.
-  Decisions and append-only human judgments remain private Firestore metadata.
-* The private portal uses existing GathR email/password authentication, verified
-  email plus an explicit UID allowlist. No new login account is created. The shell
-  is public; queue, playback, notes and source transport URLs require authorization.
-  Source CDN URLs and API keys are never returned to browsers. Expired/missing or
-  over-limit clips provide an original-post link instead of pretending to play.
-* New human actions are `use_video`, `dont_use_video`, or `unsure`; legacy clients
-  remain compatible. Each binds the
-  exact saved assessment revision and clip hash. They do not publish videos or
-  overwrite automated decisions.
+Public links and assets use the existing `listing_video_links`,
+`listing_video_assets`, immutable SHA256 object paths and existing app endpoint.
+No event or image is rewritten. A shared media-registry lease fences publication
+and cleanup. Interrupted paid reviews do not automatically retry. Public upload
+reservations can resume only with the same reviewed bytes and fresh guards.
+Exact WAV hashes permit transcript reuse across posts and context reassessments.
+Evidence paths include the reviewed context, preserving previous immutable runs.
+
+Private clips/evidence expire after 14 days; decisions remain. Public assets stay
+while referenced, then receive seven days of application grace before owned,
+generation-checked deletion. Existing GCS soft deletion adds recovery retention.
+`cleanupPublishedListingVideos` paginates without the legacy twenty-asset ceiling.
+Its successful baseline protection check precedes pausing the legacy pilot cleanup
+schedule. The legacy function remains deployed for recovery, but its capped job
+must not run against a larger registry.
 
 ## Configuration and release
 
-Private `runtime_metadata/video_review` document:
-`{enabled: boolean, enabledAt: ISO timestamp, adminUids: [approved UID]}`.
-Default is OFF when absent. The bucket must be `gathr-private-video-reviews`, with
-uniform access and enforced public-access prevention. Keep existing bucket IAM
-and public listing media unchanged. Worker uses the parser's existing compute
-identity and `GATHR_OPENAI_API_KEY` secret; API key reuse was authorized by Craig.
+`runtime_metadata/video_review` controls `enabled`, `automaticPublication`,
+`automaticPublicationEnabledAt`, `publishedCleanupEnabled` and the existing private
+admin UID allowlist. Defaults are off. Publication activation is video-specific;
+parser automatic-resolution gates remain unchanged. Set `automaticPublication`
+false to stop new attachments while retaining review and cleanup.
 
-Release only the four functions in this codebase, with `--dry-run` first. Never
-run the main parser codebase deploy from this older diagnostic checkout.
+Review/discovery keep the existing compute identity and authorized parser key.
+Publication/cleanup use the already bucket-authorized Firebase Admin SDK identity,
+with no model secret or new bucket permissions. The portal retains verified-email
+and exact UID checks; private playback, notes and signed source URLs stay private.
 
-```powershell
-npm ci
-npm run check
-npm test
-firebase deploy --config firebase.json --project gathr-migrated --only "functions:listing-video-review:discoverListingVideos,functions:listing-video-review:reviewListingVideos,functions:listing-video-review:cleanupVideoReviews,functions:listing-video-review:videoReviewPortal" --dry-run
-```
+Use the codebase-qualified dry run before release. Deploy only changed video
+functions from this directory; never deploy the older main-parser checkout.
+Current runtime evidence, typed snapshots and migration/activation receipts are at
+`C:/Users/craig/Documents/Codex/2026-10-30/video-model-comparison/automation-90s`.
 
-Before enabling, verify bucket privacy, UID identity, existing secret binding,
-normal-account deploy access, live completion capture, rendered phone/desktop UI,
-unauthorized queue/media denial, one real processing receipt and unchanged parser
-revisions. Disable via `enabled:false` without disabling cleanup or portal review.
-
-Limitations: virtual `apify-dataset:` files without a retained raw capture are held
-in the dataset ledger. No yt-dlp, fresh scraper runs or public-source crawling is
-invoked automatically. Initial exact binding uses retained `sourceUniqueIds`; a
-missing legacy scalar-only source remains held. Multiple active listing matches
-need human selection. Models see sampled images and speech text, not full audio.
-
-Official references: [Firebase codebases](https://firebase.google.com/docs/functions/organize-functions),
-[scheduled functions](https://firebase.google.com/docs/functions/schedule-functions),
-[OpenAI transcription](https://developers.openai.com/api/docs/guides/speech-to-text).
+Limitations: raw-capture-less virtual Apify datasets are held. Missing video URLs
+are not automatically recovered through Facebook browsing. Source/occurrence
+ambiguity is held. Models receive sampled frames and speech text, not a continuous
+video/audio viewing. The reviewed Hokum trial demonstrated full 83-second handling.

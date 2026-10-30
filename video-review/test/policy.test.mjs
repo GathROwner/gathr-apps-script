@@ -12,8 +12,9 @@ test('XLSX flattened discovery is identical to nested JSON and deduplicates repe
   assert.equal(discover([flat,flat],'file').length,1);assert.equal(discover([flat],'a')[0].id,discover([flat],'b')[0].id);
 });
 test('overlong and undownloadable clips remain visible with source and judgment revision',()=>{
-  const [c]=discover([{postId:'999999',media:[{...media,playable_duration_in_ms:61000}]}],'f');
-  assert.equal(c.state,'held');assert.deepEqual(c.reasons,['clip_over_60_seconds']);assert.match(c.revision,/^[a-f0-9]{64}$/);assert.match(c.sourcePage,/1234567/);
+  const [c]=discover([{postId:'999999',media:[{...media,playable_duration_in_ms:91000}]}],'f');
+  assert.equal(c.state,'held');assert.deepEqual(c.reasons,['clip_over_90_seconds']);assert.match(c.revision,/^[a-f0-9]{64}$/);assert.match(c.sourcePage,/1234567/);
+  assert.equal(discover([{postId:'999999',media:[{...media,playable_duration_in_ms:90000}]}],'f')[0].state,'queued');
 });
 test('different captions create a new candidate while repeat datasets reuse identity',()=>{
   const c=t=>discover([{postId:'999999',text:t,media:[media]}],'f')[0].id;

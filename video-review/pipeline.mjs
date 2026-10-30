@@ -11,6 +11,7 @@ import {Timestamp,FieldValue} from 'firebase-admin/firestore';
 import {POLICY,hash,cdnUrl,discover} from './policy.mjs';
 import {prepare,transcribe,rebindTranscripts,canonical,sha256} from './evidence-worker.mjs';
 import {reviewEditorial,EDITORIAL_VERSION} from './editorial-review.mjs';
+import {listingFingerprint} from './published-policy.mjs';
 const exec=promisify(execFile);
 process.env.FFMPEG_PATH=ffmpeg; process.env.FFPROBE_PATH=ffprobe.path;
 const now=()=>new Date().toISOString();
@@ -69,10 +70,10 @@ export async function normalize(input,output) {
   const probe=JSON.parse((await exec(ffprobe.path,['-v','error','-protocol_whitelist','file','-f','mov','-i',input,'-show_streams','-show_format','-of','json'],{timeout:45000,maxBuffer:1000000,windowsHide:true})).stdout);
   const video=probe.streams.filter(s=>s.codec_type==='video'),audio=probe.streams.filter(s=>s.codec_type==='audio');
   const duration=Number(probe.format.duration);
-  if(video.length!==1||audio.length>1||!Number.isFinite(duration)||duration<=0||duration>60||
+  if(video.length!==1||audio.length>1||!Number.isFinite(duration)||duration<=0||duration>POLICY.maxSeconds||
     video[0].width*video[0].height>16777216)throw Error('unsupported_duration_or_streams');
   await exec(ffmpeg,['-nostdin','-v','error','-n','-xerror','-protocol_whitelist','file','-f','mov','-enable_drefs','0','-use_absolute_path','0','-i',input,
-    '-map','0:v:0','-map','0:a:0?','-map_metadata','-1','-vf',"scale=w='min(1280,iw)':h='min(1280,ih)':force_original_aspect_ratio=decrease:force_divisible_by=2,setsar=1",
+    '-map','0:v:0','-map','0:a:0?','-map_metadata','-1','-vf',"scale=w='if(gte(iw,ih),min(1280,iw),min(720,iw))':h='if(gte(iw,ih),min(720,ih),min(1280,ih))':force_original_aspect_ratio=decrease:force_divisible_by=2,setsar=1",
     '-c:v','libx264','-preset','fast','-crf','27','-maxrate','800k','-bufsize','1600k','-pix_fmt','yuv420p','-c:a','aac','-b:a','80k','-movflags','+faststart',output],{timeout:120000,maxBuffer:1000000,windowsHide:true});
   const bytes=await fs.readFile(output);if(bytes.length>8_000_000)throw Error('review_rendition_over_size');
   return {bytes,hasAudio:audio.length===1,durationSeconds:duration,originalWidth:video[0].width,originalHeight:video[0].height};
@@ -86,9 +87,9 @@ export async function exactListings(db,c) {
     if(!/^(venues\/[^/]+\/events\/[^/]+|events\/[^/]+)$/.test(d.ref.path))continue;
     const v=d.data(); if(v.isExpired||v.isCancelled||v.cancelled||['expired','cancelled','deleted','archived'].includes(v.status))continue;
     const end=String(v.endDate||v.startDate||'').slice(0,10);if(!/^\d{4}-\d{2}-\d{2}$/.test(end)||end<today)continue;
-    let venue=v.venueName||v.locationName||'';
+    let venue=v.venueName||v.locationLabel||v.locationName||v.establishment||'';
     if(d.ref.path.startsWith('venues/')) {const p=await d.ref.parent.parent.get();venue=p.data()?.name||venue;}
-    all.push({path:d.ref.path,updateTime:`${d.updateTime.seconds}:${d.updateTime.nanoseconds}`,title:v.title||v.name||'',date:String(v.startDate||''),time:String(v.startTime||''),venue,sourceMatched:true});
+    all.push({path:d.ref.path,updateTime:`${d.updateTime.seconds}:${d.updateTime.nanoseconds}`,fingerprint:listingFingerprint(v),title:v.title||v.name||'',date:String(v.startDate||''),time:String(v.startTime||''),venue,price:typeof(v.price||v.ticketPrice)==='string'?(v.price||v.ticketPrice):JSON.stringify(v.price??v.ticketPrice??v.pricing??''),description:String(v.description||'').slice(0,4000),sourceMatched:true});
   }
   return all;
 }
@@ -149,7 +150,9 @@ export async function work({db,bucket},apiKey) {
     for(const doc of queue.docs) {
       if(Date.now()>deadline)break;
       const c=doc.data(); if(Date.parse(c.expiresAt)<=Date.now()){await doc.ref.update({state:'expired',reasons:['review_retention_expired']});continue;}
-      const root=join(tmpdir(),'gathr-video-review',doc.id,EDITORIAL_VERSION);const prefix=`evidence/${doc.id}/${EDITORIAL_VERSION}`;const uploaded=new Map();
+      const listings=await exactListings(db,c);
+      const contextKey=hash(JSON.stringify({listings:listings.map(({updateTime,...v})=>v),selectedListingPath:c.humanJudgment?.listingPath||null,sourcePostedAt:c.sourcePostedAt||null}));
+      const root=join(tmpdir(),'gathr-video-review',doc.id,EDITORIAL_VERSION,contextKey);const prefix=`evidence/${doc.id}/${EDITORIAL_VERSION}/${contextKey}`;const uploaded=new Map();
       // Never reset a paid attempt: crash recovery creates a hold, not another charge.
       await doc.ref.update({state:'processing',lease:{owner,until:new Date(Date.now()+32*60000).toISOString()},startedAt:now()});
       try {
@@ -169,9 +172,9 @@ export async function work({db,bucket},apiKey) {
           await bucket.file(object).save(rendition.bytes,{resumable:false,preconditionOpts:{ifGenerationMatch:0},metadata:{contentType:'video/mp4',cacheControl:'private, no-store',metadata:{sha256:sha,owner:POLICY.version}}});
           base={object,sha256:sha,originalSHA256:hash(raw),bytes:rendition.bytes.length,durationSeconds:rendition.durationSeconds,hasAudio:rendition.hasAudio};
         }
-        const listings=await exactListings(db,c);
         await doc.ref.update({...base,listings});
-        const listingContext=listings.length===1?listings[0]:{sourceMatched:false,notes:listings.length?'Multiple exact listings need selection.':'No existing exact source-linked listing was found.'};
+        const chosen=listings.find(v=>v.path===c.humanJudgment?.listingPath)||(listings.length===1?listings[0]:null);
+        const listingContext=chosen?{...chosen,notes:c.sourcePostedAt?`Source post published ${c.sourcePostedAt}; interpret relative dates against the post date.`:''}:{sourceMatched:false,notes:listings.length?'Multiple exact listings need selection.':'No existing exact source-linked listing was found.'};
         await fs.writeFile(join(root,'input.json'),JSON.stringify({clips:[{id:doc.id,videoPath:join(root,'video.mp4'),sourcePostId:c.sourcePostId,sourceVideoId:c.sourceVideoId,caption:c.caption,listingContext,sourceAudio:c.sourceAudio}]}));
         const prepared=await prepare({manifestPath:join(root,'input.json'),out:join(root,'prepared')});
         const boundedFetch=async(url,options)=>{
@@ -187,9 +190,9 @@ export async function work({db,bucket},apiKey) {
         const report=await reviewEditorial({preparedPath:join(root,'prepared/prepared.json'),transcriptsPath:join(root,'transcripts/transcripts.json'),out:join(root,'editorial'),execute:true,apiKey,fetchImpl:boundedFetch});
         await uploadDirectory(bucket,root,prefix,uploaded);
         const e=report.entries[0];
-        const listingCheck={status:listings.length===0?'not_found':listings.length>1?'needs_selection':e.listingAssessment?.conflicts.length?'conflict':e.listingAssessment?.association==='matched'?'matched':'uncertain',reason:e.listingAssessment?.reason||'A listing match needs review.'};
+        const listingCheck={status:listings.length===0?'not_found':!chosen&&listings.length>1?'needs_selection':e.listingAssessment?.conflicts.length?'conflict':e.listingAssessment?.association==='matched'?'matched':'uncertain',reason:e.listingAssessment?.reason||'A listing match needs review.'};
         await doc.ref.update({state:e.state,decision:e.decision,reasons:e.reasons,route:e.route,luna:e.luna,terra:e.terra,
-          contentAssessment:e.contentAssessment,listingCheck,audioNotes:e.audioNotes,reviewVersion:EDITORIAL_VERSION,speechReused:speech.reused,
+          contentAssessment:e.contentAssessment,listingCheck,reviewedListingPath:chosen?.path||null,audioNotes:e.audioNotes,reviewVersion:EDITORIAL_VERSION,speechReused:speech.reused,
           callSummary:e.callSummary,finishedAt:now(),revision:hash(JSON.stringify([sha,listings,e])),artifacts:prefix});processed++;
       } catch(e) {
         await uploadDirectory(bucket,root,prefix,uploaded).catch(()=>{});
