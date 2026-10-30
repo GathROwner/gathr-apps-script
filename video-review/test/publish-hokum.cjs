@@ -38,7 +38,7 @@ const root='C:/Users/craig/Documents/Codex/2026-10-30/video-model-comparison/hok
   for(const d of docs.slice(3))if(expectedState?d.data()?.state!==expectedState:d.exists)throw Error('Hokum reservation drift');
  }
  if(mode==='apply'){
-  const ota=JSON.parse(await fs.readFile(root+'/OTA_VERIFIED.json','utf8'));if(ota.commit!=='4d0ac38d3783fea71be614a42e6b34b079501727'||ota.runtime!=='1.1.20'||ota.platform!=='ios'||!ota.newest)throw Error('Longer playback release not verified');
+  const ota=JSON.parse(await fs.readFile(root+'/OTA_VERIFIED.json','utf8'));if(ota.commit!=='1cb68ecc37e19fe665cc1067cb6a04bc7c64f765'||ota.runtime!=='1.1.20'||ota.platform!=='ios'||!ota.newest)throw Error('Longer playback release not verified');
   await save('PUBLICATION_ATTEMPT.json',{atUTC:new Date().toISOString(),packetSHA256:p.digest(JSON.stringify(packet))});
   await db.runTransaction(async tx=>{await fresh(tx,null);const q=await tx.get(quota),ids=q.data()?.assetIds||[];if(ids.length>=20||ids.includes(plan.sha256))throw Error('Registry drift');const at=new Date().toISOString();
    tx.set(quota,{version:'listing-video-pilot-v1',assetIds:[...ids,plan.sha256],updatedAt:at});tx.create(asset,{state:'preparing',plan,fingerprints:packet.fingerprints,objectPath:'listingvideos/'+plan.sha256+'.mp4',createdAt:at,stagingExpiresAt:new Date(Date.now()+86400000).toISOString()});linkRefs.forEach((ref,i)=>tx.create(ref,{state:'preparing',assetId:plan.sha256,binding:plan.bindings[i],fingerprint:packet.fingerprints[i]}));});
