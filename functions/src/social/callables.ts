@@ -41,6 +41,7 @@ import {
   createPrivateCheckInPlaceCandidate,
   discoverNearbyCheckInPlaces,
   listNearbyCanonicalCheckInVenues,
+  renewNearbyCheckInPreparation,
 } from './nearbyCheckInPlaces.js';
 import { SOCIAL_REGION, SocialDomainError } from './validation.js';
 
@@ -237,6 +238,21 @@ export const discoverNearbyCheckInPlacesCallable = onCall({ ...releaseTwoOptions
   const uid = requireUid(request.auth);
   const data = asData(request.data);
   return run(async () => {
+    if (data.renewPreparationPool !== undefined) {
+      try {
+        await enforceSocialRateLimit(uid, 'nearby_preparation_renewal', 8, 60 * 60_000);
+      } catch (error) {
+        if (error instanceof SocialDomainError && error.code === 'resource-exhausted')
+          throw new SocialDomainError(error.code, error.message,
+            {condition: 'preparation_renewal_rate_limited', retryable: true});
+        throw error;
+      }
+      return renewNearbyCheckInPreparation(uid, {
+        preparation: data.preparation, renewPreparationPool: data.renewPreparationPool,
+        latitude: data.latitude, longitude: data.longitude,
+        accuracyMeters: data.accuracyMeters, capturedAtMs: data.capturedAtMs,
+      });
+    }
     await enforceSocialRateLimit(uid, 'nearby_check_in_places', 20, 24 * 60 * 60_000);
     return discoverNearbyCheckInPlaces(uid, {
       preparation: data.preparation,

@@ -20,6 +20,10 @@ export const CHECK_IN_PLACE_CANDIDATE_TTL_MS = 15 * 60_000;
 export const CHECK_IN_PLACE_DISCOVERY_RADIUS_METRES = 175;
 export const CHECK_IN_PLACE_MAX_ACCURACY_METRES = 100;
 export const CHECK_IN_PLACE_LOCATION_MAX_AGE_MS = 60_000;
+export const CHECK_IN_PREPARATION_SOURCE_MAX_AGE_MS = 6 * 60 * 60_000;
+export const CHECK_IN_PREPARATION_REFRESH_MS = 10 * 60_000;
+const PREPARATION_POOL_MODE = 'nearby_preparation_pool_v1';
+const PREPARATION_AREA_METRES = 20;
 const MAX_RETURNED_CANDIDATES = 5;
 const MAX_RESERVED_EXTERNAL_CANDIDATES = 2;
 const MAX_CANONICAL_VENUES_SCANNED = 500;
@@ -84,6 +88,29 @@ interface NearbyPlaceInput {
   accuracyMeters?: unknown;
   capturedAtMs?: unknown;
   preparation?: unknown;
+  renewPreparationPool?: unknown;
+}
+
+export interface CheckInPreparationPool {
+  id: string;
+  expiresAtMs: number;
+  refreshAtMs: number;
+  sourceExpiresAtMs: number;
+  originLatitude: number;
+  originLongitude: number;
+}
+
+export interface NearbyCheckInPreparationResult {
+  candidates: NearbyCheckInPlaceCandidate[];
+  expiresAt: Timestamp;
+  externalLookupStatus: 'complete' | 'partial_unavailable';
+  preparationRadiusMetres?: 175;
+  preparationPool?: CheckInPreparationPool;
+  preparationReused?: boolean;
+  catalogSource?: string;
+  catalogVersion?: string;
+  catalogSourceTimestamp?: string;
+  catalogReason?: string;
 }
 
 interface PrivatePlaceInput extends NearbyPlaceInput {
@@ -305,10 +332,11 @@ async function nearbyCanonicalVenues(
   accuracyMeters: number,
   now: Timestamp,
   preparation = false,
-  legacyListingRadiusMetres?: number
+  legacyListingRadiusMetres?: number,
+  fresh = false
 ): Promise<NearbyCheckInPlaceCandidate[]> {
   const documents = preparation
-    ? await preparedCanonicalVenueRecords(db, latitude, now.toMillis())
+    ? await preparedCanonicalVenueRecords(db, latitude, now.toMillis(), fresh)
     : (await db.collection('venues').limit(MAX_CANONICAL_VENUES_SCANNED).get()).docs
       .map(document => ({id: document.id, data: document.data()}));
   const candidates: NearbyCheckInPlaceCandidate[] = [];
@@ -376,6 +404,128 @@ function externalMatchesCanonical(
   });
 }
 
+export function checkInPreparationPoolDocumentId(uid: string): string {
+  // Deliberately not a UUID/candidate. Existing server-only rules and TTL apply.
+  return `${uid}__nearby_preparation_pool`;
+}
+
+function preparationLease(id: string, latitude: number, longitude: number, nowMs: number,
+  sourceExpiresAtMs: number): CheckInPreparationPool {
+  const expiresAtMs = Math.min(nowMs + CHECK_IN_PLACE_CANDIDATE_TTL_MS, sourceExpiresAtMs);
+  return {id, expiresAtMs, refreshAtMs: Math.min(nowMs + CHECK_IN_PREPARATION_REFRESH_MS, expiresAtMs),
+    sourceExpiresAtMs, originLatitude: latitude, originLongitude: longitude};
+}
+
+function candidateIdentity(candidate: DocumentData): string {
+  const place = record(candidate.place);
+  return createHash('sha256').update(JSON.stringify([candidate.source, candidate.osmElementKeyHash,
+    candidate.catalogSource ?? null, candidate.catalogVersion ?? null, candidate.catalogSourceTimestamp ?? null,
+    place.type, place.locationKey, place.name, place.address, place.category, place.latitude, place.longitude,
+    candidate.checkInBoundary ?? null])).digest('hex');
+}
+
+function renewalRefusal(condition: 'rediscovery_required' | 'preparation_renewal_unqualified'): never {
+  throw new SocialDomainError('failed-precondition', condition === 'rediscovery_required'
+    ? 'Prepare nearby public places again.' : 'A fresh qualified arrival is needed to keep nearby places ready.',
+  {condition, retryable: true});
+}
+
+/** Renew existing identities only. This path has no provider or discovery fallback. */
+export async function renewNearbyCheckInPreparation(
+  uidValue: unknown,
+  input: NearbyPlaceInput,
+  options: {db?: Firestore; now?: Timestamp} = {}
+): Promise<NearbyCheckInPreparationResult> {
+  const uid = validateUid(uidValue, 'uid');
+  const db = options.db || getFirestore();
+  const now = options.now || Timestamp.now();
+  const nowMs = now.toMillis();
+  const request = record(input.renewPreparationPool);
+  const poolId = validateSocialOperationId(request.poolId);
+  const sessionId = validateSocialOperationId(request.readinessSessionId);
+  let location: ReturnType<typeof parseFreshNearbyLocation>;
+  try { location = parseFreshNearbyLocation(input, now); }
+  catch { return renewalRefusal('preparation_renewal_unqualified'); }
+  if (input.preparation !== true || location.accuracyMeters > 50)
+    renewalRefusal('preparation_renewal_unqualified');
+  const poolRef = db.collection('checkInPlaceCandidates').doc(checkInPreparationPoolDocumentId(uid));
+  const sessionRef = db.collection('checkInEligibilitySessions').doc(`${uid}_${sessionId}`);
+  const ownerRef = db.collection('checkInEligibilitySessions').doc(`${uid}__readiness_owner`);
+  const activeRef = db.collection('activeCheckIns').doc(uid);
+  let canonicalPromise: Promise<NearbyCheckInPlaceCandidate[]> | undefined;
+  return db.runTransaction(async transaction => {
+    const [poolSnapshot, sessionSnapshot, ownerSnapshot, activeSnapshot] = await transaction.getAll(
+      poolRef, sessionRef, ownerRef, activeRef);
+    const pool = poolSnapshot.data() || {};
+    const session = sessionSnapshot.data() || {};
+    const owner = ownerSnapshot.data() || {};
+    const unexpired = (value: unknown) => value instanceof Timestamp && value.toMillis() > nowMs;
+    const fresh = (value: unknown) => value instanceof Timestamp
+      && value.toMillis() >= nowMs - CHECK_IN_PLACE_LOCATION_MAX_AGE_MS && value.toMillis() <= nowMs;
+    const arrival = storedQualifiedArrival(session.arrival, sessionId, nowMs);
+    const activeExpiry = activeSnapshot.data()?.expiresAt;
+    const hasActiveCheckIn = activeSnapshot.exists
+      && (!(activeExpiry instanceof Timestamp) || activeExpiry.toMillis() > nowMs);
+    if (session.uid !== uid || session.mode !== 'prequalification_v1' || session.boundAt || session.consumedAt
+      || !unexpired(session.expiresAt) || !arrival || Number(session.hereQualifyingMs) < 30_000
+      || !fresh(session.lastSeenAt) || !fresh(session.lastHereQualifyingAt)
+      || !Number.isFinite(session.lastCapturedAtMs) || session.lastCapturedAtMs < nowMs - CHECK_IN_PLACE_LOCATION_MAX_AGE_MS
+      || session.lastCapturedAtMs > nowMs + 10_000
+      || !Number.isFinite(session.lastAccuracyMeters) || session.lastAccuracyMeters < 0 || session.lastAccuracyMeters > 50
+      || owner.uid !== uid || owner.mode !== 'prequalification_owner_v1' || owner.activeSessionId !== sessionId
+      || !unexpired(owner.expiresAt) || hasActiveCheckIn) renewalRefusal('preparation_renewal_unqualified');
+    const ids = pool.candidateIds;
+    const identities = record(pool.identities);
+    if (pool.uid !== uid || pool.mode !== PREPARATION_POOL_MODE || pool.poolId !== poolId
+      || !unexpired(pool.expiresAt) || !(pool.discoveredAt instanceof Timestamp)
+      || pool.discoveredAt.toMillis() > nowMs || nowMs - pool.discoveredAt.toMillis() >= CHECK_IN_PREPARATION_SOURCE_MAX_AGE_MS
+      || !Array.isArray(ids) || ids.length > MAX_PREPARED_EXTERNAL_CANDIDATES || new Set(ids).size !== ids.length
+      || !ids.every(id => typeof id === 'string' && /^[a-f0-9-]{36}$/.test(id) && /^[a-f0-9]{64}$/.test(String(identities[id])))
+      || !Number.isFinite(pool.latitude) || Math.abs(pool.latitude) > 90
+      || !Number.isFinite(pool.longitude) || Math.abs(pool.longitude) > 180) renewalRefusal('rediscovery_required');
+    const origin = {latitude: pool.latitude as number, longitude: pool.longitude as number};
+    const close = (latitude: unknown, longitude: unknown) => typeof latitude === 'number' && typeof longitude === 'number'
+      && Number.isFinite(latitude) && Number.isFinite(longitude)
+      && distanceMetres(origin.latitude, origin.longitude, latitude, longitude) <= PREPARATION_AREA_METRES;
+    if (!close(location.latitude, location.longitude) || !close(arrival.latitude, arrival.longitude)
+      || !close(session.lastLatitude, session.lastLongitude)) renewalRefusal('rediscovery_required');
+    if (pool.catalogSource === 'osm_regional_snapshot') {
+      const {lookupPeiOsmCatalogue} = await import('./peiOsmCatalogue.js');
+      const catalogue = lookupPeiOsmCatalogue(origin, nowMs);
+      if (catalogue.status !== 'complete' || catalogue.version !== pool.catalogVersion
+        || catalogue.sourceTimestamp !== pool.catalogSourceTimestamp) renewalRefusal('rediscovery_required');
+    }
+    const refs = (ids as string[]).map(id => db.collection('checkInPlaceCandidates').doc(id));
+    const snapshots = refs.length ? await transaction.getAll(...refs) : [];
+    const external: NearbyCheckInPlaceCandidate[] = snapshots.map((snapshot, index) => {
+      const candidate = snapshot.data() || {};
+      let place: ExternalCheckInPlaceSnapshot;
+      try { place = validateExternalCheckInPlaceCandidate(candidate, uid, ids[index], now); }
+      catch { return renewalRefusal('rediscovery_required'); }
+      if (candidateIdentity(candidate) !== identities[ids[index]]) renewalRefusal('rediscovery_required');
+      const boundary = parseCheckInBoundary(candidate.checkInBoundary);
+      return {id: ids[index], ...place, distanceMetres: Math.round(checkInPlaceDistance(origin, place, boundary)),
+        ...(boundary ? {checkInBoundary: boundary} : {})};
+    });
+    // Revalidate current canonical records with the existing bounded numeric +
+    // legacy queries. Preserve the ORIGINAL covered circle, not a shifted175m claim.
+    canonicalPromise ??= nearbyCanonicalVenues(db, origin.latitude, origin.longitude, location.accuracyMeters,
+      now, true, undefined, true);
+    const canonical = await canonicalPromise;
+    const preparationPool = preparationLease(poolId, origin.latitude, origin.longitude, nowMs,
+      pool.discoveredAt.toMillis() + CHECK_IN_PREPARATION_SOURCE_MAX_AGE_MS);
+    const expiresAt = Timestamp.fromMillis(preparationPool.expiresAtMs);
+    refs.forEach(ref => transaction.update(ref, {expiresAt}));
+    transaction.update(poolRef, {expiresAt, lastPresenceAt: now});
+    return {candidates: [...canonical, ...external].sort((a, b) => a.distanceMetres - b.distanceMetres), expiresAt,
+      externalLookupStatus: 'complete', preparationRadiusMetres: CHECK_IN_PLACE_DISCOVERY_RADIUS_METRES,
+      preparationPool, preparationReused: true,
+      ...(pool.catalogSource ? {catalogSource: pool.catalogSource} : {}),
+      ...(pool.catalogVersion ? {catalogVersion: pool.catalogVersion} : {}),
+      ...(pool.catalogSourceTimestamp ? {catalogSourceTimestamp: pool.catalogSourceTimestamp} : {})};
+  });
+}
+
 export async function discoverNearbyCheckInPlaces(
   uidValue: unknown,
   input: NearbyPlaceInput,
@@ -389,8 +539,12 @@ export async function discoverNearbyCheckInPlaces(
     // This option is never accepted from a callable request.
     useBundledCatalogue?: boolean;
   } = {}
-): Promise<{ candidates: NearbyCheckInPlaceCandidate[]; expiresAt: Timestamp; externalLookupStatus: 'complete' | 'partial_unavailable'; preparationRadiusMetres?: 175;
-  catalogSource?: string; catalogVersion?: string; catalogSourceTimestamp?: string; catalogReason?: string }> {
+): Promise<NearbyCheckInPreparationResult> {
+  if (input.renewPreparationPool !== undefined) {
+    // Defense in depth for direct domain callers: never let a renewal flag
+    // silently invoke the expensive ordinary provider path.
+    return renewNearbyCheckInPreparation(uidValue, input, options);
+  }
   const uid = validateUid(uidValue, 'uid');
   const db = options.db || getFirestore();
   const now = options.now || Timestamp.now();
@@ -509,9 +663,10 @@ export async function discoverNearbyCheckInPlaces(
   const selectedCanonical = selected.canonical;
   const selectedExternal = selected.external;
   const batch = db.batch();
+  const identities: Record<string, string> = {};
   const externalCandidates = selectedExternal.map((candidate) => {
     const candidateId = randomUUID();
-    batch.set(db.collection('checkInPlaceCandidates').doc(candidateId), {
+    const stored = {
       uid,
       candidateId,
       source: 'openstreetmap_overpass',
@@ -531,7 +686,9 @@ export async function discoverNearbyCheckInPlaces(
       },
       createdAt: now,
       expiresAt,
-    });
+    };
+    identities[candidateId] = candidateIdentity(stored);
+    batch.set(db.collection('checkInPlaceCandidates').doc(candidateId), stored);
     return {
       id: candidateId,
       type: candidate.type,
@@ -545,11 +702,19 @@ export async function discoverNearbyCheckInPlaces(
       ...(candidate.checkInBoundary ? { checkInBoundary: candidate.checkInBoundary } : {}),
     } satisfies NearbyCheckInPlaceCandidate;
   });
-  if (selectedExternal.length > 0) await batch.commit();
+  const preparationPool = preparation ? preparationLease(randomUUID(), latitude, longitude, now.toMillis(),
+    now.toMillis() + CHECK_IN_PREPARATION_SOURCE_MAX_AGE_MS) : undefined;
+  if (preparationPool) batch.set(db.collection('checkInPlaceCandidates').doc(checkInPreparationPoolDocumentId(uid)), {
+    uid, mode: PREPARATION_POOL_MODE, poolId: preparationPool.id, latitude, longitude,
+    candidateIds: externalCandidates.map(candidate => candidate.id), identities,
+    ...catalogMetadata, discoveredAt: now, lastPresenceAt: now, expiresAt,
+  });
+  if (selectedExternal.length > 0 || preparationPool) await batch.commit();
   const candidates = [...selectedCanonical, ...externalCandidates]
     .sort((left, right) => left.distanceMetres - right.distanceMetres
       || (left.type === 'gathr_venue' ? -1 : 1));
   return { candidates, expiresAt, externalLookupStatus: 'complete', ...catalogMetadata,
+    ...(preparationPool ? {preparationPool, preparationReused: false} : {}),
     ...(preparation ? {preparationRadiusMetres: CHECK_IN_PLACE_DISCOVERY_RADIUS_METRES} : {}) };
 }
 

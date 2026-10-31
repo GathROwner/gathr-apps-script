@@ -42,11 +42,11 @@ function publicRecords(documents: QueryDocumentSnapshot[]): PublicCanonicalVenue
   });
 }
 
-async function numericRecords(db: Firestore, latitude: number, nowMs: number): Promise<PublicCanonicalVenueRecord[]> {
+async function numericRecords(db: Firestore, latitude: number, nowMs: number, fresh = false): Promise<PublicCanonicalVenueRecord[]> {
   const required = latitudeBounds(latitude, PREPARED_VENUE_RADIUS_METRES);
   const bands = (numericBands.get(db) || []).filter(band => band.expiresAtMs > nowMs);
   numericBands.set(db, bands);
-  const existing = bands.find(band => band.lower <= required.lower && band.upper >= required.upper);
+  const existing = fresh ? undefined : bands.find(band => band.lower <= required.lower && band.upper >= required.upper);
   if (existing?.records) return existing.records;
   if (existing?.promise) return existing.promise;
   const bounds = latitudeBounds(latitude, PREPARED_NUMERIC_QUERY_RADIUS_METRES);
@@ -72,8 +72,8 @@ async function numericRecords(db: Firestore, latitude: number, nowMs: number): P
   }
 }
 
-async function legacyRecords(db: Firestore, nowMs: number): Promise<PublicCanonicalVenueRecord[]> {
-  const existing = legacyStrings.get(db);
+async function legacyRecords(db: Firestore, nowMs: number, fresh = false): Promise<PublicCanonicalVenueRecord[]> {
+  const existing = fresh ? undefined : legacyStrings.get(db);
   if (existing && existing.expiresAtMs > nowMs) {
     if (existing.records) return existing.records;
     if (existing.promise) return existing.promise;
@@ -101,8 +101,8 @@ async function legacyRecords(db: Firestore, nowMs: number): Promise<PublicCanoni
 }
 
 /** Complete number|string coverage, with bounded reads and reusable proven bounds. */
-export async function preparedCanonicalVenueRecords(db: Firestore, latitude: number, nowMs: number): Promise<PublicCanonicalVenueRecord[]> {
-  const [numeric, legacy] = await Promise.all([numericRecords(db, latitude, nowMs), legacyRecords(db, nowMs)]);
+export async function preparedCanonicalVenueRecords(db: Firestore, latitude: number, nowMs: number, fresh = false): Promise<PublicCanonicalVenueRecord[]> {
+  const [numeric, legacy] = await Promise.all([numericRecords(db, latitude, nowMs, fresh), legacyRecords(db, nowMs, fresh)]);
   // A normalizer can convert a cached legacy document to numeric coordinates
   // before that legacy cache expires. Prefer the numeric record and emit one ID.
   const records = new Map(numeric.map(record => [record.id, record]));

@@ -56,8 +56,10 @@ test('actual mapped public pub uses catalogue without any provider call and mint
   assert.equal(result.catalogSource, 'osm_regional_snapshot');
   assert.equal(result.preparationRadiusMetres, 175);
   assert.ok(result.candidates.some(candidate => candidate.name === (actualPub.tags as Record<string, string>).name));
-  assert.ok(db.writes.length > 0 && db.writes.length <= 20);
-  for (const candidate of db.writes) {
+  const candidates = db.writes.filter(value => value.candidateId);
+  assert.ok(candidates.length > 0 && candidates.length <= 20);
+  assert.equal(db.writes.length, candidates.length + 1, 'One non-bindable pool metadata record');
+  for (const candidate of candidates) {
     assert.equal(candidate.source, 'openstreetmap_overpass');
     assert.equal(candidate.catalogSource, 'osm_regional_snapshot');
     assert.equal(candidate.catalogVersion, result.catalogVersion);
