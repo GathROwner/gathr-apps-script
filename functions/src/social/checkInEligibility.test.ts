@@ -108,6 +108,94 @@ function sample(sessionId: string, sequence: number, nowMs: number, overrides: R
   };
 }
 
+test('readiness latency variation does not discard qualifying captured or server-observed time', async () => {
+  const db = new ReadinessFirestore();
+  const sessionId = 'latency-bank-session-001';
+  let receipt;
+  for (let index = 0; index <= 9; index++) {
+    const capturedAtMs = startMs + index * 10_000;
+    const observedAtMs = capturedAtMs + (index % 2 ? 9_000 : index === 0 ? 9_000 : 0);
+    receipt = await recordCheckInReadinessSample(uid,
+      sample(sessionId, index + 1, observedAtMs, { capturedAtMs }),
+      db as unknown as Firestore, Timestamp.fromMillis(observedAtMs));
+    if (index === 3) {
+      assert.equal(receipt.hereQualifyingMs, 30_000, '30s captured AND 30s observed should qualify Here');
+      assert.equal(receipt.arrival?.here, true);
+    }
+  }
+  assert.equal(receipt?.placeQualifyingMs, 90_000, 'latency jitter must not turn 90s into repeated extra waiting');
+  assert.equal(receipt?.arrival?.place, true);
+});
+
+test('readiness credit remains bounded by both clocks with no fast capture or server-time shortcut', async () => {
+  for (const fastClock of ['capture', 'server']) {
+    const db = new ReadinessFirestore();
+    const sessionId = `fast-${fastClock}-session-001`;
+    let receipt;
+    for (let index = 0; index <= 3; index++) {
+      // All fixes remain in the accepted age/future window. Neither clock alone
+      // may qualify a 30-second arrival while the other has only observed 9s.
+      const capturedAtMs = startMs + index * (fastClock === 'capture' ? 10_000 : 3_000);
+      const observedAtMs = startMs + 21_000 + index * (fastClock === 'capture' ? 3_000 : 10_000);
+      receipt = await recordCheckInReadinessSample(uid,
+        sample(sessionId, index + 1, observedAtMs, { capturedAtMs }),
+        db as unknown as Firestore, Timestamp.fromMillis(observedAtMs));
+    }
+    assert.equal(receipt?.hereQualifyingMs, 9_000);
+    assert.equal(receipt?.hereReady, false);
+    assert.equal(receipt?.arrival, undefined);
+  }
+});
+
+test('readiness clock banks reset together after motion or explicit reset', async () => {
+  for (const reset of [false, true]) {
+    const db = new ReadinessFirestore();
+    const sessionId = `bank-reset-${reset}-session-001`;
+    for (const [index, delay] of [9_000, 9_000, 0].entries()) {
+      const capture = startMs + index * 10_000;
+      await recordCheckInReadinessSample(uid, sample(sessionId, index + 1, capture + delay, { capturedAtMs: capture }),
+        db as unknown as Firestore, Timestamp.fromMillis(capture + delay));
+    }
+    const stopped = await recordCheckInReadinessSample(uid,
+      sample(sessionId, 4, startMs + 39_000, { capturedAtMs: startMs + 30_000, reset, speedMetersPerSecond: reset ? 0 : 1.2 }),
+      db as unknown as Firestore, Timestamp.fromMillis(startMs + 39_000));
+    assert.equal(stopped.hereQualifyingMs, 0);
+    const stored = db.documents.get(`checkInEligibilitySessions/${checkInEligibilitySessionId(uid, sessionId)}`)!;
+    for (const field of ['hereCapturedQualifyingMs', 'hereObservedQualifyingMs', 'placeCapturedQualifyingMs', 'placeObservedQualifyingMs']) {
+      assert.equal(stored[field], 0, `do not revive a discarded clock bank: ${field}`);
+    }
+  }
+});
+
+test('readiness uncertainty preserves earned banks without credit across bad-accuracy endpoints', async () => {
+  const db = new ReadinessFirestore();
+  const sessionId = 'bank-accuracy-session-001';
+  let receipt;
+  for (const [index, delay] of [9_000, 9_000, 0, 9_000, 0].entries()) {
+    const capture = startMs + index * 10_000;
+    receipt = await recordCheckInReadinessSample(uid,
+      sample(sessionId, index + 1, capture + delay, { capturedAtMs: capture, accuracyMeters: index === 3 ? 60 : 8 }),
+      db as unknown as Firestore, Timestamp.fromMillis(capture + delay));
+    if (index >= 2) assert.equal(receipt.hereQualifyingMs, 11_000);
+  }
+  assert.equal(receipt?.hereReady, false);
+});
+
+test('existing readiness sessions migrate only their already-earned credit into the two clock banks', async () => {
+  const db = new ReadinessFirestore();
+  const sessionId = 'bank-legacy-session-001';
+  for (let index = 0; index <= 2; index++) {
+    await recordCheckInReadinessSample(uid, sample(sessionId, index + 1, startMs + index * 10_000,
+      { capturedAtMs: startMs + index * 10_000 }), db as unknown as Firestore, Timestamp.fromMillis(startMs + index * 10_000));
+  }
+  const stored = db.documents.get(`checkInEligibilitySessions/${checkInEligibilitySessionId(uid, sessionId)}`)!;
+  for (const field of ['hereCapturedQualifyingMs', 'hereObservedQualifyingMs', 'placeCapturedQualifyingMs', 'placeObservedQualifyingMs']) delete stored[field];
+  const receipt = await recordCheckInReadinessSample(uid, sample(sessionId, 4, startMs + 30_000,
+    { capturedAtMs: startMs + 30_000 }), db as unknown as Firestore, Timestamp.fromMillis(startMs + 30_000));
+  assert.equal(receipt.hereQualifyingMs, 30_000);
+  assert.equal(receipt.arrival?.here, true);
+});
+
 test('Here-level private binding can authorize an explicit exact-pin opt-in before Place readiness', async () => {
   const now = Timestamp.fromMillis(startMs);
   const db = new ReadinessFirestore();

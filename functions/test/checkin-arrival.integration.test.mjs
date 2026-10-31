@@ -47,6 +47,39 @@ function binding(fixture, overrides = {}) {
   };
 }
 
+test('real Firestore keeps both qualifying clocks without losing transport jitter or accepting one fast clock', async () => {
+  const uid = `arrival-clock-fixture-${++sequence}-${Date.now()}`;
+  const sessionId = `arrival-clock-session-${sequence}`;
+  const base = Date.now() - 120_000;
+  let receipt;
+  for (let index = 0; index <= 9; index++) {
+    const capturedAtMs = base + index * 10_000;
+    const observedAtMs = capturedAtMs + (index % 2 || index === 0 ? 9_000 : 0);
+    receipt = await recordCheckInReadinessSample(uid, {
+      protocolVersion: 1, reset: false, sessionId, sequence: index + 1,
+      ...point, capturedAtMs,
+    }, db, Timestamp.fromMillis(observedAtMs));
+    if (index === 3) assert.equal(receipt.arrival?.here, true);
+  }
+  assert.equal(receipt.arrival?.place, true);
+  const saved = (await db.doc(`checkInEligibilitySessions/${checkInEligibilitySessionId(uid, sessionId)}`).get()).data();
+  assert.equal(saved.hereCapturedQualifyingMs, 30_000);
+  assert.equal(saved.hereObservedQualifyingMs, 30_000);
+  assert.equal(saved.placeCapturedQualifyingMs, 90_000);
+  assert.equal(saved.placeObservedQualifyingMs, 90_000);
+
+  const fastUid = `${uid}-fast-capture`;
+  let fast;
+  for (let index = 0; index <= 3; index++) {
+    fast = await recordCheckInReadinessSample(fastUid, {
+      protocolVersion: 1, reset: false, sessionId, sequence: index + 1,
+      ...point, capturedAtMs: base + index * 10_000,
+    }, db, Timestamp.fromMillis(base + 21_000 + index * 3_000));
+  }
+  assert.equal(fast.hereQualifyingMs, 9_000);
+  assert.equal(fast.hereReady, false);
+});
+
 test('qualified arrival survives an expired raw receipt and creates exactly one idempotent check-in', async () => {
   const fixture = await qualified();
   assert.ok(fixture.receipt.expiresAtMs < fixture.nowMs);

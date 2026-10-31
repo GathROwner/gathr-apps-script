@@ -387,12 +387,20 @@ export async function recordCheckInReadinessSample(
     let anchorLongitude = evidenceSource
       ? parseLongitude(evidenceSource.anchorLongitude)
       : sample.longitude;
-    let hereQualifyingMs = evidenceSource
-      ? Math.max(0, Number(evidenceSource.hereQualifyingMs) || 0)
-      : 0;
-    let placeQualifyingMs = evidenceSource
-      ? Math.max(0, Number(evidenceSource.placeQualifyingMs) || 0)
-      : 0;
+    // Keep the two clocks independently. Taking their minimum per request
+    // permanently loses time whenever transport latency falls on a later fix.
+    // A level still requires enough qualifying time on BOTH clocks in total.
+    const restoreCredit = (level: 'here' | 'place', target: number) => {
+      const storedEarned = Number(evidenceSource?.[`${level}QualifyingMs`]);
+      const earned = Number.isFinite(storedEarned) ? Math.min(target, Math.max(0, storedEarned)) : 0;
+      const restore = (value: unknown) => typeof value === 'number' && Number.isFinite(value) && value >= 0
+        ? Math.min(target, value) : earned;
+      return { capturedMs: restore(evidenceSource?.[`${level}CapturedQualifyingMs`]),
+        observedMs: restore(evidenceSource?.[`${level}ObservedQualifyingMs`]) };
+    };
+    const emptyCredit = () => ({ capturedMs: 0, observedMs: 0 });
+    let hereCredit = restoreCredit('here', CHECK_IN_HERE_TARGET_MS);
+    let placeCredit = restoreCredit('place', CHECK_IN_PLACE_TARGET_MS);
     const lastSeenMs = continuing && !resetRequested ? timestampMillis(previous.lastSeenAt) : null;
     const priorEvidence = continuing && !resetRequested ? previous : checkoutContinuation;
     const lastCapturedAtMs = priorEvidence
@@ -469,8 +477,8 @@ export async function recordCheckInReadinessSample(
     const lastHereQualifyingAtMs = timestampMillis(previous.lastHereQualifyingAt);
     const lastPlaceQualifyingAtMs = timestampMillis(previous.lastPlaceQualifyingAt);
     if (reason === 'driving' || clearDeparture) {
-      hereQualifyingMs = 0;
-      placeQualifyingMs = 0;
+      hereCredit = emptyCredit();
+      placeCredit = emptyCredit();
       anchorLatitude = sample.latitude;
       anchorLongitude = sample.longitude;
     } else if (reason === 'qualifying' && continuingAfterCheckOut) {
@@ -499,40 +507,43 @@ export async function recordCheckInReadinessSample(
       // it cannot retroactively credit the interrupted interval.
       const validGap = !recoveringFromDriving && (shortGap || resumeGap);
       if (!validGap && lastSeenMs !== null) {
-        hereQualifyingMs = 0;
-        placeQualifyingMs = 0;
+        hereCredit = emptyCredit();
+        placeCredit = emptyCredit();
         anchorLatitude = sample.latitude;
         anchorLongitude = sample.longitude;
       }
       if (validGap) {
-        const creditMs = Math.min(captureGapMs, serverGapMs);
-        if (previousAccuracy <= CHECK_IN_HERE_MAX_ACCURACY_METRES) hereQualifyingMs += creditMs;
+        if (previousAccuracy <= CHECK_IN_HERE_MAX_ACCURACY_METRES) {
+          hereCredit.capturedMs = Math.min(CHECK_IN_HERE_TARGET_MS, hereCredit.capturedMs + captureGapMs);
+          hereCredit.observedMs = Math.min(CHECK_IN_HERE_TARGET_MS, hereCredit.observedMs + serverGapMs);
+        }
         if (accuratePlace && previousAccuracy <= CHECK_IN_PLACE_MAX_ACCURACY_METRES) {
-          placeQualifyingMs += creditMs;
+          placeCredit.capturedMs = Math.min(CHECK_IN_PLACE_TARGET_MS, placeCredit.capturedMs + captureGapMs);
+          placeCredit.observedMs = Math.min(CHECK_IN_PLACE_TARGET_MS, placeCredit.observedMs + serverGapMs);
         }
       }
     } else if (reason === 'low_accuracy') {
       // Uncertainty earns no time. Keep already earned evidence only within the
       // existing five-minute interruption bound, and never credit across this fix.
       if (lastHereQualifyingAtMs === null || nowMs - lastHereQualifyingAtMs > CHECK_IN_RESUME_MAX_GAP_MS) {
-        hereQualifyingMs = 0;
+        hereCredit = emptyCredit();
       }
       if (lastPlaceQualifyingAtMs === null || nowMs - lastPlaceQualifyingAtMs > CHECK_IN_RESUME_MAX_GAP_MS) {
-        placeQualifyingMs = 0;
+        placeCredit = emptyCredit();
       }
     } else {
-      hereQualifyingMs = 0;
-      placeQualifyingMs = 0;
+      hereCredit = emptyCredit();
+      placeCredit = emptyCredit();
       anchorLatitude = sample.latitude;
       anchorLongitude = sample.longitude;
     }
 
-    hereQualifyingMs = Math.min(hereQualifyingMs, CHECK_IN_HERE_TARGET_MS);
-    placeQualifyingMs = Math.min(placeQualifyingMs, CHECK_IN_PLACE_TARGET_MS);
     if (!accuratePlace && !priorArrival?.place
       && (lastPlaceQualifyingAtMs === null || nowMs - lastPlaceQualifyingAtMs > CHECK_IN_RESUME_MAX_GAP_MS)) {
-      placeQualifyingMs = 0;
+      placeCredit = emptyCredit();
     }
+    const hereQualifyingMs = Math.min(hereCredit.capturedMs, hereCredit.observedMs);
+    const placeQualifyingMs = Math.min(placeCredit.capturedMs, placeCredit.observedMs);
     let arrival = clearDeparture || confirmedDriving || resetRequested ? null : priorArrival;
     if (reason === 'qualifying' && accurateHere && hereQualifyingMs >= CHECK_IN_HERE_TARGET_MS) {
       const place = placeQualifyingMs >= CHECK_IN_PLACE_TARGET_MS && accuratePlace;
@@ -558,6 +569,10 @@ export async function recordCheckInReadinessSample(
       qualifyingMs: placeQualifyingMs,
       hereQualifyingMs,
       placeQualifyingMs,
+      hereCapturedQualifyingMs: hereCredit.capturedMs,
+      hereObservedQualifyingMs: hereCredit.observedMs,
+      placeCapturedQualifyingMs: placeCredit.capturedMs,
+      placeObservedQualifyingMs: placeCredit.observedMs,
       anchorLatitude,
       anchorLongitude,
       lastLatitude: sample.latitude,
