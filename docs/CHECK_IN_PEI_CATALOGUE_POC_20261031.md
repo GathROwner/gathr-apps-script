@@ -33,6 +33,8 @@ Inside covered fresh data, discovery makes zero Overpass requests. Stale/future,
 
 Candidates retain the legacy `source: openstreetmap_overpass` compatibility discriminator accepted by separately deployed bind/create functions, plus truthful `catalogSource: osm_regional_snapshot`, `catalogVersion` and `catalogSourceTimestamp`. Each returned target still gets a fresh owner-bound UUID,15-minute TTL and existing one-use/idempotent arrival pipeline. No catalogue coordinate counts as user presence. Auth, rate guards,30/90second dwell, departure/accuracy rules and private sharing remain unchanged.
 
+An additive optional public `locationKey` response field exposes the existing OSM identity (`external:` plus32hex digits from type/ID hashing) for exact client re-resolution across refreshed UUIDs. It is not authorization. Bind/create still accept only the owner-bound candidate UUID and enforce its expiry/consumption and session/arrival checks. Canonical/private response behavior is unchanged. Older clients ignore the new field; a client receiving no stable key must explicitly reselect rather than guess by name/coordinates. The focused54-case follow-up passed, including fresh UUID/same identity and expired/consumed/wrong-owner/wrong-ID rejection. No TTL was extended.
+
 ## Measured local cost/performance
 
 One actual-data run on the local Windows host: cold catalogue load29.1ms; added post-GC heap2,108,944bytes; addedRSS9,302,016bytes. Across200 full regional lookup+parser samples: median26.68ms, p9563.19ms, maximum103.33ms. These measurements are not Cloud Run or iPhone latency guarantees. The real Fox & Crow test point returns four OSM places; internal parsed payload5677bytes.

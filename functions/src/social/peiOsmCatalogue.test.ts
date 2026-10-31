@@ -67,6 +67,30 @@ test('actual mapped public pub uses catalogue without any provider call and mint
   }
 });
 
+test('external public identity survives fresh UUIDs without granting expired, consumed or other-user authority', async () => {
+  const db = emptyCanonicalDb();
+  const prepare = (uid: string, ms: number) => discoverNearbyCheckInPlaces(uid, {...point,
+    accuracyMeters: 17, capturedAtMs: ms, preparation: true}, {db: db as never, now: Timestamp.fromMillis(ms),
+    fetchImpl: async () => {throw Error('No provider call in covered region');}});
+  const first = await prepare('identity-owner', freshMs);
+  const next = await prepare('identity-owner', freshMs + 1);
+  const old = first.candidates.find(candidate => candidate.name === (actualPub.tags as Record<string, string>).name)!;
+  const replacement = next.candidates.find(candidate => candidate.locationKey === old.locationKey)!;
+  assert.match(old.locationKey || '', /^external:[a-f0-9]{32}$/);
+  assert.notEqual(old.id, replacement.id);
+  assert.equal(old.locationKey, replacement.locationKey);
+  assert.equal(new Set(first.candidates.map(candidate => candidate.locationKey)).size, first.candidates.length);
+  const stored = db.writes.find(candidate => candidate.candidateId === old.id)!;
+  assert.equal((stored.place as {locationKey: string}).locationKey, old.locationKey);
+  assert.throws(() => validateCheckInPlaceCandidate(stored, 'other-user', old.id, Timestamp.fromMillis(freshMs)));
+  assert.throws(() => validateCheckInPlaceCandidate(stored, 'identity-owner', old.id,
+    Timestamp.fromMillis(freshMs + 15 * 60_000 + 1)));
+  assert.throws(() => validateCheckInPlaceCandidate({...stored, consumedAt: Timestamp.fromMillis(freshMs)},
+    'identity-owner', old.id, Timestamp.fromMillis(freshMs)));
+  // A stable public key never substitutes for an exact owner-bound UUID.
+  assert.throws(() => validateCheckInPlaceCandidate(stored, 'identity-owner', old.locationKey!, Timestamp.fromMillis(freshMs)));
+});
+
 test('an actual large closed-way footprint remains selectable when its center is more than175m away', () => {
   const large = elements.find(item => {
     const ring = parseCheckInBoundary(item.geometry);

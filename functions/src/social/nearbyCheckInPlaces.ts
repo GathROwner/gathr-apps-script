@@ -60,6 +60,9 @@ export interface NearbyCheckInPlaceCandidate {
   id: string;
   type: 'gathr_venue' | 'external_place' | 'private_place';
   venueId?: string;
+  // Public OSM identity for exact re-resolution across short-lived UUIDs.
+  // This is not authorization; bind/create still require the candidate ID.
+  locationKey?: string;
   name: string;
   address: string;
   category: string;
@@ -532,6 +535,7 @@ export async function discoverNearbyCheckInPlaces(
     return {
       id: candidateId,
       type: candidate.type,
+      locationKey: candidate.locationKey,
       name: candidate.name,
       address: candidate.address,
       category: candidate.category,
