@@ -3,7 +3,11 @@ import test from 'node:test';
 import { Timestamp } from 'firebase-admin/firestore';
 import { logger } from 'firebase-functions';
 import { logProviderException, logProviderHttpFailure, type FailureLog } from './nearbyPlaceDiagnostics.js';
-import { discoverNearbyCheckInPlaces } from './nearbyCheckInPlaces.js';
+import { discoverNearbyCheckInPlaces as actualDiscoverNearbyCheckInPlaces } from './nearbyCheckInPlaces.js';
+
+// This suite exercises provider transport, independently of regional coverage.
+const discoverNearbyCheckInPlaces: typeof actualDiscoverNearbyCheckInPlaces = (uid, input, options = {}) =>
+  actualDiscoverNearbyCheckInPlaces(uid, input, {...options, useBundledCatalogue: false});
 
 const secret = 'PRIVATE_SENTINEL_7f845b';
 const privateText = `${secret} Jane Doe jane@example.test +1-902-555-0199 123 Private Road password=hunter123 token=sk-private-123 cookie=abc latitude=46.0855005 longitude=-64.7849229 https://private.example/search?q=46.0855005,-64.7849229`;

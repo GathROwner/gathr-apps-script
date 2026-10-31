@@ -12,6 +12,10 @@ const stagingSocialDirectory = path.join(
   'social'
 );
 
+// Copy the reviewed pure-OSM public catalogue/notice into both local compiled
+// tests and the existing isolated deployment source. No download occurs here.
+await cp(path.join(functionsDirectory, 'src', 'social', 'data'), path.join(compiledSocialDirectory, 'data'), { recursive: true });
+
 await rm(stagingSocialDirectory, { recursive: true, force: true });
 await mkdir(path.dirname(stagingSocialDirectory), { recursive: true });
 await cp(compiledSocialDirectory, stagingSocialDirectory, {

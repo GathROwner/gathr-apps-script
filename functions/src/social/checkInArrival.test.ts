@@ -3,10 +3,15 @@ import test from 'node:test';
 import { Timestamp, type Firestore } from 'firebase-admin/firestore';
 import { recordCheckInReadinessSample, bindCheckInReadiness, checkInEligibilitySessionId,
   assertCompletedCheckInEligibility } from './checkInEligibility.js';
-import { createPrivateCheckInPlaceCandidate, discoverNearbyCheckInPlaces,
+import { createPrivateCheckInPlaceCandidate, discoverNearbyCheckInPlaces as actualDiscoverNearbyCheckInPlaces,
   listNearbyCanonicalCheckInVenues } from './nearbyCheckInPlaces.js';
 import { CHECK_IN_ARRIVAL_TTL_MS } from './checkInArrival.js';
 import { SocialDomainError } from './validation.js';
+
+// Provider fixtures remain deterministic; real catalogue integration has its
+// own actual-data suite and does not bypass the bundled lookup.
+const discoverNearbyCheckInPlaces: typeof actualDiscoverNearbyCheckInPlaces = (uid, input, options = {}) =>
+  actualDiscoverNearbyCheckInPlaces(uid, input, {...options, useBundledCatalogue: false});
 
 type Doc = Record<string, unknown>;
 class MemoryFirestore {

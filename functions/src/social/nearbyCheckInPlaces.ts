@@ -382,8 +382,12 @@ export async function discoverNearbyCheckInPlaces(
     now?: Timestamp;
     overpassEndpoint?: string;
     providerFailureLogger?: FailureLogger;
+    // Internal dependency-control for provider-path regression tests only.
+    // This option is never accepted from a callable request.
+    useBundledCatalogue?: boolean;
   } = {}
-): Promise<{ candidates: NearbyCheckInPlaceCandidate[]; expiresAt: Timestamp; externalLookupStatus: 'complete' | 'partial_unavailable'; preparationRadiusMetres?: 175 }> {
+): Promise<{ candidates: NearbyCheckInPlaceCandidate[]; expiresAt: Timestamp; externalLookupStatus: 'complete' | 'partial_unavailable'; preparationRadiusMetres?: 175;
+  catalogSource?: string; catalogVersion?: string; catalogSourceTimestamp?: string; catalogReason?: string }> {
   const uid = validateUid(uidValue, 'uid');
   const db = options.db || getFirestore();
   const now = options.now || Timestamp.now();
@@ -392,6 +396,33 @@ export async function discoverNearbyCheckInPlaces(
   const preparation = input.preparation === true;
   const discoveryStartedAt = Date.now();
   const canonical = await nearbyCanonicalVenues(db, latitude, longitude, accuracyMeters, now, preparation);
+  let payload: unknown;
+  let catalogMetadata: {catalogSource?: string; catalogVersion?: string; catalogSourceTimestamp?: string; catalogReason?: string} = {};
+  if (options.useBundledCatalogue !== false) {
+    // Lazy load: readiness/private functions also import the validators in this
+    // module and must not load a regional dataset merely to validate a target.
+    const {lookupPeiOsmCatalogue} = await import('./peiOsmCatalogue.js');
+    const catalogue = lookupPeiOsmCatalogue({latitude, longitude}, now.toMillis());
+    if (catalogue.status !== 'outside_coverage') {
+      catalogMetadata = {catalogSource: 'osm_regional_snapshot',
+        ...(catalogue.version ? {catalogVersion: catalogue.version} : {}),
+        ...(catalogue.sourceTimestamp ? {catalogSourceTimestamp: catalogue.sourceTimestamp} : {})};
+      if (catalogue.status === 'complete') payload = {elements: catalogue.elements};
+      else {
+        // A covered but stale/corrupt/incomplete catalogue is an explicit
+        // failure; never hide a live-provider dependency inside covered PEI.
+        if (preparation || canonical.length) return {candidates: preparation ? canonical : canonical.slice(0, MAX_RETURNED_CANDIDATES),
+          expiresAt, externalLookupStatus: 'partial_unavailable', ...catalogMetadata, catalogReason: catalogue.reason,
+          ...(preparation ? {preparationRadiusMetres: CHECK_IN_PLACE_DISCOVERY_RADIUS_METRES} : {})};
+        throw new SocialDomainError('unavailable', 'Nearby public places could not be loaded right now.', {
+          condition: 'nearby_public_places_catalogue_unavailable', retryable: false,
+        });
+      }
+    }
+  }
+  // Outside this pilot extract, retain the existing explicitly bounded free
+  // Overpass path. This is not a permanent PEI-only location restriction.
+  if (payload === undefined) {
   const overpassQuery = `[out:json][timeout:8];(`
     + `nwr(around:${CHECK_IN_PLACE_DISCOVERY_RADIUS_METRES},${latitude},${longitude})["name"]["amenity"];`
     + `nwr(around:${CHECK_IN_PLACE_DISCOVERY_RADIUS_METRES},${latitude},${longitude})["name"]["shop"];`
@@ -408,7 +439,6 @@ export async function discoverNearbyCheckInPlaces(
     ];
   const providerDeadlineAt = Math.min(discoveryStartedAt + DISCOVERY_PROVIDER_DEADLINE_MS,
     Date.now() + PROVIDER_TOTAL_BUDGET_MS);
-  let payload: unknown;
   for (const [index, endpoint] of endpoints.entries()) {
     const remainingMs = providerDeadlineAt - Date.now() - PROVIDER_DIAGNOSTIC_RESERVE_MS;
     if (remainingMs <= 0) break;
@@ -456,6 +486,7 @@ export async function discoverNearbyCheckInPlaces(
       logProviderException(provider, stage, status, error, startedAt, options.providerFailureLogger);
     }
   }
+  }
   if (payload === undefined) {
     // Keep independently usable GathR options during a public-provider failure.
     if (preparation || canonical.length) return { candidates: preparation ? canonical : canonical.slice(0, MAX_RETURNED_CANDIDATES),
@@ -481,6 +512,9 @@ export async function discoverNearbyCheckInPlaces(
       uid,
       candidateId,
       source: 'openstreetmap_overpass',
+      // Legacy source is the existing external-OSM candidate protocol tag;
+      // truthful origin/version metadata avoids breaking old bind/create images.
+      ...catalogMetadata,
       ...(candidate.checkInBoundary ? { checkInBoundary: candidate.checkInBoundary } : {}),
       osmElementKeyHash: createHash('sha256').update(candidate.osmElementKey).digest('hex'),
       place: {
@@ -511,7 +545,7 @@ export async function discoverNearbyCheckInPlaces(
   const candidates = [...selectedCanonical, ...externalCandidates]
     .sort((left, right) => left.distanceMetres - right.distanceMetres
       || (left.type === 'gathr_venue' ? -1 : 1));
-  return { candidates, expiresAt, externalLookupStatus: 'complete',
+  return { candidates, expiresAt, externalLookupStatus: 'complete', ...catalogMetadata,
     ...(preparation ? {preparationRadiusMetres: CHECK_IN_PLACE_DISCOVERY_RADIUS_METRES} : {}) };
 }
 
