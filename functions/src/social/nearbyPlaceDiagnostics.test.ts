@@ -190,13 +190,60 @@ test('provider budget subtracts canonical, response body and diagnostic time fro
       calls++;
       // Account for a slow response body, not just the initial HTTP headers.
       return {status: 200, ok: true, json: async () => {
-        context.mock.timers.tick(calls === 1 ? 10_000 : 9_000);
+        context.mock.timers.tick(calls === 1 ? 16_000 : 3_000);
         return {elements: [], remark: 'runtime error: Query timed out'};
       }} as Response;
     }});
   assert.equal(calls, 2);
-  assert.deepEqual(deadlines, [10_000, 8_900]);
+  assert.deepEqual(deadlines, [16_000, 2_900]);
   assert.equal(result.externalLookupStatus, 'partial_unavailable');
+});
+
+test('a documented15s primary queue can finish within the existing shared20s budget', async context => {
+  context.mock.timers.enable({apis: ['Date'], now: now.toMillis()});
+  const deadlines: number[] = [];
+  context.mock.method(AbortSignal, 'timeout', (milliseconds: number) => {
+    deadlines.push(milliseconds);
+    return new AbortController().signal;
+  });
+  let calls = 0;
+  const result = await discoverNearbyCheckInPlaces('private-user', input, {db: fakeDb() as never, now,
+    providerFailureLogger: () => {}, fetchImpl: async () => {
+      calls++;
+      if (calls === 1) {
+        context.mock.timers.tick(15_000);
+        if (deadlines[0] < 15_000) throw new DOMException('Synthetic queued request aborted.', 'TimeoutError');
+      }
+      return new Response('{"elements":[]}');
+    }});
+  assert.equal(calls, 1);
+  assert.deepEqual(deadlines, [16_000]);
+  assert.equal(result.externalLookupStatus, 'complete');
+});
+
+test('a16s primary timeout leaves only the shared remainder for a successful fallback', async context => {
+  context.mock.timers.enable({apis: ['Date'], now: now.toMillis()});
+  const deadlines: number[] = [];
+  context.mock.method(AbortSignal, 'timeout', (milliseconds: number) => {
+    deadlines.push(milliseconds);
+    return new AbortController().signal;
+  });
+  let calls = 0;
+  const logs: FailureLog[] = [];
+  const result = await discoverNearbyCheckInPlaces('private-user', input, {db: fakeDb() as never, now,
+    providerFailureLogger: record => logs.push(record), fetchImpl: async () => {
+      calls++;
+      if (calls === 1) {
+        context.mock.timers.tick(16_000);
+        throw new DOMException('Synthetic primary timeout.', 'TimeoutError');
+      }
+      context.mock.timers.tick(3_000);
+      return new Response('{"elements":[]}');
+    }});
+  assert.equal(calls, 2);
+  assert.deepEqual(deadlines, [16_000, 3_900]);
+  assert.equal(result.externalLookupStatus, 'complete');
+  assert.equal(logs[0].category, 'deadline_or_abort');
 });
 
 test('an exhausted canonical budget starts no provider request and never reports public preparation complete', async context => {
@@ -230,7 +277,12 @@ test('a body arriving after the shared deadline cannot mark public preparation c
   assert.equal(logs[0].stage, 'json');
 });
 
-test('a configured loopback provider remains one attempt and genuine empty results remain complete', async () => {
+test('a configured loopback provider retains10s and one attempt; genuine empty results remain complete', async context => {
+  const deadlines: number[] = [];
+  context.mock.method(AbortSignal, 'timeout', (milliseconds: number) => {
+    deadlines.push(milliseconds);
+    return new AbortController().signal;
+  });
   let calls = 0;
   const result = await discoverNearbyCheckInPlaces('private-user', input, {db: fakeDb() as never, now,
     overpassEndpoint: 'http://127.0.0.1:5018/interpreter', providerFailureLogger: () => {},
@@ -240,6 +292,7 @@ test('a configured loopback provider remains one attempt and genuine empty resul
       return new Response('{"elements":[],"remark":"  "}');
     }});
   assert.equal(calls, 1);
+  assert.deepEqual(deadlines, [10_000]);
   assert.equal(result.externalLookupStatus, 'complete');
 });
 

@@ -28,7 +28,11 @@ const MAX_PREPARED_EXTERNAL_CANDIDATES = 20;
 // callable limits, including time already spent preparing canonical venues.
 const DISCOVERY_PROVIDER_DEADLINE_MS = 22_000;
 const PROVIDER_TOTAL_BUDGET_MS = 20_000;
-const PROVIDER_ATTEMPT_BUDGET_MS = 10_000;
+// Public Overpass may normally queue for15s before a short query executes.
+// Give the primary that opportunity, then use only the shared remainder for
+// fallback. Keep an explicitly configured operator's existing10s behavior.
+const PROVIDER_PRIMARY_BUDGET_MS = 16_000;
+const PROVIDER_CONFIGURED_BUDGET_MS = 10_000;
 const PROVIDER_DIAGNOSTIC_RESERVE_MS = 100;
 
 export interface ExternalCheckInPlaceSnapshot {
@@ -408,6 +412,8 @@ export async function discoverNearbyCheckInPlaces(
   for (const [index, endpoint] of endpoints.entries()) {
     const remainingMs = providerDeadlineAt - Date.now() - PROVIDER_DIAGNOSTIC_RESERVE_MS;
     if (remainingMs <= 0) break;
+    const attemptBudgetMs = configuredEndpoint ? PROVIDER_CONFIGURED_BUDGET_MS
+      : index === 0 ? PROVIDER_PRIMARY_BUDGET_MS : remainingMs;
     const provider: ProviderAlias = configuredEndpoint ? 'configured' : index === 0 ? 'overpass_de' : 'overpass_kumi';
     const startedAt = Date.now();
     let stage: 'request' | 'json' = 'request';
@@ -423,7 +429,7 @@ export async function discoverNearbyCheckInPlaces(
         body: new URLSearchParams({ data: overpassQuery }),
         // The signal remains attached through JSON body consumption, not only
         // response headers. Failure-body diagnostics have their own100ms cap.
-        signal: AbortSignal.timeout(Math.min(PROVIDER_ATTEMPT_BUDGET_MS, remainingMs)),
+        signal: AbortSignal.timeout(Math.min(attemptBudgetMs, remainingMs)),
       });
       status = response.status;
       if (!response.ok) {
