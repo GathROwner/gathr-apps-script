@@ -147,6 +147,25 @@ test('readiness credit remains bounded by both clocks with no fast capture or se
   }
 });
 
+test('fresh cached GPS age variation does not turn fast successful requests into extra dwell', async () => {
+  const db = new ReadinessFirestore();
+  const sessionId = 'cached-fix-clock-session-001';
+  let receipt;
+  for (let index = 0; index <= 10; index++) {
+    const observedAtMs = startMs + index * 10_000;
+    // Each fix is fresh, and requests take no simulated transport time, but
+    // Core Location capture age alternates between0s and9s. Per-pair min loses
+    //9s every other interval even though neither clock runs backwards.
+    const capturedAtMs = observedAtMs - (index % 2 ? 9_000 : 0);
+    receipt = await recordCheckInReadinessSample(uid,
+      sample(sessionId, index + 1, observedAtMs, { capturedAtMs }),
+      db as unknown as Firestore, Timestamp.fromMillis(observedAtMs));
+    if (index === 4) assert.equal(receipt.hereReady, true);
+  }
+  assert.equal(receipt?.placeQualifyingMs, 90_000);
+  assert.equal(receipt?.arrival?.place, true);
+});
+
 test('readiness clock banks reset together after motion or explicit reset', async () => {
   for (const reset of [false, true]) {
     const db = new ReadinessFirestore();
