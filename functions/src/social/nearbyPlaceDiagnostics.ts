@@ -116,7 +116,21 @@ export function logProviderException(provider: ProviderAlias, stage: 'request' |
     if (candidate && ERROR_CODES.has(candidate)) code = candidate;
   } catch { /* Do not invoke arbitrary error serializers. */ }
   publish({ event: 'nearby_place_provider_failure', provider, stage, http_status: status,
-    elapsed_ms: duration(startedAt), category: stage === 'json' ? 'invalid_json' : name === 'TimeoutError' || name === 'AbortError' ? 'deadline_or_abort' : 'transport_error',
+    elapsed_ms: duration(startedAt), category: name === 'TimeoutError' || name === 'AbortError' ? 'deadline_or_abort' : stage === 'json' ? 'invalid_json' : 'transport_error',
     error_name: name, error_code: code,
+  }, sink);
+}
+
+/** HTTP200 may contain an Overpass runtime error; never publish its text. */
+export function logProviderPayloadFailure(provider: ProviderAlias, status: number, payload: unknown,
+  startedAt: number, sink?: FailureLogger): void {
+  const value = payload && typeof payload === 'object' && !Array.isArray(payload)
+    ? payload as Record<string, unknown> : {};
+  const remark = typeof value.remark === 'string' ? value.remark.trim() : '';
+  const categories = remark ? BODY_MARKERS.filter(([, pattern]) => pattern.test(normalizeBody(remark)))
+    .map(([name]) => name).slice(0, 6) : [];
+  publish({ event: 'nearby_place_provider_failure', provider, stage: 'payload', http_status: status,
+    elapsed_ms: duration(startedAt), category: remark ? 'provider_runtime_error' : 'invalid_payload',
+    body_categories: categories,
   }, sink);
 }

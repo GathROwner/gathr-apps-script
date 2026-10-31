@@ -12,7 +12,7 @@ import { storedQualifiedArrival } from './checkInArrival.js';
 import { preparedCanonicalVenueRecords } from './checkInVenueQuery.js';
 import { buildSocialRateLimitRecord } from './socialRateLimit.js';
 import { checkInPlaceDistance, parseCheckInBoundary, publicCheckInRadius, type BoundaryPoint } from './checkInPlaceGeometry.js';
-import { logProviderHttpFailure, logProviderException, type FailureLogger, type ProviderAlias } from './nearbyPlaceDiagnostics.js';
+import { logProviderHttpFailure, logProviderException, logProviderPayloadFailure, type FailureLogger, type ProviderAlias } from './nearbyPlaceDiagnostics.js';
 
 type FetchLike = (input: string | URL | Request, init?: RequestInit) => Promise<Response>;
 
@@ -24,6 +24,12 @@ const MAX_RETURNED_CANDIDATES = 5;
 const MAX_RESERVED_EXTERNAL_CANDIDATES = 2;
 const MAX_CANONICAL_VENUES_SCANNED = 500;
 const MAX_PREPARED_EXTERNAL_CANDIDATES = 20;
+// Keep provider fetch + body work inside the existing 25s client / 30s
+// callable limits, including time already spent preparing canonical venues.
+const DISCOVERY_PROVIDER_DEADLINE_MS = 22_000;
+const PROVIDER_TOTAL_BUDGET_MS = 20_000;
+const PROVIDER_ATTEMPT_BUDGET_MS = 10_000;
+const PROVIDER_DIAGNOSTIC_RESERVE_MS = 100;
 
 export interface ExternalCheckInPlaceSnapshot {
   type: 'external_place';
@@ -380,6 +386,7 @@ export async function discoverNearbyCheckInPlaces(
   const { latitude, longitude, accuracyMeters } = parseFreshNearbyLocation(input, now);
   const expiresAt = Timestamp.fromMillis(now.toMillis() + CHECK_IN_PLACE_CANDIDATE_TTL_MS);
   const preparation = input.preparation === true;
+  const discoveryStartedAt = Date.now();
   const canonical = await nearbyCanonicalVenues(db, latitude, longitude, accuracyMeters, now, preparation);
   const overpassQuery = `[out:json][timeout:8];(`
     + `nwr(around:${CHECK_IN_PLACE_DISCOVERY_RADIUS_METRES},${latitude},${longitude})["name"]["amenity"];`
@@ -392,10 +399,15 @@ export async function discoverNearbyCheckInPlaces(
     ? [configuredEndpoint]
     : [
       'https://overpass-api.de/api/interpreter',
-      'https://overpass.kumi.systems/api/interpreter',
+      // The same former Kumi operator now documents this direct hostname.
+      'https://overpass.private.coffee/api/interpreter',
     ];
+  const providerDeadlineAt = Math.min(discoveryStartedAt + DISCOVERY_PROVIDER_DEADLINE_MS,
+    Date.now() + PROVIDER_TOTAL_BUDGET_MS);
   let payload: unknown;
   for (const [index, endpoint] of endpoints.entries()) {
+    const remainingMs = providerDeadlineAt - Date.now() - PROVIDER_DIAGNOSTIC_RESERVE_MS;
+    if (remainingMs <= 0) break;
     const provider: ProviderAlias = configuredEndpoint ? 'configured' : index === 0 ? 'overpass_de' : 'overpass_kumi';
     const startedAt = Date.now();
     let stage: 'request' | 'json' = 'request';
@@ -409,7 +421,9 @@ export async function discoverNearbyCheckInPlaces(
           'User-Agent': 'GathRPreview/1.1 (support@gathr.app)',
         },
         body: new URLSearchParams({ data: overpassQuery }),
-        signal: AbortSignal.timeout(10_000),
+        // The signal remains attached through JSON body consumption, not only
+        // response headers. Failure-body diagnostics have their own100ms cap.
+        signal: AbortSignal.timeout(Math.min(PROVIDER_ATTEMPT_BUDGET_MS, remainingMs)),
       });
       status = response.status;
       if (!response.ok) {
@@ -417,7 +431,18 @@ export async function discoverNearbyCheckInPlaces(
         continue;
       }
       stage = 'json';
-      payload = await response.json();
+      const decoded: unknown = await response.json();
+      if (Date.now() >= providerDeadlineAt) throw new DOMException('Provider preparation deadline exceeded.', 'TimeoutError');
+      const result = record(decoded);
+      // Overpass streams runtime errors inside HTTP200 JSON, potentially with
+      // partial elements. Neither errors nor malformed JSON shapes prove that
+      // all nearby public places were prepared. A genuine empty array does.
+      if (!Array.isArray(result.elements)
+        || result.remark !== undefined && (typeof result.remark !== 'string' || result.remark.trim())) {
+        logProviderPayloadFailure(provider, response.status, decoded, startedAt, options.providerFailureLogger);
+        continue;
+      }
+      payload = decoded;
       break;
     } catch (error) {
       // Public Preview providers have no SLA. Try the next configured endpoint

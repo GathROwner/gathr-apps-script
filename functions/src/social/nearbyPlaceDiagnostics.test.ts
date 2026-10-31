@@ -114,7 +114,7 @@ test('the production logger receives the same safe structured payload and fixed 
   assertPrivate(calls);
 });
 
-test('502 then success preserves endpoints, request/body/deadline and returned canonical data; success is quiet', async () => {
+test('502 then success uses existing operators with the current fallback hostname; success is quiet', async () => {
   const logs: FailureLog[] = []; const calls: Array<{ url: string; init: RequestInit }> = [];
   const db = fakeDb();
   const result = await discoverNearbyCheckInPlaces('private-user', input, { db: db as never, now,
@@ -123,7 +123,7 @@ test('502 then success preserves endpoints, request/body/deadline and returned c
       return calls.length === 1 ? new Response(`Bad Gateway ${privateText}`, { status: 502 })
         : new Response('{"elements":[]}', { status: 200 });
     } });
-  assert.deepEqual(calls.map(x => x.url), ['https://overpass-api.de/api/interpreter', 'https://overpass.kumi.systems/api/interpreter']);
+  assert.deepEqual(calls.map(x => x.url), ['https://overpass-api.de/api/interpreter', 'https://overpass.private.coffee/api/interpreter']);
   assert.equal(calls[0].init.method, 'POST');
   assert.ok(calls[0].init.body instanceof URLSearchParams);
   assert.match(String(calls[0].init.body), /data=/);
@@ -134,6 +134,113 @@ test('502 then success preserves endpoints, request/body/deadline and returned c
   assert.equal(logs.length, 1);
   assert.equal(logs[0].provider, 'overpass_de');
   assertPrivate(logs);
+});
+
+test('HTTP200 runtime remarks and malformed payloads fall back rather than claim complete empty preparation', async () => {
+  for (const invalid of [null, [], {}, {elements: null}, {elements: [], remark: {message: privateText}},
+    {elements: [], remark: `runtime error: Query timed out ${privateText}`},
+    {elements: [{type: 'node', id: 1}], remark: `runtime error: out of memory ${privateText}`}]) {
+    let calls = 0;
+    const logs: FailureLog[] = [];
+    const result = await discoverNearbyCheckInPlaces('private-user', input, {db: fakeDb() as never, now,
+      providerFailureLogger: record => logs.push(record), fetchImpl: async () => new Response(JSON.stringify(
+        ++calls === 1 ? invalid : {elements: []}))});
+    assert.equal(calls, 2);
+    assert.equal(result.externalLookupStatus, 'complete');
+    assert.equal(logs.length, 1);
+    assert.equal(logs[0].stage, 'payload');
+    assertPrivate(logs);
+  }
+});
+
+test('two HTTP200 query errors retain canonical choices with partial status and no candidate writes', async () => {
+  let calls = 0;
+  const db = fakeDb();
+  const logs: FailureLog[] = [];
+  const result = await discoverNearbyCheckInPlaces('private-user', input, {db: db as never, now,
+    providerFailureLogger: record => logs.push(record), fetchImpl: async () => {
+      calls++;
+      return new Response(JSON.stringify({elements: [], remark: `runtime error: Query timed out ${privateText}`}));
+    }});
+  assert.equal(calls, 2);
+  assert.equal(result.externalLookupStatus, 'partial_unavailable');
+  assert.deepEqual(result.candidates.map(candidate => candidate.venueId), ['known']);
+  assert.equal(db.commits, 0);
+  assert.ok(logs.every(record => record.category === 'provider_runtime_error'
+    && (record.body_categories as string[]).includes('query_timeout')));
+  assertPrivate(logs);
+});
+
+test('provider budget subtracts canonical, response body and diagnostic time from the callable deadline', async context => {
+  context.mock.timers.enable({apis: ['Date'], now: now.toMillis()});
+  const deadlines: number[] = [];
+  context.mock.method(AbortSignal, 'timeout', (milliseconds: number) => {
+    deadlines.push(milliseconds);
+    return new AbortController().signal;
+  });
+  let calls = 0;
+  const db = fakeDb();
+  const query = db.collection.bind(db);
+  db.collection = name => {
+    context.mock.timers.tick(3_000); // Canonical work has already used3s.
+    return query(name);
+  };
+  const result = await discoverNearbyCheckInPlaces('private-user', input, {db: db as never, now,
+    providerFailureLogger: () => {}, fetchImpl: async () => {
+      calls++;
+      // Account for a slow response body, not just the initial HTTP headers.
+      return {status: 200, ok: true, json: async () => {
+        context.mock.timers.tick(calls === 1 ? 10_000 : 9_000);
+        return {elements: [], remark: 'runtime error: Query timed out'};
+      }} as Response;
+    }});
+  assert.equal(calls, 2);
+  assert.deepEqual(deadlines, [10_000, 8_900]);
+  assert.equal(result.externalLookupStatus, 'partial_unavailable');
+});
+
+test('an exhausted canonical budget starts no provider request and never reports public preparation complete', async context => {
+  context.mock.timers.enable({apis: ['Date'], now: now.toMillis()});
+  const db = fakeDb();
+  const query = db.collection.bind(db);
+  db.collection = name => { context.mock.timers.tick(22_000); return query(name); };
+  let calls = 0;
+  const result = await discoverNearbyCheckInPlaces('private-user', input, {db: db as never, now,
+    providerFailureLogger: () => {}, fetchImpl: async () => {calls++; return new Response('{"elements":[]}');}});
+  assert.equal(calls, 0);
+  assert.equal(result.externalLookupStatus, 'partial_unavailable');
+  assert.equal(result.candidates[0].venueId, 'known');
+});
+
+test('a body arriving after the shared deadline cannot mark public preparation complete', async context => {
+  context.mock.timers.enable({apis: ['Date'], now: now.toMillis()});
+  const logs: FailureLog[] = [];
+  let calls = 0;
+  const result = await discoverNearbyCheckInPlaces('private-user', input, {db: fakeDb() as never, now,
+    providerFailureLogger: record => logs.push(record), fetchImpl: async () => {
+      calls++;
+      return {status: 200, ok: true, json: async () => {
+        context.mock.timers.tick(20_001);
+        return {elements: []};
+      }} as Response;
+    }});
+  assert.equal(calls, 1);
+  assert.equal(result.externalLookupStatus, 'partial_unavailable');
+  assert.equal(logs[0].category, 'deadline_or_abort');
+  assert.equal(logs[0].stage, 'json');
+});
+
+test('a configured loopback provider remains one attempt and genuine empty results remain complete', async () => {
+  let calls = 0;
+  const result = await discoverNearbyCheckInPlaces('private-user', input, {db: fakeDb() as never, now,
+    overpassEndpoint: 'http://127.0.0.1:5018/interpreter', providerFailureLogger: () => {},
+    fetchImpl: async url => {
+      calls++;
+      assert.equal(String(url), 'http://127.0.0.1:5018/interpreter');
+      return new Response('{"elements":[],"remark":"  "}');
+    }});
+  assert.equal(calls, 1);
+  assert.equal(result.externalLookupStatus, 'complete');
 });
 
 test('timeouts preserve exactly two attempts and usable canonical venues with explicit partial status', async () => {
