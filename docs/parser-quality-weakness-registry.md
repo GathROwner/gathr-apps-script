@@ -11,6 +11,29 @@ a repost is not an independent confirmed example. Keep proposed custom correctio
 separate from verified resolutions and test healthy counterexamples before any
 rule implementation. This reference file does not change parser/runtime behavior.
 
+## November 1 parked receipt-draw preparation (PQ-041)
+
+Row94/source1105127199173038 (Island Chef Downtown) combines a Facebook
+like/share/tag voucher contest with dine-in receipt entries for November16 and
+December1 gift-voucher draws. The saved candidates are standalone "Win Your Meal
+contest draw" gatherings, held only for missing clocks. Existing food-promotion
+policy permits the dine-in prize-entry offer but does not establish attendance at
+the later drawing. A clock or submission deadline cannot supply that identity.
+
+The isolated preparation adds a source/item-local private hold for named draw
+candidates matched to one receipt-entry caption block, without deleting evidence
+or converting the offer into an event. Food-special items, explicit public/live
+draw attendance and unrelated scheduled activities remain eligible. Ambiguous or
+unmatched source blocks remain outside this narrow guard. Original caption and
+both saved candidate/held inventories are retained in
+`functions/src/parsing/__fixtures__/nov1-receipt-draw.json`; focused controls are
+`functions/src/parsing/receiptDrawPublication.test.ts`. This is code preparation
+only: no deployment, live repair, inferred clocks, new model call or gate change.
+Local validation passes: TypeScript build,94 focused tests (including27 new
+receipt-draw checks),5 supplementary boundary checks and the once-only full
+compiled suite (1,400 tests,zero failures/skips). Local review notes and receipts
+are under ignored `artifacts/nov1-receipt-draw/` in the preparation checkout.
+
 ## November 1 mechanism review and deployed prevention
 
 Status: **deployed, repaired and independently live verified**. Runtime source

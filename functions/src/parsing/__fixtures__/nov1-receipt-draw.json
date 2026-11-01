@@ -1,0 +1,70 @@
+{
+  "provenance": "Original saved November 1 row 94 caption, Stage3 candidates and Stage5.6 held outputs; copied without a new parser/API call.",
+  "inventoryPath": "C:/Users/craig/Documents/Codex/2026-11-01/parked-resolution/H07_SOURCE_INVENTORY.json",
+  "original": {
+    "row": 94,
+    "source": "1105127199173038",
+    "venue": "Island Chef Downtown Lounge & Eatery",
+    "caption": "Want a CHANCE TO WIN an extra $50 Gift Voucher? (Facebook Exclusive!)\n Like this post\n Share this post\n Tag a friend in the comments below who you want to bring with you!\n\n CONTEST ALERT: WIN YOUR MEAL! \nEnjoy a meal at Island Chef Downtown (62 Queen Street, Charlottetown) and your next visit could be on us!  \nHow to enter:\n Dine in with us and write your name and phone number on the back of your receipt.  \n Draw Dates: 2026 November 16th and December 1st for a $100 gift voucher each !  \n Reserve your table: https://reservations.islandchefdowntown.ca/  or call us at 9029268139 to book your table. \n#IslandChefDowntown #CharlottetownEats #PEIFood #ContestAlert #WinYourMeal\n#charlottetownpei #stratfordpei #townofthreerivers #explorepei #princeedwardislnd\n\nOCR TEXT:\nMay be an image of text",
+    "facebook": "https://www.facebook.com/islandchefatthepier",
+    "held": [
+      {
+        "name": "Win Your Meal contest draw",
+        "startDate": "2026-11-16",
+        "endDate": "2026-11-16",
+        "startTime": "",
+        "endTime": "",
+        "category": "Gatherings & Parties",
+        "ticketPrice": "",
+        "description": "A random draw for a $100 gift voucher. To enter, dine in and write your name and phone number on the back of your receipt.",
+        "_sourceTimeConstraint": {
+          "reason": "dated_activity_without_clock",
+          "evidence": "Dated activity has no advertised start clock"
+        },
+        "timeResolution": {
+          "hoursUsed": false,
+          "reason": "dated_activity_without_clock"
+        }
+      },
+      {
+        "name": "Win Your Meal contest draw",
+        "startDate": "2026-12-01",
+        "endDate": "2026-12-01",
+        "startTime": "",
+        "endTime": "",
+        "category": "Gatherings & Parties",
+        "ticketPrice": "",
+        "description": "A random draw for a $100 gift voucher. To enter, dine in and write your name and phone number on the back of your receipt.",
+        "_sourceTimeConstraint": {
+          "reason": "dated_activity_without_clock",
+          "evidence": "Dated activity has no advertised start clock"
+        },
+        "timeResolution": {
+          "hoursUsed": false,
+          "reason": "dated_activity_without_clock"
+        }
+      }
+    ],
+    "stage3": [
+      {
+        "name": "Win Your Meal contest draw",
+        "date": "2026-11-16",
+        "startTime": "",
+        "endTime": "",
+        "venue": "Island Chef Downtown, 62 Queen Street, Charlottetown",
+        "price": "",
+        "extractionReason": "The post explicitly dates a random contest draw to November 16, 2026."
+      },
+      {
+        "name": "Win Your Meal contest draw",
+        "date": "2026-12-01",
+        "startTime": "",
+        "endTime": "",
+        "venue": "Island Chef Downtown, 62 Queen Street, Charlottetown",
+        "price": "",
+        "extractionReason": "The post explicitly dates a random contest draw to December 1, 2026."
+      }
+    ],
+    "coverage": []
+  }
+}

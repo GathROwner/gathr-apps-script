@@ -12,11 +12,36 @@ function explicitlyWithholdsAttendeeVenue(text: string): boolean {
   return /\b(?:location|venue|address)(?:\s+(?:details|information))?(?:\s+and\s+preparation\s+guidelines)?\s+(?:will\s+be|(?:is|are)(?:\s+only)?)\s+(?:provided|shared|disclosed|sent|revealed|given)\s+(?:only\s+)?(?:upon|after|following|on)\s+(?:registration|registering|booking)\b/i.test(text);
 }
 
+/** A food-purchase entry offer can qualify, without creating a second event at
+ * its draw date. Limit this hold to a named draw tied to one receipt-entry block;
+ * generic prize words or unrelated items in a mixed caption are insufficient. */
+function isReceiptDrawWithoutAttendanceEvidence(item: ExtractedItem, source: string): boolean {
+  if (item._sourceType === 'special' || ('type' in item && item.type === 'special')) return false;
+  const title = String(item.name || '').trim();
+  const identity = title.replace(/\s+(?:contest\s+)?draw\s*$/i, '').trim();
+  if (identity === title || identity.split(/\s+/).length < 2 ||
+      !/\b(?:draw|drawing)\b/i.test(`${item.description || ''} ${item.extractionReason || ''}`)) return false;
+  const key = (value: string) => value.normalize('NFKC').toLowerCase().replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
+  const blocks = source.split(/\r?\n\s*\r?\n/).filter(block =>
+    ` ${key(block)} `.includes(` ${key(identity)} `));
+  // Ambiguous/repeated headings need review rather than a cross-block decision.
+  if (blocks.length !== 1) return false;
+  const block = blocks[0];
+  if (!/\b(?:dine\s+in|buy|purchase|meal)\b/i.test(block) ||
+      !/\b(?:write|put|leave)\b[^.!?\n]{0,90}\b(?:name|phone|contact)\b[^.!?\n]{0,90}\breceipt\b/i.test(block) ||
+      !/\bdraw\s+dates?\s*:/i.test(block)) return false;
+  // Attendance must refer to the draw itself. A concert, dinner reservation or
+  // public bingo elsewhere in this caption cannot turn a draw into a gathering.
+  const attendance = /\b(?:live|public|in[ -]person)\s+(?:(?:prize|receipt|contest)\s+)?draw\b|\bdraw\s+(?:is\s+|will\s+be\s+)?(?:live|in[ -]person|open\s+to\s+the\s+public)\b|\b(?:watch|attend|join\s+us\s+for|come\s+(?:to|for))\s+(?:the\s+)?(?:[\p{L}\p{N}]+\s+){0,6}draw\b|\bwinners?\b[^.!?\n]{0,65}\b(?:selected|announced|chosen|drawn)\b[^.!?\n]{0,35}\b(?:live|in[ -]person)\b|\b(?:must|need\s+to)\s+be\s+present\s+to\s+win\b/iu;
+  return !attendance.test(block) && !attendance.test(String(item.description || ''));
+}
+
 /** Source-local eligibility, before formatting can make an operations notice
  * or retail story look like a scheduled public activity. No clocks are made. */
 export function sourcePublicationHoldReason(item: ExtractedItem, caption: string): string | undefined {
   const title=String(item.name || ''), detail=String(item.description || '');
   const source=caption.split(/\n\s*OCR TEXT:/i)[0];
+  if (isReceiptDrawWithoutAttendanceEvidence(item, source)) return 'receipt_entry_draw_without_attendee_activity';
   // A past activity does not borrow a future opening window elsewhere in a
   // mixed recap. Require the item's own description to identify that recap.
   if(/\b(?:celebrated|celebrating|joined us|had a (?:wonderful|great|fantastic) time)\b/i.test(detail) &&
