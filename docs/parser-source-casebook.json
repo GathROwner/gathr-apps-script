@@ -1,0 +1,307 @@
+{
+  "schemaVersion": 1,
+  "title": "GathR unresolved source cases for future pattern review",
+  "purpose": "Retain evidence and compare repeat issues before proposing general guards or narrow custom rules.",
+  "createdAtUTC": "2026-11-01T20:13:29.300Z",
+  "scope": "Three source-clock cases from the November1 audit; reference archive only.",
+  "evidenceRoot": "C:/Users/craig/Documents/GathR Parser Evidence/source-clock-casebook/2026-11-01",
+  "originAudit": "C:/Users/craig/Documents/Codex/2026-11-01/parse-audit",
+  "relatedExistingHoldRegister": "C:/Users/craig/Documents/Codex/2026-11-01/parse-audit/parked-review-candidates.json",
+  "retained": {
+    "originalAuditHold": {
+      "path": "C:\\Users\\craig\\Documents\\GathR Parser Evidence\\source-clock-casebook\\2026-11-01\\original-H01-audit-hold.json",
+      "sha256": "28c8fe4211e4fae094b4c04c1bc305c2ce5333154146f0d28733ac5822453180"
+    },
+    "originalDivisionFinding": {
+      "path": "C:\\Users\\craig\\Documents\\GathR Parser Evidence\\source-clock-casebook\\2026-11-01\\original-N06-audit-finding.json",
+      "sha256": "b74322c4a8a534352830e65cf3ef3ae3c85da5584a247f33e186e6a8b6d3755d"
+    },
+    "sourceCaptions": {
+      "path": "C:\\Users\\craig\\Documents\\GathR Parser Evidence\\source-clock-casebook\\2026-11-01\\source-captions.json",
+      "sha256": "74c3c6c9db18a2ece3c958d7b39dd44fa174fdc873d60013c22679fa0cf86dd6"
+    },
+    "webFollowup": {
+      "path": "C:\\Users\\craig\\Documents\\GathR Parser Evidence\\source-clock-casebook\\2026-11-01\\web-verification.json",
+      "sha256": "3989a8f7f8572e662ebc9b9939b30c62570569dd245ff64d09f3e0f03d6fe134"
+    }
+  },
+  "posters": [
+    {
+      "row": 305,
+      "sourceId": "1751246487005228",
+      "sourceURL": "https://www.facebook.com/cavendishfarmscommunityeventscentre/posts/pfbid02X7NHEzTMiqiou398TnLqcgBiz6mbH4SfnhCocQ7kVx9eiMH7LmvH6MWR92FCVaerl",
+      "snapshot": "parse_snapshots/1akBwh6PyC00EvJBSwtfNZBKvb77wDpG3_305_1793543709265",
+      "poster": {
+        "path": "C:\\Users\\craig\\Documents\\GathR Parser Evidence\\source-clock-casebook\\2026-11-01\\daily-schedule-original.img",
+        "sha256": "e0c38852a675e782371b16a544cb35cf2f228433acfae4392560413a37aa5ff0",
+        "originalPath": "C:\\Users\\craig\\Documents\\Codex\\2026-11-01\\parse-audit\\media\\305-media-0.img",
+        "originalBytesPreserved": true
+      }
+    },
+    {
+      "row": 306,
+      "sourceId": "1750670827062794",
+      "sourceURL": "https://www.facebook.com/cavendishfarmscommunityeventscentre/posts/pfbid02vo81YMGPgaWoa3NXJpHyi2rTFBErDJyb6z182foTrWdPiH4q5ZwfS6VbjYzzfpxVl",
+      "snapshot": "parse_snapshots/1akBwh6PyC00EvJBSwtfNZBKvb77wDpG3_306_1793543734876",
+      "poster": {
+        "path": "C:\\Users\\craig\\Documents\\GathR Parser Evidence\\source-clock-casebook\\2026-11-01\\family-skate-original.img",
+        "sha256": "3d8652266da00aeb94a90b4cc610dfd5782688aa3a4f85308923acf068c2ddb4",
+        "originalPath": "C:\\Users\\craig\\Documents\\Codex\\2026-11-01\\parse-audit\\media\\306-media-0.img",
+        "originalBytesPreserved": true
+      }
+    }
+  ],
+  "sourceCaptions": [
+    {
+      "row": 305,
+      "sourceId": "1751246487005228",
+      "publishedAt": "2026-11-01T12:16:41.000Z",
+      "originalURL": "https://www.facebook.com/cavendishfarmscommunityeventscentre/posts/pfbid02X7NHEzTMiqiou398TnLqcgBiz6mbH4SfnhCocQ7kVx9eiMH7LmvH6MWR92FCVaerl",
+      "caption": "Today's Happenings @top fans",
+      "sharedCaption": ""
+    },
+    {
+      "row": 306,
+      "sourceId": "1750670827062794",
+      "publishedAt": "2026-11-01T00:21:23.000Z",
+      "originalURL": "https://www.facebook.com/cavendishfarmscommunityeventscentre/posts/pfbid02vo81YMGPgaWoa3NXJpHyi2rTFBErDJyb6z182foTrWdPiH4q5ZwfS6VbjYzzfpxVl",
+      "caption": "@top fans\n\nFamily Skate November 1!",
+      "sharedCaption": ""
+    }
+  ],
+  "historyNote": "The original H01 audit note mentions unsuccessful searches. The later conversation described that history too categorically. The retained web follow-up contains concrete searches/access failures. Neither establishes a verified corrected clock.",
+  "webResult": "No accessible matching official correction obtained; this does not prove none exists.",
+  "cases": [
+    {
+      "venue": {
+        "name": "Cavendish Farms Community Events Centre - Tyne Valley",
+        "venueId": "LglliE42SPFssmoU01su"
+      },
+      "occurrenceDate": "2026-11-01",
+      "timeZone": "America/Halifax",
+      "resolutionStatus": "unresolved_reference",
+      "distinctOccurrencesObserved": 1,
+      "verifiedCorrectionExamples": 0,
+      "futureMatches": [],
+      "sourceRows": [
+        305
+      ],
+      "sourceIds": [
+        "1751246487005228"
+      ],
+      "evidence": [
+        {
+          "row": 305,
+          "sourceId": "1751246487005228",
+          "sourceURL": "https://www.facebook.com/cavendishfarmscommunityeventscentre/posts/pfbid02X7NHEzTMiqiou398TnLqcgBiz6mbH4SfnhCocQ7kVx9eiMH7LmvH6MWR92FCVaerl",
+          "snapshot": "parse_snapshots/1akBwh6PyC00EvJBSwtfNZBKvb77wDpG3_305_1793543709265",
+          "poster": {
+            "path": "C:\\Users\\craig\\Documents\\GathR Parser Evidence\\source-clock-casebook\\2026-11-01\\daily-schedule-original.img",
+            "sha256": "e0c38852a675e782371b16a544cb35cf2f228433acfae4392560413a37aa5ff0",
+            "originalPath": "C:\\Users\\craig\\Documents\\Codex\\2026-11-01\\parse-audit\\media\\305-media-0.img",
+            "originalBytesPreserved": true
+          }
+        }
+      ],
+      "id": "CLOCK-001",
+      "title": "U18 girls hockey has identical printed start and finish",
+      "tags": [
+        "identical-explicit-endpoints",
+        "source-typo",
+        "hockey-age-division"
+      ],
+      "sourceClaims": [
+        {
+          "row": 305,
+          "start": "18:30",
+          "end": "18:30",
+          "literal": "6:30 PM–6:30 PM"
+        }
+      ],
+      "listingPath": null,
+      "relatedProtectedPath": "venues/LglliE42SPFssmoU01su/events/tUOl64XhgloOsjO1ekmu",
+      "runDisposition": "Incorrectly matched to distinct U11 Girls by the Nov1 run; no separate U18 listing created. Later prevention now holds this contradictory range and protects distinct U-age divisions.",
+      "decision": "Unknown finish; do not infer19:30 from the next session or copy the U11 finish.",
+      "missingEvidence": "Corrected dated venue schedule or exact organizer confirmation of the U18 finish.",
+      "ruleDiscussion": {
+        "status": "inactive_hypothesis",
+        "alreadyDeployedProtection": "Hold true same-day zero-duration source ranges; prevent U18/U11 occurrence merges.",
+        "possibleFutureRule": "Consider a narrow venue/session rule only after independent source confirmations establish the intended durations.",
+        "counterexamplesRequired": [
+          "Explicit24-hour or multi-day event with matching endpoint clocks",
+          "Recoverable printed range10~5pm whose extracted clocks accidentally match",
+          "A separate U11/U18 session at the same venue"
+        ]
+      }
+    },
+    {
+      "venue": {
+        "name": "Cavendish Farms Community Events Centre - Tyne Valley",
+        "venueId": "LglliE42SPFssmoU01su"
+      },
+      "occurrenceDate": "2026-11-01",
+      "timeZone": "America/Halifax",
+      "resolutionStatus": "unresolved_reference",
+      "distinctOccurrencesObserved": 1,
+      "verifiedCorrectionExamples": 0,
+      "futureMatches": [],
+      "sourceRows": [
+        305
+      ],
+      "sourceIds": [
+        "1751246487005228"
+      ],
+      "evidence": [
+        {
+          "row": 305,
+          "sourceId": "1751246487005228",
+          "sourceURL": "https://www.facebook.com/cavendishfarmscommunityeventscentre/posts/pfbid02X7NHEzTMiqiou398TnLqcgBiz6mbH4SfnhCocQ7kVx9eiMH7LmvH6MWR92FCVaerl",
+          "snapshot": "parse_snapshots/1akBwh6PyC00EvJBSwtfNZBKvb77wDpG3_305_1793543709265",
+          "poster": {
+            "path": "C:\\Users\\craig\\Documents\\GathR Parser Evidence\\source-clock-casebook\\2026-11-01\\daily-schedule-original.img",
+            "sha256": "e0c38852a675e782371b16a544cb35cf2f228433acfae4392560413a37aa5ff0",
+            "originalPath": "C:\\Users\\craig\\Documents\\Codex\\2026-11-01\\parse-audit\\media\\305-media-0.img",
+            "originalBytesPreserved": true
+          }
+        }
+      ],
+      "id": "CLOCK-002",
+      "title": "Morning hockey prints a PM finish",
+      "tags": [
+        "possible-AM-PM-typo",
+        "morning-context",
+        "source-clock-conflict"
+      ],
+      "sourceClaims": [
+        {
+          "row": 305,
+          "start": "10:45",
+          "end": "23:45",
+          "literal": "10:45 AM–11:45 PM"
+        }
+      ],
+      "listingPath": "venues/LglliE42SPFssmoU01su/events/HU77WFmf1S89n7pfXJe4",
+      "runDisposition": "Existing listing faithfully copied the printedPM finish; no manual time correction was made.",
+      "inference": {
+        "start": "10:45",
+        "end": "11:45",
+        "confidenceLabel": "strong inference, not independently verified",
+        "basis": [
+          "Activity is named SMH Sunday Morning Hockey",
+          "Changing onlyPM toAM makes the printed11:45 finish consistent with the morning label",
+          "The daily poster lists family skating beginning at noon"
+        ],
+        "userAssessment": "Craig considers a one-hour morning session likely; this is not independent venue confirmation."
+      },
+      "decision": "Retain unresolved source conflict; the proposed11:45AM finish is not established fact.",
+      "missingEvidence": "Corrected Nov1 poster, exact official session listing, or venue confirmation.",
+      "ruleDiscussion": {
+        "status": "inactive_hypothesis",
+        "alreadyDeployedProtection": "Hold implausibly long ordinary sport sessions while preserving explicit overnight/full-day/multi-day context.",
+        "possibleFutureRule": "If repeated independently confirmed examples demonstrate a venue-specificAM/PM mistake, evaluate an evidence-bounded correction.",
+        "counterexamplesRequired": [
+          "Overnight hockey fundraiser with overnight context only in description",
+          "A long tournament or marathon",
+          "Unrelated caption morning wording that belongs to another activity"
+        ]
+      }
+    },
+    {
+      "venue": {
+        "name": "Cavendish Farms Community Events Centre - Tyne Valley",
+        "venueId": "LglliE42SPFssmoU01su"
+      },
+      "occurrenceDate": "2026-11-01",
+      "timeZone": "America/Halifax",
+      "resolutionStatus": "unresolved_reference",
+      "distinctOccurrencesObserved": 1,
+      "verifiedCorrectionExamples": 0,
+      "futureMatches": [],
+      "sourceRows": [
+        305,
+        306
+      ],
+      "sourceIds": [
+        "1751246487005228",
+        "1750670827062794"
+      ],
+      "evidence": [
+        {
+          "row": 305,
+          "sourceId": "1751246487005228",
+          "sourceURL": "https://www.facebook.com/cavendishfarmscommunityeventscentre/posts/pfbid02X7NHEzTMiqiou398TnLqcgBiz6mbH4SfnhCocQ7kVx9eiMH7LmvH6MWR92FCVaerl",
+          "snapshot": "parse_snapshots/1akBwh6PyC00EvJBSwtfNZBKvb77wDpG3_305_1793543709265",
+          "poster": {
+            "path": "C:\\Users\\craig\\Documents\\GathR Parser Evidence\\source-clock-casebook\\2026-11-01\\daily-schedule-original.img",
+            "sha256": "e0c38852a675e782371b16a544cb35cf2f228433acfae4392560413a37aa5ff0",
+            "originalPath": "C:\\Users\\craig\\Documents\\Codex\\2026-11-01\\parse-audit\\media\\305-media-0.img",
+            "originalBytesPreserved": true
+          }
+        },
+        {
+          "row": 306,
+          "sourceId": "1750670827062794",
+          "sourceURL": "https://www.facebook.com/cavendishfarmscommunityeventscentre/posts/pfbid02vo81YMGPgaWoa3NXJpHyi2rTFBErDJyb6z182foTrWdPiH4q5ZwfS6VbjYzzfpxVl",
+          "snapshot": "parse_snapshots/1akBwh6PyC00EvJBSwtfNZBKvb77wDpG3_306_1793543734876",
+          "poster": {
+            "path": "C:\\Users\\craig\\Documents\\GathR Parser Evidence\\source-clock-casebook\\2026-11-01\\family-skate-original.img",
+            "sha256": "3d8652266da00aeb94a90b4cc610dfd5782688aa3a4f85308923acf068c2ddb4",
+            "originalPath": "C:\\Users\\craig\\Documents\\Codex\\2026-11-01\\parse-audit\\media\\306-media-0.img",
+            "originalBytesPreserved": true
+          }
+        }
+      ],
+      "id": "CLOCK-003",
+      "title": "Family skate has two official finish times",
+      "tags": [
+        "conflicting-official-posts",
+        "changed-session-end",
+        "source-recency"
+      ],
+      "sourceClaims": [
+        {
+          "row": 306,
+          "publishedAt": "2026-11-01T00:21:23.000Z",
+          "start": "12:00",
+          "end": "13:00",
+          "literal": "12–1PM dedicated Family Skate poster"
+        },
+        {
+          "row": 305,
+          "publishedAt": "2026-11-01T12:16:41.000Z",
+          "start": "12:00",
+          "end": "13:15",
+          "literal": "12–1:15PM newer daily ice schedule"
+        }
+      ],
+      "listingPath": "venues/LglliE42SPFssmoU01su/events/FVI9FJ04PvBPkbaCaR7C",
+      "runDisposition": "Retained13:15 from the newer daily schedule; no further overwrite or extra listing.",
+      "decision": "The source conflict remains unexplained. Newer publication is the retained choice, not proof that the earlier source was wrong or officially amended.",
+      "missingEvidence": "Explicit update/cancellation/correction or exact venue confirmation for Nov1.",
+      "ruleDiscussion": {
+        "status": "inactive_hypothesis",
+        "alreadyDeployedProtection": "Preserve source provenance; avoid silently rewriting a conflicting official clock.",
+        "possibleFutureRule": "Evaluate source precedence only if repeated confirmed examples establish that this venue treats its daily schedule as amendments to earlier posters.",
+        "counterexamplesRequired": [
+          "Later post repeats an older poster",
+          "Different date, venue, session or edition",
+          "Official cancellation explicitly supersedes a prior schedule"
+        ],
+        "questionToCheck": "Check whether the public activity finish and the rink allocation/turnaround window describe different things before introducing a simple newer-post-wins rule. This is an unconfirmed explanation, not source evidence."
+      }
+    }
+  ],
+  "reviewWorkflow": [
+    "For a similar new post, compare pattern tags, venue, session identity, exact occurrence date and literal source fields.",
+    "Append an independently dated example or futureMatches link; a repost or identical image is not another independent occurrence.",
+    "Keep printed claims, model output, inference, observed listing state and confirmed corrections separate.",
+    "Follow bounded official verification; record URL/date/access limits.",
+    "A reusable rule needs confirmed positive examples and healthy counterexamples. Use a general guard when appropriate; scope any venue-specific exception to explicit evidence.",
+    "Record a later resolution alongside the original conflict. Proposed rules remain inactive until separately implemented and validated."
+  ],
+  "productionWrites": 0,
+  "parserChanges": 0,
+  "canonicalReferencePath": "C:/Users/craig/Documents/GathR Parser Evidence/source-clock-casebook/cases.json",
+  "versionedRepositoryPath": "docs/parser-source-casebook.json",
+  "activeCustomOverrides": []
+}

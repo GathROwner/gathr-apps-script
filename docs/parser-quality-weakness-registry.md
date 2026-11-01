@@ -1,5 +1,16 @@
 # GathR parser-quality weakness registry
 
+## Retained unresolved source examples
+
+[Source casebook](parser-source-casebook.json) retains the three November1
+clock conflicts, exact source IDs/posters, web-check limits, saved decisions and
+inactive rule hypotheses. The durable reference and original poster copies live
+under `C:/Users/craig/Documents/GathR Parser Evidence/source-clock-casebook/`.
+For a similar new post, link the new occurrence and compare the literal evidence;
+a repost is not an independent confirmed example. Keep proposed custom corrections
+separate from verified resolutions and test healthy counterexamples before any
+rule implementation. This reference file does not change parser/runtime behavior.
+
 ## November 1 mechanism review and deployed prevention
 
 Status: **deployed, repaired and independently live verified**. Runtime source
