@@ -12,6 +12,7 @@ import {POLICY,hash,cdnUrl,discover} from './policy.mjs';
 import {prepare,transcribe,rebindTranscripts,canonical,sha256} from './evidence-worker.mjs';
 import {reviewEditorial,EDITORIAL_VERSION} from './editorial-review.mjs';
 import {listingFingerprint} from './published-policy.mjs';
+import {nextListingOccurrence,scheduleFingerprint as listingScheduleFingerprint,halifaxDate} from './listing-schedule.mjs';
 const exec=promisify(execFile);
 process.env.FFMPEG_PATH=ffmpeg; process.env.FFPROBE_PATH=ffprobe.path;
 const now=()=>new Date().toISOString();
@@ -78,18 +79,17 @@ export async function normalize(input,output) {
   const bytes=await fs.readFile(output);if(bytes.length>8_000_000)throw Error('review_rendition_over_size');
   return {bytes,hasAudio:audio.length===1,durationSeconds:duration,originalWidth:video[0].width,originalHeight:video[0].height};
 }
-export async function exactListings(db,c) {
-  const today=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Halifax',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+export async function exactListings(db,c,now=Date.now()) {
   const results=await db.collectionGroup('events').where('sourceUniqueIds','array-contains',c.sourcePostId).limit(51).get();
   if(results.size>50)return [];
   const all=[];
   for(const d of results.docs) {
     if(!/^(venues\/[^/]+\/events\/[^/]+|events\/[^/]+)$/.test(d.ref.path))continue;
-    const v=d.data(); if(v.isExpired||v.isCancelled||v.cancelled||['expired','cancelled','deleted','archived'].includes(v.status))continue;
-    const end=String(v.endDate||v.startDate||'').slice(0,10);if(!/^\d{4}-\d{2}-\d{2}$/.test(end)||end<today)continue;
+    const v=d.data(),occurrence=nextListingOccurrence(v,now);if(!occurrence)continue;
+    if(occurrence.recurring&&c.expiresAt&&occurrence.date>halifaxDate(Date.parse(c.expiresAt)))continue;
     let venue=v.venueName||v.locationLabel||v.locationName||v.establishment||'';
     if(d.ref.path.startsWith('venues/')) {const p=await d.ref.parent.parent.get();venue=p.data()?.name||venue;}
-    all.push({path:d.ref.path,updateTime:`${d.updateTime.seconds}:${d.updateTime.nanoseconds}`,fingerprint:listingFingerprint(v),title:v.title||v.name||'',date:String(v.startDate||''),time:String(v.startTime||''),venue,price:typeof(v.price||v.ticketPrice)==='string'?(v.price||v.ticketPrice):JSON.stringify(v.price??v.ticketPrice??v.pricing??''),description:String(v.description||'').slice(0,4000),sourceMatched:true});
+    all.push({path:d.ref.path,updateTime:`${d.updateTime.seconds}:${d.updateTime.nanoseconds}`,fingerprint:listingFingerprint(v),title:v.title||v.name||'',date:occurrence.date,time:String(v.startTime||''),venue,price:typeof(v.price||v.ticketPrice)==='string'?(v.price||v.ticketPrice):JSON.stringify(v.price??v.ticketPrice??v.pricing??''),description:String(v.description||'').slice(0,4000),sourceMatched:true,...(occurrence.recurring?{scheduleFingerprint:listingScheduleFingerprint(v),notes:`Recurring ${occurrence.pattern} series anchored ${occurrence.anchorDate}. The next supported occurrence is ${occurrence.date}; the source post may advertise a prior occurrence of this same series.`}:{})});
   }
   return all;
 }
@@ -174,7 +174,7 @@ export async function work({db,bucket},apiKey) {
         }
         await doc.ref.update({...base,listings});
         const chosen=listings.find(v=>v.path===c.humanJudgment?.listingPath)||(listings.length===1?listings[0]:null);
-        const listingContext=chosen?{...chosen,notes:c.sourcePostedAt?`Source post published ${c.sourcePostedAt}; interpret relative dates against the post date.`:''}:{sourceMatched:false,notes:listings.length?'Multiple exact listings need selection.':'No existing exact source-linked listing was found.'};
+        const listingContext=chosen?{...chosen,notes:[chosen.notes,c.sourcePostedAt?`Source post published ${c.sourcePostedAt}; interpret relative dates against the post date.`:''].filter(Boolean).join(' ')}:{sourceMatched:false,notes:listings.length?'Multiple exact listings need selection.':'No existing exact source-linked listing was found.'};
         await fs.writeFile(join(root,'input.json'),JSON.stringify({clips:[{id:doc.id,videoPath:join(root,'video.mp4'),sourcePostId:c.sourcePostId,sourceVideoId:c.sourceVideoId,caption:c.caption,listingContext,sourceAudio:c.sourceAudio}]}));
         const prepared=await prepare({manifestPath:join(root,'input.json'),out:join(root,'prepared')});
         const boundedFetch=async(url,options)=>{

@@ -79,3 +79,11 @@ Limitations: raw-capture-less virtual Apify datasets are held. Missing video URL
 are not automatically recovered through Facebook browsing. Source/occurrence
 ambiguity is held. Models receive sampled frames and speech text, not a continuous
 video/audio viewing. The reviewed Hokum trial demonstrated full 83-second handling.
+
+Simple weekly recurring listings use their next supported occurrence rather than
+discarding an old anchor date. Until dates, explicit end bounds, occurrence counts
+and week intervals remain binding; complex or contradictory schedules stay held.
+Review context distinguishes the series anchor and source post date from the next
+occurrence. Published recurring bindings retain a separate schedule fingerprint
+without changing the legacy public-reader fingerprint. Expiry follows the next
+occurrence in Halifax time and cannot exceed the clip's private evidence retention.

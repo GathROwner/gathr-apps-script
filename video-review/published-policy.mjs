@@ -1,4 +1,5 @@
 import {hash} from './policy.mjs';
+import {scheduleFingerprint,nextListingOccurrence} from './listing-schedule.mjs';
 export const PUBLIC_POLICY='listing-video-auto-v1';
 export const PUBLIC_BUCKET='gathr-uploaded-images';
 export const REGISTRY_LOCK='runtime_metadata/listing_video_registry_lock';
@@ -16,6 +17,7 @@ export function bindingIsCurrent(binding,data,now=Date.now()) {
  if(!data||!Number.isFinite(Date.parse(binding.expiresAt))||Date.parse(binding.expiresAt)<=now||
   [data.isExpired,data.isCancelled,data.cancelled,data.canceled,data.metadata?.isExpired,data.metadata?.isCancelled,data.metadata?.cancelled].some(truth)||
   ['expired','cancelled','deleted','archived'].includes(String(data.status||data.metadata?.status||'').toLowerCase()))return false;
+ if(binding.scheduleFingerprint&&(binding.scheduleFingerprint!==scheduleFingerprint(data)||!nextListingOccurrence(data,now)))return false;
  return (Array.isArray(data.sourceUniqueIds)&&data.sourceUniqueIds.some(x=>typeof x==='string'&&x===binding.sourceId))||String(data.uniqueId||data.sourceUniqueId||data.metadata?.uniqueId||'')===binding.sourceId;
 }
 export const humanChoice=j=>j?.choice||({want_video:'use',use_video:'use',dont_use_video:'dont_use',unsure:'unsure',agree_with_decision:'legacy_agreement'}[j?.judgment]||null);

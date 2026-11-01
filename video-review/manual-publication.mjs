@@ -1,5 +1,6 @@
 // Local, explicitly human-selected publication only. This is not an automatic worker hook.
 import {createHash} from 'node:crypto';
+import {nextListingOccurrence,recurringListing,halifaxDayEnd} from './listing-schedule.mjs';
 export const digest=x=>createHash('sha256').update(x).digest('hex');
 export const selected=j=>j?.choice==='use'||j?.judgment==='want_video';
 export function validateSelection(c,config,probe,now=Date.now(),longerTrial=null) {
@@ -29,9 +30,11 @@ export function validateMatch(c,event,match) {
  if([event.isExpired,event.isCancelled,event.cancelled,event.canceled,event.metadata?.isExpired,event.metadata?.isCancelled].some(v=>v===true||v===1||String(v).toLowerCase()==='true')||
   ['expired','cancelled','deleted','archived'].includes(String(event.status||event.metadata?.status||'').toLowerCase()))throw Error('Listing is not current');
 }
-export function expiryFor(event) {
- const date=event.endDate||event.startDate;if(!/^\d{4}-\d{2}-\d{2}$/.test(date))throw Error('Listing expiry unknown');
- const zone=new Intl.DateTimeFormat('en',{timeZone:'America/Halifax',timeZoneName:'shortOffset'}).formatToParts(new Date(date+'T12:00:00Z')).find(p=>p.type==='timeZoneName').value;
- const m=/^GMT([+-])(\d{1,2})$/.exec(zone);if(!m)throw Error('Halifax offset unknown');
- return new Date(`${date}T23:59:59${m[1]}${m[2].padStart(2,'0')}:00`).toISOString();
+export function expiryFor(event,now=Date.now(),mediaExpiresAt=null) {
+ const occurrence=recurringListing(event)?nextListingOccurrence(event,now):null;
+ if(recurringListing(event)&&!occurrence)throw Error('Listing recurrence unresolved or ended');
+ const expiry=halifaxDayEnd(occurrence?.endDate||event.endDate||event.startDate);
+ // A recurring clip never outlives its private source/evidence retention window.
+ if(occurrence&&mediaExpiresAt){if(!Number.isFinite(Date.parse(mediaExpiresAt)))throw Error('Video expiry unknown');return new Date(Math.min(Date.parse(expiry),Date.parse(mediaExpiresAt))).toISOString();}
+ return expiry;
 }

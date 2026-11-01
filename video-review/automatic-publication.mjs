@@ -10,6 +10,7 @@ import {POLICY,hash} from './policy.mjs';
 import {EDITORIAL_VERSION} from './editorial-review.mjs';
 import {exactListings,normalize} from './pipeline.mjs';
 import {expiryFor} from './manual-publication.mjs';
+import {recurringListing,scheduleFingerprint} from './listing-schedule.mjs';
 import {PUBLIC_POLICY,REGISTRY_LOCK,publicPath,listingFingerprint,bindingIsCurrent,humanChoice,reviewedListings,eligibility,validatePublicProbe,cleanupDue} from './published-policy.mjs';
 const exec=promisify(execFile),iso=()=>new Date().toISOString(),version=s=>s.updateTime?`${s.updateTime.seconds}:${s.updateTime.nanoseconds}`:'';
 const terminal=new Set(['completed','released','failed','error','aborted','expired','cancelled','canceled']);
@@ -78,7 +79,8 @@ export async function publishCandidate(svc,snapshot,fence,{probeFile=probe,norma
  const config=(await db.doc('runtime_metadata/video_review').get()).data();if(!config?.enabled||config.automaticPublication!==true)throw Error('automatic_publication_disabled');
  if(eligibility(c,EDITORIAL_VERSION).state!=='eligible')throw Error('publication_not_eligible');
  const eventRef=db.doc(target.path),event=await eventRef.get(),data=event.data();
- const binding={path:target.path,sourceId:c.sourcePostId,updateTime:version(event),expiresAt:expiryFor(data||{})};
+ if(recurringListing(data||{})&&target.scheduleFingerprint!==scheduleFingerprint(data))return queueReview(snapshot,'Checking the current recurring schedule against this video.');
+ const binding={path:target.path,sourceId:c.sourcePostId,updateTime:version(event),expiresAt:expiryFor(data||{},Date.now(),c.expiresAt),...(target.scheduleFingerprint?{scheduleFingerprint:target.scheduleFingerprint}:{})};
  if(!bindingIsCurrent(binding,data)||target.fingerprint!==listingFingerprint(data)||target.updateTime!==version(event)) {
   const latest=await exactListings(db,c),one=latest.find(x=>x.path===target.path);
   if(!one||one.fingerprint!==target.fingerprint)return queueReview(snapshot,'The listing changed; checking the video against its current details.');
@@ -155,7 +157,8 @@ export async function publishTick(svc) {
     if(decision.state==='upgrade_review'){if(await queueReview(snapshot,decision.reason))reviewQueued++;continue;}
     if(c.contentAssessment?.decision==='useful'&&c.reviewVersion===EDITORIAL_VERSION&&!['queued','processing'].includes(c.state)&&humanChoice(c.humanJudgment)!=='dont_use'){
      const fresh=await exactListings(db,c),old=c.listings||[];
-     if(JSON.stringify(fresh.map(x=>[x.path,x.fingerprint]))!==JSON.stringify(old.map(x=>[x.path,x.fingerprint]))){if(await queueReview(snapshot,'Checking a new or changed listing match.'))reviewQueued++;continue;}
+     const signature=x=>[x.path,x.fingerprint,x.scheduleFingerprint||null];
+     if(JSON.stringify(fresh.map(signature))!==JSON.stringify(old.map(signature))){if(await queueReview(snapshot,'Checking a new or changed listing match.'))reviewQueued++;continue;}
     }
     if(decision.state!=='eligible'){await status(snapshot.ref,decision);continue;}
     const stopped=c.publication;

@@ -18,6 +18,7 @@ export class FakeDB {
 }
 class Ref {
  constructor(db,path){this.firestore=db;this.db=db;this.path=path;this.id=path.split('/').at(-1);}
+ get parent(){return new Query(this.db,this.path.split('/').slice(0,-1).join('/'));}
  get(){return Promise.resolve(this.db.snap(this.path));}
  collection(name){return new Query(this.db,this.path+'/'+name);}
  update(data){this.db.apply('update',this,data);return Promise.resolve();}
@@ -25,6 +26,7 @@ class Ref {
 }
 class Query {
  constructor(db,path,group=false,options={}){Object.assign(this,{db,path,group,options});}
+ get parent(){return this.path.includes('/')?this.db.doc(this.path.split('/').slice(0,-1).join('/')):null;}
  with(options){return new Query(this.db,this.path,this.group,{...this.options,...options});}
  limit(n){return this.with({limit:n});}orderBy(){return this;}startAfter(id){return this.with({after:typeof id==='string'?id:id.id});}
  where(field,op,value){return this.with({where:[field,op,value]});}

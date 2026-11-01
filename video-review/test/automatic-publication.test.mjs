@@ -4,6 +4,7 @@ import {EDITORIAL_VERSION} from '../editorial-review.mjs';
 import {eligibility,listingFingerprint,REGISTRY_LOCK,publicPath,PUBLIC_POLICY} from '../published-policy.mjs';
 import {publishCandidate,publishTick,cleanupPublished,retireRequestedVideo,parserIdle} from '../automatic-publication.mjs';
 import {FakeDB,FakeBucket} from './fake-publication.mjs';
+import {exactListings} from '../pipeline.mjs';
 const id='a'.repeat(64),eventPath='venues/v/events/event',candidatePath=POLICY.queue+'/'+id,bytes=Buffer.from('owned full reviewed MP4 test bytes'),sha=hash(bytes);
 const probe={durationSeconds:83.06,bytes:bytes.length,width:640,height:360,codec:'h264',hasAudio:true,audioCodec:'aac'};
 const event={uniqueId:'12345',sourceUniqueIds:['12345'],venueId:'v',name:'Concert',startDate:'2099-10-30',endDate:'2099-10-30',startTime:'19:00',description:'Current concert',price:'$10'};
@@ -15,6 +16,27 @@ function setup(){const c={sourcePostId:'12345',sourceVideoId:'67890',object:`cli
 test('clear 83-second matches publish without human approval, leaving event/photo data untouched',async()=>{
  const s=setup(),before=s.db.snap(eventPath);const r=await publishCandidate(s,s.db.snap(candidatePath),s.fence,s.options);
  assert.equal(r.published,true);assert.equal(s.publicBucket.saved,1);assert.equal(s.db.snap(`listing_video_assets/${sha}`).data().state,'ready');assert.equal(s.db.snap(candidatePath).data().publication.state,'published');assert.deepEqual(s.db.snap(eventPath).data(),before.data());assert.equal(s.db.snap(eventPath).updateTime.seconds,before.updateTime.seconds);
+});
+
+test('an exact recurring source match queues the held clip for review without changing the event',async()=>{
+ const s=setup();s.db.rows.delete(REGISTRY_LOCK);
+ const recurring={...event,startDate:'2020-01-04',endDate:'2020-01-04',isRecurring:'Yes',recurringPattern:'weekly_saturday'};
+ await s.db.doc(eventPath).set(recurring);await s.db.doc(candidatePath).update({state:'held',listings:[],listingCheck:{status:'not_found'},reasons:['listing_match_needed']});
+ const result=await publishTick(s);assert.equal(result.reviewQueued,1);assert.equal(result.errors,0);assert.equal(s.db.snap(candidatePath).data().state,'queued');assert.equal(s.publicBucket.saved,0);assert.deepEqual(s.db.snap(eventPath).data(),recurring);
+});
+
+test('reviewed recurring matches publish with bounded future expiry and preserve schedule evidence',async()=>{
+ const s=setup(),recurring={...event,startDate:'2020-01-04',endDate:'2020-01-04',isRecurring:'Yes',recurringPattern:'weekly_saturday'};
+ await s.db.doc(eventPath).set(recurring);const listings=await exactListings(s.db,s.c);
+ await s.db.doc(candidatePath).update({listings});
+ const result=await publishCandidate(s,s.db.snap(candidatePath),s.fence,s.options);assert.equal(result.published,true);
+ const link=s.db.snap(`listing_video_links/${hash(eventPath)}`).data();assert.ok(Date.parse(link.binding.expiresAt)>Date.now());assert.equal(link.binding.scheduleFingerprint,listings[0].scheduleFingerprint);assert.deepEqual(s.db.snap(eventPath).data(),recurring);
+});
+
+test('a changed finite recurrence is held before upload despite unchanged legacy listing fingerprint',async()=>{
+ const s=setup(),recurring={...event,startDate:'2020-01-04',endDate:'2020-01-04',isRecurring:'Yes',recurringPattern:'weekly_saturday'};
+ await s.db.doc(eventPath).set(recurring);const listings=await exactListings(s.db,s.c);await s.db.doc(candidatePath).update({listings});await s.db.doc(eventPath).update({recurrenceUntilDate:'2020-01-04'});
+ assert.equal(await publishCandidate(s,s.db.snap(candidatePath),s.fence,s.options),true);assert.equal(s.db.snap(candidatePath).data().state,'queued');assert.equal(s.publicBucket.saved,0);
 });
 test('human vetoes and uncertainty beat automatic recommendation; content-only uncertainty is resolvable by Use',()=>{
  const {c}=setup();assert.equal(eligibility(c,EDITORIAL_VERSION).state,'eligible');
