@@ -1,12 +1,14 @@
-# November 1 parser prevention candidate
+# November 1 parser prevention
 
-Status: verified source candidate; not deployed or applied.
+Status: deployed, live verified and independently confirmed on November 1.
 Checkout: `C:/Users/craig/.codex/worktrees/5990/gathr-apps-script`.
 Branch: `codex/nov1-parser-prevention`.
 Accepted parent: `055b12d97a33d08fe67d727c2f3ae221963816db`.
 Verified runtime candidate: `9f06bce6836f285f1425ec4dfec5239c7dd4a27c`.
 Previous candidate: `2bb99c0dd39a7bafd92ca3624a8e09c3d6ffc3b7`, blocked by independent review despite its passing suite.
-Production deployment and exact data corrections belong to the coordinator.
+The coordinator completed the narrow release and exact recoverable repairs.
+See [the completion record](nov1-audit-remediation.md) for serving revisions,
+backups, public readback, independent receipts and remaining evidence limits.
 
 ## Evidence and first failing layer
 

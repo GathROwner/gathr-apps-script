@@ -1,13 +1,15 @@
 # GathR parser-quality weakness registry
 
-## November 1 mechanism review and local prevention candidate
+## November 1 mechanism review and deployed prevention
 
-Status: **locally verified after independent review; not deployed or applied**. Runtime candidate
+Status: **deployed, repaired and independently live verified**. Runtime source
 `9f06bce6836f285f1425ec4dfec5239c7dd4a27c`, accepted parent
 `055b12d97a33d08fe67d727c2f3ae221963816db`, branch
 `codex/nov1-parser-prevention`. Build,35 focused and1,373 full compiled checks
-pass;14 runtime source/compiled hashes show zero drift. Production state and exact data changes
-remain coordinator-owned. No response-reuse hooks, model/cache/configuration,
+pass;14 runtime source/compiled hashes show zero drift. Five exact updates, two
+duplicate removals, three missing occurrences and one outside-coverage queue
+disposition are complete; feed553→554. See [the completion record](nov1-audit-remediation.md).
+No response-reuse hooks, model/cache/configuration,
 automatic venue/location gates, video-worker or UI changes are included.
 
 - PQ-006/PQ-025/PQ-027: the source title's explicit two-hour disco skate duration now
