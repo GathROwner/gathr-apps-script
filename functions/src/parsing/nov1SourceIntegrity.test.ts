@@ -79,6 +79,11 @@ test('N06 actual zero-duration U18 and 13-hour source typo hold without changing
   assert.equal(typo.endTime,'11:45 PM');assert.equal(sourceItemHoldReason(typo),'source_implausible_sport_clock_range');
   const healthy=items.find(i=>/U11 Girls/.test(i.name))!;assert.equal(sourceItemHoldReason(healthy),undefined);
   assert.equal(sourceClockContradiction({...healthy,name:'Overnight hockey tournament',startTime:'18:00',endTime:'08:00'}),undefined);
+  const overnight={...healthy,name:'Open hockey session',description:'An explicitly advertised overnight session.',startTime:'22:00',endTime:'08:00',
+    timeFlags:{start:{source:'explicit' as const,evidence:'10:00 PM'},end:{source:'explicit' as const,toClose:false,evidence:'8:00 AM'}}};
+  assert.equal(sourceItemHoldReason(overnight),undefined);
+  const overnightOut=enforceDateTimeCompleteness([event(overnight,{category:'Sports'})],source.rowMeta.timestamp,'America/Halifax','');
+  assert.equal(overnightOut.length,1);assert.equal(overnightOut[0].startTime,'22:00');assert.equal(overnightOut[0].endTime,'08:00');assert.equal(overnightOut[0].endDate,'2026-11-02');
   for(const endDate of ['2026-11-02','2026-11-04'])assert.equal(sourceClockContradiction({...healthy,startTime:'17:30',endTime:'17:30',endDate}),undefined);
   assert.equal(sourceClockContradiction({...healthy,name:'24-hour hockey fundraiser',startTime:'17:30',endTime:'17:30'}),undefined);
   const collapsed={...healthy,startTime:'17:00',endTime:'17:00',timeFlags:{start:{source:'explicit' as const,evidence:'10~5pm'},end:{source:'explicit' as const,toClose:false,evidence:'10~5pm'}}};
@@ -125,6 +130,13 @@ test('origin-only geography, unquoted address and another gallery branch never c
   assert.equal(bindCaptionAttendeeRegion(uncertain,source.caption)._sourceAttendeeLocation,undefined);
   const invented={...item,_sourceAttendeeLocation:{label:'Fake',address:'123 Fake St',province:'PEI',sourceText:'Fake'}};
   assert.equal(preserveValidatedItemSourceType(invented,item)._sourceAttendeeLocation,undefined);
+  const carried=bindCaptionAttendeeRegion(item,source.caption),before=structuredClone(carried);
+  assert(carried._sourceAttendeeLocation);
+  assert.equal(bindCaptionAttendeeRegion(carried,'Chef-made in Ontario; no attendee destination is stated.')._sourceAttendeeLocation,undefined);
+  assert.deepEqual(carried,before);
+  const forged={...invented,spatial:{kind:'unknown' as const,locations:[]}},forgedBefore=structuredClone(forged);
+  assert.equal(bindCaptionAttendeeRegion(forged,source.caption)._sourceAttendeeLocation,undefined);assert.deepEqual(forged,forgedBefore);
+  assert.equal(bindCaptionAttendeeRegion(invented,source.caption)._sourceAttendeeLocation?.province,'Ontario');
 });
 
 test('N01 explicit unreadable clock evidence holds; ordinary literal clocks remain eligible without pretending independent pixel proof',()=>{
@@ -183,4 +195,24 @@ test('parked end-only market survives privately when Stage5 omits it, without in
   const saved=sanitizeStageArtifactsSnapshot(mergeStageArtifactsSnapshot(undefined,{source:'live',stage5OmittedItems:held}));
   assert.equal(saved?.stage5OmittedItems?.[0].endTime,'17:00');
   assert.deepEqual(omittedEndOnlySourceItems(source.stage4,[event(source.stage4[0])]),[]);
+});
+
+test('independent review: exact carried-proof counterexample is cleared through binding, validation and formatting',()=>{
+  const control:any=fixture.independentReviewControls.find(r=>r.id==='SOURCE_PROOF_NOT_REVALIDATED')!;
+  const item=structuredClone(control.input),before=structuredClone(item),bound=bindCaptionAttendeeRegion(item,control.caption);
+  assert.equal(bound._sourceAttendeeLocation,undefined);assert.deepEqual(item,before);
+  const validated=preserveValidatedItemSourceType({...bound,_sourceAttendeeLocation:item._sourceAttendeeLocation},bound);
+  assert.equal(validated._sourceAttendeeLocation,undefined);
+  const formatted:any=rehydrateFormattedEventMetadata(event(bound,{address:'Source venue address'}),validated);
+  assert.equal(formatted.address,'Source venue address');assert.equal(formatted.locationProvince,undefined);
+});
+
+test('independent review: exact description-only overnight hockey control survives both gates without clock invention',()=>{
+  const control:any=fixture.independentReviewControls.find(r=>r.id==='OVERNIGHT_DESCRIPTION_FALSE_HOLD')!;
+  const item=structuredClone(control.input),before=structuredClone(item);
+  assert.equal(sourceClockContradiction(item),undefined);assert.equal(sourceItemHoldReason(item),undefined);
+  const out=enforceDateTimeCompleteness([event(item,{category:'Sports'})],'2026-10-31T12:00:00Z','America/Halifax','');
+  assert.equal(out.length,1);assert.equal(out[0].startTime,'18:00');assert.equal(out[0].endTime,'08:00');assert.equal(out[0].endDate,'2026-11-02');
+  assert.deepEqual(item,before);
+  assert.equal(sourceClockContradiction({...item,description:'An ordinary daytime hockey session.'}),'source_implausible_sport_clock_range');
 });

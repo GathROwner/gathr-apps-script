@@ -1,9 +1,10 @@
 # November 1 parser prevention candidate
 
-Status: implementation and offline verification in progress; not deployed or applied.
+Status: two independent-review boundary fixes implemented; final validation pending.
 Checkout: `C:/Users/craig/.codex/worktrees/5990/gathr-apps-script`.
 Branch: `codex/nov1-parser-prevention`.
 Accepted parent: `055b12d97a33d08fe67d727c2f3ae221963816db`.
+Previous candidate: `2bb99c0dd39a7bafd92ca3624a8e09c3d6ffc3b7`, blocked by independent review despite its passing suite.
 Production deployment and exact data corrections belong to the coordinator.
 
 ## Evidence and first failing layer
@@ -46,8 +47,13 @@ scrape, replay or live write was used.
 
 ## Verification
 
-Initial11 focused checks passed before the final multi-day/parked controls.
-Expanded focused set:75/75; final build passes. Full compiled suite in progress.
+The previous2bb build passes. Its targeted controls pass **33/33**; its full compiled
+backend suite passes **1,371/1,371**, zero failures/skips, on a frozen compiled
+tree with no compiler writes during the run. The earlier expanded focused set
+also passed75/75 before the final ordering correction. The runtime source/compiled
+hash manifest and focused14-file patch are in
+`functions/artifacts/nov1-prevention/runtime-overlay.{json,patch}`. The coordinator
+owns release assembly, live verification and exact data repairs.
 The initial full run exposed an outdated October12 test expectation: its
 caption-only offer has no advertised date/start/all-day window. Exact accepted
 baseline `sourceTimeConstraints`, `sourceItemEvidence` and
@@ -60,10 +66,22 @@ The full run also caught a new guard-order regression: a collapsed17:00–17:00
 field pair with literal `10~5pm` evidence was held before existing source-range
 recovery. The source gate now allows that literal recovery; final contradiction
 checking runs after recovery, retaining genuine same-day zero-range holds. This
-runtime correction requires focused coverage and a full-suite rerun. Initial
-failed receipts remain saved rather than overwritten.
+runtime correction passed the direct early-source/completeness controls and the
+full-suite rerun. Initial failed receipts remain saved rather than overwritten:
+`full-suite.tap` records1,369pass/2fail; `full-suite-final.tap` records1,371pass/0fail.
+`ordering-focused.tap` records33pass/0fail. The final source and compiled hashes
+were rechecked after testing, with zero drift across all14 runtime files.
 
 The candidate changes no model, effort, cache layout, deployment configuration,
 queue policy, scheduler, IAM, video worker, UI, OTA or map behavior. Response reuse
 remains outside active source. The original pixel errors and uncertain source
 clocks are not represented as automatically solved.
+
+Independent review of2bb found two additional boundary cases, both now added as
+exact fixtures: carried/model-supplied `_sourceAttendeeLocation` must be discarded
+before deriving fresh proof from the current item quote and caption; and explicit
+overnight context in the same sport item's description must survive just like
+title-local context. The implementation now does both without mutating the input.
+Fresh valid Ontario proofs still rebuild, ordinary unsupported daytime hockey
+ranges still hold, and real U18 zero ranges remain held. New build/focused/full
+receipts are pending; the passing2bb receipts are retained under versioned names.

@@ -1442,5 +1442,57 @@
       ],
       "stage4": []
     }
+  ],
+  "independentReviewControls": [
+    {
+      "id": "SOURCE_PROOF_NOT_REVALIDATED",
+      "input": {
+        "name": "Community concert",
+        "description": "Join our community concert.",
+        "date": "2026-11-14",
+        "startTime": "19:00",
+        "endTime": "20:00",
+        "venue": "A PEI hall",
+        "timeFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "19:00"
+          },
+          "end": {
+            "source": "explicit",
+            "evidence": "20:00"
+          }
+        },
+        "_sourceAttendeeLocation": {
+          "label": "Unverified hall",
+          "address": "123 Unverified Street",
+          "province": "Ontario",
+          "sourceText": "unverified formatter/model field"
+        }
+      },
+      "caption": "Join the community concert at our PEI hall November14,19:00–20:00.",
+      "expected": "Unverified pre-existing proof must be cleared before deriving a new proof from the current original caption. Otherwise Stage3/saved-item extra fields can become authoritative formatter location."
+    },
+    {
+      "id": "OVERNIGHT_DESCRIPTION_FALSE_HOLD",
+      "input": {
+        "name": "Community Hockey",
+        "description": "An overnight fundraiser session from6:00PM to8:00AM.",
+        "date": "2026-11-01",
+        "startTime": "6:00 PM",
+        "endTime": "8:00 AM",
+        "timeFlags": {
+          "start": {
+            "source": "explicit",
+            "evidence": "6:00 PM"
+          },
+          "end": {
+            "source": "explicit",
+            "evidence": "8:00 AM"
+          }
+        }
+      },
+      "expected": "Explicit item-local overnight context in description survives, as a title-local overnight marker does. Stage3 may not yet carry endDate; existing later overnight normalization is never reached if this new early hold fires."
+    }
   ]
 }
