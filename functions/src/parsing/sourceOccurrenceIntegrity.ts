@@ -29,7 +29,7 @@ export function sourceClockContradiction(item:Pick<ExtractedItem,'name'|'startTi
   // A dated rink/team-sport session is not a 13-hour match. This deliberately
   // leaves festivals, movies, tournaments and ordinary overnight activities alone.
   if(/\b(?:hockey|figure skating|powerskating|ringette|basketball|volleyball)\b/i.test(item.name) &&
-      !/\b(?:tournament|marathon|festival|all[ -]day|overnight)\b/i.test(item.name) &&
+      !/\b(?:tournament|marathon|festival|all[ -]day|overnight)\b/i.test(`${item.name} ${item.description||''}`) &&
       (end-start+1440)%1440>360)return 'source_implausible_sport_clock_range';
   return undefined;
 }
@@ -67,6 +67,10 @@ export function reconcileCollapsedWeekdayRange(items:ExtractedItem[],caption:str
 /** Bind a travel announcement's destination only to a confirmed address quoted
  * in that same caption. Origin/product geography cannot supply attendee region. */
 export function bindCaptionAttendeeRegion(item:ExtractedItem,caption:string):ExtractedItem {
+  // Internal proof is derived state, never a model/carried-input credential.
+  // Rebuild it from the current item's quote and current caption on every pass.
+  item={...item};
+  delete item._sourceAttendeeLocation;
   const locations=item.spatial?.kind==='single_location'?item.spatial.locations:undefined;
   if(!Array.isArray(locations)||locations.length!==1)return item;
   const location=locations[0];

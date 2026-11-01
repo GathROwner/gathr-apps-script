@@ -2,9 +2,11 @@
 
 ## November 1 mechanism review and local prevention candidate
 
-Status: **isolated implementation; offline validation in progress; not deployed
-or applied**. Accepted parent `055b12d97a33d08fe67d727c2f3ae221963816db`,
-branch `codex/nov1-parser-prevention`. Production state and exact data changes
+Status: **independent-review fixes pending final validation; not deployed or applied**. Previous runtime candidate
+`2bb99c0dd39a7bafd92ca3624a8e09c3d6ffc3b7`, accepted parent
+`055b12d97a33d08fe67d727c2f3ae221963816db`, branch
+`codex/nov1-parser-prevention`. Build,33 focused and1,371 full compiled checks
+pass;14 runtime source/compiled hashes show zero drift. Production state and exact data changes
 remain coordinator-owned. No response-reuse hooks, model/cache/configuration,
 automatic venue/location gates, video-worker or UI changes are included.
 
