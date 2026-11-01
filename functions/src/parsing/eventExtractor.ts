@@ -3742,6 +3742,12 @@ export function captionOnlyActivityExtractionRules(imageCount: number): string {
   return 'CAPTION-ONLY PUBLIC ACCESS: A recreation facility explicitly offering a dated time slot for people to book is a qualifying public activity even when the caption does not repeat the sport. Extract that slot at the stated date/time with a neutral title such as Bookable Time Slot and the posting facility as venue. Do not invent the sport, duration or end time. Ordinary restaurant reservations, generic booking links, individual service appointments and product pickups do not qualify. A dated public care or walk-in clinic session also qualifies; ordinary product arrivals in the same caption do not. For a dated activity whose only printed time is attendee-facing same-day check-in or on-site registration, use that advertised access time as the listing start and label it as check-in/registration, without claiming it is the game or performance start. Administrative registration deadlines remain excluded.\n\n';
 }
 
+export const DENSE_SCHEDULE_LOCALITY_RULES = `SOURCE BLOCK BINDING:
+- A dense film or event poster may use horizontal panels rather than a calendar grid. Bind each title to the small date/time header inside THAT panel, bounded by its visible borders. A header above the neighbouring panel or previous row cannot supply this title's date.
+- Copy every date and clock digit literally. Read each occurrence in a paired header separately: a second date can have a different minute or meridiem. Never regularize unusual minutes to :00 or :30, or repeat the first showing's clock across the pair.
+- Preserve the exact header text with the matching title in extractionReason. If any date/time digit is faint, unclear or obscured, explicitly say which date/time is unclear and leave that field empty for review. Repeating an extracted value in prose does not independently verify the image.
+`;
+
 function createEventExtractionPrompt(
   combinedText: string,
   userName: string,
@@ -4006,6 +4012,7 @@ This appears to be a calendar with multiple dates and activities.
 Extract EVERY event/special listed for EVERY date shown.
 
 IMPORTANT (Calendar grids with lineups):
+${DENSE_SCHEDULE_LOCALITY_RULES}
 ${clarifyMeridiem ? '- Before assigning a listing to a date, inspect whether the printed date label is above, below, or beside that listing in this image. Follow the visible cell boundaries and repeat that check for each row; do not assume the date label always precedes its listings. A cell can contain multiple separately timed listings.\n' : ''}
 - Images may include day-cell crops from the SAME calendar. Treat all images as parts of one calendar.
 - Some images may repeat or overlap; de-duplicate items and merge details across images.

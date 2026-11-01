@@ -2,6 +2,7 @@ import type {ExtractedItem, FormattedEvent} from './types.js';
 import {offerHasSourceDate} from './offerServiceHours.js';
 import {reconcileSourceItemEvidence} from './sourceItemEvidence.js';
 import {repairCaptionMealCoverage,repairCaptionTakeoutWindow,unresolvedPerformanceRun} from './captionMealCoverage.js';
+import {bindCaptionAttendeeRegion,reconcileCollapsedWeekdayRange} from './sourceOccurrenceIntegrity.js';
 
 export interface SourceTimeConstraint {
   reason: 'unresolved_meridiem' | 'meal_period_without_clock' | 'activity_offer_without_clock' | 'doors_without_showtime' | 'dated_activity_without_clock' | 'offer_service_hours_unverified';
@@ -32,10 +33,12 @@ export function hasSourceClock(value: unknown): boolean {
 /** An item-local duration is evidence; a category's default duration is not. */
 export function resolveSourceDuration(item: ExtractedItem): ExtractedItem {
   if (hasSourceClock(item.endTime)) return item;
-  const text = String(item.description || '');
+  const titleDuration = /\b(?:disco|skate|skating|dance)\b/i.test(item.name) &&
+    /\b\d+(?:\.\d+)?\s*[- ]?\s*(?:hours?|hrs?|minutes?|mins?)\b/i.test(item.name);
+  const text = titleDuration ? `${item.name}. ${item.description || ''}` : String(item.description || '');
   const programDuration = /\b(?:\d+(?:\.\d+)?|one|two|three|half)\s*[- ]?\s*(?:hours?|hrs?|minutes?|mins?)\s+(?:concert|program|programme|performance|recital)\b/i.test(text);
   // A film's running time, a song length or a meal's service window is not a session duration.
-  if (!/\b(?:class|lesson|workshop|session|fitness|yoga|zumba|course|practice|guided\s+tour)\b/i.test(item.name) &&
+  if (!/\b(?:class|lesson|workshop|session|fitness|yoga|zumba|course|practice|guided\s+tour|disco|skate|skating|dance)\b/i.test(item.name) &&
       !/\b(?:class|lesson|workshop|session)\b/i.test(text) &&
       !programDuration) return item;
   // Arrival offsets, opening windows and multi-activity durations are not this occurrence's length.
@@ -144,6 +147,7 @@ export function hasUnresolvedSourceMeridiem(item?: Partial<ExtractedItem>): bool
 
 /** No clock is invented here. Item-local evidence wins over a shared meal caption. */
 export function constrainSourceTimes(items: ExtractedItem[], caption: string): ExtractedItem[] {
+  items = reconcileCollapsedWeekdayRange(items,caption).map(item=>bindCaptionAttendeeRegion(item,caption));
   items = reconcileSourceItemEvidence(repairCaptionTakeoutWindow(repairCaptionMealCoverage(items, caption), caption), caption);
   items = items.map(item=>unresolvedPerformanceRun(item,caption)?{...item,_sourceOccurrenceDateHold:true} as ExtractedItem:item);
   const captionOnly = caption.split(/\n\s*OCR TEXT:/i)[0];
@@ -170,6 +174,11 @@ export function constrainSourceTimes(items: ExtractedItem[], caption: string): E
     const special = item._sourceType === 'special' || ('type' in item && item.type === 'special') || diningService;
     if (!special) return {...item,
       _sourceTimeConstraint:{reason:'dated_activity_without_clock',evidence:'Dated activity has no advertised start clock'}};
+    const identityKey=(value:unknown)=>String(value||'').toLowerCase().replace(/[^a-z0-9]/g,'');
+    if(/\bwith\s+(?:every|each|an?)\s+(?:\w+\s+){0,3}admission\b/i.test(detail) &&
+        items.some(activity=>activity!==original && activity.date===item.date && activity._sourceType!=='special' &&
+          !hasSourceClock(activity.startTime) && identityKey(activity.name).length>=8 && identityKey(detail).includes(identityKey(activity.name))))
+      return {...item,_sourceTimeConstraint:{reason:'activity_offer_without_clock',evidence:'Admission-conditioned offer has no independently verified activity/service window'}};
     if (/\b(?:all\s*day|open\s*to\s*close)\b/i.test(`${detail} ${item.timeFlags?.start?.evidence || ''}`)) return item;
     const meal = detail.match(/\b(?:breakfast|brunch|lunch|dinner|supper)\b/i)?.[0] ||
       (items.every(x => x._sourceType === 'special') ? oneSharedMeal : '');

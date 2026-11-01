@@ -73,7 +73,9 @@ test('printed meal times and explicitly all-day ordinary specials remain usable'
   assert.equal(constrainSourceTimes([allDayBreakfast], '')[0]._sourceTimeConstraint, undefined);
   const captionOnlyDeal={...allDay,name:'Wing deal',description:'$5 wings',relevantImageIndex:undefined};
   const captionOnlyEvent={...timed,_sourceType:'event' as const,relevantImageIndex:undefined};
-  assert.equal(constrainSourceTimes([captionOnlyDeal,captionOnlyEvent], '')[0]._sourceTimeConstraint, undefined);
+  // No image index is not all-day/date evidence. The accepted service-hours
+  // guard requires an actual attendee date/window before publishing this offer.
+  assert.equal(constrainSourceTimes([captionOnlyDeal,captionOnlyEvent], '')[0]._sourceTimeConstraint?.reason, 'offer_service_hours_unverified');
 });
 
 test('old lunch keeper accepts source-supported literary identity without changing its occurrence', () => {

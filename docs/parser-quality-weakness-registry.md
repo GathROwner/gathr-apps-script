@@ -1,6 +1,44 @@
 # GathR parser-quality weakness registry
 
-Last updated: 2026-10-29 (Atlantic)
+## November 1 mechanism review and local prevention candidate
+
+Status: **isolated implementation; offline validation in progress; not deployed
+or applied**. Accepted parent `055b12d97a33d08fe67d727c2f3ae221963816db`,
+branch `codex/nov1-parser-prevention`. Production state and exact data changes
+remain coordinator-owned. No response-reuse hooks, model/cache/configuration,
+automatic venue/location gates, video-worker or UI changes are included.
+
+- PQ-006/PQ-025/PQ-027: the source title's explicit two-hour disco skate duration now
+  uses the existing proven-duration path before category fallback. The hockey
+  poster's zero range and implausibly long ordinary sport range are held rather
+  than corrected by guessing. Overnight, full-day and explicit multi-day controls
+  retain their date semantics. Dense Tivoli extraction still demonstrates a
+  confident pixel-reading limit; stronger block/header prompts and unreadable
+  clock holds do not constitute independent proof of future visual accuracy.
+- PQ-024/PQ-035/PQ-043/PQ-044: explicit U-age divisions are checked before fuzzy
+  same-occurrence selection and defensive merge. Exact duplicate copies of a
+  named weekday range can recover finite dates only when a separate explicit
+  caption endpoint corroborates the expected count and weekdays; missing proof
+  holds. Daily cinema inventory can narrow a legacy continuous run only for its
+  exact matched occurrence with publisher/venue/title/clock/source-count proof.
+  Same venue/time alone does not consolidate the Souris compound celebration.
+- PQ-012/PQ-015/PQ-036: quoted single-location evidence plus exact attendee
+  caption wording tolerates a geographic suffix on the canonical host name.
+  Gift-card/sponsor mentions cannot cancel the shared-host guard. A confirmed
+  per-item caption address and explicit destination-for-events statement preserve
+  Ontario attendee identity through formatting, so existing coverage rejection
+  executes before venue lookup. Publisher/product-origin PEI text cannot supply
+  the attendee location.
+- PQ-005/PQ-006/PQ-020: past-activity recaps cannot borrow future opening windows;
+  admission-conditioned offers without an exact attraction window retain timing
+  uncertainty. End-only source items omitted by Stage5 remain in the bounded
+  private `stage5OmittedItems` inventory with the advertised finish and unknown
+  opening. No expired record is resurrected or automatically repaired.
+
+Exact source fixtures, first-failure/function map, healthy controls, test receipts
+and residual limits: [November 1 prevention candidate](nov1-parser-prevention.md).
+
+Last updated: 2026-11-01 (Atlantic)
 
 October29 dated food/drink offer service-hours prevention: **deployed, applied and independently verified**.
 Craig accepted verified relevant service hours as inferred availability for an

@@ -65,6 +65,7 @@ import {imageExtractionCoverageHold} from './sourceCandidateRetention.js';
 import {dateOnlyActivity} from './dateOnlyActivity.js';
 import {coherentOfferAvailability} from './offerServiceHours.js';
 import {sourceItemHoldReason,needsWholeScheduleIdentityReview} from './sourceItemEvidence.js';
+import {sourceClockContradiction,omittedEndOnlySourceItems} from './sourceOccurrenceIntegrity.js';
 import {enrichLinkedPerformanceStarts,linkedPerformanceImagesTextFree} from './linkedPerformanceTime.js';
 import { shouldHoldUndatedStandingSchedule, shouldRetrySeasonalLeagueWithLegacy,
   isSelectedLunaCanaryPost, isSampledLunaCanaryPost,
@@ -844,6 +845,7 @@ async function replayPostDataFromArtifactsCore(
     postId,
     formattedCount: formattedEvents?.length || 0,
   });
+  await emitStageArtifacts(cfg,{source:'replay',stage5OmittedItems:omittedEndOnlySourceItems(validatedData,formattedEvents||[])});
 
   if (!formattedEvents || formattedEvents.length === 0) {
     await reportSkipReason({
@@ -2386,6 +2388,7 @@ async function parsePostDataCore(
       postId,
       formattedCount: formattedEvents?.length || 0,
     });
+    await emitStageArtifacts(cfg,{source:'live',stage5OmittedItems:omittedEndOnlySourceItems(validatedData,formattedEvents||[])});
 
     if (!formattedEvents || formattedEvents.length === 0) {
       if (lunaCanarySelected) return retryCanaryWithLegacy('stage5_no_items');
@@ -3653,6 +3656,12 @@ export function enforceDateTimeCompleteness(
 
     // Normalize overnight endDate in one place (Stage 5.6 only).
     applyOvernightEndDate(ev, timezone);
+
+    const clockContradiction=sourceClockContradiction(ev,false);
+    if(clockContradiction){
+      rejectedByReason[clockContradiction]=(rejectedByReason[clockContradiction]||0)+1;
+      continue;
+    }
 
     if (ev.timeResolution?.offerAvailability && !coherentOfferAvailability(ev)) {
       rejectedByReason.incoherent_offer_availability = (rejectedByReason.incoherent_offer_availability || 0) + 1;

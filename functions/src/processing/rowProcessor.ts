@@ -2395,6 +2395,7 @@ export function mergeStageArtifactsSnapshot(
     ...((incoming.stage4ValidationHold || base?.stage4ValidationHold) ?
       {stage4ValidationHold: incoming.stage4ValidationHold || base?.stage4ValidationHold} : {}),
     stage4Items,
+    stage5OmittedItems: incoming.stage5OmittedItems ?? base?.stage5OmittedItems,
     stage56HeldItems: incoming.stage56HeldItems ?? base?.stage56HeldItems,
     stage37TicketUrl,
   };
@@ -2426,6 +2427,7 @@ export function sanitizeStageArtifactsSnapshot(
     stage3InputKind: snapshot.stage3InputKind,
     ...(snapshot.stage4ValidationHold ? {stage4ValidationHold: snapshot.stage4ValidationHold} : {}),
     stage4Items: truncateItems(snapshot.stage4Items) as ParseStageArtifactsSnapshot['stage4Items'],
+    stage5OmittedItems: truncateItems(snapshot.stage5OmittedItems) as ParseStageArtifactsSnapshot['stage5OmittedItems'],
     stage56HeldItems: truncateItems(snapshot.stage56HeldItems) as ParseStageArtifactsSnapshot['stage56HeldItems'],
   });
 }
@@ -6487,6 +6489,15 @@ function buildDuplicateEventUpdates(
     timeImproved = true;
   }
 
+  const collapsedCinemaRunSpan=shouldCollapseCinemaRunSpan(existing,incoming);
+  if(collapsedCinemaRunSpan){
+    setField('endDate',incoming.startDate);
+    // Unknown finish remains unknown; a legacy category default is not part
+    // of the newly grounded screening's identity.
+    if(!incoming.endTime && getTimeFlagSource(incoming.timeFlags,'end')==='none')setField('endTime','');
+    timeImproved=true;
+  }
+
   if (timeImproved) {
     if (incoming.timeResolution != null) {
       setField('timeResolution', incoming.timeResolution);
@@ -6498,6 +6509,11 @@ function buildDuplicateEventUpdates(
       // A newer explicit clock must not retain the older estimated window.
       setField('timing', incoming.timing ?? null);
     }
+  }
+  if(collapsedCinemaRunSpan&&!incoming.endTime){
+    const resolution:Record<string,unknown>={...(incoming.timeResolution||existing.timeResolution||{hoursUsed:false})};
+    delete resolution.endFromHours;
+    setField('timeResolution',resolution);
   }
   if (incomingOffer && existingOffer) {
     setField('timing', incoming.timing);
@@ -7948,6 +7964,21 @@ function incomingRepresentsOccurrenceLocalSpan(
   }
 
   return incomingEndDate === expectedIncomingEndDate;
+}
+
+function shouldCollapseCinemaRunSpan(existing:EventData,incoming:EventData):boolean {
+  const name=(event:EventData)=>String(event.eventName||event.name||'').toLowerCase().replace(/[^a-z0-9]/g,'');
+  const sourceType=String((incoming as any)._sourceType||'');
+  return existing.category==='Cinema' && incoming.category==='Cinema' && Boolean(existing.venueId) &&
+    existing.venueId===incoming.venueId && name(existing).length>0 && name(existing)===name(incoming) &&
+    existing.startDate===incoming.startDate && existing.startTime===incoming.startTime &&
+    /^\d{4}-\d{2}-\d{2}$/.test(String(existing.startDate||'')) && String(existing.endDate||'')>String(existing.startDate) &&
+    incoming.endDate===incoming.startDate && Number(incoming.sourceOccurrenceCount)>=2 &&
+    ['calendar','schedule'].includes(sourceType) && getTimeFlagSource(incoming.timeFlags,'start')==='explicit' &&
+    getTimeFlagSource(existing.timeFlags,'end')!=='explicit' &&
+    Boolean(existing.facebookUrl && normalizeUrl(existing.facebookUrl)===normalizeUrl(incoming.facebookUrl||'')) &&
+    /\b(?:running\s+through|screening\s+run|see\s+(?:the\s+)?website\s+for\s+showtimes)\b/i.test(existing.description||'') &&
+    !/\b(?:festival|marathon|continuous|24[ -]hour)\b/i.test(`${existing.description||''} ${name(existing)}`);
 }
 
 function isStructuredFacebookEventSource(event: EventData): boolean {
