@@ -1,0 +1,69 @@
+{
+  "status": "COMPLETE_LIVE_ATTACHMENT_VERIFIED",
+  "verifiedAtUTC": "2026-11-01T22:11:34.697Z",
+  "branch": "codex/evermoore-recurring-video",
+  "runtimeCommit": "4a36c29b",
+  "project": "gathr-migrated",
+  "codebase": "listing-video-review",
+  "functions": [
+    {
+      "name": "reviewListingVideos",
+      "revision": "reviewlistingvideos-00005-roj",
+      "hash": "9dce3f1348b866655721d360d82768bf75e77055"
+    },
+    {
+      "name": "publishListingVideos",
+      "revision": "publishlistingvideos-00003-xoj",
+      "hash": "a09f07eddd1f67d567d858d313e94487015e3a6e"
+    },
+    {
+      "name": "cleanupPublishedListingVideos",
+      "revision": "cleanuppublishedlistingvideos-00002-tuy",
+      "hash": "a09f07eddd1f67d567d858d313e94487015e3a6e"
+    }
+  ],
+  "nonTargetFunctionsUnchanged": 35,
+  "sourceArchivesByteVerified": 3,
+  "runtimeFilesPerArchive": 18,
+  "tests": {
+    "passed": 69,
+    "failed": 0,
+    "skipped": 0
+  },
+  "deploymentAttempts": 1,
+  "deploymentExitCode": 0,
+  "candidateId": "51b992baff37c9b2fdfa0f7134d934d811b8842dcc6683ddd98767ef8b1cc460",
+  "sourcePostId": "1795594419240850",
+  "listingPath": "venues/Ty6yXQ3VwbKRlpnU7J9x/events/sjxpi8i9XggtUchADTN4",
+  "nextOccurrence": "2026-11-07",
+  "publicationState": "published",
+  "publishedAtUTC": "2026-11-01T22:11:07.485Z",
+  "publicVideo": {
+    "assetId": "51ad65f6d1f63f1e81c9413d55ee13ef56fc0af31a013b1ab6560d09c139ba4c",
+    "url": "https://storage.googleapis.com/gathr-uploaded-images/listingvideos/51ad65f6d1f63f1e81c9413d55ee13ef56fc0af31a013b1ab6560d09c139ba4c.mp4",
+    "durationSeconds": 36.667,
+    "bytes": 2062179,
+    "expiresAt": "2026-11-08T03:59:59.000Z",
+    "sourcePostId": "1795594419240850"
+  },
+  "review": {
+    "route": "luna_only",
+    "speechEvidenceReused": true,
+    "newModelRequests": 1,
+    "estimatedReviewUSD": 0.001247675
+  },
+  "eventRecordUnchanged": true,
+  "otherVideoCandidatesUnchanged": 83,
+  "humanChoicesPreserved": 84,
+  "previousPublicLinksUnchanged": 12,
+  "configurationRestored": true,
+  "mainParserAndAutomaticResolutionUntouched": true,
+  "otherAuditFindingsRemainParked": true,
+  "notes": [
+    "Exact source-linked weekly recurrence uses next valid occurrence instead of its old anchor date.",
+    "Finite ends, occurrence counts, intervals, cancellations, unsupported recurrence holds and source membership remain enforced.",
+    "Recurring public expiry uses Halifax occurrence end and is capped by private evidence expiry; existing publication renewal reuses owned media.",
+    "No app UI or native build changes; app-facing API and full published media hash verified."
+  ],
+  "privateEvidenceRoot": "C:\\Users\\craig\\Documents\\Codex\\2026-11-01\\evermoore-video"
+}
