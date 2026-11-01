@@ -12,6 +12,7 @@ import OpenAI from 'openai';
 import {earlierProgrammeCutoff,recurrenceScheduleText,hasOnlyDescriptiveSkillRecurrence} from './programmeSourceGuards.js';
 import {hasUnresolvedSourceMeridiem as hasUnresolvedEarlyMeridiem} from './sourceTimeConstraints.js';
 import {sourceItemHoldReason} from './sourceItemEvidence.js';
+import {restoreSourceAttendeeLocation} from './sourceOccurrenceIntegrity.js';
 import {boundCinemaRunOccurrence} from './sourcePublicationPolicy.js';
 import {
   ExtractedItem,
@@ -1314,7 +1315,7 @@ export function rehydrateFormattedEventMetadata(
   event: FormattedEvent,
   originalItem?: ExtractedItem
 ): FormattedEvent {
-  const nextEvent = { ...event } as FormattedEvent;
+  const nextEvent = restoreSourceAttendeeLocation({ ...event } as FormattedEvent,originalItem);
   let changed = false;
   // An aligned validated item owns its explicit clocks, even when Stage 5
   // supplies a nonempty but different default. Keep overnight date semantics.

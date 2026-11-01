@@ -1,6 +1,7 @@
 import type {ExtractedEvent, ExtractedItem} from './types.js';
 import {retainCaptionCandyCandidate} from './sourceCandidateRetention.js';
 import {sourcePublicationHoldReason,preserveCalendarClockPresence} from './sourcePublicationPolicy.js';
+import {sourceClockContradiction} from './sourceOccurrenceIntegrity.js';
 
 const months = ['january','february','march','april','may','june','july','august','september','october','november','december'];
 
@@ -75,9 +76,11 @@ export function bindDatedTicketLink(item: ExtractedItem, caption: string): Extra
 
 export function sourceItemHoldReason(item: ExtractedItem): string | undefined {
   if ((item as any)._sourcePublicationHold) return String((item as any)._sourcePublicationHold);
+  const contradiction=sourceClockContradiction(item);
+  if(contradiction)return contradiction;
   const identityText = `${item.description || ''} ${item.extractionReason || ''}`;
   if (['calendar','schedule'].includes(String(item._sourceType || '')) &&
-      /\bdate\s+(?:digit\s+)?(?:is\s+)?(?:faint|unclear|obscured|partly\s+obscured)|\bdate\b.{0,35}\b(?:faint|partly\s+obscured|illegible)\b/i.test(identityText)) return 'calendar_date_identity_uncertain';
+      /\b(?:date|time|clock)\s+(?:digit\s+)?(?:is\s+)?(?:faint|unclear|obscured|partly\s+obscured)|\b(?:date|time|clock)\b.{0,35}\b(?:faint|partly\s+obscured|illegible)\b/i.test(identityText)) return 'calendar_date_identity_uncertain';
   if (['calendar','schedule'].includes(String(item._sourceType || '')) &&
       /\b(?:away\s+game|marked\s+away)\b/i.test(`${item.description || ''} ${item.spatial?.evidenceNotes || ''}`) &&
       !String(item.venue || '').trim() && !(Array.isArray(item.spatial?.locations) && item.spatial.locations.length)) return 'away_game_without_attendee_venue';
@@ -107,7 +110,7 @@ export function needsWholeScheduleIdentityReview(items: ExtractedItem[]): boolea
 export function reconcileSourceItemEvidence(items: ExtractedItem[], caption: string): ExtractedItem[] {
   items = retainCaptionCandyCandidate(bindSharedAdmissionEntertainment(items, caption),caption);
   const reconciled = items.map(original => {
-    let item = preserveCalendarClockPresence(bindDatedTicketLink(original, caption));
+    let item = {...preserveCalendarClockPresence(bindDatedTicketLink(original, caption))};
     const publicationHold = sourcePublicationHoldReason(item,caption);
     if(publicationHold)(item as any)._sourcePublicationHold=publicationHold;
     const text = `${item.description || ''} ${item.extractionReason || ''}`;

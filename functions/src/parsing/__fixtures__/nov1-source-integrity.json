@@ -1,0 +1,1446 @@
+{
+  "basis": "Saved November 1 audit snapshots; source images independently inspected; no new model calls",
+  "rows": [
+    {
+      "row": 141,
+      "sourceId": "122234737142578108",
+      "caption": "Happy Halloween!  Here’s our treat, November’s schedule ️ Featuring new releases titles like Your Mother Your Mother Your Mother, Possible Love, Paper Tiger, I Play Rocky and Wicker  Limited release titles The History of Concrete, Naza, and Ken Russell’s The Devils   Classics like Heathers, The Dead Zone, and The Last Waltz featuring a live performance   And our Noirvember retrospective on the works of Raymond Chandler: The Many Faces of Marlowe! Featuring The Big Sleep, Marlowe, The Long Goodbye, and Farewell, My Lovely!  See you at the movies, Charlottetown ️\n\nOCR TEXT:\nMay be an image of text",
+      "rowMeta": {
+        "pageName": "thetivolicinema",
+        "userName": "The Tivoli Cinema",
+        "timestamp": "2026-10-31T14:15:13.000Z",
+        "utcStartDate": "",
+        "parserMode": "full5stage",
+        "dryRun": false
+      },
+      "stage3": [
+        {
+          "name": "Your Mother Your Mother Your Mother",
+          "type": "event",
+          "date": "2026-11-01",
+          "startTime": "5:00 PM",
+          "endTime": "",
+          "venue": "",
+          "price": "",
+          "description": "Advertised for Nov 1–5 at 5:00 PM.",
+          "extractionReason": "The poster prints this title, date range, and showtime; this item represents the Nov 1 occurrence.",
+          "relevantImageIndex": 0,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "The Tivoli Cinema"
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "Tivoli Cinema schedule; no street address is printed."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 5:00 PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceOccurrenceCount": 5,
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 58
+        },
+        {
+          "name": "Your Mother Your Mother Your Mother",
+          "type": "event",
+          "date": "2026-11-02",
+          "startTime": "5:00 PM",
+          "endTime": "",
+          "venue": "",
+          "price": "",
+          "description": "Advertised for Nov 1–5 at 5:00 PM.",
+          "extractionReason": "The poster prints this title, date range, and showtime; this item represents the Nov 2 occurrence.",
+          "relevantImageIndex": 0,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "The Tivoli Cinema"
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "Tivoli Cinema schedule; no street address is printed."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 5:00 PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceOccurrenceCount": 5,
+          "_pipelineIndex": 2,
+          "_pipelineTotalStage3": 58
+        },
+        {
+          "name": "Your Mother Your Mother Your Mother",
+          "type": "event",
+          "date": "2026-11-03",
+          "startTime": "5:00 PM",
+          "endTime": "",
+          "venue": "",
+          "price": "",
+          "description": "Advertised for Nov 1–5 at 5:00 PM.",
+          "extractionReason": "The poster prints this title, date range, and showtime; this item represents the Nov 3 occurrence.",
+          "relevantImageIndex": 0,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "The Tivoli Cinema"
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "Tivoli Cinema schedule; no street address is printed."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 5:00 PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceOccurrenceCount": 5,
+          "_pipelineIndex": 3,
+          "_pipelineTotalStage3": 58
+        },
+        {
+          "name": "Your Mother Your Mother Your Mother",
+          "type": "event",
+          "date": "2026-11-04",
+          "startTime": "5:00 PM",
+          "endTime": "",
+          "venue": "",
+          "price": "",
+          "description": "Advertised for Nov 1–5 at 5:00 PM.",
+          "extractionReason": "The poster prints this title, date range, and showtime; this item represents the Nov 4 occurrence.",
+          "relevantImageIndex": 0,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "The Tivoli Cinema"
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "Tivoli Cinema schedule; no street address is printed."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 5:00 PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceOccurrenceCount": 5,
+          "_pipelineIndex": 4,
+          "_pipelineTotalStage3": 58
+        },
+        {
+          "name": "Your Mother Your Mother Your Mother",
+          "type": "event",
+          "date": "2026-11-05",
+          "startTime": "5:00 PM",
+          "endTime": "",
+          "venue": "",
+          "price": "",
+          "description": "Advertised for Nov 1–5 at 5:00 PM.",
+          "extractionReason": "The poster prints this title, date range, and showtime; this item represents the Nov 5 occurrence.",
+          "relevantImageIndex": 0,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "The Tivoli Cinema"
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "Tivoli Cinema schedule; no street address is printed."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 5:00 PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceOccurrenceCount": 5,
+          "_pipelineIndex": 5,
+          "_pipelineTotalStage3": 58
+        },
+        {
+          "name": "The Big Sleep",
+          "type": "event",
+          "date": "2026-11-14",
+          "startTime": "7:15 PM",
+          "endTime": "",
+          "venue": "",
+          "price": "",
+          "description": "Part of The Many Faces of Marlowe retrospective.",
+          "extractionReason": "The poster prints The Big Sleep with a Nov 14 screening at 7:15 PM.",
+          "relevantImageIndex": 0,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "The Tivoli Cinema"
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "Tivoli Cinema schedule; no street address is printed."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 7:15 PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 52,
+          "_pipelineTotalStage3": 58
+        }
+      ],
+      "stage4": []
+    },
+    {
+      "row": 296,
+      "sourceId": "1692219036151251",
+      "caption": "Happy Halloween ‍♂️\n\nStories of the Studio and Gallery\n\nIt’s a cool day but still a nice drive on the Green Gables Shore Route\nWe are off the St. Mary’s Road between Stanley Bridge and New Glasgow in Hope River! Look for the Blue Robert McMillan Pottery signs!\n\nRobert and I are all dressed up to celebrate Halloween. We are dressed as two YOUNG Potters! lol\n\n\nRobert’s getting my broom all warmed up for me just in case I want to fly around the Studio! \n\nBut really he is hard at work trimming bowls, putting on handles, decorating and glazing and throwing different kinds of pots! Especially the Christmas mugs!\n\nThey will be ready for our Christmas Blitz next weekend! Friday - Sunday at Robert McMillan Pottery from 10-5pm\n\nThis weekend we have the same hours and this is what is on our shelves today! \n\nIf you see something you like but just can’t make it by to the gallery or live in another province, let me know through messenger at Potter’s Wife of Hope River \nand I can help you out with that we do ship across Canada! \n\n⭐️There are just 2 weekends left to our pottery season and then we are closed here in Hope River. Our last day will be Nov 8th/26\n\nIf you would like hug mugs this would be your weekend to pick them out as many of the items today will be packed up at the end of our weekend so we can make room for our Christmas Blitz!\n\nWe will be at the Seaport Christmas Show in Mid November in Charlottetown.and that will finish off our year of sales and the two Potters will be taking a rest and celebrating Christmas!\n\nSo if you are looking to buy local we have lots of beautiful pots to choose from now! ❤️\n\nHope to see you this weekend \n\n17 Broadway Road, Hope River, PEI\n\nWe’ll have a good time then\n\nI’ll keep you posted on the Christmas Mugs they should be coming soon!\n\n@topfans\n\nOCR TEXT:\nMay be an image of text\nNo photo description available.\nMay be an image of foundry\nNo photo description available.\nNo photo description available.",
+      "rowMeta": {
+        "pageName": "RobertMcMillanPottery",
+        "userName": "Robert McMillan Pottery",
+        "timestamp": "2026-10-31T15:46:34.000Z",
+        "utcStartDate": "",
+        "parserMode": "full5stage",
+        "dryRun": false
+      },
+      "stage3": [
+        {
+          "name": "Christmas Blitz",
+          "description": "Friday - Sunday at Robert McMillan Pottery from 10-5pm.",
+          "date": "2026-11-06",
+          "startTime": "10:00",
+          "endTime": "17:00",
+          "venue": "",
+          "ticketLink": "",
+          "price": "",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "A named public event is advertised for next weekend with explicit Friday–Sunday dates and hours.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "10-5pm"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "10-5pm"
+            }
+          },
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              {
+                "label": "Robert McMillan Pottery",
+                "address": "17 Broadway Road, Hope River, PEI",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "Friday - Sunday at Robert McMillan Pottery from 10-5pm; 17 Broadway Road, Hope River, PEI"
+              }
+            ],
+            "confirmedStreets": [
+              "Broadway Road"
+            ],
+            "ordered": false,
+            "evidenceNotes": "The event is placed at Robert McMillan Pottery, and the caption gives its street address."
+          },
+          "_sourceOccurrenceCount": 3,
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 3
+        },
+        {
+          "name": "Christmas Blitz",
+          "description": "Friday - Sunday at Robert McMillan Pottery from 10-5pm.",
+          "date": "2026-11-06",
+          "startTime": "10:00",
+          "endTime": "17:00",
+          "venue": "",
+          "ticketLink": "",
+          "price": "",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "A named public event is advertised for next weekend with explicit Friday–Sunday dates and hours.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "10-5pm"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "10-5pm"
+            }
+          },
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              {
+                "label": "Robert McMillan Pottery",
+                "address": "17 Broadway Road, Hope River, PEI",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "Friday - Sunday at Robert McMillan Pottery from 10-5pm; 17 Broadway Road, Hope River, PEI"
+              }
+            ],
+            "confirmedStreets": [
+              "Broadway Road"
+            ],
+            "ordered": false,
+            "evidenceNotes": "The event is placed at Robert McMillan Pottery, and the caption gives its street address."
+          },
+          "_sourceOccurrenceCount": 3,
+          "_pipelineIndex": 2,
+          "_pipelineTotalStage3": 3
+        },
+        {
+          "name": "Christmas Blitz",
+          "description": "Friday - Sunday at Robert McMillan Pottery from 10-5pm.",
+          "date": "2026-11-06",
+          "startTime": "10:00",
+          "endTime": "17:00",
+          "venue": "",
+          "ticketLink": "",
+          "price": "",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "A named public event is advertised for next weekend with explicit Friday–Sunday dates and hours.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "10-5pm"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "10-5pm"
+            }
+          },
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              {
+                "label": "Robert McMillan Pottery",
+                "address": "17 Broadway Road, Hope River, PEI",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "Friday - Sunday at Robert McMillan Pottery from 10-5pm; 17 Broadway Road, Hope River, PEI"
+              }
+            ],
+            "confirmedStreets": [
+              "Broadway Road"
+            ],
+            "ordered": false,
+            "evidenceNotes": "The event is placed at Robert McMillan Pottery, and the caption gives its street address."
+          },
+          "_sourceOccurrenceCount": 3,
+          "_pipelineIndex": 3,
+          "_pipelineTotalStage3": 3
+        }
+      ],
+      "stage4": []
+    },
+    {
+      "row": 300,
+      "sourceId": "1689214989332552",
+      "caption": "OCR TEXT:\nMay be an image of text",
+      "rowMeta": {
+        "pageName": "EasternKingsSportsplex",
+        "userName": "Eastern Kings Sportsplex",
+        "timestamp": "2026-10-31T23:49:24.000Z",
+        "utcStartDate": "",
+        "parserMode": "full5stage",
+        "dryRun": false
+      },
+      "stage3": [
+        {
+          "name": "Special 2hrs Celebration Disco Sunday Skate",
+          "description": "Hosted by: Souris Credit Union & Eastern Kings Sportsplex.",
+          "date": "2026-11-01",
+          "startTime": "12:30",
+          "endTime": "",
+          "venue": "",
+          "ticketLink": "",
+          "price": "",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "The poster advertises a public Sunday skate with disco entertainment.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "STARTING AT 12:30PM"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "spatial": {
+            "kind": "unknown",
+            "locations": [],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "Eastern Kings Sportsplex is named as a host, but the poster does not explicitly state the event location."
+          },
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 1
+        }
+      ],
+      "stage4": []
+    },
+    {
+      "row": 305,
+      "sourceId": "1751246487005228",
+      "caption": "Today's Happenings @top fans\n\nOCR TEXT:\nMay be an image of text",
+      "rowMeta": {
+        "pageName": "cavendishfarmscommunityeventscentre",
+        "userName": "Cavendish Farms Community Events Centre",
+        "timestamp": "2026-11-01T12:16:41.000Z",
+        "utcStartDate": "",
+        "parserMode": "full5stage",
+        "dryRun": false
+      },
+      "stage3": [
+        {
+          "name": "Figure Skating Powerskating",
+          "type": "event",
+          "date": "2026-11-01",
+          "startTime": "8:00 AM",
+          "endTime": "9:15 AM",
+          "venue": "",
+          "price": "",
+          "description": "",
+          "extractionReason": "A dated schedule row on the poster lists Figure Skating and Powerskating from 8:00 AM to 9:15 AM. The poster says Sunday, November 1; 2026 matches the post date and the stated weekday.",
+          "relevantImageIndex": 0,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Cavendish Farms Community Event Centre, Tyne Valley, PEI"
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The poster identifies the Community Event Centre and says activities are on the ice at the rink."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 8:00 AM"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "Extracted item clock: 9:15 AM"
+            }
+          },
+          "_sourceOccurrenceCount": 2,
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 12
+        },
+        {
+          "name": "Figure Skating Powerskating",
+          "type": "event",
+          "date": "2026-11-01",
+          "startTime": "8:00 AM",
+          "endTime": "9:15 AM",
+          "venue": "",
+          "price": "",
+          "description": "",
+          "extractionReason": "A second, separate printed schedule row lists Figure Skating and Powerskating from 8:00 AM to 9:15 AM; it is retained as its own row.",
+          "relevantImageIndex": 0,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Cavendish Farms Community Event Centre, Tyne Valley, PEI"
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The poster identifies the Community Event Centre and says activities are on the ice at the rink."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 8:00 AM"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "Extracted item clock: 9:15 AM"
+            }
+          },
+          "_sourceOccurrenceCount": 2,
+          "_pipelineIndex": 2,
+          "_pipelineTotalStage3": 12
+        },
+        {
+          "name": "Minor Hockey U15 Girls",
+          "type": "event",
+          "date": "2026-11-01",
+          "startTime": "9:30 AM",
+          "endTime": "10:30 AM",
+          "venue": "",
+          "price": "",
+          "description": "",
+          "extractionReason": "A dated schedule row lists Minor Hockey for U15 Girls from 9:30 AM to 10:30 AM.",
+          "relevantImageIndex": 0,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Cavendish Farms Community Event Centre, Tyne Valley, PEI"
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The poster identifies the Community Event Centre and says activities are on the ice at the rink."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 9:30 AM"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "Extracted item clock: 10:30 AM"
+            }
+          },
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 3,
+          "_pipelineTotalStage3": 12
+        },
+        {
+          "name": "SMH Sunday Morning Hockey",
+          "type": "event",
+          "date": "2026-11-01",
+          "startTime": "10:45 AM",
+          "endTime": "11:45 PM",
+          "venue": "",
+          "price": "",
+          "description": "",
+          "extractionReason": "A dated schedule row lists SMH and Sunday Morning Hockey from 10:45 AM to 11:45 PM; the printed end time is preserved as shown.",
+          "relevantImageIndex": 0,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Cavendish Farms Community Event Centre, Tyne Valley, PEI"
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The poster identifies the Community Event Centre and says activities are on the ice at the rink."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 10:45 AM"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "Extracted item clock: 11:45 PM"
+            }
+          },
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 4,
+          "_pipelineTotalStage3": 12
+        },
+        {
+          "name": "Family/Skater Free Family Skate",
+          "type": "event",
+          "date": "2026-11-01",
+          "startTime": "12:00 PM",
+          "endTime": "1:15 PM",
+          "venue": "",
+          "price": "",
+          "description": "The schedule labels this a free family skate.",
+          "extractionReason": "A dated schedule row lists Family/Skater and Free Family Skate from 12:00 PM to 1:15 PM.",
+          "relevantImageIndex": 0,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Cavendish Farms Community Event Centre, Tyne Valley, PEI"
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The poster identifies the Community Event Centre and says activities are on the ice at the rink."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 12:00 PM"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "Extracted item clock: 1:15 PM"
+            }
+          },
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 5,
+          "_pipelineTotalStage3": 12
+        },
+        {
+          "name": "Women's Rec Inland vs. Tyne Valley",
+          "type": "event",
+          "date": "2026-11-01",
+          "startTime": "1:15 PM",
+          "endTime": "2:30 PM",
+          "venue": "",
+          "price": "",
+          "description": "",
+          "extractionReason": "A dated schedule row lists Women's Rec, with Inland vs. Tyne Valley, from 1:15 PM to 2:30 PM.",
+          "relevantImageIndex": 0,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Cavendish Farms Community Event Centre, Tyne Valley, PEI"
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The poster identifies the Community Event Centre and says activities are on the ice at the rink."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 1:15 PM"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "Extracted item clock: 2:30 PM"
+            }
+          },
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 6,
+          "_pipelineTotalStage3": 12
+        },
+        {
+          "name": "Minor Hockey U9 (Hutch)",
+          "type": "event",
+          "date": "2026-11-01",
+          "startTime": "2:45 PM",
+          "endTime": "3:00 PM",
+          "venue": "",
+          "price": "",
+          "description": "",
+          "extractionReason": "A dated schedule row lists Minor Hockey for U9 (Hutch) from 2:45 PM to 3:00 PM.",
+          "relevantImageIndex": 0,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Cavendish Farms Community Event Centre, Tyne Valley, PEI"
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The poster identifies the Community Event Centre and says activities are on the ice at the rink."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 2:45 PM"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "Extracted item clock: 3:00 PM"
+            }
+          },
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 7,
+          "_pipelineTotalStage3": 12
+        },
+        {
+          "name": "Minor Hockey U13 Boys",
+          "type": "event",
+          "date": "2026-11-01",
+          "startTime": "4:00 PM",
+          "endTime": "5:00 PM",
+          "venue": "",
+          "price": "",
+          "description": "",
+          "extractionReason": "A dated schedule row lists Minor Hockey for U13 Boys from 4:00 PM to 5:00 PM.",
+          "relevantImageIndex": 0,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Cavendish Farms Community Event Centre, Tyne Valley, PEI"
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The poster identifies the Community Event Centre and says activities are on the ice at the rink."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 4:00 PM"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "Extracted item clock: 5:00 PM"
+            }
+          },
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 8,
+          "_pipelineTotalStage3": 12
+        },
+        {
+          "name": "Minor Hockey U11 Girls",
+          "type": "event",
+          "date": "2026-11-01",
+          "startTime": "5:30 PM",
+          "endTime": "6:30 PM",
+          "venue": "",
+          "price": "",
+          "description": "",
+          "extractionReason": "A dated schedule row lists Minor Hockey for U11 Girls from 5:30 PM to 6:30 PM.",
+          "relevantImageIndex": 0,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Cavendish Farms Community Event Centre, Tyne Valley, PEI"
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The poster identifies the Community Event Centre and says activities are on the ice at the rink."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 5:30 PM"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "Extracted item clock: 6:30 PM"
+            }
+          },
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 9,
+          "_pipelineTotalStage3": 12
+        },
+        {
+          "name": "Minor Hockey U18 Girls",
+          "type": "event",
+          "date": "2026-11-01",
+          "startTime": "6:30 PM",
+          "endTime": "6:30 PM",
+          "venue": "",
+          "price": "",
+          "description": "",
+          "extractionReason": "A dated schedule row lists Minor Hockey for U18 Girls. The printed time is 6:30 PM to 6:30 PM and is preserved as shown.",
+          "relevantImageIndex": 0,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Cavendish Farms Community Event Centre, Tyne Valley, PEI"
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The poster identifies the Community Event Centre and says activities are on the ice at the rink."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 6:30 PM"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "Extracted item clock: 6:30 PM"
+            }
+          },
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 10,
+          "_pipelineTotalStage3": 12
+        },
+        {
+          "name": "Minor Hockey U18 Boys",
+          "type": "event",
+          "date": "2026-11-01",
+          "startTime": "7:30 PM",
+          "endTime": "8:45 PM",
+          "venue": "",
+          "price": "",
+          "description": "",
+          "extractionReason": "A dated schedule row lists Minor Hockey for U18 Boys from 7:30 PM to 8:45 PM.",
+          "relevantImageIndex": 0,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Cavendish Farms Community Event Centre, Tyne Valley, PEI"
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The poster identifies the Community Event Centre and says activities are on the ice at the rink."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 7:30 PM"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "Extracted item clock: 8:45 PM"
+            }
+          },
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 11,
+          "_pipelineTotalStage3": 12
+        },
+        {
+          "name": "Donut Hockey Donuts",
+          "type": "event",
+          "date": "2026-11-01",
+          "startTime": "9:00 PM",
+          "endTime": "10:00 PM",
+          "venue": "",
+          "price": "",
+          "description": "",
+          "extractionReason": "A dated schedule row lists Donut Hockey and Donuts from 9:00 PM to 10:00 PM.",
+          "relevantImageIndex": 0,
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              "Cavendish Farms Community Event Centre, Tyne Valley, PEI"
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The poster identifies the Community Event Centre and says activities are on the ice at the rink."
+          },
+          "_sourceType": "calendar",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "Extracted item clock: 9:00 PM"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "Extracted item clock: 10:00 PM"
+            }
+          },
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 12,
+          "_pipelineTotalStage3": 12
+        }
+      ],
+      "stage4": []
+    },
+    {
+      "row": 291,
+      "sourceId": "1758532092942379",
+      "caption": "On November 14 at 7:30 PM at Harmony House, Fiddler trio Rowen Gallant, Ray Knorr, and Romy Munkres will perform a live improvised score to Stella Maris, a 1918 Marshall Neilan picture starring Canada’s biggest silent‑era movie star, Mary Pickford. \n\nStella Maris, written by Frances Marion, one of the most renowned female screenwriters of the early 20th century, tells the story of two young women, both played by Pickford in a dual role that required technical innovation to show her twice in the same shot, who fall in love with a man who is unhappily married.\n\nPresented by Roving Picture Shows and Island Jazz as part of the Cné-Concert Series \n\nTickets available at the door or right on Harmony House website. - link in our bio -\n\nOriginal poster by Melissa Marie Morse\n\nOCR TEXT:\nMay be an image of text\nMay be an image of text",
+      "rowMeta": {
+        "sharedPostAuthorName": "Roving Picture Shows",
+        "sharedPostAuthorUrl": "https://www.facebook.com/rovingpictureshows",
+        "sharedPostUrl": "https://www.facebook.com/rovingpictureshows/posts/pfbid02AWPcbQ9PWFUcRv3oZRSHRg8iihxzUs2GdkXDMuwT4QqmWkyhsZMHgFMVDv4aFg94l",
+        "sharedPostTimestamp": "2026-10-31T08:01:52.000Z",
+        "pageName": "HarmonyHousePEI",
+        "userName": "Harmony House PEI",
+        "timestamp": "2026-10-31T13:37:55.000Z",
+        "utcStartDate": "",
+        "parserMode": "full5stage",
+        "dryRun": false
+      },
+      "stage3": [],
+      "stage4": [
+        {
+          "name": "Stella Maris — live improvised score",
+          "description": "Fiddler trio Ray Knorr, Romy Munkres, and Rowen Gallant perform a live improvised score to Stella Maris, a 1918 Marshall Neilan picture starring Mary Pickford. Presented by Roving Picture Shows and Island Jazz as part of the Cné-Concert Series. Tickets available at the door or on the Harmony House website; the caption directs readers to the link in bio.",
+          "date": "2026-11-14",
+          "startTime": "19:30",
+          "endTime": "",
+          "venue": "",
+          "ticketLink": "",
+          "price": "",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "The caption and poster advertise a live improvised musical performance with a specific date, time, and venue. The poster prints Saturday, November 14, at 7:30; the year is not printed and is resolved as the upcoming November 14 in the dated caption context.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "SATURDAY NOVEMBER 14, 7:30"
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              {
+                "label": "Harmony House, Hunter River",
+                "address": "",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "HARMONY HOUSE, HUNTER RIVER"
+              }
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The poster identifies Harmony House, Hunter River; no street address is printed."
+          },
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 1
+        }
+      ]
+    },
+    {
+      "row": 113,
+      "sourceId": "1766520615475191",
+      "caption": " ONTARIO, WE'RE COMING FOR YOU!! \n\nWe're packing up a little taste of Prince Edward Island and heading to Ontario for our very first Longo's handpie sampling events!\n\nAnd guess who's coming along? Our founder, Chef Sarah! ‍\n\nCome say hello, enjoy some FREE delicious handpie bites, and discover why we're so passionate about making REAL comfort food, wrapped in our signature buttery, whole wheat pastry!\n\n HERE'S WHERE TO FIND US:\n\nSATURDAY, NOVEMBER 7\n\n KITCHENER | 10:00 AM – 12:30 PM Longo's, 1950 Fischer-Hallman Rd, Unit F\n\n KLEINBURG | 3:15 PM – 6:00 PM Longo's, 6530 Major Mackenzie Dr W\n\nSUNDAY, NOVEMBER 8\n\n WELLAND | 11:00 AM – 2:00 PM Longo's, 968 Niagara St\n\nSATURDAY, NOVEMBER 14\n\n ETOBICOKE (QUEENSWAY) | 11:00 AM – 2:00 PM Longo's, 1055 The Queensway\n\n✨ ON THE SAMPLING MENU: \n BBQ Pulled Pork \n PEI Pasty \n Chicken Pot Pie\n\nEvery handpie is chef-made right here on Prince Edward Island, generously filled with hearty, delicious ingredients, and wrapped in our signature pastry made with real butter and whole wheat flour.\n\nReady to bake straight from frozen, they're comfort food without the compromise!\n\nAlready a handpie fan? Bring a friend! Never tried one? We'd LOVE to introduce you to your new favourite freezer staple!\n\n And if you spotted that Beet, Corn & Goat Cheese handpie in Chef Sarah's hands... let's just say there are more delicious things coming to Longo's very soon!\n\n ONTARIO FRIENDS, WHICH LOCATION WILL WE SEE YOU AT? Tag someone who needs to come along! \n\n#TheHandpieCompany #Longos #MadeInPEI #OntarioFood #CanadianMade\n\nOCR TEXT:\nMay be an image of text\nMay be an image of potpie and text\nMay be an image of oatmeal cookies and text",
+      "rowMeta": {
+        "pageName": "thehandpieco",
+        "userName": "The Handpie Company",
+        "timestamp": "2026-11-01T12:46:34.000Z",
+        "utcStartDate": "",
+        "parserMode": "full5stage",
+        "dryRun": false
+      },
+      "stage3": [
+        {
+          "name": "Longo's handpie sampling events!",
+          "description": "SATURDAY, NOVEMBER 7 — Come meet Chef Sarah and enjoy free handpie samples at Longo's.",
+          "date": "2026-11-07",
+          "startTime": "10:00",
+          "endTime": "12:30",
+          "venue": "Longo's",
+          "ticketLink": "",
+          "price": "",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "A separately scheduled public handpie sampling event, with an invitation to meet Chef Sarah, is advertised for this date and location.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "10:00 AM"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "12:30 PM"
+            }
+          },
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              {
+                "label": "KITCHENER",
+                "address": "1950 Fischer-Hallman Rd, Unit F",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "KITCHENER | 10:00 AM – 12:30 PM Longo's, 1950 Fischer-Hallman Rd, Unit F"
+              }
+            ],
+            "confirmedStreets": [
+              "Fischer-Hallman Rd"
+            ],
+            "ordered": false,
+            "evidenceNotes": "The caption explicitly pairs Kitchener and its Longo's address with this event time."
+          },
+          "_sourceOccurrenceCount": 4,
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 4
+        },
+        {
+          "name": "Longo's handpie sampling events!",
+          "description": "SATURDAY, NOVEMBER 7 — Come meet Chef Sarah and enjoy free handpie samples at Longo's.",
+          "date": "2026-11-07",
+          "startTime": "15:15",
+          "endTime": "18:00",
+          "venue": "Longo's",
+          "ticketLink": "",
+          "price": "",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "A separately scheduled public handpie sampling event, with an invitation to meet Chef Sarah, is advertised for this date and location.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "3:15 PM"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "6:00 PM"
+            }
+          },
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              {
+                "label": "KLEINBURG",
+                "address": "6530 Major Mackenzie Dr W",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "KLEINBURG | 3:15 PM – 6:00 PM Longo's, 6530 Major Mackenzie Dr W"
+              }
+            ],
+            "confirmedStreets": [
+              "Major Mackenzie Dr W"
+            ],
+            "ordered": false,
+            "evidenceNotes": "The caption explicitly pairs Kleinburg and its Longo's address with this event time."
+          },
+          "_sourceOccurrenceCount": 4,
+          "_pipelineIndex": 2,
+          "_pipelineTotalStage3": 4
+        },
+        {
+          "name": "Longo's handpie sampling events!",
+          "description": "SUNDAY, NOVEMBER 8 — Come meet Chef Sarah and enjoy free handpie samples at Longo's.",
+          "date": "2026-11-08",
+          "startTime": "11:00",
+          "endTime": "14:00",
+          "venue": "Longo's",
+          "ticketLink": "",
+          "price": "",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "A separately scheduled public handpie sampling event, with an invitation to meet Chef Sarah, is advertised for this date and location.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "11:00 AM"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "2:00 PM"
+            }
+          },
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              {
+                "label": "WELLAND",
+                "address": "968 Niagara St",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "WELLAND | 11:00 AM – 2:00 PM Longo's, 968 Niagara St"
+              }
+            ],
+            "confirmedStreets": [
+              "Niagara St"
+            ],
+            "ordered": false,
+            "evidenceNotes": "The caption explicitly pairs Welland and its Longo's address with this event time."
+          },
+          "_sourceOccurrenceCount": 4,
+          "_pipelineIndex": 3,
+          "_pipelineTotalStage3": 4
+        },
+        {
+          "name": "Longo's handpie sampling events!",
+          "description": "SATURDAY, NOVEMBER 14 — Come meet Chef Sarah and enjoy free handpie samples at Longo's.",
+          "date": "2026-11-14",
+          "startTime": "11:00",
+          "endTime": "14:00",
+          "venue": "Longo's",
+          "ticketLink": "",
+          "price": "",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "A separately scheduled public handpie sampling event, with an invitation to meet Chef Sarah, is advertised for this date and location.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "11:00 AM"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "2:00 PM"
+            }
+          },
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              {
+                "label": "ETOBICOKE (QUEENSWAY)",
+                "address": "1055 The Queensway",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "ETOBICOKE (QUEENSWAY) | 11:00 AM – 2:00 PM Longo's, 1055 The Queensway"
+              }
+            ],
+            "confirmedStreets": [
+              "The Queensway"
+            ],
+            "ordered": false,
+            "evidenceNotes": "The caption explicitly pairs Etobicoke (Queensway) and its Longo's address with this event time."
+          },
+          "_sourceOccurrenceCount": 4,
+          "_pipelineIndex": 4,
+          "_pipelineTotalStage3": 4
+        }
+      ],
+      "stage4": []
+    },
+    {
+      "row": 19,
+      "sourceId": "1747167057418086",
+      "caption": " HAPPY HALLOWEEN FROM TOBY’S FARM MARKET! \n\nWe are OPEN today until 4 PM!\n\n Only 2 days left to enjoy our Fun Park and Corn Maze for 2026!\n\n FREE ICE CREAM CONES! Today and tomorrow, with every admission bracelet purchased for the Fun Park and Corn Maze, we're treating you to a FREE ice cream cone! Don't forget to grab yours! \n\n Stock up on your farm-fresh veggies! We have some extra larger bags ready to go if you forgot to pre-order!\n\n Still need a Halloween pumpkin? We have a few large orange pumpkins left if you haven't grabbed yours yet!\n\n 2027 Fun Park Season Passes are ready to go! They make the PERFECT Christmas gift for the kids! \n\n Our ice cream freezers are still stocked with delicious treats, so grab your favourites to take home!\n\nWe have a few full size icecream cakes if you need one for a upcoming birthday  \n\n Tomorrow, Sunday, November 1st, is our final day of the season!\n\nGrab the family and come on out for one last weekend of fun at Toby's! ❤️\n\nThank you for an amazing 2026 season! \n\nOCR TEXT:\nMay be an image of text\nNo photo description available.\nNo photo description available.\nNo photo description available.\nMay be an image of combine, segway and tractor",
+      "rowMeta": {
+        "pageName": "fortunebridgefarms",
+        "userName": "Fortune Bridge Farms & Toby’s Farm Market",
+        "timestamp": "2026-10-31T11:08:47.000Z",
+        "utcStartDate": "",
+        "parserMode": "full5stage",
+        "dryRun": false
+      },
+      "stage3": [
+        {
+          "name": "Fun Park and Corn Maze",
+          "description": "Today is one of the final two days to enjoy the Fun Park and Corn Maze for the 2026 season.",
+          "date": "2026-10-31",
+          "startTime": "",
+          "endTime": "",
+          "venue": "",
+          "ticketLink": "",
+          "price": "",
+          "relevantImageIndex": 1,
+          "recurringPattern": "none",
+          "extractionReason": "The post advertises public access to the Fun Park and Corn Maze as an attraction experience for today. The local post date anchors today to October 31, 2026. The market's opening time is not treated as the attraction's hours.",
+          "timeFlags": {
+            "start": {
+              "source": "none",
+              "evidence": ""
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              {
+                "label": "Toby's",
+                "address": "",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "at Toby's"
+              }
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The post says to come out for fun at Toby's; it gives no street address."
+          },
+          "_sourceType": "event",
+          "_sourceOccurrenceCount": 2,
+          "_sourceTimeConstraint": {
+            "reason": "dated_activity_without_clock",
+            "evidence": "Dated activity has no advertised start clock"
+          },
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 3
+        },
+        {
+          "name": "Fun Park and Corn Maze",
+          "description": "Tomorrow, Sunday, November 1st, is the final day of the season for enjoying the Fun Park and Corn Maze.",
+          "date": "2026-11-01",
+          "startTime": "",
+          "endTime": "",
+          "venue": "",
+          "ticketLink": "",
+          "price": "",
+          "relevantImageIndex": 2,
+          "recurringPattern": "none",
+          "extractionReason": "The post advertises public access to the Fun Park and Corn Maze as an attraction experience tomorrow and explicitly identifies Sunday, November 1st as the season's final day. No attraction hours are printed.",
+          "timeFlags": {
+            "start": {
+              "source": "none",
+              "evidence": ""
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              {
+                "label": "Toby's",
+                "address": "",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "at Toby's"
+              }
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The post says to come out for fun at Toby's; it gives no street address."
+          },
+          "_sourceType": "event",
+          "_sourceOccurrenceCount": 2,
+          "_sourceTimeConstraint": {
+            "reason": "dated_activity_without_clock",
+            "evidence": "Dated activity has no advertised start clock"
+          },
+          "_pipelineIndex": 2,
+          "_pipelineTotalStage3": 3
+        },
+        {
+          "name": "Free Ice Cream Cone with Admission",
+          "description": "Today and tomorrow, get a free ice cream cone with every admission bracelet purchased for the Fun Park and Corn Maze.",
+          "date": "2026-10-31",
+          "startTime": "",
+          "endTime": "",
+          "timeFlags": {
+            "start": {
+              "source": "none",
+              "evidence": ""
+            },
+            "end": {
+              "toClose": false
+            }
+          },
+          "venue": "Toby’s Farm Market",
+          "pricing": {
+            "price": "FREE",
+            "details": "Free ice cream cone with every admission bracelet purchased"
+          },
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "“FREE ICE CREAM CONES! Today and tomorrow, with every admission bracelet purchased for the Fun Park and Corn Maze, we're treating you to a FREE ice cream cone!”",
+          "_sourceType": "special",
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 3,
+          "_pipelineTotalStage3": 3
+        }
+      ],
+      "stage4": []
+    },
+    {
+      "row": 214,
+      "sourceId": "122335239314219467",
+      "caption": "Dare I say it!!??\n\nI think we might have the best guess the candy count jar on PEI (let me know if I am wrong)!\n\nNot only does it contain A LOT of awesome candy (including a giant gobstopper) but it also includes $150 in Downtown Summerside giftcards to some of my favorite Downtown Summerside businesses including:\n$25 to Art Buds \n$25 to Evermoore: Island Dining & Brewing \n$25 to Daisy-Mae Bookshop \n$25 to Vintage \nAND a $50 Holman's Giftcard!!!\n\nStop by anytime tomorrow before, during or after Witches on Water Street to place your guess on how many candys are in the jar! Whoever is closest wins the prize!!!\n\nNot only that but we will be giving away candy AND Free Ice Cream coupons at our pumpkin ring toss from 12 - 3 and free candy will be available at the counter!\n\nThe witches slightly off of water street are back with some great fun!!! We look forward to seeing you tomorrow!!!!\n\nP.S. we will be closing tomorrow at 4:30 to allow ourselves and our staff to fully enjoy Halloween!\n\nDon’t forget to stop into Holmans for a sweet treat and a chance to WIN some great prizes ‍♀️\n\nOCR TEXT:\nMay be an image of bubble gum, candy, baked beans and text\nMay be an image of bubble gum, candy, baked beans and text\nMay be an image of corn\nMay be an image of corn",
+      "rowMeta": {
+        "sharedPostAuthorName": "Holman's Ice Cream Parlour",
+        "sharedPostAuthorUrl": "https://www.facebook.com/Holmansicecream",
+        "sharedPostUrl": "https://www.facebook.com/Holmansicecream/posts/pfbid02svU3P5YJzWxmHhwZMPCcqXy4S4fcQdx3raAE4zEJBFKkPFcnmjH2NN4X5KgCzvthl",
+        "sharedPostTimestamp": "2026-10-30T20:30:04.000Z",
+        "pageName": "artbudspei",
+        "userName": "Art Buds",
+        "timestamp": "2026-10-31T11:26:32.000Z",
+        "utcStartDate": "",
+        "parserMode": "full5stage",
+        "dryRun": false
+      },
+      "stage3": [],
+      "stage4": [
+        {
+          "name": "Pumpkin ring toss",
+          "description": "A pumpkin ring toss is offered from 12 - 3.",
+          "date": "2026-10-31",
+          "startTime": "12:00",
+          "endTime": "15:00",
+          "venue": "",
+          "ticketLink": "",
+          "price": "",
+          "relevantImageIndex": 1,
+          "recurringPattern": "none",
+          "extractionReason": "The caption advertises a public pumpkin ring toss with an explicit time window.",
+          "timeFlags": {
+            "start": {
+              "source": "explicit",
+              "evidence": "from 12 - 3"
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "from 12 - 3"
+            }
+          },
+          "spatial": {
+            "kind": "unknown",
+            "locations": [],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The caption does not give a specific venue address."
+          },
+          "_sourceOccurrenceCount": 1,
+          "_pipelineIndex": 3,
+          "_pipelineTotalStage3": 4
+        }
+      ]
+    },
+    {
+      "row": 284,
+      "sourceId": "1625206825931297",
+      "caption": "Our Artisan Market is in full swing with some wonderful makers joining Royalty Crossing.\nJoin them today until 5:00pm and show them some local love.\n-\n#wherepeishops #royaltycrossing #discovercharlottetown #charlottetownpei\n\nOCR TEXT:\nMay be an image of eyeglasses, jewelry and text\nMay be an image of text\nMay be an image of text\nMay be an image of text\nMay be art of text",
+      "rowMeta": {
+        "pageName": "RoyaltyCrossing",
+        "userName": "Royalty Crossing",
+        "timestamp": "2026-10-31T17:14:36.000Z",
+        "utcStartDate": "",
+        "parserMode": "full5stage",
+        "dryRun": false
+      },
+      "stage3": [],
+      "stage4": [
+        {
+          "name": "Artisan Market",
+          "description": "The Artisan Market is in full swing with local makers. Join them today until 5:00pm.",
+          "date": "2026-10-31",
+          "startTime": "",
+          "endTime": "17:00",
+          "venue": "",
+          "ticketLink": "",
+          "price": "",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "The caption advertises a public artisan market taking place today at Royalty Crossing. It gives an end time but no start time.",
+          "timeFlags": {
+            "start": {
+              "source": "none",
+              "evidence": ""
+            },
+            "end": {
+              "source": "explicit",
+              "toClose": false,
+              "evidence": "until 5:00pm"
+            }
+          },
+          "spatial": {
+            "kind": "single_location",
+            "locations": [
+              {
+                "label": "Royalty Crossing",
+                "address": "",
+                "role": "location",
+                "certainty": "confirmed",
+                "sourceText": "joining Royalty Crossing"
+              }
+            ],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "The caption names Royalty Crossing; no street address is provided."
+          },
+          "_sourceOccurrenceCount": 1,
+          "_sourceTimeConstraint": {
+            "reason": "dated_activity_without_clock",
+            "evidence": "Dated activity has no advertised start clock"
+          },
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 1,
+          "_stage4NeedsTimeEnrichment": true
+        }
+      ]
+    },
+    {
+      "row": 356,
+      "sourceId": "1164554542965165",
+      "caption": "A big thank you to everyone who joined us for some Halloween fun today!  We had a wonderful time celebrating with you all, and a special thank you to Madame Abbey from The Nest for joining in on the fun!\n\nWe’re open Sunday from 10 AM–4 PM!\n\nAnd YES… we’re accepting pumpkins!  So bring them along when you visit!\n\nHappy Halloween from Island Hill Farm! \n\nOCR TEXT:\nMay be an image of text",
+      "rowMeta": {
+        "pageName": "IslandHillFarm",
+        "userName": "Island Hill Farm Inc",
+        "timestamp": "2026-10-31T19:30:49.000Z",
+        "utcStartDate": "",
+        "parserMode": "full5stage",
+        "dryRun": false
+      },
+      "stage3": [
+        {
+          "name": "Halloween fun",
+          "description": "The caption says they celebrated Halloween fun today and thanks Madame Abbey from The Nest for joining. The image reads “Trick or Treat.”",
+          "date": "2026-10-31",
+          "startTime": "",
+          "endTime": "",
+          "venue": "",
+          "ticketLink": "",
+          "price": "",
+          "relevantImageIndex": 0,
+          "recurringPattern": "none",
+          "extractionReason": "The caption identifies a public Halloween activity taking place “today,” which resolves to the post’s local date. The image includes “Trick or Treat,” but no activity hours are shown.",
+          "timeFlags": {
+            "start": {
+              "source": "none",
+              "evidence": ""
+            },
+            "end": {
+              "source": "none",
+              "toClose": false,
+              "evidence": ""
+            }
+          },
+          "spatial": {
+            "kind": "unknown",
+            "locations": [],
+            "confirmedStreets": [],
+            "ordered": false,
+            "evidenceNotes": "Island Hill Farm appears as the page identity and image branding, but no event location is explicitly stated."
+          },
+          "_sourceOccurrenceCount": 1,
+          "_sourceTimeConstraint": {
+            "reason": "dated_activity_without_clock",
+            "evidence": "Dated activity has no advertised start clock"
+          },
+          "_pipelineIndex": 1,
+          "_pipelineTotalStage3": 1
+        }
+      ],
+      "stage4": []
+    }
+  ]
+}

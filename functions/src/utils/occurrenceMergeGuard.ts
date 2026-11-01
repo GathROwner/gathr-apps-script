@@ -1,5 +1,5 @@
 import {corroboratedCalendarStart} from './calendarTileTiming.js';
-import { hasConflictingBookableActivitySlot, hasConflictingProgrammeSlot } from './eventSlotIdentity.js';
+import { hasConflictingBookableActivitySlot, hasConflictingProgrammeSlot, hasConflictingDevelopmentSlot } from './eventSlotIdentity.js';
 import {hasConflictingStandingKaraokeOccurrence} from '../services/standingKaraokeOccurrence.js';
 import {EventData} from '../types/index.js';
 import {hasCrossSourceRecurringLifecycleConflict} from './recurringSeriesLifecycle.js';
@@ -99,7 +99,7 @@ export function hasConflictingOccurrenceIdentity(a: Occurrence, b: Occurrence): 
   const audience=(e:Occurrence)=>`${title(e)} ${e.description||''}`;
   const gender=(text:string)=>/\b(?:women['’]?s|female|girls)\b/i.test(text)?'female':/\b(?:men['’]?s|male|boys)\b/i.test(text)?'male':'';
   const genderConflict=Boolean(gender(audience(a))&&gender(audience(b))&&gender(audience(a))!==gender(audience(b)));
-  return offWeek(a,b) || offWeek(b,a) || genderConflict || hasConflictingSameSourceClassClock(a,b) || hasConflictingSameSourceBundle(a,b) || hasConflictingProgrammeSlot(a,b) || hasConflictingCinemaClock(a,b) || hasConflictingBoundedClassCycle(a,b) || hasConflictingBookableActivitySlot(a,b) ||
+  return offWeek(a,b) || offWeek(b,a) || genderConflict || hasConflictingDevelopmentSlot(a,b) || hasConflictingSameSourceClassClock(a,b) || hasConflictingSameSourceBundle(a,b) || hasConflictingProgrammeSlot(a,b) || hasConflictingCinemaClock(a,b) || hasConflictingBoundedClassCycle(a,b) || hasConflictingBookableActivitySlot(a,b) ||
     hasCrossSourceRecurringLifecycleConflict(a as Partial<EventData>, b as Partial<EventData>) ||
     hasConflictingStandingKaraokeOccurrence(a as Partial<EventData>, b as Partial<EventData>);
 }

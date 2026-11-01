@@ -117,6 +117,7 @@ export interface ParseStageArtifactsSnapshot {
   stage5Pilot?: { eligible: boolean; selected: boolean; percent: number; model: string; reasoningEffort: string };
   stage3InputKind?: 'text_only' | 'image';
   stage4Items?: ExtractedItem[];
+  stage5OmittedItems?: ExtractedItem[];
   stage4ValidationHold?: { format: 'compact_v1'; reason: string; attempts: number };
   stage56HeldItems?: TimeResolvedEvent[];
   stage37TicketUrl?: string;
@@ -386,6 +387,7 @@ export type RecurringPattern =
 // NOTE: Monthly recurrence is used in legacy Apps Script and should be added in a dedicated recurrence pass.
 
 export interface RecurrenceScheduleFields {
+  _sourceAttendeeLocation?: {label:string;address:string;province:string;sourceText:string};
   _reviewedSourceImageLocation?: {sourceId:string;imageObject:string;venue:string;address:string};
   _itemEligibility?: 'ineligible';
   _sourceReviewMissing?: string[];

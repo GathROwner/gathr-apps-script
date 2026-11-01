@@ -17,6 +17,13 @@ function explicitlyWithholdsAttendeeVenue(text: string): boolean {
 export function sourcePublicationHoldReason(item: ExtractedItem, caption: string): string | undefined {
   const title=String(item.name || ''), detail=String(item.description || '');
   const source=caption.split(/\n\s*OCR TEXT:/i)[0];
+  // A past activity does not borrow a future opening window elsewhere in a
+  // mixed recap. Require the item's own description to identify that recap.
+  if(/\b(?:celebrated|celebrating|joined us|had a (?:wonderful|great|fantastic) time)\b/i.test(detail) &&
+      /\b(?:thank(?:s| you)|had a (?:wonderful|great|fantastic) time)\b/i.test(source) &&
+      /\b(?:joined us|had a (?:wonderful|great|fantastic) time)\b/i.test(source) &&
+      !/\b(?:upcoming|join us|next|tomorrow|will (?:be|return)|returns?)\b/i.test(detail))
+    return 'past_activity_recap_without_new_occurrence';
   if (/\b(?:exhibition|exhibit)\b/i.test(detail) &&
       /\bon\s+display\b[\s\S]*\buntil\b/i.test(detail) &&
       !String(item.startTime||'').trim())
