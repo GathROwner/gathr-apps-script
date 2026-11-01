@@ -22,13 +22,13 @@ function emptyCanonicalDb() {
     writes, get queries() {return queries;}};
 }
 
-test('actual official PEI artifact preserves2219 identities,1210 closed ways and24 complete center-pin relations', () => {
-  assert.equal(data.manifest.pbfSha256, '12d783b94e75d8964d2d562bd79233a03abddb3398bd5ba09d86672dc24bc1fa');
-  assert.equal(data.manifest.sourceTimestamp, '2026-10-29T21:21:26Z');
-  assert.equal(elements.length, 2219);
-  assert.equal(new Set(elements.map(item => `${item.type}:${item.id}`)).size, 2219);
+test('actual official PEI artifact preserves2227 identities,1213 closed ways and24 complete center-pin relations', () => {
+  assert.equal(data.manifest.pbfSha256, 'c682572ea356c49e87cfc94efb22ad4e25613f7f33246a3d0d33a64474aed68d');
+  assert.equal(data.manifest.sourceTimestamp, '2026-10-31T21:23:06Z');
+  assert.equal(elements.length, 2227);
+  assert.equal(new Set(elements.map(item => `${item.type}:${item.id}`)).size, 2227);
   const rings = elements.filter(item => item.type === 'way' && parseCheckInBoundary(item.geometry));
-  assert.equal(rings.length, 1210);
+  assert.equal(rings.length, 1213);
   const relations = elements.filter(item => item.type === 'relation');
   assert.equal(relations.length, 24);
   for (const item of relations) {

@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import {readFileSync} from 'node:fs';
+import {join} from 'node:path';
 import {Timestamp, type DocumentData, type Firestore} from 'firebase-admin/firestore';
 import {recordCheckInReadinessSample} from './checkInEligibility.js';
 import {checkInPreparationPoolDocumentId, discoverNearbyCheckInPlaces, renewNearbyCheckInPreparation,
@@ -39,7 +41,9 @@ class MemoryDb {
   firestore() {return this as unknown as Firestore;}
 }
 const point = {latitude: 46.2571607, longitude: -63.1406688};
-const baseMs = Date.parse('2026-10-30T21:21:26Z');
+// Keep dataset-dependent renewal tests after the actual bundled source date.
+const catalogueManifest = JSON.parse(readFileSync(join(__dirname, 'data', 'pei-osm-catalogue.json'), 'utf8')).manifest;
+const baseMs = Date.parse(catalogueManifest.sourceTimestamp) + 24 * 3_600_000;
 const uid = 'renewal-unit-owner', sessionId = 'renewal-unit-session';
 const at = (ms: number) => Timestamp.fromMillis(ms);
 const input = (ms: number, extra: Doc = {}) => ({...point, preparation: true, accuracyMeters: 17, capturedAtMs: ms, ...extra});
