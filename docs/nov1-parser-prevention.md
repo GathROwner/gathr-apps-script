@@ -1,9 +1,10 @@
 # November 1 parser prevention candidate
 
-Status: two independent-review boundary fixes implemented; final validation pending.
+Status: verified source candidate; not deployed or applied.
 Checkout: `C:/Users/craig/.codex/worktrees/5990/gathr-apps-script`.
 Branch: `codex/nov1-parser-prevention`.
 Accepted parent: `055b12d97a33d08fe67d727c2f3ae221963816db`.
+Verified runtime candidate: `9f06bce6836f285f1425ec4dfec5239c7dd4a27c`.
 Previous candidate: `2bb99c0dd39a7bafd92ca3624a8e09c3d6ffc3b7`, blocked by independent review despite its passing suite.
 Production deployment and exact data corrections belong to the coordinator.
 
@@ -47,10 +48,12 @@ scrape, replay or live write was used.
 
 ## Verification
 
-The previous2bb build passes. Its targeted controls pass **33/33**; its full compiled
-backend suite passes **1,371/1,371**, zero failures/skips, on a frozen compiled
-tree with no compiler writes during the run. The earlier expanded focused set
-also passed75/75 before the final ordering correction. The runtime source/compiled
+Candidate9f06bce6 passes the build, **35/35** targeted controls and the complete
+**1,373/1,373** compiled backend suite, zero failures/skips. Source and compiled
+bytes stayed frozen during the run; post-test SHA256 checks show zero drift
+across all14 runtime files. Receipts are `build-review-fixes.log`,
+`review-fixes-focused.tap` and `full-suite-review-fixes.tap` under
+`functions/artifacts/nov1-prevention/`. The runtime source/compiled
 hash manifest and focused14-file patch are in
 `functions/artifacts/nov1-prevention/runtime-overlay.{json,patch}`. The coordinator
 owns release assembly, live verification and exact data repairs.
@@ -83,5 +86,8 @@ before deriving fresh proof from the current item quote and caption; and explici
 overnight context in the same sport item's description must survive just like
 title-local context. The implementation now does both without mutating the input.
 Fresh valid Ontario proofs still rebuild, ordinary unsupported daytime hockey
-ranges still hold, and real U18 zero ranges remain held. New build/focused/full
-receipts are pending; the passing2bb receipts are retained under versioned names.
+ranges still hold, and real U18 zero ranges remain held. Both exact reviewer
+counterexamples pass through the early source gate and formatting/completeness
+controls in the new35-check set and complete1,373-check run. The previous2bb
+33-focused/1,371-full passing receipts are retained under versioned names; those
+passing tests did not overrule the independent source-boundary review.

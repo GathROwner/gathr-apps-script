@@ -2,10 +2,10 @@
 
 ## November 1 mechanism review and local prevention candidate
 
-Status: **independent-review fixes pending final validation; not deployed or applied**. Previous runtime candidate
-`2bb99c0dd39a7bafd92ca3624a8e09c3d6ffc3b7`, accepted parent
+Status: **locally verified after independent review; not deployed or applied**. Runtime candidate
+`9f06bce6836f285f1425ec4dfec5239c7dd4a27c`, accepted parent
 `055b12d97a33d08fe67d727c2f3ae221963816db`, branch
-`codex/nov1-parser-prevention`. Build,33 focused and1,371 full compiled checks
+`codex/nov1-parser-prevention`. Build,35 focused and1,373 full compiled checks
 pass;14 runtime source/compiled hashes show zero drift. Production state and exact data changes
 remain coordinator-owned. No response-reuse hooks, model/cache/configuration,
 automatic venue/location gates, video-worker or UI changes are included.
@@ -30,7 +30,10 @@ automatic venue/location gates, video-worker or UI changes are included.
   per-item caption address and explicit destination-for-events statement preserve
   Ontario attendee identity through formatting, so existing coverage rejection
   executes before venue lookup. Publisher/product-origin PEI text cannot supply
-  the attendee location.
+  the attendee location. Every bind discards carried/model-supplied internal
+  proof and derives fresh proof from the current item/caption. Independent-review
+  counterexamples also preserve description-only overnight context in the same
+  sports item; unsupported ordinary daytime ranges remain held.
 - PQ-005/PQ-006/PQ-020: past-activity recaps cannot borrow future opening windows;
   admission-conditioned offers without an exact attraction window retain timing
   uncertainty. End-only source items omitted by Stage5 remain in the bounded
