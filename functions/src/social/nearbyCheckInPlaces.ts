@@ -489,11 +489,13 @@ export async function renewNearbyCheckInPreparation(
       && distanceMetres(origin.latitude, origin.longitude, latitude, longitude) <= PREPARATION_AREA_METRES;
     if (!close(location.latitude, location.longitude) || !close(arrival.latitude, arrival.longitude)
       || !close(session.lastLatitude, session.lastLongitude)) renewalRefusal('rediscovery_required');
+    let catalogReason: string | undefined;
     if (pool.catalogSource === 'osm_regional_snapshot') {
       const {lookupPeiOsmCatalogue} = await import('./peiOsmCatalogue.js');
       const catalogue = lookupPeiOsmCatalogue(origin, nowMs);
       if (catalogue.status !== 'complete' || catalogue.version !== pool.catalogVersion
         || catalogue.sourceTimestamp !== pool.catalogSourceTimestamp) renewalRefusal('rediscovery_required');
+      catalogReason = catalogue.reason;
     }
     const refs = (ids as string[]).map(id => db.collection('checkInPlaceCandidates').doc(id));
     const snapshots = refs.length ? await transaction.getAll(...refs) : [];
@@ -522,7 +524,8 @@ export async function renewNearbyCheckInPreparation(
       preparationPool, preparationReused: true,
       ...(pool.catalogSource ? {catalogSource: pool.catalogSource} : {}),
       ...(pool.catalogVersion ? {catalogVersion: pool.catalogVersion} : {}),
-      ...(pool.catalogSourceTimestamp ? {catalogSourceTimestamp: pool.catalogSourceTimestamp} : {})};
+      ...(pool.catalogSourceTimestamp ? {catalogSourceTimestamp: pool.catalogSourceTimestamp} : {}),
+      ...(catalogReason ? {catalogReason} : {})};
   });
 }
 
@@ -563,10 +566,11 @@ export async function discoverNearbyCheckInPlaces(
     if (catalogue.status !== 'outside_coverage') {
       catalogMetadata = {catalogSource: 'osm_regional_snapshot',
         ...(catalogue.version ? {catalogVersion: catalogue.version} : {}),
-        ...(catalogue.sourceTimestamp ? {catalogSourceTimestamp: catalogue.sourceTimestamp} : {})};
+        ...(catalogue.sourceTimestamp ? {catalogSourceTimestamp: catalogue.sourceTimestamp} : {}),
+        ...(catalogue.reason ? {catalogReason: catalogue.reason} : {})};
       if (catalogue.status === 'complete') payload = {elements: catalogue.elements};
       else {
-        // A covered but stale/corrupt/incomplete catalogue is an explicit
+        // A covered but corrupt/invalid/incomplete catalogue is an explicit
         // failure; never hide a live-provider dependency inside covered PEI.
         if (preparation || canonical.length) return {candidates: preparation ? canonical : canonical.slice(0, MAX_RETURNED_CANDIDATES),
           expiresAt, externalLookupStatus: 'partial_unavailable', ...catalogMetadata, catalogReason: catalogue.reason,

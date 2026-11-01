@@ -3,7 +3,7 @@ import test from 'node:test';
 import {readFileSync} from 'node:fs';
 import {join} from 'node:path';
 import {Timestamp} from 'firebase-admin/firestore';
-import {evaluatePeiCatalogue, lookupPeiOsmCatalogue, PEI_CATALOGUE_MAX_AGE_MS, type PeiCatalogue} from './peiOsmCatalogue.js';
+import {evaluatePeiCatalogue, lookupPeiOsmCatalogue, PEI_CATALOGUE_REFRESH_AFTER_MS, type PeiCatalogue} from './peiOsmCatalogue.js';
 import {discoverNearbyCheckInPlaces, parsePublicNearbyPlaces, validateCheckInPlaceCandidate} from './nearbyCheckInPlaces.js';
 import {parseCheckInBoundary, pointDistance} from './checkInPlaceGeometry.js';
 
@@ -54,6 +54,7 @@ test('actual mapped public pub uses catalogue without any provider call and mint
   assert.equal(db.queries, 2, 'Only existing canonical numeric and legacy queries');
   assert.equal(result.externalLookupStatus, 'complete');
   assert.equal(result.catalogSource, 'osm_regional_snapshot');
+  assert.equal(result.catalogReason, undefined);
   assert.equal(result.preparationRadiusMetres, 175);
   assert.ok(result.candidates.some(candidate => candidate.name === (actualPub.tags as Record<string, string>).name));
   const candidates = db.writes.filter(value => value.candidateId);
@@ -111,19 +112,59 @@ test('an actual large closed-way footprint remains selectable when its center is
   assert.equal(actual.distanceMetres, 0);
 });
 
-test('actual sparse area is complete-empty, while an over-age covered catalogue is explicit unavailable without provider fallback', async () => {
+test('actual sparse area is complete-empty; overdue valid coverage remains available without provider fallback', async () => {
   const sparse = {latitude: 46.9, longitude: -62.9};
   const lookup = lookupPeiOsmCatalogue(sparse, freshMs);
   assert.equal(lookup.status, 'complete');
   assert.deepEqual(parsePublicNearbyPlaces({elements: lookup.elements}, {...sparse, preparation: true}), []);
   let providerCalls = 0;
-  const oldMs = Date.parse(data.manifest.sourceTimestamp) + PEI_CATALOGUE_MAX_AGE_MS + 1;
+  const oldMs = Date.parse(data.manifest.sourceTimestamp) + PEI_CATALOGUE_REFRESH_AFTER_MS + 1;
+  const db = emptyCanonicalDb();
   const result = await discoverNearbyCheckInPlaces('stale-catalogue-fixture', {...point,
-    accuracyMeters: 17, capturedAtMs: oldMs, preparation: true}, {db: emptyCanonicalDb() as never,
+    accuracyMeters: 17, capturedAtMs: oldMs, preparation: true}, {db: db as never,
     now: Timestamp.fromMillis(oldMs), fetchImpl: async () => {providerCalls++; throw Error('No hidden dependency');}});
   assert.equal(providerCalls, 0);
-  assert.equal(result.externalLookupStatus, 'partial_unavailable');
-  assert.equal(result.catalogReason, 'catalogue_age');
+  assert.equal(result.externalLookupStatus, 'complete');
+  assert.equal(result.catalogReason, 'catalogue_refresh_overdue');
+  assert.ok(result.candidates.some(candidate => candidate.name === (actualPub.tags as Record<string, string>).name));
+  for (const candidate of db.writes.filter(value => value.candidateId)) {
+    assert.equal(candidate.catalogReason, 'catalogue_refresh_overdue');
+    assert.equal((candidate.expiresAt as Timestamp).toMillis(), oldMs + 15 * 60_000);
+    validateCheckInPlaceCandidate(candidate, 'stale-catalogue-fixture', candidate.candidateId as string, Timestamp.fromMillis(oldMs));
+    assert.throws(() => validateCheckInPlaceCandidate(candidate, 'stale-catalogue-fixture', candidate.candidateId as string,
+      Timestamp.fromMillis(oldMs + 15 * 60_000 + 1)));
+  }
+});
+
+test('source-age boundary is observable without an eventual age-only shutdown', () => {
+  const sourceMs = Date.parse(data.manifest.sourceTimestamp);
+  assert.equal(evaluatePeiCatalogue(data, point, sourceMs + PEI_CATALOGUE_REFRESH_AFTER_MS).reason, undefined);
+  for (const age of [PEI_CATALOGUE_REFRESH_AFTER_MS + 1, 365 * 24 * 60 * 60_000]) {
+    const result = evaluatePeiCatalogue(data, point, sourceMs + age);
+    assert.equal(result.status, 'complete');
+    assert.equal(result.reason, 'catalogue_refresh_overdue');
+    assert.equal(result.elements, data.elements);
+    assert.equal(result.sourceTimestamp, data.manifest.sourceTimestamp);
+    assert.equal(result.version, lookupPeiOsmCatalogue(point, freshMs).version);
+  }
+});
+
+test('overdue availability does not bypass invalid source, manifest or geometry coverage', () => {
+  const now = Date.parse(data.manifest.sourceTimestamp) + 30 * 24 * 60 * 60_000;
+  const invalidDate = structuredClone(data);
+  invalidDate.manifest.sourceTimestamp = 'invalid-date';
+  assert.equal(evaluatePeiCatalogue(invalidDate, point, now).reason, 'catalogue_age');
+  assert.equal(evaluatePeiCatalogue(data, point, Date.parse(data.manifest.sourceTimestamp) - 1).reason, 'catalogue_age');
+  const invalidHash = structuredClone(data);
+  invalidHash.manifest.pbfSha256 = 'invalid-hash';
+  assert.equal(evaluatePeiCatalogue(invalidHash, point, now).reason, 'invalid_catalogue');
+  const missing = structuredClone(data);
+  missing.manifest.missingReferences = 1;
+  assert.equal(evaluatePeiCatalogue(missing, point, now).reason, 'invalid_catalogue');
+  const incomplete = structuredClone(data);
+  incomplete.limitations = [{type: 'way', id: 123, reason: 'missing_geometry',
+    bounds: [point.latitude - .001, point.longitude - .001, point.latitude + .001, point.longitude + .001]}];
+  assert.equal(evaluatePeiCatalogue(incomplete, point, now).reason, 'incomplete_geometry');
 });
 
 test('full-circle extent containment rejects edges and holes; invalid/future/missing-reference data cannot claim complete', () => {

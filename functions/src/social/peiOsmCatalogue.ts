@@ -2,9 +2,9 @@ import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-// Local pilot policy only; a production refresh/maintenance contract remains
-// a release decision. Candidate/arrival/grant expiry are separate clocks.
-export const PEI_CATALOGUE_MAX_AGE_MS = 7 * 24 * 60 * 60_000;
+// Source age signals overdue maintenance, not loss of valid place coverage.
+// Candidate/arrival/grant expiry remain separate authorization clocks.
+export const PEI_CATALOGUE_REFRESH_AFTER_MS = 7 * 24 * 60 * 60_000;
 export const CATALOGUE_SEARCH_RADIUS_METRES = 175;
 interface Point {latitude: number; longitude: number}
 interface Ring {hole: boolean; points: {lat: number; lon: number}[]}
@@ -61,7 +61,7 @@ export function evaluatePeiCatalogue(data: PeiCatalogue, point: Point, nowMs: nu
   const version = `pei-${manifest.sourceTimestamp}-${manifest.pbfSha256.slice(0, 12)}`;
   const details = {version, sourceTimestamp: manifest.sourceTimestamp};
   const sourceMs = Date.parse(manifest.sourceTimestamp);
-  if (!Number.isFinite(sourceMs) || sourceMs > nowMs || nowMs - sourceMs > PEI_CATALOGUE_MAX_AGE_MS)
+  if (!Number.isFinite(sourceMs) || sourceMs > nowMs)
     return {status: 'unavailable', reason: 'catalogue_age', ...details};
   const latDelta = radius / 110_000, lonDelta = radius / (110_000 * Math.cos(point.latitude * Math.PI / 180));
   for (const limitation of data.limitations) {
@@ -74,7 +74,8 @@ export function evaluatePeiCatalogue(data: PeiCatalogue, point: Point, nowMs: nu
   }
   // A complete bounded regional scan preserves large footprints whose center
   // is outside the search circle. No arbitrary catalogue record truncation.
-  return {status: 'complete', elements: data.elements, ...details};
+  return {status: 'complete', elements: data.elements, ...details,
+    ...(nowMs - sourceMs > PEI_CATALOGUE_REFRESH_AFTER_MS ? {reason: 'catalogue_refresh_overdue'} : {})};
 }
 
 export function lookupPeiOsmCatalogue(point: Point, nowMs: number): CatalogueLookup {

@@ -178,14 +178,41 @@ test('regional version changes cannot renew cached candidates', async () => {
   await assert.rejects(renewNearbyCheckInPreparation(uid, renewal(initial.preparationPool!, ms), {db: db.firestore(), now: at(ms)}), condition('rediscovery_required'));
 });
 
-test('regional catalogue freshness is checked again even when the pool lease is current', async () => {
-  const db = new MemoryDb();const initial = await prepare(db, baseMs, {useBundledCatalogue: true});
+test('overdue regional data renews a current pool with an explicit maintenance signal and unchanged lease cap', async () => {
+  const db = new MemoryDb();
   const ms = baseMs + 8 * 24 * 3_600_000;await here(db, ms);
-  const metadata = db.documents.get('checkInPlaceCandidates/' + checkInPreparationPoolDocumentId(uid))!;
-  // A synthetic recent lease isolates dataset age from the separate6h pool cap.
-  metadata.discoveredAt = at(ms - 600_000);metadata.expiresAt = at(ms + 300_000);
-  for (const id of metadata.candidateIds) db.documents.get('checkInPlaceCandidates/' + id)!.expiresAt = at(ms + 300_000);
+  const initial = await prepare(db, ms - 600_000, {useBundledCatalogue: true});
+  assert.equal(initial.catalogReason, 'catalogue_refresh_overdue');
+  const result = await renewNearbyCheckInPreparation(uid, renewal(initial.preparationPool!, ms), {db: db.firestore(), now: at(ms)});
+  assert.equal(result.externalLookupStatus, 'complete');
+  assert.equal(result.catalogReason, 'catalogue_refresh_overdue');
+  assert.equal(result.catalogVersion, initial.catalogVersion);
+  assert.equal(result.catalogSourceTimestamp, initial.catalogSourceTimestamp);
+  assert.deepEqual(result.candidates.map(c => c.id), initial.candidates.map(c => c.id));
+  assert.equal(result.preparationPool!.expiresAtMs, ms + 900_000);
+  assert.equal(result.preparationPool!.sourceExpiresAtMs, ms - 600_000 + 6 * 3_600_000);
+  db.documents.get('checkInPlaceCandidates/' + checkInPreparationPoolDocumentId(uid))!.catalogVersion = 'changed-version';
   const writes = db.writes;
   await assert.rejects(renewNearbyCheckInPreparation(uid, renewal(initial.preparationPool!, ms), {db: db.firestore(), now: at(ms)}), condition('rediscovery_required'));
   assert.equal(db.writes, writes);
 });
+
+for (const failure of ['source-mismatch', 'expired-candidate', 'consumed', 'departed', 'unqualified']) {
+  test(`overdue regional availability still refuses ${failure} without writes`, async () => {
+    const db = new MemoryDb();const ms = baseMs + 8 * 24 * 3_600_000;
+    const initial = await prepare(db, ms - 600_000, {useBundledCatalogue: true});
+    await here(db, ms);
+    const args = renewal(initial.preparationPool!, ms);
+    const pool = db.documents.get('checkInPlaceCandidates/' + checkInPreparationPoolDocumentId(uid))!;
+    const candidate = db.documents.get('checkInPlaceCandidates/' + initial.candidates[0].id)!;
+    if (failure === 'source-mismatch') pool.catalogSourceTimestamp = '2020-01-01T00:00:00Z';
+    if (failure === 'expired-candidate') candidate.expiresAt = at(ms);
+    if (failure === 'consumed') candidate.consumedAt = at(ms - 1);
+    if (failure === 'departed') args.latitude += 21 / 111_320;
+    if (failure === 'unqualified') db.documents.get(`checkInEligibilitySessions/${uid}_${sessionId}`)!.hereQualifyingMs = 29_999;
+    const writes = db.writes;
+    await assert.rejects(renewNearbyCheckInPreparation(uid, args, {db: db.firestore(), now: at(ms)}),
+      condition(failure === 'unqualified' ? 'preparation_renewal_unqualified' : 'rediscovery_required'));
+    assert.equal(db.writes, writes);
+  });
+}
