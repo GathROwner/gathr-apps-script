@@ -31,7 +31,7 @@ test('rejects stale per-resource version',t=>{const f=fixture(t);f.lease.reserve
 test('rejects duplicate resource reservation',t=>{const f=fixture(t);f.lease.reservedResources[1]=P.clone(f.lease.reservedResources[0]);f.put('DIRECT_OWNERSHIP',f.lease);assert.throws(()=>X.authority(p,f.dir));});
 test('rejects changed reviewer-message bytes',t=>{const f=fixture(t);fs.appendFileSync(path.join(f.dir,'MESSAGE.json'),' ');assert.throws(()=>X.authority(p,f.dir));});
 test('actual capture passes transaction to complete native and query guards before writes',async t=>{
- const prior=P.read(path.join(X.ROOT,'packet-preparation/GUARD_CAPTURE.json')),queries=[];let batched=0,children=0,inside=0;
+ const prior=P.read(path.join(X.OUT,'GUARD_CAPTURE.json')),queries=[];let batched=0,children=0,inside=0;
  t.mock.method(C,'batch',async(req,paths,tx)=>{assert.equal(tx,'synthetic-read-write-transaction');assert.equal(paths.length,p.documents.length);batched++;return P.clone(prior.documents);});
  t.mock.method(C,'query',async(req,q,tx)=>{assert.equal(tx,'synthetic-read-write-transaction');queries.push(q.label);return P.clone(prior.queries.find(x=>C.hash(x.query)===C.hash(q)).documents);});
  t.mock.method(R,'children',async(req,paths)=>{assert.deepEqual(paths,p.childPaths);children++;return P.clone(prior.children);});
@@ -40,7 +40,7 @@ test('actual capture passes transaction to complete native and query guards befo
  assert.equal(batched,1);assert.equal(children,1);assert.equal(inside,1);assert.equal(queries.length,p.queries.length);assert.equal(P.checkSnapshot(p,state).length,37);
 });
 test('capture rejects parser activity before a write can be constructed',async t=>{
- const prior=P.read(path.join(X.ROOT,'packet-preparation/GUARD_CAPTURE.json'));
+ const prior=P.read(path.join(X.OUT,'GUARD_CAPTURE.json'));
  t.mock.method(C,'batch',async()=>P.clone(prior.documents));t.mock.method(C,'query',async(req,q)=>P.clone(prior.queries.find(x=>C.hash(x.query)===C.hash(q)).documents));t.mock.method(R,'children',async()=>P.clone(prior.children));
  t.mock.method(C,'parserIdleInTransaction',async()=>({...prior.parserInside,activeLocks:1}));
  await assert.rejects(X.capture(()=>assert.fail('Unexpected network'),p,'synthetic',prior.parserOutside),/Parser idle/);

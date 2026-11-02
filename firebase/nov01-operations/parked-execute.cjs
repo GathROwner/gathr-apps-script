@@ -5,7 +5,7 @@
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
 const P=require('./parked-create.cjs'),R=require('./parked-create-runner.cjs'),{C}=P;
 const ROOT='C:/Users/craig/Documents/Codex/2026-11-01/parked-resolution';
-const OUT=path.join(ROOT,'exact-batch');
+const OUT=path.join(ROOT,'exact-batch-v2');
 const AUTH='C:/Users/craig/.codex/worktrees/luna-accounting-release/gathr-apps-script/functions/artifacts/ocr-caption-fooddrive-oct18/tools/normal-auth.cjs';
 const LEDGER='C:/Users/craig/Documents/Codex/2026-10-24/task/coordination/ownership.json';
 const load=P.read,save=(n,x)=>fs.writeFileSync(path.join(OUT,n+'.json'),JSON.stringify(x,null,2)+'\n',{flag:'wx'});
@@ -49,12 +49,16 @@ async function main(mode=process.argv[2]||'offline'){
  const apply=mode==='--apply',tx=(await a.request(C.BASE+':beginTransaction','POST',{options:apply?{readWrite:{}}:{readOnly:{}}})).transaction,start=Date.now();let submitted=false,response;
  try{const state=await capture(req,p,tx,parserOutside);R.durationBudget(start);
   if(!apply){save('LIVE_DRY_RUN_'+Date.now(),{atUTC:new Date().toISOString(),status:'PASS_ALL_PREWRITE_GUARDS',planDigest:p.digest,native:state.documents.length,queries:state.queries.length,children:state.children.length,runtime,shared,parserOutside,parserInside:state.parserInside,productionWrites:0});console.log(JSON.stringify({status:'LIVE_DRY_RUN_PASS',native:state.documents.length,queries:state.queries.length,productionWrites:0}));return;}
-  authority(p);sharedConflicts(p);const backup='PREWRITE_BACKUP_'+Date.now();save(backup,{atUTC:new Date().toISOString(),planDigest:p.digest,state,runtime,shared});
+  authority(p);sharedConflicts(p);
+  // Complete all fallible metadata reads before submitting. Once Firestore
+  // returns, persisting the actual response must precede further reads/checks.
+  const receiptBindings={...hashes(),approvalSHA256:C.fileHash(path.join(OUT,'EXACT_BATCH_APPROVAL.json')),independentReviewSHA256:C.fileHash(path.join(OUT,'INDEPENDENT_REVIEW.json'))};
+  const backup='PREWRITE_BACKUP_'+Date.now();save(backup,{atUTC:new Date().toISOString(),planDigest:p.digest,state,runtime,shared});
   save('ATTEMPT',{atUTC:new Date().toISOString(),planDigest:p.digest,backup:path.join(OUT,backup+'.json'),backupSHA256:C.fileHash(path.join(OUT,backup+'.json')),automaticRetry:false});R.durationBudget(start);
   const writes=P.forwardWrites(p,P.index(state.documents).get(C.FEED));submitted=true;response=await a.request(C.BASE+':commit','POST',{transaction:tx,writes});
-  const receipt={operation:'apply',ownerTaskId:P.OWNER,planDigest:p.digest,writes,response,backup:path.join(OUT,backup+'.json'),...hashes(),approvalSHA256:C.fileHash(path.join(OUT,'EXACT_BATCH_APPROVAL.json')),independentReviewSHA256:C.fileHash(path.join(OUT,'INDEPENDENT_REVIEW.json'))};save('COMMIT',receipt);
+  const receipt={operation:'apply',ownerTaskId:P.OWNER,planDigest:p.digest,writes,response,backup:path.join(OUT,backup+'.json'),...receiptBindings};save('COMMIT',receipt);
   console.log(JSON.stringify({status:'COMMIT_RESPONSE_SAVED',commitTime:response.commitTime,writes:response.writeResults?.length,feedAssigned:Number(response.writeResults?.at(-1)?.transformResults?.[0]?.integerValue),receipt:path.join(OUT,'COMMIT.json')}));P.validateReceipt(p,receipt);
- }catch(e){if(response)console.error(JSON.stringify({status:'COMMIT_RESPONSE_REQUIRES_RECONCILIATION',response,automaticRetry:false}));try{save(submitted?'UNKNOWN':'STOP_'+Date.now(),{atUTC:new Date().toISOString(),submitted,error:e.message,automaticRetry:false});}catch(_){}throw e;}
+ }catch(e){try{save(submitted?'UNKNOWN':'STOP_'+Date.now(),{atUTC:new Date().toISOString(),submitted,error:e.message,...(response?{actualResponse:response}:{}),automaticRetry:false});}catch(_){}if(response)console.error(JSON.stringify({status:'COMMIT_RESPONSE_REQUIRES_RECONCILIATION',response,automaticRetry:false}));throw e;}
  finally{if(!submitted)await req(':rollback',{transaction:tx});}
 }
 module.exports={authority,sharedConflicts,capture,hashes,main,ROOT,OUT};
