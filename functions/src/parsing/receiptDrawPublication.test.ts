@@ -120,6 +120,125 @@ test('repeated named source blocks leave ambiguous attendance for review', () =>
   assert.equal(sourcePublicationHoldReason(items()[0],caption),undefined);
 });
 
+// These controls reproduce the independent review's paragraph/OCR failures with
+// supplied clocks, so a missing-clock hold cannot conceal a publication mistake.
+const appendCaption = (text: string, separator = '\n\n'): string =>
+  original.caption.replace('\n#IslandChefDowntown',separator+text+'\n#IslandChefDowntown');
+const withOcr = (text: string): string => original.caption.replace('May be an image of text',text);
+const clockedDraw = (patch: Record<string,unknown> = {}): any =>
+  ({...items()[0],startTime:'18:00',endTime:'19:00',...patch});
+
+for (const separator of ['\n','\n\n','\r\n\r\n'])
+  test(`attendance after the receipt paragraph is not suppressed (${JSON.stringify(separator)})`, () => {
+    const caption = appendCaption('Watch the live draw at 6 PM on November 16 at Island Chef Downtown.',separator);
+    const item = clockedDraw(), before = structuredClone(item);
+    assert.equal(sourcePublicationHoldReason(item,caption),undefined);
+    const [out] = constrainSourceTimes([item],caption);
+    assert.equal(sourceItemHoldReason(out),undefined);
+    assert.deepEqual([out.startTime,out.endTime],['18:00','19:00']);
+    assert.deepEqual(item,before);
+  });
+
+for (const invitation of [
+  'Watch the Win Your Meal draw at 6 PM on November 16.',
+  'WIN YOUR MEAL DRAW:\nWatch the live draw at 6 PM on November 16.',
+  'Watch the live draw at 6 PM on November 16.',
+]) test(`poster-only attendance prevents an unsupported administrative assertion: ${invitation}`, () => {
+  const caption = withOcr(invitation);
+  assert.equal(sourcePublicationHoldReason(clockedDraw(),caption),undefined);
+  assert.equal(sourceItemHoldReason(constrainSourceTimes([clockedDraw()],caption)[0]),undefined);
+});
+
+for (const field of ['description','extractionReason'])
+  test(`item-local ${field} attendance is checked even when absent from the caption`, () => {
+    const item = clockedDraw({[field]:'The source invites guests to watch the live draw at 6 PM on November 16.'});
+    assert.equal(sourcePublicationHoldReason(item,original.caption),undefined);
+    assert.equal(sourceItemHoldReason(constrainSourceTimes([item],original.caption)[0]),undefined);
+  });
+
+for (const caption of [
+  appendCaption('Watch the live draw; the poster does not identify which contest.'),
+  withOcr('Watch the other public draw at 6 PM.'),
+  appendCaption('Win Your Meal draw: attendance details are unclear.'),
+]) test(`unresolved attendance retains missing-clock review: ${caption.slice(-100)}`, () => {
+  const item = items()[0], before = structuredClone(item);
+  assert.equal(sourcePublicationHoldReason(item,caption),undefined);
+  const [out] = constrainSourceTimes([item],caption);
+  assert.equal((out as any)._sourcePublicationHold,undefined);
+  assert.equal(out._sourceTimeConstraint?.reason,'dated_activity_without_clock');
+  assert.deepEqual([out.startTime,out.endTime],['','']);
+  assert.deepEqual(item,before);
+});
+
+const otherDraw = 'Community Prize draw:\nDine in and write your name and phone number on the back of your receipt.\n' +
+  'Draw Dates: 2026 November 16th.\nWatch the live draw at 6 PM.';
+const otherItem = (): any => clockedDraw({name:'Community Prize contest draw',description:'A random contest draw.'});
+
+for (const location of ['caption','OCR']) test(`two named draws keep different attendance (${location})`, () => {
+  const caption = location === 'caption' ? appendCaption(otherDraw) : withOcr(otherDraw);
+  const [receipt,publicDraw] = reconcileSourceItemEvidence([clockedDraw(),otherItem()],caption);
+  assert.equal(sourceItemHoldReason(receipt),reason,'unrelated named attendance cannot clear the receipt candidate');
+  assert.equal(sourceItemHoldReason(publicDraw),undefined,'the public draw cannot acquire the receipt candidate hold');
+});
+
+for (const invitation of ['Watch the live prize draw at 6 PM.', 'Watch the in-person draw at 6 PM.',
+  'The Community Prize draw will be live at 6 PM.', 'Winners will be selected live at 6 PM.'])
+  test(`a different named draw keeps its own attendance scope: ${invitation}`, () => {
+    const caption = appendCaption(otherDraw.replace('Watch the live draw at 6 PM.',invitation));
+    assert.equal(sourcePublicationHoldReason(clockedDraw(),caption),reason);
+    assert.equal(sourcePublicationHoldReason(otherItem(),caption),undefined);
+  });
+
+test('a named invitation remains local when two draws share a paragraph', () => {
+  const caption = appendCaption('Community Prize draw:\nWatch the Community Prize draw at 6 PM.','\n');
+  assert.equal(sourcePublicationHoldReason(clockedDraw(),caption),reason);
+  assert.equal(sourcePublicationHoldReason(otherItem(),caption),undefined);
+});
+
+test('an unscoped invitation is not assigned to a different named draw elsewhere', () => {
+  const caption = appendCaption(otherDraw+'\n\nWatch the live draw at 7 PM.');
+  const [out] = constrainSourceTimes([items()[0]],caption);
+  assert.equal(sourcePublicationHoldReason(items()[0],caption),undefined);
+  assert.equal((out as any)._sourcePublicationHold,undefined);
+  assert.equal(out._sourceTimeConstraint?.reason,'dated_activity_without_clock');
+});
+
+test('a second unscoped invitation in the same statement prevents a cross-draw assertion', () => {
+  const caption = appendCaption(otherDraw+'\nWatch the Community Prize draw and attend the draw at 7 PM.');
+  assert.equal(sourcePublicationHoldReason(clockedDraw(),caption),undefined);
+});
+
+for (const [caption,ocr] of [
+  [appendCaption('The drawing is private; winners will be contacted.'),
+    'Watch the Win Your Meal draw at 6 PM on November 16.'],
+  [appendCaption('Watch the live draw at 6 PM on November 16.'),
+    'Win Your Meal draw: private administrative selection; winners will be contacted.'],
+]) test('caption/poster disagreement cannot establish absence of attendee evidence', () => {
+  const combined = caption.replace('May be an image of text',ocr);
+  assert.equal(sourcePublicationHoldReason(clockedDraw(),combined),undefined);
+  assert.equal(sourceItemHoldReason(constrainSourceTimes([clockedDraw()],combined)[0]),undefined);
+});
+
+test('dinner, concert and public bingo attendance do not clear the receipt draws', () => {
+  const caption = appendCaption('Public Bingo: play in person at 6 PM.\n' +
+    'Join us for dinner at 5 PM.\nAttend the concert at 8 PM.');
+  assert.deepEqual(constrainSourceTimes(items(),caption).map(sourceItemHoldReason),[reason,reason]);
+  assert.equal(sourcePublicationHoldReason(healthy(),caption),undefined);
+});
+
+for (const stage of ['stage3Items','stage4Items'])
+  test(`${stage} replay passes clocked public-draw evidence through to formatting`, async t => {
+    offline(t); const artifacts: any[] = []; let formatted: any[] = [];
+    const caption = withOcr('Watch the Win Your Meal draw at 6 PM on November 16.');
+    t.mock.method(require('./secondaryValidator.js'),'performSecondaryValidation',async (source: any[]) => source);
+    t.mock.method(require('./finalFormatter.js'),'performFinalFormatting',async (source: any[]) => {formatted=source; return [];});
+    await replayPostDataFromArtifacts(input(caption),{}, {[stage]:[clockedDraw()],contentType:'EVENT'},config(artifacts));
+    assert.equal(formatted.length,1);
+    assert.equal(formatted[0].name,'Win Your Meal contest draw');
+    assert.equal(sourceItemHoldReason(formatted[0]),undefined);
+    assert.deepEqual(held(artifacts),[]);
+  });
+
 for (const stage of ['stage3Items','stage4Items']) test(`saved ${stage} replay retains both holds before any model or venue lookup`, async t => {
   offline(t);
   const artifacts: any[] = [];

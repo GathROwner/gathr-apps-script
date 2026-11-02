@@ -15,13 +15,14 @@ function explicitlyWithholdsAttendeeVenue(text: string): boolean {
 /** A food-purchase entry offer can qualify, without creating a second event at
  * its draw date. Limit this hold to a named draw tied to one receipt-entry block;
  * generic prize words or unrelated items in a mixed caption are insufficient. */
-function isReceiptDrawWithoutAttendanceEvidence(item: ExtractedItem, source: string): boolean {
+function isReceiptDrawWithoutAttendanceEvidence(item: ExtractedItem, caption: string): boolean {
   if (item._sourceType === 'special' || ('type' in item && item.type === 'special')) return false;
   const title = String(item.name || '').trim();
   const identity = title.replace(/\s+(?:contest\s+)?draw\s*$/i, '').trim();
   if (identity === title || identity.split(/\s+/).length < 2 ||
       !/\b(?:draw|drawing)\b/i.test(`${item.description || ''} ${item.extractionReason || ''}`)) return false;
   const key = (value: string) => value.normalize('NFKC').toLowerCase().replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
+  const source = caption.split(/\n\s*OCR TEXT:/i)[0];
   const blocks = source.split(/\r?\n\s*\r?\n/).filter(block =>
     ` ${key(block)} `.includes(` ${key(identity)} `));
   // Ambiguous/repeated headings need review rather than a cross-block decision.
@@ -30,10 +31,43 @@ function isReceiptDrawWithoutAttendanceEvidence(item: ExtractedItem, source: str
   if (!/\b(?:dine\s+in|buy|purchase|meal)\b/i.test(block) ||
       !/\b(?:write|put|leave)\b[^.!?\n]{0,90}\b(?:name|phone|contact)\b[^.!?\n]{0,90}\breceipt\b/i.test(block) ||
       !/\bdraw\s+dates?\s*:/i.test(block)) return false;
-  // Attendance must refer to the draw itself. A concert, dinner reservation or
-  // public bingo elsewhere in this caption cannot turn a draw into a gathering.
-  const attendance = /\b(?:live|public|in[ -]person)\s+(?:(?:prize|receipt|contest)\s+)?draw\b|\bdraw\s+(?:is\s+|will\s+be\s+)?(?:live|in[ -]person|open\s+to\s+the\s+public)\b|\b(?:watch|attend|join\s+us\s+for|come\s+(?:to|for))\s+(?:the\s+)?(?:[\p{L}\p{N}]+\s+){0,6}draw\b|\bwinners?\b[^.!?\n]{0,65}\b(?:selected|announced|chosen|drawn)\b[^.!?\n]{0,35}\b(?:live|in[ -]person)\b|\b(?:must|need\s+to)\s+be\s+present\s+to\s+win\b/iu;
-  return !attendance.test(block) && !attendance.test(String(item.description || ''));
+  // Receipt identification stays caption-local; absence of attendance cannot be
+  // concluded there alone. Check poster/OCR and item evidence too. An unresolved
+  // invitation declines this new distinction; it does not supply clocks or prove
+  // attendance. Existing time/identity review still applies.
+  const attendance = /\b(?:live|public|in[ -]person)\s+(?:[\p{L}\p{N}]+\s+){0,6}draw\b|\bdraw\s+(?:is\s+|will\s+be\s+)?(?:live|in[ -]person|open\s+to\s+the\s+public)\b|\b(?:watch|attend|join\s+us\s+for|come\s+(?:to|for))\s+(?:the\s+)?(?:[\p{L}\p{N}]+\s+){0,6}draw\b|\bwinners?\b[^.!?\n]{0,65}\b(?:selected|announced|chosen|drawn)\b[^.!?\n]{0,35}\b(?:live|in[ -]person)\b|\b(?:must|need\s+to)\s+be\s+present\s+to\s+win\b/iu;
+  const drawKey = (value: string) => key(value).replace(/\s+(?:contest\s+)?draw$/, '');
+  const candidateKey = key(identity);
+  // Only an explicit named heading establishes a different draw's scope. Never
+  // interpret arbitrary words before "draw" as a new identity to dismiss evidence.
+  const heading = (text: string): string | undefined => {
+    const match = text.match(/^\s*([\p{L}\p{N}][\p{L}\p{N} \t]{1,80}?)\s+(?:contest\s+)?draw\s*[:–—-]/iu) ||
+      text.match(/^\s*CONTEST ALERT:\s*([^\n!]+)!?\s*(?:\n|$)/i);
+    const name = match && drawKey(match[1]);
+    return name && name.split(' ').length >= 2 ? name : undefined;
+  };
+  const sourceBlocks = caption.split(/\r?\n\s*\r?\n|\bOCR TEXT:\s*/i).filter(text => text.trim());
+  const names = new Set([candidateKey, ...caption.split(/\r?\n/).map(heading).filter((name): name is string => Boolean(name))]);
+  for (const evidence of [...sourceBlocks, String(item.description || ''), String(item.extractionReason || '')]) {
+    for (const statement of evidence.split(/[.!?;\r\n]+/)) {
+      if (!attendance.test(statement)) continue;
+      // A named invitation wins over the enclosing heading. This also keeps two
+      // named draws separate when their statements share one paragraph.
+      const targets = [...statement.matchAll(/\b(?:watch|attend|join\s+us\s+for|come\s+(?:to|for))\s+(?:the\s+)?((?:[\p{L}\p{N}]+[ \t]+){0,7})draw\b/giu)]
+        .map(match => drawKey(match[1].trim().replace(/^(?:(?:live|public|in[ -]person)\s+)+/i, '')));
+      const unscoped = (name: string) => /^(?:(?:live|public|in person|prize|receipt|contest)\s*)*$/.test(name);
+      const namedTargets = targets.filter(name => names.has(name));
+      const statementKey = ` ${key(statement)} `;
+      const references = namedTargets.length ? [...new Set(namedTargets)] : [...names].filter(name =>
+        statementKey.includes(` ${name} draw `) || statementKey.includes(` ${name} contest draw `));
+      const scoped = references.length ? references : [heading(evidence)].filter((name): name is string => Boolean(name));
+      if (scoped.length !== 1 || scoped[0] === candidateKey ||
+          (targets.length > 1 && namedTargets.length !== targets.length) ||
+          // A second unscoped invitation in the same statement remains unresolved.
+          targets.some(name => !names.has(name) && !unscoped(name))) return false;
+    }
+  }
+  return true;
 }
 
 /** Source-local eligibility, before formatting can make an operations notice
@@ -41,7 +75,7 @@ function isReceiptDrawWithoutAttendanceEvidence(item: ExtractedItem, source: str
 export function sourcePublicationHoldReason(item: ExtractedItem, caption: string): string | undefined {
   const title=String(item.name || ''), detail=String(item.description || '');
   const source=caption.split(/\n\s*OCR TEXT:/i)[0];
-  if (isReceiptDrawWithoutAttendanceEvidence(item, source)) return 'receipt_entry_draw_without_attendee_activity';
+  if (isReceiptDrawWithoutAttendanceEvidence(item, caption)) return 'receipt_entry_draw_without_attendee_activity';
   // A past activity does not borrow a future opening window elsewhere in a
   // mixed recap. Require the item's own description to identify that recap.
   if(/\b(?:celebrated|celebrating|joined us|had a (?:wonderful|great|fantastic) time)\b/i.test(detail) &&

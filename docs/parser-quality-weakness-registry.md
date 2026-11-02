@@ -34,6 +34,33 @@ receipt-draw checks),5 supplementary boundary checks and the once-only full
 compiled suite (1,400 tests,zero failures/skips). Local review notes and receipts
 are under ignored `artifacts/nov1-receipt-draw/` in the preparation checkout.
 
+Independent review reproduced false holds when the same drawing's invitation
+appeared in a separate paragraph, only in OCR/poster text, or in the item's
+extraction reason. The boundary correction starts from exact accepted
+`5d8416d69c31ce755c545690a0a0dc27d94cc21c`. Receipt identification remains tied to
+one caption block, but attendance assessment includes all caption/OCR paragraphs
+and both item evidence fields. Only an explicit different named-draw heading and
+locally scoped statement can exclude unrelated attendance. An unscoped invitation,
+uncertain binding or caption/poster disagreement leaves this administrative
+distinction unasserted; existing missing-clock review and blank clocks remain.
+This does not certify public attendance or recover an offer automatically.
+
+The two original administrative draws remain held. Twenty-five new regression
+controls cover separate paragraphs, OCR-only exact/unscoped invitations, item-local
+evidence, mixed named draws, caption/poster disagreement and actual saved replay
+through the formatter boundary. All 119 focused tests (52 receipt-draw checks)
+and the final TypeScript build pass. One full compiled run covered 183 files and
+1,425 tests: 1,424 passed; the only failure was the verification harness blocking
+an existing loopback image-server fixture. That unchanged test passed an isolated
+rerun permitting only its own temporary 127.0.0.1 server; external access stayed
+blocked. The full suite was not repeated and its original failure log is retained.
+Source/compiled hashes have zero drift across validation. Exact
+offline baseline reproduction, original independent-review probe inputs, commands,
+logs and hashes are retained in
+`C:/Users/craig/Documents/Codex/2026-11-01/parked-resolution/receipt-draw-boundary-fix/`.
+Runtime edits remain in one module. No deployment, live write, API/model call,
+gate, prompt, configuration or food-offer extraction change is included.
+
 ## November 1 mechanism review and deployed prevention
 
 Status: **deployed, repaired and independently live verified**. Runtime source
