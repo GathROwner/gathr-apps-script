@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "title": "November1 parked source follow-up register",
-  "updatedAtUTC": "2026-11-01T23:56:11.625423+00:00",
+  "updatedAtUTC": "2026-11-02T00:22:32.467088+00:00",
   "purpose": "Retain exact source evidence, web attempts, disagreements and missing essentials for repeated-pattern review; no automatic custom overrides.",
   "originatingThreadId": "01a0ea83-7031-7423-b853-966f2180d186",
   "coverage": {
@@ -31,9 +31,12 @@
   "weaknesses": [
     {
       "id": "receipt-entry-draw-is-not-attendance",
-      "status": "validated_code_candidate",
+      "status": "PARKED_NOT_DEPLOYED",
       "codeCommit": "2581cfe0a8dea68ecc25b8a559d4a0e447fe0d39",
-      "mechanism": "Administrative receipt-entry draw dates can be extracted as public gatherings. Narrow item-local named-draw hold; actual food promotion/public live draw preserved."
+      "mechanism": "Administrative receipt-entry draw dates can be extracted as public gatherings. Narrow item-local named-draw hold; actual food promotion/public live draw preserved.",
+      "reason": "Independent review reproduced legitimate public drawing invitations receiving an administrative hold. Original two administrative draws already remain held by deployed missing-clock policy. No current bad listing requires this fragile additional runtime rule. Retain examples and counterexamples for future source-pattern review.",
+      "candidateCommit": "c6244219496469da9afec8bfbe02206a7a5ccac2",
+      "retainedBranch": "codex/nov1-receipt-draw-held"
     },
     {
       "id": "official-calendar-course-boundaries",
@@ -84,14 +87,26 @@
       "id": "web-fallback-and-coverage",
       "status": "reference_workflow",
       "mechanism": "Use bounded primary organizer/venue/ticket searches for unresolved source evidence. Wrong year, province, branch, expired events and weak snippets cannot supply missing details."
+    },
+    {
+      "id": "repair-preparation-session-theme-bleed",
+      "status": "FIXED_IN_REPAIR_HELPER",
+      "mechanism": "Cloning a course member copied its theme to other dates. Exact dated official session sections now supply four individual themes and age16+; total-course price and unknown finish remain. This was a preparation defect, not an additional claim about daily parser behavior.",
+      "evidence": "C:\\Users\\craig\\Documents\\Codex\\2026-11-01\\parked-resolution\\independent-batch-review-v2\\REVIEW.json"
+    },
+    {
+      "id": "repair-response-persistence-order",
+      "status": "FIXED_IN_REPAIR_EXECUTOR",
+      "mechanism": "All metadata hashes are now read before submission. Actual response is persisted immediately, with response-bearing UNKNOWN fallback and retry fence on primary receipt-write failure. Offline actual-executor probes cover success, uncertain response, source drift, post-response hash failure and primary receipt failure.",
+      "evidence": "C:\\Users\\craig\\Documents\\Codex\\2026-11-01\\parked-resolution\\EXECUTOR_ADDITIONAL_PROBES.json"
     }
   ],
   "activeCustomOverrides": [],
   "productionWritesByThisDocument": 0,
   "exactPreparedBatchPath": "C:\\Users\\craig\\Documents\\Codex\\2026-11-01\\parked-resolution\\packet-preparation",
-  "batchStatus": "Preparation/review pending; this register is not a completion receipt.",
+  "batchStatus": "COMPLETE_17_EVENTS_1_VENUE_INDEPENDENTLY_VERIFIED",
   "canonicalReferencePath": "C:\\Users\\craig\\Documents\\GathR Parser Evidence\\parked-source-casebook\\cases.json",
-  "canonicalSHA256": "9fc398b7056247b77a20c1f4d401a7fcc45b7874f734a096ea76515bff3b1b89",
+  "canonicalSHA256": "1d51f07c83a168cd14ebce378f3d8224955636f7c2e969fc35ac0d9cc7aa5cd7",
   "cases": [
     {
       "id": "NOV01-H01",
@@ -105,7 +120,7 @@
       "id": "NOV01-H02",
       "kind": "clock_venue_or_expired_source",
       "source": {},
-      "decision": "Prepare one future gala and exact new attendee venue; preserve point discrepancy privately.",
+      "decision": "Published gala and exact canonical venue; manual queue preserved to avoid replay side effects.",
       "missing": [
         "No advertised finish; preserve unknown.",
         "Root must reconcile website-versus-saved-Places point discrepancy and exact live venue/queue state before intake."
@@ -320,7 +335,7 @@
         "sourceTimestamp": "2026-11-01T10:38:33Z",
         "inventoryPath": "C:/Users/craig/Documents/Codex/2026-11-01/parked-resolution/H07_SOURCE_INVENTORY.json"
       },
-      "decision": "ready_candidate_check_live_siblings",
+      "decision": "Verified missing occurrences published; existing records retained.",
       "rootNote": "Research lead; reconcile exact live siblings before any creation. Saved decision is not live-write authority.",
       "facts": [
         "Exact official film page identifies A Talent for Murder, Helen Mirren as Patricia Highsmith; calendar explicitly says November2026.",
@@ -341,7 +356,49 @@
         "2026-11-07"
       ],
       "originalResearchVerdict": "ready_candidate_check_live_siblings",
-      "activation": "reference_only_no_custom_override"
+      "activation": "reference_only_no_custom_override",
+      "liveRecovery": [
+        {
+          "path": "venues/slug_citycinemachtown/events/n01park_26c0b34227511e8c006d484b",
+          "name": "A Talent for Murder",
+          "date": "2026-11-03",
+          "startTime": "19:00",
+          "row": 78,
+          "kind": "event"
+        },
+        {
+          "path": "venues/slug_citycinemachtown/events/n01park_edfb33263c463598fec3bd92",
+          "name": "A Talent for Murder",
+          "date": "2026-11-04",
+          "startTime": "19:00",
+          "row": 78,
+          "kind": "event"
+        },
+        {
+          "path": "venues/slug_citycinemachtown/events/n01park_45a36a7da13ccdbbdb005588",
+          "name": "A Talent for Murder",
+          "date": "2026-11-05",
+          "startTime": "19:00",
+          "row": 78,
+          "kind": "event"
+        },
+        {
+          "path": "venues/slug_citycinemachtown/events/n01park_467bdab5ed08401744b01b84",
+          "name": "A Talent for Murder",
+          "date": "2026-11-06",
+          "startTime": "19:00",
+          "row": 78,
+          "kind": "event"
+        },
+        {
+          "path": "venues/slug_citycinemachtown/events/n01park_7e9e88704de7d8d921cc47dc",
+          "name": "A Talent for Murder",
+          "date": "2026-11-07",
+          "startTime": "19:00",
+          "row": 78,
+          "kind": "event"
+        }
+      ]
     },
     {
       "id": "NOV01-H07-ROW-89",
@@ -380,7 +437,7 @@
         "sourceTimestamp": "2026-10-31T17:18:18Z",
         "inventoryPath": "C:/Users/craig/Documents/Codex/2026-11-01/parked-resolution/H07_SOURCE_INVENTORY.json"
       },
-      "decision": "exclude_contest_draw_not_attendee_event",
+      "decision": "Standalone administrative draws remain privately held. Proposed stronger automatic rule rejected by independent review and not deployed.",
       "rootNote": "Research lead; reconcile exact live siblings before any creation. Saved decision is not live-write authority.",
       "facts": [
         "Caption and original poster describe random gift-voucher draws; enter by dining and putting name/phone on receipt.",
@@ -440,7 +497,7 @@
         "sourceTimestamp": "2026-10-31T15:53:39Z",
         "inventoryPath": "C:/Users/craig/Documents/Codex/2026-11-01/parked-resolution/H07_SOURCE_INVENTORY.json"
       },
-      "decision": "ready_reframe_dining_candidates_keep_package_separate",
+      "decision": "Already represented by exact existing listings; no duplicate created.",
       "rootNote": "Research lead; reconcile exact live siblings before any creation. Saved decision is not live-write authority.",
       "facts": [
         "Official2026 dining series confirms ChefMichaelSmith November5\u20137 and daily dining itinerary17:00\u201321:30; optional FireBar21:30\u201322:30.",
@@ -575,7 +632,7 @@
         "sourceTimestamp": "2026-10-31T19:22:59Z",
         "inventoryPath": "C:/Users/craig/Documents/Codex/2026-11-01/parked-resolution/H07_SOURCE_INVENTORY.json"
       },
-      "decision": "ready_corrected_workshop_candidates_with_conflicts_recorded",
+      "decision": "Verified missing occurrences published; existing records retained.",
       "rootNote": "Research lead; reconcile exact live siblings before any creation. Saved decision is not live-write authority.",
       "facts": [
         "All five source images and all five stored images were inspected. The saved calendar is only 472 pixels wide; the current official November 2026 calendar was read at higher resolution.",
@@ -606,7 +663,97 @@
         "2026-11-29"
       ],
       "originalResearchVerdict": "ready_corrected_workshop_candidates_with_conflicts_recorded",
-      "activation": "reference_only_no_custom_override"
+      "activation": "reference_only_no_custom_override",
+      "liveRecovery": [
+        {
+          "path": "venues/name_6387om/events/n01park_60be43a4373f54c723dbb6cc",
+          "name": "Kids Beginner Cross Stitch Workshop",
+          "date": "2026-11-15",
+          "startTime": "14:00",
+          "row": 222,
+          "kind": "event"
+        },
+        {
+          "path": "venues/name_6387om/events/n01park_213d26497a7938507bacbb58",
+          "name": "Intermediate Lino Printmaking",
+          "date": "2026-11-18",
+          "startTime": "18:30",
+          "row": 222,
+          "kind": "event"
+        },
+        {
+          "path": "venues/name_6387om/events/n01park_c941dc81e0c11438660267b4",
+          "name": "Intermediate Lino Printmaking",
+          "date": "2026-11-25",
+          "startTime": "18:30",
+          "row": 222,
+          "kind": "event"
+        },
+        {
+          "path": "venues/name_6387om/events/n01park_5c2d0bfa0110270443691a28",
+          "name": "Intermediate Lino Printmaking",
+          "date": "2026-12-02",
+          "startTime": "18:30",
+          "row": 222,
+          "kind": "event"
+        },
+        {
+          "path": "venues/name_6387om/events/n01park_57646c4aa1dff8a4d64f7441",
+          "name": "Winter Cross Stitch Workshop",
+          "date": "2026-11-22",
+          "startTime": "14:00",
+          "row": 222,
+          "kind": "event"
+        },
+        {
+          "path": "venues/name_6387om/events/n01park_4e992446533417361254f2d3",
+          "name": "Needle Felting: Winter Decor",
+          "date": "2026-11-29",
+          "startTime": "14:00",
+          "row": 222,
+          "kind": "event"
+        },
+        {
+          "path": "venues/name_6387om/events/n01park_ae04e3f4dc7882e069265672",
+          "name": "Adults Beginner Acrylics Course - Understanding Colour",
+          "date": "2026-11-14",
+          "startTime": "13:00",
+          "row": 222,
+          "kind": "event"
+        },
+        {
+          "path": "venues/name_6387om/events/n01park_25f90222fbf5b2ac1762a66e",
+          "name": "Adults Beginner Acrylics Course - Making Marks",
+          "date": "2026-11-21",
+          "startTime": "13:00",
+          "row": 222,
+          "kind": "event"
+        },
+        {
+          "path": "venues/name_6387om/events/n01park_175d38cdb19ddb9e2cb739b8",
+          "name": "Adults Beginner Acrylics Course - Seeing the Light",
+          "date": "2026-11-28",
+          "startTime": "13:00",
+          "row": 222,
+          "kind": "event"
+        },
+        {
+          "path": "venues/name_6387om/events/n01park_8539cfe2efc793de2125b9a5",
+          "name": "Adults Beginner Acrylics Course - Developing Your Style",
+          "date": "2026-12-05",
+          "startTime": "13:00",
+          "row": 222,
+          "kind": "event"
+        },
+        {
+          "path": "venues/slug_thedalicafe/events/n01park_e2098072bcf8ea9514482cfd",
+          "name": "Cocktails & Crafts: Holiday Cards",
+          "date": "2026-11-24",
+          "startTime": "18:30",
+          "row": 222,
+          "kind": "event"
+        }
+      ]
     },
     {
       "id": "NOV01-H07-ROW-238",
@@ -645,7 +792,7 @@
         "sourceTimestamp": "2026-11-01T11:13:34Z",
         "inventoryPath": "C:/Users/craig/Documents/Codex/2026-11-01/parked-resolution/H07_SOURCE_INVENTORY.json"
       },
-      "decision": "ready_candidate_check_live_siblings_sold_out",
+      "decision": "Already represented by exact existing listings; no duplicate created.",
       "rootNote": "Research lead; reconcile exact live siblings before any creation. Saved decision is not live-write authority.",
       "facts": [
         "Venue homepage, artist calendar and official Locarius ticket page agree: Wednesday November 18, 2026 at 19:30 AST, Souris Show Hall, 5 Church Ave. Finish is unknown.",
@@ -947,6 +1094,178 @@
       "primaryUrls": [],
       "savedEvidence": [],
       "activation": "no_new_manual_video_approval"
+    }
+  ],
+  "exactExecutionBatchPath": "C:\\Users\\craig\\Documents\\Codex\\2026-11-01\\parked-resolution\\exact-batch-v2",
+  "completion": {
+    "status": "DATA_COMPLETE_INDEPENDENTLY_VERIFIED",
+    "atUTC": "2026-11-02T00:19:53.267834+00:00",
+    "newEvents": 17,
+    "newVenues": 1,
+    "archives": 18,
+    "writes": 37,
+    "feedBefore": 554,
+    "feedAfter": 555,
+    "protectedRecordsUnchanged": 80,
+    "publicDetails": 17,
+    "discoveryFeedPages": 8,
+    "discoveryFeedEvents": 718,
+    "commitTime": "2026-11-02T00:16:06.261165Z",
+    "receipt": "C:\\Users\\craig\\Documents\\Codex\\2026-11-01\\parked-resolution\\exact-batch-v2\\COMMIT.json",
+    "receiptSHA256": "f8772b7fd1093ad2ea6c0d19ed31623cc6608cd3a691a66ac6afe52de3863030",
+    "independentVerification": "C:\\Users\\craig\\Documents\\Codex\\2026-11-01\\parked-resolution\\independent-postapply\\VERIFICATION.json",
+    "existingEventsChanged": 0,
+    "removals": 0,
+    "uploads": 0,
+    "queueWrites": 0,
+    "renderedUI": false,
+    "productionParserDeployment": 0,
+    "candidateParserGuardDisposition": "PARKED: independent review found public-drawing false hold; existing row94 remains held. Final rejected review and candidate source retained separately."
+  },
+  "recovered": [
+    {
+      "path": "venues/place_c4142d7f07834944",
+      "name": "New London Carriage House",
+      "date": null,
+      "startTime": null,
+      "row": null,
+      "kind": "venue"
+    },
+    {
+      "path": "venues/slug_citycinemachtown/events/n01park_26c0b34227511e8c006d484b",
+      "name": "A Talent for Murder",
+      "date": "2026-11-03",
+      "startTime": "19:00",
+      "row": 78,
+      "kind": "event"
+    },
+    {
+      "path": "venues/slug_citycinemachtown/events/n01park_edfb33263c463598fec3bd92",
+      "name": "A Talent for Murder",
+      "date": "2026-11-04",
+      "startTime": "19:00",
+      "row": 78,
+      "kind": "event"
+    },
+    {
+      "path": "venues/slug_citycinemachtown/events/n01park_45a36a7da13ccdbbdb005588",
+      "name": "A Talent for Murder",
+      "date": "2026-11-05",
+      "startTime": "19:00",
+      "row": 78,
+      "kind": "event"
+    },
+    {
+      "path": "venues/slug_citycinemachtown/events/n01park_467bdab5ed08401744b01b84",
+      "name": "A Talent for Murder",
+      "date": "2026-11-06",
+      "startTime": "19:00",
+      "row": 78,
+      "kind": "event"
+    },
+    {
+      "path": "venues/slug_citycinemachtown/events/n01park_7e9e88704de7d8d921cc47dc",
+      "name": "A Talent for Murder",
+      "date": "2026-11-07",
+      "startTime": "19:00",
+      "row": 78,
+      "kind": "event"
+    },
+    {
+      "path": "venues/name_6387om/events/n01park_60be43a4373f54c723dbb6cc",
+      "name": "Kids Beginner Cross Stitch Workshop",
+      "date": "2026-11-15",
+      "startTime": "14:00",
+      "row": 222,
+      "kind": "event"
+    },
+    {
+      "path": "venues/name_6387om/events/n01park_213d26497a7938507bacbb58",
+      "name": "Intermediate Lino Printmaking",
+      "date": "2026-11-18",
+      "startTime": "18:30",
+      "row": 222,
+      "kind": "event"
+    },
+    {
+      "path": "venues/name_6387om/events/n01park_c941dc81e0c11438660267b4",
+      "name": "Intermediate Lino Printmaking",
+      "date": "2026-11-25",
+      "startTime": "18:30",
+      "row": 222,
+      "kind": "event"
+    },
+    {
+      "path": "venues/name_6387om/events/n01park_5c2d0bfa0110270443691a28",
+      "name": "Intermediate Lino Printmaking",
+      "date": "2026-12-02",
+      "startTime": "18:30",
+      "row": 222,
+      "kind": "event"
+    },
+    {
+      "path": "venues/name_6387om/events/n01park_57646c4aa1dff8a4d64f7441",
+      "name": "Winter Cross Stitch Workshop",
+      "date": "2026-11-22",
+      "startTime": "14:00",
+      "row": 222,
+      "kind": "event"
+    },
+    {
+      "path": "venues/name_6387om/events/n01park_4e992446533417361254f2d3",
+      "name": "Needle Felting: Winter Decor",
+      "date": "2026-11-29",
+      "startTime": "14:00",
+      "row": 222,
+      "kind": "event"
+    },
+    {
+      "path": "venues/name_6387om/events/n01park_ae04e3f4dc7882e069265672",
+      "name": "Adults Beginner Acrylics Course - Understanding Colour",
+      "date": "2026-11-14",
+      "startTime": "13:00",
+      "row": 222,
+      "kind": "event"
+    },
+    {
+      "path": "venues/name_6387om/events/n01park_25f90222fbf5b2ac1762a66e",
+      "name": "Adults Beginner Acrylics Course - Making Marks",
+      "date": "2026-11-21",
+      "startTime": "13:00",
+      "row": 222,
+      "kind": "event"
+    },
+    {
+      "path": "venues/name_6387om/events/n01park_175d38cdb19ddb9e2cb739b8",
+      "name": "Adults Beginner Acrylics Course - Seeing the Light",
+      "date": "2026-11-28",
+      "startTime": "13:00",
+      "row": 222,
+      "kind": "event"
+    },
+    {
+      "path": "venues/name_6387om/events/n01park_8539cfe2efc793de2125b9a5",
+      "name": "Adults Beginner Acrylics Course - Developing Your Style",
+      "date": "2026-12-05",
+      "startTime": "13:00",
+      "row": 222,
+      "kind": "event"
+    },
+    {
+      "path": "venues/slug_thedalicafe/events/n01park_e2098072bcf8ea9514482cfd",
+      "name": "Cocktails & Crafts: Holiday Cards",
+      "date": "2026-11-24",
+      "startTime": "18:30",
+      "row": 222,
+      "kind": "event"
+    },
+    {
+      "path": "venues/place_c4142d7f07834944/events/n01park_9621b0582a8a2f77cce6b017",
+      "name": "KACC Business of Excellence Awards Gala & Christmas Social",
+      "date": "2026-11-26",
+      "startTime": "18:30",
+      "row": 134,
+      "kind": "event"
     }
   ]
 }

@@ -11,55 +11,35 @@ a repost is not an independent confirmed example. Keep proposed custom correctio
 separate from verified resolutions and test healthy counterexamples before any
 rule implementation. This reference file does not change parser/runtime behavior.
 
-## November 1 parked receipt-draw preparation (PQ-041)
+## November 1 receipt-entry draw distinction (PQ-041): parked, not deployed
 
 Row94/source1105127199173038 (Island Chef Downtown) combines a Facebook
-like/share/tag voucher contest with dine-in receipt entries for November16 and
-December1 gift-voucher draws. The saved candidates are standalone "Win Your Meal
-contest draw" gatherings, held only for missing clocks. Existing food-promotion
-policy permits the dine-in prize-entry offer but does not establish attendance at
-the later drawing. A clock or submission deadline cannot supply that identity.
+voucher contest and dine-in receipt entries for November16/December1 draws.
+The original two standalone draw candidates remain privately held by the
+deployed missing-clock policy. Draw dates do not establish an attendee gathering;
+the food-purchase promotion is a different item and remains eligible.
 
-The isolated preparation adds a source/item-local private hold for named draw
-candidates matched to one receipt-entry caption block, without deleting evidence
-or converting the offer into an event. Food-special items, explicit public/live
-draw attendance and unrelated scheduled activities remain eligible. Ambiguous or
-unmatched source blocks remain outside this narrow guard. Original caption and
-both saved candidate/held inventories are retained in
-`functions/src/parsing/__fixtures__/nov1-receipt-draw.json`; focused controls are
-`functions/src/parsing/receiptDrawPublication.test.ts`. This is code preparation
-only: no deployment, live repair, inferred clocks, new model call or gate change.
-Local validation passes: TypeScript build,94 focused tests (including27 new
-receipt-draw checks),5 supplementary boundary checks and the once-only full
-compiled suite (1,400 tests,zero failures/skips). Local review notes and receipts
-are under ignored `artifacts/nov1-receipt-draw/` in the preparation checkout.
+An isolated additional publication guard was implemented and tested. Independent
+review found public-draw invitations missed across paragraphs/OCR/item evidence.
+Those boundaries were improved, but final review still reproduced a false hold
+for valid invitations using "live drawing" instead of "live draw". The runtime
+proposal was rejected for this release; more regex patches were not promoted.
 
-Independent review reproduced false holds when the same drawing's invitation
-appeared in a separate paragraph, only in OCR/poster text, or in the item's
-extraction reason. The boundary correction starts from exact accepted
-`5d8416d69c31ce755c545690a0a0dc27d94cc21c`. Receipt identification remains tied to
-one caption block, but attendance assessment includes all caption/OCR paragraphs
-and both item evidence fields. Only an explicit different named-draw heading and
-locally scoped statement can exclude unrelated attendance. An unscoped invitation,
-uncertain binding or caption/poster disagreement leaves this administrative
-distinction unasserted; existing missing-clock review and blank clocks remain.
-This does not certify public attendance or recover an offer automatically.
+The candidate and tests are retained at commit
+`c6244219496469da9afec8bfbe02206a7a5ccac2`, branch
+`codex/nov1-receipt-draw-held`. Original caption, saved poster, fixture, test/source
+bytes, hashes, failing counterexamples and review decisions are durably retained
+under `C:/Users/craig/Documents/GathR Parser Evidence/parked-source-casebook/2026-11-01/receipt-draw-candidate/`.
+The live parser remains source `d372c293e89fa408409dbc0e15f4ec3afee1994c`;
+active runtime source and local compiled policy were restored to the accepted
+baseline. No parser deployment or custom override was activated.
 
-The two original administrative draws remain held. Twenty-five new regression
-controls cover separate paragraphs, OCR-only exact/unscoped invitations, item-local
-evidence, mixed named draws, caption/poster disagreement and actual saved replay
-through the formatter boundary. All 119 focused tests (52 receipt-draw checks)
-and the final TypeScript build pass. One full compiled run covered 183 files and
-1,425 tests: 1,424 passed; the only failure was the verification harness blocking
-an existing loopback image-server fixture. That unchanged test passed an isolated
-rerun permitting only its own temporary 127.0.0.1 server; external access stayed
-blocked. The full suite was not repeated and its original failure log is retained.
-Source/compiled hashes have zero drift across validation. Exact
-offline baseline reproduction, original independent-review probe inputs, commands,
-logs and hashes are retained in
-`C:/Users/craig/Documents/Codex/2026-11-01/parked-resolution/receipt-draw-boundary-fix/`.
-Runtime edits remain in one module. No deployment, live write, API/model call,
-gate, prompt, configuration or food-offer extraction change is included.
+Validation history is evidence about the rejected candidate, not release approval:
+119 focused checks passed; the full1425-test run had1424 passes and a local-server
+test blocked by the verification harness. That unchanged test passed its targeted
+loopback rerun. Final independent behavior probes block publication despite the
+assembled package byte check passing. Future work must compare diverse source
+patterns and public-attendance counterexamples before proposing another rule.
 
 ## November 1 mechanism review and deployed prevention
 
