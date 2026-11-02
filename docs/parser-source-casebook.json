@@ -115,7 +115,7 @@
           "row": 305,
           "start": "18:30",
           "end": "18:30",
-          "literal": "6:30 PM–6:30 PM"
+          "literal": "6:30 PM\u20136:30 PM"
         }
       ],
       "listingPath": null,
@@ -177,7 +177,7 @@
           "row": 305,
           "start": "10:45",
           "end": "23:45",
-          "literal": "10:45 AM–11:45 PM"
+          "literal": "10:45 AM\u201311:45 PM"
         }
       ],
       "listingPath": "venues/LglliE42SPFssmoU01su/events/HU77WFmf1S89n7pfXJe4",
@@ -264,14 +264,14 @@
           "publishedAt": "2026-11-01T00:21:23.000Z",
           "start": "12:00",
           "end": "13:00",
-          "literal": "12–1PM dedicated Family Skate poster"
+          "literal": "12\u20131PM dedicated Family Skate poster"
         },
         {
           "row": 305,
           "publishedAt": "2026-11-01T12:16:41.000Z",
           "start": "12:00",
           "end": "13:15",
-          "literal": "12–1:15PM newer daily ice schedule"
+          "literal": "12\u20131:15PM newer daily ice schedule"
         }
       ],
       "listingPath": "venues/LglliE42SPFssmoU01su/events/FVI9FJ04PvBPkbaCaR7C",
@@ -303,5 +303,14 @@
   "parserChanges": 0,
   "canonicalReferencePath": "C:/Users/craig/Documents/GathR Parser Evidence/source-clock-casebook/cases.json",
   "versionedRepositoryPath": "docs/parser-source-casebook.json",
-  "activeCustomOverrides": []
+  "activeCustomOverrides": [],
+  "webFollowups": [
+    {
+      "id": "NOV01-ALL-PARKED-WEB",
+      "atUTC": "2026-11-01T23:56:11.625423+00:00",
+      "evidencePath": "C:\\Users\\craig\\Documents\\Codex\\2026-11-01\\parked-resolution\\clock-venue-research\\FINDINGS.json",
+      "evidenceSHA256": "46777ccd3f3d538743274f823442344dff1cfc7fcaaec64fbe2e50cc6a7c086f",
+      "result": "Bounded dated primary web searches did not independently resolve U18 finish, morning hockey finish or family skate conflict. No custom override activated; unchanged listings are not validation of disputed clocks."
+    }
+  ]
 }

@@ -1,0 +1,952 @@
+{
+  "schemaVersion": 1,
+  "title": "November1 parked source follow-up register",
+  "updatedAtUTC": "2026-11-01T23:56:11.625423+00:00",
+  "purpose": "Retain exact source evidence, web attempts, disagreements and missing essentials for repeated-pattern review; no automatic custom overrides.",
+  "originatingThreadId": "01a0ea83-7031-7423-b853-966f2180d186",
+  "coverage": {
+    "clockVenueAndExpiredGroups": 7,
+    "dateOnlyRows": 23,
+    "tobyRow18": "Included in H04 clock/venue findings; not duplicated in23-row offer research",
+    "videoFamilies": 9
+  },
+  "researchFiles": [
+    {
+      "path": "C:\\Users\\craig\\Documents\\Codex\\2026-11-01\\parked-resolution\\clock-venue-research\\FINDINGS.json",
+      "sha256": "46777ccd3f3d538743274f823442344dff1cfc7fcaaec64fbe2e50cc6a7c086f"
+    },
+    {
+      "path": "C:\\Users\\craig\\Documents\\Codex\\2026-11-01\\parked-resolution\\offer-class-research\\FINDINGS.json",
+      "sha256": "dcdbe79df537625ab0762460f8cf897de4f00aa40d069afec332f9fd8188f355"
+    },
+    {
+      "path": "C:\\Users\\craig\\Documents\\Codex\\2026-11-01\\parked-resolution\\GRECO_GOOGLE_PLACES_CHECK.json",
+      "sha256": "7d6926a17c65736d4fbeacb44afd6e19e82d06a23b125541cc542fd0fc098886"
+    },
+    {
+      "path": "C:\\Users\\craig\\Documents\\Codex\\2026-11-01\\parked-resolution\\gala-official-directions.json",
+      "sha256": "c8d88a29b4ce53a8b1e4eb62cfb1efe34ad5b8ac9723d634ad2bbcfd04962f71"
+    }
+  ],
+  "weaknesses": [
+    {
+      "id": "receipt-entry-draw-is-not-attendance",
+      "status": "validated_code_candidate",
+      "codeCommit": "2581cfe0a8dea68ecc25b8a559d4a0e447fe0d39",
+      "mechanism": "Administrative receipt-entry draw dates can be extracted as public gatherings. Narrow item-local named-draw hold; actual food promotion/public live draw preserved."
+    },
+    {
+      "id": "official-calendar-course-boundaries",
+      "status": "future_review",
+      "mechanism": "Calendar OCR can omit course members, lose correct class clock, or confuse workshop identity. Recover only exact official course dates and retain total-course price; do not imply drop-in admission."
+    },
+    {
+      "id": "source-reconciliation-does-not-mean-majority-vote",
+      "status": "reference_rule",
+      "mechanism": "Official title/calendar/poster corroborate Nov24 despite one product body Nov29 typo. In other cases finish13:00-14:30 versus14:45 and14+/16+ remain truly conflicting; omit disputed finish/age."
+    },
+    {
+      "id": "venue-proof-sharer-vs-attendee",
+      "status": "needs_resolver_lineage_diagnosis",
+      "mechanism": "Gala queue city hint follows sharing page Charlottetown despite explicit New London attendee venue. Current repo lacks stored caption_attendee_location_not_explicit reason string; protected resolver baseline must be traced before code edit."
+    },
+    {
+      "id": "greco-store-redirect",
+      "status": "reference_rule",
+      "mechanism": "Official Store1551 query still returns Truro header. Require returned name/address/phone identity before accepting branch hours. Reject truncated period close. Exact Google Places result retained privately."
+    },
+    {
+      "id": "legacy-multi-day-offer-hours",
+      "status": "future_review",
+      "mechanism": "Existing Greco multi-day offer has fallback clocks with unknown-end provenance. Date-aware availability migration needs ID/source/media continuity and holiday-aware service periods; do not create duplicate daily offers."
+    },
+    {
+      "id": "legacy-blank-canvas-series",
+      "status": "future_review",
+      "mechanism": "Old recurring teens and Cocktails&Crafts may overlap current calendar. Original historical sources and venue/cadence proof needed before rewriting old parents. Preserve IDs04Zuz50UotZ8WF8OaYwR,DQbEv7RZtLM1UXdcg64y,GogS33U4jGYc9FqIhd4U."
+    },
+    {
+      "id": "stockist-not-promotion-participation",
+      "status": "reference_rule",
+      "mechanism": "Handpie supplier/stockists do not establish exact participating Sobeys branch or service hours. Do not attach retailer offer to supplier venue."
+    },
+    {
+      "id": "price-context",
+      "status": "reference_rule",
+      "mechanism": "Course bundle price, dinner versus overnight package for two, and concert versus ticket-raffle price are distinct. Preserve context instead of copying price from related caption."
+    },
+    {
+      "id": "original-media-vs-stored-listing-media",
+      "status": "reference_rule",
+      "mechanism": "Stored Albert&Crown/Indigo listing assets can be unrelated old posters. Verify source ownership and image pixels before borrowing dates/clocks."
+    },
+    {
+      "id": "web-fallback-and-coverage",
+      "status": "reference_workflow",
+      "mechanism": "Use bounded primary organizer/venue/ticket searches for unresolved source evidence. Wrong year, province, branch, expired events and weak snippets cannot supply missing details."
+    }
+  ],
+  "activeCustomOverrides": [],
+  "productionWritesByThisDocument": 0,
+  "exactPreparedBatchPath": "C:\\Users\\craig\\Documents\\Codex\\2026-11-01\\parked-resolution\\packet-preparation",
+  "batchStatus": "Preparation/review pending; this register is not a completion receipt.",
+  "canonicalReferencePath": "C:\\Users\\craig\\Documents\\GathR Parser Evidence\\parked-source-casebook\\cases.json",
+  "canonicalSHA256": "9fc398b7056247b77a20c1f4d401a7fcc45b7874f734a096ea76515bff3b1b89",
+  "cases": [
+    {
+      "id": "NOV01-H01",
+      "kind": "clock_venue_or_expired_source",
+      "source": {},
+      "decision": "No guessed clock correction or expired resurrection. Retain original evidence and web follow-up.",
+      "originalResearchVerdict": "unresolved",
+      "activation": "reference_only_no_custom_override"
+    },
+    {
+      "id": "NOV01-H02",
+      "kind": "clock_venue_or_expired_source",
+      "source": {},
+      "decision": "Prepare one future gala and exact new attendee venue; preserve point discrepancy privately.",
+      "missing": [
+        "No advertised finish; preserve unknown.",
+        "Root must reconcile website-versus-saved-Places point discrepancy and exact live venue/queue state before intake."
+      ],
+      "originalResearchVerdict": "publishable evidence",
+      "activation": "reference_only_no_custom_override"
+    },
+    {
+      "id": "NOV01-H03",
+      "kind": "clock_venue_or_expired_source",
+      "source": {},
+      "decision": "No guessed clock correction or expired resurrection. Retain original evidence and web follow-up.",
+      "missing": [
+        "Live public state and corrective scope are root-owned; saved records are historical.",
+        "No additional exact-date web confirmation retrieved. Official source Facebook unsupported/throttled; web results included wrong venues and excerpt-only posts."
+      ],
+      "originalResearchVerdict": "expired-only",
+      "activation": "reference_only_no_custom_override"
+    },
+    {
+      "id": "NOV01-H04",
+      "kind": "clock_venue_or_expired_source",
+      "source": {},
+      "decision": "No guessed clock correction or expired resurrection. Retain original evidence and web follow-up.",
+      "missing": [
+        "Exact Nov1 opening and service-specific close.",
+        "New Nov1 Instagram lead https://www.instagram.com/p/DfMrIZJFS4m/ was excerpt-only; Firecrawl unsupported and web fallback throttled, so no full-passage validation.",
+        "No post timestamp may become start time; generic website hours are stale/insufficient for season-final-day schedule."
+      ],
+      "originalResearchVerdict": "expired-only",
+      "activation": "reference_only_no_custom_override"
+    },
+    {
+      "id": "NOV01-H05",
+      "kind": "clock_venue_or_expired_source",
+      "source": {},
+      "decision": "No guessed clock correction or expired resurrection. Retain original evidence and web follow-up.",
+      "missing": [
+        "Direct official Facebook fetch unsupported and web fallback throttled.",
+        "Searches did not produce a matching independent same-date correction; similarly named farms and other-edition snippets rejected."
+      ],
+      "originalResearchVerdict": "expired-only",
+      "activation": "reference_only_no_custom_override"
+    },
+    {
+      "id": "NOV01-H06",
+      "kind": "clock_venue_or_expired_source",
+      "source": {},
+      "decision": "No guessed clock correction or expired resurrection. Retain original evidence and web follow-up.",
+      "missing": [
+        "No start was explicit in original row284. The newly found09:30 must retain separate web provenance.",
+        "Candidate disappearance code cause not diagnosed here."
+      ],
+      "originalResearchVerdict": "expired-only",
+      "activation": "reference_only_no_custom_override"
+    },
+    {
+      "id": "NOV01-H08",
+      "kind": "clock_venue_or_expired_source",
+      "source": {},
+      "decision": "Keep Nov2 Rat Tales at host-supported20:00; guide20:30 does not override host.",
+      "missing": [
+        "No official host statement explicitly explaining20:30 versus20:00.",
+        "Host Facebook direct fetch unsupported/throttled; host calendar is an existing managed image fetched by its saved pointer, not original Facebook bytes."
+      ],
+      "originalResearchVerdict": "keep",
+      "activation": "reference_only_no_custom_override"
+    },
+    {
+      "id": "NOV01-H07-ROW-25",
+      "kind": "offer_or_class",
+      "row": 25,
+      "source": {
+        "sourceId": "1434019355584522",
+        "sourcePage": "https://www.facebook.com/AlbertandCrownPub",
+        "originalPostUrl": "https://www.facebook.com/AlbertandCrownPub/posts/pfbid0367Aawn52K5cavXecny6JseWhtqN33WeRV4cswud3hr4NZKAMD6JEpnbcMwrdGC81l",
+        "sourceTimestamp": "2026-10-31T14:51:52Z",
+        "inventoryPath": "C:/Users/craig/Documents/Codex/2026-11-01/parked-resolution/H07_SOURCE_INVENTORY.json"
+      },
+      "decision": "expired_do_not_resurrect",
+      "rootNote": "Research lead; reconcile exact live siblings before any creation. Saved decision is not live-write authority.",
+      "facts": [
+        "Caption explicitly advertises Loaded Newfie Fries $15, Beef Soup $8, Soup and Sandwich combo $15; today's opening and takeout run 11:30\u201321:00.",
+        "Saved stored images include unrelated August 15 and November 14 posters; no original post media is present in the media manifest. Those stored assets must not supply Halloween details."
+      ],
+      "missing": [],
+      "dates": [
+        "2026-10-31"
+      ],
+      "originalResearchVerdict": "expired_do_not_resurrect",
+      "activation": "reference_only_no_custom_override"
+    },
+    {
+      "id": "NOV01-H07-ROW-30",
+      "kind": "offer_or_class",
+      "row": 30,
+      "source": {
+        "sourceId": "1944014443670241",
+        "sourcePage": "https://www.facebook.com/awrestaurantspei",
+        "originalPostUrl": "https://www.facebook.com/awrestaurantspei/posts/pfbid02U3aE33kGLeCLPZHPFK8m91NcyMgjWASoVM5CduF7jAx3iM2ZqcLyMFYsknA5UcbPl",
+        "sourceTimestamp": "2026-10-31T17:49:22Z",
+        "inventoryPath": "C:/Users/craig/Documents/Codex/2026-11-01/parked-resolution/H07_SOURCE_INVENTORY.json"
+      },
+      "decision": "expired_do_not_resurrect",
+      "rootNote": "Research lead; reconcile exact live siblings before any creation. Saved decision is not live-write authority.",
+      "facts": [
+        "Free Buddy Burger for costumed children; original photos show Halloween customers and staff, no usable clock or precise branch identity.",
+        "Family sibling row31 explicitly lists Summerside, Charlottetown and source-spelled 'Startford'."
+      ],
+      "missing": [
+        "Exact branch addresses and date-specific offer windows not proved"
+      ],
+      "dates": [
+        "2026-10-31"
+      ],
+      "originalResearchVerdict": "expired_do_not_resurrect",
+      "activation": "reference_only_no_custom_override"
+    },
+    {
+      "id": "NOV01-H07-ROW-31",
+      "kind": "offer_or_class",
+      "row": 31,
+      "source": {
+        "sourceId": "1943889767016042",
+        "sourcePage": "https://www.facebook.com/awrestaurantspei",
+        "originalPostUrl": "https://www.facebook.com/awrestaurantspei/posts/pfbid0nstpKMWFKZbzajFGcP6Tuy3rZ47sHuDnCFs9SS1uurpPPohVYFBqqCiASVNNdo3nl",
+        "sourceTimestamp": "2026-10-31T15:36:02Z",
+        "inventoryPath": "C:/Users/craig/Documents/Codex/2026-11-01/parked-resolution/H07_SOURCE_INVENTORY.json"
+      },
+      "decision": "expired_do_not_resurrect",
+      "rootNote": "Research lead; reconcile exact live siblings before any creation. Saved decision is not live-write authority.",
+      "facts": [
+        "Caption explicitly dates offer October31 and names three cities; original shared-post photos give no event hours.",
+        "Overlaps row30 family; check exact siblings before any historical deduplication."
+      ],
+      "missing": [
+        "Exact branch identity/window"
+      ],
+      "dates": [
+        "2026-10-31"
+      ],
+      "originalResearchVerdict": "expired_do_not_resurrect",
+      "activation": "reference_only_no_custom_override"
+    },
+    {
+      "id": "NOV01-H07-ROW-43",
+      "kind": "offer_or_class",
+      "row": 43,
+      "source": {
+        "sourceId": "2231718611069564",
+        "sourcePage": "https://www.facebook.com/holycowpei",
+        "originalPostUrl": "https://www.facebook.com/holycowpei/posts/pfbid02FrshuarerjSNKocuKAQ7kuamnLGRSXgFXY5Gtq64cZ2HqEtTFNwnJbZkmrV3aUVWl",
+        "sourceTimestamp": "2026-10-31T12:02:38Z",
+        "inventoryPath": "C:/Users/craig/Documents/Codex/2026-11-01/parked-resolution/H07_SOURCE_INVENTORY.json"
+      },
+      "decision": "hold_nov1_offer_hours",
+      "rootNote": "Research lead; reconcile exact live siblings before any creation. Saved decision is not live-write authority.",
+      "facts": [
+        "Original Oct31 caption: Holiday Mess and Wicked Mess on special 'today and tomorrow'.",
+        "11:30\u201315:00 is explicitly 'today', October31 only. No source-bound original media is in manifest.",
+        "Official Page and exact sibling2229934874581271 corroborate Morell and weekend availability; search excerpts mention Wicked Mess $17 but not complete original menu details. An unrelated search summary incorrectly said Montague and is rejected."
+      ],
+      "missing": [
+        "Nov1 service start/end",
+        "Complete independently read sibling price/details",
+        "Exact street address"
+      ],
+      "dates": [
+        "2026-10-31",
+        "2026-11-01"
+      ],
+      "originalResearchVerdict": "hold_nov1_offer_hours",
+      "activation": "reference_only_no_custom_override"
+    },
+    {
+      "id": "NOV01-H07-ROW-75",
+      "kind": "offer_or_class",
+      "row": 75,
+      "source": {
+        "sourceId": "1449252614070010",
+        "sourcePage": "https://www.facebook.com/makeawishpe",
+        "originalPostUrl": "https://www.facebook.com/makeawishpe/posts/pfbid0MUDJkZ7RuHw6gZz77MRM6TuAJkXyDkvoDduEKRnJMAMHsR2VZU8GQDr2fAAoDQTkl",
+        "sourceTimestamp": "2026-11-01T13:02:57Z",
+        "inventoryPath": "C:/Users/craig/Documents/Codex/2026-11-01/parked-resolution/H07_SOURCE_INVENTORY.json"
+      },
+      "decision": "exclude_outside_pei_and_coverage",
+      "rootNote": "Research lead; reconcile exact live siblings before any creation. Saved decision is not live-write authority.",
+      "facts": [
+        "Original poster explicitly prints September17\u201319,2027 and20years2007\u20132027; caption names Mirabel/ICAR.",
+        "Official DonorDrive page is currently 2026 participant centre,18\u201320September; it is a different edition, not a correction to2027 source.",
+        "PEI sharing Page does not make the attendee location PEI."
+      ],
+      "missing": [
+        "2027 clock not needed for exclusion"
+      ],
+      "dates": [
+        "2027-09-17",
+        "2027-09-18",
+        "2027-09-19"
+      ],
+      "originalResearchVerdict": "exclude_outside_pei_and_coverage",
+      "activation": "reference_only_no_custom_override"
+    },
+    {
+      "id": "NOV01-H07-ROW-78",
+      "kind": "offer_or_class",
+      "row": 78,
+      "source": {
+        "sourceId": "1667519308718317",
+        "sourcePage": "https://www.facebook.com/CityCinemaChtown",
+        "originalPostUrl": "https://www.facebook.com/CityCinemaChtown/posts/pfbid04rm7ecqfps79zyf6FWrPqtecfWCQFZp8HfNxkxk8bHR57M9BFwj4YDCb8pgPZop6l",
+        "sourceTimestamp": "2026-11-01T10:38:33Z",
+        "inventoryPath": "C:/Users/craig/Documents/Codex/2026-11-01/parked-resolution/H07_SOURCE_INVENTORY.json"
+      },
+      "decision": "ready_candidate_check_live_siblings",
+      "rootNote": "Research lead; reconcile exact live siblings before any creation. Saved decision is not live-write authority.",
+      "facts": [
+        "Exact official film page identifies A Talent for Murder, Helen Mirren as Patricia Highsmith; calendar explicitly says November2026.",
+        "November1\u20137 each19:00; finish is not advertised. Runtime106min must not become an advertised end.",
+        "Original saved still shows Mirren and co-star; trailer poster is JPEG not the full video."
+      ],
+      "missing": [
+        "Advertised finish unknown",
+        "Ticket price not read"
+      ],
+      "dates": [
+        "2026-11-01",
+        "2026-11-02",
+        "2026-11-03",
+        "2026-11-04",
+        "2026-11-05",
+        "2026-11-06",
+        "2026-11-07"
+      ],
+      "originalResearchVerdict": "ready_candidate_check_live_siblings",
+      "activation": "reference_only_no_custom_override"
+    },
+    {
+      "id": "NOV01-H07-ROW-89",
+      "kind": "offer_or_class",
+      "row": 89,
+      "source": {
+        "sourceId": "1806836841451106",
+        "sourcePage": "https://www.facebook.com/somerseticecreambar",
+        "originalPostUrl": "https://www.facebook.com/somerseticecreambar/posts/pfbid02WZohcRLVRckCeg7qDGDsprStpihgmPM4LNYQtAjHrMRtEsQxWM2cjPfba5MCMnyBl",
+        "sourceTimestamp": "2026-10-31T14:41:58Z",
+        "inventoryPath": "C:/Users/craig/Documents/Codex/2026-11-01/parked-resolution/H07_SOURCE_INVENTORY.json"
+      },
+      "decision": "expired_do_not_resurrect",
+      "rootNote": "Research lead; reconcile exact live siblings before any creation. Saved decision is not live-write authority.",
+      "facts": [
+        "Monster Mash limited dessert is advertised 'today'. Separate trick-or-treat handout is explicitly16:00\u201321:00.",
+        "Original three photos show dessert/shop; no service hours for Monster Mash."
+      ],
+      "missing": [
+        "Offer window separate from handout window"
+      ],
+      "dates": [
+        "2026-10-31"
+      ],
+      "originalResearchVerdict": "expired_do_not_resurrect",
+      "activation": "reference_only_no_custom_override"
+    },
+    {
+      "id": "NOV01-H07-ROW-94",
+      "kind": "offer_or_class",
+      "row": 94,
+      "source": {
+        "sourceId": "1105127199173038",
+        "sourcePage": "https://www.facebook.com/islandchefatthepier",
+        "originalPostUrl": "https://www.facebook.com/islandchefatthepier/posts/pfbid02ra47xoHEGDb9MxaNiEjgaq5nMwKvpVwM8SC8mNatzoJdHiuUjSYZTa6hgMTcrTLxl",
+        "sourceTimestamp": "2026-10-31T17:18:18Z",
+        "inventoryPath": "C:/Users/craig/Documents/Codex/2026-11-01/parked-resolution/H07_SOURCE_INVENTORY.json"
+      },
+      "decision": "exclude_contest_draw_not_attendee_event",
+      "rootNote": "Research lead; reconcile exact live siblings before any creation. Saved decision is not live-write authority.",
+      "facts": [
+        "Caption and original poster describe random gift-voucher draws; enter by dining and putting name/phone on receipt.",
+        "Facebook-exclusive like/share/tag entry is another contest mechanism, not an attendee gathering.",
+        "No public draw attendance/session is advertised. Date is not sufficient to classify Gatherings & Parties."
+      ],
+      "missing": [
+        "No advertised attendance requirement or clock"
+      ],
+      "dates": [
+        "2026-11-16",
+        "2026-12-01"
+      ],
+      "originalResearchVerdict": "exclude_contest_draw_not_attendee_event",
+      "activation": "reference_only_no_custom_override"
+    },
+    {
+      "id": "NOV01-H07-ROW-114",
+      "kind": "offer_or_class",
+      "row": 114,
+      "source": {
+        "sourceId": "1765565412237378",
+        "sourcePage": "https://www.facebook.com/thehandpieco",
+        "originalPostUrl": "https://www.facebook.com/thehandpieco/posts/pfbid02a1mbXWFqGe65XMq3KG1ZKAxGstsQqYD5aanR8CdGe36dsow2uigKL2qMy6GZV4mCl",
+        "sourceTimestamp": "2026-10-31T17:03:48Z",
+        "inventoryPath": "C:/Users/craig/Documents/Codex/2026-11-01/parked-resolution/H07_SOURCE_INVENTORY.json"
+      },
+      "decision": "hold_branch_participation_and_hours",
+      "rootNote": "Research lead; reconcile exact live siblings before any creation. Saved decision is not live-write authority.",
+      "facts": [
+        "Original caption advertises $9.99 each regularly$11.99 untilWednesdayNovember4; original photo shows shelf$9.99.",
+        "Official stockist directory lists PEI Sobeys AllenStreet400UniversityAve Charlottetown; Granville475GranvilleSt Summerside; Montague531MainSt; Stratford9KinlockRd; WestRoyalty39BabineauDr Charlottetown.",
+        "Stockist directory is not proof each branch participates in this sale. Older sibling search snippet saysWednesdayNovember3, an inconsistent date, and must not override exact source November4."
+      ],
+      "missing": [
+        "Branch-specific sale participation",
+        "Date-specific service hours",
+        "Sale starting date not explicitly in original caption"
+      ],
+      "dates": [
+        "2026-11-01",
+        "2026-11-02",
+        "2026-11-03",
+        "2026-11-04"
+      ],
+      "originalResearchVerdict": "hold_branch_participation_and_hours",
+      "activation": "reference_only_no_custom_override"
+    },
+    {
+      "id": "NOV01-H07-ROW-122",
+      "kind": "offer_or_class",
+      "row": 122,
+      "source": {
+        "sourceId": "1746038410860066",
+        "sourcePage": "https://www.facebook.com/TheInnAtBayFortune",
+        "originalPostUrl": "https://www.facebook.com/reel/2193087594608673/",
+        "sourceTimestamp": "2026-10-31T15:53:39Z",
+        "inventoryPath": "C:/Users/craig/Documents/Codex/2026-11-01/parked-resolution/H07_SOURCE_INVENTORY.json"
+      },
+      "decision": "ready_reframe_dining_candidates_keep_package_separate",
+      "rootNote": "Research lead; reconcile exact live siblings before any creation. Saved decision is not live-write authority.",
+      "facts": [
+        "Official2026 dining series confirms ChefMichaelSmith November5\u20137 and daily dining itinerary17:00\u201321:30; optional FireBar21:30\u201322:30.",
+        "Dining-only price$305+tax perperson includes service; $950+HST is overnight retreat for two guests, includes one-night room,dinner for two,breakfast,foraging and amenities; beverages extra.",
+        "Original phrase 'two dinners' should not create two nights or apply$950 as per-person dining admission.",
+        "Check-in15:00, breakfast07:30\u201309:00,foraging09:15,checkout11:00 are package components; do not flatten into three all-day lodging events."
+      ],
+      "missing": [
+        "Booking availability not verified; no booking made"
+      ],
+      "dates": [
+        "2026-11-05",
+        "2026-11-06",
+        "2026-11-07"
+      ],
+      "originalResearchVerdict": "ready_reframe_dining_candidates_keep_package_separate",
+      "activation": "reference_only_no_custom_override"
+    },
+    {
+      "id": "NOV01-H07-ROW-139",
+      "kind": "offer_or_class",
+      "row": 139,
+      "source": {
+        "sourceId": "122234771726578108",
+        "sourcePage": "https://www.facebook.com/thetivolicinema",
+        "originalPostUrl": "https://www.facebook.com/thetivolicinema/posts/pfbid0TFVFxk9XzwUWSB5jVtNMo4ouBnMJCVZ8kvhv8pMKDf3obaegfr9dVRYRsW6i8PAUl",
+        "sourceTimestamp": "2026-10-31T17:03:20Z",
+        "inventoryPath": "C:/Users/craig/Documents/Codex/2026-11-01/parked-resolution/H07_SOURCE_INVENTORY.json"
+      },
+      "decision": "expired_do_not_resurrect",
+      "rootNote": "Research lead; reconcile exact live siblings before any creation. Saved decision is not live-write authority.",
+      "facts": [
+        "Eight Hours of Agony Halloween marathon; original four photos are horror-film stills without clock.",
+        "Official Instagram result corroborates SaturdayOctober31,2026; no start established.",
+        "Eight hours in title is duration branding, not a start clock."
+      ],
+      "missing": [
+        "Exact start/end"
+      ],
+      "dates": [
+        "2026-10-31"
+      ],
+      "originalResearchVerdict": "expired_do_not_resurrect",
+      "activation": "reference_only_no_custom_override"
+    },
+    {
+      "id": "NOV01-H07-ROW-151",
+      "kind": "offer_or_class",
+      "row": 151,
+      "source": {
+        "sourceId": "1154884753735223",
+        "sourcePage": "https://www.facebook.com/tipsyfarmers",
+        "originalPostUrl": "https://www.facebook.com/tipsyfarmers/posts/pfbid02xnSunNGQ3P21RMvbCfz67PC3MyfRpHSsKG3tUyTUbxfVjxcnAZfj3gy5GDghhwiXl",
+        "sourceTimestamp": "2026-10-31T13:22:53Z",
+        "inventoryPath": "C:/Users/craig/Documents/Codex/2026-11-01/parked-resolution/H07_SOURCE_INVENTORY.json"
+      },
+      "decision": "expired_and_nov1_closed",
+      "rootNote": "Research lead; reconcile exact live siblings before any creation. Saved decision is not live-write authority.",
+      "facts": [
+        "Caption and original poster closeHalloweenOctober31 at18:00; caption explicitly CLOSED SUNDAY NOV1.",
+        "SoupOfTheDay$12 and three AllDaySpecials belong to Oct31; grab-n-go fridge is ordinary retail menu."
+      ],
+      "missing": [
+        "Oct31 opening start unknown"
+      ],
+      "dates": [
+        "2026-10-31"
+      ],
+      "originalResearchVerdict": "expired_and_nov1_closed",
+      "activation": "reference_only_no_custom_override"
+    },
+    {
+      "id": "NOV01-H07-ROW-171",
+      "kind": "offer_or_class",
+      "row": 171,
+      "source": {
+        "sourceId": "1748123000650795",
+        "sourcePage": "https://www.facebook.com/DowntownSummerside",
+        "originalPostUrl": "https://www.facebook.com/DowntownSummerside/posts/pfbid02iU86KV1ueWjfAVdd5Jy3VwiHLcdsy9uED5kFzZwk9VfzbTMidtCnJWLRbQE57CeWl",
+        "sourceTimestamp": "2026-10-31T15:08:50Z",
+        "inventoryPath": "C:/Users/craig/Documents/Codex/2026-11-01/parked-resolution/H07_SOURCE_INVENTORY.json"
+      },
+      "decision": "expired_family_link_only",
+      "rootNote": "Research lead; reconcile exact live siblings before any creation. Saved decision is not live-write authority.",
+      "facts": [
+        "Witches on WaterStreet 'right now until14:00'; row172 exact same family gives12:00\u201314:00 onOct31.",
+        "Original photos show in-progress Halloween activity, not HauntedMallNov1 session."
+      ],
+      "missing": [],
+      "dates": [
+        "2026-10-31"
+      ],
+      "originalResearchVerdict": "expired_family_link_only",
+      "activation": "reference_only_no_custom_override"
+    },
+    {
+      "id": "NOV01-H07-ROW-172",
+      "kind": "offer_or_class",
+      "row": 172,
+      "source": {
+        "sourceId": "1748031417326620",
+        "sourcePage": "https://www.facebook.com/DowntownSummerside",
+        "originalPostUrl": "https://www.facebook.com/DowntownSummerside/posts/pfbid0xfZv8pckzHmx61fF7VupQfEQWPycGMk2mWQAm5pXcym9FBgEmbBareJ9Wxh8dDbal",
+        "sourceTimestamp": "2026-10-31T13:33:51Z",
+        "inventoryPath": "C:/Users/craig/Documents/Codex/2026-11-01/parked-resolution/H07_SOURCE_INVENTORY.json"
+      },
+      "decision": "hold_haunted_mall_nov1_clock_and_exact_venue",
+      "rootNote": "Research lead; reconcile exact live siblings before any creation. Saved decision is not live-write authority.",
+      "facts": [
+        "Oct31caption explicitly says HauntedMall'tomorrow'(ages5+). Samecaption's12:00\u201314:00 belongs to WitchesOct31.",
+        "Original poster is Witches on WaterStreet artwork without HauntedMalltime.",
+        "Official DowntownSummerside sibling1745598734236555 names hauntedmall atMcNeillMall presented byCameronApartmentsInc, withinOct31Witches context. Other recruitment post identifiesMcNeillMall251WaterStreet. These corroborate family location, not Nov1clock."
+      ],
+      "missing": [
+        "Nov1 start/end",
+        "Exact Nov1 attendee venue confirmation; no substitution fromOct31 context"
+      ],
+      "dates": [
+        "2026-11-01"
+      ],
+      "originalResearchVerdict": "hold_haunted_mall_nov1_clock_and_exact_venue",
+      "activation": "reference_only_no_custom_override"
+    },
+    {
+      "id": "NOV01-H07-ROW-222",
+      "kind": "offer_or_class",
+      "row": 222,
+      "source": {
+        "sourceId": "1070271196035284",
+        "sourcePage": "https://www.facebook.com/p/Blank-Canvas-Art-Supplies-100091572402204/",
+        "originalPostUrl": "https://www.facebook.com/permalink.php?story_fbid=pfbid02yK8qnYzAknoydLRdcV5o23dUn6oJrwN2v6pJkmFxgrwLCLN9HQ9f5n3n3ao9nepEl&id=100091572402204",
+        "sourceTimestamp": "2026-10-31T19:22:59Z",
+        "inventoryPath": "C:/Users/craig/Documents/Codex/2026-11-01/parked-resolution/H07_SOURCE_INVENTORY.json"
+      },
+      "decision": "ready_corrected_workshop_candidates_with_conflicts_recorded",
+      "rootNote": "Research lead; reconcile exact live siblings before any creation. Saved decision is not live-write authority.",
+      "facts": [
+        "All five source images and all five stored images were inspected. The saved calendar is only 472 pixels wide; the current official November 2026 calendar was read at higher resolution.",
+        "November 1 and 8 drawing holds are Intro to Drawing: Teens, 16:00\u201317:30, not adults. November 12 and 19 adult drawing is 18:30\u201320:00. November 18 and 25 is Intermediate Lino Printmaking, 18:30\u201320:30, not line drawing.",
+        "November 15 Kids Beginner Cross Stitch is 14:00\u201315:30; November 22 Winter Cross Stitch is 14:00\u201316:00. November 29 is Winter Needle Felting, 14:00\u201316:00, not painting.",
+        "November 24 Cocktails & Crafts is Holiday/Christmas Cards, 18:30\u201320:00, at Dali Cafe, 155 Kent Street, $25 + HST. The product body incorrectly says Tuesday November 29; its title, official poster and calendar independently say November 24. November 29, 2026 is Sunday.",
+        "November 28 adult acrylic starts 13:00. Current product says finish 14:45; calendar says 14:30. Leave finish unknown pending adjudication.",
+        "Age conflicts: November 22 calendar 16+ versus product 14+; November 29 calendar 14+ versus product 16+. Do not publish an exact age from conflicting evidence.",
+        "Outside the 11 holds, November 10 cross-stitch has a finish conflict: original poster and product say 20:00; calendar says 20:30. Root should review its existing sibling separately."
+      ],
+      "missing": [
+        "Drawing course price unknown",
+        "AcrylicNov28finish14:30vs14:45",
+        "Age conflictsNov22and29",
+        "Nov10existing sibling finish conflict"
+      ],
+      "dates": [
+        "2026-11-01",
+        "2026-11-08",
+        "2026-11-12",
+        "2026-11-15",
+        "2026-11-18",
+        "2026-11-19",
+        "2026-11-22",
+        "2026-11-24",
+        "2026-11-25",
+        "2026-11-28",
+        "2026-11-29"
+      ],
+      "originalResearchVerdict": "ready_corrected_workshop_candidates_with_conflicts_recorded",
+      "activation": "reference_only_no_custom_override"
+    },
+    {
+      "id": "NOV01-H07-ROW-238",
+      "kind": "offer_or_class",
+      "row": 238,
+      "source": {
+        "sourceId": "1712870630851441",
+        "sourcePage": "https://www.facebook.com/tignish.coop",
+        "originalPostUrl": "https://www.facebook.com/tignish.coop/posts/pfbid0PQ9r8HiRUrGbsmyvEPyi4ieMR9xo5xqQJXwxPpm6tzrcNAeN6KktZmF941vh8Qr3l",
+        "sourceTimestamp": "2026-10-31T16:34:53Z",
+        "inventoryPath": "C:/Users/craig/Documents/Codex/2026-11-01/parked-resolution/H07_SOURCE_INVENTORY.json"
+      },
+      "decision": "expired_do_not_resurrect",
+      "rootNote": "Research lead; reconcile exact live siblings before any creation. Saved decision is not live-write authority.",
+      "facts": [
+        "Cashiers welcome children for treat bags; original graphic says Trick r Treat without a clock. This is an October 31 invitation, now expired.",
+        "No held object exists in inventory for this row; targeted research and decision were still completed."
+      ],
+      "missing": [
+        "Time and exact address not established"
+      ],
+      "dates": [
+        "2026-10-31"
+      ],
+      "originalResearchVerdict": "expired_do_not_resurrect",
+      "activation": "reference_only_no_custom_override"
+    },
+    {
+      "id": "NOV01-H07-ROW-240",
+      "kind": "offer_or_class",
+      "row": 240,
+      "source": {
+        "sourceId": "1766784618788338",
+        "sourcePage": "https://www.facebook.com/sourisshowhall/",
+        "originalPostUrl": "https://www.facebook.com/sourisshowhall/posts/pfbid02GYJM6kKHztjWci3YdKzYjsp32Xe24qgyY3KvMdQBtj7PXJ1bPYwTueSieakyGN27l",
+        "sourceTimestamp": "2026-11-01T11:13:34Z",
+        "inventoryPath": "C:/Users/craig/Documents/Codex/2026-11-01/parked-resolution/H07_SOURCE_INVENTORY.json"
+      },
+      "decision": "ready_candidate_check_live_siblings_sold_out",
+      "rootNote": "Research lead; reconcile exact live siblings before any creation. Saved decision is not live-write authority.",
+      "facts": [
+        "Venue homepage, artist calendar and official Locarius ticket page agree: Wednesday November 18, 2026 at 19:30 AST, Souris Show Hall, 5 Church Ave. Finish is unknown.",
+        "Correct title is Lennie Gallant: The Innkeeper's Christmas. Official ticket page explicitly says Sold out.",
+        "Original image advertises a Friends, Food & Fall fundraising raffle: $5 each or 3/$10, draw November 13. The $100 value for two concert tickets is a prize valuation, not verified concert admission.",
+        "21 Breakwater dinner, gas card, Indigo gift card and blanket are raffle prizes, not extra venues for the concert."
+      ],
+      "missing": [
+        "Showadmissionpriceunknown",
+        "Advertisedfinishunknown"
+      ],
+      "dates": [
+        "2026-11-18"
+      ],
+      "originalResearchVerdict": "ready_candidate_check_live_siblings_sold_out",
+      "activation": "reference_only_no_custom_override"
+    },
+    {
+      "id": "NOV01-H07-ROW-246",
+      "kind": "offer_or_class",
+      "row": 246,
+      "source": {
+        "sourceId": "1626762629245458",
+        "sourcePage": "https://www.facebook.com/GrecoPizzaSherwood",
+        "originalPostUrl": "https://www.facebook.com/GrecoPizzaSherwood/posts/pfbid02q5n67TQB1hxA4HKE7AjQmdN1KkU2utRBRb1gGTCTse9c8JrwNXubcsgkqm33jtxRl",
+        "sourceTimestamp": "2026-10-31T20:52:29Z",
+        "inventoryPath": "C:/Users/craig/Documents/Codex/2026-11-01/parked-resolution/H07_SOURCE_INVENTORY.json"
+      },
+      "decision": "expired_source_halloween_do_not_extend",
+      "rootNote": "Research lead; reconcile exact live siblings before any creation. Saved decision is not live-write authority.",
+      "facts": [
+        "Original bilingual posters advertise a $30 Halloween bundle: large GrecoWorks or three-topping pizza, large garlic fingers and one dip.",
+        "Current ordering page shows a similar $30 bundle but resolves to Truro. That cannot extend this exact Sherwood Halloween source into November 1\u201315."
+      ],
+      "missing": [
+        "Sherwooddate-specificservicewindow"
+      ],
+      "dates": [
+        "2026-10-31"
+      ],
+      "originalResearchVerdict": "expired_source_halloween_do_not_extend",
+      "activation": "reference_only_no_custom_override"
+    },
+    {
+      "id": "NOV01-H07-ROW-247",
+      "kind": "offer_or_class",
+      "row": 247,
+      "source": {
+        "sourceId": "1626730772581977",
+        "sourcePage": "https://www.facebook.com/GrecoPizzaSherwood",
+        "originalPostUrl": "https://www.facebook.com/GrecoPizzaSherwood/posts/pfbid0JNTG6CTVeQkm2D1QMppCXA163pS8RjVjXvshdEoaJ7nj6s74Akd6VLnRMS44r9kwl",
+        "sourceTimestamp": "2026-10-31T20:09:33Z",
+        "inventoryPath": "C:/Users/craig/Documents/Codex/2026-11-01/parked-resolution/H07_SOURCE_INVENTORY.json"
+      },
+      "decision": "expired_source_halloween_do_not_extend",
+      "rootNote": "Research lead; reconcile exact live siblings before any creation. Saved decision is not live-write authority.",
+      "facts": [
+        "East Coast Kitchen Party is a $39.99 meal bundle: party pizza with up to three toppings, medium garlic fingers, eight Donair Dippers and three dips. It is not a live party.",
+        "The source advertises Halloween. November 1\u201315 belongs to row 248's separate PayDay offer, not this post."
+      ],
+      "missing": [
+        "Sherwooddate-specificservicewindow",
+        "Noexplicitpost-Halloweenvalidity"
+      ],
+      "dates": [
+        "2026-10-31"
+      ],
+      "originalResearchVerdict": "expired_source_halloween_do_not_extend",
+      "activation": "reference_only_no_custom_override"
+    },
+    {
+      "id": "NOV01-H07-ROW-248",
+      "kind": "offer_or_class",
+      "row": 248,
+      "source": {
+        "sourceId": "1625850882669966",
+        "sourcePage": "https://www.facebook.com/GrecoPizzaSherwood",
+        "originalPostUrl": "https://www.facebook.com/GrecoPizzaSherwood/posts/pfbid02FDdkNUVWHTg52k2VXNMe7ZF6f9XeHhEnoiXegj1o6x8C959baxap55TRbty1EmXXl",
+        "sourceTimestamp": "2026-10-31T00:36:19Z",
+        "inventoryPath": "C:/Users/craig/Documents/Codex/2026-11-01/parked-resolution/H07_SOURCE_INVENTORY.json"
+      },
+      "decision": "existing_listing_keep_no_duplicate_timing_debt_recorded",
+      "rootNote": "Source own local Sherwood page plus exact Google Places phone/address confirms branch identity. Existing venues/slug_grecopizzasherwood/events/IewXoBSTelqyP3jKAjyW already covers Nov1-15. Do not create six overlapping offers. Google complete current periods cover Nov1-6 only; Nov7 close23:59 is truncated. Later dates including Nov11 holiday remain outside date-specific evidence. Existing multi-day fallback11:00-21:00/category_default is not validated as daily service availability. Future repair needs a date-aware availability schedule preserving ID, media and source unions; not a blind replacement with22:00 for all15days. Exact PlacesID currently absent from venue; address/postal and point differences retained.",
+      "facts": [
+        "Original French caption explicitly dates the PayDay offer November 1\u201315, 2026. Posters show a medium three-topping pizza for $9.99, online and pickup at participating locations.",
+        "Free contest entry with no purchase required is a separate promotion, not a timed attendee session.",
+        "The official deals URL redirects to weborder and confirms the same offer, but its header says TRURO, ROBIE STREET, 11:00\u201300:00. These are not Sherwood hours.",
+        "Official locations search indexes Sherwood at 180 Brackley Point Road and Store 1551. Fetching that exact official store URL still returned Truro, so its branch hours and participation are rejected."
+      ],
+      "missing": [
+        "ExactSherwoodparticipationanddate-specificservicehours",
+        "Storeparameterdidnotselectintendedbranch"
+      ],
+      "dates": [
+        "2026-11-01",
+        "2026-11-02",
+        "2026-11-03",
+        "2026-11-04",
+        "2026-11-05",
+        "2026-11-06",
+        "2026-11-07",
+        "2026-11-08",
+        "2026-11-09",
+        "2026-11-10",
+        "2026-11-11",
+        "2026-11-12",
+        "2026-11-13",
+        "2026-11-14",
+        "2026-11-15"
+      ],
+      "originalResearchVerdict": "hold_exact_branch_service_window",
+      "activation": "reference_only_no_custom_override"
+    },
+    {
+      "id": "NOV01-H07-ROW-278",
+      "kind": "offer_or_class",
+      "row": 278,
+      "source": {
+        "sourceId": "1737147711744201",
+        "sourcePage": "https://www.facebook.com/mothlanebrewing",
+        "originalPostUrl": "https://www.facebook.com/MothLaneBrewing/posts/pfbid02xVxSymJRrhmtus1gBm9wChp4nBDJCvBJqx1gWMAkocLdiqSyHohzWwvHzFQjhU1wl",
+        "sourceTimestamp": "2026-10-31T14:40:38Z",
+        "inventoryPath": "C:/Users/craig/Documents/Codex/2026-11-01/parked-resolution/H07_SOURCE_INVENTORY.json"
+      },
+      "decision": "expired_do_not_resurrect",
+      "rootNote": "Research lead; reconcile exact live siblings before any creation. Saved decision is not live-write authority.",
+      "facts": [
+        "Original photo and caption advertise an October 31 Halloween Feast for $49.99: choice of two burgers/sandwiches, loaded Moth Fries and seven wings.",
+        "An old January 2025 kitchen-hours result cannot establish October 31, 2026 service hours."
+      ],
+      "missing": [
+        "Date-specificstart/end"
+      ],
+      "dates": [
+        "2026-10-31"
+      ],
+      "originalResearchVerdict": "expired_do_not_resurrect",
+      "activation": "reference_only_no_custom_override"
+    },
+    {
+      "id": "NOV01-H07-ROW-285",
+      "kind": "offer_or_class",
+      "row": 285,
+      "source": {
+        "sourceId": "122284876814151845",
+        "sourcePage": "https://www.facebook.com/soulfitpei/",
+        "originalPostUrl": "https://www.facebook.com/soulfitpei/posts/pfbid02o4hqkCKmoPMNkpPYqiSesEZzDsKPshMk8PuKJWUgazDnHAMh7XxUB4Sb1hcukRE5l",
+        "sourceTimestamp": "2026-10-31T00:05:01Z",
+        "inventoryPath": "C:/Users/craig/Documents/Codex/2026-11-01/parked-resolution/H07_SOURCE_INVENTORY.json"
+      },
+      "decision": "exclude_retrospective_photo",
+      "rootNote": "Research lead; reconcile exact live siblings before any creation. Saved decision is not live-write authority.",
+      "facts": [
+        "Original image shows costumed fitness participants with the words Halloween Bounce and Box Fit Fun. There is no future invitation, date or clock.",
+        "Related official search results mention a Wednesday Halloween Bounce but do not prove this photo announces an upcoming session."
+      ],
+      "missing": [
+        "Noactionablefuturedate/time"
+      ],
+      "dates": [],
+      "originalResearchVerdict": "exclude_retrospective_photo",
+      "activation": "reference_only_no_custom_override"
+    },
+    {
+      "id": "NOV01-H07-ROW-339",
+      "kind": "offer_or_class",
+      "row": 339,
+      "source": {
+        "sourceId": "1735129278498949",
+        "sourcePage": "https://www.facebook.com/indigocharlottetown",
+        "originalPostUrl": "https://www.facebook.com/IndigoCharlottetown/posts/pfbid034krx3EHWq9e43TD1c3maFuDe9DZuQdQU7nMCYbHfkopnoGjnMxvuven7vSMZfQFgl",
+        "sourceTimestamp": "2026-10-31T13:15:13Z",
+        "inventoryPath": "C:/Users/craig/Documents/Codex/2026-11-01/parked-resolution/H07_SOURCE_INVENTORY.json"
+      },
+      "decision": "expired_generic_invitation_do_not_resurrect",
+      "rootNote": "Research lead; reconcile exact live siblings before any creation. Saved decision is not live-write authority.",
+      "facts": [
+        "Exact October 31 caption invites people to show costumes today without a clock.",
+        "Manifest contains stored assets only: a Halloween Waldo scavenger-station photo and an unrelated November 4 noon Chantal Kreviazuk/Raine Maida poster. Neither supplies this post's activity time.",
+        "An Instagram search hit for costume colouring 11:00\u201315:00 is not proved to be this branch/source and is not imported."
+      ],
+      "missing": [
+        "Exactactivityclocknotprovided"
+      ],
+      "dates": [
+        "2026-10-31"
+      ],
+      "originalResearchVerdict": "expired_generic_invitation_do_not_resurrect",
+      "activation": "reference_only_no_custom_override"
+    },
+    {
+      "id": "NOV01-VIDEO-side-door-day-of-the-dead",
+      "kind": "video",
+      "source": {},
+      "sourceId": "122152267257035455",
+      "decision": "Expired Oct31 Arts Guild event; primary Locarius5206 confirms19:00. No resurrection or unreviewed clip publication.",
+      "primaryUrls": [
+        "https://locarius.io/events/5206/day-of-the-dead"
+      ],
+      "savedEvidence": [
+        "C:\\Users\\craig\\Documents\\Codex\\2026-11-01\\parked-resolution\\web-sidedoor.json",
+        "C:\\Users\\craig\\Documents\\Codex\\2026-11-01\\parked-resolution\\web-sidedoor-official.json",
+        "C:\\Users\\craig\\Documents\\Codex\\2026-11-01\\parked-resolution\\page-daydead-ticket.json"
+      ],
+      "activation": "no_new_manual_video_approval"
+    },
+    {
+      "id": "NOV01-VIDEO-spicey-chef-halloween",
+      "kind": "video",
+      "source": {},
+      "sourceId": "1631830268956337",
+      "decision": "Halloween food items are not the current generic15%online-order offer. No transfer of dates/availability between promotions.",
+      "primaryUrls": [
+        "https://spiceychef.ca/"
+      ],
+      "savedEvidence": [
+        "C:\\Users\\craig\\Documents\\Codex\\2026-11-01\\parked-resolution\\web-spicey.json",
+        "C:\\Users\\craig\\Documents\\Codex\\2026-11-01\\parked-resolution\\web-spicey-site.json",
+        "C:\\Users\\craig\\Documents\\Codex\\2026-11-01\\parked-resolution\\page-spicey-menu.json"
+      ],
+      "activation": "no_new_manual_video_approval"
+    },
+    {
+      "id": "NOV01-VIDEO-coldstream-tour",
+      "kind": "video",
+      "source": {},
+      "sourceId": "1647677413719818",
+      "decision": "The Club Sydney Nova Scotia source is outside PEI; generic venue tour is not a supported future attendee event.",
+      "primaryUrls": [],
+      "savedEvidence": [
+        "C:\\Users\\craig\\Documents\\Codex\\2026-11-01\\parked-resolution\\web-coldstream.json"
+      ],
+      "activation": "no_new_manual_video_approval"
+    },
+    {
+      "id": "NOV01-VIDEO-rodd-halloween",
+      "kind": "video",
+      "source": {},
+      "sourceId": "2397137301027442",
+      "decision": "Three shares of one generic Halloween greeting; no attendee event/offer. Full clip unavailable; no claim of full audiovisual review.",
+      "primaryUrls": [],
+      "savedEvidence": [
+        "C:\\Users\\craig\\Documents\\Codex\\2026-11-01\\parked-resolution\\web-rodd.json"
+      ],
+      "activation": "no_new_manual_video_approval"
+    },
+    {
+      "id": "NOV01-VIDEO-meyer-beef-stew",
+      "kind": "video",
+      "source": {},
+      "sourceId": "1650819336411802",
+      "decision": "Recipe/cookware promotion, not dated event/special. No reason to raise90-second limit for this clip.",
+      "primaryUrls": [],
+      "savedEvidence": [
+        "C:\\Users\\craig\\Documents\\Codex\\2026-11-01\\parked-resolution\\web-meyer.json"
+      ],
+      "activation": "no_new_manual_video_approval"
+    },
+    {
+      "id": "NOV01-VIDEO-sportsplex",
+      "kind": "video",
+      "source": {},
+      "sourceId": "1548840990603811",
+      "decision": "Nov1 celebration12:30-14:30 already has correct keeper. Now expired; no resurrection. Download remains unavailable.",
+      "primaryUrls": [],
+      "savedEvidence": [
+        "C:\\Users\\craig\\Documents\\Codex\\2026-11-01\\parked-resolution\\web-sportsplex.json"
+      ],
+      "activation": "no_new_manual_video_approval"
+    },
+    {
+      "id": "NOV01-VIDEO-chef-harvest",
+      "kind": "video",
+      "source": {},
+      "sourceId": "1746038410860066",
+      "decision": "Nov5/6/7 dinner events already exist at17:00. Dinner305+tax/person;950+HST is an overnight package for two. Audio/download evidence still needed for video.",
+      "primaryUrls": [
+        "https://innatbayfortune.com/special-events-offerings/chefs-harvest-dining-series/"
+      ],
+      "savedEvidence": [],
+      "activation": "no_new_manual_video_approval"
+    },
+    {
+      "id": "NOV01-VIDEO-city-cinema",
+      "kind": "video",
+      "source": {},
+      "sourceId": "1667519308718317",
+      "decision": "Nov1/2 screenings already exist; five missing Nov3-7 screenings19:00 are prepared. Missing video bytes not supplied by web proof.",
+      "primaryUrls": [],
+      "savedEvidence": [],
+      "activation": "no_new_manual_video_approval"
+    },
+    {
+      "id": "NOV01-VIDEO-evermoore",
+      "kind": "video",
+      "source": {},
+      "sourceId": "1795594419240850",
+      "decision": "Recurring date-aware matching fix already deployed and exact weekly event attachment independently verified. Preserve accepted result.",
+      "primaryUrls": [],
+      "savedEvidence": [],
+      "activation": "no_new_manual_video_approval"
+    }
+  ]
+}
